@@ -39,7 +39,7 @@ type MediaUploadResponse struct {
 // @Param bot_id path string true "Bot ID"
 // @Success 200 {object} MediaUploadLimitsResponse
 // @Failure 401,403,404,500 {object} server.Problem
-// @Router /bots/{bot_id}/media/limits [get]
+// @Router /bots/{bot_id}/media/limits [get].
 func (h *MessageHandler) MediaUploadLimits(c echo.Context) error {
 	if _, err := h.mediaUploadBot(c); err != nil {
 		return err
@@ -58,7 +58,7 @@ func (h *MessageHandler) MediaUploadLimits(c echo.Context) error {
 // @Param file formData file true "Attachment"
 // @Success 201 {object} MediaUploadResponse
 // @Failure 400,401,403,404,413,500 {object} server.Problem
-// @Router /bots/{bot_id}/media [post]
+// @Router /bots/{bot_id}/media [post].
 func (h *MessageHandler) UploadMedia(c echo.Context) error {
 	botID, err := h.mediaUploadBot(c)
 	if err != nil {

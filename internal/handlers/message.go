@@ -843,8 +843,8 @@ func (h *MessageHandler) authorizeMessageSession(c echo.Context, channelIdentity
 // @Success 206 {file} binary
 // @Failure 401,403,404,500 {object} server.Problem
 // @Failure 416 {string} string "Unsatisfiable byte range"
-// @Router /bots/{bot_id}/media/{content_hash} [get]
-// @Router /bots/{bot_id}/media/{content_hash} [head]
+// @Router /bots/{bot_id}/media/{content_hash} [get].
+// @Router /bots/{bot_id}/media/{content_hash} [head].
 func (h *MessageHandler) ServeMedia(c echo.Context) error {
 	channelIdentityID, err := h.requireChannelIdentityID(c)
 	if err != nil {
