@@ -115,7 +115,11 @@ type wsMessageAdmission struct {
 
 func (a *wsMessageAdmission) build(ctx context.Context, handle sessionruntime.RunHandle) (sessionruntime.RunAdmissionView, error) {
 	if !a.attachmentsPrepared {
-		a.attachments = a.handler.ingestWSInboundAttachments(ctx, a.botID, a.attachments)
+		prepared, err := a.handler.ingestWSInboundAttachments(ctx, a.botID, a.attachments)
+		if err != nil {
+			return sessionruntime.RunAdmissionView{}, err
+		}
+		a.attachments = prepared
 		a.attachmentsPrepared = true
 	}
 	request := a.request
@@ -155,7 +159,11 @@ func (a *wsReplacementAdmission) build(ctx context.Context, handle sessionruntim
 	}
 	if a.replacementUserTurn != nil {
 		if !a.attachmentsPrepared {
-			a.attachments = a.handler.ingestWSInboundAttachments(ctx, a.botID, a.attachments)
+			prepared, err := a.handler.ingestWSInboundAttachments(ctx, a.botID, a.attachments)
+			if err != nil {
+				return sessionruntime.RunAdmissionView{}, err
+			}
+			a.attachments = prepared
 			a.attachmentsPrepared = true
 		}
 		replacement := *a.replacementUserTurn

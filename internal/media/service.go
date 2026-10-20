@@ -18,9 +18,16 @@ import (
 // Service provides content-addressed media asset persistence.
 // All metadata is derived from the filesystem — no database, no sidecar files.
 type Service struct {
-	provider storage.Provider
-	logger   *slog.Logger
+	provider           storage.Provider
+	logger             *slog.Logger
+	requirePersistence bool
 }
+
+// SetRequirePersistence makes attachment admission fail if an original cannot
+// be persisted or resolved. It also applies when storage is reached over RPC.
+func (s *Service) SetRequirePersistence(required bool) { s.requirePersistence = required }
+
+func (s *Service) RequiresPersistence() bool { return s != nil && s.requirePersistence }
 
 // NewService creates a media service with the given storage provider.
 func NewService(log *slog.Logger, provider storage.Provider) *Service {
@@ -39,7 +46,7 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 	if s.provider == nil {
 		return Asset{}, ErrProviderUnavailable
 	}
-	if strings.TrimSpace(input.BotID) == "" {
+	if !validPathComponent(input.BotID) {
 		return Asset{}, errors.New("bot id is required")
 	}
 	if input.Reader == nil {
@@ -50,7 +57,7 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 	if maxBytes <= 0 {
 		maxBytes = MaxAssetBytes
 	}
-	contentHash, sizeBytes, tempFile, err := spoolAndHashWithLimit(input.Reader, maxBytes)
+	contentHash, sizeBytes, tempFile, err := spoolAndHashWithLimit(contextReader{ctx, input.Reader}, maxBytes)
 	if err != nil {
 		return Asset{}, fmt.Errorf("read input: %w", err)
 	}
@@ -64,11 +71,18 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 	if ext == ".bin" && input.OriginalExt != "" {
 		ext = input.OriginalExt
 	}
+	if !validPathComponent(ext) || !strings.HasPrefix(ext, ".") || strings.Count(ext, ".") != 1 {
+		return Asset{}, errors.New("invalid file extension")
+	}
 	storageKey := path.Join(contentHash[:2], contentHash+ext)
 	routingKey := path.Join(input.BotID, storageKey)
 
 	// Filesystem dedup: if the file already exists, skip write.
-	if _, openErr := s.provider.Open(ctx, routingKey); openErr == nil {
+	if existing, openErr := s.provider.Open(ctx, routingKey); openErr == nil {
+		_ = existing.Close()
+		if err := ctx.Err(); err != nil {
+			return Asset{}, err
+		}
 		return Asset{
 			ContentHash: contentHash,
 			BotID:       input.BotID,
@@ -80,6 +94,9 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 
 	if err := s.provider.Put(ctx, routingKey, tempFile); err != nil {
 		return Asset{}, fmt.Errorf("store media: %w", err)
+	}
+	if err := ctx.Err(); err != nil {
+		return Asset{}, err
 	}
 
 	return Asset{
@@ -128,6 +145,9 @@ func (s *Service) GetByStorageKey(ctx context.Context, botID, storageKey string)
 	if s.provider == nil {
 		return Asset{}, ErrProviderUnavailable
 	}
+	if !validPathComponent(botID) || !validStorageKey(storageKey) {
+		return Asset{}, ErrAssetNotFound
+	}
 	routingKey := path.Join(botID, storageKey)
 	rc, err := s.provider.Open(ctx, routingKey)
 	if err != nil {
@@ -151,6 +171,9 @@ func (s *Service) AccessPath(ctx context.Context, asset Asset) string {
 func (s *Service) EnsureAccessPath(ctx context.Context, asset Asset) (string, error) {
 	if s.provider == nil {
 		return "", ErrProviderUnavailable
+	}
+	if !validPathComponent(asset.BotID) || !validStorageKey(asset.StorageKey) {
+		return "", ErrAssetNotFound
 	}
 	routingKey := path.Join(asset.BotID, asset.StorageKey)
 	if ensurer, ok := s.provider.(storage.AccessPathEnsurer); ok {
@@ -195,10 +218,38 @@ func (s *Service) IngestContainerFile(ctx context.Context, botID, containerPath 
 // It first tries known extensions (fast path), then falls back to a directory
 // listing if the provider supports it, so arbitrary file types are found.
 func (s *Service) resolveByContentHash(ctx context.Context, botID, contentHash string) (Asset, error) {
-	if strings.TrimSpace(contentHash) == "" || len(contentHash) < 2 {
+	if !validPathComponent(botID) || !validPathComponent(contentHash) || len(contentHash) < 2 {
 		return Asset{}, ErrAssetNotFound
 	}
 	prefix := contentHash[:2]
+
+	if s.requirePersistence {
+		// Canonical originals use lowercase SHA-256 keys. Classify malformed
+		// references before provider validation can turn them into storage errors.
+		if len(contentHash) != hex.EncodedLen(sha256.Size) || contentHash != strings.ToLower(contentHash) {
+			return Asset{}, ErrAssetNotFound
+		}
+		if _, err := hex.DecodeString(contentHash); err != nil {
+			return Asset{}, ErrAssetNotFound
+		}
+		if lister, ok := s.provider.(storage.PrefixLister); ok {
+			keys, err := lister.ListPrefix(ctx, path.Join(botID, prefix, contentHash))
+			if err != nil {
+				if errors.Is(err, os.ErrNotExist) {
+					return Asset{}, ErrAssetNotFound
+				}
+				return Asset{}, fmt.Errorf("find original: %w", err)
+			}
+			for _, key := range keys {
+				owner, storageKey := splitFirst(key, '/')
+				asset := deriveAssetFromKey(botID, storageKey)
+				if owner == botID && validStorageKey(storageKey) && asset.ContentHash == contentHash {
+					return asset, nil
+				}
+			}
+			return Asset{}, ErrAssetNotFound
+		}
+	}
 
 	for _, ext := range knownExtensions {
 		storageKey := path.Join(prefix, contentHash+ext)
@@ -225,6 +276,28 @@ func (s *Service) resolveByContentHash(ctx context.Context, botID, contentHash s
 	}
 
 	return Asset{}, ErrAssetNotFound
+}
+
+func validPathComponent(value string) bool {
+	return strings.TrimSpace(value) != "" && value != "." && value != ".." &&
+		!strings.ContainsAny(value, "/\\\x00")
+}
+
+func validStorageKey(value string) bool {
+	parts := strings.Split(value, "/")
+	return len(parts) == 2 && validPathComponent(parts[0]) && validPathComponent(parts[1])
+}
+
+type contextReader struct {
+	ctx context.Context
+	io.Reader
+}
+
+func (r contextReader) Read(b []byte) (int, error) {
+	if err := r.ctx.Err(); err != nil {
+		return 0, err
+	}
+	return r.Reader.Read(b)
 }
 
 func splitFirst(s string, sep byte) (string, string) {

@@ -632,10 +632,16 @@ func (p *ChannelInboundProcessor) HandleInbound(ctx context.Context, cfg channel
 		})
 	}
 
-	resolvedAttachments := p.ingestInboundAttachments(ctx, cfg, msg, strings.TrimSpace(identity.BotID), msg.Message.Attachments)
+	resolvedAttachments, err := p.ingestInboundAttachments(ctx, cfg, msg, strings.TrimSpace(identity.BotID), msg.Message.Attachments)
+	if err != nil {
+		return fmt.Errorf("persist inbound attachment: %w", err)
+	}
 	msg.Message.Attachments = resolvedAttachments
 	if msg.Message.Reply != nil && len(msg.Message.Reply.Attachments) > 0 {
-		msg.Message.Reply.Attachments = p.ingestInboundAttachments(ctx, cfg, msg, strings.TrimSpace(identity.BotID), msg.Message.Reply.Attachments)
+		msg.Message.Reply.Attachments, err = p.ingestInboundAttachments(ctx, cfg, msg, strings.TrimSpace(identity.BotID), msg.Message.Reply.Attachments)
+		if err != nil {
+			return fmt.Errorf("persist reply attachment: %w", err)
+		}
 	}
 	hadVoiceAttachment := containsVoiceAttachment(resolvedAttachments)
 	attachments := mapChannelToChatAttachments(resolvedAttachments)
@@ -2687,25 +2693,44 @@ func parseRawJSON(raw json.RawMessage) any {
 	return v
 }
 
+func (p *ChannelInboundProcessor) requiresOriginalPersistence() bool {
+	policy, ok := p.mediaService.(interface{ RequiresPersistence() bool })
+	return ok && policy.RequiresPersistence()
+}
+
 func (p *ChannelInboundProcessor) ingestInboundAttachments(
 	ctx context.Context,
 	cfg channel.ChannelConfig,
 	msg channel.InboundMessage,
 	botID string,
 	attachments []channel.Attachment,
-) []channel.Attachment {
+) ([]channel.Attachment, error) {
 	if len(attachments) == 0 || p == nil || p.mediaService == nil || strings.TrimSpace(botID) == "" {
-		return attachments
+		return attachments, nil
 	}
 	result := make([]channel.Attachment, 0, len(attachments))
 	for _, att := range attachments {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		item := att
 		if strings.TrimSpace(item.ContentHash) != "" {
+			if p.requiresOriginalPersistence() {
+				reader, asset, err := p.mediaService.Open(ctx, botID, item.ContentHash)
+				if err != nil {
+					return nil, err
+				}
+				_ = reader.Close()
+				item = channel.AttachmentFromBundle(channel.BundleFromAttachment(item).WithAsset(botID, asset))
+			}
 			result = append(result, item)
 			continue
 		}
 		payload, err := p.loadInboundAttachmentPayload(ctx, cfg, msg, item)
 		if err != nil {
+			if p.requiresOriginalPersistence() || ctx.Err() != nil {
+				return nil, err
+			}
 			if p.logger != nil {
 				p.logger.WarnContext(ctx,
 					"inbound attachment ingest skipped",
@@ -2734,6 +2759,9 @@ func (p *ChannelInboundProcessor) ingestInboundAttachments(
 			if payload.reader != nil {
 				_ = payload.reader.Close()
 			}
+			if p.requiresOriginalPersistence() || ctx.Err() != nil {
+				return nil, err
+			}
 			if p.logger != nil {
 				p.logger.WarnContext(ctx,
 					"inbound attachment mime prepare failed",
@@ -2759,6 +2787,9 @@ func (p *ChannelInboundProcessor) ingestInboundAttachments(
 			_ = payload.reader.Close()
 		}
 		if err != nil {
+			if p.requiresOriginalPersistence() || ctx.Err() != nil {
+				return nil, err
+			}
 			if p.logger != nil {
 				p.logger.WarnContext(ctx,
 					"inbound attachment ingest failed",
@@ -2778,7 +2809,7 @@ func (p *ChannelInboundProcessor) ingestInboundAttachments(
 		))
 		result = append(result, item)
 	}
-	return result
+	return result, nil
 }
 
 type inboundAttachmentPayload struct {
@@ -3008,6 +3039,9 @@ func (p *ChannelInboundProcessor) ingestOutboundAttachments(ctx context.Context,
 	if err != nil {
 		if p.logger != nil {
 			p.logger.WarnContext(ctx, "prepare outbound attachments failed", slog.Any("error", err))
+		}
+		if p.requiresOriginalPersistence() || ctx.Err() != nil {
+			return nil
 		}
 		return attachments
 	}

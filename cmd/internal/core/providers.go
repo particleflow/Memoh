@@ -1242,11 +1242,16 @@ func provideMediaStorage(provider bridge.Provider, cfg config.Config) storagepkg
 		dataRoot = config.DefaultDataRoot
 	}
 	secondary := localfs.New(filepath.Join(dataRoot, "media"))
+	if root := strings.TrimSpace(cfg.Files.OriginalsRoot); root != "" {
+		return fallback.NewDurable(primary, localfs.NewOriginals(root), secondary)
+	}
 	return fallback.New(primary, secondary)
 }
 
-func provideMediaService(log *slog.Logger, provider storagepkg.Provider) *media.Service {
-	return media.NewService(log, provider)
+func provideMediaService(log *slog.Logger, provider storagepkg.Provider, cfg config.Config) *media.Service {
+	service := media.NewService(log, provider)
+	service.SetRequirePersistence(strings.TrimSpace(cfg.Files.OriginalsRoot) != "")
+	return service
 }
 
 func provideAudioRegistry() *audiopkg.Registry {

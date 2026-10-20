@@ -61,6 +61,51 @@ clone. It also resolves a release and rewrites image tags, and obtains files
 from the official repository. It is not the update mechanism for a customized
 rolling-image deployment.
 
+## File originals outside workspaces
+
+The existing media service stores all attachment types, including documents,
+archives, images and audio. The server can now keep their originals independently
+of workspace containers. The content-hash references and Bot access checks remain
+the same; this does not persist every arbitrary workspace file.
+
+The root Compose file sets `MEMOH_ORIGINALS_ROOT=/opt/memoh/originals` for Server
+and Channel and mounts `${MEMOH_ORIGINALS_DIR:-memoh_originals}` there on Server.
+Channel accesses storage through the existing Server RPC. Set
+`MEMOH_ORIGINALS_DIR` to an absolute, dedicated host directory in the private
+deployment `.env`. Keep config, database and workspace-data mounts separate.
+Leave actual host paths out of commits and logs. Without a host directory,
+Compose uses the new `memoh_originals` named volume.
+
+For a native deployment, configure:
+
+```toml
+[files]
+originals_root = "/srv/memoh-originals"
+```
+
+The operator must verify ownership, available space and access permissions of
+the chosen directory. A shared folder name does not establish safe permissions.
+Do not mount this root inside Bot workspaces or expose it through a public file
+server. Access goes through the existing authenticated attachment endpoints.
+
+Uploads are admitted only after the original has been saved. Failed or canceled
+ingestion cannot fall back to sending unpersisted inline bytes in this mode.
+Writes use a temporary file, SHA256 verification, sync and atomic rename; reads
+verify the content hash. Each Bot has a confined filesystem root. Workspaces
+receive disposable copies on demand; recreating a workspace or restarting Server
+does not remove originals. Back up this directory along with the database.
+
+Existing attachments are copied from legacy workspace/spill storage on a
+successful first read, without removing their old copy. This is **not** a bulk
+migration: untouched legacy attachments still depend on their old storage.
+Back up and verify all required legacy originals before deleting any existing
+workspace or changing legacy mounts. Changing a mount does not move files.
+No automatic deletion or garbage collection of originals is introduced.
+
+Reverting to an older binary does not move originals back into workspaces.
+Preserve this directory and its backup on rollback; old versions may be unable
+to resolve attachments that exist only here.
+
 ## Review and apply an update
 
 First verify the candidate images together in the cloud, including migration,

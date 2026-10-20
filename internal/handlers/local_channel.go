@@ -2348,7 +2348,12 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				// invocation id: it exists before any run does, and the
 				// invocation is precisely the key a redelivery would repeat.
 				externalMessageID = ref.InvocationID
-				ingestedActivationAttachments = h.ingestWSInboundAttachments(streamBaseCtx, botID, chatAttachments)
+				ingestedActivationAttachments, err = h.ingestWSInboundAttachments(streamBaseCtx, botID, chatAttachments)
+				if err != nil {
+					failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", err)
+					releaseActiveWSTurnNow()
+					continue
+				}
 				userReq := application.ChatRequest{
 					BotID:                   botID,
 					ChatID:                  botID,
@@ -2877,6 +2882,34 @@ func (h *LocalChannelHandler) wsIngestAttachments(ctx context.Context, botID str
 	if len(rawItems) == 0 {
 		return []json.RawMessage{original}
 	}
+	if h.mediaService.RequiresPersistence() {
+		attachments := make([]turn.Attachment, 0, len(rawItems))
+		originalItems := make([]map[string]any, 0, len(rawItems))
+		for _, raw := range rawItems {
+			item, ok := raw.(map[string]any)
+			if !ok {
+				continue
+			}
+			attachments = append(attachments, turn.AttachmentFromBundle(attachmentpkg.BundleFromMap(item)))
+			originalItems = append(originalItems, item)
+		}
+		prepared, err := h.ingestWSInboundAttachments(ctx, botID, attachments)
+		if err != nil {
+			frame, _ := server.NewStreamError(ctx, err, "")
+			encoded, _ := json.Marshal(frame)
+			return []json.RawMessage{encoded}
+		}
+		items := make([]map[string]any, 0, len(prepared))
+		for i, att := range prepared {
+			items = append(items, applyBundleToItemMap(maps.Clone(originalItems[i]), att.Bundle()))
+		}
+		event["attachments"] = items
+		encoded, err := json.Marshal(event)
+		if err != nil {
+			return nil
+		}
+		return []json.RawMessage{encoded}
+	}
 
 	changed := false
 	for i, raw := range rawItems {
@@ -2912,16 +2945,19 @@ func (h *LocalChannelHandler) wsIngestAttachments(ctx context.Context, botID str
 }
 
 func (h *LocalChannelHandler) ingestSingleAttachment(ctx context.Context, botID string, bundle attachmentpkg.Bundle) (attachmentpkg.Bundle, bool) {
+	value, err := h.persistSingleAttachment(ctx, botID, bundle)
+	return value, err == nil
+}
+
+func (h *LocalChannelHandler) persistSingleAttachment(ctx context.Context, botID string, bundle attachmentpkg.Bundle) (attachmentpkg.Bundle, error) {
 	bundle = bundle.Normalize()
 	if bundle.Path != "" {
 		asset, err := h.mediaService.IngestContainerFile(ctx, botID, bundle.Path)
 		if err != nil {
-			h.logger.WarnContext(ctx, "ws ingest container file failed", slog.String("path", bundle.Path), slog.Any("error", err))
-			return attachmentpkg.Bundle{}, false
+			return attachmentpkg.Bundle{}, err
 		}
-		return bundle.WithAsset(botID, asset), true
+		return bundle.WithAsset(botID, asset), nil
 	}
-
 	if bundle.Base64 != "" {
 		mimeType := bundle.Mime
 		if mimeType == "" {
@@ -2929,23 +2965,17 @@ func (h *LocalChannelHandler) ingestSingleAttachment(ctx context.Context, botID 
 		}
 		decoded, err := attachmentpkg.DecodeBase64(bundle.Base64, media.MaxAssetBytes)
 		if err != nil {
-			h.logger.WarnContext(ctx, "ws decode data url failed", slog.Any("error", err))
-			return attachmentpkg.Bundle{}, false
+			return attachmentpkg.Bundle{}, err
 		}
 		asset, err := h.mediaService.Ingest(ctx, media.IngestInput{
-			BotID:    botID,
-			Mime:     mimeType,
-			Reader:   decoded,
-			MaxBytes: media.MaxAssetBytes,
+			BotID: botID, Mime: mimeType, Reader: decoded, MaxBytes: media.MaxAssetBytes,
 		})
 		if err != nil {
-			h.logger.WarnContext(ctx, "ws ingest data url failed", slog.Any("error", err))
-			return attachmentpkg.Bundle{}, false
+			return attachmentpkg.Bundle{}, err
 		}
-		return bundle.WithAsset(botID, asset), true
+		return bundle.WithAsset(botID, asset), nil
 	}
-
-	return attachmentpkg.Bundle{}, false
+	return attachmentpkg.Bundle{}, errors.New("attachment has no persistable content")
 }
 
 // wsSynthesizeSpeech handles speech_delta events by synthesizing audio and
@@ -2985,6 +3015,9 @@ func (h *LocalChannelHandler) wsSynthesizeSpeech(ctx context.Context, botID stri
 		}
 
 		att := h.buildTtsAttachment(ctx, botID, contentType, audioData)
+		if att == nil {
+			continue
+		}
 		attachmentEvent, _ := json.Marshal(map[string]any{
 			"type":        "attachment_delta",
 			"attachments": []any{att},
@@ -3015,6 +3048,9 @@ func (h *LocalChannelHandler) buildTtsAttachment(ctx context.Context, botID, con
 		h.logger.WarnContext(ctx, "ws tts ingest failed", slog.Any("error", err))
 	}
 
+	if h.mediaService != nil && h.mediaService.RequiresPersistence() {
+		return nil
+	}
 	bundle.Base64 = "data:" + contentType + ";base64," + base64.StdEncoding.EncodeToString(audioData)
 	return bundle.Normalize().ToMap()
 }
@@ -3076,31 +3112,47 @@ func applyBundleToItemMap(item map[string]any, bundle attachmentpkg.Bundle) map[
 // so without this step the file shows up in the live turn yet disappears from
 // history after the session refreshes. Mirrors the channel inbound path's
 // ingestInboundAttachments behaviour for the WebSocket transport.
-func (h *LocalChannelHandler) ingestWSInboundAttachments(ctx context.Context, botID string, attachments []turn.Attachment) []turn.Attachment {
+func (h *LocalChannelHandler) ingestWSInboundAttachments(ctx context.Context, botID string, attachments []turn.Attachment) ([]turn.Attachment, error) {
 	if len(attachments) == 0 || h.mediaService == nil || strings.TrimSpace(botID) == "" {
-		return attachments
+		return attachments, nil
 	}
 	result := make([]turn.Attachment, 0, len(attachments))
 	for _, att := range attachments {
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if strings.TrimSpace(att.ContentHash) != "" {
+			if h.mediaService.RequiresPersistence() {
+				reader, asset, err := h.mediaService.Open(ctx, botID, att.ContentHash)
+				if err != nil {
+					return nil, errs.Wrap(err, "resolve attachment original")
+				}
+				_ = reader.Close()
+				att = turn.AttachmentFromBundle(att.Bundle().WithAsset(botID, asset))
+			}
 			result = append(result, att)
 			continue
 		}
 		bundle := att.Bundle()
 		if strings.TrimSpace(bundle.Base64) == "" && strings.TrimSpace(bundle.Path) == "" {
+			if h.mediaService.RequiresPersistence() {
+				return nil, errs.Wrap(errors.New("attachment has no persistable content"), "persist attachment")
+			}
 			result = append(result, att)
 			continue
 		}
-		ingested, ok := h.ingestSingleAttachment(ctx, botID, bundle)
-		if !ok {
-			// Keep the original so the model can still see the inlined payload
-			// even if persistence failed.
+		ingested, err := h.persistSingleAttachment(ctx, botID, bundle)
+		if err != nil {
+			if h.mediaService.RequiresPersistence() || ctx.Err() != nil {
+				return nil, errs.Wrap(err, "persist attachment original")
+			}
+			// Preserve legacy inline fallback only when durable storage is disabled.
 			result = append(result, att)
 			continue
 		}
 		result = append(result, turn.AttachmentFromBundle(ingested))
 	}
-	return result
+	return result, nil
 }
 
 func parseWSClientAttachments(rawAttachments []json.RawMessage) ([]turn.Attachment, error) {
