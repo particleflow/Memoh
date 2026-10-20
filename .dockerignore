@@ -37,9 +37,18 @@ target/
 logs/
 
 # Environment
-.env
-.env.local
-.env.*.local
+**/.env
+**/.env.*
+!apps/desktop/.env.example
+
+# Private deployment configuration; keep conf/app.*.toml and OAuth examples.
+/config.toml
+/config.toml.*
+/conf/oauth-clients.toml
+/conf/oauth-clients.toml.*
+/certs/
+/secrets/
+/.workdocs/
 
 # OS
 .DS_Store
@@ -58,6 +67,7 @@ coverage/
 
 # Mise
 .mise.toml.local
+mise.local.toml
 
 # Data
 data/
@@ -66,3 +76,6 @@ data/
 
 # Docker
 docker-compose.override.yml
+docker-compose.override.yaml
+compose.override.yml
+compose.override.yaml

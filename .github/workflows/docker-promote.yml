@@ -1,0 +1,92 @@
+name: Promote Docker images
+on:
+  workflow_dispatch:
+    inputs:
+      validated_sha:
+        description: Candidate commit that passed runtime acceptance
+        type: string
+        required: true
+      server_digest:
+        description: Validated server manifest digest (sha256:...)
+        type: string
+        required: true
+      web_digest:
+        description: Validated web manifest digest (sha256:...)
+        type: string
+        required: true
+      workspace_digest:
+        description: Validated workspace manifest digest (sha256:...)
+        type: string
+        required: true
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: docker-promote-main
+  cancel-in-progress: false
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    env:
+      VALIDATED_SHA: ${{ inputs.validated_sha }}
+      SERVER_DIGEST: ${{ inputs.server_digest }}
+      WEB_DIGEST: ${{ inputs.web_digest }}
+      WORKSPACE_DIGEST: ${{ inputs.workspace_digest }}
+      IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify accepted source
+        run: |
+          test "$GITHUB_REF" = refs/heads/main
+          [[ "$VALIDATED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          for digest in "$SERVER_DIGEST" "$WEB_DIGEST" "$WORKSPACE_DIGEST"; do
+            [[ "$digest" =~ ^sha256:[a-f0-9]{64}$ ]] || exit 1
+          done
+          git merge-base --is-ancestor "$VALIDATED_SHA" "$GITHUB_SHA"
+          test "$(git rev-parse "${VALIDATED_SHA}^{tree}")" = "$(git rev-parse "${GITHUB_SHA}^{tree}")"
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Verify all candidate manifests before promotion
+        run: |
+          mkdir -p /tmp/release
+          images=(server web workspace)
+          digests=("$SERVER_DIGEST" "$WEB_DIGEST" "$WORKSPACE_DIGEST")
+          for i in "${!images[@]}"; do
+            image="${IMAGE_PREFIX}/${images[$i]}"
+            digest="${digests[$i]}"
+            docker buildx imagetools inspect "${image}@${digest}" --raw > /tmp/release/manifest.json
+            jq -e --arg sha "$VALIDATED_SHA" \
+              '.annotations["org.opencontainers.image.revision"] == $sha
+               and any(.manifests[]; .platform.os == "linux" and .platform.architecture == "amd64")
+               and any(.manifests[]; .platform.os == "linux" and .platform.architecture == "arm64")' \
+              /tmp/release/manifest.json
+            jq -n --arg image "$image" --arg digest "$digest" --arg commit "$VALIDATED_SHA" \
+              '{image: $image, digest: $digest, commit: $commit}' > "/tmp/release/${images[$i]}.json"
+          done
+          rm /tmp/release/manifest.json
+      - name: Record the validated release
+        uses: actions/upload-artifact@v4
+        with:
+          name: validated-image-references
+          path: /tmp/release/*.json
+          if-no-files-found: error
+          retention-days: 90
+      - name: Promote the exact validated digests
+        run: |
+          for image_name in server web workspace; do
+            record="/tmp/release/${image_name}.json"
+            image=$(jq -r '.image' "$record")
+            digest=$(jq -r '.digest' "$record")
+            docker buildx imagetools create --prefer-index=false -t "${image}:main" "${image}@${digest}"
+            actual=$(docker buildx imagetools inspect "${image}:main" | awk '$1 == "Digest:" {print $2; exit}')
+            test "$actual" = "$digest"
+            printf '%s:main -> %s (commit %s)\n' "$image" "$digest" "$VALIDATED_SHA" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo 'All three rolling tags match the validated release. Deployment remains a separate action.' >> "$GITHUB_STEP_SUMMARY"

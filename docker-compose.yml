@@ -8,7 +8,7 @@ services:
       POSTGRES_USER: memoh
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-memoh123}
     volumes:
-      - postgres_data:/var/lib/postgresql
+      - ${MEMOH_POSTGRES_DATA_DIR:-postgres_data}:/var/lib/postgresql
       - /etc/localtime:/etc/localtime:ro
     expose:
       - "5432"
@@ -29,7 +29,7 @@ services:
       POSTGRES_USER: memoh
       POSTGRES_PASSWORD: ${PGVECTOR_PASSWORD:-${POSTGRES_PASSWORD:-memoh123}}
     volumes:
-      - pgvector_data:/var/lib/postgresql
+      - ${MEMOH_PGVECTOR_DATA_DIR:-pgvector_data}:/var/lib/postgresql
       - /etc/localtime:/etc/localtime:ro
     expose:
       - "5432"
@@ -43,12 +43,12 @@ services:
       - memoh-network
 
   migrate:
-    image: memohai/server:latest
+    image: "${MEMOH_SERVER_IMAGE:-memohai/server:latest}"
     container_name: memoh-migrate
     entrypoint: ["/app/memoh-server", "migrate", "up"]
     volumes:
       - ${MEMOH_CONFIG:-./config.toml}:/app/config.toml:ro
-      - memoh_data:/opt/memoh/data
+      - ${MEMOH_DATA_DIR:-memoh_data}:/opt/memoh/data
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,7 +58,7 @@ services:
 
   server:
     stop_grace_period: 45s
-    image: memohai/server:latest
+    image: "${MEMOH_SERVER_IMAGE:-memohai/server:latest}"
     container_name: memoh-server
     privileged: true
     pid: host
@@ -88,9 +88,9 @@ services:
     volumes:
       - ${MEMOH_CONFIG:-./config.toml}:/app/config.toml:ro
       - ./conf/providers:/app/conf/providers:ro
-      - containerd_data:/var/lib/containerd
-      - server_cni_state:/var/lib/cni
-      - memoh_data:/opt/memoh/data
+      - ${MEMOH_CONTAINERD_DATA_DIR:-containerd_data}:/var/lib/containerd
+      - ${MEMOH_CNI_STATE_DIR:-server_cni_state}:/var/lib/cni
+      - ${MEMOH_DATA_DIR:-memoh_data}:/opt/memoh/data
       # Expose host CDI specs to the nested containerd used for bot workspaces.
       - /etc/cdi:/etc/cdi:ro
       - /var/run/cdi:/var/run/cdi:ro
@@ -111,7 +111,7 @@ services:
       - memoh-network
 
   channel:
-    image: memohai/server:latest
+    image: "${MEMOH_SERVER_IMAGE:-memohai/server:latest}"
     container_name: memoh-channel
     entrypoint: ["/app/memoh-channel", "serve"]
     extra_hosts:
@@ -206,7 +206,7 @@ services:
       - memoh-network
 
   web:
-    image: memohai/web:latest
+    image: "${MEMOH_WEB_IMAGE:-memohai/web:latest}"
     container_name: memoh-web
     environment:
       MEMOH_SERVER_UPSTREAM: ${MEMOH_SERVER_UPSTREAM:-memoh-server:8080}
