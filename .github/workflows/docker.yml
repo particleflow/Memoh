@@ -1,23 +1,32 @@
 name: Docker
 on:
   push:
-    branches: [main, "v*.*"]
-    tags: ["v*"]
-  release:
-    types: [published]
+    branches: [main]
   workflow_dispatch:
+    inputs:
+      validated_sha:
+        description: Exact commit selected for candidate image validation
+        type: string
+        required: true
 permissions:
   contents: read
   packages: write
-  id-token: write
 concurrency:
   group: docker-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 jobs:
+  validate-ref:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check selected commit
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          VALIDATED_SHA: ${{ inputs.validated_sha }}
+        run: |
+          [[ "$VALIDATED_SHA" =~ ^[a-f0-9]{40}$ ]]
+          test "$VALIDATED_SHA" = "$GITHUB_SHA"
   build:
+    needs: validate-ref
     uses: ./.github/workflows/docker-build.yml
     with:
-      publish: ${{ github.repository == 'felinics/Memoh' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/v') || startsWith(github.ref, 'refs/tags/') || github.event_name == 'release') }}
-    secrets:
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      publish: ${{ github.event_name == 'workflow_dispatch' }}

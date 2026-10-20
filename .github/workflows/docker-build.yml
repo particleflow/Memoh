@@ -5,11 +5,6 @@ on:
       publish:
         type: boolean
         default: false
-    secrets:
-      DOCKERHUB_USERNAME:
-        required: false
-      DOCKERHUB_TOKEN:
-        required: false
 
 env:
   PUSH: ${{ inputs.publish }}
@@ -35,6 +30,8 @@ jobs:
           predicate-quantifier: some
           filters: |
             server:
+              - '.dockerignore'
+              - '.github/workflows/docker*.yml'
               - '**/*.go'
               - 'go.mod'
               - 'go.sum'
@@ -46,6 +43,8 @@ jobs:
               - 'conf/providers/**'
               - 'spec/**'
             web:
+              - '.dockerignore'
+              - '.github/workflows/docker*.yml'
               - 'apps/web/**'
               - 'packages/**'
               - 'pnpm-lock.yaml'
@@ -53,6 +52,8 @@ jobs:
               - 'docker/Dockerfile.web'
               - 'docker/nginx.conf'
             workspace:
+              - '.dockerignore'
+              - '.github/workflows/docker*.yml'
               - 'docker/Dockerfile.workspace'
               - 'docker/toolkit/**'
               - 'crates/**'
@@ -142,13 +143,6 @@ jobs:
           mkdir -p .go-cache
           GOMODCACHE=$(pwd)/.go-cache go mod download
 
-      - name: Login to Docker Hub
-        if: steps.should-build.outputs.skip != 'true' && env.PUSH == 'true'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Login to GitHub Container Registry
         if: steps.should-build.outputs.skip != 'true' && env.PUSH == 'true'
         uses: docker/login-action@v3
@@ -182,6 +176,9 @@ jobs:
           tags: ${{ env.PUSH != 'true' && matrix.image == 'workspace' && matrix.platform == 'linux/amd64' && 'memoh-ci-workspace:debian' || '' }}
           outputs: ${{ env.PUSH == 'true' && format('type=image,"name={0}/{1}/{2}",push-by-digest=true,name-canonical=true,push=true,compression=zstd', env.REGISTRY, github.repository_owner, matrix.image) || '' }}
           build-contexts: ${{ matrix.image == 'server' && format('gomodcache={0}/.go-cache', github.workspace) || '' }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           build-args: |
             VERSION=${{ github.ref_name }}
             COMMIT_HASH=${{ github.sha }}
@@ -278,13 +275,6 @@ jobs:
         if: steps.should-publish.outputs.skip != 'true'
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
-        if: steps.should-publish.outputs.skip != 'true'
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Login to GitHub Container Registry
         if: steps.should-publish.outputs.skip != 'true'
         uses: docker/login-action@v3
@@ -293,67 +283,34 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Resolve publish config
-        if: steps.should-publish.outputs.skip != 'true'
-        id: publish
-        run: |
-          IMAGE="memohai/${{ matrix.image }}"
-          GHCR_IMAGE="ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}"
-          REF_NAME="${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name }}"
-          VERSION="${REF_NAME#v}"
-          BASE_VERSION="${VERSION%%-*}"
-          MAJOR_MINOR="${BASE_VERSION%.*}"
-          MAJOR="${BASE_VERSION%%.*}"
-          VARIANT="${{ matrix.variant }}"
-          TAG_ARGS=""
-
-          add_tag() {
-            local tag="$1"
-            TAG_ARGS="$TAG_ARGS -t ${IMAGE}:${tag} -t ${GHCR_IMAGE}:${tag}"
-          }
-
-          if [ -n "$VARIANT" ]; then
-            VERSION_TAG_SUFFIX="-$VARIANT"
-            DEV_TAG="${VARIANT}-dev"
-            BRANCH_DEV_TAG="${VARIANT}-${REF_NAME}-dev"
-            LATEST_TAG="${VARIANT}-latest"
-          else
-            VERSION_TAG_SUFFIX=""
-            DEV_TAG="dev"
-            BRANCH_DEV_TAG="${REF_NAME}-dev"
-            LATEST_TAG="latest"
-          fi
-
-          if [ "$GITHUB_REF" = "refs/heads/main" ]; then
-            add_tag "$DEV_TAG"
-            if [ "${{ matrix.image }}" = "workspace" ] && [ -n "$VARIANT" ]; then
-              add_tag "$VARIANT"
-            fi
-          fi
-
-          if [[ "$GITHUB_REF" == refs/heads/v* ]]; then
-            add_tag "$BRANCH_DEV_TAG"
-          fi
-
-          if [ "${{ github.event_name }}" = "release" ] || [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            add_tag "${VERSION}${VERSION_TAG_SUFFIX}"
-
-            if [ "$VERSION" = "$BASE_VERSION" ]; then
-              add_tag "$LATEST_TAG"
-              add_tag "${MAJOR_MINOR}${VERSION_TAG_SUFFIX}"
-              add_tag "${MAJOR}${VERSION_TAG_SUFFIX}"
-              if [ "${{ matrix.image }}" = "workspace" ] && [ -n "$VARIANT" ]; then
-                add_tag "$VARIANT"
-              fi
-            fi
-          fi
-
-          echo "tag_args=${TAG_ARGS# }" >> "$GITHUB_OUTPUT"
-
-      - name: Create manifest list and push
+      - name: Publish candidate manifest
         if: steps.should-publish.outputs.skip != 'true'
         working-directory: /tmp/digests
+        env:
+          IMAGE: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
+          SOURCE_URL: https://github.com/${{ github.repository }}
         run: |
+          sources=()
+          for digest in *; do
+            [[ "$digest" =~ ^[a-f0-9]{64}$ ]] || exit 1
+            sources+=("${IMAGE}@sha256:${digest}")
+          done
           docker buildx imagetools create \
-            ${{ steps.publish.outputs.tag_args }} \
-            $(printf 'ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}@sha256:%s ' *)
+            --annotation "index:org.opencontainers.image.source=${SOURCE_URL}" \
+            --annotation "index:org.opencontainers.image.revision=${GITHUB_SHA}" \
+            -t "${IMAGE}:sha-${GITHUB_SHA}" "${sources[@]}"
+          manifest_digest=$(docker buildx imagetools inspect "${IMAGE}:sha-${GITHUB_SHA}" | awk '$1 == "Digest:" {print $2; exit}')
+          [[ "$manifest_digest" =~ ^sha256:[a-f0-9]{64}$ ]] || exit 1
+          mkdir -p /tmp/release
+          jq -n --arg image "$IMAGE" --arg digest "$manifest_digest" --arg commit "$GITHUB_SHA" \
+            '{image: $image, digest: $digest, commit: $commit}' > /tmp/release/${{ matrix.image }}.json
+          printf '%s@%s (commit %s)\n' "$IMAGE" "$manifest_digest" "$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Save candidate image reference
+        if: steps.should-publish.outputs.skip != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: candidate-${{ matrix.image }}
+          path: /tmp/release/${{ matrix.image }}.json
+          if-no-files-found: error
+          retention-days: 30
