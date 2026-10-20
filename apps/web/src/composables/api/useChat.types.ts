@@ -95,9 +95,11 @@ export interface FetchMessagesOptions {
 
 export interface ChatAttachment {
   type: string
-  base64: string
+  base64?: string
+  content_hash?: string
   mime?: string
   name?: string
+  size?: number
 }
 
 export interface RequestedSkillSelection {

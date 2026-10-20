@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	// MaxAssetBytes is the global max accepted payload size.
+	// MaxAssetBytes is the default HTTP upload limit and the legacy inline limit.
 	MaxAssetBytes int64 = 200 * 1024 * 1024
 )
 

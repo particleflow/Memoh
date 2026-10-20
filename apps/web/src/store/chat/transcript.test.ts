@@ -73,6 +73,18 @@ function approvalMessage(status = 'pending'): UIMessage {
 }
 
 describe('chat transcript controller', () => {
+  it('keeps uploaded hash references available in the optimistic transcript', () => {
+    const { transcript } = makeTranscript()
+    const hash = 'a'.repeat(64)
+    const turn = transcript.createOptimisticUserTurn('attached', [{
+      type: 'audio', content_hash: hash, name: 'fixture.mp3', mime: 'audio/mpeg', size: 100,
+    }])
+    expect(turn.attachments[0]).toMatchObject({
+      content_hash: hash, bot_id: 'bot-1', name: 'fixture.mp3', mime: 'audio/mpeg', size: 100,
+    })
+    expect(JSON.stringify(turn.attachments)).not.toContain('base64')
+  })
+
   it('is the single context gate for appending active-session turns', () => {
     const { transcript } = makeTranscript()
     const turn = assistant('assistant-1')

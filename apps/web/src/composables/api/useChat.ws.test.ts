@@ -98,6 +98,21 @@ describe('useChat.ws', () => {
     })
   })
 
+  it('sends a large pre-uploaded attachment as a small hash-only frame', () => {
+    const ws = connectWebSocket('bot-1', vi.fn())
+    const socket = MockWebSocket.instances[0]!
+    socket.open()
+    const attachment = {
+      type: 'file', name: 'large.bin', content_hash: 'a'.repeat(64),
+      mime: 'application/octet-stream', size: 201 * 1024 * 1024,
+    }
+    ws.send({ type: 'message', invocation_id: 'pre-upload', text: 'attached', attachments: [attachment] })
+    expect(JSON.parse(socket.sent[0]!).attachments).toEqual([attachment])
+    expect(socket.sent[0]!.length).toBeLessThan(512)
+    expect(socket.sent[0]).not.toMatch(/base64|data:/)
+    ws.close()
+  })
+
   it('replays an unacknowledged control with the same id', () => {
     vi.useFakeTimers()
     const ws = connectWebSocket('bot-1', vi.fn())

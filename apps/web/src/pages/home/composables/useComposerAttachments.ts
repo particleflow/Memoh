@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { ChatAttachment } from '@/composables/api/useChat'
 import type { MediaGalleryItem } from '../components/media-gallery-lightbox.vue'
+import { uploadedAttachmentFile } from './useComposerUpload'
 
 // Composer attachment tray: pending File list, paste-to-attachment capture,
 // object-URL previews, async line counts, the reveal/collapse animation
@@ -31,23 +32,10 @@ const LINE_COUNT_MAX_BYTES = 2 * 1024 * 1024
 // Exported: the composer's radius morph syncs its duration to this.
 export const ATTACHMENT_ANIM_MS = 230
 
-export async function fileToAttachment(file: File): Promise<ChatAttachment> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      resolve({
-        type: file.type.startsWith('image/') ? 'image' : 'file',
-        base64: reader.result as string,
-        mime: file.type || 'application/octet-stream',
-        name: file.name,
-      })
-    }
-    reader.onerror = () => reject(new Error('Failed to read file'))
-    reader.readAsDataURL(file)
-  })
-}
-
 export function attachmentToFile(attachment: ChatAttachment): File | null {
+  const uploaded = uploadedAttachmentFile(attachment)
+  if (uploaded) return uploaded
+  // Retain retry support for messages prepared by legacy clients.
   const source = attachment.base64?.trim()
   if (!source) return null
   try {

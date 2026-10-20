@@ -1251,6 +1251,7 @@ func provideMediaStorage(provider bridge.Provider, cfg config.Config) storagepkg
 func provideMediaService(log *slog.Logger, provider storagepkg.Provider, cfg config.Config) *media.Service {
 	service := media.NewService(log, provider)
 	service.SetRequirePersistence(strings.TrimSpace(cfg.Files.OriginalsRoot) != "")
+	service.SetMaxUploadBytes(cfg.Files.MaxUploadBytes)
 	return service
 }
 

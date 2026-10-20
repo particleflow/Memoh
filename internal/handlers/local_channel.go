@@ -3122,14 +3122,14 @@ func (h *LocalChannelHandler) ingestWSInboundAttachments(ctx context.Context, bo
 			return nil, err
 		}
 		if strings.TrimSpace(att.ContentHash) != "" {
-			if h.mediaService.RequiresPersistence() {
-				reader, asset, err := h.mediaService.Open(ctx, botID, att.ContentHash)
-				if err != nil {
-					return nil, errs.Wrap(err, "resolve attachment original")
-				}
-				_ = reader.Close()
-				att = turn.AttachmentFromBundle(att.Bundle().WithAsset(botID, asset))
+			// HTTP pre-uploads and legacy hash references must both resolve in
+			// the authorized Bot, even when independent originals are disabled.
+			reader, asset, err := h.mediaService.Open(ctx, botID, att.ContentHash)
+			if err != nil {
+				return nil, errs.Wrap(err, "resolve attachment original")
 			}
+			_ = reader.Close()
+			att = turn.AttachmentFromBundle(att.Bundle().WithAsset(botID, asset))
 			result = append(result, att)
 			continue
 		}

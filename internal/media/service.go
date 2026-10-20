@@ -21,6 +21,17 @@ type Service struct {
 	provider           storage.Provider
 	logger             *slog.Logger
 	requirePersistence bool
+	maxUploadBytes     int64
+}
+
+// SetMaxUploadBytes configures HTTP attachment admission. Zero keeps the default.
+func (s *Service) SetMaxUploadBytes(limit int64) { s.maxUploadBytes = limit }
+
+func (s *Service) MaxUploadBytes() int64 {
+	if s.maxUploadBytes > 0 {
+		return s.maxUploadBytes
+	}
+	return MaxAssetBytes
 }
 
 // SetRequirePersistence makes attachment admission fail if an original cannot
