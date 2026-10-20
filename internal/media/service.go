@@ -224,6 +224,14 @@ func (s *Service) resolveByContentHash(ctx context.Context, botID, contentHash s
 	prefix := contentHash[:2]
 
 	if s.requirePersistence {
+		// Canonical originals use lowercase SHA-256 keys. Classify malformed
+		// references before provider validation can turn them into storage errors.
+		if len(contentHash) != hex.EncodedLen(sha256.Size) || contentHash != strings.ToLower(contentHash) {
+			return Asset{}, ErrAssetNotFound
+		}
+		if _, err := hex.DecodeString(contentHash); err != nil {
+			return Asset{}, ErrAssetNotFound
+		}
 		if lister, ok := s.provider.(storage.PrefixLister); ok {
 			keys, err := lister.ListPrefix(ctx, path.Join(botID, prefix, contentHash))
 			if err != nil {

@@ -62,13 +62,44 @@ sync order and simulate errors while syncing the configured root's ancestors,
 the originals root and the Bot directory. They verify that failed parent syncs
 reject publication and that retries resync entries left by a failed attempt.
 
+## Malformed reference classification follow-up
+
+The durable lookup introduced in this PR propagated the canonical provider's
+invalid-hash error as a server failure. The authenticated media handler is
+unchanged from the PR base. Durable lookup now rejects noncanonical SHA-256
+references before storage access, retaining the previous `media.asset_not_found`
+/404 classification. Genuine storage errors remain500; authorization still
+runs before lookup.
+
+New service and HTTP regression tests first reproduced the500, then passed with
+the fix. They cover short, nonhex, uppercase, prefixed and encoded references,
+valid originals, missing originals, storage failures and access denial. The
+storage/media, apperror, server, handlers and inbound suites passed, as did the
+two Web error-handling files (123 tests).
+
+The changed source Server was run with the existing published Web and synthetic
+database/originals. Seven malformed requests were checked both directly and
+through Web's Nginx proxy. All14 returned404. The exact reported
+`ab` and `sha256%3A..%2F..%2Fconfig.toml` cases returned
+`media.asset_not_found`. Nginx normalizes the plain encoded traversal path and
+answers `http.not_found` instead; this is distinguished from handler rejection.
+The valid1917-byte original returned200 with the same hash before and after.
+
+A fresh browser login and history preview displayed that original without page
+errors: [source Server preview](hash-classification-preview.png). The screenshot
+also shows the expected unavailable-workspace warning because this focused
+classification check did not create a Workspace. It is not a new candidate
+image or full lifecycle acceptance result.
+
 ## Limits
 
 - Cancellation and split Channel admission were tested in Go; external channel
   integrations and a real external model were not exercised.
 - No real NAS, private deployment data or production configuration was accessed.
-- No image was published or promoted for this change. The complete repository
-  test suite and existing unrelated Web/typecheck failures were not addressed.
+- The original source verification preceded candidate86 publication. The
+  malformed-reference follow-up still needs a new candidate selected and
+  verified after CI; no image publication or promotion was performed for it.
+  Existing unrelated Web/typecheck failures were not addressed.
 - First-read legacy copying is not a bulk migration. Originals must be backed
   up independently; an older binary may not read originals-only attachments.
 - No physical power-loss or storage-device fault injection was performed. Normal
