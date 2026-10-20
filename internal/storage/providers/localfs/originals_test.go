@@ -31,6 +31,11 @@ func (r brokenReader) Read(b []byte) (int, error) {
 func TestOriginalsAtomicIntegrityAndCancellation(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
+	disk, err := os.OpenRoot(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = disk.Close() }()
 	p := NewOriginals(root)
 	payload := []byte("the complete original")
 	key := originalKey("bot-a", payload)
@@ -44,7 +49,7 @@ func TestOriginalsAtomicIntegrityAndCancellation(t *testing.T) {
 			if err := p.Put(ctx, key, reader); err == nil {
 				t.Fatal("partial or mismatched write succeeded")
 			}
-			got, err := os.ReadFile(filepath.Join(root, key))
+			got, err := disk.ReadFile(key)
 			if err != nil || !bytes.Equal(got, payload) {
 				t.Fatalf("original replaced: %q, %v", got, err)
 			}
@@ -75,6 +80,11 @@ func TestOriginalsAtomicIntegrityAndCancellation(t *testing.T) {
 func TestOriginalsConfinesEveryBotAndRejectsTraversal(t *testing.T) {
 	ctx := context.Background()
 	root := t.TempDir()
+	disk, err := os.OpenRoot(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = disk.Close() }()
 	p := NewOriginals(root)
 	payload := []byte("bot b private original")
 	key := originalKey("bot-b", payload)
@@ -113,7 +123,7 @@ func TestOriginalsConfinesEveryBotAndRejectsTraversal(t *testing.T) {
 	if err := p.Delete(ctx, "bot-a/"+sub); err == nil {
 		t.Fatal("delete followed symlink out of bot root")
 	}
-	other, err := os.ReadFile(filepath.Join(root, key))
+	other, err := disk.ReadFile(key)
 	if err != nil || !bytes.Equal(other, payload) {
 		t.Fatalf("other bot original changed: %v", err)
 	}
