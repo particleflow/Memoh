@@ -1014,6 +1014,8 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "uploadingAttachments": "添付ファイルをアップロード中…",
+    "attachmentUploadTooLarge": "「{name}」はこのサーバーの上限（{limit} バイト）を超えています。小さいファイルを選んでください。",
     "workspaceLinkUnavailable": "ここではワークスペースのリンクを開けません。ワークスペースへのアクセス権がある Memoh の会話で開いてください。",
     "runtimeStatus": {
       "compacting": "コンテキストを圧縮中…",

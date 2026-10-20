@@ -457,8 +457,8 @@ export function createTranscriptController({
       role: 'user',
       text,
       attachments: (attachments ?? []).map(attachment => ({
-        type: attachment.type,
-        base64: attachment.base64,
+        ...attachment,
+        bot_id: currentBotId.value ?? undefined,
         name: attachment.name ?? '',
         mime: attachment.mime ?? '',
       })),

@@ -1017,6 +1017,8 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "uploadingAttachments": "正在上传附件…",
+    "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",
     "workspaceLinkUnavailable": "此处无法打开工作区链接，请在有工作区访问权限的 Memoh 对话中打开。",
     "runtimeStatus": {
       "compacting": "正在压缩上下文…",

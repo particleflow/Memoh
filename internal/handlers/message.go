@@ -135,6 +135,9 @@ func (h *MessageHandler) Register(e *echo.Echo) {
 	botGroup.GET("/messages/locate", h.LocateMessage)
 	botGroup.DELETE("/messages", h.DeleteMessages)
 	botGroup.GET("/media/:content_hash", h.ServeMedia)
+	botGroup.HEAD("/media/:content_hash", h.ServeMedia)
+	botGroup.GET("/media/limits", h.MediaUploadLimits)
+	botGroup.POST("/media", h.UploadMedia)
 
 	// Bot-wide activity SSE, carrying only lightweight session metadata (no
 	// message bodies) for sidebar live-sort. A session's own contents are read
@@ -827,6 +830,21 @@ func (h *MessageHandler) authorizeMessageSession(c echo.Context, channelIdentity
 }
 
 // ServeMedia streams a media asset by bot_id + content_hash with read-access authorization.
+//
+// @Summary Download a verified Bot attachment
+// @Description Verifies the complete stored file before serving full content or byte ranges.
+// @Tags messages
+// @Produce octet-stream
+// @Param bot_id path string true "Bot ID"
+// @Param content_hash path string true "Attachment SHA-256"
+// @Param Range header string false "Requested byte range"
+// @Param If-Range header string false "Previously received ETag"
+// @Success 200 {file} binary
+// @Success 206 {file} binary
+// @Failure 401,403,404,500 {object} server.Problem
+// @Failure 416 {string} string "Unsatisfiable byte range"
+// @Router /bots/{bot_id}/media/{content_hash} [get]
+// @Router /bots/{bot_id}/media/{content_hash} [head]
 func (h *MessageHandler) ServeMedia(c echo.Context) error {
 	channelIdentityID, err := h.requireChannelIdentityID(c)
 	if err != nil {
@@ -848,7 +866,7 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 	if h.mediaService == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "media service not configured")
 	}
-	reader, asset, err := h.mediaService.Open(c.Request().Context(), botID, contentHash)
+	reader, asset, err := h.mediaService.OpenSeekable(c.Request().Context(), botID, contentHash)
 	if err != nil {
 		if errors.Is(err, media.ErrAssetNotFound) {
 			return apperror.Wrap(apperror.CodeMediaAssetNotFound, err, nil)
@@ -862,9 +880,9 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 	}
 	c.Response().Header().Set("Content-Type", contentType)
 	c.Response().Header().Set("Cache-Control", "private, max-age=86400")
-	c.Response().WriteHeader(http.StatusOK)
-	if _, err := io.Copy(c.Response().Writer, reader); err != nil {
-		h.logger.WarnContext(c.Request().Context(), "serve media stream failed", slog.Any("error", err))
-	}
+	c.Response().Header().Set("ETag", `"`+asset.ContentHash+`"`)
+	// OpenSeekable verifies the complete original before any range is served.
+	// ServeContent owns Range, If-Range, HEAD, 206 and 416 semantics.
+	http.ServeContent(c.Response(), c.Request(), "", time.Time{}, reader)
 	return nil
 }

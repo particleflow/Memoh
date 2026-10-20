@@ -549,6 +549,16 @@
                           @preview="preview.isPasted ? (pastedViewerText = preview.pastedText) : openComposerPreview(preview.url)"
                         />
                       </div>
+                      <div
+                        v-if="attachmentUploading"
+                        class="flex items-center justify-between gap-2"
+                        role="status"
+                      >
+                        <InlineLoadingRow>{{ $t('chat.uploadingAttachments') }}</InlineLoadingRow>
+                        <TextButton @click="cancelAttachmentUpload">
+                          {{ $t('common.cancel') }}
+                        </TextButton>
+                      </div>
                     </div>
                   </div>
                 </Transition>
@@ -634,7 +644,7 @@
                   v-model="inputText"
                   rows="1"
                   :placeholder="composerPreviewShown ? '' : composerPlaceholder"
-                  :disabled="!currentBotId || activeChatReadOnly || loadingMessages || firstSendAwaiting"
+                  :disabled="!currentBotId || activeChatReadOnly || loadingMessages || firstSendAwaiting || attachmentUploading"
                   class="order-none max-h-52 w-full basis-full field-sizing-content resize-none break-words bg-transparent pl-2 pr-1 pt-2 pb-1.5 text-base leading-[var(--chat-leading)] outline-none placeholder:text-[var(--field-placeholder)] disabled:cursor-not-allowed"
                   :class="[isWelcome ? 'min-h-12' : 'min-h-10', composerPreviewShown ? 'text-transparent' : 'text-foreground']"
                   @keydown="handleComposerKeydown"
@@ -919,10 +929,10 @@
                         type="button"
                         variant="brand"
                         shape="circle"
-                        :disabled="streaming ? false : (!showSend || !currentBotId || activeChatReadOnly || loadingMessages || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason)"
+                        :disabled="attachmentUploading || (streaming ? false : (!showSend || !currentBotId || activeChatReadOnly || loadingMessages || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason))"
                         :title="goalSubmissionBlocked ? goalExecutionBlockedReason : undefined"
                         :class="runtimeModeChanging && !streaming && showSend && !!currentBotId && !activeChatReadOnly && !loadingMessages && !composerAgentConfigPending && !composerHasNoModel ? 'disabled:opacity-100' : undefined"
-                        :aria-busy="firstSendAwaiting || undefined"
+                        :aria-busy="firstSendAwaiting || attachmentUploading || undefined"
                         :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : (streaming ? 'Stop generating response' : 'Send message')"
                         class="size-full"
                         @click="handleSendButton"
@@ -934,7 +944,7 @@
                           <!-- The arrow, which bends into the busy ring while a
                                first send waits for the server. -->
                           <SendMorphIcon
-                            :busy="firstSendAwaiting"
+                            :busy="firstSendAwaiting || attachmentUploading"
                             class="col-start-1 row-start-1 size-[18px] max-md:size-5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
                             :class="streaming && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
                           />
@@ -1289,7 +1299,7 @@ import {
   Lightbulb,
   Target,
 } from 'lucide-vue-next'
-import { Button, Command, CommandGroup, CommandItem, CommandKeyBridge, CommandList, CommandSeparator, ConfirmDeleteDialog, Dialog, DialogContent, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, PanePlaceholder, ScrollArea, Skeleton, Spinner, toast } from '@felinic/ui'
+import { Button, Command, CommandGroup, CommandItem, CommandKeyBridge, CommandList, CommandSeparator, ConfirmDeleteDialog, Dialog, DialogContent, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InlineLoadingRow, PanePlaceholder, ScrollArea, Skeleton, Spinner, TextButton, toast } from '@felinic/ui'
 import { useChatStore, type ExternalAgentSessionInput, type ChatMessage, type ChatWorkspaceTargetSnapshot, type SendMessageResult } from '@/store/chat-list'
 import { useWorkdirsStore } from '@/store/workdirs'
 import type { BotWorkdir } from '@/composables/api/useWorkdirs'
@@ -1335,7 +1345,8 @@ import { useSessionInfo } from '../composables/useSessionInfo'
 import ComposerModelMenu from './composer-model-menu.vue'
 import { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort, reconcileStoredEffort } from '@/pages/bots/components/reasoning-effort'
 import { useMediaGallery } from '../composables/useMediaGallery'
-import { ATTACHMENT_ANIM_MS, attachmentToFile, fileToAttachment, useComposerAttachments } from '../composables/useComposerAttachments'
+import { ATTACHMENT_ANIM_MS, attachmentToFile, useComposerAttachments } from '../composables/useComposerAttachments'
+import { AttachmentUploadLimitError, useComposerUpload } from '../composables/useComposerUpload'
 import { useComposerDrafts } from '../composables/useComposerDrafts'
 import ChatExampleSuggestions from './chat-example-suggestions.vue'
 import { useChatExamplesUi } from '@/components/chat-examples/use-chat-examples-ui'
@@ -1404,10 +1415,21 @@ const {
   pastedViewerText,
   pastedViewerOpen,
   showAttachmentGrid,
-  removeAttachment,
+  removeAttachment: removePendingAttachment,
   handleFileInputChange,
   handlePaste,
 } = useComposerAttachments()
+const {
+  uploading: attachmentUploading,
+  upload: uploadAttachments,
+  cancel: cancelAttachmentUpload,
+} = useComposerUpload()
+function removeAttachment(index: number) {
+  // The last card's visual collapse delays removal from pendingFiles.
+  // Abort immediately, before that animation can race upload completion.
+  cancelAttachmentUpload()
+  removePendingAttachment(index)
+}
 
 const composerError = ref('')
 const forkDialogOpen = ref(false)
@@ -3691,6 +3713,7 @@ watch(currentBotId, cancelVoiceInput)
 onBeforeUnmount(cancelVoiceInput)
 
 const stopAuthSessionCleanup = onAuthSessionCleared(() => {
+  cancelAttachmentUpload()
   clearAllDrafts()
   inputText.value = ''
   pendingFiles.value = []
@@ -3701,6 +3724,14 @@ const { inputDraftKey, saveInputDraft, clearAllDrafts } = useComposerDrafts({
   tabId: () => props.tabId,
   inputText,
 })
+// A pending batch belongs to its original Bot/session and File selection.
+// Switching target, removing a file, or dropping another cancels that send.
+watch(
+  () => [paneTarget.value.botId, paneTarget.value.sessionId, paneTarget.value.viewId],
+  cancelAttachmentUpload,
+  { flush: 'sync' },
+)
+watch(() => pendingFiles.value.slice(), cancelAttachmentUpload, { flush: 'sync' })
 // Registered after useComposerDrafts so its draft restore runs first and
 // cannot overwrite a prefilled prompt (usage examples, App "Try it").
 const replaceDraftConfirm = useAsyncConfirm()
@@ -4068,7 +4099,7 @@ async function handleEditMessage(turnId: string, text: string, done?: (started: 
 }
 
 async function handleSend() {
-  if (!isActive.value) return
+  if (!isActive.value || attachmentUploading.value || firstSendAwaiting.value) return
   if (!skillSlashEnabled.value && requestedSkills.value.length) {
     requestedSkills.value = []
   }
@@ -4241,12 +4272,11 @@ async function handleSend() {
     requestedSkills.value = []
   }
   if (holdsInput) draftSendStarting.value = true
-  else clearSentInput()
 
   let attachments: ChatAttachment[] | undefined
   try {
     if (files.length) {
-      attachments = await Promise.all(files.map(fileToAttachment))
+      attachments = await uploadAttachments(sentContext.target.botId, files)
     }
   } catch (error) {
     pairSend.releaseReads()
@@ -4256,12 +4286,15 @@ async function handleSend() {
       paneTarget.value,
       inputDraftKey.value || 'chat',
     )) return
-    inputText.value = text
-    pendingFiles.value = files
-    requestedSkills.value = skills
-    composerError.value = resolveApiErrorMessage(error, t('chat.sendFailed'))
+    // The draft remains visible throughout upload; cancellation must not
+    // resurrect a removed file or overwrite a changed composer.
+    if (error instanceof DOMException && error.name === 'AbortError') return
+    composerError.value = error instanceof AttachmentUploadLimitError
+      ? t('chat.attachmentUploadTooLarge', { name: error.fileName, limit: error.maxBytes.toLocaleString() })
+      : resolveApiErrorMessage(error, t('chat.sendFailed'))
     return
   }
+  if (!holdsInput) clearSentInput()
 
   // Arm the pin only once the store has passed command handling and session
   // setup and is about to start a real turn. Command-only sends therefore do

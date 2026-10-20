@@ -63,6 +63,8 @@ type FilesConfig struct {
 	// OriginalsRoot keeps attachment originals outside disposable workspaces.
 	// Empty preserves the legacy workspace-first storage behavior.
 	OriginalsRoot string `toml:"originals_root"`
+	// MaxUploadBytes bounds each HTTP attachment; zero uses the 200 MiB default.
+	MaxUploadBytes int64 `toml:"max_upload_bytes"`
 }
 
 type Config struct {
@@ -984,6 +986,9 @@ func Load(path string) (Config, error) {
 }
 
 func (cfg Config) validate() error {
+	if cfg.Files.MaxUploadBytes < 0 || cfg.Files.MaxUploadBytes > (1<<53)-1 {
+		return errors.New("files.max_upload_bytes must be between 0 and 9007199254740991")
+	}
 	if cfg.Server.PublicURL != "" {
 		u, err := url.Parse(cfg.Server.PublicURL)
 		if err != nil || u.Host == "" || (u.Scheme != "https" && u.Scheme != "http") || u.User != nil || u.RawQuery != "" || u.Fragment != "" {

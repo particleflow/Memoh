@@ -21,7 +21,8 @@ on:
       - "mise.toml"
       - ".github/workflows/go-ci.yml"
   pull_request:
-    branches: ["main"]
+    # Stacked feature PRs need the same validation before their base is merged.
+    branches: ["main", "feat/**"]
     paths:
       - "**/*.go"
       - "go.mod"

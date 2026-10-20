@@ -8,6 +8,13 @@ timezone = "UTC"
 # Leave empty unless [bridge_tls].mode = "strict".
 instance_id = ""
 
+[files]
+# Per-file HTTP attachment limit in bytes; 0 uses the default 200 MiB.
+# The Web composer reads this limit before uploading. Restart Server after edits.
+max_upload_bytes = 209715200
+# Optional independent originals storage, outside disposable workspaces.
+originals_root = ""
+
 [log]
 level = "info"
 format = "text"

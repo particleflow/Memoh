@@ -2286,6 +2286,16 @@ export type HandlersMcpStdioResponse = {
     url?: string;
 };
 
+export type HandlersMediaUploadLimitsResponse = {
+    max_upload_bytes: number;
+};
+
+export type HandlersMediaUploadResponse = {
+    content_hash: string;
+    mime: string;
+    size_bytes: number;
+};
+
 export type HandlersModelTokenUsage = {
     input_tokens?: number;
     model_id?: string;
@@ -9963,6 +9973,227 @@ export type PostBotsByBotIdMcpByIdProbeResponses = {
 };
 
 export type PostBotsByBotIdMcpByIdProbeResponse = PostBotsByBotIdMcpByIdProbeResponses[keyof PostBotsByBotIdMcpByIdProbeResponses];
+
+export type PostBotsByBotIdMediaData = {
+    body: {
+        /**
+         * Attachment
+         */
+        file: Blob | File;
+    };
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media';
+};
+
+export type PostBotsByBotIdMediaErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Request Entity Too Large
+     */
+    413: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdMediaError = PostBotsByBotIdMediaErrors[keyof PostBotsByBotIdMediaErrors];
+
+export type PostBotsByBotIdMediaResponses = {
+    /**
+     * Created
+     */
+    201: HandlersMediaUploadResponse;
+};
+
+export type PostBotsByBotIdMediaResponse = PostBotsByBotIdMediaResponses[keyof PostBotsByBotIdMediaResponses];
+
+export type GetBotsByBotIdMediaLimitsData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/limits';
+};
+
+export type GetBotsByBotIdMediaLimitsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaLimitsError = GetBotsByBotIdMediaLimitsErrors[keyof GetBotsByBotIdMediaLimitsErrors];
+
+export type GetBotsByBotIdMediaLimitsResponses = {
+    /**
+     * OK
+     */
+    200: HandlersMediaUploadLimitsResponse;
+};
+
+export type GetBotsByBotIdMediaLimitsResponse = GetBotsByBotIdMediaLimitsResponses[keyof GetBotsByBotIdMediaLimitsResponses];
+
+export type GetBotsByBotIdMediaByContentHashData = {
+    body?: never;
+    headers?: {
+        /**
+         * Requested byte range
+         */
+        Range?: string;
+        /**
+         * Previously received ETag
+         */
+        'If-Range'?: string;
+    };
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Attachment SHA-256
+         */
+        content_hash: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/{content_hash}';
+};
+
+export type GetBotsByBotIdMediaByContentHashErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Unsatisfiable byte range
+     */
+    416: Blob | File;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaByContentHashError = GetBotsByBotIdMediaByContentHashErrors[keyof GetBotsByBotIdMediaByContentHashErrors];
+
+export type GetBotsByBotIdMediaByContentHashResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
+};
+
+export type HeadBotsByBotIdMediaByContentHashData = {
+    body?: never;
+    headers?: {
+        /**
+         * Requested byte range
+         */
+        Range?: string;
+        /**
+         * Previously received ETag
+         */
+        'If-Range'?: string;
+    };
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Attachment SHA-256
+         */
+        content_hash: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/{content_hash}';
+};
+
+export type HeadBotsByBotIdMediaByContentHashErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Unsatisfiable byte range
+     */
+    416: Blob | File;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type HeadBotsByBotIdMediaByContentHashError = HeadBotsByBotIdMediaByContentHashErrors[keyof HeadBotsByBotIdMediaByContentHashErrors];
+
+export type HeadBotsByBotIdMediaByContentHashResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
+};
 
 export type DeleteBotsByBotIdMemoryData = {
     /**

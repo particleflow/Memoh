@@ -4011,6 +4011,26 @@ definitions:
       url:
         type: string
     type: object
+  handlers.MediaUploadLimitsResponse:
+    properties:
+      max_upload_bytes:
+        type: integer
+    required:
+    - max_upload_bytes
+    type: object
+  handlers.MediaUploadResponse:
+    properties:
+      content_hash:
+        type: string
+      mime:
+        type: string
+      size_bytes:
+        type: integer
+    required:
+    - content_hash
+    - mime
+    - size_bytes
+    type: object
   handlers.ModelTokenUsage:
     properties:
       input_tokens:
@@ -12061,6 +12081,204 @@ paths:
       summary: Probe MCP connection
       tags:
       - mcp
+  /bots/{bot_id}/media:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Streams one file into Bot-scoped storage. No session or model turn
+        is created.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Attachment
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.MediaUploadResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Upload an attachment before sending a chat message
+      tags:
+      - messages
+  /bots/{bot_id}/media/{content_hash}:
+    get:
+      description: Verifies the complete stored file before serving full content or
+        byte ranges.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Attachment SHA-256
+        in: path
+        name: content_hash
+        required: true
+        type: string
+      - description: Requested byte range
+        in: header
+        name: Range
+        type: string
+      - description: Previously received ETag
+        in: header
+        name: If-Range
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "206":
+          description: Partial Content
+          schema:
+            type: file
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "416":
+          description: Unsatisfiable byte range
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Download a verified Bot attachment
+      tags:
+      - messages
+    head:
+      description: Verifies the complete stored file before serving full content or
+        byte ranges.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Attachment SHA-256
+        in: path
+        name: content_hash
+        required: true
+        type: string
+      - description: Requested byte range
+        in: header
+        name: Range
+        type: string
+      - description: Previously received ETag
+        in: header
+        name: If-Range
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "206":
+          description: Partial Content
+          schema:
+            type: file
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "416":
+          description: Unsatisfiable byte range
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Download a verified Bot attachment
+      tags:
+      - messages
+  /bots/{bot_id}/media/limits:
+    get:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MediaUploadLimitsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Get the attachment upload limit
+      tags:
+      - messages
   /bots/{bot_id}/memory:
     delete:
       consumes:
