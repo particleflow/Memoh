@@ -89,6 +89,7 @@
           kind="file"
           :name="getDisplayName(att)"
           :ext="getExt(att)"
+          :size="attachmentSize(att)"
           :lines="linesFor(att)"
           :loading="isCounting(att)"
           interactive
@@ -119,6 +120,7 @@ import ChatAttachmentCard from './chat-attachment-card.vue'
 // (optimistic → persisted) or a re-mount doesn't refetch. Keyed by content hash
 // when known (stable), else the source URL.
 const lineCountCache = new Map<string, number>()
+const LINE_COUNT_MAX_BYTES = 2 * 1024 * 1024
 
 const props = withDefaults(defineProps<{
   block: AttachmentBlock
@@ -152,8 +154,17 @@ function isTextAttachment(att: AttachmentItem): boolean {
   return isTextFile(getDisplayName(att))
 }
 
+function attachmentSize(att: AttachmentItem): number | undefined {
+  const size = att.size
+  return typeof size === 'number' && Number.isSafeInteger(size) && size >= 0 ? size : undefined
+}
+
 async function ensureLineCount(att: AttachmentItem) {
   if (!isTextAttachment(att)) return
+  // History can contain large uploads or legacy records without a known size.
+  // Rendering a card must not download those files just to count their lines.
+  const size = attachmentSize(att)
+  if (size == null || size > LINE_COUNT_MAX_BYTES) return
   const url = getUrl(att)
   if (!url) return
   const key = attachmentKey(att)

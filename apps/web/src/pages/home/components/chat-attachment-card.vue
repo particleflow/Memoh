@@ -96,6 +96,12 @@
           >
             {{ t('chat.attachmentLines', { count: lines }) }}
           </span>
+          <span
+            v-else-if="size != null"
+            class="text-caption text-muted-foreground"
+          >
+            {{ sizeLabel }}
+          </span>
           <div class="flex-1" />
           <span
             v-if="ext"

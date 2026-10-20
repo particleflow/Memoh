@@ -1,4 +1,4 @@
-import { onScopeDispose, ref, toRaw } from 'vue'
+import { getCurrentInstance, onDeactivated, onScopeDispose, ref, toRaw } from 'vue'
 import { getBotsByBotIdMediaLimits, postBotsByBotIdMedia } from '@memohai/sdk'
 import type { ChatAttachment } from '@/composables/api/useChat'
 
@@ -80,6 +80,9 @@ export function useComposerUpload() {
 
   function cancel() { active?.abort() }
   onScopeDispose(cancel)
+  // Dock tabs are cached by KeepAlive: leaving a tab does not dispose its scope
+  // or change its bot/session props, but must still stop an unfinished send.
+  if (getCurrentInstance()) onDeactivated(cancel)
 
   async function upload(botId: string, files: File[]) {
     if (active) throw new Error('An attachment upload is already running')
