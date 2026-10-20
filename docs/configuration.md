@@ -12,6 +12,7 @@ The main configuration file is `config.toml` (copied from `conf/app.example.toml
 - `[auth]` — JWT authentication settings
 - `[database]` — Database backend selection (`postgres`)
 - `[container]` — Workspace container backend selection (`docker`, `containerd`, `apple`) and common workspace image/data/bridge/CNI settings
+- `[files]` — Optional `originals_root` for independently persistent attachment/file originals, including documents and archives. `MEMOH_ORIGINALS_ROOT` overrides it. Empty preserves legacy workspace-first storage. See [file originals](image-deployment.md#file-originals-outside-workspaces).
 - `[containerd]` / `[docker]` / `[apple]` — Backend-specific runtime configuration
 - `[postgres]` — PostgreSQL connection
 - `[qdrant]` — Qdrant vector database connection

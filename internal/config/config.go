@@ -59,7 +59,14 @@ const (
 	ImagePullPolicyNever        = "never"
 )
 
+type FilesConfig struct {
+	// OriginalsRoot keeps attachment originals outside disposable workspaces.
+	// Empty preserves the legacy workspace-first storage behavior.
+	OriginalsRoot string `toml:"originals_root"`
+}
+
 type Config struct {
+	Files                 FilesConfig                 `toml:"files"`
 	Log                   LogConfig                   `toml:"log"`
 	Server                ServerConfig                `toml:"server"`
 	Channel               ChannelConfig               `toml:"channel"`
@@ -1033,6 +1040,9 @@ func (cfg Config) ValidateChannelRuntime() error {
 }
 
 func (cfg *Config) applyBridgeTLSEnvOverrides() {
+	if value := strings.TrimSpace(os.Getenv("MEMOH_ORIGINALS_ROOT")); value != "" {
+		cfg.Files.OriginalsRoot = value
+	}
 	if value := strings.TrimSpace(os.Getenv("MEMOH_INSTANCE_ID")); value != "" {
 		cfg.InstanceID = value
 	}

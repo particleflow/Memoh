@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"strings"
 	"time"
 
 	"go.uber.org/fx"
@@ -44,8 +45,10 @@ func provideTurnClient(conn *grpc.ClientConn, log *slog.Logger) turn.Service {
 	return turntransport.NewClient(conn, turntransport.WithClientLogger(log))
 }
 
-func provideRemoteMediaService(conn *grpc.ClientConn, log *slog.Logger) *media.Service {
-	return media.NewService(log, storageruntime.NewProvider(conn))
+func provideRemoteMediaService(conn *grpc.ClientConn, log *slog.Logger, cfg config.Config) *media.Service {
+	service := media.NewService(log, storageruntime.NewProvider(conn))
+	service.SetRequirePersistence(strings.TrimSpace(cfg.Files.OriginalsRoot) != "")
+	return service
 }
 
 func provideRuntimeRPCClient(conn *grpc.ClientConn) *runtimeRpc.Client {
