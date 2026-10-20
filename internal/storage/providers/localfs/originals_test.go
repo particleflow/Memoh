@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 )
@@ -126,5 +127,102 @@ func TestOriginalsConfinesEveryBotAndRejectsTraversal(t *testing.T) {
 	other, err := disk.ReadFile(key)
 	if err != nil || !bytes.Equal(other, payload) {
 		t.Fatalf("other bot original changed: %v", err)
+	}
+}
+
+func syncTarget(t *testing.T, base string, file *os.File) string {
+	t.Helper()
+	info, err := file.Stat()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !info.IsDir() {
+		return "file"
+	}
+	name, err := filepath.Rel(base, file.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return filepath.ToSlash(name)
+}
+
+func TestOriginalsSyncsDirectoryEntriesBeforePublishing(t *testing.T) {
+	base := t.TempDir()
+	disk, err := os.OpenRoot(base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = disk.Close() }()
+	p := NewOriginals(filepath.Join(base, "new", "originals"))
+	payload := []byte("first original in new directories")
+	key := originalKey("bot-a", payload)
+	finalPath := filepath.Join("new", "originals", key)
+	leaf := "new/originals/" + filepath.ToSlash(filepath.Dir(key))
+	var synced []string
+	p.syncFile = func(file *os.File) error {
+		target := syncTarget(t, base, file)
+		if target != ".." && !strings.HasPrefix(target, "../") {
+			synced = append(synced, target)
+		}
+		got, err := disk.ReadFile(finalPath)
+		if target == leaf {
+			if err != nil || !bytes.Equal(got, payload) {
+				t.Fatalf("leaf synced before complete original was published: %q, %v", got, err)
+			}
+		} else if !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("original published before ancestor/file sync: %s, %v", target, err)
+		}
+		return file.Sync()
+	}
+	if err := p.Put(context.Background(), key, bytes.NewReader(payload)); err != nil {
+		t.Fatal(err)
+	}
+	want := []string{".", "new", "new/originals", "new/originals/bot-a", "file", leaf}
+	if !slices.Equal(synced, want) {
+		t.Fatalf("sync order = %v, want %v", synced, want)
+	}
+}
+
+func TestOriginalsRetriesFailedDirectorySyncBeforePublishing(t *testing.T) {
+	for _, target := range []string{".", "new", "new/originals", "new/originals/bot-a"} {
+		t.Run(target, func(t *testing.T) {
+			base := t.TempDir()
+			disk, err := os.OpenRoot(base)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = disk.Close() }()
+			p := NewOriginals(filepath.Join(base, "new", "originals"))
+			payload := []byte("retry after a directory sync failure")
+			key := originalKey("bot-a", payload)
+			failedSync := errors.New("synthetic directory sync failure")
+			p.syncFile = func(file *os.File) error {
+				if syncTarget(t, base, file) == target {
+					return failedSync
+				}
+				return file.Sync()
+			}
+			if err := p.Put(context.Background(), key, bytes.NewReader(payload)); !errors.Is(err, failedSync) {
+				t.Fatalf("directory sync failure was acknowledged: %v", err)
+			}
+			if _, err := disk.ReadFile(filepath.Join("new", "originals", key)); !errors.Is(err, os.ErrNotExist) {
+				t.Fatalf("original published after directory sync failed: %v", err)
+			}
+			var retried []string
+			p.syncFile = func(file *os.File) error {
+				retried = append(retried, syncTarget(t, base, file))
+				return file.Sync()
+			}
+			if err := p.Put(context.Background(), key, bytes.NewReader(payload)); err != nil {
+				t.Fatal(err)
+			}
+			if !slices.Contains(retried, target) {
+				t.Fatalf("retry skipped sync for an existing directory entry: %v", retried)
+			}
+			got, err := disk.ReadFile(filepath.Join("new", "originals", key))
+			if err != nil || !bytes.Equal(got, payload) {
+				t.Fatalf("retry did not preserve original: %q, %v", got, err)
+			}
+		})
 	}
 }

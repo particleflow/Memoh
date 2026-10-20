@@ -23,8 +23,8 @@ verification, not verification of a newly published production image.
    attachment, and caused zero new model requests. Restored the directory and
    verified the previous original again.
 
-All successful reads contained 1,915 bytes with SHA256
-`02c8f4808ecb57a0477f69070d51cf4470b453c13e5ddb5ad5441f3e80533708`.
+All successful reads contained 1,917 bytes with SHA256
+`e268fe4ba82c18bbeccf91618dc0bb3dfd7866293b6b6e8b7cd14c30d51b140c`.
 Unauthenticated access returned 401, another account without Bot access returned
 403, and looking up this hash under another Bot returned 404. The traversal
 request was rejected. Browser verification recorded no JavaScript page errors.
@@ -55,6 +55,13 @@ cover persistence failure, cancellation and foreign-Bot references. Compose
 rendering with synthetic paths confirmed distinct config/data/originals mounts
 and consistent Server/Channel policy.
 
+After the directory-sync fix, the upload, workspace deletion/recreation,
+Server restart, browser history preview, write-failure and authorization checks
+above were repeated with the new payload. Focused tests record the filesystem
+sync order and simulate errors while syncing the configured root's ancestors,
+the originals root and the Bot directory. They verify that failed parent syncs
+reject publication and that retries resync entries left by a failed attempt.
+
 ## Limits
 
 - Cancellation and split Channel admission were tested in Go; external channel
@@ -64,4 +71,6 @@ and consistent Server/Channel policy.
   test suite and existing unrelated Web/typecheck failures were not addressed.
 - First-read legacy copying is not a bulk migration. Originals must be backed
   up independently; an older binary may not read originals-only attachments.
+- No physical power-loss or storage-device fault injection was performed. Normal
+  restart tests and unit-level sync-error simulation do not establish that coverage.
 - Agent verification does not establish human QA.

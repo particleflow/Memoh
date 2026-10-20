@@ -16,9 +16,14 @@ import (
 
 // Originals stores verified originals in independent, per-bot directory roots.
 // The configured root is operator-owned and must never be mounted in workspaces.
-type Originals struct{ root string }
+type Originals struct {
+	root     string
+	syncFile func(*os.File) error
+}
 
-func NewOriginals(root string) *Originals { return &Originals{root: root} }
+func NewOriginals(root string) *Originals {
+	return &Originals{root: root, syncFile: (*os.File).Sync}
+}
 
 func mediaKey(key string) (bot, name, hash string, err error) {
 	parts := strings.Split(key, "/")
@@ -39,9 +44,52 @@ func validComponent(value string) bool {
 		!strings.ContainsAny(value, "/\\\x00")
 }
 
+func (p *Originals) syncDirectory(root *os.Root, name string) error {
+	dir, err := root.Open(name)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = dir.Close() }()
+	return p.syncFile(dir)
+}
+
+// mkdirOriginalsRoot persists the configured root's ancestry before adding data.
+// Resync existing ancestors too: a failed attempt may have left unsynced entries.
+func (p *Originals) mkdirOriginalsRoot(dir string) error {
+	if dir == "" {
+		return errors.New("media root is required")
+	}
+	dir, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(dir, 0o750); err != nil {
+		return err
+	}
+	var parents []string
+	for parent := filepath.Dir(dir); ; parent = filepath.Dir(parent) {
+		parents = append(parents, parent)
+		if parent == filepath.Dir(parent) {
+			break
+		}
+	}
+	for i := len(parents) - 1; i >= 0; i-- {
+		parent, err := os.OpenRoot(parents[i])
+		if err != nil {
+			return err
+		}
+		err = p.syncDirectory(parent, ".")
+		_ = parent.Close()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (p *Originals) botRoot(bot string, create bool) (*os.Root, error) {
 	if create {
-		if err := os.MkdirAll(p.root, 0o750); err != nil {
+		if err := p.mkdirOriginalsRoot(p.root); err != nil {
 			return nil, err
 		}
 	}
@@ -52,6 +100,9 @@ func (p *Originals) botRoot(bot string, create bool) (*os.Root, error) {
 	defer func() { _ = root.Close() }()
 	if create {
 		if err := root.Mkdir(bot, 0o750); err != nil && !errors.Is(err, os.ErrExist) {
+			return nil, err
+		}
+		if err := p.syncDirectory(root, "."); err != nil {
 			return nil, err
 		}
 	}
@@ -102,7 +153,10 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 	}
 	defer func() { _ = root.Close() }()
 	dir := path.Dir(name)
-	if err := root.MkdirAll(dir, 0o750); err != nil {
+	if err := root.Mkdir(dir, 0o750); err != nil && !errors.Is(err, os.ErrExist) {
+		return err
+	}
+	if err := p.syncDirectory(root, "."); err != nil {
 		return err
 	}
 	temp := dir + "/.pending-" + rand.Text()
@@ -118,7 +172,7 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 	if hex.EncodeToString(h.Sum(nil)) != expected {
 		return errors.New("media content hash mismatch")
 	}
-	if err := f.Sync(); err != nil {
+	if err := p.syncFile(f); err != nil {
 		return err
 	}
 	if err := f.Close(); err != nil {
@@ -132,12 +186,7 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 	if err := root.Rename(temp, name); err != nil {
 		return err
 	}
-	d, err := root.Open(dir)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = d.Close() }()
-	return d.Sync()
+	return p.syncDirectory(root, dir)
 }
 
 func (p *Originals) Open(ctx context.Context, key string) (io.ReadCloser, error) {
