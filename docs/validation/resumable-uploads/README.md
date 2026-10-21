@@ -4,6 +4,10 @@ Date: 2026-10-21. Base: `e6f4999dd294a09b4171fdaae0176714405971d5`
 (merged PR #6). The implementation and contract are in
 [resumable-uploads.md](../../resumable-uploads.md).
 
+The measurements below record the reviewed `2bf79bbb` stage. Subsequent rebase
+onto the merged PR7 main, preservation checks, and fresh integrated runtime
+results are recorded separately in [PR7 integration validation](pr7-integration.md).
+
 ## Environment and boundaries
 
 Isolated Linux cloud workspace, Go 1.25.7, PostgreSQL 18 and pgvector 18,
