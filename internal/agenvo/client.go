@@ -34,13 +34,19 @@ type Target struct {
 // AgentProfile is private deployment configuration, never model-supplied.
 // No provider default is inferred and no credential is stored here.
 type AgentProfile struct {
-	Provider  string `json:"provider"`
-	Model     string `json:"model"`
-	ConfigDir string `json:"config_dir"`
-	Path      string `json:"path,omitempty"`
+	// Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
+	// finite official CLI invocations; no automatic protocol fallback occurs.
+	ExecutionMode string `json:"execution_mode,omitempty"`
+	Provider      string `json:"provider"`
+	Model         string `json:"model"`
+	ConfigDir     string `json:"config_dir"`
+	Path          string `json:"path,omitempty"`
 }
 
 func (p AgentProfile) Validate() error {
+	if p.ExecutionMode != "" && p.ExecutionMode != "pi-json-v1" {
+		return ErrInvalidTarget
+	}
 	if p.Provider == "" || p.Model == "" || !windowsAbsolute.MatchString(p.ConfigDir) || len(p.ConfigDir) > 4096 || len(p.Provider) > 128 || len(p.Model) > 256 {
 		return ErrInvalidTarget
 	}

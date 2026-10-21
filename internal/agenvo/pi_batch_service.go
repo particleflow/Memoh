@@ -1,0 +1,241 @@
+package agenvo
+
+import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type batchPane struct {
+	ID        string `json:"pane_id"`
+	Workspace string `json:"workspace_id"`
+	Terminal  string `json:"terminal_id"`
+}
+
+// ValidateBatchRequest applies the existing connector's command size limit
+// before a durable claim or any remote mutation. Native IDs are bounded too.
+func ValidateBatchRequest(p BatchProgress, target Target, workDir, task string) error {
+	if !p.valid() {
+		return ErrUnsupported
+	}
+	cwd, err := resolveWorkDir(target.WorkDir, workDir)
+	if err != nil {
+		return err
+	}
+	p.WorkspaceID, p.PaneID, p.TerminalID = strings.Repeat("x", 256), strings.Repeat("x", 256), strings.Repeat("x", 256)
+	if len(launchBashScript(batchScript(p, target, cwd, task), target.BashPath)) > 48000 {
+		return ErrUnsupported
+	}
+	return nil
+}
+
+// SubmitBatch only starts a previously reserved new invocation. The original
+// workspace pane is reserved for fixed file reads, and Pi gets a separate tab.
+func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir string, p BatchProgress, save func(BatchProgress) error) (BatchProgress, error) {
+	c, target, err := s.Client(ctx, scope)
+	if err != nil {
+		return p, err
+	}
+	if !p.valid() || p.Phase != "" || target.Agent.ExecutionMode != "pi-json-v1" || target.Agent.Validate() != nil || ValidateBatchRequest(p, target, workDir, task) != nil {
+		return p, ErrUnsupported
+	}
+	cwd, err := resolveWorkDir(target.WorkDir, workDir)
+	if err != nil {
+		return p, err
+	}
+	call := func(phase, method string, args map[string]any) (Receipt, error) {
+		p.Phase = phase
+		if err := save(p); err != nil {
+			return Receipt{}, err
+		}
+		return c.native(ctx, scope, target, method, args)
+	}
+	created, err := call("batch_creating_workspace", "workspace.create", map[string]any{"session": target.Session, "cwd": cwd, "label": "memoh-batch-" + p.Attempt})
+	if err != nil {
+		return p, err
+	}
+	var ws struct {
+		Workspace struct {
+			ID    string `json:"workspace_id"`
+			Label string `json:"label"`
+		} `json:"workspace"`
+		Root batchPane `json:"root_pane"`
+	}
+	if resultBody(created, &ws) != nil || ws.Workspace.ID == "" || ws.Workspace.Label != "memoh-batch-"+p.Attempt || ws.Root.ID == "" || ws.Root.Terminal == "" || ws.Root.Workspace != ws.Workspace.ID {
+		return p, ErrUnknown
+	}
+	p.WorkspaceID, p.ControlPane, p.ControlTerminal = ws.Workspace.ID, ws.Root.ID, ws.Root.Terminal
+	env := map[string]string{"PI_CODING_AGENT_DIR": target.Agent.ConfigDir}
+	if target.Agent.Path != "" {
+		env["PATH"] = target.Agent.Path
+	}
+	created, err = call("batch_creating_tab", "tab.create", map[string]any{"session": target.Session, "workspaceId": p.WorkspaceID, "cwd": cwd, "label": "memoh-pi-" + p.Attempt, "env": env})
+	if err != nil {
+		return p, err
+	}
+	var tab struct {
+		Root batchPane `json:"root_pane"`
+	}
+	if resultBody(created, &tab) != nil || tab.Root.Workspace != p.WorkspaceID || tab.Root.ID == "" || tab.Root.Terminal == "" || tab.Root.ID == p.ControlPane {
+		return p, ErrUnknown
+	}
+	p.PaneID, p.TerminalID = tab.Root.ID, tab.Root.Terminal
+	if len(p.PaneID) > 256 || len(p.WorkspaceID) > 256 || len(p.TerminalID) > 256 {
+		return p, ErrUnknown
+	}
+	command := launchBashScript(batchScript(p, target, cwd, task), target.BashPath)
+	// Agenvo's official pane.run contract has a 48,000-character limit.
+	if len(command) > 48000 {
+		return p, ErrUnsupported
+	}
+	r, err := call("batch_submitting", "pane.run", map[string]any{"session": target.Session, "paneId": p.PaneID, "command": command})
+	p.RequestID = r.RequestID
+	if err != nil {
+		return p, err
+	}
+	p.Phase = "batch_submitted"
+	return p, save(p)
+}
+
+func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, pane string, lines int) (string, error) {
+	r, err := c.native(ctx, scope, target, "pane.read", map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"})
+	if err != nil {
+		return "", err
+	}
+	var out struct {
+		Output  *string `json:"output"`
+		Session string  `json:"session"`
+	}
+	if json.Unmarshal(r.Result, &out) != nil || out.Output == nil || out.Session != target.Session {
+		return "", ErrUnknown
+	}
+	return *out.Output, nil
+}
+
+// ObserveBatch never types into Pi, including after timeout or cancellation.
+func (s *Service) ObserveBatch(ctx context.Context, scope Scope, p BatchProgress) (*BatchReceipt, error) {
+	if !p.valid() || p.PaneID == "" || p.TerminalID == "" {
+		return nil, ErrUnknown
+	}
+	c, target, err := s.Client(ctx, scope)
+	if err != nil {
+		return nil, err
+	}
+	text, err := c.readBatchPane(ctx, scope, target, p.PaneID, 20)
+	if err != nil {
+		return nil, err
+	}
+	receipt, err := parseBatchReceipt(text, p)
+	if err != nil || receipt != nil {
+		return receipt, err
+	}
+	// A terminal snapshot may have lost the frame. Read the immutable receipt
+	// through the separate control pane; never type a status query into Pi.
+	raw, err := s.readBatchFile(ctx, scope, p, "receipt.json", 0, BatchPageBytes)
+	if err != nil || len(raw) == 0 {
+		return nil, err
+	}
+	var persisted BatchReceipt
+	if len(raw) >= BatchPageBytes || json.Unmarshal(raw, &persisted) != nil || persisted.Validate(p) != nil {
+		return nil, ErrUnknown
+	}
+	return &persisted, nil
+}
+
+const BatchPageBytes = 16384
+
+// ReadBatchPage reads only a receipt-bound stdout/stderr file. It is never a
+// model-specified path or shell command. The control pane never hosts Pi.
+// Metadata checks detect a changed pane but cannot provide Herdr's missing
+// atomic expected-generation operation; no native restart/close safety is claimed.
+func (s *Service) ReadBatchPage(ctx context.Context, scope Scope, p BatchProgress, receipt BatchReceipt, file BatchFile, offset int64) ([]byte, error) {
+	if receipt.Validate(p) != nil || (file != receipt.Stdout && file != receipt.Stderr) || offset < 0 || offset >= file.Size || p.ControlPane == "" || p.ControlPane == p.PaneID {
+		return nil, ErrUnsupported
+	}
+	count := min(int64(BatchPageBytes), file.Size-offset)
+	data, err := s.readBatchFile(ctx, scope, p, file.Name, offset, count)
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(data)) != count {
+		return nil, ErrUnknown
+	}
+	return data, nil
+}
+
+// readBatchFile issues a bounded, fixed read on the dedicated control shell.
+// An absent receipt is a complete empty response, not evidence of termination.
+func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgress, name string, offset, count int64) ([]byte, error) {
+	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > BatchPageBytes || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt") {
+		return nil, ErrUnsupported
+	}
+	c, target, err := s.Client(ctx, scope)
+	if err != nil {
+		return nil, err
+	}
+	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
+	if err != nil {
+		return nil, err
+	}
+	var info struct {
+		Type string    `json:"type"`
+		Pane batchPane `json:"pane"`
+	}
+	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != p.ControlPane || info.Pane.Terminal != p.ControlTerminal || info.Pane.Workspace != p.WorkspaceID {
+		return nil, ErrTargetChanged
+	}
+	nonce := strings.ReplaceAll(uuid.NewString(), "-", "")
+	script := fmt.Sprintf(`set -euo pipefail
+memoh_root=%s; memoh_root="${memoh_root%%.}"
+memoh_root="$(cygpath -u "$memoh_root")"
+memoh_file="$memoh_root/.memoh-computer/attempts/%s/%s"
+printf '\r\nMEMOH_FILE_%s:'
+if test -f "$memoh_file"; then
+  dd if="$memoh_file" bs=1 skip=%d count=%d status=none | base64 -w 0
+fi
+printf ':END_FILE_%s\r\n'
+`, shellData(target.WorkDir), p.Attempt, name, nonce, offset, count, nonce)
+	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": launchBashScript(script, target.BashPath)})
+	if err != nil {
+		return nil, err
+	} // never repeat an uncertain input call
+	for {
+		// Keep recent unwrapped output below the relay's 64 KiB response limit;
+		// do not request hundreds of previous base64 page frames.
+		text, err := c.readBatchPane(ctx, scope, target, p.ControlPane, 4)
+		if err != nil {
+			return nil, err
+		}
+		var data []byte
+		found := false
+		for _, line := range strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+			start, end := "MEMOH_FILE_"+nonce+":", ":END_FILE_"+nonce
+			if !strings.HasPrefix(line, start) || !strings.HasSuffix(line, end) {
+				continue
+			}
+			if found || len(line) > 2*BatchPageBytes {
+				return nil, ErrUnknown
+			}
+			data, err = base64.StdEncoding.DecodeString(strings.TrimSuffix(strings.TrimPrefix(line, start), end))
+			found = true
+			if err != nil || int64(len(data)) > count {
+				return nil, ErrUnknown
+			}
+		}
+		if found {
+			return data, nil
+		}
+		timer := time.NewTimer(100 * time.Millisecond)
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil, ErrUnknown
+		case <-timer.C:
+		}
+	}
+}

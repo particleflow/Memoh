@@ -52,10 +52,11 @@ func NewService(store dbstore.ComputerOperationStore, registry Registry, relay *
 }
 
 type Target struct {
-	ID           string   `json:"target_id"`
-	Name         string   `json:"name"`
-	Capabilities []string `json:"capabilities"`
-	Availability string   `json:"availability"`
+	ID            string   `json:"target_id"`
+	Name          string   `json:"name"`
+	Capabilities  []string `json:"capabilities"`
+	Availability  string   `json:"availability"`
+	AgentProtocol string   `json:"agent_protocol,omitempty"`
 }
 type Submit struct {
 	TargetID string `json:"target_id,omitempty"`
@@ -64,6 +65,7 @@ type Submit struct {
 	WorkDir  string `json:"work_dir,omitempty"`
 }
 type Details struct {
+	Batch        *BatchDetails            `json:"batch,omitempty"`
 	Kind         string                   `json:"kind"`
 	Agent        agenvo.AgentProgress     `json:"agent"`
 	Output       string                   `json:"output,omitempty"`
@@ -75,6 +77,9 @@ type Details struct {
 	Foreground   *agenvo.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
+	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
+	StdoutHash         string                   `json:"stdout_hash,omitempty"`
+	StderrHash         string                   `json:"stderr_hash,omitempty"`
 	ID                 string                   `json:"operation_id"`
 	TargetID           string                   `json:"target_id"`
 	State              string                   `json:"state"`
@@ -114,6 +119,19 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 	if d.Foreground != nil {
 		out.WorkspaceID, out.PaneID, out.RequestID, out.CleanupRequired = d.Foreground.WorkspaceID, d.Foreground.PaneID, d.Foreground.RequestID, d.Foreground.CleanupRequired
 	}
+	if d.Batch != nil {
+		out.WorkspaceID, out.PaneID, out.RequestID = d.Batch.Progress.WorkspaceID, d.Batch.Progress.PaneID, d.Batch.Progress.RequestID
+		out.ProcessStopped = d.Batch.Receipt != nil && d.Batch.Receipt.Validate(d.Batch.Progress) == nil
+		out.PiResult = d.Batch.Result
+		for _, f := range d.Batch.Files {
+			switch f.Meta.Name {
+			case "stdout.jsonl":
+				out.StdoutHash = f.ReadyHash
+			case "stderr.txt":
+				out.StderrHash = f.ReadyHash
+			}
+		}
+	}
 	return out
 }
 
@@ -142,7 +160,11 @@ func (s *Service) targets(ctx context.Context, b toolcontext.ComputerBinding) ([
 		if t.Agent != (agenvo.AgentProfile{}) {
 			caps = append(caps, "herdr_pi_task")
 		}
-		items = append(items, Target{ID: r.ID, Name: r.RuntimeName, Capabilities: caps, Availability: "not_probed"})
+		protocol := t.Agent.ExecutionMode
+		if t.Agent != (agenvo.AgentProfile{}) && protocol == "" {
+			protocol = "herdr-tui-observation"
+		}
+		items = append(items, Target{ID: r.ID, Name: r.RuntimeName, Capabilities: caps, Availability: "not_probed", AgentProtocol: protocol})
 	}
 	return items, nil
 }
@@ -205,6 +227,12 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		return Result{}, err
 	}
 	d := Details{Kind: in.Kind}
+	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
+		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+			return Result{}, err
+		}
+	}
 	raw, _ := json.Marshal(d)
 	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw})
 	if err != nil {
@@ -261,6 +289,23 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		}
 		return result(r, d), runErr
 	}
+	if d.Batch != nil {
+		p, runErr := s.relay.SubmitBatch(work, scope(b, id), in.Task, in.WorkDir, d.Batch.Progress, func(p agenvo.BatchProgress) error {
+			d.Batch.Progress = p
+			d.Phase = p.Phase
+			return save("dispatching")
+		})
+		d.Batch.Progress = p
+		d.Phase = p.Phase
+		state := "submitted"
+		if runErr != nil {
+			state = "unknown"
+		}
+		if err := save(state); err != nil {
+			return result(r, d), err
+		}
+		return result(r, d), runErr
+	}
 	d.Agent.Name = "m" + strings.ReplaceAll(uuid.NewString(), "-", "")[:30]
 	p, runErr := s.relay.SubmitAgent(work, scope(b, id), in.Task, in.WorkDir, d.Agent, func(p agenvo.AgentProgress) error { d.Agent = p; d.Phase = p.Phase; return save("dispatching") })
 	d.Agent = p
@@ -305,6 +350,9 @@ func (s *Service) observe(ctx context.Context, b toolcontext.ComputerBinding, id
 	if err != nil {
 		return Result{}, err
 	}
+	if refresh && d.Batch != nil {
+		return s.observeBatch(ctx, b, r, d)
+	}
 	if refresh && d.Kind == "herdr_pi_task" && d.Agent.Name != "" && r.State != "rejected" {
 		obs, observeErr := s.relay.ObserveAgent(agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint), scope(b, r.TargetID), d.Agent)
 		if observeErr != nil {
@@ -342,6 +390,12 @@ func (s *Service) artifact(ctx context.Context, b toolcontext.ComputerBinding, i
 	r, d, err := s.load(ctx, b, id)
 	if err != nil {
 		return Result{}, err
+	}
+	if d.Batch != nil {
+		if d.Batch.Result == nil {
+			return Result{}, agenvo.ErrUnknown
+		}
+		return result(r, d), nil
 	}
 	if s.assets == nil || d.Output == "" {
 		return Result{}, agenvo.ErrUnsupported

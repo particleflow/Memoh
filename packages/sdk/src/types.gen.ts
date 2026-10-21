@@ -374,6 +374,11 @@ export type AgentcredentialPublicCredential = {
 
 export type AgenvoAgentProfile = {
     config_dir?: string;
+    /**
+     * Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
+     * finite official CLI invocations; no automatic protocol fallback occurs.
+     */
+    execution_mode?: string;
     model?: string;
     path?: string;
     provider?: string;
