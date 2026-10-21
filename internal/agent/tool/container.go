@@ -21,6 +21,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/hooks"
+	"github.com/felinics/memoh/internal/toolcontext"
 	workspacepkg "github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 	pb "github.com/felinics/memoh/internal/workspace/bridgepb"
@@ -88,7 +89,7 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 		parts = append(parts,
 			locationRef+": discover the Server Workspace and connected computers authorized for this Bot. For requests to use a computer (including an unnamed Windows PC), inspect these locations before claiming no computer is configured or looking for a separate cloud computer.",
 			"Check each location's `provider`, `capabilities`, `available` and `status`. Authorization is not availability; an offline target is not an unconfigured account. A missing target means it is not exposed to this Bot, not that no account computer exists. Never substitute another location after a target fails.",
-			"An Agenvo location advertising `exec_foreground` supports foreground Bash commands, not a full workspace, filesystem, desktop, or local coding agent. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
+			"An Agenvo location advertising `exec_foreground` supports foreground Bash through `computer_task_submit(kind=foreground_bash)`, not ordinary `exec`, a full workspace, filesystem or desktop. The computer task tools also own configured Herdr/Pi Agent dispatch and durable receipts. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
 		)
 		if skillRef, ok := available.Ref(ToolUseSkill()); ok {
 			parts = append(parts, "For a connected-computer or local-agent task, use "+skillRef+" when an available skill covers that workflow. Skills explain usage; they do not grant target or connector access.")
@@ -105,10 +106,8 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 			targetDescription += " " + strconv.Quote(name)
 		}
 		text := "File and command tools default to the " + targetDescription + " for this turn"
-		if sessionIsWorkdirBound(session) {
-			// The bound working directory pins the location for the session's
-			// whole life, so the model must not be told target_id can move it.
-			text += ". The chat's working directory pins this location: `target_id` cannot move file or command tools to another computer"
+		if sessionUsesRemoteWorkspaceTarget(session) {
+			text += ". This PC conversation pins every computer tool to this location; other computers cannot be discovered or used"
 		} else {
 			text += ". An explicit `target_id` still takes precedence"
 		}
@@ -140,8 +139,8 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 		parts = append(parts, ref+": execute command")
 	}
 	if hasLocationTool && len(available.Refs(ToolRead(), ToolWrite(), ToolList(), ToolEdit(), ToolApplyPatch(), ToolExec())) > 0 {
-		if sessionIsWorkdirBound(session) {
-			parts = append(parts, "Use "+locationRef+" only to report which locations exist or to check availability: this chat's working directory pins its location. File and command tools must omit `target_id`; the one other accepted value is `native`, for reading files Browser Use and Computer Use leave on the Server Workspace. Any other location's `target_id` fails.")
+		if sessionUsesRemoteWorkspaceTarget(session) {
+			parts = append(parts, "Use "+locationRef+" to check this conversation's selected PC. Omit `target_id` or pass only that PC's returned ID. Other PCs and the Server Workspace are outside this conversation's scope.")
 		} else {
 			defaultDescription := "the Bot's default"
 			if strings.TrimSpace(session.WorkspaceTargetID) != "" {
@@ -150,15 +149,8 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 			parts = append(parts, "Use "+locationRef+" when the user asks to use a computer, you need a non-default location, availability may have changed, or a target call fails. Pass its `target_id` only to tools supported by that location; omit `target_id` to use "+defaultDescription+". Listing locations does not switch locations or folders. If several locations fit and no selected/default location resolves the user's intent, clarify the destination before executing.")
 		}
 	}
-	if sessionUsesRemoteWorkspaceTarget(session) {
-		displayRefs := available.Refs(ToolBrowserObserve(), ToolBrowserAction(), ToolBrowserRemoteSession(), ToolComputerObserve(), ToolComputerAction())
-		if len(displayRefs) > 0 {
-			text := "The request-selected connected computer is the default only for file and command tools. Browser Use and Computer Use (" + strings.Join(displayRefs, ", ") + ") remain on the native Server Workspace and do not follow that default."
-			if readRef, ok := available.Ref(ToolRead()); ok {
-				text += " Use " + readRef + " with `target_id` `native` to read screenshots or other files those tools create there."
-			}
-			parts = append(parts, text)
-		}
+	if displayRefs := available.Refs(ToolBrowserObserve(), ToolBrowserAction(), ToolBrowserRemoteSession(), ToolComputerObserve(), ToolComputerAction()); len(displayRefs) > 0 {
+		parts = append(parts, "Browser Use and Computer Use ("+strings.Join(displayRefs, ", ")+") control the Server Workspace desktop, not a user's PC. A PC request requires capabilities exposed for that authorized PC; these tools are not a fallback for missing PC GUI support.")
 	}
 	// Workspace links are a Web/Desktop affordance, not a portable channel URL.
 	// Other execution locations must not be advertised as the native workspace.
@@ -312,10 +304,10 @@ Delete a file:
 		locationTool := toolexec.Tool{
 			Name: ToolListExecutionLocations().String(),
 			Description: "List the execution locations configured for this Bot for file operations and command execution, with current availability and status. " +
-				"Discover these for requests to use a computer before assuming a separate cloud computer is needed. Results are Bot-scoped, not an account-wide inventory. " +
+				"Results follow both Bot grants and conversation scope: a PC conversation lists only its selected PC; a Server Workspace conversation may list its Bot-authorized PCs. " +
 				"Check provider and capabilities before choosing a tool: Agenvo exec_foreground is foreground Bash only, not filesystem, desktop or agent lifecycle support. " +
 				"The default field identifies the current turn's default (the request-selected target when present, otherwise the Bot's Primary). " +
-				"Use the returned target_id with file and command tools when a non-default location is needed. " +
+				"Use computer_task_submit for Agenvo tasks; ordinary exec and file tools cannot execute on an Agenvo target. Other workspace providers accept target_id on file/command tools. " +
 				"The available field says whether a location can currently be used. This tool does not change the default location or starting folder.",
 			Parameters: toolexec.SchemaFromValue(emptyObjectSchema()),
 			Execute: func(ctx *toolexec.ToolExecContext, _ sdk.ToolArguments) (sdk.ToolOutput, error) {
@@ -329,12 +321,24 @@ Delete a file:
 					if strings.TrimSpace(target.TargetID) == "" {
 						continue
 					}
+					if toolcontext.CheckComputerTarget(ctx.Context, target.TargetID) != nil {
+						continue
+					}
 					locations = append(locations, executionLocationFromTarget(target, sess.WorkspaceTargetID))
 				}
 				return toolexec.OutputFromValue(listExecutionLocationsResult{Locations: locations}), nil
 			},
 		}
 		toolList = append([]toolexec.Tool{locationTool}, toolList...)
+	}
+	if workspace.computerTaskOnly {
+		filtered := toolList[:0]
+		for _, tool := range toolList {
+			if tool.Name == ToolListExecutionLocations().String() {
+				filtered = append(filtered, tool)
+			}
+		}
+		return filtered, nil
 	}
 	return toolList, nil
 }
@@ -387,7 +391,8 @@ type execArgs struct {
 }
 
 type toolWorkspace struct {
-	defaultWorkDir string
+	computerTaskOnly bool
+	defaultWorkDir   string
 	// workdirPath is the session's working directory. It changes where
 	// relative tool paths land and what cwd exec defaults to; it never
 	// replaces defaultWorkDir, which stays the workspace root that
@@ -496,6 +501,7 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 		}
 	}
 	if info.Backend == bridge.WorkspaceBackendAgenvo {
+		workspace.computerTaskOnly = true
 		workspace.windows = true
 		// The executor resolves this against the current authorized target config.
 		workspace.defaultWorkDir = "."
@@ -511,11 +517,10 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 
 func workspaceTargetDescription(session SessionContext) string {
 	description := "Exact target_id returned by list_execution_locations. Do not pass a location name, type, or runtime ID. Omit to use the default location for the current turn."
-	if sessionIsWorkdirBound(session) {
-		// A bound session's directory only exists on one machine, so the
-		// pinned target is the only accepted value — say so here as well as
-		// rejecting it at execution time.
-		description = "Exact target_id returned by list_execution_locations. This chat has a fixed working directory, which pins its execution location: omit this parameter. The only other accepted value is native, for reading files Browser Use and Computer Use leave on the Server Workspace; any other target_id is rejected."
+	if sessionUsesRemoteWorkspaceTarget(session) {
+		description = "This PC conversation is restricted to its selected computer: omit this parameter or pass only that computer's target_id. Other PCs and native are rejected. A target_id is a Memoh reference, never an Agenvo deviceId or instanceId."
+	} else if sessionIsWorkdirBound(session) && strings.TrimSpace(session.WorkspaceTargetID) == "" {
+		description = "This chat has a fixed working directory without a resolved target: omit this parameter."
 	}
 	return description
 }
@@ -527,38 +532,24 @@ func sessionIsWorkdirBound(session SessionContext) bool {
 	return strings.TrimSpace(session.WorkdirPath) != ""
 }
 
-// ensureWorkdirPinnedTarget rejects an explicit tool target that would move a
-// workdir-bound session off the location its workdir pins. The chat request
-// path rejects the same switch (ErrWorkspaceTargetWorkdirConflict); without
-// this guard the tool path bypasses it, running commands on another computer
-// while relative paths still resolve against the working directory — a
-// directory that exists only on the workdir's machine.
+// PC conversations cannot cross computers, even without a bound directory.
+// Native conversations may use Bot-authorized PCs; workdirPathForTarget keeps
+// their native directory from leaking into a different machine's path base.
 func ensureWorkdirPinnedTarget(session SessionContext, requestedTargetID string) error {
 	requested := strings.TrimSpace(requestedTargetID)
-	if requested == "" || !sessionIsWorkdirBound(session) {
-		return nil
-	}
 	pinned := strings.TrimSpace(session.WorkspaceTargetID)
-	if strings.EqualFold(pinned, requested) {
-		return nil
+	if requested != "" && sessionUsesRemoteWorkspaceTarget(session) && !strings.EqualFold(pinned, requested) {
+		return toolcontext.ErrComputerScope
 	}
-	// The native Server Workspace stays reachable: Browser Use and Computer
-	// Use always run there and save screenshots there, so even a session
-	// pinned to a remote workdir must be able to read them back. Those reads
-	// resolve against the native workspace root, never the working directory
-	// — see workdirPathForTarget.
-	if strings.EqualFold(requested, workspacepkg.WorkspaceTargetNative) {
-		return nil
-	}
-	if pinned == "" {
+	if requested != "" && pinned == "" && sessionIsWorkdirBound(session) {
 		return errors.New("this chat has a fixed working directory, which pins its execution location; omit target_id")
 	}
-	return fmt.Errorf("this chat's working directory lives on execution location %q, which pins it for the whole chat; omit target_id (or pass %q)", pinned, pinned)
+	return nil
 }
 
 // workdirPathForTarget returns the working directory only for the target the
-// workdir actually lives on. The native escape hatch above lands on a
-// different machine, where that directory does not exist; carrying it there
+// workdir actually lives on. A native chat can target an authorized PC,
+// where its directory does not exist; carrying it there
 // would resolve every relative path against a phantom directory.
 func workdirPathForTarget(session SessionContext, resolvedTargetID string) string {
 	workDir := strings.TrimSpace(session.WorkdirPath)
@@ -616,6 +607,9 @@ func (p *ContainerProvider) resolveToolTarget(ctx context.Context, session Sessi
 	if err := ensureWorkdirPinnedTarget(session, targetID); err != nil {
 		return resolvedToolTarget{}, err
 	}
+	if err := toolcontext.CheckComputerTarget(ctx, targetID); err != nil {
+		return resolvedToolTarget{}, err
+	}
 	if resolver, ok := p.clients.(workspaceTargetResolver); ok {
 		resolved, err := resolver.ResolveWorkspaceTarget(ctx, session.BotID, targetID)
 		if err != nil {
@@ -623,6 +617,9 @@ func (p *ContainerProvider) resolveToolTarget(ctx context.Context, session Sessi
 				return resolvedToolTarget{}, fmt.Errorf("execution location target_id is invalid or is no longer configured for this Bot; call %s and retry with a returned target_id: %w", ToolListExecutionLocations().String(), err)
 			}
 			return resolvedToolTarget{}, fmt.Errorf("workspace target is not reachable: %w", err)
+		}
+		if err := toolcontext.CheckComputerTarget(ctx, resolved.TargetID); err != nil {
+			return resolvedToolTarget{}, err
 		}
 		if resolved.Client == nil {
 			return resolvedToolTarget{}, errors.New("workspace target is not reachable: client is unavailable")
@@ -655,7 +652,7 @@ func workspaceContextForSession(ctx context.Context, session SessionContext) con
 	if targetID == "" {
 		return ctx
 	}
-	return workspacepkg.WithWorkspaceTarget(ctx, targetID)
+	return toolcontext.WithComputerScope(workspacepkg.WithWorkspaceTarget(ctx, targetID), targetID)
 }
 
 func sessionUsesRemoteWorkspaceTarget(session SessionContext) bool {
@@ -1145,6 +1142,9 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 	command := strings.TrimSpace(args.Command)
 	if command == "" {
 		return nil, errors.New("command is required")
+	}
+	if target.workspace.computerTaskOnly {
+		return nil, agenvo.ErrComputerTaskRequired
 	}
 	workDir := strings.TrimSpace(args.WorkDir)
 	switch {

@@ -46,6 +46,7 @@ func (p *WorkdirProvider) Tools(_ context.Context, session SessionContext) ([]to
 			Description: "List this bot's workdirs (named working directories): workdir_id, name, target kind (native workspace or remote runtime), and path. Use a workdir_id to bind a scheduled task's sessions to that directory.",
 			Parameters:  toolexec.SchemaFor[listWorkdirsArgs](),
 			Execute: toolexec.Typed(func(ctx *toolexec.ToolExecContext, _ listWorkdirsArgs) (sdk.ToolOutput, error) {
+				ctx.Context = workspaceContextForSession(ctx.Context, sess)
 				botID := strings.TrimSpace(sess.BotID)
 				if botID == "" {
 					return sdk.ToolOutput{}, errors.New("bot_id is required")

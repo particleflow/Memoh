@@ -193,6 +193,12 @@ func (s *Service) streamRuntimeWS(ctx context.Context, driver external.Driver, r
 	if err := validateSessionBot(req.BotID, req.ThreadID, sess.BotID); err != nil {
 		return RunOutcome{}, err
 	}
+	// Resolve computer authority in the host. Original runtime drivers carry
+	// this run context to their MCP mounts without changes to Agent code.
+	ctx, req, err = s.prepareWorkspaceRequest(ctx, req)
+	if err != nil {
+		return RunOutcome{}, err
+	}
 	runtimeType := strings.TrimSpace(driver.RuntimeType())
 	runtimeMeta := runtimeSessionMeta(sess)
 	projectPath := metadataString(runtimeMeta, "project_path")

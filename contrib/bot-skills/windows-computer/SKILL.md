@@ -1,26 +1,21 @@
 ---
 name: windows-computer
-description: Use authorized Windows foreground Bash or the deployment's Agenvo/Herdr/Pi/Magpie agent workflow. Discover capabilities and reconcile uncertain results.
+description: Use authorized Windows task tools without guessing device IDs or raw Herdr methods. Preserve conversation scope and uncertain receipts.
 ---
 
 # Connected Windows computer
 
-Instructions, not permissions. Use this Bot's registered tools and authorized resources. Do not install, grant access, create credentials or change security policy. Keep secrets and machine paths in private deployment configuration.
+Instructions, not permissions. Use registered tools; never create credentials, grant access, or change security policy. The service enforces scope without this skill or Agent prompt changes.
 
-## Discover and choose
+Use `computer_targets` for user-PC work. A PC conversation sees only that PC; a NAS conversation sees only Bot-authorized PCs. Do not look for a separate cloud computer, send NAS tasks to Windows, or change the default workspace. An absent target is not exposed to this conversation; configured capability is not proof of availability. Ask only when multiple authorized destinations remain ambiguous.
 
-Use `list_execution_locations`; check provider, capabilities, availability and status. Missing means not exposed to this Bot, not absent account-wide. Offline differs from unauthorized. Do not seek a separate cloud computer for user-PC work or redirect Server Workspace tasks to Windows. Preserve its default, files and skills. Clarify an ambiguous destination; never fall back to another machine.
+Use `computer_task_submit` once with a returned `target_id`, `kind` and `task`. The target ID is a Memoh mount, never an Agenvo device ID. The service resolves the private connector/device/instance mapping. Do not call raw Agenvo search/execute or reconstruct Herdr protocols. If the high-level tools are unavailable, report that gap; repeatedly loading this skill will not repair it.
 
-For short Bash commands, use `exec` with the returned `target_id` advertising `exec_foreground`. This selects one call, not the conversation/default. Respect workdir-bound target restrictions. Prefer `work_dir: "."` or root-relative paths; the configured target root is the base, not the server cwd. This is not an OS sandbox. The target has no FS/HostFS, desktop, background or interactive-agent support. Memoh Browser/Computer Use stays on Server Workspace. Check the bounded UTF-8 receipt, exit code and truncation. Cancellation stops observation, not necessarily execution.
+- `foreground_bash`: short Bash commands through configured Git Bash on Windows, not WSL. Ordinary `exec` cannot dispatch Agenvo commands; it would bypass the durable task ledger. Prefer `work_dir: "."` or root-relative paths. This is a path contract, not an OS sandbox. Check UTF-8 output, real exit code and truncation.
+- `herdr_pi_task`: only when advertised. The service follows Agenvo → Herdr → Pi using the registered provider/model profile (Magpie where configured), without provider fallback. It owns layout creation, fixed `agent.start` and a single prompt. Pi tools remain those actually configured; Bash file work does not imply desktop GUI or independent read/write/edit tools. A shell, a Memoh subagent and a Herdr agent are different execution resources.
 
-## Agent task: existing Agenvo → Herdr → Pi → Magpie
+Keep the returned `operation_id`. Use `computer_task_get` for its saved receipt or `computer_task_result` for read-only `agent.get` / `agent.read` observation. Accepted, starting, interactive-ready, old done status, completion sequence and terminal text do not independently prove this task succeeded. Agent observations remain unverified; no Pi lifecycle hook is assumed.
 
-1. Discover current Herdr methods, schemas and result contracts with the existing Agenvo search tool, then use its registered execute tool. Method names below are not assumed Memoh tool names. Match the authorized connector machine/session to the intended PC; command-target access does not grant connector access. Use returned IDs, never guessed or remembered ones.
-2. Inspect layout/agents. Use an idle task-owned pane or create only required layout through the discovered API; do not take another task's pane. Verify Pi, Magpie provider/model and enabled tools for this identity without reading secrets. Missing configuration/authentication must not trigger a switch to Codex, OpenAI or another paid provider. Bash file work does not imply independent read/write/edit or screen/mouse tools.
-3. Use discovered `agent.start`, kind `pi`, with verified configuration. Pass only schema-supported options; private config directories belong in supported tab/process configuration, not an invented start env field. Pi business tools use configured Git Bash; the outer terminal may remain PowerShell. A shell and a Memoh subagent are not a Herdr agent.
-4. Once ready, submit the task once through the discovered agent prompt method. Retain returned session/pane/agent/request identifiers in this conversation. Observe with discovered `agent.get` / `agent.read` and bounded waits; do not send shell input to an agent-owned pane. Correlate output/state with this task: accepted, launch-ready, echoed text or initial idle is not completion.
-5. On blocked input, inspect the question and stay within authorization. Timeout, stalled submission or unknown outcome requires read-only reconciliation before any mutation. Do not repeat start/prompt, kill, auto-close or recover by an old ID; IDs may be reused. Report progress and verified results or uncertainty in the originating conversation, including failure evidence. This adds no dashboard or persistent job tracking.
+An unknown result must not be resubmitted, even with a new task string or run. Cancellation records intent and returns `process_stopped: false`; it cannot safely kill/close a reused workspace. Report uncertainty and the receipt for manual inspection. `computer_task_artifact` creates a stable content-hash attachment of the bounded terminal snapshot only after storage is ready; arbitrary PC file transfer is not supported here.
 
-If these full instructions are missing/pruned, stop agent mutations and report the gap; do not reconstruct the workflow or repeatedly activate this skill. Existing known operations may be observed read-only.
-
-[Herdr reference](https://herdr.dev/docs/agent-automation/); the installed connector's discovered contract governs.
+Missing authorization, missing provider profile, offline transport and unknown outcome are distinct failures. Do not bypass them with raw MCP, shell-launched Agents, other PCs, NAS desktop tools or another provider. This interface does not implement a full filesystem/runtime, GUI automation, media editing or an Agent monitoring dashboard.

@@ -27,6 +27,7 @@ import (
 	netctl "github.com/felinics/memoh/internal/network"
 	"github.com/felinics/memoh/internal/settings"
 	skillset "github.com/felinics/memoh/internal/skills"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 	workspacetemplates "github.com/felinics/memoh/templates"
 )
@@ -283,6 +284,12 @@ func (m *Manager) NativeMCPClient(ctx context.Context, botID string) (*bridge.Cl
 	return m.nativeMCPClient(ctx, botID)
 }
 
+// NativeWorkspaceInfo describes the Bot-owned Agent host, independently of
+// the conversation's computer task target. It grants no tool target access.
+func (m *Manager) NativeWorkspaceInfo(ctx context.Context, botID string) (bridge.WorkspaceInfo, error) {
+	return m.nativeWorkspaceInfo(ctx, botID)
+}
+
 // MCPClient implements bridge.Provider and resolves the request-scoped target
 // override before falling back to the Bot's persisted Primary target.
 func (m *Manager) MCPClient(ctx context.Context, botID string) (*bridge.Client, error) {
@@ -337,7 +344,20 @@ func (m *Manager) CurrentWorkspaceTargetID(ctx context.Context, botID string) (s
 func (m *Manager) ResolveWorkspaceTarget(ctx context.Context, botID, targetID string) (ResolvedWorkspaceTarget, error) {
 	targetID = strings.TrimSpace(targetID)
 	if targetID == "" {
+		targetID = toolcontext.ComputerScope(ctx)
+	}
+	if targetID == "" {
 		targetID = WorkspaceTargetFromContext(ctx)
+	}
+	if targetID == "" && !toolcontext.ComputerContextTrusted(ctx) {
+		var err error
+		targetID, err = m.CurrentWorkspaceTargetID(ctx, botID)
+		if err != nil {
+			return ResolvedWorkspaceTarget{}, err
+		}
+	}
+	if err := toolcontext.CheckComputerTarget(ctx, targetID); err != nil {
+		return ResolvedWorkspaceTarget{}, err
 	}
 	if targetID == "" && m.remote != nil {
 		if target, primary, err := m.remote.ResolvePrimary(ctx, botID); err != nil || primary {
@@ -482,6 +502,21 @@ func (m *Manager) nativeToolApprovalConfig(ctx context.Context, botID string) (s
 }
 
 func (m *Manager) ListWorkspaceTargets(ctx context.Context, botID string) ([]WorkspaceTarget, error) {
+	if !toolcontext.ComputerContextTrusted(ctx) {
+		return nil, toolcontext.ErrComputerBinding
+	}
+	if selected := toolcontext.ComputerScope(ctx); selected != "" {
+		if m.remote == nil {
+			return nil, ErrWorkspaceTargetNotFound
+		}
+		// Resolve only the selected mount. Listing and then filtering would
+		// still probe other computers, which is outside this session's scope.
+		target, err := m.remote.GetMount(ctx, botID, selected)
+		if err != nil {
+			return nil, err
+		}
+		return []WorkspaceTarget{target}, nil
+	}
 	approval, err := m.nativeToolApprovalConfig(ctx, botID)
 	if err != nil {
 		return nil, err

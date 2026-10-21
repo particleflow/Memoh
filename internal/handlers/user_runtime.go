@@ -36,6 +36,35 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.GET("", h.List)
 	g.DELETE("/:id", h.Delete)
 	g.POST("/agenvo/discover", h.DiscoverAgenvo)
+	g.PUT("/:id/agenvo-agent", h.ConfigureAgenvoAgent)
+}
+
+// ConfigureAgenvoAgent godoc
+// @Summary Configure Pi on an existing owned Agenvo computer
+// @Description Updates non-secret provider/model/config-directory references without creating credentials, changing the device mapping, or granting Bots. An empty profile disables Agent tasks.
+// @Tags user-runtimes
+// @Accept json
+// @Produce json
+// @Param id path string true "Existing runtime ID"
+// @Param request body agenvo.AgentProfile true "Private deployment profile"
+// @Success 200 {object} userruntime.Runtime
+// @Failure 400 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Router /users/me/runtimes/{id}/agenvo-agent [put].
+func (h *UserRuntimeHandler) ConfigureAgenvoAgent(c echo.Context) error {
+	owner, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	var profile agenvo.AgentProfile
+	if err = c.Bind(&profile); err != nil {
+		return err
+	}
+	runtime, err := h.service.ConfigureAgenvoAgent(c.Request().Context(), owner, strings.TrimSpace(c.Param("id")), profile)
+	if err != nil {
+		return runtimeHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, runtime)
 }
 
 type DiscoverAgenvoRequest struct {

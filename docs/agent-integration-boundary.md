@@ -34,7 +34,9 @@ workspace integration are extension code. No Claude Code, Codex or Pi vendor
 source is patched. Official tool configuration/plugins are distinct from
 modifying an Agent executable or its reasoning loop.
 
-## Subsequent service and MCP work — not implemented by this restoration
+## Subsequent service and MCP work
+
+The restoration itself did not implement computer task routing. The subsequent independent branch implements the service described in [Scoped computer tasks over standard MCP](computer-task-mcp.md), with its explicit limits and acceptance status.
 
 The existing MCP ToolGatewayService supports additional ToolSource instances
 and Streamable HTTP tools. Computer submit/query/result/cancel operations

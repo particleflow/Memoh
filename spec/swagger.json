@@ -16995,6 +16995,59 @@
                 }
             }
         },
+        "/users/me/runtimes/{id}/agenvo-agent": {
+            "put": {
+                "description": "Updates non-secret provider/model/config-directory references without creating credentials, changing the device mapping, or granting Bots. An empty profile disables Agent tasks.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Configure Pi on an existing owned Agenvo computer",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Private deployment profile",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.AgentProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.Runtime"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "Get user details (self or admin only)",
@@ -18473,6 +18526,23 @@
                 }
             }
         },
+        "agenvo.AgentProfile": {
+            "type": "object",
+            "properties": {
+                "config_dir": {
+                    "type": "string"
+                },
+                "model": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                }
+            }
+        },
         "agenvo.DiscoveredInstance": {
             "type": "object",
             "properties": {
@@ -18496,6 +18566,9 @@
         "agenvo.Target": {
             "type": "object",
             "properties": {
+                "agent": {
+                    "$ref": "#/definitions/agenvo.AgentProfile"
+                },
                 "bash_path": {
                     "type": "string"
                 },

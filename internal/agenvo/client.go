@@ -22,12 +22,37 @@ var (
 // Target refers to an existing authorized MCP connection. Credentials belong
 // to the MCP/OAuth service and must never be copied into an execution target.
 type Target struct {
-	ConnectionID string `json:"connection_id"`
-	DeviceID     string `json:"device_id"`
-	InstanceID   string `json:"instance_id"`
-	Session      string `json:"session"`
-	WorkDir      string `json:"work_dir"`
-	BashPath     string `json:"bash_path"`
+	ConnectionID string       `json:"connection_id"`
+	DeviceID     string       `json:"device_id"`
+	InstanceID   string       `json:"instance_id"`
+	Session      string       `json:"session"`
+	WorkDir      string       `json:"work_dir"`
+	BashPath     string       `json:"bash_path"`
+	Agent        AgentProfile `json:"agent,omitempty,omitzero"`
+}
+
+// AgentProfile is private deployment configuration, never model-supplied.
+// No provider default is inferred and no credential is stored here.
+type AgentProfile struct {
+	Provider  string `json:"provider"`
+	Model     string `json:"model"`
+	ConfigDir string `json:"config_dir"`
+	Path      string `json:"path,omitempty"`
+}
+
+func (p AgentProfile) Validate() error {
+	if p.Provider == "" || p.Model == "" || !windowsAbsolute.MatchString(p.ConfigDir) || len(p.ConfigDir) > 4096 || len(p.Provider) > 128 || len(p.Model) > 256 {
+		return ErrInvalidTarget
+	}
+	if len(p.Path) > 4096 {
+		return ErrInvalidTarget
+	}
+	for _, s := range []string{p.Provider, p.Model, p.ConfigDir, p.Path} {
+		if strings.ContainsAny(s, "\x00\r\n") || strings.HasPrefix(s, "-") {
+			return ErrInvalidTarget
+		}
+	}
+	return nil
 }
 
 // Scope is always supplied by the authenticated Memoh execution boundary.
@@ -56,7 +81,8 @@ type Receipt struct {
 	RequestID string          `json:"requestId,omitempty"`
 	Result    json.RawMessage `json:"result,omitempty"`
 	Error     *struct {
-		Code string `json:"code"`
+		Code   string          `json:"code"`
+		Native json.RawMessage `json:"native,omitempty"`
 	} `json:"error,omitempty"`
 }
 
@@ -77,6 +103,23 @@ func (c *Client) resolveTarget(ctx context.Context, scope Scope) (Target, error)
 // native issues exactly one native call. A network failure is an unknown
 // outcome, even for a canceled HTTP request. There is deliberately no retry.
 func (c *Client) native(ctx context.Context, scope Scope, expected Target, method string, params map[string]any) (Receipt, error) {
+	receipt, err := c.relay(ctx, scope, expected, method, params)
+	if err != nil {
+		return receipt, err
+	}
+	if receipt.Execution != "accepted" {
+		return receipt, ErrUnknown
+	}
+	var envelope struct {
+		NativeError json.RawMessage `json:"nativeError"`
+	}
+	if json.Unmarshal(receipt.Result, &envelope) != nil || (len(envelope.NativeError) > 0 && string(envelope.NativeError) != "null") {
+		return receipt, ErrUnknown
+	}
+	return receipt, nil
+}
+
+func (c *Client) relay(ctx context.Context, scope Scope, expected Target, method string, params map[string]any) (Receipt, error) {
 	current, err := c.resolveTarget(ctx, scope)
 	if err != nil {
 		return Receipt{}, err
@@ -111,7 +154,7 @@ func (c *Client) native(ctx context.Context, scope Scope, expected Target, metho
 		}
 		return receipt, ErrUnknown
 	}
-	if receipt.Execution != "accepted" {
+	if receipt.Execution != "accepted" && (method != "agent.start" || receipt.Execution != "starting") {
 		return receipt, ErrUnknown
 	}
 	return receipt, nil

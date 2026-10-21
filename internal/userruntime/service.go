@@ -38,6 +38,17 @@ type Service struct {
 
 func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
 
+func (s *Service) ConfigureAgenvoAgent(ctx context.Context, owner, id string, profile agenvo.AgentProfile) (Runtime, error) {
+	if s.agenvo == nil {
+		return Runtime{}, agenvo.ErrUnavailable
+	}
+	row, err := s.agenvo.ConfigureAgent(ctx, owner, id, profile)
+	if err != nil {
+		return Runtime{}, err
+	}
+	return runtimeFromRecord(row, nil), nil
+}
+
 func (s *Service) DiscoverAgenvo(ctx context.Context, ownerID, connectionID string) ([]agenvo.DiscoveredInstance, error) {
 	if s.agenvo == nil {
 		return nil, agenvo.ErrUnavailable
@@ -320,6 +331,9 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 		runtime.Capabilities = []string{agenvo.CapabilityForegroundExec}
 		if target, err := agenvo.DecodeTarget(row.ProviderConfig); err == nil {
 			runtime.WorkspaceBase = target.WorkDir
+			if target.Agent != (agenvo.AgentProfile{}) {
+				runtime.Capabilities = append(runtime.Capabilities, "herdr_pi_task")
+			}
 		}
 		return runtime
 	}

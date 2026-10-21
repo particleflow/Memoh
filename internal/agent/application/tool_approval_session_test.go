@@ -14,6 +14,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/sessionmode"
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	session "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace"
 )
 
@@ -157,6 +158,21 @@ func TestToolApprovalHandlerOnlyRecoversMissingWorkspaceTarget(t *testing.T) {
 				t.Fatalf("handler error = %v, want %v", err, tt.resolveErr)
 			}
 		})
+	}
+}
+
+func TestToolApprovalHandlerRejectsComputerScopeWithoutPendingApprovalOrRuntimeFault(t *testing.T) {
+	log := slog.New(slog.DiscardHandler)
+	approvalService := toolapproval.NewService(log, nil, nil)
+	approvalService.SetWorkspaceTargetPolicyResolver(workspaceTargetPolicyErrorResolver{err: toolcontext.ErrComputerScope})
+	service := &Service{toolApproval: approvalService, logger: log}
+	handler := service.buildToolApprovalHandler(baseRunConfigParams{BotID: "bot-1", SessionID: "session-1", SessionType: sessionmode.Chat})
+	result, err := handler(toolcontext.WithComputerScope(t.Context(), "pc-a"), sdk.ToolCall{
+		ToolCallID: "synthetic-call", ToolName: "exec",
+		Input: toolexec.ArgumentsFromValue(map[string]any{"target_id": "native", "command": "printf SHOULD_NOT_EXECUTE"}),
+	})
+	if err != nil || result.Decision != toolexec.ToolApprovalDecisionRejected || result.Reason != toolcontext.ErrComputerScope.Error() || result.ApprovalID != "" {
+		t.Fatalf("scope rejection was not delivered as a denied tool result: %+v err=%v", result, err)
 	}
 }
 

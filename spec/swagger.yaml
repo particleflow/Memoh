@@ -618,6 +618,17 @@ definitions:
       updated_at:
         type: string
     type: object
+  agenvo.AgentProfile:
+    properties:
+      config_dir:
+        type: string
+      model:
+        type: string
+      path:
+        type: string
+      provider:
+        type: string
+    type: object
   agenvo.DiscoveredInstance:
     properties:
       device_id:
@@ -633,6 +644,8 @@ definitions:
     type: object
   agenvo.Target:
     properties:
+      agent:
+        $ref: '#/definitions/agenvo.AgentProfile'
       bash_path:
         type: string
       connection_id:
@@ -19128,6 +19141,43 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Revoke a Remote Runtime credential
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/agenvo-agent:
+    put:
+      consumes:
+      - application/json
+      description: Updates non-secret provider/model/config-directory references without
+        creating credentials, changing the device mapping, or granting Bots. An empty
+        profile disables Agent tasks.
+      parameters:
+      - description: Existing runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Private deployment profile
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.AgentProfile'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userruntime.Runtime'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Configure Pi on an existing owned Agenvo computer
       tags:
       - user-runtimes
   /users/me/runtimes/agenvo/discover:

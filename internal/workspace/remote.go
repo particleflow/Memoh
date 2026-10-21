@@ -300,9 +300,8 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 		return ResolvedWorkspaceTarget{
 			TargetID: record.ID, Kind: WorkspaceTargetRemote, Name: record.RuntimeName, Primary: record.IsPrimary,
 			Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: config.WorkDir},
-			Approval: toolApprovalConfig(record.ToolApproval), Execute: func(ctx context.Context, req agenvo.Request) (agenvo.Result, error) {
-				req.Scope.BotID, req.Scope.TargetID = record.BotID, record.ID
-				return s.agenvo.Execute(ctx, req)
+			Approval: toolApprovalConfig(record.ToolApproval), Execute: func(_ context.Context, _ agenvo.Request) (agenvo.Result, error) {
+				return agenvo.Result{State: "not_started"}, agenvo.ErrComputerTaskRequired
 			},
 		}, nil
 	}
@@ -442,6 +441,9 @@ func (s *RemoteWorkspaceService) target(ctx context.Context, record dbstore.BotR
 		target.Status = WorkspaceTargetStatusRevoked
 	case record.RuntimeProvider == agenvo.Provider:
 		target.Capabilities = []string{agenvo.CapabilityForegroundExec}
+		if config, err := agenvo.DecodeTarget(record.RuntimeProviderConfig); err == nil && config.Agent != (agenvo.AgentProfile{}) {
+			target.Capabilities = append(target.Capabilities, "herdr_pi_task")
+		}
 		target.Status = WorkspaceTargetStatusOffline
 		if s.agenvo != nil && s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig) == nil {
 			target.Status = WorkspaceTargetStatusOnline

@@ -9,6 +9,7 @@ import (
 
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 	"github.com/felinics/memoh/internal/workspace/vpath"
@@ -176,7 +177,11 @@ func (s *Service) List(ctx context.Context, botID string, includeArchived bool) 
 	}
 	workdirs := make([]Workdir, 0, len(records))
 	for _, record := range records {
-		workdirs = append(workdirs, toWorkdir(record))
+		wd := toWorkdir(record)
+		if toolcontext.CheckComputerTarget(ctx, wd.WorkspaceTargetID) != nil {
+			continue
+		}
+		workdirs = append(workdirs, wd)
 	}
 	return workdirs, nil
 }
@@ -194,7 +199,11 @@ func (s *Service) Get(ctx context.Context, botID, workdirID string) (Workdir, er
 		}
 		return Workdir{}, err
 	}
-	return toWorkdir(record), nil
+	wd := toWorkdir(record)
+	if err := toolcontext.CheckComputerTarget(ctx, wd.WorkspaceTargetID); err != nil {
+		return Workdir{}, err
+	}
+	return wd, nil
 }
 
 // RequireActive is Get plus an archive check — the gate for binding new

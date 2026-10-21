@@ -58,7 +58,7 @@ func TestComputerWorkflowUsageFollowsRegisteredCapabilities(t *testing.T) {
 				t.Fatalf("skill guidance does not match registered tools: %s", usage)
 			}
 			if tt.wantDiscovery {
-				for _, boundary := range []string{"Authorization is not availability", "exec_foreground", "Never substitute another location", "not a full workspace"} {
+				for _, boundary := range []string{"Authorization is not availability", "exec_foreground", "Never substitute another location", "not ordinary `exec`, a full workspace", "computer_task_submit(kind=foreground_bash)"} {
 					if !strings.Contains(usage, boundary) {
 						t.Errorf("missing boundary %q", boundary)
 					}
@@ -565,7 +565,7 @@ func TestContainerProviderUsageGatesRegisteredTools(t *testing.T) {
 		WorkspaceTargetName: "Office PC",
 	}, availableToolsForTest(ToolRead(), ToolExec(), ToolListExecutionLocations(), ToolBrowserObserve(), ToolComputerObserve()))
 	assertUsageItemsAreBulleted(t, got)
-	for _, want := range []string{"request-selected connected computer", "Office PC", "explicit `target_id` still takes precedence", "request-selected default for this turn", "Browser Use and Computer Use", "native Server Workspace", "`browser_observe`", "`computer_observe`", "`target_id` `native`"} {
+	for _, want := range []string{"request-selected connected computer", "Office PC", "pins every computer tool", "outside this conversation", "Browser Use and Computer Use", "Server Workspace desktop", "`browser_observe`", "`computer_observe`", "not a fallback"} {
 		if !strings.Contains(got, want) {
 			t.Fatalf("Usage with a request target should contain %q, got:\n%s", want, got)
 		}

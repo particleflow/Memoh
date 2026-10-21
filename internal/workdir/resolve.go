@@ -7,6 +7,7 @@ import (
 
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace"
 )
 
@@ -30,7 +31,11 @@ func (s *Service) ResolveForSession(ctx context.Context, botID, workdirID string
 		}
 		return Resolved{}, err
 	}
-	return resolvedFromRecord(record), nil
+	resolved := resolvedFromRecord(record)
+	if err := toolcontext.CheckComputerTarget(ctx, resolved.TargetID); err != nil {
+		return Resolved{}, err
+	}
+	return resolved, nil
 }
 
 func resolvedFromRecord(record dbstore.BotWorkdirRecord) Resolved {

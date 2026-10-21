@@ -6,12 +6,37 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	mcpgw "github.com/felinics/memoh/internal/mcp"
 )
+
+func TestFederationEndpointGuardChecksRedirectBeforeCredentialsOrEffect(t *testing.T) {
+	var calls atomic.Int32
+	blocked := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { calls.Add(1); w.WriteHeader(http.StatusOK) }))
+	defer blocked.Close()
+	redirect := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, blocked.URL+"/computer", http.StatusTemporaryRedirect)
+	}))
+	defer redirect.Close()
+	gateway := &MCPFederationGateway{client: redirect.Client()}
+	ctx := mcpgw.WithEndpointCheck(t.Context(), func(_ context.Context, endpoint string) error {
+		if strings.HasPrefix(endpoint, blocked.URL) {
+			return mcpgw.ErrToolNotFound
+		}
+		return nil
+	})
+	conn := mcpgw.Connection{Config: map[string]any{"url": redirect.URL, "headers": map[string]any{"Authorization": "Bearer synthetic"}}}
+	if _, err := gateway.CallHTTPConnectionTool(ctx, conn, "execute", nil); err == nil {
+		t.Fatal("redirect escaped endpoint policy")
+	}
+	if calls.Load() != 0 {
+		t.Fatal("blocked endpoint received a request")
+	}
+}
 
 type testToolInput struct {
 	Query string `json:"query"`

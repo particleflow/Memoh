@@ -7,12 +7,29 @@ import (
 	"testing"
 
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 type serviceStore struct {
 	record        dbstore.BotRemoteRuntimeBindingRecord
 	sourceAllowed bool
 	created       int
+}
+
+func TestServiceComputerScopeRejectsAuthorizedOtherPCBeforeRelay(t *testing.T) {
+	s, _, f := serviceFixture(t)
+	ctx := toolcontext.WithComputerScope(t.Context(), "mount-b")
+	result, err := s.Execute(ctx, request()) // mount-a is a valid Bot grant
+	if !errors.Is(err, toolcontext.ErrComputerScope) || result.State != "not_started" || len(f.calls) != 0 {
+		t.Fatalf("cross-PC execution: state=%s err=%v calls=%v", result.State, err, f.calls)
+	}
+	for _, selected := range []string{"native", "mount-a"} {
+		s, _, f := serviceFixture(t)
+		result, err := s.Execute(toolcontext.WithComputerScope(t.Context(), selected), request())
+		if err != nil || result.State != "completed" || f.runs != 1 {
+			t.Fatalf("authorized selected PC: selected=%s state=%s err=%v runs=%d", selected, result.State, err, f.runs)
+		}
+	}
 }
 
 func (s *serviceStore) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {

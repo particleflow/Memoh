@@ -67,7 +67,9 @@ func NewToolGatewayService(log *slog.Logger, sources []ToolSource, opts ...ToolG
 }
 
 func (s *ToolGatewayService) ListTools(ctx context.Context, session ToolSessionContext) ([]ToolDescriptor, error) {
-	registry, err := s.getRegistry(ctx, session, false)
+	// Sources revalidate mutable authorization before disclosing their catalog.
+	// A cached routing table is still usable for calls, whose sources recheck.
+	registry, err := s.getRegistry(ctx, session, true)
 	if err != nil {
 		return nil, err
 	}

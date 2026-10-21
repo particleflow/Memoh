@@ -238,13 +238,25 @@ func (g *MCPFederationGateway) connectionHTTPClient(ctx context.Context, connect
 			headers: headers,
 		}
 	}
-	status := &responseStatusRecorder{next: transport}
+	status := &responseStatusRecorder{next: checkedEndpointTransport{next: transport, ctx: ctx}}
 	return &http.Client{
 		Timeout:       base.Timeout,
 		CheckRedirect: base.CheckRedirect,
 		Jar:           base.Jar,
 		Transport:     status,
 	}, status
+}
+
+type checkedEndpointTransport struct {
+	next http.RoundTripper
+	ctx  context.Context
+}
+
+func (t checkedEndpointTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if err := mcpgw.CheckEndpoint(t.ctx, req.URL.String()); err != nil {
+		return nil, err
+	}
+	return t.next.RoundTrip(req)
 }
 
 func (g *MCPFederationGateway) ListStdioConnectionTools(ctx context.Context, botID string, connection mcpgw.Connection) ([]mcpgw.ToolDescriptor, error) {

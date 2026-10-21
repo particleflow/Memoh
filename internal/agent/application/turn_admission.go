@@ -21,6 +21,7 @@ import (
 	chatview "github.com/felinics/memoh/internal/agent/view"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/runtimefence"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 // turnAdmitter is the durable admission gate StartTurn depends on.
@@ -418,6 +419,24 @@ func (s *Service) AdmitSubagentRun(
 	// The durable fence is installed during triggered admission. The opaque run
 	// handle also travels on the context so spawned step persistence and live
 	// observation can use it without exposing runtime types through this port.
+	if parent, bound := toolcontext.HostComputerBinding(runCtx); bound {
+		var bindErr error
+		if s.sessionService == nil {
+			bindErr = toolcontext.ErrComputerBinding
+		} else {
+			child, lookupErr := s.sessionService.Get(runCtx, threadID)
+			if lookupErr != nil || child.ID != threadID || child.BotID != botID || child.ParentThreadID != parent.SessionID || child.Type != sessionmode.Subagent {
+				bindErr = toolcontext.ErrComputerBinding
+			} else {
+				runCtx, bindErr = toolcontext.DeriveComputerBinding(runCtx, botID, child.ParentThreadID, threadID, admission.RunID)
+			}
+		}
+		if bindErr != nil {
+			finish(RunOutcome{Status: sessionruntime.RunStatusErrored, Cause: bindErr})
+			endActiveTurn()
+			return nil, tools.SubagentAdmission{}, nil, bindErr
+		}
+	}
 	runCtx = withSubagentRunHandle(runCtx, admission.Handle)
 	toolAdmission := tools.SubagentAdmission{
 		RunID:        admission.RunID,
