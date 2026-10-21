@@ -51,6 +51,7 @@ import (
 	"github.com/felinics/memoh/internal/providers"
 	"github.com/felinics/memoh/internal/reasoning"
 	"github.com/felinics/memoh/internal/settings"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace"
 )
 
@@ -1204,6 +1205,14 @@ func (s *Service) buildToolApprovalHandler(p baseRunConfigParams) func(context.C
 		}
 		eval, err := s.toolApproval.EvaluatePolicy(ctx, input)
 		if err != nil {
+			if errors.Is(err, toolcontext.ErrComputerScope) {
+				// A scope violation is a denied call, not a runtime fault or
+				// an approval request. No user decision can broaden this turn.
+				return toolexec.ToolApprovalResult{
+					Decision: toolexec.ToolApprovalDecisionRejected,
+					Reason:   toolcontext.ErrComputerScope.Error(),
+				}, nil
+			}
 			if input.WorkspaceTargeted && errors.Is(err, workspace.ErrWorkspaceTargetNotFound) {
 				requestedTargetID := ""
 				if args, ok := toolexec.ArgumentsValue(call.Input).(map[string]any); ok {

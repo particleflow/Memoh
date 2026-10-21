@@ -18,21 +18,26 @@ type Session struct {
 	// PublicRequest marks HTTP routing headers that must not become tool authority.
 	PublicRequest bool `json:"-"`
 	// UserID is authenticated by the server; it is never read from a routing header.
-	UserID            string `json:"-"`
-	BotID             string
-	ChatID            string
-	RuntimeID         string
-	RuntimeToken      string `json:"-"`
-	SessionID         string
-	RunID             string
-	ToolCallID        string
-	SessionType       string
-	RouteID           string
-	ChannelIdentityID string
-	SessionToken      string `json:"-"`
-	CurrentPlatform   string
-	ReplyTarget       string
-	ConversationType  string
+	UserID       string `json:"-"`
+	BotID        string
+	ChatID       string
+	RuntimeID    string
+	RuntimeToken string `json:"-"`
+	SessionID    string
+	RunID        string
+	ToolCallID   string
+	SessionType  string
+	// Workspace fields are server-resolved conversation state, never headers.
+	WorkspaceTargetID   string `json:"-"`
+	WorkspaceTargetKind string `json:"-"`
+	WorkspaceTargetName string `json:"-"`
+	WorkdirPath         string `json:"-"`
+	RouteID             string
+	ChannelIdentityID   string
+	SessionToken        string `json:"-"`
+	CurrentPlatform     string
+	ReplyTarget         string
+	ConversationType    string
 	// ReasoningStoredEffort and ReasoningRequestedEffort are unresolved turn
 	// inputs. A tool that selects another model must resolve them against that
 	// model instead of inheriting the parent runtime's provider-specific result.
@@ -65,10 +70,10 @@ func Bind(callbackCtx context.Context, session Session) (context.Context, contex
 		callbackCtx = context.Background()
 	}
 	if session.RunContext == nil {
-		return runtimefence.WithContext(callbackCtx, session.RuntimeFence), func() {}
+		return bindComputerScope(runtimefence.WithContext(callbackCtx, session.RuntimeFence), session), func() {}
 	}
 
-	base := runtimefence.WithContext(session.RunContext, session.RuntimeFence)
+	base := bindComputerScope(runtimefence.WithContext(session.RunContext, session.RuntimeFence), session)
 	bound, cancel := context.WithCancel(base)
 	stop := context.AfterFunc(callbackCtx, cancel)
 	if callbackCtx.Err() != nil {
@@ -78,6 +83,13 @@ func Bind(callbackCtx context.Context, session Session) (context.Context, contex
 		stop()
 		cancel()
 	}
+}
+
+func bindComputerScope(ctx context.Context, session Session) context.Context {
+	if session.PublicRequest {
+		return context.WithValue(ctx, untrustedComputerKey{}, true)
+	}
+	return WithComputerScope(ctx, session.WorkspaceTargetID)
 }
 
 // ValidateRuntimeGuard performs the last ownership check immediately before a
@@ -140,6 +152,12 @@ func Merge(base, latest Session) Session {
 	}
 	if value := strings.TrimSpace(latest.SessionType); value != "" {
 		merged.SessionType = value
+	}
+	if !latest.PublicRequest && strings.TrimSpace(latest.WorkspaceTargetID) != "" {
+		merged.WorkspaceTargetID = latest.WorkspaceTargetID
+		merged.WorkspaceTargetKind = latest.WorkspaceTargetKind
+		merged.WorkspaceTargetName = latest.WorkspaceTargetName
+		merged.WorkdirPath = latest.WorkdirPath
 	}
 	if value := strings.TrimSpace(latest.RouteID); value != "" {
 		merged.RouteID = value

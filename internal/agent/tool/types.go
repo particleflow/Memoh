@@ -333,8 +333,9 @@ type SessionContext struct {
 	ReasoningStoredEffort    string
 	ReasoningRequestedEffort string
 	ForkContext              *MessageSnapshot
-	// WorkspaceTargetID is the request-scoped default for file and command
-	// tools. An explicit tool target_id still takes precedence.
+	// WorkspaceTargetID is the server-resolved conversation target. A PC
+	// conversation is restricted to it; native conversations may explicitly
+	// use another Bot-authorized target.
 	WorkspaceTargetID   string
 	WorkspaceTargetKind string
 	WorkspaceTargetName string

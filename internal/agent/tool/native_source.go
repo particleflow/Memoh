@@ -433,6 +433,10 @@ func sessionFromMCP(session mcp.ToolSessionContext) SessionContext {
 	if session.PublicRequest {
 		session.SessionID = ""
 		session.SessionType = ""
+		session.WorkspaceTargetID = ""
+		session.WorkspaceTargetKind = ""
+		session.WorkspaceTargetName = ""
+		session.WorkdirPath = ""
 	}
 	return SessionContext{
 		BotID:                    session.BotID,
@@ -440,6 +444,10 @@ func sessionFromMCP(session mcp.ToolSessionContext) SessionContext {
 		ChatID:                   firstNonEmpty(session.ChatID, session.BotID),
 		SessionID:                session.SessionID,
 		SessionType:              session.SessionType,
+		WorkspaceTargetID:        session.WorkspaceTargetID,
+		WorkspaceTargetKind:      session.WorkspaceTargetKind,
+		WorkspaceTargetName:      session.WorkspaceTargetName,
+		WorkdirPath:              session.WorkdirPath,
 		ChannelIdentityID:        session.ChannelIdentityID,
 		SessionToken:             session.SessionToken,
 		CurrentPlatform:          session.CurrentPlatform,

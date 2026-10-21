@@ -442,6 +442,9 @@ func (s *RemoteWorkspaceService) target(ctx context.Context, record dbstore.BotR
 		target.Status = WorkspaceTargetStatusRevoked
 	case record.RuntimeProvider == agenvo.Provider:
 		target.Capabilities = []string{agenvo.CapabilityForegroundExec}
+		if config, err := agenvo.DecodeTarget(record.RuntimeProviderConfig); err == nil && config.Agent != (agenvo.AgentProfile{}) {
+			target.Capabilities = append(target.Capabilities, "herdr_pi_task")
+		}
 		target.Status = WorkspaceTargetStatusOffline
 		if s.agenvo != nil && s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig) == nil {
 			target.Status = WorkspaceTargetStatusOnline

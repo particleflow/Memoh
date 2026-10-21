@@ -372,6 +372,13 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AgenvoAgentProfile = {
+    config_dir?: string;
+    model?: string;
+    path?: string;
+    provider?: string;
+};
+
 export type AgenvoDiscoveredInstance = {
     device_id?: string;
     device_name?: string;
@@ -381,6 +388,7 @@ export type AgenvoDiscoveredInstance = {
 };
 
 export type AgenvoTarget = {
+    agent?: AgenvoAgentProfile;
     bash_path?: string;
     connection_id?: string;
     device_id?: string;
@@ -18023,6 +18031,43 @@ export type DeleteUsersMeRuntimesByIdResponses = {
      */
     204: unknown;
 };
+
+export type PutUsersMeRuntimesByIdAgenvoAgentData = {
+    /**
+     * Private deployment profile
+     */
+    body: AgenvoAgentProfile;
+    path: {
+        /**
+         * Existing runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/agenvo-agent';
+};
+
+export type PutUsersMeRuntimesByIdAgenvoAgentErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdAgenvoAgentError = PutUsersMeRuntimesByIdAgenvoAgentErrors[keyof PutUsersMeRuntimesByIdAgenvoAgentErrors];
+
+export type PutUsersMeRuntimesByIdAgenvoAgentResponses = {
+    /**
+     * OK
+     */
+    200: UserruntimeRuntime;
+};
+
+export type PutUsersMeRuntimesByIdAgenvoAgentResponse = PutUsersMeRuntimesByIdAgenvoAgentResponses[keyof PutUsersMeRuntimesByIdAgenvoAgentResponses];
 
 export type DeleteUsersByIdData = {
     body?: never;

@@ -8,6 +8,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/runtime/native"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
 	"github.com/felinics/memoh/internal/workspace"
 )
@@ -84,6 +85,13 @@ func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) 
 		Name:     strings.TrimSpace(resolved.Name),
 	}
 	ctx = workspace.WithWorkspaceTarget(ctx, req.WorkspaceTargetID)
+	ctx = toolcontext.WithComputerScope(ctx, req.WorkspaceTargetID)
+	if strings.TrimSpace(req.UserID) != "" && strings.TrimSpace(req.ThreadID) != "" && strings.TrimSpace(req.RunID) != "" {
+		ctx, err = toolcontext.WithComputerBinding(ctx, toolcontext.ComputerBinding{BotID: req.BotID, UserID: req.UserID, SessionID: req.ThreadID, TargetID: req.WorkspaceTargetID, RunID: req.RunID})
+		if err != nil {
+			return ctx, req, err
+		}
+	}
 	return ctx, req, nil
 }
 

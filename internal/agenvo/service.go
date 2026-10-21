@@ -11,6 +11,7 @@ import (
 	"github.com/google/uuid"
 
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 const (
@@ -101,6 +102,13 @@ func DecodeTarget(raw []byte) (Target, error) {
 	return target, validateTarget(target)
 }
 
+// ValidateWorkDir permits host reservation only after the adapter's path
+// contract is satisfied. It does not probe or mutate a remote filesystem.
+func ValidateWorkDir(root, requested string) error {
+	_, err := resolveWorkDir(root, requested)
+	return err
+}
+
 var (
 	sessionName     = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$`)
 	windowsAbsolute = regexp.MustCompile(`^(?:[A-Za-z]:[\\/]|\\\\[^\\]+\\[^\\]+)`)
@@ -108,6 +116,11 @@ var (
 )
 
 func validateTarget(t Target) error {
+	if t.Agent != (AgentProfile{}) {
+		if err := t.Agent.Validate(); err != nil {
+			return err
+		}
+	}
 	if _, err := uuid.Parse(t.ConnectionID); err != nil {
 		return ErrInvalidTarget
 	}
@@ -126,6 +139,29 @@ func validateTarget(t Target) error {
 		}
 	}
 	return nil
+}
+
+// ResolveTarget exposes only a grant-checked registration to the host service.
+func (s *Service) ResolveTarget(ctx context.Context, scope Scope) (Target, error) {
+	t, _, err := s.resolve(ctx, scope)
+	return t, err
+}
+
+func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, error) {
+	target, owner, err := s.resolve(ctx, scope)
+	if err != nil {
+		return nil, Target{}, err
+	}
+	c := NewClient(func(ctx context.Context, scope Scope) (Target, error) {
+		t, currentOwner, err := s.resolve(ctx, scope)
+		if err == nil && currentOwner != owner {
+			return Target{}, ErrTargetChanged
+		}
+		return t, err
+	}, func(ctx context.Context, id, name string, args map[string]any) (json.RawMessage, error) {
+		return s.call(ctx, owner, id, name, args)
+	})
+	return c, target, nil
 }
 
 func (s *Service) Register(ctx context.Context, ownerID, name string, target Target) (dbstore.UserRuntimeRecord, error) {
@@ -172,6 +208,9 @@ func (s *Service) Probe(ctx context.Context, ownerID string, raw []byte) error {
 }
 
 func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, error) {
+	if err := toolcontext.CheckComputerTarget(ctx, scope.TargetID); err != nil {
+		return Target{}, "", err
+	}
 	if s == nil || s.store == nil || s.permissions == nil || scope.UserID == "" {
 		return Target{}, "", ErrForbidden
 	}

@@ -26,6 +26,7 @@ import (
 	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/skills"
 	"github.com/felinics/memoh/internal/supermarket"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspacedeps/catalog"
 )
 
@@ -114,7 +115,10 @@ func (*CapabilityProvider) Usage(_ context.Context, _ SessionContext, available 
 	return usageSection("Capability management", hints)
 }
 
-func (p *CapabilityProvider) Tools(_ context.Context, session SessionContext) ([]toolexec.Tool, error) {
+func (p *CapabilityProvider) Tools(ctx context.Context, session SessionContext) ([]toolexec.Tool, error) {
+	if toolcontext.ComputerScope(workspaceContextForSession(ctx, session)) != "" {
+		return nil, nil
+	}
 	if p.opts.Access == nil || session.IsSubagent || session.BotID == "" || session.ChannelIdentityID == "" {
 		return nil, nil
 	}
@@ -179,6 +183,9 @@ func (p *CapabilityProvider) access(ctx context.Context, session SessionContext,
 }
 
 func (p *CapabilityProvider) execute(ctx *toolexec.ToolExecContext, session SessionContext, spec capabilitySpec, args map[string]any) (any, error) {
+	if toolcontext.ComputerScope(workspaceContextForSession(ctx.Context, session)) != "" {
+		return nil, toolcontext.ErrComputerScope
+	}
 	if err := spec.validate(args); err != nil {
 		return nil, err
 	}

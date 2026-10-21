@@ -2,6 +2,7 @@ package federation
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"sort"
@@ -48,16 +49,25 @@ type cacheEntry struct {
 }
 
 type Source struct {
-	logger      *slog.Logger
-	gateway     Gateway
-	connections ConnectionLister
-	reserved    func(string) bool
+	logger          *slog.Logger
+	gateway         Gateway
+	connections     ConnectionLister
+	reserved        func(string) bool
+	connectionCheck func(context.Context, mcpgw.Connection) error
 
 	mu    sync.Mutex
 	cache map[string]cacheEntry
 }
 
 type SourceOption func(*Source)
+
+// WithConnectionCheck lets the host reserve a registered computer connection
+// for its constrained service tools. The raw federation route must not bypass
+// that service's target checks. The check is repeated on cached discovery and
+// immediately before calls; it does not inspect or rewrite user JavaScript.
+func WithConnectionCheck(check func(context.Context, mcpgw.Connection) error) SourceOption {
+	return func(s *Source) { s.connectionCheck = check }
+}
 
 func WithReservedToolName(fn func(string) bool) SourceOption {
 	return func(s *Source) {
@@ -87,12 +97,17 @@ func NewSource(log *slog.Logger, gateway Gateway, connections ConnectionLister, 
 func (s *Source) Invalidate(botID string) { s.mu.Lock(); delete(s.cache, botID); s.mu.Unlock() }
 
 func (s *Source) ListTools(ctx context.Context, session mcpgw.ToolSessionContext) ([]mcpgw.ToolDescriptor, error) {
+	ctx, cancel := toolcontext.Bind(ctx, session)
+	defer cancel()
+	if s.connectionCheck != nil && toolcontext.ComputerScope(ctx) != "" {
+		return []mcpgw.ToolDescriptor{}, nil
+	}
 	botID := strings.TrimSpace(session.BotID)
 	if botID == "" || s.gateway == nil {
 		return []mcpgw.ToolDescriptor{}, nil
 	}
 	if cached, ok := s.getCache(botID); ok {
-		return cloneTools(cached.tools), nil
+		return s.filterTools(ctx, cached.tools, cached.routes)
 	}
 	tools, routes := s.buildToolsAndRoutes(ctx, botID)
 	s.setCache(botID, cacheEntry{
@@ -100,10 +115,42 @@ func (s *Source) ListTools(ctx context.Context, session mcpgw.ToolSessionContext
 		routes:    routes,
 		tools:     tools,
 	})
-	return cloneTools(tools), nil
+	return s.filterTools(ctx, tools, routes)
+}
+
+func (s *Source) filterTools(ctx context.Context, tools []mcpgw.ToolDescriptor, routes map[string]toolRoute) ([]mcpgw.ToolDescriptor, error) {
+	if s.connectionCheck == nil {
+		return cloneTools(tools), nil
+	}
+	allowed := make(map[string]bool)
+	result := make([]mcpgw.ToolDescriptor, 0, len(tools))
+	for _, tool := range tools {
+		route, exists := routes[tool.Name]
+		if !exists {
+			continue
+		}
+		ok, checked := allowed[route.connection.ID]
+		if !checked {
+			err := s.connectionCheck(ctx, route.connection)
+			if err != nil && !errors.Is(err, mcpgw.ErrToolNotFound) {
+				return nil, err
+			}
+			ok = err == nil
+			allowed[route.connection.ID] = ok
+		}
+		if ok {
+			result = append(result, tool)
+		}
+	}
+	return cloneTools(result), nil
 }
 
 func (s *Source) CallTool(ctx context.Context, session mcpgw.ToolSessionContext, toolName string, arguments map[string]any) (map[string]any, error) {
+	ctx, cancel := toolcontext.Bind(ctx, session)
+	defer cancel()
+	if s.connectionCheck != nil && toolcontext.ComputerScope(ctx) != "" {
+		return nil, mcpgw.ErrToolNotFound
+	}
 	if s.gateway == nil {
 		return mcpgw.BuildToolErrorResult("federation gateway not available"), nil
 	}
@@ -138,6 +185,11 @@ func (s *Source) CallTool(ctx context.Context, session mcpgw.ToolSessionContext,
 	if !valid {
 		s.Invalidate(botID)
 		return nil, mcpgw.ErrToolNotFound
+	}
+	if s.connectionCheck != nil {
+		if err := s.connectionCheck(ctx, route.connection); err != nil {
+			return nil, err
+		}
 	}
 	if arguments == nil {
 		arguments = map[string]any{}
@@ -216,6 +268,11 @@ func (s *Source) buildToolsAndRoutes(ctx context.Context, botID string) ([]mcpgw
 				return items[i].Name < items[j].Name
 			})
 			for _, connection := range items {
+				if s.connectionCheck != nil {
+					if err := s.connectionCheck(ctx, connection); err != nil {
+						continue
+					}
+				}
 				var connTools []mcpgw.ToolDescriptor
 				listCtx, listCancel := context.WithTimeout(ctx, mcpCallTimeout)
 				switch strings.ToLower(strings.TrimSpace(connection.Type)) {

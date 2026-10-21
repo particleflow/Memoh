@@ -130,10 +130,8 @@ func TestResolveToolTargetRejectsTargetSwitchForWorkdirBoundSession(t *testing.T
 	if err == nil {
 		t.Fatal("resolveToolTarget() with a foreign target_id must fail for a workdir-bound session")
 	}
-	for _, want := range []string{"working directory", "workdir-computer"} {
-		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("error = %q, want it to mention %q", err, want)
-		}
+	if !strings.Contains(err.Error(), "restricted to its selected computer") {
+		t.Fatalf("unexpected scope error: %v", err)
 	}
 	if targetProvider.resolvedInput != "" {
 		t.Fatalf("resolver was called with %q — the guard must run before resolution", targetProvider.resolvedInput)
@@ -163,33 +161,29 @@ func TestResolveToolTargetAllowsPinnedTargetForWorkdirBoundSession(t *testing.T)
 	}
 }
 
-// Browser Use and Computer Use always run on the native Server Workspace and
-// save screenshots there, so a remote-workdir session must still be able to
-// read them back — but without dragging the (remote) workdir directory onto
-// that machine.
-func TestResolveToolTargetAllowsNativeReadbackWithoutWorkdirPath(t *testing.T) {
-	t.Parallel()
+// Selecting a PC restricts execution to it; there is no native readback escape.
+func TestResolveToolTargetRejectsNativeReadback(t *testing.T) {
+	clients := &containerTestTargetProvider{}
+	provider := NewContainerProvider(nil, clients, nil, "")
+	_, err := provider.resolveToolTarget(context.Background(), SessionContext{
+		BotID: "bot-1", WorkspaceTargetID: "workdir-computer", WorkdirPath: `C:\Synthetic\project`,
+	}, workspacepkg.WorkspaceTargetNative)
+	if err == nil || clients.resolvedInput != "" {
+		t.Fatalf("native escaped PC scope: err=%v target=%q", err, clients.resolvedInput)
+	}
+}
 
-	targetProvider := &containerTestTargetProvider{resolved: workspacepkg.ResolvedWorkspaceTarget{
-		TargetID: workspacepkg.WorkspaceTargetNative,
-		Client:   &bridge.Client{},
-		Info:     bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendContainer, DefaultWorkDir: "/data"},
+func TestNativeWorkdirSessionCanUseAuthorizedPCWithoutCarryingNativeDirectory(t *testing.T) {
+	clients := &containerTestTargetProvider{resolved: workspacepkg.ResolvedWorkspaceTarget{
+		TargetID: "pc-a", Client: &bridge.Client{},
+		Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote, DefaultWorkDir: `C:\Synthetic`},
 	}}
-	provider := NewContainerProvider(nil, targetProvider, nil, "")
-	session := SessionContext{
-		BotID:             "bot-1",
-		WorkspaceTargetID: "workdir-computer",
-		WorkdirPath:       `C:\Users\alice\proj`,
-	}
-	resolved, err := provider.resolveToolTarget(context.Background(), session, workspacepkg.WorkspaceTargetNative)
-	if err != nil {
-		t.Fatalf("resolveToolTarget() to the native workspace error = %v", err)
-	}
-	if resolved.workspace.workdirPath != "" {
-		t.Fatalf("workdirPath = %q — the working directory does not exist on the native workspace", resolved.workspace.workdirPath)
-	}
-	if resolved.workspace.defaultWorkDir != "/data" {
-		t.Fatalf("defaultWorkDir = %q, want the native workspace root", resolved.workspace.defaultWorkDir)
+	provider := NewContainerProvider(nil, clients, nil, "")
+	resolved, err := provider.resolveToolTarget(context.Background(), SessionContext{
+		BotID: "bot-1", WorkspaceTargetID: "native", WorkdirPath: "/data/project",
+	}, "pc-a")
+	if err != nil || resolved.workspace.workdirPath != "" || clients.resolvedInput != "pc-a" {
+		t.Fatalf("native-to-PC path routing failed: err=%v target=%q", err, clients.resolvedInput)
 	}
 }
 

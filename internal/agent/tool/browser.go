@@ -23,6 +23,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	displaypkg "github.com/felinics/memoh/internal/display"
 	"github.com/felinics/memoh/internal/settings"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
 
@@ -120,6 +121,9 @@ func (*BrowserProvider) Usage(_ context.Context, session SessionContext, availab
 }
 
 func (p *BrowserProvider) Tools(ctx context.Context, session SessionContext) ([]toolexec.Tool, error) {
+	if sessionUsesRemoteWorkspaceTarget(session) || toolcontext.ComputerScope(ctx) != "" {
+		return nil, nil
+	}
 	if p == nil || p.settings == nil {
 		return nil, nil
 	}
@@ -290,7 +294,10 @@ func (p *BrowserProvider) browserTools(session SessionContext) []toolexec.Tool {
 	}
 }
 
-func sessionBotID(session SessionContext) (string, error) {
+func sessionBotID(ctx context.Context, session SessionContext) (string, error) {
+	if sessionUsesRemoteWorkspaceTarget(session) || toolcontext.ComputerScope(ctx) != "" {
+		return "", toolcontext.ErrComputerScope
+	}
 	botID := strings.TrimSpace(session.BotID)
 	if botID == "" {
 		return "", errors.New("bot_id is required")
@@ -315,7 +322,7 @@ func (p *BrowserProvider) execBrowserObserve(ctx context.Context, session Sessio
 }
 
 func (p *BrowserProvider) runBrowserCommand(ctx context.Context, session SessionContext, cmd browserCommand) (any, error) {
-	botID, err := sessionBotID(session)
+	botID, err := sessionBotID(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +339,7 @@ func (p *BrowserProvider) runBrowserCommand(ctx context.Context, session Session
 }
 
 func (p *BrowserProvider) execRemoteSession(ctx context.Context, session SessionContext, args browserRemoteSessionArgs) (any, error) {
-	botID, err := sessionBotID(session)
+	botID, err := sessionBotID(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -399,7 +406,7 @@ func (p *BrowserProvider) execComputerObserve(ctx context.Context, session Sessi
 }
 
 func (p *BrowserProvider) execComputerScreenshot(ctx context.Context, session SessionContext) (any, error) {
-	botID, err := p.requireComputerDisplay(session)
+	botID, err := p.requireComputerDisplay(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -414,7 +421,7 @@ func (p *BrowserProvider) execComputerScreenshot(ctx context.Context, session Se
 }
 
 func (p *BrowserProvider) execComputerSnapshot(ctx context.Context, session SessionContext) (any, error) {
-	botID, err := p.requireComputerDisplay(session)
+	botID, err := p.requireComputerDisplay(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -433,7 +440,7 @@ func (p *BrowserProvider) execComputerSnapshot(ctx context.Context, session Sess
 }
 
 func (p *BrowserProvider) execComputerAction(ctx context.Context, session SessionContext, args computerActionArgs) (any, error) {
-	botID, err := p.requireComputerDisplay(session)
+	botID, err := p.requireComputerDisplay(ctx, session)
 	if err != nil {
 		return nil, err
 	}
@@ -623,8 +630,8 @@ func (p *BrowserProvider) editByRef(ctx context.Context, botID, ref, text string
 	}
 }
 
-func (p *BrowserProvider) requireComputerDisplay(session SessionContext) (string, error) {
-	botID, err := sessionBotID(session)
+func (p *BrowserProvider) requireComputerDisplay(ctx context.Context, session SessionContext) (string, error) {
+	botID, err := sessionBotID(ctx, session)
 	if err != nil {
 		return "", err
 	}

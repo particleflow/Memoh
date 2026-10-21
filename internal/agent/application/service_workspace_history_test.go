@@ -8,6 +8,7 @@ import (
 	historyfrag "github.com/felinics/memoh/internal/agent/context/history"
 	"github.com/felinics/memoh/internal/bots"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace"
 )
 
@@ -55,6 +56,9 @@ func TestPrepareWorkspaceRequestRequiresWorkspaceRead(t *testing.T) {
 	}
 	if targetID := workspace.WorkspaceTargetFromContext(ctx); targetID != "computer-b" {
 		t.Fatalf("context target = %q, want computer-b", targetID)
+	}
+	if toolcontext.ComputerScope(ctx) != "computer-b" || toolcontext.CheckComputerTarget(ctx, "native") == nil {
+		t.Fatal("authorized PC request failed to establish an immutable tool scope")
 	}
 }
 

@@ -60,6 +60,7 @@ import (
 	"github.com/felinics/memoh/internal/chat/message"
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/chat/timeline"
+	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/config"
 	"github.com/felinics/memoh/internal/connectors"
 	ctr "github.com/felinics/memoh/internal/container"
@@ -1095,10 +1096,10 @@ func injectACPToolProviders(source *agenttools.NativeToolSource, toolProviders [
 	}
 }
 
-func provideToolGatewayService(log *slog.Logger, fedGateway *handlers.MCPFederationGateway, oauthService *mcp.OAuthService, connectorSource *connectors.Source, containerdHandler *handlers.ContainerdHandler, nativeSource *agenttools.NativeToolSource, toolContexts *mcp.ToolSessionContextStore, cfg config.Config, fedSource *mcpfederation.Source) *mcp.ToolGatewayService {
+func provideToolGatewayService(log *slog.Logger, fedGateway *handlers.MCPFederationGateway, oauthService *mcp.OAuthService, connectorSource *connectors.Source, containerdHandler *handlers.ContainerdHandler, nativeSource *agenttools.NativeToolSource, toolContexts *mcp.ToolSessionContextStore, cfg config.Config, fedSource *mcpfederation.Source, computerSource *computertask.Source) *mcp.ToolGatewayService {
 	fedGateway.SetOAuthService(oauthService)
 	limits := agentLimitsFromConfig(cfg.Agent)
-	svc := mcp.NewToolGatewayService(log, []mcp.ToolSource{nativeSource, connectorSource, fedSource}, mcp.WithToolOutputLimit(limits.ToolOutputLimit()))
+	svc := mcp.NewToolGatewayService(log, []mcp.ToolSource{nativeSource, computerSource, computerScopedConnectorSource{connectorSource}, fedSource}, mcp.WithToolOutputLimit(limits.ToolOutputLimit()))
 	containerdHandler.SetToolGatewayService(svc)
 	containerdHandler.SetToolSessionContextStore(toolContexts)
 	return svc
@@ -1122,7 +1123,7 @@ func provideBackgroundManager(log *slog.Logger) *background.Manager {
 	return background.New(log)
 }
 
-func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source) []agenttools.ToolProvider {
+func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source) []agenttools.ToolProvider {
 	var assetResolver messaging.AssetResolver
 	if mediaService != nil {
 		assetResolver = &mediaAssetResolverAdapter{media: mediaService}
@@ -1189,7 +1190,8 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewTranscriptionProvider(log, settingsService, audioService, mediaService),
 		agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, manager, config.DefaultDataMount),
 		agenttools.NewVideoGenProvider(log, settingsService, videoService, bgManager, manager, config.DefaultDataMount),
-		agenttools.NewFederationProvider(log, connectorSource),
+		agenttools.NewFederationProvider(log, computerSource),
+		agenttools.NewFederationProvider(log, computerScopedConnectorSource{connectorSource}),
 		agenttools.NewFederationProvider(log, fedSource),
 		agenttools.NewHistoryProvider(log, historySessions, messageService, queries),
 	}
@@ -1657,7 +1659,7 @@ func (a *applicationBotPermissionChecker) HasBotPermission(ctx context.Context, 
 	return bots.HasPermission(perms, permission), nil
 }
 
-func provideFederationSource(log *slog.Logger, gateway *handlers.MCPFederationGateway, connections *mcp.ConnectionService, oauth *mcp.OAuthService) *mcpfederation.Source {
+func provideFederationSource(log *slog.Logger, gateway *handlers.MCPFederationGateway, connections *mcp.ConnectionService, oauth *mcp.OAuthService, store *postgresstore.Store) *mcpfederation.Source {
 	gateway.SetOAuthService(oauth)
-	return mcpfederation.NewSource(log, gateway, connections, mcpfederation.WithReservedToolName(agenttools.IsBuiltInToolName))
+	return mcpfederation.NewSource(log, gateway, connections, mcpfederation.WithReservedToolName(agenttools.IsBuiltInToolName), mcpfederation.WithConnectionCheck(computerConnectionCheck(store)))
 }

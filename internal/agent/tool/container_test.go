@@ -368,7 +368,7 @@ func TestListExecutionLocationsUsesRequestOverrideAsDefault(t *testing.T) {
 		t.Fatalf("list_execution_locations error = %v", err)
 	}
 	result := decodeListExecutionLocations(t, raw)
-	if len(result.Locations) != 2 || result.Locations[0].Default || !result.Locations[1].Default {
+	if len(result.Locations) != 1 || result.Locations[0].TargetID != "target-1" || !result.Locations[0].Default {
 		t.Fatalf("request defaults = %#v", result.Locations)
 	}
 	if targetProvider.listedCtx != "target-1" {
@@ -389,11 +389,11 @@ func TestContainerProviderResolvesOneCanonicalTargetPerInvocation(t *testing.T) 
 		},
 	}}
 	provider := NewContainerProvider(nil, targetProvider, nil, "")
-	resolved, err := provider.resolveToolTarget(context.Background(), SessionContext{BotID: "bot-1", WorkspaceTargetID: "request-default"}, "requested-target")
+	resolved, err := provider.resolveToolTarget(context.Background(), SessionContext{BotID: "bot-1", WorkspaceTargetID: "native"}, "requested-target")
 	if err != nil {
 		t.Fatalf("resolveToolTarget() error = %v", err)
 	}
-	if targetProvider.resolvedInput != "requested-target" || targetProvider.resolvedCtx != "request-default" || resolved.id != "canonical-target" {
+	if targetProvider.resolvedInput != "requested-target" || targetProvider.resolvedCtx != "native" || resolved.id != "canonical-target" {
 		t.Fatalf("resolved input/context/id = %q/%q/%q", targetProvider.resolvedInput, targetProvider.resolvedCtx, resolved.id)
 	}
 	if !resolved.workspace.windows || resolved.workspace.defaultWorkDir != `C:\Users\alice\project` {

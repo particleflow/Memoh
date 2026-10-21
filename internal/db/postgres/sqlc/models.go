@@ -528,6 +528,24 @@ type ChannelLinkCode struct {
 	TeamID                    pgtype.UUID        `json:"team_id"`
 }
 
+type ComputerOperation struct {
+	ID                pgtype.UUID        `json:"id"`
+	TeamID            pgtype.UUID        `json:"team_id"`
+	BotID             pgtype.UUID        `json:"bot_id"`
+	SessionID         pgtype.UUID        `json:"session_id"`
+	UserID            pgtype.UUID        `json:"user_id"`
+	TargetID          pgtype.UUID        `json:"target_id"`
+	RunID             string             `json:"run_id"`
+	Fingerprint       string             `json:"fingerprint"`
+	TargetFingerprint string             `json:"target_fingerprint"`
+	State             string             `json:"state"`
+	Details           []byte             `json:"details"`
+	CancelRequested   bool               `json:"cancel_requested"`
+	Revision          int64              `json:"revision"`
+	CreatedAt         pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+}
+
 type Connector struct {
 	TeamID       pgtype.UUID        `json:"team_id"`
 	BotID        pgtype.UUID        `json:"bot_id"`
