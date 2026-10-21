@@ -17,7 +17,87 @@ import (
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/models"
 	"github.com/felinics/memoh/internal/skills"
+	workspacepkg "github.com/felinics/memoh/internal/workspace"
+	"github.com/felinics/memoh/internal/workspace/bridge"
 )
+
+// Only the bridge/target service is synthetic; ContainerProvider registers its
+// real multi-tool set, including apply_patch before list_execution_locations.
+type routingTargetFixture struct{}
+
+func (routingTargetFixture) MCPClient(context.Context, string) (*bridge.Client, error) {
+	return nil, errors.New("fixture does not execute workspace operations")
+}
+
+func (routingTargetFixture) WorkspaceInfo(context.Context, string) (bridge.WorkspaceInfo, error) {
+	return bridge.WorkspaceInfo{}, nil
+}
+
+func (routingTargetFixture) ResolveWorkspaceTarget(context.Context, string, string) (workspacepkg.ResolvedWorkspaceTarget, error) {
+	return workspacepkg.ResolvedWorkspaceTarget{}, workspacepkg.ErrWorkspaceTargetNotFound
+}
+
+func (routingTargetFixture) ListWorkspaceTargets(context.Context, string) ([]workspacepkg.WorkspaceTarget, error) {
+	return nil, nil
+}
+
+func TestComputerRoutingRequiredTracksDiscoveryCapability(t *testing.T) {
+	const requiredID = "system.tool_usage.required.apply_patch"
+	var captured agentpkg.RunConfig
+	applier := ProviderRunConfigApplier(nil)
+	agent := agentpkg.New(agentpkg.Deps{ContextViewApplier: func(ctx context.Context, cfg agentpkg.RunConfig) (agentpkg.RunConfig, error) {
+		// The application supplies authoritative typed sources for capability
+		// revocation; the legacy flattened-input path has no roster gate.
+		cfg.ContextSourceFrags = CollectProviderSourceFrags(ctx, cfg)
+		captured = cfg
+		return applier(ctx, cfg)
+	}})
+	agent.SetToolProviders([]agenttools.ToolProvider{agenttools.NewContainerProvider(nil, routingTargetFixture{}, nil, "")})
+	provider := &envelopeProbeProvider{handler: func(_ int, req sdk.Request) (sdk.ModelResult, error) {
+		if !strings.Contains(req.System, "Computer routing contract") {
+			t.Fatal("available discovery lost required instructions")
+		}
+		return sdk.ModelResult{Text: "fixture", FinishReason: sdk.FinishReasonStop}, nil
+	}}
+	_, err := agent.Generate(t.Context(), agentpkg.RunConfig{Model: &sdk.Model{ID: "synthetic", Provider: provider, Type: sdk.ModelTypeChat}, SupportsToolCall: true, ContextBudgetMaxTokens: 32768, Messages: []sdk.Message{sdk.UserMessage("Use my PC")}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, frag := range captured.ContextToolUsageFrags {
+		if frag.ID == requiredID {
+			found = true
+			if frag.RequiredCapability != "list_execution_locations" || frag.RetentionTier != contextfrag.RetentionRequired {
+				t.Fatalf("wrong capability or retention: %+v", frag)
+			}
+		}
+	}
+	if !found {
+		t.Fatal("real multi-tool Container contract not assembled")
+	}
+	// Recompose after discovery is removed, while apply_patch and the rest of
+	// the real tool set remain. A required tier must not defeat this gate.
+	defs := make([]contextfrag.ToolDefAccounting, 0, len(captured.ContextToolDefs))
+	for _, def := range captured.ContextToolDefs {
+		if def.Name != "list_execution_locations" {
+			defs = append(defs, def)
+		}
+	}
+	if len(defs) != len(captured.ContextToolDefs)-1 {
+		t.Fatal("fixture did not revoke exactly the discovery capability")
+	}
+	captured.ContextToolDefs = defs
+	got, err := applier(t.Context(), captured)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(got.System, "Computer routing contract") || !hasFragID(got.ContextFrags, "system.tool_usage.apply_patch") {
+		t.Fatalf("revocation: required_present=%v selected=%v decisions=%+v", strings.Contains(got.System, "Computer routing contract"), fragIDs(got.ContextFrags), got.ContextManifest.SelectionDecisions)
+	}
+	if decision, ok := decisionByID(got.ContextManifest.SelectionDecisions, requiredID); !ok || decision.Reason != capabilityGateDropReason {
+		t.Fatalf("required fragment was not capability-gated: %+v", decision)
+	}
+}
 
 // Run the actual native assembler, initial composer, step reselection and
 // provider serialization. Only the model and read-only external operations
@@ -29,9 +109,9 @@ type computerWorkflowProvider struct {
 	observations      int
 }
 
-func (p *computerWorkflowProvider) RequiredUsage(ctx context.Context, session agenttools.SessionContext, available agenttools.AvailableTools) string {
+func (p *computerWorkflowProvider) RequiredUsage(ctx context.Context, session agenttools.SessionContext, available agenttools.AvailableTools) (agenttools.ToolName, string) {
 	if p.baseline {
-		return ""
+		return agenttools.ToolName{}, ""
 	}
 	return p.ContainerProvider.RequiredUsage(ctx, session, available)
 }
@@ -81,7 +161,7 @@ func TestComputerWorkflowProviderRequests(t *testing.T) {
 	}{
 		{"32K original pruning", true, 32768, 18000},
 		{"32K compact and required routing", false, 32768, 18000},
-		{"64K reasoning and 110 synthetic messages", false, 65536, 21810},
+		{"64K reasoning and 110 synthetic messages", false, 65536, 21767},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			baseline := tc.baseline

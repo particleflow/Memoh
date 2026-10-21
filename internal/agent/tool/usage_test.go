@@ -76,7 +76,7 @@ func TestComputerWorkflowUsageFollowsRegisteredCapabilities(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			usage := p.Usage(t.Context(), SessionContext{}, availableToolsForTest(tt.names...))
-			required := p.RequiredUsage(t.Context(), SessionContext{}, availableToolsForTest(tt.names...))
+			capability, required := p.RequiredUsage(t.Context(), SessionContext{}, availableToolsForTest(tt.names...))
 			if (required != "") != tt.wantDiscovery {
 				t.Fatal("required contract escaped capability gate")
 			}
@@ -84,6 +84,12 @@ func TestComputerWorkflowUsageFollowsRegisteredCapabilities(t *testing.T) {
 				t.Fatalf("required routing contract is no longer short: %d bytes", len(required))
 			}
 			if tt.wantDiscovery {
+				if capability != ToolListExecutionLocations() {
+					t.Fatal("required contract bound to wrong capability")
+				}
+				if !strings.Contains(required, "For a discovered Agenvo Windows target") {
+					t.Fatal("Agenvo route is not scoped to its discovered target")
+				}
 				for _, rule := range []string{"missing or pruned", "do not guess", "repeatedly activate", "Unknown submission: reconcile read-only", "Keep Server Workspace tasks there"} {
 					if !strings.Contains(required, rule) {
 						t.Errorf("missing required rule %q", rule)

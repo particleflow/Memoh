@@ -147,7 +147,8 @@ func (s *NativeToolSource) ListTools(ctx context.Context, session mcp.ToolSessio
 			// External runtimes receive the same contract as tool documentation;
 			// only the native runtime owns system-fragment retention guarantees.
 			if provider, ok := item.usageProvider.(ToolRequiredUsage); ok {
-				if usage := strings.TrimSpace(provider.RequiredUsage(ctx, sessionFromMCP(session), available)); usage != "" {
+				capability, usage := provider.RequiredUsage(ctx, sessionFromMCP(session), available)
+				if usage = strings.TrimSpace(usage); usage != "" && available.Has(capability) {
 					description = appendToolUsageDescription(description, usage)
 				}
 			}

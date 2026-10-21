@@ -662,9 +662,10 @@ func (a *Agent) assembleTools(
 			})
 		}
 		if provider, ok := registration.provider.(tools.ToolRequiredUsage); ok {
-			if text := strings.TrimSpace(provider.RequiredUsage(ctx, session, availableTools)); text != "" {
+			capability, text := provider.RequiredUsage(ctx, session, availableTools)
+			if text = strings.TrimSpace(text); text != "" && availableTools.Has(capability) {
 				usageSections = append(usageSections, toolUsageSection{
-					id: "required." + registration.capability, capability: registration.capability,
+					id: "required." + registration.capability, capability: capability.String(),
 					text: text, required: true,
 				})
 			}

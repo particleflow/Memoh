@@ -81,14 +81,14 @@ func (p *ContainerProvider) SetHookService(h *hooks.Service) {
 	p.hookService = h
 }
 
-func (*ContainerProvider) RequiredUsage(_ context.Context, _ SessionContext, available AvailableTools) string {
+func (*ContainerProvider) RequiredUsage(_ context.Context, _ SessionContext, available AvailableTools) (ToolName, string) {
 	ref, ok := available.Ref(ToolListExecutionLocations())
 	if !ok {
-		return ""
+		return ToolName{}, ""
 	}
-	return usageSection("Computer routing contract", []string{
+	return ToolListExecutionLocations(), usageSection("Computer routing contract", []string{
 		"For user-PC work, first use " + ref + "; use only this Bot's authorized, available targets and advertised capabilities. Do not seek a separate cloud computer. Keep Server Workspace tasks there and preserve the default. Missing assignment: report it, never expand permissions or fall back to another machine.",
-		"Simple PC tasks use foreground Bash; agent tasks use the configured Agenvo / Herdr / Pi / Magpie route only after verifying connector schemas and provider readiness. A shell or Memoh subagent is not a Herdr agent. Unknown submission: reconcile read-only, never redispatch.",
+		"For a discovered Agenvo Windows target: simple tasks use its advertised foreground Bash; agent tasks use its configured Herdr / Pi / Magpie route only after verifying connector schemas and provider readiness. A shell or Memoh subagent is not a Herdr agent. Unknown submission: reconcile read-only, never redispatch.",
 		"If the full local-agent skill is missing or pruned, stop agent mutations: do not guess the workflow or repeatedly activate the skill. Report the gap; only known authorized read-only observations may reconcile existing work.",
 	})
 }
