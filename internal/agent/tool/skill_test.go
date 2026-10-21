@@ -2,10 +2,56 @@ package tools
 
 import (
 	"context"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/skills"
 )
+
+func TestWindowsComputerSkillIsOptInAndLoadsThroughNativeTool(t *testing.T) {
+	raw, err := os.ReadFile("../../../contrib/bot-skills/windows-computer/SKILL.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	parsed := skills.ParseFile(string(raw), "")
+	if parsed.Name != "windows-computer" || parsed.Description == "" {
+		t.Fatal("invalid skill metadata")
+	}
+	p := NewSkillProvider(nil)
+	uninstalled, err := p.Tools(t.Context(), SessionContext{})
+	if err != nil || len(uninstalled) != 0 {
+		t.Fatalf("uninstalled skill registered tools: %v", err)
+	}
+	installed, err := p.Tools(t.Context(), SessionContext{Skills: map[string]SkillDetail{
+		parsed.Name: {Description: parsed.Description, Content: parsed.Content, Path: skills.ManagedDir() + "/" + parsed.Name + "/SKILL.md"},
+	}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	use := toolByNameForTest(t, installed, ToolUseSkill())
+	out, err := use.Execute(nil, toolexec.ArgumentsFromValue(map[string]any{"skillName": parsed.Name, "reason": "Use the connected Windows computer"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	value := toolexec.OutputValue(out).(map[string]any)
+	if value["success"] != true || value["content"] != parsed.Content {
+		t.Fatal("native activation did not preserve instructions")
+	}
+	for _, boundary := range []string{"exec_foreground", "agent.start", "agent.get", "agent.read", "Magpie", "Memoh subagent", "unknown", "not permissions"} {
+		if !strings.Contains(parsed.Content, boundary) {
+			t.Errorf("missing workflow boundary %q", boundary)
+		}
+	}
+	missing, err := use.Execute(nil, toolexec.ArgumentsFromValue(map[string]any{"skillName": "not-installed", "reason": "test isolation"}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if toolexec.OutputValue(missing).(map[string]any)["success"] != false {
+		t.Fatal("unregistered skill was activated")
+	}
+}
 
 func TestListSkillReturnsSortedSummaries(t *testing.T) {
 	provider := NewSkillProvider(nil)

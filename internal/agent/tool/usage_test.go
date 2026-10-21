@@ -37,6 +37,37 @@ func availableToolsForTest(names ...ToolName) AvailableTools {
 	return NewAvailableTools(sdkTools)
 }
 
+func TestComputerWorkflowUsageFollowsRegisteredCapabilities(t *testing.T) {
+	p := &ContainerProvider{}
+	for _, tt := range []struct {
+		name                     string
+		names                    []ToolName
+		wantDiscovery, wantSkill bool
+	}{
+		{name: "no tools"},
+		{name: "exec without discovery", names: []ToolName{ToolExec()}},
+		{name: "discovery", names: []ToolName{ToolListExecutionLocations(), ToolExec()}, wantDiscovery: true},
+		{name: "installed skill", names: []ToolName{ToolListExecutionLocations(), ToolExec(), ToolUseSkill()}, wantDiscovery: true, wantSkill: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			usage := p.Usage(t.Context(), SessionContext{}, availableToolsForTest(tt.names...))
+			if strings.Contains(usage, "before claiming no computer") != tt.wantDiscovery {
+				t.Fatalf("discovery guidance does not match registered tools: %s", usage)
+			}
+			if strings.Contains(usage, "`use_skill`") != tt.wantSkill {
+				t.Fatalf("skill guidance does not match registered tools: %s", usage)
+			}
+			if tt.wantDiscovery {
+				for _, boundary := range []string{"Authorization is not availability", "exec_foreground", "Never substitute another location", "not a full workspace"} {
+					if !strings.Contains(usage, boundary) {
+						t.Errorf("missing boundary %q", boundary)
+					}
+				}
+			}
+		})
+	}
+}
+
 func assertUsageItemsAreBulleted(t *testing.T, usage string) {
 	t.Helper()
 	usage = strings.TrimSpace(usage)
