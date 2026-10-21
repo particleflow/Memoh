@@ -2,7 +2,8 @@
 
 Cloud development environment: PostgreSQL 18 (isolated synthetic database), Go
 1.25.7 server, Vite on `http://127.0.0.1:18082`, Chromium. No production secrets,
-NAS data, personal endpoints or real Windows tasks were used.
+NAS data, personal endpoints or real Windows tasks were used in cloud tests.
+Separate runtime-side Windows wrapper evidence is recorded below.
 
 ## Verified
 
@@ -77,9 +78,10 @@ NAS data, personal endpoints or real Windows tasks were used.
   followed by that boundary and its synthetic completion. One submission,
   one read, zero closes; the UI displayed completed output and retention.
   This validates application wiring, not the Windows terminal implementation.
-- The new Windows batch and CI for this correction remain pending at this
-  checkpoint. Reuse the already observed live acceptance pane; do not repeat
-  the old unknown command, close the workspace or resume IDs after a restart.
+- The new Windows batch was handed to the runtime thread without repeating
+  the old unknown command or creating another acceptance workspace. Its
+  completed observations are recorded below; the original failed batch remains
+  failed evidence.
 
 The follow-up contract check kept the same wrapper and fixed vectors. Account
 and Bot target responses advertise only `exec_foreground`; account rows and the
@@ -91,17 +93,51 @@ Current browser captures verify the clarified form and Chinese dark narrow
 scrolling; Bot B still cannot select the ungranted target. Locale duplicate-key
 checks and the UI contract guard passed (three existing guard warnings).
 
+## Real Windows wrapper acceptance
+
+The runtime thread executed the five `200...` vectors generated at
+`e9ce9f7014c4fb2acc552f71fbc4c6afd627ddae` through the existing Agenvo MCP
+tool connection. Each command was submitted exactly once in the same live
+acceptance pane. Completion frames were parsed with the strict whole-line
+nonce/base64 rules; no parser relaxation was used. No new workspace, close,
+kill or focus takeover was performed. The pane remains retained for inspection.
+
+| Vector | Observed result |
+| --- | --- |
+| Normal/Unicode/native/path | Git Bash 5.2.26, `msys`, result 42, Chinese/✓, native `Windows_NT`, successful `cygpath` round trip; exit 0. |
+| Native stderr | `MEMOH_STDERR` followed by `MEMOH_AFTER`; exit 0. |
+| Native nonzero | `MEMOH_NONZERO\n`; exit 7. |
+| Large output | 4096 bytes, exit 0, truncated true: the 12-byte `MEMOH_LARGE\|` prefix plus 4084 ASCII `x` characters. |
+| Canceled observation | At 0.228 seconds the early read contained no complete frame. Stopping observation remained unknown with no exit code. A later read at 06:11:27 UTC independently observed `MEMOH_DELAYED\|42\n`, exit 0; it did not change the canceled observation into success. |
+
+The old large-output expectation incorrectly said 4085 `x` characters. The
+original comparison therefore recorded three passes and one documentation
+mismatch. Only that arithmetic expectation is corrected: the submitted command,
+encoded wrapper, nonce and command hash are unchanged, and no command was rerun.
+
+These are real Windows observations of the wrapper through the existing tool
+channel. They do not establish that this PR is deployed, that the account/Bot
+adapter has completed a production turn, or that a Go context cancellation was
+propagated through that adapter to the real machine. Cloud cancellation tests
+and the runtime-side stop-waiting observation remain separate evidence. No
+claim is made that Windows execution was terminated or the pane safely closed.
+
+Independent review reported no new P0/P1 findings for `eeb6c5c` and `e9ce9f70`.
+The execution code in `022b56c2` is identical to `e9ce9f70`; all five CI workflows
+for `022b56c2` completed successfully. Candidate image publication and deployed
+account/grant/session integration acceptance are separate release steps.
+
 ## Limits and failures
 
-The Agenvo MCP and model endpoints are controlled protocol fixtures, not a real
-Windows machine. The completion wrapper still requires Windows Git Bash
-acceptance for actual commands, Unicode/large output, nonzero exit and cancel.
-ARM64 execution has not been exercised.
+The cloud Agenvo MCP and model endpoints are controlled protocol fixtures. The
+runtime-side wrapper acceptance above uses a real Windows machine through the
+existing tool channel, not the deployed PR adapter. ARM64 execution has not
+been exercised.
 
 [Bash acceptance instructions](bash-acceptance.md) and
 [exact generated commands](bash-vectors.json) provide one-time synthetic
-vectors for the existing Windows execution thread. They are preparation
-artifacts; their presence does not mean Windows acceptance passed.
+vectors for the existing Windows execution thread. Their generation and the
+separate runtime-side result record must not be conflated.
 
 The cloud Docker daemon uses vfs. Creating a full native workspace from the
 existing image exhausted its 32 GiB filesystem. Derived caches were moved to
@@ -125,6 +161,9 @@ Only synthetic labels, paths and output appear in these current-build captures.
   selection and capability limits.
 - [Zero default grants](agenvo-bash-no-grants.png): both Bots off after registration.
 - [A only](agenvo-bash-grant-a.png): A on, B off.
+- [Candidate gate recheck](agenvo-release-grants.png): current running Web,
+  command-only target, A still enabled and B disabled; read-only inspection
+  performed without submitting another command or modifying grants.
 - [Completed synthetic command](agenvo-bash-chat-completed.png): output and retained
   workspace notice in the actual chat UI.
 - [Completion boundary regression](agenvo-bash-boundary-completed.png): current
@@ -132,5 +171,7 @@ Only synthetic labels, paths and output appear in these current-build captures.
   the wrapper's explicit CRLF boundary.
 - [Chinese/dark/narrow](agenvo-bash-mobile-zh-dark.png): shared scrollable dialog.
 
-Agent screenshots and automated checks are not human QA. Keep the PR draft and
-production release unchanged pending review and controlled Windows acceptance.
+Agent screenshots and automated checks are not human QA. The owner has released
+the review gate for a controlled candidate publication. Production deployment
+and image promotion remain separate from wrapper acceptance; this record does
+not claim either has happened.

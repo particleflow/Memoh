@@ -63,7 +63,7 @@
         "exit_code": 0,
         "output_bytes": 4096,
         "output_prefix": "MEMOH_LARGE|",
-        "remaining_output": "4085 ASCII x characters; no trailing newline",
+        "remaining_output": "4084 ASCII x characters; no trailing newline",
         "truncated": true
       }
     },
