@@ -46,6 +46,12 @@ func sameComputerCredential(a, b dbstore.JSON) bool {
 		values := map[string]string{}
 		for key, value := range config.Headers {
 			key = strings.ToLower(strings.TrimSpace(key))
+			value = strings.TrimSpace(value) // Match the HTTP gateway's header normalization.
+			if key == "authorization" {
+				if parts := strings.Fields(value); len(parts) == 2 {
+					value = strings.ToLower(parts[0]) + " " + parts[1]
+				}
+			}
 			if value != "" && (key == "authorization" || key == "x-api-key") {
 				values[key] = value
 			}

@@ -20,3 +20,17 @@ func TestComputerEndpointAliases(t *testing.T) {
 		}
 	}
 }
+
+func TestComputerCredentialIdentityMatchesHTTPNormalization(t *testing.T) {
+	registered := []byte(`{"headers":{"Authorization":"Bearer synthetic-only"}}`)
+	for _, raw := range []string{`{"headers":{"authorization":"  Bearer synthetic-only  "}}`, `{"headers":{"AUTHORIZATION":"bearer synthetic-only"}}`} {
+		if !sameComputerCredential(registered, []byte(raw)) {
+			t.Fatal("equivalent HTTP credential reopened raw access")
+		}
+	}
+	for _, raw := range []string{`{"headers":{}}`, `{"headers":{"Authorization":"Bearer another-token"}}`} {
+		if sameComputerCredential(registered, []byte(raw)) {
+			t.Fatal("unrelated credential reserved")
+		}
+	}
+}

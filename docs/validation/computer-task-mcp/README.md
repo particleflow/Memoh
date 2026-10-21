@@ -60,7 +60,8 @@ After review of `9fe76e91`, this revision adds these regressions:
 - An unknown standard-MCP task followed by the old ordinary `exec` path is
   rejected without a second relay submission. Root-relative workdirs are now
   tested through the durable standard-MCP path; NAS native exec remains.
-- Endpoint normalization, credential identity, revoked aliases, per-request
+- Endpoint normalization, credential identity (including HTTP whitespace and
+  authorization-scheme normalization), revoked aliases, per-request
   redirect checks and propagation through federation listing/calls are tested.
   The isolated PostgreSQL migration test includes semantic/credential aliases.
   Unknown independently authenticated proxy aliases are not claimed detected.
