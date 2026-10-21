@@ -5,6 +5,12 @@ actual `bashCommand` function; source hashes are recorded in the JSON. Their
 presence is preparation evidence, not Windows execution evidence. The older
 PowerShell vectors are superseded and must not be run.
 
+This batch uses new `200...` nonces and explicit CRLF around every completion
+frame. The first `100...` vector on Windows produced the expected output and
+exit 0 inside its payload, but terminal residue `U+01B0 U+006D` preceded the
+frame on the same line. Strict parsing did not accept it. That attempt remains
+unknown; do not resend it or count payload inspection as a successful result.
+
 The existing Windows execution thread verified Git Bash 5.2.26(1)-release,
 `OSTYPE=msys`, UTF-8, native Windows process exit/stderr, and `cygpath` in a
 one-time process. It also found that PATH's first `bash.exe` is a WSL launcher.
@@ -15,11 +21,10 @@ path belongs only in local configuration, never in this repository.
 ## Minimal execution
 
 1. Reuse the authorized Agenvo device/instance and observed Herdr session.
-   Create one uniquely labeled acceptance workspace in an approved existing
-   directory, once. Record the returned root pane. The earlier PowerShell
-   preparation submitted no commands or workspaces, according to the runtime
-   thread. If any later attempt has an unknown outcome, inspect that attempt
-   first rather than repeating a create or run.
+   Reuse the still-live acceptance workspace and pane already observed by the
+   runtime thread after the first Bash attempt. Do not create another workspace
+   for this batch. Do not resume saved IDs after a Herdr restart or uncertain
+   lifecycle. Inspect uncertain attempts instead of repeating a create or run.
 2. In each JSON `pane_run_command`, replace the **one occurrence** of the
    `bash_path_parameter` value with the already verified Git Bash path. The
    path is a PowerShell single-quoted argument: replace any literal `'` in the
@@ -85,6 +90,13 @@ nonce. Ignore other vectors' frames. Multiple matching frames in **one**
 snapshot, invalid base64/JSON, oversized payloads or invalid output are unknown.
 Parse each snapshot independently; do not concatenate repeated reads. Never
 inject a synthetic result into the terminal.
+
+The wrapper writes CRLF before the frame and after its suffix, including known
+failure frames. Residual terminal text belongs on the preceding line. Do not
+strip arbitrary prefixes, search for frame substrings, or treat an echoed
+launcher as completion. Business output stays inside the base64 payload, even
+when it prints a frame-shaped string. Confirm this physical line boundary in
+the real snapshot before recording a pass.
 
 Return per-vector submission count, request ID, parsed output/exit/truncation,
 early-read observation and any close/termination count (expected zero). Keep

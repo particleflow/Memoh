@@ -3,10 +3,12 @@ package agenvo
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -111,5 +113,71 @@ func TestBashCompletionRejectsInvalidOutputAndExit(t *testing.T) {
 		if _, _, err := parseCompletion(frame, "n"); !errors.Is(err, ErrUnknown) {
 			t.Fatalf("accepted %s: %v", payload, err)
 		}
+	}
+}
+
+func TestBashFrameStartsAfterObservedTerminalResidue(t *testing.T) {
+	// Sanitized evidence from Windows: U+01B0 U+006D was on the same line
+	// as the old completion frame. It must not become a permitted substring.
+	const residue = "\u01b0\u006d"
+	const observedOutput = "MEMOH_BASH|5.2.26(1)-release|msys\nMEMOH_NORMAL|42|中文|✓\nMEMOH_NATIVE_Windows_NT\r\nMEMOH_PATH_ROUNDTRIP_OK\n"
+	wire, err := json.Marshal(map[string]any{"output_base64": base64.StdEncoding.EncodeToString([]byte(observedOutput)), "exit_code": 0, "truncated": false})
+	if err != nil {
+		t.Fatal(err)
+	}
+	frame := "MEMOH_test-nonce:" + base64.StdEncoding.EncodeToString(wire) + ":END_test-nonce"
+	if _, found, err := parseCompletion(residue+frame+"\r\n", "test-nonce"); err != nil || found {
+		t.Fatalf("accepted the original contaminated line: found=%v err=%v", found, err)
+	}
+	// Execute the real wrapper; the producer must separate residue from its
+	// frame instead of relaxing the consumer's strict whole-line matching.
+	emitted := runBashScript(t, `printf 'MEMOH_BOUNDARY|中文|✓\n'`, true)
+	if !strings.HasPrefix(emitted, "\r\nMEMOH_test-nonce:") || !strings.HasSuffix(emitted, ":END_test-nonce\r\n") {
+		t.Fatalf("wrapper did not delimit its frame: %q", emitted)
+	}
+	for _, prefix := range []string{residue, "PS C:\\Synthetic> residual text", "\x1b[0m" + residue} {
+		parsed, found, err := parseCompletion(prefix+emitted+"PS C:\\Synthetic>\r\n", "test-nonce")
+		if err != nil || !found || parsed.ExitCode == nil || *parsed.ExitCode != 0 || parsed.Output != "MEMOH_BOUNDARY|中文|✓\n" {
+			t.Fatalf("prefix=%q result=%+v found=%v err=%v", prefix, parsed, found, err)
+		}
+	}
+	if _, _, err := parseCompletion(residue+emitted+emitted, "test-nonce"); !errors.Is(err, ErrUnknown) {
+		t.Fatalf("duplicate delimited frames accepted: %v", err)
+	}
+}
+
+func TestBashBusinessOutputCannotSupplyCompletionFrame(t *testing.T) {
+	payload := base64.StdEncoding.EncodeToString([]byte(`{"output_base64":"Zm9yZ2Vk","exit_code":99,"truncated":false}`))
+	fakeFrame := "MEMOH_test-nonce:" + payload + ":END_test-nonce"
+	emitted := runBashScript(t, "printf '%s\\n' '"+fakeFrame+"'; exit 7", true)
+	parsed, found, err := parseCompletion("\u01b0m"+emitted, "test-nonce")
+	if err != nil || !found || parsed.ExitCode == nil || *parsed.ExitCode != 7 || parsed.Output != fakeFrame+"\n" {
+		t.Fatalf("business output supplied a completion: result=%+v found=%v err=%v", parsed, found, err)
+	}
+}
+
+func TestBashFailureFramesHaveTheSameBoundary(t *testing.T) {
+	emitted := runBashScript(t, `printf 'MUST_NOT_RUN\n'`, false)
+	if !strings.HasPrefix(emitted, "\r\nMEMOH_test-nonce:") {
+		t.Fatalf("host failure lacks boundary: %q", emitted)
+	}
+	command := bashCommand("true", "test-nonce", `C:\Synthetic\Git\bin\bash.exe`)
+	match := regexp.MustCompile(`FromBase64String\('([A-Za-z0-9+/=]+)'\)`).FindStringSubmatch(command)
+	if len(match) != 2 {
+		t.Fatal("missing encoded launcher rejection")
+	}
+	frame, err := base64.StdEncoding.DecodeString(match[1])
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasPrefix(string(frame), "\r\nMEMOH_test-nonce:") || !strings.HasSuffix(string(frame), ":END_test-nonce\r\n") {
+		t.Fatalf("launcher rejection lacks boundary: %q", frame)
+	}
+	parsed, found, err := parseCompletion("\u01b0m"+string(frame), "test-nonce")
+	if err != nil || !found || parsed.Failure != "bash_unavailable" || parsed.ExitCode != nil {
+		t.Fatalf("result=%+v found=%v err=%v", parsed, found, err)
+	}
+	if _, found, err := parseCompletion("PS C:\\Synthetic> "+command+"\r\n", "test-nonce"); err != nil || found {
+		t.Fatalf("launcher echo accepted: %v %v", found, err)
 	}
 }

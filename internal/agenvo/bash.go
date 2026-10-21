@@ -9,6 +9,8 @@ import (
 // bashScript runs the user command in a separate Bash process. Its bounded
 // capture drains excess output so truncation cannot inject SIGPIPE into the
 // command or replace its exit status. stderr is ordinary merged output.
+// CRLF on both sides keeps terminal residue and the next shell prompt outside
+// the completion line; the consumer still requires one exact, complete frame.
 func bashScript(command, nonce string) string {
 	body := base64.StdEncoding.EncodeToString([]byte(command))
 	wrongHost := base64.StdEncoding.EncodeToString([]byte(`{"failure":"unsupported_bash_host"}`))
@@ -17,16 +19,16 @@ func bashScript(command, nonce string) string {
 set -o pipefail
 case "$(command uname -s 2>/dev/null)" in
   MINGW*_NT-*|MSYS_NT-*) ;;
-  *) printf 'MEMOH_%[2]s:%[3]s:END_%[2]s\n'; exit 0 ;;
+  *) printf '\r\nMEMOH_%[2]s:%[3]s:END_%[2]s\r\n'; exit 0 ;;
 esac
 for memoh_tool in base64 head cat; do
   if ! command -v "$memoh_tool" >/dev/null 2>&1; then
-    printf 'MEMOH_%[2]s:%[4]s:END_%[2]s\n'; exit 0
+    printf '\r\nMEMOH_%[2]s:%[4]s:END_%[2]s\r\n'; exit 0
   fi
 done
 memoh_body="$(printf '%%s' '%[1]s' | base64 --decode; printf '.')"
 memoh_body="${memoh_body%%.}"
-printf 'MEMOH_%[2]s:'
+printf '\r\nMEMOH_%[2]s:'
 {
   "$BASH" --noprofile --norc -p -c "$memoh_body" </dev/null 2>&1 | {
     memoh_output="$(head -c 4096 | base64 -w 0)" || exit 125
@@ -40,7 +42,7 @@ printf 'MEMOH_%[2]s:'
   if [ "${memoh_codes[1]}" -ne 0 ]; then printf '"exit_code":null}'; exit 0; fi
   printf '"exit_code":%%d}' "${memoh_codes[0]}"
 } | base64 -w 0
-printf ':END_%[2]s\n'
+printf ':END_%[2]s\r\n'
 `, body, nonce, wrongHost, missingTools)
 }
 
@@ -54,6 +56,6 @@ printf ':END_%[2]s\n'
 func bashCommand(command, nonce, bashPath string) string {
 	encoded := base64.StdEncoding.EncodeToString([]byte(bashScript(command, nonce)))
 	missing := base64.StdEncoding.EncodeToString([]byte(`{"failure":"bash_unavailable"}`))
-	missingFrame := base64.StdEncoding.EncodeToString([]byte("MEMOH_" + nonce + ":" + missing + ":END_" + nonce))
+	missingFrame := base64.StdEncoding.EncodeToString([]byte("\r\nMEMOH_" + nonce + ":" + missing + ":END_" + nonce + "\r\n"))
 	return fmt.Sprintf(`& { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { & $memohBash --noprofile --norc -p -c 'printf %%s %s | base64 --decode | /usr/bin/bash --noprofile --norc -p' } else { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('%s')) } } '%s'`, encoded, missingFrame, strings.ReplaceAll(bashPath, "'", "''"))
 }

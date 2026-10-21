@@ -51,6 +51,35 @@ NAS data, personal endpoints or real Windows tasks were used.
   local targets no longer reclassify native gRPC Unimplemented protocol errors.
 - PostgreSQL authorization/race and SDK typecheck passed for the Bash changes.
   Generated Swagger/SDK and sqlc v1.31.1 outputs were regenerated.
+- The Bash checkpoint `eeb6c5c` subsequently passed all five CI workflows:
+  Go CI, Migrations, Docker PR, ESLint and Electron CI. In particular,
+  [Migrations 39550463541](https://github.com/particleflow/Memoh/actions/runs/39550463541)
+  completed successfully. No images were published.
+
+## Completion boundary correction
+
+- Windows submitted the first `100...` vector once. Its payload contained the
+  expected normal/Unicode/native/path output and exit 0, but `U+01B0 U+006D`
+  terminal residue preceded its frame on the same line. Strict whole-line
+  parsing found no completion: one submitted, zero strict passes; the other
+  four vectors were not submitted. Payload inspection is not a passing result.
+- The wrapper now emits explicit CRLF before and after all success and failure
+  frames. The parser is unchanged. Regression tests reproduce the original
+  rejected line, execute the actual fixed Bash wrapper after terminal residue,
+  reject duplicate frames and launcher echoes, and keep frame-shaped business
+  output encoded inside the actual result (with its real exit 7).
+- Agenvo/Hook race tests, including isolated PostgreSQL authorization checks,
+  server build and Go lint passed. The five vectors were regenerated from the
+  actual implementation with new `200...` nonces; the old batch is superseded.
+- The rebuilt Go server and real Chromium on `http://127.0.0.1:18082` repeated
+  target selection and chat execution. The controlled MCP fixture inspected
+  the submitted wrapper for the new boundary, then returned terminal residue
+  followed by that boundary and its synthetic completion. One submission,
+  one read, zero closes; the UI displayed completed output and retention.
+  This validates application wiring, not the Windows terminal implementation.
+- The new Windows batch and CI for this correction remain pending at this
+  checkpoint. Reuse the already observed live acceptance pane; do not repeat
+  the old unknown command, close the workspace or resume IDs after a restart.
 
 ## Limits and failures
 
@@ -88,6 +117,9 @@ Only synthetic labels, paths and output appear in these current-build captures.
 - [A only](agenvo-bash-grant-a.png): A on, B off.
 - [Completed synthetic command](agenvo-bash-chat-completed.png): output and retained
   workspace notice in the actual chat UI.
+- [Completion boundary regression](agenvo-bash-boundary-completed.png): current
+  application completes a synthetic result preceded by terminal residue and
+  the wrapper's explicit CRLF boundary.
 - [Chinese/dark/narrow](agenvo-bash-mobile-zh-dark.png): shared scrollable dialog.
 
 Agent screenshots and automated checks are not human QA. Keep the PR draft and
