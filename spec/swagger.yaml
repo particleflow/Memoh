@@ -6972,6 +6972,93 @@ definitions:
       item_id:
         type: string
     type: object
+  sessiontask.Page:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/sessiontask.Task'
+        type: array
+      next_cursor:
+        type: string
+    required:
+    - items
+    type: object
+  sessiontask.Task:
+    properties:
+      attachments_available:
+        type: boolean
+      business_state:
+        enum:
+        - unknown
+        type: string
+      cancel_requested:
+        type: boolean
+      content_available:
+        type: boolean
+      created_at:
+        type: string
+      operation_kind:
+        enum:
+        - foreground_bash
+        - herdr_pi_task
+        - unknown
+        type: string
+      parent_session_id:
+        description: ParentSessionID is the requested aggregation root, not a rewritten
+          owner.
+        format: uuid
+        type: string
+      pi_result:
+        enum:
+        - unknown
+        - not_applicable
+        type: string
+      process_state:
+        enum:
+        - unknown
+        - exited
+        - not_started
+        type: string
+      revision:
+        type: string
+      session_id:
+        format: uuid
+        type: string
+      status:
+        enum:
+        - unknown
+        - submitted
+        - process_exited
+        - not_started
+        - rejected
+        type: string
+      summary:
+        type: string
+      target_id:
+        format: uuid
+        type: string
+      task_id:
+        format: uuid
+        type: string
+      task_type:
+        enum:
+        - subagent
+        - computer_operation
+        type: string
+      updated_at:
+        type: string
+    required:
+    - attachments_available
+    - content_available
+    - created_at
+    - parent_session_id
+    - session_id
+    - status
+    - summary
+    - task_id
+    - task_type
+    - updated_at
+    type: object
   settings.Settings:
     properties:
       acl_default_effect:
@@ -14575,6 +14662,121 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Reorder accepted steer inputs
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks:
+    get:
+      description: Read-only persisted facts. Includes owned subagent descendants
+        and computer receipts; rechecks current target grants. No dispatch, device
+        polling, reasoning, raw output or attachments. Continue while next_cursor
+        is nonempty, even for an empty page. States are live; creation order is stable.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - default: 20
+        description: Page size (1-100)
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque continuation for this caller, Bot and parent
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.Page'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List safe task summaries under an owned conversation
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}:
+    get:
+      description: Same projection as a list item, with fresh authorization. Unknown
+        execution and cancel intent never assert termination or business completion.
+        Attachments and execution content are unavailable in this version.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - subagent
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Subagent session or computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.Task'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read a safe task summary within an owned conversation
       tags:
       - sessions
   /bots/{bot_id}/sessions/events:

@@ -4116,6 +4116,34 @@ export type SessionruntimeSteerPendingRef = {
     item_id?: string;
 };
 
+export type SessiontaskPage = {
+    items: Array<SessiontaskTask>;
+    next_cursor?: string;
+};
+
+export type SessiontaskTask = {
+    attachments_available: boolean;
+    business_state?: 'unknown';
+    cancel_requested?: boolean;
+    content_available: boolean;
+    created_at: string;
+    operation_kind?: 'foreground_bash' | 'herdr_pi_task' | 'unknown';
+    /**
+     * ParentSessionID is the requested aggregation root, not a rewritten owner.
+     */
+    parent_session_id: string;
+    pi_result?: 'unknown' | 'not_applicable';
+    process_state?: 'unknown' | 'exited' | 'not_started';
+    revision?: string;
+    session_id: string;
+    status: 'unknown' | 'submitted' | 'process_exited' | 'not_started' | 'rejected';
+    summary: string;
+    target_id?: string;
+    task_id: string;
+    task_type: 'subagent' | 'computer_operation';
+    updated_at: string;
+};
+
 export type SettingsSettings = {
     acl_default_effect?: string;
     chat_acp_agent_id?: string;
@@ -12891,6 +12919,123 @@ export type PatchBotsByBotIdSessionsBySessionIdSteerQueueByItemIdResponses = {
 };
 
 export type PatchBotsByBotIdSessionsBySessionIdSteerQueueByItemIdResponse = PatchBotsByBotIdSessionsBySessionIdSteerQueueByItemIdResponses[keyof PatchBotsByBotIdSessionsBySessionIdSteerQueueByItemIdResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Parent session ID
+         */
+        session_id: string;
+    };
+    query?: {
+        /**
+         * Page size (1-100)
+         */
+        limit?: number;
+        /**
+         * Opaque continuation for this caller, Bot and parent
+         */
+        cursor?: string;
+    };
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksError = GetBotsByBotIdSessionsBySessionIdTasksErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskPage;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksResponse = GetBotsByBotIdSessionsBySessionIdTasksResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'subagent' | 'computer_operation';
+        /**
+         * Subagent session or computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskTask;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses];
 
 export type DeleteBotsByBotIdSettingsData = {
     body?: never;

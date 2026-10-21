@@ -10586,6 +10586,169 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/tasks": {
+            "get": {
+                "description": "Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "List safe task summaries under an owned conversation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 20,
+                        "description": "Page size (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Opaque continuation for this caller, Bot and parent",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sessiontask.Page"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}": {
+            "get": {
+                "description": "Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Attachments and execution content are unavailable in this version.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Read a safe task summary within an owned conversation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "subagent",
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Subagent session or computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sessiontask.Task"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/settings": {
             "get": {
                 "description": "Get agent settings for current user",
@@ -27561,6 +27724,124 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "item_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "sessiontask.Page": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sessiontask.Task"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                }
+            }
+        },
+        "sessiontask.Task": {
+            "type": "object",
+            "required": [
+                "attachments_available",
+                "content_available",
+                "created_at",
+                "parent_session_id",
+                "session_id",
+                "status",
+                "summary",
+                "task_id",
+                "task_type",
+                "updated_at"
+            ],
+            "properties": {
+                "attachments_available": {
+                    "type": "boolean"
+                },
+                "business_state": {
+                    "type": "string",
+                    "enum": [
+                        "unknown"
+                    ]
+                },
+                "cancel_requested": {
+                    "type": "boolean"
+                },
+                "content_available": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "operation_kind": {
+                    "type": "string",
+                    "enum": [
+                        "foreground_bash",
+                        "herdr_pi_task",
+                        "unknown"
+                    ]
+                },
+                "parent_session_id": {
+                    "description": "ParentSessionID is the requested aggregation root, not a rewritten owner.",
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "pi_result": {
+                    "type": "string",
+                    "enum": [
+                        "unknown",
+                        "not_applicable"
+                    ]
+                },
+                "process_state": {
+                    "type": "string",
+                    "enum": [
+                        "unknown",
+                        "exited",
+                        "not_started"
+                    ]
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "unknown",
+                        "submitted",
+                        "process_exited",
+                        "not_started",
+                        "rejected"
+                    ]
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "target_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "task_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "task_type": {
+                    "type": "string",
+                    "enum": [
+                        "subagent",
+                        "computer_operation"
+                    ]
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
