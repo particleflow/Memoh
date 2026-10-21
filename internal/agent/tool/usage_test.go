@@ -8,8 +8,33 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/sessionmode"
 	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/messaging"
 )
+
+func TestNativeToolSourceRequiredComputerContractFollowsAllowlist(t *testing.T) {
+	for _, discovery := range []bool{false, true} {
+		provider := NewContainerProvider(nil, &containerTestTargetProvider{}, nil, "")
+		source := NewNativeToolSource(nil, []ToolProvider{provider}, NativeToolSourceOptions{AllowTools: map[string]bool{ToolExec().String(): true, ToolListExecutionLocations().String(): discovery}})
+		descriptors, err := source.ListTools(t.Context(), mcp.ToolSessionContext{BotID: "synthetic-bot"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		contracts := 0
+		for _, d := range descriptors {
+			if strings.Contains(d.Description, "Computer routing contract") {
+				contracts++
+			}
+		}
+		want := 0
+		if discovery {
+			want = 1
+		}
+		if contracts != want {
+			t.Fatalf("discovery=%v contract count=%d want=%d", discovery, contracts, want)
+		}
+	}
+}
 
 type usageTestResolver struct{}
 
@@ -51,6 +76,20 @@ func TestComputerWorkflowUsageFollowsRegisteredCapabilities(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			usage := p.Usage(t.Context(), SessionContext{}, availableToolsForTest(tt.names...))
+			required := p.RequiredUsage(t.Context(), SessionContext{}, availableToolsForTest(tt.names...))
+			if (required != "") != tt.wantDiscovery {
+				t.Fatal("required contract escaped capability gate")
+			}
+			if len(required) > 1100 {
+				t.Fatalf("required routing contract is no longer short: %d bytes", len(required))
+			}
+			if tt.wantDiscovery {
+				for _, rule := range []string{"missing or pruned", "do not guess", "repeatedly activate", "Unknown submission: reconcile read-only", "Keep Server Workspace tasks there"} {
+					if !strings.Contains(required, rule) {
+						t.Errorf("missing required rule %q", rule)
+					}
+				}
+			}
 			if strings.Contains(usage, "before claiming no computer") != tt.wantDiscovery {
 				t.Fatalf("discovery guidance does not match registered tools: %s", usage)
 			}

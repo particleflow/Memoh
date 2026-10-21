@@ -661,6 +661,14 @@ func (a *Agent) assembleTools(
 				text:       text,
 			})
 		}
+		if provider, ok := registration.provider.(tools.ToolRequiredUsage); ok {
+			if text := strings.TrimSpace(provider.RequiredUsage(ctx, session, availableTools)); text != "" {
+				usageSections = append(usageSections, toolUsageSection{
+					id: "required." + registration.capability, capability: registration.capability,
+					text: text, required: true,
+				})
+			}
+		}
 	}
 	// Providers that could not register their tools still get to say so:
 	// a silent gap reads as "no such tool" to the model.

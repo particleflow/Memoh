@@ -144,6 +144,13 @@ func (s *NativeToolSource) ListTools(ctx context.Context, session mcp.ToolSessio
 			if usage := strings.TrimSpace(item.usageProvider.Usage(ctx, sessionFromMCP(session), available)); usage != "" {
 				description = appendToolUsageDescription(description, usage)
 			}
+			// External runtimes receive the same contract as tool documentation;
+			// only the native runtime owns system-fragment retention guarantees.
+			if provider, ok := item.usageProvider.(ToolRequiredUsage); ok {
+				if usage := strings.TrimSpace(provider.RequiredUsage(ctx, sessionFromMCP(session), available)); usage != "" {
+					description = appendToolUsageDescription(description, usage)
+				}
+			}
 			usageApplied[item.usageID] = true
 		}
 		descriptors = append(descriptors, mcp.ToolDescriptor{

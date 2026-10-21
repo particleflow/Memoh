@@ -1,0 +1,49 @@
+{
+  "window": 32768,
+  "fixture": "synthetic provider through rebuilt Memoh Web/server",
+  "observations": [
+    {
+      "request": 1,
+      "system_contract": true,
+      "full_skill": false,
+      "tools": 44
+    },
+    {
+      "request": 2,
+      "system_contract": true,
+      "full_skill": true,
+      "tools": 44
+    },
+    {
+      "request": 3,
+      "system_contract": true,
+      "full_skill": true,
+      "tools": 44
+    },
+    {
+      "request": 4,
+      "system_contract": true,
+      "full_skill": false,
+      "tools": 44
+    },
+    {
+      "request": 5,
+      "system_contract": true,
+      "full_skill": false,
+      "tools": 44
+    },
+    {
+      "request": 6,
+      "system_contract": true,
+      "full_skill": false,
+      "tools": 44
+    },
+    {
+      "request": 7,
+      "system_contract": true,
+      "full_skill": false,
+      "tools": 44
+    }
+  ],
+  "command_or_agent_mutations": 0
+}
