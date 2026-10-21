@@ -151,3 +151,19 @@ it('retains structured diagnostics alongside MCP error text', async () => {
   expect(root.textContent).toContain('"exit_code":1')
   expect(root.textContent).toContain('diagnostic')
 })
+
+it('shows Agenvo merged output and retained workspace without claiming separate streams', async () => {
+  const { root } = mountTool('exec', { command: 'Write-Output ok' }, { state: 'completed', output: 'SYNTHETIC_WINDOWS_OK', exit_code: 0, cleanup_required: true, workspace_id: 'w-test' })
+  await open(root)
+  expect(root.textContent).toContain('SYNTHETIC_WINDOWS_OK')
+  expect(root.textContent).toContain('combines stdout and error text')
+  expect(root.textContent).toContain('w-test is retained')
+  expect(root.textContent).not.toContain('No output')
+})
+it('shows an uncertain Agenvo result without claiming cancellation succeeded', async () => {
+  const { root } = mountTool('exec', { command: 'Start-Sleep 30' }, { result: { state: 'unknown', cleanup_required: true, workspace_id: 'w-test' }, error: 'inspect before retrying' })
+  await open(root)
+  expect(root.textContent).toContain('outcome is unknown or rejected')
+  expect(root.textContent).toContain('does not stop Windows execution')
+  expect(root.textContent).not.toContain('No output')
+})

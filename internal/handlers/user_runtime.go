@@ -8,15 +8,16 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/userruntime"
 )
 
-// UserRuntimeHandler only manages the long-lived credential used by the
-// reverse-RPC WebSocket. Runtime selection and bot bindings are separate
-// product concerns and intentionally do not live here.
+// UserRuntimeHandler manages account computer registrations. Native clients
+// use reverse-RPC credentials; limited providers refer to an existing connection.
+// Bot grants and session selection remain separate concerns.
 type UserRuntimeHandler struct {
 	log     *slog.Logger
 	service *userruntime.Service
@@ -34,11 +35,46 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.POST("", h.Create)
 	g.GET("", h.List)
 	g.DELETE("/:id", h.Delete)
+	g.POST("/agenvo/discover", h.DiscoverAgenvo)
+}
+
+type DiscoverAgenvoRequest struct {
+	ConnectionID string `json:"connection_id" validate:"required"`
+}
+
+// DiscoverAgenvo godoc
+// @Summary List Herdr instances from an existing account-owned MCP connection
+// @Tags user-runtimes
+// @Accept json
+// @Produce json
+// @Param request body DiscoverAgenvoRequest true "Existing MCP connection"
+// @Success 200 {array} agenvo.DiscoveredInstance
+// @Failure 400 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 503 {object} server.Problem
+// @Router /users/me/runtimes/agenvo/discover [post].
+func (h *UserRuntimeHandler) DiscoverAgenvo(c echo.Context) error {
+	ownerID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	var req DiscoverAgenvoRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+	if req.ConnectionID == "" {
+		return apperror.FieldRequired("connection_id")
+	}
+	items, err := h.service.DiscoverAgenvo(c.Request().Context(), ownerID, req.ConnectionID)
+	if err != nil {
+		return runtimeHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, items)
 }
 
 // Create godoc
-// @Summary Create a Remote Runtime credential
-// @Description Register a Remote Runtime and return its reusable API token.
+// @Summary Register an account computer
+// @Description Register a native Remote Runtime credential or an Agenvo command target backed by an existing account-owned MCP connection. Agenvo registrations return no API token.
 // @Tags user-runtimes
 // @Accept json
 // @Produce json
@@ -110,6 +146,14 @@ func (h *UserRuntimeHandler) Delete(c echo.Context) error {
 }
 
 func runtimeHTTPError(err error) error {
+	switch {
+	case errors.Is(err, agenvo.ErrInvalidTarget):
+		return apperror.FieldInvalid("agenvo", err)
+	case errors.Is(err, agenvo.ErrForbidden):
+		return echo.NewHTTPError(http.StatusForbidden).WithInternal(err)
+	case errors.Is(err, agenvo.ErrUnavailable), errors.Is(err, agenvo.ErrUnknown), errors.Is(err, agenvo.ErrRejected):
+		return workspaceUnavailableError(err)
+	}
 	if errors.Is(err, db.ErrNotFound) {
 		return apperror.Wrap(apperror.CodeUserRuntimeNotFound, err, nil)
 	}

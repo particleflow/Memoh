@@ -20,6 +20,7 @@ FROM team_members owner_membership, users owner
 WHERE runtime.team_id = public.memoh_current_team_id()
   AND runtime.id = $1
   AND runtime.api_token = $2
+  AND runtime.provider = 'memoh'
   AND runtime.revoked_at IS NULL
   AND (runtime.activated_at IS NOT NULL OR runtime.pending_expires_at > now())
   AND owner_membership.team_id = public.memoh_current_team_id()
@@ -27,7 +28,7 @@ WHERE runtime.team_id = public.memoh_current_team_id()
   AND owner_membership.is_active = TRUE
   AND owner.id = owner_membership.user_id
   AND owner.is_active = TRUE
-RETURNING runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
+RETURNING runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
 `
 
 type ActivateUserRuntimeParams struct {
@@ -45,6 +46,8 @@ func (q *Queries) ActivateUserRuntime(ctx context.Context, arg ActivateUserRunti
 		&i.UserID,
 		&i.Name,
 		&i.ApiToken,
+		&i.Provider,
+		&i.ProviderConfig,
 		&i.RevokedAt,
 		&i.ActivatedAt,
 		&i.PendingExpiresAt,
@@ -101,6 +104,41 @@ func (q *Queries) ClearBotRemoteRuntimePrimary(ctx context.Context, botID pgtype
 	return err
 }
 
+const createAgenvoUserRuntime = `-- name: CreateAgenvoUserRuntime :one
+INSERT INTO user_runtimes (user_id, name, api_token, provider, provider_config, activated_at, pending_expires_at)
+VALUES ($1, $2, 'agenvo_' || gen_random_uuid()::text, 'agenvo', $3, now(), NULL)
+ON CONFLICT (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL
+DO UPDATE SET updated_at = user_runtimes.updated_at
+WHERE user_runtimes.provider_config = EXCLUDED.provider_config
+RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+`
+
+type CreateAgenvoUserRuntimeParams struct {
+	OwnerID        pgtype.UUID `json:"owner_id"`
+	Name           string      `json:"name"`
+	ProviderConfig []byte      `json:"provider_config"`
+}
+
+func (q *Queries) CreateAgenvoUserRuntime(ctx context.Context, arg CreateAgenvoUserRuntimeParams) (UserRuntime, error) {
+	row := q.db.QueryRow(ctx, createAgenvoUserRuntime, arg.OwnerID, arg.Name, arg.ProviderConfig)
+	var i UserRuntime
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.ApiToken,
+		&i.Provider,
+		&i.ProviderConfig,
+		&i.RevokedAt,
+		&i.ActivatedAt,
+		&i.PendingExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.TeamID,
+	)
+	return i, err
+}
+
 const createOrUpdateBotRemoteRuntimeMount = `-- name: CreateOrUpdateBotRemoteRuntimeMount :one
 INSERT INTO bot_remote_runtime_bindings (bot_id, runtime_id)
 SELECT b.id, r.id
@@ -138,7 +176,7 @@ func (q *Queries) CreateOrUpdateBotRemoteRuntimeMount(ctx context.Context, arg C
 const createUserRuntime = `-- name: CreateUserRuntime :one
 INSERT INTO user_runtimes (user_id, name, api_token)
 VALUES ($1, $2, $3)
-RETURNING id, user_id, name, api_token, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type CreateUserRuntimeParams struct {
@@ -155,6 +193,8 @@ func (q *Queries) CreateUserRuntime(ctx context.Context, arg CreateUserRuntimePa
 		&i.UserID,
 		&i.Name,
 		&i.ApiToken,
+		&i.Provider,
+		&i.ProviderConfig,
 		&i.RevokedAt,
 		&i.ActivatedAt,
 		&i.PendingExpiresAt,
@@ -222,6 +262,39 @@ func (q *Queries) ExpirePendingUserRuntimes(ctx context.Context, userID pgtype.U
 	return err
 }
 
+const findAgenvoUserRuntime = `-- name: FindAgenvoUserRuntime :one
+SELECT id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
+WHERE team_id = public.memoh_current_team_id() AND user_id = $1
+  AND provider = 'agenvo' AND provider_config = $2
+  AND revoked_at IS NULL
+ORDER BY created_at LIMIT 1
+`
+
+type FindAgenvoUserRuntimeParams struct {
+	OwnerID        pgtype.UUID `json:"owner_id"`
+	ProviderConfig []byte      `json:"provider_config"`
+}
+
+func (q *Queries) FindAgenvoUserRuntime(ctx context.Context, arg FindAgenvoUserRuntimeParams) (UserRuntime, error) {
+	row := q.db.QueryRow(ctx, findAgenvoUserRuntime, arg.OwnerID, arg.ProviderConfig)
+	var i UserRuntime
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.ApiToken,
+		&i.Provider,
+		&i.ProviderConfig,
+		&i.RevokedAt,
+		&i.ActivatedAt,
+		&i.PendingExpiresAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.TeamID,
+	)
+	return i, err
+}
+
 const getBotRemoteRuntimeMount = `-- name: GetBotRemoteRuntimeMount :one
 SELECT
   binding.id,
@@ -232,6 +305,8 @@ SELECT
   binding.created_at,
   binding.updated_at,
   runtime.name AS runtime_name,
+  runtime.provider AS runtime_provider,
+  runtime.provider_config AS runtime_provider_config,
   runtime.user_id AS runtime_user_id,
   (runtime.revoked_at IS NOT NULL OR NOT owner.is_active OR NOT owner_membership.is_active) AS runtime_unavailable,
   bot.owner_user_id AS bot_owner_user_id
@@ -253,17 +328,19 @@ type GetBotRemoteRuntimeMountParams struct {
 }
 
 type GetBotRemoteRuntimeMountRow struct {
-	ID                 pgtype.UUID        `json:"id"`
-	BotID              pgtype.UUID        `json:"bot_id"`
-	RuntimeID          pgtype.UUID        `json:"runtime_id"`
-	IsPrimary          bool               `json:"is_primary"`
-	ToolApprovalConfig []byte             `json:"tool_approval_config"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	RuntimeName        string             `json:"runtime_name"`
-	RuntimeUserID      pgtype.UUID        `json:"runtime_user_id"`
-	RuntimeUnavailable pgtype.Bool        `json:"runtime_unavailable"`
-	BotOwnerUserID     pgtype.UUID        `json:"bot_owner_user_id"`
+	ID                    pgtype.UUID        `json:"id"`
+	BotID                 pgtype.UUID        `json:"bot_id"`
+	RuntimeID             pgtype.UUID        `json:"runtime_id"`
+	IsPrimary             bool               `json:"is_primary"`
+	ToolApprovalConfig    []byte             `json:"tool_approval_config"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	RuntimeName           string             `json:"runtime_name"`
+	RuntimeProvider       string             `json:"runtime_provider"`
+	RuntimeProviderConfig []byte             `json:"runtime_provider_config"`
+	RuntimeUserID         pgtype.UUID        `json:"runtime_user_id"`
+	RuntimeUnavailable    pgtype.Bool        `json:"runtime_unavailable"`
+	BotOwnerUserID        pgtype.UUID        `json:"bot_owner_user_id"`
 }
 
 func (q *Queries) GetBotRemoteRuntimeMount(ctx context.Context, arg GetBotRemoteRuntimeMountParams) (GetBotRemoteRuntimeMountRow, error) {
@@ -278,6 +355,8 @@ func (q *Queries) GetBotRemoteRuntimeMount(ctx context.Context, arg GetBotRemote
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.RuntimeName,
+		&i.RuntimeProvider,
+		&i.RuntimeProviderConfig,
 		&i.RuntimeUserID,
 		&i.RuntimeUnavailable,
 		&i.BotOwnerUserID,
@@ -295,6 +374,8 @@ SELECT
   binding.created_at,
   binding.updated_at,
   runtime.name AS runtime_name,
+  runtime.provider AS runtime_provider,
+  runtime.provider_config AS runtime_provider_config,
   runtime.user_id AS runtime_user_id,
   (runtime.revoked_at IS NOT NULL OR NOT owner.is_active OR NOT owner_membership.is_active) AS runtime_unavailable,
   bot.owner_user_id AS bot_owner_user_id
@@ -311,17 +392,19 @@ WHERE binding.team_id = public.memoh_current_team_id()
 `
 
 type GetPrimaryBotRemoteRuntimeMountRow struct {
-	ID                 pgtype.UUID        `json:"id"`
-	BotID              pgtype.UUID        `json:"bot_id"`
-	RuntimeID          pgtype.UUID        `json:"runtime_id"`
-	IsPrimary          bool               `json:"is_primary"`
-	ToolApprovalConfig []byte             `json:"tool_approval_config"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	RuntimeName        string             `json:"runtime_name"`
-	RuntimeUserID      pgtype.UUID        `json:"runtime_user_id"`
-	RuntimeUnavailable pgtype.Bool        `json:"runtime_unavailable"`
-	BotOwnerUserID     pgtype.UUID        `json:"bot_owner_user_id"`
+	ID                    pgtype.UUID        `json:"id"`
+	BotID                 pgtype.UUID        `json:"bot_id"`
+	RuntimeID             pgtype.UUID        `json:"runtime_id"`
+	IsPrimary             bool               `json:"is_primary"`
+	ToolApprovalConfig    []byte             `json:"tool_approval_config"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	RuntimeName           string             `json:"runtime_name"`
+	RuntimeProvider       string             `json:"runtime_provider"`
+	RuntimeProviderConfig []byte             `json:"runtime_provider_config"`
+	RuntimeUserID         pgtype.UUID        `json:"runtime_user_id"`
+	RuntimeUnavailable    pgtype.Bool        `json:"runtime_unavailable"`
+	BotOwnerUserID        pgtype.UUID        `json:"bot_owner_user_id"`
 }
 
 func (q *Queries) GetPrimaryBotRemoteRuntimeMount(ctx context.Context, botID pgtype.UUID) (GetPrimaryBotRemoteRuntimeMountRow, error) {
@@ -336,6 +419,8 @@ func (q *Queries) GetPrimaryBotRemoteRuntimeMount(ctx context.Context, botID pgt
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.RuntimeName,
+		&i.RuntimeProvider,
+		&i.RuntimeProviderConfig,
 		&i.RuntimeUserID,
 		&i.RuntimeUnavailable,
 		&i.BotOwnerUserID,
@@ -344,7 +429,7 @@ func (q *Queries) GetPrimaryBotRemoteRuntimeMount(ctx context.Context, botID pgt
 }
 
 const getUserRuntimeByAPIToken = `-- name: GetUserRuntimeByAPIToken :one
-SELECT runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
+SELECT runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
 FROM user_runtimes runtime
 JOIN team_members owner_membership
   ON owner_membership.team_id = public.memoh_current_team_id()
@@ -353,6 +438,7 @@ JOIN team_members owner_membership
 JOIN users owner ON owner.id = owner_membership.user_id AND owner.is_active = TRUE
 WHERE runtime.team_id = public.memoh_current_team_id()
   AND runtime.api_token = $1
+  AND runtime.provider = 'memoh'
   AND runtime.revoked_at IS NULL
   AND (runtime.activated_at IS NOT NULL OR runtime.pending_expires_at > now())
 `
@@ -365,6 +451,8 @@ func (q *Queries) GetUserRuntimeByAPIToken(ctx context.Context, apiToken string)
 		&i.UserID,
 		&i.Name,
 		&i.ApiToken,
+		&i.Provider,
+		&i.ProviderConfig,
 		&i.RevokedAt,
 		&i.ActivatedAt,
 		&i.PendingExpiresAt,
@@ -436,6 +524,8 @@ SELECT
   binding.created_at,
   binding.updated_at,
   runtime.name AS runtime_name,
+  runtime.provider AS runtime_provider,
+  runtime.provider_config AS runtime_provider_config,
   runtime.user_id AS runtime_user_id,
   (runtime.revoked_at IS NOT NULL OR NOT owner.is_active OR NOT owner_membership.is_active) AS runtime_unavailable,
   bot.owner_user_id AS bot_owner_user_id
@@ -453,17 +543,19 @@ ORDER BY binding.created_at ASC, binding.id ASC
 `
 
 type ListBotRemoteRuntimeMountsRow struct {
-	ID                 pgtype.UUID        `json:"id"`
-	BotID              pgtype.UUID        `json:"bot_id"`
-	RuntimeID          pgtype.UUID        `json:"runtime_id"`
-	IsPrimary          bool               `json:"is_primary"`
-	ToolApprovalConfig []byte             `json:"tool_approval_config"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt          pgtype.Timestamptz `json:"updated_at"`
-	RuntimeName        string             `json:"runtime_name"`
-	RuntimeUserID      pgtype.UUID        `json:"runtime_user_id"`
-	RuntimeUnavailable pgtype.Bool        `json:"runtime_unavailable"`
-	BotOwnerUserID     pgtype.UUID        `json:"bot_owner_user_id"`
+	ID                    pgtype.UUID        `json:"id"`
+	BotID                 pgtype.UUID        `json:"bot_id"`
+	RuntimeID             pgtype.UUID        `json:"runtime_id"`
+	IsPrimary             bool               `json:"is_primary"`
+	ToolApprovalConfig    []byte             `json:"tool_approval_config"`
+	CreatedAt             pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+	RuntimeName           string             `json:"runtime_name"`
+	RuntimeProvider       string             `json:"runtime_provider"`
+	RuntimeProviderConfig []byte             `json:"runtime_provider_config"`
+	RuntimeUserID         pgtype.UUID        `json:"runtime_user_id"`
+	RuntimeUnavailable    pgtype.Bool        `json:"runtime_unavailable"`
+	BotOwnerUserID        pgtype.UUID        `json:"bot_owner_user_id"`
 }
 
 func (q *Queries) ListBotRemoteRuntimeMounts(ctx context.Context, botID pgtype.UUID) ([]ListBotRemoteRuntimeMountsRow, error) {
@@ -484,6 +576,8 @@ func (q *Queries) ListBotRemoteRuntimeMounts(ctx context.Context, botID pgtype.U
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.RuntimeName,
+			&i.RuntimeProvider,
+			&i.RuntimeProviderConfig,
 			&i.RuntimeUserID,
 			&i.RuntimeUnavailable,
 			&i.BotOwnerUserID,
@@ -499,7 +593,7 @@ func (q *Queries) ListBotRemoteRuntimeMounts(ctx context.Context, botID pgtype.U
 }
 
 const listUserRuntimes = `-- name: ListUserRuntimes :many
-SELECT id, user_id, name, api_token, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
+SELECT id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
 WHERE team_id = public.memoh_current_team_id()
   AND user_id = $1 AND revoked_at IS NULL
 ORDER BY created_at ASC, id ASC
@@ -519,6 +613,8 @@ func (q *Queries) ListUserRuntimes(ctx context.Context, userID pgtype.UUID) ([]U
 			&i.UserID,
 			&i.Name,
 			&i.ApiToken,
+			&i.Provider,
+			&i.ProviderConfig,
 			&i.RevokedAt,
 			&i.ActivatedAt,
 			&i.PendingExpiresAt,
@@ -536,12 +632,35 @@ func (q *Queries) ListUserRuntimes(ctx context.Context, userID pgtype.UUID) ([]U
 	return items, nil
 }
 
+const ownedHTTPMCPConnectionBot = `-- name: OwnedHTTPMCPConnectionBot :one
+SELECT bot.id FROM mcp_connections connection
+JOIN bots bot ON bot.id = connection.bot_id AND bot.team_id = public.memoh_current_team_id()
+JOIN team_members membership ON membership.team_id = public.memoh_current_team_id() AND membership.user_id = bot.owner_user_id AND membership.is_active
+JOIN users owner ON owner.id = bot.owner_user_id AND owner.is_active
+WHERE connection.team_id = public.memoh_current_team_id()
+  AND connection.id = $1
+  AND bot.owner_user_id = $2
+  AND connection.is_active AND connection.type = 'http'
+`
+
+type OwnedHTTPMCPConnectionBotParams struct {
+	ConnectionID pgtype.UUID `json:"connection_id"`
+	OwnerID      pgtype.UUID `json:"owner_id"`
+}
+
+func (q *Queries) OwnedHTTPMCPConnectionBot(ctx context.Context, arg OwnedHTTPMCPConnectionBotParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, ownedHTTPMCPConnectionBot, arg.ConnectionID, arg.OwnerID)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const revokeUserRuntime = `-- name: RevokeUserRuntime :one
 UPDATE user_runtimes
 SET revoked_at = now(), updated_at = now()
 WHERE team_id = public.memoh_current_team_id()
   AND id = $1 AND user_id = $2 AND revoked_at IS NULL
-RETURNING id, user_id, name, api_token, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type RevokeUserRuntimeParams struct {
@@ -557,6 +676,8 @@ func (q *Queries) RevokeUserRuntime(ctx context.Context, arg RevokeUserRuntimePa
 		&i.UserID,
 		&i.Name,
 		&i.ApiToken,
+		&i.Provider,
+		&i.ProviderConfig,
 		&i.RevokedAt,
 		&i.ActivatedAt,
 		&i.PendingExpiresAt,

@@ -15,11 +15,13 @@ var (
 	ErrUnavailable = errors.New("unavailable")
 	ErrBadRequest  = errors.New("invalid argument")
 	ErrForbidden   = errors.New("permission denied")
+	ErrUnsupported = errors.New("this execution target supports foreground commands only; file, terminal and background operations are unavailable")
 )
 
 // restoredByCode is how the client restores a bridge status: the bridge
 // reports its failures by status code alone.
 var restoredByCode = map[codes.Code]error{
+	codes.Unimplemented:    ErrUnsupported,
 	codes.NotFound:         ErrNotFound,
 	codes.InvalidArgument:  ErrBadRequest,
 	codes.PermissionDenied: ErrForbidden,

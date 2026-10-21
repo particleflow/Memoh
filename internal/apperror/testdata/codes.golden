@@ -290,6 +290,7 @@ workspace.display_clipboard_too_large	413
 workspace.display_prepare_failed	500
 workspace.image_not_found	400
 workspace.image_registry_unavailable	503
+workspace.operation_unsupported	501
 workspace.teardown_failed	500
 workspace.template_bootstrap_failed	500
 workspace.unreachable	503

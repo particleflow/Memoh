@@ -618,6 +618,32 @@ definitions:
       updated_at:
         type: string
     type: object
+  agenvo.DiscoveredInstance:
+    properties:
+      device_id:
+        type: string
+      device_name:
+        type: string
+      instance_id:
+        type: string
+      name:
+        type: string
+      online:
+        type: boolean
+    type: object
+  agenvo.Target:
+    properties:
+      connection_id:
+        type: string
+      device_id:
+        type: string
+      instance_id:
+        type: string
+      session:
+        type: string
+      work_dir:
+        type: string
+    type: object
   apperror.Fault:
     enum:
     - client
@@ -3709,6 +3735,13 @@ definitions:
         type: integer
       reasoning_tokens:
         type: integer
+    type: object
+  handlers.DiscoverAgenvoRequest:
+    properties:
+      connection_id:
+        type: string
+    required:
+    - connection_id
     type: object
   handlers.FSArchiveRequest:
     properties:
@@ -7268,7 +7301,11 @@ definitions:
     type: object
   userruntime.CreateRuntimeRequest:
     properties:
+      agenvo:
+        $ref: '#/definitions/agenvo.Target'
       name:
+        type: string
+      provider:
         type: string
     type: object
   userruntime.Runtime:
@@ -7294,6 +7331,8 @@ definitions:
       online:
         type: boolean
       os:
+        type: string
+      provider:
         type: string
       team_id:
         type: string
@@ -7538,6 +7577,10 @@ definitions:
     type: object
   workspace.WorkspaceTarget:
     properties:
+      capabilities:
+        items:
+          type: string
+        type: array
       kind:
         type: string
       name:
@@ -7546,6 +7589,8 @@ definitions:
         type: boolean
       primary:
         type: boolean
+      provider:
+        type: string
       runtime_id:
         type: string
       status:
@@ -11601,6 +11646,12 @@ paths:
   /bots/{bot_id}/mcp:
     get:
       description: List MCP connections for a bot
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       responses:
         "200":
           description: OK
@@ -19019,7 +19070,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a Remote Runtime and return its reusable API token.
+      description: Register a native Remote Runtime credential or an Agenvo command
+        target backed by an existing account-owned MCP connection. Agenvo registrations
+        return no API token.
       parameters:
       - description: Runtime configuration
         in: body
@@ -19046,7 +19099,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/server.Problem'
-      summary: Create a Remote Runtime credential
+      summary: Register an account computer
       tags:
       - user-runtimes
   /users/me/runtimes/{id}:
@@ -19073,6 +19126,41 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Revoke a Remote Runtime credential
+      tags:
+      - user-runtimes
+  /users/me/runtimes/agenvo/discover:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Existing MCP connection
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.DiscoverAgenvoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/agenvo.DiscoveredInstance'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List Herdr instances from an existing account-owned MCP connection
       tags:
       - user-runtimes
   /video-models:

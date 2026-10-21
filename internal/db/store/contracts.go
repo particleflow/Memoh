@@ -28,6 +28,8 @@ type UserRuntimeRecord struct {
 	ActivatedAt      time.Time
 	PendingExpiresAt time.Time
 	CreatedAt        time.Time
+	Provider         string
+	ProviderConfig   JSON
 }
 
 type CreateUserRuntimeInput struct {
@@ -51,17 +53,27 @@ type UserRuntimeStore interface {
 }
 
 type BotRemoteRuntimeBindingRecord struct {
-	ID             string
-	BotID          string
-	RuntimeID      string
-	IsPrimary      bool
-	ToolApproval   JSON
-	RuntimeName    string
-	RuntimeUserID  string
-	BotOwnerUserID string
-	RuntimeRevoked bool
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
+	ID                    string
+	BotID                 string
+	RuntimeID             string
+	IsPrimary             bool
+	ToolApproval          JSON
+	RuntimeName           string
+	RuntimeUserID         string
+	BotOwnerUserID        string
+	RuntimeRevoked        bool
+	RuntimeProvider       string
+	RuntimeProviderConfig JSON
+	CreatedAt             time.Time
+	UpdatedAt             time.Time
+}
+
+// AgenvoRuntimeStore extends the existing account computer registry. It stores
+// only references to an existing owner-authorized MCP connection, never tokens.
+type AgenvoRuntimeStore interface {
+	CreateAgenvoRuntime(ctx context.Context, ownerID, name string, config JSON) (UserRuntimeRecord, error)
+	OwnedHTTPMCPConnectionBot(ctx context.Context, ownerID, connectionID string) (string, error)
+	GetMount(ctx context.Context, botID, targetID string) (BotRemoteRuntimeBindingRecord, error)
 }
 
 type BotRemoteRuntimeBindingStore interface {

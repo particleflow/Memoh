@@ -17,27 +17,25 @@ import (
 // The fixture models the public Agenvo MCP/native outcome envelopes. It does
 // not claim to run Herdr or PowerShell; real Windows acceptance is separate.
 type fixture struct {
-	t                *testing.T
-	target           Target
-	grants           map[Scope]bool
-	labels           map[string]string
-	panes            map[string]string
-	calls            []string
-	runs             int
-	nonce            string
-	output           string
-	exit             int
-	truncated        bool
-	submitErr        bool
-	nativeRejected   bool
-	neverComplete    bool
-	foreignWorkspace bool
-	closeUnknown     bool
-	afterSubmit      func()
+	t              *testing.T
+	target         Target
+	grants         map[Scope]bool
+	labels         map[string]string
+	panes          map[string]string
+	calls          []string
+	runs           int
+	nonce          string
+	output         string
+	exit           int
+	truncated      bool
+	submitErr      bool
+	nativeRejected bool
+	neverComplete  bool
+	afterSubmit    func()
 }
 
 func newFixture(t *testing.T) (*fixture, *Executor) {
-	f := &fixture{t: t, target: Target{ConnectionID: "connection", DeviceID: "device", InstanceID: "windows", Session: "default", WorkDir: `C:\synthetic`}, grants: map[Scope]bool{{"bot-a", "mount-a"}: true, {"bot-b", "mount-b"}: true}, labels: map[string]string{}, panes: map[string]string{}, output: "synthetic result"}
+	f := &fixture{t: t, target: Target{ConnectionID: "connection", DeviceID: "device", InstanceID: "windows", Session: "default", WorkDir: `C:\synthetic`}, grants: map[Scope]bool{{"bot-a", "mount-a", "user"}: true, {"bot-b", "mount-b", "user"}: true}, labels: map[string]string{}, panes: map[string]string{}, output: "synthetic result"}
 	c := NewClient(func(_ context.Context, scope Scope) (Target, error) {
 		if !f.grants[scope] {
 			return Target{}, errors.New("permission denied")
@@ -51,7 +49,7 @@ func newFixture(t *testing.T) (*fixture, *Executor) {
 
 func (f *fixture) call(_ context.Context, connection, tool string, args map[string]any) (json.RawMessage, error) {
 	f.t.Helper()
-	if connection != "connection" || tool != "execute" {
+	if connection != f.target.ConnectionID || tool != "execute" {
 		f.t.Fatalf("unexpected transport target: %q %q", connection, tool)
 	}
 	code, _ := args["code"].(string)
@@ -133,22 +131,10 @@ func (f *fixture) call(_ context.Context, connection, tool string, args map[stri
 			output += "MEMOH_" + f.nonce + ":" + base64.StdEncoding.EncodeToString(payload) + ":END_" + f.nonce + "\r\n"
 		}
 		result = map[string]any{"output": output}
-	case "workspace.get":
-		id := fmt.Sprint(params["workspaceId"])
-		label := f.labels[id]
-		if f.foreignWorkspace {
-			label = "another-bot"
-		}
-		result = map[string]any{"workspace": map[string]string{"workspace_id": id, "label": label}}
+		return mcpValue(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"output": output, "session": "default"}}), nil
+
 	case "workspace.close":
-		if f.foreignWorkspace {
-			f.t.Fatal("closed another Bot's native workspace")
-		}
-		if f.closeUnknown {
-			return nil, errors.New("synthetic lost close response")
-		}
-		delete(f.labels, fmt.Sprint(params["workspaceId"]))
-		result = map[string]any{"closed": true}
+		f.t.Fatal("automatic close is forbidden without atomic generation matching")
 	default:
 		f.t.Fatalf("unexpected native method %s", method)
 	}
@@ -162,14 +148,14 @@ func mcpValue(value any) json.RawMessage {
 }
 
 func request() Request {
-	return Request{Scope: Scope{"bot-a", "mount-a"}, Command: "Write-Output 'synthetic'", Timeout: time.Second}
+	return Request{Scope: Scope{"bot-a", "mount-a", "user"}, Command: "Write-Output 'synthetic'", Timeout: time.Second}
 }
 
 func TestExecuteRequiresNonceBoundCompletionAndKeepsExitCode(t *testing.T) {
 	f, e := newFixture(t)
 	f.exit, f.truncated = 7, true
 	r, err := e.Execute(t.Context(), request())
-	if err != nil || r.State != "completed" || r.ExitCode == nil || *r.ExitCode != 7 || !r.Truncated || r.Output != "synthetic result" || !r.CleanupConfirmed {
+	if err != nil || r.State != "completed" || r.ExitCode == nil || *r.ExitCode != 7 || !r.Truncated || r.Output != "synthetic result" || !r.CleanupRequired {
 		t.Fatalf("result=%+v err=%v", r, err)
 	}
 	if f.runs != 1 {
@@ -180,7 +166,7 @@ func TestExecuteRequiresNonceBoundCompletionAndKeepsExitCode(t *testing.T) {
 func TestExecuteRejectsCrossBotMountBeforeAnyRemoteCall(t *testing.T) {
 	f, e := newFixture(t)
 	req := request()
-	req.Scope = Scope{"bot-b", "mount-a"}
+	req.Scope = Scope{"bot-b", "mount-a", "user"}
 	r, err := e.Execute(t.Context(), req)
 	if err == nil || r.State != "not_started" || len(f.calls) != 0 {
 		t.Fatalf("result=%+v err=%v calls=%v", r, err, f.calls)
@@ -191,7 +177,7 @@ func TestExecuteRechecksGrantAfterSubmission(t *testing.T) {
 	f, e := newFixture(t)
 	f.afterSubmit = func() { delete(f.grants, request().Scope) }
 	r, err := e.Execute(t.Context(), request())
-	if err == nil || r.State != "unknown" || r.ExitCode != nil || r.CleanupConfirmed {
+	if err == nil || r.State != "unknown" || r.ExitCode != nil || !r.CleanupRequired {
 		t.Fatalf("result=%+v err=%v", r, err)
 	}
 	for _, method := range f.calls {
@@ -219,31 +205,21 @@ func TestExecuteNativeRejectionInsideSuccessfulMCPResult(t *testing.T) {
 	}
 }
 
-func TestExecuteCancellationRequiresObservedWorkspaceRemoval(t *testing.T) {
-	for _, uncertain := range []bool{false, true} {
-		t.Run(fmt.Sprint(uncertain), func(t *testing.T) {
-			f, e := newFixture(t)
-			f.closeUnknown = uncertain
-			ctx, cancel := context.WithCancel(t.Context())
-			defer cancel()
-			f.afterSubmit = cancel
-			r, err := e.Execute(ctx, request())
-			want := "canceled"
-			if uncertain {
-				want = "unknown"
-			}
-			if !errors.Is(err, context.Canceled) || r.State != want || r.CleanupConfirmed == uncertain || r.ExitCode != nil || f.runs != 1 {
-				t.Fatalf("result=%+v err=%v", r, err)
-			}
-		})
+func TestExecuteCancellationRetainsUncertainWorkspace(t *testing.T) {
+	f, e := newFixture(t)
+	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
+	f.afterSubmit = cancel
+	r, err := e.Execute(ctx, request())
+	if !errors.Is(err, context.Canceled) || r.State != "unknown" || !r.CleanupRequired || r.ExitCode != nil || f.runs != 1 {
+		t.Fatalf("result=%+v err=%v", r, err)
 	}
 }
 
-func TestExecuteDoesNotCloseReusedForeignWorkspaceID(t *testing.T) {
+func TestExecuteRetainsWorkspaceWithoutUnsafeClose(t *testing.T) {
 	f, e := newFixture(t)
-	f.foreignWorkspace = true
 	r, err := e.Execute(t.Context(), request())
-	if err != nil || r.CleanupConfirmed {
+	if err != nil || !r.CleanupRequired {
 		t.Fatalf("result=%+v err=%v", r, err)
 	}
 	for _, method := range f.calls {
@@ -259,7 +235,7 @@ func TestExecuteIdlePromptIsNotCompletion(t *testing.T) {
 	req := request()
 	req.Timeout = 10 * time.Millisecond
 	r, err := e.Execute(t.Context(), req)
-	if !errors.Is(err, context.DeadlineExceeded) || r.State != "canceled" || r.ExitCode != nil || f.runs != 1 {
+	if !errors.Is(err, context.DeadlineExceeded) || r.State != "unknown" || r.ExitCode != nil || f.runs != 1 {
 		t.Fatalf("result=%+v err=%v", r, err)
 	}
 }

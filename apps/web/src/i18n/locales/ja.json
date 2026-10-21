@@ -524,6 +524,7 @@
       "display_prepare_failed": "ディスプレイの準備に失敗しました。しばらくしてからもう一度お試しください。",
       "image_not_found": "ワークスペースのイメージが存在しないか、レジストリの認証が必要か、名前が正しくありません。イメージ名を確認してからもう一度お試しください。",
       "image_registry_unavailable": "イメージレジストリに接続できません。しばらくしてからもう一度お試しください。",
+      "operation_unsupported": "この実行先はフォアグラウンドコマンドのみ対応します。ファイルや対話端末の操作には別のコンピューターを選択してください。",
       "teardown_failed": "ワークスペースの削除に失敗しました。ボットの削除を再試行してください。",
       "template_bootstrap_failed": "Workspace ファイルを初期化できませんでした。Workspace を再構築してからもう一度お試しください。",
       "unreachable": "Workspace に接続できません。しばらくしてからもう一度お試しください。"
@@ -4481,5 +4482,28 @@
   "elicitation": {
     "done": "完了",
     "cancel": "キャンセル"
+  },
+  "agenvo": {
+    "connect": "Agenvo に接続",
+    "description": "認証済みの Agenvo MCP 接続を再利用し、コマンドの実行を許可する Bot を選択します。",
+    "limits": "フォアグラウンドの PowerShell コマンドのみ対応します。ファイル操作と対話端末には未対応です。待機を停止してもコマンドは終了せず、ワークスペースは手動確認のため保持されます。許可された Bot は Windows アカウントのアクセス範囲を共有します。",
+    "sourceBot": "既存の接続を持つ Bot",
+    "connection": "Agenvo MCP 接続",
+    "connectionHelp": "自分が所有する有効な HTTP 接続のみ共有できます。",
+    "device": "Windows デバイス / Herdr インスタンス",
+    "choose": "選択…",
+    "name": "コンピューター名",
+    "session": "Herdr セッション",
+    "sessionHelp": "既存のセッション名を入力してください。登録時に接続を確認します。",
+    "workDir": "Windows 作業ディレクトリ",
+    "discovering": "利用可能な接続を確認中…",
+    "register": "接続して Bot を選択",
+    "noConnections": "この Bot に有効な HTTP MCP 接続がありません。MCP 設定で Agenvo を設定してください。",
+    "noDevices": "この接続に Herdr インスタンスが見つかりません。",
+    "capability": "Agenvo · コマンドのみ",
+    "completed": "フォアグラウンドコマンドが完了しました。標準出力とエラーテキストをまとめて表示します。",
+    "uncertain": "コマンドの結果が不明、または拒否されました。待機を停止しても Windows 上の実行は終了しません。再試行前に確認してください。",
+    "retained": "ワークスペース {id} は手動確認のため保持され、自動終了されていません。",
+    "truncated": "出力は切り詰められました。"
   }
 }

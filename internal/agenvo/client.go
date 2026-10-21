@@ -22,16 +22,16 @@ var (
 // Target refers to an existing authorized MCP connection. Credentials belong
 // to the MCP/OAuth service and must never be copied into an execution target.
 type Target struct {
-	ConnectionID string
-	DeviceID     string
-	InstanceID   string
-	Session      string
-	WorkDir      string
+	ConnectionID string `json:"connection_id"`
+	DeviceID     string `json:"device_id"`
+	InstanceID   string `json:"instance_id"`
+	Session      string `json:"session"`
+	WorkDir      string `json:"work_dir"`
 }
 
 // Scope is always supplied by the authenticated Memoh execution boundary.
 // TargetID is a Bot mount ID, not a user-supplied Agenvo device ID.
-type Scope struct{ BotID, TargetID string }
+type Scope struct{ BotID, TargetID, UserID string }
 
 // Resolve must check both the Bot grant and the caller's execution permission.
 // It is called before every native operation, including reads and cleanup.

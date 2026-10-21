@@ -256,6 +256,8 @@ func fsFileInfoFromEntry(containerPath, name string, isDir bool, size int64, mod
 // fsHTTPError maps mcpclient domain errors to HTTP status codes.
 func fsHTTPError(err error) error {
 	switch {
+	case errors.Is(err, bridge.ErrUnsupported):
+		return apperror.Wrap(apperror.CodeWorkspaceOperationUnsupported, err, nil)
 	case errors.Is(err, bridge.ErrNotFound):
 		return apperror.Wrap(apperror.CodeWorkspaceFileNotFound, err, nil)
 	case errors.Is(err, bridge.ErrBadRequest):

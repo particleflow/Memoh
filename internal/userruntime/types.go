@@ -1,10 +1,15 @@
 package userruntime
 
-import "time"
+import (
+	"time"
+
+	"github.com/felinics/memoh/internal/agenvo"
+)
 
 // Runtime is one registered client. Machine details only exist while its
 // reverse-RPC connection is online; they are not persisted.
 type Runtime struct {
+	Provider      string    `json:"provider,omitempty"`
 	ID            string    `json:"id"`
 	TeamID        string    `json:"team_id"`
 	Name          string    `json:"name"`
@@ -20,7 +25,9 @@ type Runtime struct {
 }
 
 type CreateRuntimeRequest struct {
-	Name string `json:"name"`
+	Name     string         `json:"name"`
+	Provider string         `json:"provider,omitempty"`
+	Agenvo   *agenvo.Target `json:"agenvo,omitempty"`
 }
 
 type HandshakeInfo struct {

@@ -301,6 +301,20 @@ func (m *Manager) MCPClient(ctx context.Context, botID string) (*bridge.Client, 
 	return m.nativeMCPClient(ctx, botID)
 }
 
+// HookConfigClient separates policy storage from a command-only execution
+// provider. It does not provide a file-tool or command fallback: hook actions
+// still resolve the original target through MCPClient.
+func (m *Manager) HookConfigClient(ctx context.Context, botID string) (*bridge.Client, error) {
+	target, err := m.ResolveWorkspaceTarget(ctx, botID, "")
+	if err != nil {
+		return nil, err
+	}
+	if target.Info.Backend == bridge.WorkspaceBackendAgenvo {
+		return m.nativeMCPClient(ctx, botID)
+	}
+	return target.Client, nil
+}
+
 // CurrentWorkspaceTargetID resolves only the request or persisted target ID.
 // It intentionally avoids connecting to a runtime or loading target settings.
 func (m *Manager) CurrentWorkspaceTargetID(ctx context.Context, botID string) (string, error) {

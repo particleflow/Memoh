@@ -1,79 +1,94 @@
-# Agenvo execution target: implementation boundary
+# Agenvo execution target
 
-Status: protocol adapter prototype. `internal/agenvo` is not wired into the
-server, account registry, workspace resolver, or Web UI. It must not be advertised
-as an online Memoh Remote Runtime or deployed as a completed integration.
+This integration registers a command-only Windows target in the existing
+account computer registry. It reuses `user_runtimes`, Bot mounts and session
+`workspace_target_id`; it does not implement `memoh.runtime.v1`, a scheduler, or
+a new credential owner. Production deployment requires separate Windows
+acceptance of the PowerShell completion wrapper.
 
-## Existing integration points
+## Registration and authorization
 
-Keep account registration, Bot grants and session selection in their existing
-owners:
+1. Configure an Agenvo HTTP MCP connection through the existing MCP settings.
+2. In **Computers → Connect Agenvo**, select its source Bot, connection, Herdr
+   instance, existing session and Windows working directory.
+3. `POST /users/me/runtimes/agenvo/discover` returns only Herdr identity/display
+   fields. Search advertisements alone never establish runtime readiness.
+4. `POST /users/me/runtimes` with `provider: "agenvo"` probes `workspace.list`
+   before registering. The database stores an existing MCP connection ID and
+   target selectors; no endpoint, OAuth token or reusable Memoh runtime key is
+   returned or duplicated. Identical registrations reuse the existing record.
+5. Select individual Bots in the existing computer-access dialog. Registration
+   creates **zero grants**. `PUT /bots/:bot_id/workspace-targets/remotes/:runtime_id`
+   and the existing session target selector remain the only assignment paths.
 
-- `POST /users/me/runtimes`: account-owned computer registration.
-- `GET /users/me/computer-access`: account grant view.
-- `PUT /bots/:bot_id/workspace-targets/remotes/:runtime_id`: explicit Bot grant.
-- `PUT /bots/:bot_id/workspace-targets/primary`: optional Bot default.
-- `workspace_target_id`: request/session execution selection.
+The source connection must be active, HTTP, in the current team and owned by
+that account. Removing/disabling it, transferring its Bot, revoking the target,
+or deactivating its owner invalidates access. Each native operation rechecks the
+Bot mount, owner/team and authenticated caller's `workspace_exec` permission.
+Another Bot's mount ID is never accepted. This is authorization and terminal
+routing isolation; authorized Bots share the Windows account's OS permissions,
+not separate filesystem or process sandboxes.
 
-These currently describe native Memoh reverse-gRPC clients. Agenvo needs a
-distinct provider implementation; its MCP endpoint is not a runtime ID. Existing
-owner/team checks and per-Bot approval rules must remain authoritative. A target
-registration must not grant it to every Bot. The existing new-computer dialog
-currently performs bulk grants and cannot be reused unchanged for this provider.
+## Protocol subset
 
-Reuse an existing authorized MCP connection and its OAuth refresh owner. Do not
-copy tokens, create a second relay, or couple the provider to a named Bot. Before
-wiring persistence, define the connection ownership/lifecycle explicitly: a
-reference to a Bot-owned MCP connection must verify the owner's authority and
-become unavailable if the source connection is disabled, removed or revoked.
-The adapter's `Resolve` function is only a port today, not an implemented database
-authorization check.
+The public contract inspected is Agenvo commit
+`9ec5643610ab8408503adc79a9e37f42eeb8e6e2`, supplemented by sanitized native receipts.
 
-## Implemented protocol subset
-
-The public Agenvo contract inspected is commit
-`9ec5643610ab8408503adc79a9e37f42eeb8e6e2` of
-[`Xuanwo/agenvo`](https://github.com/Xuanwo/agenvo).
-
-| Memoh operation | Agenvo/Herdr mapping | Boundary |
+| Operation | Mapping | Result and limits |
 | --- | --- | --- |
-| Readiness | `execute` calling `workspace.list` for the selected session | Validate an actual native response; search advertisements alone are insufficient. |
-| Foreground command | `workspace.create`, then one `pane.run` with a bounded PowerShell wrapper | One fresh labeled workspace per operation; submission is not completion. |
-| Result | `pane.read` with `recent-unwrapped` | Require this command's nonce-bound completion record and explicit exit code; retain truncation. |
-| Cleanup/cancel | Verify label with `workspace.get`, call `workspace.close`, verify absence with `workspace.list` | Unknown/reused IDs or uncertain responses are not confirmed cancellation. This verifies workspace removal, not every detached OS descendant. |
-| File operations | None | Do not advertise `fs` or `host_fs`; the eventual runtime boundary must reject unsupported operations. |
-| PTY, stdin, environment injection, persistent/background execution | None | Explicitly rejected by the prototype before remote calls. |
+| Discovery | MCP `search` | Herdr instance identities, filtered metadata. |
+| Readiness | MCP `execute` → `workspace.list` | Actual session response required. |
+| Foreground command | `workspace.create` → one `pane.run` | Fresh labeled workspace; bounded encoded Windows PowerShell 5.1 wrapper. |
+| Completion | `pane.read`, `source: recent-unwrapped` | `result.output` contains terminal text. Require the operation's nonce-bound base64 JSON completion and explicit exit code. |
+| Cancel/timeout | Stop waiting | State **unknown**, no invented exit code or promise that Windows execution stopped. |
+| Cleanup | None automatically | Known workspaces are reported with `cleanup_required: true` and retained for manual inspection. |
+| Files, HostFS, PTY, stdin, custom env, persistent/background jobs | Unsupported | Explicit rejection; no native/NAS execution fallback. |
 
-Every native operation resolves the authenticated Bot mount again. Native
-rejections inside successful MCP responses are errors. Unknown write outcomes
-are never retried. There is no native/NAS fallback. Native workspaces provide
-separate terminal routing, not an OS filesystem sandbox between authorized Bots.
+Workspace CLI receipts nest under `result.result`; pane output is directly
+`result.output`. `execution: accepted` is submission, not command completion.
+The wrapper returns bounded text with error output merged, not byte-preserving
+stdout/stderr streams. Prompts, command echoes and PSReadLine errors cannot count
+as completion. Malformed/ambiguous responses and lost write responses remain
+unknown and are never retried automatically.
 
-The adapter uses bounded PowerShell text output with merged error output. It
-does not provide byte-preserving stdout/stderr streams. The wrapper and Herdr
-response shapes still require real Windows verification; synthetic tests do not
-establish that compatibility. Native session IDs can be reused after restart;
-Agenvo's inspected public call interface has no expected-generation argument.
-The label check reduces accidental cleanup of reused IDs but is not an atomic
-generation check. This limitation must be resolved or explicitly constrained
-before enabling automatic cleanup in production.
+Herdr has no atomic expected-generation close. IDs can repeat after restart;
+labels, terminal IDs, revision and a separate get/list check do not prove safe
+cleanup. No automatic `workspace.close` is issued, including on cancellation.
+No workspace is resumed or recovered from an old ID. The connector still cannot
+guarantee OS isolation or atomic lifecycle identity across a native restart.
 
-## Remaining integration and acceptance
+## Native workspace responsibilities
 
-1. Verify sanitized native response envelopes from the existing deployment:
-   `workspace.create`, `workspace.get`, `workspace.list`, `workspace.close`,
-   `pane.run`, `pane.read`. Preserve field names and nesting, replace private
-   paths, identifiers and output. Reuse existing receipts where possible.
-2. Validate the PowerShell wrapper, Unicode/large output, nonzero exit, timeout
-   and cancellation on a synthetic Windows task without installing new services.
-3. Wire the provider into persistent account registration and the existing
-   grant/selection paths; enforce real permission checks, connection revocation,
-   explicit unsupported capabilities and no fallback. Credentials stay in the
-   existing MCP/OAuth owner.
-4. Exercise the actual application UI with two synthetic Bots, grant only one,
-   check the other cannot select/execute, then revoke and disconnect. Capture
-   current-build screenshots and verify restart recovery before candidate images.
+`chat_runtime` remains the model runtime. The native Memoh workspace still owns
+Bot configuration, profiles, memory and App/dependency installation. This first
+phase replaces foreground command execution only.
 
-Apps installation/dependency management and direct external Agent runtimes still
-require their native Memoh workspace. Selecting this provider must not silently
-change those responsibilities or pretend that MCP replaces `chat_runtime`.
+For command-only targets, Hook **configuration** is explicitly read from the
+Bot's native storage. Hook actions retain the selected execution target: a
+configured command action requiring bridge stdin/env is rejected, never executed
+on the policy-storage machine. Failure to load policy blocks the turn; policy is
+never silently skipped. Selecting Agenvo therefore still requires reachable
+native Bot configuration storage. Full native-workspace removal is outside this
+adapter's contract.
+
+## Verification and rollout
+
+Synthetic tests cover the observed envelopes, completion/nonzero exit/truncation,
+unknown results, cancellation, no automatic close, repeated authorization checks,
+unsupported operations and unavailable-target rejection. PostgreSQL integration
+checks use an isolated migrated database and rollback every fixture:
+
+```sh
+MEMOH_AGENVO_TEST_DATABASE_URL='<isolated test database>' go test -race ./internal/agenvo
+```
+
+The account/grant/selection UI must be exercised against the running server with
+two synthetic Bots. Keep the release unchanged until the PR is reviewed and a
+controlled candidate passes Windows PowerShell 5.1 execution, Unicode, nonzero
+exit, large output and cancellation acceptance. ARM64 execution is not implied
+by compilation. Do not send production configuration/data to cloud tests.
+
+Migration 0169 adds provider metadata and an idempotency index. Rollback by
+running the previous application with the provider unused, retaining the DB and
+known image digests. Do not run the global `migrate down` command as an upgrade
+rollback; it may remove unrelated data and this provider's registration history.

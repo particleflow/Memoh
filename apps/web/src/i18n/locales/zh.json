@@ -527,6 +527,7 @@
       "display_prepare_failed": "显示环境准备失败，请稍后重试。",
       "image_not_found": "工作区镜像不存在、需要镜像仓库凭据，或名称无效，请检查镜像名称后重试。",
       "image_registry_unavailable": "暂时无法连接镜像仓库，请稍后重试。",
+      "operation_unsupported": "此执行目标仅支持前台命令。文件或交互终端操作请选择其他电脑。",
       "teardown_failed": "移除工作区失败。请重试删除 bot。",
       "template_bootstrap_failed": "工作区文件初始化失败，请尝试重建工作区。",
       "unreachable": "暂时无法连接工作区，请稍后重试。"
@@ -4487,5 +4488,28 @@
   "elicitation": {
     "done": "已完成",
     "cancel": "取消"
+  },
+  "agenvo": {
+    "connect": "连接 Agenvo",
+    "description": "复用已授权的 Agenvo MCP 连接，再选择允许执行命令的 Bot。",
+    "limits": "仅支持前台 PowerShell 命令，不支持文件与交互终端操作。停止等待不会终止命令，工作区会保留以供人工检查。获授权的 Bot 共享该 Windows 账户的访问范围。",
+    "sourceBot": "已有连接所在的 Bot",
+    "connection": "Agenvo MCP 连接",
+    "connectionHelp": "只能共享由你拥有的、已启用的 HTTP 连接。",
+    "device": "Windows 设备 / Herdr 实例",
+    "choose": "请选择…",
+    "name": "电脑名称",
+    "session": "Herdr 会话",
+    "sessionHelp": "填写已有会话名称，连接时会验证该会话是否可访问。",
+    "workDir": "Windows 工作目录",
+    "discovering": "正在检查可用连接…",
+    "register": "连接并选择 Bot",
+    "noConnections": "此 Bot 没有已启用的 HTTP MCP 连接，请先在其 MCP 设置中配置 Agenvo。",
+    "noDevices": "此连接未发现 Herdr 实例。",
+    "capability": "Agenvo · 仅命令",
+    "completed": "前台命令已完成，输出合并了标准输出和错误文本。",
+    "uncertain": "命令结果未确定或被拒绝。停止等待不会终止 Windows 执行，请先检查再决定是否重试。",
+    "retained": "工作区 {id} 已保留以供人工检查，未自动关闭。",
+    "truncated": "输出已截断。"
   }
 }

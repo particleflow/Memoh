@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/felinics/memoh/internal/agenvo"
 	"io"
 	"log/slog"
 	"math"
@@ -395,6 +396,7 @@ type toolWorkspace struct {
 }
 
 type resolvedToolTarget struct {
+	execute   func(context.Context, agenvo.Request) (agenvo.Result, error)
 	id        string
 	client    *bridge.Client
 	info      bridge.WorkspaceInfo
@@ -424,12 +426,14 @@ type workspaceTargetResolver interface {
 }
 
 type executionLocation struct {
-	TargetID  string `json:"target_id"`
-	Name      string `json:"name"`
-	Type      string `json:"type"`
-	Default   bool   `json:"default"`
-	Available bool   `json:"available"`
-	Status    string `json:"status"`
+	Provider     string   `json:"provider,omitempty"`
+	Capabilities []string `json:"capabilities,omitempty"`
+	TargetID     string   `json:"target_id"`
+	Name         string   `json:"name"`
+	Type         string   `json:"type"`
+	Default      bool     `json:"default"`
+	Available    bool     `json:"available"`
+	Status       string   `json:"status"`
 }
 
 type listExecutionLocationsResult struct {
@@ -481,6 +485,15 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 - Do not use start to detach a command. Use run_in_background so the Runtime retains ownership of the process tree.`
 			workspace.delayInstruction = "  - Do not use timeout /t or ping loops to wait for background work; use wait_until."
 		}
+	}
+	if info.Backend == bridge.WorkspaceBackendAgenvo {
+		workspace.windows = true
+		workspace.locationDescription = "on the selected Agenvo Windows machine"
+		workspace.absolutePathDescription = "Windows path"
+		workspace.shellDescription = "Windows PowerShell 5.1"
+		workspace.commandExamples = "Get-Location, Get-ChildItem, Write-Output 'hello'"
+		workspace.platformInstructions = "- Agenvo supports foreground PowerShell commands only. File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
+		workspace.delayInstruction = ""
 	}
 	return workspace
 }
@@ -575,12 +588,14 @@ func executionLocationFromTarget(target workspacepkg.WorkspaceTarget, requestTar
 		isDefault = strings.TrimSpace(target.TargetID) == requestTargetID
 	}
 	return executionLocation{
-		TargetID:  strings.TrimSpace(target.TargetID),
-		Name:      name,
-		Type:      targetType,
-		Default:   isDefault,
-		Available: status == workspacepkg.WorkspaceTargetStatusOnline,
-		Status:    status,
+		Provider:     target.Provider,
+		Capabilities: target.Capabilities,
+		TargetID:     strings.TrimSpace(target.TargetID),
+		Name:         name,
+		Type:         targetType,
+		Default:      isDefault,
+		Available:    status == workspacepkg.WorkspaceTargetStatusOnline,
+		Status:       status,
 	}
 }
 
@@ -602,6 +617,7 @@ func (p *ContainerProvider) resolveToolTarget(ctx context.Context, session Sessi
 			return resolvedToolTarget{}, errors.New("workspace target is not reachable: client is unavailable")
 		}
 		return resolvedToolTarget{
+			execute:   resolved.Execute,
 			id:        resolved.TargetID,
 			client:    resolved.Client,
 			info:      resolved.Info,
@@ -1146,6 +1162,27 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 			t = maxTimeout
 		}
 		timeout = int32(t) //nolint:gosec // bounded above
+	}
+
+	if target.execute != nil {
+		if args.RunInBackground || args.BackgroundMode != "" || args.MaxDurationSeconds != nil {
+			return nil, agenvo.ErrUnsupported
+		}
+		if timeout > 300 {
+			timeout = 300
+		}
+		return p.execWithWorkspaceHooks(ctx, session, hookWorkspace, command, workDir, timeout, false, func() (any, error) {
+			result, err := target.execute(ctx, agenvo.Request{Scope: agenvo.Scope{UserID: session.UserID}, Command: command, WorkDir: workDir, Timeout: time.Duration(timeout) * time.Second})
+			if err != nil && result.State == "not_started" {
+				return nil, err
+			}
+			// Preserve uncertain receipts instead of converting them into a
+			// generic retryable tool failure or fabricating an exit code.
+			if err != nil {
+				return map[string]any{"result": result, "error": "The command outcome is uncertain or rejected. Inspect the retained Windows workspace before retrying; stopping the wait does not terminate the command."}, nil
+			}
+			return result, nil
+		})
 	}
 
 	// Block sleep N (N>=2) in foreground — nudge model toward run_in_background.

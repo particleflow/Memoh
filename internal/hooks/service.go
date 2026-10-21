@@ -21,6 +21,13 @@ type ToolRunner interface {
 	RunHookTool(ctx context.Context, toolName string, input map[string]any) (any, error)
 }
 
+// Limited execution targets keep Hook policy in the Bot's native storage.
+// This port selects configuration only; command actions still use MCPClient
+// with the original execution target and may explicitly reject unsupported I/O.
+type configClientProvider interface {
+	HookConfigClient(context.Context, string) (*bridge.Client, error)
+}
+
 type workspaceTargetIDResolver interface {
 	CurrentWorkspaceTargetID(ctx context.Context, botID string) (string, error)
 }
@@ -52,7 +59,13 @@ func (s *Service) Load(ctx context.Context, botID string) (Config, bool, error) 
 	if s == nil || s.provider == nil {
 		return Config{Version: 1, Enabled: boolPtr(false)}, false, nil
 	}
-	client, err := s.provider.MCPClient(ctx, strings.TrimSpace(botID))
+	var client *bridge.Client
+	var err error
+	if configProvider, ok := s.provider.(configClientProvider); ok {
+		client, err = configProvider.HookConfigClient(ctx, strings.TrimSpace(botID))
+	} else {
+		client, err = s.provider.MCPClient(ctx, strings.TrimSpace(botID))
+	}
 	if err != nil {
 		return Config{}, false, err
 	}

@@ -81,6 +81,7 @@ func ServerModule() fx.Option {
 			provideBotWorkdirStore,
 			provideUserRuntimeHub,
 			userruntime.NewService,
+			provideAgenvoService,
 			workspace.NewRemoteWorkspaceService,
 			provideUserRuntimePipe,
 			provideWikiStore,
@@ -144,6 +145,7 @@ func ServerModule() fx.Option {
 			provideOAuthService,
 		),
 		fx.Invoke(
+			setupAgenvoService,
 			injectToolProviders,
 			injectBackgroundTaskEvents,
 			injectACPToolProviders,

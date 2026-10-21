@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/google/uuid"
 
 	"github.com/felinics/memoh/internal/db"
@@ -29,9 +30,19 @@ type ConnectionCommitGuard func() error
 // in-memory reverse-RPC connections. Bot/session routing belongs outside this
 // package.
 type Service struct {
+	agenvo         *agenvo.Service
 	store          dbstore.UserRuntimeStore
 	hub            *Hub
 	lifecycleLocks *runtimeLifecycleLocks
+}
+
+func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
+
+func (s *Service) DiscoverAgenvo(ctx context.Context, ownerID, connectionID string) ([]agenvo.DiscoveredInstance, error) {
+	if s.agenvo == nil {
+		return nil, agenvo.ErrUnavailable
+	}
+	return s.agenvo.Discover(ctx, ownerID, connectionID)
 }
 
 func NewService(store dbstore.UserRuntimeStore, hub *Hub) *Service {
@@ -65,6 +76,24 @@ func (s *Service) CreateRuntime(ctx context.Context, userID string, req CreateRu
 	}
 	if len(name) > maxRuntimeNameBytes || strings.ContainsRune(name, '\x00') || !utf8.ValidString(name) {
 		return Runtime{}, fmt.Errorf("%w: name must be valid UTF-8 of at most %d bytes", ErrInvalidName, maxRuntimeNameBytes)
+	}
+	if req.Provider == agenvo.Provider {
+		if req.Agenvo == nil || name == "" {
+			return Runtime{}, agenvo.ErrInvalidTarget
+		}
+		if s.agenvo == nil {
+			return Runtime{}, agenvo.ErrUnavailable
+		}
+		row, err := s.agenvo.Register(ctx, userID, name, *req.Agenvo)
+		if err != nil {
+			return Runtime{}, err
+		}
+		runtime := runtimeFromRecord(row, nil)
+		runtime.Online = true // Register completed a real, read-only native probe.
+		return runtime, nil
+	}
+	if req.Provider != "" && req.Provider != "memoh" || req.Agenvo != nil {
+		return Runtime{}, agenvo.ErrInvalidTarget
 	}
 	if err := s.store.ExpirePendingUserRuntimes(ctx, userID); err != nil {
 		return Runtime{}, err
@@ -103,6 +132,9 @@ func (s *Service) ListRuntimes(ctx context.Context, userID string) ([]Runtime, e
 	items := make([]Runtime, 0, len(rows))
 	for _, row := range rows {
 		runtime := runtimeFromRecord(row, s.connection(row.ID))
+		if row.Provider == agenvo.Provider && s.agenvo != nil {
+			runtime.Online = s.agenvo.Probe(ctx, row.UserID, row.ProviderConfig) == nil
+		}
 		// A credential becomes a manageable computer only after a ready
 		// connection consumes its short-lived pending state. Persisting that
 		// boundary keeps listing correct across restarts and browser failures.
@@ -280,6 +312,16 @@ func canonicalRuntimeUUID(value string) (string, bool) {
 func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Runtime {
 	runtime := Runtime{
 		ID: row.ID, TeamID: row.TeamID, Name: row.Name, Key: row.APIToken, CreatedAt: row.CreatedAt,
+	}
+	runtime.Provider = row.Provider
+	if row.Provider == agenvo.Provider {
+		runtime.Key = ""
+		runtime.OS = "windows"
+		runtime.Capabilities = []string{agenvo.CapabilityForegroundExec}
+		if target, err := agenvo.DecodeTarget(row.ProviderConfig); err == nil {
+			runtime.WorkspaceBase = target.WorkDir
+		}
+		return runtime
 	}
 	if connection == nil {
 		return runtime

@@ -28,14 +28,14 @@ type Request struct {
 }
 
 type Result struct {
-	State            string `json:"state"`
-	Output           string `json:"output,omitempty"`
-	ExitCode         *int   `json:"exit_code,omitempty"`
-	Truncated        bool   `json:"truncated"`
-	WorkspaceID      string `json:"workspace_id,omitempty"`
-	PaneID           string `json:"pane_id,omitempty"`
-	RequestID        string `json:"request_id,omitempty"`
-	CleanupConfirmed bool   `json:"cleanup_confirmed"`
+	State           string `json:"state"`
+	Output          string `json:"output,omitempty"`
+	ExitCode        *int   `json:"exit_code,omitempty"`
+	Truncated       bool   `json:"truncated"`
+	WorkspaceID     string `json:"workspace_id,omitempty"`
+	PaneID          string `json:"pane_id,omitempty"`
+	RequestID       string `json:"request_id,omitempty"`
+	CleanupRequired bool   `json:"cleanup_required"`
 }
 
 type Executor struct {
@@ -86,7 +86,7 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 	if workDir == "" {
 		workDir = target.WorkDir
 	}
-	if workDir == "" || len(workDir) > 4096 || strings.ContainsRune(workDir, 0) {
+	if !windowsAbsolute.MatchString(workDir) || len(workDir) > 4096 || strings.ContainsRune(workDir, 0) {
 		return result, ErrUnsupported
 	}
 	if err := e.client.Probe(ctx, req.Scope); err != nil {
@@ -114,16 +114,12 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 		result.State = "unknown"
 		return result, ErrUnknown
 	}
+	// Agenvo does not offer an atomic expected-generation close. Retain the
+	// workspace for inspection; never close a potentially reused native ID.
+	result.CleanupRequired = true
 	defer func() {
-		cleanupCtx, cleanupCancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
-		defer cleanupCancel()
-		result.CleanupConfirmed = e.cleanup(cleanupCtx, req.Scope, target, result.WorkspaceID, label)
 		if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-			if result.CleanupConfirmed {
-				result.State = "canceled"
-			} else {
-				result.State = "unknown"
-			}
+			result.State = "unknown"
 		}
 	}()
 	command := powershellCommand(req.Command, nonce)
@@ -149,9 +145,11 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 		var snapshot struct {
 			Output string `json:"output"`
 		}
-		if err := resultBody(read, &snapshot); err != nil {
+		// Unlike workspace CLI replies, pane.read is plain terminal output
+		// directly under the Agenvo native result, without another result key.
+		if err := json.Unmarshal(read.Result, &snapshot); err != nil {
 			result.State = "unknown"
-			return result, err
+			return result, ErrUnknown
 		}
 		completion, found, err := parseCompletion(snapshot.Output, nonce)
 		if err != nil {
@@ -170,40 +168,6 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 		case <-timer.C:
 		}
 	}
-}
-
-func (e *Executor) cleanup(ctx context.Context, scope Scope, target Target, workspaceID, label string) bool {
-	// Native IDs may be reused after a Herdr restart. Check our unique label
-	// before closing, and refuse a mismatched or unknown native shape.
-	got, err := e.client.native(ctx, scope, target, "workspace.get", map[string]any{"session": target.Session, "workspaceId": workspaceID})
-	if err != nil {
-		return false
-	}
-	var current nativeWorkspace
-	if resultBody(got, &current) != nil || current.Workspace.ID != workspaceID || current.Workspace.Label != label {
-		return false
-	}
-	if _, err := e.client.native(ctx, scope, target, "workspace.close", map[string]any{"session": target.Session, "workspaceId": workspaceID}); err != nil {
-		return false
-	}
-	listed, err := e.client.native(ctx, scope, target, "workspace.list", map[string]any{"session": target.Session})
-	if err != nil {
-		return false
-	}
-	var remaining struct {
-		Workspaces []struct {
-			ID string `json:"workspace_id"`
-		} `json:"workspaces"`
-	}
-	if resultBody(listed, &remaining) != nil || remaining.Workspaces == nil {
-		return false
-	}
-	for _, workspace := range remaining.Workspaces {
-		if workspace.ID == workspaceID {
-			return false
-		}
-	}
-	return true
 }
 
 type completion struct {
