@@ -204,10 +204,12 @@ printf ':END_FILE_%s\r\n'
 	if err != nil {
 		return nil, err
 	} // never repeat an uncertain input call
+	lines := 4
 	for {
-		// Keep recent unwrapped output below the relay's 64 KiB response limit;
-		// do not request hundreds of previous base64 page frames.
-		text, err := c.readBatchPane(ctx, scope, target, p.ControlPane, 4)
+		// Herdr 0.9.5 counts rendered rows even for recent-unwrapped. Grow
+		// read-only snapshots until the whole frame fits, rather than assuming
+		// a base64 logical line occupies one row. Never repeat pane.run here.
+		text, err := c.readBatchPane(ctx, scope, target, p.ControlPane, lines)
 		if err != nil {
 			return nil, err
 		}
@@ -229,6 +231,10 @@ printf ':END_FILE_%s\r\n'
 		}
 		if found {
 			return data, nil
+		}
+		if lines < 1000 {
+			lines = min(lines*2, 1000) // official pane.read maximum
+			continue
 		}
 		timer := time.NewTimer(100 * time.Millisecond)
 		select {

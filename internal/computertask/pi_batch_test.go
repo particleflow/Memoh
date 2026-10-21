@@ -205,11 +205,30 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 				text = "echo is not a receipt\r\nMEMOH_BATCH_" + f.progress.Generation + ":" + base64.StdEncoding.EncodeToString(raw) + ":END_BATCH_" + f.progress.Generation + "\r\n"
 			}
 		}
+		// Vendor recent-unwrapped is limited by rendered rows, not logical
+		// lines. A 16 KiB base64 frame is hundreds of rows at 80 columns.
+		if params["paneId"] == "control" {
+			text = renderedTail(text, 80, int(params["lines"].(float64)))
+		}
 		return envelope(map[string]any{"session": "synthetic", "output": text}), nil
 	default:
 		f.t.Fatalf("unexpected native operation: %s", method)
 	}
 	return envelope(map[string]any{"session": "synthetic", "result": body}), nil
+}
+
+func renderedTail(text string, columns, limit int) string {
+	rows := []string{}
+	for _, line := range strings.SplitAfter(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
+		for len(line) > columns {
+			rows = append(rows, line[:columns])
+			line = line[columns:]
+		}
+		if line != "" {
+			rows = append(rows, line)
+		}
+	}
+	return strings.Join(rows[max(0, len(rows)-limit):], "")
 }
 
 func setupBatch(t *testing.T) (*Source, *fixtureStore, *batchTransport, *batchAssets) {

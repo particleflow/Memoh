@@ -77,6 +77,19 @@ No browser errors occurred. No media code or migration was changed.
 
 ![Current Web verifies empty stderr without a false artifact ref](empty-stderr.png)
 
+### Rendered-row correction
+
+Official Herdr 0.9.5
+[terminal reads](https://github.com/herdrdev/herdr/blob/v0.9.5/src/pane/terminal.rs#L2770-L2815)
+count rendered rows even for `recent-unwrapped`. Fixed four-row reads could
+omit the start of a long base64 page. The service now grows only the read
+snapshot (4 through at most 1000 rows) until a complete frame fits, without
+repeating pane.run. The standard MCP regression and browser relay now simulate
+80-column soft wrapping. Race, lint and build passed; the rebuilt Web completed
+another fresh synthetic large-output task with no browser errors. `web.png`
+was refreshed and inspected from that run. Narrow-terminal or relay-size
+failures remain unknown/pending rather than relaxing nonce/frame/hash checks.
+
 ## Remaining acceptance
 
 Independent review, GitHub CI and controlled Windows Git Bash + unchanged Pi

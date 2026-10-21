@@ -64,6 +64,10 @@ limited to Bot grants. The same checks apply to result, cancellation and refs.
    exposing content refs. Persist only refs, offsets and a bounded text preview,
    never the complete JSONL in conversation/operation context. One observation
    imports at most 16 pages within its time budget; another observation resumes.
+   Herdr limits `recent-unwrapped` by rendered rows. Read-only snapshots grow
+   from 4 to at most 1000 rows until the full frame is present; input is not
+   repeated. Extremely narrow terminals, changed panes or connector size errors
+   can leave observation unknown/pending, never falsely complete.
 
 `generation` is a wrapper invocation nonce, **not** Herdr's internal generation.
 Control pane metadata is checked before use, but Herdr does not expose an atomic
