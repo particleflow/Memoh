@@ -232,7 +232,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	d := Details{Kind: in.Kind}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
-		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{LayoutVersion: agenvo.BatchLayoutVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
 		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
 			return Result{}, err
 		}

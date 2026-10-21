@@ -25,6 +25,15 @@ The main configuration file is `config.toml` (copied from `conf/app.example.toml
 
 Provider YAML templates in `conf/providers/` define preset configurations for various LLM providers (OpenAI, Anthropic, GitHub Copilot, etc.).
 
+Non-empty `files.originals_root` follows the existing `Config.resolvePaths`
+convention: expand `~` / `~/...`, then resolve a relative path against the Server
+process working directory at configuration load time, **not** the TOML file's
+directory. Consumers receive that absolute path. Absolute paths keep their
+location; an empty setting keeps legacy storage behavior. Changing the launch
+working directory can therefore change a relative root on the next restart.
+Use a stable working directory or an explicit deployment path. See
+[data path contracts](data-path-resolution.md) for the separate Windows Pi layout.
+
 Configuration templates available in `conf/`:
 - `app.example.toml` — Default template
 - `app.docker.toml` — Docker deployment

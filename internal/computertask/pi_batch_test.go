@@ -340,6 +340,9 @@ func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
 	if r.State != "submitted" || r.ProcessStopped || r.PiResult != nil || f.runs != 1 {
 		t.Fatalf("submission=%+v", r)
 	}
+	if f.progress.LayoutVersion != agenvo.BatchLayoutVersion {
+		t.Fatal("new operation did not persist its layout before dispatch")
+	}
 	got := batchResultUntilReady(t, c, r.ID)
 	if got.State != "completed" || !got.ProcessStopped || got.ExitCode == nil || *got.ExitCode != 0 || got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {
 		t.Fatalf("result=%+v", got)
@@ -599,6 +602,7 @@ func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T
 	var d Details
 	_ = json.Unmarshal(old.Details, &d)
 	attempt := d.Batch.Progress.Attempt
+	d.Batch.Progress.LayoutVersion = 0 // Historical JSON had no layout_version.
 	d.Batch.Receipt = &f.receipt
 	d.Batch.Files = []BatchTransfer{
 		{Meta: stdout, Offset: stdout.Size, ReadyHash: stdout.Hash, Chunks: []BatchChunk{{Hash: stdout.Hash, Size: stdout.Size}}},
@@ -607,6 +611,9 @@ func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T
 	d.Phase, old.State = "pi_exited_output_pending", "completed"
 	d.ExitCode = &f.receipt.ExitCode
 	old.Details, _ = json.Marshal(d)
+	if bytes.Contains(old.Details, []byte("layout_version")) {
+		t.Fatal("legacy fixture contains a layout version")
+	}
 	store.records[r.ID] = old
 	store.mu.Unlock()
 	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize))
@@ -618,8 +625,29 @@ func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T
 	store.mu.Lock()
 	_ = json.Unmarshal(store.records[r.ID].Details, &d)
 	store.mu.Unlock()
-	if d.Batch.Progress.Attempt != attempt || d.Batch.Files[1].Chunks[0].Hash != prefix.Hash || d.Batch.Files[1].Chunks[0].Size != 16384 {
+	if d.Batch.Progress.Attempt != attempt || d.Batch.Progress.LayoutVersion != 0 || d.Batch.Files[1].Chunks[0].Hash != prefix.Hash || d.Batch.Files[1].Chunks[0].Size != 16384 {
 		t.Fatal("legacy persisted chunk was replaced")
+	}
+}
+
+func TestStandardMCPPiBatchUnknownLayoutDoesNotReadOrRedispatch(t *testing.T) {
+	source, store, f, a := setupBatch(t)
+	c := standardClient(t, source, "pc-a", false)
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	store.mu.Lock()
+	record := store.records[r.ID]
+	var d Details
+	_ = json.Unmarshal(record.Details, &d)
+	d.Batch.Progress.LayoutVersion = agenvo.BatchLayoutVersion + 1
+	record.Details, _ = json.Marshal(d)
+	store.records[r.ID] = record
+	store.mu.Unlock()
+	before := len(f.calls)
+	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize))
+	resumed := standardClient(t, restarted, "pc-a", false)
+	got := parseResult(t, invoke(t, resumed, "computer_task_result", map[string]any{"operation_id": r.ID}, true))
+	if got.ID != r.ID || got.State != "submitted" || got.ProcessStopped || got.PiResult != nil || len(f.calls) != before || f.runs != 1 {
+		t.Fatal("unknown layout performed remote IO or released the invocation slot")
 	}
 }
 
