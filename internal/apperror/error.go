@@ -380,6 +380,7 @@ const (
 	CodeWorkspaceStartFailed                    Code = "workspace_start_failed"
 	CodeWorkspaceStopFailed                     Code = "workspace_stop_failed"
 	CodeWorkspaceSnapshotsUnsupported           Code = "workspace_snapshots_unsupported"
+	CodeWorkspaceOperationUnsupported           Code = "workspace.operation_unsupported"
 	CodeWorkspaceSnapshotManagerUnavailable     Code = "workspace_snapshot_manager_unavailable"
 	CodeWorkspaceSnapshotRequestInvalid         Code = "workspace_snapshot_request_invalid"
 	CodeWorkspaceSnapshotCreateFailed           Code = "workspace_snapshot_create_failed"
@@ -1395,6 +1396,7 @@ var catalog = map[Code]Definition{
 	CodeWorkspaceStartFailed:                    {HTTPStatus: http.StatusInternalServerError, Detail: "Failed to start the workspace. Please try again."},
 	CodeWorkspaceStopFailed:                     {HTTPStatus: http.StatusInternalServerError, Detail: "Failed to stop the workspace. Please try again."},
 	CodeWorkspaceSnapshotsUnsupported:           {HTTPStatus: http.StatusNotImplemented, Detail: "Snapshots are not supported by this workspace runtime."},
+	CodeWorkspaceOperationUnsupported:           {HTTPStatus: http.StatusNotImplemented, Detail: "This execution target supports foreground commands only. Choose another target for file or terminal operations."},
 	CodeWorkspaceSnapshotManagerUnavailable:     {HTTPStatus: http.StatusInternalServerError, Detail: "Snapshots are not configured on this server."},
 	CodeWorkspaceSnapshotRequestInvalid:         {HTTPStatus: http.StatusBadRequest, Detail: "The snapshot request is invalid."},
 	CodeWorkspaceSnapshotCreateFailed:           {HTTPStatus: http.StatusInternalServerError, Detail: "Failed to create the snapshot. Please try again."},

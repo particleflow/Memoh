@@ -42,7 +42,7 @@ func (s *Store) ListMounts(ctx context.Context, botID string) ([]dbstore.BotRemo
 	for _, row := range rows {
 		records = append(records, remoteMountRecord(
 			row.ID, row.BotID, row.RuntimeID, row.IsPrimary, row.ToolApprovalConfig,
-			row.RuntimeName, row.RuntimeUserID, row.RuntimeUnavailable, row.BotOwnerUserID,
+			row.RuntimeName, row.RuntimeProvider, row.RuntimeProviderConfig, row.RuntimeUserID, row.RuntimeUnavailable, row.BotOwnerUserID,
 			row.CreatedAt, row.UpdatedAt,
 		))
 	}
@@ -81,7 +81,7 @@ func (s *Store) GetMount(ctx context.Context, botID, targetID string) (dbstore.B
 	}
 	return remoteMountRecord(
 		row.ID, row.BotID, row.RuntimeID, row.IsPrimary, row.ToolApprovalConfig,
-		row.RuntimeName, row.RuntimeUserID, row.RuntimeUnavailable, row.BotOwnerUserID,
+		row.RuntimeName, row.RuntimeProvider, row.RuntimeProviderConfig, row.RuntimeUserID, row.RuntimeUnavailable, row.BotOwnerUserID,
 		row.CreatedAt, row.UpdatedAt,
 	), nil
 }
@@ -97,7 +97,7 @@ func (s *Store) GetPrimaryMount(ctx context.Context, botID string) (dbstore.BotR
 	}
 	return remoteMountRecord(
 		row.ID, row.BotID, row.RuntimeID, row.IsPrimary, row.ToolApprovalConfig,
-		row.RuntimeName, row.RuntimeUserID, row.RuntimeUnavailable, row.BotOwnerUserID,
+		row.RuntimeName, row.RuntimeProvider, row.RuntimeProviderConfig, row.RuntimeUserID, row.RuntimeUnavailable, row.BotOwnerUserID,
 		row.CreatedAt, row.UpdatedAt,
 	), nil
 }
@@ -187,22 +187,26 @@ func remoteMountRecord(
 	isPrimary bool,
 	toolApproval []byte,
 	runtimeName string,
+	runtimeProvider string,
+	runtimeProviderConfig []byte,
 	runtimeUserID pgtype.UUID,
 	runtimeUnavailable pgtype.Bool,
 	botOwnerUserID pgtype.UUID,
 	createdAt, updatedAt pgtype.Timestamptz,
 ) dbstore.BotRemoteRuntimeBindingRecord {
 	return dbstore.BotRemoteRuntimeBindingRecord{
-		ID:             id.String(),
-		BotID:          botID.String(),
-		RuntimeID:      runtimeID.String(),
-		IsPrimary:      isPrimary,
-		ToolApproval:   append(dbstore.JSON(nil), toolApproval...),
-		RuntimeName:    runtimeName,
-		RuntimeUserID:  runtimeUserID.String(),
-		BotOwnerUserID: botOwnerUserID.String(),
-		RuntimeRevoked: runtimeUnavailable.Bool,
-		CreatedAt:      db.TimeFromPg(createdAt),
-		UpdatedAt:      db.TimeFromPg(updatedAt),
+		ID:                    id.String(),
+		BotID:                 botID.String(),
+		RuntimeID:             runtimeID.String(),
+		IsPrimary:             isPrimary,
+		ToolApproval:          append(dbstore.JSON(nil), toolApproval...),
+		RuntimeName:           runtimeName,
+		RuntimeProvider:       runtimeProvider,
+		RuntimeProviderConfig: append(dbstore.JSON(nil), runtimeProviderConfig...),
+		RuntimeUserID:         runtimeUserID.String(),
+		BotOwnerUserID:        botOwnerUserID.String(),
+		RuntimeRevoked:        runtimeUnavailable.Bool,
+		CreatedAt:             db.TimeFromPg(createdAt),
+		UpdatedAt:             db.TimeFromPg(updatedAt),
 	}
 }

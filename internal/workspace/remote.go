@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/settings"
@@ -49,6 +50,8 @@ type WorkspaceTargetToolApproval struct {
 // mounts by TargetID; RuntimeID identifies the backing remote Runtime and is
 // empty for the Native target.
 type WorkspaceTarget struct {
+	Provider           string                      `json:"provider,omitempty"`
+	Capabilities       []string                    `json:"capabilities,omitempty"`
 	TargetID           string                      `json:"target_id"`
 	Kind               string                      `json:"kind"`
 	RuntimeID          string                      `json:"runtime_id,omitempty"`
@@ -77,6 +80,7 @@ type UpdateWorkspaceTargetToolApprovalRequest struct {
 }
 
 type ResolvedWorkspaceTarget struct {
+	Execute  func(context.Context, agenvo.Request) (agenvo.Result, error)
 	TargetID string
 	Kind     string
 	Name     string
@@ -89,9 +93,12 @@ type ResolvedWorkspaceTarget struct {
 // RemoteWorkspaceService owns persistent remote mounts. Live runtime
 // connections remain owned by userruntime.Service.
 type RemoteWorkspaceService struct {
+	agenvo   *agenvo.Service
 	store    dbstore.BotRemoteRuntimeBindingStore
 	runtimes runtimeConnectionResolver
 }
+
+func (s *RemoteWorkspaceService) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
 
 type runtimeConnectionResolver interface {
 	Connection(runtimeID string) (*userruntime.Connection, bool)
@@ -120,7 +127,7 @@ func (s *RemoteWorkspaceService) Mount(ctx context.Context, botID, runtimeID str
 	if err != nil {
 		return WorkspaceTarget{}, err
 	}
-	return s.target(record), nil
+	return s.target(ctx, record), nil
 }
 
 func (s *RemoteWorkspaceService) ListMounts(ctx context.Context, botID string) ([]WorkspaceTarget, error) {
@@ -130,7 +137,7 @@ func (s *RemoteWorkspaceService) ListMounts(ctx context.Context, botID string) (
 	}
 	targets := make([]WorkspaceTarget, 0, len(records))
 	for _, record := range records {
-		targets = append(targets, s.target(record))
+		targets = append(targets, s.target(ctx, record))
 	}
 	return targets, nil
 }
@@ -179,7 +186,7 @@ func (s *RemoteWorkspaceService) GetMount(ctx context.Context, botID, targetID s
 	if err != nil {
 		return WorkspaceTarget{}, err
 	}
-	return s.target(record), nil
+	return s.target(ctx, record), nil
 }
 
 func (s *RemoteWorkspaceService) GetPrimaryMount(ctx context.Context, botID string) (WorkspaceTarget, error) {
@@ -187,7 +194,7 @@ func (s *RemoteWorkspaceService) GetPrimaryMount(ctx context.Context, botID stri
 	if err != nil {
 		return WorkspaceTarget{}, err
 	}
-	return s.target(record), nil
+	return s.target(ctx, record), nil
 }
 
 func (s *RemoteWorkspaceService) SetPrimary(ctx context.Context, botID, targetID string) error {
@@ -269,10 +276,36 @@ func (s *RemoteWorkspaceService) ResolveMount(ctx context.Context, botID, target
 	if err != nil {
 		return ResolvedWorkspaceTarget{}, err
 	}
-	return s.resolveRecord(record)
+	return s.resolveRecord(ctx, record)
 }
 
-func (s *RemoteWorkspaceService) resolveRecord(record dbstore.BotRemoteRuntimeBindingRecord) (ResolvedWorkspaceTarget, error) {
+func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbstore.BotRemoteRuntimeBindingRecord) (ResolvedWorkspaceTarget, error) {
+	if record.RuntimeProvider == agenvo.Provider {
+		if record.RuntimeUserID != record.BotOwnerUserID {
+			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeOwnerMismatch
+		}
+		if record.RuntimeRevoked {
+			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeRevoked
+		}
+		if s.agenvo == nil {
+			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeOffline
+		}
+		if err := s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig); err != nil {
+			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeOffline
+		}
+		config, err := agenvo.DecodeTarget(record.RuntimeProviderConfig)
+		if err != nil {
+			return ResolvedWorkspaceTarget{}, err
+		}
+		return ResolvedWorkspaceTarget{
+			TargetID: record.ID, Kind: WorkspaceTargetRemote, Name: record.RuntimeName, Primary: record.IsPrimary,
+			Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: config.WorkDir},
+			Approval: toolApprovalConfig(record.ToolApproval), Execute: func(ctx context.Context, req agenvo.Request) (agenvo.Result, error) {
+				req.Scope.BotID, req.Scope.TargetID = record.BotID, record.ID
+				return s.agenvo.Execute(ctx, req)
+			},
+		}, nil
+	}
 	client, connection, err := s.clientForRecord(record)
 	if err != nil {
 		return ResolvedWorkspaceTarget{}, err
@@ -300,7 +333,7 @@ func (s *RemoteWorkspaceService) ResolvePrimary(ctx context.Context, botID strin
 	if err != nil {
 		return ResolvedWorkspaceTarget{}, false, err
 	}
-	target, err := s.resolveRecord(record)
+	target, err := s.resolveRecord(ctx, record)
 	return target, true, err
 }
 
@@ -308,6 +341,9 @@ func (s *RemoteWorkspaceService) EnsurePrimaryReady(ctx context.Context, botID s
 	target, primary, err := s.ResolvePrimary(ctx, botID)
 	if err != nil || !primary {
 		return primary, err
+	}
+	if target.Info.Backend == bridge.WorkspaceBackendAgenvo {
+		return true, nil
 	}
 	entry, err := target.Client.Stat(ctx, target.Info.DefaultWorkDir)
 	if err != nil {
@@ -385,7 +421,7 @@ func (s *RemoteWorkspaceService) clientForRecord(record dbstore.BotRemoteRuntime
 	return client, connection, nil
 }
 
-func (s *RemoteWorkspaceService) target(record dbstore.BotRemoteRuntimeBindingRecord) WorkspaceTarget {
+func (s *RemoteWorkspaceService) target(ctx context.Context, record dbstore.BotRemoteRuntimeBindingRecord) WorkspaceTarget {
 	approval := toolApprovalConfig(record.ToolApproval)
 	target := WorkspaceTarget{
 		TargetID:           record.ID,
@@ -393,6 +429,7 @@ func (s *RemoteWorkspaceService) target(record dbstore.BotRemoteRuntimeBindingRe
 		RuntimeID:          record.RuntimeID,
 		Name:               record.RuntimeName,
 		Primary:            record.IsPrimary,
+		Provider:           record.RuntimeProvider,
 		ToolApproval:       WorkspaceToolApprovalModes(approval),
 		ToolApprovalConfig: approval,
 	}
@@ -403,6 +440,13 @@ func (s *RemoteWorkspaceService) target(record dbstore.BotRemoteRuntimeBindingRe
 		target.Status = WorkspaceTargetStatusOwnerMismatch
 	case record.RuntimeRevoked:
 		target.Status = WorkspaceTargetStatusRevoked
+	case record.RuntimeProvider == agenvo.Provider:
+		target.Capabilities = []string{agenvo.CapabilityForegroundExec}
+		target.Status = WorkspaceTargetStatusOffline
+		if s.agenvo != nil && s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig) == nil {
+			target.Status = WorkspaceTargetStatusOnline
+			target.Online = true
+		}
 	case s.runtimes == nil:
 		target.Status = WorkspaceTargetStatusOffline
 	default:

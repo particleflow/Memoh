@@ -2,6 +2,12 @@
   <PageShell :title="t('runtimes.title')">
     <template #actions>
       <Button
+        variant="outline"
+        @click="agenvoDialogOpen = true"
+      >
+        {{ t('agenvo.connect') }}
+      </Button>
+      <Button
         :loading="creatingRuntime"
         @click="startConnect"
       >
@@ -164,6 +170,13 @@
               <p class="flex min-w-0 items-center gap-2 text-sm">
                 <span class="truncate font-medium text-foreground">{{ runtime.name }}</span>
                 <Badge
+                  v-if="runtime.provider === 'agenvo'"
+                  variant="secondary"
+                  size="sm"
+                >
+                  {{ t('agenvo.capability') }}
+                </Badge>
+                <Badge
                   v-if="accessCount(runtime) > 0"
                   variant="secondary"
                   size="sm"
@@ -308,6 +321,11 @@
     </DialogPanel>
   </Dialog>
 
+  <ConnectAgenvoDialog
+    v-model:open="agenvoDialogOpen"
+    @registered="onAgenvoRegistered"
+  />
+
   <ConnectComputerDialog
     v-model:open="connectDialogOpen"
     :credential="connectCredential"
@@ -355,6 +373,7 @@ import { SettingsIcon as Settings } from '@memohai/icon/ui'
 import { ConfirmPopover, FieldStack, FormStack, InlineLoadingRow, PageShell, SettingsRow, SettingsSection } from '@felinic/ui'
 import BotComputerAccessDialog from '@/components/computer/bot-computer-access-dialog.vue'
 import ComputerAccessList from '@/components/computer/computer-access-list.vue'
+import ConnectAgenvoDialog from '@/components/computer/connect-agenvo-dialog.vue'
 import ConnectComputerDialog from '@/components/computer/connect-computer-dialog.vue'
 import { useAccountRuntimes, useComputerAccessActions, useComputerAccessGrants } from '@/components/computer/use-computer-access'
 import {
@@ -380,6 +399,12 @@ const botAccessTotal = computed(() => botsData.value?.items?.length ?? 0)
 
 function accessCount(runtime: UserruntimeRuntime): number {
   return grants.value.filter(grant => grant.runtime_id === runtime.id).length
+}
+
+const agenvoDialogOpen = ref(false)
+async function onAgenvoRegistered(runtime: UserruntimeRuntime): Promise<void> {
+  await refetchRuntimes()
+  openAccessDialog(runtime)
 }
 
 const accessDialogOpen = ref(false)

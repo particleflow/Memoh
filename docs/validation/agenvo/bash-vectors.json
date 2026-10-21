@@ -1,0 +1,87 @@
+{
+  "bash_path_parameter": "C:\\SYNTHETIC_GIT_BASH\\bin\\bash.exe",
+  "batch": "Explicit CRLF boundary; new nonces supersede the prior 100... batch. Do not resend old attempts.",
+  "generation": "Calls actual bashCommand and parseCompletion in a temporary Go test overlay; Windows execution is not claimed",
+  "path_substitution": "Replace this one synthetic path in each pane_run_command with the already verified absolute Git Bash path, doubling any single quote for the PowerShell single-quoted argument. Do not alter the encoded script or use PATH/WSL.",
+  "source_revision": "The Git commit containing this artifact; verify the exact source hashes below",
+  "source_sha256": {
+    "internal/agenvo/bash.go": "8b237fdda1855836fabea4bf79ded2a3ca1f8269009eee84942919d79ac6b428",
+    "internal/agenvo/exec.go": "45a161cd8d3b308db2d195d53149e538ac3fa2ca813c0bf57653db3180f2304b"
+  },
+  "vectors": [
+    {
+      "id": "normal_unicode_native_path",
+      "nonce": "20000000000000000000000000000001",
+      "body": "printf 'MEMOH_BASH|%s|%s\\n' \"$BASH_VERSION\" \"$OSTYPE\"; printf 'MEMOH_NORMAL|%s|中文|✓\\n' \"$((6 * 7))\"; MSYS2_ARG_CONV_EXCL='*' cmd.exe /d /c 'echo MEMOH_NATIVE_%OS%' || exit 13; memoh_win=$(cygpath -w \"$PWD\") \u0026\u0026 memoh_unix=$(cygpath -u \"$memoh_win\") || exit 14; [ \"$memoh_unix\" = \"$PWD\" ] || exit 15; printf 'MEMOH_PATH_ROUNDTRIP_OK\\n'",
+      "pane_run_command": "\u0026 { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { \u0026 $memohBash --noprofile --norc -p -c 'printf %s c2V0ICtlCnNldCAtbyBwaXBlZmFpbApjYXNlICIkKGNvbW1hbmQgdW5hbWUgLXMgMj4vZGV2L251bGwpIiBpbgogIE1JTkdXKl9OVC0qfE1TWVNfTlQtKikgOzsKICAqKSBwcmludGYgJ1xyXG5NRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMTpleUptWVdsc2RYSmxJam9pZFc1emRYQndiM0owWldSZlltRnphRjlvYjNOMEluMD06RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxXHJcbic7IGV4aXQgMCA7Owplc2FjCmZvciBtZW1vaF90b29sIGluIGJhc2U2NCBoZWFkIGNhdDsgZG8KICBpZiAhIGNvbW1hbmQgLXYgIiRtZW1vaF90b29sIiA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIHByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxOmV5Sm1ZV2xzZFhKbElqb2lZbUZ6YUY5MGIyOXNjMTkxYm1GMllXbHNZV0pzWlNKOTpFTkRfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDFcclxuJzsgZXhpdCAwCiAgZmkKZG9uZQptZW1vaF9ib2R5PSIkKHByaW50ZiAnJXMnICdjSEpwYm5SbUlDZE5SVTFQU0Y5Q1FWTklmQ1Z6ZkNWelhHNG5JQ0lrUWtGVFNGOVdSVkpUU1U5T0lpQWlKRTlUVkZsUVJTSTdJSEJ5YVc1MFppQW5UVVZOVDBoZlRrOVNUVUZNZkNWemZPUzRyZWFXaDN6aW5KTmNiaWNnSWlRb0tEWWdLaUEzS1NraU95Qk5VMWxUTWw5QlVrZGZRMDlPVmw5RldFTk1QU2NxSnlCamJXUXVaWGhsSUM5a0lDOWpJQ2RsWTJodklFMUZUVTlJWDA1QlZFbFdSVjhsVDFNbEp5QjhmQ0JsZUdsMElERXpPeUJ0WlcxdmFGOTNhVzQ5SkNoamVXZHdZWFJvSUMxM0lDSWtVRmRFSWlrZ0ppWWdiV1Z0YjJoZmRXNXBlRDBrS0dONVozQmhkR2dnTFhVZ0lpUnRaVzF2YUY5M2FXNGlLU0I4ZkNCbGVHbDBJREUwT3lCYklDSWtiV1Z0YjJoZmRXNXBlQ0lnUFNBaUpGQlhSQ0lnWFNCOGZDQmxlR2wwSURFMU95QndjbWx1ZEdZZ0owMUZUVTlJWDFCQlZFaGZVazlWVGtSVVVrbFFYMDlMWEc0bicgfCBiYXNlNjQgLS1kZWNvZGU7IHByaW50ZiAnLicpIgptZW1vaF9ib2R5PSIke21lbW9oX2JvZHklLn0iCnByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAxOicKewogICIkQkFTSCIgLS1ub3Byb2ZpbGUgLS1ub3JjIC1wIC1jICIkbWVtb2hfYm9keSIgPC9kZXYvbnVsbCAyPiYxIHwgewogICAgbWVtb2hfb3V0cHV0PSIkKGhlYWQgLWMgNDA5NiB8IGJhc2U2NCAtdyAwKSIgfHwgZXhpdCAxMjUKICAgIG1lbW9oX2V4dHJhPSIkKGhlYWQgLWMgMSB8IGJhc2U2NCAtdyAwKSIgfHwgZXhpdCAxMjUKICAgIGNhdCA+L2Rldi9udWxsIHx8IGV4aXQgMTI1CiAgICBtZW1vaF90cnVuY2F0ZWQ9ZmFsc2UKICAgIGlmIFsgLW4gIiRtZW1vaF9leHRyYSIgXTsgdGhlbiBtZW1vaF90cnVuY2F0ZWQ9dHJ1ZTsgZmkKICAgIHByaW50ZiAneyJvdXRwdXRfYmFzZTY0IjoiJXMiLCJ0cnVuY2F0ZWQiOiVzLCcgIiRtZW1vaF9vdXRwdXQiICIkbWVtb2hfdHJ1bmNhdGVkIgogIH0KICBtZW1vaF9jb2Rlcz0oIiR7UElQRVNUQVRVU1tAXX0iKQogIGlmIFsgIiR7bWVtb2hfY29kZXNbMV19IiAtbmUgMCBdOyB0aGVuIHByaW50ZiAnImV4aXRfY29kZSI6bnVsbH0nOyBleGl0IDA7IGZpCiAgcHJpbnRmICciZXhpdF9jb2RlIjolZH0nICIke21lbW9oX2NvZGVzWzBdfSIKfSB8IGJhc2U2NCAtdyAwCnByaW50ZiAnOkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMVxyXG4nCg== | base64 --decode | /usr/bin/bash --noprofile --norc -p' } else { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('DQpNRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMTpleUptWVdsc2RYSmxJam9pWW1GemFGOTFibUYyWVdsc1lXSnNaU0o5OkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMQ0K')) } } 'C:\\SYNTHETIC_GIT_BASH\\bin\\bash.exe'",
+      "template_command_sha256": "075540ea7d6492210d04cec105f7a362e84a55dd8be0319b6f62c0681a248b8b",
+      "expected": {
+        "exit_code": 0,
+        "output_contains_in_order": [
+          "MEMOH_BASH|5.2.26(1)-release|msys",
+          "MEMOH_NORMAL|42|中文|✓",
+          "MEMOH_NATIVE_Windows_NT",
+          "MEMOH_PATH_ROUNDTRIP_OK"
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "id": "native_stderr_zero",
+      "nonce": "20000000000000000000000000000002",
+      "body": "MSYS2_ARG_CONV_EXCL='*' cmd.exe /d /c 'echo MEMOH_STDERR 1\u003e\u00262 \u0026 exit /b 0'; printf 'MEMOH_AFTER\\n'",
+      "pane_run_command": "\u0026 { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { \u0026 $memohBash --noprofile --norc -p -c 'printf %s c2V0ICtlCnNldCAtbyBwaXBlZmFpbApjYXNlICIkKGNvbW1hbmQgdW5hbWUgLXMgMj4vZGV2L251bGwpIiBpbgogIE1JTkdXKl9OVC0qfE1TWVNfTlQtKikgOzsKICAqKSBwcmludGYgJ1xyXG5NRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMjpleUptWVdsc2RYSmxJam9pZFc1emRYQndiM0owWldSZlltRnphRjlvYjNOMEluMD06RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAyXHJcbic7IGV4aXQgMCA7Owplc2FjCmZvciBtZW1vaF90b29sIGluIGJhc2U2NCBoZWFkIGNhdDsgZG8KICBpZiAhIGNvbW1hbmQgLXYgIiRtZW1vaF90b29sIiA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIHByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAyOmV5Sm1ZV2xzZFhKbElqb2lZbUZ6YUY5MGIyOXNjMTkxYm1GMllXbHNZV0pzWlNKOTpFTkRfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDJcclxuJzsgZXhpdCAwCiAgZmkKZG9uZQptZW1vaF9ib2R5PSIkKHByaW50ZiAnJXMnICdUVk5aVXpKZlFWSkhYME5QVGxaZlJWaERURDBuS2ljZ1kyMWtMbVY0WlNBdlpDQXZZeUFuWldOb2J5Qk5SVTFQU0Y5VFZFUkZVbElnTVQ0bU1pQW1JR1Y0YVhRZ0wySWdNQ2M3SUhCeWFXNTBaaUFuVFVWTlQwaGZRVVpVUlZKY2JpYz0nIHwgYmFzZTY0IC0tZGVjb2RlOyBwcmludGYgJy4nKSIKbWVtb2hfYm9keT0iJHttZW1vaF9ib2R5JS59IgpwcmludGYgJ1xyXG5NRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMjonCnsKICAiJEJBU0giIC0tbm9wcm9maWxlIC0tbm9yYyAtcCAtYyAiJG1lbW9oX2JvZHkiIDwvZGV2L251bGwgMj4mMSB8IHsKICAgIG1lbW9oX291dHB1dD0iJChoZWFkIC1jIDQwOTYgfCBiYXNlNjQgLXcgMCkiIHx8IGV4aXQgMTI1CiAgICBtZW1vaF9leHRyYT0iJChoZWFkIC1jIDEgfCBiYXNlNjQgLXcgMCkiIHx8IGV4aXQgMTI1CiAgICBjYXQgPi9kZXYvbnVsbCB8fCBleGl0IDEyNQogICAgbWVtb2hfdHJ1bmNhdGVkPWZhbHNlCiAgICBpZiBbIC1uICIkbWVtb2hfZXh0cmEiIF07IHRoZW4gbWVtb2hfdHJ1bmNhdGVkPXRydWU7IGZpCiAgICBwcmludGYgJ3sib3V0cHV0X2Jhc2U2NCI6IiVzIiwidHJ1bmNhdGVkIjolcywnICIkbWVtb2hfb3V0cHV0IiAiJG1lbW9oX3RydW5jYXRlZCIKICB9CiAgbWVtb2hfY29kZXM9KCIke1BJUEVTVEFUVVNbQF19IikKICBpZiBbICIke21lbW9oX2NvZGVzWzFdfSIgLW5lIDAgXTsgdGhlbiBwcmludGYgJyJleGl0X2NvZGUiOm51bGx9JzsgZXhpdCAwOyBmaQogIHByaW50ZiAnImV4aXRfY29kZSI6JWR9JyAiJHttZW1vaF9jb2Rlc1swXX0iCn0gfCBiYXNlNjQgLXcgMApwcmludGYgJzpFTkRfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDJcclxuJwo= | base64 --decode | /usr/bin/bash --noprofile --norc -p' } else { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('DQpNRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMjpleUptWVdsc2RYSmxJam9pWW1GemFGOTFibUYyWVdsc1lXSnNaU0o5OkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMg0K')) } } 'C:\\SYNTHETIC_GIT_BASH\\bin\\bash.exe'",
+      "template_command_sha256": "59eac86adf6638582c9b3bfdecd3c2cdfd1eef52df884671d4abfd3960ba19f6",
+      "expected": {
+        "exit_code": 0,
+        "output_contains_in_order": [
+          "MEMOH_STDERR",
+          "MEMOH_AFTER"
+        ],
+        "truncated": false
+      }
+    },
+    {
+      "id": "native_nonzero",
+      "nonce": "20000000000000000000000000000003",
+      "body": "printf 'MEMOH_NONZERO\\n'; MSYS2_ARG_CONV_EXCL='*' cmd.exe /d /c 'exit /b 7'",
+      "pane_run_command": "\u0026 { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { \u0026 $memohBash --noprofile --norc -p -c 'printf %s c2V0ICtlCnNldCAtbyBwaXBlZmFpbApjYXNlICIkKGNvbW1hbmQgdW5hbWUgLXMgMj4vZGV2L251bGwpIiBpbgogIE1JTkdXKl9OVC0qfE1TWVNfTlQtKikgOzsKICAqKSBwcmludGYgJ1xyXG5NRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMzpleUptWVdsc2RYSmxJam9pZFc1emRYQndiM0owWldSZlltRnphRjlvYjNOMEluMD06RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAzXHJcbic7IGV4aXQgMCA7Owplc2FjCmZvciBtZW1vaF90b29sIGluIGJhc2U2NCBoZWFkIGNhdDsgZG8KICBpZiAhIGNvbW1hbmQgLXYgIiRtZW1vaF90b29sIiA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIHByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAzOmV5Sm1ZV2xzZFhKbElqb2lZbUZ6YUY5MGIyOXNjMTkxYm1GMllXbHNZV0pzWlNKOTpFTkRfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDNcclxuJzsgZXhpdCAwCiAgZmkKZG9uZQptZW1vaF9ib2R5PSIkKHByaW50ZiAnJXMnICdjSEpwYm5SbUlDZE5SVTFQU0Y5T1QwNWFSVkpQWEc0bk95Qk5VMWxUTWw5QlVrZGZRMDlPVmw5RldFTk1QU2NxSnlCamJXUXVaWGhsSUM5a0lDOWpJQ2RsZUdsMElDOWlJRGNuJyB8IGJhc2U2NCAtLWRlY29kZTsgcHJpbnRmICcuJykiCm1lbW9oX2JvZHk9IiR7bWVtb2hfYm9keSUufSIKcHJpbnRmICdcclxuTUVNT0hfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDM6Jwp7CiAgIiRCQVNIIiAtLW5vcHJvZmlsZSAtLW5vcmMgLXAgLWMgIiRtZW1vaF9ib2R5IiA8L2Rldi9udWxsIDI+JjEgfCB7CiAgICBtZW1vaF9vdXRwdXQ9IiQoaGVhZCAtYyA0MDk2IHwgYmFzZTY0IC13IDApIiB8fCBleGl0IDEyNQogICAgbWVtb2hfZXh0cmE9IiQoaGVhZCAtYyAxIHwgYmFzZTY0IC13IDApIiB8fCBleGl0IDEyNQogICAgY2F0ID4vZGV2L251bGwgfHwgZXhpdCAxMjUKICAgIG1lbW9oX3RydW5jYXRlZD1mYWxzZQogICAgaWYgWyAtbiAiJG1lbW9oX2V4dHJhIiBdOyB0aGVuIG1lbW9oX3RydW5jYXRlZD10cnVlOyBmaQogICAgcHJpbnRmICd7Im91dHB1dF9iYXNlNjQiOiIlcyIsInRydW5jYXRlZCI6JXMsJyAiJG1lbW9oX291dHB1dCIgIiRtZW1vaF90cnVuY2F0ZWQiCiAgfQogIG1lbW9oX2NvZGVzPSgiJHtQSVBFU1RBVFVTW0BdfSIpCiAgaWYgWyAiJHttZW1vaF9jb2Rlc1sxXX0iIC1uZSAwIF07IHRoZW4gcHJpbnRmICciZXhpdF9jb2RlIjpudWxsfSc7IGV4aXQgMDsgZmkKICBwcmludGYgJyJleGl0X2NvZGUiOiVkfScgIiR7bWVtb2hfY29kZXNbMF19Igp9IHwgYmFzZTY0IC13IDAKcHJpbnRmICc6RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAzXHJcbicK | base64 --decode | /usr/bin/bash --noprofile --norc -p' } else { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('DQpNRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMzpleUptWVdsc2RYSmxJam9pWW1GemFGOTFibUYyWVdsc1lXSnNaU0o5OkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMw0K')) } } 'C:\\SYNTHETIC_GIT_BASH\\bin\\bash.exe'",
+      "template_command_sha256": "84ab431786df22c4eb74c5f7469de67fb2785674c15eba2495fc6624193c845b",
+      "expected": {
+        "exit_code": 7,
+        "output": "MEMOH_NONZERO\n",
+        "truncated": false
+      }
+    },
+    {
+      "id": "bounded_large_output",
+      "nonce": "20000000000000000000000000000004",
+      "body": "printf 'MEMOH_LARGE|'; printf '%1000000s' '' | tr ' ' x",
+      "pane_run_command": "\u0026 { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { \u0026 $memohBash --noprofile --norc -p -c 'printf %s c2V0ICtlCnNldCAtbyBwaXBlZmFpbApjYXNlICIkKGNvbW1hbmQgdW5hbWUgLXMgMj4vZGV2L251bGwpIiBpbgogIE1JTkdXKl9OVC0qfE1TWVNfTlQtKikgOzsKICAqKSBwcmludGYgJ1xyXG5NRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNDpleUptWVdsc2RYSmxJam9pZFc1emRYQndiM0owWldSZlltRnphRjlvYjNOMEluMD06RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA0XHJcbic7IGV4aXQgMCA7Owplc2FjCmZvciBtZW1vaF90b29sIGluIGJhc2U2NCBoZWFkIGNhdDsgZG8KICBpZiAhIGNvbW1hbmQgLXYgIiRtZW1vaF90b29sIiA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIHByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA0OmV5Sm1ZV2xzZFhKbElqb2lZbUZ6YUY5MGIyOXNjMTkxYm1GMllXbHNZV0pzWlNKOTpFTkRfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDRcclxuJzsgZXhpdCAwCiAgZmkKZG9uZQptZW1vaF9ib2R5PSIkKHByaW50ZiAnJXMnICdjSEpwYm5SbUlDZE5SVTFQU0Y5TVFWSkhSWHduT3lCd2NtbHVkR1lnSnlVeE1EQXdNREF3Y3ljZ0p5Y2dmQ0IwY2lBbklDY2dlQT09JyB8IGJhc2U2NCAtLWRlY29kZTsgcHJpbnRmICcuJykiCm1lbW9oX2JvZHk9IiR7bWVtb2hfYm9keSUufSIKcHJpbnRmICdcclxuTUVNT0hfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDQ6Jwp7CiAgIiRCQVNIIiAtLW5vcHJvZmlsZSAtLW5vcmMgLXAgLWMgIiRtZW1vaF9ib2R5IiA8L2Rldi9udWxsIDI+JjEgfCB7CiAgICBtZW1vaF9vdXRwdXQ9IiQoaGVhZCAtYyA0MDk2IHwgYmFzZTY0IC13IDApIiB8fCBleGl0IDEyNQogICAgbWVtb2hfZXh0cmE9IiQoaGVhZCAtYyAxIHwgYmFzZTY0IC13IDApIiB8fCBleGl0IDEyNQogICAgY2F0ID4vZGV2L251bGwgfHwgZXhpdCAxMjUKICAgIG1lbW9oX3RydW5jYXRlZD1mYWxzZQogICAgaWYgWyAtbiAiJG1lbW9oX2V4dHJhIiBdOyB0aGVuIG1lbW9oX3RydW5jYXRlZD10cnVlOyBmaQogICAgcHJpbnRmICd7Im91dHB1dF9iYXNlNjQiOiIlcyIsInRydW5jYXRlZCI6JXMsJyAiJG1lbW9oX291dHB1dCIgIiRtZW1vaF90cnVuY2F0ZWQiCiAgfQogIG1lbW9oX2NvZGVzPSgiJHtQSVBFU1RBVFVTW0BdfSIpCiAgaWYgWyAiJHttZW1vaF9jb2Rlc1sxXX0iIC1uZSAwIF07IHRoZW4gcHJpbnRmICciZXhpdF9jb2RlIjpudWxsfSc7IGV4aXQgMDsgZmkKICBwcmludGYgJyJleGl0X2NvZGUiOiVkfScgIiR7bWVtb2hfY29kZXNbMF19Igp9IHwgYmFzZTY0IC13IDAKcHJpbnRmICc6RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA0XHJcbicK | base64 --decode | /usr/bin/bash --noprofile --norc -p' } else { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('DQpNRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNDpleUptWVdsc2RYSmxJam9pWW1GemFGOTFibUYyWVdsc1lXSnNaU0o5OkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNA0K')) } } 'C:\\SYNTHETIC_GIT_BASH\\bin\\bash.exe'",
+      "template_command_sha256": "9237e79a6fa8b6ecbfd29cf8811bdebd6774c6a0546578bc92979c79b0f3472a",
+      "expected": {
+        "exit_code": 0,
+        "output_bytes": 4096,
+        "output_prefix": "MEMOH_LARGE|",
+        "remaining_output": "4084 ASCII x characters; no trailing newline",
+        "truncated": true
+      }
+    },
+    {
+      "id": "delayed_observation",
+      "nonce": "20000000000000000000000000000005",
+      "body": "sleep 8; printf 'MEMOH_DELAYED|%s\\n' \"$((6 * 7))\"",
+      "pane_run_command": "\u0026 { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { \u0026 $memohBash --noprofile --norc -p -c 'printf %s c2V0ICtlCnNldCAtbyBwaXBlZmFpbApjYXNlICIkKGNvbW1hbmQgdW5hbWUgLXMgMj4vZGV2L251bGwpIiBpbgogIE1JTkdXKl9OVC0qfE1TWVNfTlQtKikgOzsKICAqKSBwcmludGYgJ1xyXG5NRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNTpleUptWVdsc2RYSmxJam9pZFc1emRYQndiM0owWldSZlltRnphRjlvYjNOMEluMD06RU5EXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA1XHJcbic7IGV4aXQgMCA7Owplc2FjCmZvciBtZW1vaF90b29sIGluIGJhc2U2NCBoZWFkIGNhdDsgZG8KICBpZiAhIGNvbW1hbmQgLXYgIiRtZW1vaF90b29sIiA+L2Rldi9udWxsIDI+JjE7IHRoZW4KICAgIHByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA1OmV5Sm1ZV2xzZFhKbElqb2lZbUZ6YUY5MGIyOXNjMTkxYm1GMllXbHNZV0pzWlNKOTpFTkRfMjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDVcclxuJzsgZXhpdCAwCiAgZmkKZG9uZQptZW1vaF9ib2R5PSIkKHByaW50ZiAnJXMnICdjMnhsWlhBZ09Ec2djSEpwYm5SbUlDZE5SVTFQU0Y5RVJVeEJXVVZFZkNWelhHNG5JQ0lrS0NnMklDb2dOeWtwSWc9PScgfCBiYXNlNjQgLS1kZWNvZGU7IHByaW50ZiAnLicpIgptZW1vaF9ib2R5PSIke21lbW9oX2JvZHklLn0iCnByaW50ZiAnXHJcbk1FTU9IXzIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA1OicKewogICIkQkFTSCIgLS1ub3Byb2ZpbGUgLS1ub3JjIC1wIC1jICIkbWVtb2hfYm9keSIgPC9kZXYvbnVsbCAyPiYxIHwgewogICAgbWVtb2hfb3V0cHV0PSIkKGhlYWQgLWMgNDA5NiB8IGJhc2U2NCAtdyAwKSIgfHwgZXhpdCAxMjUKICAgIG1lbW9oX2V4dHJhPSIkKGhlYWQgLWMgMSB8IGJhc2U2NCAtdyAwKSIgfHwgZXhpdCAxMjUKICAgIGNhdCA+L2Rldi9udWxsIHx8IGV4aXQgMTI1CiAgICBtZW1vaF90cnVuY2F0ZWQ9ZmFsc2UKICAgIGlmIFsgLW4gIiRtZW1vaF9leHRyYSIgXTsgdGhlbiBtZW1vaF90cnVuY2F0ZWQ9dHJ1ZTsgZmkKICAgIHByaW50ZiAneyJvdXRwdXRfYmFzZTY0IjoiJXMiLCJ0cnVuY2F0ZWQiOiVzLCcgIiRtZW1vaF9vdXRwdXQiICIkbWVtb2hfdHJ1bmNhdGVkIgogIH0KICBtZW1vaF9jb2Rlcz0oIiR7UElQRVNUQVRVU1tAXX0iKQogIGlmIFsgIiR7bWVtb2hfY29kZXNbMV19IiAtbmUgMCBdOyB0aGVuIHByaW50ZiAnImV4aXRfY29kZSI6bnVsbH0nOyBleGl0IDA7IGZpCiAgcHJpbnRmICciZXhpdF9jb2RlIjolZH0nICIke21lbW9oX2NvZGVzWzBdfSIKfSB8IGJhc2U2NCAtdyAwCnByaW50ZiAnOkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNVxyXG4nCg== | base64 --decode | /usr/bin/bash --noprofile --norc -p' } else { [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('DQpNRU1PSF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNTpleUptWVdsc2RYSmxJam9pWW1GemFGOTFibUYyWVdsc1lXSnNaU0o5OkVORF8yMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwNQ0K')) } } 'C:\\SYNTHETIC_GIT_BASH\\bin\\bash.exe'",
+      "template_command_sha256": "ef70f7c391bc4eb8061a82722144d37d4df5432f9af86e990b512fef49e6f4b3",
+      "expected": {
+        "cancel_exit_code": null,
+        "cancel_state": "unknown",
+        "early_completion_found": false,
+        "later_observed_exit_code": 0,
+        "later_observed_output": "MEMOH_DELAYED|42\n",
+        "truncated": false
+      }
+    }
+  ],
+  "wire_format": "CRLF + MEMOH_\u003cnonce\u003e:base64(UTF-8 JSON {output_base64,exit_code,truncated}):END_\u003cnonce\u003e + CRLF; decode output_base64 as bounded UTF-8"
+}

@@ -372,6 +372,23 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AgenvoDiscoveredInstance = {
+    device_id?: string;
+    device_name?: string;
+    instance_id?: string;
+    name?: string;
+    online?: boolean;
+};
+
+export type AgenvoTarget = {
+    bash_path?: string;
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    session?: string;
+    work_dir?: string;
+};
+
 export type ApperrorFault = 'client' | 'server' | 'dependency' | 'canceled';
 
 export type AudioConfigSchema = {
@@ -2097,6 +2114,10 @@ export type HandlersDailyTokenUsage = {
     input_tokens?: number;
     output_tokens?: number;
     reasoning_tokens?: number;
+};
+
+export type HandlersDiscoverAgenvoRequest = {
+    connection_id: string;
 };
 
 export type HandlersFsArchiveRequest = {
@@ -4295,7 +4316,9 @@ export type UserinputUiQuestion = {
 };
 
 export type UserruntimeCreateRuntimeRequest = {
+    agenvo?: AgenvoTarget;
     name?: string;
+    provider?: string;
 };
 
 export type UserruntimeRuntime = {
@@ -4309,6 +4332,7 @@ export type UserruntimeRuntime = {
     name?: string;
     online?: boolean;
     os?: string;
+    provider?: string;
     team_id?: string;
     workspace_base?: string;
 };
@@ -4454,10 +4478,12 @@ export type WorkspaceUpdateWorkspaceTargetToolApprovalRequest = {
 };
 
 export type WorkspaceWorkspaceTarget = {
+    capabilities?: Array<string>;
     kind?: string;
     name?: string;
     online?: boolean;
     primary?: boolean;
+    provider?: string;
     runtime_id?: string;
     status?: string;
     target_id?: string;
@@ -9371,7 +9397,12 @@ export type PostBotsByBotIdHooksTestResponse = PostBotsByBotIdHooksTestResponses
 
 export type GetBotsByBotIdMcpData = {
     body?: never;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp';
 };
@@ -17920,6 +17951,42 @@ export type PostUsersMeRuntimesResponses = {
 };
 
 export type PostUsersMeRuntimesResponse = PostUsersMeRuntimesResponses[keyof PostUsersMeRuntimesResponses];
+
+export type PostUsersMeRuntimesAgenvoDiscoverData = {
+    /**
+     * Existing MCP connection
+     */
+    body: HandlersDiscoverAgenvoRequest;
+    path?: never;
+    query?: never;
+    url: '/users/me/runtimes/agenvo/discover';
+};
+
+export type PostUsersMeRuntimesAgenvoDiscoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeRuntimesAgenvoDiscoverError = PostUsersMeRuntimesAgenvoDiscoverErrors[keyof PostUsersMeRuntimesAgenvoDiscoverErrors];
+
+export type PostUsersMeRuntimesAgenvoDiscoverResponses = {
+    /**
+     * OK
+     */
+    200: Array<AgenvoDiscoveredInstance>;
+};
+
+export type PostUsersMeRuntimesAgenvoDiscoverResponse = PostUsersMeRuntimesAgenvoDiscoverResponses[keyof PostUsersMeRuntimesAgenvoDiscoverResponses];
 
 export type DeleteUsersMeRuntimesByIdData = {
     body?: never;

@@ -14,6 +14,7 @@ import (
 	"google.golang.org/grpc/test/bufconn"
 
 	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/hooks"
 	workspacepkg "github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"
@@ -555,4 +556,40 @@ func decodeListExecutionLocations(t *testing.T, raw sdk.ToolOutput) listExecutio
 		t.Fatalf("decode list_execution_locations output: %v", err)
 	}
 	return result
+}
+
+func TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback(t *testing.T) {
+	calls := 0
+	clients := &containerTestTargetProvider{resolved: workspacepkg.ResolvedWorkspaceTarget{
+		TargetID: "selected", Kind: "remote", Client: bridge.UnsupportedClient(),
+		Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: `C:\Synthetic`},
+		Execute: func(_ context.Context, req agenvo.Request) (agenvo.Result, error) {
+			calls++
+			if req.Scope.UserID != "caller" || req.WorkDir != "." || req.Command != "printf 'ok'" {
+				t.Fatalf("wrong execution context: %+v", req)
+			}
+			exit := 0
+			return agenvo.Result{State: "completed", ExitCode: &exit, Output: "ok", CleanupRequired: true}, nil
+		},
+	}}
+	provider := NewContainerProvider(nil, clients, nil, "/data")
+	session := SessionContext{BotID: "bot", UserID: "caller", WorkspaceTargetID: "selected", WorkspaceTargetKind: "remote"}
+	value, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'"})
+	if err != nil || value == nil || calls != 1 {
+		t.Fatalf("value=%v err=%v calls=%d", value, err, calls)
+	}
+	if _, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'", RunInBackground: true}); !errors.Is(err, agenvo.ErrUnsupported) || calls != 1 {
+		t.Fatalf("background allowed: %v", err)
+	}
+	if _, err := provider.execRead(t.Context(), session, readArgs{Path: `C:\Synthetic\file.txt`}); !errors.Is(err, bridge.ErrUnsupported) {
+		t.Fatalf("file request should fail explicitly: %v", err)
+	}
+	clients.resolveErr = workspacepkg.ErrRemoteRuntimeOffline
+	if _, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'"}); err == nil || calls != 1 {
+		t.Fatalf("offline target fell back: %v", err)
+	}
+	w := toolWorkspaceFromInfo(clients.resolved.Info, "/data", "")
+	if !w.windows || w.shellDescription != "Git Bash on Windows" {
+		t.Fatalf("incorrect shell: %+v", w)
+	}
 }

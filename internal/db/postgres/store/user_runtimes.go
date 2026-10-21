@@ -2,6 +2,7 @@ package postgresstore
 
 import (
 	"context"
+	"errors"
 
 	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -122,5 +123,43 @@ func userRuntimeRecord(row dbsqlc.UserRuntime) dbstore.UserRuntimeRecord {
 		ID: row.ID.String(), TeamID: row.TeamID.String(), UserID: row.UserID.String(), Name: row.Name,
 		APIToken: row.ApiToken, ActivatedAt: db.TimeFromPg(row.ActivatedAt),
 		PendingExpiresAt: db.TimeFromPg(row.PendingExpiresAt), CreatedAt: db.TimeFromPg(row.CreatedAt),
+		Provider: row.Provider, ProviderConfig: row.ProviderConfig,
 	}
+}
+
+func (s *Store) OwnedHTTPMCPConnectionBot(ctx context.Context, ownerID, connectionID string) (string, error) {
+	owner, err := db.ParseUUID(ownerID)
+	if err != nil {
+		return "", err
+	}
+	connection, err := db.ParseUUID(connectionID)
+	if err != nil {
+		return "", err
+	}
+	bot, err := s.queries.OwnedHTTPMCPConnectionBot(ctx, dbsqlc.OwnedHTTPMCPConnectionBotParams{OwnerID: owner, ConnectionID: connection})
+	if err != nil {
+		return "", mapQueryErr(err)
+	}
+	return bot.String(), nil
+}
+
+func (s *Store) CreateAgenvoRuntime(ctx context.Context, ownerID, name string, config dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
+	owner, err := db.ParseUUID(ownerID)
+	if err != nil {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	// Reuse an already registered target after an interrupted response. Sharing
+	// grants and OAuth credentials is never repeated by this operation.
+	existing, err := s.queries.FindAgenvoUserRuntime(ctx, dbsqlc.FindAgenvoUserRuntimeParams{OwnerID: owner, ProviderConfig: config})
+	if err == nil {
+		return userRuntimeRecord(existing), nil
+	}
+	if !errors.Is(mapQueryErr(err), db.ErrNotFound) {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	row, err := s.queries.CreateAgenvoUserRuntime(ctx, dbsqlc.CreateAgenvoUserRuntimeParams{OwnerID: owner, Name: name, ProviderConfig: config})
+	if err != nil {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	return userRuntimeRecord(row), nil
 }

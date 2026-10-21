@@ -122,6 +122,10 @@
             class="size-4 shrink-0"
           />
           <span class="min-w-0 flex-1 truncate">{{ displayName(target) }}</span>
+          <span
+            v-if="target.provider === 'agenvo'"
+            class="text-caption text-muted-foreground"
+          >{{ t('agenvo.capability') }}</span>
           <!-- Positive states (default / online) say nothing — being listed at
                all already means usable. Only an unavailable target carries a
                reason label, and the row greys out via :disabled above. -->

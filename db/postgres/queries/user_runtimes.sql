@@ -13,6 +13,7 @@ JOIN team_members owner_membership
 JOIN users owner ON owner.id = owner_membership.user_id AND owner.is_active = TRUE
 WHERE runtime.team_id = public.memoh_current_team_id()
   AND runtime.api_token = sqlc.arg(api_token)
+  AND runtime.provider = 'memoh'
   AND runtime.revoked_at IS NULL
   AND (runtime.activated_at IS NOT NULL OR runtime.pending_expires_at > now());
 
@@ -27,6 +28,7 @@ FROM team_members owner_membership, users owner
 WHERE runtime.team_id = public.memoh_current_team_id()
   AND runtime.id = sqlc.arg(id)
   AND runtime.api_token = sqlc.arg(api_token)
+  AND runtime.provider = 'memoh'
   AND runtime.revoked_at IS NULL
   AND (runtime.activated_at IS NOT NULL OR runtime.pending_expires_at > now())
   AND owner_membership.team_id = public.memoh_current_team_id()
@@ -117,6 +119,8 @@ SELECT
   binding.created_at,
   binding.updated_at,
   runtime.name AS runtime_name,
+  runtime.provider AS runtime_provider,
+  runtime.provider_config AS runtime_provider_config,
   runtime.user_id AS runtime_user_id,
   (runtime.revoked_at IS NOT NULL OR NOT owner.is_active OR NOT owner_membership.is_active) AS runtime_unavailable,
   bot.owner_user_id AS bot_owner_user_id
@@ -142,6 +146,8 @@ SELECT
   binding.created_at,
   binding.updated_at,
   runtime.name AS runtime_name,
+  runtime.provider AS runtime_provider,
+  runtime.provider_config AS runtime_provider_config,
   runtime.user_id AS runtime_user_id,
   (runtime.revoked_at IS NOT NULL OR NOT owner.is_active OR NOT owner_membership.is_active) AS runtime_unavailable,
   bot.owner_user_id AS bot_owner_user_id
@@ -166,6 +172,8 @@ SELECT
   binding.created_at,
   binding.updated_at,
   runtime.name AS runtime_name,
+  runtime.provider AS runtime_provider,
+  runtime.provider_config AS runtime_provider_config,
   runtime.user_id AS runtime_user_id,
   (runtime.revoked_at IS NOT NULL OR NOT owner.is_active OR NOT owner_membership.is_active) AS runtime_unavailable,
   bot.owner_user_id AS bot_owner_user_id
@@ -228,3 +236,28 @@ WHERE binding.team_id = public.memoh_current_team_id()
   AND bot.owner_user_id = sqlc.arg(owner_user_id)
   AND runtime.revoked_at IS NULL
 ORDER BY binding.created_at ASC, binding.id ASC;
+
+-- name: OwnedHTTPMCPConnectionBot :one
+SELECT bot.id FROM mcp_connections connection
+JOIN bots bot ON bot.id = connection.bot_id AND bot.team_id = public.memoh_current_team_id()
+JOIN team_members membership ON membership.team_id = public.memoh_current_team_id() AND membership.user_id = bot.owner_user_id AND membership.is_active
+JOIN users owner ON owner.id = bot.owner_user_id AND owner.is_active
+WHERE connection.team_id = public.memoh_current_team_id()
+  AND connection.id = sqlc.arg(connection_id)
+  AND bot.owner_user_id = sqlc.arg(owner_id)
+  AND connection.is_active AND connection.type = 'http';
+
+-- name: CreateAgenvoUserRuntime :one
+INSERT INTO user_runtimes (user_id, name, api_token, provider, provider_config, activated_at, pending_expires_at)
+VALUES (sqlc.arg(owner_id), sqlc.arg(name), 'agenvo_' || gen_random_uuid()::text, 'agenvo', sqlc.arg(provider_config), now(), NULL)
+ON CONFLICT (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL
+DO UPDATE SET updated_at = user_runtimes.updated_at
+WHERE user_runtimes.provider_config = EXCLUDED.provider_config
+RETURNING *;
+
+-- name: FindAgenvoUserRuntime :one
+SELECT * FROM user_runtimes
+WHERE team_id = public.memoh_current_team_id() AND user_id = sqlc.arg(owner_id)
+  AND provider = 'agenvo' AND provider_config = sqlc.arg(provider_config)
+  AND revoked_at IS NULL
+ORDER BY created_at LIMIT 1;

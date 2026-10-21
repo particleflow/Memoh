@@ -1105,6 +1105,8 @@ type UserRuntime struct {
 	UserID           pgtype.UUID        `json:"user_id"`
 	Name             string             `json:"name"`
 	ApiToken         string             `json:"api_token"`
+	Provider         string             `json:"provider"`
+	ProviderConfig   []byte             `json:"provider_config"`
 	RevokedAt        pgtype.Timestamptz `json:"revoked_at"`
 	ActivatedAt      pgtype.Timestamptz `json:"activated_at"`
 	PendingExpiresAt pgtype.Timestamptz `json:"pending_expires_at"`

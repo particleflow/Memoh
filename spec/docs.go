@@ -6182,6 +6182,15 @@ const docTemplate = `{
                     "mcp"
                 ],
                 "summary": "List MCP connections",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -16851,7 +16860,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Register a Remote Runtime and return its reusable API token.",
+                "description": "Register a native Remote Runtime credential or an Agenvo command target backed by an existing account-owned MCP connection. Agenvo registrations return no API token.",
                 "consumes": [
                     "application/json"
                 ],
@@ -16861,7 +16870,7 @@ const docTemplate = `{
                 "tags": [
                     "user-runtimes"
                 ],
-                "summary": "Create a Remote Runtime credential",
+                "summary": "Register an account computer",
                 "parameters": [
                     {
                         "description": "Runtime configuration",
@@ -16894,6 +16903,60 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/agenvo/discover": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "List Herdr instances from an existing account-owned MCP connection",
+                "parameters": [
+                    {
+                        "description": "Existing MCP connection",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DiscoverAgenvoRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/agenvo.DiscoveredInstance"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -18415,6 +18478,49 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.DiscoveredInstance": {
+            "type": "object",
+            "properties": {
+                "device_id": {
+                    "type": "string"
+                },
+                "device_name": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "online": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "agenvo.Target": {
+            "type": "object",
+            "properties": {
+                "bash_path": {
+                    "type": "string"
+                },
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "session": {
+                    "type": "string"
+                },
+                "work_dir": {
                     "type": "string"
                 }
             }
@@ -22857,6 +22963,17 @@ const docTemplate = `{
                 },
                 "reasoning_tokens": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.DiscoverAgenvoRequest": {
+            "type": "object",
+            "required": [
+                "connection_id"
+            ],
+            "properties": {
+                "connection_id": {
+                    "type": "string"
                 }
             }
         },
@@ -27858,7 +27975,13 @@ const docTemplate = `{
         "userruntime.CreateRuntimeRequest": {
             "type": "object",
             "properties": {
+                "agenvo": {
+                    "$ref": "#/definitions/agenvo.Target"
+                },
                 "name": {
+                    "type": "string"
+                },
+                "provider": {
                     "type": "string"
                 }
             }
@@ -27897,6 +28020,9 @@ const docTemplate = `{
                     "type": "boolean"
                 },
                 "os": {
+                    "type": "string"
+                },
+                "provider": {
                     "type": "string"
                 },
                 "team_id": {
@@ -28271,6 +28397,12 @@ const docTemplate = `{
         "workspace.WorkspaceTarget": {
             "type": "object",
             "properties": {
+                "capabilities": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -28282,6 +28414,9 @@ const docTemplate = `{
                 },
                 "primary": {
                     "type": "boolean"
+                },
+                "provider": {
+                    "type": "string"
                 },
                 "runtime_id": {
                     "type": "string"

@@ -55,6 +55,7 @@ func (h *MCPHandler) Register(e *echo.Echo) {
 }
 
 // List godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary List MCP connections
 // @Description List MCP connections for a bot
 // @Tags mcp

@@ -29,6 +29,15 @@
       v-if="backgroundOutput"
       class="text-foreground overflow-x-auto whitespace-pre-wrap break-all max-h-72 overflow-y-auto"
     >{{ backgroundOutput }}</pre>
+    <CalloutBanner
+      v-if="agenvoReceipt"
+      :tone="agenvoReceipt.state === 'completed' ? 'neutral' : 'warning'"
+      :description="agenvoNotice"
+    />
+    <pre
+      v-if="combinedOutput"
+      class="text-foreground overflow-x-auto whitespace-pre-wrap break-all max-h-72 overflow-y-auto"
+    >{{ combinedOutput }}</pre>
     <pre
       v-if="stdout"
       class="text-foreground overflow-x-auto whitespace-pre-wrap break-all max-h-72 overflow-y-auto"
@@ -45,7 +54,7 @@
       v-if="fallbackText"
       class="text-foreground overflow-x-auto whitespace-pre-wrap break-all max-h-72 overflow-y-auto"
     >{{ fallbackText }}</pre>
-    <EmptyRow v-if="!progressText && !backgroundOutput && !stdout && !stderr && !errorText && !fallbackText">
+    <EmptyRow v-if="!agenvoReceipt && !combinedOutput && !progressText && !backgroundOutput && !stdout && !stderr && !errorText && !fallbackText">
       {{ isBackgroundActive ? t('chat.tools.detail.waitingOutput') : t('chat.tools.detail.noOutput') }}
     </EmptyRow>
   </div>
@@ -53,6 +62,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { CalloutBanner } from '@felinic/ui'
 import { useI18n } from 'vue-i18n'
 import type { ToolCallBlock } from '@/store/chat-list'
 import EmptyRow from './tool-detail/empty-row.vue'
@@ -73,6 +83,25 @@ function resolveResult(): Record<string, unknown> | null {
   const sc = result.structuredContent as Record<string, unknown> | undefined
   return sc ?? result
 }
+
+const agenvoReceipt = computed(() => {
+  const result = resolveResult()
+  const receipt = result?.result && typeof result.result === 'object'
+    ? result.result as Record<string, unknown> : result
+  return typeof receipt?.cleanup_required === 'boolean' && typeof receipt.state === 'string' ? receipt : null
+})
+const combinedOutput = computed(() => {
+  const value = agenvoReceipt.value?.output
+  return typeof value === 'string' ? value : ''
+})
+const agenvoNotice = computed(() => {
+  const receipt = agenvoReceipt.value
+  if (!receipt) return ''
+  const parts = [receipt.state === 'completed' ? t('agenvo.completed') : t('agenvo.uncertain')]
+  if (receipt.cleanup_required) parts.push(t('agenvo.retained', { id: receipt.workspace_id || '' }))
+  if (receipt.truncated) parts.push(t('agenvo.truncated'))
+  return parts.join(' ')
+})
 
 // 退出码属于按需查看的执行诊断，不应出现在工具标题中。
 const exitLabel = computed(() => {
@@ -130,7 +159,7 @@ const errorText = computed(() => {
 // (rather than structuredContent.stdout). Only used when nothing else matched
 // so we never silently show "no output" when output is actually present.
 const fallbackText = computed(() => {
-  if (stdout.value || stderr.value || errorText.value) return ''
+  if (agenvoReceipt.value || stdout.value || stderr.value || errorText.value) return ''
   const result = props.block.result as Record<string, unknown> | null
   if (!result || !Array.isArray(result.content)) return ''
   return (result.content as Array<Record<string, unknown>>)

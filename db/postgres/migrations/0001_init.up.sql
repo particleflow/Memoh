@@ -292,6 +292,8 @@ CREATE TABLE IF NOT EXISTS user_runtimes (
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL CHECK (btrim(name) <> ''),
   api_token TEXT NOT NULL UNIQUE,
+  provider TEXT NOT NULL DEFAULT 'memoh',
+  provider_config JSONB NOT NULL DEFAULT '{}'::jsonb,
   revoked_at TIMESTAMPTZ,
   activated_at TIMESTAMPTZ,
   pending_expires_at TIMESTAMPTZ DEFAULT (now() + INTERVAL '15 minutes'),
@@ -3109,3 +3111,5 @@ CREATE POLICY bot_memory_usage_team_update ON public.bot_memory_usage
   WITH CHECK (team_id = public.memoh_current_team_id());
 CREATE POLICY bot_memory_usage_team_delete ON public.bot_memory_usage
   FOR DELETE USING (team_id = public.memoh_current_team_id());
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_runtimes_agenvo_config ON user_runtimes (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL;

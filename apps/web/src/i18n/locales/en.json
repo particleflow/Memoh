@@ -527,6 +527,7 @@
       "display_prepare_failed": "Display preparation failed.",
       "image_not_found": "The workspace image does not exist, needs registry credentials, or its name is invalid. Check the image name and try again.",
       "image_registry_unavailable": "The image registry could not be reached. Please try again later.",
+      "operation_unsupported": "This target supports foreground commands only. Choose another computer for file or terminal operations.",
       "teardown_failed": "Workspace removal failed. Retry deleting the bot.",
       "template_bootstrap_failed": "The workspace files could not be initialized. Please try rebuilding the workspace.",
       "unreachable": "The workspace could not be reached."
@@ -4487,5 +4488,30 @@
   "elicitation": {
     "done": "Done",
     "cancel": "Cancel"
+  },
+  "agenvo": {
+    "bashPathHelp": "Absolute Windows path to the verified Git Bash bash.exe. Do not use the WSL launcher or rely on PATH.",
+    "bashPath": "Git Bash executable",
+    "connect": "Connect Agenvo",
+    "description": "Register an existing Agenvo connection as a Windows Bash command target.",
+    "limits": "Foreground Bash commands only. File/HostFS APIs, interactive terminals and managed background tasks are unavailable. Cancellation stops waiting; workspaces remain for inspection. Authorized Bots share the Windows account’s access.",
+    "sourceBot": "Bot with the existing connection",
+    "connection": "Agenvo MCP connection",
+    "connectionHelp": "Only active HTTP connections owned by your account can be shared.",
+    "device": "Windows device / Herdr instance",
+    "choose": "Choose…",
+    "name": "Computer name",
+    "session": "Herdr session",
+    "sessionHelp": "Enter an existing session name. Registration checks that this session is reachable.",
+    "workDir": "Windows working directory",
+    "discovering": "Checking available connections…",
+    "register": "Connect and choose Bots",
+    "noConnections": "No active HTTP MCP connection on this Bot. Configure Agenvo in its MCP settings first.",
+    "noDevices": "No Herdr instances found on this connection.",
+    "capability": "Agenvo · commands only",
+    "completed": "Foreground command completed. Output combines stdout and error text.",
+    "uncertain": "Command outcome is unknown or rejected. Stopping the wait does not stop Windows execution. Inspect it before retrying.",
+    "retained": "Workspace {id} is retained for manual inspection; it was not closed automatically.",
+    "truncated": "Output was truncated."
   }
 }

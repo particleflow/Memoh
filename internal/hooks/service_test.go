@@ -1251,3 +1251,34 @@ func newHookBridgeTestClient(t *testing.T, server pb.ContainerServiceServer) *br
 	})
 	return bridge.NewClientFromConn(conn)
 }
+
+type limitedHookProvider struct{ config *bridge.Client }
+
+func (p limitedHookProvider) HookConfigClient(context.Context, string) (*bridge.Client, error) {
+	return p.config, nil
+}
+
+func (limitedHookProvider) MCPClient(context.Context, string) (*bridge.Client, error) {
+	return bridge.UnsupportedClient(), nil
+}
+
+func TestLimitedTargetLoadsPolicyWithoutExecutingOnPolicyStorage(t *testing.T) {
+	server := &hookBridgeTestServer{files: map[string][]byte{DefaultConfigPath: emptyConfigFile}}
+	service := NewService(nil, limitedHookProvider{config: newHookBridgeTestClient(t, server)})
+	ctx := bridge.WithWorkspaceTarget(t.Context(), "limited")
+	if _, err := service.Run(ctx, Request{Event: EventUserMessageReceived, BotID: "bot"}, nil); err != nil {
+		t.Fatal(err)
+	}
+	server.mu.Lock()
+	server.files[DefaultConfigPath] = []byte(`{"version":1,"enabled":true,"hooks":[{"name":"policy","event":"UserMessageReceived","actions":[{"type":"command","command":"must not execute on policy storage","on_error":"block"}]}]}`)
+	server.mu.Unlock()
+	result, err := service.Run(ctx, Request{Event: EventUserMessageReceived, BotID: "bot"}, nil)
+	if err == nil || result.Decision != DecisionDeny {
+		t.Fatalf("policy was bypassed: %+v %v", result, err)
+	}
+	server.mu.Lock()
+	defer server.mu.Unlock()
+	if len(server.execs) != 0 {
+		t.Fatal("command fell back to policy storage")
+	}
+}
