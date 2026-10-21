@@ -59,15 +59,25 @@ limited to Bot grants. The same checks apply to result, cancellation and refs.
 7. Observation first reads the job terminal without typing. If the frame has
    scrolled away, a fixed read on the separate control shell retrieves the
    receipt. No receipt means unknown. No kill, close, focus or interrupt is sent.
-8. Import files in at most 16 KiB chunks through that control shell, with unique
+8. Import files in at most 2 KiB chunks through that control shell, with unique
    response frames. Verify chunk readiness and the complete file hash before
    exposing content refs. Persist only refs, offsets and a bounded text preview,
    never the complete JSONL in conversation/operation context. One observation
    imports at most 16 pages within its time budget; another observation resumes.
-   Herdr limits `recent-unwrapped` by rendered rows. Read-only snapshots grow
-   from 4 to at most 1000 rows until the full frame is present; input is not
-   repeated. Extremely narrow terminals, changed panes or connector size errors
-   can leave observation unknown/pending, never falsely complete.
+   Agenvo 0.2.0 [pane.read schema](https://github.com/Xuanwo/agenvo/blob/v0.2.0/apps/herdr/src/herdr.ts#L67-L73)
+   permits only 1–500 rendered rows; `recent-unwrapped` does not change that
+   unit. Start with eight rows and wait for this response's exact nonce end
+   marker before expanding, so delayed responses do not expand into unrelated
+   historical frames. A connector `result_too_large` narrows only the read.
+   The snapshot never exceeds 500 rows and no input is repeated in that poll.
+   Data pages are 2 KiB; complete receipt recovery has an independent 4 KiB
+   budget, including long native IDs. Existing 16 KiB chunks remain valid:
+   continuation uses their saved byte offsets without resetting the attempt.
+   Synthetic coverage includes 16/43/44/80/240-column panes and very wide
+   oversized history. Arbitrarily narrow terminals or long prompt decoration
+   can still leave observation unknown/pending; there is no guarantee that
+   every terminal geometry can carry a complete frame. Read rejection such as
+   `invalid_params` is not evidence that the Pi invocation did not start.
 
 `generation` is a wrapper invocation nonce, **not** Herdr's internal generation.
 Control pane metadata is checked before use, but Herdr does not expose an atomic
@@ -77,6 +87,14 @@ not start another Pi or close any workspace. Concurrent read observations can
 fail their frame/CAS checks and remain pending; they never repeat the business
 task. High-privilege local programs can access the running account's files: this
 protocol is not an OS sandbox or protection from a malicious local process.
+
+A future user task panel must consume a separate allowlisted projection: raw Pi
+JSONL may contain internal reasoning and is not a user-facing activity log.
+Current task tools enforce operation/session/target scope, but the existing media
+GET authorizes Bot plus content hash, not that narrower operation scope. Raw hash
+refs therefore must not be presented as task-scoped download authorization.
+Session-tree listing, safe projections and operation-authorized attachments are
+separate follow-up work, not part of this reader correction.
 
 ## Result semantics
 

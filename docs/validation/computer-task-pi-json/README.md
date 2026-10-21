@@ -77,13 +77,14 @@ No browser errors occurred. No media code or migration was changed.
 
 ![Current Web verifies empty stderr without a false artifact ref](empty-stderr.png)
 
-### Rendered-row correction
+### Historical rendered-row correction (superseded)
 
 Official Herdr 0.9.5
 [terminal reads](https://github.com/herdrdev/herdr/blob/v0.9.5/src/pane/terminal.rs#L2770-L2815)
 count rendered rows even for `recent-unwrapped`. Fixed four-row reads could
-omit the start of a long base64 page. The service now grows only the read
-snapshot (4 through at most 1000 rows) until a complete frame fits, without
+omit the start of a long base64 page. That candidate grew only the read
+snapshot (4 through at most 1000 rows; this exceeded the Agenvo schema and
+was invalidated by subsequent Windows acceptance) until a complete frame fits, without
 repeating pane.run. The standard MCP regression and browser relay now simulate
 80-column soft wrapping. Race, lint and build passed; the rebuilt Web completed
 another fresh synthetic large-output task with no browser errors. `web.png`
@@ -98,12 +99,56 @@ cases. Race/lint/build and a fresh browser large-output flow passed after this
 preflight correction; `web.png` was refreshed again. Failure to write any receipt
 still remains unknown and must not be retried as a business task.
 
+## Agenvo read-limit correction after Windows rejection
+
+Windows acceptance invalidated the `940e1655` reader: it requested 512 rows,
+while Agenvo 0.2.0 allows at most 500. The already submitted invocation had a
+correlated exit receipt and files; the read error did not establish no-start.
+No real operation IDs, host paths, outputs or credentials are included here.
+
+The regression fixture now loads JSON Schema generated directly from the
+fixed official v0.2.0 `herdr.ts` Zod `pane.read` declaration. Its 500 boundary is
+accepted; 501/512/1000 and invented fields are rejected. The original reader
+failed that fixture at `lines=512` before the correction.
+
+The corrected reader uses 2 KiB data pages and a separate 4 KiB complete-receipt
+budget. Delayed current frames do not expand snapshots into old frames. Only
+this read's exact nonce end marker permits expansion, always capped at 500;
+a vendor `result_too_large` narrows the observation without repeating input.
+An observation's `invalid_params/not_started` remains an unknown observation,
+with the submitted task receipt and slot intact. Only its own valid invocation
+receipt may establish that Pi did not start.
+
+The affected-package race suite and lint passed. Standard MCP regressions cover
+16/43/44/80/240-column snapshots, accumulated old 16 KiB frames, command echo,
+delayed current responses, oversized wide history, long-ID receipt recovery,
+and a fresh service reading legacy 16 KiB chunks from the saved byte offset.
+The task attempt, old chunk refs and offset are preserved. Later read recovery
+completes the same operation without another Pi dispatch. Core boundary and
+server build passed.
+
+The initial Web restart used an incorrect configuration environment name and
+failed before task submission; corrected `CONFIG_PATH` restored health 200.
+The first strict cloud relay flow completed output ingestion and Pi semantics,
+but its synthetic provider's message-count fixture looped on completed results.
+The fixture was corrected to use typed tool results and unique tool-call IDs;
+it does not modify the Agent core. A subsequent discovery-only fixture failure
+submitted no task. The final fresh browser session passed: one batch submission,
+54 fixed page reads, zero close operations, no browser errors, `pi_succeeded`,
+and complete ready stdout/stderr refs. The strict relay used a 43-column terminal,
+accumulated old frames, delayed responses, lines <=500 and the connector response
+size bound. The screenshot below was captured and visually inspected from the
+corrected running service. This remains synthetic vendor/provider acceptance.
+
+![Corrected reader completes the strict cloud Web flow](web-500.png)
+
 ## Remaining acceptance
 
-Independent review, GitHub CI and controlled Windows Git Bash + unchanged Pi
+The corrected reader still requires independent review, GitHub CI and controlled Windows Git Bash + unchanged Pi
 1.2.0 + existing Magpie acceptance are still required before release. No new
 migration is introduced: operation details and media refs reuse schema170.
 See [the protocol contract](../../computer-task-pi-json.md) for control-channel
 restart/ID-reuse limitations, non-sandbox trust boundaries, output limits and
-honest cancellation semantics. No production images for this iteration have
-been published and no NAS deployment was performed by this task.
+honest cancellation semantics. The prior `940e1655` candidate was published and exposed the read-limit defect
+in controlled Windows acceptance; it must not be merged/promoted as accepted.
+The correction has not been published. No NAS deployment was performed by this task.

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -103,8 +104,20 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 }
 
 func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, pane string, lines int) (string, error) {
+	// Agenvo v0.2.0 herdr.ts uses z.number().int().min(1).max(500).
+	if lines < 1 || lines > batchReadMaxLines {
+		return "", ErrUnknown
+	}
 	r, err := c.native(ctx, scope, target, "pane.read", map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"})
 	if err != nil {
+		if r.Error != nil && r.Error.Code == "result_too_large" {
+			return "", errBatchSnapshotTooLarge
+		}
+		// Rejection applies to this observation, never to the already
+		// submitted Pi invocation. Only a correlated receipt proves no start.
+		if errors.Is(err, ErrRejected) {
+			return "", ErrUnknown
+		}
 		return "", err
 	}
 	var out struct {
@@ -127,7 +140,7 @@ func (s *Service) ObserveBatch(ctx context.Context, scope Scope, p BatchProgress
 		return nil, err
 	}
 	text, err := c.readBatchPane(ctx, scope, target, p.PaneID, 20)
-	if err != nil {
+	if err != nil && !errors.Is(err, errBatchSnapshotTooLarge) {
 		return nil, err
 	}
 	receipt, err := parseBatchReceipt(text, p)
@@ -136,18 +149,26 @@ func (s *Service) ObserveBatch(ctx context.Context, scope Scope, p BatchProgress
 	}
 	// A terminal snapshot may have lost the frame. Read the immutable receipt
 	// through the separate control pane; never type a status query into Pi.
-	raw, err := s.readBatchFile(ctx, scope, p, "receipt.json", 0, BatchPageBytes)
+	raw, err := s.readBatchFile(ctx, scope, p, "receipt.json", 0, batchReceiptBytes)
 	if err != nil || len(raw) == 0 {
 		return nil, err
 	}
 	var persisted BatchReceipt
-	if len(raw) >= BatchPageBytes || json.Unmarshal(raw, &persisted) != nil || persisted.Validate(p) != nil {
+	if len(raw) >= batchReceiptBytes || json.Unmarshal(raw, &persisted) != nil || persisted.Validate(p) != nil {
 		return nil, ErrUnknown
 	}
 	return &persisted, nil
 }
 
-const BatchPageBytes = 16384
+// Data pages are independent of the receipt's complete JSON budget. Persisted
+// offsets/chunks remain byte based, including those written with 16 KiB pages.
+const (
+	BatchPageBytes    = 2048
+	batchReceiptBytes = 4096
+	batchReadMaxLines = 500
+)
+
+var errBatchSnapshotTooLarge = errors.New("batch observation exceeds connector response limit")
 
 // ReadBatchPage reads only a receipt-bound stdout/stderr file. It is never a
 // model-specified path or shell command. The control pane never hosts Pi.
@@ -171,7 +192,11 @@ func (s *Service) ReadBatchPage(ctx context.Context, scope Scope, p BatchProgres
 // readBatchFile issues a bounded, fixed read on the dedicated control shell.
 // An absent receipt is a complete empty response, not evidence of termination.
 func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgress, name string, offset, count int64) ([]byte, error) {
-	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > BatchPageBytes || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt") {
+	limit := int64(BatchPageBytes)
+	if name == "receipt.json" {
+		limit = batchReceiptBytes
+	}
+	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt") {
 		return nil, ErrUnsupported
 	}
 	c, target, err := s.Client(ctx, scope)
@@ -180,6 +205,9 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	}
 	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
 	if err != nil {
+		if errors.Is(err, ErrRejected) {
+			return nil, ErrUnknown
+		}
 		return nil, err
 	}
 	var info struct {
@@ -202,25 +230,37 @@ printf ':END_FILE_%s\r\n'
 `, shellData(target.WorkDir), p.Attempt, name, nonce, offset, count, nonce)
 	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": launchBashScript(script, target.BashPath)})
 	if err != nil {
+		if errors.Is(err, ErrRejected) {
+			return nil, ErrUnknown
+		}
 		return nil, err
 	} // never repeat an uncertain input call
-	lines := 4
+	lines := 8
 	for {
-		// Herdr 0.9.5 counts rendered rows even for recent-unwrapped. Grow
-		// read-only snapshots until the whole frame fits, rather than assuming
-		// a base64 logical line occupies one row. Never repeat pane.run here.
+		// Do not expand into old history while this response is delayed.
+		// Only this nonce's exact end marker permits growing the snapshot.
+		// Herdr counts rendered rows even for recent-unwrapped.
 		text, err := c.readBatchPane(ctx, scope, target, p.ControlPane, lines)
-		if err != nil {
+		if errors.Is(err, errBatchSnapshotTooLarge) {
+			// Old terminal history can exceed 64 KiB even for a legal row
+			// count. Narrow only the read; never retype the control command.
+			if lines == 1 {
+				return nil, ErrUnknown
+			}
+			lines = max(1, lines/2)
+		} else if err != nil {
 			return nil, err
 		}
 		var data []byte
 		found := false
+		ended := false
 		for _, line := range strings.Split(strings.ReplaceAll(text, "\r\n", "\n"), "\n") {
 			start, end := "MEMOH_FILE_"+nonce+":", ":END_FILE_"+nonce
+			ended = ended || strings.HasSuffix(line, end)
 			if !strings.HasPrefix(line, start) || !strings.HasSuffix(line, end) {
 				continue
 			}
-			if found || len(line) > 2*BatchPageBytes {
+			if found || len(line) > base64.StdEncoding.EncodedLen(int(count))+len(start)+len(end) {
 				return nil, ErrUnknown
 			}
 			data, err = base64.StdEncoding.DecodeString(strings.TrimSuffix(strings.TrimPrefix(line, start), end))
@@ -232,9 +272,12 @@ printf ':END_FILE_%s\r\n'
 		if found {
 			return data, nil
 		}
-		if lines < 1000 {
-			lines = min(lines*2, 1000) // official pane.read maximum
+		if ended && lines < batchReadMaxLines {
+			lines = min(lines*2, batchReadMaxLines)
 			continue
+		}
+		if ended {
+			return nil, ErrUnknown // complete frame does not fit the legal window
 		}
 		timer := time.NewTimer(100 * time.Millisecond)
 		select {

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"time"
 
@@ -115,6 +116,9 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 	if batch.Receipt == nil {
 		receipt, err := s.relay.ObserveBatch(readCtx, scope(b, r.TargetID), batch.Progress)
 		if err != nil {
+			if errors.Is(err, agenvo.ErrUnknown) {
+				return result(r, d), err
+			}
 			return Result{}, err
 		}
 		if receipt == nil {
@@ -158,6 +162,9 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 			}
 			raw, err := s.relay.ReadBatchPage(readCtx, scope(b, r.TargetID), batch.Progress, *batch.Receipt, f.Meta, f.Offset)
 			if err != nil {
+				if errors.Is(err, agenvo.ErrUnknown) {
+					return result(r, d), err
+				}
 				return Result{}, err
 			}
 			hash, err := s.storeBatchBytes(ctx, b.BotID, raw)
