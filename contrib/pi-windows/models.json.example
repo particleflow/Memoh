@@ -1,0 +1,11 @@
+{
+  "providers": {
+    "magpie": {
+      "baseUrl": "https://gateway.invalid/v1",
+      "api": "openai-completions",
+      "apiKey": "!powershell.exe -NoLogo -NoProfile -NonInteractive -File \"${PI_CODING_AGENT_DIR}/read-dpapi.ps1\"",
+      "authHeader": true,
+      "models": [{ "id": "codex/gpt-6.1-sol" }]
+    }
+  }
+}

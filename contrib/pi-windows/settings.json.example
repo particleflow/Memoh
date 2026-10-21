@@ -1,0 +1,4 @@
+{
+  "defaultProvider": "magpie",
+  "defaultModel": "codex/gpt-6.1-sol"
+}
