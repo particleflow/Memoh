@@ -90,6 +90,14 @@ another fresh synthetic large-output task with no browser errors. `web.png`
 was refreshed and inspected from that run. Narrow-terminal or relay-size
 failures remain unknown/pending rather than relaxing nonce/frame/hash checks.
 
+The envelope also writes a correlated `not_started` receipt when the requested
+directory is absent, Pi is not on the configured PATH, or the session lock is
+already held, provided its result directory and basic shell utilities remain
+available. The actual Bash regression covers the absent-directory and held-lock
+cases. Race/lint/build and a fresh browser large-output flow passed after this
+preflight correction; `web.png` was refreshed again. Failure to write any receipt
+still remains unknown and must not be retried as a business task.
+
 ## Remaining acceptance
 
 Independent review, GitHub CI and controlled Windows Git Bash + unchanged Pi

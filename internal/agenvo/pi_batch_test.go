@@ -104,6 +104,15 @@ func TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt(t *testing.T) {
 	if string(input) != task {
 		t.Fatal("another attempt concurrently invoked Pi")
 	}
+	// A nonexistent working directory is a proven pre-input rejection, not a
+	// forever-unknown task. It must still emit the atomic not-started receipt.
+	next.Attempt = strings.Repeat("1", 32)
+	script = batchScript(next, target, filepath.Join(dir, "missing-directory"), "must not start")
+	output, err = run()
+	missing, parseErr := parseBatchReceipt(string(output), next)
+	if err != nil || parseErr != nil || missing == nil || missing.Started || missing.ExitCode != 125 {
+		t.Fatal("preflight failure lost its receipt")
+	}
 	p.Generation = strings.Repeat("e", 32)
 	if r.Validate(p) == nil {
 		t.Fatal("stale attempt generation accepted")

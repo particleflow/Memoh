@@ -94,12 +94,11 @@ func batchScript(p BatchProgress, target Target, cwd, task string) string {
 	return fmt.Sprintf(`set -euo pipefail
 umask 077
 case "$(uname -s)" in MINGW*_NT-*|MSYS_NT-*) ;; *) exit 125 ;; esac
-for t in base64 cygpath sha256sum wc mkdir mv rm rmdir pi; do command -v "$t" >/dev/null || exit 125; done
+for t in base64 cygpath sha256sum wc mkdir mv rm rmdir; do command -v "$t" >/dev/null || exit 125; done
 memoh_root=%s; memoh_root="${memoh_root%%.}"
 memoh_cwd=%s; memoh_cwd="${memoh_cwd%%.}"
 memoh_root="$(cygpath -u "$memoh_root")"
 memoh_cwd="$(cygpath -u "$memoh_cwd")"
-cd "$memoh_cwd"
 memoh_attempt="$memoh_root/.memoh-computer/attempts/%s"
 memoh_session="$memoh_root/.memoh-computer/sessions/%s"
 mkdir -p "$memoh_root/.memoh-computer/attempts" "$memoh_session"
@@ -110,7 +109,7 @@ printf '%%s' '%s' | base64 --decode > "$memoh_attempt/prompt.txt"
 memoh_started=false
 memoh_exit=125
 memoh_locked=false
-if mkdir "$memoh_session/lock" 2>/dev/null; then
+if cd "$memoh_cwd" && command -v pi >/dev/null && mkdir "$memoh_session/lock" 2>/dev/null; then
   memoh_locked=true
   printf '%%s' '%s' > "$memoh_session/lock/owner"
   memoh_provider=%s; memoh_provider="${memoh_provider%%.}"
