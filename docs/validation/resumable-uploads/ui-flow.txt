@@ -1,0 +1,26 @@
+PASS real UI: login, existing synthetic Bot, file picker, pending attachment preview visible
+UI attachment bytes 1200000 sha256 3c6c887f8b336301e8ee12d4a5710096e016e94fd125f90ebbad1489b7456c37
+No send/model turn; no model configured. File selection stages the existing UI preview; independent byte transfer is verified separately through live HTTP.
+SU
+Synthetic upload validation
+Chat
+Files
+Schedule
+Supermarket
+Quick Actions
+New Session
+Bot Settings
+Folders
+Recents
+No sessions yet
+See what Memoh can do
+AD
+admin
+New Session
+Ready when you are.
+synthetic-ui-attachment.txt
+24001 lines
+TXT
+None
+Cloud Computer
+Memoh

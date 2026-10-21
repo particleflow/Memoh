@@ -22,6 +22,7 @@ type Service struct {
 	logger             *slog.Logger
 	requirePersistence bool
 	maxUploadBytes     int64
+	uploads            *UploadStore
 }
 
 // SetMaxUploadBytes configures HTTP attachment admission. Zero keeps the default.
@@ -77,6 +78,10 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 		_ = os.Remove(tempFile.Name()) //nolint:gosec // G703: path is from os.CreateTemp, not from user input
 	}()
 
+	return s.persist(ctx, input, contentHash, sizeBytes, tempFile)
+}
+
+func (s *Service) persist(ctx context.Context, input IngestInput, contentHash string, sizeBytes int64, reader io.Reader) (Asset, error) {
 	mime := coalesce(input.Mime, "application/octet-stream")
 	ext := extensionFromMime(mime)
 	if ext == ".bin" && input.OriginalExt != "" {
@@ -103,7 +108,7 @@ func (s *Service) Ingest(ctx context.Context, input IngestInput) (Asset, error) 
 		}, nil
 	}
 
-	if err := s.provider.Put(ctx, routingKey, tempFile); err != nil {
+	if err := s.provider.Put(ctx, routingKey, reader); err != nil {
 		return Asset{}, fmt.Errorf("store media: %w", err)
 	}
 	if err := ctx.Err(); err != nil {

@@ -1,0 +1,5 @@
+=== RUN   TestUploadsLarge512MiB
+    uploads_test.go:323: synthetic_bytes=536870912 chunks=64 elapsed=5.819951546s sampled_peak_heap_bytes=3897072 sha256=9acca8e8c22201155389f65abbf6bc9723edc7384ead80503839f49dcc56d767
+--- PASS: TestUploadsLarge512MiB (6.08s)
+PASS
+exit=0 peak_rss_kib=10044 user_seconds=3.855553 system_seconds=1.5589879999999998
