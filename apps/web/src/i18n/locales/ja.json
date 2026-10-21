@@ -4488,7 +4488,7 @@
     "bashPath": "Git Bash の実行ファイル",
     "connect": "Agenvo に接続",
     "description": "既存の Agenvo 接続を Windows の Bash コマンド実行先として登録します。",
-    "limits": "フォアグラウンドの Bash コマンドのみ対応。ファイル操作、対話端末、バックグラウンド処理は利用できません。キャンセルは待機のみを停止し、ワークスペースは確認用に保持します。 許可された Bot は Windows アカウントのアクセス権を共有します。",
+    "limits": "フォアグラウンドの Bash コマンドのみ対応。ファイル/HostFS API、対話端末、管理されたバックグラウンド処理は利用できません。キャンセルは待機のみを停止し、ワークスペースは確認用に保持します。 許可された Bot は Windows アカウントのアクセス権を共有します。",
     "sourceBot": "既存の接続を持つ Bot",
     "connection": "Agenvo MCP 接続",
     "connectionHelp": "自分が所有する有効な HTTP 接続のみ共有できます。",

@@ -4494,7 +4494,7 @@
     "bashPath": "Git Bash 可执行文件",
     "connect": "连接 Agenvo",
     "description": "将已有 Agenvo 连接注册为 Windows Bash 命令目标。",
-    "limits": "仅支持前台 Bash 命令。文件、交互终端和后台任务暂不可用。取消只停止等待，工作区会保留供检查。 获授权的 Bot 共享该 Windows 账户的访问范围。",
+    "limits": "仅支持前台 Bash 命令。不提供文件/HostFS API、交互终端或托管后台任务。取消只停止等待，工作区会保留供检查。 获授权的 Bot 共享该 Windows 账户的访问范围。",
     "sourceBot": "已有连接所在的 Bot",
     "connection": "Agenvo MCP 连接",
     "connectionHelp": "只能共享由你拥有的、已启用的 HTTP 连接。",

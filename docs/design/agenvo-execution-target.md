@@ -6,6 +6,28 @@ account computer registry. It reuses `user_runtimes`, Bot mounts and session
 a new credential owner. Production deployment requires separate Windows
 acceptance of the Bash completion wrapper.
 
+## Release status and terminology
+
+This document describes the unmerged PR #4 candidate on
+`feat/agenvo-execution-target`, not a deployed feature. The reported deployed
+release is main `5900e4c1`, with native workspace storage still active. The
+runtime thread's existing direct Bot MCP connection is separate from this
+candidate's account registration, per-Bot grants and session target adapter.
+
+The existing API paths and database names containing `runtime` or `workspace`
+are shared registry/routing identifiers. For `provider: "agenvo"`, both account
+and Bot target responses advertise only `capabilities: ["exec_foreground"]`.
+They do not advertise native `fs`, `exec` or `hostfs` protocol support. The
+Computers page and session selector label it **Agenvo · commands only**.
+`online` means the authorized Herdr session answered `workspace.list`; it is
+not proof that the configured Bash executable, full filesystem protocol or a
+Herdr AI agent is running. Bash availability is checked at command execution.
+
+Unsupported file APIs do not prohibit a Bash command from reading or writing
+files under the Windows account's permissions. Likewise, rejecting managed
+background-job options is not an OS sandbox that prevents a shell from creating
+child processes. This adapter does not manage a Herdr AI-agent lifecycle.
+
 ## Registration and authorization
 
 1. Configure an Agenvo HTTP MCP connection through the existing MCP settings.
@@ -52,6 +74,10 @@ The wrapper returns bounded UTF-8 text with stderr merged, not byte-preserving
 stdout/stderr streams. Prompts, command echoes and PSReadLine errors cannot count
 as completion. Malformed/ambiguous responses and lost write responses remain
 unknown and are never retried automatically.
+Every result frame starts and ends with explicit CRLF. Terminal residue remains
+on the preceding line; the parser still requires one entire nonce-matched frame
+and rejects duplicates. See the [current validation record](../validation/agenvo/README.md)
+for the original Windows framing failure and the new fixed-nonce batch.
 
 Herdr has no atomic expected-generation close. IDs can repeat after restart;
 labels, terminal IDs, revision and a separate get/list check do not prove safe

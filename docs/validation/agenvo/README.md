@@ -81,6 +81,16 @@ NAS data, personal endpoints or real Windows tasks were used.
   checkpoint. Reuse the already observed live acceptance pane; do not repeat
   the old unknown command, close the workspace or resume IDs after a restart.
 
+The follow-up contract check kept the same wrapper and fixed vectors. Account
+and Bot target responses advertise only `exec_foreground`; account rows and the
+session selector identify the provider as command-only. Registration copy now
+says file/HostFS **APIs** are unavailable, since Bash commands still have the
+Windows account's ordinary file access. The design document separates this
+unmerged candidate from the deployed main release and retained native storage.
+Current browser captures verify the clarified form and Chinese dark narrow
+scrolling; Bot B still cannot select the ungranted target. Locale duplicate-key
+checks and the UI contract guard passed (three existing guard warnings).
+
 ## Limits and failures
 
 The Agenvo MCP and model endpoints are controlled protocol fixtures, not a real

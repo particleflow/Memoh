@@ -4494,7 +4494,7 @@
     "bashPath": "Git Bash executable",
     "connect": "Connect Agenvo",
     "description": "Register an existing Agenvo connection as a Windows Bash command target.",
-    "limits": "Foreground Bash commands only. Files, interactive terminals and background tasks are unavailable. Cancellation stops waiting; workspaces remain for inspection. Authorized Bots share the Windows account’s access.",
+    "limits": "Foreground Bash commands only. File/HostFS APIs, interactive terminals and managed background tasks are unavailable. Cancellation stops waiting; workspaces remain for inspection. Authorized Bots share the Windows account’s access.",
     "sourceBot": "Bot with the existing connection",
     "connection": "Agenvo MCP connection",
     "connectionHelp": "Only active HTTP connections owned by your account can be shared.",
