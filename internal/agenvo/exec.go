@@ -3,18 +3,16 @@ package agenvo
 import (
 	"context"
 	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
-	"unicode/utf16"
+	"unicode/utf8"
 
 	"github.com/google/uuid"
 )
 
-// Request supports bounded, foreground PowerShell commands only. It does not
+// Request supports bounded, foreground Bash commands only. It does not
 // claim POSIX exec, a PTY, binary stdin, or persistent/background processes.
 type Request struct {
 	Scope      Scope
@@ -82,6 +80,9 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 	if err != nil {
 		return result, err
 	}
+	if !windowsBash.MatchString(target.BashPath) || len(target.BashPath) > 4096 || strings.ContainsRune(target.BashPath, 0) {
+		return result, ErrUnsupported
+	}
 	workDir := req.WorkDir
 	if workDir == "" {
 		workDir = target.WorkDir
@@ -122,7 +123,7 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 			result.State = "unknown"
 		}
 	}()
-	command := powershellCommand(req.Command, nonce)
+	command := bashCommand(req.Command, nonce, target.BashPath)
 	submitted, err := e.client.native(ctx, req.Scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": result.PaneID, "command": command})
 	result.RequestID = submitted.RequestID
 	if err != nil {
@@ -157,6 +158,10 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 			return result, err
 		}
 		if found {
+			if completion.Failure != "" {
+				result.State = "rejected"
+				return result, ErrUnsupported
+			}
 			result.State, result.Output, result.ExitCode, result.Truncated = "completed", completion.Output, completion.ExitCode, completion.Truncated
 			return result, nil
 		}
@@ -171,9 +176,10 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 }
 
 type completion struct {
-	Output    string `json:"output"`
-	ExitCode  *int   `json:"exit_code"`
-	Truncated bool   `json:"truncated"`
+	Output    string
+	ExitCode  *int
+	Truncated bool
+	Failure   string
 }
 
 func parseCompletion(snapshot, nonce string) (completion, bool, error) {
@@ -192,9 +198,46 @@ func parseCompletion(snapshot, nonce string) (completion, bool, error) {
 		if err != nil {
 			return completion{}, false, ErrUnknown
 		}
-		var parsed completion
-		if json.Unmarshal(data, &parsed) != nil || parsed.ExitCode == nil || len(parsed.Output) > 16384 {
+		var wire struct {
+			OutputBase64 *string `json:"output_base64"`
+			ExitCode     *int    `json:"exit_code"`
+			Truncated    bool    `json:"truncated"`
+			Failure      string  `json:"failure"`
+		}
+		if json.Unmarshal(data, &wire) != nil {
 			return completion{}, false, ErrUnknown
+		}
+		parsed := completion{ExitCode: wire.ExitCode, Truncated: wire.Truncated, Failure: wire.Failure}
+		if wire.Failure != "" {
+			if wire.ExitCode != nil || wire.OutputBase64 != nil || (wire.Failure != "bash_unavailable" && wire.Failure != "unsupported_bash_host" && wire.Failure != "bash_tools_unavailable") {
+				return completion{}, false, ErrUnknown
+			}
+		} else {
+			if wire.ExitCode == nil || *wire.ExitCode < 0 || *wire.ExitCode > 255 || wire.OutputBase64 == nil {
+				return completion{}, false, ErrUnknown
+			}
+			output, err := base64.StdEncoding.DecodeString(*wire.OutputBase64)
+			if err != nil || len(output) > 4096 {
+				return completion{}, false, ErrUnknown
+			}
+			// A byte limit may split only the final UTF-8 rune. Reject binary
+			// or malformed text; trim an incomplete suffix only on truncation.
+			if wire.Truncated {
+				for len(output) > 0 && !utf8.Valid(output) {
+					start := len(output) - 1
+					for start > 0 && !utf8.RuneStart(output[start]) {
+						start--
+					}
+					if utf8.FullRune(output[start:]) {
+						break
+					}
+					output = output[:start]
+				}
+			}
+			if !utf8.Valid(output) || strings.ContainsRune(string(output), 0) {
+				return completion{}, false, ErrUnknown
+			}
+			parsed.Output = string(output)
 		}
 		matched = &parsed
 	}
@@ -202,37 +245,4 @@ func parseCompletion(snapshot, nonce string) (completion, bool, error) {
 		return completion{}, false, nil
 	}
 	return *matched, true, nil
-}
-
-func powershellCommand(command, nonce string) string {
-	// Commands are UTF-8 data inside an encoded PowerShell script. The nonce is
-	// not visible in the echoed shell command, which cannot fake completion.
-	body := base64.StdEncoding.EncodeToString([]byte(command))
-	script := fmt.Sprintf(`$ErrorActionPreference = 'Stop'
-$global:LASTEXITCODE = 0
-$memohOutput = New-Object System.Text.StringBuilder
-$memohTruncated = $false
-$memohExit = 0
-function Add-MemohOutput([string]$line) {
-  $remaining = 4096 - $memohOutput.Length
-  if ($remaining -gt 0) {
-    $text = $line + [Environment]::NewLine
-    if ($text.Length -gt $remaining) { $text = $text.Substring(0, $remaining); $script:memohTruncated = $true }
-    [void]$memohOutput.Append($text)
-  } else { $script:memohTruncated = $true }
-}
-try {
-  $body = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('%s'))
-  & ([scriptblock]::Create($body)) 2>&1 | ForEach-Object { Add-MemohOutput ([string]$_) }
-  $memohExit = $global:LASTEXITCODE
-} catch { $memohExit = 1; Add-MemohOutput ([string]$_) }
-$result = @{output=$memohOutput.ToString();exit_code=[int]$memohExit;truncated=$memohTruncated} | ConvertTo-Json -Compress
-$encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($result))
-Write-Output ('MEMOH_%s:' + $encoded + ':END_%s')`, body, nonce, nonce)
-	units := utf16.Encode([]rune(script))
-	bytes := make([]byte, len(units)*2)
-	for i, unit := range units {
-		binary.LittleEndian.PutUint16(bytes[i*2:], unit)
-	}
-	return "powershell.exe -NoProfile -NonInteractive -EncodedCommand " + base64.StdEncoding.EncodeToString(bytes)
 }

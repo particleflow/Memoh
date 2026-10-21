@@ -490,9 +490,9 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 		workspace.windows = true
 		workspace.locationDescription = "on the selected Agenvo Windows machine"
 		workspace.absolutePathDescription = "Windows path"
-		workspace.shellDescription = "Windows PowerShell 5.1"
-		workspace.commandExamples = "Get-Location, Get-ChildItem, Write-Output 'hello'"
-		workspace.platformInstructions = "- Agenvo supports foreground PowerShell commands only. File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
+		workspace.shellDescription = "Git Bash on Windows"
+		workspace.commandExamples = "pwd, ls, printf 'hello\\n'"
+		workspace.platformInstructions = "- Agenvo executes foreground Bash commands through the explicitly configured Git Bash on the selected Windows machine, not WSL. Use Bash syntax. The work_dir parameter is an absolute Windows path; use cygpath inside Bash for path conversion.\n- File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
 		workspace.delayInstruction = ""
 	}
 	return workspace

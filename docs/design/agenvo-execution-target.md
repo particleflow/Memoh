@@ -4,13 +4,13 @@ This integration registers a command-only Windows target in the existing
 account computer registry. It reuses `user_runtimes`, Bot mounts and session
 `workspace_target_id`; it does not implement `memoh.runtime.v1`, a scheduler, or
 a new credential owner. Production deployment requires separate Windows
-acceptance of the PowerShell completion wrapper.
+acceptance of the Bash completion wrapper.
 
 ## Registration and authorization
 
 1. Configure an Agenvo HTTP MCP connection through the existing MCP settings.
 2. In **Computers → Connect Agenvo**, select its source Bot, connection, Herdr
-   instance, existing session and Windows working directory.
+   instance, existing session and Windows working directory and the verified absolute Git Bash executable path.
 3. `POST /users/me/runtimes/agenvo/discover` returns only Herdr identity/display
    fields. Search advertisements alone never establish runtime readiness.
 4. `POST /users/me/runtimes` with `provider: "agenvo"` probes `workspace.list`
@@ -38,7 +38,7 @@ The public contract inspected is Agenvo commit
 | --- | --- | --- |
 | Discovery | MCP `search` | Herdr instance identities, filtered metadata. |
 | Readiness | MCP `execute` → `workspace.list` | Actual session response required. |
-| Foreground command | `workspace.create` → one `pane.run` | Fresh labeled workspace; bounded encoded Windows PowerShell 5.1 wrapper. |
+| Foreground command | `workspace.create` → one `pane.run` | Fresh labeled workspace; bounded encoded Git Bash wrapper. |
 | Completion | `pane.read`, `source: recent-unwrapped` | `result.output` contains terminal text. Require the operation's nonce-bound base64 JSON completion and explicit exit code. |
 | Cancel/timeout | Stop waiting | State **unknown**, no invented exit code or promise that Windows execution stopped. |
 | Cleanup | None automatically | Known workspaces are reported with `cleanup_required: true` and retained for manual inspection. |
@@ -46,7 +46,9 @@ The public contract inspected is Agenvo commit
 
 Workspace CLI receipts nest under `result.result`; pane output is directly
 `result.output`. `execution: accepted` is submission, not command completion.
-The wrapper returns bounded text with error output merged, not byte-preserving
+PowerShell is only the existing pane launcher; the command body runs in the explicitly configured Git Bash. PATH lookup and WSL are not used. A Windows/MSYS host check rejects Linux/WSL before user execution. Bash exit status is preserved independently of stderr. Output is capped at 4096 bytes while excess is drained to avoid SIGPIPE; an incomplete final UTF-8 character is omitted. Missing Bash or unsupported host receipts are rejected without an exit code.
+
+The wrapper returns bounded UTF-8 text with stderr merged, not byte-preserving
 stdout/stderr streams. Prompts, command echoes and PSReadLine errors cannot count
 as completion. Malformed/ambiguous responses and lost write responses remain
 unknown and are never retried automatically.
@@ -84,7 +86,7 @@ MEMOH_AGENVO_TEST_DATABASE_URL='<isolated test database>' go test -race ./intern
 
 The account/grant/selection UI must be exercised against the running server with
 two synthetic Bots. Keep the release unchanged until the PR is reviewed and a
-controlled candidate passes Windows PowerShell 5.1 execution, Unicode, nonzero
+controlled candidate passes Windows Git Bash execution, Unicode, nonzero
 exit, large output and cancellation acceptance. ARM64 execution is not implied
 by compilation. Do not send production configuration/data to cloud tests.
 

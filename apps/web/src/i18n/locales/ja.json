@@ -4484,9 +4484,11 @@
     "cancel": "キャンセル"
   },
   "agenvo": {
+    "bashPathHelp": "確認済み Git Bash の bash.exe の絶対 Windows パス。WSL ランチャーや PATH 検索は使用しません。",
+    "bashPath": "Git Bash の実行ファイル",
     "connect": "Agenvo に接続",
-    "description": "認証済みの Agenvo MCP 接続を再利用し、コマンドの実行を許可する Bot を選択します。",
-    "limits": "フォアグラウンドの PowerShell コマンドのみ対応します。ファイル操作と対話端末には未対応です。待機を停止してもコマンドは終了せず、ワークスペースは手動確認のため保持されます。許可された Bot は Windows アカウントのアクセス範囲を共有します。",
+    "description": "既存の Agenvo 接続を Windows の Bash コマンド実行先として登録します。",
+    "limits": "フォアグラウンドの Bash コマンドのみ対応。ファイル操作、対話端末、バックグラウンド処理は利用できません。キャンセルは待機のみを停止し、ワークスペースは確認用に保持します。 許可された Bot は Windows アカウントのアクセス権を共有します。",
     "sourceBot": "既存の接続を持つ Bot",
     "connection": "Agenvo MCP 接続",
     "connectionHelp": "自分が所有する有効な HTTP 接続のみ共有できます。",

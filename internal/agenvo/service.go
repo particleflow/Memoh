@@ -104,6 +104,7 @@ func DecodeTarget(raw []byte) (Target, error) {
 var (
 	sessionName     = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$`)
 	windowsAbsolute = regexp.MustCompile(`^(?:[A-Za-z]:[\\/]|\\\\[^\\]+\\[^\\]+)`)
+	windowsBash     = regexp.MustCompile(`(?i)^[A-Z]:[\\/].*[\\/]bash\.exe$`)
 )
 
 func validateTarget(t Target) error {
@@ -116,7 +117,10 @@ func validateTarget(t Target) error {
 	if !windowsAbsolute.MatchString(t.WorkDir) || len(t.WorkDir) > 4096 {
 		return ErrInvalidTarget
 	}
-	for _, value := range []string{t.DeviceID, t.InstanceID, t.WorkDir} {
+	if !windowsBash.MatchString(t.BashPath) || len(t.BashPath) > 4096 {
+		return ErrInvalidTarget
+	}
+	for _, value := range []string{t.DeviceID, t.InstanceID, t.WorkDir, t.BashPath} {
 		if strings.ContainsRune(value, 0) {
 			return ErrInvalidTarget
 		}

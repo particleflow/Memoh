@@ -3,7 +3,6 @@ package agenvo
 import (
 	"context"
 	"encoding/base64"
-	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,7 +10,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"unicode/utf16"
 )
 
 // The fixture models the public Agenvo MCP/native outcome envelopes. It does
@@ -35,7 +33,7 @@ type fixture struct {
 }
 
 func newFixture(t *testing.T) (*fixture, *Executor) {
-	f := &fixture{t: t, target: Target{ConnectionID: "connection", DeviceID: "device", InstanceID: "windows", Session: "default", WorkDir: `C:\synthetic`}, grants: map[Scope]bool{{"bot-a", "mount-a", "user"}: true, {"bot-b", "mount-b", "user"}: true}, labels: map[string]string{}, panes: map[string]string{}, output: "synthetic result"}
+	f := &fixture{t: t, target: Target{ConnectionID: "connection", DeviceID: "device", InstanceID: "windows", Session: "default", WorkDir: `C:\synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}, grants: map[Scope]bool{{"bot-a", "mount-a", "user"}: true, {"bot-b", "mount-b", "user"}: true}, labels: map[string]string{}, panes: map[string]string{}, output: "synthetic result"}
 	c := NewClient(func(_ context.Context, scope Scope) (Target, error) {
 		if !f.grants[scope] {
 			return Target{}, errors.New("permission denied")
@@ -95,17 +93,15 @@ func (f *fixture) call(_ context.Context, connection, tool string, args map[stri
 			f.t.Fatal("command sent to an unowned pane")
 		}
 		command, _ := params["command"].(string)
-		parts := strings.Split(command, " ")
-		encoded := parts[len(parts)-1]
-		binaryScript, err := base64.StdEncoding.DecodeString(encoded)
+		bootstrap := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
+		if len(bootstrap) != 2 {
+			f.t.Fatal("missing encoded Bash script")
+		}
+		decoded, err := base64.StdEncoding.DecodeString(bootstrap[1])
 		if err != nil {
 			f.t.Fatal(err)
 		}
-		units := make([]uint16, len(binaryScript)/2)
-		for i := range units {
-			units[i] = binary.LittleEndian.Uint16(binaryScript[2*i:])
-		}
-		script := string(utf16.Decode(units))
+		script := string(decoded)
 		match := regexp.MustCompile(`MEMOH_([0-9a-f]{32}):`).FindStringSubmatch(script)
 		if len(match) != 2 {
 			f.t.Fatal("missing command completion nonce")
@@ -127,7 +123,7 @@ func (f *fixture) call(_ context.Context, connection, tool string, args map[stri
 		}
 		output := "PS C:\\synthetic> idle\n"
 		if !f.neverComplete {
-			payload, _ := json.Marshal(map[string]any{"output": f.output, "exit_code": f.exit, "truncated": f.truncated})
+			payload, _ := json.Marshal(map[string]any{"output_base64": base64.StdEncoding.EncodeToString([]byte(f.output)), "exit_code": f.exit, "truncated": f.truncated})
 			output += "MEMOH_" + f.nonce + ":" + base64.StdEncoding.EncodeToString(payload) + ":END_" + f.nonce + "\r\n"
 		}
 		return mcpValue(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"output": output, "session": "default"}}), nil
@@ -147,7 +143,7 @@ func mcpValue(value any) json.RawMessage {
 }
 
 func request() Request {
-	return Request{Scope: Scope{"bot-a", "mount-a", "user"}, Command: "Write-Output 'synthetic'", Timeout: time.Second}
+	return Request{Scope: Scope{"bot-a", "mount-a", "user"}, Command: "printf 'synthetic\\n'", Timeout: time.Second}
 }
 
 func TestExecuteRequiresNonceBoundCompletionAndKeepsExitCode(t *testing.T) {
@@ -263,8 +259,8 @@ func TestUnavailableTargetHasNoNativeFallback(t *testing.T) {
 }
 
 func TestCompletionRejectsMalformedOrAmbiguousEvidence(t *testing.T) {
-	valid := base64.StdEncoding.EncodeToString([]byte(`{"exit_code":0,"output":"ok","truncated":false}`))
-	for _, snapshot := range []string{"MEMOH_n:%%%:END_n", "MEMOH_n:" + base64.StdEncoding.EncodeToString([]byte(`{"output":"ok"}`)) + ":END_n", "MEMOH_n:" + valid + ":END_n\nMEMOH_n:" + valid + ":END_n"} {
+	valid := base64.StdEncoding.EncodeToString([]byte(`{"exit_code":0,"output_base64":"b2s=","truncated":false}`))
+	for _, snapshot := range []string{"MEMOH_n:%%%:END_n", "MEMOH_n:" + base64.StdEncoding.EncodeToString([]byte(`{"output_base64":"b2s="}`)) + ":END_n", "MEMOH_n:" + valid + ":END_n\nMEMOH_n:" + valid + ":END_n"} {
 		if _, _, err := parseCompletion(snapshot, "n"); !errors.Is(err, ErrUnknown) {
 			t.Fatalf("accepted ambiguous evidence: %v", err)
 		}

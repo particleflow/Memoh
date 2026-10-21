@@ -31,15 +31,36 @@ NAS data, personal endpoints or real Windows tasks were used.
 - Narrow Chinese/dark dialog has no horizontal page overflow. Form body scrolls
   within the shared dialog; its footer remains reachable.
 
+## Bash checkpoint
+
+- The requested Bash replacement requires an explicit verified Windows Git Bash
+  executable path. No PATH/WSL fallback, installation or global shell change.
+- The actual Bash script passed Linux execution tests for normal UTF-8 output,
+  stderr without failure, nonzero exits, one-million-byte output draining,
+  truncated UTF-8, syntax errors and rejection of a Linux host. Only the uname
+  host identity was synthetic for script tests; these are not Windows tests.
+- Real Chromium repeated registration with the new Bash field (zero grants),
+  A-only assignment, A target selection and a synthetic model/MCP command. One
+  command was submitted, one snapshot read, zero workspaces closed. B could not
+  see the target. Chinese dark narrow layout remained scrollable without
+  horizontal overflow. New screenshots are linked below.
+- CI on `84e46dbe` reached terminal results: Docker PR, Electron, ESLint and
+  Go lint passed; migrations and Go tests failed. Both newly introduced defects
+  have targeted passing local regressions: 0169 rollback now uses per-team
+  context and restores the teams policy in the same transaction; unsupported
+  local targets no longer reclassify native gRPC Unimplemented protocol errors.
+- PostgreSQL authorization/race and SDK typecheck passed for the Bash changes.
+  Generated Swagger/SDK and sqlc v1.31.1 outputs were regenerated.
+
 ## Limits and failures
 
 The Agenvo MCP and model endpoints are controlled protocol fixtures, not a real
-Windows machine. The completion wrapper still requires Windows PowerShell 5.1
+Windows machine. The completion wrapper still requires Windows Git Bash
 acceptance for actual commands, Unicode/large output, nonzero exit and cancel.
 ARM64 execution has not been exercised.
 
-[Windows acceptance instructions](windows-acceptance.md) and
-[exact generated commands](windows-vectors.json) provide one-time synthetic
+[Bash acceptance instructions](bash-acceptance.md) and
+[exact generated commands](bash-vectors.json) provide one-time synthetic
 vectors for the existing Windows execution thread. They are preparation
 artifacts; their presence does not mean Windows acceptance passed.
 
@@ -61,13 +82,13 @@ one. These checks are not described as passing.
 
 Only synthetic labels, paths and output appear in these current-build captures.
 
-- [Registration](agenvo-registration.png): existing connection, explicit target
+- [Registration](agenvo-bash-registration.png): existing connection, explicit target
   selection and capability limits.
-- [Zero default grants](agenvo-no-grants.png): both Bots off after registration.
-- [A only](agenvo-grant-a.png): A on, B off.
-- [Completed synthetic command](agenvo-chat-completed.png): output and retained
+- [Zero default grants](agenvo-bash-no-grants.png): both Bots off after registration.
+- [A only](agenvo-bash-grant-a.png): A on, B off.
+- [Completed synthetic command](agenvo-bash-chat-completed.png): output and retained
   workspace notice in the actual chat UI.
-- [Chinese/dark/narrow](agenvo-mobile-zh-dark.png): shared scrollable dialog.
+- [Chinese/dark/narrow](agenvo-bash-mobile-zh-dark.png): shared scrollable dialog.
 
 Agent screenshots and automated checks are not human QA. Keep the PR draft and
 production release unchanged pending review and controlled Windows acceptance.

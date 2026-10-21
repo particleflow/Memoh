@@ -18505,6 +18505,9 @@ const docTemplate = `{
         "agenvo.Target": {
             "type": "object",
             "properties": {
+                "bash_path": {
+                    "type": "string"
+                },
                 "connection_id": {
                     "type": "string"
                 },

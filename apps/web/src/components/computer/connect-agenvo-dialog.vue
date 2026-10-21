@@ -112,6 +112,19 @@
               />
             </FieldStack>
             <FieldStack
+              :label="t('agenvo.bashPath')"
+              for="agenvo-bash-path"
+              :help="t('agenvo.bashPathHelp')"
+            >
+              <Input
+                id="agenvo-bash-path"
+                v-model="bashPath"
+                required
+                :disabled="busy"
+                placeholder="C:\Git\bin\bash.exe"
+              />
+            </FieldStack>
+            <FieldStack
               :label="t('agenvo.workDir')"
               for="agenvo-workdir"
             >
@@ -182,12 +195,13 @@ const instanceKey = ref('')
 const name = ref('')
 const session = ref('')
 const workDir = ref('')
+const bashPath = ref('')
 const busy = ref(false)
 const loadingConnections = ref(false)
 const discovering = ref(false)
 const error = ref('')
 const selected = computed(() => instanceKey.value === '' ? undefined : instances.value[Number(instanceKey.value)])
-const canRegister = computed(() => !busy.value && !discovering.value && !!selected.value?.online && !!name.value.trim() && !!session.value.trim() && !!workDir.value.trim())
+const canRegister = computed(() => !busy.value && !discovering.value && !!selected.value?.online && !!name.value.trim() && !!session.value.trim() && !!workDir.value.trim() && !!bashPath.value.trim())
 let connectionsVersion = 0
 let discoverVersion = 0
 
@@ -237,7 +251,7 @@ async function register() {
     const { data } = await postUsersMeRuntimes({
       body: { name: name.value.trim(), provider: 'agenvo', agenvo: {
         connection_id: connectionId.value, device_id: selected.value.device_id!, instance_id: selected.value.instance_id!,
-        session: session.value.trim(), work_dir: workDir.value.trim(),
+        session: session.value.trim(), work_dir: workDir.value.trim(), bash_path: bashPath.value.trim(),
       } }, throwOnError: true,
     })
     // The existing access dialog starts with no grants. Never grant all Bots.

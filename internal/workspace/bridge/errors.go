@@ -21,7 +21,6 @@ var (
 // restoredByCode is how the client restores a bridge status: the bridge
 // reports its failures by status code alone.
 var restoredByCode = map[codes.Code]error{
-	codes.Unimplemented:    ErrUnsupported,
 	codes.NotFound:         ErrNotFound,
 	codes.InvalidArgument:  ErrBadRequest,
 	codes.PermissionDenied: ErrForbidden,

@@ -633,6 +633,8 @@ definitions:
     type: object
   agenvo.Target:
     properties:
+      bash_path:
+        type: string
       connection_id:
         type: string
       device_id:

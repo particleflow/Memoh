@@ -4490,9 +4490,11 @@
     "cancel": "Cancel"
   },
   "agenvo": {
+    "bashPathHelp": "Absolute Windows path to the verified Git Bash bash.exe. Do not use the WSL launcher or rely on PATH.",
+    "bashPath": "Git Bash executable",
     "connect": "Connect Agenvo",
-    "description": "Reuse an authorized Agenvo MCP connection, then choose which Bots may execute commands.",
-    "limits": "Foreground PowerShell commands only. File and terminal operations are unavailable. Stopping a wait does not stop the command; workspaces are retained for manual inspection. Authorized Bots share the Windows account’s access.",
+    "description": "Register an existing Agenvo connection as a Windows Bash command target.",
+    "limits": "Foreground Bash commands only. Files, interactive terminals and background tasks are unavailable. Cancellation stops waiting; workspaces remain for inspection. Authorized Bots share the Windows account’s access.",
     "sourceBot": "Bot with the existing connection",
     "connection": "Agenvo MCP connection",
     "connectionHelp": "Only active HTTP connections owned by your account can be shared.",

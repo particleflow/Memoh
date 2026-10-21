@@ -27,6 +27,7 @@ type Target struct {
 	InstanceID   string `json:"instance_id"`
 	Session      string `json:"session"`
 	WorkDir      string `json:"work_dir"`
+	BashPath     string `json:"bash_path"`
 }
 
 // Scope is always supplied by the authenticated Memoh execution boundary.

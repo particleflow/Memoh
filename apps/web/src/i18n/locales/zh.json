@@ -4490,9 +4490,11 @@
     "cancel": "取消"
   },
   "agenvo": {
+    "bashPathHelp": "填写已验证 Git Bash 的 bash.exe 绝对 Windows 路径，不使用 WSL 启动器或 PATH 查找。",
+    "bashPath": "Git Bash 可执行文件",
     "connect": "连接 Agenvo",
-    "description": "复用已授权的 Agenvo MCP 连接，再选择允许执行命令的 Bot。",
-    "limits": "仅支持前台 PowerShell 命令，不支持文件与交互终端操作。停止等待不会终止命令，工作区会保留以供人工检查。获授权的 Bot 共享该 Windows 账户的访问范围。",
+    "description": "将已有 Agenvo 连接注册为 Windows Bash 命令目标。",
+    "limits": "仅支持前台 Bash 命令。文件、交互终端和后台任务暂不可用。取消只停止等待，工作区会保留供检查。 获授权的 Bot 共享该 Windows 账户的访问范围。",
     "sourceBot": "已有连接所在的 Bot",
     "connection": "Agenvo MCP 连接",
     "connectionHelp": "只能共享由你拥有的、已启用的 HTTP 连接。",

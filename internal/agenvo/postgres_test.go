@@ -49,7 +49,7 @@ func TestPostgresAccountAndBotAuthorization(t *testing.T) {
 	if _, err := store.OwnedHTTPMCPConnectionBot(ctx, other, connection); err == nil {
 		t.Fatal("another account shared owner's MCP")
 	}
-	raw, _ := json.Marshal(Target{ConnectionID: connection, DeviceID: "synthetic", InstanceID: "herdr", Session: "test", WorkDir: `C:\Synthetic`})
+	raw, _ := json.Marshal(Target{ConnectionID: connection, DeviceID: "synthetic", InstanceID: "herdr", Session: "test", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`})
 	registered, err := store.CreateAgenvoRuntime(ctx, owner, "Windows", raw)
 	if err != nil {
 		t.Fatal(err)

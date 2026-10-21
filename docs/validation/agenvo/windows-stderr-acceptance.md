@@ -1,3 +1,5 @@
+> Superseded by the requested Bash adapter. Historical preparation only; do not execute these PowerShell vectors. See [Bash acceptance](bash-acceptance.md).
+
 # Additional native stderr probe (unexecuted)
 
 [windows-stderr-vector.json](windows-stderr-vector.json) is an independent fifth

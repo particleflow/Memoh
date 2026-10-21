@@ -103,3 +103,16 @@ func TestMapErrorKeepsOtherStatuses(t *testing.T) {
 		t.Fatalf("nil: %v", err)
 	}
 }
+
+func TestLimitedTargetDoesNotReclassifyNativeUnimplemented(t *testing.T) {
+	t.Parallel()
+	_, err := UnsupportedClient().ReadFile(t.Context(), "/synthetic", 0, 0)
+	if !errors.Is(err, ErrUnsupported) {
+		t.Fatalf("limited target: %v", err)
+	}
+	received := status.Error(codes.Unimplemented, "unknown service bridgepb.ContainerService")
+	err = mapError(t.Context(), received)
+	if errors.Is(err, ErrUnsupported) || status.Code(err) != codes.Unimplemented {
+		t.Fatalf("native protocol mismatch reclassified as limited target: %v", err)
+	}
+}

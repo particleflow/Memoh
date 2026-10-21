@@ -127,6 +127,17 @@ func TestServiceDoesNotRegisterForeignOrOfflineSource(t *testing.T) {
 	}
 }
 
+func TestServiceRequiresExplicitWindowsBashExecutable(t *testing.T) {
+	for _, path := range []string{"", "bash", `C:\Windows\System32\wsl.exe`, "/usr/bin/bash", `\\server\share\bash.exe`} {
+		s, store, f := serviceFixture(t)
+		target := f.target
+		target.BashPath = path
+		if _, err := s.Register(t.Context(), "owner", "Windows", target); !errors.Is(err, ErrInvalidTarget) || store.created != 0 || len(f.calls) != 0 {
+			t.Fatalf("unqualified or unsupported shell accepted: %q err=%v", path, err)
+		}
+	}
+}
+
 func TestDiscoveryFiltersPrivateMetadataAndNonHerdrInstances(t *testing.T) {
 	s, _, _ := serviceFixture(t)
 	s.call = func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {

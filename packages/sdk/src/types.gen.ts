@@ -381,6 +381,7 @@ export type AgenvoDiscoveredInstance = {
 };
 
 export type AgenvoTarget = {
+    bash_path?: string;
     connection_id?: string;
     device_id?: string;
     instance_id?: string;

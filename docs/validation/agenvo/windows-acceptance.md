@@ -1,3 +1,5 @@
+> Superseded by the requested Bash adapter. Historical preparation only; do not execute these PowerShell vectors. See [Bash acceptance](bash-acceptance.md).
+
 # Windows PowerShell 5.1 wrapper acceptance
 
 These are **unexecuted Windows test vectors**, not successful Windows results.
