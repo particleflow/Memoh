@@ -85,7 +85,14 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 	var parts []string
 	locationRef, hasLocationTool := available.Ref(ToolListExecutionLocations())
 	if hasLocationTool {
-		parts = append(parts, locationRef+": list the current Server Workspace and connected computers available to this Bot for file and command work")
+		parts = append(parts,
+			locationRef+": discover the Server Workspace and connected computers authorized for this Bot. For requests to use a computer (including an unnamed Windows PC), inspect these locations before claiming no computer is configured or looking for a separate cloud computer.",
+			"Check each location's `provider`, `capabilities`, `available` and `status`. Authorization is not availability; an offline target is not an unconfigured account. A missing target means it is not exposed to this Bot, not that no account computer exists. Never substitute another location after a target fails.",
+			"An Agenvo location advertising `exec_foreground` supports foreground Bash commands, not a full workspace, filesystem, desktop, or local coding agent. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
+		)
+		if skillRef, ok := available.Ref(ToolUseSkill()); ok {
+			parts = append(parts, "For a connected-computer or local-agent task, use "+skillRef+" when an available skill covers that workflow. Skills explain usage; they do not grant target or connector access.")
+		}
 	}
 	if targetID := strings.TrimSpace(session.WorkspaceTargetID); targetID != "" {
 		targetDescription := "request-selected execution location"
@@ -140,7 +147,7 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 			if strings.TrimSpace(session.WorkspaceTargetID) != "" {
 				defaultDescription = "the request-selected default for this turn"
 			}
-			parts = append(parts, "Use "+locationRef+" when the user names a computer, you need a non-default location, availability may have changed, or a target call fails. Pass its `target_id` to file and command tools; omit `target_id` to use "+defaultDescription+". Listing locations does not switch locations or folders.")
+			parts = append(parts, "Use "+locationRef+" when the user asks to use a computer, you need a non-default location, availability may have changed, or a target call fails. Pass its `target_id` only to tools supported by that location; omit `target_id` to use "+defaultDescription+". Listing locations does not switch locations or folders. If several locations fit and no selected/default location resolves the user's intent, clarify the destination before executing.")
 		}
 	}
 	if sessionUsesRemoteWorkspaceTarget(session) {
@@ -305,6 +312,8 @@ Delete a file:
 		locationTool := toolexec.Tool{
 			Name: ToolListExecutionLocations().String(),
 			Description: "List the execution locations configured for this Bot for file operations and command execution, with current availability and status. " +
+				"Discover these for requests to use a computer before assuming a separate cloud computer is needed. Results are Bot-scoped, not an account-wide inventory. " +
+				"Check provider and capabilities before choosing a tool: Agenvo exec_foreground is foreground Bash only, not filesystem, desktop or agent lifecycle support. " +
 				"The default field identifies the current turn's default (the request-selected target when present, otherwise the Bot's Primary). " +
 				"Use the returned target_id with file and command tools when a non-default location is needed. " +
 				"The available field says whether a location can currently be used. This tool does not change the default location or starting folder.",

@@ -50,6 +50,18 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  agent-core-boundary:
+    name: Agent core boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify unmodified upstream Agent core
+        run: bash scripts/check-agent-core-boundary.sh
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
