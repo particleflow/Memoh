@@ -82,6 +82,31 @@ no existing uncertain operation was repeated or cleared.
 Two build attempts exhausted temporary disk; only obsolete derived caches and
 stopped development binaries were cleaned. The subsequent build succeeded.
 
+## Fixed vendor evidence for prompt rejection
+
+Herdr **v0.9.5** [agents.rs, lines 82–268](https://github.com/herdrdev/herdr/blob/v0.9.5/src/app/api/agents.rs#L82-L268)
+returns `agent_not_found`, `agent_not_ready`, `agent_blocked` and
+`empty_agent_prompt` before sending or queuing terminal input. The second
+not-found check inside submit also precedes `try_send_bytes` and queueing.
+Agenvo **v0.2.0** [herdr.ts](https://github.com/Xuanwo/agenvo/blob/v0.2.0/apps/herdr/src/herdr.ts)
+invokes `agent.prompt` without `--wait`. This fixed-source review establishes
+these four pre-input cases; synthetic fixtures alone do not establish it.
+
+Only the correctly associated response to the current prompt can mark that
+operation rejected. A later get/read error or a text substring cannot free
+its slot. `agent_prompt_failed`, timeout and malformed responses remain unknown
+because input may already have occurred. No automatic retry is introduced.
+
+The first final CI run exposed one stale skill-text assertion still naming
+the old direct-exec capability. It was corrected to require `foreground_bash`,
+`computer_task_submit` and the explicit rejection of ordinary Agenvo `exec`;
+the full tool package was rerun. The corrected skill/route checks passed; seven
+existing image-download tests failed locally because the environment proxy
+resolves to an address rejected by their network guard. No proxy or security
+setting was changed, and those failures are not marked passed. Full Go CI on
+the final commit remains the repository-wide gate. No runtime behavior changed
+in this correction.
+
 ## Automated checks
 
 | Check | Observed result |
