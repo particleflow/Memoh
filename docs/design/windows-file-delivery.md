@@ -46,6 +46,13 @@ of both old and new bytes, atomic metadata switch, and read/write tests. Fail on
 a stale locator revision; never fall back silently to the old directory.
 No such cross-module migration or production path change is in this branch.
 
+The parent storage audit identified existing gaps at the base SHA:
+`config.resolvePaths` does not resolve relative `Files.OriginalsRoot`; an empty
+root enables legacy fallback; media spool creation can use the system temp
+directory; Pi attempt paths are assembled in two places. These are not solved
+by this adapter and remain separately coordinated changes. A configured storage
+failure must not be interpreted as permission to use a legacy directory.
+
 ## Minimal integration and durable queue contract
 
 `internal/transferclient` is an unconnected, standard-library client adapter.
@@ -96,6 +103,10 @@ In-memory callbacks are test fixtures, not a production queue implementation.
    hash in media, and return the same association on repeated registration.
    Treat wrong-task hash reuse as unauthorized; hash equality alone is not task
    authority. The current adapter does not claim server task binding.
+   Prefer the existing `ComputerOperationStore` receipt/revision transaction for
+   bounded associations and a media-backed manifest for large result batches;
+   do not invent a separate operation or data-location registry. Exact schema,
+   pagination and authorization changes require parent coordination first.
 8. Chat gets only a bounded manifest/reference (IDs, hash, size, MIME, status).
    The existing attachment path can access original bytes as needed; transfer
    never routes originals, base64 or full logs through a model or terminal.
