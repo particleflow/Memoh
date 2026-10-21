@@ -91,6 +91,10 @@ protocol is not an OS sandbox or protection from a malicious local process.
   cannot become success. The preview is at most 16 KiB.
 - Full stdout/stderr import is limited to 64 MiB per file. Larger output yields
   `output_limit`, with known exit but no imported artifact ref or success claim.
+- Empty stdout/stderr uses an explicit `stdout_empty`/`stderr_empty` flag after
+  verifying the empty SHA-256 and zero size in the receipt. Media rejects empty
+  assets, so no unopenable hash ref is invented. Empty stdout cannot establish
+  Pi success; a never-started invocation remains `not_started`.
 - A cancellation request preserves intent; without an atomic safe stop contract
   the process is not killed. A later real receipt can establish exit without
   rewriting the earlier cancellation as successful cancellation.

@@ -80,6 +80,8 @@ type Result struct {
 	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
 	StdoutHash         string                   `json:"stdout_hash,omitempty"`
 	StderrHash         string                   `json:"stderr_hash,omitempty"`
+	StdoutEmpty        bool                     `json:"stdout_empty,omitempty"`
+	StderrEmpty        bool                     `json:"stderr_empty,omitempty"`
 	ID                 string                   `json:"operation_id"`
 	TargetID           string                   `json:"target_id"`
 	State              string                   `json:"state"`
@@ -127,8 +129,10 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 			switch f.Meta.Name {
 			case "stdout.jsonl":
 				out.StdoutHash = f.ReadyHash
+				out.StdoutEmpty = out.ProcessStopped && f.Meta.Size == 0
 			case "stderr.txt":
 				out.StderrHash = f.ReadyHash
+				out.StderrEmpty = out.ProcessStopped && f.Meta.Size == 0
 			}
 		}
 	}

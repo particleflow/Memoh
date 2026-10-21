@@ -174,7 +174,7 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 		if f.Offset != f.Meta.Size {
 			return result(r, d), nil
 		}
-		if f.ReadyHash == "" {
+		if f.ReadyHash == "" && f.Meta.Size > 0 {
 			if err := s.finishBatchFile(ctx, b.BotID, f); err != nil {
 				return Result{}, err
 			}
@@ -187,9 +187,15 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 	if err != nil {
 		return Result{}, err
 	}
-	reader, _, err := s.assets.Open(ctx, b.BotID, batch.Files[0].ReadyHash)
-	if err != nil {
-		return Result{}, agenvo.ErrUnavailable
+	// Media intentionally rejects empty assets. The validated receipt already
+	// proves the empty digest/size; expose an explicit empty flag, never a ref
+	// that cannot be opened. Empty stdout still fails the Pi JSON protocol.
+	reader := io.NopCloser(bytes.NewReader(nil))
+	if batch.Files[0].Meta.Size > 0 {
+		reader, _, err = s.assets.Open(ctx, b.BotID, batch.Files[0].ReadyHash)
+		if err != nil {
+			return Result{}, agenvo.ErrUnavailable
+		}
 	}
 	parsed := agenvo.VerifyPiJSON(reader, batch.Progress.PiSessionID, target.Agent.Provider, target.Agent.Model, batch.Receipt.ExitCode)
 	_ = reader.Close()

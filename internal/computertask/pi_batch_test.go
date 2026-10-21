@@ -18,6 +18,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/storage/providers/localfs"
 )
 
 type batchAssets struct {
@@ -35,6 +36,9 @@ func (a *batchAssets) Ingest(_ context.Context, in media.IngestInput) (media.Ass
 	b, err := io.ReadAll(in.Reader)
 	if err != nil {
 		return media.Asset{}, err
+	}
+	if len(b) == 0 {
+		return media.Asset{}, errors.New("asset payload is empty")
 	}
 	h := sha256.Sum256(b)
 	id := hex.EncodeToString(h[:])
@@ -370,5 +374,46 @@ func TestStandardMCPPiBatchRejectsOversizeBeforeClaim(t *testing.T) {
 	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": strings.Repeat("x", 32000)}, true)
 	if len(store.records) != 0 || len(f.calls) != 0 {
 		t.Fatal("oversized launch reserved or dispatched")
+	}
+}
+
+func TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs(t *testing.T) {
+	for _, mode := range []string{"stderr", "stdout", "not_started"} {
+		t.Run(mode, func(t *testing.T) {
+			source, _, f, _ := setupBatch(t)
+			// Exercise the actual media spool/hash/persistence contract, not
+			// a permissive fake that accidentally accepts zero-byte assets.
+			assets := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+			assets.SetRequirePersistence(true)
+			if _, err := assets.Ingest(t.Context(), media.IngestInput{BotID: "bot-a", Reader: strings.NewReader("")}); err == nil {
+				t.Fatal("media empty-payload contract changed")
+			}
+			source.service.assets = assets
+			c := standardClient(t, source, "pc-a", false)
+			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+			if mode != "stdout" {
+				f.stderr = nil
+				f.receipt.Stderr = batchFile("stderr.txt", nil)
+			}
+			if mode != "stderr" {
+				f.stdout = nil
+				f.receipt.Stdout = batchFile("stdout.jsonl", nil)
+			}
+			if mode == "not_started" {
+				f.receipt.Started = false
+				f.receipt.ExitCode = 125
+			}
+			got := parseResult(t, invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, false))
+			want := map[string]string{"stderr": "succeeded", "stdout": "invalid_protocol", "not_started": "not_started"}[mode]
+			if !got.ProcessStopped || got.PiResult == nil || got.PiResult.Outcome != want {
+				t.Fatalf("empty output=%+v", got)
+			}
+			if mode != "stdout" && (!got.StderrEmpty || got.StderrHash != "") {
+				t.Fatal("empty stderr claimed a media ref")
+			}
+			if mode != "stderr" && (!got.StdoutEmpty || got.StdoutHash != "") {
+				t.Fatal("empty stdout claimed a media ref")
+			}
+		})
 	}
 }

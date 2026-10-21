@@ -59,6 +59,24 @@ rebuild. The provider/relay deliberately return synthetic records; this proves
 application wiring and evidence handling, not natural-language routing by GLM,
 real Pi/Magpie interoperability or independent completion of a user's task.
 
+### Empty-output correction after the initial checkpoint
+
+Source review found that the actual media spool rejects zero-byte assets. The
+initial synthetic asset fake did not expose this. The correction verifies the
+receipt's empty SHA-256/size and returns explicit empty-output flags without
+inventing a media ref. A new standard MCP test uses the real `media.Service`
+with `localfs.NewOriginals` and required persistence. Empty stderr succeeds,
+empty stdout is invalid protocol, and a never-started invocation is not_started.
+The affected-package race suite and lint passed again.
+
+The rebuilt server was exercised through another new Web session with the real
+media service and synthetic relay/provider. It returned `pi_succeeded`, exit 0,
+`stderr_empty=true`, no stderr ref, and ready stdout hash
+`9e5f6eee1e86379988ad897b211908ab8ada8a275a8af995b9f4d4b012429908`.
+No browser errors occurred. No media code or migration was changed.
+
+![Current Web verifies empty stderr without a false artifact ref](empty-stderr.png)
+
 ## Remaining acceptance
 
 Independent review, GitHub CI and controlled Windows Git Bash + unchanged Pi

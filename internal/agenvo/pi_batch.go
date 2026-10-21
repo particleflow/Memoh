@@ -1,6 +1,7 @@
 package agenvo
 
 import (
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -61,6 +62,9 @@ func (r BatchReceipt) Validate(p BatchProgress) error {
 	}
 	for i, f := range []BatchFile{r.Stdout, r.Stderr} {
 		if f.Name != []string{"stdout.jsonl", "stderr.txt"}[i] || !batchHex.MatchString(f.Hash) || f.Size < 0 {
+			return ErrUnknown
+		}
+		if f.Size == 0 && f.Hash != fmt.Sprintf("%x", sha256.Sum256(nil)) {
 			return ErrUnknown
 		}
 	}
