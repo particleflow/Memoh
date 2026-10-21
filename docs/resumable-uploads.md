@@ -66,6 +66,12 @@ The client must query status after any lost response and resume at the returned
 offset. If a PATCH returned 429 (`http.too_many_requests`), retry with bounded
 backoff; lock stripes can briefly serialize unrelated upload IDs too.
 
+Cross-origin preflight explicitly permits the three `Upload-*` headers above;
+the existing origin and credentials policies are unchanged. If the HTTP writer
+cannot enforce a read deadline, PATCH returns `http.service_unavailable` (503)
+before reading the body or acquiring an upload lock. A failed/stalled body never
+advances the acknowledged offset; reconnect and GET before retrying.
+
 An incomplete completion is 409. A malformed input or checksum mismatch is
 `request.field_invalid` (400, field `upload`); exceeding the configured file size is
 `http.payload_too_large` (413). All responses use the existing Problem catalog;
@@ -91,6 +97,15 @@ fsync. The journal advances only after durable byte verification. Restart repair
 truncates any unacknowledged tail to the stored offset. A final pass computes the
 whole-file SHA; the existing canonical provider independently verifies its
 atomic publication. Completion avoids a second whole-file temporary spool.
+
+Readable files alone are not proof of durable publication. Deduplication repairs
+the canonical file and directory fsync barriers before acknowledging an existing
+original. Journal reads likewise fsync the visible journal and its directory
+before returning an offset/ready receipt or allowing terminal payload cleanup.
+This repairs a process interruption or lost acknowledgement between rename and
+directory fsync. A failed barrier returns an error and preserves staging until
+recovery; it cannot authorize deleting the only pending copy. These guarantees
+depend on the filesystem honoring its fsync contract.
 
 Cross-process nonblocking locks cover append, completion, cancellation and
 collection. Receipt admission has a separate lock. The current bounded policy

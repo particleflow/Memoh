@@ -121,14 +121,21 @@ func (h *MessageHandler) AppendMediaUpload(c echo.Context) error {
 	}
 	// Bound lock occupancy even if a client stops sending midway through a body.
 	controller := http.NewResponseController(c.Response().Writer)
-	if err := controller.SetReadDeadline(time.Now().Add(2 * time.Minute)); err == nil {
-		defer func() { _ = controller.SetReadDeadline(time.Time{}) }()
+	timeout := h.uploadReadTimeout
+	if timeout <= 0 {
+		timeout = 2 * time.Minute
+	}
+	if err := controller.SetReadDeadline(time.Now().Add(timeout)); err != nil {
+		return apperror.Wrap(apperror.CodeHTTPServiceUnavailable, err, nil)
 	}
 	c.Request().Body = http.MaxBytesReader(c.Response(), c.Request().Body, media.UploadChunkBytes+1)
 	result, err := store.Append(c.Request().Context(), owner, bot, c.Param("upload_id"), offset, size, c.Request().Header.Get("Upload-SHA256"), c.Request().Body)
 	if err != nil {
+		// Keep the deadline on failure: net/http may drain an unread request body
+		// while writing the error. Clearing it here could stall that drain forever.
 		return resumableError(err)
 	}
+	_ = controller.SetReadDeadline(time.Time{})
 	return c.JSON(http.StatusOK, result)
 }
 

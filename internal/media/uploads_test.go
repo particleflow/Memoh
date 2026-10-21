@@ -485,3 +485,206 @@ func TestUploadsConcurrentCompletionAndCancel(t *testing.T) {
 		t.Fatal(status)
 	}
 }
+
+// Inject exactly after a journal rename, not before it. The real rename is
+// observable; every subsequent reader must repair the failed directory fsync.
+func failJournalDirectorySync(s *UploadStore) error {
+	failure := errors.New("injected journal directory fsync failure")
+	armed := false
+	s.syncFile = func(f *os.File) error {
+		info, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		if strings.HasSuffix(f.Name(), ".tmp") {
+			armed = true
+		}
+		if info.IsDir() && armed {
+			return failure
+		}
+		return f.Sync()
+	}
+	return failure
+}
+
+func TestUploadJournalRenameFailureRequiresReadBarrier(t *testing.T) {
+	ctx := t.Context()
+	root := t.TempDir()
+	s := uploadService(t, root, 1024).Uploads()
+	b := []byte("offset durability")
+	u := createUpload(ctx, t, s, b)
+	failure := failJournalDirectorySync(s)
+	if _, err := s.Append(ctx, "owner", "bot", u.ID, 0, int64(len(b)), digest(b), bytes.NewReader(b)); !errors.Is(err, failure) {
+		t.Fatal(err)
+	}
+	// A visible checkpoint alone is not an acknowledged durable offset.
+	if got, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, failure) || got.ID != "" {
+		t.Fatal(got, err)
+	}
+	restarted := uploadService(t, root, 1024).Uploads()
+	barriers := 0
+	restarted.syncFile = func(f *os.File) error {
+		info, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			barriers++
+		}
+		return f.Sync()
+	}
+	status, err := restarted.Get(ctx, "owner", "bot", u.ID)
+	if err != nil || status.Offset != int64(len(b)) || barriers == 0 {
+		t.Fatal(status, err, barriers)
+	}
+	if _, err := restarted.Complete(ctx, "owner", "bot", u.ID); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestUploadTerminalJournalSyncBeforeRetryOrCollection(t *testing.T) {
+	for _, state := range []string{"ready", "canceled"} {
+		t.Run(state, func(t *testing.T) {
+			ctx := t.Context()
+			root := t.TempDir()
+			s := uploadService(t, root, 1024).Uploads()
+			b := []byte("retain until terminal checkpoint is durable")
+			u := createUpload(ctx, t, s, b)
+			appendBytes(ctx, t, s, u, b)
+			failure := failJournalDirectorySync(s)
+			var err error
+			if state == "ready" {
+				_, err = s.Complete(ctx, "owner", "bot", u.ID)
+			} else {
+				_, err = s.Cancel(ctx, "owner", "bot", u.ID)
+			}
+			if !errors.Is(err, failure) {
+				t.Fatal(err)
+			}
+			for _, operation := range []func() error{
+				func() error { _, err := s.Get(ctx, "owner", "bot", u.ID); return err },
+				func() error { _, err := s.Complete(ctx, "owner", "bot", u.ID); return err },
+				func() error { return s.Sweep(ctx) },
+			} {
+				if err := operation(); !errors.Is(err, failure) {
+					t.Fatal(err)
+				}
+			}
+			staging := filepath.Join(root, ".uploads", u.ID+".data")
+			if _, err := os.Stat(staging); err != nil {
+				t.Fatal("terminal journal not durable but staging deleted", err)
+			}
+			restarted := uploadService(t, root, 1024).Uploads()
+			barriers := 0
+			restarted.syncFile = func(f *os.File) error {
+				info, err := f.Stat()
+				if err != nil {
+					return err
+				}
+				if info.IsDir() {
+					barriers++
+					if barriers == 1 {
+						if _, err := os.Stat(staging); err != nil {
+							t.Fatal("collection removed payload before recovery barrier", err)
+						}
+					}
+				}
+				return f.Sync()
+			}
+			if err := restarted.Sweep(ctx); err != nil {
+				t.Fatal(err)
+			}
+			if barriers == 0 {
+				t.Fatal("missing recovery barrier")
+			}
+			if _, err := os.Stat(staging); !errors.Is(err, os.ErrNotExist) {
+				t.Fatal(err)
+			}
+			got, err := restarted.Get(ctx, "owner", "bot", u.ID)
+			if err != nil || got.State != state {
+				t.Fatal(got, err)
+			}
+		})
+	}
+}
+
+func TestUploadProcessDeathAfterJournalRename(t *testing.T) {
+	ctx := t.Context()
+	if root := os.Getenv("MEMOH_UPLOAD_RENAME_CHILD"); root != "" {
+		s := uploadService(t, root, 1024).Uploads()
+		b := []byte("crash after rename")
+		u := createUpload(ctx, t, s, b)
+		armed := false
+		s.syncFile = func(f *os.File) error {
+			info, err := f.Stat()
+			if err != nil {
+				return err
+			}
+			if strings.HasSuffix(f.Name(), ".tmp") {
+				armed = true
+			}
+			if info.IsDir() && armed {
+				_, _ = os.Stdout.WriteString(u.ID + "\n")
+				os.Exit(42)
+			}
+			return f.Sync()
+		}
+		appendBytes(ctx, t, s, u, b)
+		t.Fatal("did not reach crash boundary")
+	}
+	root := t.TempDir()
+	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestUploadProcessDeathAfterJournalRename$") //nolint:gosec // G204: fixed test binary invocation.
+	cmd.Env = append(os.Environ(), "MEMOH_UPLOAD_RENAME_CHILD="+root)
+	output, err := cmd.Output()
+	var exit *exec.ExitError
+	if !errors.As(err, &exit) || exit.ExitCode() != 42 {
+		t.Fatal(string(output), err)
+	}
+	id := strings.TrimSpace(string(output))
+	if !validUploadID(id) {
+		t.Fatal(id)
+	}
+	s := uploadService(t, root, 1024).Uploads()
+	barriers := 0
+	s.syncFile = func(f *os.File) error {
+		info, err := f.Stat()
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			barriers++
+		}
+		return f.Sync()
+	}
+	status, err := s.Get(ctx, "owner", "bot", id)
+	if err != nil || status.Offset != int64(len("crash after rename")) || barriers == 0 {
+		t.Fatal(status, err, barriers)
+	}
+	if _, err := s.Complete(ctx, "owner", "bot", id); err != nil {
+		t.Fatal(err)
+	}
+}
+
+type publicationWithoutBarrier struct {
+	storage.Provider
+	puts int
+}
+
+func (p *publicationWithoutBarrier) Put(ctx context.Context, key string, reader io.Reader) error {
+	p.puts++
+	return p.Provider.Put(ctx, key, reader)
+}
+
+func TestRequiredPersistenceRepublishesWithoutBarrierCapability(t *testing.T) {
+	p := &publicationWithoutBarrier{Provider: localfs.NewOriginals(t.TempDir())}
+	s := NewService(nil, p)
+	s.SetRequirePersistence(true)
+	for i := 0; i < 2; i++ {
+		if _, err := s.Ingest(t.Context(), IngestInput{BotID: "bot", Mime: "text/plain", Reader: strings.NewReader("transport-backed durable original")}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if p.puts != 2 {
+		t.Fatalf("readability was treated as durability without a barrier: puts=%d", p.puts)
+	}
+}

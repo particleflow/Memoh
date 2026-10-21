@@ -9,6 +9,7 @@ import (
 	"io"
 	"mime"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -60,9 +61,10 @@ type uploadRecord struct {
 // root. It never deletes or indexes originals. Fixed lock stripes survive GC;
 // advisory locks serialize writers across processes sharing a local filesystem.
 type UploadStore struct {
-	root  *os.Root
-	media *Service
-	now   func() time.Time
+	root     *os.Root
+	media    *Service
+	now      func() time.Time
+	syncFile func(*os.File) error
 }
 
 func (s *Service) Uploads() *UploadStore { return s.uploads }
@@ -73,6 +75,25 @@ func (s *Service) Uploads() *UploadStore { return s.uploads }
 func (s *Service) EnableUploads(originalsRoot string) error {
 	if err := os.MkdirAll(originalsRoot, 0o750); err != nil {
 		return err
+	}
+	// Persist any directories created by MkdirAll before acknowledging a journal.
+	absolute, err := filepath.Abs(originalsRoot)
+	if err != nil {
+		return err
+	}
+	for directory := filepath.Dir(absolute); ; directory = filepath.Dir(directory) {
+		ancestor, err := os.OpenRoot(directory)
+		if err != nil {
+			return err
+		}
+		err = syncRootWith(ancestor, (*os.File).Sync)
+		_ = ancestor.Close()
+		if err != nil {
+			return err
+		}
+		if directory == filepath.Dir(directory) {
+			break
+		}
 	}
 	parent, err := os.OpenRoot(originalsRoot)
 	if err != nil {
@@ -98,11 +119,11 @@ func (s *Service) EnableUploads(originalsRoot string) error {
 		_ = root.Close()
 		return ErrUploadInvalid
 	}
-	if err := syncRoot(parent); err != nil {
+	if err := syncRootWith(parent, (*os.File).Sync); err != nil {
 		_ = root.Close()
 		return err
 	}
-	store := &UploadStore{root: root, media: s, now: time.Now}
+	store := &UploadStore{root: root, media: s, now: time.Now, syncFile: (*os.File).Sync}
 	unlock, err := store.lock(context.Background(), "admission")
 	if err != nil && !errors.Is(err, ErrUploadBusy) {
 		_ = root.Close()
@@ -130,13 +151,13 @@ func validSHA(hash string) bool {
 	return err == nil && len(b) == sha256.Size && hash == strings.ToLower(hash)
 }
 
-func syncRoot(root *os.Root) error {
+func syncRootWith(root *os.Root, syncFile func(*os.File) error) error {
 	f, err := root.Open(".")
 	if err != nil {
 		return err
 	}
 	defer func() { _ = f.Close() }()
-	return f.Sync()
+	return syncFile(f)
 }
 
 func (s *UploadStore) read(id string) (uploadRecord, error) {
@@ -155,6 +176,15 @@ func (s *UploadStore) read(id string) (uploadRecord, error) {
 	if r.ID != id || r.SizeBytes <= 0 || r.Offset < 0 || r.Offset > r.SizeBytes || !validSHA(r.SHA256) {
 		return r, ErrUploadInvalid
 	}
+	// A prior process may have renamed this journal and failed before its
+	// directory fsync. Repair that barrier before GET/ready retry can acknowledge
+	// it, or Sweep can remove the payload on the strength of a terminal state.
+	if err := s.syncFile(f); err != nil {
+		return uploadRecord{}, err
+	}
+	if err := syncRootWith(s.root, s.syncFile); err != nil {
+		return uploadRecord{}, err
+	}
 	return r, nil
 }
 
@@ -171,7 +201,7 @@ func (s *UploadStore) save(r uploadRecord) error {
 	if err := json.NewEncoder(f).Encode(r); err != nil {
 		return err
 	}
-	if err := f.Sync(); err != nil {
+	if err := s.syncFile(f); err != nil {
 		return err
 	}
 	if err := f.Close(); err != nil {
@@ -180,7 +210,7 @@ func (s *UploadStore) save(r uploadRecord) error {
 	if err := s.root.Rename(name, r.ID+".json"); err != nil {
 		return err
 	}
-	return syncRoot(s.root)
+	return syncRootWith(s.root, s.syncFile)
 }
 
 func (s *UploadStore) remove(name string) error {
@@ -312,7 +342,7 @@ func (s *UploadStore) Append(ctx context.Context, owner, bot, id string, offset,
 	if n != size || hex.EncodeToString(h.Sum(nil)) != hash {
 		return Upload{}, ErrUploadInvalid
 	}
-	if err := f.Sync(); err != nil {
+	if err := s.syncFile(f); err != nil {
 		return Upload{}, err
 	}
 	if err := ctx.Err(); err != nil {
@@ -395,7 +425,7 @@ func (s *UploadStore) Complete(ctx context.Context, owner, bot, id string) (Uplo
 	if err := s.remove(id + ".data"); err != nil {
 		return Upload{}, err
 	}
-	if err := syncRoot(s.root); err != nil {
+	if err := syncRootWith(s.root, s.syncFile); err != nil {
 		return Upload{}, err
 	}
 	return r.Upload, nil
@@ -421,7 +451,7 @@ func (s *UploadStore) Cancel(ctx context.Context, owner, bot, id string) (Upload
 	if err := s.remove(id + ".data"); err != nil {
 		return Upload{}, err
 	}
-	if err := syncRoot(s.root); err != nil {
+	if err := syncRootWith(s.root, s.syncFile); err != nil {
 		return Upload{}, err
 	}
 	return r.Upload, nil
@@ -498,11 +528,11 @@ func (s *UploadStore) sweep(ctx context.Context) error {
 					return err
 				}
 			}
-			return syncRoot(s.root)
+			return syncRootWith(s.root, s.syncFile)
 		}()
 		if err != nil {
 			return err
 		}
 	}
-	return syncRoot(s.root)
+	return syncRootWith(s.root, s.syncFile)
 }

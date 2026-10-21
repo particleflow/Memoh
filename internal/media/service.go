@@ -96,6 +96,18 @@ func (s *Service) persist(ctx context.Context, input IngestInput, contentHash st
 	// Filesystem dedup: if the file already exists, skip write.
 	if existing, openErr := s.provider.Open(ctx, routingKey); openErr == nil {
 		_ = existing.Close()
+		if ensurer, ok := s.provider.(storage.DurabilityEnsurer); ok {
+			if err := ensurer.EnsureDurable(ctx, routingKey); err != nil {
+				return Asset{}, fmt.Errorf("confirm existing media durability: %w", err)
+			}
+		} else if s.requirePersistence {
+			// Providers reached over a transport may not expose a repair barrier.
+			// Republish through their successful-Put contract instead of treating
+			// readability alone as a durable acknowledgement.
+			if err := s.provider.Put(ctx, routingKey, reader); err != nil {
+				return Asset{}, fmt.Errorf("republish existing media: %w", err)
+			}
+		}
 		if err := ctx.Err(); err != nil {
 			return Asset{}, err
 		}

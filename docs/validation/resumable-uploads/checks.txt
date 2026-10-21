@@ -1,4 +1,4 @@
-Final check outcomes, 2026-10-21:
+Initial implementation check outcomes (2d67c5ae), 2026-10-21:
 PASS golangci-lint 2.10.1 run --new-from-rev=origin/main ./internal/media/... ./internal/handlers/... ./cmd/internal/core/... (exit 0, no findings)
 PASS go vet ./internal/media ./internal/handlers ./cmd/internal/core (exit 0)
 PASS go build -p 3 ./cmd/agent

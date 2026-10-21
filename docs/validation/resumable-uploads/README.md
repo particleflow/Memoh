@@ -33,8 +33,8 @@ These are server HTTP tests, not client-only large-file fixtures.
 
 | Synthetic file | Final measured elapsed | Server peak RSS | Result |
 | --- | ---: | ---: | --- |
-| 200 MiB / 209,715,200 bytes | 3.120 s | 88,772 KiB | upload, completion, repeat completion, full readback SHA passed |
-| 512 MiB / 536,870,912 bytes | 12.988 s | 88,556 KiB | same, plus actual Server restart after 16 MiB acknowledged; resumed exact offset |
+| 200 MiB / 209,715,200 bytes | 2.645 s | 87,240 KiB | upload, completion, repeat completion, full readback SHA passed |
+| 512 MiB / 536,870,912 bytes | 22.594 s | 87,880 KiB | same, plus actual Server restart after 16 MiB acknowledged; resumed exact offset |
 
 The 512 MiB time includes the owned Server/Web restart helper, its health checks,
 and final readback. These cloud-local timings are not NAS performance claims.
@@ -51,6 +51,16 @@ incomplete completion (409), `content_hash` absent before ready, ready receipt
 identity across repeated completion, and cancellation of ready upload rejected
 (409). A generated SDK Blob test sends non-UTF8 bytes and checks exact readback;
 see the captured result in [sdk-binary.txt](sdk-binary.txt).
+
+Review reproduced an actual Chromium cross-origin failure against the earlier
+commit: creating a receipt succeeded, but PATCH preflight rejected
+`upload-offset`. The fix explicitly allows only `Upload-Offset`, `Upload-Length`
+and `Upload-SHA256` in addition to the six existing headers. A fresh real OPTIONS
+request and generated SDK Blob transfer from Web port 18082 directly to Server
+port 18080 passed, including non-UTF8 byte-for-byte readback. An unrelated header
+is not echoed as allowed; the existing wildcard origin and absent credentials
+header are unchanged. See [cors-http.txt](cors-http.txt) and
+[cross-origin-sdk.txt](cross-origin-sdk.txt).
 
 ## Automated integrity, fault and resource checks
 
@@ -75,10 +85,34 @@ Passed targeted Go tests cover:
 - Per-identity/global reserved byte limits, oversize files/chunks and old upload
   endpoint compatibility. Existing 200 MiB default admission tests remain green.
 
+Additional review regressions exercise the actual rename-to-directory-fsync
+window, rather than only failures before rename or after a fully successful Put:
+
+- Canonical rename succeeds, directory fsync fails: completion and dedup retry
+  both fail and retain staging until the canonical durability barrier succeeds.
+- Journal rename succeeds, directory fsync fails: GET, ready completion retry
+  and Sweep cannot acknowledge the visible checkpoint or remove its payload.
+  Reopening repairs the barrier before successful recovery/cleanup.
+- Separate child processes exit precisely after canonical or journal rename,
+  before directory fsync. A new service performs the recovery barrier and resumes.
+- Real HTTP through `NewServer` middleware/JWT creates one receipt, then checks
+  cross-Bot GET/PATCH/complete/DELETE (404) and revoked Bot chat access (403).
+  Permissions are supplied by a revocable query fixture, not a live database.
+- A real TCP request through the same middleware stalls after two of eight body
+  bytes. The private test timeout is 250 ms (production remains two minutes);
+  the response terminates, offset remains zero, and another PATCH/complete
+  succeeds, proving lock release. Unsupported read-deadline writers return 503
+  without reading any body. These are not NAS or physical power-loss tests.
+
+The complete affected-package and focused race logs for the review fixes are
+[review-go-tests.txt](review-go-tests.txt) and [review-race-tests.txt](review-race-tests.txt).
+Individual rename-window and real HTTP test cases are recorded in
+[review-fault-http-tests.txt](review-fault-http-tests.txt).
+
 The standalone 512 MiB test binary processed 64 chunks with final readback SHA
-verification. Final measured peak RSS: **10,044 KiB** (Python `getrusage` for the
-child process); sampled Go heap peak **3,897,072 bytes**; internal elapsed
-**5.820 s**, test duration **6.08 s**. The heap metric is a sample after each chunk,
+verification. Final measured peak RSS: **9,848 KiB** (Python `getrusage` for the
+child process); sampled Go heap peak **3,898,064 bytes**; internal elapsed
+**6.918 s**, test duration **7.01 s**. The heap metric is a sample after each chunk,
 not a continuously sampled heap maximum. RSS covers the whole test process.
 The implementation does not hold the complete file in memory. Temporary disk
 can hold staging plus an original during publication; this is bounded-memory,
@@ -99,6 +133,10 @@ pnpm --filter @memohai/sdk typecheck
 pnpm exec tsc --ignoreConfig --noEmit --moduleResolution bundler --module esnext --target es2022 --skipLibCheck openapi-ts.config.ts
 NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run --project web apps/web/src/utils/api-error.test.ts apps/web/src/composables/api/sse-error.test.ts --maxWorkers=3
 golangci-lint run --new-from-rev=origin/main ./internal/media/... ./internal/handlers/... ./cmd/internal/core/...
+# Review fixes: final complete affected packages and focused race suite
+go test -p 3 ./internal/media ./internal/handlers ./internal/server ./internal/storage/... ./cmd/internal/core
+go test -race -p 3 ./internal/media ./internal/storage/providers/localfs ./internal/storage/providers/fallback ./internal/server ./internal/handlers -run 'TestUpload|TestResumable|TestDurable|TestRequiredPersistence|TestMediaHTTP' -count=1
+golangci-lint run --new-from-rev=origin/main ./internal/media/... ./internal/handlers/... ./internal/storage/... ./internal/server/... ./cmd/internal/core/...
 ```
 
 The selected frontend suites passed **123 tests**. SDK code generation includes

@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/storage/providers/localfs"
@@ -34,7 +35,7 @@ func TestResumableHTTPContract(t *testing.T) {
 			req.Header.Set(k, v)
 		}
 		rec := httptest.NewRecorder()
-		e.ServeHTTP(rec, req)
+		e.ServeHTTP(uploadDeadlineRecorder{rec}, req)
 		if strings.Contains(rec.Body.String(), root) {
 			t.Fatal("physical path exposed")
 		}
@@ -133,3 +134,9 @@ func TestResumableHTTPDisabledAndLimits(t *testing.T) {
 		t.Fatal(limits, err)
 	}
 }
+
+// These recorder tests cover the handler contract. Real transport deadlines are
+// tested separately through NewServer and a stalled TCP request body.
+type uploadDeadlineRecorder struct{ *httptest.ResponseRecorder }
+
+func (uploadDeadlineRecorder) SetReadDeadline(time.Time) error { return nil }

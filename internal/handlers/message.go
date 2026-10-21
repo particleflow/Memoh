@@ -41,6 +41,7 @@ type MessageHandler struct {
 	messagePublisher              messageevent.Publisher
 	activityInvalidationSupported bool
 	mediaService                  *media.Service
+	uploadReadTimeout             time.Duration
 	botService                    *bots.Service
 	accountService                *accounts.Service
 	toolApproval                  *toolapproval.Service

@@ -1,0 +1,34 @@
+=== RUN   TestResumableHTTPContract
+--- PASS: TestResumableHTTPContract (0.03s)
+=== RUN   TestResumableHTTPDisabledAndLimits
+--- PASS: TestResumableHTTPDisabledAndLimits (0.00s)
+=== RUN   TestResumableHTTPRevocationAndCrossBot
+--- PASS: TestResumableHTTPRevocationAndCrossBot (0.05s)
+=== RUN   TestResumableHTTPStalledBodyDeadlineReleasesLock
+--- PASS: TestResumableHTTPStalledBodyDeadlineReleasesLock (0.30s)
+=== RUN   TestResumableHTTPUnsupportedDeadlineFailsBeforeReading
+--- PASS: TestResumableHTTPUnsupportedDeadlineFailsBeforeReading (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.575s
+=== RUN   TestUploadJournalRenameFailureRequiresReadBarrier
+--- PASS: TestUploadJournalRenameFailureRequiresReadBarrier (0.02s)
+=== RUN   TestUploadTerminalJournalSyncBeforeRetryOrCollection
+=== RUN   TestUploadTerminalJournalSyncBeforeRetryOrCollection/ready
+=== RUN   TestUploadTerminalJournalSyncBeforeRetryOrCollection/canceled
+--- PASS: TestUploadTerminalJournalSyncBeforeRetryOrCollection (0.03s)
+    --- PASS: TestUploadTerminalJournalSyncBeforeRetryOrCollection/ready (0.02s)
+    --- PASS: TestUploadTerminalJournalSyncBeforeRetryOrCollection/canceled (0.01s)
+=== RUN   TestUploadProcessDeathAfterJournalRename
+--- PASS: TestUploadProcessDeathAfterJournalRename (0.06s)
+PASS
+ok  	github.com/felinics/memoh/internal/media	0.130s
+=== RUN   TestUploadRetryRepairsCanonicalRenameBeforeDirectorySync
+--- PASS: TestUploadRetryRepairsCanonicalRenameBeforeDirectorySync (0.01s)
+=== RUN   TestUploadProcessDeathAfterCanonicalRename
+--- PASS: TestUploadProcessDeathAfterCanonicalRename (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	0.026s
+=== RUN   TestUploadCORSPreflightAllowsOnlyExplicitHeaders
+--- PASS: TestUploadCORSPreflightAllowsOnlyExplicitHeaders (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/server	0.012s
