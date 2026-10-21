@@ -39,18 +39,6 @@ func CollectProviderSourceFrags(ctx context.Context, cfg agentpkg.RunConfig) []c
 	if err != nil {
 		return nil
 	}
-	// Preserve code-owned retention/capability metadata on the legacy input
-	// path too; flattening typed usage loses the required/preferred distinction.
-	if len(cfg.ContextToolUsageFrags) > 0 {
-		filtered := system[:0]
-		for _, frag := range system {
-			if frag.Kind != contextfrag.KindToolUsage {
-				filtered = append(filtered, frag)
-			}
-		}
-		filtered = append(filtered, cfg.ContextToolUsageFrags...)
-		system = filtered
-	}
 	nonSystem := CollectNonSystemProviderSourceFrags(ctx, cfg)
 	if nonSystem == nil {
 		return nil

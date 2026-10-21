@@ -15,7 +15,7 @@ var ErrContainerWorkspaceRequired = errors.New("direct agent runtime requires a 
 // credential paths assume the container layout. The remote bridge maps file
 // RPC paths, but it does not translate paths embedded in process environments.
 func RequireContainerWorkspace(info bridge.WorkspaceInfo, runtime string) error {
-	if info.Backend != bridge.WorkspaceBackendRemote && info.Backend != bridge.WorkspaceBackendAgenvo {
+	if info.Backend != bridge.WorkspaceBackendRemote {
 		return nil
 	}
 	return fmt.Errorf("%w: %s on workspace backend %q", ErrContainerWorkspaceRequired, runtime, info.Backend)

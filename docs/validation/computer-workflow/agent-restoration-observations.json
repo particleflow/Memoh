@@ -1,0 +1,22 @@
+{
+  "provider": "synthetic; fixed tool sequence",
+  "observations": [
+    {
+      "required_contract": false,
+      "ordinary_usage": true,
+      "discovery_tool": true,
+      "tool_results": 0,
+      "finish": "tool_calls"
+    },
+    {
+      "required_contract": false,
+      "ordinary_usage": true,
+      "discovery_tool": true,
+      "tool_results": 1,
+      "finish": "stop"
+    }
+  ],
+  "server_run_state": "completed",
+  "browser_page_errors": 0,
+  "remote_mutations": 0
+}

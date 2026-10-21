@@ -4,60 +4,9 @@ import (
 	"context"
 	"testing"
 
-	sdk "github.com/felinics/twilight/sdk"
-
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
 	tools "github.com/felinics/memoh/internal/agent/tool"
 )
-
-type requiredUsageTestProvider struct{ usageTestProvider }
-
-func (*requiredUsageTestProvider) RequiredUsage(context.Context, tools.SessionContext, tools.AvailableTools) (tools.ToolName, string) {
-	return tools.ToolListExecutionLocations(), "short code-owned contract"
-}
-
-func TestRequiredUsageIsIndividuallyTypedAndCapabilityGated(t *testing.T) {
-	for _, emit := range []bool{false, true} {
-		p := &requiredUsageTestProvider{usageTestProvider{emitTool: emit, toolName: "list_execution_locations", usage: "ordinary preferred documentation"}}
-		_, _, frags, _, err := newTestAgent(p).assembleTools(t.Context(), RunConfig{}, nil, false)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if !emit {
-			if len(frags) != 0 {
-				t.Fatal("unregistered provider injected required instructions")
-			}
-			continue
-		}
-		required := 0
-		for _, f := range frags {
-			if f.RetentionTier == contextfrag.RetentionRequired {
-				required++
-				if f.RequiredCapability != "list_execution_locations" || f.Role != sdk.MessageRoleSystem || f.Slot != contextfrag.SlotSystem || f.Trust != contextfrag.TrustSystem {
-					t.Fatalf("wrong required fragment: %+v", f)
-				}
-			} else if f.RetentionTier != contextfrag.RetentionPreferred {
-				t.Fatal("ordinary usage tier changed")
-			}
-		}
-		if required != 1 {
-			t.Fatalf("required fragment count=%d", required)
-		}
-	}
-}
-
-func TestRequiredUsageCannotClaimUnavailableCapability(t *testing.T) {
-	p := &requiredUsageTestProvider{usageTestProvider{emitTool: true, toolName: "apply_patch", usage: "ordinary preferred documentation"}}
-	_, _, frags, _, err := newTestAgent(p).assembleTools(t.Context(), RunConfig{}, nil, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	for _, frag := range frags {
-		if frag.RetentionTier == contextfrag.RetentionRequired {
-			t.Fatal("provider injected a contract for an unavailable capability")
-		}
-	}
-}
 
 func TestAssembleToolsReturnsStructuredUsageFragments(t *testing.T) {
 	t.Parallel()

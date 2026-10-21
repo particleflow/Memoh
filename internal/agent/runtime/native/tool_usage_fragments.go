@@ -19,11 +19,9 @@ type toolUsageSection struct {
 	// Empty for provider notices, which exist precisely because a tool is
 	// missing and must survive the gate.
 	capability string
-	// id optionally distinguishes sections sharing the same capability.
+	// id names the fragment when capability is empty.
 	id   string
 	text string
-	// Only code-owned, explicitly required provider contracts use this tier.
-	required bool
 }
 
 func (s toolUsageSection) fragID() string {
@@ -67,11 +65,7 @@ func structuredToolUsage(sections []toolUsageSection, scope contextfrag.Scope) [
 		GroupID:     toolUsageGroupID,
 		GroupJoiner: "\n\n",
 	}
-	frag := func(id, text, capability string, index int, required bool) contextfrag.ContextFrag {
-		retention := contextfrag.RetentionPreferred
-		if required {
-			retention = contextfrag.RetentionRequired
-		}
+	frag := func(id, text, capability string, index int) contextfrag.ContextFrag {
 		return contextfrag.TextFrag(contextfrag.TextFragInput{
 			ID:                 id,
 			Kind:               contextfrag.KindToolUsage,
@@ -79,7 +73,7 @@ func structuredToolUsage(sections []toolUsageSection, scope contextfrag.Scope) [
 			Slot:               contextfrag.SlotSystem,
 			Text:               text,
 			Priority:           45,
-			RetentionTier:      retention,
+			RetentionTier:      contextfrag.RetentionPreferred,
 			RequiredCapability: capability,
 			CacheClass:         contextfrag.CacheStable,
 			Trust:              contextfrag.TrustSystem,
@@ -98,7 +92,6 @@ func structuredToolUsage(sections []toolUsageSection, scope contextfrag.Scope) [
 		"## Tool usage",
 		sections[0].capability,
 		0,
-		false,
 	))
 	for i, section := range sections {
 		frags = append(frags, frag(
@@ -106,7 +99,6 @@ func structuredToolUsage(sections []toolUsageSection, scope contextfrag.Scope) [
 			section.text,
 			section.capability,
 			i+1,
-			section.required,
 		))
 	}
 	return frags

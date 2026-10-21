@@ -474,16 +474,6 @@ type ToolUsage interface {
 	Usage(ctx context.Context, session SessionContext, available AvailableTools) string
 }
 
-// ToolRequiredUsage contributes a short, code-owned contract which the native
-// runtime must retain while the returned capability is available. It uses the
-// existing required-system-fragment budget policy: a contract that cannot fit fails
-// the request, not the budget limit. Ordinary Usage remains preferred. This is
-// not a skill metadata option or a way to elevate uploaded instructions.
-type ToolRequiredUsage interface {
-	ToolUsage
-	RequiredUsage(ctx context.Context, session SessionContext, available AvailableTools) (ToolName, string)
-}
-
 // ToolNotice lets a provider tell the model about tools it could not
 // register this turn, for example a federated source whose upstream failed.
 // Unlike ToolUsage the text is collected even when the provider contributed
