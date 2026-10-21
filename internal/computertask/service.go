@@ -26,6 +26,7 @@ var (
 	ErrAmbiguous = errors.New("multiple authorized computers match; select a target_id")
 	ErrInvalid   = errors.New("invalid computer task arguments")
 	ErrApproval  = errors.New("computer execution requires approval under the existing target policy")
+	ErrConflict  = errors.New("another unresolved computer operation blocks this task; inspect blocked_by_operation without resubmitting")
 )
 
 type Registry interface {
@@ -71,21 +72,26 @@ type Details struct {
 	Observation  *agenvo.AgentObservation `json:"observation,omitempty"`
 	ArtifactHash string                   `json:"artifact_hash,omitempty"`
 	Phase        string                   `json:"phase"`
+	Foreground   *agenvo.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
-	ID              string                   `json:"operation_id"`
-	TargetID        string                   `json:"target_id"`
-	State           string                   `json:"state"`
-	Phase           string                   `json:"phase"`
-	Kind            string                   `json:"kind"`
-	Output          string                   `json:"output,omitempty"`
-	ExitCode        *int                     `json:"exit_code,omitempty"`
-	Truncated       bool                     `json:"truncated"`
-	Observation     *agenvo.AgentObservation `json:"observation,omitempty"`
-	ArtifactHash    string                   `json:"artifact_hash,omitempty"`
-	CancelRequested bool                     `json:"cancel_requested"`
-	ProcessStopped  bool                     `json:"process_stopped"`
-	CleanupRequired bool                     `json:"cleanup_required"`
+	ID                 string                   `json:"operation_id"`
+	TargetID           string                   `json:"target_id"`
+	State              string                   `json:"state"`
+	Phase              string                   `json:"phase"`
+	Kind               string                   `json:"kind"`
+	Output             string                   `json:"output,omitempty"`
+	ExitCode           *int                     `json:"exit_code,omitempty"`
+	Truncated          bool                     `json:"truncated"`
+	Observation        *agenvo.AgentObservation `json:"observation,omitempty"`
+	ArtifactHash       string                   `json:"artifact_hash,omitempty"`
+	CancelRequested    bool                     `json:"cancel_requested"`
+	ProcessStopped     bool                     `json:"process_stopped"`
+	CleanupRequired    bool                     `json:"cleanup_required"`
+	BlockedByOperation string                   `json:"blocked_by_operation,omitempty"`
+	WorkspaceID        string                   `json:"workspace_id,omitempty"`
+	PaneID             string                   `json:"pane_id,omitempty"`
+	RequestID          string                   `json:"request_id,omitempty"`
 }
 
 func fingerprint(value any) string {
@@ -104,7 +110,11 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 	if r.State == "dispatching" {
 		r.State = "unknown"
 	}
-	return Result{ID: r.ID, TargetID: r.TargetID, State: r.State, Phase: d.Phase, Kind: d.Kind, Output: d.Output, ExitCode: d.ExitCode, Truncated: d.Truncated, Observation: d.Observation, ArtifactHash: d.ArtifactHash, CancelRequested: r.CancelRequested, CleanupRequired: d.Phase != ""}
+	out := Result{ID: r.ID, TargetID: r.TargetID, State: r.State, Phase: d.Phase, Kind: d.Kind, Output: d.Output, ExitCode: d.ExitCode, Truncated: d.Truncated, Observation: d.Observation, ArtifactHash: d.ArtifactHash, CancelRequested: r.CancelRequested, CleanupRequired: d.Phase != ""}
+	if d.Foreground != nil {
+		out.WorkspaceID, out.PaneID, out.RequestID, out.CleanupRequired = d.Foreground.WorkspaceID, d.Foreground.PaneID, d.Foreground.RequestID, d.Foreground.CleanupRequired
+	}
+	return out
 }
 
 func (s *Service) targets(ctx context.Context, b toolcontext.ComputerBinding) ([]Target, error) {
@@ -196,16 +206,21 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	d := Details{Kind: in.Kind}
 	raw, _ := json.Marshal(d)
-	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: fingerprint(target), Details: raw})
+	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw})
 	if err != nil {
 		return Result{}, ErrDenied
 	}
 	if !created {
-		if r.TargetFingerprint != fingerprint(target) {
+		if r.TargetFingerprint != agenvo.TargetFingerprint(target) {
 			return Result{}, agenvo.ErrTargetChanged
 		}
 		if json.Unmarshal(r.Details, &d) != nil {
 			return Result{}, agenvo.ErrUnknown
+		}
+		if r.Fingerprint != fingerprint(in) {
+			blocked := result(r, d)
+			blocked.BlockedByOperation = r.ID
+			return blocked, ErrConflict
 		}
 		return result(r, d), nil
 	}
@@ -223,7 +238,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		r = next
 		return nil
 	}
-	work, cancel := context.WithTimeout(ctx, 35*time.Second)
+	work, cancel := context.WithTimeout(agenvo.PinRegistration(ctx, scope(b, id), r.TargetFingerprint), 35*time.Second)
 	defer cancel()
 	if in.Kind == "foreground_bash" {
 		d.Phase = "foreground_dispatch"
@@ -231,6 +246,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 			return result(r, d), err
 		}
 		out, runErr := s.relay.Execute(work, agenvo.Request{Scope: scope(b, id), Command: in.Task, WorkDir: in.WorkDir, Timeout: 30 * time.Second})
+		d.Foreground = &out
 		d.Output, d.ExitCode, d.Truncated = out.Output, out.ExitCode, out.Truncated
 		state := out.State
 		if state != "completed" && state != "not_started" && state != "rejected" {
@@ -252,11 +268,14 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	state := "submitted"
 	if runErr != nil {
 		state = "unknown"
+		if p.Phase == "prompt_rejected" && errors.Is(runErr, agenvo.ErrRejected) {
+			state = "rejected"
+		}
 	}
 	if err := save(state); err != nil {
 		return result(r, d), err
 	}
-	return result(r, d), nil
+	return result(r, d), runErr
 }
 
 func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
@@ -271,7 +290,7 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 	if err != nil {
 		return r, Details{}, ErrDenied
 	}
-	if fingerprint(t) != r.TargetFingerprint {
+	if agenvo.TargetFingerprint(t) != r.TargetFingerprint {
 		return r, Details{}, agenvo.ErrTargetChanged
 	}
 	var d Details
@@ -286,8 +305,8 @@ func (s *Service) observe(ctx context.Context, b toolcontext.ComputerBinding, id
 	if err != nil {
 		return Result{}, err
 	}
-	if refresh && d.Kind == "herdr_pi_task" && d.Agent.Name != "" {
-		obs, observeErr := s.relay.ObserveAgent(ctx, scope(b, r.TargetID), d.Agent)
+	if refresh && d.Kind == "herdr_pi_task" && d.Agent.Name != "" && r.State != "rejected" {
+		obs, observeErr := s.relay.ObserveAgent(agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint), scope(b, r.TargetID), d.Agent)
 		if observeErr != nil {
 			return result(r, d), observeErr
 		}

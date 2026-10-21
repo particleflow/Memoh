@@ -218,3 +218,49 @@ func TestCachedRouteCannotCallRemovedOrReconfiguredConnection(t *testing.T) {
 		})
 	}
 }
+
+type endpointGateway struct {
+	testGateway
+	checks int
+	t      *testing.T
+}
+
+func (g *endpointGateway) check(ctx context.Context) {
+	g.t.Helper()
+	g.checks++
+	if err := mcpgw.CheckEndpoint(ctx, "https://synthetic.invalid/managed"); !errors.Is(err, mcpgw.ErrToolNotFound) {
+		g.t.Fatal("transport lost actual endpoint guard", err)
+	}
+}
+
+func (g *endpointGateway) ListHTTPConnectionTools(ctx context.Context, c mcpgw.Connection) ([]mcpgw.ToolDescriptor, error) {
+	g.check(ctx)
+	return g.testGateway.ListHTTPConnectionTools(ctx, c)
+}
+
+func (g *endpointGateway) CallHTTPConnectionTool(ctx context.Context, c mcpgw.Connection, n string, a map[string]any) (map[string]any, error) {
+	g.check(ctx)
+	return g.testGateway.CallHTTPConnectionTool(ctx, c, n, a)
+}
+
+func TestComputerEndpointGuardSurvivesFederationListAndCall(t *testing.T) {
+	g := &endpointGateway{t: t, testGateway: testGateway{listHTTP: []mcpgw.ToolDescriptor{{Name: "echo", InputSchema: map[string]any{"type": "object"}}}}}
+	l := &testConnectionLister{items: []mcpgw.Connection{{ID: "alias", Name: "safe", Type: "http", Active: true, Config: map[string]any{"url": "https://synthetic.invalid/safe"}}}}
+	source := NewSource(nil, g, l, WithConnectionCheck(func(_ context.Context, c mcpgw.Connection) error {
+		if c.Config["url"] == "https://synthetic.invalid/managed" {
+			return mcpgw.ErrToolNotFound
+		}
+		return nil
+	}))
+	session := mcpgw.ToolSessionContext{BotID: "bot"}
+	listed, err := source.ListTools(t.Context(), session)
+	if err != nil || len(listed) != 1 {
+		t.Fatalf("list: %v %v", listed, err)
+	}
+	if _, err = source.CallTool(t.Context(), session, listed[0].Name, nil); err != nil {
+		t.Fatal(err)
+	}
+	if g.checks != 2 {
+		t.Fatalf("checks=%d", g.checks)
+	}
+}

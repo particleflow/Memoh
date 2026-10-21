@@ -284,6 +284,12 @@ func (m *Manager) NativeMCPClient(ctx context.Context, botID string) (*bridge.Cl
 	return m.nativeMCPClient(ctx, botID)
 }
 
+// NativeWorkspaceInfo describes the Bot-owned Agent host, independently of
+// the conversation's computer task target. It grants no tool target access.
+func (m *Manager) NativeWorkspaceInfo(ctx context.Context, botID string) (bridge.WorkspaceInfo, error) {
+	return m.nativeWorkspaceInfo(ctx, botID)
+}
+
 // MCPClient implements bridge.Provider and resolves the request-scoped target
 // override before falling back to the Bot's persisted Primary target.
 func (m *Manager) MCPClient(ctx context.Context, botID string) (*bridge.Client, error) {

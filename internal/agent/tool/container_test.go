@@ -575,17 +575,17 @@ func TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback(t *testing.T) {
 	provider := NewContainerProvider(nil, clients, nil, "/data")
 	session := SessionContext{BotID: "bot", UserID: "caller", WorkspaceTargetID: "selected", WorkspaceTargetKind: "remote"}
 	value, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'"})
-	if err != nil || value == nil || calls != 1 {
+	if !errors.Is(err, agenvo.ErrComputerTaskRequired) || value != nil || calls != 0 {
 		t.Fatalf("value=%v err=%v calls=%d", value, err, calls)
 	}
-	if _, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'", RunInBackground: true}); !errors.Is(err, agenvo.ErrUnsupported) || calls != 1 {
+	if _, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'", RunInBackground: true}); !errors.Is(err, agenvo.ErrComputerTaskRequired) || calls != 0 {
 		t.Fatalf("background allowed: %v", err)
 	}
 	if _, err := provider.execRead(t.Context(), session, readArgs{Path: `C:\Synthetic\file.txt`}); !errors.Is(err, bridge.ErrUnsupported) {
 		t.Fatalf("file request should fail explicitly: %v", err)
 	}
 	clients.resolveErr = workspacepkg.ErrRemoteRuntimeOffline
-	if _, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'"}); err == nil || calls != 1 {
+	if _, err := provider.execExec(t.Context(), session, execArgs{Command: "printf 'ok'"}); err == nil || calls != 0 {
 		t.Fatalf("offline target fell back: %v", err)
 	}
 	w := toolWorkspaceFromInfo(clients.resolved.Info, "/data", "")

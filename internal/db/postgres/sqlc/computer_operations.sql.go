@@ -181,25 +181,41 @@ func (q *Queries) GetOwnedAgenvoRuntime(ctx context.Context, arg GetOwnedAgenvoR
 	return i, err
 }
 
-const isManagedComputerConnection = `-- name: IsManagedComputerConnection :one
-SELECT EXISTS(SELECT 1 FROM user_runtimes
-WHERE team_id=public.memoh_current_team_id() AND provider='agenvo'
-AND (provider_config->>'connection_id'=$1::text
- OR EXISTS (
-   SELECT 1 FROM mcp_connections registered, mcp_connections candidate
-   WHERE registered.team_id=user_runtimes.team_id AND candidate.team_id=user_runtimes.team_id
-   AND registered.id::text=user_runtimes.provider_config->>'connection_id'
-   AND candidate.id::text=$1::text
-   AND registered.type IN ('http','sse') AND candidate.type IN ('http','sse')
-   AND NULLIF(rtrim(registered.config->>'url','/'),'')=rtrim(candidate.config->>'url','/')
- )))
+const listComputerConnectionEndpoints = `-- name: ListComputerConnectionEndpoints :many
+SELECT candidate.config AS candidate_config, registered.config AS registered_config,
+       (user_runtimes.provider_config->>'connection_id'=$1::text) AS direct
+FROM user_runtimes
+JOIN mcp_connections registered ON registered.team_id=user_runtimes.team_id
+ AND registered.id::text=user_runtimes.provider_config->>'connection_id'
+JOIN mcp_connections candidate ON candidate.team_id=user_runtimes.team_id
+ AND candidate.id::text=$1::text
+WHERE user_runtimes.team_id=public.memoh_current_team_id() AND user_runtimes.provider='agenvo'
 `
 
-func (q *Queries) IsManagedComputerConnection(ctx context.Context, connectionID string) (bool, error) {
-	row := q.db.QueryRow(ctx, isManagedComputerConnection, connectionID)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+type ListComputerConnectionEndpointsRow struct {
+	CandidateConfig  []byte `json:"candidate_config"`
+	RegisteredConfig []byte `json:"registered_config"`
+	Direct           bool   `json:"direct"`
+}
+
+func (q *Queries) ListComputerConnectionEndpoints(ctx context.Context, connectionID string) ([]ListComputerConnectionEndpointsRow, error) {
+	rows, err := q.db.Query(ctx, listComputerConnectionEndpoints, connectionID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListComputerConnectionEndpointsRow
+	for rows.Next() {
+		var i ListComputerConnectionEndpointsRow
+		if err := rows.Scan(&i.CandidateConfig, &i.RegisteredConfig, &i.Direct); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateAgenvoRuntimeConfig = `-- name: UpdateAgenvoRuntimeConfig :one

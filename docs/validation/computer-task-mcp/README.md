@@ -41,6 +41,46 @@ select the existing valid Bash registration; validation was not relaxed.
 
 ![Agent output remains unknown in the actual Web application](herdr.png)
 
+## Review-fix checkpoint
+
+After review of `9fe76e91`, this revision adds these regressions:
+
+- The actual application child admission and unchanged native SpawnAdapter
+  receive a child-session binding after checking the stored parent; PC-B and
+  NAS remain denied. An unrelated child record is rejected.
+- The unchanged Claude Code and Codex drivers run their real `Prompt` path
+  through bridge/container checks to a synthetic launcher boundary, twice.
+  Their host is native while task scope stays PC-A. This does not exercise a
+  live vendor process or an already-running Codex app-server.
+- Standard MCP rejects malformed/native-error prompt receipts without claiming
+  submission. Proven pre-input rejection and unknown remain distinct; a second
+  submit does not repeat either operation. Different tasks return an explicit
+  blocked-operation conflict. Foreground location/request/cleanup evidence is
+  persisted. Registration changes after claim cannot dispatch elsewhere.
+- An unknown standard-MCP task followed by the old ordinary `exec` path is
+  rejected without a second relay submission. Root-relative workdirs are now
+  tested through the durable standard-MCP path; NAS native exec remains.
+- Endpoint normalization, credential identity, revoked aliases, per-request
+  redirect checks and propagation through federation listing/calls are tested.
+  The isolated PostgreSQL migration test includes semantic/credential aliases.
+  Unknown independently authenticated proxy aliases are not claimed detected.
+
+The final rebuilt server/browser pair used fresh synthetic sessions. Deltas
+were one foreground submission, one Agent start, one prompt and zero closes;
+PostgreSQL retained `completed`/`foreground_completed` and
+`unknown`/`prompt_submitted` with `prompt_submitted=true` and
+`task_success_verified=false`. Both screenshots above were recaptured and
+inspected, and both browser runs reported zero page errors.
+
+An earlier rerun reached a still-running old fixture with a malformed prompt
+receipt. The server correctly recorded `unknown`/`submitting_prompt`, with
+`prompt_submitted=false`. That row was retained. The synthetic relay was
+replaced with the strict official response shape and a new session was used;
+no existing uncertain operation was repeated or cleared.
+
+Two build attempts exhausted temporary disk; only obsolete derived caches and
+stopped development binaries were cleaned. The subsequent build succeeded.
+
 ## Automated checks
 
 | Check | Observed result |
@@ -57,8 +97,9 @@ select the existing valid Bash registration; validation was not relaxed.
 
 The complete repository test suite and Web type suite were not rerun. Existing
 unrelated Web type and image-proxy failures are not reclassified as passed.
-The full affected-package lint run covers handlers and generated-store users;
-its final correction changed a test only.
+The full affected-package lint run covers handlers and generated-store users.
+The review revision corrected an error-string style finding and reran the
+affected packages. Usage assertions now check the required durable task path.
 
 ## Remaining acceptance boundaries
 

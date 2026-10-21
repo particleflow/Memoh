@@ -9,6 +9,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/runtime/codex"
 	"github.com/felinics/memoh/internal/agent/runtime/external"
 	"github.com/felinics/memoh/internal/agent/runtime/grok"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
 
@@ -23,6 +24,50 @@ type guardedRuntimeFixture struct {
 	err         error
 	client      *bridge.Client
 	clientCalls int
+}
+
+type nativeHostFixture struct {
+	guardedRuntimeFixture
+	nativeCalls   int
+	observedScope string
+}
+
+func (f *nativeHostFixture) NativeWorkspaceInfo(ctx context.Context, _ string) (bridge.WorkspaceInfo, error) {
+	f.observedScope = toolcontext.ComputerScope(ctx)
+	return bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendContainer}, nil
+}
+
+func (f *nativeHostFixture) NativeMCPClient(ctx context.Context, _ string) (*bridge.Client, error) {
+	f.nativeCalls++
+	f.observedScope = toolcontext.ComputerScope(ctx)
+	return f.client, nil
+}
+
+func TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget(t *testing.T) {
+	ctx, err := toolcontext.WithComputerBinding(t.Context(), toolcontext.ComputerBinding{BotID: "bot", UserID: "user", SessionID: "thread", TargetID: "pc-a", RunID: "run"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := &nativeHostFixture{guardedRuntimeFixture: guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo}, client: &bridge.Client{}}}
+	host := containerRuntimeBridge{source: f, runtime: "codex"}
+	for range 2 { // Both cold acquisition and a later turn must use the host.
+		info, err := host.WorkspaceInfo(ctx, "bot")
+		if err != nil || external.RequireContainerWorkspace(info, "codex") != nil {
+			t.Fatal("Agent host was resolved as task PC", err)
+		}
+		if _, err = host.MCPClient(ctx, "bot"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if f.clientCalls != 0 || f.nativeCalls != 2 || f.observedScope != "pc-a" {
+		t.Fatal("host isolation changed MCP task scope")
+	}
+	if err := toolcontext.CheckComputerTarget(ctx, "native"); !errors.Is(err, toolcontext.ErrComputerScope) {
+		t.Fatal("task tools gained NAS access")
+	}
+	if _, err := host.MCPClient(ctx, "other-bot"); err == nil {
+		t.Fatal("binding crossed Bot ownership")
+	}
 }
 
 func (f *guardedRuntimeFixture) WorkspaceInfo(context.Context, string) (bridge.WorkspaceInfo, error) {

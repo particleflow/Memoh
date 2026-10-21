@@ -15,6 +15,7 @@ type agentFixture struct {
 	name, workspace, pane, terminal                         string
 	starting, nativeError, moved, acceptedStart, lostPrompt bool
 	read                                                    any
+	promptReceipt                                           any
 }
 
 func newAgentFixture(t *testing.T) (*Service, *agentFixture) {
@@ -77,7 +78,10 @@ func newAgentFixture(t *testing.T) (*Service, *agentFixture) {
 			if a.lostPrompt {
 				return nil, errors.New("lost response")
 			}
-			inner = map[string]any{"agent": map[string]any{"agent_status": "done", "completion_seq": 12}} // PREVIOUS round; never success
+			if a.promptReceipt != nil {
+				return mcpValue(a.promptReceipt), nil
+			}
+			return mcpValue(map[string]any{"execution": "accepted", "result": map[string]any{"id": "cli:agent:prompt", "session": "default", "result": map[string]any{"type": "agent_prompted", "agent": map[string]any{"name": a.name, "agent": "pi", "workspace_id": a.workspace, "pane_id": a.pane, "terminal_id": a.terminal, "agent_status": "done", "completion_seq": 12}}}}), nil // PREVIOUS round; never success
 		case "agent.read":
 			return mcpValue(map[string]any{"execution": "accepted", "result": a.read}), nil
 		default:
@@ -161,6 +165,41 @@ func TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown(t *testing.T) {
 				}
 			}
 			if starts > 1 || prompts > 1 || (mode != "lost" && prompts != 0) || (mode == "persist" && starts != 0) {
+				t.Fatalf("calls=%v", a.calls)
+			}
+		})
+	}
+}
+
+func TestAgentPromptReceiptRejectsMalformedAndNativeFailures(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		receipt any
+		want    error
+	}{
+		{"native-rejection", map[string]any{"execution": "accepted", "result": map[string]any{"nativeError": map[string]any{"execution": "rejected", "error": map[string]any{"code": "native_error", "native": map[string]any{"code": "agent_not_found"}}}}}, ErrRejected},
+		{"native-unproven", map[string]any{"execution": "accepted", "result": map[string]any{"nativeError": map[string]any{"code": "not_found"}}}, ErrUnknown},
+		{"partial-input", map[string]any{"execution": "rejected", "error": map[string]any{"code": "native_error", "native": map[string]any{"code": "agent_prompt_failed"}}}, ErrUnknown},
+		{"wrong-type", map[string]any{"execution": "accepted", "result": map[string]any{"id": "cli:agent:prompt", "session": "default", "result": map[string]any{"type": "ok"}}}, ErrUnknown},
+		{"missing-result", map[string]any{"execution": "accepted"}, ErrUnknown},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s, a := newAgentFixture(t)
+			a.promptReceipt = tc.receipt
+			p, err := s.SubmitAgent(t.Context(), request().Scope, "synthetic", ".", AgentProgress{Name: "m" + strings.Repeat("c", 30)}, func(AgentProgress) error { return nil })
+			if !errors.Is(err, tc.want) || p.PromptSubmitted {
+				t.Fatalf("progress=%+v err=%v", p, err)
+			}
+			if (p.Phase == "prompt_rejected") != errors.Is(tc.want, ErrRejected) {
+				t.Fatal("rejected and unknown phases conflated")
+			}
+			prompts := 0
+			for _, m := range a.calls {
+				if m == "agent.prompt" {
+					prompts++
+				}
+			}
+			if prompts != 1 {
 				t.Fatalf("calls=%v", a.calls)
 			}
 		})

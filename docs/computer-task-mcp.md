@@ -32,7 +32,11 @@ for several differently scoped conversations.
 
 An Agenvo command target cannot host the external Agent binary, its filesystem
 or credentials. The original drivers' container requirement and the host's
-Agenvo rejection remain. Hosting the brain in an existing Server Workspace
+Agenvo rejection remain. The host bridge resolves the native workspace explicitly
+for an authenticated computer-bound turn; the same context retains the selected
+PC restriction for all task tools. Durable child-thread admission verifies the
+stored parent relationship and derives a child binding with exactly the parent
+computer scope, rather than relaxing the session identity check. Hosting the brain in an existing Server Workspace
 and calling a registered PC through these tools is distinct from installing
 that brain on the PC or replacing the workspace runtime.
 
@@ -62,9 +66,13 @@ all enabled target policy modes. Task prose cannot match command bypass rules.
 Ask/deny policies fail before reservation/dispatch; this first interface does
 not yet implement a pending-approval continuation for computer tasks.
 
-Raw federation search/execute for registered Agenvo connections and same-URL
-aliases is hidden and rejected, including cached routes and revoked registry
-entries. All raw federated connections are unavailable in a PC conversation:
+Raw federation search/execute for registered Agenvo connections is hidden and
+rejected, including cached routes and revoked registry entries. Endpoint checks
+normalize host case, default ports, fragments and paths; actual HTTP requests
+(including redirects and SSE message endpoints) are checked before forwarding credentials or sending a request to that endpoint. Reuse of a stored Authorization/API-key header is also
+reserved across URLs. Unknown reverse proxies, DNS aliases or independently
+authenticated aliases cannot be inferred from URL equality; this is not a claim
+to identify every service behind arbitrary unrelated MCP endpoints. All raw federated connections are unavailable in a PC conversation:
 their protocol cannot prove a device scope. The aggregate Connect-It source is
 likewise unavailable in PC turns until it can enforce device scope. Global
 capability management is also unavailable from that conversation; Web administration is unchanged.
@@ -104,9 +112,19 @@ Bot/conversation/target prevents an unknown effect from being repeated with a
 different task text, tool-call ID, run or restarted server. A stale dispatch
 reservation is reported as unknown, not proof a worker is running. A failed
 post-dispatch persistence attempt retains the receipt in the error response.
+A different task blocked by an unsettled slot returns an explicit conflict and
+`blocked_by_operation`, not a normal receipt for the new task. Ordinary `exec`
+cannot dispatch Agenvo commands, even from a NAS conversation; all foreground
+commands must use this durable service. Native NAS exec is unchanged. Foreground
+workspace/pane/request IDs and cleanup requirements are stored for investigation.
+The ledger target fingerprint is pinned through every subsequent authorization
+resolve; a changed registration cannot redirect an already claimed operation.
 
 Herdr start acceptance, interactive readiness, a previous prompt snapshot,
 completion sequence and terminal output do not prove this task completed.
+Prompt acceptance requires the exact `agent_prompted` envelope and matching
+identity. Proven pre-input native rejection is `rejected`; malformed responses
+and errors that may follow partial input remain `unknown`, without a retry.
 No Pi lifecycle hook is assumed. Pi observations remain unknown/unverified;
 the connector can parse JSON-looking terminal text, so output fidelity is
 explicitly unverified. Restarted/reused/moved IDs are not a safe cleanup handle.

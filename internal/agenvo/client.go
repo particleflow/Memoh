@@ -81,7 +81,8 @@ type Receipt struct {
 	RequestID string          `json:"requestId,omitempty"`
 	Result    json.RawMessage `json:"result,omitempty"`
 	Error     *struct {
-		Code string `json:"code"`
+		Code   string          `json:"code"`
+		Native json.RawMessage `json:"native,omitempty"`
 	} `json:"error,omitempty"`
 }
 

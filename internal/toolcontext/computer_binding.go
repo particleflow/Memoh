@@ -22,6 +22,27 @@ type ComputerBinding struct {
 	RunID     string
 }
 
+// HostComputerBinding reads process-local authority only. It is not populated
+// by transport headers or tool arguments.
+func HostComputerBinding(ctx context.Context) (ComputerBinding, bool) {
+	if ctx == nil || !ComputerContextTrusted(ctx) {
+		return ComputerBinding{}, false
+	}
+	b, ok := ctx.Value(computerBindingKey{}).(ComputerBinding)
+	return b, ok
+}
+
+// DeriveComputerBinding is called only after the host has admitted a persisted
+// child thread and verified its parent. Only the child thread/run change.
+func DeriveComputerBinding(ctx context.Context, bot, parent, child, run string) (context.Context, error) {
+	b, ok := HostComputerBinding(ctx)
+	if !ok || ctx.Err() != nil || b.BotID != bot || b.SessionID != parent || child == "" || child == parent || run == "" {
+		return ctx, ErrComputerBinding
+	}
+	b.SessionID, b.RunID = child, run
+	return context.WithValue(ctx, computerBindingKey{}, b), nil
+}
+
 // WithComputerBinding is only for trusted host code. Child contexts cannot
 // replace the identity or broaden a selected PC into native/NAS scope.
 func WithComputerBinding(ctx context.Context, binding ComputerBinding) (context.Context, error) {

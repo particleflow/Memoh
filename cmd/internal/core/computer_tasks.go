@@ -2,6 +2,7 @@ package core
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/felinics/memoh/internal/accounts"
 	toolapproval "github.com/felinics/memoh/internal/agent/decision/approval"
@@ -70,7 +71,11 @@ func computerConnectionCheck(store *postgresstore.Store) func(context.Context, m
 		if toolcontext.ComputerScope(ctx) != "" {
 			return mcp.ErrToolNotFound
 		}
-		managed, err := store.IsManagedComputerConnection(ctx, connection.ID)
+		config, err := json.Marshal(connection.Config)
+		if err != nil {
+			return computertask.ErrDenied
+		}
+		managed, err := store.IsManagedComputerEndpoint(ctx, connection.ID, config)
 		if err != nil {
 			return computertask.ErrDenied
 		}

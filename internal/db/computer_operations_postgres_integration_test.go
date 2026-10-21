@@ -111,11 +111,33 @@ func TestComputerOperationsMigrationAndDurableIsolation(t *testing.T) {
 			t.Fatalf("managed alias check: %v %v", managed, e)
 		}
 	}
+	for _, endpoint := range []string{"https://EXAMPLE.invalid:443/computer#alias", "https://example.invalid:443/a/../computer", "https://example.invalid/%63omputer"} {
+		raw, _ := json.Marshal(map[string]string{"url": endpoint})
+		if _, e := conn.Exec(ctx, "UPDATE mcp_connections SET config=$1 WHERE id=$2", raw, alias); e != nil {
+			t.Fatal(e)
+		}
+		if managed, e := store.IsManagedComputerConnection(ctx, alias); e != nil || !managed {
+			t.Fatalf("semantic alias %s: %v %v", endpoint, managed, e)
+		}
+		if managed, e := store.IsManagedComputerEndpoint(ctx, unrelated, raw); e != nil || !managed {
+			t.Fatalf("redirect target %s: %v %v", endpoint, managed, e)
+		}
+	}
 	if _, err = conn.Exec(ctx, "UPDATE user_runtimes SET revoked_at=now() WHERE id=$1", runtime.ID); err != nil {
 		t.Fatal(err)
 	}
 	if managed, e := store.IsManagedComputerConnection(ctx, alias); e != nil || !managed {
 		t.Fatal("revocation reopened raw transport")
+	}
+	// The managed credential identity remains reserved at another endpoint.
+	for _, id := range []string{connection, alias} {
+		raw, _ := json.Marshal(map[string]any{"url": "https://" + id + ".invalid/mcp", "headers": map[string]string{"aUtHoRiZaTiOn": "Bearer synthetic-computer-only"}})
+		if _, e := conn.Exec(ctx, "UPDATE mcp_connections SET config=$1 WHERE id=$2", raw, id); e != nil {
+			t.Fatal(e)
+		}
+	}
+	if managed, e := store.IsManagedComputerConnection(ctx, alias); e != nil || !managed {
+		t.Fatal("credential alias reopened raw route", e)
 	}
 	old := r
 	r.State = "unknown"

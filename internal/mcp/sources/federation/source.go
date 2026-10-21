@@ -96,6 +96,17 @@ func NewSource(log *slog.Logger, gateway Gateway, connections ConnectionLister, 
 // Invalidate forgets discovery after a management change.
 func (s *Source) Invalidate(botID string) { s.mu.Lock(); delete(s.cache, botID); s.mu.Unlock() }
 
+func (s *Source) endpointContext(ctx context.Context, connection mcpgw.Connection) context.Context {
+	if s.connectionCheck == nil {
+		return ctx
+	}
+	return mcpgw.WithEndpointCheck(ctx, func(ctx context.Context, endpoint string) error {
+		candidate := connection
+		candidate.Config = map[string]any{"url": endpoint}
+		return s.connectionCheck(ctx, candidate)
+	})
+}
+
 func (s *Source) ListTools(ctx context.Context, session mcpgw.ToolSessionContext) ([]mcpgw.ToolDescriptor, error) {
 	ctx, cancel := toolcontext.Bind(ctx, session)
 	defer cancel()
@@ -195,7 +206,7 @@ func (s *Source) CallTool(ctx context.Context, session mcpgw.ToolSessionContext,
 		arguments = map[string]any{}
 	}
 
-	callCtx, callCancel := context.WithTimeout(ctx, mcpCallTimeout)
+	callCtx, callCancel := context.WithTimeout(s.endpointContext(ctx, route.connection), mcpCallTimeout)
 	defer callCancel()
 	if err := toolcontext.ValidateRuntimeGuard(callCtx, session); err != nil {
 		return nil, err
@@ -274,7 +285,7 @@ func (s *Source) buildToolsAndRoutes(ctx context.Context, botID string) ([]mcpgw
 					}
 				}
 				var connTools []mcpgw.ToolDescriptor
-				listCtx, listCancel := context.WithTimeout(ctx, mcpCallTimeout)
+				listCtx, listCancel := context.WithTimeout(s.endpointContext(ctx, connection), mcpCallTimeout)
 				switch strings.ToLower(strings.TrimSpace(connection.Type)) {
 				case "http":
 					connTools, err = s.gateway.ListHTTPConnectionTools(listCtx, connection)

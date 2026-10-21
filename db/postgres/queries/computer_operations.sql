@@ -23,18 +23,15 @@ WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
 AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND revision=sqlc.arg(revision) RETURNING *;
 
--- name: IsManagedComputerConnection :one
-SELECT EXISTS(SELECT 1 FROM user_runtimes
-WHERE team_id=public.memoh_current_team_id() AND provider='agenvo'
-AND (provider_config->>'connection_id'=sqlc.arg(connection_id)::text
- OR EXISTS (
-   SELECT 1 FROM mcp_connections registered, mcp_connections candidate
-   WHERE registered.team_id=user_runtimes.team_id AND candidate.team_id=user_runtimes.team_id
-   AND registered.id::text=user_runtimes.provider_config->>'connection_id'
-   AND candidate.id::text=sqlc.arg(connection_id)::text
-   AND registered.type IN ('http','sse') AND candidate.type IN ('http','sse')
-   AND NULLIF(rtrim(registered.config->>'url','/'),'')=rtrim(candidate.config->>'url','/')
- )));
+-- name: ListComputerConnectionEndpoints :many
+SELECT candidate.config AS candidate_config, registered.config AS registered_config,
+       (user_runtimes.provider_config->>'connection_id'=sqlc.arg(connection_id)::text) AS direct
+FROM user_runtimes
+JOIN mcp_connections registered ON registered.team_id=user_runtimes.team_id
+ AND registered.id::text=user_runtimes.provider_config->>'connection_id'
+JOIN mcp_connections candidate ON candidate.team_id=user_runtimes.team_id
+ AND candidate.id::text=sqlc.arg(connection_id)::text
+WHERE user_runtimes.team_id=public.memoh_current_team_id() AND user_runtimes.provider='agenvo';
 
 -- name: GetOwnedAgenvoRuntime :one
 SELECT * FROM user_runtimes WHERE team_id=public.memoh_current_team_id()

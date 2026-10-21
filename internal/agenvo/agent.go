@@ -163,8 +163,14 @@ func (s *Service) SubmitAgent(ctx context.Context, scope Scope, task, workDir st
 		case <-timer.C:
 		}
 	}
-	_, err = call("submitting_prompt", "agent.prompt", map[string]any{"session": target.Session, "name": p.Name, "text": task})
+	prompted, err := call("submitting_prompt", "agent.prompt", map[string]any{"session": target.Session, "name": p.Name, "text": task})
+	if err == nil || errors.Is(err, ErrRejected) {
+		err = validatePromptReceipt(prompted, target.Session, p)
+	}
 	if err != nil {
+		if errors.Is(err, ErrRejected) {
+			p.Phase = "prompt_rejected"
+		}
 		return p, err
 	}
 	// The prompt receipt can be a snapshot of the PREVIOUS round. No status
@@ -172,6 +178,59 @@ func (s *Service) SubmitAgent(ctx context.Context, scope Scope, task, workDir st
 	p.PromptSubmitted = true
 	p.Phase = "prompt_submitted"
 	return p, save(p)
+}
+
+// Only Herdr's pre-submission validation errors prove that no prompt was
+// delivered. timeout/agent_prompt_failed can follow partial terminal input.
+func promptRejection(r Receipt) error {
+	if r.Error == nil || (r.Execution != "rejected" && r.Execution != "not_started") {
+		return ErrUnknown
+	}
+	var native struct {
+		Code string `json:"code"`
+	}
+	if r.Error.Code != "native_error" || json.Unmarshal(r.Error.Native, &native) != nil {
+		return ErrUnknown
+	}
+	switch native.Code {
+	case "agent_not_found", "agent_not_ready", "agent_blocked", "empty_agent_prompt":
+		return ErrRejected
+	default:
+		return ErrUnknown
+	}
+}
+
+func validatePromptReceipt(r Receipt, session string, p AgentProgress) error {
+	if r.Error != nil {
+		return promptRejection(r)
+	}
+	var envelope struct {
+		ID          string          `json:"id"`
+		Session     string          `json:"session"`
+		NativeError json.RawMessage `json:"nativeError"`
+		Result      *struct {
+			Type  string     `json:"type"`
+			Agent *agentInfo `json:"agent"`
+		} `json:"result"`
+	}
+	if r.Execution != "accepted" || json.Unmarshal(r.Result, &envelope) != nil {
+		return ErrUnknown
+	}
+	if len(envelope.NativeError) != 0 && string(envelope.NativeError) != "null" {
+		var rejected Receipt
+		if json.Unmarshal(envelope.NativeError, &rejected) != nil {
+			return ErrUnknown
+		}
+		return promptRejection(rejected)
+	}
+	if envelope.ID != "cli:agent:prompt" || envelope.Session != session || envelope.Result == nil || envelope.Result.Type != "agent_prompted" || envelope.Result.Agent == nil {
+		return ErrUnknown
+	}
+	a := envelope.Result.Agent
+	if a.Name != p.Name || a.Agent != "pi" || a.WorkspaceID != p.WorkspaceID || a.PaneID != p.PaneID || a.TerminalID != p.TerminalID {
+		return ErrUnknown
+	}
+	return nil
 }
 
 func (s *Service) ObserveAgent(ctx context.Context, scope Scope, p AgentProgress) (AgentObservation, error) {

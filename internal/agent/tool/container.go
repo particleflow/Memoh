@@ -89,7 +89,7 @@ func (*ContainerProvider) Usage(_ context.Context, session SessionContext, avail
 		parts = append(parts,
 			locationRef+": discover the Server Workspace and connected computers authorized for this Bot. For requests to use a computer (including an unnamed Windows PC), inspect these locations before claiming no computer is configured or looking for a separate cloud computer.",
 			"Check each location's `provider`, `capabilities`, `available` and `status`. Authorization is not availability; an offline target is not an unconfigured account. A missing target means it is not exposed to this Bot, not that no account computer exists. Never substitute another location after a target fails.",
-			"An Agenvo location advertising `exec_foreground` supports foreground Bash commands, not a full workspace, filesystem or desktop. Separately advertised computer task tools own configured Herdr/Pi Agent dispatch. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
+			"An Agenvo location advertising `exec_foreground` supports foreground Bash through `computer_task_submit(kind=foreground_bash)`, not ordinary `exec`, a full workspace, filesystem or desktop. The computer task tools also own configured Herdr/Pi Agent dispatch and durable receipts. Use only its advertised capabilities; prefer `.` or root-relative working directories. Do not launch an interactive coding agent through foreground exec.",
 		)
 		if skillRef, ok := available.Ref(ToolUseSkill()); ok {
 			parts = append(parts, "For a connected-computer or local-agent task, use "+skillRef+" when an available skill covers that workflow. Skills explain usage; they do not grant target or connector access.")
@@ -307,7 +307,7 @@ Delete a file:
 				"Results follow both Bot grants and conversation scope: a PC conversation lists only its selected PC; a Server Workspace conversation may list its Bot-authorized PCs. " +
 				"Check provider and capabilities before choosing a tool: Agenvo exec_foreground is foreground Bash only, not filesystem, desktop or agent lifecycle support. " +
 				"The default field identifies the current turn's default (the request-selected target when present, otherwise the Bot's Primary). " +
-				"Use the returned target_id with file and command tools when a non-default location is needed. " +
+				"Use computer_task_submit for Agenvo tasks; ordinary exec and file tools cannot execute on an Agenvo target. Other workspace providers accept target_id on file/command tools. " +
 				"The available field says whether a location can currently be used. This tool does not change the default location or starting folder.",
 			Parameters: toolexec.SchemaFromValue(emptyObjectSchema()),
 			Execute: func(ctx *toolexec.ToolExecContext, _ sdk.ToolArguments) (sdk.ToolOutput, error) {
@@ -330,6 +330,15 @@ Delete a file:
 			},
 		}
 		toolList = append([]toolexec.Tool{locationTool}, toolList...)
+	}
+	if workspace.computerTaskOnly {
+		filtered := toolList[:0]
+		for _, tool := range toolList {
+			if tool.Name == ToolListExecutionLocations().String() {
+				filtered = append(filtered, tool)
+			}
+		}
+		return filtered, nil
 	}
 	return toolList, nil
 }
@@ -382,7 +391,8 @@ type execArgs struct {
 }
 
 type toolWorkspace struct {
-	defaultWorkDir string
+	computerTaskOnly bool
+	defaultWorkDir   string
 	// workdirPath is the session's working directory. It changes where
 	// relative tool paths land and what cwd exec defaults to; it never
 	// replaces defaultWorkDir, which stays the workspace root that
@@ -491,6 +501,7 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 		}
 	}
 	if info.Backend == bridge.WorkspaceBackendAgenvo {
+		workspace.computerTaskOnly = true
 		workspace.windows = true
 		// The executor resolves this against the current authorized target config.
 		workspace.defaultWorkDir = "."
@@ -1131,6 +1142,9 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 	command := strings.TrimSpace(args.Command)
 	if command == "" {
 		return nil, errors.New("command is required")
+	}
+	if target.workspace.computerTaskOnly {
+		return nil, agenvo.ErrComputerTaskRequired
 	}
 	workDir := strings.TrimSpace(args.WorkDir)
 	switch {

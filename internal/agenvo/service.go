@@ -2,6 +2,8 @@ package agenvo
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"regexp"
@@ -20,6 +22,8 @@ const (
 )
 
 var ErrForbidden = errors.New("agenvo target access denied")
+
+var ErrComputerTaskRequired = errors.New("agenvo commands require computer_task_submit so unresolved operations cannot be bypassed with exec")
 
 // SourceCaller resolves the existing MCP connection under ownerID and uses its
 // existing OAuth transport. A target never supplies an endpoint or a token.
@@ -141,6 +145,24 @@ func validateTarget(t Target) error {
 	return nil
 }
 
+type registrationPin struct {
+	Scope       Scope
+	Fingerprint string
+}
+type registrationPinKey struct{}
+
+// PinRegistration adds a ledger-owned constraint, never authorization. Every
+// subsequent resolve still checks current grants, owner and connection access.
+func PinRegistration(ctx context.Context, scope Scope, fingerprint string) context.Context {
+	return context.WithValue(ctx, registrationPinKey{}, registrationPin{Scope: scope, Fingerprint: fingerprint})
+}
+
+func TargetFingerprint(t Target) string {
+	raw, _ := json.Marshal(t)
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:])
+}
+
 // ResolveTarget exposes only a grant-checked registration to the host service.
 func (s *Service) ResolveTarget(ctx context.Context, scope Scope) (Target, error) {
 	t, _, err := s.resolve(ctx, scope)
@@ -228,6 +250,9 @@ func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, err
 	}
 	if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, record.RuntimeUserID, target.ConnectionID); err != nil {
 		return Target{}, "", ErrForbidden
+	}
+	if pin, ok := ctx.Value(registrationPinKey{}).(registrationPin); ok && (pin.Scope != scope || pin.Fingerprint == "" || pin.Fingerprint != TargetFingerprint(target)) {
+		return Target{}, "", ErrTargetChanged
 	}
 	return target, record.RuntimeUserID, nil
 }
