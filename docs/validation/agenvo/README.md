@@ -38,6 +38,11 @@ Windows machine. The completion wrapper still requires Windows PowerShell 5.1
 acceptance for actual commands, Unicode/large output, nonzero exit and cancel.
 ARM64 execution has not been exercised.
 
+[Windows acceptance instructions](windows-acceptance.md) and
+[exact generated commands](windows-vectors.json) provide one-time synthetic
+vectors for the existing Windows execution thread. They are preparation
+artifacts; their presence does not mean Windows acceptance passed.
+
 The cloud Docker daemon uses vfs. Creating a full native workspace from the
 existing image exhausted its 32 GiB filesystem. Derived caches were moved to
 `/tmp`; no existing deployment or user data was deleted. For the end-to-end
