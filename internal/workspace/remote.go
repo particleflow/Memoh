@@ -8,9 +8,9 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/google/uuid"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/settings"
@@ -297,12 +297,14 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 		if err != nil {
 			return ResolvedWorkspaceTarget{}, err
 		}
-		return ResolvedWorkspaceTarget{TargetID: record.ID, Kind: WorkspaceTargetRemote, Name: record.RuntimeName, Primary: record.IsPrimary,
+		return ResolvedWorkspaceTarget{
+			TargetID: record.ID, Kind: WorkspaceTargetRemote, Name: record.RuntimeName, Primary: record.IsPrimary,
 			Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: config.WorkDir},
 			Approval: toolApprovalConfig(record.ToolApproval), Execute: func(ctx context.Context, req agenvo.Request) (agenvo.Result, error) {
 				req.Scope.BotID, req.Scope.TargetID = record.BotID, record.ID
 				return s.agenvo.Execute(ctx, req)
-			}}, nil
+			},
+		}, nil
 	}
 	client, connection, err := s.clientForRecord(record)
 	if err != nil {

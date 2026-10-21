@@ -8,21 +8,26 @@ import (
 	"strings"
 	"time"
 
-	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/google/uuid"
+
+	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
-const Provider = "agenvo"
-const CapabilityForegroundExec = "exec_foreground"
+const (
+	Provider                 = "agenvo"
+	CapabilityForegroundExec = "exec_foreground"
+)
 
-var ErrForbidden = errors.New("Agenvo target access denied")
+var ErrForbidden = errors.New("agenvo target access denied")
 
 // SourceCaller resolves the existing MCP connection under ownerID and uses its
 // existing OAuth transport. A target never supplies an endpoint or a token.
-type SourceCaller func(context.Context, string, string, string, map[string]any) (json.RawMessage, error)
-type PermissionChecker interface {
-	HasBotPermission(context.Context, string, string, string) (bool, error)
-}
+type (
+	SourceCaller      func(context.Context, string, string, string, map[string]any) (json.RawMessage, error)
+	PermissionChecker interface {
+		HasBotPermission(context.Context, string, string, string) (bool, error)
+	}
+)
 
 type Service struct {
 	store       dbstore.AgenvoRuntimeStore
@@ -96,8 +101,10 @@ func DecodeTarget(raw []byte) (Target, error) {
 	return target, validateTarget(target)
 }
 
-var sessionName = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$`)
-var windowsAbsolute = regexp.MustCompile(`^(?:[A-Za-z]:[\\/]|\\\\[^\\]+\\[^\\]+)`)
+var (
+	sessionName     = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$`)
+	windowsAbsolute = regexp.MustCompile(`^(?:[A-Za-z]:[\\/]|\\\\[^\\]+\\[^\\]+)`)
+)
 
 func validateTarget(t Target) error {
 	if _, err := uuid.Parse(t.ConnectionID); err != nil {

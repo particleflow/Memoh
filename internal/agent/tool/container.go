@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/felinics/memoh/internal/agenvo"
 	"io"
 	"log/slog"
 	"math"
@@ -20,6 +19,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/background"
 	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/hooks"
 	workspacepkg "github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"

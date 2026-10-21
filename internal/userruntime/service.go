@@ -7,9 +7,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/google/uuid"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )

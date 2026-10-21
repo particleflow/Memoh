@@ -12,11 +12,11 @@ import (
 
 var (
 	ErrInvalidTarget = errors.New("invalid Agenvo target")
-	ErrUnavailable   = errors.New("Agenvo target unavailable")
+	ErrUnavailable   = errors.New("agenvo target unavailable")
 	ErrUnsupported   = errors.New("operation not supported by Agenvo target")
-	ErrRejected      = errors.New("Agenvo operation rejected")
-	ErrUnknown       = errors.New("Agenvo operation outcome is unknown; do not repeat the operation")
-	ErrTargetChanged = errors.New("Agenvo target authorization changed")
+	ErrRejected      = errors.New("agenvo operation rejected")
+	ErrUnknown       = errors.New("agenvo operation outcome is unknown; do not repeat the operation")
+	ErrTargetChanged = errors.New("agenvo target authorization changed")
 )
 
 // Target refers to an existing authorized MCP connection. Credentials belong

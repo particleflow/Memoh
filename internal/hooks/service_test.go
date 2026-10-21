@@ -1257,9 +1257,11 @@ type limitedHookProvider struct{ config *bridge.Client }
 func (p limitedHookProvider) HookConfigClient(context.Context, string) (*bridge.Client, error) {
 	return p.config, nil
 }
-func (p limitedHookProvider) MCPClient(context.Context, string) (*bridge.Client, error) {
+
+func (limitedHookProvider) MCPClient(context.Context, string) (*bridge.Client, error) {
 	return bridge.UnsupportedClient(), nil
 }
+
 func TestLimitedTargetLoadsPolicyWithoutExecutingOnPolicyStorage(t *testing.T) {
 	server := &hookBridgeTestServer{files: map[string][]byte{DefaultConfigPath: emptyConfigFile}}
 	service := NewService(nil, limitedHookProvider{config: newHookBridgeTestClient(t, server)})

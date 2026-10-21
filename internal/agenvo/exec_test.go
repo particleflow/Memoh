@@ -130,7 +130,6 @@ func (f *fixture) call(_ context.Context, connection, tool string, args map[stri
 			payload, _ := json.Marshal(map[string]any{"output": f.output, "exit_code": f.exit, "truncated": f.truncated})
 			output += "MEMOH_" + f.nonce + ":" + base64.StdEncoding.EncodeToString(payload) + ":END_" + f.nonce + "\r\n"
 		}
-		result = map[string]any{"output": output}
 		return mcpValue(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"output": output, "session": "default"}}), nil
 
 	case "workspace.close":

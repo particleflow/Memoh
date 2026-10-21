@@ -21,12 +21,14 @@ func (s *serviceStore) OwnedHTTPMCPConnectionBot(context.Context, string, string
 	}
 	return "source-bot", nil
 }
+
 func (s *serviceStore) GetMount(_ context.Context, bot, target string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	if bot != s.record.BotID || target != s.record.ID {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, errors.New("not found")
 	}
 	return s.record, nil
 }
+
 func (s *serviceStore) CreateAgenvoRuntime(_ context.Context, owner, name string, config dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
 	s.created++
 	return dbstore.UserRuntimeRecord{ID: "registered", UserID: owner, Name: name, Provider: Provider, ProviderConfig: config}, nil
@@ -62,6 +64,7 @@ func TestServiceRegistrationProbesAndDoesNotCreateGrants(t *testing.T) {
 		t.Fatalf("record=%+v err=%v calls=%v", record, err, f.calls)
 	}
 }
+
 func TestServiceRejectsAuthorizationFailuresBeforeRelay(t *testing.T) {
 	for _, test := range []string{"no_user", "no_permission", "other_bot", "other_mount", "revoked", "owner_changed", "wrong_provider", "source_revoked", "invalid_config"} {
 		t.Run(test, func(t *testing.T) {
@@ -94,6 +97,7 @@ func TestServiceRejectsAuthorizationFailuresBeforeRelay(t *testing.T) {
 		})
 	}
 }
+
 func TestServiceRevocationAfterSubmissionBlocksReads(t *testing.T) {
 	s, store, f := serviceFixture(t)
 	f.afterSubmit = func() { store.sourceAllowed = false }
@@ -107,6 +111,7 @@ func TestServiceRevocationAfterSubmissionBlocksReads(t *testing.T) {
 		}
 	}
 }
+
 func TestServiceDoesNotRegisterForeignOrOfflineSource(t *testing.T) {
 	s, store, f := serviceFixture(t)
 	store.sourceAllowed = false
@@ -121,6 +126,7 @@ func TestServiceDoesNotRegisterForeignOrOfflineSource(t *testing.T) {
 		t.Fatalf("err=%v created=%d", err, store.created)
 	}
 }
+
 func TestDiscoveryFiltersPrivateMetadataAndNonHerdrInstances(t *testing.T) {
 	s, _, _ := serviceFixture(t)
 	s.call = func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {

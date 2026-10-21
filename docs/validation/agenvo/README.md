@@ -26,6 +26,8 @@ NAS data, personal endpoints or real Windows tasks were used.
 - Web error and tool rendering tests: 149 passed. SDK typecheck passed.
 - ESLint: zero errors, 18 existing warnings. UI contract guard passed with three
   existing warnings.
+- Go lint for changed backend packages against `origin/main` passed with no
+  reported issues after formatting and private error-message cleanup.
 - Narrow Chinese/dark dialog has no horizontal page overflow. Form body scrolls
   within the shared dialog; its footer remains reachable.
 

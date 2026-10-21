@@ -6,10 +6,11 @@ import (
 	"os"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
-	"github.com/google/uuid"
 )
 
 // Run against an isolated migrated test database. All fixtures roll back;

@@ -570,7 +570,8 @@ func TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback(t *testing.T) {
 			}
 			exit := 0
 			return agenvo.Result{State: "completed", ExitCode: &exit, Output: "ok", CleanupRequired: true}, nil
-		}}}
+		},
+	}}
 	provider := NewContainerProvider(nil, clients, nil, "/data")
 	session := SessionContext{BotID: "bot", UserID: "caller", WorkspaceTargetID: "selected", WorkspaceTargetKind: "remote"}
 	value, err := provider.execExec(t.Context(), session, execArgs{Command: "Write-Output 'ok'"})
