@@ -8,11 +8,14 @@ acceptance of the Bash completion wrapper.
 
 ## Release status and terminology
 
-This document describes the unmerged PR #4 candidate on
-`feat/agenvo-execution-target`, not a deployed feature. The reported deployed
-release is main `5900e4c1`, with native workspace storage still active. The
-runtime thread's existing direct Bot MCP connection is separate from this
-candidate's account registration, per-Bot grants and session target adapter.
+This document describes unmerged PR #4 on `feat/agenvo-execution-target`.
+Controlled candidate `383d23c` was deployed for acceptance with schema 169;
+its first account/Bot adapter command failed on explicit cwd normalization.
+The follow-up below fixes that routing contract. A replacement candidate still
+requires deployment acceptance; merging and main promotion remain blocked.
+Main remains `5900e4c1`, and native workspace storage remains active. The
+existing direct Bot MCP channel and earlier Windows wrapper tests do not prove
+that the new account/Bot adapter has completed a production turn.
 
 The existing API paths and database names containing `runtime` or `workspace`
 are shared registry/routing identifiers. For `provider: "agenvo"`, both account
@@ -50,6 +53,39 @@ Bot mount, owner/team and authenticated caller's `workspace_exec` permission.
 Another Bot's mount ID is never accepted. This is authorization and terminal
 routing isolation; authorized Bots share the Windows account's OS permissions,
 not separate filesystem or process sandboxes.
+
+## Working-directory contract
+
+Business tasks should use root-relative `work_dir` and relative file references
+inside Bash. The base is the **currently authorized registered Windows target
+root**, not the Memoh server cwd, a prior pane cwd, or an inferred drive.
+
+| `work_dir` | Behavior |
+| --- | --- |
+| Omitted | Use the session's bound directory if present, otherwise `.`. |
+| `.` | Resolve to the current registered root. |
+| `child` or `child/subdir` | Resolve below that root; Windows separators also work. |
+| `child/../other` | Normalize within the root. |
+| `../outside`, drive-relative or slash-rooted paths | Reject before workspace creation/command submission. |
+| Legacy absolute Windows path | Accept only if its normalized volume and components are within the current root; compare Windows components case-insensitively. |
+| Cross-drive, other UNC share or absolute path outside the root | Reject explicitly; never redirect to native execution. |
+
+The tool forwards cwd intent unchanged to the Agenvo executor. The executor
+loads the current authorized target configuration, resolves the root-relative
+reference and passes an absolute Windows cwd only to `workspace.create`.
+A relative task reference keeps working when that configured root changes;
+legacy absolute references to an old root are rejected. Tool descriptions use
+`.` rather than embedding the machine's root. Existing bound sessions retain
+their stored path; this change does not rewrite historical tasks or messages.
+The account UI currently registers/lists/deletes targets; editing a registered
+root in that UI is **not implemented**. The configuration-resolution tests do
+not claim such an edit UI exists or change a deployed registration.
+
+These are lexical checks, **not a filesystem sandbox**. Symlinks/junctions can
+resolve outside the lexical root, and arbitrary Bash retains the Windows
+account's file/process permissions. No new filesystem containment is claimed.
+Bash executable paths and machine mounts remain deployment configuration;
+attachment hash references and native Linux workspace semantics are unchanged.
 
 ## Protocol subset
 

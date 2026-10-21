@@ -488,11 +488,13 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 	}
 	if info.Backend == bridge.WorkspaceBackendAgenvo {
 		workspace.windows = true
+		// The executor resolves this against the current authorized target config.
+		workspace.defaultWorkDir = "."
 		workspace.locationDescription = "on the selected Agenvo Windows machine"
 		workspace.absolutePathDescription = "Windows path"
 		workspace.shellDescription = "Git Bash on Windows"
 		workspace.commandExamples = "pwd, ls, printf 'hello\\n'"
-		workspace.platformInstructions = "- Agenvo executes foreground Bash commands through the explicitly configured Git Bash on the selected Windows machine, not WSL. Use Bash syntax. The work_dir parameter is an absolute Windows path; use cygpath inside Bash for path conversion.\n- File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
+		workspace.platformInstructions = "- Agenvo executes foreground Bash commands through the explicitly configured Git Bash on the selected Windows machine, not WSL. Use Bash syntax. Use root-relative work_dir paths (default: .); the base is the registered Windows target root, never the server or pane cwd. Paths escaping that root are rejected. Legacy absolute paths are accepted only inside the current root. Use relative file references in Bash; cygpath is available for explicit path conversion.\n- File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
 		workspace.delayInstruction = ""
 	}
 	return workspace
@@ -1138,9 +1140,11 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 	workDir := strings.TrimSpace(args.WorkDir)
 	switch {
 	case workDir != "":
-		// A relative work_dir resolves against the working directory like
-		// every other tool path.
-		workDir = target.workspace.resolveToolPath(workDir)
+		// Bridge paths are workspace-relative. Command-only adapters own
+		// their path contract and resolve against their current target config.
+		if target.execute == nil {
+			workDir = target.workspace.resolveToolPath(workDir)
+		}
 	case target.workspace.workdirPath != "":
 		workDir = target.workspace.workdirPath
 	default:

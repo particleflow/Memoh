@@ -565,7 +565,7 @@ func TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback(t *testing.T) {
 		Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: `C:\Synthetic`},
 		Execute: func(_ context.Context, req agenvo.Request) (agenvo.Result, error) {
 			calls++
-			if req.Scope.UserID != "caller" || req.WorkDir != `C:\Synthetic` || req.Command != "printf 'ok'" {
+			if req.Scope.UserID != "caller" || req.WorkDir != "." || req.Command != "printf 'ok'" {
 				t.Fatalf("wrong execution context: %+v", req)
 			}
 			exit := 0

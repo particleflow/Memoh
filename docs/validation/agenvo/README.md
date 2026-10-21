@@ -127,6 +127,57 @@ The execution code in `022b56c2` is identical to `e9ce9f70`; all five CI workflo
 for `022b56c2` completed successfully. Candidate image publication and deployed
 account/grant/session integration acceptance are separate release steps.
 
+## Tool-to-executor cwd correction
+
+Controlled candidate `383d23c` reached schema 169 and application health checks,
+but the runtime thread reported its first actual adapter command rejected an
+explicit cwd. This was not a passing production execution. Merge and main
+promotion are blocked until replacement-candidate acceptance.
+
+The cloud reproduced the failure with the old binary through the real Chromium
+chat UI: a synthetic model passed `work_dir: C:\Synthetic`, which the bridge
+path normalizer reduced to `.` before the absolute-only executor rejected it.
+The MCP fixture recorded zero workspace creations and zero command submissions.
+
+The replacement forwards command-target cwd intent without bridge normalization
+and resolves it against the current authorized Windows root. The actual
+`Tool.Execute` decoder → target router → Agenvo executor → MCP fixture regression
+covers omitted/default/dot, relative child, legacy same-root absolute paths,
+bound sessions, root changes despite stale tool metadata, UNC roots, denied
+callers, unavailable targets and invalid/escaping paths. Rejected inputs perform
+zero executor MCP calls and never use the native client. A resolver readiness
+probe may still occur before the executor, but no workspace or command is
+created for an invalid cwd. Native Linux/Windows bridge path and target-pinning
+regressions pass unchanged.
+
+On the rebuilt server, real Chromium selected the existing A-only target and
+sent three synthetic commands: legacy absolute root, relative `child`, and `.`.
+The fixture observed `C:\Synthetic`, `C:\Synthetic\child`, and `C:\Synthetic`
+respectively, three submissions/reads, zero closes. A fourth request with
+`../outside` was rejected without adding a workspace or submission. The native
+Exec sentinel remained absent. These are cloud application/transport tests,
+not real Windows filesystem execution. The synthetic model's fixed final text
+is not used as a success assertion; tool receipts and transport counts are.
+
+Agenvo/Hook race tests, isolated PostgreSQL permissions, targeted tool race tests,
+server build and changed-package Go lint passed. The first tool race link failed
+because the temporary filesystem was full; after removing this task's unused
+downloaded browser/build artifacts, the same command passed. No user data was
+removed. The Bash wrapper and strict completion parser are unchanged; existing
+fixed-vector source hashes describe their original generation commit, not this
+cwd follow-up's modified `exec.go`.
+
+Screenshots from the actual localhost app:
+
+- [Old explicit-cwd failure](agenvo-cwd-before.png).
+- [Relative child completes](agenvo-cwd-relative.png).
+- [Dot resolves to registered root](agenvo-cwd-dot.png).
+- [Parent traversal rejects](agenvo-cwd-rejected.png).
+
+No production registration/grant was created or changed by these cloud tests.
+Schema remains 169; this follow-up adds no migration. The configured-root change
+is covered at the executor boundary; a registered-root edit UI/API is not added.
+
 ## Limits and failures
 
 The cloud Agenvo MCP and model endpoints are controlled protocol fixtures. The
@@ -172,6 +223,5 @@ Only synthetic labels, paths and output appear in these current-build captures.
 - [Chinese/dark/narrow](agenvo-bash-mobile-zh-dark.png): shared scrollable dialog.
 
 Agent screenshots and automated checks are not human QA. The owner has released
-the review gate for a controlled candidate publication. Production deployment
-and image promotion remain separate from wrapper acceptance; this record does
-not claim either has happened.
+the review gate for a controlled candidate publication. The first controlled deployment and its cwd failure are recorded above; a
+replacement candidate and main promotion remain separate release gates.

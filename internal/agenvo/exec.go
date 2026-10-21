@@ -83,12 +83,9 @@ func (e *Executor) Execute(ctx context.Context, req Request) (result Result, err
 	if !windowsBash.MatchString(target.BashPath) || len(target.BashPath) > 4096 || strings.ContainsRune(target.BashPath, 0) {
 		return result, ErrUnsupported
 	}
-	workDir := req.WorkDir
-	if workDir == "" {
-		workDir = target.WorkDir
-	}
-	if !windowsAbsolute.MatchString(workDir) || len(workDir) > 4096 || strings.ContainsRune(workDir, 0) {
-		return result, ErrUnsupported
+	workDir, err := resolveWorkDir(target.WorkDir, req.WorkDir)
+	if err != nil {
+		return result, err
 	}
 	if err := e.client.Probe(ctx, req.Scope); err != nil {
 		return result, err
