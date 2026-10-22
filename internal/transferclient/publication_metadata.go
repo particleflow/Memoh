@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"slices"
 	"strings"
 )
 
@@ -20,6 +21,7 @@ const (
 	publicationReceipts          = 128 // Per bucket in locator v2; global only in legacy v1.
 	publicationBuckets           = 64
 	publicationJournalBytes      = 64 << 10
+	publicationUsageBytes        = 16 << 10
 	publicationBucketBytes       = publicationReceipts * publicationJournalBytes
 	publicationMetadataDirectory = "records-v2"
 	publicationMigrationBatch    = 16
@@ -63,17 +65,62 @@ type publicationMetadata struct {
 }
 
 type publicationUsage struct {
-	Version  int    `json:"version"`
-	Identity string `json:"identity"`
-	Count    int    `json:"count"`
-	Bytes    int64  `json:"bytes"`
-	Metadata int64  `json:"metadata"`
+	Version  int      `json:"version"`
+	Identity string   `json:"identity"`
+	Count    int      `json:"count"`
+	Bytes    int64    `json:"bytes"`
+	Metadata int64    `json:"metadata"`
+	Keys     []string `json:"keys"`
 }
 
 func (m *publicationMetadata) mark(stage string) {
 	if m.hook != nil {
 		m.hook(stage)
 	}
+}
+
+// Only creation of a new store, or closed locator state 0 migration, may seed
+// empty buckets. Once locator v2 is visible every bucket and usage file MUST
+// exist: absence is damaged evidence, never proof that an ID was unused.
+func (m *publicationMetadata) initialize(ctx context.Context) error {
+	for i := range publicationBuckets {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		root, closeRoot, err := m.bucket(i, true)
+		if err != nil {
+			return err
+		}
+		if _, err := root.Lstat("usage"); errors.Is(err, os.ErrNotExist) {
+			dir, openErr := root.Open(".")
+			if openErr != nil {
+				closeRoot()
+				return ErrStore
+			}
+			entries, readErr := dir.ReadDir(1)
+			_ = dir.Close()
+			if readErr != nil && !errors.Is(readErr, io.EOF) {
+				closeRoot()
+				return ErrStore
+			}
+			if len(entries) == 0 {
+				err = m.dirty(root, i, true)
+				if err != nil {
+					closeRoot()
+					return err
+				}
+			}
+		} else if err != nil {
+			closeRoot()
+			return ErrStore
+		}
+		_, err = m.usage(ctx, root, i)
+		closeRoot()
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (m *publicationMetadata) bucket(index int, create bool) (*os.Root, func(), error) {
@@ -180,23 +227,69 @@ func readPublicationJournal(root *os.Root, name string, repair bool) (publicatio
 	return record, f, nil
 }
 
-func (m *publicationMetadata) dirty(root *os.Root) error {
-	f, err := openPrivateFile(root, "usage.dirty", os.O_CREATE|os.O_RDWR, 0o600)
+// The dirty witness retains the last acknowledged membership before any journal
+// or usage mutation. Recovery may add records but must never shrink this set.
+// Missing usage may only be seeded during new-store creation or closed migration.
+func (m *publicationMetadata) dirty(root *os.Root, index int, seed bool) error {
+	if _, err := m.loadUsage(root, "usage.dirty", index); err == nil {
+		return nil
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
+	before, err := m.loadUsage(root, "usage", index)
+	if err == nil {
+		err = checkPublicationMembership(root, before.Keys)
+	}
+	if errors.Is(err, os.ErrNotExist) && seed {
+		before.Identity, err = publicationRootIdentity(root)
+		before.Version = 1
+	}
+	if err != nil {
+		return ErrStore
+	}
+	body, err := json.Marshal(before)
+	if err != nil {
+		return ErrStore
+	}
+	f, err := openPrivateFile(root, "usage.dirty", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
 	if err != nil {
 		return err
 	}
-	st, err := f.Stat()
-	if err == nil && st.Size() != 0 {
-		err = ErrStore
-	}
-	if err == nil {
-		err = f.Sync()
-	}
+	err = appendJournalFrame(f, body, publicationUsageBytes)
 	_ = f.Close()
 	if err != nil || syncQueueDir(root) != nil {
 		return ErrStore
 	}
 	m.mark("metadata_after_dirty")
+	return nil
+}
+
+// Check only bounded directory entries, not journal payloads. Before mutation,
+// this prevents accepting an unexpected journal through dirty-cache recovery.
+func checkPublicationMembership(root *os.Root, keys []string) error {
+	dir, err := root.Open(".")
+	if err != nil {
+		return ErrStore
+	}
+	entries, readErr := dir.ReadDir(publicationReceipts + 3)
+	_ = dir.Close()
+	if readErr != nil && !errors.Is(readErr, io.EOF) || len(entries) > publicationReceipts+2 {
+		return ErrStore
+	}
+	var actual []string
+	for _, entry := range entries {
+		if entry.Name() == "usage" || entry.Name() == "usage.dirty" {
+			continue
+		}
+		if !entry.Type().IsRegular() {
+			return ErrStore
+		}
+		actual = append(actual, entry.Name())
+	}
+	slices.Sort(actual)
+	if !slices.Equal(actual, keys) {
+		return ErrStore
+	}
 	return nil
 }
 
@@ -239,6 +332,7 @@ func (m *publicationMetadata) census(ctx context.Context, root *os.Root, index i
 			return usage, ErrStore
 		}
 		usage.Count++
+		usage.Keys = append(usage.Keys, e.Name())
 		usage.Metadata += st.Size()
 		if r.State != "fenced" {
 			if r.Reference.SizeBytes > m.objectBytes-usage.Bytes {
@@ -250,13 +344,23 @@ func (m *publicationMetadata) census(ctx context.Context, root *os.Root, index i
 	if usage.Count > publicationReceipts || usage.Metadata > publicationBucketBytes {
 		return usage, ErrCapacity
 	}
+	slices.Sort(usage.Keys)
 	return usage, nil
 }
 
 func (m *publicationMetadata) rebuild(ctx context.Context, root *os.Root, index int) (publicationUsage, error) {
+	before, err := m.loadUsage(root, "usage.dirty", index)
+	if err != nil {
+		return publicationUsage{}, ErrStore
+	}
 	usage, err := m.census(ctx, root, index)
 	if err != nil {
 		return usage, err
+	}
+	for _, key := range before.Keys {
+		if _, present := slices.BinarySearch(usage.Keys, key); !present {
+			return usage, ErrStore
+		}
 	}
 	body, err := json.Marshal(usage)
 	if err != nil {
@@ -270,7 +374,7 @@ func (m *publicationMetadata) rebuild(ctx context.Context, root *os.Root, index 
 		_, err = f.Seek(0, io.SeekStart)
 	}
 	if err == nil {
-		err = appendJournalFrame(f, body, 4096)
+		err = appendJournalFrame(f, body, publicationUsageBytes)
 	}
 	_ = f.Close()
 	if err != nil || syncQueueDir(root) != nil {
@@ -288,38 +392,27 @@ func (m *publicationMetadata) rebuild(ctx context.Context, root *os.Root, index 
 }
 
 func (m *publicationMetadata) usage(ctx context.Context, root *os.Root, index int) (publicationUsage, error) {
-	var u publicationUsage
-	dirty, err := openPrivateFile(root, "usage.dirty", os.O_RDWR, 0o600)
-	if err == nil {
-		st, err := dirty.Stat()
-		_ = dirty.Close()
-		if err != nil || st.Size() != 0 {
-			return u, ErrStore
-		}
+	if _, err := root.Lstat("usage.dirty"); err == nil {
 		return m.rebuild(ctx, root, index)
+	} else if !errors.Is(err, os.ErrNotExist) {
+		return publicationUsage{}, ErrStore
 	}
-	if !errors.Is(err, os.ErrNotExist) {
-		return u, err
+	u, err := m.loadUsage(root, "usage", index)
+	if err != nil {
+		return u, ErrStore
 	}
-	f, err := openPrivateFile(root, "usage", os.O_RDWR, 0o600)
-	if errors.Is(err, os.ErrNotExist) {
-		dir, err := root.Open(".")
-		if err != nil {
-			return u, ErrStore
-		}
-		entries, readErr := dir.ReadDir(1)
-		_ = dir.Close()
-		if len(entries) != 0 || readErr != nil && !errors.Is(readErr, io.EOF) {
-			return u, ErrStore
-		}
-		return u, nil
-	}
+	return u, nil
+}
+
+func (m *publicationMetadata) loadUsage(root *os.Root, name string, index int) (publicationUsage, error) {
+	var u publicationUsage
+	f, err := openPrivateFile(root, name, os.O_RDWR, 0o600)
 	if err != nil {
 		return u, err
 	}
 	defer func() { _ = f.Close() }()
 	count := 0
-	_, err = readJournalFramesMode(f, 4096, false, func(body []byte) error {
+	_, err = readJournalFramesMode(f, publicationUsageBytes, false, func(body []byte) error {
 		dec := json.NewDecoder(bytes.NewReader(body))
 		dec.DisallowUnknownFields()
 		count++
@@ -329,8 +422,14 @@ func (m *publicationMetadata) usage(ctx context.Context, root *os.Root, index in
 		return nil
 	})
 	identity, identityErr := publicationRootIdentity(root)
-	if err != nil || identityErr != nil || count != 1 || u.Version != 1 || u.Identity != identity || u.Count < 0 || u.Count > publicationReceipts || u.Bytes < 0 || u.Bytes > m.objectBytes || u.Metadata < 0 || u.Metadata > publicationBucketBytes {
+	if err != nil || identityErr != nil || count != 1 || u.Version != 1 || u.Identity != identity || u.Count < 0 || u.Count > publicationReceipts || u.Count != len(u.Keys) || u.Bytes < 0 || u.Bytes > m.objectBytes || u.Metadata < 0 || u.Metadata > publicationBucketBytes {
 		return u, ErrStore
+	}
+	for i, key := range u.Keys {
+		bucket, err := publicationBucket(key)
+		if err != nil || bucket != index || i > 0 && key <= u.Keys[i-1] {
+			return u, ErrStore
+		}
 	}
 	return u, nil
 }
@@ -342,16 +441,25 @@ func (m *publicationMetadata) read(ctx context.Context, name string) (publicatio
 	}
 	root, closeRoot, err := m.bucket(index, false)
 	if errors.Is(err, os.ErrNotExist) {
-		return publicationRecord{}, nil, nil
+		return publicationRecord{}, nil, ErrStore
 	}
 	if err != nil {
 		return publicationRecord{}, nil, err
 	}
 	defer closeRoot()
-	if _, err := m.usage(ctx, root, index); err != nil {
+	u, err := m.usage(ctx, root, index)
+	if err != nil {
 		return publicationRecord{}, nil, err
 	}
-	return readPublicationJournal(root, name, true)
+	r, f, err := readPublicationJournal(root, name, true)
+	_, present := slices.BinarySearch(u.Keys, name)
+	if err == nil && present != (f != nil) {
+		if f != nil {
+			_ = f.Close()
+		}
+		return publicationRecord{}, nil, ErrStore
+	}
+	return r, f, err
 }
 
 // Reserve metadata before creating a first frame. All 64 bounded summaries are
@@ -367,7 +475,7 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 		}
 		root, closeRoot, err := m.bucket(i, false)
 		if errors.Is(err, os.ErrNotExist) {
-			continue
+			return ErrStore
 		}
 		if err != nil {
 			return err
@@ -388,7 +496,7 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 	if state != "fenced" && ref.SizeBytes > m.objectBytes-total {
 		return ErrCapacity
 	}
-	root, closeRoot, err := m.bucket(index, true)
+	root, closeRoot, err := m.bucket(index, false)
 	if err != nil {
 		return err
 	}
@@ -396,7 +504,7 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 	if err := queueFreeSpace(root, publicationJournalBytes); err != nil {
 		return err
 	}
-	return m.dirty(root)
+	return m.dirty(root, index, false)
 }
 
 func (m *publicationMetadata) create(ref Reference) (*os.File, error) {
@@ -416,7 +524,7 @@ func (m *publicationMetadata) save(ctx context.Context, f *os.File, r publicatio
 		return err
 	}
 	defer closeRoot()
-	if err := m.dirty(root); err != nil {
+	if err := m.dirty(root, index, false); err != nil {
 		return err
 	}
 	body, err := json.Marshal(r)
@@ -432,4 +540,30 @@ func (m *publicationMetadata) save(ctx context.Context, f *os.File, r publicatio
 	m.mark("metadata_after_journal_sync")
 	_, err = m.rebuild(ctx, root, index)
 	return err
+}
+
+func (m *publicationMetadata) validate(ctx context.Context) error {
+	var total int64
+	for i := range publicationBuckets {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		root, closeRoot, err := m.bucket(i, false)
+		if err != nil {
+			return ErrStore
+		}
+		u, err := m.usage(ctx, root, i)
+		if err == nil {
+			err = checkPublicationMembership(root, u.Keys)
+		}
+		closeRoot()
+		if err != nil {
+			return err
+		}
+		if u.Bytes > m.objectBytes-total {
+			return ErrCapacity
+		}
+		total += u.Bytes
+	}
+	return nil
 }

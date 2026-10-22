@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.org/x/sys/windows"
 )
@@ -31,10 +32,12 @@ type NativePublication struct {
 }
 
 func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*NativePublication, error) {
-	return q.openNativePublication(authorize, false, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	return q.openNativePublication(ctx, authorize, false, nil)
 }
 
-func (q *DiskQueue) openNativePublication(authorize PublicationAuthorization, maintenance bool, hook func(string)) (*NativePublication, error) {
+func (q *DiskQueue) openNativePublication(ctx context.Context, authorize PublicationAuthorization, maintenance bool, hook func(string)) (*NativePublication, error) {
 	if q == nil || q.root == nil || authorize == nil {
 		return nil, ErrBinding
 	}
@@ -98,6 +101,11 @@ func (q *DiskQueue) openNativePublication(authorize PublicationAuthorization, ma
 		return nil, ErrStore
 	}
 	if len(actual) == 0 && flags&os.O_EXCL != 0 {
+		// Persist the complete empty catalog before accepting locator v2. A
+		// later missing bucket/cache must never look like an unused namespace.
+		if err := p.metadata.initialize(ctx); err != nil {
+			return nil, err
+		}
 		if _, err := f.Write(want); err != nil || f.Sync() != nil {
 			return nil, ErrStore
 		}

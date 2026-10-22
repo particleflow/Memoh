@@ -100,7 +100,7 @@ func (q *DiskQueue) MigrateNativePublication(ctx context.Context) (bool, error) 
 		}
 		workers = append(workers, worker)
 	}
-	p, err := q.openNativePublication(func(ctx context.Context, _ Reference) error { return ctx.Err() }, true, nil)
+	p, err := q.openNativePublication(ctx, func(ctx context.Context, _ Reference) error { return ctx.Err() }, true, nil)
 	if err != nil {
 		return false, err
 	}
@@ -130,7 +130,8 @@ func (p *NativePublication) migratePublication(ctx context.Context) (bool, error
 		return false, ErrStore
 	}
 	if locator.Version == 2 {
-		return true, nil
+		err := p.metadata.validate(ctx)
+		return err == nil, err
 	}
 	if locator.Version != 0 {
 		return false, ErrVersion

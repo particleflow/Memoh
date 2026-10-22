@@ -55,6 +55,9 @@ func (m *publicationMetadata) migrateLegacy(ctx context.Context) (bool, error) {
 	// Cache recovery is safe only after ALL partial targets have been completed
 	// from their original journals. This avoids one partial target blocking a
 	// different valid duplicate in the same bucket on a resumed invocation.
+	if err := m.initialize(ctx); err != nil {
+		return false, err
+	}
 	var count int
 	var total int64
 	for i := range publicationBuckets {
@@ -63,7 +66,7 @@ func (m *publicationMetadata) migrateLegacy(ctx context.Context) (bool, error) {
 		}
 		root, closeRoot, err := m.bucket(i, false)
 		if errors.Is(err, os.ErrNotExist) {
-			continue
+			return false, ErrStore
 		}
 		if err != nil {
 			return false, err
@@ -129,7 +132,7 @@ func (m *publicationMetadata) copyLegacy(ctx context.Context, name string) (bool
 	defer closeRoot()
 	target, err := openPrivateFile(root, name, os.O_RDWR, 0o600)
 	if errors.Is(err, os.ErrNotExist) {
-		if err := m.dirty(root); err != nil {
+		if err := m.dirty(root, index, true); err != nil {
 			return false, err
 		}
 		target, err = openPrivateFile(root, name, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
@@ -144,7 +147,7 @@ func (m *publicationMetadata) copyLegacy(ctx context.Context, name string) (bool
 	}
 	changed := len(saved) < len(raw)
 	if changed {
-		if err := m.dirty(root); err != nil {
+		if err := m.dirty(root, index, true); err != nil {
 			return false, err
 		}
 		if _, err := target.Write(raw[len(saved):]); err != nil {

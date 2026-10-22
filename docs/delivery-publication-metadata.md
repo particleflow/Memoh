@@ -9,14 +9,20 @@ adds no service, transfer protocol, credential or configurable second root.
 
 The existing queue locator resolves `publications-v1`. Final `.object` files stay
 there. Publication locator **v2** derives `records-v2/<bucket>` for journals and
-usage caches. The bucket is the low six bits of the first SHA-256 byte of the
+usage caches. All 64 buckets and their usage records exist before the v2 locator
+is committed; missing buckets, a missing catalog or missing usage records are
+errors, never an unused namespace. Only new-store initialization or closed v0
+migration may seed empty buckets. An interrupted initial creation that has not
+committed its locator remains explicitly unavailable for inspection; normal opens
+do not recreate missing state. The bucket is the low six bits of the first SHA-256 byte of the
 logical delivery ID. A record retains its full original checksummed journal,
 reference, state and FileID; published history and cancellation tombstones are
 never evicted. Resolve/OpenPublished use the original ID and exact reference.
 
 The versioned defaults are 64 buckets, at most 128 journals per bucket, at most
 64 KiB per journal. Thus the layout admits at most 8192 records and at most
-512 MiB journal metadata, plus bounded usage caches, dirty markers, locators and
+512 MiB journal metadata, plus at most 2 MiB for usage records and dirty witnesses
+(each bounded to 16 KiB), locators and
 filesystem allocation overhead. Skew can fill a bucket earlier; the next distinct
 record then receives capacity backpressure. Existing-ID replay still works.
 These are explicit defaults encoded by locator v2, not a promise of infinite
@@ -38,16 +44,21 @@ journals remain authoritative for original-ID results and file ownership.
 
 ## Dirty-cache crash protocol
 
-1. Persist an empty private `usage.dirty` marker and sync its directory before
-   creating or appending a journal.
+1. Persist the previous acknowledged usage and sorted journal membership in a
+   private checksummed `usage.dirty` witness and sync its directory before creating
+   or appending a journal. Never replace an existing witness during recovery.
 2. Append/sync the original checksummed state transition and sync the directory.
-3. Validate that bucket's journals and reconstruct count, reserved object bytes
-   and metadata bytes. Write/sync its checksummed usage record, bound to the bucket
+3. Validate that bucket's journals and reconstruct count, reserved object bytes,
+   metadata bytes and membership. Every previously acknowledged key in the witness
+   must remain present; a lost journal fails explicitly rather than shrinking history. Write/sync its checksummed usage record, bound to the bucket
    directory identity, and sync the directory.
 4. Remove the dirty marker and sync the directory before returning success.
 
-A crash while the marker exists reconstructs the summary from complete journal
-states. Existing torn-tail recovery may retain the preceding complete state;
+A crash while the witness exists reconstructs the summary from complete journal
+states only after verifying that its prior membership has not shrunk. A missing
+journal named by a clean summary cannot become an absent delivery, and an untracked
+journal cannot be accepted as a valid result. Torn usage can be rebuilt with the
+intact witness; damaged witnesses are retained and require inspection. Existing torn-tail recovery may retain the preceding complete state;
 full-frame corruption fails closed. An empty/unknown first journal is preserved
 and cannot be interpreted as a free slot or successful cancellation. A corrupt
 summary without a dirty marker also fails explicitly. A full bucket, byte budget,

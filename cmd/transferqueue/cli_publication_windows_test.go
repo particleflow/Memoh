@@ -33,6 +33,11 @@ func TestCLIPathPublicationMigration(t *testing.T) {
 	}
 	_ = p.Close()
 	_ = q.Close()
+	// Fixture-only removal of the empty v2 catalog creates an actual legacy v1
+	// layout; no journal, published object or production directory exists here.
+	if err := os.RemoveAll(filepath.Join(state, "deliveries-v1", "publications-v1", "records-v2")); err != nil {
+		t.Fatal(err)
+	}
 	f, err := os.OpenFile(filepath.Join(state, "deliveries-v1", "publications-v1", "locator"), os.O_RDWR, 0) //nolint:gosec // Existing private fixture locator; no owner/ACL change.
 	if err != nil {
 		t.Fatal(err)

@@ -273,7 +273,7 @@ func TestWindowsNativePublicationExplicitMigration(t *testing.T) {
 func TestWindowsNativePublicationMigrationProcessCrash(t *testing.T) {
 	if path := os.Getenv("MEMOH_PUBLICATION_MIGRATION_ROOT"); path != "" {
 		q := nativeQueue(t, path)
-		p, err := q.openNativePublication(func(ctx context.Context, _ Reference) error { return ctx.Err() }, true, func(stage string) {
+		p, err := q.openNativePublication(t.Context(), func(ctx context.Context, _ Reference) error { return ctx.Err() }, true, func(stage string) {
 			if stage == os.Getenv("MEMOH_PUBLICATION_MIGRATION_STAGE") {
 				os.Exit(86)
 			}

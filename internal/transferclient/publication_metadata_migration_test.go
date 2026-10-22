@@ -36,7 +36,7 @@ func putLegacyPublication(t *testing.T, m *publicationMetadata, id, state string
 }
 
 func TestPublicationMetadataMigrationPreservesCompleteHistory(t *testing.T) {
-	m := metadataFixture(t)
+	m := metadataBareFixture(t)
 	m.objectBytes = 4096
 	records := make([]publicationRecord, 20)
 	original := map[string][]byte{}
@@ -73,7 +73,7 @@ func TestPublicationMetadataMigrationPreservesCompleteHistory(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if err := m.dirty(root); err != nil {
+			if err := m.dirty(root, index, true); err != nil {
 				t.Fatal(err)
 			}
 			f, err := openPrivateFile(root, name, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
@@ -132,7 +132,7 @@ func TestPublicationMetadataMigrationPreservesCompleteHistory(t *testing.T) {
 }
 
 func TestPublicationMetadataMigrationConflictPreservesBothCopies(t *testing.T) {
-	m := metadataFixture(t)
+	m := metadataBareFixture(t)
 	r := putLegacyPublication(t, m, "conflict", "fenced")
 	name := publicationKey(r.Reference) + ".journal"
 	raw, err := m.root.ReadFile(name)
@@ -172,7 +172,7 @@ func TestPublicationMetadataMigrationConflictPreservesBothCopies(t *testing.T) {
 func TestPublicationMetadataMigrationInterruptedCopies(t *testing.T) {
 	for _, stage := range []string{"publication_before_target_sync", "publication_after_target_sync", "publication_before_legacy_remove", "publication_after_legacy_remove"} {
 		t.Run(stage, func(t *testing.T) {
-			m := metadataFixture(t)
+			m := metadataBareFixture(t)
 			r := putLegacyPublication(t, m, "interrupted-migration", "published")
 			sentinel := "test boundary"
 			m.hook = func(at string) {
