@@ -31,9 +31,10 @@ an existing private local NTFS parent. Its fixed `native-profile-v1` quota profi
 is immutable in the locator. It never repairs ACLs, changes roots or falls back.
 
 The executable exposes finite `enqueue-upload`, `enqueue-download`, `advance`,
-`advance-next`, `reconcile`, `inspect`, `cancel`, and `retire` actions. Except for
-`advance-next`, later actions select `-delivery <logical-id>`. The manifest's
-`advance-delivery` runs exactly one due job and exits. It does not poll, schedule,
+`advance-next`, `reconcile`, `inspect`, `cancel`, and `retire` actions. Explicit
+job actions select `-delivery <logical-id>`. The manifest's `advance-delivery`
+runs `advance-results`: at most 64 existing queue steps on one due job within
+two minutes, then exits. It does not poll, schedule,
 reset retry budgets, create a business attempt, or run a background service.
 Herdr/Agenvo can invoke the installed command through its existing command path;
 no connector or Agent core change is needed. Input acceptance alone is not a
@@ -44,11 +45,13 @@ completion receipt.
 1. Approve the Memoh HTTPS origin and its valid hostname/certificate trust. The
    helper requires HTTPS and normal certificate verification. Existing HTTP is
    not encryption and cannot be configured as a shortcut.
-2. Configure the Server's `DeviceTransferVerifier` for the already paired
-   connection/device/instance. The verifier port and synthetic tests exist; a
-   production credential backend/record is **not included or enabled**. Decide
-   its lifetime, revoke and rotate procedure once, then configure one reusable
-   purpose-specific device credential. Do not use a PC account JWT, broad Bot
+2. Upgrade the fully integrated Server through migrations 171/172 and approve
+   enabling `files.device_transfers_enabled`. The existing runtime registry
+   includes the stable credential backend and Server verifier. The runtime
+   owner enrolls the already paired connection/device/instance once through
+   `/users/me/runtimes/:id/transfer-credential`; only its digest is stored on
+   Server. Choose expiry/revoke/rotation policy and privately provision the
+   one-time returned purpose-specific device credential. Do not use a PC account JWT, broad Bot
    token or the Agenvo control/OAuth credential. No per-file token or pairing is
    required. Missing verifier means unavailable, never account-auth fallback.
 3. After installation approval, install this bundle through the existing Herdr
@@ -102,11 +105,35 @@ commit and can report that delivery already won. `reconcile` is an explicit
 recovery action, not a retry-budget reset. The original create-unknown protocol
 fence remains; never guess a new receipt after uncertain creation.
 
+## Single-file task producer
+
+The optional task declaration `artifact: {source_ref, mime}` is available for
+`herdr_pi_task` / `pi-json-v1` at `work_dir: "."`. The registered task root must
+match the existing private `source_root`; a mismatch fails explicitly. Write and
+close the declared file before Pi exits. The envelope supplies non-secret
+`MEMOH_DELIVERY_CONTEXT_FILE`, closes a metadata manifest, and invokes the fixed
+`collect-result` action. This does not change Agent code or its prompt.
+
+`enqueue-result` accepts only bounded closed metadata on stdin. The official
+Herdr CLI does not forward arbitrary stdin: its fixed `collect-result` action
+opens the manifest through the configured root and feeds that same decoder.
+After durable admission the original snapshot/receipt are reused; repeated task
+result queries can wake finite advancement through the dedicated control pane.
+No host timer or daemon is added. NAS `delivery.reference` is available to the
+parent task only after committed association, separately from Pi completion.
+
+This first increment has one file per declaration and the existing eight-job /
+256 MiB total snapshot limit. Explicit `retire` is still needed for acknowledged
+jobs. Multi-file production, automatic retirement and recovery from a crash
+before a closed manifest exists are not complete. A pending delivery is not a
+successful file transfer, and task cancellation does not retract delivery.
+
 CLI stdout contains bounded phase/offset/association/reference data only. It is
 not execution success and does not contain source locations, credentials, file
-bytes or full logs. Automated producer-to-stdin wiring and the real PC/NAS
-connection still require deployment-specific acceptance; the cloud tests use
-synthetic identity and isolated TLS/PG/NTFS.
+bytes or full logs. Producer wiring is implemented and cloud tested. Actual installed Herdr/PC
+ownership, HTTPS trust and the real PC/NAS route still require acceptance.
+Windows producer tests use a protocol fixture; Linux upload Server/PG and
+Windows download publication/PG tests are separate combinations.
 
 Do not install/link or configure this package against production as part of
 fixture acceptance. The API fault model and limitations are documented in
