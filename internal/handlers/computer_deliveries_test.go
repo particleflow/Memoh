@@ -170,7 +170,7 @@ func TestComputerDeliveryHTTPSFixture(t *testing.T) {
 		t.Fatal(err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	resp, err := ts.Client().Do(req)
+	resp, err := ts.Client().Do(req) //nolint:gosec // URL is the isolated httptest TLS server, never caller input.
 	if err != nil {
 		t.Fatal(err)
 	}

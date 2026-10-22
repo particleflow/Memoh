@@ -28,6 +28,7 @@ var (
 	ErrDeliveryLimit    = errors.New("operation delivery limit reached")
 	ErrDeliveryRetry    = errors.New("delivery transaction conflicted; resolve before retrying")
 	ErrDeliveryAsset    = errors.New("delivery asset is unavailable or does not match")
+	errVerifyDelivery   = errors.New("verify delivery outside the database transaction")
 	deliveryIDPattern   = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$`)
 	deliveryHash        = regexp.MustCompile(`^[a-f0-9]{64}$`)
 	deliveryAttempt     = regexp.MustCompile(`^[a-f0-9]{32}$`)
@@ -148,21 +149,33 @@ func (s *DeliveryService) apply(ctx context.Context, operation, delivery string,
 	if !deliveryIDPattern.MatchString(delivery) || !ref.valid() {
 		return DeliveryOutcome{}, ErrInvalid
 	}
-	for range 3 {
+	verified := false
+	for conflicts := 0; conflicts < 3; {
 		var out DeliveryOutcome
 		err := s.transactions(ctx, func(tx DeliveryTransaction) error {
 			var err error
-			out, err = s.applyInTransaction(ctx, tx, id, delivery, ref, commit, cancel)
+			out, err = s.applyInTransaction(ctx, tx, id, delivery, ref, commit, cancel, verified)
 			return err
 		})
 		if err == nil {
 			return out, nil
+		}
+		if errors.Is(err, errVerifyDelivery) {
+			// No mutation has occurred. Release the DB transaction before a
+			// potentially long Media integrity scan, then reauthorize in a new
+			// snapshot before CAS. Reuse verification across known CAS aborts.
+			if err := s.verifyAsset(ctx, b.BotID, ref); err != nil {
+				return DeliveryOutcome{}, err
+			}
+			verified = true
+			continue
 		}
 		// Only a KNOWN aborted transaction may be retried. Timeout/connection
 		// loss at commit is unknown, even if a retry could be idempotent.
 		if !errors.Is(err, ErrDeliveryRetry) {
 			return DeliveryOutcome{}, err
 		}
+		conflicts++
 		if err := ctx.Err(); err != nil {
 			return DeliveryOutcome{}, err
 		}
@@ -170,7 +183,7 @@ func (s *DeliveryService) apply(ctx context.Context, operation, delivery string,
 	return DeliveryOutcome{}, ErrDeliveryRetry
 }
 
-func (s *DeliveryService) applyInTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, commit, cancel bool) (DeliveryOutcome, error) {
+func (s *DeliveryService) applyInTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, commit, cancel, verified bool) (DeliveryOutcome, error) {
 	if tx.Store == nil || tx.Authorize == nil {
 		return DeliveryOutcome{}, ErrDeliveryBinding
 	}
@@ -237,26 +250,8 @@ func (s *DeliveryService) applyInTransaction(ctx context.Context, tx DeliveryTra
 	}
 	out.Outcome = "canceled"
 	if commit {
-		if s.assets == nil {
-			return DeliveryOutcome{}, ErrDeliveryAsset
-		}
-		reader, asset, err := s.assets.OpenSeekable(ctx, b.BotID, ref.ContentHash)
-		if err != nil {
-			return DeliveryOutcome{}, err
-		}
-		// Resolve/Stat derives metadata from the storage key and does not fill
-		// SizeBytes. Use the existing verified Range stream; never trust the
-		// request's length or treat a filename as proof of readable content.
-		size, seekErr := reader.Seek(0, io.SeekEnd)
-		closeErr := reader.Close()
-		if seekErr != nil {
-			return DeliveryOutcome{}, seekErr
-		}
-		if closeErr != nil {
-			return DeliveryOutcome{}, closeErr
-		}
-		if asset.BotID != b.BotID || asset.ContentHash != ref.ContentHash || size != ref.SizeBytes {
-			return DeliveryOutcome{}, ErrDeliveryAsset
+		if !verified {
+			return DeliveryOutcome{}, errVerifyDelivery
 		}
 		out.Outcome = "committed"
 	}
@@ -279,4 +274,28 @@ func (s *DeliveryService) applyInTransaction(ctx context.Context, tx DeliveryTra
 	}
 	out.Revision = strconv.FormatInt(r.Revision, 10)
 	return out, nil
+}
+
+func (s *DeliveryService) verifyAsset(ctx context.Context, bot string, ref DeliveryRequest) error {
+	if s.assets == nil {
+		return ErrDeliveryAsset
+	}
+	reader, asset, err := s.assets.OpenSeekable(ctx, bot, ref.ContentHash)
+	if err != nil {
+		return err
+	}
+	// Resolve/Stat does not fill SizeBytes. Use the existing verified Range
+	// stream; never treat the request's length or filename as content proof.
+	size, seekErr := reader.Seek(0, io.SeekEnd)
+	closeErr := reader.Close()
+	if seekErr != nil {
+		return seekErr
+	}
+	if closeErr != nil {
+		return closeErr
+	}
+	if asset.BotID != bot || asset.ContentHash != ref.ContentHash || size != ref.SizeBytes {
+		return ErrDeliveryAsset
+	}
+	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -16,6 +18,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/storage/providers/localfs"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -32,9 +35,11 @@ type deliveryFixture struct {
 	conflicts           int
 	loseResponse        error
 	revokeAfterConflict bool
+	revokeDuringVerify  bool
+	verifications       int
 }
 
-func newDeliveryFixture(t *testing.T) (*deliveryFixture, *DeliveryService, context.Context, DeliveryRequest) {
+func newDeliveryFixture(t testing.TB) (*deliveryFixture, *DeliveryService, context.Context, DeliveryRequest) {
 	t.Helper()
 	f := &deliveryFixture{}
 	f.id = DeliveryIdentity{Binding: toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "synthetic-run"}, OperationID: uuid.NewString(), DeviceID: "fixture-device", InstanceID: "fixture-instance", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
@@ -104,6 +109,12 @@ type fixtureMedia struct{ *bytes.Reader }
 func (fixtureMedia) Close() error { return nil }
 
 func (f *deliveryFixture) OpenSeekable(context.Context, string, string) (media.ReadSeekCloser, media.Asset, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.verifications++
+	if f.revokeDuringVerify {
+		f.revoked = true
+	}
 	return fixtureMedia{bytes.NewReader(make([]byte, f.asset.SizeBytes))}, f.asset, nil
 }
 
@@ -125,7 +136,7 @@ func TestDeliveryCommitResolveAndExecutionSeparation(t *testing.T) {
 		}
 	}
 	out, err = s.Commit(ctx, f.id.OperationID, "result-1", ref)
-	if err != nil || out.Revision != "4" || f.authorizations != 5 {
+	if err != nil || out.Revision != "4" || f.authorizations != 6 || f.verifications != 1 {
 		t.Fatalf("idempotency must reauthorize: %+v %v checks=%d", out, err, f.authorizations)
 	}
 	var details Details
@@ -140,7 +151,7 @@ func TestDeliveryUnknownCommitReconcilesBeforeCancel(t *testing.T) {
 		t.Run(cause.Error(), func(t *testing.T) {
 			f, s, ctx, ref := newDeliveryFixture(t)
 			f.loseResponse = cause
-			if out, err := s.Commit(ctx, f.id.OperationID, "result", ref); !errors.Is(err, cause) || out.Outcome != "" || f.authorizations != 1 {
+			if out, err := s.Commit(ctx, f.id.OperationID, "result", ref); !errors.Is(err, cause) || out.Outcome != "" || f.authorizations != 2 {
 				t.Fatalf("unknown commit must not retry or acknowledge: %+v %v", out, err)
 			}
 			out, err := s.Resolve(ctx, f.id.OperationID, "result", ref, true)
@@ -220,7 +231,7 @@ func TestDeliveryRejectsCrossScopeAndForgedIdentity(t *testing.T) {
 }
 
 func TestDeliveryRechecksRevocationAndBoundsCASRetries(t *testing.T) {
-	for _, mode := range []string{"revoked-before", "revoked-after-commit", "revoke-on-conflict", "retry-success", "retry-exhausted"} {
+	for _, mode := range []string{"revoked-before", "revoked-after-commit", "revoke-on-conflict", "revoke-during-verify", "retry-success", "retry-exhausted"} {
 		t.Run(mode, func(t *testing.T) {
 			f, s, ctx, ref := newDeliveryFixture(t)
 			switch mode {
@@ -233,6 +244,8 @@ func TestDeliveryRechecksRevocationAndBoundsCASRetries(t *testing.T) {
 				f.revoked = true
 			case "revoke-on-conflict":
 				f.conflicts, f.revokeAfterConflict = 1, true
+			case "revoke-during-verify":
+				f.revokeDuringVerify = true
 			case "retry-success":
 				f.conflicts = 2
 			case "retry-exhausted":
@@ -241,11 +254,11 @@ func TestDeliveryRechecksRevocationAndBoundsCASRetries(t *testing.T) {
 			_, err := s.Commit(ctx, f.id.OperationID, "result", ref)
 			switch mode {
 			case "retry-success":
-				if err != nil || f.authorizations != 3 {
+				if err != nil || f.authorizations != 4 || f.verifications != 1 {
 					t.Fatalf("retry: %v checks=%d", err, f.authorizations)
 				}
 			case "retry-exhausted":
-				if !errors.Is(err, ErrDeliveryRetry) || f.authorizations != 3 {
+				if !errors.Is(err, ErrDeliveryRetry) || f.authorizations != 4 || f.verifications != 1 {
 					t.Fatalf("budget: %v", err)
 				}
 			default:
@@ -339,5 +352,51 @@ func TestDeliveryTransactionErrorClassification(t *testing.T) {
 		if !errors.Is(out, db.ErrCommitOutcomeUnknown) || !errors.Is(out, err) {
 			t.Fatalf("lost classification: %v", out)
 		}
+	}
+}
+
+func TestDeliveryUnknownCancellationRemainsFenced(t *testing.T) {
+	f, s, ctx, ref := newDeliveryFixture(t)
+	f.loseResponse = context.DeadlineExceeded
+	if _, err := s.Resolve(ctx, f.id.OperationID, "result", ref, true); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("lost cancel: %v", err)
+	}
+	if out, err := s.Resolve(ctx, f.id.OperationID, "result", ref, false); err != nil || out.Outcome != "canceled" {
+		t.Fatalf("lost fence: %+v %v", out, err)
+	}
+	if _, err := s.Commit(ctx, f.id.OperationID, "result", ref); !errors.Is(err, ErrDeliveryConflict) || f.verifications != 0 {
+		t.Fatalf("late commit: %v", err)
+	}
+}
+
+type deliveryZeros struct{}
+
+func (deliveryZeros) Read(p []byte) (int, error) { clear(p); return len(p), nil }
+
+// Reproducible cached-filesystem cost of the unchanged Media verifier. This
+// excludes PostgreSQL/network and does not measure peak RSS or physical disks.
+func BenchmarkDeliveryVerifiedCommit(b *testing.B) {
+	for _, size := range []int64{64 << 20, 512 << 20} {
+		b.Run(strconv.FormatInt(size>>20, 10)+"MiB", func(b *testing.B) {
+			f, _, ctx, ref := newDeliveryFixture(b)
+			assets := media.NewService(nil, localfs.NewOriginals(b.TempDir()))
+			assets.SetRequirePersistence(true)
+			asset, err := assets.Ingest(ctx, media.IngestInput{BotID: f.id.Binding.BotID, Mime: ref.Mime, Reader: io.LimitReader(deliveryZeros{}, size), MaxBytes: size})
+			if err != nil {
+				b.Fatal(err)
+			}
+			ref.ContentHash, ref.SizeBytes = asset.ContentHash, size
+			s := NewDeliveryService(f.transact, assets)
+			original := f.record
+			b.SetBytes(size)
+			b.ReportAllocs()
+			b.ResetTimer()
+			for range b.N {
+				f.record = original
+				if _, err := s.Commit(ctx, f.id.OperationID, "result", ref); err != nil {
+					b.Fatal(err)
+				}
+			}
+		})
 	}
 }

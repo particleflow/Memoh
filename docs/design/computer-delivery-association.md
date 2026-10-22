@@ -79,6 +79,10 @@ the trusted host must finish Range/hash validation and local publication before
 committing its attestation. A registered reference is not business success.
 This preserves the current Media integrity policy without modifying it, but
 costs a full verification scan on a new commit (two passes for Originals).
+The first transaction only authorizes and checks for an existing outcome. The
+scan runs outside the transaction; a new transaction reauthorizes and CASes.
+Revocation or cancellation during the scan therefore prevents a new commit.
+Verified content is reused across at most three known CAS aborts in that call.
 Replay/resolve performs none. Large-object commit latency and the client call
 budget need acceptance measurement; a future cheap verified metadata API is a
 cross-module change, not an excuse to trust unverified fixture sizes here.

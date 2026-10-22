@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/computertask"
@@ -19,12 +20,20 @@ import (
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/storage/providers/localfs"
+	"github.com/felinics/memoh/internal/team"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	ctx := t.Context()
-	pool := freshMigratedDB(t) // Creates and drops a separate synthetic database.
+	ownerPool := freshMigratedDB(t) // Creates and drops a separate synthetic database.
+	config := ownerPool.Config().Copy()
+	config.ConnConfig.RuntimeParams["memoh.team_id"] = team.DefaultTeamID
+	pool, err := pgxpool.NewWithConfig(ctx, config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(pool.Close)
 	store, err := postgresstore.New(pool)
 	if err != nil {
 		t.Fatal(err)
@@ -73,6 +82,24 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 		t.Fatal(err)
 	}
 	ref := computertask.DeliveryRequest{Version: 1, Direction: "upload", ContentHash: asset.ContentHash, SizeBytes: asset.SizeBytes, Mime: asset.Mime}
+	// Exercise the production adapter under a non-superuser, NOBYPASSRLS
+	// fixture role. Keep the admin pool only for synthetic revoke operations.
+	rls := rlsConn(t, pool, teamMigrationDSN(t))
+	var role string
+	if err := rls.QueryRow(ctx, "SELECT current_user").Scan(&role); err != nil {
+		t.Fatal(err)
+	}
+	runtimeConfig := pool.Config().Copy()
+	runtimeConfig.ConnConfig.RuntimeParams["role"] = role
+	runtimePool, err := pgxpool.NewWithConfig(ctx, runtimeConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(runtimePool.Close)
+	store, err = postgresstore.New(runtimePool)
+	if err != nil {
+		t.Fatal(err)
+	}
 	s := computertask.NewPostgresDeliveryService(store, assets)
 	out, err := s.Commit(ctx, id.OperationID, "result", ref)
 	if err != nil || out.Outcome != "committed" {
