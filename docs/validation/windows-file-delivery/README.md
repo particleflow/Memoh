@@ -1,5 +1,9 @@
 # Windows delivery adapter: isolated validation
 
+For the 2026-10-22 merged-server and persistent-queue increment, see
+[queue integration evidence and remaining host bindings](queue-integration.md).
+The results below describe the original `92b090bb` library checkpoint.
+
 Date: 2026-10-21. Branch: `feat/windows-delivery-contract`.
 Base: `a819c75ed94ae06a3a8196e9416302b18d8dd34f`.
 Design checkpoint: `6009e761` (before implementation).

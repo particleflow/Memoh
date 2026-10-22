@@ -1,5 +1,12 @@
 # Windows file delivery: frozen client boundary
 
+Integration update (2026-10-22): PR #8 is merged at
+`eeb1fdabf50ec94d48f08302c9da3f5b3811293e`; its tree matches `a6149e63`.
+The original checkpoint below is retained as history. The finite Herdr action,
+disk queue implementation, source references and explicit Windows/auth blockers
+are recorded in [the integration handoff](../validation/windows-file-delivery/queue-integration.md).
+No production host, identity, TLS or directory configuration has been changed.
+
 Status: isolated client prototype, not connected to a Windows host or production.
 Base: `a819c75ed94ae06a3a8196e9416302b18d8dd34f`.
 Server contract: PR #8 at `2bf79bbb8a2be4f1f08eefcadde850b2361e29c4`,
