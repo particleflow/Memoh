@@ -1,0 +1,12 @@
+Validation commands completed successfully in the isolated cloud workspace:
+
+MEMOH_RANGE_VOLUME=1 go test ./internal/media -run '^TestSeekableReadVolume$' -count=1 -v
+go test -race -p 3 ./internal/storage/... ./internal/media ./internal/handlers ./internal/server ./cmd/internal/core
+go test -race ./internal/storage/providers/localfs ./internal/handlers -run 'TestVerifiedRange|TestMediaRange' -count=1
+go test -race ./internal/storage/providers/localfs -run '^TestVerifiedRangeConfinesKeysAndLinks$' -count=1
+mise exec golangci-lint@2.10.1 -- golangci-lint run --new-from-rev=origin/main ./internal/storage/... ./internal/media ./internal/handlers
+bash scripts/check-agent-core-boundary.sh
+git diff --check
+
+Go 1.25.7. Main baseline 75a70fe961808ed5ec2284767cb92ea85f30890f.
+The full related race result precedes the final private Seek error wrapper; the subsequent range/HTTP race result covers that change. The last confinement test followed a test-only rooted-file-read lint fix. Lint produced no diagnostics and completed before the recorded core-boundary check.
