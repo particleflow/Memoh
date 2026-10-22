@@ -19,15 +19,16 @@ func TestAdmissionCompactionRetryKeepsCorruptEvidence(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if mode == "version" {
+			switch mode {
+			case "version":
 				r.Version = 99
 				body, _ := json.Marshal(r)
 				if err = f.Truncate(0); err == nil {
 					err = appendJournalFrame(f, body, activeJournalLimits.JournalBytes)
 				}
-			} else if mode == "empty" {
+			case "empty":
 				err = f.Truncate(0)
-			} else {
+			default:
 				var first [1]byte
 				if _, err = f.ReadAt(first[:], 4); err == nil {
 					first[0] ^= 1
