@@ -11,8 +11,8 @@ import (
 const (
 	PayloadReleasePending = "release_pending"
 	PayloadReleased       = "released"
-	// Completed receipts have a separate finite metadata bound. Never evict an
-	// idempotency proof to admit new work. No additional root or registry exists.
+	// Active or not-yet-archived records keep the original bounded catalog.
+	// Confirmed released history has a separate finite budget in history.go.
 	maxQueueRecords     = 1024
 	releaseReceiptBytes = 16384 + 36
 )
@@ -26,7 +26,7 @@ func confirmedDelivery(r QueueStatus) bool {
 }
 
 // ReleaseConfirmed deletes ONLY this queue's cache files after durable NAS
-// association. It retains the exact terminal job/receipt in the existing journal.
+// association. It retains the exact terminal job/receipt in this queue's history.
 // User sources and native published destination objects are never addressed.
 func (q *DiskQueue) ReleaseConfirmed(ctx context.Context, id string) error {
 	if !validID(id) || id == "admission" {
@@ -57,17 +57,14 @@ func (q *DiskQueue) ReclaimConfirmed(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	archived := 0
 	for _, head := range records {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
 		id := head.Job.DeliveryID
-		if head.PayloadState == PayloadReleased {
-			if _, err := q.root.Lstat(queueName(id + ".release")); errors.Is(err, os.ErrNotExist) {
-				continue
-			} else if err != nil {
-				return ErrStore
-			}
+		if archived >= historyReclaimBatch {
+			break
 		}
 		lock, err := q.lock(id)
 		if errors.Is(err, ErrBusy) {
@@ -81,6 +78,9 @@ func (q *DiskQueue) ReclaimConfirmed(ctx context.Context) error {
 			_ = f.Close()
 			if confirmedDelivery(r) {
 				err = q.releaseConfirmedLocked(ctx, id)
+				if err == nil {
+					archived++
+				}
 			}
 		}
 		unlockClose(lock)
@@ -105,7 +105,10 @@ func (q *DiskQueue) releaseConfirmedLocked(ctx context.Context, id string) error
 	}
 	if r.PayloadState == PayloadReleased {
 		if _, err := q.root.Lstat(queueName(id + ".release")); errors.Is(err, os.ErrNotExist) {
-			return journal.Close()
+			if err := journal.Close(); err != nil {
+				return err
+			}
+			return q.archiveConfirmedLocked(ctx, id)
 		} else if err != nil {
 			_ = journal.Close()
 			return ErrStore
@@ -197,7 +200,7 @@ func (q *DiskQueue) releaseConfirmedLocked(ctx context.Context, id string) error
 		return err
 	}
 	q.markRelease("after_finish")
-	return nil
+	return q.archiveConfirmedLocked(ctx, id)
 }
 
 func (q *DiskQueue) saveReceipt(f *os.File, r QueueStatus) error {

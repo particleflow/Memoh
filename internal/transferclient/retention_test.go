@@ -76,7 +76,12 @@ func assertReleased(t *testing.T, q *DiskQueue, job Job) {
 			t.Fatal("cache retained", suffix, err)
 		}
 	}
-	st, err := q.root.Stat(queueName(job.DeliveryID + ".journal"))
+	_, file, err := q.load(job.DeliveryID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	st, err := file.Stat()
+	_ = file.Close()
 	if err != nil || st.Size() > releaseReceiptBytes {
 		t.Fatal("unbounded receipt", err)
 	}
@@ -235,7 +240,7 @@ func TestQueueReleaseReceiptCatalogBound(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Populate bounded completed metadata only; payload storage is never allocated.
-	for n := 1; n < maxQueueRecords; n++ {
+	for n := 1; n <= maxQueueRecords; n++ {
 		saved := r
 		saved.Job.DeliveryID, saved.Job.SnapshotID = fmt.Sprintf("retained-%04d", n), fmt.Sprintf("retained-%04d", n)
 		ref := *r.Job.Ready
@@ -253,6 +258,12 @@ func TestQueueReleaseReceiptCatalogBound(t *testing.T) {
 	}
 	if err := q.capacity(7); !errors.Is(err, ErrCapacity) {
 		t.Fatal("receipt catalog unbounded", err)
+	}
+	if err := q.ReclaimConfirmed(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if err := q.capacity(7); err != nil {
+		t.Fatal("bounded history migration did not free admission", err)
 	}
 	assertReleased(t, q, job)
 }

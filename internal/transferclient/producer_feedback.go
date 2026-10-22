@@ -176,6 +176,14 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 			report.Files = append(report.Files, deliverymeta.FileFeedback{DeliveryID: file.DeliveryID(), State: "pending", Code: code, Retryable: true, RetryAt: now.Add(30 * time.Second), Change: feedbackChange(code)})
 			continue
 		}
+		if _, ok := statuses[file.DeliveryID()]; !ok {
+			r, err := q.Inspect(file.DeliveryID())
+			if err == nil {
+				statuses[file.DeliveryID()] = r
+			} else if !errors.Is(err, os.ErrNotExist) {
+				return report, err
+			}
+		}
 		if r, ok := statuses[file.DeliveryID()]; ok {
 			if !feedbackTaskMatches(plan.Task, r.Job) || r.Job.Spec.Mime != file.Artifact.Mime {
 				return report, ErrProducerFeedback
