@@ -65,6 +65,9 @@ func TestWindowsNativePublicationRoundTrip(t *testing.T) {
 	if out, err := p.Publish(t.Context(), ref, source); err != nil || out != OutcomeCommitted {
 		t.Fatal("publish", out, err)
 	}
+	if out, err := p.Publish(t.Context(), ref, source); err != nil || out != OutcomeCommitted {
+		t.Fatal("same invocation replay", out, err)
+	}
 	if _, err := q.root.Lstat(queueName(ref.DeliveryID + ".part")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("source was copied instead of transferred", err)
 	}
@@ -110,7 +113,7 @@ func TestWindowsNativePublicationNeverOverwritesTarget(t *testing.T) {
 	if _, err := p.Publish(t.Context(), ref, source); !errors.Is(err, ErrPublicationConflict) {
 		t.Fatal("existing target accepted", err)
 	}
-	got, err := os.ReadFile(path)
+	got, err := os.ReadFile(path) //nolint:gosec // Fixture-owned NTFS directory and hash-derived fixed basename.
 	if err != nil || string(got) != "existing target" {
 		t.Fatal("existing bytes changed", err)
 	}

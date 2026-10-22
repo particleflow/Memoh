@@ -236,19 +236,27 @@ func checkQueueFile(f *os.File) error {
 	return checkPrivateHandle(h)
 }
 
-func queueFileIdentity(f *os.File) (string, error) {
+func queueObjectIdentity(f *os.File) (string, error) {
 	var id struct {
 		Volume uint64
 		ID     [16]byte
 	}
-	if windows.GetFileInformationByHandleEx(windows.Handle(f.Fd()), windows.FileIdInfo, (*byte)(unsafe.Pointer(&id)), uint32(unsafe.Sizeof(id))) != nil { //nolint:gosec // Exact fixed FILE_ID_INFO layout passed to the Windows API.
+	if windows.GetFileInformationByHandleEx(windows.Handle(f.Fd()), windows.FileIdInfo, (*byte)(unsafe.Pointer(&id)), uint32(unsafe.Sizeof(id))) != nil { //nolint:gosec // Exact FILE_ID_INFO layout from the validated handle.
 		return "", ErrStore
+	}
+	return fmt.Sprintf("%x:%x", id.Volume, id.ID), nil
+}
+
+func queueFileIdentity(f *os.File) (string, error) {
+	identity, err := queueObjectIdentity(f)
+	if err != nil {
+		return "", err
 	}
 	info, err := f.Stat()
 	if err != nil {
 		return "", ErrStore
 	}
-	return fmt.Sprintf("%x:%x:%d", id.Volume, id.ID, info.Size()), nil
+	return fmt.Sprintf("%s:%d", identity, info.Size()), nil
 }
 
 func lockQueueFile(f *os.File) error {

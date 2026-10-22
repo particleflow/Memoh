@@ -18,8 +18,10 @@ import (
 	"golang.org/x/sys/windows"
 )
 
-const publicationReceipts = 128
-const publicationJournalBytes = 64 << 10
+const (
+	publicationReceipts     = 128
+	publicationJournalBytes = 64 << 10
+)
 
 type publicationRecord struct {
 	Version   int       `json:"version"`
@@ -67,7 +69,7 @@ func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*
 		return nil, err
 	}
 	defer unlockClose(lock)
-	identity, err := queueFileIdentity(p.guard)
+	identity, err := queueObjectIdentity(p.guard)
 	if err != nil {
 		return nil, err
 	}
@@ -311,7 +313,9 @@ func (p *NativePublication) Publish(ctx context.Context, ref Reference, reader i
 		return "", ErrStore
 	}
 	actual, err := handlePath(windows.Handle(source.file.Fd()))
-	if err != nil || !strings.EqualFold(actual, filepath.Join(p.queue.root.Name(), queueName(ref.DeliveryID+".part"))) {
+	atSource := strings.EqualFold(actual, filepath.Join(p.queue.root.Name(), queueName(ref.DeliveryID+".part")))
+	atDestination := strings.EqualFold(actual, filepath.Join(p.root.Name(), publicationKey(ref)+".object"))
+	if err != nil || !atSource && !atDestination {
 		return "", ErrPublicationConflict
 	}
 	if err := source.file.Sync(); err != nil {
@@ -323,12 +327,23 @@ func (p *NativePublication) Publish(ctx context.Context, ref Reference, reader i
 	}
 	defer func() { _ = f.Close() }()
 	if r.State == "fenced" {
+		if !atSource {
+			return "", ErrPublicationConflict
+		}
 		return OutcomeCanceled, nil
 	}
-	if r.State == "published" {
-		return "", ErrPublicationConflict
-	} // A fresh source cannot replace the published object.
 	if r.FileID != identity {
+		return "", ErrPublicationConflict
+	}
+	if atDestination {
+		if r.State == "prepared" {
+			if err := p.finish(source.file, f, r); err != nil {
+				return "", err
+			}
+		}
+		return OutcomeCommitted, nil
+	}
+	if r.State == "published" {
 		return "", ErrPublicationConflict
 	}
 	p.mark("after_prepare")
