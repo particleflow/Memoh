@@ -6315,6 +6315,71 @@ definitions:
     - client_type
     - name
     type: object
+  providers.DiscoverModelsResponse:
+    properties:
+      adapter:
+        $ref: '#/definitions/providers.DiscoveryAdapter'
+      completeness:
+        enum:
+        - unknown
+        type: string
+      models:
+        items:
+          $ref: '#/definitions/providers.DiscoveredModel'
+        type: array
+    type: object
+  providers.DiscoveredModel:
+    properties:
+      capabilities:
+        items:
+          $ref: '#/definitions/providers.DiscoveryCapability'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  providers.DiscoveryAdapter:
+    properties:
+      images_edit:
+        type: boolean
+      images_generation:
+        type: boolean
+      source:
+        enum:
+        - memoh_adapter
+        type: string
+      type:
+        enum:
+        - openai-completions
+        - openai-responses
+        - anthropic-messages
+        - google-generative-ai
+        - opencode-go
+        type: string
+    type: object
+  providers.DiscoveryCapability:
+    properties:
+      name:
+        enum:
+        - vision
+        - tool-call
+        - image-output
+        - image-edit
+        - reasoning
+        - file-input
+        type: string
+      source:
+        enum:
+        - provider_template
+        - unknown
+        type: string
+      status:
+        enum:
+        - declared
+        - unknown
+        type: string
+    type: object
   providers.GetResponse:
     properties:
       client_type:
@@ -17979,6 +18044,57 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Import models from provider
+      tags:
+      - providers
+  /providers/{id}/model-discovery:
+    get:
+      description: 'Uses the existing team''s provider configuration server-side.
+        GET-only: no inference, embedding probe, import or OAuth refresh. Only explicit
+        exact-ID provider-template declarations are reported; undeclared model capabilities
+        remain unknown. Adapter implementation is separate from model support. The
+        SDK listing is not guaranteed exhaustive. OAuth and non-LLM adapters are unsupported.'
+      parameters:
+      - description: Provider ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/providers.DiscoverModelsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "501":
+          description: Not Implemented
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read upstream model metadata without importing or probing models
       tags:
       - providers
   /providers/{id}/models:

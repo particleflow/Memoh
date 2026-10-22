@@ -39,6 +39,7 @@ func NewProvidersHandler(log *slog.Logger, service *providers.Service, modelsSer
 }
 
 func (h *ProvidersHandler) Register(e *echo.Echo) {
+	h.registerDiscovery(e)
 	group := e.Group("/providers")
 	group.POST("", h.Create)
 	group.POST("/from-template", h.CreateFromTemplate)

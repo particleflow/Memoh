@@ -3642,6 +3642,31 @@ export type ProvidersCreateRequest = {
     name: string;
 };
 
+export type ProvidersDiscoverModelsResponse = {
+    adapter?: ProvidersDiscoveryAdapter;
+    completeness?: 'unknown';
+    models?: Array<ProvidersDiscoveredModel>;
+};
+
+export type ProvidersDiscoveredModel = {
+    capabilities?: Array<ProvidersDiscoveryCapability>;
+    id?: string;
+    name?: string;
+};
+
+export type ProvidersDiscoveryAdapter = {
+    images_edit?: boolean;
+    images_generation?: boolean;
+    source?: 'memoh_adapter';
+    type?: 'openai-completions' | 'openai-responses' | 'anthropic-messages' | 'google-generative-ai' | 'opencode-go';
+};
+
+export type ProvidersDiscoveryCapability = {
+    name?: 'vision' | 'tool-call' | 'image-output' | 'image-edit' | 'reasoning' | 'file-input';
+    source?: 'provider_template' | 'unknown';
+    status?: 'declared' | 'unknown';
+};
+
 export type ProvidersGetResponse = {
     client_type?: string;
     config?: {
@@ -16606,6 +16631,60 @@ export type PostProvidersByIdImportModelsResponses = {
 };
 
 export type PostProvidersByIdImportModelsResponse = PostProvidersByIdImportModelsResponses[keyof PostProvidersByIdImportModelsResponses];
+
+export type GetProvidersByIdModelDiscoveryData = {
+    body?: never;
+    path: {
+        /**
+         * Provider ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/providers/{id}/model-discovery';
+};
+
+export type GetProvidersByIdModelDiscoveryErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Not Implemented
+     */
+    501: ServerProblem;
+    /**
+     * Bad Gateway
+     */
+    502: ServerProblem;
+};
+
+export type GetProvidersByIdModelDiscoveryError = GetProvidersByIdModelDiscoveryErrors[keyof GetProvidersByIdModelDiscoveryErrors];
+
+export type GetProvidersByIdModelDiscoveryResponses = {
+    /**
+     * OK
+     */
+    200: ProvidersDiscoverModelsResponse;
+};
+
+export type GetProvidersByIdModelDiscoveryResponse = GetProvidersByIdModelDiscoveryResponses[keyof GetProvidersByIdModelDiscoveryResponses];
 
 export type GetProvidersByIdModelsData = {
     body?: never;

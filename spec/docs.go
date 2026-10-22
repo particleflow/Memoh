@@ -15259,6 +15259,77 @@ const docTemplate = `{
                 }
             }
         },
+        "/providers/{id}/model-discovery": {
+            "get": {
+                "description": "Uses the existing team's provider configuration server-side. GET-only: no inference, embedding probe, import or OAuth refresh. Only explicit exact-ID provider-template declarations are reported; undeclared model capabilities remain unknown. Adapter implementation is separate from model support. The SDK listing is not guaranteed exhaustive. OAuth and non-LLM adapters are unsupported.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "providers"
+                ],
+                "summary": "Read upstream model metadata without importing or probing models",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/providers.DiscoverModelsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/providers/{id}/models": {
             "get": {
                 "description": "Get models for a provider by id, optionally filtered by type",
@@ -27314,6 +27385,100 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "providers.DiscoverModelsResponse": {
+            "type": "object",
+            "properties": {
+                "adapter": {
+                    "$ref": "#/definitions/providers.DiscoveryAdapter"
+                },
+                "completeness": {
+                    "type": "string",
+                    "enum": [
+                        "unknown"
+                    ]
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/providers.DiscoveredModel"
+                    }
+                }
+            }
+        },
+        "providers.DiscoveredModel": {
+            "type": "object",
+            "properties": {
+                "capabilities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/providers.DiscoveryCapability"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "providers.DiscoveryAdapter": {
+            "type": "object",
+            "properties": {
+                "images_edit": {
+                    "type": "boolean"
+                },
+                "images_generation": {
+                    "type": "boolean"
+                },
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "memoh_adapter"
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "openai-completions",
+                        "openai-responses",
+                        "anthropic-messages",
+                        "google-generative-ai",
+                        "opencode-go"
+                    ]
+                }
+            }
+        },
+        "providers.DiscoveryCapability": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "enum": [
+                        "vision",
+                        "tool-call",
+                        "image-output",
+                        "image-edit",
+                        "reasoning",
+                        "file-input"
+                    ]
+                },
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "provider_template",
+                        "unknown"
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "declared",
+                        "unknown"
+                    ]
                 }
             }
         },
