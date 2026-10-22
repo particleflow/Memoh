@@ -15,9 +15,9 @@ This was not one generated-code failure. The repair covers:
 
 No new `any`, ignore/suppression, relaxed strictness, skipped check, removed business feature, provider, task layer or Agent core change. The obsolete `@ts-expect-error` is removed. Once baseline is clear, **Typecheck Web no longer has `continue-on-error`** in the existing ESLint workflow.
 
-## Executed checks
+## Original local checks (`06a53e15`)
 
-On the cloud development environment, Node 25.9.0, TypeScript 6.0.3, vue-tsc 3.3.8:
+These are **local** checks on the cloud development environment, Node 25.9.0, TypeScript 6.0.3, vue-tsc 3.3.8. In particular, the 2,399-test full Web run was local; GitHub CI runs its configured subset, not that full suite:
 
 | Check | Actual result |
 | --- | --- |
@@ -50,3 +50,34 @@ The two-node force fixture initially auto-fits beyond the viewport. With a zoom-
 A normal zoom-out interaction brings both nodes into view (Y approximately 310.48 / 169.52), captured above. The pre-existing automatic-fit issue is **not repaired by this typecheck change** and is not described as a fully successful initial graph layout. No expanded graph redesign is included.
 
 [Read-only 13-commit upstream classification](UPSTREAM.md) is separate from this repair. Production provider/Pi/MCP/skills effective configuration was not inspected; a code-level absence of disabling flags does not prove live configuration or a historical pane changed. No merge, release, production deployment or upstream synchronization is performed by this validation.
+
+## Lock metadata review follow-up
+
+Restore exactly **41 `libc` constraints and three `deprecated` metadata fields**
+from main851, without regenerating the lockfile. Package versions, integrity
+hashes, snapshot edges, Vue alignment and all application/test source are unchanged
+from `06a53e15`. After excluding these two metadata field names, the lockfile is
+byte-identical to that head (SHA-256
+`80ead475af7ab49ad2c6c3a58f90bfe92a4e75f35283ab284fcaf3473bf9df43`).
+The complete current lock diff against main851 contains no `libc` or `deprecated`
+field changes.
+
+Executed again locally after restoration:
+
+- `pnpm install --frozen-lockfile --ignore-scripts`: exit 0; exact lock SHA-256
+  unchanged. Existing installed dependencies were reused, **not a clean install**.
+  Submodule and installed patched-dependency checks passed explicitly.
+- Full Web typecheck: exit 0, zero diagnostics.
+- Related model-input, memory-chart, Markdown, icon and storage suites:
+  **10 files / 79 tests passed**. The full 2,399-test suite above was not rerun for
+  this metadata-only follow-up and is not claimed as a GitHub CI run.
+- Web build: exit 0; it exercises the installed native bundler/CSS dependencies.
+  Existing large-chunk warnings remain.
+- Actual current Vite app / Chromium: Bot list → General settings after frozen
+  install, **0 mutation requests and 0 page errors**. [Fresh screenshot](lock-metadata-smoke.png).
+
+Clean-checkout `pnpm install --frozen-lockfile` is validated separately in the new
+GitHub-hosted workflow run (cached pnpm store is permitted; no checked-in
+node_modules). Its final result is linked from the PR rather than inferred from
+the reused local installation. No PR54 product tests, release, deployment,
+credential change or unrelated dependency upgrade is included.
