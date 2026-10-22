@@ -128,7 +128,9 @@ func (s *AsyncDeliveryService) apply(ctx context.Context, operation, delivery st
 			return true, nil
 		}
 		if !hasSlot {
-			if !exists {
+			// The task guard reserves a delivery before its first Commit. It
+			// still needs a verifier slot; absent is not a Commit acknowledgement.
+			if !exists || reserved {
 				return false, ErrDeliveryLimit
 			}
 			return false, nil

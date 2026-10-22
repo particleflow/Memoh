@@ -51,7 +51,12 @@ func (v *transferVerifierFixture) Revalidate(ctx context.Context, _ computertask
 	return ctx.Err()
 }
 
-func taskTransferHTTPFixture(t *testing.T, disabled bool) (*deliveryHTTPFixture, *transferVerifierFixture, *httptest.Server, *transferclient.Client) {
+type taskTransferFixtureOptions struct {
+	assets  func(*media.Service) computertask.DeliveryAssets
+	request func(*http.Request)
+}
+
+func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransferFixtureOptions) (*deliveryHTTPFixture, *transferVerifierFixture, *httptest.Server, *transferclient.Client) {
 	t.Helper()
 	f, _ := deliveryHTTPServer(t)
 	root := t.TempDir()
@@ -61,6 +66,14 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool) (*deliveryHTTPFixture,
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { _ = assets.Uploads().Close() })
+	var option taskTransferFixtureOptions
+	if len(options) > 0 {
+		option = options[0]
+	}
+	var verificationAssets computertask.DeliveryAssets = assets
+	if option.assets != nil {
+		verificationAssets = option.assets(assets)
+	}
 	var mu sync.Mutex
 	base := computertask.NewDeliveryService(func(_ context.Context, apply func(computertask.DeliveryTransaction) error) error {
 		mu.Lock()
@@ -72,7 +85,7 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool) (*deliveryHTTPFixture,
 			f.r = before
 		}
 		return err
-	}, assets)
+	}, verificationAssets)
 	p := computertask.VerifiedTransfer{Identity: f.id, DeliveryID: "one", Reference: f.ref, Audience: computertask.TransferAudience, CredentialID: "fixture-one", IssuedAt: time.Now().Add(-time.Minute), ExpiresAt: time.Now().Add(10 * time.Minute)}
 	v := &transferVerifierFixture{grants: map[string]computertask.VerifiedTransfer{"one": p}}
 	second := p
@@ -91,6 +104,14 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool) (*deliveryHTTPFixture,
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log)
 	h.Register(e)
+	if option.request != nil {
+		e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+			return func(c echo.Context) error {
+				option.request(c.Request())
+				return next(c)
+			}
+		})
+	}
 	ts := httptest.NewTLSServer(e)
 	t.Cleanup(ts.Close)
 	client, err := transferclient.NewTask(ts.URL, f.id.OperationID, "one", ts.Client(), func(context.Context) (string, error) { return "Memoh-Transfer one", nil })
