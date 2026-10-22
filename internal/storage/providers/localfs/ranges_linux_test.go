@@ -275,8 +275,8 @@ func TestVerifiedRangeCancellationDoesNotPublishIndexOrHoldLock(t *testing.T) {
 	}
 	p.readAt = baseRead
 	readRangeFixture(t, p, key, 0, payload[:100])
-	if n := reads.Load(); n != int64(len(payload))+rangeBlockBytes {
-		t.Fatalf("partial scan was cached: %d", n)
+	if n := reads.Load(); n != int64(len(payload)) {
+		t.Fatalf("resume did not reuse exactly the completed scan block: %d", n)
 	}
 	// Waiting for the same verification stripe is also bounded by context.
 	unlock, err := p.ranges.lock(t.Context(), key)
