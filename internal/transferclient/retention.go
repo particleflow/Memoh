@@ -204,6 +204,7 @@ func (q *DiskQueue) saveReceipt(f *os.File, r QueueStatus) error {
 	if !q.validRecord(r, r.Job.DeliveryID) || r.PayloadState != PayloadReleased {
 		return ErrInvalid
 	}
+	r.Version = 4
 	raw, err := json.Marshal(r)
 	if err != nil {
 		return ErrStore

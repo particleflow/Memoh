@@ -245,8 +245,9 @@ func TestDiskQueueAdmissionAndJournalFailures(t *testing.T) {
 						break
 					}
 				}
-				if !errors.Is(err, ErrCapacity) {
-					t.Fatal("journal grew without bound", err)
+				stat, statErr := f.Stat()
+				if err != nil || statErr != nil || stat.Size() > limits.JournalBytes {
+					t.Fatal("journal did not compact within its bound", err, statErr)
 				}
 				return
 			}

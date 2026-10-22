@@ -56,6 +56,15 @@ func nativeLimits() QueueLimits {
 	return QueueLimits{Jobs: 8, Bytes: 256 << 20, JournalBytes: 1 << 20, Workers: 1}
 }
 
+func TestWindowsNativeActiveJournal(t *testing.T) {
+	t.Run("progress", TestActiveJournalBoundedAcrossProgress)
+	t.Run("process-crash", TestActiveJournalProcessCrash)
+	t.Run("corruption", TestActiveJournalIncompleteAndCorruptCheckpoint)
+	t.Run("unknown", TestActiveJournalPreservesUnknownAssociation)
+	t.Run("legacy", TestActiveJournalLegacyReadAndFullBoundary)
+	t.Run("record-bound", TestActiveJournalMaximumRecordEnvelope)
+}
+
 func nativeQueue(t *testing.T, path string) *DiskQueue {
 	t.Helper()
 	q, err := OpenHerdrQueue(func(string) string { return path }, "revision-1", nativeLimits())

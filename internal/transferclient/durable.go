@@ -41,6 +41,7 @@ type DiskQueue struct {
 	revision    string
 	limits      QueueLimits
 	releaseHook func(string)
+	journalHook func(string)
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
@@ -250,6 +251,9 @@ func (q *DiskQueue) worker() (*os.File, error) {
 // Only an incomplete final frame is truncated on reopen. Full corrupt frames,
 // wrong versions and journal exhaustion fail closed. No rename per checkpoint.
 func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
+	if r, f, found, err := q.recoverActiveJournal(id); found || err != nil {
+		return r, f, err
+	}
 	r, f, err := q.loadJournal(id)
 	if err == nil {
 		return r, f, nil
@@ -329,12 +333,13 @@ func readJournalFrames(f *os.File, limit int64, consume func([]byte) error) (int
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
-	if r.Version == 3 {
-		if (r.PayloadState != PayloadReleasePending && r.PayloadState != PayloadReleased) || !confirmedDelivery(r) {
+	if r.Version != 2 && r.Version != 3 && r.Version != 4 {
+		return false
+	}
+	if r.PayloadState != "" || r.Version == 3 {
+		if r.Version == 2 || (r.PayloadState != PayloadReleasePending && r.PayloadState != PayloadReleased) || !confirmedDelivery(r) {
 			return false
 		}
-	} else if r.Version != 2 || r.PayloadState != "" {
-		return false
 	}
 
 	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || r.Job.Spec.SizeBytes > q.limits.Bytes {
@@ -364,15 +369,32 @@ func (q *DiskQueue) save(f *os.File, r QueueStatus) error {
 	if !q.validRecord(r, r.Job.DeliveryID) {
 		return ErrInvalid
 	}
+	// Fence old queue writers before creating a compaction witness. Every later
+	// write retains this version, including terminal receipt compaction.
+	r.Version = 4
 	body, err := json.Marshal(r)
 	if err != nil || len(body) > 16384 {
 		return ErrStore
 	}
-	return appendJournalFrame(f, body, q.limits.JournalBytes)
+	if err := appendJournalFrame(f, body, q.limits.JournalBytes); err != nil {
+		return err
+	}
+	stat, err := f.Stat()
+	if err != nil {
+		return ErrStore
+	}
+	if r.PayloadState == "" && stat.Size() >= min(int64(65536), q.limits.JournalBytes/2) {
+		return q.compactActiveJournal(f, r)
+	}
+	return nil
 }
 
 func appendJournalFrame(f *os.File, body []byte, limit int64) error {
-	if len(body) < 1 || len(body) > 16384 {
+	return appendBoundedFrame(f, body, limit, 16384)
+}
+
+func appendBoundedFrame(f *os.File, body []byte, limit int64, maxBody int) error {
+	if maxBody < 1 || maxBody > 17408 || len(body) < 1 || len(body) > maxBody {
 		return ErrStore
 	}
 	end, err := f.Seek(0, io.SeekEnd)
@@ -380,7 +402,7 @@ func appendJournalFrame(f *os.File, body []byte, limit int64) error {
 		return ErrCapacity
 	}
 	frame := make([]byte, 36+len(body))
-	binary.BigEndian.PutUint32(frame[:4], uint32(len(body))) //nolint:gosec // Body length was bounded to 16384 above.
+	binary.BigEndian.PutUint32(frame[:4], uint32(len(body))) //nolint:gosec // Body length was bounded to at most 17408 above.
 	sum := sha256.Sum256(body)
 	copy(frame[4:36], sum[:])
 	copy(frame[36:], body)

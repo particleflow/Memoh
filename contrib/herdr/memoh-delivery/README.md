@@ -4,6 +4,13 @@ This is a review/test package, not a production installation. It contains a
 finite Herdr plugin executable, manifest, and isolated Windows test executable.
 It installs no service, daemon, Memoh runtime or Agent modification.
 
+Version 0.4 writes checkpoint-aware queue record v4. Stop older writers before
+updating; v2/v3 records remain readable, but an old executable cannot read a
+record after its first v4 write. Active journals compact through a durable
+checkpoint without changing payloads, receipt IDs or retry/unknown outcomes.
+There is no automatic downgrade or repair of an already-full legacy journal.
+See `docs/delivery-active-journal.md` for process-crash and compatibility bounds.
+
 ## Unified Windows endpoint: implemented and missing
 
 The transfer helper is an internal component of the Windows execution endpoint.

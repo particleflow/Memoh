@@ -109,8 +109,8 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 		return nil, ErrStore
 	}
 	defer func() { _ = dir.Close() }()
-	entries, err := dir.ReadDir(q.limits.Jobs*5 + maxQueueRecords*2 + 136)
-	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*5+maxQueueRecords*2+136 {
+	entries, err := dir.ReadDir(q.limits.Jobs*6 + maxQueueRecords*2 + 136)
+	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*6+maxQueueRecords*2+136 {
 		return nil, ErrCapacity
 	}
 	var records []QueueStatus
@@ -120,6 +120,9 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 		if !ok {
 			stem, ok = strings.CutSuffix(e.Name(), ".release")
 		}
+		if !ok {
+			stem, ok = strings.CutSuffix(e.Name(), ".checkpoint")
+		}
 		if !ok || seen[stem] {
 			continue
 		}
@@ -128,6 +131,11 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 		}
 		seen[stem] = true
 		r, err := q.admissionHead(stem + ".journal")
+		if err != nil {
+			if checkpoint, checkpointErr := q.activeCheckpointHead(stem + ".checkpoint"); checkpointErr == nil {
+				r, err = checkpoint.Record, nil
+			}
+		}
 		if err != nil {
 			// Compaction can leave the original journal empty/torn. Only the
 			// synced, fully confirmed sibling can recover its original identity.

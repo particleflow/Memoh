@@ -35,6 +35,14 @@ func queueFileIdentity(f *os.File) (string, error) {
 	return fmt.Sprintf("%x:%x:%d", stat.Dev, stat.Ino, stat.Size), nil
 }
 
+func queueObjectIdentity(f *os.File) (string, error) {
+	var stat unix.Stat_t
+	if unix.Fstat(int(f.Fd()), &stat) != nil { //nolint:gosec // Fd originates from an open Unix descriptor.
+		return "", ErrStore
+	}
+	return fmt.Sprintf("%x:%x", stat.Dev, stat.Ino), nil
+}
+
 func checkQueueRoot(root *os.Root) error {
 	f, err := root.Open(".")
 	if err != nil {
