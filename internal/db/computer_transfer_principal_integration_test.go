@@ -121,6 +121,20 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	// Inject only the second registry read: VerifyDevice reads real PostgreSQL,
+	// then the guard's RevalidateDevice sees a transient storage deadline.
+	verifier.storage.reads.Store(0)
+	verifier.storage.failAt.Store(2)
+	_, recheckErr := client.Get(ctx, id.Binding.BotID, r.ID)
+	var unavailable *transferclient.HTTPError
+	if !errors.As(recheckErr, &unavailable) || unavailable.Status != http.StatusServiceUnavailable {
+		t.Fatal("real verifier second read did not stay retryable", recheckErr)
+	}
+	recovered, recheckErr := client.Get(ctx, id.Binding.BotID, r.ID)
+	if recheckErr != nil || recovered.ID != r.ID || recovered.Offset != 0 {
+		t.Fatal("registry recovery lost original receipt", recheckErr)
+	}
 	if _, err := client.Patch(ctx, id.Binding.BotID, r.ID, 0, []byte("synthetic delivery content")); err != nil {
 		t.Fatal(err)
 	}
@@ -202,6 +216,7 @@ type registeredTransferVerifier struct {
 	device         computertask.VerifiedTransferDevice
 	owner, runtime string
 	denied         chan struct{}
+	storage        *transferRegistryReadFault
 }
 
 func newRegisteredTransferVerifier(ctx context.Context, t *testing.T, store *postgresstore.Store, id computertask.DeliveryIdentity) *registeredTransferVerifier {
@@ -210,7 +225,8 @@ func newRegisteredTransferVerifier(ctx context.Context, t *testing.T, store *pos
 	if err != nil {
 		t.Fatal(err)
 	}
-	credentials := userruntime.NewTransferCredentials(store, true)
+	storage := &transferRegistryReadFault{RuntimeTransferStore: store}
+	credentials := userruntime.NewTransferCredentials(storage, true)
 	status, err := credentials.Status(ctx, mount.RuntimeUserID, mount.RuntimeID)
 	if err != nil {
 		t.Fatal(err)
@@ -219,7 +235,7 @@ func newRegisteredTransferVerifier(ctx context.Context, t *testing.T, store *pos
 	if err != nil {
 		t.Fatal(err)
 	}
-	v := &registeredTransferVerifier{RuntimeDeviceTransferVerifier: handlers.RuntimeDeviceTransferVerifier{Credentials: credentials}, token: enrollment.Credential, owner: mount.RuntimeUserID, runtime: mount.RuntimeID, denied: make(chan struct{}, 1)}
+	v := &registeredTransferVerifier{RuntimeDeviceTransferVerifier: handlers.RuntimeDeviceTransferVerifier{Credentials: credentials}, storage: storage, token: enrollment.Credential, owner: mount.RuntimeUserID, runtime: mount.RuntimeID, denied: make(chan struct{}, 1)}
 	v.device, err = v.VerifyDevice(ctx, v.token)
 	if err != nil {
 		t.Fatal(err)
@@ -243,4 +259,18 @@ func (v *registeredTransferVerifier) revoke(ctx context.Context, t *testing.T) {
 	if err := v.Credentials.Revoke(ctx, v.owner, v.runtime, v.device.CredentialID); err != nil {
 		t.Fatal(err)
 	}
+}
+
+// A deterministic storage fault, not a replacement authentication decision.
+// Normal reads and all writes still use the real PostgreSQL registry adapter.
+type transferRegistryReadFault struct {
+	dbstore.RuntimeTransferStore
+	reads, failAt atomic.Int64
+}
+
+func (s *transferRegistryReadFault) ReadRuntimeTransfer(ctx context.Context, id string) (dbstore.RuntimeTransferRecord, error) {
+	if n := s.reads.Add(1); n == s.failAt.Load() {
+		return dbstore.RuntimeTransferRecord{}, context.DeadlineExceeded
+	}
+	return s.RuntimeTransferStore.ReadRuntimeTransfer(ctx, id)
 }

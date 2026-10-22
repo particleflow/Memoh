@@ -13,9 +13,10 @@ import (
 )
 
 type deviceVerifierFixture struct {
-	device      computertask.VerifiedTransferDevice
-	revoked     atomic.Bool
-	unavailable atomic.Bool
+	device                  computertask.VerifiedTransferDevice
+	revoked                 atomic.Bool
+	unavailable             atomic.Bool
+	revalidationUnavailable atomic.Bool
 }
 
 func (v *deviceVerifierFixture) VerifyDevice(ctx context.Context, secret string) (computertask.VerifiedTransferDevice, error) {
@@ -29,6 +30,9 @@ func (v *deviceVerifierFixture) VerifyDevice(ctx context.Context, secret string)
 }
 
 func (v *deviceVerifierFixture) RevalidateDevice(ctx context.Context, d computertask.VerifiedTransferDevice) error {
+	if v.revalidationUnavailable.Load() {
+		return ErrTransferVerificationUnavailable
+	}
 	if v.revoked.Load() || d != v.device {
 		return computertask.ErrDenied
 	}
