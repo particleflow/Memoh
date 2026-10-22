@@ -47,6 +47,7 @@ type QueueStatus struct {
 	Direction           string        `json:"direction"`
 	Job                 Job           `json:"job"`
 	Seal                *SnapshotSeal `json:"seal,omitempty"`
+	AdmissionVersion    int           `json:"admission_version,omitempty"`
 	Admitted            bool          `json:"admitted"`
 	Associated          bool          `json:"associated"`
 	AssociationState    string        `json:"association_state,omitempty"`
@@ -267,7 +268,7 @@ func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
-	if r.Job.Spec.SizeBytes > q.limits.Bytes {
+	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || r.Job.Spec.SizeBytes > q.limits.Bytes {
 		return false
 	}
 	if r.Admitted && r.Direction == "upload" && !r.Seal.valid() {
