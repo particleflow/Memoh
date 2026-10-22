@@ -13,6 +13,18 @@ import (
 	"time"
 )
 
+func writePublicationFixture(t *testing.T, root *os.Root, name string, data []byte) {
+	t.Helper()
+	f, err := openPrivateFile(root, name, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = f.Close() }()
+	if _, err := f.Write(data); err != nil || f.Sync() != nil {
+		t.Fatal("private fixture write", err)
+	}
+}
+
 func TestWindowsNativePublicationFiniteHerdrAction(t *testing.T) {
 	root := nativeFixtureRoot(t, false)
 	getenv := func(string) string { return root }
@@ -65,9 +77,7 @@ func TestWindowsNativePublicationRenameCollision(t *testing.T) {
 	path := filepath.Join(p.root.Name(), publicationKey(ref)+".object")
 	p.hook = func(stage string) {
 		if stage == "after_prepare" {
-			if err := os.WriteFile(path, []byte("racing existing object"), 0o600); err != nil {
-				t.Fatal(err)
-			}
+			writePublicationFixture(t, p.root, publicationKey(ref)+".object", []byte("racing existing object"))
 		}
 	}
 	if _, err := p.Publish(t.Context(), ref, source); err == nil {
@@ -113,12 +123,13 @@ func TestWindowsNativePublicationRejectsLinksAndReplacement(t *testing.T) {
 					if err := os.Symlink(outside, path); err != nil {
 						t.Fatal("native symlink fixture unavailable", err)
 					}
-				} else if err := os.WriteFile(path, data, 0o600); err != nil {
-					t.Fatal(err)
+				} else {
+					writePublicationFixture(t, p.root, publicationKey(ref)+".object", data)
 				}
 			}
 			for _, cancel := range []bool{false, true} {
-				if _, err := p.Resolve(t.Context(), ref, cancel); err == nil {
+				_, err := p.Resolve(t.Context(), ref, cancel)
+				if err == nil || attack == "same-content-replacement" && !errors.Is(err, ErrPublicationConflict) {
 					t.Fatal("identity/link attack acknowledged", attack, cancel)
 				}
 			}
@@ -156,9 +167,12 @@ func TestWindowsNativePublicationDirectoryIdentity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(path, "locator"), locator, 0o600); err != nil {
+	newRoot, err := q.root.OpenRoot(publicationDirectory)
+	if err != nil {
 		t.Fatal(err)
 	}
+	writePublicationFixture(t, newRoot, "locator", locator)
+	_ = newRoot.Close()
 	if replacement, err := q.OpenNativePublication(p.authorize); !errors.Is(err, ErrVersion) {
 		if replacement != nil {
 			_ = replacement.Close()
