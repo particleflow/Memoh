@@ -74,6 +74,10 @@ func TestImageToolRejectsWithdrawnArgumentsBeforeProvider(t *testing.T) {
 		`{"prompt":"synthetic","task_id":"synthetic-task"}`,
 		`{"prompt":"synthetic","mode":"edit","input_refs":["synthetic-hash"]}`,
 		`{"prompt":"synthetic","unexpected":null}`,
+		`{"prompt":"synthetic","mode":null}`,
+		`{"prompt":"synthetic","input_refs":null}`,
+		`{"prompt":"synthetic","task_id":null}`,
+		`null`,
 	} {
 		t.Run(input, func(t *testing.T) {
 			before := calls.Load()
