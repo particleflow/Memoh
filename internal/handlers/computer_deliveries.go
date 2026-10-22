@@ -18,10 +18,16 @@ import (
 // process-local execution identity. Ordinary JWT/header/URL values do not.
 type ComputerDeliveryHandler struct {
 	service *computertask.DeliveryService
+	async   *computertask.AsyncDeliveryService
 }
 
 func NewComputerDeliveryHandler(service *computertask.DeliveryService) *ComputerDeliveryHandler {
 	return &ComputerDeliveryHandler{service: service}
+}
+
+// NewAsyncComputerDeliveryHandler remains unregistered in the application.
+func NewAsyncComputerDeliveryHandler(service *computertask.AsyncDeliveryService) *ComputerDeliveryHandler {
+	return &ComputerDeliveryHandler{async: service}
 }
 
 func (h *ComputerDeliveryHandler) Register(e *echo.Echo) {
@@ -69,11 +75,22 @@ func readDeliveryBody(c echo.Context, dest any) error {
 }
 
 func (h *ComputerDeliveryHandler) commit(c echo.Context) error {
-	var ref computertask.DeliveryRequest
+	var ref struct {
+		computertask.DeliveryRequest
+		Publication string `json:"publication,omitempty"`
+	}
 	if err := readDeliveryBody(c, &ref); err != nil {
 		return err
 	}
-	out, err := h.service.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref)
+	var out computertask.DeliveryOutcome
+	var err error
+	if h.async != nil {
+		out, err = h.async.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref.DeliveryRequest, ref.Publication)
+	} else if h.service != nil && ref.Publication == "" {
+		out, err = h.service.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref.DeliveryRequest)
+	} else {
+		err = computertask.ErrDeliveryBinding
+	}
 	if err != nil {
 		return deliveryHTTPError(err)
 	}
@@ -83,12 +100,21 @@ func (h *ComputerDeliveryHandler) commit(c echo.Context) error {
 func (h *ComputerDeliveryHandler) resolve(c echo.Context) error {
 	var req struct {
 		computertask.DeliveryRequest
-		Cancel bool `json:"cancel"`
+		Cancel      bool   `json:"cancel"`
+		Publication string `json:"publication,omitempty"`
 	}
 	if err := readDeliveryBody(c, &req); err != nil {
 		return err
 	}
-	out, err := h.service.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Cancel)
+	var out computertask.DeliveryOutcome
+	var err error
+	if h.async != nil {
+		out, err = h.async.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Publication, req.Cancel)
+	} else if h.service != nil && req.Publication == "" {
+		out, err = h.service.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Cancel)
+	} else {
+		err = computertask.ErrDeliveryBinding
+	}
 	if err != nil {
 		return deliveryHTTPError(err)
 	}

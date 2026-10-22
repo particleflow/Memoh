@@ -92,10 +92,14 @@ type DeliveryOutcome struct {
 }
 
 type deliveryEntry struct {
-	Reference DeliveryRequest `json:"reference"`
-	Scope     string          `json:"scope"`
-	Outcome   string          `json:"outcome"`
-	At        time.Time       `json:"at"`
+	Reference   DeliveryRequest `json:"reference"`
+	Scope       string          `json:"scope"`
+	Outcome     string          `json:"outcome"`
+	At          time.Time       `json:"at"`
+	Lease       string          `json:"lease,omitempty"`
+	Until       time.Time       `json:"until,omitempty"`
+	Attempts    int             `json:"attempts,omitempty"`
+	Publication string          `json:"publication,omitempty"`
 }
 
 type deliveryLedger struct {
@@ -184,6 +188,28 @@ func (s *DeliveryService) apply(ctx context.Context, operation, delivery string,
 }
 
 func applyDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, commit, cancel, verified bool) (DeliveryOutcome, error) {
+	return mutateDeliveryTransaction(ctx, tx, id, delivery, ref, 1, func(entry *deliveryEntry, exists bool) (bool, error) {
+		if exists {
+			if commit && entry.Outcome == "canceled" {
+				return false, ErrDeliveryConflict
+			}
+			return false, nil
+		}
+		if !commit && !cancel {
+			return false, nil
+		}
+		entry.Outcome = "canceled"
+		if commit {
+			if !verified {
+				return false, errVerifyDelivery
+			}
+			entry.Outcome = "committed"
+		}
+		return true, nil
+	})
+}
+
+func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, version int, mutate func(*deliveryEntry, bool) (bool, error)) (DeliveryOutcome, error) {
 	if tx.Store == nil || tx.Authorize == nil {
 		return DeliveryOutcome{}, ErrDeliveryBinding
 	}
@@ -215,47 +241,53 @@ func applyDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id De
 			return DeliveryOutcome{}, ErrDeliveryConflict
 		}
 	} else {
-		ledger.Version, ledger.Entries = 1, map[string]deliveryEntry{}
+		ledger.Version, ledger.Entries = version, map[string]deliveryEntry{}
 	}
-	if ledger.Version != 1 {
+	if ledger.Version != version && !(version == 2 && ledger.Version == 1) {
 		return DeliveryOutcome{}, ErrDeliveryVersion
 	}
 	if ledger.Entries == nil || len(ledger.Entries) > maxDeliveries {
 		return DeliveryOutcome{}, ErrDeliveryConflict
 	}
 	for key, entry := range ledger.Entries {
-		if !deliveryIDPattern.MatchString(key) || !entry.Reference.valid() || !deliveryHash.MatchString(entry.Scope) || entry.At.IsZero() || (entry.Outcome != "committed" && entry.Outcome != "canceled") {
+		if version == 2 && ledger.Version == 1 && entry.Reference.Direction == "download" {
+			return DeliveryOutcome{}, ErrDeliveryVersion
+		}
+		if !deliveryIDPattern.MatchString(key) || !entry.Reference.valid() || !deliveryHash.MatchString(entry.Scope) || entry.At.IsZero() || !validDeliveryEntry(entry, ledger.Version) {
 			return DeliveryOutcome{}, ErrDeliveryConflict
 		}
 	}
 	rawScope, _ := json.Marshal(id)
 	hash := sha256.Sum256(rawScope)
 	scope := hex.EncodeToString(hash[:])
-	out := DeliveryOutcome{Version: 1, Outcome: "absent", Revision: strconv.FormatInt(r.Revision, 10)}
-	if entry, exists := ledger.Entries[delivery]; exists {
+	out := DeliveryOutcome{Version: version, Outcome: "absent", Revision: strconv.FormatInt(r.Revision, 10)}
+	entry, exists := ledger.Entries[delivery]
+	if exists {
 		if entry.Reference != ref || entry.Scope != scope {
 			return DeliveryOutcome{}, ErrDeliveryConflict
 		}
-		out.Outcome = entry.Outcome
-		if commit && entry.Outcome == "canceled" {
-			return DeliveryOutcome{}, ErrDeliveryConflict
+		// A v1 download cancellation never attested a local publication fence.
+		if version == 2 && ledger.Version == 1 && ref.Direction == "download" {
+			return DeliveryOutcome{}, ErrDeliveryVersion
 		}
+		out.Outcome = entry.Outcome
+	} else {
+		entry = deliveryEntry{Reference: ref, Scope: scope}
+	}
+	changed, err := mutate(&entry, exists)
+	if err != nil {
+		return DeliveryOutcome{}, err
+	}
+	if !changed {
 		return out, nil
 	}
-	if !commit && !cancel {
-		return out, nil
-	}
-	if len(ledger.Entries) == maxDeliveries {
+	if !exists && len(ledger.Entries) == maxDeliveries {
 		return DeliveryOutcome{}, ErrDeliveryLimit
 	}
-	out.Outcome = "canceled"
-	if commit {
-		if !verified {
-			return DeliveryOutcome{}, errVerifyDelivery
-		}
-		out.Outcome = "committed"
-	}
-	ledger.Entries[delivery] = deliveryEntry{Reference: ref, Scope: scope, Outcome: out.Outcome, At: time.Now().UTC()}
+	entry.At = time.Now().UTC()
+	ledger.Version = version
+	ledger.Entries[delivery] = entry
+	out.Outcome = entry.Outcome
 	data, err := json.Marshal(ledger)
 	if err != nil {
 		return DeliveryOutcome{}, err
@@ -298,4 +330,20 @@ func (s *DeliveryService) verifyAsset(ctx context.Context, bot string, ref Deliv
 		return ErrDeliveryAsset
 	}
 	return nil
+}
+
+func validDeliveryEntry(e deliveryEntry, version int) bool {
+	if version == 1 {
+		return e.Outcome == "committed" || e.Outcome == "canceled"
+	}
+	if e.Attempts < 0 || e.Attempts > 3 || (e.Publication != "" && e.Publication != "published" && e.Publication != "fenced") {
+		return false
+	}
+	if e.Reference.Direction == "download" && ((e.Outcome == "canceled" && e.Publication != "fenced") || (e.Outcome != "canceled" && e.Publication != "published")) {
+		return false
+	}
+	if e.Outcome == "pending" {
+		return e.Lease != "" && !e.Until.IsZero() && e.Attempts > 0
+	}
+	return e.Outcome == "committed" || e.Outcome == "canceled" || e.Outcome == "failed"
 }
