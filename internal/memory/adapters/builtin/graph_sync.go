@@ -20,8 +20,8 @@ import (
 // real open() syscalls inside its container) sees the same content.
 //
 // Syncs are serialized per botID so concurrent writes do not race on the same
-// memory bundle. Failures are best-effort: PG remains authoritative, so a
-// sync error is logged, not returned to the caller (graphRuntime swallows it).
+// memory bundle. The caller decides whether a projection failure is best-effort
+// (ordinary writes) or must be returned (deletion and explicit rebuild).
 type graphSync struct {
 	fs     memoryStore
 	logger *slog.Logger

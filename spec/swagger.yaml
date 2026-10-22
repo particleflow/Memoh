@@ -13244,8 +13244,9 @@ paths:
       - memory
   /bots/{bot_id}/memory/rebuild:
     post:
-      description: Read memory files from the workspace filesystem (source of truth)
-        and restore missing entries to memory storage
+      description: Regenerate derived Markdown and the search index from authoritative
+        database memories. Does not import files; use the explicit ingest endpoint
+        for that.
       parameters:
       - description: Bot ID
         in: path
@@ -13279,7 +13280,7 @@ paths:
           description: Service Unavailable
           schema:
             $ref: '#/definitions/server.Problem'
-      summary: Rebuild memories from filesystem
+      summary: Rebuild memory projections and index
       tags:
       - memory
   /bots/{bot_id}/memory/search:
