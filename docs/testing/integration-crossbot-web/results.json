@@ -1,0 +1,151 @@
+{
+  "code_commit": "221d2cf9cb1bc2b580ec3d768e8733d47a77ad84",
+  "code_tree": "5471cb437d6d364d4c9ac1331530a499e008421c",
+  "execution": "local combined checkout; not GitHub CI",
+  "web": {
+    "files_passed": 258,
+    "tests_passed": 2464,
+    "typecheck_diagnostics": 0,
+    "eslint_errors": 0,
+    "eslint_warnings": 18,
+    "ui_contract_warnings": 3
+  },
+  "logs": {
+    "web-tests-retry": {
+      "sha256": "9cb25561cef5f0f02b0ffbf0ba0c93cbb7348129256d3d09b03146fdb5bc6f6e",
+      "bytes": 731
+    },
+    "web-typecheck-final": {
+      "sha256": "2825b2d730754d45b501c4f141702e8a35d722710342ff383286d8cd317af729",
+      "bytes": 100
+    },
+    "sdk-typecheck-final": {
+      "sha256": "6f2a9a3ae6dee0b3e1a59a2954340e4df29c85dc1666ae226ddcbf102050a73c",
+      "bytes": 96
+    },
+    "desktop-typecheck-final": {
+      "sha256": "7c6d5f11126a97df720015dbd3514025333455750631bdbccbaf49f31960d8dd",
+      "bytes": 673
+    },
+    "eslint-final": {
+      "sha256": "a04cf1ec8c89b1a5372f14f7e2949fa2b61232fb6a20a7128187673585d9f549",
+      "bytes": 2280
+    },
+    "ui-contract-final": {
+      "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "bytes": 1169
+    },
+    "web-build": {
+      "sha256": "07a0d40e75f46da4d017f587fc7a56e2baf74e1ab6b2f657cc5ee6e7ec9c4c68",
+      "bytes": 105539
+    },
+    "server-build": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "go-service": {
+      "sha256": "74745346c172babde4b314ae110b8d53ec0ecc6b9e66cee2f0fef3e6fdda975d",
+      "bytes": 205631,
+      "test_events": {
+        "pass": 222
+      }
+    },
+    "go-host-retry2": {
+      "sha256": "703159c9031ae8cced176085dc8811121633e34f5939c8a58ec7a4bc3659800b",
+      "bytes": 62069,
+      "test_events": {
+        "pass": 62
+      }
+    },
+    "go-host-retry3": {
+      "sha256": "9adc3bcd2e0afbdbc0c33d0c48789308e3e16691895990cfa218283b1df22231",
+      "bytes": 115488,
+      "test_events": {
+        "pass": 86
+      }
+    },
+    "pg-memory": {
+      "sha256": "8d23d79aa9ff32dd15c43ba87494cbe4cc72a76334c7464c19b964ccc38049da",
+      "bytes": 354250,
+      "test_events": {
+        "pass": 233
+      }
+    },
+    "pg-delivery-retry": {
+      "sha256": "63b65f6f70d48e3ab68abed3c06b1d37c3952a3d9e21f2ed5c6521c2f076cc30",
+      "bytes": 28741,
+      "test_events": {
+        "pass": 26
+      }
+    },
+    "browser-retry": {
+      "sha256": "837e2d6d7244a3f95cea0ad08bab502c8fa8f16bf74287caa28914c2b146ec6e",
+      "bytes": 338
+    }
+  },
+  "browser": {
+    "mocked_api": false,
+    "page_errors": [],
+    "requests": 210,
+    "request_statuses": {
+      "200": 146,
+      "304": 52,
+      "404": 4,
+      "503": 8
+    },
+    "non_get_after_login": 0,
+    "delegation_reads": 5,
+    "fixture_records": 22,
+    "business_dispatches": 0,
+    "schema": 173,
+    "dirty": false,
+    "screenshots_inspected": true
+  },
+  "contracts": {
+    "operations": 360,
+    "sources": {
+      "PR60": {
+        "sha": "e61459dab9c2f8bcd2a56166f6dac46d0756ba3c",
+        "operations": 354,
+        "all_preserved": true,
+        "ancestor": true
+      },
+      "PR55": {
+        "sha": "75bbf15870ab931788e37b2b8caed99cae96a60b",
+        "operations": 351,
+        "all_preserved": true,
+        "ancestor": true
+      },
+      "PR58": {
+        "sha": "a1df904c38e19c08cb78f1cb509697251d05936c",
+        "operations": 351,
+        "all_preserved": true,
+        "ancestor": true
+      },
+      "PR59": {
+        "sha": "b0f686e7862fc953f57d0dd39b0525340ebcc1a5",
+        "operations": 351,
+        "all_preserved": true,
+        "ancestor": true
+      },
+      "CrossBot": {
+        "sha": "9bd82f57d66846a6d6c36c3515f0344acf16a9f7",
+        "operations": 360,
+        "all_preserved": true,
+        "ancestor": true
+      },
+      "PR54": {
+        "sha": "8022eca5dd00df20f407451a935269f002256027",
+        "operations": 356,
+        "all_preserved": true,
+        "ancestor": true
+      }
+    },
+    "migration_blobs_unchanged": [
+      171,
+      172,
+      173
+    ]
+  },
+  "known_open_blocker": "Legacy media-read P1; no remediation attempted in this integration"
+}
