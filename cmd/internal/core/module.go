@@ -120,6 +120,7 @@ func ServerModule() fx.Option {
 			provideAudioTempStore,
 			provideMediaStorage,
 			provideMediaService,
+			provideBotDelegation,
 			provideSessionRunLedger,
 			provideRuntimeFenceActivator,
 			provideSessionRuntimeManager,
@@ -148,6 +149,7 @@ func ServerModule() fx.Option {
 		fx.Invoke(
 			setupAgenvoService,
 			injectToolProviders,
+			injectBotDelegation,
 			injectBackgroundTaskEvents,
 			injectACPToolProviders,
 			injectBotConnectorLifecycle,

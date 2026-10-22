@@ -52,6 +52,7 @@ import (
 	"github.com/felinics/memoh/internal/boot"
 	"github.com/felinics/memoh/internal/botagents"
 	"github.com/felinics/memoh/internal/botbackup"
+	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/botworkspace"
 	"github.com/felinics/memoh/internal/channel"
@@ -555,7 +556,7 @@ func agentLoopReselectModeFromConfig(log *slog.Logger, cfg config.AgentConfig) n
 }
 
 func injectToolProviders(a *native.Agent, msgService *message.DBService, hookService *hookspkg.Service, agentService *application.Service, providers []agenttools.ToolProvider) {
-	a.SetToolProviders(providers)
+	a.SetToolProviders(delegationScopedTools(providers))
 	for _, p := range providers {
 		if cp, ok := p.(*agenttools.ContainerProvider); ok {
 			cp.SetHookService(hookService)
@@ -1092,7 +1093,7 @@ func provideACPToolSource(log *slog.Logger, toolApproval *toolapproval.Service, 
 
 func injectACPToolProviders(source *agenttools.NativeToolSource, toolProviders []agenttools.ToolProvider) {
 	if source != nil {
-		source.SetProviders(acpToolProviders(toolProviders))
+		source.SetProviders(delegationScopedTools(acpToolProviders(toolProviders)))
 	}
 }
 
@@ -1123,7 +1124,7 @@ func provideBackgroundManager(log *slog.Logger) *background.Manager {
 	return background.New(log)
 }
 
-func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source) ([]agenttools.ToolProvider, error) {
+func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source, delegations *botdelegation.Service) ([]agenttools.ToolProvider, error) {
 	var assetResolver messaging.AssetResolver
 	if mediaService != nil {
 		assetResolver = &mediaAssetResolverAdapter{media: mediaService}
@@ -1135,6 +1136,7 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 	spawnProvider := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
 	backgroundProvider := agenttools.NewBackgroundProvider(log, bgManager)
 	return []agenttools.ToolProvider{
+		agenttools.NewBotDelegationProvider(delegations, botService),
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
 			Connections: mcpConnService, OAuth: oauthService, Apps: appService, PublicURL: cfg.Server.PublicURL,
 			Registry: supermarket.NewInstaller(supermarket.NewClient(cfg.Supermarket.GetBaseURL(), nil), manager, log),

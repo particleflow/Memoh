@@ -359,6 +359,9 @@ func (m *Manager) ResolveWorkspaceTarget(ctx context.Context, botID, targetID st
 	if err := toolcontext.CheckComputerTarget(ctx, targetID); err != nil {
 		return ResolvedWorkspaceTarget{}, err
 	}
+	if err := toolcontext.CheckDelegationTarget(ctx, botID, targetID, ""); err != nil {
+		return ResolvedWorkspaceTarget{}, err
+	}
 	if targetID == "" && m.remote != nil {
 		if target, primary, err := m.remote.ResolvePrimary(ctx, botID); err != nil || primary {
 			return target, err
@@ -504,6 +507,28 @@ func (m *Manager) nativeToolApprovalConfig(ctx context.Context, botID string) (s
 func (m *Manager) ListWorkspaceTargets(ctx context.Context, botID string) ([]WorkspaceTarget, error) {
 	if !toolcontext.ComputerContextTrusted(ctx) {
 		return nil, toolcontext.ErrComputerBinding
+	}
+	allowed, delegated, err := toolcontext.DelegationTargets(ctx, botID)
+	if err != nil {
+		return nil, err
+	}
+	if delegated {
+		out := []WorkspaceTarget{}
+		for _, id := range allowed {
+			if id == WorkspaceTargetNative {
+				out = append(out, WorkspaceTarget{TargetID: WorkspaceTargetNative, Kind: WorkspaceTargetNative, Name: "Server Workspace", Primary: true})
+				continue
+			}
+			if m.remote == nil {
+				continue
+			}
+			target, err := m.remote.GetMount(ctx, botID, id)
+			if err != nil {
+				return nil, err
+			}
+			out = append(out, target)
+		}
+		return out, nil
 	}
 	if selected := toolcontext.ComputerScope(ctx); selected != "" {
 		if m.remote == nil {

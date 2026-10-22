@@ -245,6 +245,28 @@ type BotChannelRoute struct {
 	TeamID                 pgtype.UUID        `json:"team_id"`
 }
 
+type BotDelegation struct {
+	ID              pgtype.UUID        `json:"id"`
+	TeamID          pgtype.UUID        `json:"team_id"`
+	UserID          pgtype.UUID        `json:"user_id"`
+	SourceBotID     pgtype.UUID        `json:"source_bot_id"`
+	SourceSessionID pgtype.UUID        `json:"source_session_id"`
+	SourceRootID    pgtype.UUID        `json:"source_root_id"`
+	TargetBotID     pgtype.UUID        `json:"target_bot_id"`
+	TargetSessionID pgtype.UUID        `json:"target_session_id"`
+	RequestID       pgtype.UUID        `json:"request_id"`
+	RunID           pgtype.UUID        `json:"run_id"`
+	Fingerprint     string             `json:"fingerprint"`
+	SourceSelection string             `json:"source_selection"`
+	State           string             `json:"state"`
+	DeliveryState   string             `json:"delivery_state"`
+	Payload         []byte             `json:"payload"`
+	Result          []byte             `json:"result"`
+	Revision        int64              `json:"revision"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+}
+
 type BotDependencyInstallation struct {
 	ID                 pgtype.UUID        `json:"id"`
 	TeamID             pgtype.UUID        `json:"team_id"`

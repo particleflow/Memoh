@@ -104,6 +104,10 @@ func (s *Service) EnqueueFollowUp(ctx context.Context, input QueueInput) (sessio
 // channel both arrive here as a StartTurnCommand, so the queue holds one
 // payload shape and the continuation has one way to read it.
 func (s *Service) enqueueFollowUpCommand(ctx context.Context, invocationID string, cmd turn.StartTurnCommand) (sessionruntime.FollowUpItem, error) {
+	return s.enqueueFollowUpCommandWithID(ctx, uuid.NewString(), invocationID, cmd)
+}
+
+func (s *Service) enqueueFollowUpCommandWithID(ctx context.Context, itemID, invocationID string, cmd turn.StartTurnCommand) (sessionruntime.FollowUpItem, error) {
 	runtime, err := s.liveQueueRuntime()
 	if err != nil {
 		return sessionruntime.FollowUpItem{}, err
@@ -112,7 +116,7 @@ func (s *Service) enqueueFollowUpCommand(ctx context.Context, invocationID strin
 	if err != nil {
 		return sessionruntime.FollowUpItem{}, err
 	}
-	item, err := runtime.EnqueueFollowUp(ctx, sessionruntime.Key{BotID: cmd.BotID, SessionID: cmd.ThreadID}, uuid.NewString(), invocationID, payload)
+	item, err := runtime.EnqueueFollowUp(ctx, sessionruntime.Key{BotID: cmd.BotID, SessionID: cmd.ThreadID}, itemID, invocationID, payload)
 	if err != nil {
 		return sessionruntime.FollowUpItem{}, err
 	}

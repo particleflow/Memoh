@@ -96,3 +96,34 @@ func TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundar
 		}
 	}
 }
+
+func TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation(t *testing.T) {
+	f := &unscopedConnectorFixture{}
+	s := computerScopedConnectorSource{f}
+	revoked := false
+	ctx := toolcontext.WithDelegationScope(t.Context(), &toolcontext.DelegationScope{Check: func(context.Context) error {
+		if revoked {
+			return toolcontext.ErrComputerScope
+		}
+		return nil
+	}})
+	nas := mcp.ToolSessionContext{WorkspaceTargetID: "native", RunContext: ctx}
+	if tools, err := s.ListTools(t.Context(), nas); err != nil || len(tools) != 1 {
+		t.Fatalf("legitimate NAS connector lost: %v", err)
+	}
+	if _, err := s.CallTool(t.Context(), nas, "connector", nil); err != nil {
+		t.Fatal(err)
+	}
+	revoked = true
+	if _, err := s.CallTool(t.Context(), nas, "connector", nil); err == nil {
+		t.Fatal("revoked connector dispatched")
+	}
+	if f.calls != 1 {
+		t.Fatal("revocation reached upstream")
+	}
+	pc := mcp.ToolSessionContext{WorkspaceTargetID: "pc-a", RunContext: ctx}
+	revoked = false
+	if _, err := s.CallTool(t.Context(), pc, "connector", nil); !errors.Is(err, toolcontext.ErrComputerScope) {
+		t.Fatal("PC restriction changed")
+	}
+}

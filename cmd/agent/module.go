@@ -87,6 +87,7 @@ func commonOptions() fx.Option {
 			provideServerHandler(provideMessageHandler),
 			provideServerHandler(provideSessionHandler),
 			provideServerHandler(provideSessionTaskHandler),
+			provideServerHandler(handlers.NewBotDelegationHandler),
 			provideServerHandler(provideSessionQueueHandler),
 			provideServerHandler(handlers.NewStarterPromptsHandler),
 			provideServerHandler(handlers.NewUserRuntimeHandler),

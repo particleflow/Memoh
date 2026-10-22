@@ -46,6 +46,16 @@ function resolveAssetApiUrl(att: UIAttachment): string {
 }
 
 function resolveUrl(att: UIAttachment): string {
+  // A delegated reference must keep its conversation-scoped authorization on
+  // reload. Never fall back to the wider Bot+hash route for these references.
+  const scoped = att.metadata?.delegation_url
+  if (scoped !== undefined) {
+    const uuid = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
+    const pattern = new RegExp(`^/bots/(${uuid})/sessions/(${uuid})/delegations/(${uuid})/attachments/([0-9a-f]{64})$`)
+    const match = typeof scoped === 'string' ? pattern.exec(scoped) : null
+    if (!match || match[4] !== String(att.content_hash ?? '')) return ''
+    return sdkApiUrl({ url: scoped as string, query: sdkAuthQuery() })
+  }
   // Prefer asset API when content_hash is available (reliable, auth-aware).
   const assetUrl = resolveAssetApiUrl(att)
   if (assetUrl) return assetUrl

@@ -230,6 +230,9 @@ func (s *Service) Probe(ctx context.Context, ownerID string, raw []byte) error {
 }
 
 func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, error) {
+	if err := toolcontext.CheckDelegationTarget(ctx, scope.BotID, scope.TargetID, "workspace_exec"); err != nil {
+		return Target{}, "", err
+	}
 	if err := toolcontext.CheckComputerTarget(ctx, scope.TargetID); err != nil {
 		return Target{}, "", err
 	}
