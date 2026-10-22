@@ -43,7 +43,8 @@ import (
 )
 
 func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
-	ctx := context.Background()
+	baseCtx := t.Context()
+	ctx := baseCtx
 	dsn := os.Getenv("TEST_POSTGRES_DSN")
 	if dsn == "" {
 		t.Skip("TEST_POSTGRES_DSN is not set")
@@ -65,12 +66,20 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 	if err := m.EnableUploads(root); err != nil {
 		t.Fatal(err)
 	}
-	defer m.Uploads().Close()
+	defer func() {
+		if err := m.Uploads().Close(); err != nil {
+			t.Error(err)
+		}
+	}()
 	journal, err := media.OpenImageTaskJournal(root)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer journal.Close()
+	defer func() {
+		if err := journal.Close(); err != nil {
+			t.Error(err)
+		}
+	}()
 	input := imageJobPNG(t, color.RGBA{R: 255, A: 255})
 	output := imageJobPNG(t, color.RGBA{G: 255, A: 255})
 	original, err := m.Ingest(ctx, media.IngestInput{BotID: bot, Mime: "image/png", Reader: bytes.NewReader(input)})
@@ -95,7 +104,11 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		defer r.MultipartForm.RemoveAll()
+		defer func() {
+			if err := r.MultipartForm.RemoveAll(); err != nil {
+				t.Error(err)
+			}
+		}()
 		f, _, err := r.FormFile("image[]")
 		if err != nil {
 			t.Error(err)
@@ -164,7 +177,7 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 
 	// An independently admitted context without this attachment cannot infer
 	// permission from a known same-Bot hash before message linking.
-	unboundInput := imagejob.WithOrigin(context.Background(), imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: run})
+	unboundInput := imagejob.WithOrigin(baseCtx, imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: run})
 	if _, err := invoke(unboundInput, child); err == nil || calls.Load() != 0 {
 		t.Fatal("unknown current attachment dispatched")
 	}
@@ -220,7 +233,7 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 		t.Run(fmt.Sprintf("queued_root_turn_unknown_%v", unknown), func(t *testing.T) {
 			runB, turnB := uuid.NewString(), uuid.NewString()
 			exec(`INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,$5,$4,$6,'completed','{}','synthetic')`, runB, bot, parent, turnB, runB, index+2)
-			ctxB := imagejob.WithOrigin(context.Background(), imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: runB})
+			ctxB := imagejob.WithOrigin(baseCtx, imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: runB})
 			mgr := background.New(nil)
 			queued := NewSpawnProvider(slog.New(slog.DiscardHandler), nil, nil, queries, thread.NewService(nil, queries, nil), mgr)
 			queued.modelResolver = spawn.modelResolver
@@ -250,7 +263,7 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 			if e != nil {
 				t.Fatal(e)
 			}
-			defer mgr.Kill(asMap(t, first)["task_id"].(string))
+			defer func() { _ = mgr.Kill(asMap(t, first)["task_id"].(string)) }()
 			select {
 			case <-entered:
 			case <-time.After(5 * time.Second):
@@ -269,7 +282,7 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 			uncertain.Store(unknown)
 			before := calls.Load()
 			close(release)
-			waitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			waitCtx, cancel := context.WithTimeout(ctxB, 5*time.Second)
 			defer cancel()
 			snap, _, e := mgr.WaitForSessionTask(waitCtx, bot, parent, task["task_id"].(string), 0)
 			if e != nil || snap.Status != background.TaskCompleted {
