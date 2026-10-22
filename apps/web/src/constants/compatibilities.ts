@@ -8,6 +8,5 @@ export const COMPATIBILITY_OPTIONS: CompatibilityMeta[] = [
   { value: 'file-input', label: 'File Input (PDF)' },
   { value: 'tool-call', label: 'Tool Call' },
   { value: 'image-output', label: 'Image Output' },
-  { value: 'image-edit', label: 'Image Editing (Images API)' },
   { value: 'reasoning', label: 'Reasoning' },
 ]

@@ -54,7 +54,6 @@ type SpawnBranch struct {
 
 // AgentTaskResult is the terminal output for one managed subagent run.
 type AgentTaskResult struct {
-	ImageTaskIDs   []string `json:"-"`
 	AgentID        string
 	AgentSessionID string
 	Message        string
@@ -181,7 +180,6 @@ func (m *Manager) CompleteAgentTask(taskID string, result AgentTaskResult) {
 	}
 	task.CompletedAt = time.Now()
 	task.Status = status
-	task.ImageTaskIDs = append([]string(nil), result.ImageTaskIDs...)
 	task.AgentReport = result.Report
 	task.AgentError = result.Error
 	task.AgentModelID = result.ModelID

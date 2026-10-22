@@ -81,9 +81,7 @@ const (
 	CompatVision      = "vision"
 	CompatToolCall    = "tool-call"
 	CompatImageOutput = "image-output"
-	// CompatImageEdit explicitly selects the OpenAI Images edit adapter for this model.
-	CompatImageEdit = "image-edit"
-	CompatReasoning = "reasoning"
+	CompatReasoning   = "reasoning"
 	// CompatFileInput marks models whose provider API accepts documents (PDF)
 	// as native input parts. Distinct from CompatVision: a model can have
 	// vision yet lack a provider-side PDF ingestion pipeline (and vice versa
@@ -132,7 +130,7 @@ const (
 // validCompatibilities enumerates accepted compatibility tokens.
 var validCompatibilities = map[string]struct{}{
 	CompatVision: {}, CompatToolCall: {}, CompatImageOutput: {}, CompatReasoning: {},
-	CompatFileInput: {}, CompatImageEdit: {},
+	CompatFileInput: {},
 }
 
 // ValidateCompatibilities validates capability tokens supplied by a client.
