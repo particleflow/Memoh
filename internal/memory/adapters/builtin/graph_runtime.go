@@ -102,24 +102,31 @@ func (r *graphRuntime) RefreshOverview(ctx context.Context, botID string) error 
 	return r.syncer.refreshOverview(ctx, botID)
 }
 
+// syncAndInvalidate retains best-effort projection updates for ordinary writes.
+// Destructive operations and explicit rebuilds call syncDerived directly so a
+// committed database mutation cannot be mistaken for a fully completed cleanup.
 func (r *graphRuntime) syncAndInvalidate(ctx context.Context, botID string) {
-	// Regenerate the derived Markdown view from the authoritative PG nodes.
-	// Best-effort: PG is the source of truth, so a sync failure is logged, not
-	// propagated to the caller.
-	if r.syncer == nil || r.fs == nil {
-		r.cache.invalidate(botID)
-		return
+	if err := r.syncDerived(ctx, botID); err != nil {
+		r.logger.WarnContext(ctx, "graph: derived memory sync failed", "bot_id", botID, "err", err)
 	}
+}
+
+func (r *graphRuntime) syncDerived(ctx context.Context, botID string) error {
+	defer r.cache.invalidate(botID)
+	if r.syncer == nil || r.fs == nil {
+		return nil
+	}
+	var syncErr error
 	nodes, err := r.store.ListNodes(ctx, botID)
 	if err != nil {
-		r.logger.WarnContext(ctx, "graph: list nodes for sync failed", "bot_id", botID, "err", err)
+		syncErr = fmt.Errorf("graph: list nodes for sync: %w", err)
 	} else if err := r.syncer.syncMarkdownFromNodes(ctx, botID, nodes); err != nil {
-		r.logger.WarnContext(ctx, "graph: markdown sync failed", "bot_id", botID, "err", err)
+		syncErr = fmt.Errorf("graph: sync markdown: %w", err)
 	}
 	if _, err := r.store.RebuildDerivedEdges(ctx, botID); err != nil {
-		r.logger.DebugContext(ctx, "graph: rebuild derived edges failed", "bot_id", botID, "err", err)
+		syncErr = errors.Join(syncErr, fmt.Errorf("graph: rebuild edges: %w", err))
 	}
-	r.cache.invalidate(botID)
+	return syncErr
 }
 
 func (r *graphRuntime) semanticUpsertBestEffort(botID string, n migrate.NodeSpec) {
@@ -184,19 +191,10 @@ func (r *graphRuntime) Search(ctx context.Context, req adapters.SearchRequest) (
 		limit = 10
 	}
 
-	// Primary path: graph seed-then-expand over the cached PG graph.
-	resp, graphErr := r.searchGraph(ctx, botID, req.Query, limit)
-	if graphErr == nil {
-		return resp, nil
-	}
-
-	// Reliability fallback: degrade to file-lexical over the derived Markdown.
-	r.logger.WarnContext(ctx, "graph search failed, falling back to file lexical", "bot_id", botID, "err", graphErr)
-	fallback, err := r.searchFileFallback(ctx, botID, req.Query, limit)
-	if fallback.FallbackReason == "" {
-		fallback.FallbackReason = "graph_error"
-	}
-	return fallback, err
+	// Markdown is a derived view and may still contain a deleted node after
+	// a failed sync. Without the authoritative graph, fail rather than recall
+	// unverified files (including files from a previous process).
+	return r.searchGraph(ctx, botID, req.Query, limit)
 }
 
 // searchGraph runs seed-then-expand: lexical-score nodes -> top-K seeds ->
@@ -310,41 +308,6 @@ func (r *graphRuntime) searchGraph(ctx context.Context, botID, query string, lim
 	return adapters.SearchResponse{Results: results, Relations: relations, RetrievalMode: "graph"}, nil
 }
 
-// searchFileFallback is the reliability fallback: read the derived Markdown via
-// the bridge and score lexically, exactly like fileRuntime. Used when the PG
-// graph is unavailable.
-func (r *graphRuntime) searchFileFallback(ctx context.Context, botID, query string, limit int) (adapters.SearchResponse, error) {
-	if r.fs == nil {
-		return adapters.SearchResponse{}, nil
-	}
-	items, err := r.fs.ReadAllMemoryFiles(ctx, botID)
-	if err != nil {
-		return adapters.SearchResponse{}, fmt.Errorf("graph runtime: file fallback read: %w", err)
-	}
-	q := strings.ToLower(strings.TrimSpace(query))
-	results := make([]adapters.MemoryItem, 0, len(items))
-	for _, it := range items {
-		score := graphLexicalScore(q, it.Memory)
-		if q != "" && score <= 0 {
-			continue
-		}
-		m := memoryItemFromStore(it)
-		m.BotID = botID
-		m.Score = score
-		results = append(results, m)
-	}
-	sort.Slice(results, func(i, j int) bool {
-		if results[i].Score == results[j].Score {
-			return results[i].UpdatedAt > results[j].UpdatedAt
-		}
-		return results[i].Score > results[j].Score
-	})
-	if limit > 0 && len(results) > limit {
-		results = results[:limit]
-	}
-	return adapters.SearchResponse{Results: results, RetrievalMode: "file_fallback"}, nil
-}
-
 func (r *graphRuntime) GetAll(ctx context.Context, req adapters.GetAllRequest) (adapters.SearchResponse, error) {
 	if r.store == nil {
 		return adapters.SearchResponse{}, errors.New("graph runtime: wiki store not configured")
@@ -355,13 +318,7 @@ func (r *graphRuntime) GetAll(ctx context.Context, req adapters.GetAllRequest) (
 	}
 	nodes, err := r.store.ListNodes(ctx, botID)
 	if err != nil {
-		// Fallback to derived files if the store is unavailable.
-		r.logger.WarnContext(ctx, "graph GetAll failed, falling back to files", "bot_id", botID, "err", err)
-		fallback, fallbackErr := r.searchFileFallback(ctx, botID, "", req.Limit)
-		if fallback.FallbackReason == "" {
-			fallback.FallbackReason = "graph_error"
-		}
-		return fallback, fallbackErr
+		return adapters.SearchResponse{}, fmt.Errorf("graph runtime: list nodes: %w", err)
 	}
 	out := make([]adapters.MemoryItem, 0, len(nodes))
 	for _, n := range nodes {
@@ -429,7 +386,8 @@ func (r *graphRuntime) DeleteBatch(ctx context.Context, botID string, memoryIDs 
 		return adapters.DeleteResponse{}, errors.New("graph runtime: wiki store not configured")
 	}
 	seen := map[string]bool{}
-	deletedByBot := map[string][]string{}
+	deletedIDs := []string{}
+	var deleteErr error
 	for _, rawID := range memoryIDs {
 		memoryID := strings.TrimSpace(rawID)
 		if memoryID == "" || seen[memoryID] {
@@ -439,30 +397,35 @@ func (r *graphRuntime) DeleteBatch(ctx context.Context, botID string, memoryIDs 
 		_, storedID, err := r.resolveNodeByMemoryID(ctx, botID, memoryID)
 		if err != nil {
 			if !errors.Is(err, wikistore.ErrNodeNotFound) {
-				return adapters.DeleteResponse{}, fmt.Errorf("graph runtime: get node for delete: %w", err)
+				deleteErr = fmt.Errorf("graph runtime: get node for delete: %w", err)
+				break
 			}
 			storedID = memoryID
 		}
 		if err := r.store.DeleteNode(ctx, botID, storedID); err != nil {
-			return adapters.DeleteResponse{}, fmt.Errorf("graph runtime: delete node: %w", err)
+			deleteErr = fmt.Errorf("graph runtime: delete node: %w", err)
+			break
 		}
-		deletedByBot[botID] = append(deletedByBot[botID], storedID)
+		deletedIDs = append(deletedIDs, storedID)
 		if storedID != memoryID {
-			deletedByBot[botID] = append(deletedByBot[botID], memoryID)
+			deletedIDs = append(deletedIDs, memoryID)
 		}
-		r.syncAndInvalidate(ctx, botID)
 	}
-	for botID, ids := range deletedByBot {
-		r.retry.discard(botID, ids)
-	}
-	if r.semantic != nil {
-		semanticCtx, cancel := context.WithTimeout(ctx, semanticEmbedTimeout)
-		defer cancel()
-		for botID, ids := range deletedByBot {
-			if err := r.semantic.DeleteNodes(semanticCtx, botID, ids); err != nil {
-				r.logger.DebugContext(ctx, "graph: pgvector delete failed", "bot_id", botID, "err", err)
+	// Always finish cleanup for mutations already committed, even if a later
+	// batch item failed. A retry also repairs a previously failed projection.
+	if len(deletedIDs) > 0 {
+		r.retry.discard(botID, deletedIDs)
+		deleteErr = errors.Join(deleteErr, r.syncDerived(ctx, botID))
+		if r.semantic != nil {
+			semanticCtx, cancel := context.WithTimeout(ctx, semanticEmbedTimeout)
+			defer cancel()
+			if err := r.semantic.DeleteNodes(semanticCtx, botID, deletedIDs); err != nil {
+				deleteErr = errors.Join(deleteErr, fmt.Errorf("graph: delete semantic nodes: %w", err))
 			}
 		}
+	}
+	if deleteErr != nil {
+		return adapters.DeleteResponse{}, deleteErr
 	}
 	return adapters.DeleteResponse{Message: "Memories deleted successfully!"}, nil
 }
@@ -512,20 +475,20 @@ func (r *graphRuntime) DeleteAll(ctx context.Context, req adapters.DeleteAllRequ
 	if err := r.store.DeleteAllNodes(ctx, botID); err != nil {
 		return adapters.DeleteResponse{}, fmt.Errorf("graph runtime: delete all nodes: %w", err)
 	}
-	if r.fs != nil {
-		if err := r.fs.RemoveAllMemories(ctx, botID); err != nil {
-			r.logger.WarnContext(ctx, "graph: remove derived markdown failed", "bot_id", botID, "err", err)
-		}
-	}
+	// Regenerate only DB projections. RemoveAllMemories recursively removes
+	// original agent-authored documents as well and is not an index deletion.
 	r.retry.discardBot(botID)
+	cleanupErr := r.syncDerived(ctx, botID)
 	if r.semantic != nil {
 		auxCtx, cancel := context.WithTimeout(ctx, semanticEmbedTimeout)
 		defer cancel()
 		if err := r.semantic.DeleteBot(auxCtx, botID); err != nil {
-			r.logger.DebugContext(ctx, "graph: pgvector delete bot failed", "bot_id", botID, "err", err)
+			cleanupErr = errors.Join(cleanupErr, fmt.Errorf("graph: delete semantic index: %w", err))
 		}
 	}
-	r.cache.invalidate(botID)
+	if cleanupErr != nil {
+		return adapters.DeleteResponse{}, cleanupErr
+	}
 	return adapters.DeleteResponse{Message: "All memories deleted successfully!"}, nil
 }
 
@@ -596,29 +559,28 @@ func (r *graphRuntime) Rebuild(ctx context.Context, botID string) (adapters.Rebu
 	if r.store == nil {
 		return adapters.RebuildResult{}, errors.New("graph runtime: wiki store not configured")
 	}
-	// Ingest agent-authored /data/memory/*.md BEFORE the destructive
-	// derived-view rebuild so their content becomes DB nodes and survives the
-	// regeneration. Without this, a rebuild would silently drop any file the
-	// agent wrote directly that has not yet been ingested.
-	if r.fs != nil {
-		if _, err := r.IngestMarkdownFiles(ctx, botID); err != nil {
-			r.logger.WarnContext(ctx, "graph: rebuild ingest failed", "bot_id", botID, "err", err)
-		}
-	}
+	// Recovery is PG -> derived Markdown/index only. Importing files here
+	// would resurrect deleted nodes after a failed projection sync, and also
+	// silently re-import preserved originals. File -> PG is the separate,
+	// explicit IngestMarkdownFiles operation; originals remain untouched.
 	nodes, err := r.store.ListNodes(ctx, botID)
 	if err != nil {
 		return adapters.RebuildResult{}, fmt.Errorf("graph runtime: rebuild list: %w", err)
 	}
-	r.syncAndInvalidate(ctx, botID)
+	if err := r.syncDerived(ctx, botID); err != nil {
+		return adapters.RebuildResult{}, err
+	}
 	count, _ := r.store.CountNodes(ctx, botID)
 	result := adapters.RebuildResult{FsCount: len(nodes), StorageCount: count}
 	if r.semantic != nil {
 		r.retry.discardBot(botID)
 		if err := r.semantic.DeleteBot(ctx, botID); err != nil {
-			r.logger.DebugContext(ctx, "graph: pgvector rebuild clear failed", "bot_id", botID, "err", err)
+			return result, fmt.Errorf("graph: clear semantic index: %w", err)
 		}
 		for _, node := range nodes {
-			r.semanticUpsertBestEffort(botID, node) //nolint:contextcheck // async semantic upsert uses its own bounded context
+			if err := r.semantic.Upsert(ctx, botID, node.ID, node.Body, node.Hash); err != nil {
+				return result, fmt.Errorf("graph: rebuild semantic node: %w", err)
+			}
 		}
 		if indexed, err := r.semantic.Count(ctx, botID); err == nil {
 			result.StorageCount = indexed

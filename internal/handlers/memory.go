@@ -760,7 +760,7 @@ func (h *MemoryHandler) ChatDelete(c echo.Context) error {
 			Filters: buildNamespaceFilters(scope.Namespace, scope.ScopeID, nil),
 		}
 		if _, delErr := provider.DeleteAll(c.Request().Context(), req); delErr != nil {
-			h.logger.WarnContext(c.Request().Context(), "deleteall namespace failed", slog.String("namespace", scope.Namespace), slog.Any("error", delErr))
+			return errs.Wrap(delErr, "delete all memories")
 		}
 	}
 	return c.JSON(http.StatusOK, memprovider.DeleteResponse{Message: "All memories deleted successfully!"})
@@ -960,8 +960,8 @@ func (h *MemoryHandler) ChatUsage(c echo.Context) error {
 }
 
 // ChatRebuild godoc
-// @Summary Rebuild memories from filesystem
-// @Description Read memory files from the workspace filesystem (source of truth) and restore missing entries to memory storage
+// @Summary Rebuild memory projections and index
+// @Description Regenerate derived Markdown and the search index from authoritative database memories. Does not import files; use the explicit ingest endpoint for that.
 // @Tags memory
 // @Produce json
 // @Param bot_id path string true "Bot ID"
@@ -983,7 +983,7 @@ func (h *MemoryHandler) ChatRebuild(c echo.Context) error {
 	}
 	syncProvider, ok := provider.(memprovider.SourceSyncProvider)
 	if !ok {
-		return echo.NewHTTPError(http.StatusConflict, "selected memory provider does not support rebuild from markdown source")
+		return echo.NewHTTPError(http.StatusConflict, "selected memory provider does not support rebuilding memory projections")
 	}
 	status, err := syncProvider.Status(c.Request().Context(), botID)
 	if err != nil {

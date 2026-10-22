@@ -15,6 +15,7 @@ import (
 	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/bots"
 	memprovider "github.com/felinics/memoh/internal/memory/adapters"
+	"github.com/felinics/memoh/internal/server"
 )
 
 // recordingMemoryProvider records write calls so tests can assert the handler
@@ -25,6 +26,7 @@ type recordingMemoryProvider struct {
 	deleteCalls      []string
 	deleteBatchCalls [][]string
 	deleteAllCalls   int
+	deleteAllErr     error
 }
 
 func (p *recordingMemoryProvider) Update(_ context.Context, req memprovider.UpdateRequest) (memprovider.MemoryItem, error) {
@@ -307,7 +309,34 @@ func TestChatDeleteBatchAllowsOwnBotMemoryIDs(t *testing.T) {
 
 func (p *recordingMemoryProvider) DeleteAll(_ context.Context, _ memprovider.DeleteAllRequest) (memprovider.DeleteResponse, error) {
 	p.deleteAllCalls++
-	return memprovider.DeleteResponse{}, nil
+	return memprovider.DeleteResponse{}, p.deleteAllErr
+}
+
+func TestChatDeleteAllReturnsProblemWhenCleanupFails(t *testing.T) {
+	botID, userID := "11111111-1111-1111-1111-111111111111", "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
+	h, p := newMemoryAuthzHandler(t, botID, userID)
+	p.deleteAllErr = errors.New("SECRET synthetic workspace diagnostic")
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodDelete, "/bots/"+botID+"/memory", nil)
+	rec := httptest.NewRecorder()
+	e := echo.New()
+	c := testAuthContext(e, req, rec, userID)
+	c.SetPath("/bots/:bot_id/memory")
+	c.SetParamNames("bot_id")
+	c.SetParamValues(botID)
+	err := h.ChatDelete(c)
+	if err == nil {
+		t.Fatal("delete all hid a provider cleanup failure")
+	}
+	server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))(err, c)
+	if rec.Code != http.StatusInternalServerError {
+		t.Fatalf("status=%d body=%s", rec.Code, rec.Body)
+	}
+	if !bytes.Contains(rec.Body.Bytes(), []byte(`"code":"internal"`)) || bytes.Contains(rec.Body.Bytes(), []byte("SECRET")) {
+		t.Fatalf("unsafe problem response: %s", rec.Body)
+	}
+	if p.deleteAllCalls != 1 {
+		t.Fatalf("delete all calls=%d", p.deleteAllCalls)
+	}
 }
 
 func TestChatDeleteMalformedBodyNeverFallsBackToDeleteAll(t *testing.T) {

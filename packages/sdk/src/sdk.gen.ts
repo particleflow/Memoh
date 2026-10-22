@@ -1378,9 +1378,9 @@ export const getBotsByBotIdMemoryGraph = <ThrowOnError extends boolean = false>(
 export const postBotsByBotIdMemoryIngest = <ThrowOnError extends boolean = false>(options: Options<PostBotsByBotIdMemoryIngestData, ThrowOnError>): RequestResult<PostBotsByBotIdMemoryIngestResponses, PostBotsByBotIdMemoryIngestErrors, ThrowOnError> => (options.client ?? client).post<PostBotsByBotIdMemoryIngestResponses, PostBotsByBotIdMemoryIngestErrors, ThrowOnError>({ url: '/bots/{bot_id}/memory/ingest', ...options });
 
 /**
- * Rebuild memories from filesystem
+ * Rebuild memory projections and index
  *
- * Read memory files from the workspace filesystem (source of truth) and restore missing entries to memory storage
+ * Regenerate derived Markdown and the search index from authoritative database memories. Does not import files; use the explicit ingest endpoint for that.
  */
 export const postBotsByBotIdMemoryRebuild = <ThrowOnError extends boolean = false>(options: Options<PostBotsByBotIdMemoryRebuildData, ThrowOnError>): RequestResult<PostBotsByBotIdMemoryRebuildResponses, PostBotsByBotIdMemoryRebuildErrors, ThrowOnError> => (options.client ?? client).post<PostBotsByBotIdMemoryRebuildResponses, PostBotsByBotIdMemoryRebuildErrors, ThrowOnError>({ url: '/bots/{bot_id}/memory/rebuild', ...options });
 
