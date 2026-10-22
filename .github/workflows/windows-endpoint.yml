@@ -34,3 +34,19 @@ jobs:
           & ./contrib/windows-endpoint/endpoint.ps1 -NodePath $node -NodeSha256 ('0' * 64) help
           if ($LASTEXITCODE -ne 2) { throw 'Bootstrap accepted incorrect hash' }
           exit 0
+  official-dependencies:
+    name: Official Windows dependencies in isolated roots
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Assemble fixed official dependency fixture
+        shell: pwsh
+        run: ./contrib/windows-endpoint/official-smoke/prepare.ps1 -Root '${{ runner.temp }}/endpoint official Unicode 空格'
+      - name: Exercise actual binaries with no runner tool PATH
+        shell: pwsh
+        run: |
+          & '${{ runner.temp }}/endpoint official Unicode 空格/node/node.exe' ./contrib/windows-endpoint/official-smoke/verify.mjs '${{ runner.temp }}/endpoint official Unicode 空格'
+          if ($LASTEXITCODE -ne 0) { throw 'Official dependency smoke failed' }

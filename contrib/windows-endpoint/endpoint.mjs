@@ -202,7 +202,8 @@ function managedEnvironment(config) {
   for (const k of Object.keys(env)) {
     if (/^(PATH|NODE_OPTIONS|NODE_PATH|BASH_ENV|BASH_FUNC_.*|ENV|CDPATH|SHELLOPTS|BASHOPTS|HERDR_.*|XDG_CONFIG_HOME|XDG_STATE_HOME|AGENVO_.*|PI_CODING_AGENT_DIR)$/i.test(k)) delete env[k]
   }
-  env.PATH = [path.join(root, 'node'), path.join(root, 'herdr'), path.join(root, 'node_modules/.bin'), path.join(root, 'git/bin'), path.join(root, 'git/usr/bin'), path.join(root, 'git/mingw64/bin'), path.join(root, 'git/cmd'), path.join(process.env.SystemRoot || 'C:\\Windows', 'System32')].join(path.delimiter)
+  const system = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32')
+  env.PATH = [path.join(root, 'node'), path.join(root, 'herdr'), path.join(root, 'node_modules/.bin'), path.join(root, 'git/bin'), path.join(root, 'git/usr/bin'), path.join(root, 'git/mingw64/bin'), path.join(root, 'git/cmd'), system, path.join(system, 'WindowsPowerShell/v1.0')].join(path.delimiter)
   env.HERDR_CONFIG_PATH = path.join(config.herdrConfigRoot, 'config.toml')
   env.XDG_CONFIG_HOME = path.dirname(config.herdrConfigRoot)
   env.XDG_STATE_HOME = path.dirname(config.herdrStateRoot)
@@ -283,23 +284,7 @@ export async function doctor(config, run = probe) {
   } catch { /* Optional official status snapshot; absence is unknown, not READY. */ }
   // Only execute inventory-verified dependencies on their target OS.
   if (bundleOK && process.platform === 'win32' && process.arch === 'x64') {
-    const env = managedEnvironment(config)
-    const entry = id => path.join(config.bundleRoot, catalog.components[id].entry)
-    await check('git_version', () => requireThat(run(path.join(config.bundleRoot, 'git/cmd/git.exe'), ['--version'], env) === `git version ${bundle.manifest.components.git.version}`, 'executable_version_mismatch'))
-    await check('connector_version', () => {
-      let version
-      try { version = JSON.parse(run(entry('node'), [entry('connector'), '--version'], env)).version } catch { throw new EndpointError('executable_version_mismatch') }
-      requireThat(version === catalog.components.connector.version, 'executable_version_mismatch')
-    })
-    for (const id of ['node', 'herdr']) await check(`${id}_version`, () => {
-      const text = run(entry(id), ['--version'], env)
-      requireThat(text === `${id === 'node' ? 'v' : 'herdr '}${catalog.components[id].version}`, 'executable_version_mismatch')
-    })
-    await check('git_bash_toolchain', () => {
-      const script = 'case "$(uname -s)" in MINGW*|MSYS*) ;; *) exit 91;; esac; for t in base64 cygpath sha256sum wc mkdir mv rm rmdir node pi herdr; do command -v "$t" >/dev/null || exit 92; done; printf endpoint-git-bash-ok'
-      requireThat(run(entry('git'), ['--noprofile', '--norc', '-c', script], env) === 'endpoint-git-bash-ok', 'git_bash_required')
-    })
-    await check('pi_version', () => requireThat(run(entry('node'), [entry('pi'), '--version'], env) === catalog.components.pi.version, 'executable_version_mismatch'))
+    checks.push(...await verifyToolchain(config, bundle.manifest.components.git.version, run))
   }
   return {
     schema: 1, ready: false, activation: 'blocked', checks,
@@ -308,6 +293,35 @@ export async function doctor(config, run = probe) {
     blockers: [...catalog.blockers],
     recovery: 'No restart or task resubmission. Authentication failure requires the existing authentication owner.',
   }
+}
+
+// Shared by doctor and the isolated official-binary CI harness. Callers must
+// establish artifact provenance first. This never grants endpoint qualification.
+export async function verifyToolchain(config, gitVersion, run = probe) {
+  requireThat(process.platform === 'win32' && process.arch === 'x64', 'windows_x64_required')
+  const checks = []
+  async function check(name, action) {
+    try { await action(); checks.push({ check: name, state: 'passed' }) }
+    catch (e) { checks.push({ check: name, state: 'blocked', code: e instanceof EndpointError ? e.code : 'dependency_unavailable' }) }
+  }
+  const env = managedEnvironment(config)
+  const entry = id => path.join(config.bundleRoot, catalog.components[id].entry)
+  await check('git_version', () => requireThat(run(path.join(config.bundleRoot, 'git/cmd/git.exe'), ['--version'], env) === `git version ${gitVersion}`, 'executable_version_mismatch'))
+  await check('connector_version', () => {
+    let version
+    try { version = JSON.parse(run(entry('node'), [entry('connector'), '--version'], env)).version } catch { throw new EndpointError('executable_version_mismatch') }
+    requireThat(version === catalog.components.connector.version, 'executable_version_mismatch')
+  })
+  for (const id of ['node', 'herdr']) await check(`${id}_version`, () => {
+    const text = run(entry(id), ['--version'], env)
+    requireThat(text === `${id === 'node' ? 'v' : 'herdr '}${catalog.components[id].version}`, 'executable_version_mismatch')
+  })
+  await check('git_bash_toolchain', () => {
+    const script = 'case "$(uname -s)" in MINGW*|MSYS*) ;; *) exit 91;; esac; for t in base64 cygpath sha256sum wc mkdir mv rm rmdir node pi herdr; do command -v "$t" >/dev/null || exit 92; done; printf endpoint-git-bash-ok'
+    requireThat(run(entry('git'), ['--noprofile', '--norc', '-c', script], env) === 'endpoint-git-bash-ok', 'git_bash_required')
+  })
+  await check('pi_version', () => requireThat(run(entry('node'), [entry('pi'), '--version'], env) === catalog.components.pi.version, 'executable_version_mismatch'))
+  return checks
 }
 
 export async function main(args) {

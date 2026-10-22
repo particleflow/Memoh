@@ -212,6 +212,19 @@ workflow inventory and expected count were updated without weakening the checks.
 Local governance tests additionally require Ruby (absent in this cloud shell);
 GitHub's existing policy job provides that environment.
 
+The separate `official-dependencies` Windows job assembles actual, unchanged
+Node 24.14.0, Herdr 0.9.5 and PortableGit 2.51.0 artifacts from fixed official URLs
+and SHA-256 hashes. Agenvo/Pi and all npm dependencies are frozen in the
+`official-smoke/package-lock.json` integrity lock and installed with scripts
+disabled in the build fixture only. Git here is a test candidate, not an endpoint
+release selection. The job removes the runner's tool PATH and exercises the same
+version/Bash probes used by `doctor`, missing Node/Pi/Bash, version mismatch,
+unconfigured connector exit, and isolated official Herdr API start, explicit
+restart after process termination, and graceful stop. It installs no service and
+creates no credentials. Transfer and unattended recovery remain excluded. A
+successful result is dependency/lifecycle smoke evidence, not full bundle, GUI,
+physical power loss or production acceptance.
+
 The Agent core boundary check matches official baseline
 `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`. No files under Agent core,
 `internal/transferclient`, `contrib/herdr`, migrations, existing runtime or desktop
@@ -227,3 +240,8 @@ devenv/docker-compose.yml` also failed building the Server/Channel image:
 `proxy.golang.org:443`. This is an environment/build blocker, not an approval denial.
 There is no successful current-app UI URL, interaction record or screenshot.
 Synthetic tests and CI do not substitute for the mandatory real UI/human QA.
+No further workspace rebuild is needed for these delivery CLI checks. A future
+application test may reuse the user-identified clean-main workspace image
+`ghcr.io/particleflow/workspace@sha256:bb086c5ab393cca91a769b8a21a22730cfc7bd2697dfef5ad815eba79bd2e9b4`
+after verifying its registry provenance; this task has not used it or claimed UI
+acceptance from it.
