@@ -151,7 +151,8 @@ The unit suite covers ownership, order, coalescing, persisted budgets, auth and
 unknown states, shutdown/backoff and data preservation. Windows CI additionally
 assembles unchanged official binaries from fixed archive hashes/npm integrity,
 uses a loopback TLS relay with an ephemeral synthetic registration, and exercises
-component crashes, original connector network reconnect, real HTTP 401, normal
+component crashes through the coordinator's own foreground run loop (observation
+polls do not drive recovery), original connector network reconnect, real HTTP 401, normal
 stop, a lease-holder process death, and restoration of one ordinary shell command
 without replay. TLS validation stays enabled; no system trust store is changed.
 Results must be read from the exact commit's CI, not inferred from fixture code.

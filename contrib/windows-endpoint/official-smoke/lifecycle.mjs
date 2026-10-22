@@ -58,21 +58,24 @@ async function verify(root) {
   const originals = await Promise.all(officialFiles.map(f => fs.readFile(f)))
   const driver = new NativeDriver(config, { inheritedEnvironment: { ...process.env, NODE_EXTRA_CA_CERTS: cert, PATH: 'unusable', NODE_PATH: 'unusable', NODE_OPTIONS: '--require=DO-NOT-LOAD', BASH_ENV: 'unusable', HERDR_SESSION: 'pollution', HERDR_SOCKET_PATH: 'pollution', AGENVO_CONFIG_DIR: 'pollution' }, qualify: async () => (await verifyToolchain(config, '2.51.0.windows.1')).every(c => c.state === 'passed') })
   const create = () => new EndpointLifecycle({ driver, store: new StateStore(state, config.deviceId), acquire: () => acquireLeases(leaseKeys(config), state), policy: { retryMs: 100 } })
-  const lifecycle = create(), results = []
+  const lifecycle = create(), results = [], controller = new AbortController()
+  let running, backgroundFailure
   const checked = name => results.push({ check: name, state: 'passed' })
   async function until(predicate, message, timeout = 30000) {
     const end = Date.now() + timeout
-    while (Date.now() < end) { if (await predicate()) return; await delay(100) }
+    while (Date.now() < end) { if (backgroundFailure) throw backgroundFailure; if (await predicate()) return; await delay(100) }
     throw new Error(`${message}: ${JSON.stringify(lifecycle.snapshot())}`)
   }
-  async function tickUntil(predicate, message) { await until(async () => { await lifecycle.tick(); return predicate() }, message) }
+  // Observations do not drive recovery. Only the product's own run loop calls tick.
+  async function observeUntil(predicate, message) { await until(predicate, message) }
   async function killOwned(component) {
     const child = driver.children.get(component)
     child.process.kill(); await child.done
   }
   try {
     await lifecycle.start()
-    await tickUntil(() => lifecycle.snapshot().connection === 'online_snapshot', 'Official connector did not become online')
+    running = lifecycle.run(controller.signal).catch(error => { backgroundFailure = error })
+    await observeUntil(() => lifecycle.snapshot().connection === 'online_snapshot', 'Official connector did not become online')
     assert.equal(lifecycle.snapshot().ready, false)
     checked('official_dependencies_ordered_start_with_clean_environment')
     await assert.rejects(create().start(), /endpoint_already_owned/)
@@ -88,13 +91,13 @@ async function verify(root) {
 
     const pid = driver.children.get('connector').process.pid, previousWelcomes = welcomes
     for (const socket of sockets) socket.terminate()
-    await tickUntil(() => welcomes > previousWelcomes && lifecycle.snapshot().connection === 'online_snapshot', 'Official network reconnect failed')
+    await observeUntil(() => welcomes > previousWelcomes && lifecycle.snapshot().connection === 'online_snapshot', 'Official network reconnect failed')
     assert.equal(driver.children.get('connector').process.pid, pid)
     assert.equal(lifecycle.state.restarts.length, 0)
     checked('network_reconnect_uses_official_connector_without_second_watchdog')
 
     await killOwned('connector')
-    await tickUntil(() => driver.alive('connector') && lifecycle.snapshot().connection === 'online_snapshot', 'Connector process recovery failed')
+    await observeUntil(() => driver.alive('connector') && lifecycle.snapshot().connection === 'online_snapshot', 'Connector process recovery failed')
     assert.notEqual(driver.children.get('connector').process.pid, pid)
     assert.equal(lifecycle.state.restarts.length, 1)
     checked('owned_connector_crash_recovers_via_official_stale_lock_action')
@@ -108,7 +111,7 @@ async function verify(root) {
     await until(async () => { try { return await fs.readFile(path.join(config.sourceRoot, 'executions.txt'), 'utf8') === 'once\n' } catch { return false } }, 'Ordinary pane command failed')
     await delay(1500) // allow official persisted session snapshot
     await killOwned('herdr')
-    await tickUntil(() => driver.alive('herdr') && lifecycle.state.restarts.length === 2 && lifecycle.snapshot().connection === 'online_snapshot', 'Herdr dependency recovery failed')
+    await observeUntil(() => driver.alive('herdr') && lifecycle.state.restarts.length === 2 && lifecycle.snapshot().connection === 'online_snapshot', 'Herdr dependency recovery failed')
     await delay(2000)
     assert.equal(await fs.readFile(path.join(config.sourceRoot, 'executions.txt'), 'utf8'), 'once\n')
     const listed = JSON.parse(driver.command(driver.herdr, ['--session', config.session, 'pane', 'list']))
@@ -117,19 +120,22 @@ async function verify(root) {
 
     rejectAuth = true
     for (const socket of sockets) socket.terminate()
-    await tickUntil(() => lifecycle.state.attention === 'connector_authentication_required', 'Authentication failure not classified')
+    await observeUntil(() => lifecycle.state.attention === 'connector_authentication_required', 'Authentication failure not classified')
     const authPid = driver.children.get('connector').process.pid
-    await delay(1200); await lifecycle.tick()
+    await delay(1200)
     assert.equal(driver.children.get('connector').process.pid, authPid)
     assert.equal(lifecycle.state.restarts.length, 2)
     checked('real_401_requires_attention_without_process_restart')
-    const stopped = await lifecycle.stop()
+    controller.abort(); await running
+    if (backgroundFailure) throw backgroundFailure
+    const stopped = lifecycle.snapshot()
     assert.equal(stopped.phase, 'stopped'); assert.equal(driver.hostStatus().running, false)
     assert.equal(driver.alive('connector'), false)
     for (let i = 0; i < officialFiles.length; i++) assert.deepEqual(await fs.readFile(officialFiles[i]), originals[i])
     checked('owned_components_stopped_and_official_config_credentials_preserved')
     process.stdout.write(`${JSON.stringify({ lifecycleSmoke: results, transferAutomaticRecovery: false, agentBusinessReplay: 'not_tested', customOrOldAgentResume: 'unverified', lockedDesktop: 'not_tested', loggedOut: 'no_autostart', physicalPowerLoss: 'not_tested', gui: 'not_tested' }, null, 2)}\n`)
   } finally {
+    controller.abort(); await running
     if (lifecycle.release) await lifecycle.stop()
     for (const c of driver.children.values()) if (!c.exited) c.process.kill()
     for (const socket of sockets) socket.terminate()
