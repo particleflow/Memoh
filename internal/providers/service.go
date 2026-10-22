@@ -494,7 +494,8 @@ func (s *Service) fetchRemoteModelsViaSDK(ctx context.Context, provider sqlc.Pro
 	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
 	defer cancel()
 
-	sdkModels, err := listModelMetadata(ctx, baseURL, creds, clientType, nil)
+	sdkProvider := models.NewSDKProvider(baseURL, creds.APIKey, creds.CodexAccountID, clientType, probeTimeout, nil)
+	sdkModels, err := sdkProvider.ListModels(ctx)
 	if err != nil {
 		return nil, errs.WrapDependency(err, "list models")
 	}

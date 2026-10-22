@@ -40,8 +40,9 @@
            bare-count details. ONLY the verb carries the shimmer — shimmering
            the counts too turns the whole line into uniform noise and kills the
            contrast between "phase" and "progress". -->
-      <template v-if="verbLabel">
+      <template v-if="toolItems.length > 1">
         <span
+          v-if="verbLabel"
           class="shrink-0"
           :class="(active || anyToolRunning) ? 'tool-shimmer-text' : 'text-muted-foreground group-hover:text-inherit transition-colors duration-75' /* ui-allow-style: header verb inherits the HeaderRow hover color */"
         >{{ verbLabel }}</span>
@@ -152,6 +153,7 @@ import HeaderRow from './tool-detail/header-row.vue'
 import ExpandChevron from './tool-detail/expand-chevron.vue'
 import Capsule from './tool-detail/capsule.vue'
 import ConnectorLogo from './tool-detail/connector-logo.vue'
+import { hasToolResultError } from './tool-result-error'
 import { useConnectorLogos, type ConnectorIdentity } from '../composables/useConnectorLogos'
 
 const props = defineProps<{
@@ -255,7 +257,9 @@ const verbLabel = computed(() => {
   const tools = toolItems.value
   if (tools.length <= 1) return ''
   const key = phaseKey.value
-  if (!key) return ''
+  // Media tools can fail, remain pending, or return text instead of a file.
+  // Invocation counts alone never prove that media was generated.
+  if (!key || key === 'media') return ''
   return t(`chat.process.phase.${key}.${props.active ? 'ing' : 'done'}`)
 })
 
@@ -279,6 +283,10 @@ const detailsLabel = computed(() => {
   const parts = SUMMARY_FRAGMENT_ORDER
     .filter(kind => counts.has(kind))
     .map(kind => t(`chat.process.frag.${kind}`, { count: counts.get(kind)! }))
+  const failed = tools.filter(hasToolResultError).length
+  const pending = tools.filter(tool => !hasToolResultError(tool) && (!tool.done || tool.running)).length
+  if (failed) parts.push(t('chat.process.outcomes.failed', { count: failed }))
+  if (pending) parts.push(t('chat.process.outcomes.pending', { count: pending }))
   return parts.length ? parts.join(t('chat.process.fragmentSeparator')) : t('chat.process.steps', { count: tools.length })
 })
 

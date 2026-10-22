@@ -8,7 +8,6 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/runtime/native"
 	"github.com/felinics/memoh/internal/bots"
-	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
 	"github.com/felinics/memoh/internal/workspace"
@@ -38,13 +37,6 @@ func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) 
 			return ctx, req, err
 		}
 	}
-	inputRefs := make([]string, 0, len(req.Attachments))
-	for _, attachment := range req.Attachments {
-		if hash := strings.TrimSpace(attachment.ContentHash); hash != "" {
-			inputRefs = append(inputRefs, hash)
-		}
-	}
-	ctx = imagejob.WithOrigin(ctx, imagejob.Origin{BotID: req.BotID, UserID: req.UserID, SessionID: req.ThreadID, RunID: req.RunID, InputRefs: inputRefs})
 	requestedTargetID := strings.TrimSpace(req.WorkspaceTargetID)
 	bound, hasWorkdir, err := s.resolveSessionWorkdirBinding(ctx, req.BotID, req.ThreadID)
 	if err != nil {

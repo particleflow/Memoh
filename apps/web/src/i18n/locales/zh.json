@@ -1157,10 +1157,14 @@
         "commands": "{count} 条命令",
         "messages": "{count} 条消息",
         "schedules": "{count} 个定时任务",
-        "media": "{count} 个媒体文件",
+        "media": "{count} 次媒体调用",
         "agents": "{count} 个 Agent",
         "steps": "{count} 步",
         "sites": "{count} 个网站"
+      },
+      "outcomes": {
+        "failed": "{count} 次失败",
+        "pending": "{count} 次待返回"
       },
       "fragmentSeparator": "、"
     },
@@ -1949,7 +1953,6 @@
       "file-input": "文件输入(PDF)",
       "tool-call": "工具调用",
       "image-output": "图片生成",
-      "image-edit": "图片编辑（Images API）",
       "reasoning": "推理"
     },
     "contextWindow": "上下文窗口",

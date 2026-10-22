@@ -1157,10 +1157,14 @@
         "commands": "{count} commands",
         "messages": "{count} messages",
         "schedules": "{count} schedules",
-        "media": "{count} media files",
+        "media": "{count} media call | {count} media calls",
         "agents": "{count} agents",
         "steps": "{count} step | {count} steps",
         "sites": "{count} sites"
+      },
+      "outcomes": {
+        "failed": "{count} failed",
+        "pending": "{count} pending"
       },
       "fragmentSeparator": ", "
     },
@@ -1949,7 +1953,6 @@
       "file-input": "File Input (PDF)",
       "tool-call": "Tool Call",
       "image-output": "Image Output",
-      "image-edit": "Image Editing (Images API)",
       "reasoning": "Reasoning"
     },
     "contextWindow": "Context Window",

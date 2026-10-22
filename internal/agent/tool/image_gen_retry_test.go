@@ -26,7 +26,8 @@ func imagesServer(t *testing.T, first int, calls *atomic.Int32) *httptest.Server
 	return server
 }
 
-// The persistent image service owns the only attempt, including rate limits.
+// The adapter makes one generation request, including on rate limits. A provider
+// error does not prove that replaying the request cannot create a second image.
 func TestGenerateOpenAIImagesImageDoesNotRetryRateLimit(t *testing.T) {
 	t.Parallel()
 

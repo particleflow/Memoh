@@ -209,22 +209,3 @@ func TestQueuedAgentTaskRetainsSubmittingContext(t *testing.T) {
 		t.Fatal("transient parent cancellation stopped queued task")
 	}
 }
-
-func TestAgentImageTaskSnapshotCopiesIDs(t *testing.T) {
-	mgr := New(nil)
-	id, _, err := mgr.StartAgentTask(context.Background(), "bot", "root", "editor", "child", "edit", "edit", false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	ids := []string{"trusted-receipt"}
-	mgr.CompleteAgentTask(id, AgentTaskResult{Status: TaskCompleted, ImageTaskIDs: ids})
-	ids[0] = "caller-modified"
-	first := mgr.Get(id).Snapshot()
-	if first.ImageTaskIDs[0] != "trusted-receipt" {
-		t.Fatal("caller changed stored task IDs")
-	}
-	first.ImageTaskIDs[0] = "snapshot-modified"
-	if mgr.Get(id).Snapshot().ImageTaskIDs[0] != "trusted-receipt" {
-		t.Fatal("snapshot changed stored task IDs")
-	}
-}
