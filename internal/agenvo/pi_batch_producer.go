@@ -39,6 +39,23 @@ func (s *Service) AdvanceBatchDelivery(ctx context.Context, scope Scope, p Batch
 	return err
 }
 
+// ReadBatchProducerFeedback reads only the fixed advisory receipt through the
+// original registered control pane. A command acceptance is not a receipt.
+func (s *Service) ReadBatchProducerFeedback(ctx context.Context, scope Scope, p BatchProgress) (*deliverymeta.Feedback, error) {
+	if !p.valid() || p.Producer == nil || !p.Producer.Valid() || p.Producer.Task.BotID != scope.BotID || p.Producer.Task.TargetID != scope.TargetID || p.Producer.Task.UserID != scope.UserID {
+		return nil, ErrUnsupported
+	}
+	raw, err := s.readBatchFile(ctx, scope, p, deliverymeta.ProducerFeedbackName, 0, deliverymeta.FeedbackMaxBytes)
+	if err != nil || len(raw) == 0 {
+		return nil, err
+	}
+	feedback, ok := deliverymeta.DecodeFeedback(raw, *p.Producer)
+	if !ok {
+		return nil, ErrUnknown
+	}
+	return feedback, nil
+}
+
 // producerEnvelope does not read credentials or change Pi. The declared flat
 // result is closed only after Pi exits. Native admission still verifies private
 // ownership, links, exact size/hash and an immutable source snapshot.
@@ -51,8 +68,8 @@ func producerEnvelope(script string, p BatchProgress, target Target) (string, er
 		return "", ErrUnsupported
 	}
 	raw, _ := json.Marshal(plan)
-	setup := fmt.Sprintf(`printf '%%s' '%s' | base64 --decode > "$memoh_attempt/producer-context.json"
-export MEMOH_DELIVERY_CONTEXT_FILE="$(cygpath -w "$memoh_attempt/producer-context.json")"`, base64.StdEncoding.EncodeToString(raw))
+	setup := fmt.Sprintf(`printf '%%s' '%s' | base64 --decode > "$memoh_attempt/%s"
+export MEMOH_DELIVERY_CONTEXT_FILE="$(cygpath -w "$memoh_attempt/%s")"`, base64.StdEncoding.EncodeToString(raw), deliverymeta.ProducerContextName, deliverymeta.ProducerContextName)
 	script = strings.Replace(script, `mkdir "$memoh_attempt" || exit 125`, `mkdir "$memoh_attempt" || exit 125`+"\n"+setup, 1)
 	// A pre-existing export is not evidence from this invocation. Reject before
 	// starting Pi; the ordinary not-started receipt still records that fact.

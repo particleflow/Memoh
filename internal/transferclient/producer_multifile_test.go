@@ -3,6 +3,7 @@ package transferclient
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,6 +19,21 @@ import (
 // Real host queue and repeated finite actions; HTTPS NAS/association endpoints
 // here are synthetic. Aggregate task status has separate ledger/CAS tests.
 func TestProducerMultiplePartialRestartAndDeniedFile(t *testing.T) {
+	exerciseProducerDeniedPosition(t, 2, 1)
+}
+
+func TestProducerFeedbackDeniedFirstAndMiddle(t *testing.T) {
+	for _, slots := range []int{1, 2} {
+		for _, position := range []int{0, 1} {
+			t.Run(fmt.Sprintf("slots-%d-denied-%d", slots, position), func(t *testing.T) {
+				exerciseProducerDeniedPosition(t, position, slots)
+			})
+		}
+	}
+}
+
+func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int) {
+	t.Helper()
 	type remote struct {
 		upload    *fixture
 		committed atomic.Bool
@@ -62,8 +78,13 @@ func TestProducerMultiplePartialRestartAndDeniedFile(t *testing.T) {
 	files[1].Artifact.SourceRef = "result-two"
 	files[2].Artifact.SourceRef = "result-three"
 	sort.Slice(files, func(i, j int) bool { return files[i].ManifestName() < files[j].ManifestName() })
+	plan := deliverymeta.Plan{Version: 2, Task: one.Task}
+	for _, file := range files {
+		plan.Artifacts = append(plan.Artifacts, file.Artifact)
+	}
+	writeProducerContextFixture(t, getenv, plan)
 	for i, file := range files {
-		state := &remote{upload: &fixture{calls: map[string]int{}}, denied: i == 2}
+		state := &remote{upload: &fixture{calls: map[string]int{}}, denied: i == deniedPosition}
 		if i == 1 {
 			state.upload.setDrop("PATCH /bots/" + file.Task.BotID + "/media/uploads/receipt-1")
 		}
@@ -72,11 +93,16 @@ func TestProducerMultiplePartialRestartAndDeniedFile(t *testing.T) {
 		raw, _ := json.Marshal(file)
 		write("source", file.ManifestName(), raw)
 	}
-	limits := QueueLimits{Jobs: 1, Bytes: 16384, JournalBytes: 65536, Workers: 1}
+	limits := QueueLimits{Jobs: slots, Bytes: int64(slots) * 16384, JournalBytes: 65536, Workers: 1}
 	for range 12 {
-		_, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now().Add(time.Hour))
-		if err != nil && !errors.Is(err, ErrNoWork) {
+		status, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now().Add(time.Hour))
+		if err != nil && !errors.Is(err, ErrNoWork) && !errors.Is(err, ErrCapacity) {
 			t.Fatal("finite hook", err)
+		}
+		if status.Job.DeliveryID != "" {
+			if err := PublishProducerFeedback(t.Context(), getenv, "fixture", limits, status.Job, time.Now().Add(time.Hour)); err != nil {
+				t.Fatal(err)
+			}
 		}
 	}
 	q, err := OpenHerdrQueue(getenv, "fixture", limits)
@@ -84,13 +110,26 @@ func TestProducerMultiplePartialRestartAndDeniedFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = q.Close() }()
+	report := readProducerFeedbackFixture(t, getenv, plan)
 	for i, file := range files {
+		if slots == 1 && i > deniedPosition {
+			if report.Files[i].Code != "capacity_blocked" || report.Files[i].Retryable {
+				t.Fatal("full blocked slot not reported", report.Files[i])
+			}
+			if remotes[file.DeliveryID()].upload.count("POST /bots/"+file.Task.BotID+"/media/uploads") != 0 {
+				t.Fatal("unadmitted file uploaded")
+			}
+			continue
+		}
 		r, err := q.Inspect(file.DeliveryID())
 		if err != nil || r.Job.OperationID != operation {
 			t.Fatal("original operation lost", err)
 		}
 		remote := remotes[file.DeliveryID()]
-		if i == 2 {
+		if i == deniedPosition {
+			if report.Files[i].Code != "authorization" || report.Files[i].Retryable {
+				t.Fatal("denial not reported", report.Files[i])
+			}
 			if r.Associated || r.Job.Phase != "blocked" || r.PayloadState != "" || remote.upload.count("POST /bots/"+file.Task.BotID+"/media/uploads") != 0 {
 				t.Fatal("denied file was delivered")
 			}
@@ -105,7 +144,7 @@ func TestProducerMultiplePartialRestartAndDeniedFile(t *testing.T) {
 	}
 	_ = q.Close()
 	for range 3 {
-		if _, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now().Add(2*time.Hour)); err != nil && !errors.Is(err, ErrNoWork) {
+		if _, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now().Add(2*time.Hour)); err != nil && !errors.Is(err, ErrNoWork) && !errors.Is(err, ErrCapacity) {
 			t.Fatal("duplicate hook", err)
 		}
 	}
@@ -114,12 +153,18 @@ func TestProducerMultiplePartialRestartAndDeniedFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = cfg.Close() }()
-	for _, file := range files {
+	for i, file := range files {
 		source, err := cfg.OpenSource(file.Artifact.SourceRef)
 		if err != nil {
 			t.Fatal("user source deleted", err)
 		}
 		_ = source.Close()
+		if slots == 1 && i > deniedPosition {
+			if _, err := cfg.sources.Lstat(file.ManifestName()); err != nil {
+				t.Fatal("unadmitted evidence removed", err)
+			}
+			continue
+		}
 		if _, err := cfg.sources.Lstat(file.ManifestName()); !errors.Is(err, os.ErrNotExist) {
 			t.Fatal("manifest not consumed", err)
 		}
