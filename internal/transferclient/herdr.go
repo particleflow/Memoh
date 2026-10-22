@@ -20,7 +20,7 @@ type HerdrAction struct {
 // credentials and the existing task/storage registration binding. This prepares
 // the integration without inventing an installed binary, daemon or credential
 // provider. The isolated tests invoke this exact action with explicit fixtures.
-func InvokeHerdr(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, action HerdrAction, source *os.File, client *Client, associate Associate, now time.Time) (QueueStatus, error) {
+func InvokeHerdr(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, action HerdrAction, source *os.File, client *Client, binding *AssociationBinding, now time.Time) (QueueStatus, error) {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 	q, err := OpenHerdrQueue(getenv, revision, limits)
@@ -43,7 +43,14 @@ func InvokeHerdr(ctx context.Context, getenv func(string) string, revision strin
 		if client == nil {
 			return QueueStatus{}, ErrBinding
 		}
-		err = q.RunOne(ctx, id, client, associate, now)
+		err = q.RunOne(ctx, id, client, binding, now)
+	case "reconcile":
+		if client == nil {
+			return QueueStatus{}, ErrBinding
+		}
+		if err = q.ResumeAssociation(id); err == nil {
+			err = q.RunOne(ctx, id, client, binding, now)
+		}
 	case "cancel":
 		err = q.RequestCancel(id)
 	case "retire":

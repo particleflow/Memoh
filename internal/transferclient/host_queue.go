@@ -60,7 +60,7 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 		return err
 	}
 	defer func() { _ = journal.Close() }()
-	r := QueueStatus{Version: 1, Direction: direction, Job: job}
+	r := QueueStatus{Version: 1, Direction: direction, Job: job, AssociationState: AssociationIdle}
 	if err := q.save(journal, r); err != nil {
 		return err
 	}
@@ -208,6 +208,14 @@ func (q *DiskQueue) RequestCancel(id string) error {
 	if r.Direction == "upload" && (r.Job.Phase == "create_unknown" || r.Job.Phase == "blocked") {
 		return ErrBinding
 	}
+	if r.AssociationState == AssociationInFlight || r.AssociationState == "" && r.AssociationAttempts > 0 {
+		r.AssociationState = AssociationUnknown
+	}
+	if !r.Job.CancelRequested {
+		r.AssociationAttempts = 0
+		r.AssociationDue = time.Time{}
+		r.AssociationBlocked = false
+	}
 	r.Job.CancelRequested = true
 	return q.save(f, r)
 }
@@ -233,7 +241,7 @@ func (s diskSnapshot) ReadAt(ctx context.Context, ref, revision string, spec Spe
 // calls can outlive it. No sleeps, detached workers or task execution states.
 // Host startup/event/manual actions may call again when due; no reliable idle
 // retry scheduler is implied. Production auth/association remain injected ports.
-func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, associate Associate, now time.Time) error {
+func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, binding *AssociationBinding, now time.Time) error {
 	if !validID(id) || id == "admission" || client == nil {
 		return ErrInvalid
 	}
@@ -261,11 +269,28 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		r.Job.Phase, r.Job.ErrorCode, r.Job.NextAttempt = "canceled", "", time.Time{}
 		return q.save(journal, r)
 	}
-	if r.Associated || r.AssociationBlocked || r.Job.Phase == "canceled" || r.Job.Phase == "blocked" || r.Job.Phase == "create_unknown" || now.Before(r.Job.NextAttempt) || now.Before(r.AssociationDue) {
+	if r.AssociationState == AssociationInFlight || r.AssociationState == "" && r.AssociationAttempts > 0 && !r.Associated {
+		r.AssociationState = AssociationUnknown
+		if err := q.save(journal, r); err != nil {
+			return err
+		}
+	}
+	if r.Associated || r.Job.Phase == "canceled" || r.Job.Phase == "blocked" || r.Job.Phase == "create_unknown" || now.Before(r.Job.NextAttempt) {
 		return nil
 	}
-	if r.Job.CancelRequested && r.Job.Phase == "ready" {
-		return nil
+	if r.Job.Phase == "ready" {
+		if r.Job.CancelRequested && (r.AssociationState == AssociationIdle || r.AssociationState == "") {
+			return q.finishAssociation(journal, r, OutcomeCanceled)
+		}
+		if r.AssociationBlocked || now.Before(r.AssociationDue) {
+			return nil
+		}
+		if binding == nil || binding.Commit == nil || binding.Resolve == nil {
+			return ErrBinding
+		}
+		if r.AssociationState == AssociationUnknown || r.Job.CancelRequested {
+			return q.resolveAssociation(ctx, journal, r, binding, now)
+		}
 	}
 	save := func(j Job) error {
 		next := r
@@ -312,7 +337,8 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		err = client.Download(ctx, r.Job.BotID, r.Job.Spec.SHA256, r.Job.Spec.SizeBytes, r.Job.Offset, f, func(offset int64) error { next := r.Job; next.Offset = offset; return save(next) })
 		if err != nil {
 			if r.Job.Ready != nil {
-				return q.associationResult(journal, r, err, now)
+				r.AssociationAttempts++
+				return q.waitAssociation(journal, r, err, now)
 			}
 			return fail(&r.Job, err, now, save)
 		}
@@ -331,27 +357,12 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		}
 		content = io.LimitReader(f, r.Job.Spec.SizeBytes)
 	}
-	if associate == nil {
+	if binding == nil || binding.Commit == nil || binding.Resolve == nil {
 		return ErrBinding
 	}
 	// The registration endpoint itself MUST authorize atomically; an earlier
 	// upload/download grant and a local ready bit cannot authorize association.
-	err = associate(ctx, r.Direction, *r.Job.Ready, content)
-	return q.associationResult(journal, r, err, now)
-}
-
-func (q *DiskQueue) associationResult(journal *os.File, r QueueStatus, err error, now time.Time) error {
-	if err == nil {
-		r.Associated = true
-	} else {
-		r.AssociationAttempts++
-		if !errors.Is(err, ErrTransport) || r.AssociationAttempts >= 12 {
-			r.AssociationBlocked = true
-		} else {
-			r.AssociationDue = now.Add(min(time.Second*time.Duration(1<<r.AssociationAttempts), 5*time.Minute))
-		}
-	}
-	return q.save(journal, r)
+	return q.commitAssociation(ctx, journal, r, binding, content, now)
 }
 
 // Retire releases only acknowledged delivery bytes or confirmed cancellation.

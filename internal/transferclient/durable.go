@@ -47,6 +47,7 @@ type QueueStatus struct {
 	Job                 Job       `json:"job"`
 	Admitted            bool      `json:"admitted"`
 	Associated          bool      `json:"associated"`
+	AssociationState    string    `json:"association_state,omitempty"`
 	AssociationAttempts int       `json:"association_attempts"`
 	AssociationDue      time.Time `json:"association_due,omitempty"`
 	AssociationBlocked  bool      `json:"association_blocked"`
@@ -260,7 +261,21 @@ func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
-	return r.Version == 1 && r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12
+	switch r.AssociationState {
+	case AssociationCommitted:
+		if !r.Associated || r.Job.Phase != "ready" {
+			return false
+		}
+	case AssociationCanceled:
+		if r.Associated || r.Job.Phase != "canceled" {
+			return false
+		}
+	case AssociationInFlight, AssociationUnknown, AssociationRetryCommit:
+		if r.Associated || !r.Admitted || r.Job.Phase != "ready" {
+			return false
+		}
+	}
+	return r.Version == 1 && r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12 && associationStateValid(r.AssociationState)
 }
 
 func (q *DiskQueue) save(f *os.File, r QueueStatus) error {
