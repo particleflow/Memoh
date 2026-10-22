@@ -21,7 +21,7 @@ func queuePlatformReady() error { return nil }
 // case folding, reserved DOS devices, ADS and trailing-dot aliases. Constants
 // such as locator/striped locks retain their fixed names. Never decode a path ID.
 func queueName(name string) string {
-	for _, suffix := range []string{".journal", ".snapshot", ".tree", ".part", ".admission"} {
+	for _, suffix := range []string{".journal", ".snapshot", ".tree", ".part", ".admission", ".release"} {
 		if strings.HasSuffix(name, suffix) {
 			return fmt.Sprintf("%x%s", sha256.Sum256([]byte(strings.TrimSuffix(name, suffix))), suffix)
 		}
