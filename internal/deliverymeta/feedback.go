@@ -81,7 +81,7 @@ func (f FileFeedback) Valid() bool {
 			return false
 		}
 		switch f.Code {
-		case "create_outcome_unknown", "association_requires_reconciliation", "closure_or_admission_unknown", "local_canceled", "awaiting_nas_ledger":
+		case "receipt_unavailable", "create_outcome_unknown", "association_requires_reconciliation", "closure_or_admission_unknown", "local_canceled", "awaiting_nas_ledger":
 			return true
 		}
 	}

@@ -74,9 +74,9 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 		return err
 	}
 	if id != "" {
-		result, err := store.Get(c.Request().Context(), owner, bot, id)
+		result, err := readMediaUpload(c, store, owner, bot, id, false)
 		if err != nil {
-			return resumableError(err)
+			return err
 		}
 		if err := checkTaskTransferResponse(c); err != nil {
 			return err
@@ -123,9 +123,9 @@ func (h *MessageHandler) GetMediaUpload(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	result, err := store.Get(c.Request().Context(), owner, bot, c.Param("upload_id"))
+	result, err := readMediaUpload(c, store, owner, bot, c.Param("upload_id"), false)
 	if err != nil {
-		return resumableError(err)
+		return err
 	}
 	if err := checkTaskTransferResponse(c); err != nil {
 		return err
@@ -197,9 +197,9 @@ func (h *MessageHandler) CompleteMediaUpload(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	result, err := store.Complete(c.Request().Context(), owner, bot, c.Param("upload_id"))
+	result, err := readMediaUpload(c, store, owner, bot, c.Param("upload_id"), true)
 	if err != nil {
-		return resumableError(err)
+		return err
 	}
 	if err := checkTaskTransferResponse(c); err != nil {
 		return err

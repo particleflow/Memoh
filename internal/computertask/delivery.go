@@ -211,7 +211,7 @@ func applyDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id De
 }
 
 func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, version int, mutate func(*deliveryEntry, bool) (bool, error)) (DeliveryOutcome, error) {
-	if version == 3 {
+	if version >= 3 {
 		p, ok := VerifiedTransferFromContext(ctx)
 		if !ok || !p.Valid(time.Now()) || p.Identity != id || p.DeliveryID != delivery || p.Reference != ref {
 			return DeliveryOutcome{}, ErrDeliveryBinding
@@ -274,7 +274,7 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 	rawScope, _ := json.Marshal(id)
 	hash := sha256.Sum256(rawScope)
 	scope := hex.EncodeToString(hash[:])
-	out := DeliveryOutcome{Version: version, Outcome: "absent", Revision: strconv.FormatInt(r.Revision, 10)}
+	out := DeliveryOutcome{Version: min(version, 3), Outcome: "absent", Revision: strconv.FormatInt(r.Revision, 10)}
 	entry, exists := ledger.Entries[delivery]
 	if exists {
 		if entry.Reference != ref || entry.Scope != scope {
@@ -366,9 +366,12 @@ func validDeliveryEntry(e deliveryEntry, version int) bool {
 			e.Reference.Direction != "upload" && (e.Transfer.Creating || e.Transfer.UploadID != "") {
 			return false
 		}
+		if e.Transfer.Ready != nil && (version < transferLedgerVersion || !validTransferReady(*e.Transfer.Ready, e.Reference, e.Transfer.UploadID)) {
+			return false
+		}
 	}
 	if e.Outcome == "reserved" {
-		return version == 3 && e.Transfer != nil && e.Publication == "" && e.Lease == "" && e.Until.IsZero() && e.Attempts == 0
+		return version >= 3 && e.Transfer != nil && e.Publication == "" && e.Lease == "" && e.Until.IsZero() && e.Attempts == 0
 	}
 	if version == 1 {
 		return e.Outcome == "committed" || e.Outcome == "canceled"

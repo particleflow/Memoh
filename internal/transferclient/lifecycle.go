@@ -140,6 +140,9 @@ func recordLifecycle(r QueueStatus, binding string, now time.Time) Lifecycle {
 			class = "unknown"
 		}
 		return lifecycle("unknown", class, time.Time{})
+	case r.Job.Phase == "blocked" && r.Job.ErrorCode == "receipt_unavailable":
+		// Missing staging metadata is not proof that publication never happened.
+		return lifecycle("unknown", "unknown", time.Time{})
 	case r.Job.Phase == "blocked":
 		class := "unknown"
 		switch r.Job.ErrorCode {

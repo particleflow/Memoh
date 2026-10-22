@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
@@ -77,13 +78,14 @@ func VerifiedTransferFromContext(ctx context.Context) (VerifiedTransfer, bool) {
 }
 
 type transferAccess struct {
-	UploadID string `json:"upload_id,omitempty"`
-	Creating bool   `json:"creating,omitempty"`
+	UploadID string        `json:"upload_id,omitempty"`
+	Creating bool          `json:"creating,omitempty"`
+	Ready    *media.Upload `json:"ready,omitempty"`
 }
 
 // ReserveTransfer binds the file grant using the existing operation revision
 // CAS. Legacy entries cannot silently acquire an incoming PC grant. Existing
-// execution writers preserve this ledger; pre-v3 delivery writers fail closed.
+// execution writers preserve this ledger; older delivery writers fail closed.
 func (s *DeliveryService) ReserveTransfer(ctx context.Context) error {
 	return s.transferMutation(ctx, func(e *deliveryEntry, exists bool) (bool, error) {
 		if exists {
@@ -173,7 +175,7 @@ func (s *DeliveryService) transferMutation(ctx context.Context, mutate func(*del
 	}
 	for range 3 {
 		err := s.transactions(ctx, func(tx DeliveryTransaction) error {
-			_, err := mutateDeliveryTransaction(ctx, tx, p.Identity, p.DeliveryID, p.Reference, 3, mutate)
+			_, err := mutateDeliveryTransaction(ctx, tx, p.Identity, p.DeliveryID, p.Reference, transferLedgerVersion, mutate)
 			return err
 		})
 		if !errors.Is(err, ErrDeliveryRetry) {

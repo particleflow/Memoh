@@ -165,7 +165,7 @@ func (s *AsyncDeliveryService) apply(ctx context.Context, operation, delivery st
 func (s *AsyncDeliveryService) transact(ctx context.Context, id DeliveryIdentity, delivery string, ref DeliveryRequest, mutate func(*deliveryEntry, bool) (bool, error)) (DeliveryOutcome, error) {
 	version := 2
 	if _, ok := VerifiedTransferFromContext(ctx); ok {
-		version = 3
+		version = transferLedgerVersion
 	}
 	for range 3 {
 		var out DeliveryOutcome
