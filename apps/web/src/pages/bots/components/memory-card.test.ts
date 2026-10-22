@@ -22,7 +22,7 @@ async function mount(item: AdaptersMemoryItem & { memory: string }) {
 }
 
 it('opens only the server-validated projection and preserves the edit action', async () => {
-  const file = { status: 'available' as const, content_hash: 'a'.repeat(64), name: `${'a'.repeat(64)}.txt`, mime: 'text/plain' }
+  const file = { status: 'located' as const, content_hash: 'a'.repeat(64), name: `${'a'.repeat(64)}.txt`, mime: 'text/plain' }
   const { onOpenFile, onEdit } = await mount({ id: 'm1', memory: 'synthetic summary', file_refs: [file], metadata: { url: 'https://SECRET.invalid', name: 'SECRET', bot_id: 'SECRET' } })
   const buttons = [...root!.querySelectorAll('button')]
   buttons.find(b => b.textContent?.includes('bots.memory.openFile'))!.click()
@@ -40,7 +40,7 @@ it('renders unavailable without an open action', async () => {
 })
 
 it('does not promote arbitrary metadata or change plain memories', async () => {
-  const { onEdit } = await mount({ id: 'm3', memory: 'plain memory', metadata: { content_hash: 'c'.repeat(64), url: 'https://SECRET.invalid', file_refs: [{ status: 'available' }] } })
+  const { onEdit } = await mount({ id: 'm3', memory: 'plain memory', metadata: { content_hash: 'c'.repeat(64), url: 'https://SECRET.invalid', file_refs: [{ status: 'located' }] } })
   expect(root!.textContent).toContain('plain memory')
   expect(root!.textContent).not.toContain('bots.memory.openFile')
   expect(root!.textContent).not.toContain('bots.memory.fileUnavailable')

@@ -120,10 +120,11 @@ type MemoryItem struct {
 	SourceMessageIDs []string `json:"-"`
 }
 
-// MemoryFileRef exposes only a verified canonical media reference. Unavailable
-// references contain status alone, with no untrusted locator or diagnostic.
+// MemoryFileRef exposes only a scoped canonical media locator, not a content
+// integrity or durability verdict. Unavailable references contain status alone,
+// with no untrusted locator or diagnostic.
 type MemoryFileRef struct {
-	Status      string `json:"status" enums:"available,unavailable"`
+	Status      string `json:"status" enums:"located,unavailable"`
 	ContentHash string `json:"content_hash,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Mime        string `json:"mime,omitempty"`

@@ -1,0 +1,7 @@
+=== RUN   TestBoundedMemoryProjectionIO
+    io_probe_test.go:36: IO map[duplicate_refs_per_query:2 elapsed_ns:2229182 file_bytes:1048576 queries:3 rchar_delta:3145832]
+    io_probe_test.go:36: IO map[duplicate_refs_per_query:2 elapsed_ns:34664534 file_bytes:16777216 queries:3 rchar_delta:50331757]
+rchar counts bytes returned by read syscalls, not physical disk traffic; setup excluded
+--- PASS: TestBoundedMemoryProjectionIO (0.19s)
+PASS
+ok  	github.com/felinics/memoh/internal/memory/adapters/builtin	0.202s

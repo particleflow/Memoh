@@ -170,7 +170,7 @@ func TestPostgresMemoryFileReferenceLifecycle(t *testing.T) {
 			t.Fatalf("%s: %+v %v", mode, response, err)
 		}
 		item := response.Results[0]
-		if item.ID != id || len(item.FileRefs) != 1 || item.FileRefs[0].ContentHash != asset.ContentHash || item.FileRefs[0].Status != "available" {
+		if item.ID != id || len(item.FileRefs) != 1 || item.FileRefs[0].ContentHash != asset.ContentHash || item.FileRefs[0].Status != "located" {
 			t.Fatal(item)
 		}
 	}

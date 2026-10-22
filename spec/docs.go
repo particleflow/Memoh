@@ -18981,7 +18981,7 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "enum": [
-                        "available",
+                        "located",
                         "unavailable"
                     ]
                 }

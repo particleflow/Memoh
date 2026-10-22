@@ -473,7 +473,7 @@ const workspaceTabs = useWorkspaceTabsStore()
 // Use the existing authenticated asset preview. Never turn arbitrary memory
 // metadata into a URL, workspace path, or a different Bot's ownership grant.
 async function openMemoryFile(file: AdaptersMemoryFileRef) {
-  if (file.status !== 'available' || !file.content_hash || !/^[a-f0-9]{64}$/.test(file.content_hash)) return
+  if (file.status !== 'located' || !file.content_hash || !/^[a-f0-9]{64}$/.test(file.content_hash)) return
   const botId = props.botId.trim()
   if (!botId) return
   try {

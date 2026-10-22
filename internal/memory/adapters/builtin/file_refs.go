@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"io"
 	"path"
 	"strings"
 
@@ -12,11 +11,10 @@ import (
 	"github.com/felinics/memoh/internal/memory/adapters"
 )
 
-// FileResolver is the existing Bot-scoped original-file reader. Opening, rather
-// than merely inspecting a claimed hash, checks current readability. The caller
-// still uses the regular authenticated media endpoint to retrieve the bytes.
+// FileResolver is the shared metadata-only media locator. A located reference
+// is not a content-integrity check, authorization grant or durability receipt.
 type FileResolver interface {
-	Open(context.Context, string, string) (io.ReadCloser, media.Asset, error)
+	Locate(context.Context, string, string) (media.Asset, error)
 }
 
 func (p *BuiltinProvider) SetFileResolver(files FileResolver) {
@@ -25,7 +23,7 @@ func (p *BuiltinProvider) SetFileResolver(files FileResolver) {
 
 func (p *BuiltinProvider) projectFileRefs(ctx context.Context, botID string, items []adapters.MemoryItem) {
 	// A page may contain many memories referring to the same immutable asset.
-	// Cache only within this response, so later reads recheck availability.
+	// Cache only within this response, so later queries recheck visibility.
 	checked := make(map[string]adapters.MemoryFileRef)
 	for i := range items {
 		item := &items[i]
@@ -47,12 +45,9 @@ func (p *BuiltinProvider) projectFileRefs(ctx context.Context, botID string, ite
 		if p.files != nil {
 			// Ignore every metadata owner, path, URL, name, MIME and status. Only
 			// the trusted caller Bot and canonical hash reach the existing store.
-			reader, asset, err := p.files.Open(ctx, botID, hash)
-			if reader != nil {
-				closeErr := reader.Close()
-				if err == nil && closeErr == nil && asset.BotID == botID && asset.ContentHash == hash {
-					ref = adapters.MemoryFileRef{Status: "available", ContentHash: hash, Name: path.Base(asset.StorageKey), Mime: asset.Mime}
-				}
+			asset, err := p.files.Locate(ctx, botID, hash)
+			if err == nil && asset.BotID == botID && asset.ContentHash == hash {
+				ref = adapters.MemoryFileRef{Status: "located", ContentHash: hash, Name: path.Base(asset.StorageKey), Mime: asset.Mime}
 			}
 		}
 		checked[hash] = ref

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -62,7 +61,7 @@ func TestMemoryFileReferencesFailClosed(t *testing.T) {
 		wantStatus string
 	}{
 		{"no attachment", "owner-bot", map[string]any{"topic": "unchanged"}, ""},
-		{"valid with untrusted fields", "owner-bot", map[string]any{"content_hash": asset.ContentHash, "owner": "SECRET", "bot_id": "SECRET", "name": "../../SECRET", "mime": "SECRET", "url": "https://SECRET.invalid"}, "available"},
+		{"valid with untrusted fields", "owner-bot", map[string]any{"content_hash": asset.ContentHash, "owner": "SECRET", "bot_id": "SECRET", "name": "../../SECRET", "mime": "SECRET", "url": "https://SECRET.invalid"}, "located"},
 		{"other bot self reports owner", "other-bot", map[string]any{"content_hash": asset.ContentHash, "bot_id": "owner-bot", "owner": "owner-bot"}, "unavailable"},
 		{"missing", "owner-bot", map[string]any{"content_hash": strings.Repeat("a", 64)}, "unavailable"},
 		{"path", "owner-bot", map[string]any{"content_hash": "../../SECRET"}, "unavailable"},
@@ -74,7 +73,7 @@ func TestMemoryFileReferencesFailClosed(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			items := []adapters.MemoryItem{{Memory: "unchanged", Metadata: tc.metadata, FileRefs: []adapters.MemoryFileRef{{Status: "available", ContentHash: "FORGED"}}}}
+			items := []adapters.MemoryItem{{Memory: "unchanged", Metadata: tc.metadata, FileRefs: []adapters.MemoryFileRef{{Status: "located", ContentHash: "FORGED"}}}}
 			p.projectFileRefs(t.Context(), tc.bot, items)
 			refs := items[0].FileRefs
 			if tc.wantStatus == "" {
@@ -93,7 +92,7 @@ func TestMemoryFileReferencesFailClosed(t *testing.T) {
 			if tc.wantStatus == "unavailable" && string(raw) != `[{"status":"unavailable"}]` {
 				t.Fatalf("unavailable locator leaked: %s", raw)
 			}
-			if tc.wantStatus == "available" && (refs[0].ContentHash != asset.ContentHash || refs[0].Name != asset.ContentHash+".txt" || refs[0].Mime != "text/plain") {
+			if tc.wantStatus == "located" && (refs[0].ContentHash != asset.ContentHash || refs[0].Name != asset.ContentHash+".txt" || refs[0].Mime != "text/plain") {
 				t.Fatal(refs)
 			}
 		})
@@ -101,7 +100,7 @@ func TestMemoryFileReferencesFailClosed(t *testing.T) {
 	// The projection must be recomputed; a successful earlier lookup is no grant.
 	items := []adapters.MemoryItem{{Metadata: map[string]any{"content_hash": asset.ContentHash}}}
 	p.projectFileRefs(t.Context(), "owner-bot", items)
-	if items[0].FileRefs[0].Status != "available" {
+	if items[0].FileRefs[0].Status != "located" {
 		t.Fatal(items)
 	}
 	if err := os.Remove(filepath.Join(root, "owner-bot", asset.StorageKey)); err != nil {
@@ -115,8 +114,8 @@ func TestMemoryFileReferencesFailClosed(t *testing.T) {
 
 type failedMemoryFileResolver struct{}
 
-func (failedMemoryFileResolver) Open(context.Context, string, string) (io.ReadCloser, media.Asset, error) {
-	return nil, media.Asset{}, errors.New("SECRET provider path/token")
+func (failedMemoryFileResolver) Locate(context.Context, string, string) (media.Asset, error) {
+	return media.Asset{}, errors.New("SECRET provider path/token")
 }
 
 func TestMemoryFileReferenceStorageErrorDoesNotLeak(t *testing.T) {

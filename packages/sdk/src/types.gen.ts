@@ -277,7 +277,7 @@ export type AdaptersMemoryFileRef = {
     content_hash?: string;
     mime?: string;
     name?: string;
-    status?: 'available' | 'unavailable';
+    status?: 'located' | 'unavailable';
 };
 
 export type AdaptersMemoryItem = {

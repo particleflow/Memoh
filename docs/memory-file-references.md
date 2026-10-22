@@ -24,31 +24,41 @@ metadata:
 ```json
 {
   "file_refs": [{
-    "status": "available",
-    "content_hash": "<verified canonical hash>",
+    "status": "located",
+    "content_hash": "<canonical hash locator>",
     "name": "<canonical stored basename>",
     "mime": "text/plain"
   }]
 }
 ```
 
-The provider opens the existing media asset under the **trusted request Bot** and
-closes it without copying its content into memory. It checks the returned asset's
-Bot and content identity. A metadata-supplied owner, Bot, filename, MIME, URL,
-path or status cannot authorize another Bot or override the projection. The
-basename and MIME come from the existing media service, not from memory metadata.
-The basename is a display label for the stored content, not a new alias.
+The provider calls the shared media `Locate` capability under the **trusted
+request Bot**. It uses the existing `PrefixLister` directory metadata only: no
+payload read, hash scan, migration, durability repair or memory-side original
+copy. A metadata-supplied owner, Bot, filename, MIME, path or status cannot
+authorize another Bot or override the projection. The basename and MIME come
+from the located storage key, not from memory metadata. The basename is a display
+label, not a new alias. Providers without a metadata capability return unavailable;
+there is deliberately no fallback to `Open` or the legacy `Stat` path, which can
+open content when persistence is not configured.
 
-A malformed, missing, unreadable or unconfigured reference becomes only
+`located` means an exactly scoped canonical locator was found. It does **not**
+prove readability, content integrity, authorization for a future operation, or
+committed/durable publication. Even a corrupt file may have a valid locator.
+Actual retrieval must still use the authenticated
+`GET /bots/{bot_id}/media/{content_hash}` and its unchanged integrity checks. That
+read may use `Durable.Open`'s existing legacy copy-on-read migration. This change
+creates no memory-side original copy; it does not claim all file reads are free
+of storage side effects.
+
+A malformed, missing, inaccessible-directory or unsupported reference becomes only
 `{"file_refs":[{"status":"unavailable"}]}`. It carries no untrusted locator,
 owner or underlying error. A memory without `metadata.content_hash` has no new
-field. Availability is never persisted and is checked again on every query;
-duplicate hashes share a check only within one response. A successful check is
-not an authorization grant. Fetching the file still uses the existing authenticated
-`GET /bots/{bot_id}/media/{content_hash}`, including its current access and
-integrity checks. The original may become unavailable between query and fetch.
+field. Visibility is queried again on every request; duplicate hashes share a
+lookup only within one response. The original may become unavailable between
+query and fetch.
 
-The memory UI consumes only this validated projection. Available references open
+The memory UI consumes only this validated projection. Located references open
 the existing asset preview for the current Bot; unavailable references show a
 localized message. Generic management metadata remains backward compatible, but
 is not a URL or attachment source for this UI and is not copied into tool output.

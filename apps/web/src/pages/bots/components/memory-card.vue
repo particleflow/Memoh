@@ -21,7 +21,7 @@
           :key="index"
         >
           <TextButton
-            v-if="file.status === 'available' && file.content_hash"
+            v-if="file.status === 'located' && file.content_hash"
             @click="$emit('openFile', file)"
           >
             <Paperclip />

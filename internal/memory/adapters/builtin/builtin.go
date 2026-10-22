@@ -360,7 +360,7 @@ func (p *BuiltinProvider) ListTools(_ context.Context, _ mcp.ToolSessionContext)
 	return []mcp.ToolDescriptor{
 		{
 			Name:        adapters.ToolSearchMemory,
-			Description: "Search for memories relevant to the current chat. Available file_refs contain canonical content_hash values for the current Bot; unavailable references must not be opened or guessed.",
+			Description: "Search for memories relevant to the current chat. Located file_refs contain canonical content_hash locators for the current Bot, not proof of content integrity or committed storage. Fetch through the authorized media path; unavailable references must not be opened or guessed.",
 			InputSchema: map[string]any{
 				"type": "object",
 				"properties": map[string]any{

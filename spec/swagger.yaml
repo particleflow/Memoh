@@ -450,7 +450,7 @@ definitions:
         type: string
       status:
         enum:
-        - available
+        - located
         - unavailable
         type: string
     type: object
