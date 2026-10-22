@@ -1,0 +1,36 @@
+name: Windows endpoint delivery checks
+on:
+  pull_request:
+    paths:
+      - 'contrib/windows-endpoint/**'
+      - '.github/workflows/windows-endpoint.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  delivery:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-2025]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.14.0'
+      - name: Verify delivery boundary and recovery fixtures
+        run: node --test contrib/windows-endpoint/endpoint.test.mjs
+      - name: Verify native PowerShell bootstrap and hash rejection
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          $node = (Get-Command node.exe).Source
+          $hash = (Get-FileHash -LiteralPath $node -Algorithm SHA256).Hash.ToLowerInvariant()
+          & ./contrib/windows-endpoint/endpoint.ps1 -NodePath $node -NodeSha256 $hash help
+          if ($LASTEXITCODE -ne 0) { throw 'Bootstrap failed' }
+          & ./contrib/windows-endpoint/endpoint.ps1 -NodePath $node -NodeSha256 ('0' * 64) help
+          if ($LASTEXITCODE -ne 2) { throw 'Bootstrap accepted incorrect hash' }
+          exit 0

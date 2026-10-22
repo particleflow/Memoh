@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "bundleRoot": "C:\\NASAssistant\\packages\\REVIEWED-MANIFEST-SHA256",
+  "manifestSha256": "REPLACE_WITH_TRUSTED_MANIFEST_SHA256",
+  "nasOrigin": "https://configure-your-approved-host.invalid",
+  "sourceRoot": "C:\\NASAssistantData\\exports",
+  "herdrConfigRoot": "C:\\NASAssistantData\\config\\herdr",
+  "herdrStateRoot": "C:\\NASAssistantData\\state\\herdr",
+  "agenvoConfigDir": "C:\\NASAssistantData\\agenvo",
+  "piConfigDir": "C:\\NASAssistantData\\pi",
+  "transferConfigDir": "C:\\NASAssistantData\\config\\herdr\\plugins\\config\\memoh.delivery",
+  "transferStateDir": "C:\\NASAssistantData\\state\\herdr\\plugins\\memoh.delivery",
+  "deviceId": "EXISTING_AGENVO_DEVICE_UUID",
+  "instanceId": "EXISTING_APPROVED_HERDR_INSTANCE",
+  "runtimeId": "EXISTING_MEMOH_RUNTIME_UUID",
+  "session": "default"
+}
