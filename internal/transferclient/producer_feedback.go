@@ -1,0 +1,216 @@
+package transferclient
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"io"
+	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/felinics/memoh/internal/deliverymeta"
+)
+
+var ErrProducerFeedback = errors.New("producer feedback unavailable")
+
+// PublishProducerFeedback writes a bounded advisory projection in the EXISTING
+// attempt directory. It never creates directories, credentials, success refs or
+// a second queue. Source/config/journal failures remain explicit to the caller.
+func PublishProducerFeedback(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, job Job, now time.Time) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	cfg, err := OpenHostConfig(getenv)
+	if err != nil {
+		return ErrProducerFeedback
+	}
+	defer func() { _ = cfg.Close() }()
+	relative, ok := deliverymeta.AttemptDirectory(job.Task.Attempt)
+	if !ok || cfg.sourcePath == "" {
+		return ErrProducerFeedback
+	}
+	root, guard, err := privateHostRoot(filepath.Join(cfg.sourcePath, filepath.FromSlash(relative)))
+	if err != nil {
+		return ErrProducerFeedback
+	}
+	defer func() { closeQueueGuard(guard); _ = root.Close() }()
+	f, err := openPrivateFile(root, deliverymeta.ProducerContextName, os.O_RDONLY, 0)
+	if err != nil {
+		return ErrProducerFeedback
+	}
+	raw, err := io.ReadAll(io.LimitReader(f, 16385))
+	_ = f.Close()
+	if err != nil || len(raw) > 16384 {
+		return ErrProducerFeedback
+	}
+	var plan deliverymeta.Plan
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.DisallowUnknownFields()
+	if dec.Decode(&plan) != nil || dec.Decode(new(any)) != io.EOF || !plan.Valid() || !feedbackTaskMatches(plan.Task, job) || plan.Task.RootHash != deliverymeta.RootHash(cfg.sourcePath) {
+		return ErrProducerFeedback
+	}
+	boundID := false
+	for _, file := range plan.FilePlans() {
+		boundID = boundID || file.DeliveryID() == job.DeliveryID
+	}
+	if !boundID {
+		return ErrProducerFeedback
+	}
+	q, err := OpenHerdrQueue(getenv, revision, limits)
+	if err != nil {
+		return ErrProducerFeedback
+	}
+	defer func() { _ = q.Close() }()
+	global, err := q.lock("admission")
+	if err != nil {
+		return err
+	}
+	defer unlockClose(global)
+	report, err := q.producerFeedback(ctx, cfg, plan, now)
+	if err != nil {
+		return err
+	}
+	raw, err = json.Marshal(report)
+	if err != nil || len(raw) >= deliverymeta.FeedbackMaxBytes || !report.ValidFor(plan) {
+		return ErrProducerFeedback
+	}
+	// Concurrent publishers share the existing admission lock. Readers reject a
+	// partial JSON document after process death; the authoritative queue is intact.
+	f, err = openPrivateFile(root, deliverymeta.ProducerFeedbackName, os.O_CREATE|os.O_RDWR, 0o600)
+	if err != nil {
+		return ErrProducerFeedback
+	}
+	defer func() { _ = f.Close() }()
+	if f.Truncate(0) != nil {
+		return ErrProducerFeedback
+	}
+	if n, err := f.Write(raw); err != nil || n != len(raw) || f.Sync() != nil || syncQueueDir(root) != nil {
+		return ErrProducerFeedback
+	}
+	return nil
+}
+
+func feedbackTaskMatches(t deliverymeta.Task, j Job) bool {
+	return t.OperationID == j.OperationID && t.BotID == j.BotID && t.UserID == j.Task.UserID && t.SessionID == j.Task.SessionID && t.TargetID == j.Task.TargetID && t.RunID == j.Task.RunID && t.Attempt == j.Task.Attempt && t.Generation == j.Task.Generation
+}
+
+func feedbackChange(value any) string {
+	raw, _ := json.Marshal(value)
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:])
+}
+
+func queueFeedback(r QueueStatus, binding string, now time.Time) deliverymeta.FileFeedback {
+	f := deliverymeta.FileFeedback{DeliveryID: r.Job.DeliveryID, State: "pending", Code: "queued", Retryable: true, Change: feedbackChange(r)}
+	switch {
+	case r.Job.HostBinding != binding:
+		f.State, f.Code, f.Retryable = "blocked", "configuration_changed", false
+	case r.Associated:
+		f.State, f.Code, f.Retryable = "unknown", "awaiting_nas_ledger", false
+	case r.AssociationBlocked:
+		f.State, f.Code, f.Retryable = "unknown", "association_requires_reconciliation", false
+	case r.Job.Phase == "blocked":
+		f.State, f.Code, f.Retryable = "blocked", r.Job.ErrorCode, false
+	case r.Job.Phase == "create_unknown" || r.Job.Phase == "creating":
+		f.State, f.Code, f.Retryable = "unknown", "create_outcome_unknown", false
+	case r.Job.Phase == "canceled":
+		f.State, f.Code, f.Retryable = "unknown", "local_canceled", false
+	case !r.Admitted:
+		f.Code = "admission_pending"
+	case r.AssociationDue.After(now):
+		f.Code, f.RetryAt = "retry_backoff", r.AssociationDue
+	case r.Job.NextAttempt.After(now):
+		f.Code, f.RetryAt = "retry_backoff", r.Job.NextAttempt
+	case r.Job.Phase == "ready":
+		f.Code = "association_pending"
+	case r.Job.Phase == "uploading":
+		f.Code = "uploading"
+	}
+	if !f.Valid() {
+		f.State, f.Code, f.Retryable, f.RetryAt = "blocked", "protocol", false, time.Time{}
+	}
+	return f
+}
+
+func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan deliverymeta.Plan, now time.Time) (deliverymeta.Feedback, error) {
+	report := deliverymeta.Feedback{Version: 1, Task: plan.Task, PlanHash: deliverymeta.PlanHash(plan)}
+	// Caller holds the admission lock through projection and file synchronization.
+	if _, err := cfg.producerManifests(); err != nil {
+		return report, ErrProducerFeedback
+	}
+	heads, err := q.admissions()
+	if err != nil {
+		return report, ErrProducerFeedback
+	}
+	statuses := make(map[string]QueueStatus, len(heads))
+	readErrors := make(map[string]string)
+	runnable := false
+	for _, head := range heads {
+		if err := ctx.Err(); err != nil {
+			return report, err
+		}
+		r := head
+		if r.PayloadState != PayloadReleased {
+			r, err = q.Inspect(head.Job.DeliveryID)
+			if err != nil && !errors.Is(err, ErrAdmissionPending) {
+				runnable = true
+				readErrors[head.Job.DeliveryID] = "queue_unavailable"
+				if errors.Is(err, ErrBusy) {
+					readErrors[head.Job.DeliveryID] = "queue_busy"
+				}
+				continue
+			}
+		}
+		statuses[r.Job.DeliveryID] = r
+		local := queueFeedback(r, cfg.Binding, now)
+		runnable = runnable || local.Retryable || r.Associated && r.PayloadState != PayloadReleased
+	}
+	for _, file := range plan.FilePlans() {
+		if code := readErrors[file.DeliveryID()]; code != "" {
+			report.Files = append(report.Files, deliverymeta.FileFeedback{DeliveryID: file.DeliveryID(), State: "pending", Code: code, Retryable: true, RetryAt: now.Add(30 * time.Second), Change: feedbackChange(code)})
+			continue
+		}
+		if r, ok := statuses[file.DeliveryID()]; ok {
+			if !feedbackTaskMatches(plan.Task, r.Job) || r.Job.Spec.Mime != file.Artifact.Mime {
+				return report, ErrProducerFeedback
+			}
+			report.Files = append(report.Files, queueFeedback(r, cfg.Binding, now))
+			continue
+		}
+		local := deliverymeta.FileFeedback{DeliveryID: file.DeliveryID(), State: "unknown", Code: "closure_or_admission_unknown", Change: feedbackChange(file)}
+		_, existsErr := cfg.sources.Lstat(file.ManifestName())
+		source, err := cfg.OpenSource(file.ManifestName())
+		if existsErr == nil && err != nil {
+			local.State, local.Code = "blocked", "manifest_invalid"
+		}
+		if existsErr != nil && !errors.Is(existsErr, os.ErrNotExist) {
+			return report, ErrProducerFeedback
+		}
+		if err == nil {
+			raw, readErr := io.ReadAll(io.LimitReader(source, 16385))
+			_ = source.Close()
+			action, closed, parseErr := ProducerAdmission(bytes.NewReader(raw), q.revision)
+			if readErr != nil || parseErr != nil || closed.Task != plan.Task || closed.Artifact != file.Artifact {
+				local.State, local.Code = "blocked", "manifest_invalid"
+			} else {
+				local.State, local.Code, local.Retryable = "pending", "queued", true
+				local.Change = feedbackChange(closed)
+				if err := q.capacity(action.Job.Spec.SizeBytes); err != nil {
+					if !errors.Is(err, ErrCapacity) {
+						return report, err
+					}
+					local.State, local.Code, local.Retryable = "blocked", "capacity_blocked", false
+					if runnable {
+						local.State, local.Code, local.Retryable, local.RetryAt = "pending", "capacity_wait", true, now.Add(30*time.Second)
+					}
+				}
+			}
+		}
+		report.Files = append(report.Files, local)
+	}
+	return report, nil
+}

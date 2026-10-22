@@ -20,7 +20,7 @@ func TestPiCompletionOfficialProtocolProjection(t *testing.T) {
 	}
 	dir := t.TempDir()
 	reader := filepath.Join(dir, "reader.cjs")
-	if err := os.WriteFile(reader, []byte(piResultAdapter), 0o600); err != nil {
+	if err := os.WriteFile(reader, []byte(completionAdapterProgram()), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	good := piEvents("session-a", "stop", "42 中文 ✓", false)
@@ -147,7 +147,7 @@ func TestCompactCompletionWireBudgetAndCorrelation(t *testing.T) {
 	p.CompletionVersion = BatchCompletionVersion
 	contextJSON, _ := json.Marshal(map[string]string{"attempt": p.Attempt, "generation": p.Generation, "request_hash": p.RequestHash, "pi_session_id": p.PiSessionID, "workspace_id": p.WorkspaceID, "pane_id": p.PaneID, "terminal_id": p.TerminalID, "provider": "synthetic", "model": "synthetic-model"})
 	stream := []byte(piEvents(p.PiSessionID, "stop", strings.Repeat("\x01中文", 4000), false))
-	for name, raw := range map[string][]byte{"reader.cjs": []byte(piResultAdapter), "result-context.json": contextJSON, "stdout.jsonl": stream} {
+	for name, raw := range map[string][]byte{"reader.cjs": []byte(completionAdapterProgram()), "result-context.json": contextJSON, "stdout.jsonl": stream} {
 		if err := os.WriteFile(filepath.Join(dir, name), raw, 0o600); err != nil {
 			t.Fatal(err)
 		}

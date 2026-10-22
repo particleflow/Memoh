@@ -17750,6 +17750,154 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/me/runtimes/{id}/transfer-credential": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Read owned computer file credential status (no secret)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing Agenvo runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.TransferCredentialStatus"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Returns the secret once. Existing credentials require expected_id CAS; a lost response requires status read and explicit rotation. Never a per-file action.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Enroll or explicitly rotate an owned computer file credential",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing Agenvo runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Expected current credential ID and optional device expiry",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.ChangeTransferCredentialRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.TransferCredentialEnrollment"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Revoke an owned computer file credential with current-ID CAS",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing Agenvo runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current non-secret credential ID",
+                        "name": "expected_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Revoked"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "Get user details (self or admin only)",
@@ -28973,6 +29121,18 @@ const docTemplate = `{
                 }
             }
         },
+        "userruntime.ChangeTransferCredentialRequest": {
+            "type": "object",
+            "properties": {
+                "expected_id": {
+                    "description": "Empty means first enrollment. Rotation must name the current credential.",
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                }
+            }
+        },
         "userruntime.CreateRuntimeRequest": {
             "type": "object",
             "properties": {
@@ -29033,6 +29193,31 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspace_base": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.TransferCredentialEnrollment": {
+            "type": "object",
+            "properties": {
+                "credential": {
+                    "type": "string"
+                },
+                "credential_id": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.TransferCredentialStatus": {
+            "type": "object",
+            "properties": {
+                "credential_id": {
+                    "type": "string"
+                },
+                "expires_at": {
                     "type": "string"
                 }
             }

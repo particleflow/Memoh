@@ -170,3 +170,16 @@ func TestShouldSkipJWTOnlyForDigestAddressedSupermarketSkillIcons(t *testing.T) 
 		}
 	}
 }
+
+func TestDeviceTransferJWTBoundary(t *testing.T) {
+	for _, path := range []string{"/internal/computer-transfers/op/delivery/bots/bot/media/limits", "/internal/computer-transfers/op/delivery/internal/computer-deliveries/op/delivery/resolve"} {
+		if !shouldSkipJWT(path) {
+			t.Fatalf("device namespace requires own authentication: %s", path)
+		}
+	}
+	for _, path := range []string{"/internal/computer-transfers-evil/op", "/internal/computer-deliveries/op/delivery/commit", "/users/me/runtimes/runtime/transfer-credential", "/bots/bot/media/limits"} {
+		if shouldSkipJWT(path) {
+			t.Fatalf("account authentication bypass: %s", path)
+		}
+	}
+}

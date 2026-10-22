@@ -28,7 +28,7 @@ WHERE runtime.team_id = public.memoh_current_team_id()
   AND owner_membership.is_active = TRUE
   AND owner.id = owner_membership.user_id
   AND owner.is_active = TRUE
-RETURNING runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
+RETURNING runtime.transfer_credential_id, runtime.transfer_credential_digest, runtime.transfer_target_digest, runtime.transfer_expires_at, runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
 `
 
 type ActivateUserRuntimeParams struct {
@@ -42,6 +42,10 @@ func (q *Queries) ActivateUserRuntime(ctx context.Context, arg ActivateUserRunti
 	row := q.db.QueryRow(ctx, activateUserRuntime, arg.ID, arg.ApiToken)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -110,7 +114,7 @@ VALUES ($1, $2, 'agenvo_' || gen_random_uuid()::text, 'agenvo', $3, now(), NULL)
 ON CONFLICT (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL
 DO UPDATE SET updated_at = user_runtimes.updated_at
 WHERE user_runtimes.provider_config = EXCLUDED.provider_config
-RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type CreateAgenvoUserRuntimeParams struct {
@@ -123,6 +127,10 @@ func (q *Queries) CreateAgenvoUserRuntime(ctx context.Context, arg CreateAgenvoU
 	row := q.db.QueryRow(ctx, createAgenvoUserRuntime, arg.OwnerID, arg.Name, arg.ProviderConfig)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -176,7 +184,7 @@ func (q *Queries) CreateOrUpdateBotRemoteRuntimeMount(ctx context.Context, arg C
 const createUserRuntime = `-- name: CreateUserRuntime :one
 INSERT INTO user_runtimes (user_id, name, api_token)
 VALUES ($1, $2, $3)
-RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type CreateUserRuntimeParams struct {
@@ -189,6 +197,10 @@ func (q *Queries) CreateUserRuntime(ctx context.Context, arg CreateUserRuntimePa
 	row := q.db.QueryRow(ctx, createUserRuntime, arg.UserID, arg.Name, arg.ApiToken)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -263,7 +275,7 @@ func (q *Queries) ExpirePendingUserRuntimes(ctx context.Context, userID pgtype.U
 }
 
 const findAgenvoUserRuntime = `-- name: FindAgenvoUserRuntime :one
-SELECT id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
+SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
 WHERE team_id = public.memoh_current_team_id() AND user_id = $1
   AND provider = 'agenvo' AND provider_config = $2
   AND revoked_at IS NULL
@@ -279,6 +291,10 @@ func (q *Queries) FindAgenvoUserRuntime(ctx context.Context, arg FindAgenvoUserR
 	row := q.db.QueryRow(ctx, findAgenvoUserRuntime, arg.OwnerID, arg.ProviderConfig)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -429,7 +445,7 @@ func (q *Queries) GetPrimaryBotRemoteRuntimeMount(ctx context.Context, botID pgt
 }
 
 const getUserRuntimeByAPIToken = `-- name: GetUserRuntimeByAPIToken :one
-SELECT runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
+SELECT runtime.transfer_credential_id, runtime.transfer_credential_digest, runtime.transfer_target_digest, runtime.transfer_expires_at, runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id
 FROM user_runtimes runtime
 JOIN team_members owner_membership
   ON owner_membership.team_id = public.memoh_current_team_id()
@@ -447,6 +463,10 @@ func (q *Queries) GetUserRuntimeByAPIToken(ctx context.Context, apiToken string)
 	row := q.db.QueryRow(ctx, getUserRuntimeByAPIToken, apiToken)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -593,7 +613,7 @@ func (q *Queries) ListBotRemoteRuntimeMounts(ctx context.Context, botID pgtype.U
 }
 
 const listUserRuntimes = `-- name: ListUserRuntimes :many
-SELECT id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
+SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
 WHERE team_id = public.memoh_current_team_id()
   AND user_id = $1 AND revoked_at IS NULL
 ORDER BY created_at ASC, id ASC
@@ -609,6 +629,10 @@ func (q *Queries) ListUserRuntimes(ctx context.Context, userID pgtype.UUID) ([]U
 	for rows.Next() {
 		var i UserRuntime
 		if err := rows.Scan(
+			&i.TransferCredentialID,
+			&i.TransferCredentialDigest,
+			&i.TransferTargetDigest,
+			&i.TransferExpiresAt,
 			&i.ID,
 			&i.UserID,
 			&i.Name,
@@ -660,7 +684,7 @@ UPDATE user_runtimes
 SET revoked_at = now(), updated_at = now()
 WHERE team_id = public.memoh_current_team_id()
   AND id = $1 AND user_id = $2 AND revoked_at IS NULL
-RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type RevokeUserRuntimeParams struct {
@@ -672,6 +696,10 @@ func (q *Queries) RevokeUserRuntime(ctx context.Context, arg RevokeUserRuntimePa
 	row := q.db.QueryRow(ctx, revokeUserRuntime, arg.ID, arg.UserID)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,

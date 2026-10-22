@@ -17,6 +17,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -62,10 +63,12 @@ type Target struct {
 	AgentProtocol string   `json:"agent_protocol,omitempty"`
 }
 type Submit struct {
-	TargetID string `json:"target_id,omitempty"`
-	Kind     string `json:"kind"`
-	Task     string `json:"task"`
-	WorkDir  string `json:"work_dir,omitempty"`
+	Artifact  *deliverymeta.Artifact  `json:"artifact,omitempty"`
+	Artifacts []deliverymeta.Artifact `json:"artifacts,omitempty"`
+	TargetID  string                  `json:"target_id,omitempty"`
+	Kind      string                  `json:"kind"`
+	Task      string                  `json:"task"`
+	WorkDir   string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
 	Batch        *BatchDetails            `json:"batch,omitempty"`
@@ -80,6 +83,7 @@ type Details struct {
 	Foreground   *agenvo.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
+	Delivery           *ProducerResult          `json:"delivery,omitempty"`
 	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
 	DiagnosticsState   string                   `json:"diagnostics_state,omitempty"`
 	StdoutHash         string                   `json:"stdout_hash,omitempty"`
@@ -122,6 +126,7 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 		r.State = "unknown"
 	}
 	out := Result{ID: r.ID, TargetID: r.TargetID, State: r.State, Phase: d.Phase, Kind: d.Kind, Output: d.Output, ExitCode: d.ExitCode, Truncated: d.Truncated, Observation: d.Observation, ArtifactHash: d.ArtifactHash, CancelRequested: r.CancelRequested, CleanupRequired: d.Phase != ""}
+	out.Delivery = producerResult(r, d)
 	if d.Foreground != nil {
 		out.WorkspaceID, out.PaneID, out.RequestID, out.CleanupRequired = d.Foreground.WorkspaceID, d.Foreground.PaneID, d.Foreground.RequestID, d.Foreground.CleanupRequired
 	}
@@ -247,15 +252,29 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if err := s.authorize(ctx, b, id, in.Kind, in.Task); err != nil {
 		return Result{}, err
 	}
+	if (in.Artifact != nil || in.Artifacts != nil) && (in.Artifact != nil && (in.Artifacts != nil || !in.Artifact.Valid()) || in.Artifacts != nil && !deliverymeta.ValidArtifacts(in.Artifacts) || in.Kind != "herdr_pi_task" || target.Agent.ExecutionMode != "pi-json-v1" || in.WorkDir != ".") {
+		return Result{}, ErrInvalid
+	}
+	operationID := uuid.NewString()
 	d := Details{Kind: in.Kind}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
 		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+
+		if in.Artifact != nil || in.Artifacts != nil {
+			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
+			if in.Artifact != nil {
+				d.Batch.Progress.Producer.Artifact = *in.Artifact
+			} else {
+				d.Batch.Progress.Producer.Version = 2
+				d.Batch.Progress.Producer.Artifacts = append([]deliverymeta.Artifact(nil), in.Artifacts...)
+			}
+		}
 		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
 			return Result{}, err
 		}
 	}
 	raw, _ := json.Marshal(d)
-	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw})
+	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: operationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw})
 	if err != nil {
 		return Result{}, ErrDenied
 	}
@@ -396,8 +415,12 @@ func (s *Service) cancel(ctx context.Context, b toolcontext.ComputerBinding, id 
 	if err != nil {
 		return Result{}, err
 	}
-	if r.State != "completed" && r.State != "not_started" && r.State != "rejected" {
-		r.State = "unknown"
+	active := r.State != "completed" && r.State != "not_started" && r.State != "rejected"
+	delivery := producerResult(r, d)
+	if active || delivery != nil && delivery.hasPending() {
+		if active {
+			r.State = "unknown"
+		}
 		r.CancelRequested = true
 		r, err = s.store.SaveComputerOperation(ctx, r)
 		if err != nil {

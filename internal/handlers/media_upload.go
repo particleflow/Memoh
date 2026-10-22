@@ -106,6 +106,11 @@ func (h *MessageHandler) UploadMedia(c echo.Context) error {
 }
 
 func (h *MessageHandler) mediaUploadBot(c echo.Context) (string, error) {
+	if scope := taskTransfer(c); scope != nil {
+		// Only the explicitly registered task adapter can supply this scope.
+		// Account JWTs cannot create it, and the adapter has rechecked DB rights.
+		return scope.principal.Identity.Binding.BotID, nil
+	}
 	identityID, err := h.requireChannelIdentityID(c)
 	if err != nil {
 		return "", err

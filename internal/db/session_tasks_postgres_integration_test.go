@@ -22,6 +22,13 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer conn.Release()
+	// These read/list operations must not alter the schema. New independent
+	// migrations can advance the starting version without changing that contract.
+	var startingVersion int
+	var startingDirty bool
+	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&startingVersion, &startingDirty); err != nil || startingVersion < 170 || startingDirty {
+		t.Fatalf("initial schema=%d dirty=%v err=%v", startingVersion, startingDirty, err)
+	}
 	exec := func(sql string, args ...any) {
 		t.Helper()
 		if _, err := conn.Exec(ctx, sql, args...); err != nil {
@@ -127,7 +134,7 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 	}
 	var version int
 	var dirty bool
-	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != 170 || dirty {
+	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != startingVersion || dirty {
 		t.Fatalf("schema=%d dirty=%v err=%v", version, dirty, err)
 	}
 }

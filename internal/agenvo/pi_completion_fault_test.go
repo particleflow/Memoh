@@ -117,7 +117,7 @@ func TestCompactCompletionLargeDiagnosticsStayLocal(t *testing.T) {
 	// Large tool progress stays inside the invocation's valid event boundaries.
 	largeEvent := `{"type":"message_update","assistantMessageEvent":{"type":"thinking_delta","delta":"` + strings.Repeat("PRIVATE_REASONING", 32768) + `"}}` + "\n"
 	stream = strings.Replace(stream, `{"message":{"content"`, largeEvent+`{"message":{"content"`, 1)
-	for name, raw := range map[string][]byte{"reader.cjs": []byte(piResultAdapter), "result-context.json": ctx, "stdout.jsonl": []byte(stream), "stderr.txt": []byte(strings.Repeat("PRIVATE_DIAGNOSTIC\n", 131072))} {
+	for name, raw := range map[string][]byte{"reader.cjs": []byte(completionAdapterProgram()), "result-context.json": ctx, "stdout.jsonl": []byte(stream), "stderr.txt": []byte(strings.Repeat("PRIVATE_DIAGNOSTIC\n", 131072))} {
 		if err := os.WriteFile(filepath.Join(dir, name), raw, 0o600); err != nil {
 			t.Fatal(err)
 		}
@@ -144,7 +144,7 @@ func TestCompactCompletionLongLineHasLinearReadAndCopyCost(t *testing.T) {
 			dir := t.TempDir()
 			reader := filepath.Join(dir, "reader.cjs")
 			events := filepath.Join(dir, "events")
-			if err := os.WriteFile(reader, []byte(piResultAdapter), 0o600); err != nil {
+			if err := os.WriteFile(reader, []byte(completionAdapterProgram()), 0o600); err != nil {
 				t.Fatal(err)
 			}
 			stream := piEvents("session-a", "stop", "42", false)
@@ -214,7 +214,7 @@ func TestCompactCompletionWatchdogStopsBlockedParser(t *testing.T) {
 	dir := t.TempDir()
 	reader := filepath.Join(dir, "reader.cjs")
 	fault := filepath.Join(dir, "block.cjs")
-	if err := os.WriteFile(reader, []byte(piResultAdapter), 0o600); err != nil {
+	if err := os.WriteFile(reader, []byte(completionAdapterProgram()), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	blocker := `if(!require('node:worker_threads').isMainThread){require('node:fs').writeFileSync('blocked','worker reached fault');Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0);}`
