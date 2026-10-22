@@ -342,7 +342,18 @@ func TestCLIPathHistoryMigration(t *testing.T) {
 	if bytes.Equal(old, raw) {
 		t.Fatal("unexpected layout")
 	}
-	if err := cliFixtureWrite(path, old); err != nil {
+	// Mutate only the version byte in this test's existing locator. The Windows
+	// fixture creator deliberately refuses replacement of an existing file.
+	f, err := os.OpenFile(path, os.O_RDWR, 0) //nolint:gosec // Existing private fixture file; no ACL or owner change.
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = f.WriteAt([]byte{'2'}, int64(len(`{"Version":`)))
+	if err == nil {
+		err = f.Sync()
+	}
+	_ = f.Close()
+	if err != nil {
 		t.Fatal(err)
 	}
 	var out, stderr bytes.Buffer
