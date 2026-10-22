@@ -122,7 +122,8 @@ A Harmony native HTML dialog can embed the same body without that context.
 
 Events: `openTask(task: BotdelegationView)`, `page(cursor?: string)`, and
 `refresh()`. Wire these to the same `useBotDelegations(scope, visible)` methods;
-pass its returned refs as props. `scope` is `Ref<TaskScope | null>` with `bot`,
+pass its returned refs as props. The host's detail Back button calls
+`reader.back()`; do not create a second selected-task state. `scope` is `Ref<TaskScope | null>` with `bot`,
 `session`, `selection` (workspace selection), and `identity` from the authenticated
 host. `visible` is `Ref<boolean>` and must reflect the active tab/dialog as well
 as page visibility. Set it false on close/cancel or host hiding; clear scope on
@@ -165,3 +166,12 @@ Final changed-file ESLint and Web build passed. The UI contract passed with its
 three existing warnings, and the runtime/contextview official-baseline check
 passed. The build retains its existing large-chunk warning. A successful build
 or reporting CI does not turn the failing whole-Web typecheck into a pass.
+
+PR54 gallery fixture follow-up: attachment fixtures now satisfy `UIAttachment`
+(including `type`), and mock URL interpolation iterates actual path entries
+instead of assuming unchecked indexed values exist. The five inherited fixture
+diagnostics are addressed without changing runtime URL authorization behavior.
+The scoped-gallery suite passed all seven cases; changed-file lint passed.
+Whole-Web typecheck now reports 145 diagnostics, identical to the frozen main851
+comparison. This removes only the five test errors; it does not make typecheck
+pass. No runtime implementation changed in this follow-up.
