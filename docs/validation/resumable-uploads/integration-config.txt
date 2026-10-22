@@ -1,0 +1,1 @@
+ok  	github.com/felinics/memoh/internal/config	0.009s

@@ -17,6 +17,21 @@ const sseOperations = new Set([
 export default defineConfig({
   input: './spec/swagger.json',
   output: 'packages/sdk/src',
+  parser: {
+    patch: {
+      input: spec => {
+        // swag v1 places body Format(binary) on the parameter. OpenAPI 2
+        // consumers need it on the body schema to generate Blob/File inputs.
+        const parameters = spec.paths?.['/bots/{bot_id}/media/uploads/{upload_id}']?.patch?.parameters ?? []
+        for (const parameter of parameters) {
+          if ('in' in parameter && parameter.in === 'body' && 'schema' in parameter
+            && parameter.schema && 'format' in parameter && parameter.format === 'binary') {
+            parameter.schema = { ...parameter.schema, type: 'string', format: 'binary' }
+          }
+        }
+      },
+    },
+  },
   plugins: [
     '@hey-api/typescript',
     {

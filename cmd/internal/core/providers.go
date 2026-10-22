@@ -1250,11 +1250,39 @@ func provideMediaStorage(provider bridge.Provider, cfg config.Config) storagepkg
 	return fallback.New(primary, secondary)
 }
 
-func provideMediaService(log *slog.Logger, provider storagepkg.Provider, cfg config.Config) *media.Service {
+func provideMediaService(lc fx.Lifecycle, log *slog.Logger, provider storagepkg.Provider, cfg config.Config) (*media.Service, error) {
 	service := media.NewService(log, provider)
 	service.SetRequirePersistence(strings.TrimSpace(cfg.Files.OriginalsRoot) != "")
 	service.SetMaxUploadBytes(cfg.Files.MaxUploadBytes)
-	return service
+	if root := strings.TrimSpace(cfg.Files.OriginalsRoot); root != "" {
+		if err := service.EnableUploads(root); err != nil {
+			return nil, err
+		}
+		ctx, cancel := context.WithCancel(context.Background())
+		done := make(chan struct{})
+		lc.Append(fx.Hook{
+			OnStart: func(context.Context) error {
+				go func() {
+					defer close(done)
+					ticker := time.NewTicker(time.Hour)
+					defer ticker.Stop()
+					for {
+						if err := service.Uploads().Sweep(ctx); err != nil && !errors.Is(err, context.Canceled) && !errors.Is(err, media.ErrUploadBusy) {
+							log.ErrorContext(ctx, "upload staging cleanup failed", slog.Any("error", err))
+						}
+						select {
+						case <-ctx.Done():
+							return
+						case <-ticker.C:
+						}
+					}
+				}()
+				return nil
+			},
+			OnStop: func(context.Context) error { cancel(); <-done; return service.Uploads().Close() },
+		})
+	}
+	return service, nil
 }
 
 func provideAudioRegistry() *audiopkg.Registry {
