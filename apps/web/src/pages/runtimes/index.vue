@@ -174,7 +174,7 @@
                   variant="secondary"
                   size="sm"
                 >
-                  {{ t('agenvo.capability') }}
+                  {{ agenvoCapabilityLabel(runtime, t) }}
                 </Badge>
                 <Badge
                   v-if="accessCount(runtime) > 0"
@@ -197,7 +197,7 @@
                     class="size-1.5 rounded-full"
                     :class="runtime.online ? 'bg-success' : 'bg-accent-gray-border'"
                   />
-                  {{ runtime.online ? t('runtimes.status.online') : t('runtimes.status.offline') }}
+                  {{ t(`runtimes.status.${runtimeAvailability(runtime)}`) }}
                 </span>
                 <Button
                   v-if="!runtime.online && runtime.key"
@@ -339,6 +339,7 @@
 </template>
 
 <script setup lang="ts">
+import { runtimeAvailability, agenvoCapabilityLabel } from '@/utils/workspace-target'
 import { computed, inject, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'

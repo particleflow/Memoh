@@ -16,6 +16,7 @@ type Runtime struct {
 	Key           string    `json:"key"`
 	CreatedAt     time.Time `json:"created_at"`
 	Online        bool      `json:"online"`
+	Availability  string    `json:"availability,omitempty"`
 	WorkspaceBase string    `json:"workspace_base,omitempty"`
 	Hostname      string    `json:"hostname,omitempty"`
 	OS            string    `json:"os,omitempty"`

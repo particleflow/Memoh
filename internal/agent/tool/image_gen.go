@@ -1,8 +1,10 @@
 package tools
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -10,9 +12,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
-	"time"
 
 	alibabaimages "github.com/felinics/twilight/provider/alibabacloud/images"
 	openaiimages "github.com/felinics/twilight/provider/openai/images"
@@ -21,15 +21,13 @@ import (
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/models"
-	"github.com/felinics/memoh/internal/models/modelretry"
 	"github.com/felinics/memoh/internal/providers"
 	"github.com/felinics/memoh/internal/settings"
-	"github.com/felinics/memoh/internal/workspace/bridge"
 )
 
 const (
-	imageGenDir            = "/data/generated-images"
 	maxGeneratedImageBytes = 50 << 20
 	maxImageErrorBodyBytes = 512
 )
@@ -53,12 +51,11 @@ func (e *imageModelTextResponseError) Error() string {
 }
 
 type ImageGenProvider struct {
-	logger     *slog.Logger
-	settings   *settings.Service
-	models     *models.Service
-	queries    dbstore.Queries
-	containers bridge.Provider
-	dataMount  string
+	logger   *slog.Logger
+	settings *settings.Service
+	models   *models.Service
+	queries  dbstore.Queries
+	media    *media.Service
 }
 
 func NewImageGenProvider(
@@ -66,19 +63,17 @@ func NewImageGenProvider(
 	settingsSvc *settings.Service,
 	modelsSvc *models.Service,
 	queries dbstore.Queries,
-	containers bridge.Provider,
-	dataMount string,
+	mediaService *media.Service,
 ) *ImageGenProvider {
 	if log == nil {
 		log = slog.Default()
 	}
 	return &ImageGenProvider{
-		logger:     log.With(slog.String("tool", "image_gen")),
-		settings:   settingsSvc,
-		models:     modelsSvc,
-		queries:    queries,
-		containers: containers,
-		dataMount:  dataMount,
+		logger:   log.With(slog.String("tool", "image_gen")),
+		settings: settingsSvc,
+		models:   modelsSvc,
+		queries:  queries,
+		media:    mediaService,
 	}
 }
 
@@ -97,7 +92,7 @@ func (p *ImageGenProvider) Tools(ctx context.Context, session SessionContext) ([
 	if strings.TrimSpace(botSettings.ImageModelID) == "" {
 		return nil, nil
 	}
-	description := "Generate an image from a text description using the configured image generation model. Returns the workspace file path of the generated image."
+	description := "Generate an image from a text description using the configured image generation model. Returns a persisted file content_hash for the existing attachment/send flow."
 	if session.CanUseLocalMessagingShortcut() {
 		description += " The generated image is automatically shown to the user in the current conversation."
 	} else {
@@ -113,11 +108,29 @@ type generateImageArgs struct {
 
 func (p *ImageGenProvider) imageTools(session SessionContext, description string) []toolexec.Tool {
 	sess := session
-	return []toolexec.Tool{toolexec.Define(ToolGenerateImage().String(), description,
-		func(execCtx *toolexec.ToolExecContext, args generateImageArgs) (sdk.ToolOutput, error) {
+	return []toolexec.Tool{{
+		Name:        ToolGenerateImage().String(),
+		Description: description,
+		Parameters:  toolexec.SchemaFor[generateImageArgs](toolexec.Strict()),
+		Execute: func(execCtx *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
+			// The shared typed decoder tolerates unknown fields. Validate here so
+			// a withdrawn operation cannot silently become a billed generation.
+			var fields map[string]json.RawMessage
+			if err := input.Unmarshal(&fields); err != nil || fields == nil {
+				return sdk.ToolOutput{}, errors.New("generate_image requires an object containing only prompt and size")
+			}
+			for key := range fields {
+				if key != "prompt" && key != "size" {
+					return sdk.ToolOutput{}, errors.New("generate_image accepts only prompt and size")
+				}
+			}
+			args, err := toolexec.DecodeArguments[generateImageArgs](ToolGenerateImage().String(), input)
+			if err != nil {
+				return sdk.ToolOutput{}, err
+			}
 			return toolexec.OutputPair(p.execGenerateImage(execCtx.Context, sess, execCtx.ToolCallID, args))
 		},
-	)}
+	}}
 }
 
 func (*ImageGenProvider) Usage(_ context.Context, session SessionContext, available AvailableTools) string {
@@ -130,10 +143,10 @@ func (*ImageGenProvider) Usage(_ context.Context, session SessionContext, availa
 	if session.CanUseLocalMessagingShortcut() {
 		items = append(items, genRef+" already shows the generated image to the user in the current conversation; do not send it there again.")
 		if hasSend {
-			items = append(items, "To share a generated image with another channel or person, call "+sendRef+" with the returned path in `attachments`.")
+			items = append(items, "To share a generated image with another channel or person, call "+sendRef+" with the returned content_hash in `attachments`.")
 		}
 	} else if hasSend {
-		items = append(items, genRef+" only saves the image to the workspace; the user never sees it automatically. Share it by calling "+sendRef+" with the returned path in `attachments`.")
+		items = append(items, genRef+" only saves the image to the file store; the user never sees it automatically. Share it by calling "+sendRef+" with the returned content_hash in `attachments`.")
 	}
 	return usageSection("Image generation", items)
 }
@@ -142,6 +155,9 @@ func (p *ImageGenProvider) execGenerateImage(ctx context.Context, session Sessio
 	botID := strings.TrimSpace(session.BotID)
 	if botID == "" {
 		return nil, errors.New("bot_id is required")
+	}
+	if p.media == nil || !p.media.RequiresPersistence() {
+		return nil, errors.New("persistent attachment storage is unavailable")
 	}
 	prompt := strings.TrimSpace(args.Prompt)
 	if prompt == "" {
@@ -194,101 +210,35 @@ func (p *ImageGenProvider) execGenerateImage(ctx context.Context, session Sessio
 		}
 		return nil, fmt.Errorf("image generation failed: %w", err)
 	}
-	imgBytes := image.Data
+	return p.persistGeneratedImage(ctx, session, toolCallID, image)
+}
 
-	ext := "png"
-	switch {
-	case strings.Contains(image.MediaType, "jpeg"), strings.Contains(image.MediaType, "jpg"):
-		ext = "jpg"
-	case strings.Contains(image.MediaType, "webp"):
-		ext = "webp"
+// Persist through the same content-addressed file service used by attachments.
+// A storage failure never sends inline image bytes back to the model.
+func (p *ImageGenProvider) persistGeneratedImage(ctx context.Context, session SessionContext, toolCallID string, image generatedImage) (any, error) {
+	asset, err := p.media.Ingest(ctx, media.IngestInput{BotID: session.BotID, Mime: image.MediaType, Reader: bytes.NewReader(image.Data), MaxBytes: maxGeneratedImageBytes})
+	if err != nil {
+		return map[string]any{"note": "Image generation finished, but the file could not be saved. Do not repeat generation to retry file delivery."}, nil
 	}
-
-	imageDir := strings.TrimRight(p.dataMount, "/") + strings.TrimPrefix(imageGenDir, "/data")
-	if resolver, ok := p.containers.(bridge.WorkspaceInfoProvider); ok {
-		if info, err := resolver.WorkspaceInfo(ctx, botID); err == nil &&
-			info.Backend == bridge.WorkspaceBackendRemote &&
-			strings.TrimSpace(info.DefaultWorkDir) != "" {
-			imageDir = strings.TrimRight(info.DefaultWorkDir, "/") + "/generated-images"
-		}
-	}
-	containerPath := fmt.Sprintf("%s/%d.%s", imageDir, time.Now().UnixMilli(), ext)
-
-	if p.containers == nil {
-		return p.unsavedImageResult(session, toolCallID, image, "Image generated, but the workspace is not reachable, so the file was not saved"), nil
-	}
-
-	client, clientErr := p.containers.MCPClient(ctx, botID)
-	if clientErr != nil {
-		return p.unsavedImageResult(session, toolCallID, image, "Image generated, but the workspace is not reachable, so the file was not saved"), nil
-	}
-
-	if writeErr := client.WriteFile(ctx, containerPath, imgBytes); writeErr != nil {
-		return p.unsavedImageResult(session, toolCallID, image, fmt.Sprintf("Image generated (failed to save: %s)", writeErr.Error())), nil
-	}
-
-	result := map[string]any{
-		"path":       containerPath,
-		"media_type": image.MediaType,
-		"size_bytes": len(imgBytes),
-	}
-	if p.deliverGeneratedImage(session, toolCallID, Attachment{
-		Type: "image",
-		Path: containerPath,
-		Name: path.Base(containerPath),
-		Mime: image.MediaType,
-		Size: int64(len(imgBytes)),
-	}) {
+	result := map[string]any{"content_hash": asset.ContentHash, "media_type": asset.Mime, "size_bytes": asset.SizeBytes}
+	if p.deliverGeneratedImage(session, toolCallID, Attachment{Type: "image", ContentHash: asset.ContentHash, Mime: asset.Mime, Size: asset.SizeBytes, Name: "image"}) {
 		result["delivered"] = "current_conversation"
 	}
 	return result, nil
 }
 
-// deliverGeneratedImage shows the generated image to the user in the current
-// conversation via the live agent stream, mirroring how speak delivers
-// same-conversation voice attachments. Non-interactive runs return false and
-// rely on the model sharing the returned path through the send tool.
+// Non-interactive runs return the same ready reference for the existing send tool.
 func (*ImageGenProvider) deliverGeneratedImage(session SessionContext, toolCallID string, att Attachment) bool {
 	if !session.CanUseLocalMessagingShortcut() {
 		return false
 	}
-	session.Emitter(ToolStreamEvent{
-		Type:        StreamEventAttachment,
-		ToolCallID:  toolCallID,
-		Attachments: []Attachment{att},
-	})
+	session.Emitter(ToolStreamEvent{Type: StreamEventAttachment, ToolCallID: toolCallID, Attachments: []Attachment{att}})
 	return true
 }
 
-// unsavedImageResult handles images that could not be persisted to the
-// workspace: deliver them to the user inline when the live stream allows it,
-// otherwise fall back to returning the image content to the model.
-func (p *ImageGenProvider) unsavedImageResult(session SessionContext, toolCallID string, image generatedImage, text string) map[string]any {
-	if p.deliverGeneratedImage(session, toolCallID, Attachment{
-		Type: "image",
-		URL:  fmt.Sprintf("data:%s;base64,%s", image.MediaType, base64.StdEncoding.EncodeToString(image.Data)),
-		Mime: image.MediaType,
-		Size: int64(len(image.Data)),
-	}) {
-		return map[string]any{
-			"delivered":  "current_conversation",
-			"media_type": image.MediaType,
-			"size_bytes": len(image.Data),
-			"note":       text,
-		}
-	}
-	return map[string]any{
-		"content": []map[string]any{
-			{"type": "text", "text": text},
-			{"type": "image", "data": base64.StdEncoding.EncodeToString(image.Data), "mimeType": image.MediaType},
-		},
-	}
-}
-
 // generateImage asks the image model for one image. A generated image may be
-// billed even when the call that produced it fails, so a call is made again
-// only after a rate-limit answer, which proves no image was made. The
-// DashScope task API is not retried at all: its create and poll requests fail
+// billed even when the call that produced it fails, so this adapter does not
+// retry generation. The DashScope task API is not retried: create and poll fail
 // alike, and creating the task again after a failed poll would generate a
 // second image.
 func (p *ImageGenProvider) generateImage(ctx context.Context, provider sqlc.Provider, apiKey, modelID, prompt, size string) (generatedImage, error) {
@@ -361,7 +311,7 @@ func generateDashScopeImage(ctx context.Context, httpClient *http.Client, baseUR
 	return imageResultToGeneratedImage(ctx, httpClient, result)
 }
 
-func generateOpenAIImagesImage(ctx context.Context, logger *slog.Logger, httpClient *http.Client, baseURL, apiKey, modelID, prompt, size string) (generatedImage, error) {
+func generateOpenAIImagesImage(ctx context.Context, _ *slog.Logger, httpClient *http.Client, baseURL, apiKey, modelID, prompt, size string) (generatedImage, error) {
 	opts := []openaiimages.Option{
 		openaiimages.WithAPIKey(apiKey),
 		openaiimages.WithHTTPClient(httpClient),
@@ -371,22 +321,14 @@ func generateOpenAIImagesImage(ctx context.Context, logger *slog.Logger, httpCli
 	}
 	provider := openaiimages.New(opts...)
 	imageModel := provider.GenerationModel(modelID)
-	result, err := modelretry.Do(ctx, logger, "tool.image_gen", modelretry.Config{}, modelretry.RateLimited,
-		func(ctx context.Context) (*sdk.ImageResult, error) {
-			return sdk.GenerateImage(ctx,
-				sdk.WithImageGenerationModel(imageModel),
-				sdk.WithImagePrompt(prompt),
-				sdk.WithImageSize(size),
-				sdk.WithImageN(1),
-			)
-		})
+	result, err := sdk.GenerateImage(ctx, sdk.WithImageGenerationModel(imageModel), sdk.WithImagePrompt(prompt), sdk.WithImageSize(size), sdk.WithImageN(1))
 	if err != nil {
 		return generatedImage{}, err
 	}
 	return imageResultToGeneratedImage(ctx, httpClient, result)
 }
 
-func generateChatImage(ctx context.Context, logger *slog.Logger, provider sqlc.Provider, apiKey, modelID, prompt, size string) (generatedImage, error) {
+func generateChatImage(ctx context.Context, _ *slog.Logger, provider sqlc.Provider, apiKey, modelID, prompt, size string) (generatedImage, error) {
 	if strings.TrimSpace(size) == "" {
 		size = "1024x1024"
 	}
@@ -410,8 +352,7 @@ func generateChatImage(ctx context.Context, logger *slog.Logger, provider sqlc.P
 		System:   system,
 		Messages: messages,
 	}
-	result, err := modelretry.Do(ctx, logger, "tool.image_gen", modelretry.Config{}, modelretry.RateLimited,
-		func(ctx context.Context) (sdk.ModelResult, error) { return sdkModel.Generate(ctx, request) })
+	result, err := sdkModel.Generate(ctx, request)
 	if err != nil {
 		return generatedImage{}, err
 	}

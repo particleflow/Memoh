@@ -911,8 +911,8 @@ func (p *SpawnProvider) finishAgentRequest(ctx context.Context, key string, resu
 	go p.runAgentRequest(runCtx, key, next)
 }
 
-func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) agentRunResult {
-	res := agentRunResult{
+func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) (res agentRunResult) {
+	res = agentRunResult{
 		AgentID:   req.agentID,
 		SessionID: req.agentSessionID,
 		TaskID:    req.taskID,

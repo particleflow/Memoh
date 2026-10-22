@@ -678,6 +678,9 @@
     "status": {
       "online": "Online",
       "offline": "Offline",
+      "authentication_unavailable": "Authentication unavailable",
+      "connection_unavailable": "Connection unverified",
+      "runtime_unavailable": "Native service unavailable",
       "revoked": "Access removed",
       "owner_mismatch": "No longer available",
       "client_update_required": "Update required"
@@ -1018,6 +1021,42 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "tasks": {
+      "title": "Tasks",
+      "detail": "Task details",
+      "description": "Recorded tasks in this conversation. This view updates while open.",
+      "loadFailed": "Unable to load tasks.",
+      "reload": "Reload view",
+      "result": "Final assistant summary",
+      "unavailable": "No final summary is available.",
+      "truncated": "This summary is truncated.",
+      "businessUnknown": "Business completion remains unverified. Attachments are unavailable.",
+      "cancelIntent": "Cancellation was requested; this does not confirm termination.",
+      "filteredPage": "No accessible tasks on this page. Continue to the next page.",
+      "empty": "No recorded tasks.",
+      "newest": "Back to newest",
+      "next": "Next page",
+      "types": {
+        "subagent": "Subagent",
+        "computer_operation": "Computer task"
+      },
+      "statuses": {
+        "unknown": "Execution status unknown",
+        "submitted": "Submission recorded",
+        "process_exited": "Process exited",
+        "not_started": "Not started",
+        "rejected": "Rejected"
+      },
+      "outcomes": {
+        "succeeded": "Pi completed",
+        "failed": "Pi failed",
+        "aborted": "Pi reported aborted",
+        "incomplete": "Pi result incomplete",
+        "not_started": "Pi not started",
+        "invalid_protocol": "Pi result could not be verified",
+        "output_limit": "Pi result exceeded the observation limit"
+      }
+    },
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",
     "workspaceLinkUnavailable": "This workspace link is unavailable here. Open the conversation in Memoh with workspace access.",
@@ -1118,10 +1157,14 @@
         "commands": "{count} commands",
         "messages": "{count} messages",
         "schedules": "{count} schedules",
-        "media": "{count} media files",
+        "media": "{count} media call | {count} media calls",
         "agents": "{count} agents",
         "steps": "{count} step | {count} steps",
         "sites": "{count} sites"
+      },
+      "outcomes": {
+        "failed": "{count} failed",
+        "pending": "{count} pending"
       },
       "fragmentSeparator": ", "
     },
@@ -2278,6 +2321,8 @@
       "discoverFailed": "OAuth detection failed",
       "authSuccess": "Authorization successful",
       "authFailed": "Authorization failed",
+      "authUnconfirmed": "Authorization was not confirmed. Check the connection before starting another authorization.",
+      "connectionUnverified": "Authorization was saved, but the connection could not be verified.",
       "scopes": "Scopes",
       "authServer": "Authorization Server",
       "clientId": "Client ID",
@@ -4508,7 +4553,8 @@
     "register": "Connect and choose Bots",
     "noConnections": "No active HTTP MCP connection on this Bot. Configure Agenvo in its MCP settings first.",
     "noDevices": "No Herdr instances found on this connection.",
-    "capability": "Agenvo · commands only",
+    "capability": "Agenvo · commands",
+    "agentCapability": "Agenvo · Pi tasks and commands",
     "completed": "Foreground command completed. Output combines stdout and error text.",
     "uncertain": "Command outcome is unknown or rejected. Stopping the wait does not stop Windows execution. Inspect it before retrying.",
     "retained": "Workspace {id} is retained for manual inspection; it was not closed automatically.",

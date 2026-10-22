@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -158,6 +159,20 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 	if f.reads != 0 {
 		t.Fatal("unauthenticated read")
 	}
+	// Exercise the full JWT/authorization chain with actual display content so
+	// every later denial also proves it cannot retain or leak a prior summary.
+	completion, err := os.ReadFile("../sessiontask/testdata/compact-result.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.op.State, f.op.Details = "completed", completion
+	for _, path := range []string{base, detail} {
+		body := call("GET", path, taskUser, 200)
+		if !strings.Contains(body, "Synthetic final answer") || !strings.Contains(body, `"pi_result":"succeeded"`) {
+			t.Fatal("persisted final summary missing")
+		}
+	}
+	before, _ := json.Marshal(f.op)
 	for _, path := range []string{base, detail} {
 		call("GET", path, taskUser, 200)
 		call("GET", path, taskOwner, 404)
@@ -188,6 +203,10 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 	}
 	if f.relayCalls != 0 || f.op.Revision != 0 {
 		t.Fatal("GET caused an external call or mutation")
+	}
+	after, _ := json.Marshal(f.op)
+	if string(before) != string(after) {
+		t.Fatal("GET changed receipt")
 	}
 }
 

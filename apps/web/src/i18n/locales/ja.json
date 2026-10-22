@@ -675,6 +675,9 @@
     "status": {
       "online": "オンライン",
       "offline": "オフライン",
+      "authentication_unavailable": "認証を利用できません",
+      "connection_unavailable": "接続状態を確認できません",
+      "runtime_unavailable": "ネイティブサービスを利用できません",
       "revoked": "アクセス解除済み",
       "owner_mismatch": "利用できません",
       "client_update_required": "更新が必要です"
@@ -1015,6 +1018,42 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "tasks": {
+      "title": "タスク",
+      "detail": "タスクの詳細",
+      "description": "この会話のタスク記録。表示中は自動更新されます。",
+      "loadFailed": "タスクを読み込めません。",
+      "reload": "再読み込み",
+      "result": "最終応答の要約",
+      "unavailable": "最終応答の要約はありません。",
+      "truncated": "要約は一部省略されています。",
+      "businessUnknown": "業務目標の達成は未検証です。添付成果物は利用できません。",
+      "cancelIntent": "キャンセル要求は記録されていますが、終了の確認ではありません。",
+      "filteredPage": "このページに閲覧可能なタスクはありません。次のページに進めます。",
+      "empty": "タスク記録はありません。",
+      "newest": "最新に戻る",
+      "next": "次のページ",
+      "types": {
+        "subagent": "サブエージェント",
+        "computer_operation": "コンピュータータスク"
+      },
+      "statuses": {
+        "unknown": "実行状態は不明",
+        "submitted": "送信を記録済み",
+        "process_exited": "プロセス終了",
+        "not_started": "未開始",
+        "rejected": "拒否済み"
+      },
+      "outcomes": {
+        "succeeded": "Pi 完了",
+        "failed": "Pi 失敗",
+        "aborted": "Pi が中止を報告",
+        "incomplete": "Pi の結果は不完全",
+        "not_started": "Pi 未開始",
+        "invalid_protocol": "Pi の結果を検証できません",
+        "output_limit": "Pi の結果が確認上限を超過"
+      }
+    },
     "uploadingAttachments": "添付ファイルをアップロード中…",
     "attachmentUploadTooLarge": "「{name}」はこのサーバーの上限（{limit} バイト）を超えています。小さいファイルを選んでください。",
     "workspaceLinkUnavailable": "ここではワークスペースのリンクを開けません。ワークスペースへのアクセス権がある Memoh の会話で開いてください。",
@@ -1102,10 +1141,14 @@
         "commands": "{count} コマンド",
         "messages": "{count} 件のメッセージ",
         "schedules": "{count} 件のスケジュール",
-        "media": "{count} 個のメディアファイル",
+        "media": "メディア呼び出し {count} 件",
         "agents": "{count} のAgent",
         "steps": "{count} ステップ",
         "sites": "{count} 件のサイト"
+      },
+      "outcomes": {
+        "failed": "失敗 {count} 件",
+        "pending": "応答待ち {count} 件"
       },
       "fragmentSeparator": "、"
     },
@@ -2245,6 +2288,8 @@
       "discoverFailed": "OAuth 検出に失敗しました",
       "authSuccess": "認可成功",
       "authFailed": "認証に失敗しました",
+      "authUnconfirmed": "今回の認可結果を確認できませんでした。再認可する前に接続を確認してください。",
+      "connectionUnverified": "認可は保存されましたが、接続を確認できませんでした。",
       "scopes": "スコープ",
       "authServer": "認可サーバー",
       "clientId": "クライアントID",
@@ -4502,7 +4547,8 @@
     "register": "接続して Bot を選択",
     "noConnections": "この Bot に有効な HTTP MCP 接続がありません。MCP 設定で Agenvo を設定してください。",
     "noDevices": "この接続に Herdr インスタンスが見つかりません。",
-    "capability": "Agenvo · コマンドのみ",
+    "capability": "Agenvo · コマンド",
+    "agentCapability": "Agenvo · Pi タスクとコマンド",
     "completed": "フォアグラウンドコマンドが完了しました。標準出力とエラーテキストをまとめて表示します。",
     "uncertain": "コマンドの結果が不明、または拒否されました。待機を停止しても Windows 上の実行は終了しません。再試行前に確認してください。",
     "retained": "ワークスペース {id} は手動確認のため保持され、自動終了されていません。",

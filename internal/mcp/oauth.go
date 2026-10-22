@@ -26,10 +26,11 @@ import (
 
 // OAuthService manages OAuth flows for MCP connections.
 type OAuthService struct {
-	queries     dbstore.Queries
-	logger      *slog.Logger
-	httpClient  *http.Client
-	callbackURL string
+	queries        dbstore.Queries
+	logger         *slog.Logger
+	httpClient     *http.Client
+	callbackURL    string
+	authorizations *oauthAuthorizations
 }
 
 func NewOAuthService(log *slog.Logger, queries dbstore.Queries, callbackURL string) *OAuthService {
@@ -37,10 +38,11 @@ func NewOAuthService(log *slog.Logger, queries dbstore.Queries, callbackURL stri
 		log = slog.Default()
 	}
 	return &OAuthService{
-		queries:     queries,
-		logger:      log.With(slog.String("service", "mcp_oauth")),
-		httpClient:  &http.Client{Timeout: 15 * time.Second},
-		callbackURL: callbackURL,
+		queries:        queries,
+		logger:         log.With(slog.String("service", "mcp_oauth")),
+		httpClient:     &http.Client{Timeout: 15 * time.Second},
+		callbackURL:    callbackURL,
+		authorizations: &oauthAuthorizations{entries: make(map[string]oauthAuthorizationEntry)},
 	}
 }
 
@@ -67,18 +69,20 @@ type DiscoveryResult struct {
 
 // OAuthStatus describes the current OAuth state of a connection.
 type OAuthStatus struct {
-	Configured  bool       `json:"configured"`
-	HasToken    bool       `json:"has_token"`
-	Expired     bool       `json:"expired"`
-	Scopes      string     `json:"scopes,omitempty"`
-	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
-	AuthServer  string     `json:"auth_server,omitempty"`
-	CallbackURL string     `json:"callback_url"`
+	Configured    bool                `json:"configured"`
+	HasToken      bool                `json:"has_token"`
+	Expired       bool                `json:"expired"`
+	Scopes        string              `json:"scopes,omitempty"`
+	ExpiresAt     *time.Time          `json:"expires_at,omitempty"`
+	AuthServer    string              `json:"auth_server,omitempty"`
+	CallbackURL   string              `json:"callback_url"`
+	Authorization *OAuthAuthorization `json:"authorization,omitempty"`
 }
 
 // AuthorizeResult holds the authorization URL to redirect the user to.
 type AuthorizeResult struct {
 	AuthorizationURL string `json:"authorization_url"`
+	AuthorizationID  string `json:"authorization_id"`
 }
 
 // Discover performs the MCP OAuth discovery flow:
@@ -296,7 +300,7 @@ func (s *OAuthService) StartAuthorization(ctx context.Context, connectionID, cli
 	}
 
 	authURL := token.AuthorizationEndpoint + "?" + params.Encode()
-	return &AuthorizeResult{AuthorizationURL: authURL}, nil
+	return &AuthorizeResult{AuthorizationURL: authURL, AuthorizationID: s.authorizations.begin(connectionID, state)}, nil
 }
 
 // HandleCallback exchanges the authorization code for tokens.
@@ -324,6 +328,8 @@ func (s *OAuthService) HandleCallback(ctx context.Context, state, code string) (
 	if token.TokenEndpoint == "" || token.PkceCodeVerifier == "" {
 		return "", fmt.Errorf("%w: missing token endpoint or code verifier", ErrOAuthStateInvalid)
 	}
+	succeeded := false
+	defer func() { s.authorizations.finish(token.ConnectionID.String(), state, succeeded) }()
 
 	redirectURI := token.RedirectUri
 	if redirectURI == "" {
@@ -351,11 +357,14 @@ func (s *OAuthService) HandleCallback(ctx context.Context, state, code string) (
 		return "", fmt.Errorf("failed to save tokens: %w", err)
 	}
 
-	_ = s.queries.UpdateMCPConnectionAuthType(ctx, sqlc.UpdateMCPConnectionAuthTypeParams{
+	if err := s.queries.UpdateMCPConnectionAuthType(ctx, sqlc.UpdateMCPConnectionAuthTypeParams{
 		ID:       token.ConnectionID,
 		AuthType: "oauth",
-	})
+	}); err != nil {
+		return "", fmt.Errorf("failed to enable oauth connection: %w", err)
+	}
 
+	succeeded = true
 	return token.ConnectionID.String(), nil
 }
 
@@ -372,12 +381,12 @@ func (s *OAuthService) GetValidToken(ctx context.Context, connectionID string) (
 	}
 
 	if token.AccessToken == "" {
-		return "", errors.New("no access token available, authorization required")
+		return "", oauthFailure("access_token_missing", 0, "")
 	}
 
 	if token.ExpiresAt.Valid && time.Now().After(token.ExpiresAt.Time.Add(-30*time.Second)) {
 		if token.RefreshToken == "" {
-			return "", errors.New("access token expired and no refresh token available")
+			return "", oauthFailure("refresh_token_missing", 0, "")
 		}
 		refreshed, err := s.refreshToken(ctx, token.TokenEndpoint, token.RefreshToken, token.ClientID, token.ResourceUri)
 		if err != nil {
@@ -403,7 +412,7 @@ func (s *OAuthService) GetValidToken(ctx context.Context, connectionID string) (
 			ExpiresAt:    expiresAt,
 			Scope:        refreshed.Scope,
 		}); err != nil {
-			s.logger.WarnContext(ctx, "failed to save refreshed tokens", slog.Any("error", err))
+			s.logger.WarnContext(ctx, "failed to save refreshed tokens", slog.String("oauth_failure_category", "token_persist_failed"))
 		}
 		return refreshed.AccessToken, nil
 	}
@@ -747,29 +756,29 @@ func (s *OAuthService) refreshToken(ctx context.Context, tokenEndpoint, refreshT
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, tokenEndpoint, strings.NewReader(data.Encode()))
 	if err != nil {
-		return nil, err
+		return nil, oauthFailure("request_invalid", 0, "")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := s.httpClient.Do(req) //nolint:gosec // G704: URL is from OAuth server discovery metadata or operator config, not user input
 	if err != nil {
-		return nil, err
+		return nil, oauthTransportFailure(err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
 	if err != nil {
-		return nil, fmt.Errorf("failed to read refresh response: %w", err)
+		return nil, oauthFailure("response_read", resp.StatusCode, "")
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, errs.NewDependency("token refresh request failed", slog.Int("status", resp.StatusCode))
+		return nil, oauthResponseFailure("http_error", resp.StatusCode, body)
 	}
 
 	tok, err := parseTokenResponse(body)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse refresh response: %w", err)
+		return nil, oauthResponseFailure("response_invalid", resp.StatusCode, body)
 	}
 	return tok, nil
 }

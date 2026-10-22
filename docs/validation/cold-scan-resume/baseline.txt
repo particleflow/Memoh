@@ -1,0 +1,6 @@
+=== RUN   TestColdScanResumesAcrossRequestDeadlines
+    cold_scan_linux_test.go:43: 12 deadlines exhausted without completing: scan offsets=[0 0 0 0 0 0 0 0 0 0 0 0] read bytes=12582912
+--- FAIL: TestColdScanResumesAcrossRequestDeadlines (0.45s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/storage/providers/localfs	0.470s
+FAIL

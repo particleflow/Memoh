@@ -257,7 +257,7 @@ func emitWaitProgress(sendProgress func(sdk.ToolOutput), payload map[string]any)
 	}
 }
 
-func (p *BackgroundProvider) execGetBackgroundStatus(_ context.Context, session SessionContext, args taskArgs) (any, error) {
+func (p *BackgroundProvider) execGetBackgroundStatus(ctx context.Context, session SessionContext, args taskArgs) (any, error) {
 	taskID := strings.TrimSpace(args.TaskID)
 	if taskID == "" {
 		return nil, errors.New("task_id is required")
@@ -266,7 +266,9 @@ func (p *BackgroundProvider) execGetBackgroundStatus(_ context.Context, session 
 	if task == nil {
 		return nil, fmt.Errorf("task %s not found", taskID)
 	}
-	return backgroundStatusMap(session, task.Snapshot()), nil
+	snapshot := task.Snapshot()
+	result := backgroundStatusMap(session, snapshot)
+	return result, nil
 }
 
 func (p *BackgroundProvider) execKillBackground(_ context.Context, session SessionContext, args taskArgs) (any, error) {

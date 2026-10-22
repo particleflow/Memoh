@@ -895,7 +895,8 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 		c.Response().Header().Set("Cache-Control", "private, max-age=86400")
 	}
 	c.Response().Header().Set("ETag", `"`+asset.ContentHash+`"`)
-	// OpenSeekable verifies the complete original before any range is served.
+	// OpenSeekable verifies the full original on cold reads and each emitted
+	// block on supported warm reads; authorization above is never cached.
 	// ServeContent owns Range, If-Range, HEAD, 206 and 416 semantics.
 	http.ServeContent(c.Response(), c.Request(), "", time.Time{}, reader)
 	return nil

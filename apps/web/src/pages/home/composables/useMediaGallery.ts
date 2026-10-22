@@ -2,9 +2,10 @@ import { computed, ref, type Ref } from 'vue'
 import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { useChatStore } from '@/store/chat-list'
 import type { ChatMessage } from '@/store/chat-list'
+import type { UIAttachment } from '@/composables/api/useChat.types'
 import type { MediaGalleryItem } from '../components/media-gallery-lightbox.vue'
 
-function isMediaType(att: Record<string, unknown>): boolean {
+function isMediaType(att: UIAttachment): boolean {
   const type = String(att.type ?? '').toLowerCase()
   if (type === 'image' || type === 'gif' || type === 'video') return true
   const mime = String(att.mime ?? '').toLowerCase()
@@ -17,10 +18,10 @@ function isBrowserAccessibleUrl(url: string): boolean {
   return lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('data:')
 }
 
-function resolveBotId(att: Record<string, unknown>): string {
+function resolveBotId(att: UIAttachment): string {
   let botId = String(att.bot_id ?? '').trim()
   if (botId) return botId
-  const meta = att.metadata as Record<string, unknown> | undefined
+  const meta = att.metadata
   botId = String(meta?.bot_id ?? '').trim()
   if (botId) return botId
   // Fall back to the currently active bot in the chat store.
@@ -32,7 +33,7 @@ function resolveBotId(att: Record<string, unknown>): string {
   }
 }
 
-function resolveAssetApiUrl(att: Record<string, unknown>): string {
+function resolveAssetApiUrl(att: UIAttachment): string {
   const contentHash = String(att.content_hash ?? '').trim()
   if (!contentHash) return ''
   const botId = resolveBotId(att)
@@ -44,7 +45,7 @@ function resolveAssetApiUrl(att: Record<string, unknown>): string {
   })
 }
 
-function resolveUrl(att: Record<string, unknown>): string {
+function resolveUrl(att: UIAttachment): string {
   // Prefer asset API when content_hash is available (reliable, auth-aware).
   const assetUrl = resolveAssetApiUrl(att)
   if (assetUrl) return assetUrl

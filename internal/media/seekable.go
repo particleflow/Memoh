@@ -8,6 +8,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
+
+	"github.com/felinics/memoh/internal/storage"
 )
 
 // ReadSeekCloser is a verified media stream usable for HTTP byte ranges.
@@ -17,9 +20,26 @@ type ReadSeekCloser interface {
 	io.Closer
 }
 
-// OpenSeekable retains originals' full-file verification. Legacy streaming
-// providers are spooled to disk, never memory, and verified before serving.
+// OpenSeekable uses a provider's explicit verified-range contract when present.
+// Legacy providers retain full-file verification and disk-only spooling.
 func (s *Service) OpenSeekable(ctx context.Context, botID, contentHash string) (ReadSeekCloser, Asset, error) {
+	if opener, ok := s.provider.(storage.VerifiedRangeOpener); ok {
+		asset, err := s.Resolve(ctx, botID, contentHash)
+		if err != nil {
+			return nil, Asset{}, err
+		}
+		r, err := opener.OpenVerifiedRange(ctx, path.Join(botID, asset.StorageKey))
+		if err == nil {
+			if r.VerifiedContentHash() != asset.ContentHash {
+				_ = r.Close()
+				return nil, Asset{}, errors.New("verified range content identity mismatch")
+			}
+			return r, asset, nil
+		}
+		if !errors.Is(err, storage.ErrVerifiedRangeUnsupported) {
+			return nil, Asset{}, fmt.Errorf("open verified media range: %w", err)
+		}
+	}
 	reader, asset, err := s.Open(ctx, botID, contentHash)
 	if err != nil {
 		return nil, Asset{}, err

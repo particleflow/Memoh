@@ -1,8 +1,12 @@
+// @vitest-environment jsdom
 import { ref } from 'vue'
 import { client } from '@memohai/sdk/client'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { resolveUrl, useMediaGallery } from './useMediaGallery'
 import type { ChatMessage } from '@/store/chat-list'
+import type { UIAttachment } from '@/composables/api/useChat.types'
+
+vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'active-bot' }) }))
 
 function stubLocalStorage() {
   const store = new Map<string, string>()
@@ -81,5 +85,16 @@ describe('useMediaGallery', () => {
       bot_id: 'bot 1',
       content_hash: 'sha256:asset/1',
     })).toBe('http://127.0.0.1:18080/bots/bot%201/media/sha256%3Aasset%2F1?token=token%20with%20spaces')
+  })
+
+  it('preserves the typed attachment identity and stored hash over a direct URL', () => {
+    const attachment: UIAttachment = {
+      type: 'image',
+      content_hash: 'sha256:synthetic',
+      metadata: { bot_id: 'source-bot' },
+      url: 'https://example.invalid/stale-image.png',
+    }
+    expect(resolveUrl(attachment)).toBe('/api/bots/source-bot/media/sha256%3Asynthetic')
+    expect(resolveUrl({ type: 'image', url: '/data/private-image.png' })).toBe('')
   })
 })

@@ -26,18 +26,16 @@ func imagesServer(t *testing.T, first int, calls *atomic.Int32) *httptest.Server
 	return server
 }
 
-// A rate-limited image request made no image, so it is made again.
-func TestGenerateOpenAIImagesImageRetriesRateLimit(t *testing.T) {
+// The adapter makes one generation request, including on rate limits. A provider
+// error does not prove that replaying the request cannot create a second image.
+func TestGenerateOpenAIImagesImageDoesNotRetryRateLimit(t *testing.T) {
 	t.Parallel()
 
 	var calls atomic.Int32
 	server := imagesServer(t, http.StatusTooManyRequests, &calls)
-	image, err := generateOpenAIImagesImage(context.Background(), nil, http.DefaultClient, server.URL, "openai-key", "gpt-image-1", "a cube", "1024x1024")
-	if err != nil {
-		t.Fatalf("generateOpenAIImagesImage() error = %v, want the retried image", err)
-	}
-	if calls.Load() != 2 || string(image.Data) != string(testPNGBytes) {
-		t.Fatalf("image = %v after %d calls, want the image after 2", image.Data, calls.Load())
+	_, err := generateOpenAIImagesImage(context.Background(), nil, http.DefaultClient, server.URL, "openai-key", "gpt-image-1", "a cube", "1024x1024")
+	if err == nil || calls.Load() != 1 {
+		t.Fatalf("err=%v calls=%d, want one failed attempt", err, calls.Load())
 	}
 }
 

@@ -165,6 +165,7 @@
 </template>
 
 <script setup lang="ts">
+import { runtimeAvailability, workspaceTargetStatus } from '@/utils/workspace-target'
 import { computed, inject, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -292,7 +293,7 @@ const computerRows = computed<ComputerRow[]>(() => {
       runtimeId: runtime.id,
       targetId: target?.target_id,
       name: runtimeName(runtime),
-      status: target ? targetStatus(target) : (runtime.online ? 'online' : 'offline'),
+      status: target ? targetStatus(target) : runtimeAvailability(runtime),
       primary: target?.primary ?? false,
       enabled: !!target,
     })
@@ -337,13 +338,16 @@ function runtimeName(runtime: { id?: string, name?: string, hostname?: string })
 }
 
 function targetStatus(target: WorkspaceWorkspaceTarget): string {
-  return target.status || 'offline'
+  return target.status || workspaceTargetStatus(target)
 }
 
 function statusLabel(status: string): string {
   switch (status) {
     case 'online':
     case 'offline':
+    case 'authentication_unavailable':
+    case 'connection_unavailable':
+    case 'runtime_unavailable':
     case 'revoked':
     case 'owner_mismatch':
     case 'client_update_required':

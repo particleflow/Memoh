@@ -93,6 +93,10 @@ func (s *Service) finishBatchFile(ctx context.Context, bot string, f *BatchTrans
 }
 
 func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBinding, r dbstore.ComputerOperationRecord, d Details) (Result, error) {
+	return s.readBatch(ctx, b, r, d, false)
+}
+
+func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, r dbstore.ComputerOperationRecord, d Details, diagnostics bool) (Result, error) {
 	batch := d.Batch
 	if batch == nil {
 		return Result{}, ErrInvalid
@@ -132,6 +136,9 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 		// slot, including on failure, without claiming Pi/AI success or retrying.
 		r.State = "completed"
 		d.Phase = "pi_exited_output_pending"
+		if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion {
+			d.Phase = "pi_exited_result_pending"
+		}
 		d.ExitCode = &receipt.ExitCode
 		if err := save(); err != nil {
 			return Result{}, err
@@ -172,9 +179,46 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 			return result(current, currentDetails), nil
 		}
 	}
+	if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion && !diagnostics {
+		if batch.Result != nil {
+			return result(r, d), nil
+		}
+		if !batch.Receipt.Started {
+			batch.Result = &agenvo.PiJSONResult{Outcome: "not_started"}
+		} else {
+			meta := batch.Receipt.Completion
+			if meta == nil {
+				return result(r, d), agenvo.ErrUnknown
+			}
+			// At most 8 KiB / four fixed pages. No log ingestion or model-driven
+			// continuation is needed; failed reads only retry this immutable file.
+			var raw []byte
+			for int64(len(raw)) < meta.Size {
+				page, err := s.relay.ReadBatchPage(readCtx, scope(b, r.TargetID), batch.Progress, *batch.Receipt, *meta, int64(len(raw)))
+				if err != nil {
+					return result(r, d), err
+				}
+				raw = append(raw, page...)
+			}
+			parsed, err := agenvo.ParseBatchCompletion(raw, batch.Progress, *batch.Receipt)
+			if err != nil {
+				return result(r, d), err
+			}
+			batch.Result = &parsed
+		}
+		d.Output, d.Truncated = batch.Result.Output, batch.Result.Truncated
+		d.Phase = "pi_" + batch.Result.Outcome
+		if err := save(); err != nil {
+			return Result{}, err
+		}
+		return result(r, d), nil
+	}
 	// Release the invocation slot, but do not claim AI success or expose refs.
 	for _, f := range batch.Files {
 		if f.Meta.Size > 64<<20 {
+			if diagnostics {
+				return result(r, d), agenvo.ErrUnsupported // never overwrite a known Pi outcome
+			}
 			batch.Result = &agenvo.PiJSONResult{Outcome: "output_limit"}
 			d.Phase = "pi_output_limit"
 			if err := save(); err != nil {
@@ -183,7 +227,7 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 			return result(r, d), nil
 		}
 	}
-	if batch.Result != nil {
+	if batch.Result != nil && !diagnostics {
 		return result(r, d), nil
 	}
 	if s.assets == nil {
@@ -225,6 +269,9 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 				return Result{}, err
 			}
 		}
+	}
+	if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion {
+		return result(r, d), nil // optional logs cannot decide or change the Pi result
 	}
 	target, err := s.relay.ResolveTarget(pinned, scope(b, r.TargetID))
 	if err != nil {

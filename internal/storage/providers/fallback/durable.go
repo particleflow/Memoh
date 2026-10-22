@@ -58,6 +58,25 @@ func (p *Durable) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 	return p.canonical.Open(ctx, key)
 }
 
+func (p *Durable) OpenVerifiedRange(ctx context.Context, key string) (storage.VerifiedRangeReader, error) {
+	opener, ok := p.canonical.(storage.VerifiedRangeOpener)
+	if !ok {
+		return nil, storage.ErrVerifiedRangeUnsupported
+	}
+	r, err := opener.OpenVerifiedRange(ctx, key)
+	if err == nil || !errors.Is(err, fs.ErrNotExist) {
+		return r, err
+	}
+	// Keep the existing copy-on-first-read migration. Corrupt or changed
+	// canonical objects must never silently select a workspace copy.
+	legacy, err := p.Open(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	_ = legacy.Close()
+	return opener.OpenVerifiedRange(ctx, key)
+}
+
 func (p *Durable) AccessPath(ctx context.Context, key string) string {
 	value, _ := p.EnsureAccessPath(ctx, key)
 	return value

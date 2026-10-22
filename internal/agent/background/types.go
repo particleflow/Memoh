@@ -46,6 +46,7 @@ type Task struct {
 	StartedAt      time.Time
 	CompletedAt    time.Time
 
+	queuedContext  context.Context // submitting host context; never inherited from the previous task
 	mu             sync.Mutex
 	cancel         context.CancelFunc
 	stopRequested  bool            // running agent task cancellation awaits its runtime terminal

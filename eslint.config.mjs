@@ -10,6 +10,16 @@ export default [
   // (pinned verbatim; a freshness test diffs them against upstream).
   { ignores: ['**/node_modules/**', '**/dist/**', '**/out/**', '**/cache/**', '**/target/**', '**/.toolkit/**', 'packages/sdk/src/**', 'internal/**/protocolref/**'] },
   {
+    // This finite Node CLI is embedded as CommonJS, outside the Web ESM build.
+    // Permit only its Node builtins; keep the import rule for other modules.
+    files: ['internal/agenvo/pi_result.cjs'],
+    rules: {
+      '@typescript-eslint/no-require-imports': ['error', {
+        allow: ['^node:(?:fs|path|crypto|worker_threads)$'],
+      }],
+    },
+  },
+  {
     files: ['packages/**/*.{js,jsx,ts,tsx}', 'apps/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parserOptions: {

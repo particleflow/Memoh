@@ -3406,6 +3406,7 @@ export type HooksToolPayload = {
 };
 
 export type McpAuthorizeResult = {
+    authorization_id?: string;
     authorization_url?: string;
 };
 
@@ -3449,8 +3450,14 @@ export type McpMcpServerEntry = {
     url?: string;
 };
 
+export type McpOAuthAuthorization = {
+    id?: string;
+    status?: string;
+};
+
 export type McpOAuthStatus = {
     auth_server?: string;
+    authorization?: McpOAuthAuthorization;
     callback_url?: string;
     configured?: boolean;
     expired?: boolean;
@@ -4144,6 +4151,12 @@ export type SessiontaskPage = {
     next_cursor?: string;
 };
 
+export type SessiontaskResultSummary = {
+    source: 'pi_final_assistant';
+    text: string;
+    truncated: boolean;
+};
+
 export type SessiontaskTask = {
     attachments_available: boolean;
     business_state?: 'unknown';
@@ -4155,8 +4168,9 @@ export type SessiontaskTask = {
      * ParentSessionID is the requested aggregation root, not a rewritten owner.
      */
     parent_session_id: string;
-    pi_result?: 'unknown' | 'not_applicable';
+    pi_result?: 'unknown' | 'not_applicable' | 'succeeded' | 'failed' | 'aborted' | 'incomplete' | 'not_started' | 'invalid_protocol' | 'output_limit';
     process_state?: 'unknown' | 'exited' | 'not_started';
+    result_summary?: SessiontaskResultSummary;
     revision?: string;
     session_id: string;
     status: 'unknown' | 'submitted' | 'process_exited' | 'not_started' | 'rejected';
@@ -4390,6 +4404,7 @@ export type UserruntimeCreateRuntimeRequest = {
 
 export type UserruntimeRuntime = {
     arch?: string;
+    availability?: string;
     capabilities?: Array<string>;
     client_version?: string;
     created_at?: string;
@@ -9520,7 +9535,12 @@ export type PostBotsByBotIdMcpData = {
      * MCP payload
      */
     body: McpUpsertRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp';
 };
@@ -9560,7 +9580,12 @@ export type PostBotsByBotIdMcpOpsBatchDeleteData = {
      * IDs to delete
      */
     body: HandlersBatchDeleteRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp-ops/batch-delete';
 };
@@ -9591,7 +9616,12 @@ export type PostBotsByBotIdMcpOpsBatchDeleteResponses = {
 
 export type GetBotsByBotIdMcpOpsExportData = {
     body?: never;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp-ops/export';
 };
@@ -9627,7 +9657,12 @@ export type PutBotsByBotIdMcpOpsImportData = {
      * mcpServers dict
      */
     body: McpImportRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp-ops/import';
 };
@@ -9752,6 +9787,10 @@ export type DeleteBotsByBotIdMcpByIdData = {
     body?: never;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP ID
          */
         id: string;
@@ -9791,6 +9830,10 @@ export type DeleteBotsByBotIdMcpByIdResponses = {
 export type GetBotsByBotIdMcpByIdData = {
     body?: never;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP ID
          */
@@ -9837,6 +9880,10 @@ export type PutBotsByBotIdMcpByIdData = {
     body: McpUpsertRequest;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP ID
          */
         id: string;
@@ -9882,6 +9929,10 @@ export type PostBotsByBotIdMcpByIdOauthAuthorizeData = {
     body?: HandlersOauthAuthorizeRequest;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP connection ID
          */
         id: string;
@@ -9918,6 +9969,10 @@ export type PostBotsByBotIdMcpByIdOauthDiscoverData = {
      */
     body?: HandlersOauthDiscoverRequest;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */
@@ -9983,11 +10038,20 @@ export type GetBotsByBotIdMcpByIdOauthStatusData = {
     body?: never;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP connection ID
          */
         id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Current authorization transaction receipt ID
+         */
+        authorization_id?: string;
+    };
     url: '/bots/{bot_id}/mcp/{id}/oauth/status';
 };
 
@@ -10017,6 +10081,10 @@ export type DeleteBotsByBotIdMcpByIdOauthTokenData = {
     body?: never;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP connection ID
          */
         id: string;
@@ -10044,6 +10112,10 @@ export type DeleteBotsByBotIdMcpByIdOauthTokenResponses = {
 export type PostBotsByBotIdMcpByIdProbeData = {
     body?: never;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */

@@ -6223,6 +6223,13 @@
                 "summary": "Create MCP connection",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "MCP payload",
                         "name": "payload",
                         "in": "body",
@@ -6275,6 +6282,13 @@
                 "summary": "Batch delete MCP connections",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "IDs to delete",
                         "name": "payload",
                         "in": "body",
@@ -6316,6 +6330,15 @@
                     "mcp"
                 ],
                 "summary": "Export MCP connections",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -6352,6 +6375,13 @@
                 ],
                 "summary": "Import MCP connections",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "mcpServers dict",
                         "name": "payload",
@@ -6513,6 +6543,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP ID",
                         "name": "id",
                         "in": "path",
@@ -6559,6 +6596,13 @@
                 ],
                 "summary": "Update MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP ID",
@@ -6618,6 +6662,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP ID",
                         "name": "id",
                         "in": "path",
@@ -6665,6 +6716,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6709,6 +6767,13 @@
                 ],
                 "summary": "Discover OAuth configuration for MCP server",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -6794,10 +6859,23 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current authorization transaction receipt ID",
+                        "name": "authorization_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6832,6 +6910,13 @@
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6859,6 +6944,13 @@
                 ],
                 "summary": "Probe MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -26904,6 +26996,9 @@
         "mcp.AuthorizeResult": {
             "type": "object",
             "properties": {
+                "authorization_id": {
+                    "type": "string"
+                },
                 "authorization_url": {
                     "type": "string"
                 }
@@ -27006,11 +27101,25 @@
                 }
             }
         },
+        "mcp.OAuthAuthorization": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "mcp.OAuthStatus": {
             "type": "object",
             "properties": {
                 "auth_server": {
                     "type": "string"
+                },
+                "authorization": {
+                    "$ref": "#/definitions/mcp.OAuthAuthorization"
                 },
                 "callback_url": {
                     "type": "string"
@@ -28390,6 +28499,28 @@
                 }
             }
         },
+        "sessiontask.ResultSummary": {
+            "type": "object",
+            "required": [
+                "source",
+                "text",
+                "truncated"
+            ],
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "pi_final_assistant"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "sessiontask.Task": {
             "type": "object",
             "required": [
@@ -28440,7 +28571,14 @@
                     "type": "string",
                     "enum": [
                         "unknown",
-                        "not_applicable"
+                        "not_applicable",
+                        "succeeded",
+                        "failed",
+                        "aborted",
+                        "incomplete",
+                        "not_started",
+                        "invalid_protocol",
+                        "output_limit"
                     ]
                 },
                 "process_state": {
@@ -28450,6 +28588,9 @@
                         "exited",
                         "not_started"
                     ]
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/sessiontask.ResultSummary"
                 },
                 "revision": {
                     "type": "string"
@@ -29001,6 +29142,9 @@
             "type": "object",
             "properties": {
                 "arch": {
+                    "type": "string"
+                },
+                "availability": {
                     "type": "string"
                 },
                 "capabilities": {

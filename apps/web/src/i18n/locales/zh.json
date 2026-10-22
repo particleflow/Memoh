@@ -678,6 +678,9 @@
     "status": {
       "online": "在线",
       "offline": "离线",
+      "authentication_unavailable": "认证不可用",
+      "connection_unavailable": "连接状态未确认",
+      "runtime_unavailable": "原生服务不可用",
       "revoked": "已移除权限",
       "owner_mismatch": "已不可用",
       "client_update_required": "需要更新"
@@ -1018,6 +1021,42 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "tasks": {
+      "title": "任务",
+      "detail": "任务详情",
+      "description": "本会话的任务记录。打开时自动刷新。",
+      "loadFailed": "暂时无法读取任务。",
+      "reload": "重新读取",
+      "result": "最终回复摘要",
+      "unavailable": "暂无可用的最终回复摘要。",
+      "truncated": "摘要已截断。",
+      "businessUnknown": "业务目标尚未独立核验。成果附件暂不可用。",
+      "cancelIntent": "已请求取消，但尚不能据此确认进程终止。",
+      "filteredPage": "本页没有可查看的任务，可继续下一页。",
+      "empty": "暂无任务记录。",
+      "newest": "返回最新",
+      "next": "下一页",
+      "types": {
+        "subagent": "子 Agent",
+        "computer_operation": "电脑任务"
+      },
+      "statuses": {
+        "unknown": "执行状态未知",
+        "submitted": "已记录提交",
+        "process_exited": "进程已退出",
+        "not_started": "未启动",
+        "rejected": "已拒绝"
+      },
+      "outcomes": {
+        "succeeded": "Pi 已完成",
+        "failed": "Pi 失败",
+        "aborted": "Pi 回报已中止",
+        "incomplete": "Pi 结果不完整",
+        "not_started": "Pi 未启动",
+        "invalid_protocol": "Pi 结果无法验证",
+        "output_limit": "Pi 结果超出观察上限"
+      }
+    },
     "uploadingAttachments": "正在上传附件…",
     "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",
     "workspaceLinkUnavailable": "此处无法打开工作区链接，请在有工作区访问权限的 Memoh 对话中打开。",
@@ -1118,10 +1157,14 @@
         "commands": "{count} 条命令",
         "messages": "{count} 条消息",
         "schedules": "{count} 个定时任务",
-        "media": "{count} 个媒体文件",
+        "media": "{count} 次媒体调用",
         "agents": "{count} 个 Agent",
         "steps": "{count} 步",
         "sites": "{count} 个网站"
+      },
+      "outcomes": {
+        "failed": "{count} 次失败",
+        "pending": "{count} 次待返回"
       },
       "fragmentSeparator": "、"
     },
@@ -2278,6 +2321,8 @@
       "discoverFailed": "OAuth 检测失败",
       "authSuccess": "授权成功",
       "authFailed": "授权失败",
+      "authUnconfirmed": "未能确认本次授权结果。再次授权前请先检查连接。",
+      "connectionUnverified": "授权已保存，但连接尚未验证通过。",
       "scopes": "权限范围",
       "authServer": "授权服务器",
       "clientId": "Client ID",
@@ -4508,7 +4553,8 @@
     "register": "连接并选择 Bot",
     "noConnections": "此 Bot 没有已启用的 HTTP MCP 连接，请先在其 MCP 设置中配置 Agenvo。",
     "noDevices": "此连接未发现 Herdr 实例。",
-    "capability": "Agenvo · 仅命令",
+    "capability": "Agenvo · 命令",
+    "agentCapability": "Agenvo · Pi 任务与命令",
     "completed": "前台命令已完成，输出合并了标准输出和错误文本。",
     "uncertain": "命令结果未确定或被拒绝。停止等待不会终止 Windows 执行，请先检查再决定是否重试。",
     "retained": "工作区 {id} 已保留以供人工检查，未自动关闭。",

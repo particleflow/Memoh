@@ -1123,7 +1123,7 @@ func provideBackgroundManager(log *slog.Logger) *background.Manager {
 	return background.New(log)
 }
 
-func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source) []agenttools.ToolProvider {
+func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source) ([]agenttools.ToolProvider, error) {
 	var assetResolver messaging.AssetResolver
 	if mediaService != nil {
 		assetResolver = &mediaAssetResolverAdapter{media: mediaService}
@@ -1131,6 +1131,9 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 	channelMessaging := channelmessagingadapter.New(channelRuntime, registry, assetResolver)
 	historySessions := channelthreadadapter.NewLister(sessionService, routeService)
 	fedGateway.SetOAuthService(oauthService)
+	imageProvider := agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService)
+	spawnProvider := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
+	backgroundProvider := agenttools.NewBackgroundProvider(log, bgManager)
 	return []agenttools.ToolProvider{
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
 			Connections: mcpConnService, OAuth: oauthService, Apps: appService, PublicURL: cfg.Server.PublicURL,
@@ -1171,10 +1174,10 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewMemoryProvider(log, memoryRegistry, settingsService, historySessions, hookService),
 		agenttools.NewWebProvider(log, settingsService, searchProviderService),
 		agenttools.NewContainerProvider(log, manager, bgManager, config.DefaultDataMount, hookService),
-		agenttools.NewBackgroundProvider(log, bgManager),
+		backgroundProvider,
 		agenttools.NewBrowserProvider(log, settingsService, nativeWorkspaceBridgeProvider{manager: manager}, displayService, config.DefaultDataMount),
 		agenttools.NewWebFetchProvider(log, settingsService, fetchProviderService),
-		agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager),
+		spawnProvider,
 		agenttools.NewSkillProvider(log, func(ctx context.Context, botID string) (map[string]agenttools.SkillDetail, error) {
 			items, err := containerdHandler.LoadSkills(ctx, botID)
 			if err != nil {
@@ -1188,13 +1191,13 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		}),
 		agenttools.NewTTSProvider(log, settingsService, audioService, channelMessaging, channelMessaging),
 		agenttools.NewTranscriptionProvider(log, settingsService, audioService, mediaService),
-		agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, manager, config.DefaultDataMount),
+		imageProvider,
 		agenttools.NewVideoGenProvider(log, settingsService, videoService, bgManager, manager, config.DefaultDataMount),
 		agenttools.NewFederationProvider(log, computerSource),
 		agenttools.NewFederationProvider(log, computerScopedConnectorSource{connectorSource}),
 		agenttools.NewFederationProvider(log, fedSource),
 		agenttools.NewHistoryProvider(log, historySessions, messageService, queries),
-	}
+	}, nil
 }
 
 // acpRuntimePoolAdapter maps the ACP session pool onto the tool package's

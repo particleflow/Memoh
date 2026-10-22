@@ -1,0 +1,8 @@
+?   	github.com/felinics/memoh/internal/storage	[no test files]
+ok  	github.com/felinics/memoh/internal/storage/providers/containerfs	(cached)
+ok  	github.com/felinics/memoh/internal/storage/providers/fallback	1.017s
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	1.983s
+ok  	github.com/felinics/memoh/internal/media	6.189s
+ok  	github.com/felinics/memoh/internal/handlers	18.732s
+ok  	github.com/felinics/memoh/internal/server	(cached)
+ok  	github.com/felinics/memoh/cmd/internal/core	(cached)

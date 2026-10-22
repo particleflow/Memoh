@@ -19,20 +19,21 @@ func batchFixtureProgress() BatchProgress {
 
 func TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt(t *testing.T) {
 	for _, tc := range []struct {
-		name, root string
-		version    int
+		name, root          string
+		version, completion int
 	}{
-		{"legacy", `C:\Synthetic`, 0},
-		{"versioned-backslashes", `C:\Synthetic`, BatchLayoutVersion},
-		{"versioned-slashes", "C:/Synthetic", BatchLayoutVersion},
+		{"legacy", `C:\Synthetic`, 0, 0},
+		{"versioned-backslashes", `C:\Synthetic`, BatchLayoutVersion, 0},
+		{"versioned-slashes", "C:/Synthetic", BatchLayoutVersion, 0},
+		{"compact-result", `C:\Synthetic`, BatchLayoutVersion, BatchCompletionVersion},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			testBatchEnvelopeAndReadback(t, tc.root, tc.version)
+			testBatchEnvelopeAndReadback(t, tc.root, tc.version, tc.completion)
 		})
 	}
 }
 
-func testBatchEnvelopeAndReadback(t *testing.T, root string, version int) {
+func testBatchEnvelopeAndReadback(t *testing.T, root string, version, completion int) {
 	t.Helper()
 	dir := t.TempDir()
 	bin := filepath.Join(dir, "bin")
@@ -51,6 +52,16 @@ func testBatchEnvelopeAndReadback(t *testing.T, root string, version int) {
 	}
 	p := batchFixtureProgress()
 	p.LayoutVersion = version
+	p.CompletionVersion = completion
+	if completion != 0 {
+		node, err := exec.LookPath("node")
+		if err != nil {
+			t.Fatal("Node required for compact-result contract tests")
+		}
+		if err := os.Symlink(node, filepath.Join(bin, "node")); err != nil {
+			t.Fatal(err)
+		}
+	}
 	events := filepath.Join(dir, "events")
 	if err := os.WriteFile(events, []byte(piEvents(p.PiSessionID, "stop", "42 中文 ✓", false)), 0o600); err != nil {
 		t.Fatal(err)
@@ -72,6 +83,16 @@ func testBatchEnvelopeAndReadback(t *testing.T, root string, version int) {
 	r, err := parseBatchReceipt(string(output), p)
 	if err != nil || r == nil || !r.Started || r.ExitCode != 7 {
 		t.Fatalf("receipt=%+v err=%v output=%s", r, err, output)
+	}
+	if completion != 0 {
+		if r.Completion == nil {
+			t.Fatal("local projection did not produce completion metadata")
+		}
+		raw := readBatchFixture(t, filepath.Join(dir, ".memoh-computer", "attempts", p.Attempt, "result.json"))
+		result, err := ParseBatchCompletion(raw, p, *r)
+		if err != nil || result.Outcome != "failed" || result.Output != "42 中文 ✓" {
+			t.Fatalf("actual Bash/Node projection: %+v %v", result, err)
+		}
 	}
 	input := readBatchFixture(t, filepath.Join(dir, "input"))
 	if string(input) != task {
@@ -113,7 +134,11 @@ func testBatchEnvelopeAndReadback(t *testing.T, root string, version int) {
 		t.Fatal("legacy fixture must have no layout version")
 	}
 	writer := script
-	for _, name := range []string{"receipt.json", "stdout.jsonl", "stderr.txt"} {
+	names := []string{"receipt.json", "stdout.jsonl", "stderr.txt"}
+	if completion != 0 {
+		names = append(names, "result.json")
+	}
+	for _, name := range names {
 		nonce := strings.Repeat("1", 32)
 		count := int64(BatchPageBytes)
 		if name == "receipt.json" {

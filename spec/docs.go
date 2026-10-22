@@ -6232,6 +6232,13 @@ const docTemplate = `{
                 "summary": "Create MCP connection",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "MCP payload",
                         "name": "payload",
                         "in": "body",
@@ -6284,6 +6291,13 @@ const docTemplate = `{
                 "summary": "Batch delete MCP connections",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "IDs to delete",
                         "name": "payload",
                         "in": "body",
@@ -6325,6 +6339,15 @@ const docTemplate = `{
                     "mcp"
                 ],
                 "summary": "Export MCP connections",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -6361,6 +6384,13 @@ const docTemplate = `{
                 ],
                 "summary": "Import MCP connections",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "mcpServers dict",
                         "name": "payload",
@@ -6522,6 +6552,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP ID",
                         "name": "id",
                         "in": "path",
@@ -6568,6 +6605,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP ID",
@@ -6627,6 +6671,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP ID",
                         "name": "id",
                         "in": "path",
@@ -6674,6 +6725,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6718,6 +6776,13 @@ const docTemplate = `{
                 ],
                 "summary": "Discover OAuth configuration for MCP server",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -6803,10 +6868,23 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current authorization transaction receipt ID",
+                        "name": "authorization_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6841,6 +6919,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6868,6 +6953,13 @@ const docTemplate = `{
                 ],
                 "summary": "Probe MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -26913,6 +27005,9 @@ const docTemplate = `{
         "mcp.AuthorizeResult": {
             "type": "object",
             "properties": {
+                "authorization_id": {
+                    "type": "string"
+                },
                 "authorization_url": {
                     "type": "string"
                 }
@@ -27015,11 +27110,25 @@ const docTemplate = `{
                 }
             }
         },
+        "mcp.OAuthAuthorization": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "mcp.OAuthStatus": {
             "type": "object",
             "properties": {
                 "auth_server": {
                     "type": "string"
+                },
+                "authorization": {
+                    "$ref": "#/definitions/mcp.OAuthAuthorization"
                 },
                 "callback_url": {
                     "type": "string"
@@ -28399,6 +28508,28 @@ const docTemplate = `{
                 }
             }
         },
+        "sessiontask.ResultSummary": {
+            "type": "object",
+            "required": [
+                "source",
+                "text",
+                "truncated"
+            ],
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "pi_final_assistant"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "sessiontask.Task": {
             "type": "object",
             "required": [
@@ -28449,7 +28580,14 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "unknown",
-                        "not_applicable"
+                        "not_applicable",
+                        "succeeded",
+                        "failed",
+                        "aborted",
+                        "incomplete",
+                        "not_started",
+                        "invalid_protocol",
+                        "output_limit"
                     ]
                 },
                 "process_state": {
@@ -28459,6 +28597,9 @@ const docTemplate = `{
                         "exited",
                         "not_started"
                     ]
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/sessiontask.ResultSummary"
                 },
                 "revision": {
                     "type": "string"
@@ -29010,6 +29151,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "arch": {
+                    "type": "string"
+                },
+                "availability": {
                     "type": "string"
                 },
                 "capabilities": {

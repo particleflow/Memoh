@@ -5934,6 +5934,8 @@ definitions:
     type: object
   mcp.AuthorizeResult:
     properties:
+      authorization_id:
+        type: string
       authorization_url:
         type: string
     type: object
@@ -6000,10 +6002,19 @@ definitions:
       url:
         type: string
     type: object
+  mcp.OAuthAuthorization:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+    type: object
   mcp.OAuthStatus:
     properties:
       auth_server:
         type: string
+      authorization:
+        $ref: '#/definitions/mcp.OAuthAuthorization'
       callback_url:
         type: string
       configured:
@@ -7033,6 +7044,21 @@ definitions:
     required:
     - items
     type: object
+  sessiontask.ResultSummary:
+    properties:
+      source:
+        enum:
+        - pi_final_assistant
+        type: string
+      text:
+        type: string
+      truncated:
+        type: boolean
+    required:
+    - source
+    - text
+    - truncated
+    type: object
   sessiontask.Task:
     properties:
       attachments_available:
@@ -7062,6 +7088,13 @@ definitions:
         enum:
         - unknown
         - not_applicable
+        - succeeded
+        - failed
+        - aborted
+        - incomplete
+        - not_started
+        - invalid_protocol
+        - output_limit
         type: string
       process_state:
         enum:
@@ -7069,6 +7102,8 @@ definitions:
         - exited
         - not_started
         type: string
+      result_summary:
+        $ref: '#/definitions/sessiontask.ResultSummary'
       revision:
         type: string
       session_id:
@@ -7472,6 +7507,8 @@ definitions:
   userruntime.Runtime:
     properties:
       arch:
+        type: string
+      availability:
         type: string
       capabilities:
         items:
@@ -11856,6 +11893,11 @@ paths:
     post:
       description: Create a MCP connection for a bot
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP payload
         in: body
         name: payload
@@ -11890,6 +11932,11 @@ paths:
     post:
       description: Delete multiple MCP connections by IDs.
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: IDs to delete
         in: body
         name: payload
@@ -11917,6 +11964,12 @@ paths:
   /bots/{bot_id}/mcp-ops/export:
     get:
       description: Export all MCP connections for a bot in standard mcpServers format.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       responses:
         "200":
           description: OK
@@ -11943,6 +11996,11 @@ paths:
         connections (matched by name) get config updated with is_active preserved.
         New connections are created as active.
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: mcpServers dict
         in: body
         name: payload
@@ -12049,6 +12107,11 @@ paths:
     delete:
       description: Delete a MCP connection by ID
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP ID
         in: path
         name: id
@@ -12079,6 +12142,11 @@ paths:
     get:
       description: Get a MCP connection by ID
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP ID
         in: path
         name: id
@@ -12111,6 +12179,11 @@ paths:
     put:
       description: Update a MCP connection by ID
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP ID
         in: path
         name: id
@@ -12150,6 +12223,11 @@ paths:
     post:
       description: Generate PKCE and return authorization URL for the user to authorize
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
@@ -12181,6 +12259,11 @@ paths:
       description: Probe MCP server URL for OAuth requirements and discover authorization
         server metadata
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
@@ -12236,10 +12319,19 @@ paths:
     get:
       description: Returns the current OAuth status including whether tokens are available
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
         required: true
+        type: string
+      - description: Current authorization transaction receipt ID
+        in: query
+        name: authorization_id
         type: string
       responses:
         "200":
@@ -12261,6 +12353,11 @@ paths:
     delete:
       description: Clears stored OAuth tokens
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
@@ -12280,6 +12377,11 @@ paths:
     post:
       description: Probe a MCP connection to discover tools and verify connectivity
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id

@@ -53,6 +53,9 @@ func TestProducerOriginalOperationAndFiniteWake(t *testing.T) {
 func exerciseProducerWake(t *testing.T, multiple bool) {
 	t.Helper()
 	source, store, transport, _ := setupBatch(t)
+	// The integrated compact result path must not import full logs to make
+	// producer delivery progress, including after execution has completed.
+	source.service.assets = nil
 	binding := toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "producer-run"}
 	mount := store.mounts["pc-a"]
 	mount.ID = binding.TargetID
@@ -76,7 +79,7 @@ func exerciseProducerWake(t *testing.T, multiple bool) {
 	if err != nil || second.ID != first.ID || transport.runs != 1 {
 		t.Fatal("duplicate business submission", err)
 	}
-	if transport.progress.Producer == nil || transport.progress.Producer.Task.OperationID != first.ID || transport.progress.Producer.Task.RunID != binding.RunID {
+	if transport.progress.CompletionVersion != agenvo.BatchCompletionVersion || transport.progress.Producer == nil || transport.progress.Producer.Task.OperationID != first.ID || transport.progress.Producer.Task.RunID != binding.RunID {
 		t.Fatal("original operation identity lost")
 	}
 	var current Result

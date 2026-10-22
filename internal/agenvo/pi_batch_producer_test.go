@@ -97,7 +97,17 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 }
 
 func TestBatchProducerMaximumCountAndCommandBound(t *testing.T) {
+	exerciseProducerCommandBound(t, 0)
+}
+
+func TestBatchProducerCompactCompletionCommandBound(t *testing.T) {
+	exerciseProducerCommandBound(t, BatchCompletionVersion)
+}
+
+func exerciseProducerCommandBound(t *testing.T, completion int) {
+	t.Helper()
 	p := batchFixtureProgress()
+	p.CompletionVersion = completion
 	task := deliverymeta.Task{OperationID: uuid.NewString(), BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture", Attempt: p.Attempt, Generation: p.Generation, RootHash: deliverymeta.RootHash(`C:\Synthetic`)}
 	p.Producer = &deliverymeta.Plan{Version: 2, Task: task}
 	for i := range deliverymeta.MaxArtifacts {

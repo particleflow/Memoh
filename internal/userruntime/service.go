@@ -101,6 +101,7 @@ func (s *Service) CreateRuntime(ctx context.Context, userID string, req CreateRu
 		}
 		runtime := runtimeFromRecord(row, nil)
 		runtime.Online = true // Register completed a real, read-only native probe.
+		runtime.Availability = "online"
 		return runtime, nil
 	}
 	if req.Provider != "" && req.Provider != "memoh" || req.Agenvo != nil {
@@ -144,7 +145,8 @@ func (s *Service) ListRuntimes(ctx context.Context, userID string) ([]Runtime, e
 	for _, row := range rows {
 		runtime := runtimeFromRecord(row, s.connection(row.ID))
 		if row.Provider == agenvo.Provider && s.agenvo != nil {
-			runtime.Online = s.agenvo.Probe(ctx, row.UserID, row.ProviderConfig) == nil
+			runtime.Availability = agenvo.Availability(s.agenvo.Probe(ctx, row.UserID, row.ProviderConfig))
+			runtime.Online = runtime.Availability == "online"
 		}
 		// A credential becomes a manageable computer only after a ready
 		// connection consumes its short-lived pending state. Persisting that
@@ -326,6 +328,7 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 	}
 	runtime.Provider = row.Provider
 	if row.Provider == agenvo.Provider {
+		runtime.Availability = "connection_unavailable"
 		runtime.Key = ""
 		runtime.OS = "windows"
 		runtime.Capabilities = []string{agenvo.CapabilityForegroundExec}

@@ -28,6 +28,9 @@ var (
 	ErrInvalid   = errors.New("invalid computer task arguments")
 	ErrApproval  = errors.New("computer execution requires approval under the existing target policy")
 	ErrConflict  = errors.New("another unresolved computer operation blocks this task; inspect blocked_by_operation without resubmitting")
+	// Only used before the ledger claim and any business dispatch. It does not
+	// classify an in-flight transport failure, which must remain unknown.
+	ErrPreflightUnavailable = errors.New("computer connection is unavailable before submission; no operation was created; check the existing connection and do not resubmit automatically")
 )
 
 type Registry interface {
@@ -82,6 +85,7 @@ type Details struct {
 type Result struct {
 	Delivery           *ProducerResult          `json:"delivery,omitempty"`
 	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
+	DiagnosticsState   string                   `json:"diagnostics_state,omitempty"`
 	StdoutHash         string                   `json:"stdout_hash,omitempty"`
 	StderrHash         string                   `json:"stderr_hash,omitempty"`
 	StdoutEmpty        bool                     `json:"stdout_empty,omitempty"`
@@ -130,6 +134,19 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 		out.WorkspaceID, out.PaneID, out.RequestID = d.Batch.Progress.WorkspaceID, d.Batch.Progress.PaneID, d.Batch.Progress.RequestID
 		out.ProcessStopped = d.Batch.Receipt != nil && d.Batch.Receipt.Validate(d.Batch.Progress) == nil
 		out.PiResult = d.Batch.Result
+		if d.Batch.Receipt != nil {
+			out.DiagnosticsState = "not_collected"
+			ready := len(d.Batch.Files) == 2
+			for _, f := range d.Batch.Files {
+				ready = ready && (f.ReadyHash != "" || f.Meta.Size == 0)
+				if f.Offset > 0 {
+					out.DiagnosticsState = "collecting"
+				}
+			}
+			if ready {
+				out.DiagnosticsState = "ready"
+			}
+		}
 		for _, f := range d.Batch.Files {
 			switch f.Meta.Name {
 			case "stdout.jsonl":
@@ -241,7 +258,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	operationID := uuid.NewString()
 	d := Details{Kind: in.Kind}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
-		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{LayoutVersion: agenvo.BatchLayoutVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
 
 		if in.Artifact != nil || in.Artifacts != nil {
 			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
@@ -451,4 +468,15 @@ func (s *Service) artifact(ctx context.Context, b toolcontext.ComputerBinding, i
 		return Result{}, agenvo.ErrUnknown
 	}
 	return result(r, d), nil
+}
+
+func (s *Service) diagnostics(ctx context.Context, b toolcontext.ComputerBinding, id string) (Result, error) {
+	r, d, err := s.load(ctx, b, id)
+	if err != nil {
+		return Result{}, err
+	}
+	if d.Batch == nil {
+		return Result{}, agenvo.ErrUnsupported
+	}
+	return s.readBatch(ctx, b, r, d, true)
 }

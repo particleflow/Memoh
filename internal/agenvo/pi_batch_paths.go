@@ -38,7 +38,7 @@ func resolveBatchLayout(p BatchProgress) (batchLayout, error) {
 
 func (l batchLayout) resultFile(name string) (string, error) {
 	switch name {
-	case "receipt.json", "stdout.jsonl", "stderr.txt", deliverymeta.ProducerFeedbackName:
+	case "receipt.json", "stdout.jsonl", "stderr.txt", "result.json", deliverymeta.ProducerFeedbackName:
 		return path.Join(l.Attempt, name), nil
 	default:
 		return "", ErrUnsupported
