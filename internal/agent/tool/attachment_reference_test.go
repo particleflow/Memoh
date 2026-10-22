@@ -52,8 +52,11 @@ func TestSubagentTextReferenceCanUseParentSend(t *testing.T) {
 	if err != nil || string(data) != "synthetic child artifact" {
 		t.Fatal("attachment changed", err)
 	}
-	if _, err := m.Stat(t.Context(), "other-bot", ref); err == nil {
-		t.Fatal("cross-Bot hash was resolved")
+	// This store has no delegation or artifact binding to another Bot. This
+	// negative lookup does not specify whether authorized Bot delegation is
+	// allowed, and does not test a supervisor-to-specialist task flow.
+	if _, err := m.Stat(t.Context(), "unrelated-bot", ref); err == nil {
+		t.Fatal("unrelated Bot without an artifact binding resolved the hash")
 	}
 }
 

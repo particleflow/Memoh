@@ -43,6 +43,22 @@ callback was specialized to image tasks; no equivalent generic interface is
 claimed. Access still goes through existing Bot-scoped media and authenticated
 file APIs; no removed image-input route continues to consume unverified hashes.
 
+## Cross-Bot delegation remains a separate acceptance requirement
+
+The negative media lookup uses an unrelated Bot with no delegation or artifact
+binding. It does **not** require rejecting legitimate cross-Bot cooperation.
+The browser test is same-Bot: `spawn_agent` copies `parentSession.BotID`, and
+`send` addresses a channel/conversation, not a configured specialist Bot.
+No supervisor-to-specialist delegation entry point was verified by this cleanup.
+
+Follow-up acceptance must include an already-authorized user/team delegating from
+a supervisor Bot to a specialist Bot, passing NAS input refs, and returning result
+refs to the original supervisor task/conversation. Also check revocation and
+unrelated-access rejection. Reuse existing owner/team permissions and a trusted
+task relationship, without per-file tickets, repeated human approval or another
+file-transfer service. This positive cross-Bot flow is not yet implemented or
+passed here; the negative test cannot substitute for it.
+
 ## Data safety
 
 No startup cleanup, filesystem deletion or ledger replay is added. The removed
@@ -61,7 +77,7 @@ Old persisted turns are history and are not replayed under the restored tool sch
 ## Verification
 
 - Official Agent runtime/contextview boundary check passes against `bf0318c5`.
-- Targeted race tests cover ordinary spawn/send references, cross-Bot denial,
+- Targeted race tests cover ordinary spawn/send references, an unrelated Bot lookup without artifact binding,
   image publication through shared media, no inline payload on storage failure,
   schema goldens and retained queued-submitter context.
 - Media/background/provider race suites pass after resolving local temporary-disk
