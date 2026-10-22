@@ -1,0 +1,93 @@
+# Remove the specialized image workflow
+
+Base: `43e77123dc06e07bb56153cf616fe62c69ec8ffc`. This is a source cleanup,
+not a data cleanup, runtime migration, new Agent framework or deployment.
+
+## Removed and retained
+
+| Removed | Retained |
+| --- | --- |
+| Dedicated image execution/publication service and authority | Ordinary subagent admission, model selection, inherited skills/tools and session scope |
+| Image-only journal creation and startup injection | Existing NAS originals and upload records; no removal or migration runs |
+| `generate_image` edit/result modes and original-input task binding | Upstream prompt/size generation and Bot `ImageModelID` |
+| Image-only spawn/background result IDs and callbacks | Ordinary child text/history and explicit parent `send(content_hash)` |
+| Image-specific task instructions, fixtures, current documentation and added model-discovery API | Generic file/hash/ready, ordinary resumable uploads/quota and queued submitter context tests |
+
+The original generation tool publishes through `media.Service.Ingest` to the
+existing file store. It returns a ready content hash after persistence succeeds;
+it does not restore the old workspace path or inline-base64 fallback. A storage
+failure reports that generation finished without publishing a reference. It
+does not retry generation and does not claim a durable recoverable result.
+The deleted image-specific billing/idempotency ledger is not replaced by a hidden
+state machine. The original tool's provider protocol selection is unchanged.
+
+The dedicated `image-edit` capability/selector added for this workflow is removed
+from new configuration choices. Existing stored configuration is not rewritten.
+The added provider model-discovery endpoint, its generated SDK/schema and adapter
+image booleans are withdrawn too; official provider management and the original
+provider-model list/import behavior remain. The unpublished Magpie directory
+experiment is not part of this branch or any release.
+
+## Ordinary subagents and attachments
+
+`spawn_agent` is wired through `native.NewSpawnAdapter` to the existing in-process
+native Agent. It selects an enabled chat model from the current session provider,
+with the existing tool/skill inheritance and denylist. It does not launch an
+external Pi, Codex or Claude Code process or automatically provision an image-capable
+Agent. No Agent runtime or context-composition code is changed.
+
+A child may return a NAS content hash in its normal text result; the parent may
+explicitly send that reference through the existing attachment tool. This is not
+a generic automatic artifact-promotion interface. The removed automatic result
+callback was specialized to image tasks; no equivalent generic interface is
+claimed. Access still goes through existing Bot-scoped media and authenticated
+file APIs; no removed image-input route continues to consume unverified hashes.
+
+## Data safety
+
+No startup cleanup, filesystem deletion or ledger replay is added. The removed
+image service was the only caller of result reservation, retention and upload-root
+journal assembly helpers; those helpers, the `reserved` state and TTL exemption
+are removed too. Ordinary resumable uploads, quota, locking and hash publication
+are unchanged from the pre-image foundation (`2472cbba`).
+
+Deployment precondition: recheck that `.image-tasks` is empty and `.uploads`
+contains no `retain_result`/`reserved` records or unpublished image payloads.
+If this changes, stop deployment and preserve those files for a separate disposition;
+do not run Sweep to make the check pass. Ordinary upload receipts, locks and originals
+must remain. An empty legacy directory can be removed separately after verification.
+Old persisted turns are history and are not replayed under the restored tool schema.
+
+## Verification
+
+- Official Agent runtime/contextview boundary check passes against `bf0318c5`.
+- Targeted race tests cover ordinary spawn/send references, cross-Bot denial,
+  image publication through shared media, no inline payload on storage failure,
+  schema goldens and retained queued-submitter context.
+- Media/background/provider race suites pass after resolving local temporary-disk
+  pressure: the only media failure was the 512 MiB copy test; that exact test
+  passed on rerun after removing regenerable Go build-cache entries.
+- SDK generation and typecheck pass. The Web model-list suite passes 11 tests;
+  changed TypeScript ESLint and UI contract checks pass (three existing UI warnings;
+  locale JSON is outside ESLint's configured file set).
+- Scoped golangci-lint 2.10.1 and the final server build pass.
+- Real Web at `http://127.0.0.1:18082` and the rebuilt cloud-fixture server were
+  exercised after final source changes (`HEAD /health` 200). A fresh conversation
+  uploads a synthetic text file, invokes one ordinary subagent, receives its hash
+  in child text, then sends that hash from the parent. Four deterministic chat
+  requests perform spawn / child answer / send / final answer; zero image endpoint
+  requests occur. The downloaded attachment exactly matches the uploaded bytes.
+- The removed discovery route returns 404; original provider model listing remains
+  200. No browser page errors occurred. Synthetic settings are restored afterward.
+- An earlier browser attempt reached an old fixture server and failed the removed-
+  endpoint assertion; it is not counted as verification of this change. The final
+  run above uses the rebuilt server. No uncertain or production task was replayed.
+
+[Before submission](before-submit.png) shows the fresh synthetic request.
+[Completed flow](result.png) shows the ordinary Agent activity and parent attachment.
+Screenshots are from the running application; they are not human QA.
+
+Tests use synthetic files and deterministic providers. No production configuration,
+files, credentials or paid API were used. Generic subagent text plus explicit parent
+send is distinct from automatic structured artifact promotion or arbitrary external
+Agent support.

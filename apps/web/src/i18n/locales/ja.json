@@ -1918,7 +1918,6 @@
       "file-input": "ファイル入力(PDF)",
       "tool-call": "ツール呼び出し",
       "image-output": "画像出力",
-      "image-edit": "画像編集（Images API）",
       "reasoning": "推論"
     },
     "contextWindow": "コンテキストウィンドウ",

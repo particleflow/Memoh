@@ -1,5 +1,10 @@
 # Provider discovery and device observation integration
 
+> Historical validation of a superseded candidate. The added model-discovery API
+> and image-adapter metadata described below are withdrawn by the image-workflow
+> cleanup; this document is not the current provider API contract.
+
+
 This follow-up preserves #38 at
 `c4644d33b1377d36e634d90ee6c7f920c5194522` and adds #37 at
 `a42d0b9592e9080f6e9d82df0bd2d365d43ce28a`. The 819575f6 discovery implementation

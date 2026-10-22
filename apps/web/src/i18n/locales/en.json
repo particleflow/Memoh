@@ -1949,7 +1949,6 @@
       "file-input": "File Input (PDF)",
       "tool-call": "Tool Call",
       "image-output": "Image Output",
-      "image-edit": "Image Editing (Images API)",
       "reasoning": "Reasoning"
     },
     "contextWindow": "Context Window",

@@ -75,7 +75,6 @@ import (
 	"github.com/felinics/memoh/internal/fetchproviders"
 	"github.com/felinics/memoh/internal/handlers"
 	hookspkg "github.com/felinics/memoh/internal/hooks"
-	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/logger"
 	"github.com/felinics/memoh/internal/mcp"
 	mcpfederation "github.com/felinics/memoh/internal/mcp/sources/federation"
@@ -1124,7 +1123,7 @@ func provideBackgroundManager(log *slog.Logger) *background.Manager {
 	return background.New(log)
 }
 
-func provideToolProviders(lc fx.Lifecycle, log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source) ([]agenttools.ToolProvider, error) {
+func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, registry *channel.Registry, routeService *route.DBService, scheduleService *schedule.Service, settingsService *settings.Service, searchProviderService *searchproviders.Service, fetchProviderService *fetchproviders.Service, manager *workspace.Manager, displayService *displaypkg.Service, mediaService *media.Service, memoryRegistry *memprovider.Registry, fedGateway *handlers.MCPFederationGateway, mcpConnService *mcp.ConnectionService, connectorSource *connectors.Source, modelsService *models.Service, queries dbstore.Queries, audioService *audiopkg.Service, videoService *videopkg.Service, sessionService *sessionpkg.Service, messageService *message.DBService, bgManager *background.Manager, hookService *hookspkg.Service, workdirService *workdir.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, appService *apps.Service, oauthService *mcp.OAuthService, approvalService *toolapproval.Service, workspaceDeps *workspacedeps.Service, cfg config.Config, containerdHandler *handlers.ContainerdHandler, fedSource *mcpfederation.Source, computerSource *computertask.Source) ([]agenttools.ToolProvider, error) {
 	var assetResolver messaging.AssetResolver
 	if mediaService != nil {
 		assetResolver = &mediaAssetResolverAdapter{media: mediaService}
@@ -1132,26 +1131,9 @@ func provideToolProviders(lc fx.Lifecycle, log *slog.Logger, channelRuntime chan
 	channelMessaging := channelmessagingadapter.New(channelRuntime, registry, assetResolver)
 	historySessions := channelthreadadapter.NewLister(sessionService, routeService)
 	fedGateway.SetOAuthService(oauthService)
-	imageProvider := agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, manager, config.DefaultDataMount)
+	imageProvider := agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService)
 	spawnProvider := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
 	backgroundProvider := agenttools.NewBackgroundProvider(log, bgManager)
-	if root := strings.TrimSpace(cfg.Files.OriginalsRoot); root != "" {
-		if mediaService == nil || !mediaService.RequiresPersistence() || mediaService.Uploads() == nil {
-			return nil, errors.New("persistent image media storage is unavailable")
-		}
-		if err := mediaService.Uploads().VerifyRoot(root); err != nil {
-			return nil, err
-		}
-		journal, err := media.OpenImageTaskJournal(root)
-		if err != nil {
-			return nil, err
-		}
-		lc.Append(fx.Hook{OnStop: func(context.Context) error { return journal.Close() }})
-		authority := &imagejob.Authority{Queries: queries, Accounts: accountService, Bots: botService, Sessions: sessionService}
-		imageProvider.SetImageJobs(imagejob.New(mediaService, journal, authority.Authorize), authority)
-		spawnProvider.SetImageResults(imageProvider.CollectImageResults)
-		backgroundProvider.SetImageResults(imageProvider.ResolveImageResults)
-	}
 	return []agenttools.ToolProvider{
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
 			Connections: mcpConnService, OAuth: oauthService, Apps: appService, PublicURL: cfg.Server.PublicURL,

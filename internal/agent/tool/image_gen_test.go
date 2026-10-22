@@ -14,7 +14,6 @@ import (
 
 	sdk "github.com/felinics/twilight/sdk"
 
-	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/models"
 )
 
@@ -391,42 +390,5 @@ func liveShortcutSession(emitter StreamEmitter) SessionContext {
 		Emitter:         emitter,
 		CurrentPlatform: "local",
 		ReplyTarget:     "chat-1",
-	}
-}
-
-func TestImageGenUsageExplainsRefsAndRecovery(t *testing.T) {
-	p := &ImageGenProvider{}
-	if p.Usage(context.Background(), SessionContext{}, AvailableTools{}) != "" {
-		t.Fatal("usage without tools")
-	}
-	usage := p.Usage(context.Background(), SessionContext{}, availableToolsForTest(ToolGenerateImage()))
-	for _, want := range []string{"content_hash", "artifact_refs", "Unknown", "result"} {
-		if !strings.Contains(usage, want) {
-			t.Fatalf("usage lacks %s", want)
-		}
-	}
-}
-
-func TestDeliverImageRefsOnlyOnLiveShortcut(t *testing.T) {
-	p := &ImageGenProvider{}
-	ref := imagejob.Artifact{ContentHash: strings.Repeat("a", 64), Mime: "image/png", SizeBytes: 64}
-	var events []ToolStreamEvent
-	live := liveShortcutSession(func(e ToolStreamEvent) { events = append(events, e) })
-	p.deliverImageRefs(live, "call-1", []imagejob.Artifact{ref})
-	if len(events) != 1 || len(events[0].Attachments) != 1 || events[0].Attachments[0].ContentHash != ref.ContentHash || events[0].Attachments[0].Path != "" || events[0].Attachments[0].URL != "" {
-		t.Fatalf("invalid attachment event: %+v", events)
-	}
-	live.SessionType = "subagent"
-	p.deliverImageRefs(live, "call-2", []imagejob.Artifact{ref})
-	if len(events) != 1 {
-		t.Fatal("child directly delivered")
-	}
-}
-
-func TestImageToolMissingServiceHasNoLegacyFallback(t *testing.T) {
-	p := &ImageGenProvider{}
-	_, err := p.execGenerateImage(context.Background(), SessionContext{}, "call", generateImageArgs{Prompt: "synthetic"})
-	if !errors.Is(err, imagejob.ErrDenied) {
-		t.Fatalf("err=%v", err)
 	}
 }

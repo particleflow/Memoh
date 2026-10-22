@@ -1,5 +1,9 @@
 # Workspace observation and image-reference integration
 
+Historical validation record. The dedicated image task workflow described here
+is withdrawn by the image-workflow cleanup. These results describe the earlier
+commit, not an active image-task API or current Agent capability.
+
 This integration combines the existing `4521d323050e27d12a0e496ff51f0bd9bea938f6`
 baseline with workspace observation from
 `c4b77db84555080aba49fbfab132ebf351d0643e` and cloud image references from
@@ -78,7 +82,7 @@ Later validation documentation and screenshots do not change application code.
   because the environment proxy resolves to a restricted address rejected by
   the existing SSRF policy. These are the same failures documented and baseline-
   reproduced by the image source branch in
-  [background-and-browser.md](../cloud-image-foundation/background-and-browser.md).
+  [historical background/browser evidence](https://github.com/particleflow/Memoh/blob/43e77123dc06e07bb56153cf616fe62c69ec8ffc/docs/validation/cloud-image-foundation/background-and-browser.md).
   Neither proxy settings nor SSRF checks were weakened. Do not describe the
   complete local Go run as passing.
 - That loaded run also hit animated-sticker and WebSocket deadlines. Both exact
