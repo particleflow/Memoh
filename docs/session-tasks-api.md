@@ -1,9 +1,10 @@
 # Conversation task summaries (v1)
 
 Original base: main `e6f4999dd294a09b4171fdaae0176714405971d5`, schema 170.
-Integration base: main `a819c75ed94ae06a3a8196e9416302b18d8dd34f`, including
-merged Pi JSON (#7). The frozen task API is unchanged; it does not invoke or
-expose the Pi output/attachment path. Resumable upload (#8) remains separate.
+Integration base: main `eeb1fdabf50ec94d48f08302c9da3f5b3811293e`
+(merged Pi JSON #7 and resumable upload #8).
+The frozen task API is unchanged; it does not invoke or expose the Pi output,
+attachment or resumable-upload paths.
 This API is an HTTP read model, not a scheduler or a new control plane.
 
 ## Frozen HTTP contract

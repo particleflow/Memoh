@@ -41,6 +41,7 @@ type MessageHandler struct {
 	messagePublisher              messageevent.Publisher
 	activityInvalidationSupported bool
 	mediaService                  *media.Service
+	uploadReadTimeout             time.Duration
 	botService                    *bots.Service
 	accountService                *accounts.Service
 	toolApproval                  *toolapproval.Service
@@ -138,6 +139,11 @@ func (h *MessageHandler) Register(e *echo.Echo) {
 	botGroup.HEAD("/media/:content_hash", h.ServeMedia)
 	botGroup.GET("/media/limits", h.MediaUploadLimits)
 	botGroup.POST("/media", h.UploadMedia)
+	botGroup.POST("/media/uploads", h.CreateMediaUpload)
+	botGroup.GET("/media/uploads/:upload_id", h.GetMediaUpload)
+	botGroup.PATCH("/media/uploads/:upload_id", h.AppendMediaUpload)
+	botGroup.POST("/media/uploads/:upload_id/complete", h.CompleteMediaUpload)
+	botGroup.DELETE("/media/uploads/:upload_id", h.CancelMediaUpload)
 
 	// Bot-wide activity SSE, carrying only lightweight session metadata (no
 	// message bodies) for sidebar live-sort. A session's own contents are read

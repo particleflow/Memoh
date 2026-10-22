@@ -1,10 +1,12 @@
 # Read-only conversation task validation
 
 Revalidated on 2026-10-22 after integrating actual main
-`a819c75ed94ae06a3a8196e9416302b18d8dd34f` (merged PR #7). The original
+`eeb1fdabf50ec94d48f08302c9da3f5b3811293e` (merged PR #7 and PR #8). The original
 implementation checkpoint is `ea424d52680e9707fb6dfe3a1534db62ff740145`.
 Integration adds a Pi batch projection regression and refreshes these records;
 the task service and frozen mobile API behavior are unchanged.
+The only merge conflicts with PR #8 were generated SDK files, resolved by
+regenerating Swagger and SDK with the merged generator configuration.
 API contract: [session-tasks-api.md](../../session-tasks-api.md).
 
 ## Environment and boundaries
@@ -25,14 +27,14 @@ API contract: [session-tasks-api.md](../../session-tasks-api.md).
   cancellation, media ingestion or task execution was requested.
 - No NAS/Windows production access, new production credentials, server ports,
   migrations, control plane or Agent changes. PR #7 is now part of the main
-  baseline; unmerged PR #8 code is not included.
+  baseline together with PR #8. Neither PR was merged or published by this task.
 
 ## Automated checks
 
 Passed again on the integrated source (not reused from the old checkpoint):
 
 ```text
-go test -race -count=1 -p 3 ./internal/sessiontask ./internal/handlers ./internal/server ./internal/apperror ./internal/agenvo ./internal/computertask ./internal/db/postgres/store
+go test -race -count=1 -p 3 ./internal/sessiontask ./internal/handlers ./internal/server ./internal/apperror ./internal/agenvo ./internal/computertask ./internal/db/postgres/store ./internal/media ./internal/storage/providers/localfs
 go test -tags=integration -p 2 ./internal/db -run TestSessionTasksPostgres -count=1 -v
 go build -p 3 -o <cloud-server> ./cmd/agent
 golangci-lint run ./internal/sessiontask/... ./internal/handlers/... ./internal/db/store/... ./internal/db/postgres/store/... ./cmd/agent/...
@@ -103,6 +105,9 @@ inspected on the integrated source.
 ![Clicking the synthetic spawn entry opens its child in the existing pane](child.png)
 
 These are screenshots of the running application, not a new mobile task UI.
+The child screenshot retains the real optional-workspace-unreachable toast;
+persisted conversation reads and the task endpoints still completed. This
+environment does not establish workspace or live execution readiness.
 Live model execution, actual computer work and HarmonyOS UI integration were
 **not** verified. The mobile client is separate.
 

@@ -2321,7 +2321,9 @@ export type HandlersMcpStdioResponse = {
 };
 
 export type HandlersMediaUploadLimitsResponse = {
+    chunk_max_bytes?: number;
     max_upload_bytes: number;
+    resumable_enabled?: boolean;
 };
 
 export type HandlersMediaUploadResponse = {
@@ -3480,6 +3482,22 @@ export type McpUpsertRequest = {
     name?: string;
     transport?: string;
     url?: string;
+};
+
+export type MediaUpload = {
+    content_hash?: string;
+    expires_at: string;
+    id: string;
+    mime: string;
+    offset: number;
+    size_bytes: number;
+    state: 'uploading' | 'ready' | 'canceled';
+};
+
+export type MediaUploadInput = {
+    mime: string;
+    sha256: string;
+    size_bytes: number;
 };
 
 export type ModelsAddRequest = {
@@ -10142,6 +10160,324 @@ export type GetBotsByBotIdMediaLimitsResponses = {
 };
 
 export type GetBotsByBotIdMediaLimitsResponse = GetBotsByBotIdMediaLimitsResponses[keyof GetBotsByBotIdMediaLimitsResponses];
+
+export type PostBotsByBotIdMediaUploadsData = {
+    /**
+     * Expected size, SHA-256 and MIME
+     */
+    body: MediaUploadInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/uploads';
+};
+
+export type PostBotsByBotIdMediaUploadsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Request Entity Too Large
+     */
+    413: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdMediaUploadsError = PostBotsByBotIdMediaUploadsErrors[keyof PostBotsByBotIdMediaUploadsErrors];
+
+export type PostBotsByBotIdMediaUploadsResponses = {
+    /**
+     * Created
+     */
+    201: MediaUpload;
+};
+
+export type PostBotsByBotIdMediaUploadsResponse = PostBotsByBotIdMediaUploadsResponses[keyof PostBotsByBotIdMediaUploadsResponses];
+
+export type DeleteBotsByBotIdMediaUploadsByUploadIdData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Upload ID
+         */
+        upload_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/uploads/{upload_id}';
+};
+
+export type DeleteBotsByBotIdMediaUploadsByUploadIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type DeleteBotsByBotIdMediaUploadsByUploadIdError = DeleteBotsByBotIdMediaUploadsByUploadIdErrors[keyof DeleteBotsByBotIdMediaUploadsByUploadIdErrors];
+
+export type DeleteBotsByBotIdMediaUploadsByUploadIdResponses = {
+    /**
+     * OK
+     */
+    200: MediaUpload;
+};
+
+export type DeleteBotsByBotIdMediaUploadsByUploadIdResponse = DeleteBotsByBotIdMediaUploadsByUploadIdResponses[keyof DeleteBotsByBotIdMediaUploadsByUploadIdResponses];
+
+export type GetBotsByBotIdMediaUploadsByUploadIdData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Upload ID
+         */
+        upload_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/uploads/{upload_id}';
+};
+
+export type GetBotsByBotIdMediaUploadsByUploadIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaUploadsByUploadIdError = GetBotsByBotIdMediaUploadsByUploadIdErrors[keyof GetBotsByBotIdMediaUploadsByUploadIdErrors];
+
+export type GetBotsByBotIdMediaUploadsByUploadIdResponses = {
+    /**
+     * OK
+     */
+    200: MediaUpload;
+};
+
+export type GetBotsByBotIdMediaUploadsByUploadIdResponse = GetBotsByBotIdMediaUploadsByUploadIdResponses[keyof GetBotsByBotIdMediaUploadsByUploadIdResponses];
+
+export type PatchBotsByBotIdMediaUploadsByUploadIdData = {
+    /**
+     * Raw bytes
+     */
+    body: Blob | File;
+    headers: {
+        /**
+         * Acknowledged byte offset
+         */
+        'Upload-Offset': number;
+        /**
+         * Exact chunk byte count, at most 8 MiB
+         */
+        'Upload-Length': number;
+        /**
+         * Lowercase chunk SHA-256
+         */
+        'Upload-SHA256': string;
+    };
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Upload ID
+         */
+        upload_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/uploads/{upload_id}';
+};
+
+export type PatchBotsByBotIdMediaUploadsByUploadIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Request Entity Too Large
+     */
+    413: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PatchBotsByBotIdMediaUploadsByUploadIdError = PatchBotsByBotIdMediaUploadsByUploadIdErrors[keyof PatchBotsByBotIdMediaUploadsByUploadIdErrors];
+
+export type PatchBotsByBotIdMediaUploadsByUploadIdResponses = {
+    /**
+     * OK
+     */
+    200: MediaUpload;
+};
+
+export type PatchBotsByBotIdMediaUploadsByUploadIdResponse = PatchBotsByBotIdMediaUploadsByUploadIdResponses[keyof PatchBotsByBotIdMediaUploadsByUploadIdResponses];
+
+export type PostBotsByBotIdMediaUploadsByUploadIdCompleteData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Upload ID
+         */
+        upload_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/uploads/{upload_id}/complete';
+};
+
+export type PostBotsByBotIdMediaUploadsByUploadIdCompleteErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdMediaUploadsByUploadIdCompleteError = PostBotsByBotIdMediaUploadsByUploadIdCompleteErrors[keyof PostBotsByBotIdMediaUploadsByUploadIdCompleteErrors];
+
+export type PostBotsByBotIdMediaUploadsByUploadIdCompleteResponses = {
+    /**
+     * OK
+     */
+    200: MediaUpload;
+};
+
+export type PostBotsByBotIdMediaUploadsByUploadIdCompleteResponse = PostBotsByBotIdMediaUploadsByUploadIdCompleteResponses[keyof PostBotsByBotIdMediaUploadsByUploadIdCompleteResponses];
 
 export type GetBotsByBotIdMediaByContentHashData = {
     body?: never;

@@ -4066,8 +4066,12 @@ definitions:
     type: object
   handlers.MediaUploadLimitsResponse:
     properties:
+      chunk_max_bytes:
+        type: integer
       max_upload_bytes:
         type: integer
+      resumable_enabled:
+        type: boolean
     required:
     - max_upload_bytes
     type: object
@@ -6051,6 +6055,47 @@ definitions:
         type: string
       url:
         type: string
+    type: object
+  media.Upload:
+    properties:
+      content_hash:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      mime:
+        type: string
+      offset:
+        type: integer
+      size_bytes:
+        type: integer
+      state:
+        enum:
+        - uploading
+        - ready
+        - canceled
+        type: string
+    required:
+    - expires_at
+    - id
+    - mime
+    - offset
+    - size_bytes
+    - state
+    type: object
+  media.UploadInput:
+    properties:
+      mime:
+        type: string
+      sha256:
+        type: string
+      size_bytes:
+        type: integer
+    required:
+    - mime
+    - sha256
+    - size_bytes
     type: object
   models.AddRequest:
     properties:
@@ -12435,6 +12480,298 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Get the attachment upload limit
+      tags:
+      - messages
+  /bots/{bot_id}/media/uploads:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Expected size, SHA-256 and MIME
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media.UploadInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/media.Upload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Create a resumable attachment upload
+      tags:
+      - messages
+  /bots/{bot_id}/media/uploads/{upload_id}:
+    delete:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Upload ID
+        in: path
+        name: upload_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/media.Upload'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Cancel a resumable upload
+      tags:
+      - messages
+    get:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Upload ID
+        in: path
+        name: upload_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/media.Upload'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Get resumable upload status
+      tags:
+      - messages
+    patch:
+      consumes:
+      - application/octet-stream
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Upload ID
+        in: path
+        name: upload_id
+        required: true
+        type: string
+      - description: Acknowledged byte offset
+        in: header
+        name: Upload-Offset
+        required: true
+        type: integer
+      - description: Exact chunk byte count, at most 8 MiB
+        in: header
+        name: Upload-Length
+        required: true
+        type: integer
+      - description: Lowercase chunk SHA-256
+        in: header
+        name: Upload-SHA256
+        required: true
+        type: string
+      - description: Raw bytes
+        format: binary
+        in: body
+        name: chunk
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/media.Upload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Append a verified upload chunk
+      tags:
+      - messages
+  /bots/{bot_id}/media/uploads/{upload_id}/complete:
+    post:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Upload ID
+        in: path
+        name: upload_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/media.Upload'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Complete a resumable upload idempotently
       tags:
       - messages
   /bots/{bot_id}/memory:

@@ -1,0 +1,11 @@
+PASS live configured policy {'max_upload_bytes': 536870912, 'resumable_enabled': True, 'chunk_max_bytes': 8388608}
+PASS live bytes=209715200 sha256=72abf2ca8f36943ebe2e49ca3a51d409ca5f0bfcffab6c9d25643c17c32889da elapsed_seconds=2.846
+server_resource VmHWM:	   88252 kB
+VmRSS:	   87596 kB
+Threads:	9
+PASS live server process restart at 16 MiB acknowledged
+PASS live bytes=536870912 sha256=9acca8e8c22201155389f65abbf6bc9723edc7384ead80503839f49dcc56d767 elapsed_seconds=17.438
+server_resource VmHWM:	   86436 kB
+VmRSS:	   85400 kB
+Threads:	9
+PASS all live resumable checks; no model turn invoked
