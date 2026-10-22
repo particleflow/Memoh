@@ -4151,6 +4151,12 @@ export type SessiontaskPage = {
     next_cursor?: string;
 };
 
+export type SessiontaskResultSummary = {
+    source: 'pi_final_assistant';
+    text: string;
+    truncated: boolean;
+};
+
 export type SessiontaskTask = {
     attachments_available: boolean;
     business_state?: 'unknown';
@@ -4162,8 +4168,9 @@ export type SessiontaskTask = {
      * ParentSessionID is the requested aggregation root, not a rewritten owner.
      */
     parent_session_id: string;
-    pi_result?: 'unknown' | 'not_applicable';
+    pi_result?: 'unknown' | 'not_applicable' | 'succeeded' | 'failed' | 'aborted' | 'incomplete' | 'not_started' | 'invalid_protocol' | 'output_limit';
     process_state?: 'unknown' | 'exited' | 'not_started';
+    result_summary?: SessiontaskResultSummary;
     revision?: string;
     session_id: string;
     status: 'unknown' | 'submitted' | 'process_exited' | 'not_started' | 'rejected';
@@ -9870,6 +9877,10 @@ export type PostBotsByBotIdMcpByIdOauthAuthorizeData = {
     body?: HandlersOauthAuthorizeRequest;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP connection ID
          */
         id: string;
@@ -9906,6 +9917,10 @@ export type PostBotsByBotIdMcpByIdOauthDiscoverData = {
      */
     body?: HandlersOauthDiscoverRequest;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */
@@ -9970,6 +9985,10 @@ export type PostBotsByBotIdMcpByIdOauthExchangeResponse = PostBotsByBotIdMcpById
 export type GetBotsByBotIdMcpByIdOauthStatusData = {
     body?: never;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */

@@ -70,6 +70,7 @@ type oauthDiscoverRequest struct {
 // @Summary Discover OAuth configuration for MCP server
 // @Description Probe MCP server URL for OAuth requirements and discover authorization server metadata
 // @Tags mcp
+// @Param bot_id path string true "Bot ID"
 // @Param id path string true "MCP connection ID"
 // @Param payload body oauthDiscoverRequest false "Optional URL override"
 // @Success 200 {object} mcp.DiscoveryResult
@@ -136,6 +137,7 @@ type oauthAuthorizeRequest struct {
 // @Summary Start OAuth authorization flow
 // @Description Generate PKCE and return authorization URL for the user to authorize
 // @Tags mcp
+// @Param bot_id path string true "Bot ID"
 // @Param id path string true "MCP connection ID"
 // @Param payload body oauthAuthorizeRequest false "Optional client_id"
 // @Success 200 {object} mcp.AuthorizeResult
@@ -261,6 +263,7 @@ func (h *MCPOAuthHandler) Callback(c echo.Context) error {
 // @Summary Get OAuth status for MCP connection
 // @Description Returns the current OAuth status including whether tokens are available
 // @Tags mcp
+// @Param bot_id path string true "Bot ID"
 // @Param id path string true "MCP connection ID"
 // @Param authorization_id query string false "Current authorization transaction receipt ID"
 // @Success 200 {object} mcp.OAuthStatus

@@ -19,10 +19,12 @@ import (
 type Originals struct {
 	root     string
 	syncFile func(*os.File) error
+	ranges   *rangeCache
+	readAt   func(*os.File, []byte, int64) (int, error)
 }
 
 func NewOriginals(root string) *Originals {
-	return &Originals{root: root, syncFile: (*os.File).Sync}
+	return &Originals{root: root, syncFile: (*os.File).Sync, ranges: newRangeCache(), readAt: (*os.File).ReadAt}
 }
 
 func mediaKey(key string) (bot, name, hash string, err error) {

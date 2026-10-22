@@ -6674,6 +6674,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6718,6 +6725,13 @@ const docTemplate = `{
                 ],
                 "summary": "Discover OAuth configuration for MCP server",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -6801,6 +6815,13 @@ const docTemplate = `{
                 ],
                 "summary": "Get OAuth status for MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -28274,6 +28295,28 @@ const docTemplate = `{
                 }
             }
         },
+        "sessiontask.ResultSummary": {
+            "type": "object",
+            "required": [
+                "source",
+                "text",
+                "truncated"
+            ],
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "pi_final_assistant"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "sessiontask.Task": {
             "type": "object",
             "required": [
@@ -28324,7 +28367,14 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "unknown",
-                        "not_applicable"
+                        "not_applicable",
+                        "succeeded",
+                        "failed",
+                        "aborted",
+                        "incomplete",
+                        "not_started",
+                        "invalid_protocol",
+                        "output_limit"
                     ]
                 },
                 "process_state": {
@@ -28334,6 +28384,9 @@ const docTemplate = `{
                         "exited",
                         "not_started"
                     ]
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/sessiontask.ResultSummary"
                 },
                 "revision": {
                     "type": "string"

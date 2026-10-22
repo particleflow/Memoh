@@ -45,23 +45,36 @@ func ParseBatchCompletion(raw []byte, p BatchProgress, r BatchReceipt) (PiJSONRe
 	if json.Unmarshal(raw, &c) != nil || c.Version != BatchCompletionVersion || c.Attempt != p.Attempt || c.Generation != p.Generation || c.RequestHash != p.RequestHash || c.PiSessionID != p.PiSessionID || c.WorkspaceID != p.WorkspaceID || c.PaneID != p.PaneID || c.TerminalID != p.TerminalID || c.Stdout != r.Stdout || len(c.Result.Output) > 2048 || c.Result.Records < 0 {
 		return PiJSONResult{}, ErrUnknown
 	}
-	valid := false
-	switch c.Result.Outcome {
-	case "succeeded":
-		valid = r.ExitCode == 0 && c.Result.StopReason == "stop" && c.Result.Records >= 8
-	case "failed":
-		valid = (r.ExitCode != 0 || c.Result.StopReason == "error") && c.Result.Records >= 8
-	case "aborted":
-		valid = c.Result.Records >= 8
-	case "incomplete":
-		valid = (c.Result.StopReason == "length" || c.Result.StopReason == "toolUse") && c.Result.Records >= 8
-	case "invalid_protocol", "output_limit":
-		valid = c.Result.Output == "" && c.Result.StopReason == "" && !c.Result.Truncated
-	}
-	if !valid {
+	if ValidateBatchCompletionResult(c.Result, p, r) != nil {
 		return PiJSONResult{}, ErrUnknown
 	}
 	return c.Result, nil
+}
+
+// ValidateBatchCompletionResult checks the same bounded result facts for both
+// ingestion and read-only projections of already verified, persisted receipts.
+// It does not re-read files or independently verify a business outcome.
+func ValidateBatchCompletionResult(result PiJSONResult, p BatchProgress, r BatchReceipt) error {
+	if p.CompletionVersion != BatchCompletionVersion || r.Validate(p) != nil || !r.Started || r.Completion == nil || len(result.Output) > 2048 || !utf8.ValidString(result.Output) || result.Records < 0 {
+		return ErrUnknown
+	}
+	valid := false
+	switch result.Outcome {
+	case "succeeded":
+		valid = r.ExitCode == 0 && result.StopReason == "stop" && result.Records >= 8
+	case "failed":
+		valid = (r.ExitCode != 0 || result.StopReason == "error") && result.Records >= 8
+	case "aborted":
+		valid = result.Records >= 8
+	case "incomplete":
+		valid = (result.StopReason == "length" || result.StopReason == "toolUse") && result.Records >= 8
+	case "invalid_protocol", "output_limit":
+		valid = result.Output == "" && result.StopReason == "" && !result.Truncated
+	}
+	if !valid {
+		return ErrUnknown
+	}
+	return nil
 }
 
 // The adapter is finite deployment code written into this exclusive attempt,

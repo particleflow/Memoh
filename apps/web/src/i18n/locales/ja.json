@@ -1015,6 +1015,42 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "tasks": {
+      "title": "タスク",
+      "detail": "タスクの詳細",
+      "description": "この会話のタスク記録。表示中は自動更新されます。",
+      "loadFailed": "タスクを読み込めません。",
+      "reload": "再読み込み",
+      "result": "最終応答の要約",
+      "unavailable": "最終応答の要約はありません。",
+      "truncated": "要約は一部省略されています。",
+      "businessUnknown": "業務目標の達成は未検証です。添付成果物は利用できません。",
+      "cancelIntent": "キャンセル要求は記録されていますが、終了の確認ではありません。",
+      "filteredPage": "このページに閲覧可能なタスクはありません。次のページに進めます。",
+      "empty": "タスク記録はありません。",
+      "newest": "最新に戻る",
+      "next": "次のページ",
+      "types": {
+        "subagent": "サブエージェント",
+        "computer_operation": "コンピュータータスク"
+      },
+      "statuses": {
+        "unknown": "実行状態は不明",
+        "submitted": "送信を記録済み",
+        "process_exited": "プロセス終了",
+        "not_started": "未開始",
+        "rejected": "拒否済み"
+      },
+      "outcomes": {
+        "succeeded": "Pi 完了",
+        "failed": "Pi 失敗",
+        "aborted": "Pi が中止を報告",
+        "incomplete": "Pi の結果は不完全",
+        "not_started": "Pi 未開始",
+        "invalid_protocol": "Pi の結果を検証できません",
+        "output_limit": "Pi の結果が確認上限を超過"
+      }
+    },
     "uploadingAttachments": "添付ファイルをアップロード中…",
     "attachmentUploadTooLarge": "「{name}」はこのサーバーの上限（{limit} バイト）を超えています。小さいファイルを選んでください。",
     "workspaceLinkUnavailable": "ここではワークスペースのリンクを開けません。ワークスペースへのアクセス権がある Memoh の会話で開いてください。",

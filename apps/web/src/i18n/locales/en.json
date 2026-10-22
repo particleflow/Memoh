@@ -1018,6 +1018,42 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "tasks": {
+      "title": "Tasks",
+      "detail": "Task details",
+      "description": "Recorded tasks in this conversation. This view updates while open.",
+      "loadFailed": "Unable to load tasks.",
+      "reload": "Reload view",
+      "result": "Final assistant summary",
+      "unavailable": "No final summary is available.",
+      "truncated": "This summary is truncated.",
+      "businessUnknown": "Business completion remains unverified. Attachments are unavailable.",
+      "cancelIntent": "Cancellation was requested; this does not confirm termination.",
+      "filteredPage": "No accessible tasks on this page. Continue to the next page.",
+      "empty": "No recorded tasks.",
+      "newest": "Back to newest",
+      "next": "Next page",
+      "types": {
+        "subagent": "Subagent",
+        "computer_operation": "Computer task"
+      },
+      "statuses": {
+        "unknown": "Execution status unknown",
+        "submitted": "Submission recorded",
+        "process_exited": "Process exited",
+        "not_started": "Not started",
+        "rejected": "Rejected"
+      },
+      "outcomes": {
+        "succeeded": "Pi completed",
+        "failed": "Pi failed",
+        "aborted": "Pi reported aborted",
+        "incomplete": "Pi result incomplete",
+        "not_started": "Pi not started",
+        "invalid_protocol": "Pi result could not be verified",
+        "output_limit": "Pi result exceeded the observation limit"
+      }
+    },
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",
     "workspaceLinkUnavailable": "This workspace link is unavailable here. Open the conversation in Memoh with workspace access.",
