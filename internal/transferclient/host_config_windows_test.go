@@ -41,3 +41,8 @@ func TestWindowsNativeReleaseUsesJournalIdentity(t *testing.T) {
 func TestWindowsNativeProducerMultiple(t *testing.T) {
 	TestProducerMultiplePartialRestartAndDeniedFile(t)
 }
+
+func TestWindowsNativeProducerFeedback(t *testing.T) {
+	TestProducerFeedbackScopeAndUnchangedBlock(t)
+	TestProducerFeedbackDeniedFirstAndMiddle(t)
+}
