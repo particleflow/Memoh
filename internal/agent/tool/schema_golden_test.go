@@ -25,13 +25,14 @@ import (
 // gated on bot settings expose their definition step separately so the gate
 // does not need a database.
 var schemaGoldenTools = map[string]func(t *testing.T) []toolexec.Tool{
-	"background": providerTools(NewBackgroundProvider(nil, background.New(nil))),
-	"webfetch":   providerTools(NewWebFetchProvider(nil, nil, nil)),
-	"web":        providerTools(&WebProvider{settings: &settings.Service{}, searchProviders: &searchproviders.Service{}}),
-	"contacts":   providerTools(NewContactsProvider(nil, goldenContactReader{})),
-	"skill":      providerTools(NewSkillProvider(nil)),
-	"acp_agents": providerTools(&ACPAgentsProvider{pool: goldenACPPool{}, queries: (*pgstore.Queries)(nil)}),
-	"workdir":    providerTools(NewWorkdirProvider(nil, goldenWorkdirLister{})),
+	"bot_delegation": func(*testing.T) []toolexec.Tool { return (&BotDelegationProvider{}).definitions(goldenSession) },
+	"background":     providerTools(NewBackgroundProvider(nil, background.New(nil))),
+	"webfetch":       providerTools(NewWebFetchProvider(nil, nil, nil)),
+	"web":            providerTools(&WebProvider{settings: &settings.Service{}, searchProviders: &searchproviders.Service{}}),
+	"contacts":       providerTools(NewContactsProvider(nil, goldenContactReader{})),
+	"skill":          providerTools(NewSkillProvider(nil)),
+	"acp_agents":     providerTools(&ACPAgentsProvider{pool: goldenACPPool{}, queries: (*pgstore.Queries)(nil)}),
+	"workdir":        providerTools(NewWorkdirProvider(nil, goldenWorkdirLister{})),
 	"history": providerTools(
 		NewHistoryProvider(nil, fakeHistorySessionLister{}, &fakeHistoryMessageReader{}, (*pgstore.Queries)(nil)),
 	),

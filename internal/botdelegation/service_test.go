@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -76,7 +77,31 @@ func (m *memoryLedger) Save(_ context.Context, r Record) (Record, error) {
 	m.records[r.ID] = r
 	return r, nil
 }
-func (*memoryLedger) List(context.Context, Filter) ([]Record, error) { return nil, nil }
+
+func (m *memoryLedger) List(_ context.Context, f Filter) ([]Record, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	var out []Record
+	for _, r := range m.records {
+		if r.Identity.SourceBotID != f.Bot || r.Identity.SourceSessionID != f.Session || r.Identity.UserID != f.User || r.CreatedAt.After(f.Snapshot) {
+			continue
+		}
+		if f.BeforeID != "" && (r.CreatedAt.After(f.BeforeTime) || (r.CreatedAt.Equal(f.BeforeTime) && r.ID >= f.BeforeID)) {
+			continue
+		}
+		out = append(out, r)
+	}
+	slices.SortFunc(out, func(a, b Record) int {
+		if n := b.CreatedAt.Compare(a.CreatedAt); n != 0 {
+			return n
+		}
+		return strings.Compare(b.ID, a.ID)
+	})
+	if len(out) > int(f.Limit) {
+		out = out[:f.Limit]
+	}
+	return out, nil
+}
 
 type hostFixture struct {
 	service                   *Service
@@ -249,5 +274,99 @@ func TestTextAndSingleOriginalReturnThenRevocation(t *testing.T) {
 	}
 	if h.runs.Load() != 1 {
 		t.Fatal("revocation restarted execution")
+	}
+}
+
+func TestRetryDeliveryNeverRunsSpecialistAgain(t *testing.T) {
+	s, _, h, in := serviceFixture(t)
+	h.deliverErr = errors.New("SECRET delivery response lost")
+	v, err := s.Submit(t.Context(), "manager", "user", "child", in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.wg.Wait()
+	h.deliverErr = nil
+	for range 3 {
+		v, err = s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID)
+		if err != nil || v.DeliveryState != "accepted" {
+			t.Fatalf("retry=%+v %v", v, err)
+		}
+	}
+	if h.runs.Load() != 1 || h.creates.Load() != 1 || h.deliveries.Load() != 2 {
+		t.Fatal("retry repeated business or accepted delivery")
+	}
+	m := s.Ledger.(*memoryLedger)
+	r := m.records[v.ID]
+	r.State = "unknown"
+	m.records[v.ID] = r
+	if _, err = s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID); !errors.Is(err, ErrConflict) {
+		t.Fatal("unknown execution retried")
+	}
+}
+
+func TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget(t *testing.T) {
+	s, f, _, in := serviceFixture(t)
+	s.SetCursorSecret("synthetic-cursor")
+	b, _, err := s.Authority.Bind(t.Context(), "user", "manager", "child", in.TargetBotID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := s.Ledger.(*memoryLedger)
+	at := time.Now().UTC().Add(-time.Minute)
+	for i := range 205 {
+		id := uuid.NewString()
+		m.records[id] = Record{ID: id, Identity: b, State: "unknown", CreatedAt: at.Add(time.Duration(i) * time.Microsecond)}
+	}
+	f.denied[in.TargetBotID+"/chat"] = true
+	p, err := s.List(t.Context(), "manager", "user", "child", 2, "")
+	if err != nil || len(p.Items) != 0 || p.NextCursor == "" {
+		t.Fatalf("bounded revoked page=%+v %v", p, err)
+	}
+	delete(f.denied, in.TargetBotID+"/chat")
+	seen := map[string]bool{}
+	cursor := p.NextCursor
+	for cursor != "" {
+		p, err = s.List(t.Context(), "manager", "user", "child", 2, cursor)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, v := range p.Items {
+			if seen[v.ID] {
+				t.Fatal("duplicate")
+			}
+			seen[v.ID] = true
+			r := m.records[v.ID]
+			r.UpdatedAt = time.Now()
+			m.records[v.ID] = r
+		}
+		cursor = p.NextCursor
+	}
+	if len(seen) != 5 {
+		t.Fatalf("remaining=%d", len(seen))
+	}
+	p, err = s.List(t.Context(), "manager", "user", "child", 2, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	id := uuid.NewString()
+	m.records[id] = Record{ID: id, Identity: b, State: "unknown", CreatedAt: time.Now().UTC().Add(time.Second)}
+	c := p.NextCursor
+	if _, err = s.List(t.Context(), "manager", "user", "root", 2, c); !errors.Is(err, ErrCursor) {
+		t.Fatal("cross session cursor accepted")
+	}
+	if _, err = s.List(t.Context(), "manager", "user", "child", 2, "bad"+c); !errors.Is(err, ErrCursor) {
+		t.Fatal("tampered cursor accepted")
+	}
+	for c != "" {
+		p, err = s.List(t.Context(), "manager", "user", "child", 100, c)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, v := range p.Items {
+			if v.ID == id {
+				t.Fatal("late insert entered snapshot")
+			}
+		}
+		c = p.NextCursor
 	}
 }

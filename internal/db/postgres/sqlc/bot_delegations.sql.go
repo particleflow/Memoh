@@ -192,7 +192,7 @@ WITH RECURSIVE owned AS (
 SELECT DISTINCT asset.content_hash FROM owned
 JOIN bot_history_messages message ON message.session_id=owned.id AND message.team_id=owned.team_id
 JOIN bot_history_message_assets asset ON asset.message_id=message.id AND asset.team_id=owned.team_id
-WHERE message.bot_id=$1 AND message.role='assistant' AND asset.role='attachment'
+WHERE message.bot_id=$1 AND message.role='assistant' AND message.turn_visible=true AND asset.role='attachment'
 ORDER BY asset.content_hash LIMIT 256
 `
 

@@ -84,7 +84,13 @@ func ToolMCPManage() Name { return newName("mcp_manage") }
 func ToolAppSearch() Name { return newName("app_search") }
 func ToolAppManage() Name { return newName("app_manage") }
 
+func ToolListDelegateBots() Name { return newName("list_delegate_bots") }
+func ToolDelegateToBot() Name    { return newName("delegate_to_bot") }
+func ToolGetBotDelegation() Name { return newName("get_bot_delegation") }
+func ToolRetryBotDelivery() Name { return newName("retry_bot_delivery") }
+
 var all = []Name{
+	ToolListDelegateBots(), ToolDelegateToBot(), ToolGetBotDelegation(), ToolRetryBotDelivery(),
 	ToolMCPManage(), ToolAppSearch(), ToolAppManage(),
 	ToolRead(), ToolWrite(), ToolList(), ToolEdit(), ToolExec(), ToolApplyPatch(), ToolListExecutionLocations(), ToolListBackground(), ToolGetBackgroundStatus(), ToolKillBackground(), ToolWait(), ToolWaitUntil(),
 	ToolSend(), ToolReact(), ToolSpeak(),

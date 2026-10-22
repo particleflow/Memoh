@@ -1,103 +1,138 @@
-# Bot delegation implementation checkpoint
+# Authorized Bot delegation
 
-This document describes an implementation in progress. There is no registered
-delegation HTTP endpoint or execution tool yet. Do not bind clients to these
-proposed routes or interpret the package tests as an end-to-end acceptance.
+This draft integrates a supervisor Bot with an existing specialist Bot through
+ordinary sessions and native turns. It is not a separate execution platform.
+The implementation remains under validation; fixture and HTTP tests are not
+production, live-model, PC, or mobile acceptance.
 
-## Existing integration points
+## HTTP contract
 
-- `application.Service.Chat` runs a native model turn with the destination Bot's
-  configuration and persists its conversation. A successful REST channel submit
-  alone does not provide a correlated completed result.
-- `thread.Service.Create` creates a destination-owned session. Cross-Bot work
-  must not be attached to `parent_session_id`, whose task-reader contract assumes
-  a complete same-Bot, same-user ancestry.
-- `application.Service.EnqueueFollowUp` provides asynchronous wakeup with an
-  invocation ID, user and team. Its public input is currently text-only and its
-  queue is memory/Redis state. It is not a durable delegation ledger or an
-  attachment transfer API.
-- `media.Service.Stat/Open` resolve stable originals. A handoff can read the
-  source original through an authorized reference without creating a permanent
-  destination Bot/hash alias or copying bytes.
-- Existing Bot grants, computer mounts and Agenvo registration fingerprints
-  supply authorization. No new organizational role system is needed.
+Base: `/bots/{bot_id}/sessions/{session_id}/delegations`, where the Bot and session
+identify the initiating user's supervisor conversation. All responses in this
+namespace, including JWT failures and route 404/405 responses, use
+`Cache-Control: no-store`.
 
-## First increment
+| Method and suffix | Request | Response |
+| --- | --- | --- |
+| `POST` | `request_id`: UUID, `target_bot_id`: UUID, `message`: nonempty text up to 64 KiB, optional `attachments`: array of `{content_hash}` | `202`, one View. Acceptance is not completion. |
+| `GET` | `limit`: 1–100 (default 20), optional opaque `cursor` | `200`, `{items: View[], next_cursor?: string}` |
+| `GET /{delegation_id}` | none | `200`, one View |
+| `POST /{delegation_id}/delivery` | none | `200`, current View after delivery-only retry. Unknown execution returns `409`. |
+| `GET /{delegation_id}/attachments/{content_hash}` | authenticated request | `200`, original bytes with download disposition and `nosniff`; no public link or copied original |
 
-`internal/botdelegation` currently contains read-only authority, attachment and
-final-text projection components, without production wiring:
+View fields:
 
-1. Check the initiating user's live account, both Bot chat grants, same team,
-   complete source-session ancestry, and exact destination session ownership.
-2. Compare mounts through their shared runtime identity. A source PC-A selection
-   constrains the source mount; the specialist may hold a different mount ID for
-   that same PC. Recheck both mounts, owners, grants and registration fingerprints.
-3. Limit shared references to the recorded inputs/results and their actual
-   conversation asset links. Recheck authorization for metadata/open/read; expose
-   no storage key, private path, raw URL or model-inline bytes in the descriptor.
-4. Project only text parts of the actual final assistant message after confirmed
-   terminal completion. Earlier narration, reasoning, tool output and unknown
-   part types do not become a final summary. This is not general secret redaction.
+- `delegation_id`, `request_id`, `source_session_id`, `target_bot_id`: UUID strings.
+- `target_session_id`: UUID string, omitted before a target session is persisted.
+- `state`: `accepted | running | unknown | completed | failed`.
+- `delivery_state`: `pending | accepted | unknown | unavailable`. Accepted means
+  the supervisor follow-up queue accepted the result, not that the supervisor
+  finished processing it.
+- Optional `summary`: `{text, truncated, source: "assistant_final"}`.
+- `attachments`: array of `{content_hash, mime?, size_bytes?, url?}`. `url` is the
+  authenticated delegation-scoped route above, never a storage path or raw URL.
+- `created_at`, `updated_at`: RFC3339 timestamps.
 
-Tests use synthetic in-memory collaborators. Real JWT, database, native Agent,
-browser, queue wakeup, and device integration remain untested for delegation.
+Errors use existing Problem Details: malformed input/cursor `400`, missing or
+invalid JWT `401`, source Bot access denial `403`, unavailable/foreign/revoked
+handoff `404`, request conflict or nonterminal delivery retry `409`, infrastructure
+failure `500`. Causes and provider diagnostics are not public response fields.
 
-## Proposed transport (not frozen)
+Pagination orders immutable `(created_at, id)` descending and freezes a creation
+snapshot. Status remains live. Each candidate is authorized against current
+permissions. A scan stops after 200 candidates; follow a nonempty `next_cursor`
+even when `items` is empty. Cursors are bound to the caller, Bot, conversation and
+current source selection. GET never starts work, polls a PC, imports logs, retries
+execution, or retries delivery.
 
-The intended namespace is
-`/bots/{bot_id}/sessions/{session_id}/delegations`.
+The first acceptance covers text and one attachment; the current input bound is
+16 distinct references, not a permanent one-attachment product limit.
 
-- `POST`: `request_id` (UUID), `target_bot_id` (UUID), `message` (nonempty text),
-  `attachments` (initially zero or one `{content_hash}`). Return a durable
-  delegation ID and accepted state with HTTP 202, never an execution-success
-  claim. Reusing the same request ID and payload returns the existing record;
-  a changed payload conflicts and does not dispatch.
-- `GET`: list by immutable creation order with bounded `limit` and opaque cursor.
-- `GET /{delegation_id}`: current authorized facts, source/destination session
-  identifiers, execution and result-delivery states, optional final summary and
-  authorized attachment descriptors. No side effects.
-- `GET /{delegation_id}/attachments/{content_hash}`: resolve a recorded shared
-  reference under fresh authorization. Do not return a broad original-media URL.
+## Tools and native execution
 
-All responses, including JWT failures and namespace 404/405 responses, must use
-`Cache-Control: no-store`. Unknown execution is separate from accepted, running,
-completed and failed; result delivery is separate from business completion.
-Cancellation, retry, arbitrary workspace management and new file transfer are
-outside this increment. Read endpoints cannot repair, resubmit or poll devices.
+`list_delegate_bots`, `delegate_to_bot`, `get_bot_delegation`, and
+`retry_bot_delivery` use the actual authenticated tool session. Bot names are not
+hardcoded. A tool call derives its request ID from the trusted call identity;
+HTTP clients supply their own stable request ID. An identical unresolved task
+also deduplicates across new request IDs. A changed replay conflicts.
 
-## Remaining dependencies before wiring
+The sole successful durable claim creates a target-owned chat session and calls
+`application.Service.StartTurn` with the target Bot's normal configuration. It
+stores the actual run ID and observes its persisted terminal fact. No API submit
+acknowledgement is treated as completion. Restarts and uncertain runs remain
+unknown and are never automatically executed again.
 
-- A durable, server-owned delegation table is required for request deduplication,
-  immutable source/destination links, device constraints, result references and
-  delivery receipts. Ordinary session metadata is client-editable and cannot
-  supply authority. Migration numbering is being coordinated with the parent;
-  this branch has not allocated or edited any migration, including 171/172.
-- The trusted execution adapter must map a source PC mount to the destination
-  mount without reusing or weakening the source's host computer binding. Existing
-  `WithComputerScope`/`WithComputerBinding` deliberately cannot be replaced by
-  child contexts. The fixture-level authority tests do not prove this adapter.
-- Native/NAS delegation must retain the current intersection for every device
-  operation and prevent raw aggregate MCP/connector paths from bypassing it.
-  Persisted delegated sessions also need the constraint on later turns and
-  queue continuations, not only on the original in-process context.
-- The result notification must carry actual attachment references through the
-  existing turn/queue port and survive uncertain delivery without rerunning the
-  specialist. A text mentioning a hash is not attachment delivery.
-- Production adapters, HTTP handlers, tool registration, persistence and the
-  end-to-end text/single-attachment fixtures are still to be implemented.
+A result uses only the last final assistant text parts, bounded to 16 KiB. It does
+not expose reasoning, raw tool output, provider JSONL or private paths. This is
+field projection, not universal secret redaction of user-visible assistant text.
 
-The anticipated shared files with cleanup PR #43 are
-`cmd/internal/core/providers.go` (tool and asset adapter registration) and
-`internal/agent/application/service_workspace_target.go` (trusted turn scope).
-Neither file has been edited by this branch. No image-job/discovery code is
-copied into delegation. Agent runtime/contextview remain unchanged.
+Completed result references include properly owned same-Bot subagent descendants,
+excluding foreign-user branches and hidden/non-assistant messages. Inputs retain
+the source original's owner even when returned unchanged. New outputs retain the
+target original's owner. Both are resolved through `media.Service`; delegation
+creates no per-file ticket, broad media alias, or second copy of NAS bytes.
+
+The supervisor receives a complete follow-up command with actual attachment
+references. The queue invocation and item identity are stable on delivery retry;
+retry never calls the specialist. The queued result carries the delegation ID
+for fresh authorization before consumption. Existing queue durability still
+applies: accepted delivery is not proof of receipt after server/Redis loss.
+Attachment metadata preserves `delegation_url` for the existing Web attachment
+renderer after history reload. Invalid scoped metadata never falls back to the
+broader Bot/hash route.
+
+## Authority and device boundary
+
+A handoff is not a grant. Each access checks the live user, both Bot chat grants,
+same team, complete owned source ancestry, target ownership, and unchanged source
+selection. Source PC-A can use only the specialist's mount of that same RuntimeID
+and registration fingerprint. Source NAS uses the existing resource intersection.
+Selection metadata is read without requiring execution permission; actual device
+reads, writes and execution retain their separate permission checks.
+
+The target's fresh turn reconstructs its scope from the durable ledger; it does
+not clear or replace a source ComputerScope. Later target turns, same-Bot children,
+queue continuations and tool effects reconstruct or recheck that scope. Ordinary
+nondelegated conversations retain their existing ownership policy.
+
+Authorized NAS cloud connectors/MCP remain available. Existing PC restrictions
+and managed computer endpoint guards remain in effect; computer operations use
+the constrained service and the current Bot/device intersection.
+
+## Persistence, integration and limits
+
+Migration `0173_bot_delegations` is reserved for this feature. It records immutable
+source/destination associations, deduplication keys, device constraints, result
+references and delivery state under forced team RLS and composite foreign keys.
+Deployment must coordinate the complete 171/172/173 sequence with the PC transfer
+line. This branch does not supply or deploy 171/172. No production migration or
+candidate publication is authorized by a local database test.
+
+The first implementation handles one supervisor → specialist → supervisor hop;
+further cross-Bot relays require a durable authority chain. Same-Bot child agents
+retain native behavior. Cancellation, specialist retry, arbitrary workspace
+management and new transfer protocols are not exposed.
+
+The protected official `internal/agent/runtime` and `internal/contextview` trees
+must remain unchanged. Host orchestration and turn ports supply the adapter.
+Integration with cleanup main must preserve removal of image-job/discovery and
+withdrawn image edit/result modes.
+
+## Validation status
+
+Implemented synthetic checks cover authority/grant revocation, shared runtime
+mapping across different Bot mounts, source original preservation, descendant
+asset queries, deduplication, delivery-only retry, bounded cursors and live status,
+GET side-effect absence, real JWT/handler response policy, and Web scoped URLs.
+PostgreSQL uses a newly created isolated test database. Native model/queue end-to-
+end execution and real browser attachment opening remain required before this
+draft can be considered a complete handoff. Production PC, OAuth and mobile
+acceptance are separate and are not claimed here.
 
 ## Product references
 
-The product comparison is limited to the official
-[Bot roles](https://docs.x.ai/grok-bot/bots),
-[asynchronous collaboration](https://docs.x.ai/grok-bot/chat-and-collaboration),
-and [files/results](https://docs.x.ai/grok-bot/files-and-results) documentation.
-These sources do not establish a NAS ACL implementation or a general DAG API.
-Bot-to-group handoff is documented as text-only; actual shared attachments must
-be implemented and verified independently here.
+The comparison uses official [Bot roles](https://docs.x.ai/grok-bot/bots),
+[asynchronous collaboration](https://docs.x.ai/grok-bot/chat-and-collaboration), and
+[files/results](https://docs.x.ai/grok-bot/files-and-results). These references do
+not establish a NAS ACL implementation or general DAG API. Actual shared-file
+transport and authorization are verified independently in this project.

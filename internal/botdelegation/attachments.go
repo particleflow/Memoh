@@ -20,6 +20,7 @@ type Attachment struct {
 	ContentHash string `json:"content_hash"`
 	Mime        string `json:"mime,omitempty"`
 	SizeBytes   int64  `json:"size_bytes,omitempty"`
+	URL         string `json:"url,omitempty"`
 }
 
 // AttachmentSet is constructed from a server-owned delegation record. Reusing

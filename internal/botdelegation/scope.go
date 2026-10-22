@@ -16,19 +16,23 @@ import (
 // ancestry and ownership, not caller metadata, establish the inherited scope.
 func (s *Service) ForSession(ctx context.Context, bot, user, session string) (Record, error) {
 	seen := map[string]bool{}
+	var path []thread.Thread
 	for id := session; id != ""; {
 		if seen[id] || len(seen) >= 64 {
 			return Record{}, ErrDenied
 		}
 		seen[id] = true
 		t, err := s.Authority.Sessions.Get(ctx, id)
-		if err != nil || t.ID != id || t.BotID != bot || t.CreatedByUserID != user {
+		if err != nil || t.ID != id {
 			return Record{}, ErrDenied
 		}
+		path = append(path, t)
 		r, err := s.Ledger.ForTarget(ctx, bot, id)
 		if err == nil {
-			if r.Identity.UserID != user || r.Identity.TeamID != t.TeamID {
-				return Record{}, ErrDenied
+			for _, ancestor := range path {
+				if r.Identity.UserID != user || r.Identity.TeamID != ancestor.TeamID || ancestor.BotID != bot || ancestor.CreatedByUserID != user {
+					return Record{}, ErrDenied
+				}
 			}
 			if _, err = s.Authority.Authorize(ctx, r.Identity); err != nil {
 				return Record{}, err

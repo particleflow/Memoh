@@ -17,6 +17,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/turn"
 	"github.com/felinics/memoh/internal/agenvo"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	"github.com/felinics/memoh/internal/boot"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
@@ -42,14 +43,36 @@ type delegationHost struct {
 	media       *media.Service
 }
 
-func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, workdirs *workdir.Service, media *media.Service, messages *messagepkg.DBService) *botdelegation.Service {
+func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, media *media.Service, messages *messagepkg.DBService, runtime *boot.RuntimeConfig) *botdelegation.Service {
 	h := &delegationHost{store: store, accounts: accounts, permissions: &applicationBotPermissionChecker{bots: bots, accounts: accounts}, sessions: sessions, media: media, messages: messages}
-	a := &botdelegation.Authority{Permissions: h, Sessions: sessions, Workdirs: workdirs, Mounts: store, Assets: h}
+	a := &botdelegation.Authority{Permissions: h, Sessions: sessions, Workdirs: delegationWorkdirs{store}, Mounts: store, Assets: h}
 	s := botdelegation.NewService(a, botdelegation.NewPostgresLedger(store.SQLC()), media, log)
+	s.SetCursorSecret(runtime.JwtSecret)
 	h.service = s
 	s.Host = h
 	lc.Append(fx.Hook{OnStop: func(context.Context) error { s.Close(); return nil }})
 	return s
+}
+
+// The authority reads persisted selection metadata, not a workspace capability.
+// Using workdir.Service.Get here would compare the source Bot's mount with the
+// destination ComputerScope and reject two valid mounts of the same computer.
+type delegationWorkdirs struct {
+	store interface {
+		GetWorkdir(context.Context, string, string) (dbstore.BotWorkdirRecord, error)
+	}
+}
+
+func (w delegationWorkdirs) Get(ctx context.Context, bot, id string) (workdir.Workdir, error) {
+	r, err := w.store.GetWorkdir(ctx, bot, id)
+	if err != nil {
+		return workdir.Workdir{}, err
+	}
+	target := "native"
+	if r.TargetKind == workdir.TargetKindRemote {
+		target = r.RemoteBindingID
+	}
+	return workdir.Workdir{ID: r.ID, BotID: r.BotID, WorkspaceTargetID: target}, nil
 }
 
 func injectBotDelegation(s *botdelegation.Service, agent *application.Service, assets *media.Service) {
@@ -160,7 +183,7 @@ func (h *delegationHost) inputAttachments(ctx context.Context, r botdelegation.R
 		if len(a.Mime) > 6 && a.Mime[:6] == "image/" {
 			typ = "image"
 		}
-		out = append(out, turn.Attachment{ContentHash: hash, Type: typ, Mime: a.Mime, Size: a.SizeBytes, URL: botdelegation.AttachmentURL(r, hash)})
+		out = append(out, turn.Attachment{ContentHash: hash, Type: typ, Mime: a.Mime, Size: a.SizeBytes, URL: botdelegation.AttachmentURL(r, hash), Metadata: map[string]any{"delegation_url": botdelegation.AttachmentURL(r, hash)}})
 	}
 	return out, nil
 }
@@ -238,7 +261,7 @@ func (h *delegationHost) Deliver(ctx context.Context, r botdelegation.Record) er
 	if r.Result.Summary != nil {
 		text += "\n\n" + r.Result.Summary.Text
 	}
-	return h.agent.EnqueueAuthorizedFollowUp(ctx, "bot-delegation-result:"+r.ID, turn.StartTurnCommand{SchemaVersion: 1, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.SourceBotID, ChatID: r.Identity.SourceBotID, ThreadID: r.Identity.SourceSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, Query: text, UserVisibleText: text, Attachments: attachments, CurrentChannel: "web"})
+	return h.agent.EnqueueAuthorizedFollowUp(ctx, "bot-delegation-result:"+r.ID, turn.StartTurnCommand{DelegationResultID: r.ID, SchemaVersion: 1, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.SourceBotID, ChatID: r.Identity.SourceBotID, ThreadID: r.Identity.SourceSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, Query: text, UserVisibleText: text, Attachments: attachments, CurrentChannel: "web"})
 }
 
 type (
@@ -283,13 +306,19 @@ func (h *delegationHost) outboundRefs(ctx context.Context, r botdelegation.Recor
 			}
 			asset = a
 		}
-		refs = append(refs, messagepkg.AssetRef{ContentHash: asset.ContentHash, Role: "attachment", Ordinal: len(refs), Mime: asset.Mime, SizeBytes: asset.SizeBytes})
+		refs = append(refs, messagepkg.AssetRef{ContentHash: asset.ContentHash, Role: "attachment", Ordinal: len(refs), Mime: asset.Mime, SizeBytes: asset.SizeBytes, Metadata: map[string]any{"delegation_url": botdelegation.AttachmentURL(r, asset.ContentHash)}})
 	}
 	return refs, nil
 }
 
 func (h *delegationHost) prepare(ctx context.Context, req application.ChatRequest) (context.Context, application.ChatRequest, error) {
 	ctx = context.WithValue(ctx, delegationMediaKey{}, delegationMediaIdentity{req.BotID, req.UserID, req.ThreadID})
+	if req.DelegationResultID != "" {
+		r, err := h.service.ReadRecord(ctx, req.BotID, req.UserID, req.ThreadID, req.DelegationResultID)
+		if err != nil || (r.State != "completed" && r.State != "failed") {
+			return ctx, req, botdelegation.ErrDenied
+		}
+	}
 	if req.ThreadID == "" || req.UserID == "" {
 		return ctx, req, nil
 	}

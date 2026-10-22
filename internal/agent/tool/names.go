@@ -83,3 +83,8 @@ func BuiltInToolNames() []ToolName {
 func lookupBuiltInToolName(name string) (ToolName, bool) {
 	return toolname.Lookup(name)
 }
+
+func ToolListDelegateBots() ToolName { return toolname.ToolListDelegateBots() }
+func ToolDelegateToBot() ToolName    { return toolname.ToolDelegateToBot() }
+func ToolGetBotDelegation() ToolName { return toolname.ToolGetBotDelegation() }
+func ToolRetryBotDelivery() ToolName { return toolname.ToolRetryBotDelivery() }

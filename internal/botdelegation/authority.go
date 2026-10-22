@@ -66,6 +66,27 @@ type Authority struct {
 	Assets      AssetLinks
 }
 
+// Source authorizes an owned source conversation before listing its handoffs.
+// Each returned record still requires both Bots' current permissions.
+func (a *Authority) Source(ctx context.Context, user, bot, session string) (Identity, error) {
+	b := Identity{UserID: user, SourceBotID: bot, SourceSessionID: session}
+	path, err := a.sourcePath(ctx, b)
+	if err != nil || a.Permissions == nil || a.Permissions.ValidateSession(ctx, user) != nil {
+		return Identity{}, ErrDenied
+	}
+	b.TeamID, b.SourceRootID = path[0].TeamID, path[len(path)-1].ID
+	team, err := a.Permissions.BotTeam(ctx, bot)
+	if err != nil || team != b.TeamID {
+		return Identity{}, ErrDenied
+	}
+	ok, err := a.Permissions.Allowed(ctx, user, bot, bots.PermissionChat)
+	if err != nil || !ok {
+		return Identity{}, ErrDenied
+	}
+	b.SourceSelection, err = a.selection(ctx, b, path)
+	return b, err
+}
+
 // Bind checks the caller's complete owned source ancestry and both Bot grants.
 // The target session is deliberately separate; it is never attached to another
 // Bot's parent_session_id tree or re-labelled as a same-Bot subagent.

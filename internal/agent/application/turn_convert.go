@@ -10,6 +10,7 @@ import (
 // fields (InjectCh, OutboundAssetCollector) are wired by StartTurn.
 func chatRequestFromCommand(cmd turn.StartTurnCommand) ChatRequest {
 	return ChatRequest{
+		DelegationResultID:        cmd.DelegationResultID,
 		BotID:                     cmd.BotID,
 		ChatID:                    cmd.ChatID,
 		ThreadID:                  cmd.ThreadID,

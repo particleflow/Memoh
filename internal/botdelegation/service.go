@@ -2,6 +2,7 @@ package botdelegation
 
 import (
 	"context"
+	"crypto/cipher"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -54,15 +55,18 @@ type Host interface {
 }
 
 type Service struct {
-	Authority *Authority
-	Ledger    Ledger
-	Originals Originals
-	Host      Host
-	logger    *slog.Logger
-	active    sync.Map
-	ctx       context.Context
-	cancel    context.CancelFunc
-	wg        sync.WaitGroup
+	Authority    *Authority
+	Ledger       Ledger
+	Originals    Originals
+	Host         Host
+	logger       *slog.Logger
+	active       sync.Map
+	ctx          context.Context
+	cancel       context.CancelFunc
+	wg           sync.WaitGroup
+	cursorCipher cipher.AEAD
+	lifecycle    sync.Mutex
+	closed       bool
 }
 
 func NewService(a *Authority, ledger Ledger, originals Originals, log *slog.Logger) *Service {
@@ -73,7 +77,13 @@ func NewService(a *Authority, ledger Ledger, originals Originals, log *slog.Logg
 	return &Service{Authority: a, Ledger: ledger, Originals: originals, logger: log, ctx: ctx, cancel: cancel}
 }
 
-func (s *Service) Close() { s.cancel(); s.wg.Wait() }
+func (s *Service) Close() {
+	s.lifecycle.Lock()
+	s.closed = true
+	s.cancel()
+	s.lifecycle.Unlock()
+	s.wg.Wait()
+}
 
 func (s *Service) Submit(ctx context.Context, bot, user, session string, in Input) (View, error) {
 	if s.Host == nil || s.Ledger == nil {
@@ -135,6 +145,11 @@ func (s *Service) Submit(ctx context.Context, bot, user, session string, in Inpu
 // start reconstructs a fresh destination execution from durable identity.
 // Source tool capabilities and PC mount IDs must not be copied into another Bot.
 func (s *Service) start(r Record) {
+	s.lifecycle.Lock()
+	defer s.lifecycle.Unlock()
+	if s.closed {
+		return
+	}
 	s.active.Store(r.ID, true)
 	s.wg.Add(1)
 	// Only this successful durable claim dispatches. Reads/restarts and an
@@ -207,12 +222,55 @@ func (s *Service) notStarted(ctx context.Context, r Record, cause error) error {
 }
 
 func (s *Service) Get(ctx context.Context, bot, user, session, id string) (View, error) {
-	r, err := s.Ledger.Get(ctx, bot, user, session, id)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return View{}, ErrDenied
-	}
+	r, err := s.ReadRecord(ctx, bot, user, session, id)
 	if err != nil {
 		return View{}, err
+	}
+	return s.project(ctx, r)
+}
+
+// ReadRecord is an authorized read, shared by detail and scoped attachment HTTP.
+func (s *Service) ReadRecord(ctx context.Context, bot, user, session, id string) (Record, error) {
+	r, err := s.Ledger.Get(ctx, bot, user, session, id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return Record{}, ErrDenied
+	}
+	if err != nil {
+		return Record{}, err
+	}
+	if _, err = s.Authority.Authorize(ctx, r.Identity); err != nil {
+		return Record{}, err
+	}
+	return r, nil
+}
+
+// RetryDelivery never creates a session or executes a specialist. The host
+// uses the same durable queue invocation ID even after an uncertain response.
+func (s *Service) RetryDelivery(ctx context.Context, bot, user, session, id string) (View, error) {
+	r, err := s.ReadRecord(ctx, bot, user, session, id)
+	if err != nil {
+		return View{}, err
+	}
+	if r.State != "completed" && r.State != "failed" {
+		return View{}, ErrConflict
+	}
+	if r.DeliveryState == "accepted" {
+		return s.project(ctx, r)
+	}
+	if s.Host == nil {
+		return View{}, ErrDenied
+	}
+	if err = s.Host.Deliver(ctx, r); err != nil {
+		r.DeliveryState = "unknown"
+	} else {
+		r.DeliveryState = "accepted"
+	}
+	r, saveErr := s.Ledger.Save(ctx, r)
+	if errors.Is(saveErr, pgx.ErrNoRows) || errors.Is(saveErr, ErrConflict) {
+		return s.Get(ctx, bot, user, session, id)
+	}
+	if saveErr != nil {
+		return View{}, saveErr
 	}
 	return s.project(ctx, r)
 }
@@ -237,6 +295,7 @@ func (s *Service) project(ctx context.Context, r Record) (View, error) {
 			if err != nil {
 				return View{}, err
 			}
+			a.URL = AttachmentURL(r, hash)
 			v.Attachments = append(v.Attachments, a)
 		}
 	}
