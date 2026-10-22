@@ -1,0 +1,2164 @@
+{
+  "mode": "busy-crash",
+  "source_bot": "d2e3b1c1-3f36-43ea-9fe5-474d50da808d",
+  "target_bot": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+  "source_session": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+  "initial_admission": {
+    "state": "running",
+    "input_asset_hashes": [
+      "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+    ],
+    "owner_matches": true,
+    "fence_matches": true,
+    "history_asset_links": 0
+  },
+  "view": {
+    "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+    "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+    "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+    "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+    "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+    "state": "completed",
+    "delivery_state": "accepted",
+    "summary": {
+      "text": "SPECIALIST_FINAL",
+      "truncated": false,
+      "source": "assistant_final"
+    },
+    "attachments": [
+      {
+        "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+        "mime": "text/plain",
+        "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+      },
+      {
+        "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+        "mime": "text/plain",
+        "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+      }
+    ],
+    "created_at": "2026-10-22T20:57:12.861537Z",
+    "updated_at": "2026-10-22T20:57:29.836487Z"
+  },
+  "busy_queue_before": {
+    "source": {
+      "steer_supported": true,
+      "steer": [],
+      "follow_up": [
+        {
+          "item_id": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "status": "accepted",
+          "position": 1,
+          "text": "Delegation 31ae2cf8-6510-433a-9e77-77792d8f62d7 (Bot c35b3a6e-77ce-4937-a8a5-a72410d7af6b) execution state: completed.\n\nSPECIALIST_FINAL",
+          "enqueued_during_run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853"
+        }
+      ]
+    },
+    "target": {
+      "steer_supported": false,
+      "steer": [],
+      "follow_up": []
+    }
+  },
+  "before_full_restart": {
+    "snapshot": {
+      "source_runs": [
+        {
+          "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+          "state": "completed",
+          "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+          "error_code": null
+        },
+        {
+          "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "state": "running",
+          "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+          "error_code": null
+        }
+      ],
+      "target_runs": [
+        {
+          "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+          "state": "completed",
+          "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+          "error_code": null
+        }
+      ],
+      "model_calls": 6
+    },
+    "view": {
+      "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+      "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+      "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+      "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+      "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+      "state": "completed",
+      "delivery_state": "accepted",
+      "summary": {
+        "text": "SPECIALIST_FINAL",
+        "truncated": false,
+        "source": "assistant_final"
+      },
+      "attachments": [
+        {
+          "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+          "mime": "text/plain",
+          "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+        },
+        {
+          "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+          "mime": "text/plain",
+          "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+        }
+      ],
+      "created_at": "2026-10-22T20:57:12.861537Z",
+      "updated_at": "2026-10-22T20:57:13.571835Z"
+    },
+    "queue_item": {
+      "item_id": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+      "status": "accepted",
+      "position": 1,
+      "text": "Delegation 31ae2cf8-6510-433a-9e77-77792d8f62d7 (Bot c35b3a6e-77ce-4937-a8a5-a72410d7af6b) execution state: completed.\n\nSPECIALIST_FINAL",
+      "enqueued_during_run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853"
+    },
+    "model_calls": [
+      {
+        "model": "regression-supervisor",
+        "tool_result_ids": [],
+        "phase": "initial",
+        "sequence": 1,
+        "started_at": 1792702632.748433
+      },
+      {
+        "model": "regression-supervisor",
+        "tool_result_ids": [
+          "delegate"
+        ],
+        "phase": "initial",
+        "sequence": 2,
+        "started_at": 1792702632.911496
+      },
+      {
+        "model": "regression-specialist",
+        "tool_result_ids": [],
+        "phase": "specialist",
+        "sequence": 3,
+        "started_at": 1792702633.0869427
+      },
+      {
+        "model": "regression-supervisor",
+        "tool_result_ids": [
+          "delegate"
+        ],
+        "phase": "held_parent",
+        "sequence": 4,
+        "started_at": 1792702633.319009
+      },
+      {
+        "model": "regression-specialist",
+        "tool_result_ids": [
+          "new-output"
+        ],
+        "phase": "specialist",
+        "sequence": 5,
+        "started_at": 1792702633.39436
+      },
+      {
+        "model": "regression-specialist",
+        "tool_result_ids": [
+          "new-output",
+          "return-input"
+        ],
+        "phase": "specialist",
+        "sequence": 6,
+        "started_at": 1792702633.4529984
+      }
+    ]
+  },
+  "restart": {
+    "method": "SIGKILL",
+    "old_pid": 117403,
+    "queue_restarted": false,
+    "queue_started_before": "2026-10-22T20:28:11.02449027Z",
+    "before_kill": {
+      "observed_at": 1792702634.171828,
+      "redis_time": [
+        "1792702634",
+        "229759"
+      ],
+      "original_lease_pttl_ms": 1574,
+      "leader_lease_pttl_ms": 1529,
+      "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+      "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+      "queue_items": [
+        {
+          "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "Status": "accepted",
+          "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+        }
+      ],
+      "original_parent": {
+        "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "state": "running",
+        "error_code": null,
+        "fencing_token": 15,
+        "updated_at": "2026-10-22T20:57:13.200474+00:00"
+      }
+    },
+    "signal_sent_at": 1792702634.4634345,
+    "process_dead_at": 1792702634.4641166,
+    "offline_lease_samples": [
+      {
+        "observed_at": 1792702634.6171994,
+        "redis_time": [
+          "1792702634",
+          "676541"
+        ],
+        "original_lease_pttl_ms": 1132,
+        "leader_lease_pttl_ms": 1117,
+        "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+        "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+        "queue_items": [
+          {
+            "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "Status": "accepted",
+            "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+          }
+        ],
+        "original_parent": {
+          "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "state": "running",
+          "error_code": null,
+          "fencing_token": 15,
+          "updated_at": "2026-10-22T20:57:13.200474+00:00"
+        }
+      },
+      {
+        "observed_at": 1792702635.15686,
+        "redis_time": [
+          "1792702635",
+          "208439"
+        ],
+        "original_lease_pttl_ms": 594,
+        "leader_lease_pttl_ms": 576,
+        "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+        "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+        "queue_items": [
+          {
+            "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "Status": "accepted",
+            "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+          }
+        ],
+        "original_parent": {
+          "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "state": "running",
+          "error_code": null,
+          "fencing_token": 15,
+          "updated_at": "2026-10-22T20:57:13.200474+00:00"
+        }
+      },
+      {
+        "observed_at": 1792702635.6943138,
+        "redis_time": [
+          "1792702635",
+          "758065"
+        ],
+        "original_lease_pttl_ms": 45,
+        "leader_lease_pttl_ms": 43,
+        "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+        "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+        "queue_items": [
+          {
+            "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "Status": "accepted",
+            "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+          }
+        ],
+        "original_parent": {
+          "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "state": "running",
+          "error_code": null,
+          "fencing_token": 15,
+          "updated_at": "2026-10-22T20:57:13.200474+00:00"
+        }
+      },
+      {
+        "observed_at": 1792702636.250157,
+        "redis_time": [
+          "1792702636",
+          "299830"
+        ],
+        "original_lease_pttl_ms": -2,
+        "leader_lease_pttl_ms": -2,
+        "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+        "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+        "queue_items": [
+          {
+            "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "Status": "accepted",
+            "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+          }
+        ],
+        "original_parent": {
+          "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "state": "running",
+          "error_code": null,
+          "fencing_token": 15,
+          "updated_at": "2026-10-22T20:57:13.200474+00:00"
+        }
+      }
+    ],
+    "lease_expired_observed_at": 1792702636.250157,
+    "new_server_start_requested_at": 1792702636.498831,
+    "new_pid": 136440,
+    "server_ready_at": 1792702636.6031458,
+    "server_restarted": true,
+    "queue_started_after": "2026-10-22T20:28:11.02449027Z",
+    "after_new_server_ready": {
+      "observed_at": 1792702636.780014,
+      "redis_time": [
+        "1792702636",
+        "845190"
+      ],
+      "original_lease_pttl_ms": -2,
+      "leader_lease_pttl_ms": -2,
+      "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+      "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+      "queue_items": [
+        {
+          "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "Status": "accepted",
+          "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+        }
+      ],
+      "original_parent": {
+        "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "state": "running",
+        "error_code": null,
+        "fencing_token": 15,
+        "updated_at": "2026-10-22T20:57:13.200474+00:00"
+      }
+    }
+  },
+  "automatic_recovery_samples": [
+    {
+      "at": 1792702637.2528296,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "running",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 6
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702637.8669634,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702638.476837,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702639.103383,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702639.7437005,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702640.363344,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702640.9785175,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702641.575447,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702642.1818006,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702642.790868,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702643.3846893,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702643.9763165,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702644.5561626,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702645.151837,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702645.7616317,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702646.3736532,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702646.9763687,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702647.5754411,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702648.2115529,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    },
+    {
+      "at": 1792702648.8028104,
+      "snapshot": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      },
+      "view": {
+        "delegation_id": "31ae2cf8-6510-433a-9e77-77792d8f62d7",
+        "request_id": "ad82af38-fef4-5df1-8b5d-f9fe1c2cc233",
+        "source_session_id": "ba81088c-f8ae-4e5d-ab28-54d20782d28c",
+        "target_bot_id": "c35b3a6e-77ce-4937-a8a5-a72410d7af6b",
+        "target_session_id": "54725f3f-815a-4fcb-8226-abe3d737cdcb",
+        "state": "completed",
+        "delivery_state": "accepted",
+        "summary": {
+          "text": "SPECIALIST_FINAL",
+          "truncated": false,
+          "source": "assistant_final"
+        },
+        "attachments": [
+          {
+            "content_hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+          },
+          {
+            "content_hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+            "mime": "text/plain",
+            "url": "/bots/d2e3b1c1-3f36-43ea-9fe5-474d50da808d/sessions/ba81088c-f8ae-4e5d-ab28-54d20782d28c/delegations/31ae2cf8-6510-433a-9e77-77792d8f62d7/attachments/ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+          }
+        ],
+        "created_at": "2026-10-22T20:57:12.861537Z",
+        "updated_at": "2026-10-22T20:57:13.571835Z"
+      }
+    }
+  ],
+  "busy_client_after_restart": {
+    "client_disconnected": true,
+    "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f"
+  },
+  "post_restart_attachment_reads": [
+    {
+      "hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+      "status": 200,
+      "bytes": 31
+    },
+    {
+      "hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+      "status": 200,
+      "bytes": 40
+    }
+  ],
+  "drain_observation": {
+    "snapshot": {
+      "source_runs": [
+        {
+          "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+          "state": "completed",
+          "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+          "error_code": null
+        },
+        {
+          "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "state": "lost",
+          "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+          "error_code": "runtime_owner_lease_expired"
+        },
+        {
+          "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+          "state": "completed",
+          "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "error_code": null
+        }
+      ],
+      "target_runs": [
+        {
+          "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+          "state": "completed",
+          "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+          "error_code": null
+        }
+      ],
+      "model_calls": 7
+    },
+    "queues": {
+      "source": {
+        "steer_supported": false,
+        "steer": [],
+        "follow_up": []
+      },
+      "target": {
+        "steer_supported": false,
+        "steer": [],
+        "follow_up": []
+      }
+    },
+    "followup_runs": [
+      {
+        "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+        "state": "completed",
+        "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+        "error_code": null
+      }
+    ]
+  },
+  "interrupted_parent_runs": [
+    {
+      "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+      "state": "lost",
+      "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+      "error_code": "runtime_owner_lease_expired"
+    }
+  ],
+  "assistant_links": [
+    {
+      "message_id": "53457e0f-581c-457c-81ec-7d3c61b6eb5f",
+      "hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+    },
+    {
+      "message_id": "53457e0f-581c-457c-81ec-7d3c61b6eb5f",
+      "hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+    }
+  ],
+  "model_phase_counts": {
+    "initial": 2,
+    "specialist": 3,
+    "held_parent": 1,
+    "followup": 1
+  },
+  "quiet_windows": [
+    {
+      "label": "initial completion",
+      "seconds": 5,
+      "samples": 14,
+      "pending_items": 0,
+      "terminal_runs": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "final_queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      }
+    },
+    {
+      "label": "after restart/retry/reopen",
+      "seconds": 5,
+      "samples": 14,
+      "pending_items": 0,
+      "terminal_runs": {
+        "source_runs": [
+          {
+            "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+            "state": "completed",
+            "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+            "error_code": null
+          },
+          {
+            "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+            "state": "lost",
+            "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+            "error_code": "runtime_owner_lease_expired"
+          },
+          {
+            "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+            "state": "completed",
+            "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+            "error_code": null
+          }
+        ],
+        "target_runs": [
+          {
+            "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+            "state": "completed",
+            "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+            "error_code": null
+          }
+        ],
+        "model_calls": 7
+      },
+      "final_queues": {
+        "source": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        },
+        "target": {
+          "steer_supported": false,
+          "steer": [],
+          "follow_up": []
+        }
+      }
+    }
+  ],
+  "source_runs": [
+    {
+      "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+      "state": "completed",
+      "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+      "error_code": null
+    },
+    {
+      "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+      "state": "lost",
+      "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+      "error_code": "runtime_owner_lease_expired"
+    },
+    {
+      "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+      "state": "completed",
+      "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+      "error_code": null
+    }
+  ],
+  "target_runs": [
+    {
+      "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+      "state": "completed",
+      "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+      "error_code": null
+    }
+  ],
+  "downloads": [
+    {
+      "hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16",
+      "bytes": 31,
+      "sha256_verified": true,
+      "range_verified": true,
+      "no_store": true
+    },
+    {
+      "hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9",
+      "bytes": 40,
+      "sha256_verified": true,
+      "range_verified": true,
+      "no_store": true
+    }
+  ],
+  "model_calls": [
+    {
+      "model": "regression-supervisor",
+      "tool_result_ids": [],
+      "phase": "initial",
+      "sequence": 1,
+      "started_at": 1792702632.748433
+    },
+    {
+      "model": "regression-supervisor",
+      "tool_result_ids": [
+        "delegate"
+      ],
+      "phase": "initial",
+      "sequence": 2,
+      "started_at": 1792702632.911496
+    },
+    {
+      "model": "regression-specialist",
+      "tool_result_ids": [],
+      "phase": "specialist",
+      "sequence": 3,
+      "started_at": 1792702633.0869427
+    },
+    {
+      "model": "regression-supervisor",
+      "tool_result_ids": [
+        "delegate"
+      ],
+      "phase": "held_parent",
+      "sequence": 4,
+      "started_at": 1792702633.319009
+    },
+    {
+      "model": "regression-specialist",
+      "tool_result_ids": [
+        "new-output"
+      ],
+      "phase": "specialist",
+      "sequence": 5,
+      "started_at": 1792702633.39436
+    },
+    {
+      "model": "regression-specialist",
+      "tool_result_ids": [
+        "new-output",
+        "return-input"
+      ],
+      "phase": "specialist",
+      "sequence": 6,
+      "started_at": 1792702633.4529984
+    },
+    {
+      "model": "regression-supervisor",
+      "tool_result_ids": [
+        "delegate"
+      ],
+      "phase": "followup",
+      "sequence": 7,
+      "started_at": 1792702637.4415767
+    }
+  ],
+  "failures": [],
+  "final_source_runs": [
+    {
+      "run_id": "cebf098a-ccf1-4d70-902c-660ac4c59703",
+      "state": "completed",
+      "invocation_id": "f978014f-5a9b-4c2a-811c-b2946e4aeac0",
+      "error_code": null
+    },
+    {
+      "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+      "state": "lost",
+      "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+      "error_code": "runtime_owner_lease_expired"
+    },
+    {
+      "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+      "state": "completed",
+      "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+      "error_code": null
+    }
+  ],
+  "final_target_runs": [
+    {
+      "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+      "state": "completed",
+      "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+      "error_code": null
+    }
+  ],
+  "final_assistant_asset_links": [
+    {
+      "message_id": "53457e0f-581c-457c-81ec-7d3c61b6eb5f",
+      "hash": "05e4f2914ef7e12643fcd5580fe102355109e43aa43c50f83d0dfdb410afeb16"
+    },
+    {
+      "message_id": "53457e0f-581c-457c-81ec-7d3c61b6eb5f",
+      "hash": "ea9ec1e51bc42608d72cdcd025166e0fa03b96672de0b09cf1318d41202701c9"
+    }
+  ]
+}

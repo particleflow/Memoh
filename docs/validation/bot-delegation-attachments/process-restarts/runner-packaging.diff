@@ -1,0 +1,11 @@
+--- executed-native-fixture
++++ committed-native-fixture
+@@ -27,2 +27 @@
+-from delegation_fixture import restart_fixture
+-from crash_fixture import crash_restart_fixture
++from delegation_fixture import crash_restart_fixture, restart_fixture, validate_busy_restart
+@@ -371,0 +371,4 @@
++        if a.mode in {"busy-service", "busy-crash"}:
++            result["model_calls"] = list(model_calls)
++            result["restart_verification"] = validate_busy_restart(result)
++            (evidence / "restart-verification.json").write_text(json.dumps(result["restart_verification"], indent=2))

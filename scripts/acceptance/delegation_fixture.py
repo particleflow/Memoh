@@ -9,6 +9,8 @@ Resources remain for inspection. `stop` only stops this fixture's owned resource
 """
 import argparse
 import base64
+from collections import Counter
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,6 +21,7 @@ import socket
 import string
 import subprocess
 import time
+import tomllib
 import urllib.error
 import urllib.request
 import uuid
@@ -137,6 +140,119 @@ def restart_fixture(state_file, queue_only=False):
     return {"queue_restarted": True, "server_restarted": not queue_only, "old_pid": old_pid, "new_pid": state["server_pid"], "queue_started_before": before, "queue_started_after": after}
 
 
+def crash_restart_fixture(state_file, bot_id, session_id, run_id, evidence):
+    state_file = Path(state_file).resolve()
+    state = json.loads(state_file.read_text())
+    evidence = Path(evidence)
+    for key in ['pg_container', 'queue_container']:
+        inspect_container(state, state[key])
+    bot_id, session_id, run_id = map(lambda x: str(uuid.UUID(x)), [bot_id, session_id, run_id])
+    config = tomllib.loads(Path(state['config']).read_text())
+    prefix = config['session_runtime']['redis']['key_prefix']
+    run_key = prefix + 'run:' + bot_id + ':' + session_id + ':' + run_id
+    queue_key = prefix + 'follow_up_queue:' + bot_id + ':' + session_id
+
+    def redis(*args):
+        return subprocess.check_output(['docker', 'exec', state['queue_container'], 'valkey-cli', '--raw', *args], text=True).rstrip('\n')
+
+    def snapshot():
+        queue = redis('GET', queue_key)
+        items = json.loads(queue or '{}').get('items', [])
+        sql = "SELECT json_build_object('run_id',run_id,'state',state,'error_code',error_code,'fencing_token',fencing_token,'updated_at',updated_at) FROM session_runs WHERE run_id='" + run_id + "'"
+        parent = json.loads(subprocess.check_output(['docker', 'exec', state['pg_container'], 'psql', '-U', state['pg_user'], '-d', state['database'], '-At', '-c', sql], text=True))
+        return {'observed_at': time.time(), 'redis_time': redis('TIME').splitlines(), 'original_lease_pttl_ms': int(redis('PTTL', run_key)), 'leader_lease_pttl_ms': int(redis('PTTL', prefix + 'reaper_leader')), 'generation_sha256': hashlib.sha256(redis('GET', prefix + 'generation').encode()).hexdigest(), 'queue_sha256': hashlib.sha256(queue.encode()).hexdigest(), 'queue_items': [{k: x.get(k) for k in ['ID', 'Status', 'EnqueuedDuringRunID', 'InvocationID']} for x in items], 'original_parent': parent}
+    pid = state['server_pid']
+    process = Path('/proc') / str(pid)
+    assert process.exists() and process.stat().st_uid == os.getuid()
+    assert (process / 'cmdline').read_bytes() == os.fsencode(state['server_binary']) + b'\x00serve\x00'
+    assert (process / 'stat').read_text().split()[21] == state['server_start_ticks']
+    started_before = inspect_container(state, state['queue_container'])['State']['StartedAt']
+    before = snapshot()
+    assert before['original_parent']['state'] == 'running' and before['original_lease_pttl_ms'] > 0 and (len(before['queue_items']) == 1)
+    proof = {'method': 'SIGKILL', 'old_pid': pid, 'queue_restarted': False, 'queue_started_before': started_before, 'before_kill': before, 'signal_sent_at': time.time()}
+    (evidence / 'crash-lease-proof.json').write_text(json.dumps(proof, indent=2))
+    os.kill(pid, signal.SIGKILL)
+    wait_until(lambda: not process.exists() or (process / 'stat').read_text().split()[2] == 'Z', timeout=5)
+    proof['process_dead_at'] = time.time()
+    samples = []
+    deadline = time.monotonic() + 8
+    while time.monotonic() < deadline:
+        sample = snapshot()
+        samples.append(sample)
+        proof['offline_lease_samples'] = samples
+        (evidence / 'crash-lease-proof.json').write_text(json.dumps(proof, indent=2))
+        assert sample['original_parent']['state'] == 'running', 'SIGKILL must not execute graceful durable release'
+        assert sample['queue_sha256'] == before['queue_sha256'] and sample['generation_sha256'] == before['generation_sha256']
+        if sample['original_lease_pttl_ms'] == -2:
+            break
+        time.sleep(0.15)
+    assert samples[-1]['original_lease_pttl_ms'] == -2, 'real original owner lease did not expire within deadline'
+    proof['lease_expired_observed_at'] = samples[-1]['observed_at']
+    proof['new_server_start_requested_at'] = time.time()
+    start_server(state, state_file)
+    proof['new_pid'] = state['server_pid']
+    proof['server_ready_at'] = time.time()
+    proof['server_restarted'] = True
+    proof['queue_started_after'] = inspect_container(state, state['queue_container'])['State']['StartedAt']
+    assert proof['new_pid'] != pid and proof['queue_started_after'] == started_before
+    proof['after_new_server_ready'] = snapshot()
+    (evidence / 'crash-lease-proof.json').write_text(json.dumps(proof, indent=2))
+    return proof
+
+
+def validate_busy_restart(result):
+    """Assert recovery identity/counts without mistaking an interrupted run for success."""
+    mode = result["mode"]
+    assert mode in {"busy-service", "busy-crash"}
+    assert not result.get("failures")
+    before = result["before_full_restart"]
+    item = before["queue_item"]
+    original_id = item["enqueued_during_run_id"]
+    source, target = result["source_runs"], result["target_runs"]
+    original = [run for run in source if run["run_id"] == original_id]
+    resumed = [run for run in source if run["invocation_id"] == "resume:" + original_id]
+    follow = [run for run in source if run["invocation_id"] == "follow-up:" + item["item_id"]]
+    assert len(original) == len(follow) == 1
+    assert original[0]["state"] == "lost" and follow[0]["state"] == "completed"
+    assert target == before["snapshot"]["target_runs"] and len(target) == 1
+    assert target[0]["state"] == "completed"
+    phases = Counter(call["phase"] for call in result["model_calls"])
+    restart = result["restart"]
+    assert restart["server_restarted"] and restart["old_pid"] != restart["new_pid"]
+    if mode == "busy-service":
+        assert original[0]["error_code"] == "session_runtime.interrupted"
+        assert len(source) == 4 and len(resumed) == 1 and resumed[0]["state"] == "completed"
+        assert phases == {"initial": 2, "specialist": 3, "held_parent": 2, "followup": 1}
+        assert restart["queue_restarted"]
+        assert restart["queue_started_before"] != restart["queue_started_after"]
+        assert all(sample["queues"]["source"]["follow_up"] == [item] for sample in result["automatic_recovery_samples"])
+    else:
+        assert original[0]["error_code"] == "runtime_owner_lease_expired"
+        assert len(source) == 3 and not resumed
+        assert phases == {"initial": 2, "specialist": 3, "held_parent": 1, "followup": 1}
+        assert restart["method"] == "SIGKILL" and not restart["queue_restarted"]
+        assert restart["queue_started_before"] == restart["queue_started_after"]
+        baseline, samples = restart["before_kill"], restart["offline_lease_samples"]
+        assert baseline["original_lease_pttl_ms"] > 0 and samples[-1]["original_lease_pttl_ms"] == -2
+        assert all(sample["original_parent"]["state"] == "running" for sample in samples)
+        assert all(sample["queue_sha256"] == baseline["queue_sha256"] and sample["generation_sha256"] == baseline["generation_sha256"] for sample in samples)
+        assert restart["signal_sent_at"] <= restart["process_dead_at"] <= restart["lease_expired_observed_at"] <= restart["new_server_start_requested_at"]
+    for sample in result["automatic_recovery_samples"]:
+        assert sample["snapshot"]["target_runs"] == target
+    assert all(not group[key] for group in result["drain_observation"]["queues"].values() for key in ["steer", "follow_up"])
+    expected = Counter(x["hash"] for x in result["downloads"])
+    links = result["assistant_links"]
+    assert len(links) == len(expected) == 2 and len({x["message_id"] for x in links}) == 1
+    assert Counter(x["hash"] for x in links) == expected
+    assert len(result["quiet_windows"]) == 2
+    assert all(window["pending_items"] == 0 and window["seconds"] == 5 for window in result["quiet_windows"])
+    return {"mode": mode, "original_parent": original[0], "resumed_parents": resumed,
+            "specialist": target[0], "followup": follow[0], "queue_item_id": item["item_id"],
+            "model_phase_counts": dict(phases), "old_pid": restart["old_pid"], "new_pid": restart["new_pid"],
+            "queue_restarted": restart["queue_restarted"], "specialist_replayed": False,
+            "unknown_parent_marked_success": False, "final_asset_links": 2, "final_messages_with_assets": 1}
+
+
 def run_logged(args, path, env=None):
     with open(path, "w") as log:
         result = subprocess.run(args, cwd=REPO, env=env, stdout=log, stderr=subprocess.STDOUT)
@@ -239,9 +355,14 @@ def bootstrap(root):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("action", choices=["run", "check", "stop"])
+    p.add_argument("action", choices=["run", "check", "stop", "verify"])
     p.add_argument("--root", type=Path, required=True)
+    p.add_argument("--modes", nargs="+", choices=["idle", "busy", "busy-service", "busy-crash"], default=["idle", "busy"])
     a = p.parse_args()
+    if a.action == "verify":
+        proof = validate_busy_restart(json.loads((a.root / "results.json").read_text()))
+        print(json.dumps(proof, indent=2))
+        return
     if a.action == "stop":
         state = json.loads((a.root / "fixture-private.json").read_text())
         stop_server(state)
@@ -260,7 +381,7 @@ def main():
     else:
         state_file, state = bootstrap(a.root)
         evidence_root = a.root
-    for mode in ["idle", "busy"]:
+    for mode in a.modes:
         args = ["python", str(Path(__file__).with_name("bot_delegation.py")), "--base-url", state["base_url"], "--source-bot", state["source_bot"], "--target-bot", state["target_bot"],
                 "--token-file", state["token_file"], "--setup-token-file", state["setup_token_file"], "--pg-container", state["pg_container"], "--pg-user", "acceptance", "--database", "acceptance", "--evidence", str(evidence_root / mode),
                 "--model-port", str(state["model_port"]), "--restart-fixture", str(state_file), "--mode", mode, "--allow-isolated-fixture-writes"]

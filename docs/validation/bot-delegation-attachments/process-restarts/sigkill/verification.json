@@ -1,0 +1,36 @@
+{
+  "mode": "busy-crash",
+  "original_parent": {
+    "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+    "state": "lost",
+    "invocation_id": "ac049f82-96c2-433f-8ffc-48e71e349d7f",
+    "error_code": "runtime_owner_lease_expired"
+  },
+  "resumed_parents": [],
+  "specialist": {
+    "run_id": "e2a6d057-d6a6-41e0-8c1e-1b1952c7cca4",
+    "state": "completed",
+    "invocation_id": "bot-delegation:31ae2cf8-6510-433a-9e77-77792d8f62d7",
+    "error_code": null
+  },
+  "followup": {
+    "run_id": "4ebc97ff-7e84-445a-aa5b-40a390f6ad50",
+    "state": "completed",
+    "invocation_id": "follow-up:4cd89df6-65af-5e79-b581-5ecc4e006e90",
+    "error_code": null
+  },
+  "queue_item_id": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+  "model_phase_counts": {
+    "initial": 2,
+    "specialist": 3,
+    "held_parent": 1,
+    "followup": 1
+  },
+  "old_pid": 117403,
+  "new_pid": 136440,
+  "queue_restarted": false,
+  "specialist_replayed": false,
+  "unknown_parent_marked_success": false,
+  "final_asset_links": 2,
+  "final_messages_with_assets": 1
+}

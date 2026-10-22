@@ -24,7 +24,7 @@ import uuid
 
 import websockets
 
-from delegation_fixture import restart_fixture
+from delegation_fixture import crash_restart_fixture, restart_fixture, validate_busy_restart
 
 INPUT = b"delegation regression original\n"
 OUTPUT = b"delegation regression specialist output\n"
@@ -37,12 +37,12 @@ def main():
     p.add_argument("--setup-token-file", help="isolated admin token for model setup and reversible grant revocation")
     p.add_argument("--model-port", type=int, default=18281)
     p.add_argument("--restart-fixture", help="private state file created by delegation_fixture.py")
-    p.add_argument("--mode", choices=["idle", "busy"], default="idle")
+    p.add_argument("--mode", choices=["idle", "busy", "busy-service", "busy-crash"], default="idle")
     p.add_argument("--allow-isolated-fixture-writes", action="store_true")
     a = p.parse_args()
     if not a.allow_isolated_fixture_writes or urllib.parse.urlparse(a.base_url).hostname not in {"127.0.0.1", "localhost", "::1"}:
         p.error("explicit opt-in and loopback server are required")
-    if a.mode == "busy" and not a.restart_fixture:
+    if a.mode in {"busy", "busy-service", "busy-crash"} and not a.restart_fixture:
         p.error("busy recovery requires the owned restart fixture")
     source, target = str(uuid.UUID(a.source_bot)), str(uuid.UUID(a.target_bot))
     assert source != target
@@ -108,7 +108,8 @@ def main():
             last_user = next((str(m.get("content", "")) for m in reversed(messages) if m.get("role") == "user"), "")
             ids = [m.get("tool_call_id") for m in messages if m.get("role") == "tool"]
             specialist = req["model"].endswith("specialist")
-            model_calls.append({"model": req["model"], "tool_result_ids": ids})
+            phase = "specialist" if specialist else "followup" if "execution state:" in last_user else "held_parent" if "HOLD_PARENT" in last_user else "initial"
+            model_calls.append({"model": req["model"], "tool_result_ids": ids, "phase": phase, "sequence": len(model_calls) + 1, "started_at": time.time()})
             call = None
             if specialist:
                 assert release.wait(90), "specialist gate deadline"
@@ -180,6 +181,10 @@ def main():
                         await asyncio.wait_for(ws.recv(), .2)
                     except asyncio.TimeoutError:
                         pass
+                    except websockets.ConnectionClosed:
+                        if a.mode in {"busy-service", "busy-crash"} and text == "HOLD_PARENT":
+                            return {"client_disconnected": True, "invocation_id": invocation}
+                        raise
                     rows = await asyncio.to_thread(runs, session)
                     current = [r for r in rows if r["invocation_id"] == invocation]
                     if current and current[0]["state"] in {"completed", "failed", "aborted", "lost"}:
@@ -210,7 +215,8 @@ def main():
             while time.monotonic() < deadline:
                 q, current = queues(), snapshot()
                 assert current == expected, label + ": late business execution"
-                assert all(r["state"] == "completed" for key in ["source_runs", "target_runs"] for r in current[key]), label + ": nonterminal run"
+                assert all(r["state"] in ({"completed", "failed", "aborted", "lost"} if a.mode in {"busy-service", "busy-crash"} else {"completed"}) for r in current["source_runs"]), label + ": nonterminal source run"
+                assert all(r["state"] == "completed" for r in current["target_runs"]), label + ": nonterminal specialist run"
                 assert all(not group[k] for group in q.values() for k in ["steer", "follow_up"]), label + ": pending queue"
                 samples.append(round(time.monotonic(), 3))
                 time.sleep(.2)
@@ -226,37 +232,90 @@ def main():
                 retried = list(ex.map(lambda _: api(detail + "/delivery", {}), range(16)))
             check(len(retried) == 16 and all(x["delegation_id"] == view["delegation_id"] for x in retried), "16 concurrent delivery attempts preserve task identity")
 
-        if a.mode == "busy":
+        if a.mode in {"busy", "busy-service", "busy-crash"}:
             busy_future = busy_executor.submit(lambda: asyncio.run(send_turn("HOLD_PARENT", [])))
             check(parent_started.wait(30), "second real supervisor turn is blocked inside local model")
         release.set()
         view = wait_for(lambda: api(detail), lambda x: x["state"] in {"completed", "failed", "unknown"} and x["delivery_state"] in {"accepted", "unknown", "unavailable"}, "specialist terminal")
         check(view["state"] == "completed" and view["delivery_state"] == "accepted", "specialist completes and delivery is accepted")
-        if a.mode == "busy":
+        if a.mode in {"busy", "busy-service", "busy-crash"}:
             q = queues()
             check(len(q["source"]["follow_up"]) == 1, "busy supervisor has exactly one persisted pending follow-up")
             queued = q["source"]["follow_up"][0]
             before_busy = snapshot()
             result["busy_queue_before"] = q
-            result["restart"] = restart_fixture(a.restart_fixture, queue_only=True)
-            q = queues()
-            check(q["source"]["follow_up"] == [queued], "Valkey AOF restart preserves the exact queued follow-up identity")
-            lose_ack()
-            retry16()
-            q = queues()
-            check(q["source"]["follow_up"] == [queued] and snapshot() == before_busy, "lost-ack concurrent retries keep one busy queue item and never rerun specialist")
-            result["busy_queue_after_restart_and_retry"] = q
-            release_parent.set()
-            check(busy_future.result(timeout=45)["state"] == "completed", "blocked parent completes after controlled release")
-        count = 3 if a.mode == "busy" else 2
-        source_runs = wait_for(lambda: runs(session), lambda rows: len(rows) >= count and all(x["state"] == "completed" for x in rows), "follow-up terminal")
-        check(len(source_runs) == count, "exactly one supervisor follow-up completes")
+            result["before_full_restart"] = {"snapshot": before_busy, "view": api(detail), "queue_item": queued, "model_calls": list(model_calls)}
+            (evidence / "before-restart.json").write_text(json.dumps(result["before_full_restart"], indent=2))
+            if a.mode == "busy-crash":
+                result["restart"] = crash_restart_fixture(a.restart_fixture, source, session, queued["enqueued_during_run_id"], evidence)
+            else:
+                result["restart"] = restart_fixture(a.restart_fixture, queue_only=a.mode != "busy-service")
+            if a.mode in {"busy-service", "busy-crash"}:
+                samples = []
+                deadline = time.monotonic() + 12
+                while time.monotonic() < deadline:
+                    current = snapshot()
+                    samples.append({"at": time.time(), "snapshot": current, "queues": queues(), "view": api(detail)})
+                    assert current["target_runs"] == before_busy["target_runs"], "restart repeated or changed specialist business"
+                    (evidence / "automatic-recovery-observation.json").write_text(json.dumps(samples, indent=2))
+                    time.sleep(.4)
+                result["automatic_recovery_samples"] = samples
+                result["busy_client_after_restart"] = busy_future.result(timeout=5)
+                result["post_restart_attachment_reads"] = []
+                for h, content in zip(hashes, [INPUT, OUTPUT]):
+                    status, headers, data = request(detail + "/attachments/" + h, binary=True)
+                    check(status == 200 and data == content and headers.get("Cache-Control") == "no-store", "original remains intact after busy process restart " + h[:12])
+                    result["post_restart_attachment_reads"].append({"hash": h, "status": status, "bytes": len(data)})
+                release_parent.set()
+                follow_invocation = "follow-up:" + queued["item_id"]
+                def drained():
+                    current = snapshot()
+                    q = queues()
+                    follow = [r for r in current["source_runs"] if r["invocation_id"] == follow_invocation]
+                    return {"snapshot": current, "queues": q, "followup_runs": follow}
+                end = time.monotonic() + 15
+                while time.monotonic() < end:
+                    observed = drained()
+                    result["drain_observation"] = observed
+                    (evidence / "drain-observation.json").write_text(json.dumps(observed, indent=2))
+                    if len(observed["followup_runs"]) == 1 and observed["followup_runs"][0]["state"] == "completed" and all(not g[k] for g in observed["queues"].values() for k in ["steer", "follow_up"]):
+                        break
+                    time.sleep(.4)
+                check(len(observed["followup_runs"]) == 1 and observed["followup_runs"][0]["state"] == "completed", "automatic recovery completes exactly the original queued follow-up")
+                check(all(not g[k] for g in observed["queues"].values() for k in ["steer", "follow_up"]), "recovered source and target queues are drained")
+                result["interrupted_parent_runs"] = [r for r in runs(session) if r["run_id"] == queued["enqueued_during_run_id"]]
+                check(runs(view["target_session_id"]) == before_busy["target_runs"], "specialist run identity remains unchanged through busy server restart")
+                lose_ack()
+                retry16()
+            else:
+                q = queues()
+                check(q["source"]["follow_up"] == [queued], "Valkey AOF restart preserves the exact queued follow-up identity")
+                lose_ack()
+                retry16()
+                q = queues()
+                check(q["source"]["follow_up"] == [queued] and snapshot() == before_busy, "lost-ack concurrent retries keep one busy queue item and never rerun specialist")
+                result["busy_queue_after_restart_and_retry"] = q
+                release_parent.set()
+                check(busy_future.result(timeout=45)["state"] == "completed", "blocked parent completes after controlled release")
+        if a.mode in {"busy-service", "busy-crash"}:
+            source_runs = runs(session)
+            count = len(source_runs)
+            check(len([r for r in source_runs if r["invocation_id"].startswith("follow-up:")]) == 1, "exactly one original follow-up invocation exists")
+        else:
+            count = 3 if a.mode == "busy" else 2
+            source_runs = wait_for(lambda: runs(session), lambda rows: len(rows) >= count and all(x["state"] == "completed" for x in rows), "follow-up terminal")
+            check(len(source_runs) == count, "exactly one supervisor follow-up completes")
         check(Counter(x["content_hash"] for x in view["attachments"]) == Counter(hashes), "ledger contains exactly one reference to each original and output")
         links = sql("SELECT coalesce(json_agg(json_build_object('message_id',m.id,'hash',a.content_hash)),'[]'::json) FROM bot_history_message_assets a JOIN bot_history_messages m ON m.id=a.message_id WHERE m.session_id='" + session + "' AND m.role='assistant'")
         check(len(links) == 2 and len({x["message_id"] for x in links}) == 1 and Counter(x["hash"] for x in links) == Counter(hashes), "one supervisor assistant message contains both attachments exactly once")
         result["assistant_links"] = links
         counts = Counter("specialist" if c["model"].endswith("specialist") else "supervisor" for c in model_calls)
-        check(counts == {"specialist": 3, "supervisor": count + 1}, "synthetic model call counts match one specialist business execution")
+        if a.mode in {"busy-service", "busy-crash"}:
+            phases = Counter(c["phase"] for c in model_calls)
+            result["model_phase_counts"] = dict(phases)
+            check(phases["specialist"] == 3 and phases["followup"] == 1 and phases["initial"] == 2, "one specialist business and one follow-up model execution; interrupted parent counted separately")
+        else:
+            check(counts == {"specialist": 3, "supervisor": count + 1}, "synthetic model call counts match one specialist business execution")
         before = snapshot()
         quiet(before, "initial completion")
         if a.mode == "idle" and a.restart_fixture:
@@ -309,6 +368,10 @@ def main():
         else:
             result["revocation"] = "UNRUN: isolated member/admin fixture required"
         result["downloads"] = downloads
+        if a.mode in {"busy-service", "busy-crash"}:
+            result["model_calls"] = list(model_calls)
+            result["restart_verification"] = validate_busy_restart(result)
+            (evidence / "restart-verification.json").write_text(json.dumps(result["restart_verification"], indent=2))
     except Exception as e:
         if not errors:
             errors.append(type(e).__name__ + ": " + str(e))
@@ -319,6 +382,11 @@ def main():
         httpd.shutdown()
         busy_executor.shutdown(wait=True)
         result["model_calls"], result["failures"] = model_calls, errors
+        if result.get("source_session"):
+            result["final_source_runs"] = runs(result["source_session"])
+            if result.get("view", {}).get("target_session_id"):
+                result["final_target_runs"] = runs(result["view"]["target_session_id"])
+            result["final_assistant_asset_links"] = sql("SELECT coalesce(json_agg(json_build_object('message_id',m.id,'hash',a.content_hash)),'[]'::json) FROM bot_history_message_assets a JOIN bot_history_messages m ON m.id=a.message_id WHERE m.session_id='" + result["source_session"] + "' AND m.role='assistant'")
         (evidence / "results.json").write_text(json.dumps(result, indent=2))
 
 
