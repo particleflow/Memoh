@@ -32,6 +32,11 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		return QueueStatus{}, err
 	}
 	defer func() { _ = q.Close() }()
+	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" || action.Kind == "advance-next" {
+		if err := q.ReclaimConfirmed(ctx); err != nil {
+			return QueueStatus{}, err
+		}
+	}
 	local := HerdrAction{Kind: action.Kind, DeliveryID: action.DeliveryID, Job: action.Job}
 	if action.Kind == "advance-next" {
 		id, err := q.nextDue(now)
@@ -108,6 +113,11 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 // A single bounded selection, not a worker loop. Locks remain owned by RunOne;
 // a race with another invocation returns busy and never runs duplicate work.
 func (q *DiskQueue) nextDue(now time.Time) (string, error) {
+	global, err := q.lock("admission")
+	if err != nil {
+		return "", err
+	}
+	defer unlockClose(global)
 	records, err := q.admissions()
 	if err != nil {
 		return "", err

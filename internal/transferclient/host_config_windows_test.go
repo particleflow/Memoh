@@ -15,3 +15,12 @@ func TestWindowsNativeProducerClosedManifest(t *testing.T) {
 func TestWindowsNativeProducerMissingSource(t *testing.T) {
 	TestProducerCollectMissingSourceStillAdvances(t)
 }
+
+func TestWindowsNativeQueueReleaseCapacity(t *testing.T) {
+	TestQueueReleaseConfirmedFreesJobAndByteCapacity(t)
+}
+
+func TestWindowsNativeQueueReleaseUnknown(t *testing.T) {
+	TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered(t)
+}
+func TestWindowsNativeQueueReleaseProcessCrash(t *testing.T) { TestQueueReleaseProcessCrash(t) }

@@ -21,8 +21,9 @@ var (
 	ErrVersion  = errors.New("delivery queue schema migration required")
 )
 
-// QueueLimits bound retained jobs (including incomplete admissions), reserved
-// bytes and each journal. Nothing is evicted to make room for a new delivery.
+// QueueLimits bound active jobs (including incomplete admissions), reserved
+// bytes and each active journal. Confirmed deliveries keep bounded compact
+// receipts; their separate maxQueueRecords bound never evicts idempotency proof.
 type QueueLimits struct {
 	Jobs         int
 	Bytes        int64
@@ -35,16 +36,18 @@ type QueueLimits struct {
 // The host must grant this directory only to its trusted user. Config, logs,
 // execution receipts and NAS originals remain owned by their existing services.
 type DiskQueue struct {
-	root     *os.Root
-	guard    *os.File
-	revision string
-	limits   QueueLimits
+	root        *os.Root
+	guard       *os.File
+	revision    string
+	limits      QueueLimits
+	releaseHook func(string)
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
 // authorized registration accepted the stable reference, not task completion.
 type QueueStatus struct {
 	Version             int           `json:"version"`
+	PayloadState        string        `json:"payload_state,omitempty"`
 	Direction           string        `json:"direction"`
 	Job                 Job           `json:"job"`
 	Seal                *SnapshotSeal `json:"seal,omitempty"`
@@ -242,10 +245,25 @@ func (q *DiskQueue) worker() (*os.File, error) {
 	return nil, ErrBusy
 }
 
-// A journal is append-only length+SHA256+JSON, fsynced before acknowledgement.
+// An active journal is append-only length+SHA256+JSON, synced before acknowledgement.
+// Confirmed delivery journals may be compacted with a synced release witness.
 // Only an incomplete final frame is truncated on reopen. Full corrupt frames,
 // wrong versions and journal exhaustion fail closed. No rename per checkpoint.
 func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
+	r, f, err := q.loadJournal(id)
+	if err == nil {
+		return r, f, nil
+	}
+	// A durable released receipt is authoritative only after payload deletion
+	// and directory sync. It recovers an interrupted journal compaction.
+	saved, backup, recoverErr := q.loadReleaseReceipt(id)
+	if recoverErr == nil {
+		return saved, backup, nil
+	}
+	return r, nil, err
+}
+
+func (q *DiskQueue) loadJournal(id string) (QueueStatus, *os.File, error) {
 	var record QueueStatus
 	f, err := q.file(id+".journal", os.O_RDWR, 0o600)
 	if err != nil {
@@ -311,6 +329,14 @@ func readJournalFrames(f *os.File, limit int64, consume func([]byte) error) (int
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
+	if r.Version == 3 {
+		if (r.PayloadState != PayloadReleasePending && r.PayloadState != PayloadReleased) || !confirmedDelivery(r) {
+			return false
+		}
+	} else if r.Version != 2 || r.PayloadState != "" {
+		return false
+	}
+
 	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || r.Job.Spec.SizeBytes > q.limits.Bytes {
 		return false
 	}
@@ -331,7 +357,7 @@ func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
 			return false
 		}
 	}
-	return r.Version == 2 && r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12 && associationStateValid(r.AssociationState)
+	return r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12 && associationStateValid(r.AssociationState)
 }
 
 func (q *DiskQueue) save(f *os.File, r QueueStatus) error {

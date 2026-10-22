@@ -123,9 +123,13 @@ No host timer or daemon is added. NAS `delivery.reference` is available to the
 parent task only after committed association, separately from Pi completion.
 
 This first increment has one file per declaration and the existing eight-job /
-256 MiB total snapshot limit. Explicit `retire` is still needed for acknowledged
-jobs. Multi-file production, automatic retirement and recovery from a crash
-before a closed manifest exists are not complete. A pending delivery is not a
+256 MiB total snapshot limit. Finite host actions automatically release only
+confirmed committed queue payloads and retain the original delivery/receipt.
+Unknown, canceled and blocked jobs are not automatically cleared. The compact
+receipt catalog stops new admissions at 1024 records; proofs are never silently
+evicted. See `docs/delivery-queue-retention.md` for recovery and upgrade bounds.
+Multi-file production and recovery from a crash before a closed manifest exists
+are not complete. A pending delivery is not a
 successful file transfer, and task cancellation does not retract delivery.
 
 CLI stdout contains bounded phase/offset/association/reference data only. It is
