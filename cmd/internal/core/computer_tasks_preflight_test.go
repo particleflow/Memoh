@@ -114,10 +114,19 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 				args["target_id"] = tc.target
 			}
 			result, err := source.CallTool(ctx, session, "computer_task_submit", args)
-			if !errors.Is(err, tc.want) || result != nil {
+			if errors.Is(tc.want, computertask.ErrPreflightUnavailable) {
+				if err != nil || result["isError"] != true {
+					t.Fatalf("preflight wire result=%v err=%v", result, err)
+				}
+				data, ok := result["structuredContent"].(map[string]any)
+				if !ok || data["code"] != "computer.connection_unavailable" || data["phase"] != "preflight" || data["operation_created"] != false || data["business_dispatched"] != false {
+					t.Fatalf("missing machine-readable preflight facts: %v", data)
+				}
+			} else if !errors.Is(err, tc.want) || result != nil {
 				t.Fatalf("result=%v err=%v want=%v", result, err, tc.want)
 			}
-			if strings.Contains(err.Error(), "SECRET") || store.claims != 0 || probes != tc.probes {
+			wire, marshalErr := json.Marshal(result)
+			if marshalErr != nil || strings.Contains(string(wire), "SECRET") || (err != nil && strings.Contains(err.Error(), "SECRET")) || store.claims != 0 || probes != tc.probes {
 				t.Fatalf("error leaked or effect reached: claims=%d probes=%d", store.claims, probes)
 			}
 		})

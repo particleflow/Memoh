@@ -307,6 +307,46 @@ func parseResult(t *testing.T, raw []byte) Result {
 	return v.Computer
 }
 
+func TestStandardMCPPreflightFailureHasNonRetryableStructuredFacts(t *testing.T) {
+	source, store, transport, _ := setupBatch(t)
+	source.service.authorize = func(context.Context, toolcontext.ComputerBinding, string, string, string) error {
+		return fmt.Errorf("private diagnostic SECRET: %w", ErrPreflightUnavailable)
+	}
+	client := standardClient(t, source, "pc-a", false)
+	response, err := client.CallTool(t.Context(), &sdkmcp.CallToolParams{Name: "computer_task_submit", Arguments: map[string]any{"kind": "herdr_pi_task", "task": "Compute synthetic 42", "work_dir": "."}})
+	if err != nil || !response.IsError {
+		t.Fatalf("MCP preflight result=%v err=%v", response, err)
+	}
+	wire, err := json.Marshal(response.StructuredContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var facts map[string]any
+	if err := json.Unmarshal(wire, &facts); err != nil {
+		t.Fatal(err)
+	}
+	retry, ok := facts["retry"].(map[string]any)
+	if !ok || facts["ok"] != false || facts["code"] != "computer.connection_unavailable" || facts["phase"] != "preflight" || facts["operation_created"] != false || facts["business_dispatched"] != false || retry["automatic"] != false || retry["requires"] != "verified_connection_recovery" {
+		t.Fatalf("preflight machine contract=%s", wire)
+	}
+	if _, exists := facts["computer"]; exists {
+		t.Fatal("invented operation receipt")
+	}
+	if _, exists := facts["operation_id"]; exists {
+		t.Fatal("invented operation ID")
+	}
+	if len(response.Content) != 1 {
+		t.Fatal("missing MCP text fallback")
+	}
+	text, ok := response.Content[0].(*sdkmcp.TextContent)
+	if !ok || text.Text != string(wire) {
+		t.Fatal("MCP text and structured facts differ")
+	}
+	if strings.Contains(string(wire), "SECRET") || len(store.records) != 0 || len(transport.calls) != 0 || transport.runs != 0 {
+		t.Fatal("private diagnostic leaked or preflight dispatched work")
+	}
+}
+
 func TestStandardMCPTrustedPCBindingAndSingleTask(t *testing.T) {
 	source, _, f := setup(t)
 	c := standardClient(t, source, "pc-a", false)

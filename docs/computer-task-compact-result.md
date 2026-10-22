@@ -105,6 +105,17 @@ existing connection must be checked before another submission. It does not
 infer OAuth expiration from arbitrary transport errors, expose private causes,
 change grants, or alter unknown outcomes after a business dispatch.
 
+The standard MCP tool result carries `isError: true`. Both `structuredContent`
+and its JSON text fallback contain `ok: false`,
+`code: "computer.connection_unavailable"`, `phase: "preflight"`,
+`operation_created: false`, `business_dispatched: false`, and
+`retry: {"automatic": false, "requires": "verified_connection_recovery"}`.
+Callers can classify the failure without parsing its prose. These facts refer
+only to the current call: they do not clear or settle an older operation.
+There is no fabricated operation ID or receipt. The existing ledger still
+governs uncertain business submissions; this preflight envelope does not make
+those submissions retryable. No automatic retry or credential repair is added.
+
 The real tool source, authorizer, workspace resolver and Agenvo probe are
 covered together with a synthetic failing transport. Explicit and inferred PC
 targets in a native root conversation both reproduce the old error; missing
