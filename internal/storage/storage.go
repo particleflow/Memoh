@@ -71,6 +71,9 @@ type ContainerFileOpener interface {
 
 // PrefixLister is an optional interface for providers that can list keys
 // sharing a common prefix (e.g. directory listing on a filesystem backend).
+// This is metadata-only: it must not read payload bytes, migrate or materialize
+// objects, or repair publication. A listed key is not an integrity/durability
+// acknowledgement or an authorization grant.
 type PrefixLister interface {
 	ListPrefix(ctx context.Context, prefix string) ([]string, error)
 }

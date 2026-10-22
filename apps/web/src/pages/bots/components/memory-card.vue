@@ -12,6 +12,30 @@
         {{ item.memory }}
       </p>
 
+      <div
+        v-if="item.file_refs?.length"
+        class="mt-2 flex flex-wrap items-center gap-2"
+      >
+        <template
+          v-for="(file, index) in item.file_refs"
+          :key="index"
+        >
+          <TextButton
+            v-if="file.status === 'located' && file.content_hash"
+            @click="$emit('openFile', file)"
+          >
+            <Paperclip />
+            {{ $t('bots.memory.openFile') }}
+          </TextButton>
+          <span
+            v-else
+            class="text-caption text-muted-foreground"
+          >
+            {{ $t('bots.memory.fileUnavailable') }}
+          </span>
+        </template>
+      </div>
+
       <!-- Metadata row: layer + confidence + tags badges, then relative time. -->
       <div
         v-if="hasMeta"
@@ -69,10 +93,10 @@
 </template>
 
 <script setup lang="ts">
-import { Pencil } from 'lucide-vue-next'
+import { Paperclip, Pencil } from 'lucide-vue-next'
 import { computed } from 'vue'
-import { Badge, Button, SettingsRow } from '@felinic/ui'
-import type { AdaptersMemoryItem } from '@memohai/sdk'
+import { Badge, Button, SettingsRow, TextButton } from '@felinic/ui'
+import type { AdaptersMemoryFileRef, AdaptersMemoryItem } from '@memohai/sdk'
 import { useI18n } from 'vue-i18n'
 import { formatRelativeTime } from '@/utils/date-time'
 import { memoryConfidence, memoryLayerOf, memoryTags } from './use-memory-filter'
@@ -90,7 +114,7 @@ const props = withDefaults(defineProps<{
   showTimestamp: true,
 })
 
-defineEmits<{ edit: [] }>()
+defineEmits<{ edit: [], openFile: [file: AdaptersMemoryFileRef] }>()
 
 const { t: _t } = useI18n()
 

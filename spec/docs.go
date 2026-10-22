@@ -19114,6 +19114,27 @@ const docTemplate = `{
                 }
             }
         },
+        "adapters.MemoryFileRef": {
+            "type": "object",
+            "properties": {
+                "content_hash": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "located",
+                        "unavailable"
+                    ]
+                }
+            }
+        },
         "adapters.MemoryItem": {
             "type": "object",
             "properties": {
@@ -19125,6 +19146,13 @@ const docTemplate = `{
                 },
                 "created_at": {
                     "type": "string"
+                },
+                "file_refs": {
+                    "description": "FileRefs is a read-time projection validated against the caller's Bot.\nIt is never an authorization grant or persisted availability snapshot.",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/adapters.MemoryFileRef"
+                    }
                 },
                 "hash": {
                     "type": "string"

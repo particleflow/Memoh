@@ -45,6 +45,7 @@ type BuiltinProvider struct {
 	llm     adapters.LLM
 	logger  *slog.Logger
 	packer  contextPackerConfig
+	files   FileResolver
 }
 
 // Runtime is the runtime memory backend required by the builtin provider.
@@ -359,7 +360,7 @@ func (p *BuiltinProvider) ListTools(_ context.Context, _ mcp.ToolSessionContext)
 	return []mcp.ToolDescriptor{
 		{
 			Name:        adapters.ToolSearchMemory,
-			Description: "Search for memories relevant to the current chat",
+			Description: "Search for memories relevant to the current chat. Located file_refs contain canonical content_hash locators for the current Bot, not proof of content integrity or committed storage. Fetch through the authorized media path; unavailable references must not be opened or guessed.",
 			InputSchema: map[string]any{
 				"type": "object",
 				"properties": map[string]any{
@@ -407,7 +408,7 @@ func (p *BuiltinProvider) CallTool(ctx context.Context, session mcp.ToolSessionC
 		limit = maxMemoryToolLimit
 	}
 
-	resp, err := p.service.Search(ctx, adapters.SearchRequest{
+	resp, err := p.Search(ctx, adapters.SearchRequest{
 		Query: query,
 		BotID: botID,
 		Limit: limit,
@@ -440,6 +441,9 @@ func (p *BuiltinProvider) CallTool(ctx context.Context, session mcp.ToolSessionC
 		if refs := sourceRefsPayload(item.SourceMessageIDs); len(refs) > 0 {
 			entry["source_refs"] = refs
 		}
+		if len(item.FileRefs) > 0 {
+			entry["file_refs"] = item.FileRefs
+		}
 		results = append(results, entry)
 	}
 
@@ -463,14 +467,24 @@ func (p *BuiltinProvider) Search(ctx context.Context, req adapters.SearchRequest
 	if p.service == nil {
 		return adapters.SearchResponse{}, errors.New("memory runtime not configured")
 	}
-	return p.service.Search(ctx, req)
+	resp, err := p.service.Search(ctx, req)
+	if err == nil {
+		botID, _ := runtimeBotID(req.BotID, req.Filters)
+		p.projectFileRefs(ctx, botID, resp.Results)
+	}
+	return resp, err
 }
 
 func (p *BuiltinProvider) GetAll(ctx context.Context, req adapters.GetAllRequest) (adapters.SearchResponse, error) {
 	if p.service == nil {
 		return adapters.SearchResponse{}, errors.New("memory runtime not configured")
 	}
-	return p.service.GetAll(ctx, req)
+	resp, err := p.service.GetAll(ctx, req)
+	if err == nil {
+		botID, _ := runtimeBotID(req.BotID, req.Filters)
+		p.projectFileRefs(ctx, botID, resp.Results)
+	}
+	return resp, err
 }
 
 func (p *BuiltinProvider) Update(ctx context.Context, req adapters.UpdateRequest) (adapters.MemoryItem, error) {

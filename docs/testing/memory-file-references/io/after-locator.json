@@ -1,0 +1,16 @@
+[
+  {
+    "duplicate_refs_per_query": 2,
+    "elapsed_ns": 72706,
+    "file_bytes": 1048576,
+    "queries": 3,
+    "rchar_delta": 104
+  },
+  {
+    "duplicate_refs_per_query": 2,
+    "elapsed_ns": 120709,
+    "file_bytes": 16777216,
+    "queries": 3,
+    "rchar_delta": 109
+  }
+]
