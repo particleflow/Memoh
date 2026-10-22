@@ -1,6 +1,6 @@
 id = "memoh.delivery"
 name = "Memoh delivery storage"
-version = "0.2.0"
+version = "0.3.0"
 min_herdr_version = "0.9.5"
 description = "Finite native delivery queue using a configured reusable device identity"
 platforms = ["windows"]
@@ -15,10 +15,16 @@ command = ["./transferqueue.exe", "-action", "probe"]
 id = "advance-delivery"
 title = "Advance one due delivery"
 contexts = ["workspace"]
-command = ["./transferqueue.exe", "-action", "advance-next"]
+command = ["./transferqueue.exe", "-action", "advance-results"]
 
 [[actions]]
 id = "fixture-check"
 title = "Run isolated delivery fixtures"
 contexts = ["workspace"]
 command = ["./transferqueue.test.exe", "-test.run=^TestWindowsNative", "-test.v", "-test.timeout=5m"]
+
+[[actions]]
+id = "collect-result"
+title = "Collect one closed task result"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "collect-result"]

@@ -136,6 +136,21 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 		}
 	}
 	// Exit evidence remains valid even when output exceeds the import budget.
+	if delivery := producerResult(r, d); delivery != nil && delivery.State == "pending" && !r.CancelRequested {
+		// A finite idempotent wakeup, not a new execution attempt or a scheduler.
+		// Its transport outcome cannot change execution or delivery truth. A later
+		// query repeats this safe wakeup and reads the original ledger after restart.
+		_ = s.relay.AdvanceBatchDelivery(readCtx, scope(b, r.TargetID), batch.Progress)
+		current, _, err := s.load(ctx, b, r.ID)
+		if err != nil {
+			return Result{}, err
+		}
+		// A concurrent association may have advanced revision. Do not overwrite it
+		// with this observer's stale business details; retry observation next call.
+		if current.Revision != r.Revision {
+			return result(current, d), nil
+		}
+	}
 	// Release the invocation slot, but do not claim AI success or expose refs.
 	for _, f := range batch.Files {
 		if f.Meta.Size > 64<<20 {

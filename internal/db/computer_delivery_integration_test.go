@@ -138,6 +138,7 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	// Exercise the pre-association SQL shape with a current revision. An old
 	// writer must get an explicit failure, not erase the durable ledger.
 	before := current.Revision
+	t.Run("producer-single-file", func(t *testing.T) { exerciseProducerHandoff(ctx, t, store, assets, id, ref) })
 	_, err = runtimePool.Exec(ctx, "UPDATE computer_operations SET details=$1, revision=revision+1 WHERE id=$2 AND revision=$3", details, id.OperationID, before)
 	var guardError *pgconn.PgError
 	if !errors.As(err, &guardError) || guardError.Code != "23514" {

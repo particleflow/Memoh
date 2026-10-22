@@ -7,23 +7,26 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/felinics/memoh/internal/deliverymeta"
 )
 
 // BatchProgress is owned by the durable operation. Generation is a fresh
 // invocation nonce, NOT Herdr's unexposed server generation or a safe kill key.
 type BatchProgress struct {
-	LayoutVersion   int    `json:"layout_version,omitempty"`
-	Attempt         string `json:"attempt"`
-	Generation      string `json:"generation"`
-	RequestHash     string `json:"request_hash"`
-	PiSessionID     string `json:"pi_session_id"`
-	Phase           string `json:"phase"`
-	WorkspaceID     string `json:"workspace_id"`
-	PaneID          string `json:"pane_id"`
-	TerminalID      string `json:"terminal_id"`
-	RequestID       string `json:"request_id,omitempty"`
-	ControlPane     string `json:"control_pane"`
-	ControlTerminal string `json:"control_terminal"`
+	Producer        *deliverymeta.Plan `json:"producer,omitempty"`
+	LayoutVersion   int                `json:"layout_version,omitempty"`
+	Attempt         string             `json:"attempt"`
+	Generation      string             `json:"generation"`
+	RequestHash     string             `json:"request_hash"`
+	PiSessionID     string             `json:"pi_session_id"`
+	Phase           string             `json:"phase"`
+	WorkspaceID     string             `json:"workspace_id"`
+	PaneID          string             `json:"pane_id"`
+	TerminalID      string             `json:"terminal_id"`
+	RequestID       string             `json:"request_id,omitempty"`
+	ControlPane     string             `json:"control_pane"`
+	ControlTerminal string             `json:"control_terminal"`
 }
 
 type BatchFile struct {
@@ -55,7 +58,7 @@ var (
 
 func (p BatchProgress) valid() bool {
 	_, err := resolveBatchLayout(p)
-	return err == nil && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash)
+	return err == nil && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation)
 }
 
 func (r BatchReceipt) Validate(p BatchProgress) error {
@@ -97,7 +100,7 @@ func batchScript(p BatchProgress, target Target, cwd, task string) (string, erro
 	}
 	encoded, _ := json.Marshal(identity)
 	prefix := strings.TrimSuffix(string(encoded), "}")
-	return fmt.Sprintf(`set -euo pipefail
+	script := fmt.Sprintf(`set -euo pipefail
 umask 077
 case "$(uname -s)" in MINGW*_NT-*|MSYS_NT-*) ;; *) exit 125 ;; esac
 for t in base64 cygpath sha256sum wc mkdir mv rm rmdir; do command -v "$t" >/dev/null || exit 125; done
@@ -144,7 +147,8 @@ fi
 printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
-`, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, base64.StdEncoding.EncodeToString([]byte(task)), p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, base64.StdEncoding.EncodeToString([]byte(prefix)), p.Generation, p.Generation), nil
+`, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, base64.StdEncoding.EncodeToString([]byte(task)), p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, base64.StdEncoding.EncodeToString([]byte(prefix)), p.Generation, p.Generation)
+	return producerEnvelope(script, p, target)
 }
 
 // launchBashScript shares the verified PowerShell-only launch boundary without
