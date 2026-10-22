@@ -1,0 +1,7 @@
+ok  	github.com/felinics/memoh/internal/media	17.578s
+ok  	github.com/felinics/memoh/internal/handlers	30.424s
+ok  	github.com/felinics/memoh/internal/server	1.324s
+ok  	github.com/felinics/memoh/internal/storage/providers/localfs	1.168s
+ok  	github.com/felinics/memoh/internal/storage/providers/fallback	1.120s
+ok  	github.com/felinics/memoh/internal/agenvo	2.052s
+ok  	github.com/felinics/memoh/internal/computertask	29.402s

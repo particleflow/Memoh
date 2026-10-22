@@ -33,6 +33,15 @@ func (p *Durable) Put(ctx context.Context, key string, reader io.Reader) error {
 	return p.canonical.Put(ctx, key, reader)
 }
 
+// EnsureDurable must reach the canonical provider, never the workspace copy.
+func (p *Durable) EnsureDurable(ctx context.Context, key string) error {
+	ensurer, ok := p.canonical.(storage.DurabilityEnsurer)
+	if !ok {
+		return errors.New("canonical storage cannot confirm publication durability")
+	}
+	return ensurer.EnsureDurable(ctx, key)
+}
+
 func (p *Durable) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 	reader, err := p.canonical.Open(ctx, key)
 	if err == nil || !errors.Is(err, fs.ErrNotExist) {
