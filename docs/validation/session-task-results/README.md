@@ -1,7 +1,7 @@
 # Persisted task result observation
 
 Dependency: compact-result #12, integrated through
-`31e44e637855867a085ac3dccc8df5f18e4503d5`, on main
+`828a35ec8d7e634495915c358f1972c7beaca56a`, on main
 `75a70fe961808ed5ec2284767cb92ea85f30890f` (#11). The initial review/mobile
 checkpoint `20d91381cc107eb917debf4ce6b89c14c5370401` remains in history.
 Merge `44d3a241b50f594079958b06370a50cfc22fe4ec` adds the dependency's
@@ -153,7 +153,7 @@ Mobile implementation is outside this PR.
   production credential repair, new task submission or deployment here.
 - Official Agent runtime/contextview boundary remains zero diff.
 
-## Current #12 integration (2026-10-22 UTC, `31e44e63`)
+## Prior #12 integration (2026-10-22 UTC, `31e44e63`)
 
 - Preserved `a0c1c938` and merged the exact fixed dependency on the same branch.
   This includes the unknown-operation/preflight regression and current OAuth
@@ -193,6 +193,58 @@ Mobile implementation is outside this PR.
 - This checkpoint is for integration review and ordinary PR CI only. No new
   candidate workflow was dispatched; the earlier `a0c1c938` candidate remains
   separate. No merge into main, promotion or deployment was performed.
+
+## Combined OAuth and verified Range integration (2026-10-22 UTC)
+
+- Preserved `fbad9a74` and integrated #12 `828a35ec` with merge `26bf2fd4`,
+  then #21 `8b5db5a7` with merge `0d38a587`. Both merges were conflict-free.
+  The Range storage/media/HTTP implementation is identical to #21; OAuth
+  differs from #12 only by the three previously reviewed `bot_id` annotations.
+  No rewrite or routing architecture was added. Main remains unchanged.
+- Both task paths and all three task definitions still equal `20d91381`.
+  Task API docs, generated SDK, projection, Web component/composable and
+  identity/late-response guards are unchanged from `fbad9a74`. No migration,
+  operation write-path, parser or official Agent core change was introduced.
+- Go race passed for localfs, fallback, media, sessiontask and server, plus
+  handler tests matching `Test(SessionTask|MCPOAuth|Media)`. These cover real
+  JWT/Problem middleware, task permissions/revocation/no-dispatch, OAuth
+  rejection/cache boundaries and warm media authorization. Affected Go lint
+  passed. PostgreSQL owned-tree/stable-cursor integration passed.
+- All 173 frontend tests passed again; SDK typecheck and UI guard passed
+  (3 existing UI warnings). Frontend source and generated types did not change;
+  the previous full Web typecheck result remains **442 existing errors**.
+  This integration does not claim a green full Web typecheck.
+- Rebuilt/restarted the native development Server and verified direct/proxy
+  login and readiness. All 33 actual task HTTP checks passed: outcomes, scope,
+  cursor, revocation, no-store and unchanged operation ledger digests.
+- Before and after a further process restart, 18 OAuth HTTP checks each passed:
+  anonymous 401 on status/discover/authorize/unknown, authenticated status 200,
+  denied Bot/unknown-route 404, method 405, both callback prefixes 400/405/404,
+  and unchanged neighboring-path cache policy. These are synthetic development
+  requests, not a production OAuth authorization or credential-repair result.
+- Eight media HTTP checks each passed before/after restart: cross-block/suffix
+  206, If-Range mismatch/full 200, unsatisfiable 416, anonymous 401, HEAD, a
+  client disconnect and resumed download whose complete SHA-256 matches the
+  uploaded synthetic original. Operation ledger digests remained unchanged.
+- The isolated 200/512 MiB read-volume test passed: 64 KiB warm responses read
+  approximately 1 MiB; first/new-provider reads additionally scan the complete
+  original. Measurements are own-process Linux read syscall bytes, not physical
+  disk I/O, separate Server process accounting or NAS performance. Warm checks
+  validate requested blocks; they do not scrub untouched blocks. Cold full
+  verification, canonical originals and fallback integrity behavior remain.
+- Chromium repeated actual task list/detail/back/unknown, Chinese dark 480px,
+  grant revocation, literal adversarial markup and delayed-auth-response
+  checks. Zero page errors, active summary elements, external probe requests or
+  task GET writes. Current screenshots were inspected. Synthetic detail/grant
+  mutations were restored; no PC, model or chat execution was submitted.
+- Browser attachment selection and an authenticated cross-block Range request
+  through the Vite proxy passed. The selected file was not sent as a message.
+  [Combined attachment preview](combined-range-selected.png) shows this UI
+  state; its HTTP byte check is separate from the screenshot.
+- Candidate publication is handled separately after this fixed tree's ordinary
+  CI succeeds. No merge into main, promotion or production deployment is part
+  of this verification. The combined candidate still needs production HTTP
+  acceptance. Task attachments, cancel and retry remain unavailable.
 
 All fixtures and screenshots are synthetic. No real model, Pi or Windows task
 was launched. The occasional workspace-unreachable toast belongs to the
