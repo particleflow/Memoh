@@ -36,7 +36,13 @@ function button(label: string | RegExp) {
   expect(found).toBeDefined()
   return found!
 }
-async function open(group = 'execution') {
+async function selectGroup(name: string) {
+  const tab = [...document.querySelectorAll('[role=tab]')].find(el => el.textContent?.includes(name))
+  expect(tab).toBeDefined()
+  tab!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+  await settled()
+}
+async function open(group = 'execution', selectDetail = true) {
   root = document.createElement('div')
   document.body.append(root)
   app = createApp(SessionTasks, { botId: 'bot', sessionId: 'parent', selection: 'pc-a', visible: true })
@@ -46,11 +52,9 @@ async function open(group = 'execution') {
   button('Tasks').click()
   await settled()
   if (group === 'delegations') {
-    const tab = [...document.querySelectorAll('[role=tab]')].find(el => el.textContent?.includes('Specialist Bot handoffs'))!
-    tab.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
-    await settled()
-    button(/Target Bot/).click()
-  } else button(/Computer task/).click()
+    await selectGroup('Specialist Bot handoffs')
+    if (selectDetail) button(/Target Bot/).click()
+  } else if (selectDetail) button(/Computer task/).click()
   await settled()
 }
 
@@ -80,6 +84,44 @@ describe('task detail identity and rendering boundary', () => {
     await vi.advanceTimersByTimeAsync(5000)
     expect(api.list).toHaveBeenCalledTimes(1)
     expect(api.delegationDetail).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps delegation page two and execution task cursors separate across tab round trips', async () => {
+    api.list.mockImplementation(({ query }: { query: { cursor?: string } }) => Promise.resolve({
+      data: {
+        items: [{ ...task, task_id: query.cursor ? 'exec-two' : 'exec-one' }],
+        next_cursor: query.cursor ? 'execution-page-3' : 'execution-page-2',
+      },
+    }))
+    api.delegations.mockImplementation(({ query }: { query: { cursor?: string } }) => Promise.resolve({
+      data: {
+        items: [{ ...delegation, target_bot_id: query.cursor ? 'bot-two' : 'bot-one' }],
+        next_cursor: query.cursor ? 'delegation-page-3' : 'delegation-page-2',
+      },
+    }))
+    await open('delegations', false)
+    button(en.chat.tasks.next).click(); await settled()
+    expect(document.body.textContent).toContain('Target Bot bot-two')
+    expect(api.delegations.mock.lastCall![0].query.cursor).toBe('delegation-page-2')
+
+    await selectGroup('Execution tasks')
+    expect(api.list.mock.lastCall![0].query.cursor).toBeUndefined()
+    expect(document.body.textContent).toContain('exec-one')
+    expect(document.body.textContent).not.toContain('Target Bot bot-two')
+    button(en.chat.tasks.next).click(); await settled()
+    expect(api.list.mock.lastCall![0].query.cursor).toBe('execution-page-2')
+    expect(document.body.textContent).toContain('exec-two')
+
+    await selectGroup('Specialist Bot handoffs')
+    expect(api.delegations.mock.lastCall![0].query.cursor).toBeUndefined()
+    expect(document.body.textContent).toContain('Target Bot bot-one')
+    expect(document.body.textContent).not.toContain('exec-two')
+    button(en.chat.tasks.next).click(); await settled()
+    expect(api.delegations.mock.lastCall![0].query.cursor).toBe('delegation-page-2')
+    expect(api.list.mock.calls.map(([options]) => options.query.cursor)).toEqual([undefined, undefined, 'execution-page-2'])
+    expect(api.delegations.mock.calls.map(([options]) => options.query.cursor)).toEqual([undefined, 'delegation-page-2', undefined, 'delegation-page-2'])
+    expect(api.detail).not.toHaveBeenCalled()
+    expect(api.delegationDetail).not.toHaveBeenCalled()
   })
 
   it('closes specialist detail and ignores its late reply after same-tab logout', async () => {

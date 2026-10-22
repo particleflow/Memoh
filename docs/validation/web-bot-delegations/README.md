@@ -67,6 +67,28 @@ These screenshots were captured from that running application and inspected:
 They contain synthetic data only. Browser fixtures are not production backend
 acceptance and are not human QA.
 
+## Follow-up race and cursor regression
+
+Executable Vitest regressions add the previously untested A → B → A return:
+Bot, conversation, identity and workspace selection each cover list and detail
+reads, with old A and B responses deliberately ignoring abort. Both old success
+and scoped denial responses are delivered after a fresh A result, which must
+remain visible with its own cursor and no stale error. Polling must still work
+after the stale denial. These are 16 new cases, not an inference from the
+implementation's generation counter.
+
+A mounted Tasks dialog test navigates to delegation page two, switches to the
+original execution Tasks, advances that group's page, then returns to delegations.
+It verifies both visible content and the exact SDK cursor sequence: each group
+restarts at its own first page and never sends the other group's cursor. No detail
+or mutation call is made in this list-only flow.
+
+All 39 tests in the two affected suites pass (17 new cases). This increment only
+changes tests and this record; it does not enable attachment downloads or change
+runtime/UI behavior. These are mocked SDK + Vue/jsdom regressions, not new
+production, browser, or PostgreSQL acceptance. The screenshots above still show
+the unchanged application implementation.
+
 ## Integration acceptance still required
 
 After PR #45's separate attachment fixes are integrated, regenerate the SDK if

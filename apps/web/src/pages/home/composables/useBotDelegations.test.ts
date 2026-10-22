@@ -107,6 +107,73 @@ describe('authorized Bot handoff observation', () => {
     expect(reader.nextCursor.value).toBeUndefined()
   })
 
+  describe.each(['bot', 'session', 'identity', 'selection'] as const)('A → B → A %s round trip', (field) => {
+    it.each(['success', 'denial'] as const)('ignores old list %s responses from both visits', async (outcome) => {
+      type Page = { data: { items: BotdelegationView[], next_cursor?: string } }
+      const oldA = deferred<Page>()
+      const oldB = deferred<Page>()
+      const fresh = { ...task, summary: { text: 'Fresh A result' } }
+      api.list.mockReturnValueOnce(oldA.promise).mockReturnValueOnce(oldB.promise)
+        .mockResolvedValue({ data: { items: [fresh], next_cursor: 'fresh-A-cursor' } })
+      const { reader, scope } = setup()
+      const original = { ...scope.value! }
+      const signalA = api.list.mock.lastCall![0].signal as AbortSignal
+      scope.value = { ...original, [field]: 'scope-B' }
+      const signalB = api.list.mock.lastCall![0].signal as AbortSignal
+      scope.value = { ...original }
+      await settle()
+      expect(signalA.aborted).toBe(true)
+      expect(signalB.aborted).toBe(true)
+      expect(reader.items.value).toEqual([fresh])
+      // These transports deliberately ignore AbortSignal. Even a response for
+      // the identical A scope must not replace the new visit's result or error.
+      for (const old of [oldB, oldA]) {
+        if (outcome === 'success') old.resolve({ data: { items: [task], next_cursor: 'stale-cursor' } })
+        else old.reject({ code: 'http.forbidden', status: 403 })
+        await settle()
+        expect(reader.items.value).toEqual([fresh])
+        expect(reader.nextCursor.value).toBe('fresh-A-cursor')
+        expect(reader.error.value).toBeUndefined()
+        expect(reader.loading.value).toBe(false)
+      }
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(api.list).toHaveBeenCalledTimes(4)
+      expect(reader.items.value).toEqual([fresh])
+    })
+
+    it.each(['success', 'denial'] as const)('ignores old detail %s responses after reopening the same A task', async (outcome) => {
+      const oldA = deferred<{ data: BotdelegationView }>()
+      const oldB = deferred<{ data: BotdelegationView }>()
+      const fresh = { ...task, summary: { text: 'Fresh A detail' } }
+      api.detail.mockReturnValueOnce(oldA.promise).mockReturnValueOnce(oldB.promise)
+        .mockResolvedValue({ data: fresh })
+      const { reader, scope } = setup(); await settle()
+      const original = { ...scope.value! }
+      reader.openTask(task)
+      const signalA = api.detail.mock.lastCall![0].signal as AbortSignal
+      scope.value = { ...original, [field]: 'scope-B' }; await settle()
+      reader.openTask({ ...task, delegation_id: 'task-B' })
+      const signalB = api.detail.mock.lastCall![0].signal as AbortSignal
+      scope.value = { ...original }; await settle()
+      reader.openTask(task); await settle()
+      expect(signalA.aborted).toBe(true)
+      expect(signalB.aborted).toBe(true)
+      expect(reader.detail.value).toEqual(fresh)
+      for (const old of [oldB, oldA]) {
+        if (outcome === 'success') old.resolve({ data: task })
+        else old.reject({ code: 'session.not_found', status: 404 })
+        await settle()
+        expect(reader.detail.value).toEqual(fresh)
+        expect(reader.selected.value).toBe(task.delegation_id)
+        expect(reader.error.value).toBeUndefined()
+        expect(reader.loading.value).toBe(false)
+      }
+      await vi.advanceTimersByTimeAsync(5000)
+      expect(api.detail).toHaveBeenCalledTimes(4)
+      expect(reader.detail.value).toEqual(fresh)
+    })
+  })
+
   it.each([
     { code: 'http.unauthorized', status: 401 },
     { code: 'http.forbidden', status: 403 },
