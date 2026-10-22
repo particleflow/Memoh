@@ -1021,6 +1021,36 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "delegations": {
+      "title": "专业 Bot 委派",
+      "executionGroup": "执行任务",
+      "description": "当前会话已授权的 Bot 委派记录。执行与结果投递分别记录状态。",
+      "targetBot": "目标 Bot",
+      "execution": "执行状态",
+      "returnDelivery": "返回投递",
+      "reply": "最终可见回复",
+      "deliveryAccepted": "投递已受理，不代表主管 Bot 已处理结果。",
+      "contentUnavailable": "暂无最终可见回复。",
+      "noLiveContent": "此视图暂不提供运行中的内容和工具日志。",
+      "attachmentsUnavailable": "已报告 {count} 个返回引用，此视图暂不提供下载。",
+      "empty": "当前会话没有专业 Bot 委派记录。",
+      "unsupported": "此服务器暂不支持 Bot 委派观察。升级服务器后可重新读取。",
+      "inaccessible": "当前委派或会话已无法访问。",
+      "loadFailed": "无法读取 Bot 委派，请重新读取。",
+      "states": {
+        "accepted": "已受理",
+        "running": "运行中",
+        "unknown": "执行状态未知",
+        "completed": "执行已完成",
+        "failed": "执行失败"
+      },
+      "delivery": {
+        "pending": "待投递",
+        "accepted": "已受理",
+        "unknown": "投递状态未知",
+        "unavailable": "无法投递"
+      }
+    },
     "tasks": {
       "title": "任务",
       "detail": "任务详情",

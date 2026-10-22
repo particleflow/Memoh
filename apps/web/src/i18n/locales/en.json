@@ -1021,6 +1021,36 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "delegations": {
+      "title": "Specialist Bot handoffs",
+      "executionGroup": "Execution tasks",
+      "description": "Authorized Bot handoffs from this conversation. Execution and return delivery have separate states.",
+      "targetBot": "Target Bot",
+      "execution": "Execution",
+      "returnDelivery": "Return delivery",
+      "reply": "Final visible reply",
+      "deliveryAccepted": "Delivery was accepted; this does not confirm that the supervisor has processed the result.",
+      "contentUnavailable": "No final visible reply is available.",
+      "noLiveContent": "Live work and tool logs are not available in this view.",
+      "attachmentsUnavailable": "{count} returned reference(s). Downloads are not available in this view yet.",
+      "empty": "No specialist Bot handoffs in this conversation.",
+      "unsupported": "This server does not support Bot handoff observation yet. Reload after upgrading the server.",
+      "inaccessible": "This handoff or conversation is no longer accessible.",
+      "loadFailed": "Could not read Bot handoffs. Try reloading.",
+      "states": {
+        "accepted": "Accepted",
+        "running": "Running",
+        "unknown": "Execution unknown",
+        "completed": "Execution completed",
+        "failed": "Execution failed"
+      },
+      "delivery": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "unknown": "Delivery unknown",
+        "unavailable": "Unavailable"
+      }
+    },
     "tasks": {
       "title": "Tasks",
       "detail": "Task details",

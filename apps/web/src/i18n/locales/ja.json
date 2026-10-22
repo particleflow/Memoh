@@ -1018,6 +1018,36 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "delegations": {
+      "title": "専門 Bot への委任",
+      "executionGroup": "実行タスク",
+      "description": "この会話で許可された Bot への委任です。実行と結果の配信は別の状態で表示します。",
+      "targetBot": "対象 Bot",
+      "execution": "実行状態",
+      "returnDelivery": "結果の配信",
+      "reply": "最終の表示可能な返信",
+      "deliveryAccepted": "配信は受け付けられましたが、管理 Bot が結果を処理したことを示すものではありません。",
+      "contentUnavailable": "最終の返信はまだありません。",
+      "noLiveContent": "この画面では実行中の内容やツールのログを表示できません。",
+      "attachmentsUnavailable": "返却された参照は {count} 件です。この画面ではまだダウンロードできません。",
+      "empty": "この会話には専門 Bot への委任がありません。",
+      "unsupported": "このサーバーは Bot の委任状況の表示にまだ対応していません。更新後に再読み込みしてください。",
+      "inaccessible": "この委任または会話にはアクセスできなくなりました。",
+      "loadFailed": "Bot の委任を読み込めませんでした。再読み込みしてください。",
+      "states": {
+        "accepted": "受付済み",
+        "running": "実行中",
+        "unknown": "実行状態不明",
+        "completed": "実行完了",
+        "failed": "実行失敗"
+      },
+      "delivery": {
+        "pending": "配信待ち",
+        "accepted": "受付済み",
+        "unknown": "配信状態不明",
+        "unavailable": "配信不可"
+      }
+    },
     "tasks": {
       "title": "タスク",
       "detail": "タスクの詳細",
