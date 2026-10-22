@@ -167,8 +167,8 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	} {
 		t.Run(item.name, func(t *testing.T) {
 			exec(item.off, item.value)
-			if _, err := s.Resolve(ctx, id.OperationID, "result", ref, true); err == nil {
-				t.Fatal("revoked scope resolved")
+			if _, err := s.Resolve(ctx, id.OperationID, "result", ref, true); !errors.Is(err, computertask.ErrDenied) {
+				t.Fatalf("revoked scope must be forbidden, not retryable: %v", err)
 			}
 			exec(item.on, item.value)
 		})

@@ -9,6 +9,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/computertask"
 )
 
@@ -51,7 +52,7 @@ func deliveryHTTPError(err error) error {
 	case errors.Is(err, computertask.ErrDeliveryLimit):
 		status = http.StatusTooManyRequests
 	}
-	return echo.NewHTTPError(status, "delivery request was not acknowledged")
+	return echo.NewHTTPError(status)
 }
 
 func readDeliveryBody(c echo.Context, dest any) error {
@@ -59,10 +60,10 @@ func readDeliveryBody(c echo.Context, dest any) error {
 	decoder := json.NewDecoder(c.Request().Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(dest); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid delivery reference")
+		return apperror.FieldInvalid("reference", nil)
 	}
 	if decoder.Decode(new(any)) != io.EOF {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid delivery reference")
+		return apperror.FieldInvalid("reference", nil)
 	}
 	return nil
 }

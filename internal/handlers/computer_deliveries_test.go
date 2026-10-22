@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,6 +19,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/storage/providers/localfs"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -79,6 +81,7 @@ func deliveryHTTPServer(t *testing.T) (*deliveryHTTPFixture, *echo.Echo) {
 		return err
 	}, assets)
 	e := echo.New()
+	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))
 	NewComputerDeliveryHandler(s).Register(e)
 	// Explicit fixture for the missing authenticated host adapter. Headers are
 	// intentionally ignored; neither a JWT nor an operation ID binds a host.

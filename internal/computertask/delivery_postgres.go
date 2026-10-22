@@ -90,6 +90,9 @@ func (p *deliveryPermissions) HasBotPermission(ctx context.Context, bot, user, p
 	// IsAdmin alone returns false for inactive users; owner bypass must not
 	// thereby permit a deactivated account to commit or query a delivery.
 	if err := p.accounts.ValidateSession(ctx, user); err != nil {
+		if errors.Is(err, accounts.ErrInactiveAccount) {
+			return false, ErrDenied
+		}
 		return false, err
 	}
 	admin, err := p.accounts.IsAdmin(ctx, user)
