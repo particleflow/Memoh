@@ -103,7 +103,7 @@ func (q *DiskQueue) openNativePublication(ctx context.Context, authorize Publica
 	if len(actual) == 0 && flags&os.O_EXCL != 0 {
 		// Persist the complete empty catalog before accepting locator v2. A
 		// later missing bucket/cache must never look like an unused namespace.
-		if err := p.metadata.initialize(ctx); err != nil {
+		if err := p.metadata.initialize(ctx, true); err != nil {
 			return nil, err
 		}
 		if _, err := f.Write(want); err != nil || f.Sync() != nil {

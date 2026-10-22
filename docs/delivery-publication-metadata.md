@@ -36,7 +36,12 @@ or their accounting. This change cannot unblock an actually full object-byte
 budget. Ownership transfer, object deletion, history eviction and unlimited large
 file throughput are outside this change.
 
-Each mutation holds the same permanent `publication.lock`. Capacity reads at most
+Each mutation holds the same permanent `publication.lock`. A finite scan pins
+and validates the catalog directory once, then checks each bucket; no identity,
+authorization or usage is cached across invocations. Only a brand-new store before
+its first locator commit may seed empty usage directly. Existing-state mutation
+and migration still use the witness protocol; a fresh initialization attempt on
+an existing catalog fails without changing it. Capacity reads at most
 64 small usage summaries instead of replaying all historical journals. A mutation
 rebuilds its own bucket (at most 128 journals / 8 MiB). Summaries are internal,
 rebuildable accounting caches, never another task or delivery authority. Complete

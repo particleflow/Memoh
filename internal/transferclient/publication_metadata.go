@@ -82,14 +82,34 @@ func (m *publicationMetadata) mark(stage string) {
 // Only creation of a new store, or closed locator state 0 migration, may seed
 // empty buckets. Once locator v2 is visible every bucket and usage file MUST
 // exist: absence is damaged evidence, never proof that an ID was unused.
-func (m *publicationMetadata) initialize(ctx context.Context) error {
+func (m *publicationMetadata) initialize(ctx context.Context, fresh bool) error {
+	if fresh {
+		// This path is exclusively before the very first locator commit. Never
+		// use it to repair an existing store or a closed migration's evidence.
+		if _, err := m.root.Lstat(publicationMetadataDirectory); !errors.Is(err, os.ErrNotExist) {
+			return ErrStore
+		}
+	}
+	catalog, closeCatalog, err := openPublicationDirectory(m.root, publicationMetadataDirectory, true)
+	if err != nil {
+		return errors.Join(ErrStore, err)
+	}
+	defer closeCatalog()
 	for i := range publicationBuckets {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		root, closeRoot, err := m.bucket(i, true)
+		root, closeRoot, err := openPublicationDirectory(catalog, fmt.Sprintf("%02x", i), true)
 		if err != nil {
 			return err
+		}
+		if fresh {
+			err = seedEmptyPublicationUsage(root)
+			closeRoot()
+			if err != nil {
+				return err
+			}
+			continue
 		}
 		if _, err := root.Lstat("usage"); errors.Is(err, os.ErrNotExist) {
 			dir, openErr := root.Open(".")
@@ -123,60 +143,83 @@ func (m *publicationMetadata) initialize(ctx context.Context) error {
 	return nil
 }
 
+// A brand-new, still uncommitted store has no old state to witness. Persist
+// each initial empty usage exactly once; a partial initial creation remains
+// unavailable, just like an incomplete initial locator, rather than resetting it.
+func seedEmptyPublicationUsage(root *os.Root) error {
+	identity, err := publicationRootIdentity(root)
+	if err != nil {
+		return err
+	}
+	body, err := json.Marshal(publicationUsage{Version: 1, Identity: identity})
+	if err != nil {
+		return ErrStore
+	}
+	f, err := openPrivateFile(root, "usage", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+	if err != nil {
+		return err
+	}
+	err = appendJournalFrame(f, body, publicationUsageBytes)
+	_ = f.Close()
+	if err != nil || syncQueueDir(root) != nil {
+		return ErrStore
+	}
+	return nil
+}
+
 func (m *publicationMetadata) bucket(index int, create bool) (*os.Root, func(), error) {
 	if index < 0 || index >= publicationBuckets {
 		return nil, nil, ErrInvalid
 	}
-	parent := m.root
-	var roots []*os.Root
-	var guards []*os.File
-	closeAll := func() {
-		for i := len(roots) - 1; i >= 0; i-- {
-			closeQueueGuard(guards[i])
-			_ = roots[i].Close()
-		}
+	catalog, closeCatalog, err := openPublicationDirectory(m.root, publicationMetadataDirectory, create)
+	if err != nil {
+		return nil, nil, err
 	}
-	for _, name := range []string{publicationMetadataDirectory, fmt.Sprintf("%02x", index)} {
-		if create {
-			if err := makeQueueDir(parent, name); err != nil && !errors.Is(err, os.ErrExist) {
-				closeAll()
-				return nil, nil, err
-			}
-		}
-		st, err := parent.Lstat(name)
-		if err != nil {
-			closeAll()
-			return nil, nil, err
-		}
-		if !st.IsDir() || st.Mode()&os.ModeSymlink != 0 {
-			closeAll()
-			return nil, nil, ErrStore
-		}
-		root, err := parent.OpenRoot(name)
-		if err != nil {
-			closeAll()
-			return nil, nil, ErrStore
-		}
-		if err := checkQueueRoot(root); err != nil {
-			_ = root.Close()
-			closeAll()
-			return nil, nil, err
-		}
-		guard, err := guardQueueRoot(root)
-		if err != nil {
-			_ = root.Close()
-			closeAll()
-			return nil, nil, err
-		}
-		roots = append(roots, root)
-		guards = append(guards, guard)
-		if create && syncQueueDir(parent) != nil {
-			closeAll()
-			return nil, nil, ErrStore
-		}
-		parent = root
+	root, closeRoot, err := openPublicationDirectory(catalog, fmt.Sprintf("%02x", index), create)
+	if err != nil {
+		closeCatalog()
+		return nil, nil, err
 	}
-	return parent, closeAll, nil
+	return root, func() { closeRoot(); closeCatalog() }, nil
+}
+
+// A caller may retain this verified, pinned directory only for one locked,
+// finite operation. No usage or authorization is cached across invocations.
+func openPublicationDirectory(parent *os.Root, name string, create bool) (*os.Root, func(), error) {
+	st, err := parent.Lstat(name)
+	if create && errors.Is(err, os.ErrNotExist) {
+		if err := makeQueueDir(parent, name); err != nil && !errors.Is(err, os.ErrExist) {
+			return nil, nil, err
+		}
+		st, err = parent.Lstat(name)
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+	if !st.IsDir() || st.Mode()&os.ModeSymlink != 0 {
+		return nil, nil, ErrStore
+	}
+	root, err := parent.OpenRoot(name)
+	if err != nil {
+		return nil, nil, ErrStore
+	}
+	if err := checkQueueRoot(root); err != nil {
+		_ = root.Close()
+		return nil, nil, err
+	}
+	guard, err := guardQueueRoot(root)
+	if err != nil {
+		_ = root.Close()
+		return nil, nil, err
+	}
+	closeRoot := func() { closeQueueGuard(guard); _ = root.Close() }
+	// Also flush a pre-existing entry during maintenance: an earlier create
+	// may have returned a sync error before this resumed invocation.
+	if create && syncQueueDir(parent) != nil {
+		closeRoot()
+		return nil, nil, ErrStore
+	}
+	return root, closeRoot, nil
 }
 
 func publicationRootIdentity(root *os.Root) (string, error) {
@@ -469,11 +512,16 @@ func (m *publicationMetadata) reserve(ctx context.Context, ref Reference, state 
 	name := publicationKey(ref) + ".journal"
 	index, _ := publicationBucket(name)
 	total := int64(0)
+	catalog, closeCatalog, err := openPublicationDirectory(m.root, publicationMetadataDirectory, false)
+	if err != nil {
+		return errors.Join(ErrStore, err)
+	}
+	defer closeCatalog()
 	for i := range publicationBuckets {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		root, closeRoot, err := m.bucket(i, false)
+		root, closeRoot, err := openPublicationDirectory(catalog, fmt.Sprintf("%02x", i), false)
 		if errors.Is(err, os.ErrNotExist) {
 			return ErrStore
 		}
@@ -544,11 +592,16 @@ func (m *publicationMetadata) save(ctx context.Context, f *os.File, r publicatio
 
 func (m *publicationMetadata) validate(ctx context.Context) error {
 	var total int64
+	catalog, closeCatalog, err := openPublicationDirectory(m.root, publicationMetadataDirectory, false)
+	if err != nil {
+		return errors.Join(ErrStore, err)
+	}
+	defer closeCatalog()
 	for i := range publicationBuckets {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		root, closeRoot, err := m.bucket(i, false)
+		root, closeRoot, err := openPublicationDirectory(catalog, fmt.Sprintf("%02x", i), false)
 		if err != nil {
 			return ErrStore
 		}

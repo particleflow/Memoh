@@ -22,7 +22,7 @@ func metadataBareFixture(t *testing.T) *publicationMetadata {
 func metadataFixture(t *testing.T) *publicationMetadata {
 	t.Helper()
 	m := metadataBareFixture(t)
-	if err := m.initialize(t.Context()); err != nil {
+	if err := m.initialize(t.Context(), true); err != nil {
 		t.Fatal(err)
 	}
 	return m
@@ -425,5 +425,21 @@ func TestPublicationMetadataUntrackedJournalFailsClosed(t *testing.T) {
 	after, err := root.ReadFile(name)
 	if err != nil || !bytes.Equal(raw, after) {
 		t.Fatal("untracked evidence changed", err)
+	}
+}
+
+func TestPublicationMetadataFreshInitializationNeverRepairsExistingState(t *testing.T) {
+	m := metadataFixture(t)
+	r := publicationRecord{Version: 1, Reference: metadataReference("initialization-retained"), State: "fenced"}
+	appendMetadata(t, m, r)
+	if err := m.initialize(t.Context(), true); !errors.Is(err, ErrStore) {
+		t.Fatal("existing catalog accepted fresh initialization", err)
+	}
+	got, f, err := m.read(t.Context(), publicationKey(r.Reference)+".journal")
+	if f != nil {
+		_ = f.Close()
+	}
+	if err != nil || got != r {
+		t.Fatal("initialization changed existing evidence", err)
 	}
 }

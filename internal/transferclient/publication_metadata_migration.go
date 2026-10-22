@@ -55,7 +55,7 @@ func (m *publicationMetadata) migrateLegacy(ctx context.Context) (bool, error) {
 	// Cache recovery is safe only after ALL partial targets have been completed
 	// from their original journals. This avoids one partial target blocking a
 	// different valid duplicate in the same bucket on a resumed invocation.
-	if err := m.initialize(ctx); err != nil {
+	if err := m.initialize(ctx, false); err != nil {
 		return false, err
 	}
 	var count int
