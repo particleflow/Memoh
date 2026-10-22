@@ -270,6 +270,7 @@
         :locale="locale"
         :show-score="typeof item.score === 'number'"
         @edit="openEditDialog(item)"
+        @open-file="openMemoryFile"
       />
     </SettingsSection>
 
@@ -291,6 +292,7 @@
           :locale="locale"
           :show-timestamp="false"
           @edit="openEditDialog(item)"
+          @open-file="openMemoryFile"
         />
       </SettingsSection>
       <div
@@ -383,7 +385,7 @@
 import { Brain, CalendarDays, Plus, RefreshCw, Search, Trash2, X } from 'lucide-vue-next'
 import type { DateRange } from 'reka-ui'
 import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
-import { useIntersectionObserver } from '@vueuse/core'
+import { until, useIntersectionObserver } from '@vueuse/core'
 import { computed, ref, watch } from 'vue'
 import {
   Button,
@@ -431,6 +433,7 @@ import {
   postBotsByBotIdMemoryCompact,
 } from '@memohai/sdk'
 import type {
+	AdaptersMemoryFileRef,
   AdaptersMemoryItem,
   AdaptersMemoryStatusResponse,
 } from '@memohai/sdk'
@@ -443,6 +446,9 @@ import MemoryCard from './memory-card.vue'
 import MemoryAdvancedActions from './memory-advanced-actions.vue'
 import { useMemoryGroups } from './use-memory-groups'
 import { MEMORY_LAYERS, useMemoryFilter } from './use-memory-filter'
+import { useRouter } from 'vue-router'
+import { useChatStore } from '@/store/chat-list'
+import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 
 interface MemoryItem {
   id: string
@@ -452,6 +458,7 @@ interface MemoryItem {
   hash?: string
   score?: number
   metadata?: Record<string, unknown>
+  file_refs?: AdaptersMemoryFileRef[]
 }
 
 const props = defineProps<{
@@ -459,6 +466,30 @@ const props = defineProps<{
 }>()
 
 const { t, locale } = useI18n()
+const router = useRouter()
+const chatStore = useChatStore()
+const workspaceTabs = useWorkspaceTabsStore()
+
+// Use the existing authenticated asset preview. Never turn arbitrary memory
+// metadata into a URL, workspace path, or a different Bot's ownership grant.
+async function openMemoryFile(file: AdaptersMemoryFileRef) {
+  if (file.status !== 'available' || !file.content_hash || !/^[a-f0-9]{64}$/.test(file.content_hash)) return
+  const botId = props.botId.trim()
+  if (!botId) return
+  try {
+    await chatStore.selectBot(botId)
+    await router.push({ name: 'bot', params: { botName: botId } })
+    await until(() => workspaceTabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
+    workspaceTabs.openAsset({
+      key: `${botId}:${file.content_hash}`,
+      botId,
+      contentHash: file.content_hash,
+      name: file.name || file.content_hash,
+    })
+  } catch (error) {
+    toast.error(resolveApiErrorMessage(error, t('bots.memory.fileUnavailable')))
+  }
+}
 const loading = ref(false)
 const actionLoading = ref(false)
 const compactLoading = ref(false)
@@ -569,6 +600,7 @@ async function loadMemories() {
         hash: item.hash,
         score: item.score,
         metadata: item.metadata,
+        file_refs: item.file_refs,
       }))
   } catch (error) {
     console.error('Failed to load memories:', error)

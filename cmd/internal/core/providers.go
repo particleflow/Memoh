@@ -415,7 +415,7 @@ func provideMemoryLLM(modelsService *models.Service, settingsService *settings.S
 	}
 }
 
-func provideMemoryProviderRegistry(log *slog.Logger, llm memprovider.LLM, provider bridge.Provider, queries dbstore.Queries, vectorStore *pgvectordb.Store, wikiStore *wikistore.Store) *memprovider.Registry {
+func provideMemoryProviderRegistry(log *slog.Logger, llm memprovider.LLM, provider bridge.Provider, queries dbstore.Queries, vectorStore *pgvectordb.Store, wikiStore *wikistore.Store, mediaService *media.Service) *memprovider.Registry {
 	registry := memprovider.NewRegistry(log)
 	fileStore := storefs.New(log, provider)
 	registry.RegisterFactory(string(memprovider.ProviderBuiltin), func(ctx context.Context, teamID, _ string, providerConfig map[string]any) (memprovider.Provider, error) {
@@ -429,6 +429,7 @@ func provideMemoryProviderRegistry(log *slog.Logger, llm memprovider.LLM, provid
 		}
 		p := membuiltin.NewBuiltinProvider(log, runtime)
 		p.SetLLM(llm)
+		p.SetFileResolver(mediaService)
 		p.ApplyProviderConfig(providerConfig)
 		return p, nil
 	})
@@ -444,6 +445,7 @@ func provideMemoryProviderRegistry(log *slog.Logger, llm memprovider.LLM, provid
 	}
 	defaultProvider := membuiltin.NewBuiltinProvider(log, defaultRuntime)
 	defaultProvider.SetLLM(llm)
+	defaultProvider.SetFileResolver(mediaService)
 	registry.Register("__builtin_default__", defaultProvider)
 	return registry
 }

@@ -3761,6 +3761,8 @@
       "searchPlaceholder": "搜索记忆...",
       "newMemory": "新建记忆",
       "editMemory": "编辑记忆",
+      "openFile": "打开附件",
+      "fileUnavailable": "附件不可用，请检查原文件后重试。",
       "contentLabel": "内容",
       "contentPlaceholder": "在此输入记忆内容（支持 Markdown）...",
       "totalCount": "记忆总数",

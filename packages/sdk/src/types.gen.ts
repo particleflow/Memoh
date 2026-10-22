@@ -273,10 +273,22 @@ export type AdaptersMemoryConfigUpdateRequest = {
     embedding_model_id?: string;
 };
 
+export type AdaptersMemoryFileRef = {
+    content_hash?: string;
+    mime?: string;
+    name?: string;
+    status?: 'available' | 'unavailable';
+};
+
 export type AdaptersMemoryItem = {
     agent_id?: string;
     bot_id?: string;
     created_at?: string;
+    /**
+     * FileRefs is a read-time projection validated against the caller's Bot.
+     * It is never an authorization grant or persisted availability snapshot.
+     */
+    file_refs?: Array<AdaptersMemoryFileRef>;
     hash?: string;
     id?: string;
     memory?: string;

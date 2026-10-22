@@ -440,6 +440,20 @@ definitions:
       embedding_model_id:
         type: string
     type: object
+  adapters.MemoryFileRef:
+    properties:
+      content_hash:
+        type: string
+      mime:
+        type: string
+      name:
+        type: string
+      status:
+        enum:
+        - available
+        - unavailable
+        type: string
+    type: object
   adapters.MemoryItem:
     properties:
       agent_id:
@@ -448,6 +462,13 @@ definitions:
         type: string
       created_at:
         type: string
+      file_refs:
+        description: |-
+          FileRefs is a read-time projection validated against the caller's Bot.
+          It is never an authorization grant or persisted availability snapshot.
+        items:
+          $ref: '#/definitions/adapters.MemoryFileRef'
+        type: array
       hash:
         type: string
       id:

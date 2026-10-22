@@ -231,6 +231,21 @@ jobs:
             -run '^TestPostgresDiscuss(RecoveryPreservesBatchAcrossCompactorRestart|BacklogOverBudgetIsAnsweredAndNextRoundContinues|BacklogWithoutCompactionIsAnsweredAndRecordsOmission|OversizedInputFailsOnceThenNextMessageIsAnswered|ImageBacklogKeepsImagesOnTheirMessages|OversizedImageInputFailsOnceThenNextMessageIsAnswered|ImageBacklogYieldsAnsweredHistoryFirst|CompactedImageInputIsRecorded|CompactionKeepsBatchTextOverImages)$' ./cmd/agent
           TEST_POSTGRES_BOOTSTRAP_SCHEMA=0 go test -v -race -count=1 -timeout 90s \
             -run '^TestPostgres(SummaryOnlyRollup|CompleteCompactionRollup)' ./internal/chat/message
+      - name: Verify canonical memory file references on PostgreSQL
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+          MEMOH_TEST_MEMORY_FILES_REQUIRED: "1"
+        run: |
+          # The fencing step applies the server's full migration chain.
+          : "${TEST_POSTGRES_DSN:?Memory file references require PostgreSQL}"
+          set -o pipefail
+          go test -json -race -count=1 -timeout 90s -run '^TestPostgresMemoryFileReferenceLifecycle$' ./internal/memory/adapters/builtin | tee memory-file-refs.jsonl
+          python3 - <<'PYTEST'
+          import json
+          from pathlib import Path
+          events = [json.loads(line) for line in Path("memory-file-refs.jsonl").read_text().splitlines()]
+          assert any(event.get("Action") == "pass" and event.get("Test") == "TestPostgresMemoryFileReferenceLifecycle" for event in events), "required memory file reference regression did not PASS"
+          PYTEST
       - name: Verify atomic connector disconnect and tenant isolation
         env:
           TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
