@@ -31,6 +31,13 @@ func (s *Service) ValidateWorkspaceTarget(ctx context.Context, botID, targetID s
 }
 
 func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) (context.Context, ChatRequest, error) {
+	if s.delegationScope != nil {
+		var err error
+		ctx, req, err = s.delegationScope(ctx, req)
+		if err != nil {
+			return ctx, req, err
+		}
+	}
 	inputRefs := make([]string, 0, len(req.Attachments))
 	for _, attachment := range req.Attachments {
 		if hash := strings.TrimSpace(attachment.ContentHash); hash != "" {

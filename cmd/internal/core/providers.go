@@ -556,7 +556,7 @@ func agentLoopReselectModeFromConfig(log *slog.Logger, cfg config.AgentConfig) n
 }
 
 func injectToolProviders(a *native.Agent, msgService *message.DBService, hookService *hookspkg.Service, agentService *application.Service, providers []agenttools.ToolProvider) {
-	a.SetToolProviders(providers)
+	a.SetToolProviders(delegationScopedTools(providers))
 	for _, p := range providers {
 		if cp, ok := p.(*agenttools.ContainerProvider); ok {
 			cp.SetHookService(hookService)
@@ -1093,7 +1093,7 @@ func provideACPToolSource(log *slog.Logger, toolApproval *toolapproval.Service, 
 
 func injectACPToolProviders(source *agenttools.NativeToolSource, toolProviders []agenttools.ToolProvider) {
 	if source != nil {
-		source.SetProviders(acpToolProviders(toolProviders))
+		source.SetProviders(delegationScopedTools(acpToolProviders(toolProviders)))
 	}
 }
 

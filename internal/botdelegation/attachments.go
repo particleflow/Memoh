@@ -2,6 +2,7 @@ package botdelegation
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"slices"
 
@@ -45,6 +46,14 @@ func (s *AttachmentSet) authorize(ctx context.Context, hash string, result bool)
 	}
 	if err := s.Authority.AuthorizeAsset(ctx, s.Identity, hash, result); err != nil {
 		return "", err
+	}
+	// Returning an unchanged input keeps its original owner; the specialist's
+	// assistant link proves it actually returned the reference, not just a hash.
+	if result && slices.Contains(s.Inputs, hash) {
+		if err := s.Authority.AuthorizeAsset(ctx, s.Identity, hash, false); err != nil {
+			return "", err
+		}
+		owner = s.Identity.SourceBotID
 	}
 	return owner, nil
 }
@@ -102,4 +111,9 @@ func (r *authorizedReader) Read(p []byte) (int, error) {
 		return 0, err
 	}
 	return r.ReadCloser.Read(p)
+}
+
+// AttachmentURL is an authenticated delegation-scoped endpoint, not an original-media URL.
+func AttachmentURL(r Record, hash string) string {
+	return fmt.Sprintf("/bots/%s/sessions/%s/delegations/%s/attachments/%s", r.Identity.SourceBotID, r.Identity.SourceSessionID, r.ID, hash)
 }

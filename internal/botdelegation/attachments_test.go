@@ -98,7 +98,9 @@ func TestHandoffRejectsUndelegatedHashEvenWhenUserOwnsIt(t *testing.T) {
 }
 
 func TestResultAttachmentReadsSpecialistOriginalWithBothGrants(t *testing.T) {
-	s, f, o, hash := attachmentFixture()
+	s, f, o, _ := attachmentFixture()
+	hash := strings.Repeat("b", 64)
+	o.asset.ContentHash = hash
 	s.Results = []string{hash}
 	f.assets["specialist/specialist-session/"+hash] = true
 	o.asset.BotID = "specialist"

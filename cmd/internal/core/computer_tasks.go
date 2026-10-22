@@ -30,6 +30,9 @@ func computerTaskAuthorizer(permissions agenvo.PermissionChecker, resolve func(c
 			// A general Agent can read/write/run arbitrary commands. A task's
 			// prose must never match a narrow foreground-command bypass rule.
 			for _, permission := range []string{bots.PermissionWorkspaceRead, bots.PermissionWorkspaceWrite, bots.PermissionWorkspaceExec} {
+				if err := toolcontext.CheckDelegationTarget(ctx, b.BotID, target, permission); err != nil {
+					return computertask.ErrDenied
+				}
 				ok, err := permissions.HasBotPermission(ctx, b.BotID, b.UserID, permission)
 				if err != nil || !ok {
 					return computertask.ErrDenied
@@ -75,7 +78,7 @@ func computerConnectionCheck(store *postgresstore.Store) func(context.Context, m
 	return func(ctx context.Context, connection mcp.Connection) error {
 		// Raw MCP has no trustworthy per-device scope. On a PC conversation
 		// only the constrained computer service may access remote devices.
-		if toolcontext.ComputerScope(ctx) != "" {
+		if toolcontext.ComputerScope(ctx) != "" || toolcontext.HasDelegationScope(ctx) {
 			return mcp.ErrToolNotFound
 		}
 		config, err := json.Marshal(connection.Config)
@@ -100,7 +103,7 @@ type computerScopedConnectorSource struct{ mcp.ToolSource }
 func (s computerScopedConnectorSource) ListTools(ctx context.Context, session mcp.ToolSessionContext) ([]mcp.ToolDescriptor, error) {
 	ctx, cancel := toolcontext.Bind(ctx, session)
 	defer cancel()
-	if toolcontext.ComputerScope(ctx) != "" {
+	if toolcontext.ComputerScope(ctx) != "" || toolcontext.HasDelegationScope(ctx) {
 		return []mcp.ToolDescriptor{}, nil
 	}
 	return s.ToolSource.ListTools(ctx, session)
@@ -109,7 +112,7 @@ func (s computerScopedConnectorSource) ListTools(ctx context.Context, session mc
 func (s computerScopedConnectorSource) CallTool(ctx context.Context, session mcp.ToolSessionContext, name string, args map[string]any) (map[string]any, error) {
 	ctx, cancel := toolcontext.Bind(ctx, session)
 	defer cancel()
-	if toolcontext.ComputerScope(ctx) != "" {
+	if toolcontext.ComputerScope(ctx) != "" || toolcontext.HasDelegationScope(ctx) {
 		return nil, toolcontext.ErrComputerScope
 	}
 	return s.ToolSource.CallTool(ctx, session, name, args)

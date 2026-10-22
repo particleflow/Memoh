@@ -20,6 +20,7 @@ import (
 var ErrDenied = errors.New("delegation is unavailable in this conversation")
 
 type Identity struct {
+	SourceSelection                                            string
 	TeamID, UserID, SourceBotID, SourceSessionID, SourceRootID string
 	TargetBotID, TargetSessionID                               string
 }
@@ -49,14 +50,12 @@ type Workdirs interface {
 type Mounts interface {
 	GetMount(context.Context, string, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
 	GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
-}
-
-type Targets interface {
-	ResolveTarget(context.Context, agenvo.Scope) (agenvo.Target, error)
+	OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
 }
 
 type AssetLinks interface {
 	SessionHasAsset(context.Context, string, string, string) (bool, error)
+	ResultHasAsset(context.Context, string, string, string, string) (bool, error)
 }
 
 type Authority struct {
@@ -64,7 +63,6 @@ type Authority struct {
 	Sessions    Sessions
 	Workdirs    Workdirs
 	Mounts      Mounts
-	Targets     Targets
 	Assets      AssetLinks
 }
 
@@ -85,6 +83,7 @@ func (a *Authority) Bind(ctx context.Context, user, sourceBot, sourceSession, ta
 	if err != nil {
 		return Identity{}, "", err
 	}
+	b.SourceSelection = selected
 	return b, selected, nil
 }
 
@@ -104,7 +103,11 @@ func (a *Authority) Authorize(ctx context.Context, b Identity) (string, error) {
 			return "", ErrDenied
 		}
 	}
-	return a.selection(ctx, b, path)
+	selected, err := a.selection(ctx, b, path)
+	if err != nil || (b.SourceSelection != "" && b.SourceSelection != selected) {
+		return "", ErrDenied
+	}
+	return selected, nil
 }
 
 func (a *Authority) authorizeBots(ctx context.Context, b Identity) error {
@@ -195,10 +198,7 @@ func (a *Authority) selection(ctx context.Context, b Identity, path []thread.Thr
 		selected = candidate
 	}
 	if selected != "native" {
-		if a.Targets == nil {
-			return "", ErrDenied
-		}
-		if _, err := a.Targets.ResolveTarget(ctx, agenvo.Scope{BotID: b.SourceBotID, UserID: b.UserID, TargetID: selected}); err != nil {
+		if _, _, err := a.registration(ctx, b.SourceBotID, selected); err != nil {
 			return "", ErrDenied
 		}
 	}
@@ -234,7 +234,7 @@ func storedSelection(metadata map[string]any) (string, error) {
 // source mount; the target Bot can hold a different mount of the same runtime.
 func (a *Authority) AuthorizeDevice(ctx context.Context, b Identity, pair DevicePair, permission string) error {
 	selected, err := a.Authorize(ctx, b)
-	if err != nil || a.Mounts == nil || a.Targets == nil || pair.SourceMountID == "" || pair.TargetMountID == "" || pair.RuntimeID == "" || pair.Fingerprint == "" || (selected != "native" && selected != pair.SourceMountID) {
+	if err != nil || a.Mounts == nil || pair.SourceMountID == "" || pair.TargetMountID == "" || pair.RuntimeID == "" || pair.Fingerprint == "" || (selected != "native" && selected != pair.SourceMountID) {
 		return ErrDenied
 	}
 	switch permission {
@@ -247,16 +247,33 @@ func (a *Authority) AuthorizeDevice(ctx context.Context, b Identity, pair Device
 		if err != nil || !allowed {
 			return ErrDenied
 		}
-		m, err := a.Mounts.GetMount(ctx, side.bot, side.mount)
-		if err != nil || m.BotID != side.bot || m.ID != side.mount || m.RuntimeID != pair.RuntimeID || m.RuntimeRevoked || m.RuntimeUserID == "" || m.RuntimeUserID != m.BotOwnerUserID {
-			return ErrDenied
-		}
-		t, err := a.Targets.ResolveTarget(ctx, agenvo.Scope{BotID: side.bot, UserID: b.UserID, TargetID: side.mount})
-		if err != nil || agenvo.TargetFingerprint(t) != pair.Fingerprint {
+		m, t, err := a.registration(ctx, side.bot, side.mount)
+		if err != nil || m.RuntimeID != pair.RuntimeID || agenvo.TargetFingerprint(t) != pair.Fingerprint {
 			return ErrDenied
 		}
 	}
 	return nil
+}
+
+// registration is a database-only boundary check. ResolveTarget is deliberately
+// not used: that execution resolver requires workspace_exec, which must not be
+// implied by chat, original-media reads, or read-only device authorization.
+func (a *Authority) registration(ctx context.Context, bot, mount string) (dbstore.BotRemoteRuntimeBindingRecord, agenvo.Target, error) {
+	if a.Mounts == nil {
+		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+	}
+	m, err := a.Mounts.GetMount(ctx, bot, mount)
+	if err != nil || m.BotID != bot || m.ID != mount || m.RuntimeID == "" || m.RuntimeRevoked || m.RuntimeUserID == "" || m.RuntimeUserID != m.BotOwnerUserID || m.RuntimeProvider != agenvo.Provider {
+		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+	}
+	t, err := agenvo.DecodeTarget(m.RuntimeProviderConfig)
+	if err != nil {
+		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+	}
+	if _, err = a.Mounts.OwnedHTTPMCPConnectionBot(ctx, m.RuntimeUserID, t.ConnectionID); err != nil {
+		return dbstore.BotRemoteRuntimeBindingRecord{}, agenvo.Target{}, ErrDenied
+	}
+	return m, t, nil
 }
 
 // AuthorizeAsset accepts a content hash only when the original is linked to
@@ -275,7 +292,7 @@ func (a *Authority) AuthorizeAsset(ctx context.Context, b Identity, hash string,
 		if b.TargetSessionID == "" {
 			return ErrDenied
 		}
-		ok, err := a.Assets.SessionHasAsset(ctx, b.TargetBotID, b.TargetSessionID, hash)
+		ok, err := a.Assets.ResultHasAsset(ctx, b.TargetBotID, b.UserID, b.TargetSessionID, hash)
 		if err != nil || !ok {
 			return ErrDenied
 		}
