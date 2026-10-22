@@ -90,6 +90,13 @@ func TestProducerOriginalOperationAndFiniteWake(t *testing.T) {
 	if _, err = source.service.observe(ctx, binding, first.ID, true); err != nil || transport.producerWakes != wakes+1 {
 		t.Fatal("changed control pane was used", err)
 	}
+	canceled, err := source.service.cancel(ctx, binding, first.ID)
+	if err != nil || !canceled.CancelRequested || canceled.State != "completed" || canceled.Delivery.State != "canceled" || canceled.Delivery.Reference != nil {
+		t.Fatal("completed execution cannot cancel pending delivery", err)
+	}
+	if _, err = source.service.observe(ctx, binding, first.ID, true); err != nil || transport.producerWakes != wakes+1 || transport.runs != 1 {
+		t.Fatal("canceled producer was woken or rerun", err)
+	}
 	store.revoked = true
 	if _, err = source.service.observe(ctx, binding, first.ID, true); err == nil || transport.producerWakes != wakes+1 {
 		t.Fatal("revoked target was used")

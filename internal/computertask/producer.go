@@ -34,6 +34,9 @@ func producerResult(r dbstore.ComputerOperationRecord, d Details) *ProducerResul
 		return out
 	}
 	out.State = "pending"
+	if r.CancelRequested {
+		out.State = "canceled"
+	}
 	if stored.Ledger == nil {
 		return out
 	}

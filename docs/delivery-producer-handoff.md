@@ -59,7 +59,14 @@ new daemon or timer; pending work needs a later task query or host action.
 `Result.delivery` is independent of `pi_result`: only an upload entry committed
 in the original operation's NAS ledger yields `state: delivered` and `reference`.
 Pending validation, ready uploads, a local receipt, or plugin acceptance cannot
-yield a delivered reference. Reference reads retain existing task authorization
+yield a delivered reference. A persisted operation cancellation fences every
+uncommitted declared upload in the same transaction/revision CAS as reservation
+and final scan commit, including a delayed exit hook. A committed winner stays
+queryable; cancellation does not retract it. Completed execution can still
+request cancellation of a pending producer delivery. The client receives a
+permanent denial for the fenced upload; existing local cancel/retire actions
+remain responsible for snapshot cleanup. Bytes already in flight may remain in
+NAS staging/retention, but cannot become a committed producer reference. Reference reads retain existing task authorization
 and target-fingerprint checks. NAS media retention/pinning is unchanged.
 
 ## Explicit limits and remaining integration

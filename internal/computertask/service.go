@@ -391,8 +391,12 @@ func (s *Service) cancel(ctx context.Context, b toolcontext.ComputerBinding, id 
 	if err != nil {
 		return Result{}, err
 	}
-	if r.State != "completed" && r.State != "not_started" && r.State != "rejected" {
-		r.State = "unknown"
+	active := r.State != "completed" && r.State != "not_started" && r.State != "rejected"
+	delivery := producerResult(r, d)
+	if active || delivery != nil && delivery.State == "pending" {
+		if active {
+			r.State = "unknown"
+		}
 		r.CancelRequested = true
 		r, err = s.store.SaveComputerOperation(ctx, r)
 		if err != nil {
