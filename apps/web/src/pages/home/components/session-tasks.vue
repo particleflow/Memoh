@@ -9,6 +9,7 @@ import { onAuthSessionCleared } from '@/lib/auth-session'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
 import { useBotDelegations } from '../composables/useBotDelegations'
+import { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
 
 const props = defineProps<{ botId: string, sessionId: string, selection: string, visible: boolean }>()
@@ -22,7 +23,10 @@ const scope = computed(() => props.botId && props.sessionId ? {
   bot: props.botId, session: props.sessionId, selection: props.selection, identity: token.value,
 } : null)
 const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh } = useSessionTasks(scope, computed(() => visible.value && group.value === 'execution'))
-const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = useBotDelegations(scope, computed(() => visible.value && group.value === 'delegations'))
+const delegationVisible = computed(() => visible.value && group.value === 'delegations')
+const delegationReader = useBotDelegations(scope, delegationVisible)
+const deliveryAction = useBotDelegationDelivery(scope, delegationVisible, delegationReader)
+const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = delegationReader
 const hasSelection = computed(() => group.value === 'delegations' ? !!delegationSelected.value : !!selected.value)
 function goBack() {
   if (group.value === 'delegations') backDelegation()
@@ -89,6 +93,7 @@ function taskLabel(task: SessiontaskTask) {
               :next-cursor="delegationNext"
               :loading="delegationLoading"
               :error="delegationError"
+              :delivery-action="deliveryAction"
               @open-task="openDelegation"
               @page="delegationPage"
               @refresh="refreshDelegations"

@@ -1,0 +1,1 @@
+PASS unchanged shared public component in read-only host: terminal/unknown delivery, no retry button, zero API requests

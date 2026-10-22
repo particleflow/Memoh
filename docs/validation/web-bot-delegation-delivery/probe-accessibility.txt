@@ -1,0 +1,34 @@
+Task details
+
+Authorized Bot handoffs from this conversation. Execution and return delivery have separate states.
+
+Target Bot c6f224d4 · b1357ff7
+
+Execution · Execution completed
+
+Return delivery · Delivery unknown
+
+Retry result delivery
+Final visible reply
+
+SPECIALIST_FINAL
+
+2 returned reference(s). Downloads are not available in this view yet.
+accessibility - dialog "Task details":
+  - button "Back":
+    - img
+  - heading "Task details" [level=2]
+  - button "Close":
+    - img
+  - tabpanel:
+    - paragraph: Authorized Bot handoffs from this conversation. Execution and return delivery have separate states.
+    - heading "Target Bot c6f224d4 · b1357ff7" [level=3]
+    - paragraph: Execution · Execution completed
+    - paragraph: Return delivery · Delivery unknown
+    - button "Loading Retry result delivery":
+      - status "Loading"
+      - text: Retry result delivery
+    - heading "Final visible reply" [level=3]
+    - paragraph: SPECIALIST_FINAL
+    - paragraph: 2 returned reference(s). Downloads are not available in this view yet.
+calls [{'status': 200, 'detail': False}, {'status': 200, 'detail': True}, {'status': 200, 'detail': True}] visibility visible

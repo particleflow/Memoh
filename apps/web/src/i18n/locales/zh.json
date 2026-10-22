@@ -1022,6 +1022,9 @@
   },
   "chat": {
     "delegations": {
+      "retryDelivery": "重试结果投递",
+      "deliveryResponse": "投递请求响应",
+      "deliveryRequestUnconfirmed": "尚未确认此次投递请求的结果，请重新读取状态。",
       "title": "专业 Bot 委派",
       "executionGroup": "执行任务",
       "description": "当前会话已授权的 Bot 委派记录。执行与结果投递分别记录状态。",

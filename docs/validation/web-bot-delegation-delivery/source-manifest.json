@@ -1,0 +1,15 @@
+{
+  "comparison_base": "42b25dabcd06c83288731bcadfca58821602c0bc",
+  "files": {
+    "apps/web/src/i18n/locales/en.json": "2191b164a02a6f894a351850bfe352c03e463bf37441ce1e49f114b3fcd0180e",
+    "apps/web/src/i18n/locales/ja.json": "76baa2854665e983b481fc5b25f56c70ec0e3e91c14f0b1dd02a56a1fcf08dfd",
+    "apps/web/src/i18n/locales/zh.json": "1aa136ec2a59ab0d798fbf4a2f53197baaa6d8026eaeca86dbde88242feb32ca",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts": "35f8ba15afeede1c0a2e8ea72b6e2d02c6b7eacc3138ac3f9cfdcd976eb81fb3",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.vue": "191e72f26d45afd4ed471c1bf972e77520a6101605d08b3b42c81bd94ddc33d1",
+    "apps/web/src/pages/home/components/session-tasks.test.ts": "88f5f4e980f7e49fbf0ea30caf151b74118490fc687ceef06a126a902fc7bb2e",
+    "apps/web/src/pages/home/components/session-tasks.vue": "9e8decd2d9b7436f60e5a1ea00a4ea12a6646b24fc41517ed545392fc0d332a4",
+    "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts": "ed382cc0bdeb803c56c064bc4ca790884521131a4bb25a869b8a13a4805d4ed8",
+    "apps/web/src/pages/home/composables/useBotDelegationDelivery.ts": "2034d81a80cb976e7ed916e63b8011e76a3cb3060ed05f04f95154134f97fac3",
+    "apps/web/src/pages/home/composables/useBotDelegations.ts": "523cb081ecf13e449d74a9811e5c82193731d89951632d27889edb9ad1d34e17"
+  }
+}

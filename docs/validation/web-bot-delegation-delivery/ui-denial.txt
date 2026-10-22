@@ -1,0 +1,1 @@
+PASS real UI denial: target grant revoked before POST; backend returned 404/session.not_found, refresh discarded prior content; original explicit permissions restored

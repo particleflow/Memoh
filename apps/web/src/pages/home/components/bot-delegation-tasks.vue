@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import { Button, CalloutBanner, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import type { BotdelegationView } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
 import { delegationAPIUnsupported } from '../composables/useBotDelegations'
+import type { BotDelegationDeliveryAction } from '../composables/useBotDelegationDelivery'
 
 const props = defineProps<{
   items: BotdelegationView[]
@@ -14,6 +15,7 @@ const props = defineProps<{
   nextCursor?: string
   loading: boolean
   error?: unknown
+  deliveryAction?: BotDelegationDeliveryAction
 }>()
 const emit = defineEmits<{
   openTask: [task: BotdelegationView]
@@ -68,11 +70,40 @@ function taskLabel(task: BotdelegationView) {
         {{ t('chat.delegations.returnDelivery') }} · {{ deliveryLabel(detail.delivery_state) }}
       </p>
       <p
-        v-if="detail.delivery_state === 'accepted'"
+        v-if="detail.delivery_state === 'accepted' || deliveryAction?.response?.delivery_state === 'accepted'"
         class="text-body text-muted-foreground"
       >
         {{ t('chat.delegations.deliveryAccepted') }}
       </p>
+    </div>
+    <div
+      v-if="deliveryAction && (((detail.state === 'completed' || detail.state === 'failed') && detail.delivery_state !== 'accepted') || deliveryAction.response || deliveryAction.error)"
+      class="space-y-2"
+    >
+      <Button
+        v-if="(detail.state === 'completed' || detail.state === 'failed') && detail.delivery_state !== 'accepted'"
+        variant="outline"
+        :disabled="loading || deliveryAction.disabled || deliveryAction.pending"
+        :loading="deliveryAction.pending"
+        :aria-label="t('chat.delegations.retryDelivery')"
+        loading-mode="leading"
+        @click="deliveryAction.retry()"
+      >
+        {{ t('chat.delegations.retryDelivery') }}
+      </Button>
+      <p
+        v-if="deliveryAction.response"
+        role="status"
+        class="text-body text-muted-foreground"
+      >
+        {{ t('chat.delegations.deliveryResponse') }} · {{ deliveryLabel(deliveryAction.response.delivery_state) }}
+      </p>
+      <CalloutBanner
+        v-if="deliveryAction.error"
+        tone="warning"
+        size="sm"
+        :description="resolveApiErrorMessage(deliveryAction.error, t('chat.delegations.deliveryRequestUnconfirmed'))"
+      />
     </div>
     <div class="space-y-2">
       <h3 class="text-label font-medium">

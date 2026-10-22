@@ -7,8 +7,9 @@ import { notifyAuthSessionCleared } from '@/lib/auth-session'
 import en from '@/i18n/locales/en.json'
 import SessionTasks from './session-tasks.vue'
 
-const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn() }))
+const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn(), retryDelivery: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
+  postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDelivery: api.retryDelivery,
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
   getBotsByBotIdSessionsBySessionIdDelegations: api.delegations,
   getBotsByBotIdSessionsBySessionIdDelegationsByDelegationId: api.delegationDetail,
@@ -64,6 +65,7 @@ describe('task detail identity and rendering boundary', () => {
     vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
     localStorage.clear()
     localStorage.setItem('token', 'synthetic-identity')
+    api.retryDelivery.mockReset().mockResolvedValue({ data: delegation })
     api.list.mockReset().mockResolvedValue({ data: { items: [task] } })
     api.detail.mockReset().mockResolvedValue({ data: task })
     api.delegations.mockReset().mockResolvedValue({ data: { items: [delegation] } })
@@ -74,6 +76,19 @@ describe('task detail identity and rendering boundary', () => {
     root?.remove()
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  })
+
+  it('wires the shared retry action through the existing SDK and never reports supervisor completion', async () => {
+    api.delegationDetail.mockResolvedValue({ data: { ...delegation, delivery_state: 'unknown' } })
+    await open('delegations')
+    expect(api.retryDelivery).not.toHaveBeenCalled()
+    api.delegationDetail.mockResolvedValue({ data: delegation })
+    button(en.chat.delegations.retryDelivery).click(); await settled()
+    expect(api.retryDelivery).toHaveBeenCalledTimes(1)
+    expect(api.retryDelivery.mock.calls[0]![0].path).toEqual({ bot_id: 'bot', session_id: 'parent', delegation_id: 'handoff-a' })
+    expect(document.body.textContent).toContain(en.chat.delegations.deliveryAccepted)
+    expect(document.body.textContent).toContain('Delivery request response · Accepted')
+    expect([...document.querySelectorAll('button')].some(b => b.textContent?.trim() === en.chat.delegations.retryDelivery)).toBe(false)
   })
 
   it('opens the specialist group without polling the hidden execution group', async () => {

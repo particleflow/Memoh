@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/delegation-delivery-baseline
+
+
+ Test Files  3 passed (3)
+      Tests  54 passed (54)
+   Start at  22:33:32
+   Duration  8.39s (transform 9.62s, setup 0ms, import 13.75s, tests 1.29s, environment 1.22s)
+
