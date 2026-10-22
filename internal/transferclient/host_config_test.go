@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -17,7 +16,23 @@ func TestConfiguredHostSecretsPathsAndRecovery(t *testing.T) {
 	config, state, source := configFixtureRoot(t), configFixtureRoot(t), configFixtureRoot(t)
 	write := func(root, name string, data []byte) {
 		t.Helper()
-		if err := os.WriteFile(filepath.Join(root, name), data, 0o600); err != nil {
+		dir, err := os.OpenRoot(root)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() { _ = dir.Close() }()
+		file, err := openPrivateFile(dir, name, os.O_CREATE|os.O_RDWR, 0o600)
+		if err != nil {
+			t.Fatal("private fixture file", err)
+		}
+		defer func() { _ = file.Close() }()
+		if err := file.Truncate(0); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := file.Write(data); err != nil {
+			t.Fatal(err)
+		}
+		if err := file.Sync(); err != nil {
 			t.Fatal(err)
 		}
 	}

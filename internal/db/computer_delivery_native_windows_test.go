@@ -136,6 +136,40 @@ func nativeDeliveryPrivateRoot(t *testing.T) string {
 	return resolved
 }
 
+// Explicit owner at creation, as in the queue primitive. The runner's default
+// owner for an ordinary os.WriteFile can be its administrators group; inheritance
+// of a private DACL alone does not establish the required invoking-user owner.
+func nativeDeliveryPrivateFile(t *testing.T, path string, data []byte) {
+	t.Helper()
+	user, err := windows.GetCurrentProcessToken().GetTokenUser()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sid := user.User.Sid.String()
+	sd, err := windows.SecurityDescriptorFromString("O:" + sid + "D:P(A;;FA;;;" + sid + ")(A;;FA;;;SY)(A;;FA;;;BA)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sa := windows.SecurityAttributes{SecurityDescriptor: sd}
+	sa.Length = uint32(unsafe.Sizeof(sa))
+	ptr, err := windows.UTF16PtrFromString(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := windows.CreateFile(ptr, windows.GENERIC_READ|windows.GENERIC_WRITE, windows.FILE_SHARE_READ, &sa, windows.CREATE_NEW, windows.FILE_ATTRIBUTE_NORMAL, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := os.NewFile(uintptr(h), "synthetic-device-configuration")
+	defer func() { _ = f.Close() }()
+	if _, err := f.Write(data); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 type nativeLostPublication struct {
 	*transferclient.NativePublication
 	lose bool
@@ -348,12 +382,8 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	_ = queue.Close()
 	configRoot := nativeDeliveryPrivateRoot(t)
 	configJSON, _ := json.Marshal(map[string]any{"version": 1, "origin": https.URL, "source_root": ""})
-	if err := os.WriteFile(filepath.Join(configRoot, "transfer.json"), configJSON, 0o600); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.WriteFile(filepath.Join(configRoot, "device.credential"), []byte("isolated-transfer-fixture"), 0o600); err != nil {
-		t.Fatal(err)
-	}
+	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "transfer.json"), configJSON)
+	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "device.credential"), []byte("isolated-transfer-fixture"))
 	getenv := func(key string) string {
 		if key == "HERDR_PLUGIN_CONFIG_DIR" {
 			return configRoot
