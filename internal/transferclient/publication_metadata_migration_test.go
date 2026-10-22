@@ -203,3 +203,51 @@ func TestPublicationMetadataMigrationInterruptedCopies(t *testing.T) {
 		})
 	}
 }
+
+func TestPublicationMetadataMigrationMissingDurableTarget(t *testing.T) {
+	m := metadataBareFixture(t)
+	var names []string
+	for i := range 20 {
+		r := putLegacyPublication(t, m, fmt.Sprintf("missing-target-%02d", i), "fenced")
+		names = append(names, publicationKey(r.Reference)+".journal")
+	}
+	// First call copies sixteen; second makes every target durable and removes
+	// sixteen originals. Damage after that checkpoint must not be hidden by the
+	// cached count when migration resumes, nor consume the remaining originals.
+	for range 2 {
+		if done, err := m.migrateLegacy(t.Context()); err != nil || done {
+			t.Fatal("finite checkpoint", done, err)
+		}
+	}
+	var removed string
+	var remaining []string
+	for _, name := range names {
+		if _, err := m.root.Lstat(name); errors.Is(err, os.ErrNotExist) {
+			removed = name
+		} else if err != nil {
+			t.Fatal(err)
+		} else {
+			remaining = append(remaining, name)
+		}
+	}
+	if removed == "" || len(remaining) != 4 {
+		t.Fatal("checkpoint did not retain four originals")
+	}
+	index, _ := publicationBucket(removed)
+	root, closeRoot, err := m.bucket(index, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := removeQueueFile(root, removed); err != nil {
+		t.Fatal(err)
+	}
+	closeRoot()
+	if done, err := m.migrateLegacy(t.Context()); done || !errors.Is(err, ErrStore) {
+		t.Fatal("lost durable target claimed migration complete", done, err)
+	}
+	for _, name := range remaining {
+		if _, err := m.root.Lstat(name); err != nil {
+			t.Fatal("remaining original removed after evidence loss", err)
+		}
+	}
+}

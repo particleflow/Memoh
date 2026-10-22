@@ -72,6 +72,9 @@ func (m *publicationMetadata) migrateLegacy(ctx context.Context) (bool, error) {
 			return false, err
 		}
 		u, err := m.usage(ctx, root, i)
+		if err == nil {
+			err = checkPublicationMembership(root, u.Keys)
+		}
 		closeRoot()
 		if err != nil {
 			return false, err
