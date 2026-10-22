@@ -64,7 +64,8 @@ locator version is a different gate:
 - v2: bucketed metadata with the defaults above.
 
 Stop **all** old publication/queue writers, including idle handles, and retain a
-complete raw state backup. A live lock is rejected with busy; it cannot revoke
+complete raw state backup. The existing admission, worker and publication locks reject an active caller
+with busy; they cannot revoke
 an idle old process. Never mix old and new binaries or edit a version for rollback.
 
 Invoke the finite fixed `migrate-publications` CLI/plugin action under the same

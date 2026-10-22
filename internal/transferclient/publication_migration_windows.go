@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 )
@@ -72,11 +73,32 @@ func (p *NativePublication) prepareMigration(f *os.File, actual, want []byte) er
 // authorization bypass. It never consumes a source or calls the NAS. The host
 // must stop ALL old writers and retain a complete raw backup before invocation.
 func (q *DiskQueue) MigrateNativePublication(ctx context.Context) (bool, error) {
-	if ctx == nil {
+	if ctx == nil || q == nil || q.root == nil || q.readOnly {
 		return false, ErrInvalid
 	}
 	if err := ctx.Err(); err != nil {
 		return false, err
+	}
+	// Match existing queue maintenance lock order, without waiting: an active
+	// worker may need admission while finishing. Idle old handles still require
+	// explicit host quiescence; these locks cannot revoke another process.
+	admission, err := q.lock("admission")
+	if err != nil {
+		return false, err
+	}
+	defer unlockClose(admission)
+	var workers []*os.File
+	defer func() {
+		for _, worker := range workers {
+			unlockClose(worker)
+		}
+	}()
+	for i := range q.limits.Workers {
+		worker, err := q.lockName(fmt.Sprintf("worker-%d", i))
+		if err != nil {
+			return false, err
+		}
+		workers = append(workers, worker)
 	}
 	p, err := q.openNativePublication(func(ctx context.Context, _ Reference) error { return ctx.Err() }, true, nil)
 	if err != nil {

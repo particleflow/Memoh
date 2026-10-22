@@ -308,6 +308,14 @@ func TestWindowsNativePublicationMigrationProcessCrash(t *testing.T) {
 
 func TestWindowsNativePublicationMigrationBusyAndPermanentLock(t *testing.T) {
 	q, ref, r, verifyBackup := legacyNativePublication(t, 1)
+	worker, err := q.worker()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := q.MigrateNativePublication(t.Context()); !errors.Is(err, ErrBusy) {
+		t.Fatal("migration crossed active worker", err)
+	}
+	unlockClose(worker)
 	root, err := q.root.OpenRoot(publicationDirectory)
 	if err != nil {
 		t.Fatal(err)
