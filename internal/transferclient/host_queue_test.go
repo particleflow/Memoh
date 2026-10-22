@@ -65,7 +65,7 @@ func inspectQueue(t *testing.T, q *DiskQueue, id string) QueueStatus {
 	return r
 }
 
-func runQueue(t *testing.T, q *DiskQueue, c *Client, associate Associate) QueueStatus {
+func runQueue(t *testing.T, q *DiskQueue, c *Client, associate *AssociationBinding) QueueStatus {
 	t.Helper()
 	r := inspectQueue(t, q, "delivery-1")
 	now := time.Now()
@@ -119,13 +119,20 @@ func TestDiskQueueRestartSnapshotAndOutbox(t *testing.T) {
 		} // Lost registration response.
 		return nil
 	}
-	r = runQueue(t, q, c, register)
+	binding := &AssociationBinding{Commit: register, Resolve: func(_ context.Context, _ string, ref Reference, _ bool) (AssociationOutcome, error) {
+		calls++
+		if associated[ref.DeliveryID] != ref {
+			return OutcomeAbsent, nil
+		}
+		return OutcomeCommitted, nil
+	}}
+	r = runQueue(t, q, c, binding)
 	if r.Associated || r.AssociationDue.IsZero() {
 		t.Fatal("outbox acknowledged lost response")
 	}
 	_ = q.Close()
 	q = openQueue(t, path, queueLimits())
-	r = runQueue(t, q, c, register)
+	r = runQueue(t, q, c, binding)
 	if !r.Associated || calls != 2 || len(associated) != 1 {
 		t.Fatal("outbox replay not idempotent")
 	}
@@ -303,8 +310,12 @@ func TestDiskQueueCancelUnknownAndRevokedAssociation(t *testing.T) {
 				}
 				return ErrAuthorization
 			}
+			binding := &AssociationBinding{Commit: register, Resolve: func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
+				calls++
+				return "", ErrTransport
+			}}
 			for range 14 {
-				runQueue(t, q, c, register)
+				runQueue(t, q, c, binding)
 			}
 			r := inspectQueue(t, q, "delivery-1")
 			want := 1
@@ -402,7 +413,7 @@ func TestDiskQueueDownloadRangeHashAndReauthorization(t *testing.T) {
 				_ = file.Close()
 			}
 			called := false
-			err = q.RunOne(t.Context(), j.DeliveryID, c, func(context.Context, string, Reference, io.Reader) error { called = true; return nil }, time.Now())
+			err = q.RunOne(t.Context(), j.DeliveryID, c, commitOnlyFixture(t, func(context.Context, string, Reference, io.Reader) error { called = true; return nil }), time.Now())
 			if mode == "resume" {
 				if err != nil || !called || !inspectQueue(t, q, j.DeliveryID).Associated {
 					t.Fatal("verified download association", err)
@@ -495,4 +506,12 @@ func BenchmarkDiskSnapshotReopen(b *testing.B) {
 			}
 		})
 	}
+}
+
+func commitOnlyFixture(t *testing.T, commit Associate) *AssociationBinding {
+	t.Helper()
+	return &AssociationBinding{Commit: commit, Resolve: func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
+		t.Fatal("unexpected resolve in commit-only fixture")
+		return "", ErrProtocol
+	}}
 }

@@ -240,7 +240,9 @@ func TestHerdrActionAgainstMergedUploadHandlers(t *testing.T) {
 		return nil
 	}
 	f.queries.revoked.Store(true)
-	status, err = transferclient.InvokeHerdr(t.Context(), getenv, "fixture-v1", limits, action, nil, client, register, time.Now())
+	status, err = transferclient.InvokeHerdr(t.Context(), getenv, "fixture-v1", limits, action, nil, client, &transferclient.AssociationBinding{Commit: register, Resolve: func(context.Context, string, transferclient.Reference, bool) (transferclient.AssociationOutcome, error) {
+		return "", transferclient.ErrAuthorization
+	}}, time.Now())
 	if err != nil || status.Associated || !status.AssociationBlocked || calls != 1 {
 		t.Fatal("revoked ready association accepted", err)
 	}
@@ -267,7 +269,10 @@ func TestHerdrActionAgainstMergedUploadHandlers(t *testing.T) {
 		downloaded = true
 		return nil
 	}
-	status, err = transferclient.InvokeHerdr(t.Context(), getenv, "fixture-v1", limits, action, nil, client, accept, time.Now())
+	status, err = transferclient.InvokeHerdr(t.Context(), getenv, "fixture-v1", limits, action, nil, client, &transferclient.AssociationBinding{Commit: accept, Resolve: func(context.Context, string, transferclient.Reference, bool) (transferclient.AssociationOutcome, error) {
+		t.Fatal("unexpected resolve")
+		return "", transferclient.ErrProtocol
+	}}, time.Now())
 	if err != nil || !downloaded || !status.Associated {
 		t.Fatal("reverse delivery failed", err)
 	}

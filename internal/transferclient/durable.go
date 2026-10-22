@@ -18,6 +18,7 @@ var (
 	ErrStore    = errors.New("delivery store unavailable or corrupt")
 	ErrCapacity = errors.New("delivery capacity exhausted")
 	ErrBinding  = errors.New("delivery host binding unavailable")
+	ErrVersion  = errors.New("delivery queue schema migration required")
 )
 
 // QueueLimits bound retained jobs (including incomplete admissions), reserved
@@ -42,14 +43,16 @@ type DiskQueue struct {
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
 // authorized registration accepted the stable reference, not task completion.
 type QueueStatus struct {
-	Version             int       `json:"version"`
-	Direction           string    `json:"direction"`
-	Job                 Job       `json:"job"`
-	Admitted            bool      `json:"admitted"`
-	Associated          bool      `json:"associated"`
-	AssociationAttempts int       `json:"association_attempts"`
-	AssociationDue      time.Time `json:"association_due,omitempty"`
-	AssociationBlocked  bool      `json:"association_blocked"`
+	Version             int           `json:"version"`
+	Direction           string        `json:"direction"`
+	Job                 Job           `json:"job"`
+	Seal                *SnapshotSeal `json:"seal,omitempty"`
+	Admitted            bool          `json:"admitted"`
+	Associated          bool          `json:"associated"`
+	AssociationState    string        `json:"association_state,omitempty"`
+	AssociationAttempts int           `json:"association_attempts"`
+	AssociationDue      time.Time     `json:"association_due,omitempty"`
+	AssociationBlocked  bool          `json:"association_blocked"`
 }
 
 // OpenHerdrQueue accepts Herdr's resolved locator once. Empty, relative,
@@ -109,7 +112,7 @@ func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		Version        int
 		Revision, Path string
 		Limits         QueueLimits
-	}{1, revision, path, limits})
+	}{2, revision, path, limits})
 	if err != nil {
 		return nil, ErrInvalid
 	}
@@ -142,6 +145,10 @@ func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 			return nil, ErrStore
 		}
 	} else if !bytes.Equal(actual, want) {
+		var old struct{ Version int }
+		if json.Unmarshal(actual, &old) == nil && old.Version != 2 {
+			return nil, ErrVersion
+		}
 		return nil, ErrStore
 	}
 	if syncQueueDir(root) != nil || syncQueueDir(parent) != nil {
@@ -260,7 +267,27 @@ func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
-	return r.Version == 1 && r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12
+	if r.Job.Spec.SizeBytes > q.limits.Bytes {
+		return false
+	}
+	if r.Admitted && r.Direction == "upload" && !r.Seal.valid() {
+		return false
+	}
+	switch r.AssociationState {
+	case AssociationCommitted:
+		if !r.Associated || r.Job.Phase != "ready" {
+			return false
+		}
+	case AssociationCanceled:
+		if r.Associated || r.Job.Phase != "canceled" {
+			return false
+		}
+	case AssociationInFlight, AssociationUnknown, AssociationRetryCommit:
+		if r.Associated || !r.Admitted || r.Job.Phase != "ready" {
+			return false
+		}
+	}
+	return r.Version == 2 && r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12 && associationStateValid(r.AssociationState)
 }
 
 func (q *DiskQueue) save(f *os.File, r QueueStatus) error {

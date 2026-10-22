@@ -261,7 +261,13 @@ func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapsho
 		}
 	default:
 		body := make([]byte, int(min(int64(j.ChunkBytes), j.Spec.SizeBytes-j.Offset)))
-		if source == nil || source.ReadAt(ctx, j.SnapshotID, j.LocatorRevision, j.Spec, body, j.Offset) != nil {
+		if source == nil {
+			return stop(j, "blocked", "snapshot_unavailable", save)
+		}
+		if sourceErr := source.ReadAt(ctx, j.SnapshotID, j.LocatorRevision, j.Spec, body, j.Offset); sourceErr != nil {
+			if errors.Is(sourceErr, context.Canceled) || errors.Is(sourceErr, context.DeadlineExceeded) {
+				return fail(j, sourceErr, now, save)
+			}
 			return stop(j, "blocked", "snapshot_unavailable", save)
 		}
 		r, err = c.Patch(ctx, j.BotID, j.ReceiptID, j.Offset, body)

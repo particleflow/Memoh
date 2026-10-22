@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -32,6 +31,9 @@ type Associate func(context.Context, string, Reference, io.Reader) error
 func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source *os.File) error {
 	if !job.valid() || job.Phase != "queued" || job.Offset != 0 || job.ReceiptID != "" || job.CancelRequested || job.Attempts != 0 || job.SnapshotID != job.DeliveryID || job.LocatorRevision != q.revision || job.DeliveryID == "admission" || direction != "upload" && direction != "download" {
 		return ErrInvalid
+	}
+	if job.Spec.SizeBytes > q.limits.Bytes {
+		return ErrCapacity
 	}
 	if direction == "upload" {
 		if source == nil {
@@ -60,7 +62,7 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 		return err
 	}
 	defer func() { _ = journal.Close() }()
-	r := QueueStatus{Version: 1, Direction: direction, Job: job}
+	r := QueueStatus{Version: 2, Direction: direction, Job: job, AssociationState: AssociationIdle}
 	if err := q.save(journal, r); err != nil {
 		return err
 	}
@@ -82,26 +84,17 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 		if _, err := source.Seek(0, io.SeekStart); err != nil {
 			return ErrSnapshot
 		}
-		h := sha256.New()
-		remaining := job.Spec.SizeBytes
-		buffer := make([]byte, copyBytes)
-		for remaining > 0 {
-			if err := ctx.Err(); err != nil {
-				return err
-			}
-			n, err := io.ReadFull(source, buffer[:min(int64(len(buffer)), remaining)])
-			if err != nil {
-				return ErrSnapshot
-			}
-			if written, err := f.Write(buffer[:n]); err != nil || written != n {
-				return ErrStore
-			}
-			_, _ = h.Write(buffer[:n])
-			remaining -= int64(n)
+		tree, err := q.file(job.DeliveryID+".tree", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+		if err != nil {
+			return err
 		}
-		var extra [1]byte
-		if n, err := source.Read(extra[:]); n != 0 || !errors.Is(err, io.EOF) || hex.EncodeToString(h.Sum(nil)) != job.Spec.SHA256 {
-			return ErrSnapshot
+		defer func() { _ = tree.Close() }()
+		r.Seal, err = sealSnapshot(ctx, source, f, tree, job.Spec)
+		if err != nil {
+			return err
+		}
+		if tree.Chmod(0o400) != nil || tree.Sync() != nil {
+			return ErrStore
 		}
 	}
 	if direction == "upload" && f.Chmod(0o400) != nil {
@@ -120,8 +113,8 @@ func (q *DiskQueue) capacity(add int64) error {
 		return ErrStore
 	}
 	defer func() { _ = dir.Close() }()
-	entries, err := dir.ReadDir(q.limits.Jobs*3 + 136)
-	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*3+136 {
+	entries, err := dir.ReadDir(q.limits.Jobs*4 + 136)
+	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*4+136 {
 		return ErrCapacity
 	}
 	count, total := 0, int64(0)
@@ -153,11 +146,13 @@ func (q *DiskQueue) capacity(add int64) error {
 			return ErrStore
 		}
 		count++
-		if r.Job.Spec.SizeBytes > q.limits.Bytes-total {
+		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes)
+		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
 		}
-		total += r.Job.Spec.SizeBytes
+		total += reserved
 	}
+	add += snapshotTreeBytes(add)
 	if count >= q.limits.Jobs || add > q.limits.Bytes-total {
 		return ErrCapacity
 	}
@@ -208,24 +203,16 @@ func (q *DiskQueue) RequestCancel(id string) error {
 	if r.Direction == "upload" && (r.Job.Phase == "create_unknown" || r.Job.Phase == "blocked") {
 		return ErrBinding
 	}
+	if r.AssociationState == AssociationInFlight || r.AssociationState == "" && r.AssociationAttempts > 0 {
+		r.AssociationState = AssociationUnknown
+	}
+	if !r.Job.CancelRequested {
+		r.AssociationAttempts = 0
+		r.AssociationDue = time.Time{}
+		r.AssociationBlocked = false
+	}
 	r.Job.CancelRequested = true
 	return q.save(f, r)
-}
-
-type diskSnapshot struct {
-	file *os.File
-	job  Job
-}
-
-func (s diskSnapshot) ReadAt(ctx context.Context, ref, revision string, spec Spec, dst []byte, offset int64) error {
-	if ctx.Err() != nil || ref != s.job.SnapshotID || revision != s.job.LocatorRevision || spec != s.job.Spec {
-		return ErrSnapshot
-	}
-	n, err := s.file.ReadAt(dst, offset)
-	if err != nil || n != len(dst) {
-		return ErrSnapshot
-	}
-	return nil
 }
 
 // RunOne is the finite Herdr action body: one job, one exclusive OS lock and
@@ -233,7 +220,7 @@ func (s diskSnapshot) ReadAt(ctx context.Context, ref, revision string, spec Spe
 // calls can outlive it. No sleeps, detached workers or task execution states.
 // Host startup/event/manual actions may call again when due; no reliable idle
 // retry scheduler is implied. Production auth/association remain injected ports.
-func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, associate Associate, now time.Time) error {
+func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, binding *AssociationBinding, now time.Time) error {
 	if !validID(id) || id == "admission" || client == nil {
 		return ErrInvalid
 	}
@@ -261,11 +248,28 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		r.Job.Phase, r.Job.ErrorCode, r.Job.NextAttempt = "canceled", "", time.Time{}
 		return q.save(journal, r)
 	}
-	if r.Associated || r.AssociationBlocked || r.Job.Phase == "canceled" || r.Job.Phase == "blocked" || r.Job.Phase == "create_unknown" || now.Before(r.Job.NextAttempt) || now.Before(r.AssociationDue) {
+	if r.AssociationState == AssociationInFlight || r.AssociationState == "" && r.AssociationAttempts > 0 && !r.Associated {
+		r.AssociationState = AssociationUnknown
+		if err := q.save(journal, r); err != nil {
+			return err
+		}
+	}
+	if r.Associated || r.Job.Phase == "canceled" || r.Job.Phase == "blocked" || r.Job.Phase == "create_unknown" || now.Before(r.Job.NextAttempt) {
 		return nil
 	}
-	if r.Job.CancelRequested && r.Job.Phase == "ready" {
-		return nil
+	if r.Job.Phase == "ready" {
+		if r.Job.CancelRequested && (r.AssociationState == AssociationIdle || r.AssociationState == "") {
+			return q.finishAssociation(journal, r, OutcomeCanceled)
+		}
+		if r.AssociationBlocked || now.Before(r.AssociationDue) {
+			return nil
+		}
+		if binding == nil || binding.Commit == nil || binding.Resolve == nil {
+			return ErrBinding
+		}
+		if r.AssociationState == AssociationUnknown || r.Job.CancelRequested {
+			return q.resolveAssociation(ctx, journal, r, binding, now)
+		}
 	}
 	save := func(j Job) error {
 		next := r
@@ -280,24 +284,15 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		if r.Job.CancelRequested {
 			return client.Advance(ctx, r.Job, save, nil, now)
 		}
-		f, err := q.file(id+".snapshot", os.O_RDONLY, 0o600)
+		source, closeSource, err := q.openSnapshot(r)
 		if err != nil {
-			return err
-		}
-		if err := lockQueueFile(f); err != nil {
-			_ = f.Close()
-			return err
-		}
-		defer unlockClose(f)
-		// Every reopened handle is hash-verified before network mutation. This
-		// deliberately favors correctness; large-file cost must be measured.
-		if err := Verify(ctx, f, r.Job.Spec); err != nil {
-			if ctx.Err() != nil {
-				return fail(&r.Job, ctx.Err(), now, save)
+			if errors.Is(err, ErrSnapshot) {
+				return stop(&r.Job, "blocked", "snapshot_unavailable", save)
 			}
-			return stop(&r.Job, "blocked", "snapshot_unavailable", save)
+			return err
 		}
-		return client.Advance(ctx, r.Job, save, diskSnapshot{f, r.Job}, now)
+		defer closeSource()
+		return client.Advance(ctx, r.Job, save, source, now)
 	}
 	var content io.Reader
 	if r.Direction == "download" {
@@ -312,7 +307,8 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		err = client.Download(ctx, r.Job.BotID, r.Job.Spec.SHA256, r.Job.Spec.SizeBytes, r.Job.Offset, f, func(offset int64) error { next := r.Job; next.Offset = offset; return save(next) })
 		if err != nil {
 			if r.Job.Ready != nil {
-				return q.associationResult(journal, r, err, now)
+				r.AssociationAttempts++
+				return q.waitAssociation(journal, r, err, now)
 			}
 			return fail(&r.Job, err, now, save)
 		}
@@ -331,27 +327,12 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, assoc
 		}
 		content = io.LimitReader(f, r.Job.Spec.SizeBytes)
 	}
-	if associate == nil {
+	if binding == nil || binding.Commit == nil || binding.Resolve == nil {
 		return ErrBinding
 	}
 	// The registration endpoint itself MUST authorize atomically; an earlier
 	// upload/download grant and a local ready bit cannot authorize association.
-	err = associate(ctx, r.Direction, *r.Job.Ready, content)
-	return q.associationResult(journal, r, err, now)
-}
-
-func (q *DiskQueue) associationResult(journal *os.File, r QueueStatus, err error, now time.Time) error {
-	if err == nil {
-		r.Associated = true
-	} else {
-		r.AssociationAttempts++
-		if !errors.Is(err, ErrTransport) || r.AssociationAttempts >= 12 {
-			r.AssociationBlocked = true
-		} else {
-			r.AssociationDue = now.Add(min(time.Second*time.Duration(1<<r.AssociationAttempts), 5*time.Minute))
-		}
-	}
-	return q.save(journal, r)
+	return q.commitAssociation(ctx, journal, r, binding, content, now)
 }
 
 // Retire releases only acknowledged delivery bytes or confirmed cancellation.
@@ -387,6 +368,11 @@ func (q *DiskQueue) Retire(id string) error {
 	}
 	if err := q.root.Remove(id + suffix); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return ErrStore
+	}
+	if r.Direction == "upload" {
+		if err := q.root.Remove(id + ".tree"); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return ErrStore
+		}
 	}
 	if syncQueueDir(q.root) != nil {
 		return ErrStore

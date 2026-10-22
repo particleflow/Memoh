@@ -3,12 +3,21 @@
 package transferclient
 
 import (
+	"fmt"
 	"os"
 
 	"golang.org/x/sys/windows"
 )
 
 func queuePlatformReady() error { return ErrBinding }
+
+func queueFileIdentity(f *os.File) (string, error) {
+	var info windows.ByHandleFileInformation
+	if windows.GetFileInformationByHandle(windows.Handle(f.Fd()), &info) != nil {
+		return "", ErrStore
+	}
+	return fmt.Sprintf("%x:%x:%x", info.VolumeSerialNumber, uint64(info.FileIndexHigh)<<32|uint64(info.FileIndexLow), uint64(info.FileSizeHigh)<<32|uint64(info.FileSizeLow)), nil
+}
 
 func checkQueueRoot(*os.Root) error { return ErrBinding }
 
