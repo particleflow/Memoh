@@ -1,0 +1,12 @@
+goos: linux
+goarch: amd64
+pkg: github.com/felinics/memoh/internal/transferclient
+cpu: INTEL(R) XEON(R) PLATINUM 8573C
+BenchmarkDiskSnapshotReopen/1MiB-4         	       1	    993400 ns/op	1055.54 MB/s	  262400 B/op	       7 allocs/op
+BenchmarkDiskSnapshotReopen/1MiB-4         	       1	    936786 ns/op	1119.33 MB/s	  262400 B/op	       7 allocs/op
+BenchmarkDiskSnapshotReopen/1MiB-4         	       1	    921346 ns/op	1138.09 MB/s	  262400 B/op	       7 allocs/op
+BenchmarkDiskSnapshotReopen/512MiB-4       	       1	 547070012 ns/op	 981.36 MB/s	  262400 B/op	       7 allocs/op
+BenchmarkDiskSnapshotReopen/512MiB-4       	       1	 545657879 ns/op	 983.90 MB/s	  262400 B/op	       7 allocs/op
+BenchmarkDiskSnapshotReopen/512MiB-4       	       1	 684242910 ns/op	 784.62 MB/s	  262400 B/op	       7 allocs/op
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	3.953s
