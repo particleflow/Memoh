@@ -68,6 +68,10 @@ func run() int {
 		case "advance-results":
 			status, err = transferclient.AdvanceProducer(ctx, getenv, "native-profile-v1", limits, nil, time.Now())
 		}
+		if errors.Is(err, transferclient.ErrProducerSource) {
+			_ = writeStatusWithSource(status, "unavailable")
+			return 1
+		}
 		if errors.Is(err, transferclient.ErrNoWork) {
 			fmt.Println(`{"state":"idle"}`)
 			return 0
@@ -146,7 +150,12 @@ func readAdmission(ctx context.Context, input io.Reader) (admissionInput, error)
 }
 
 func writeStatus(s transferclient.QueueStatus) int {
+	return writeStatusWithSource(s, "")
+}
+
+func writeStatusWithSource(s transferclient.QueueStatus, source string) int {
 	out := struct {
+		Source      string                    `json:"source_collection,omitempty"`
 		Delivery    string                    `json:"delivery_id"`
 		Phase       string                    `json:"phase"`
 		Offset      int64                     `json:"offset"`
@@ -155,7 +164,7 @@ func writeStatus(s transferclient.QueueStatus) int {
 		Association string                    `json:"association_state,omitempty"`
 		Error       string                    `json:"error_code,omitempty"`
 		Reference   *transferclient.Reference `json:"reference,omitempty"`
-	}{s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
+	}{source, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
 	if json.NewEncoder(os.Stdout).Encode(out) != nil {
 		return 1
 	}

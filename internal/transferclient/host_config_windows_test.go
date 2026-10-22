@@ -11,3 +11,7 @@ func TestWindowsNativeConfiguredHost(t *testing.T) { TestConfiguredHostSecretsPa
 func TestWindowsNativeProducerClosedManifest(t *testing.T) {
 	TestProducerClosedManifestRestartAndLostAssociation(t)
 }
+
+func TestWindowsNativeProducerMissingSource(t *testing.T) {
+	TestProducerCollectMissingSourceStillAdvances(t)
+}

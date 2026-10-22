@@ -15,6 +15,10 @@ import (
 	"github.com/felinics/memoh/internal/deliverymeta"
 )
 
+// ErrProducerSource reports an unavailable source even if a previously sealed
+// job advanced successfully. It must never be collapsed into an idle success.
+var ErrProducerSource = errors.New("producer source collection unavailable")
+
 // ProducerAdmission is the same bounded, non-secret stdin envelope accepted by
 // enqueue-result. Metadata cannot supply credentials or override resolved roots.
 func ProducerAdmission(input io.Reader, revision string) (ConfiguredAction, deliverymeta.Closed, error) {
@@ -67,7 +71,14 @@ func CollectProducer(ctx context.Context, getenv func(string) string, revision s
 	defer func() { _ = cfg.Close() }()
 	names, err := cfg.producerManifests()
 	if err != nil {
-		return QueueStatus{}, err
+		// Already admitted jobs own immutable snapshots and must not depend on
+		// the continued existence of the producer directory. Preserve the source
+		// error alongside bounded queue progress, including when no job is due.
+		status, advanceErr := AdvanceProducer(ctx, getenv, revision, limits, transport, now)
+		if errors.Is(advanceErr, ErrNoWork) {
+			advanceErr = nil
+		}
+		return status, errors.Join(ErrProducerSource, err, advanceErr)
 	}
 	if len(names) == 0 {
 		return AdvanceProducer(ctx, getenv, revision, limits, transport, now)

@@ -45,7 +45,11 @@ private source root and passes its metadata reader to the same bounded decoder
 as `transferqueue -action enqueue-result` on stdin. Source bytes are read only
 by the existing guarded snapshot admission. The collector consumes a manifest
 only after durable admission; duplicate manifests recover the original sealed
-job. Source changes after admission cannot replace that snapshot.
+job. Source changes after admission cannot replace that snapshot. If the source
+root is later unavailable, collect still attempts bounded advancement of the
+already sealed queue. It reports `source_collection: unavailable` with nonzero
+exit even when a queued delivery advances; no queued work does not turn a missing
+source into an idle or successful collection.
 
 Each collect handles at most one manifest and at most 64 existing queue steps
 within two minutes. `advance-results` selects one due job with persisted backoff.

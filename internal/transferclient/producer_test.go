@@ -67,6 +67,12 @@ func producerFixture(t *testing.T, origin string) (func(string) string, delivery
 // Runs against real private host storage on Unix and Windows NTFS. The HTTP
 // service in THIS test is a protocol fixture, not the production Server or PG.
 func TestProducerClosedManifestRestartAndLostAssociation(t *testing.T) {
+	exerciseProducerRecovery(t, false)
+}
+func TestProducerCollectMissingSourceStillAdvances(t *testing.T) { exerciseProducerRecovery(t, true) }
+
+func exerciseProducerRecovery(t *testing.T, missingSource bool) {
+	t.Helper()
 	f := &fixture{calls: map[string]int{}}
 	var committed atomic.Bool
 	var commits atomic.Int64
@@ -111,10 +117,25 @@ func TestProducerClosedManifestRestartAndLostAssociation(t *testing.T) {
 	// Source changes after sealing; a replayed manifest must recover the snapshot.
 	write("source", "result-one", []byte("changed"))
 	write("source", closed.ManifestName(), raw)
+	if missingSource {
+		cfg, openErr := OpenHostConfig(getenv)
+		if openErr != nil {
+			t.Fatal(openErr)
+		}
+		path := cfg.sourcePath
+		_ = cfg.Close()
+		if removeErr := os.RemoveAll(path); removeErr != nil {
+			t.Fatal(removeErr)
+		} // Only the private test source, after snapshot admission.
+	}
 	for range 6 {
 		now := time.Now().Add(time.Hour)
 		status, err = CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), now)
-		if err != nil {
+		if missingSource {
+			if !errors.Is(err, ErrProducerSource) || errors.Is(err, ErrNoWork) {
+				t.Fatal("source error was hidden", err)
+			}
+		} else if err != nil {
 			t.Fatal("restart", err)
 		}
 		if status.Associated {
@@ -170,5 +191,22 @@ func TestProducerConfigurationCannotChangeBetweenCheckAndAdmission(t *testing.T)
 	_, err := EnqueueProducer(t.Context(), changing, "fixture", QueueLimits{Jobs: 1, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}, bytes.NewReader(raw), nil, time.Now())
 	if !errors.Is(err, ErrVersion) {
 		t.Fatal("configuration changed silently", err)
+	}
+}
+
+func TestProducerMissingSourceWithoutQueueIsNotIdleSuccess(t *testing.T) {
+	getenv, _, _ := producerFixture(t, "https://fixture.invalid")
+	cfg, err := OpenHostConfig(getenv)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := cfg.sourcePath
+	_ = cfg.Close()
+	if err := os.RemoveAll(path); err != nil {
+		t.Fatal(err)
+	}
+	status, err := CollectProducer(t.Context(), getenv, "fixture", QueueLimits{Jobs: 1, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}, nil, time.Now())
+	if !errors.Is(err, ErrProducerSource) || errors.Is(err, ErrNoWork) || status.Admitted || status.Associated {
+		t.Fatal("missing producer was reported as complete/idle", err)
 	}
 }
