@@ -265,8 +265,8 @@ func (s *Service) RebuildFiles(ctx context.Context, botID string, items []Memory
 	// re-rendering, so stale projections of deleted nodes go away while
 	// agent-authored files that have not been ingested yet (unprefixed or
 	// missing frontmatter ids, or free-form markdown that does not parse)
-	// survive every sync until POST /bots/:bot_id/memory/ingest or /rebuild
-	// imports them as DB nodes.
+	// survive every sync. Only explicit POST /bots/:bot_id/memory/ingest
+	// imports their contents as DB nodes; their original files remain intact.
 	if err := s.removeProjectionFiles(ctx, botID); err != nil {
 		return err
 	}
@@ -292,9 +292,9 @@ func (s *Service) removeProjectionFiles(ctx context.Context, botID string) error
 		entryPath := memoryEntryPath(entry.GetPath())
 		content, readErr := s.readFile(ctx, botID, entryPath)
 		if readErr != nil {
-			s.logger.WarnContext(ctx, "rebuild: failed to read memory file; preserving it",
-				slog.String("bot_id", botID), slog.String("path", entryPath), slog.Any("error", readErr))
-			continue
+			// Its ownership is unknown, so preserve it and report incomplete
+			// cleanup instead of acknowledging deletion of a possible projection.
+			return fmt.Errorf("rebuild: read memory file %s: %w", entryPath, readErr)
 		}
 		parsed, parseErr := parseMemoryFile(content)
 		if parseErr != nil || !isProjectionItems(botID, parsed) {

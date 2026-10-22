@@ -2261,9 +2261,9 @@ export const postBotsByBotIdMemoryIngestMutation = (options?: Partial<Options<Po
 });
 
 /**
- * Rebuild memories from filesystem
+ * Rebuild memory projections and index
  *
- * Read memory files from the workspace filesystem (source of truth) and restore missing entries to memory storage
+ * Regenerate derived Markdown and the search index from authoritative database memories. Does not import files; use the explicit ingest endpoint for that.
  */
 export const postBotsByBotIdMemoryRebuildMutation = (options?: Partial<Options<PostBotsByBotIdMemoryRebuildData>>): UseMutationOptions<PostBotsByBotIdMemoryRebuildResponse, Options<PostBotsByBotIdMemoryRebuildData>, PostBotsByBotIdMemoryRebuildError> => ({
     mutation: async (vars) => {

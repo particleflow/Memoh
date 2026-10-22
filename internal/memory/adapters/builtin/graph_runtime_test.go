@@ -9,7 +9,6 @@ import (
 
 	adapters "github.com/felinics/memoh/internal/memory/adapters"
 	"github.com/felinics/memoh/internal/memory/migrate"
-	storefs "github.com/felinics/memoh/internal/memory/storefs"
 	"github.com/felinics/memoh/internal/memory/wikistore"
 )
 
@@ -539,31 +538,8 @@ func graphTestRequireStrings(t *testing.T, got []string, want ...string) {
 	}
 }
 
-func TestGraphRuntimeFileFallback(t *testing.T) {
-	t.Parallel()
-	// A wiki store that returns an error on ListNodes forces the file fallback.
-	store := &errWikiStore{}
-	fs := newFakeStore(
-		storefs.MemoryItem{ID: "bot-x:m1", Memory: "fallback oolong memory", CreatedAt: time.Now().Format(time.RFC3339)},
-	)
-	rt := NewGraphRuntime(nil, store, fs)
-
-	resp, err := rt.Search(context.Background(), adapters.SearchRequest{
-		BotID: "bot-x", Query: "oolong", Limit: 5,
-	})
-	if err != nil {
-		t.Fatalf("Search (fallback) should not error: %v", err)
-	}
-	if len(resp.Results) == 0 {
-		t.Fatal("file fallback returned no results")
-	}
-	if !strings.Contains(resp.Results[0].Memory, "oolong") {
-		t.Fatalf("file fallback result = %q, want oolong", resp.Results[0].Memory)
-	}
-}
-
-// errWikiStore returns an error on every read so the graph runtime degrades to
-// the file-lexical fallback path.
+// errWikiStore returns an error on every read. Lifecycle tests verify that
+// an unverified derived file cannot substitute for the authoritative store.
 type errWikiStore struct{}
 
 func (errWikiStore) UpsertNode(context.Context, migrate.NodeSpec) (migrate.NodeSpec, error) {
