@@ -1,0 +1,9 @@
+{"Time":"2026-10-22T22:04:37.19812836Z","Action":"start","Package":"github.com/felinics/memoh/internal/handlers"}
+{"Time":"2026-10-22T22:04:37.198232487Z","Action":"output","Package":"github.com/felinics/memoh/internal/handlers","Output":"FAIL\tgithub.com/felinics/memoh/internal/handlers [build failed]\n"}
+{"Time":"2026-10-22T22:04:37.198245236Z","Action":"fail","Package":"github.com/felinics/memoh/internal/handlers","Elapsed":0,"FailedBuild":"github.com/felinics/memoh/internal/handlers [github.com/felinics/memoh/internal/handlers.test]"}
+{"Time":"2026-10-22T22:04:37.198359032Z","Action":"start","Package":"github.com/felinics/memoh/internal/agent/application"}
+{"Time":"2026-10-22T22:04:37.1984103Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/application","Output":"FAIL\tgithub.com/felinics/memoh/internal/agent/application [build failed]\n"}
+{"Time":"2026-10-22T22:04:37.198428347Z","Action":"fail","Package":"github.com/felinics/memoh/internal/agent/application","Elapsed":0,"FailedBuild":"github.com/felinics/memoh/internal/agent/application [github.com/felinics/memoh/internal/agent/application.test]"}
+{"Time":"2026-10-22T22:04:45.545225906Z","Action":"start","Package":"github.com/felinics/memoh/internal/agent/tool"}
+{"Time":"2026-10-22T22:04:45.545250353Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Output":"FAIL\tgithub.com/felinics/memoh/internal/agent/tool [build failed]\n"}
+{"Time":"2026-10-22T22:04:45.545255791Z","Action":"fail","Package":"github.com/felinics/memoh/internal/agent/tool","Elapsed":0,"FailedBuild":"github.com/felinics/memoh/internal/agent/tool [github.com/felinics/memoh/internal/agent/tool.test]"}

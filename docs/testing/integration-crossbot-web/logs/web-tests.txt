@@ -1,0 +1,257 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 <repo>
+
+ ❯ |web| src/pages/providers/model-setting.test.ts (1 test | 1 failed) 15017ms
+     × keeps a template draft local when enabling before save 15015ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ |web| src/utils/markdown-dollar.render.test.ts (10 tests | 1 failed) 25610ms
+     × keeps \(...\) math while literalizing a trailing $ price pair 15004ms
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+Not implemented: HTMLCanvasElement's getContext() method: without installing the canvas npm package
+ ❯ |web| src/store/chat-list.test.ts (0 test)
+ ❯ |web| src/pages/home/components/session-tasks.test.ts (0 test)
+ ❯ |web| src/pages/keyboard-shortcuts/components/KeyCaptureDialog.test.ts (0 test)
+ ❯ |web| src/pages/bots/new.test.ts (0 test)
+ ❯ |web| src/pages/home/components/chat-user-input-form.test.ts (0 test)
+ ❯ |web| src/pages/providers/components/provider-form-test-connection.test.ts (0 test)
+ ❯ |web| src/pages/home/components/tool-call-group.test.ts (0 test)
+ ❯ |web| src/store/workspace-tabs.test.ts (0 test)
+ ❯ |web| src/pages/bots/detail.not-found.test.ts (0 test)
+ ❯ |web| src/pages/bots/components/backup-section-cards.test.ts (0 test)
+ ❯ |web| src/pages/home/commands/workspace-keyboard.integration.test.ts (0 test)
+ ❯ |web| src/pages/bots/components/settings-interaction-card.test.ts (0 test)
+ ❯ |web| src/pages/home/composables/useChatScroll.test.ts (0 test)
+ ❯ |web| src/components/add-provider/index.test.ts (1 test | 1 failed) 53ms
+     × enables submit after picking a preset and filling the api key 52ms
+ ❯ |web| src/pages/providers/connect.test.ts (6 tests | 6 failed) 59ms
+     × scrubs the fragment so the key never lingers in history 47ms
+     × re-reads the payload when a second link changes only the fragment 3ms
+     × replaces a stale confirm card with the error of an invalid second link 2ms
+     × stops listening after unmount 2ms
+     × seeds the providers cache before navigating to the new provider 2ms
+     × still navigates when the seeding request fails 2ms
+ ❯ |web| src/components/sidebar/panel-supermarket.test.ts (0 test)
+ ❯ |web| src/pages/home/composables/useComposerKeyboardFocus.test.ts (0 test)
+ ❯ |web| src/pages/bots/components/app-connector-auth-form.test.ts (0 test)
+ ❯ |web| src/pages/home/components/bot-delegation-tasks.test.ts (0 test)
+ ❯ |web| src/pages/bots/components/schedule-editor.test.ts (0 test)
+ ❯ |web| src/pages/about/index.test.ts (0 test)
+ ❯ |web| src/pages/supermarket/app-detail.test.ts (0 test)
+ ❯ |web| src/pages/providers/components/model-item.test.ts (0 test)
+ ❯ |web| src/pages/bots/new-progress.test.ts (0 test)
+ ❯ |web| src/composables/use-autosave-queue.test.ts (0 test)
+ ❯ |web| src/pages/bots/components/model-options.test.ts (0 test)
+ ❯ |web| src/pages/home/components/dockview/panel-preview.test.ts (0 test)
+ ❯ |web| src/pages/home/components/tool-call-inline.test.ts (0 test)
+ ❯ |web| src/composables/useDisplayClipboard.test.ts (0 test)
+ ❯ |web| src/pages/bots/index.test.ts (0 test)
+ ❯ |web| src/pages/home/composables/useUnfocusedComposerInput.test.ts (0 test)
+ ❯ |web| src/pages/bots/components/app-error-presentation.test.ts (0 test)
+ ❯ |web| src/pages/home/composables/useBotDelegations.test.ts (0 test)
+ ❯ |web| src/lib/keyboard-context.test.ts (0 test)
+ ❯ |web| src/components/file-manager/directory-picker-node.test.ts (0 test)
+ ❯ |web| src/lib/ui-icon-contract.test.ts (0 test)
+ ❯ |web| src/pages/home/components/tool-call-registry.test.ts (19 tests | 1 failed) 17ms
+     × gives every built-in tool its own label instead of the generic fallback 6ms
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 34 ⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/composables/use-autosave-queue.test.ts [ apps/web/src/composables/use-autosave-queue.test.ts ]
+ FAIL  |web| src/composables/useDisplayClipboard.test.ts [ apps/web/src/composables/useDisplayClipboard.test.ts ]
+ FAIL  |web| src/lib/keyboard-context.test.ts [ apps/web/src/lib/keyboard-context.test.ts ]
+ FAIL  |web| src/lib/ui-icon-contract.test.ts [ apps/web/src/lib/ui-icon-contract.test.ts ]
+ FAIL  |web| src/components/file-manager/directory-picker-node.test.ts [ apps/web/src/components/file-manager/directory-picker-node.test.ts ]
+ FAIL  |web| src/components/sidebar/panel-supermarket.test.ts [ apps/web/src/components/sidebar/panel-supermarket.test.ts ]
+ FAIL  |web| src/pages/bots/detail.not-found.test.ts [ apps/web/src/pages/bots/detail.not-found.test.ts ]
+ FAIL  |web| src/pages/bots/index.test.ts [ apps/web/src/pages/bots/index.test.ts ]
+ FAIL  |web| src/pages/bots/new-progress.test.ts [ apps/web/src/pages/bots/new-progress.test.ts ]
+ FAIL  |web| src/pages/bots/new.test.ts [ apps/web/src/pages/bots/new.test.ts ]
+ FAIL  |web| src/pages/supermarket/app-detail.test.ts [ apps/web/src/pages/supermarket/app-detail.test.ts ]
+ FAIL  |web| src/pages/bots/components/app-connector-auth-form.test.ts [ apps/web/src/pages/bots/components/app-connector-auth-form.test.ts ]
+ FAIL  |web| src/pages/bots/components/app-error-presentation.test.ts [ apps/web/src/pages/bots/components/app-error-presentation.test.ts ]
+ FAIL  |web| src/pages/bots/components/model-options.test.ts [ apps/web/src/pages/bots/components/model-options.test.ts ]
+ FAIL  |web| src/pages/bots/components/schedule-editor.test.ts [ apps/web/src/pages/bots/components/schedule-editor.test.ts ]
+ FAIL  |web| src/pages/bots/components/settings-interaction-card.test.ts [ apps/web/src/pages/bots/components/settings-interaction-card.test.ts ]
+ FAIL  |web| src/pages/home/commands/workspace-keyboard.integration.test.ts [ apps/web/src/pages/home/commands/workspace-keyboard.integration.test.ts ]
+ FAIL  |web| src/pages/home/components/bot-delegation-tasks.test.ts [ apps/web/src/pages/home/components/bot-delegation-tasks.test.ts ]
+ FAIL  |web| src/pages/home/components/chat-user-input-form.test.ts [ apps/web/src/pages/home/components/chat-user-input-form.test.ts ]
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts [ apps/web/src/pages/home/components/session-tasks.test.ts ]
+ FAIL  |web| src/pages/home/components/tool-call-inline.test.ts [ apps/web/src/pages/home/components/tool-call-inline.test.ts ]
+ FAIL  |web| src/pages/home/composables/useBotDelegations.test.ts [ apps/web/src/pages/home/composables/useBotDelegations.test.ts ]
+ FAIL  |web| src/pages/home/composables/useComposerKeyboardFocus.test.ts [ apps/web/src/pages/home/composables/useComposerKeyboardFocus.test.ts ]
+ FAIL  |web| src/pages/home/composables/useUnfocusedComposerInput.test.ts [ apps/web/src/pages/home/composables/useUnfocusedComposerInput.test.ts ]
+ FAIL  |web| src/pages/keyboard-shortcuts/components/KeyCaptureDialog.test.ts [ apps/web/src/pages/keyboard-shortcuts/components/KeyCaptureDialog.test.ts ]
+ FAIL  |web| src/pages/providers/components/model-item.test.ts [ apps/web/src/pages/providers/components/model-item.test.ts ]
+ FAIL  |web| src/pages/providers/components/provider-form-test-connection.test.ts [ apps/web/src/pages/providers/components/provider-form-test-connection.test.ts ]
+ FAIL  |web| src/pages/home/components/dockview/panel-preview.test.ts [ apps/web/src/pages/home/components/dockview/panel-preview.test.ts ]
+Error: ENOSPC: no space left on device, write
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/44]⎯
+
+ FAIL  |web| src/store/chat-list.test.ts [ apps/web/src/store/chat-list.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ src/store/chat-list.ts:3:1
+      1| import { defineStore, storeToRefs } from 'pinia'
+      2| import { computed, onScopeDispose, ref } from 'vue'
+      3| import { toast } from '@felinic/ui'
+       | ^
+      4| import { useChatSelectionStore } from '@/store/chat-selection'
+      5| import { useWorkdirsStore } from '@/store/workdirs'
+
+Caused by: Error: ENOSPC: no space left on device, write
+ ❯ ../../node_modules/.pnpm/reka-ui@2.10.1_patch_hash=b58f2bf789485626044d40b71d083765570a7d66b6ec1a3e05e8ae6920c9f840_vue@3.5.40_typescript@6.0.3_/node_modules/reka-ui/dist/index.js:153:1
+ ❯ ../../packages/ui/src/components/accordion/Accordion.vue:5:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/44]⎯
+
+ FAIL  |web| src/store/workspace-tabs.test.ts [ apps/web/src/store/workspace-tabs.test.ts ]
+Error: ENOSPC: no space left on device, write
+ ❯ src/utils/external-agent.ts:3:1
+      1| import type { Component } from 'vue'
+      2| import { Bot as BotIcon } from 'lucide-vue-next'
+      3| import { Acp, ClaudeCode, ClaudeCodeColor, Codex, CodexColor, Xai } fr…
+       | ^
+      4|
+      5| export function externalAgentIcon(agentID: unknown, color = false): Co…
+ ❯ src/utils/bot-agent.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/44]⎯
+
+ FAIL  |web| src/pages/about/index.test.ts [ apps/web/src/pages/about/index.test.ts ]
+Error: ENOSPC: no space left on device, write
+ ❯ src/pages/about/index.test.ts:5:1
+      3| import { createApp, h, ref, type App } from 'vue'
+      4| import { createPinia } from 'pinia'
+      5| import About from './index.vue'
+       | ^
+      6|
+      7| const ui = vi.hoisted(() => ({ error: vi.fn() }))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/44]⎯
+
+ FAIL  |web| src/pages/bots/components/backup-section-cards.test.ts [ apps/web/src/pages/bots/components/backup-section-cards.test.ts ]
+Error: ENOSPC: no space left on device, write
+ ❯ src/pages/bots/components/backup-section-cards.test.ts:6:1
+      4| import { createApp, h, nextTick, ref } from 'vue'
+      5| import { createI18n } from 'vue-i18n'
+      6| import BackupSectionCards from './backup-section-cards.vue'
+       | ^
+      7|
+      8| describe('backup section selection', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/44]⎯
+
+ FAIL  |web| src/pages/home/components/tool-call-group.test.ts [ apps/web/src/pages/home/components/tool-call-group.test.ts ]
+Error: ENOSPC: no space left on device, write
+ ❯ src/pages/home/components/tool-call-registry.ts:86:1
+     84| import ToolCallDetailRemoteSession from './tool-call-detail-remote-ses…
+     85| import ToolCallDetailSchedule from './tool-call-detail-schedule.vue'
+     86| import ToolCallDetailSend from './tool-call-detail-send.vue'
+       | ^
+     87| import ToolCallDetailSpawn from './tool-call-detail-spawn.vue'
+     88| import ToolCallDetailWebFetch from './tool-call-detail-web-fetch.vue'
+ ❯ src/pages/home/components/tool-call-group.vue:137:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/44]⎯
+
+ FAIL  |web| src/pages/home/composables/useChatScroll.test.ts [ apps/web/src/pages/home/composables/useChatScroll.test.ts ]
+Error: ENOSPC: no space left on device, write
+ ❯ src/pages/home/composables/useChatScroll.test.ts:6:1
+      4| import { createApp, defineComponent, h, nextTick, ref } from 'vue'
+      5| import type { ChatMessage } from '@/store/chat-list'
+      6| import { useChatScroll } from './useChatScroll'
+       | ^
+      7|
+      8| vi.mock('@vueuse/core', async () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/44]⎯
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/utils/markdown-dollar.render.test.ts > withLiteralSingleDollars through the markdown pipeline > keeps \(...\) math while literalizing a trailing $ price pair
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/utils/markdown-dollar.render.test.ts:86:3
+     84|
+     85| describe('withLiteralSingleDollars through the markdown pipeline', () …
+     86|   it('keeps \\(...\\) math while literalizing a trailing $ price pair'…
+       |   ^
+     87|     const types = await mathNodeTypes('参数 \\(\\theta\\)，GPU $3 到 $6 一小…
+     88|     expect(types.filter(t => t === 'math_inline')).toHaveLength(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/44]⎯
+
+ FAIL  |web| src/components/add-provider/index.test.ts > add provider dialog > enables submit after picking a preset and filling the api key
+Error: ENOSPC: no space left on device, write
+ ❯ src/components/add-provider/index.test.ts:120:26
+    118|
+    119|   it('enables submit after picking a preset and filling the api key', …
+    120|     const AddProvider = (await import('./index.vue')).default
+       |                          ^
+    121|     const root = document.createElement('div')
+    122|     document.body.append(root)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/44]⎯
+
+ FAIL  |web| src/pages/providers/connect.test.ts > provider connect page > scrubs the fragment so the key never lingers in history
+ FAIL  |web| src/pages/providers/connect.test.ts > provider connect page > re-reads the payload when a second link changes only the fragment
+ FAIL  |web| src/pages/providers/connect.test.ts > provider connect page > replaces a stale confirm card with the error of an invalid second link
+ FAIL  |web| src/pages/providers/connect.test.ts > provider connect page > stops listening after unmount
+ FAIL  |web| src/pages/providers/connect.test.ts > provider connect page > seeds the providers cache before navigating to the new provider
+ FAIL  |web| src/pages/providers/connect.test.ts > provider connect page > still navigates when the seeding request fails
+Error: ENOSPC: no space left on device, write
+ ❯ src/pages/providers/connect.test.ts:112:20
+    110|     mocks.postProvidersFromTemplate.mockReset().mockResolvedValue({ da…
+    111|     mocks.postProvidersByIdImportModels.mockReset().mockResolvedValue(…
+    112|     ConnectPage = (await import('./connect.vue')).default
+       |                    ^
+    113|   })
+    114|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/44]⎯
+
+ FAIL  |web| src/pages/providers/model-setting.test.ts > provider draft enable > keeps a template draft local when enabling before save
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/pages/providers/model-setting.test.ts:124:3
+    122|   })
+    123|
+    124|   it('keeps a template draft local when enabling before save', async (…
+       |   ^
+    125|     const ModelSetting = (await import('./model-setting.vue')).default
+    126|     const provider = ref<ProvidersGetResponse | undefined>({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/44]⎯
+
+ FAIL  |web| src/pages/home/components/tool-call-registry.test.ts > tool call registry > gives every built-in tool its own label instead of the generic fallback
+AssertionError: expected [ 'list_delegate_bots', …(3) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "list_delegate_bots",
++   "delegate_to_bot",
++   "get_bot_delegation",
++   "retry_bot_delivery",
++ ]
+
+ ❯ src/pages/home/components/tool-call-registry.test.ts:108:21
+    106|   it('gives every built-in tool its own label instead of the generic f…
+    107|     const unnamed = BUILT_IN_TOOLS.filter(name => getToolDisplay(toolB…
+    108|     expect(unnamed).toEqual([])
+       |                     ^
+    109|   })
+    110|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/44]⎯
+
+
+ Test Files  39 failed | 219 passed (258)
+      Tests  10 failed | 1914 passed (1924)
+   Start at  22:03:46
+   Duration  103.62s (transform 40.03s, setup 0ms, import 52.96s, tests 65.05s, environment 46.06s)
+

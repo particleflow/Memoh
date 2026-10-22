@@ -121,3 +121,22 @@ All screenshots were captured from this combined app and visually inspected:
 
 This is automated Agent-run verification, not human QA. The open legacy media-read
 P1 and production acceptance are not resolved by these passing integration checks.
+
+## Reviewable existing logs (documentation-only supplement)
+
+[Log index and reproduction instructions](logs/README.md) now provide the actual
+existing test outputs behind the counts above, including initial failures and
+remaining skipped opt-in checks. [The manifest](log-manifest.json) records each
+private original's SHA-256, published digest, exact transformation and safety review.
+This supplement did not rerun product tests or alter product commit `47434be1`.
+
+The 148 host checks are a union of the successfully completed handler package and
+the targeted rerun of the two failed build packages, **not** a fresh complete boundary
+suite run. The 18 lint warnings belong to **Web ESLint**; there is no whole-repository
+Go lint claim. The two opt-in read-volume tests remain unrun. Browser container 404s
+and workspace 503s are retained in the evidence, not counted as successful execution.
+
+Future PR-base preflight: the existing ESLint workflow accepts PR bases `main` and
+`feat/**`; Go CI also accepts `integrate/**`. A future PR targeting `integrate/**`
+would not automatically trigger the Web gate. This supplement does not change
+workflow filters; a final `main` PR has no such mismatch. No PR or CI was created.

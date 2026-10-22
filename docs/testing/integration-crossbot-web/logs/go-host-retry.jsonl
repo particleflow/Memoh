@@ -1,0 +1,6 @@
+{"ImportPath":".","Action":"build-output","Output":"# .\n"}
+{"ImportPath":".","Action":"build-output","Output":"no Go files in <repo>\n"}
+{"ImportPath":".","Action":"build-fail"}
+{"Time":"2026-10-22T22:10:30.214902343Z","Action":"start","Package":"."}
+{"Time":"2026-10-22T22:10:30.214969243Z","Action":"output","Package":".","Output":"FAIL\t. [setup failed]\n"}
+{"Time":"2026-10-22T22:10:30.214974071Z","Action":"fail","Package":".","Elapsed":0,"FailedBuild":"."}

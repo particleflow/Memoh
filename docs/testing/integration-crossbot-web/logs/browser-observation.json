@@ -1,0 +1,40 @@
+{
+  "format": "reviewed projection of existing browser proof; not raw capture",
+  "raw_sha256": "4492ccd617c56e9951f6554b51895aa327735470f3dae2ed626d77f6715d653d",
+  "raw_bytes": 30886,
+  "mockedAPI": false,
+  "pageErrors": [],
+  "realDispatches": 0,
+  "request_classes": [
+    {
+      "class": "delegation_read",
+      "status": 200,
+      "method": "GET",
+      "count": 5
+    },
+    {
+      "class": "other_observed_api",
+      "status": 200,
+      "method": "GET",
+      "count": 141
+    },
+    {
+      "class": "other_observed_api",
+      "status": 304,
+      "method": "GET",
+      "count": 52
+    },
+    {
+      "class": "unprovisioned_container",
+      "status": 404,
+      "method": "GET",
+      "count": 4
+    },
+    {
+      "class": "unprovisioned_workspace_list",
+      "status": 503,
+      "method": "GET",
+      "count": 8
+    }
+  ]
+}
