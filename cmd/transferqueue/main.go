@@ -100,8 +100,13 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		feedback := publish(status)
 		if *kind == "advance-results" {
 			summary, summaryErr := transferclient.LifecycleSummary(ctx, getenv, "native-profile-v1", limits, now())
-			if err != nil && !errors.Is(err, transferclient.ErrNoWork) && summary.State != "due" && summary.State != "waiting" {
-				summary = transferclient.LifecycleFailure(err)
+			if err != nil && !errors.Is(err, transferclient.ErrNoWork) {
+				failure := transferclient.LifecycleFailure(err)
+				// A process/storage failure is not permission to spin on a due
+				// record that did not persist the failure. Keep only a real backoff.
+				if summary.State != "waiting" || failure.ErrorClass != "transient" && failure.ErrorClass != "busy" {
+					summary = failure
+				}
 			}
 			exit := writeStatus(output, status, "", feedback, &summary)
 			if err != nil && !errors.Is(err, transferclient.ErrNoWork) || summaryErr != nil {

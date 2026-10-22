@@ -56,4 +56,5 @@ func TestWindowsNativeLifecycle(t *testing.T) {
 	t.Run("recovery", TestLifecycleReadOnlyTornAndCheckpoint)
 	t.Run("empty-busy", TestLifecycleEmptyBusyAndClassification)
 	t.Run("fair", TestLifecycleEarliestDueAndFairRotation)
+	t.Run("invalid-task", TestLifecycleInvalidTaskDoesNotStarveConfiguredWork)
 }

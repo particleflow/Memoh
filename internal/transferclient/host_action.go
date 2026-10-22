@@ -140,7 +140,7 @@ func (q *DiskQueue) nextDueForBinding(now time.Time, binding string) (string, er
 		if err != nil {
 			return "", err
 		}
-		if !recordEligible(r) || recordDue(r).After(now) || binding != "" && r.Job.HostBinding != binding {
+		if !recordEligible(r) || recordDue(r).After(now) || binding != "" && (r.Job.HostBinding != binding || !r.Job.Task.valid()) {
 			continue
 		}
 		// A persisted backoff wins once due. Continuously runnable jobs rotate

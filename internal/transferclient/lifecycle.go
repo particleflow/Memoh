@@ -121,7 +121,7 @@ func recordEligible(r QueueStatus) bool {
 
 func recordLifecycle(r QueueStatus, binding string, now time.Time) Lifecycle {
 	switch {
-	case r.Job.HostBinding != binding:
+	case r.Job.HostBinding != binding || !r.Job.Task.valid():
 		return lifecycle("blocked", "configuration", time.Time{})
 	case r.Associated:
 		if r.PayloadState != PayloadReleased {

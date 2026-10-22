@@ -21,9 +21,7 @@ type DeviceTask struct {
 // NewDeviceTask sends the SAME configured device credential for any delivery.
 // Its per-request metadata is not a signed token; it confers no authority.
 func NewDeviceTask(base string, job Job, direction string, task DeviceTask, client *http.Client, auth Authorization) (*Client, error) {
-	if !job.valid() || direction != "upload" && direction != "download" ||
-		!validID(task.UserID) || !validID(task.SessionID) || !validID(task.TargetID) || task.RunID == "" || len(task.RunID) > 256 ||
-		len(task.Attempt) != 32 || len(task.Generation) != 32 {
+	if !job.valid() || direction != "upload" && direction != "download" || !task.valid() {
 		return nil, ErrInvalid
 	}
 	c, err := NewTask(base, job.OperationID, job.DeliveryID, client, auth)
@@ -44,4 +42,8 @@ func NewDeviceTask(base string, job Job, direction string, task DeviceTask, clie
 	}
 	c.selection = base64.RawURLEncoding.EncodeToString(raw)
 	return c, nil
+}
+
+func (task DeviceTask) valid() bool {
+	return validID(task.UserID) && validID(task.SessionID) && validID(task.TargetID) && task.RunID != "" && len(task.RunID) <= 256 && len(task.Attempt) == 32 && len(task.Generation) == 32
 }

@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -34,6 +35,7 @@ func lifecycleFixture(t *testing.T) (func(string) string, *DiskQueue, string) {
 func lifecycleAdmit(t *testing.T, q *DiskQueue, id, binding string) {
 	t.Helper()
 	j := newJob([]byte("fixture"))
+	j.Task = DeviceTask{UserID: "user", SessionID: "session", TargetID: "target", RunID: "run", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
 	j.DeliveryID, j.SnapshotID, j.LocatorRevision, j.HostBinding = id, id, "fixture", binding
 	if err := q.Admit(t.Context(), "download", j, nil); err != nil {
 		t.Fatal(err)
@@ -235,5 +237,27 @@ func TestLifecycleEarliestDueAndFairRotation(t *testing.T) {
 		}
 		lifecycleEdit(t, q, id, func(r *QueueStatus) { r.LastRun = now })
 		now = now.Add(time.Second)
+	}
+}
+
+func TestLifecycleInvalidTaskDoesNotStarveConfiguredWork(t *testing.T) {
+	env, q, binding := lifecycleFixture(t)
+	lifecycleAdmit(t, q, "a", binding)
+	lifecycleAdmit(t, q, "b", binding)
+	lifecycleEdit(t, q, "a", func(r *QueueStatus) { r.Job.Task = DeviceTask{} })
+	if id, err := q.nextDueForBinding(time.Now(), binding); err != nil || id != "b" {
+		t.Fatal(id, err)
+	}
+	s, err := LifecycleSummary(t.Context(), env, "fixture", lifecycleLimits, time.Now())
+	if err != nil || s.State != "due" {
+		t.Fatal(s, err)
+	}
+	lifecycleEdit(t, q, "b", func(r *QueueStatus) { r.Job.HostBinding = "old-binding" })
+	if _, err := q.nextDueForBinding(time.Now(), binding); !errors.Is(err, ErrNoWork) {
+		t.Fatal(err)
+	}
+	s, err = LifecycleSummary(t.Context(), env, "fixture", lifecycleLimits, time.Now())
+	if err != nil || s.State != "blocked" || s.ErrorClass != "configuration" {
+		t.Fatal(s, err)
 	}
 }
