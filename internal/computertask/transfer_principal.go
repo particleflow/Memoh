@@ -12,10 +12,11 @@ const TransferAudience = "memoh:file-transfer:v1"
 
 var ErrTransferCreateUnknown = errors.New("transfer upload creation requires reconciliation")
 
-// VerifiedTransfer is the result of an injected authenticator, not wire claims.
-// One principal authorizes one immutable file of one existing execution attempt.
+// VerifiedTransfer is a short-lived internal request authorization context, not
+// a device credential or a requirement to issue a new token for every file.
 // CredentialID is an opaque revocation selector, never the credential itself.
 type VerifiedTransfer struct {
+	Device       VerifiedTransferDevice
 	Identity     DeliveryIdentity
 	DeliveryID   string
 	Reference    DeliveryRequest
@@ -25,10 +26,23 @@ type VerifiedTransfer struct {
 	ExpiresAt    time.Time
 }
 
+// VerifiedTransferDevice is returned only by the configured device authenticator.
+// Its credential can serve multiple deliveries. Expiry and revocation are owned
+// by that authenticator; the request context's 15 minute limit is independent.
+type VerifiedTransferDevice struct {
+	CredentialID, ConnectionID, DeviceID, InstanceID string
+}
+
+func (d VerifiedTransferDevice) Valid() bool {
+	return deliveryIDPattern.MatchString(d.CredentialID) && deliveryIDPattern.MatchString(d.ConnectionID) &&
+		d.DeviceID != "" && len(d.DeviceID) <= 256 && d.InstanceID != "" && len(d.InstanceID) <= 256
+}
+
 type transferPrincipalKey struct{}
 
 func (p VerifiedTransfer) Valid(now time.Time) bool {
-	return p.Audience == TransferAudience && deliveryIDPattern.MatchString(p.CredentialID) &&
+	return (p.Device == (VerifiedTransferDevice{}) || p.Device.Valid() && p.Device.CredentialID == p.CredentialID) &&
+		p.Audience == TransferAudience && deliveryIDPattern.MatchString(p.CredentialID) &&
 		deliveryIDPattern.MatchString(p.DeliveryID) && p.Reference.valid() && p.Reference.SizeBytes > 0 &&
 		!p.IssuedAt.IsZero() && !p.IssuedAt.After(now) && p.ExpiresAt.After(now) &&
 		p.ExpiresAt.After(p.IssuedAt) && p.ExpiresAt.Sub(p.IssuedAt) <= 15*time.Minute

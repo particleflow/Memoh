@@ -180,10 +180,10 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	gated := &pgGatedDeliveryAssets{Service: assets, started: make(chan struct{}, 8), release: make(chan struct{})}
 	request := computertask.DeliveryRequest{Version: 1, Direction: "download", ContentHash: hash, SizeBytes: int64(len(data)), Mime: "text/plain"}
 	principal := pgTransferPrincipal(id, "native-pg-download", request)
-	verifier := &pgTransferVerifier{principal: principal, denied: make(chan struct{}, 1)}
+	verifier := &pgTransferVerifier{principal: principal, device: pgDeviceIdentity(ctx, t, store, id), denied: make(chan struct{}, 1)}
 	messages := handlers.NewMessageHandler(log, nil, nil, nil, nil)
 	messages.SetMediaService(assets)
-	h, err := handlers.NewComputerTransferHandler(ctx, computertask.NewPostgresDeliveryService(store, gated), messages, verifier, log)
+	h, err := handlers.NewDeviceComputerTransferHandler(ctx, computertask.NewPostgresDeliveryService(store, gated), messages, verifier, log)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -204,7 +204,8 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 		e.ServeHTTP(w, r)
 	}))
 	defer https.Close()
-	client, err := transferclient.NewTask(https.URL, id.OperationID, principal.DeliveryID, https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+	deviceJob := transferclient.Job{Version: 1, DeliveryID: principal.DeliveryID, BotID: id.Binding.BotID, OperationID: id.OperationID, SnapshotID: principal.DeliveryID, LocatorRevision: "native-pg-fixture-v1", Phase: "queued", Spec: transferclient.Spec{SizeBytes: int64(len(data)), SHA256: hash, Mime: "text/plain"}}
+	client, err := transferclient.NewDeviceTask(https.URL, deviceJob, "download", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,7 +230,7 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 			if candidate != ref {
 				return transferclient.ErrAuthorization
 			}
-			return verifier.Revalidate(ctx, principal)
+			return verifier.RevalidateDevice(ctx, verifier.device)
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -336,5 +337,36 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	_ = reader.Close()
 	if err != nil || string(got) != string(data) {
 		t.Fatal("published bytes differ", err)
+	}
+	// Same device credential, second native destination and persisted CAS entry.
+	client.CloseIdleConnections()
+	job.DeliveryID, job.SnapshotID = "native-second-download", "native-second-download"
+	ref.DeliveryID = job.DeliveryID
+	client, err = transferclient.NewDeviceTask(https.URL, job, "download", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer client.CloseIdleConnections()
+	if err := queue.Admit(ctx, "download", job, nil); err != nil {
+		t.Fatal(err)
+	}
+	for range 12 {
+		status = step(client.DeliveryBinding(publication))
+		if status.Associated {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !status.Associated {
+		t.Fatal("same device did not deliver second file", status)
+	}
+	reader, err = publication.OpenPublished(ctx, ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err = io.ReadAll(reader)
+	_ = reader.Close()
+	if err != nil || string(got) != string(data) {
+		t.Fatal("second file integrity", err)
 	}
 }

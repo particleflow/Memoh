@@ -28,10 +28,11 @@ type ExecutionTransferVerifier interface {
 // a verified task principal. It remains unregistered in application providers.
 // A missing verifier yields 503; it never falls back to the account JWT path.
 type ComputerTransferHandler struct {
-	verifier ExecutionTransferVerifier
-	base     *computertask.DeliveryService
-	async    *computertask.AsyncDeliveryService
-	files    *MessageHandler
+	verifier       ExecutionTransferVerifier
+	deviceVerifier DeviceTransferVerifier
+	base           *computertask.DeliveryService
+	async          *computertask.AsyncDeliveryService
+	files          *MessageHandler
 }
 
 func NewComputerTransferHandler(ctx context.Context, base *computertask.DeliveryService, files *MessageHandler, verifier ExecutionTransferVerifier, log *slog.Logger) (*ComputerTransferHandler, error) {
@@ -55,10 +56,10 @@ func (h *ComputerTransferHandler) Close() {
 
 func (h *ComputerTransferHandler) checkIdentity(ctx context.Context, id computertask.DeliveryIdentity) error {
 	p, ok := computertask.VerifiedTransferFromContext(ctx)
-	if !ok || p.Identity != id || !p.Valid(time.Now()) || h.verifier == nil {
+	if !ok || p.Identity != id || !p.Valid(time.Now()) || h.verifier == nil && h.deviceVerifier == nil {
 		return computertask.ErrDeliveryBinding
 	}
-	if err := h.verifier.Revalidate(ctx, p); err != nil {
+	if err := h.revalidate(ctx, p); err != nil {
 		return computertask.ErrDenied // No raw verifier errors or credentials in HTTP/logs.
 	}
 	return h.base.CheckTransfer(ctx, false)
@@ -116,7 +117,7 @@ func (h *ComputerTransferHandler) Register(e *echo.Echo) {
 
 func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		if h == nil || h.verifier == nil || h.base == nil || h.async == nil || h.files == nil || h.files.mediaService == nil {
+		if h == nil || h.verifier == nil && h.deviceVerifier == nil || h.base == nil || h.async == nil || h.files == nil || h.files.mediaService == nil {
 			return apperror.New(apperror.CodeHTTPServiceUnavailable, nil)
 		}
 		values := c.Request().Header.Values("Authorization")
@@ -127,7 +128,7 @@ func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) ec
 		if credential == "" || strings.ContainsAny(credential, " \t\r\n") || c.QueryParam("token") != "" {
 			return apperror.New(apperror.CodeHTTPUnauthorized, nil)
 		}
-		p, err := h.verifier.Verify(c.Request().Context(), credential)
+		p, err := h.authenticate(c, credential)
 		if err != nil || !p.Valid(time.Now()) {
 			return apperror.New(apperror.CodeHTTPUnauthorized, nil)
 		}
@@ -148,7 +149,7 @@ func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) ec
 		if err != nil {
 			return deliveryHTTPError(err)
 		}
-		if err := h.verifier.Revalidate(bound, p); err != nil {
+		if err := h.revalidate(bound, p); err != nil {
 			return deliveryHTTPError(computertask.ErrDenied)
 		}
 		if err := h.base.ReserveTransfer(bound); err != nil {

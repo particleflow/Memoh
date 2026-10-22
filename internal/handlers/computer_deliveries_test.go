@@ -58,7 +58,7 @@ func deliveryHTTPServer(t *testing.T) (*deliveryHTTPFixture, *echo.Echo) {
 	f := &deliveryHTTPFixture{trusted: true}
 	b := toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture-run"}
 	f.id = computertask.DeliveryIdentity{Binding: b, OperationID: uuid.NewString(), DeviceID: "fixture-device", InstanceID: "fixture-instance", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}
-	f.target = agenvo.Target{DeviceID: f.id.DeviceID, InstanceID: f.id.InstanceID, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1"}}
+	f.target = agenvo.Target{ConnectionID: uuid.NewString(), DeviceID: f.id.DeviceID, InstanceID: f.id.InstanceID, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1"}}
 	details, _ := json.Marshal(computertask.Details{Kind: "herdr_pi_task", Batch: &computertask.BatchDetails{Progress: agenvo.BatchProgress{Attempt: f.id.Attempt, Generation: f.id.Generation}}})
 	f.r = dbstore.ComputerOperationRecord{ID: f.id.OperationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, TargetID: b.TargetID, RunID: b.RunID, TargetFingerprint: agenvo.TargetFingerprint(f.target), State: "submitted", Revision: 1, Details: details}
 	assets := media.NewService(nil, localfs.NewOriginals(t.TempDir()))

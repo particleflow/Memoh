@@ -35,13 +35,14 @@ var (
 )
 
 // Authorization is supplied by the approved host for every request. It must
-// resolve a current task-scoped grant; this package cannot mint or widen one.
+// resolve the configured device credential; this package cannot mint or widen it.
 type Authorization func(context.Context) (string, error)
 
 type Client struct {
-	base string
-	http http.Client
-	auth Authorization
+	base      string
+	http      http.Client
+	auth      Authorization
+	selection string
 }
 
 // New accepts HTTPS only. The supplied transport must validate the server's
@@ -174,6 +175,9 @@ func (c *Client) request(ctx context.Context, method, path string, body []byte, 
 		req.Header[k] = append([]string(nil), values...)
 	}
 	req.Header.Set("Authorization", auth)
+	if c.selection != "" {
+		req.Header.Set("Memoh-Transfer-Context", c.selection)
+	}
 	req.Header.Set("Accept-Encoding", "identity")
 	resp, err := c.http.Do(req) //nolint:gosec // Origin is approved host configuration; only validated logical IDs enter paths, and redirects are disabled.
 	if err != nil {
