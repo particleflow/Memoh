@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -87,6 +88,16 @@ func TestConfiguredHostSecretsPathsAndRecovery(t *testing.T) {
 	sealedAgain, err := InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now())
 	if err != nil || sealedAgain.Job.Spec != sealed.Job.Spec {
 		t.Fatal("source mutation replaced snapshot", err)
+	}
+	if err := os.Remove(filepath.Join(source, "result-one")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Remove(source); err != nil {
+		t.Fatal(err)
+	}
+	sealedAgain, err = InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now())
+	if err != nil || !sealedAgain.Admitted || sealedAgain.Job.Spec != sealed.Job.Spec {
+		t.Fatal("sealed recovery depends on deleted producer directory", err)
 	}
 	uploadAction.Job.Task.Attempt = strings.Repeat("c", 32)
 	if _, err := InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now()); !errors.Is(err, ErrInvalid) {

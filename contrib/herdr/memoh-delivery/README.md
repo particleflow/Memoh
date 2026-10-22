@@ -91,7 +91,10 @@ selectors, not authorization; the Server verifies them against its current
 operation, Bot permissions and authenticated device.
 
 Reinvoke the same enqueue/ID/metadata after admission timeout to resume sealing;
-do not invent a new ID. Once admitted, invoke `advance` or the fixed manifest
+do not invent a new ID. Completed admission uses its immutable snapshot even if
+the producer file or export directory has since been removed. New or incomplete
+upload admission still requires the original authorized source. Once admitted,
+invoke `advance` or the fixed manifest
 `advance-delivery` action. Each call performs bounded work then exits; the existing
 host owns when to invoke again. Backoff and unknown outcomes persist in the
 queue. `cancel` records intent; subsequent advance reconciles publication/remote

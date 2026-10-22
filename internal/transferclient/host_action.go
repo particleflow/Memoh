@@ -68,6 +68,11 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 			return QueueStatus{}, err
 		}
 		c.CloseIdleConnections()
+		if existing, err := q.Inspect(action.DeliveryID); err == nil && existing.Admitted {
+			// Admit rechecks immutable metadata under the job lock. A sealed
+			// snapshot no longer depends on the producer file or directory.
+			return q.invokeHerdr(ctx, local, nil, nil, nil, now)
+		}
 		var source *os.File
 		if direction == "upload" {
 			source, err = cfg.OpenSource(action.SourceRef)

@@ -22,6 +22,7 @@ type HostConfig struct {
 	guard       *os.File
 	sources     *os.Root
 	sourceGuard *os.File
+	sourcePath  string
 }
 
 type hostConfigWire struct {
@@ -89,15 +90,15 @@ func OpenHostConfig(getenv func(string) string) (*HostConfig, error) {
 	sum := sha256.Sum256(raw)
 	h.Binding = hex.EncodeToString(sum[:])
 	if cfg.SourceRoot != "" {
+		if !filepath.IsAbs(cfg.SourceRoot) || filepath.Clean(cfg.SourceRoot) != cfg.SourceRoot {
+			return nil, ErrBinding
+		}
 		for _, other := range []string{getenv("HERDR_PLUGIN_CONFIG_DIR"), getenv("HERDR_PLUGIN_STATE_DIR")} {
 			if rootsOverlap(cfg.SourceRoot, other) {
 				return nil, ErrBinding
 			}
 		}
-		h.sources, h.sourceGuard, err = privateHostRoot(cfg.SourceRoot)
-		if err != nil {
-			return nil, err
-		}
+		h.sourcePath = cfg.SourceRoot
 	}
 	good = true
 	return h, nil
@@ -160,8 +161,15 @@ func (h *HostConfig) Authorization(ctx context.Context) (string, error) {
 // private source root is resolved once and held; links and hardlinks are rejected
 // by the existing native private-file/immutable snapshot guards.
 func (h *HostConfig) OpenSource(ref string) (*os.File, error) {
-	if h.sources == nil || !validID(ref) {
+	if h.sourcePath == "" || !validID(ref) {
 		return nil, ErrBinding
+	}
+	if h.sources == nil {
+		var err error
+		h.sources, h.sourceGuard, err = privateHostRoot(h.sourcePath)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return openPrivateFile(h.sources, ref, os.O_RDONLY, 0)
 }
