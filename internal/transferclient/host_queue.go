@@ -13,6 +13,8 @@ import (
 	"time"
 )
 
+var errAdmissionFrame = errors.Join(ErrStore, errors.New("incomplete or changed admission frame"))
+
 // Associate must atomically reauthorize the current task owner, Bot, session,
 // target fingerprint and direction, resolve ready media, and associate by
 // DeliveryID with idempotent replay. Reuse ComputerOperationStore/CAS; never
@@ -132,8 +134,19 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 		seen[stem] = true
 		r, err := q.admissionHead(stem + ".journal")
 		if err != nil {
+			q.markJournal("admission_after_head_error")
 			if checkpoint, checkpointErr := q.activeCheckpointHead(stem + ".checkpoint"); checkpointErr == nil {
 				r, err = checkpoint.Record, nil
+			} else if errors.Is(err, errAdmissionFrame) {
+				// A job-locked compactor can finish between the short/changed
+				// first-frame read and witness lookup. If the witness is now
+				// absent, reread the journal ONCE; only a fully validated frame
+				// restores the reservation. Never reinterpret a persistent
+				// corrupt frame, wrong version or unsafe path as empty capacity.
+				if _, witnessErr := q.root.Lstat(stem + ".checkpoint"); errors.Is(witnessErr, os.ErrNotExist) {
+					q.markJournal("admission_retry_head")
+					r, err = q.admissionHead(stem + ".journal")
+				}
 			}
 		}
 		if err != nil {
@@ -149,8 +162,10 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 	return records, nil
 }
 
-// Caller owns the admission lock. Other job writers only append; compaction
-// also requires this lock. Read one bounded frame instead of every journal.
+// Caller owns the admission lock, excluding creation and terminal release.
+// Active compaction holds only the job lock and can replace the first frame;
+// admissions reconciles that race without acquiring locks in reverse order.
+// Read one bounded frame instead of every journal; this read never repairs it.
 func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
 	var r QueueStatus
 	f, err := q.physicalFile(name, os.O_RDONLY, 0o600)
@@ -160,6 +175,9 @@ func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
 	defer func() { _ = f.Close() }()
 	var head [36]byte
 	_, err = io.ReadFull(f, head[:])
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) {
+		return r, errAdmissionFrame
+	}
 	size := int64(binary.BigEndian.Uint32(head[:4]))
 	if err != nil || size < 1 || size > 16384 {
 		return r, ErrStore
@@ -167,9 +185,12 @@ func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
 	body := make([]byte, int(size))
 	_, err = io.ReadFull(f, body)
 	sum := sha256.Sum256(body)
+	if errors.Is(err, io.EOF) || errors.Is(err, io.ErrUnexpectedEOF) || err == nil && !bytes.Equal(sum[:], head[4:]) {
+		return QueueStatus{}, errAdmissionFrame
+	}
 	dec := json.NewDecoder(bytes.NewReader(body))
 	dec.DisallowUnknownFields()
-	if err != nil || !bytes.Equal(sum[:], head[4:]) || dec.Decode(&r) != nil || !q.validRecord(r, r.Job.DeliveryID) {
+	if err != nil || dec.Decode(&r) != nil || !q.validRecord(r, r.Job.DeliveryID) {
 		return QueueStatus{}, ErrStore
 	}
 	suffix := ".journal"

@@ -57,6 +57,8 @@ func nativeLimits() QueueLimits {
 }
 
 func TestWindowsNativeActiveJournal(t *testing.T) {
+	t.Run("admission-race", TestAdmissionReadDuringActiveCompaction)
+	t.Run("admission-corruption", TestAdmissionCompactionRetryKeepsCorruptEvidence)
 	t.Run("progress", TestActiveJournalBoundedAcrossProgress)
 	t.Run("process-crash", TestActiveJournalProcessCrash)
 	t.Run("corruption", TestActiveJournalIncompleteAndCorruptCheckpoint)

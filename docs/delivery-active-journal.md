@@ -6,6 +6,13 @@ though the payload was only 64 KiB. Reopening also replayed every accumulated
 frame. Raising the payload limit would amplify that cost. No NAS receipt policy,
 payload quota, task identity, scheduler or production setting changes here.
 
+Admission enumeration holds the admission lock while active compaction holds a
+job lock. If its first frame is short or its checksum changes during compaction,
+enumeration first consults the existing checkpoint. If that witness disappeared
+because compaction finished, it rereads the journal once and accepts only a fully
+validated frame. Persistent damage still fails closed; no reservation is omitted,
+no error becomes free capacity, and no reverse-order lock acquisition is added.
+
 Every new state write uses queue record version 4, preserving the entire job,
 receipt, offset, retry budget/due, cancel intent, snapshot seal and association
 outcome. Existing v2/v3 records remain readable. Old strict readers reject v4:
