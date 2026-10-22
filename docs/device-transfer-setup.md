@@ -62,7 +62,8 @@ private paths must be confirmed from the deployment, not synthetic fixtures.
 
 ## Upgrade, rollback and remaining producer work
 
-Apply migration 172 before starting a Server with this feature enabled. Down 172
+Apply migration 172 before starting this Server build, even with transfers
+disabled: generated runtime queries include the new columns. Down 172
 removes credential fields and invalidates enrolled device credentials; disable
 transfers first, then roll back. Re-upgrade requires explicit enrollment. No file
 originals, queue receipts or production volume locations move. Down 171 has its

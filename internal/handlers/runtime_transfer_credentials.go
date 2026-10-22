@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/userruntime"
 )
@@ -114,7 +115,7 @@ func transferCredentialHTTPError(err error) error {
 	case errors.Is(err, userruntime.ErrTransferConflict):
 		return echo.NewHTTPError(http.StatusConflict, "credential changed; read current status")
 	case errors.Is(err, userruntime.ErrInvalidInput):
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid credential configuration")
+		return apperror.FieldInvalid("transfer_credential", err)
 	default:
 		return echo.NewHTTPError(http.StatusInternalServerError, "credential update outcome unknown; read current status")
 	}
