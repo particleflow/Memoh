@@ -100,6 +100,7 @@ type deliveryEntry struct {
 	Until       time.Time       `json:"until,omitempty"`
 	Attempts    int             `json:"attempts,omitempty"`
 	Publication string          `json:"publication,omitempty"`
+	Transfer    *transferAccess `json:"transfer,omitempty"`
 }
 
 type deliveryLedger struct {
@@ -210,6 +211,12 @@ func applyDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id De
 }
 
 func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, version int, mutate func(*deliveryEntry, bool) (bool, error)) (DeliveryOutcome, error) {
+	if version == 3 {
+		p, ok := VerifiedTransferFromContext(ctx)
+		if !ok || !p.Valid(time.Now()) || p.Identity != id || p.DeliveryID != delivery || p.Reference != ref {
+			return DeliveryOutcome{}, ErrDeliveryBinding
+		}
+	}
 	if tx.Store == nil || tx.Authorize == nil {
 		return DeliveryOutcome{}, ErrDeliveryBinding
 	}
@@ -243,14 +250,14 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 	} else {
 		ledger.Version, ledger.Entries = version, map[string]deliveryEntry{}
 	}
-	if ledger.Version != version && (version != 2 || ledger.Version != 1) {
+	if ledger.Version != version && (version < 2 || ledger.Version < 1 || ledger.Version >= version) {
 		return DeliveryOutcome{}, ErrDeliveryVersion
 	}
 	if ledger.Entries == nil || len(ledger.Entries) > maxDeliveries {
 		return DeliveryOutcome{}, ErrDeliveryConflict
 	}
 	for key, entry := range ledger.Entries {
-		if version == 2 && ledger.Version == 1 && entry.Reference.Direction == "download" {
+		if version >= 2 && ledger.Version == 1 && entry.Reference.Direction == "download" {
 			return DeliveryOutcome{}, ErrDeliveryVersion
 		}
 		if !deliveryIDPattern.MatchString(key) || !entry.Reference.valid() || !deliveryHash.MatchString(entry.Scope) || entry.At.IsZero() || !validDeliveryEntry(entry, ledger.Version) {
@@ -267,7 +274,7 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 			return DeliveryOutcome{}, ErrDeliveryConflict
 		}
 		// A v1 download cancellation never attested a local publication fence.
-		if version == 2 && ledger.Version == 1 && ref.Direction == "download" {
+		if version >= 2 && ledger.Version == 1 && ref.Direction == "download" {
 			return DeliveryOutcome{}, ErrDeliveryVersion
 		}
 		out.Outcome = entry.Outcome
@@ -279,6 +286,9 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 		return DeliveryOutcome{}, err
 	}
 	if !changed {
+		if out.Outcome == "reserved" {
+			out.Outcome = "absent"
+		}
 		return out, nil
 	}
 	if !exists && len(ledger.Entries) == maxDeliveries {
@@ -288,6 +298,9 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 	ledger.Version = version
 	ledger.Entries[delivery] = entry
 	out.Outcome = entry.Outcome
+	if out.Outcome == "reserved" {
+		out.Outcome = "absent"
+	}
 	data, err := json.Marshal(ledger)
 	if err != nil {
 		return DeliveryOutcome{}, err
@@ -333,6 +346,16 @@ func (s *DeliveryService) verifyAsset(ctx context.Context, bot string, ref Deliv
 }
 
 func validDeliveryEntry(e deliveryEntry, version int) bool {
+	if e.Transfer != nil {
+		if version < 3 || e.Transfer.Creating && e.Transfer.UploadID != "" ||
+			e.Transfer.UploadID != "" && !deliveryIDPattern.MatchString(e.Transfer.UploadID) ||
+			e.Reference.Direction != "upload" && (e.Transfer.Creating || e.Transfer.UploadID != "") {
+			return false
+		}
+	}
+	if e.Outcome == "reserved" {
+		return version == 3 && e.Transfer != nil && e.Publication == "" && e.Lease == "" && e.Until.IsZero() && e.Attempts == 0
+	}
 	if version == 1 {
 		return e.Outcome == "committed" || e.Outcome == "canceled"
 	}

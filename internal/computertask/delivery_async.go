@@ -99,6 +99,7 @@ func (s *AsyncDeliveryService) apply(ctx context.Context, operation, delivery st
 	var until time.Time
 	out, err := s.transact(ctx, id, delivery, ref, func(e *deliveryEntry, exists bool) (bool, error) {
 		claimed = false // A known CAS abort may rerun this mutation.
+		reserved := exists && e.Outcome == "reserved"
 		if exists && e.Outcome == "committed" {
 			return false, nil
 		}
@@ -116,7 +117,7 @@ func (s *AsyncDeliveryService) apply(ctx context.Context, operation, delivery st
 			e.Outcome, e.Publication = "canceled", publication
 			return true, nil
 		}
-		if !exists && !commit {
+		if (!exists || reserved) && !commit {
 			return false, nil
 		}
 		if exists && (e.Outcome == "failed" || time.Now().Before(e.Until)) {
@@ -133,7 +134,7 @@ func (s *AsyncDeliveryService) apply(ctx context.Context, operation, delivery st
 			return false, nil
 		}
 		e.Outcome, e.Lease, e.Until = "pending", epoch, time.Now().UTC().Add(s.lease)
-		if !exists {
+		if !exists || reserved {
 			e.Publication = publication
 		}
 		e.Attempts++
@@ -160,11 +161,15 @@ func (s *AsyncDeliveryService) apply(ctx context.Context, operation, delivery st
 }
 
 func (s *AsyncDeliveryService) transact(ctx context.Context, id DeliveryIdentity, delivery string, ref DeliveryRequest, mutate func(*deliveryEntry, bool) (bool, error)) (DeliveryOutcome, error) {
+	version := 2
+	if _, ok := VerifiedTransferFromContext(ctx); ok {
+		version = 3
+	}
 	for range 3 {
 		var out DeliveryOutcome
 		err := s.base.transactions(ctx, func(tx DeliveryTransaction) error {
 			var err error
-			out, err = mutateDeliveryTransaction(ctx, tx, id, delivery, ref, 2, mutate)
+			out, err = mutateDeliveryTransaction(ctx, tx, id, delivery, ref, version, mutate)
 			return err
 		})
 		if !errors.Is(err, ErrDeliveryRetry) {

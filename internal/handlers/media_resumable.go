@@ -18,9 +18,14 @@ func (h *MessageHandler) uploadScope(c echo.Context) (*media.UploadStore, string
 	if err != nil {
 		return nil, "", "", err
 	}
-	owner, err := h.requireChannelIdentityID(c)
-	if err != nil {
-		return nil, "", "", err
+	var owner string
+	if scope := taskTransfer(c); scope != nil {
+		owner = scope.principal.Identity.Binding.UserID
+	} else {
+		owner, err = h.requireChannelIdentityID(c)
+		if err != nil {
+			return nil, "", "", err
+		}
 	}
 	store := h.mediaService.Uploads()
 	if store == nil {
@@ -64,9 +69,38 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 	if err := c.Bind(&in); err != nil {
 		return err
 	}
+	id, err := taskTransferCreate(c, in.SizeBytes, in.SHA256, in.Mime)
+	if err != nil {
+		return err
+	}
+	if id != "" {
+		result, err := store.Get(c.Request().Context(), owner, bot, id)
+		if err != nil {
+			return resumableError(err)
+		}
+		if err := checkTaskTransferResponse(c); err != nil {
+			return err
+		}
+		return c.JSON(http.StatusCreated, result)
+	}
 	result, err := store.Create(c.Request().Context(), owner, bot, in)
 	if err != nil {
+		if scope := taskTransfer(c); scope != nil && (errors.Is(err, media.ErrUploadQuota) || errors.Is(err, media.ErrUploadInvalid) || errors.Is(err, media.ErrAssetTooLarge) || errors.Is(err, media.ErrUploadBusy)) {
+			// These refusals occur before UploadStore.save. Other errors can mean
+			// a receipt was durably created; retain the unknown-create fence.
+			if resetErr := scope.handler.base.FinishTransferUpload(c.Request().Context(), ""); resetErr != nil {
+				return deliveryHTTPError(resetErr)
+			}
+		}
 		return resumableError(err)
+	}
+	if scope := taskTransfer(c); scope != nil {
+		if err := scope.handler.base.FinishTransferUpload(c.Request().Context(), result.ID); err != nil {
+			return deliveryHTTPError(err)
+		}
+	}
+	if err := checkTaskTransferResponse(c); err != nil {
+		return err
 	}
 	return c.JSON(http.StatusCreated, result)
 }
@@ -88,6 +122,9 @@ func (h *MessageHandler) GetMediaUpload(c echo.Context) error {
 	result, err := store.Get(c.Request().Context(), owner, bot, c.Param("upload_id"))
 	if err != nil {
 		return resumableError(err)
+	}
+	if err := checkTaskTransferResponse(c); err != nil {
+		return err
 	}
 	return c.JSON(http.StatusOK, result)
 }
@@ -136,6 +173,9 @@ func (h *MessageHandler) AppendMediaUpload(c echo.Context) error {
 		return resumableError(err)
 	}
 	_ = controller.SetReadDeadline(time.Time{})
+	if err := checkTaskTransferResponse(c); err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, result)
 }
 
@@ -157,6 +197,9 @@ func (h *MessageHandler) CompleteMediaUpload(c echo.Context) error {
 	if err != nil {
 		return resumableError(err)
 	}
+	if err := checkTaskTransferResponse(c); err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, result)
 }
 
@@ -177,6 +220,9 @@ func (h *MessageHandler) CancelMediaUpload(c echo.Context) error {
 	result, err := store.Cancel(c.Request().Context(), owner, bot, c.Param("upload_id"))
 	if err != nil {
 		return resumableError(err)
+	}
+	if err := checkTaskTransferResponse(c); err != nil {
+		return err
 	}
 	return c.JSON(http.StatusOK, result)
 }
