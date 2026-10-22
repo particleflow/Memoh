@@ -85,6 +85,15 @@ func (f *delegationHTTPFixture) Open(ctx context.Context, bot, hash string) (io.
 	return io.NopCloser(strings.NewReader("synthetic original")), a, e
 }
 
+type delegationTestSeekReader struct{ *strings.Reader }
+
+func (delegationTestSeekReader) Close() error { return nil }
+
+func (f *delegationHTTPFixture) OpenSeekable(ctx context.Context, bot, hash string) (media.ReadSeekCloser, media.Asset, error) {
+	a, err := f.Stat(ctx, bot, hash)
+	return delegationTestSeekReader{strings.NewReader("synthetic original")}, a, err
+}
+
 func (f *delegationHTTPFixture) Claim(_ context.Context, r botdelegation.Record) (botdelegation.Record, bool, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -240,6 +249,31 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 	if body := call("GET", view.Attachments[0].URL, taskUser, "", 200).Body.String(); body != "synthetic original" {
 		t.Fatal("returned different original")
 	}
+	callRange := func(method, user, value string, status int, contentRange, body string) {
+		t.Helper()
+		req := httptest.NewRequest(method, view.Attachments[0].URL, nil)
+		req.Header.Set("Range", value)
+		if user != "" {
+			token, _, err := auth.GenerateToken(user, "synthetic", time.Minute)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		if rec.Code != status || rec.Header().Get("Content-Range") != contentRange || rec.Header().Get("Cache-Control") != "no-store" {
+			t.Fatalf("scoped range: status=%d range=%q cache=%q", rec.Code, rec.Header().Get("Content-Range"), rec.Header().Get("Cache-Control"))
+		}
+		if status < 400 && rec.Body.String() != body {
+			t.Fatalf("scoped range bytes=%q want=%q", rec.Body.String(), body)
+		}
+	}
+	callRange("GET", taskUser, "bytes=2-6", 206, "bytes 2-6/18", "nthet")
+	callRange("GET", taskUser, "bytes=-4", 206, "bytes 14-17/18", "inal")
+	callRange("GET", taskUser, "bytes=18-", 416, "bytes */18", "")
+	callRange("HEAD", taskUser, "", 200, "", "")
+	callRange("GET", "", "bytes=2-6", 401, "", "")
 	before := f.row.Revision
 	for range 3 {
 		call("GET", base, taskUser, "", 200)
@@ -252,6 +286,7 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 	call("GET", strings.Replace(detail, taskRoot, taskChild, 1), taskUser, "", 404)
 	call("GET", detail+"/attachments/"+strings.Repeat("b", 64), taskUser, "", 404)
 	f.allowed = false
+	callRange("GET", taskUser, "bytes=2-6", 404, "", "")
 	call("GET", detail, taskUser, "", 404)
 	call("GET", view.Attachments[0].URL, taskUser, "", 404)
 	call("POST", detail+"/delivery", taskUser, "", 404)

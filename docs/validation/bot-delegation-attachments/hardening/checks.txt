@@ -1,0 +1,13 @@
+PASS go test -p 3 -count=1 ./internal/botdelegation ./internal/handlers ./internal/agent/application ./cmd/internal/core ./internal/media
+PASS go test -p 3 -count=1 ./internal/agent/runtime/session
+PASS go test -race -p 3 -count=1 ./internal/botdelegation ./internal/handlers -run 'BotDelegation|SeekableOriginal|MediaHTTPRange'
+PASS TEST_POSTGRES_DSN=<private isolated fixture DSN> go test -p 3 -count=1 -v ./internal/botdelegation ./internal/agent/application ./cmd/internal/core -run 'Scope|ComputerBinding|ComputerOriginal|DelegationFinalAssets|DelegationPendingInput' (zero skips)
+PASS go test -p 3 -json -count=1 -tags=integration ./internal/db -run '^TestBotDelegationPostgresClaimIsolationAndDescendantAssets$' (owned DSN, zero skips)
+PASS (cd internal/handlers && go generate)
+PASS pnpm run generate-sdk
+PASS pnpm --filter @memohai/sdk typecheck
+PASS golangci-lint 2.10.1 run --allow-parallel-runners ./internal/botdelegation/... ./internal/handlers/... ./internal/db/...
+PASS python scripts/acceptance/delegation_fixture.py run --root <new isolated local directory>
+PASS actual Chromium attachment panels/reload/download and authenticated scoped Range through Vite
+FAILED pnpm --filter @memohai/web typecheck: 153 diagnostics, identical headers at a68 baseline and current source
+UNRUN physical PC/NAS, external messaging channels, paid providers, production deployment, human QA, GitHub CI for this new head

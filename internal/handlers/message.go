@@ -880,13 +880,23 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 		return errs.Wrap(err, "read media asset")
 	}
 	defer func() { _ = reader.Close() }()
-	contentType := asset.Mime
+	return serveOriginalMedia(c, reader, asset.Mime, asset.ContentHash, "private, max-age=86400")
+}
+
+// serveOriginalMedia is shared by owner and delegation-scoped downloads. The
+// caller authorizes and opens the verified original before reaching this helper.
+func serveOriginalMedia(c echo.Context, reader media.ReadSeekCloser, contentType, hash, cacheControl string) error {
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
 	c.Response().Header().Set("Content-Type", contentType)
-	c.Response().Header().Set("Cache-Control", "private, max-age=86400")
-	c.Response().Header().Set("ETag", `"`+asset.ContentHash+`"`)
+	c.Response().Header().Set("Cache-Control", cacheControl)
+	if cacheControl == "no-store" {
+		// ServeContent removes cache headers on errors (including 416). Scoped
+		// downloads must keep no-store on every status, including those errors.
+		c.Response().Before(func() { c.Response().Header().Set("Cache-Control", "no-store") })
+	}
+	c.Response().Header().Set("ETag", `"`+hash+`"`)
 	// OpenSeekable verifies the full original on cold reads and each emitted
 	// block on supported warm reads; authorization above is never cached.
 	// ServeContent owns Range, If-Range, HEAD, 206 and 416 semantics.

@@ -42,6 +42,7 @@ func (h *BotDelegationHandler) Register(e *echo.Echo) {
 	g.GET("/:delegation_id", h.Get)
 	g.POST("/:delegation_id/delivery", h.Deliver)
 	g.GET("/:delegation_id/attachments/:content_hash", h.Attachment)
+	g.HEAD("/:delegation_id/attachments/:content_hash", h.Attachment)
 }
 
 func (h *BotDelegationHandler) authorize(c echo.Context) (string, error) {
@@ -192,9 +193,14 @@ func (h *BotDelegationHandler) Deliver(c echo.Context) error {
 // @Param session_id path string true "Owned source session"
 // @Param delegation_id path string true "Delegation ID"
 // @Param content_hash path string true "Returned content hash"
+// @Param Range header string false "Requested byte range"
+// @Param If-Range header string false "Previously received ETag"
 // @Success 200 {file} binary
+// @Success 206 {file} binary
 // @Failure 400,401,403,404,500 {object} server.Problem
+// @Failure 416 {string} string "Unsatisfiable byte range"
 // @Router /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/attachments/{content_hash} [get].
+// @Router /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/attachments/{content_hash} [head].
 func (h *BotDelegationHandler) Attachment(c echo.Context) error {
 	user, err := h.authorize(c)
 	if err != nil {
@@ -209,12 +215,12 @@ func (h *BotDelegationHandler) Attachment(c echo.Context) error {
 	if !result && !slices.Contains(r.Payload.Inputs, hash) {
 		return delegationHTTPError(botdelegation.ErrDenied)
 	}
-	reader, err := h.service.Attachments(r).Open(c.Request().Context(), hash, result)
+	reader, asset, err := h.service.Attachments(r).OpenSeekable(c.Request().Context(), hash, result)
 	if err != nil {
 		return delegationHTTPError(err)
 	}
 	defer func() { _ = reader.Close() }()
 	c.Response().Header().Set("X-Content-Type-Options", "nosniff")
 	c.Response().Header().Set(echo.HeaderContentDisposition, `attachment; filename="result"`)
-	return c.Stream(http.StatusOK, echo.MIMEOctetStream, reader)
+	return serveOriginalMedia(c, reader, asset.Mime, asset.ContentHash, "no-store")
 }

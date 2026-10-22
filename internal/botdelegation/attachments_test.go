@@ -30,6 +30,48 @@ func (f *originalFixture) Open(_ context.Context, owner, _ string) (io.ReadClose
 	return io.NopCloser(strings.NewReader(f.content)), f.asset, nil
 }
 
+type fixtureSeekReader struct{ *strings.Reader }
+
+func (fixtureSeekReader) Close() error { return nil }
+
+func (f *originalFixture) OpenSeekable(_ context.Context, owner, _ string) (media.ReadSeekCloser, media.Asset, error) {
+	f.opens++
+	f.owner = owner
+	return fixtureSeekReader{strings.NewReader(f.content)}, f.asset, nil
+}
+
+func TestSeekableOriginalRechecksRevocationOnReadAndSeek(t *testing.T) {
+	s, f, o, hash := attachmentFixture()
+	r, a, err := s.OpenSeekable(t.Context(), hash, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = r.Close() }()
+	if o.owner != "manager" || a.ContentHash != hash {
+		t.Fatal("original owner/reference changed")
+	}
+	if _, err := r.Seek(2, io.SeekStart); err != nil {
+		t.Fatal(err)
+	}
+	buf := make([]byte, 2)
+	if n, err := r.Read(buf); err != nil || n != 2 || string(buf) != "xt" {
+		t.Fatalf("range=%q err=%v", buf, err)
+	}
+	f.denied["specialist/chat"] = true
+	if _, err := r.Seek(0, io.SeekStart); !errors.Is(err, ErrDenied) {
+		t.Fatalf("seek after revocation: %v", err)
+	}
+	if _, err := r.Read(buf); !errors.Is(err, ErrDenied) {
+		t.Fatalf("read after revocation: %v", err)
+	}
+	if _, _, err := s.OpenSeekable(t.Context(), hash, false); !errors.Is(err, ErrDenied) {
+		t.Fatalf("open after revocation: %v", err)
+	}
+	if o.opens != 1 {
+		t.Fatal("storage reopened after revocation")
+	}
+}
+
 func attachmentFixture() (*AttachmentSet, *authorityFixture, *originalFixture, string) {
 	a, f, b, _ := fixture()
 	hash := strings.Repeat("a", 64)

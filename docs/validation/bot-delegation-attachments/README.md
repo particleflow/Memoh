@@ -46,7 +46,7 @@ render. No storage alias, new task platform, or Agent runtime change is involved
   and Redis queues, substituting only the business stream. Busy follow-up queue
   identity and once-only consumption survive a real Valkey restart.
 - Related Go package tests, targeted race tests, real PostgreSQL delegation
-  integration, Go vet/lint, 121 relevant Web tests, Web typecheck, ESLint and
+  integration, Go vet/lint, 121 relevant Web tests, ESLint and
   UI contract guard passed. Repository-wide ESLint has existing warnings;
   modified files have no lint findings.
 - Existing PC/NAS permission tests pass using synthetic registrations and
@@ -63,26 +63,16 @@ ledger, queues, persistence, media and browser routing are real. Production,
 physical PC/NAS, external messaging channels, mobile hardware and paid providers
 were not exercised. Human QA is pending.
 
-## Reproduction
+## Reproduction and strengthened acceptance
 
-Use two ready fixture Bots in an isolated local server with its own PostgreSQL
-database and persistent Redis-compatible backend. The opt-in runner changes
-only those Bots' model settings and creates tiny synthetic files and sessions:
-
-```sh
-python scripts/acceptance/bot_delegation.py --help
-python scripts/acceptance/bot_delegation.py \
-  --base-url "$LOCAL_API" --source-bot "$SUPERVISOR" --target-bot "$SPECIALIST" \
-  --token-file "$PRIVATE_TOKEN_FILE" --pg-container "$LOCAL_PG_CONTAINER" \
-  --pg-user "$LOCAL_PG_USER" --database "$ISOLATED_DB" --evidence "$EVIDENCE_DIR" \
-  --allow-isolated-fixture-writes
-```
-
-Optional `--restart-helper` names an executable that restarts only that isolated
-server and queue. The runner records failures before trying any independent
-output-chain control, so an HTTP control cannot hide a native-submit failure.
-
-The complete native regression output is [native-regression.txt](native-regression.txt).
+Use the [self-contained fixture and current proof](hardening/README.md). It starts
+fresh PG/Valkey and ready Bots, applies every official migration, fails on any Go
+integration skip, and performs real idle-server and busy-queue recovery checks.
+It supersedes the earlier external restart helper and records new check attempts
+separately. The original [native regression output](native-regression.txt) is
+retained as historical evidence; its Range assertion covered only the owner
+media route. The scoped route and stronger exactly-once assertions are verified
+in the follow-up evidence above.
 
 ## Browser evidence
 
