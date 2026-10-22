@@ -52,6 +52,7 @@ func (v *transferVerifierFixture) Revalidate(ctx context.Context, _ computertask
 }
 
 type taskTransferFixtureOptions struct {
+	root    string
 	assets  func(*media.Service) computertask.DeliveryAssets
 	request func(*http.Request)
 	device  func(computertask.DeliveryIdentity, agenvo.Target) DeviceTransferVerifier
@@ -61,6 +62,9 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransfe
 	t.Helper()
 	f, _ := deliveryHTTPServer(t)
 	root := t.TempDir()
+	if len(options) > 0 && options[0].root != "" {
+		root = options[0].root
+	}
 	assets := media.NewService(nil, localfs.NewOriginals(root))
 	assets.SetRequirePersistence(true)
 	if err := assets.EnableUploads(root); err != nil {

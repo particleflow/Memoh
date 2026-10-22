@@ -77,7 +77,7 @@ func TestTransferPrincipalReserveAndReceiptCAS(t *testing.T) {
 	var details struct {
 		Ledger deliveryLedger `json:"delivery_ledger"`
 	}
-	if err := json.Unmarshal(f.record.Details, &details); err != nil || details.Ledger.Version != 3 {
+	if err := json.Unmarshal(f.record.Details, &details); err != nil || details.Ledger.Version != transferLedgerVersion {
 		t.Fatal("missing version barrier", err)
 	}
 	// The old v2 writer cannot erase the new binding.
@@ -85,7 +85,7 @@ func TestTransferPrincipalReserveAndReceiptCAS(t *testing.T) {
 		_, err := mutateDeliveryTransaction(ctx, tx, f.id, p.DeliveryID, p.Reference, 2, func(*deliveryEntry, bool) (bool, error) { return true, nil })
 		return err
 	}); !errors.Is(err, ErrDeliveryVersion) {
-		t.Fatal("old writer accepted v3", err)
+		t.Fatal("old writer accepted the new ledger", err)
 	}
 }
 

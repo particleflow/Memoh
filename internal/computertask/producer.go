@@ -85,7 +85,7 @@ func producerResult(r dbstore.ComputerOperationRecord, d Details) *ProducerResul
 		return out
 	}
 	ledger := stored.Ledger
-	if ledger != nil && (ledger.Version < 1 || ledger.Version > 3 || len(ledger.Entries) > maxDeliveries || ledger.Entries == nil) {
+	if ledger != nil && (ledger.Version < 1 || ledger.Version > transferLedgerVersion || len(ledger.Entries) > maxDeliveries || ledger.Entries == nil) {
 		return out
 	}
 	plans := p.FilePlans()

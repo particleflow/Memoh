@@ -113,6 +113,8 @@ func queueFeedback(r QueueStatus, binding string, now time.Time) deliverymeta.Fi
 		f.State, f.Code, f.Retryable = "unknown", "awaiting_nas_ledger", false
 	case r.AssociationBlocked:
 		f.State, f.Code, f.Retryable = "unknown", "association_requires_reconciliation", false
+	case r.Job.Phase == "blocked" && r.Job.ErrorCode == "receipt_unavailable":
+		f.State, f.Code, f.Retryable = "unknown", "receipt_unavailable", false
 	case r.Job.Phase == "blocked":
 		f.State, f.Code, f.Retryable = "blocked", r.Job.ErrorCode, false
 	case r.Job.Phase == "create_unknown" || r.Job.Phase == "creating":

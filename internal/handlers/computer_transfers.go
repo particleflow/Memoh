@@ -169,18 +169,27 @@ func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) ec
 		}
 		if upload := c.Param("upload_id"); upload != "" {
 			id, err := h.base.TransferUploadID(bound)
-			if err != nil || id != upload {
+			if err != nil {
+				return deliveryHTTPError(err)
+			}
+			if id != upload {
 				return deliveryHTTPError(computertask.ErrDeliveryBinding)
 			}
 		}
 		if action == "commit" && p.Reference.Direction == "upload" {
 			id, err := h.base.TransferUploadID(bound)
 			uploads := h.files.mediaService.Uploads()
-			if err != nil || id == "" || uploads == nil {
+			if err != nil {
+				return deliveryHTTPError(err)
+			}
+			if id == "" || uploads == nil {
 				return deliveryHTTPError(computertask.ErrDeliveryBinding)
 			}
-			receipt, err := uploads.Get(bound, p.Identity.Binding.UserID, p.Identity.Binding.BotID, id)
-			if err != nil || receipt.State != "ready" || receipt.ContentHash != p.Reference.ContentHash || receipt.SizeBytes != p.Reference.SizeBytes {
+			receipt, err := h.readUpload(bound, p, id, false)
+			if err != nil {
+				return err
+			}
+			if receipt.State != "ready" || receipt.ContentHash != p.Reference.ContentHash || receipt.SizeBytes != p.Reference.SizeBytes {
 				return deliveryHTTPError(computertask.ErrDeliveryAsset)
 			}
 		}
