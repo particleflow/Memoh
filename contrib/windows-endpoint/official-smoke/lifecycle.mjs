@@ -2,7 +2,8 @@ import assert from 'node:assert/strict'
 import * as fs from 'node:fs/promises'
 import path from 'node:path'
 import https from 'node:https'
-import { spawn, spawnSync } from 'node:child_process'
+import { spawn, spawnSync, execFile } from 'node:child_process'
+import { promisify } from 'node:util'
 import { once } from 'node:events'
 import { randomUUID } from 'node:crypto'
 import { pathToFileURL, fileURLToPath } from 'node:url'
@@ -133,6 +134,7 @@ async function verify(root) {
     assert.equal(driver.alive('connector'), false)
     for (let i = 0; i < officialFiles.length; i++) assert.deepEqual(await fs.readFile(officialFiles[i]), originals[i])
     checked('owned_components_stopped_and_official_config_credentials_preserved')
+    await verifyOwnership(config, driver.env, checked)
     process.stdout.write(`${JSON.stringify({ lifecycleSmoke: results, transferAutomaticRecovery: false, agentBusinessReplay: 'not_tested', customOrOldAgentResume: 'unverified', lockedDesktop: 'not_tested', loggedOut: 'no_autostart', physicalPowerLoss: 'not_tested', gui: 'not_tested' }, null, 2)}\n`)
   } finally {
     controller.abort(); await running
@@ -140,5 +142,61 @@ async function verify(root) {
     for (const c of driver.children.values()) if (!c.exited) c.process.kill()
     for (const socket of sockets) socket.terminate()
     wss.close(); relay.closeAllConnections(); await new Promise(resolve => relay.close(resolve))
+  }
+}
+
+
+async function verifyOwnership(config, env, checked) {
+  const ownedConfig = { ...config, session: 'ownership' }
+  const driver = new NativeDriver(ownedConfig, { inheritedEnvironment: env })
+  const outsiderSession = 'outside-coordinator'
+  let outsider, handoffCreated = false
+  const status = session => JSON.parse(driver.command(driver.herdr, ['--session', session, 'status', 'server', '--json']))
+  async function wait(predicate) {
+    const end = Date.now() + 30000
+    while (Date.now() < end) { if (await predicate()) return; await delay(100) }
+    throw new Error('Ownership fixture readiness timeout')
+  }
+  try {
+    await driver.start('herdr'); await driver.waitReady('herdr')
+    const owned = driver.children.get('herdr'), marker = driver.marker
+    outsider = spawn(driver.herdr, ['--session', outsiderSession, 'server'], { env: driver.env, cwd: config.sourceRoot, stdio: ['ignore', 'pipe', 'pipe'] })
+    outsider.stdout.resume(); outsider.stderr.resume()
+    await wait(() => status(outsiderSession).running)
+    const outsiderMarker = path.join(config.herdrConfigRoot, 'sessions', outsiderSession, 'herdr.sock')
+    const outsiderGeneration = await fs.readFile(outsiderMarker, 'utf8')
+    // Exercise the actual Windows peer-PID query, not only a forged marker check.
+    const helper = fileURLToPath(new URL('../owned-herdr.ps1', import.meta.url))
+    const powershell = path.join(process.env.SystemRoot, 'System32/WindowsPowerShell/v1.0/powershell.exe')
+    await assert.rejects(promisify(execFile)(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', helper, '-MarkerPath', outsiderMarker, '-Generation', outsiderGeneration, '-OwnerProcessId', String(owned.process.pid), '-Action', 'server.stop'], { env: driver.env, timeout: 20000, maxBuffer: 16384 }), error => JSON.parse(error.stdout).error === 'herdr_owner_mismatch')
+    assert.equal(status(outsiderSession).running, true)
+    // Simulate a changed endpoint mapping while the original owned child is alive.
+    driver.marker = outsiderMarker
+    await assert.rejects(driver.stop('herdr'), /herdr_owner_mismatch/)
+    assert.equal(status(outsiderSession).running, true)
+    driver.marker = marker
+    checked('foreign_endpoint_peer_rejected_without_stopping_either_server')
+
+    driver.command(driver.herdr, ['--session', ownedConfig.session, 'workspace', 'create', '--cwd', config.sourceRoot])
+    driver.command(driver.herdr, ['--session', ownedConfig.session, 'server', 'live-handoff', '--import-exe', driver.herdr, '--expected-version', '0.9.5'], 30000)
+    handoffCreated = true
+    await wait(() => owned.exited)
+    await wait(() => status(ownedConfig.session).running)
+    assert.notEqual(await fs.readFile(marker, 'utf8'), owned.generation)
+    await driver.stop('herdr') // exited owned handle: must not send stop to its successor
+    assert.equal(status(ownedConfig.session).running, true)
+    await assert.rejects(driver.start('herdr'), /existing_herdr_requires_handoff/)
+    assert.equal(status(ownedConfig.session).running, true)
+    checked('official_live_handoff_successor_is_neither_adopted_restarted_nor_stopped')
+  } finally {
+    // Fixture-only cleanup of explicitly created isolated sessions. The product
+    // driver above is deliberately forbidden from adopting the handoff successor.
+    if (handoffCreated && status(ownedConfig.session).running) driver.command(driver.herdr, ['--session', ownedConfig.session, 'server', 'stop'], 20000)
+    else if (driver.alive('herdr')) await driver.stop('herdr')
+    if (outsider && outsider.exitCode === null) {
+      const exited = once(outsider, 'exit')
+      driver.command(driver.herdr, ['--session', outsiderSession, 'server', 'stop'], 20000)
+      await exited
+    }
   }
 }

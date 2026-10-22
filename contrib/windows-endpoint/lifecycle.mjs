@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import * as fs from 'node:fs/promises'
 import net from 'node:net'
 import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { spawn, spawnSync, execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 import { setTimeout as sleep } from 'node:timers/promises'
@@ -87,6 +88,7 @@ export class NativeDriver {
     this.herdr = path.join(config.bundleRoot, catalog.components.herdr.entry)
     this.connector = path.join(config.bundleRoot, catalog.components.connector.entry)
     this.fingerprint = null
+    this.marker = config.session === 'default' ? path.join(config.herdrConfigRoot, 'herdr.sock') : path.join(config.herdrConfigRoot, 'sessions', config.session, 'herdr.sock')
   }
   async validate() {
     demand(process.platform === 'win32' && process.arch === 'x64' && typeof this.qualify === 'function', 'qualified_windows_driver_required')
@@ -113,9 +115,42 @@ export class NativeDriver {
     demand(typeof value.running === 'boolean', 'herdr_observation_unknown')
     return value
   }
+  async ownedGeneration(capture = false) {
+    const c = this.children.get('herdr')
+    demand(this.alive('herdr'), 'herdr_owner_exited')
+    let marker
+    try { marker = await readFile(this.marker, 80) } catch { throw new LifecycleError('herdr_ownership_unverified') }
+    demand(/^\d+:\d+$/.test(marker) && marker.split(':')[0] === String(c.process.pid), 'herdr_owner_mismatch')
+    if (capture && !c.generation) c.generation = marker
+    demand(c.generation === marker, 'herdr_generation_changed')
+    return marker
+  }
+  async ownedHostRequest(action) {
+    const generation = await this.ownedGeneration()
+    const powershell = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/WindowsPowerShell/v1.0/powershell.exe')
+    const helper = fileURLToPath(new URL('./owned-herdr.ps1', import.meta.url))
+    let response
+    try {
+      const result = await promisify(execFile)(powershell, ['-NoLogo', '-NoProfile', '-NonInteractive', '-File', helper, '-MarkerPath', this.marker, '-Generation', generation, '-OwnerProcessId', String(this.children.get('herdr').process.pid), '-Action', action], { env: this.env, cwd: this.config.sourceRoot, timeout: 20000, maxBuffer: 16384, windowsHide: true, shell: false })
+      response = JSON.parse(result.stdout)
+    } catch (error) {
+      let reason
+      try { reason = JSON.parse(error.stdout).error } catch { /* Bounded diagnostics only. */ }
+      throw new LifecycleError(/^herdr_(owner_mismatch|generation_changed|ownership_unverified|request_(rejected|timeout|incomplete|oversized|failed))$/.test(reason) ? reason : 'herdr_ownership_unverified')
+    }
+    demand(response.id === 'endpoint-owned' && response.result && !response.error, 'herdr_request_failed')
+    return response.result
+  }
+  async ownedHostStatus() {
+    await this.ownedGeneration()
+    const status = this.hostStatus() // read-only; generation checked on both sides
+    await this.ownedGeneration()
+    return status
+  }
   alive(component) { const c = this.children.get(component); return Boolean(c && !c.exited && !c.error) }
   async start(component) {
     demand(!this.alive(component), 'component_already_owned')
+    if (component === 'herdr') demand(!this.hostStatus().running, 'existing_herdr_requires_handoff')
     if (component === 'connector') {
       try { await fs.lstat(path.join(this.config.agenvoConfigDir, 'run.lock')); throw new LifecycleError('connector_lock_requires_owner') }
       catch (e) { if (e.code !== 'ENOENT') throw e }
@@ -154,8 +189,16 @@ export class NativeDriver {
       if (component === 'herdr') {
         try {
           const s = this.hostStatus()
-          if (s.running && s.version === '0.9.5' && s.endpoint_compatible === true) return
-        } catch { /* Startup only: a socket may not have been published yet. */ }
+          if (s.running && s.version === '0.9.5' && s.endpoint_compatible === true) {
+            await this.ownedGeneration(true)
+            const owned = await this.ownedHostRequest('ping')
+            demand(owned.type === 'pong' && owned.version === '0.9.5', 'herdr_ownership_unverified')
+            return
+          }
+        } catch (error) {
+          if (error instanceof LifecycleError && error.code !== 'herdr_observation_unknown') throw error
+          // Startup only: the endpoint may not have been published yet.
+        }
       } else {
         const s = await this.connectorStatus()
         const attention = connectorAttention(s)
@@ -184,7 +227,7 @@ export class NativeDriver {
     if (!c) return
     if (this.alive(component)) {
       if (component === 'herdr') {
-        this.command(this.herdr, ['--session', this.config.session, 'server', 'stop'], 20000)
+        await this.ownedHostRequest('server.stop')
       } else {
         // Windows Node kill terminates this owned child; it does not guarantee
         // POSIX SIGTERM callbacks. Recover only its proven stale official lock.
@@ -315,7 +358,7 @@ export class EndpointLifecycle {
         if (!this.driver.alive('herdr')) await this.recover('herdr')
         else if (!this.driver.alive('connector')) await this.recover('connector')
         else {
-          const host = this.driver.hostStatus()
+          const host = await this.driver.ownedHostStatus()
           demand(host.running && host.version === '0.9.5' && host.endpoint_compatible === true, 'herdr_observation_unknown')
         }
       } catch (error) {

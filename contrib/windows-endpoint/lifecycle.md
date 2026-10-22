@@ -123,7 +123,15 @@ Only owned child handles can be stopped. Preexisting hosts and stale locks witho
 saved ownership proof require handoff; there is no PID-based adoption or kill.
 An exited owned connector's exact PID and saved lock nonce are checked before
 invoking official `doctor --recover-lock`; the coordinator never deletes its lock.
-Herdr uses official `server stop`. Windows termination of the owned connector is
+Herdr uses the official `server.stop` API through `owned-herdr.ps1`. The finite
+client verifies the actual named-pipe server PID using Windows
+`GetNamedPipeServerProcessId`, checks the official `PID:creation-time` generation,
+and sends the request on that same connection. It never resolves a PID to kill or
+reopens a session endpoint after the ownership check. Readiness first probes the
+owned peer; periodic read-only checks bracket status with generation checks.
+PowerShell 5.1 and its standard .NET runtime are OS dependencies; no execution
+policy is changed or bypassed. Distribution signing/policy qualification remains
+pending. This is a client helper, not a service or Agent/core modification. Windows termination of the owned connector is
 not claimed to execute POSIX shutdown handlers; official stale-lock recovery is
 part of stopping it. Failed/uncertain cleanup retains the lease and attention.
 
@@ -174,3 +182,16 @@ pending remnants; it does not inject a crash after every write.
 The exact requested read-only transfer interface is in
 [transfer-lifecycle-contract.md](transfer-lifecycle-contract.md). It is a proposal,
 not an assumed upstream implementation. No transfer/migration source is changed.
+
+## Ownership checkpoint awaiting Windows evidence
+
+The ownership increment adds an actual separate Herdr fixture, wrong-peer stop
+rejection, and official live handoff. An exited owned child cannot confer ownership
+of its successor; a live host found during recovery requires handoff and is not
+adopted. These new checks are **pending until the exact checkpoint's Windows run
+passes**. The earlier f79ca696 run proves the preexisting 43 checks and 8+8 official
+smoke checks, not this newly added helper or handoff boundary.
+
+Sources: [Herdr Windows generation](https://github.com/herdrdev/herdr/blob/5bd900d88c80d95f5b145397e45bbeea398b8165/src/ipc.rs),
+[official API](https://github.com/herdrdev/herdr/blob/5bd900d88c80d95f5b145397e45bbeea398b8165/src/api/schema.rs),
+[Windows peer identity API](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-getnamedpipeserverprocessid).

@@ -201,7 +201,7 @@ service or crash supervisor has been selected by this PR.
 
 ## Validation record
 
-Cloud Linux Node v24.19.0: 18 delivery tests and 25 lifecycle state-machine tests passed, including strict inventory,
+Cloud Linux Node v24.19.0: 18 delivery tests and 27 lifecycle state-machine tests passed, including strict inventory,
 configuration isolation, identity/path mismatch, authentication-state redaction,
 interrupted-staging remnants, idempotent publication and retained originals/queue.
 Fixtures contain inert synthetic payloads, not official binary acceptance. The
@@ -261,3 +261,11 @@ The current seven-day CI artifact retention is not a stable install/rollback
 channel. Cross-repository compatibility CI and durable, immutable artifact
 publication are prerequisites, not reasons to copy queue source or create a third
 repository. No repository move is performed here.
+
+The ownership checkpoint adds `owned-herdr.ps1`, a finite official native-API
+client using OS PowerShell 5.1/.NET and the Windows named-pipe peer identity API.
+It brings no npm/backend/queue source dependency. Its clean-Windows execution,
+script-policy/signing compatibility, external-owner and live-handoff checks must
+pass for the exact checkpoint before that boundary is qualified. Current public
+activation remains blocked. The implementation is being handed to the authorized
+separate delivery repository; no Memoh PR is merged or branch/history deleted.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import * as fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
-import { EndpointLifecycle, LifecycleError, StateStore, acquireLeases, connectorAttention, leaseKeys } from './lifecycle.mjs'
+import { EndpointLifecycle, LifecycleError, StateStore, NativeDriver, acquireLeases, connectorAttention, leaseKeys } from './lifecycle.mjs'
 import { managedEnvironment } from './endpoint.mjs'
 
 async function fixture(t, options = {}) {
@@ -14,6 +14,7 @@ async function fixture(t, options = {}) {
     validate: async () => { calls.push('validate') },
     hostStatus: () => ({ running: alive.has('herdr'), version: '0.9.5', endpoint_compatible: true }),
     alive: c => alive.has(c),
+    ownedHostStatus: () => driver.hostStatus(),
     connectorStatus: async () => driver.status,
     start: async c => { calls.push(`start:${c}`); alive.add(c) },
     waitReady: async c => { calls.push(`ready:${c}`) },
@@ -245,4 +246,35 @@ test('stop during async recovery qualification prevents any replacement spawn', 
   assert.equal(calls.filter(c => c === 'start:herdr').length, 1)
   assert.equal(alive.size, 0)
   assert.equal(lifecycle.release, null)
+})
+
+test('stop still cleans children when awaited active tick cannot persist attention', async t => {
+  const { lifecycle, driver, store, alive } = await fixture(t)
+  await lifecycle.start()
+  let resume, entered
+  const waiting = new Promise(r => { entered = r })
+  driver.connectorStatus = () => new Promise(r => { resume = () => r({ state: 'needs_attention', lastError: 'handshake_401' }); entered() })
+  const original = Object.assign(new Error('synthetic disk failure'), { code: 'ENOSPC' })
+  store.save = async () => { throw original }
+  const tick = lifecycle.tick(); const rejectedTick = assert.rejects(tick, error => error.cause === original)
+  await waiting
+  const stop = lifecycle.stop(); const rejectedStop = assert.rejects(stop, error => error.cause === original)
+  resume(); await Promise.all([rejectedTick, rejectedStop])
+  assert.equal(alive.size, 0)
+  assert.equal(lifecycle.release, null)
+  assert.equal(lifecycle.snapshot().journal, 'unavailable')
+})
+
+
+test('owned Herdr generation rejects replaced endpoint without sending stop', async t => {
+  const { directory } = await fixture(t)
+  const config = { bundleRoot: directory, sourceRoot: directory, herdrConfigRoot: directory, herdrStateRoot: directory, agenvoConfigDir: directory, piConfigDir: directory, session: 'default' }
+  const driver = new NativeDriver(config)
+  driver.children.set('herdr', { process: { pid: 123 }, exited: false, generation: '123:456' })
+  await fs.writeFile(driver.marker, '123:456')
+  assert.equal(await driver.ownedGeneration(), '123:456')
+  await fs.writeFile(driver.marker, '999:789')
+  await assert.rejects(driver.stop('herdr'), /herdr_owner_mismatch/)
+  await fs.writeFile(driver.marker, '123:789')
+  await assert.rejects(driver.stop('herdr'), /herdr_generation_changed/)
 })
