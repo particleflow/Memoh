@@ -127,7 +127,7 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 	}
 	var version int
 	var dirty bool
-	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != 170 || dirty {
+	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != 171 || dirty {
 		t.Fatalf("schema=%d dirty=%v err=%v", version, dirty, err)
 	}
 }
