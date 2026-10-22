@@ -7,6 +7,8 @@ on:
       - 'contrib/herdr/memoh-delivery/**'
       - 'scripts/build-transferqueue-bundle.py'
       - '.github/workflows/delivery-native.yml'
+      - 'internal/db/computer_delivery_native_windows_test.go'
+      - 'scripts/test-native-delivery-postgres.ps1'
   workflow_dispatch:
 permissions:
   contents: read
@@ -28,6 +30,8 @@ jobs:
           go-version-file: go.mod
       - name: Execute native tests
         run: go test -count=1 -v -timeout=5m ./internal/transferclient
+      - name: Execute native publication with PostgreSQL
+        run: ./scripts/test-native-delivery-postgres.ps1
       - name: Build reviewed binary bundle
         run: python scripts/build-transferqueue-bundle.py --output '${{ runner.temp }}/delivery-windows-amd64'
       - name: Verify packaged executable
