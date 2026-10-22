@@ -143,6 +143,9 @@ func (h *MCPOAuthHandler) Authorize(c echo.Context) error {
 	if _, err := h.authorizeBotAccess(c.Request().Context(), userID, botID); err != nil {
 		return err
 	}
+	if err := h.requireOAuthConnection(c.Request().Context(), botID, connID); err != nil {
+		return err
+	}
 
 	var req oauthAuthorizeRequest
 	_ = c.Bind(&req)
@@ -244,11 +247,13 @@ func (h *MCPOAuthHandler) Callback(c echo.Context) error {
 // @Description Returns the current OAuth status including whether tokens are available
 // @Tags mcp
 // @Param id path string true "MCP connection ID"
+// @Param authorization_id query string false "Current authorization transaction receipt ID"
 // @Success 200 {object} mcp.OAuthStatus
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Router /bots/{bot_id}/mcp/{id}/oauth/status [get].
 func (h *MCPOAuthHandler) Status(c echo.Context) error {
+	c.Response().Header().Set("Cache-Control", "no-store")
 	userID, err := h.requireChannelIdentityID(c)
 	if err != nil {
 		return err
@@ -264,13 +269,33 @@ func (h *MCPOAuthHandler) Status(c echo.Context) error {
 	if _, err := h.authorizeBotAccess(c.Request().Context(), userID, botID); err != nil {
 		return err
 	}
+	if err := h.requireOAuthConnection(c.Request().Context(), botID, connID); err != nil {
+		return err
+	}
+	authorizationID := strings.TrimSpace(c.QueryParam("authorization_id"))
+	if len(authorizationID) > 64 {
+		return apperror.FieldInvalid("authorization_id", errors.New("authorization receipt ID is too long"))
+	}
 
 	status, err := h.oauthService.GetStatus(c.Request().Context(), connID)
 	if err != nil {
 		return errs.Wrap(err, "get oauth status")
 	}
+	if authorizationID != "" {
+		status.Authorization = h.oauthService.AuthorizationStatus(connID, authorizationID)
+	}
 
 	return c.JSON(http.StatusOK, status)
+}
+
+func (h *MCPOAuthHandler) requireOAuthConnection(ctx context.Context, botID, connectionID string) error {
+	if _, err := h.connService.Get(ctx, botID, connectionID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return apperror.Wrap(apperror.CodeMCPConnectionNotFound, err, nil)
+		}
+		return errs.Wrap(err, "get mcp connection")
+	}
+	return nil
 }
 
 // RevokeToken godoc
@@ -321,8 +346,8 @@ func renderMCPOAuthCallbackResult(c echo.Context, status int, result string, mes
     <title>MCP OAuth</title>
   </head>
   <body style="font-family: sans-serif; padding: 24px;">
-    <h2>{{if eq .Result "success"}}MCP server connected{{else}}MCP authorization failed{{end}}</h2>
-    {{if .Message}}<p>{{.Message}}</p>{{else}}<p>You can close this window and return to Memoh.</p>{{end}}
+    <h2>{{if eq .Result "success"}}MCP authorization saved{{else}}MCP authorization failed{{end}}</h2>
+    {{if .Message}}<p>{{.Message}}</p>{{else}}<p>Return to Memoh to verify the connection.</p>{{end}}
     <script>
       window.opener?.postMessage({ type: "mcp-oauth-callback", status: "{{.Result}}", error: "{{.Message}}" }, "*");
       if (window.opener) window.close();

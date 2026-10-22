@@ -26,10 +26,11 @@ import (
 
 // OAuthService manages OAuth flows for MCP connections.
 type OAuthService struct {
-	queries     dbstore.Queries
-	logger      *slog.Logger
-	httpClient  *http.Client
-	callbackURL string
+	queries        dbstore.Queries
+	logger         *slog.Logger
+	httpClient     *http.Client
+	callbackURL    string
+	authorizations *oauthAuthorizations
 }
 
 func NewOAuthService(log *slog.Logger, queries dbstore.Queries, callbackURL string) *OAuthService {
@@ -37,10 +38,11 @@ func NewOAuthService(log *slog.Logger, queries dbstore.Queries, callbackURL stri
 		log = slog.Default()
 	}
 	return &OAuthService{
-		queries:     queries,
-		logger:      log.With(slog.String("service", "mcp_oauth")),
-		httpClient:  &http.Client{Timeout: 15 * time.Second},
-		callbackURL: callbackURL,
+		queries:        queries,
+		logger:         log.With(slog.String("service", "mcp_oauth")),
+		httpClient:     &http.Client{Timeout: 15 * time.Second},
+		callbackURL:    callbackURL,
+		authorizations: &oauthAuthorizations{entries: make(map[string]oauthAuthorizationEntry)},
 	}
 }
 
@@ -67,18 +69,20 @@ type DiscoveryResult struct {
 
 // OAuthStatus describes the current OAuth state of a connection.
 type OAuthStatus struct {
-	Configured  bool       `json:"configured"`
-	HasToken    bool       `json:"has_token"`
-	Expired     bool       `json:"expired"`
-	Scopes      string     `json:"scopes,omitempty"`
-	ExpiresAt   *time.Time `json:"expires_at,omitempty"`
-	AuthServer  string     `json:"auth_server,omitempty"`
-	CallbackURL string     `json:"callback_url"`
+	Configured    bool                `json:"configured"`
+	HasToken      bool                `json:"has_token"`
+	Expired       bool                `json:"expired"`
+	Scopes        string              `json:"scopes,omitempty"`
+	ExpiresAt     *time.Time          `json:"expires_at,omitempty"`
+	AuthServer    string              `json:"auth_server,omitempty"`
+	CallbackURL   string              `json:"callback_url"`
+	Authorization *OAuthAuthorization `json:"authorization,omitempty"`
 }
 
 // AuthorizeResult holds the authorization URL to redirect the user to.
 type AuthorizeResult struct {
 	AuthorizationURL string `json:"authorization_url"`
+	AuthorizationID  string `json:"authorization_id"`
 }
 
 // Discover performs the MCP OAuth discovery flow:
@@ -296,7 +300,7 @@ func (s *OAuthService) StartAuthorization(ctx context.Context, connectionID, cli
 	}
 
 	authURL := token.AuthorizationEndpoint + "?" + params.Encode()
-	return &AuthorizeResult{AuthorizationURL: authURL}, nil
+	return &AuthorizeResult{AuthorizationURL: authURL, AuthorizationID: s.authorizations.begin(connectionID, state)}, nil
 }
 
 // HandleCallback exchanges the authorization code for tokens.
@@ -324,6 +328,8 @@ func (s *OAuthService) HandleCallback(ctx context.Context, state, code string) (
 	if token.TokenEndpoint == "" || token.PkceCodeVerifier == "" {
 		return "", fmt.Errorf("%w: missing token endpoint or code verifier", ErrOAuthStateInvalid)
 	}
+	succeeded := false
+	defer func() { s.authorizations.finish(token.ConnectionID.String(), state, succeeded) }()
 
 	redirectURI := token.RedirectUri
 	if redirectURI == "" {
@@ -351,11 +357,14 @@ func (s *OAuthService) HandleCallback(ctx context.Context, state, code string) (
 		return "", fmt.Errorf("failed to save tokens: %w", err)
 	}
 
-	_ = s.queries.UpdateMCPConnectionAuthType(ctx, sqlc.UpdateMCPConnectionAuthTypeParams{
+	if err := s.queries.UpdateMCPConnectionAuthType(ctx, sqlc.UpdateMCPConnectionAuthTypeParams{
 		ID:       token.ConnectionID,
 		AuthType: "oauth",
-	})
+	}); err != nil {
+		return "", fmt.Errorf("failed to enable oauth connection: %w", err)
+	}
 
+	succeeded = true
 	return token.ConnectionID.String(), nil
 }
 

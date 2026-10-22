@@ -2245,6 +2245,8 @@
       "discoverFailed": "OAuth 検出に失敗しました",
       "authSuccess": "認可成功",
       "authFailed": "認証に失敗しました",
+      "authUnconfirmed": "今回の認可結果を確認できませんでした。再認可する前に接続を確認してください。",
+      "connectionUnverified": "認可は保存されましたが、接続を確認できませんでした。",
       "scopes": "スコープ",
       "authServer": "認可サーバー",
       "clientId": "クライアントID",

@@ -6807,6 +6807,12 @@ const docTemplate = `{
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current authorization transaction receipt ID",
+                        "name": "authorization_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -26765,6 +26771,9 @@ const docTemplate = `{
         "mcp.AuthorizeResult": {
             "type": "object",
             "properties": {
+                "authorization_id": {
+                    "type": "string"
+                },
                 "authorization_url": {
                     "type": "string"
                 }
@@ -26867,11 +26876,25 @@ const docTemplate = `{
                 }
             }
         },
+        "mcp.OAuthAuthorization": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "mcp.OAuthStatus": {
             "type": "object",
             "properties": {
                 "auth_server": {
                     "type": "string"
+                },
+                "authorization": {
+                    "$ref": "#/definitions/mcp.OAuthAuthorization"
                 },
                 "callback_url": {
                     "type": "string"

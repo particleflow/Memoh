@@ -20,6 +20,18 @@ type mcpOAuthStateQueries struct {
 	err error
 }
 
+func TestMCPOAuthCallbackDoesNotClaimConnectionVerified(t *testing.T) {
+	rec := httptest.NewRecorder()
+	ctx := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/oauth/mcp/callback", nil), rec)
+	if err := renderMCPOAuthCallbackResult(ctx, http.StatusOK, "success", ""); err != nil {
+		t.Fatal(err)
+	}
+	body := rec.Body.String()
+	if !strings.Contains(body, "MCP authorization saved") || !strings.Contains(body, "verify the connection") || strings.Contains(body, "MCP server connected") {
+		t.Fatal("exchange-only callback misreported a verified connection")
+	}
+}
+
 func (q *mcpOAuthStateQueries) GetMCPOAuthTokenByState(context.Context, string) (sqlc.McpOauthToken, error) {
 	return sqlc.McpOauthToken{}, q.err
 }
