@@ -279,7 +279,7 @@ export async function doctor(config, run = probe) {
       if (['handshake_401', 'handshake_403'].includes(status.lastError)) connection = 'authentication_required'
       else if (status.lastError === 'handshake_426') connection = 'protocol_upgrade_required'
       else if (status.state === 'needs_attention') connection = 'needs_attention'
-      else if (status.state === 'connected') connection = 'connected_snapshot_unverified'
+      else if (status.state === 'online') connection = 'online_snapshot_unverified'
     }
   } catch { /* Optional official status snapshot; absence is unknown, not READY. */ }
   // Only execute inventory-verified dependencies on their target OS.

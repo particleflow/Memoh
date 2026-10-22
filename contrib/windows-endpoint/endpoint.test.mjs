@@ -166,14 +166,29 @@ test('changed approved executable/root/device mappings are blocked', async t => 
 test('authentication failure and stale snapshots never turn into readiness or restarts', async t => {
   const f = await fixture(t)
   const file = path.join(f.config.agenvoConfigDir, 'status.json')
-  await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now(), state: 'connected', lastError: 'handshake_401', secret: 'REDACT-ME' })
+  await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now(), state: 'online', lastError: 'handshake_401', secret: 'REDACT-ME' })
   const blocked = await doctor(f.config, () => '')
   assert.equal(blocked.capabilities.connection, 'authentication_required')
   assert.equal(blocked.ready, false)
   assert.ok(!JSON.stringify(blocked).includes('REDACT-ME'))
   await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now(), state: 'needs_attention', lastError: '' })
   assert.equal((await doctor(f.config, () => '')).capabilities.connection, 'needs_attention')
-  await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now() - 121000, state: 'connected', lastError: '' })
+  await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now() - 121000, state: 'online', lastError: '' })
+  assert.equal((await doctor(f.config, () => '')).capabilities.connection, 'authentication_unverified')
+})
+
+test('official Agenvo 0.2.0 online snapshot is observed without claiming endpoint readiness', async t => {
+  const f = await fixture(t)
+  // Shape and online state from the pinned official connector main.ts, not a
+  // hypothetical connected state. No credential is part of this snapshot.
+  const snapshot = { pid: 1234, relay: 'https://relay.example.test', deviceId: f.config.deviceId, state: 'online', version: '0.2.0', updatedAt: Date.now(), instances: [{ id: f.config.instanceId, available: true, backendVersion: '0.9.5' }], lastError: '' }
+  await json(path.join(f.config.agenvoConfigDir, 'status.json'), snapshot)
+  const report = await doctor(f.config, () => '')
+  assert.equal(report.capabilities.connection, 'online_snapshot_unverified')
+  assert.equal(report.capabilities.agent, 'readiness_unverified')
+  assert.equal(report.ready, false)
+  assert.equal(report.lifecycle.automaticRecovery, false)
+  await json(path.join(f.config.agenvoConfigDir, 'status.json'), { ...snapshot, state: 'connected' })
   assert.equal((await doctor(f.config, () => '')).capabilities.connection, 'authentication_unverified')
 })
 
