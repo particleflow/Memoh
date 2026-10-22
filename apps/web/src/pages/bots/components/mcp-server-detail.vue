@@ -867,7 +867,7 @@ async function handleSave() {
       && savedSnapshot.value !== null && connectionFieldsChanged(savedSnapshot.value, draft)
     const body = buildBody(draft, form.value.active)
     if (wasNew) {
-      const { data } = await postBotsByBotIdMcp({ path: { bot_id: props.botId } as unknown as { bot_id: string }, body, throwOnError: true })
+      const { data } = await postBotsByBotIdMcp({ path: { bot_id: props.botId }, body, throwOnError: true })
       const id = data?.id ?? ''
       toast.success(t('mcp.createSuccess'))
       // Clean the draft for the brief window before the parent's redirect
@@ -876,7 +876,7 @@ async function handleSave() {
       if (id) emit('created', id)
       emit('changed')
     } else {
-      await putBotsByBotIdMcpById({ path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string }, body, throwOnError: true })
+      await putBotsByBotIdMcpById({ path: { bot_id: props.botId, id: serverId.value }, body, throwOnError: true })
       toast.success(t('mcp.updateSuccess'))
       savedSnapshot.value = draft
       emit('changed')
@@ -908,7 +908,7 @@ async function handleToggleActive(value: boolean) {
   activeSaving.value = true
   try {
     await putBotsByBotIdMcpById({
-      path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string },
+      path: { bot_id: props.botId, id: serverId.value },
       body: buildBody(snap, value),
       throwOnError: true,
     })
@@ -936,7 +936,7 @@ async function handleProbe(id: string, signal?: AbortSignal): Promise<boolean> {
   if (signal?.aborted) controller.abort()
   probeAbortController = controller
   try {
-    const { data } = await postBotsByBotIdMcpByIdProbe({ path: { bot_id: botId, id } as unknown as { bot_id: string, id: string }, signal: controller.signal, throwOnError: true })
+    const { data } = await postBotsByBotIdMcpByIdProbe({ path: { bot_id: botId, id }, signal: controller.signal, throwOnError: true })
     if (controller.signal.aborted || controller !== probeAbortController || props.botId !== botId || serverId.value !== id) return false
     if (data) {
       status.value = data.status ?? status.value
@@ -967,7 +967,7 @@ async function handleDelete() {
   if (!serverId.value) return
   deleting.value = true
   try {
-    await deleteBotsByBotIdMcpById({ path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string }, throwOnError: true })
+    await deleteBotsByBotIdMcpById({ path: { bot_id: props.botId, id: serverId.value }, throwOnError: true })
     toast.success(t('mcp.deleteSuccess'))
     emit('deleted')
   } catch {
@@ -1112,7 +1112,7 @@ async function handleOAuthRevoke() {
   if (!serverId.value || oauthRevoking.value) return
   oauthRevoking.value = true
   try {
-    await deleteBotsByBotIdMcpByIdOauthToken({ path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string }, throwOnError: true })
+    await deleteBotsByBotIdMcpByIdOauthToken({ path: { bot_id: props.botId, id: serverId.value }, throwOnError: true })
     toast.success(t('mcp.oauth.revokeSuccess'))
     oauthDiscovered.value = false
     oauthNeedsClientId.value = false
