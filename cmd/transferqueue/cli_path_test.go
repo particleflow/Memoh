@@ -318,3 +318,63 @@ func TestCLIPathCorruptQueueCannotAdvertiseIndependentDue(t *testing.T) {
 		t.Fatal("corrupt proof modified")
 	}
 }
+
+func TestCLIPathHistoryMigration(t *testing.T) {
+	state := cliPrivateRoot(t)
+	env := func(key string) string {
+		if key == "HERDR_PLUGIN_STATE_DIR" {
+			return state
+		}
+		return ""
+	}
+	limits := transferclient.QueueLimits{Jobs: 8, Bytes: 256 << 20, JournalBytes: 8 << 20, Workers: 1}
+	q, err := transferclient.OpenHerdrQueue(env, "native-profile-v1", limits)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = q.Close()
+	path := filepath.Join(state, "deliveries-v1", "locator")
+	raw, err := os.ReadFile(path) //nolint:gosec // Synthetic private CLI fixture.
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := bytes.Replace(raw, []byte(`"Version":3`), []byte(`"Version":2`), 1)
+	if bytes.Equal(old, raw) {
+		t.Fatal("unexpected layout")
+	}
+	// Mutate only the version byte in this test's existing locator. The Windows
+	// fixture creator deliberately refuses replacement of an existing file.
+	f, err := os.OpenFile(path, os.O_RDWR, 0) //nolint:gosec // Existing private fixture file; no ACL or owner change.
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = f.WriteAt([]byte{'2'}, int64(len(`{"Version":`)))
+	if err == nil {
+		err = f.Sync()
+	}
+	_ = f.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out, stderr bytes.Buffer
+	if code := runCommand([]string{"-action", "probe"}, strings.NewReader(""), &out, &stderr, env, nil, time.Now); code != 1 {
+		t.Fatal("implicit migration", code)
+	}
+	for range 2 {
+		out.Reset()
+		stderr.Reset()
+		code := runCommand([]string{"-action", "migrate-history"}, strings.NewReader(""), &out, &stderr, env, nil, time.Now)
+		if code != 0 || strings.TrimSpace(out.String()) != `{"queue_layout":3,"history":"enabled"}` {
+			t.Fatal("migration dispatcher", code, out.String(), stderr.String())
+		}
+	}
+	backup, err := os.ReadFile(filepath.Join(state, "deliveries-v1", "locator-v2.backup")) //nolint:gosec // Synthetic private CLI fixture.
+	if err != nil || !bytes.Equal(backup, old) {
+		t.Fatal("old locator backup", err)
+	}
+	out.Reset()
+	stderr.Reset()
+	if code := runCommand([]string{"-action", "probe"}, strings.NewReader(""), &out, &stderr, env, nil, time.Now); code != 0 {
+		t.Fatal("migrated probe", code, stderr.String())
+	}
+}
