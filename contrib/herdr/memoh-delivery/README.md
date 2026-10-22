@@ -4,6 +4,29 @@ This is a review/test package, not a production installation. It contains a
 finite Herdr plugin executable, manifest, and isolated Windows test executable.
 It installs no service, daemon, Memoh runtime or Agent modification.
 
+## Unified Windows endpoint: implemented and missing
+
+The transfer helper is an internal component of the Windows execution endpoint.
+The intended user experience is one installation/configuration/maintenance flow;
+this bundle alone does not implement that flow. It must not be presented as a
+complete endpoint installer or require the user to assemble separate services.
+
+| Concern | Present in this component | Remaining endpoint integration |
+| --- | --- | --- |
+| Dependencies | The prebuilt transfer executable needs no Go/Python runtime. The plugin declares Herdr >= 0.9.5; action paths are relative to its package. Fixture acceptance uses PowerShell. | Herdr/Agenvo pairing, Pi, Node and the Git Bash tools used by the existing execution envelope are external to this bundle. It neither installs nor inventories them. |
+| Configuration and data | Herdr supplies config/state locations. One `HostConfig` reads `transfer.json`; the separate private credential is read on requests. Queue/publications use the supplied state root; source files keep their existing owner. | No endpoint-wide setup currently provisions these locations and the registered task `WorkDir` together. `source_root` is a separately supplied value checked against the task root hash, not an automatically shared registration setting. |
+| Relative paths | Plugin executable paths are package-relative; source references are logical filenames. Config/state/source roots must be clean absolute private paths, never CWD-relative or silently inferred. | No endpoint root relocation tool exists. The queue binds the configuration digest and refuses changes pending drain/migration; this is detection, not automatic relocation. |
+| Startup checks | `verify-storage` checks/opens native queue storage. Task launch checks Pi, Node and required Bash utilities; the producer hook checks Herdr when collecting. | There is no combined startup health check for all dependencies, plugin installation, device authorization and real HTTPS trust. `probe` explicitly reports `device_configuration: required`; it does not prove connectivity. |
+| Compatibility | The package records its exact source SHA and hashes. Config, locator and queue versions fail closed; Server requires the complete 171/172 schema and device verifier. | The static plugin version is not a negotiated Server/host compatibility matrix. There is no coordinated version selection or automatic upgrade migration. |
+| Update/rollback/uninstall | Queue evidence, retained receipts and NAS associations survive process restart. Only durably committed queue payloads are automatically released. | No updater, atomic package switch, rollback coordinator or uninstall ownership manifest is supplied. Replacement must preserve config/state and unresolved evidence; uninstall must never imply deleting producer files or NAS originals. |
+
+The task envelope currently checks `base64`, `cygpath`, `sha256sum`, `wc`, `mkdir`,
+`mv`, `rm`, and `rmdir` in its Bash environment. Its Node projector uses built-in
+modules. A successful transfer fixture does not establish that this whole
+execution environment is installed, version-compatible or healthy. Adding that
+coordinated setup belongs to the existing endpoint's packaging/configuration
+owner; it does not require a new transfer service or Agent-core modification.
+
 ## Run the binary-only acceptance fixture
 
 Obtain the Actions artifact from the reviewed commit. Compare its source SHA
