@@ -316,6 +316,7 @@ func (h *MCPOAuthHandler) requireOAuthConnection(ctx context.Context, botID, con
 }
 
 // RevokeToken godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Revoke OAuth tokens for MCP connection
 // @Description Clears stored OAuth tokens
 // @Tags mcp

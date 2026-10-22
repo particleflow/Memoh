@@ -11868,6 +11868,11 @@ paths:
     post:
       description: Create a MCP connection for a bot
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP payload
         in: body
         name: payload
@@ -11902,6 +11907,11 @@ paths:
     post:
       description: Delete multiple MCP connections by IDs.
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: IDs to delete
         in: body
         name: payload
@@ -11929,6 +11939,12 @@ paths:
   /bots/{bot_id}/mcp-ops/export:
     get:
       description: Export all MCP connections for a bot in standard mcpServers format.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       responses:
         "200":
           description: OK
@@ -11955,6 +11971,11 @@ paths:
         connections (matched by name) get config updated with is_active preserved.
         New connections are created as active.
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: mcpServers dict
         in: body
         name: payload
@@ -12061,6 +12082,11 @@ paths:
     delete:
       description: Delete a MCP connection by ID
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP ID
         in: path
         name: id
@@ -12091,6 +12117,11 @@ paths:
     get:
       description: Get a MCP connection by ID
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP ID
         in: path
         name: id
@@ -12123,6 +12154,11 @@ paths:
     put:
       description: Update a MCP connection by ID
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP ID
         in: path
         name: id
@@ -12292,6 +12328,11 @@ paths:
     delete:
       description: Clears stored OAuth tokens
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
@@ -12311,6 +12352,11 @@ paths:
     post:
       description: Probe a MCP connection to discover tools and verify connectivity
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id

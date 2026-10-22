@@ -9516,7 +9516,12 @@ export type PostBotsByBotIdMcpData = {
      * MCP payload
      */
     body: McpUpsertRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp';
 };
@@ -9556,7 +9561,12 @@ export type PostBotsByBotIdMcpOpsBatchDeleteData = {
      * IDs to delete
      */
     body: HandlersBatchDeleteRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp-ops/batch-delete';
 };
@@ -9587,7 +9597,12 @@ export type PostBotsByBotIdMcpOpsBatchDeleteResponses = {
 
 export type GetBotsByBotIdMcpOpsExportData = {
     body?: never;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp-ops/export';
 };
@@ -9623,7 +9638,12 @@ export type PutBotsByBotIdMcpOpsImportData = {
      * mcpServers dict
      */
     body: McpImportRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp-ops/import';
 };
@@ -9748,6 +9768,10 @@ export type DeleteBotsByBotIdMcpByIdData = {
     body?: never;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP ID
          */
         id: string;
@@ -9787,6 +9811,10 @@ export type DeleteBotsByBotIdMcpByIdResponses = {
 export type GetBotsByBotIdMcpByIdData = {
     body?: never;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP ID
          */
@@ -9832,6 +9860,10 @@ export type PutBotsByBotIdMcpByIdData = {
      */
     body: McpUpsertRequest;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP ID
          */
@@ -10030,6 +10062,10 @@ export type DeleteBotsByBotIdMcpByIdOauthTokenData = {
     body?: never;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP connection ID
          */
         id: string;
@@ -10057,6 +10093,10 @@ export type DeleteBotsByBotIdMcpByIdOauthTokenResponses = {
 export type PostBotsByBotIdMcpByIdProbeData = {
     body?: never;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */

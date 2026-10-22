@@ -1098,7 +1098,7 @@ export const postBotsByBotIdMcpOpsBatchDelete = <ThrowOnError extends boolean = 
  *
  * Export all MCP connections for a bot in standard mcpServers format.
  */
-export const getBotsByBotIdMcpOpsExport = <ThrowOnError extends boolean = false>(options?: Options<GetBotsByBotIdMcpOpsExportData, ThrowOnError>): RequestResult<GetBotsByBotIdMcpOpsExportResponses, GetBotsByBotIdMcpOpsExportErrors, ThrowOnError> => (options?.client ?? client).get<GetBotsByBotIdMcpOpsExportResponses, GetBotsByBotIdMcpOpsExportErrors, ThrowOnError>({ url: '/bots/{bot_id}/mcp-ops/export', ...options });
+export const getBotsByBotIdMcpOpsExport = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdMcpOpsExportData, ThrowOnError>): RequestResult<GetBotsByBotIdMcpOpsExportResponses, GetBotsByBotIdMcpOpsExportErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdMcpOpsExportResponses, GetBotsByBotIdMcpOpsExportErrors, ThrowOnError>({ url: '/bots/{bot_id}/mcp-ops/export', ...options });
 
 /**
  * Import MCP connections
