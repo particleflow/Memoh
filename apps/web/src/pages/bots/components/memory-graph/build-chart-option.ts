@@ -1,4 +1,5 @@
-import type { EChartsType } from 'echarts/core'
+import { SeriesModel, type EChartsType } from 'echarts/core'
+import type { GraphSeriesOption } from 'echarts/charts'
 import { MEMORY_GRAPH_SERIES_ID } from './constants'
 import type { ChartNodeData, ChartTheme, GraphEdgeCandidate, GraphNode, PinnedNodePosition } from './types'
 import { neighborIdsFor } from './graph-data'
@@ -144,11 +145,28 @@ export function buildMemoryGraphOption(input: MemoryGraphOptionInput) {
   }
 }
 
+// ECharts 6 keeps its live-layout accessor internal. Keep that pre-existing
+// integration at one checked boundary: do not cast an untyped model to a
+// fabricated interface or assume that every chart/series is a graph.
+export function memoryGraphSeries(chart: EChartsType, fallbackIndex = 0): SeriesModel<GraphSeriesOption> | undefined {
+  const getModel: unknown = Reflect.get(chart, 'getModel')
+  if (typeof getModel !== 'function') return undefined
+  const model: unknown = Reflect.apply(getModel, chart, [])
+  if (!model || typeof model !== 'object' || !('getSeries' in model) || typeof model.getSeries !== 'function') return undefined
+  const all: unknown = model.getSeries()
+  const isGraph = (value: unknown): value is SeriesModel<GraphSeriesOption> => value instanceof SeriesModel && value.subType === 'graph'
+  if (!Array.isArray(all)) return undefined
+  const matching = all.find((value: unknown): value is SeriesModel<GraphSeriesOption> => isGraph(value) && value.id === MEMORY_GRAPH_SERIES_ID)
+    ?? all.find(isGraph)
+  if (matching) return matching
+  if (!('getSeriesByIndex' in model) || typeof model.getSeriesByIndex !== 'function') return undefined
+  const fallback: unknown = model.getSeriesByIndex(fallbackIndex)
+  return isGraph(fallback) ? fallback : undefined
+}
+
 export function readSeriesZoom(chart: EChartsType): number {
   try {
-    const seriesModel = chart.getModel().getSeries().find(series => (
-      series.id === MEMORY_GRAPH_SERIES_ID || series.subType === 'graph'
-    )) ?? chart.getModel().getSeriesByIndex(0)
+    const seriesModel = memoryGraphSeries(chart)
     const coord = seriesModel?.coordinateSystem as { getZoom?: () => number } | undefined
     const fromCoord = coord?.getZoom?.()
     if (typeof fromCoord === 'number' && Number.isFinite(fromCoord) && fromCoord > 0) return fromCoord
@@ -163,9 +181,7 @@ export function readSeriesZoom(chart: EChartsType): number {
 
 export function readSeriesCenter(chart: EChartsType): [number, number] | null {
   try {
-    const seriesModel = chart.getModel().getSeries().find(series => (
-      series.id === MEMORY_GRAPH_SERIES_ID || series.subType === 'graph'
-    )) ?? chart.getModel().getSeriesByIndex(0)
+    const seriesModel = memoryGraphSeries(chart)
     const center = seriesModel?.get('center')
     if (Array.isArray(center) && center.length >= 2) {
       const x = Number(center[0])
@@ -181,9 +197,7 @@ export function readSeriesCenter(chart: EChartsType): [number, number] | null {
 
 export function nodeDataIndex(chart: EChartsType, nodeId: string): number | null {
   try {
-    const seriesModel = chart.getModel().getSeries().find(series => (
-      series.id === MEMORY_GRAPH_SERIES_ID || series.subType === 'graph'
-    )) ?? chart.getModel().getSeriesByIndex(0)
+    const seriesModel = memoryGraphSeries(chart)
     const data = seriesModel?.getData()
     if (!data) return null
     let found: number | null = null
@@ -207,9 +221,7 @@ export function tooltipPositionForNode(
   if (params.dataType !== 'node' || params.dataIndex == null || !chart) return null
 
   try {
-    const seriesModel = chart.getModel().getSeries().find(series => (
-      series.id === MEMORY_GRAPH_SERIES_ID || series.subType === 'graph'
-    )) ?? chart.getModel().getSeriesByIndex(params.seriesIndex ?? 0)
+    const seriesModel = memoryGraphSeries(chart, params.seriesIndex ?? 0)
     const layout = seriesModel?.getData().getItemLayout(params.dataIndex) as [number, number] | undefined
     if (!layout || !Number.isFinite(layout[0]) || !Number.isFinite(layout[1])) return null
 

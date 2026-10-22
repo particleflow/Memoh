@@ -17,13 +17,16 @@ function entryWith(
   return { key, keyHash: JSON.stringify(key), state: { value: { status, data } } } as unknown as UseQueryEntry
 }
 
-function memoryStorage(initial?: Record<string, string>) {
+function memoryStorage(initial?: Record<string, string>): Storage {
+  const data = new Map<string, string>(Object.entries(initial ?? {}))
   return {
-    data: new Map<string, string>(Object.entries(initial ?? {})),
-    setItem(k: string, v: string) { this.data.set(k, v) },
-    removeItem(k: string) { this.data.delete(k) },
-    getItem(k: string) { return this.data.get(k) ?? null },
-  } as unknown as Storage
+    get length() { return data.size },
+    clear() { data.clear() },
+    key(index) { return [...data.keys()][index] ?? null },
+    setItem(key, value) { data.set(key, value) },
+    removeItem(key) { data.delete(key) },
+    getItem(key) { return data.get(key) ?? null },
+  }
 }
 
 function cacheWith(entries: UseQueryEntry[]) {
@@ -163,7 +166,7 @@ describe('saveQueryCacheToDiskNow', () => {
     const setItem = vi.fn(() => {
       throw new DOMException('quota', 'QuotaExceededError')
     })
-    ;(storage as unknown as { setItem: typeof setItem }).setItem = setItem
+    storage.setItem = setItem
 
     expect(() => saveQueryCacheToDiskNow(cacheWith([entryWith(['models'])]), storage)).not.toThrow()
     saveQueryCacheToDiskNow(cacheWith([entryWith(['models'])]), storage)
@@ -208,14 +211,15 @@ describe('createQueryCachePersistencePlugin', () => {
 
   function pluginHarness(setItem: (key: string, value: string) => void) {
     const storage = memoryStorage()
-    ;(storage as unknown as { setItem: typeof setItem }).setItem = setItem
+    const write = storage.setItem.bind(storage)
+    storage.setItem = setItem
     let onAction: ((ctx: { name: string, after: (cb: () => void) => void }) => void) | undefined
     const queryCache = {
       getEntries: vi.fn(() => [entryWith(['models'])]),
       $onAction: vi.fn((cb: typeof onAction) => { onAction = cb }),
     } as unknown as QueryCache
     createQueryCachePersistencePlugin({ storage })({ queryCache } as never)
-    return { storage, fire: () => onAction?.({ name: 'setEntryState', after: cb => cb() }) }
+    return { storage, write, fire: () => onAction?.({ name: 'setEntryState', after: cb => cb() }) }
   }
 
   it('recovers the debounce after a transient storage error', async () => {
@@ -226,7 +230,7 @@ describe('createQueryCachePersistencePlugin', () => {
         failNext = false
         throw new DOMException('blocked', 'SecurityError')
       }
-      ;(harness.storage as unknown as { data: Map<string, string> }).data.set(key, value)
+      harness.write(key, value)
     })
     const harness = pluginHarness(setItem)
     await Promise.resolve()

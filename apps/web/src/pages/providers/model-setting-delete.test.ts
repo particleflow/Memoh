@@ -73,12 +73,15 @@ vi.mock('@/constants/client-types', () => ({
 vi.mock('@/components/provider-icon/index.vue', () => ({ default: () => h('span') }))
 vi.mock('./components/provider-form.vue', () => ({ default: () => h('div') }))
 vi.mock('./components/model-list.vue', () => ({ default: () => h('div') }))
-vi.mock('lucide-vue-next', () => ({ Trash2: () => h('span') }))
+vi.mock('lucide-vue-next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('lucide-vue-next')>(), Trash2: () => h('span') }))
 
-vi.mock('@felinic/ui', async () => {
+vi.mock('@felinic/ui', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@felinic/ui')>()
   const { defineComponent: define, h: createElement } = await import('vue')
   const Passthrough = (_props: Record<string, unknown>, { slots }: { slots: Slots }) => createElement('div', slots.default?.())
   return {
+    ...original,
     Button: Passthrough,
     ConfirmPopover: define({
       emits: ['confirm'],

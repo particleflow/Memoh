@@ -52,7 +52,7 @@
 
       <div
         v-if="showSentinel"
-        ref="loadMoreSentinel"
+        :ref="setLoadMoreSentinel"
         data-testid="load-more-sentinel"
         class="h-px w-full"
       />
@@ -98,7 +98,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, toRef, watch } from 'vue'
+import { ref, computed, nextTick, toRef, watch, type ComponentPublicInstance } from 'vue'
 import { Plus } from 'lucide-vue-next'
 import { useLocalStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
@@ -208,6 +208,10 @@ const {
   progressCursor: sessionsCursor,
   itemCount: computed(() => visibleSessions.value.length),
 })
+
+function setLoadMoreSentinel(el: Element | ComponentPublicInstance | null) {
+  loadMoreSentinel.value = el instanceof HTMLElement ? el : null
+}
 
 watch(currentBotId, () => {
   nextTick(() => {

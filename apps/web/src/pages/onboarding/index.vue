@@ -27,6 +27,12 @@ const stepComponents = [
 
 
 
+const activeStep = computed(() => {
+  const step = stepComponents[currentStep.value]
+  if (!step) throw new Error('Invalid onboarding step')
+  return step
+})
+
 function readStepFromQuery(): number | null {
   const raw = route.query.step
   if (raw === undefined || raw === '') return null
@@ -65,8 +71,8 @@ watch(() => route.query.step, (val) => {
         :class="currentStep === LAST_STEP_INDEX ? 'max-w-3xl' : currentStep === 4 ? 'max-w-2xl' : 'max-w-lg'"
       >
         <component
-          :is="stepComponents[currentStep].component"
-          v-bind="stepComponents[currentStep].props"
+          :is="activeStep.component"
+          v-bind="activeStep.props"
         />
       </div>
     </div>

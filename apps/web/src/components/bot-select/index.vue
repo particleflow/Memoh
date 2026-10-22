@@ -1,7 +1,7 @@
 <template>
   <Select
     :model-value="modelValue"
-    @update:model-value="$emit('update:modelValue', $event)"
+    @update:model-value="value => { if (typeof value === 'string') $emit('update:modelValue', value) }"
   >
     <SelectTrigger :class="triggerClass">
       <SelectValue :placeholder="placeholder || $t('supermarket.selectBotPlaceholder')">
