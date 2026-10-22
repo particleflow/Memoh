@@ -88,7 +88,7 @@ const renderUrl = computed(() => {
   const hash = (contentHash ?? '').trim()
   const owner = (botId ?? '').trim()
   if (delegationUrl !== undefined) {
-    return resolveUrl({ content_hash: hash, metadata: { delegation_url: delegationUrl } })
+    return resolveUrl({ type: 'file', content_hash: hash, metadata: { delegation_url: delegationUrl } })
   }
   if (hash && owner) {
     return sdkApiUrl({

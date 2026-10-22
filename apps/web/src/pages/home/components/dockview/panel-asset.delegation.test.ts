@@ -6,7 +6,12 @@ import PanelAsset from './panel-asset.vue'
 let credential = 'first'
 vi.mock('@/lib/api-client', () => ({
   sdkAuthQuery: () => ({ token: credential }),
-  sdkApiUrl: ({ url, path, query }: { url: string, path?: Record<string, string>, query: { token: string } }) => `${path ? url.replace('{bot_id}', path.bot_id).replace('{content_hash}', path.content_hash) : url}?token=${query.token}`,
+  sdkApiUrl: ({ url, path, query }: { url: string, path?: Record<string, string>, query: { token: string } }) => {
+    const resolved = path
+      ? Object.entries(path).reduce((result, [key, value]) => result.replace(`{${key}}`, value), url)
+      : url
+    return `${resolved}?token=${query.token}`
+  },
 }))
 vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'supervisor' }) }))
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))

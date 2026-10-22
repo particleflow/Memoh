@@ -108,6 +108,19 @@ describe('tool call registry', () => {
     expect(unnamed).toEqual([])
   })
 
+  it('distinguishes Bot handoff, observation and result delivery from agent spawning', () => {
+    const cases: Array<[string, Record<string, string>, string]> = [
+      ['list_delegate_bots', {}, ''],
+      ['delegate_to_bot', { target_bot_id: 'specialist' }, 'specialist'],
+      ['get_bot_delegation', { delegation_id: 'handoff' }, 'handoff'],
+      ['retry_bot_delivery', { delegation_id: 'handoff' }, 'handoff'],
+    ]
+    for (const [name, input, target] of cases) {
+      expect(getToolDisplay(toolBlock(name, input))).toMatchObject({ actionKey: name, target })
+    }
+    expect(en.chat.tools.retry_bot_delivery).toBe('Retry result delivery')
+  })
+
   it('lets every built-in tool expose its input and result', () => {
     const opaque = BUILT_IN_TOOLS.filter((name) => {
       const display = getToolDisplay(toolBlock(name))

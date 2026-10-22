@@ -1115,6 +1115,14 @@ export function getToolDisplay(block: ToolCallBlock): ToolDisplay {
         target: '',
         detail: ToolCallDetailSpawn,
       }
+    case 'list_delegate_bots':
+      return { icon: ListChecks, actionKey: 'list_delegate_bots', target: '', detail: ToolCallDetailOutput }
+    case 'delegate_to_bot':
+      return { icon: Workflow, actionKey: 'delegate_to_bot', target: pickString(input, 'target_bot_id'), detail: ToolCallDetailOutput }
+    case 'get_bot_delegation':
+      return { icon: ListChecks, actionKey: 'get_bot_delegation', target: pickString(input, 'delegation_id'), detail: ToolCallDetailOutput }
+    case 'retry_bot_delivery':
+      return { icon: RotateCw, actionKey: 'retry_bot_delivery', target: pickString(input, 'delegation_id'), detail: ToolCallDetailOutput }
     case 'use_skill':
       return {
         icon: Sparkles,

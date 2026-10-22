@@ -284,3 +284,25 @@ jobs:
         run: >-
           go test -v -race -tags=integration -count=1 -timeout 90s
           -run '^Test(ConnectorDisconnectFinalizationIsAtomicAndScoped|ComputerDeliveryPostgres.*)$' ./internal/db
+      - name: Verify scoped delegation and task observation on PostgreSQL
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: |
+          : "${TEST_POSTGRES_DSN:?Delegation and task observation tests require PostgreSQL}"
+          set -o pipefail
+          go test -json -race -tags=integration -count=1 -timeout 90s \
+            -run '^Test(BotDelegationPostgresClaimIsolationAndDescendantAssets|SessionTasksPostgresOwnedTreeAndStableCursor)$' ./internal/db | tee delegation-postgres-tests.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          required = {
+              "TestBotDelegationPostgresClaimIsolationAndDescendantAssets",
+              "TestSessionTasksPostgresOwnedTreeAndStableCursor",
+          }
+          events = [json.loads(line) for line in Path("delegation-postgres-tests.jsonl").read_text().splitlines()]
+          passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
+          missing = required - passed
+          if missing:
+              raise SystemExit("Required PostgreSQL tests did not PASS: " + ", ".join(sorted(missing)))
+          print("Verified PostgreSQL PASS: " + ", ".join(sorted(required)))
+          PY
