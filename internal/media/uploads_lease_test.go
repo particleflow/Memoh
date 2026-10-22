@@ -218,46 +218,53 @@ func createTransferUpload(ctx context.Context, t *testing.T, s *UploadStore, b [
 }
 
 func TestExpiredReadyReceiptCollectionPreservesOriginal(t *testing.T) {
-	for _, trigger := range []string{"startup", "periodic", "create"} {
-		t.Run(trigger, func(t *testing.T) {
-			ctx := t.Context()
-			root := t.TempDir()
-			svc := uploadService(t, root, 1024)
-			s := svc.Uploads()
-			now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
-			s.now = func() time.Time { return now }
-			body := []byte("synthetic retained original")
-			u := createUpload(ctx, t, s, body)
-			appendBytes(ctx, t, s, u, body)
-			ready, err := s.Complete(ctx, "owner", "bot", u.ID)
-			if err != nil {
-				t.Fatal(err)
-			}
-			now = ready.ExpiresAt
-			if trigger == "startup" {
-				s = uploadService(t, root, 1024).Uploads()
+	for _, policy := range []struct {
+		name   string
+		create func(context.Context, *testing.T, *UploadStore, []byte) Upload
+	}{{"legacy", createUpload}, {"task-lease", createTransferUpload}} {
+		for _, trigger := range []string{"startup", "periodic", "create"} {
+			t.Run(policy.name+"/"+trigger, func(t *testing.T) {
+				ctx := t.Context()
+				root := t.TempDir()
+				svc := uploadService(t, root, 1024)
+				s := svc.Uploads()
+				now := time.Date(2026, 1, 1, 0, 0, 0, 0, time.UTC)
 				s.now = func() time.Time { return now }
-			}
-			if trigger == "create" {
-				createUpload(ctx, t, s, []byte("other"))
-			} else if err := s.Sweep(ctx); err != nil {
-				t.Fatal(err)
-			}
-			if _, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, ErrUploadNotFound) {
-				t.Fatal("expired legacy receipt remained addressable", err)
-			}
-			if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".json")); !errors.Is(err, os.ErrNotExist) {
-				t.Fatal("expired legacy receipt was not collected", err)
-			}
-			reader, _, err := svc.Open(ctx, "bot", ready.ContentHash)
-			if err != nil {
-				t.Fatal(err)
-			}
-			got, err := io.ReadAll(reader)
-			_ = reader.Close()
-			if err != nil || !bytes.Equal(got, body) || digest(got) != ready.ContentHash {
-				t.Fatal("receipt collection changed the original", err)
-			}
-		})
+				body := []byte("synthetic retained original")
+				u := policy.create(ctx, t, s, body)
+				now = now.Add(23 * time.Hour)
+				appendBytes(ctx, t, s, u, body)
+				now = now.Add(30 * time.Minute)
+				ready, err := s.Complete(ctx, "owner", "bot", u.ID)
+				if err != nil {
+					t.Fatal(err)
+				}
+				now = ready.ExpiresAt
+				if trigger == "startup" {
+					s = uploadService(t, root, 1024).Uploads()
+					s.now = func() time.Time { return now }
+				}
+				if trigger == "create" {
+					createUpload(ctx, t, s, []byte("other"))
+				} else if err := s.Sweep(ctx); err != nil {
+					t.Fatal(err)
+				}
+				if _, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, ErrUploadNotFound) {
+					t.Fatal("expired receipt remained addressable", err)
+				}
+				if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".json")); !errors.Is(err, os.ErrNotExist) {
+					t.Fatal("expired receipt was not collected", err)
+				}
+				reader, _, err := svc.Open(ctx, "bot", ready.ContentHash)
+				if err != nil {
+					t.Fatal(err)
+				}
+				got, err := io.ReadAll(reader)
+				_ = reader.Close()
+				if err != nil || !bytes.Equal(got, body) || digest(got) != ready.ContentHash {
+					t.Fatal("receipt collection changed the original", err)
+				}
+			})
+		}
 	}
 }
