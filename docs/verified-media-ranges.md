@@ -36,7 +36,9 @@ MEMOH_RANGE_VOLUME=1 go test ./internal/media -run '^TestSeekableReadVolume$' -c
 2. **Cold range open establishes trust.** `OpenVerifiedRange` pins a descriptor,
    verifies its complete SHA against the requested content hash, and derives
    1 MiB block SHA-256 digests from those same bytes. File identity/change metadata
-   must match before and after the scan. Cancellation/failure publishes no index.
+   must match before and after the scan. Cancellation publishes no readable index;
+   bounded unfinished work can be resumed as described below. Failed integrity
+   or I/O checks discard unfinished work.
 3. **Warm range reads use guarded evidence.** Cached evidence is bound to the
    provider instance, full Bot routing key, device, inode, size, mode, mtime and
    ctime. File descriptors must be regular and single-linked; final symlinks are
@@ -89,16 +91,17 @@ modify Server memory is outside this boundary.
   the final content hash and must not treat a status code alone as completion.
 - Cached trust does not survive eviction, a new provider instance or restart.
   The first verification can still exceed a two-minute budget on sufficiently
-  large/slow storage. This stage fixes repeated scans while warm; it does not
-  claim persistent sealing or bounded cold-open latency.
+  large/slow storage. Requests can now resume unfinished verification within the
+  same process; no single cold-open latency or retry-count guarantee is made.
 
 ## Compatibility and storage location
 
 Existing originals need no rewrite, sidecar, eager scan, directory move or index
 of Public. Their first range read builds an in-memory index; failure leaves the
-original untouched. The cache contains no original plaintext. Rollback discards
-only process-local optimization state; original bytes and stable references are
-unchanged.
+original untouched. Completed indexes contain only digests; unfinished SHA state
+can retain up to one SHA-256 block of input in process memory. No sidecar or disk
+state is written. Rollback discards only process-local optimization state;
+original bytes and stable references are unchanged.
 
 The existing resolved `cfg.Files.OriginalsRoot` remains the only location input.
 Replacing an original or opening a different mounted object cannot reuse a cache
@@ -155,3 +158,43 @@ and was corrected to test the storage contract directly; browser network-idle
 waiting was replaced with DOM/attachment readiness because the app keeps live
 connections. No production configuration or business code was weakened for
 these checks. See the [validation evidence](validation/media-ranges/README.md).
+
+## Incremental cold-scan continuation
+
+The follow-up to PR #21 retains unfinished verification in the existing LRU,
+separate from a readable `rangeIndex`. It records the same file stamp, block
+digests, completed-block cursor and incremental SHA-256 state. Only the verifier
+holding the key's existing stripe can remove and own this mutable work. A later
+request opens and validates the file again, checks the stamp, then continues at
+the next complete block. The existing HTTP handler authorizes that new request
+before reaching storage. A canceled waiter cannot steal an active verifier's work.
+
+On cancellation, a final descriptor stat must still match before progress is
+retained. I/O errors, hash mismatches, changed stamps and invalid file/link types
+never turn partial work into readable evidence. No Range reader is returned until
+the aggregate SHA matches the requested content hash and the final stamp matches.
+Every subsequently returned block is still checked against that completed index.
+An old prefix combined with a new suffix cannot bypass either the final SHA or
+the per-read block checks. Kernel timestamp limitations remain as documented above.
+
+Unfinished and completed entries share the same 16 MiB digest/cache accounting
+budget and 128-entry LRU. A paused entry retains no descriptor or data buffer.
+Active verification remains limited by the 32 existing stripes, each holding at
+most an 8 MiB index and 1 MiB scan buffer; active reader/index bounds above still
+apply. There is no timer, worker, detached scan or new service. Eviction/restart
+loses unfinished progress and forces complete verification. File, Bot or root
+replacement does not inherit a mismatching file identity's progress.
+
+This improves progress across bounded requests, not completion under arbitrary
+limits. A process restart, cache contention, repeated file mutation, a stalled
+kernel call, or a caller budget too short to finish even one block can still
+prevent progress. A file needing more scan attempts than the client's finite
+retry budget can still exhaust it. Transfer scheduling, HTTP 499 classification
+and blocked-queue reconciliation remain owned by the transfer client workstream.
+Browser cache policy is unchanged: authorization on new Server requests cannot
+revoke bytes already held by a client.
+
+The [cold-scan evidence](validation/cold-scan-resume/README.md) records the
+deterministic deadline reproduction, bounded continuation, fault/concurrency
+checks and synthetic large-file measurements. No production timeout, upload
+limit, mount option or integrity requirement is weakened.

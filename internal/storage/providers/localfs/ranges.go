@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"hash"
 	"hash/fnv"
 	"io"
 	"os"
@@ -38,9 +39,21 @@ type rangeIndex struct {
 	blocks [][sha256.Size]byte
 }
 
+// A scan is unfinished work, never a readable index. Ownership transfers only
+// under the key's verification stripe; the cache never shares a mutable scan.
+// Its hash state and digests are process-local and disappear on restart.
+type rangeScan struct {
+	stamp  fileStamp
+	blocks [][sha256.Size]byte
+	next   int
+	full   hash.Hash
+}
+
 type cachedRange struct {
 	key   string
+	stamp fileStamp
 	index *rangeIndex
+	scan  *rangeScan
 	bytes int
 }
 
@@ -80,12 +93,30 @@ func (c *rangeCache) get(key string, stamp fileStamp) *rangeIndex {
 		return nil
 	}
 	item := e.Value.(cachedRange)
-	if item.index.stamp != stamp {
+	if item.stamp != stamp {
 		c.remove(e)
 		return nil
 	}
 	c.lru.MoveToFront(e)
 	return item.index
+}
+
+func (c *rangeCache) takeScan(key string, stamp fileStamp) *rangeScan {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	e := c.items[key]
+	if e == nil {
+		return nil
+	}
+	item := e.Value.(cachedRange)
+	if item.stamp != stamp {
+		c.remove(e)
+		return nil
+	}
+	if item.scan != nil {
+		c.remove(e) // Only the active verifier owns/mutates the state now.
+	}
+	return item.scan
 }
 
 func (c *rangeCache) remove(e *list.Element) {
@@ -96,14 +127,21 @@ func (c *rangeCache) remove(e *list.Element) {
 }
 
 func (c *rangeCache) put(key string, index *rangeIndex) {
+	c.putEntry(cachedRange{key: key, stamp: index.stamp, index: index, bytes: len(index.blocks)*sha256.Size + len(key) + 512})
+}
+
+func (c *rangeCache) putScan(key string, scan *rangeScan) {
+	c.putEntry(cachedRange{key: key, stamp: scan.stamp, scan: scan, bytes: len(scan.blocks)*sha256.Size + len(key) + 512})
+}
+
+func (c *rangeCache) putEntry(item cachedRange) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if old := c.items[key]; old != nil {
+	if old := c.items[item.key]; old != nil {
 		c.remove(old)
 	}
-	n := len(index.blocks)*sha256.Size + len(key) + 256
-	c.items[key] = c.lru.PushFront(cachedRange{key: key, index: index, bytes: n})
-	c.bytes += n
+	c.items[item.key] = c.lru.PushFront(item)
+	c.bytes += item.bytes
 	for c.bytes > rangeCacheBytes || len(c.items) > rangeCacheItems {
 		c.remove(c.lru.Back())
 	}
@@ -173,7 +211,11 @@ func (p *Originals) OpenVerifiedRange(ctx context.Context, key string) (storage.
 	}
 	index := p.ranges.get(key, stamp)
 	if index == nil {
-		index, err = p.verifyRangeIndex(ctx, f, stamp, expected)
+		var paused *rangeScan
+		index, paused, err = p.verifyRangeIndex(ctx, f, stamp, expected, p.ranges.takeScan(key, stamp))
+		if paused != nil {
+			p.ranges.putScan(key, paused)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -191,40 +233,59 @@ func stampFile(f *os.File) (fileStamp, error) {
 	return originalStamp(info)
 }
 
-func (p *Originals) verifyRangeIndex(ctx context.Context, f *os.File, stamp fileStamp, expected string) (*rangeIndex, error) {
+func (p *Originals) verifyRangeIndex(ctx context.Context, f *os.File, stamp fileStamp, expected string, scan *rangeScan) (*rangeIndex, *rangeScan, error) {
 	if stamp.size < 0 || stamp.size > int64(rangeIndexLimit/sha256.Size)*rangeBlockBytes {
-		return nil, storage.ErrVerifiedRangeUnsupported
+		return nil, nil, storage.ErrVerifiedRangeUnsupported
 	}
-	count := (stamp.size + rangeBlockBytes - 1) / rangeBlockBytes
-	index := &rangeIndex{stamp: stamp, blocks: make([][sha256.Size]byte, count)}
+	if scan == nil {
+		count := (stamp.size + rangeBlockBytes - 1) / rangeBlockBytes
+		scan = &rangeScan{stamp: stamp, blocks: make([][sha256.Size]byte, count), full: sha256.New()}
+	}
 	buffer := make([]byte, rangeBlockBytes)
-	full := sha256.New()
-	for i := range index.blocks {
+	for scan.next < len(scan.blocks) {
 		if err := ctx.Err(); err != nil {
-			return nil, err
+			return scan.pause(f, err)
 		}
+		i := scan.next
 		offset := int64(i) * rangeBlockBytes
 		chunk := buffer[:min(int64(len(buffer)), stamp.size-offset)]
 		if n, err := p.readAt(f, chunk, offset); err != nil || n != len(chunk) {
-			return nil, errors.Join(io.ErrUnexpectedEOF, err)
+			return nil, nil, errors.Join(io.ErrUnexpectedEOF, err)
 		}
-		_, _ = full.Write(chunk)
-		index.blocks[i] = sha256.Sum256(chunk)
+		_, _ = scan.full.Write(chunk)
+		scan.blocks[i] = sha256.Sum256(chunk)
+		scan.next++
 	}
-	if hex.EncodeToString(full.Sum(nil)) != expected {
-		return nil, errors.New("original content hash mismatch")
+	if hex.EncodeToString(scan.full.Sum(nil)) != expected {
+		return nil, nil, errors.New("original content hash mismatch")
 	}
 	after, err := stampFile(f)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if after != stamp {
-		return nil, errOriginalChanged
+		return nil, nil, errOriginalChanged
 	}
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return scan.pause(f, err)
 	}
-	return index, nil
+	return &rangeIndex{stamp: stamp, blocks: scan.blocks}, nil, nil
+}
+
+func (s *rangeScan) pause(f *os.File, cause error) (*rangeIndex, *rangeScan, error) {
+	// Retain only complete reads from an unchanged descriptor. A read error or
+	// changed identity discards progress, rather than salvaging uncertain bytes.
+	after, err := stampFile(f)
+	if err != nil {
+		return nil, nil, err
+	}
+	if after != s.stamp {
+		return nil, nil, errOriginalChanged
+	}
+	if s.next == 0 {
+		return nil, nil, cause
+	}
+	return nil, s, cause
 }
 
 type verifiedRange struct {
