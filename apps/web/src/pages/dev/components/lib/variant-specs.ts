@@ -10,8 +10,8 @@
 export interface VariantSpec {
   /** The cva variant-axis prop name (usually 'variant', 'orientation' for ButtonGroup). */
   axis: string
-  variants: string[]
-  sizes?: string[]
+  variants: readonly string[]
+  sizes?: readonly string[]
 }
 
 export const variantSpecs = {
@@ -34,4 +34,4 @@ export const variantSpecs = {
     axis: 'orientation',
     variants: ['horizontal', 'vertical'],
   },
-} satisfies Record<string, VariantSpec>
+} as const satisfies Record<string, VariantSpec>

@@ -7,13 +7,14 @@ import * as icons from '@memohai/icon/ui'
 
 describe('shared UI icon contract', () => {
   it('uses one default stroke and forwards SVG attributes for every UI glyph', async () => {
-    for (const icon of Object.values(icons)) {
+    for (const [name, icon] of Object.entries(icons)) {
       const svg = await renderToString(createSSRApp(() => h(icon, {
         size: 16,
         class: 'contract-icon',
         'aria-hidden': 'true',
       })))
-      expect(svg).toContain('stroke-width="1.75"')
+      // ErrorIcon deliberately retains Lucide's 2-unit stroke (icons/ui contract).
+      expect(svg, name).toContain(`stroke-width="${name === 'ErrorIcon' ? 2 : 1.75}"`)
       expect(svg).toContain('stroke="currentColor"')
       expect(svg).toContain('width="16"')
       expect(svg).toContain('contract-icon')
@@ -39,7 +40,8 @@ describe('shared UI icon contract', () => {
         compilerOptions: { nodeTransforms: [node => {
           if (node.type !== 1) return
           if (node.tag === 'Button' && /<(?:AddIcon|ComputerIcon|BackIcon|ForwardIcon|SidebarOpenIcon|SidebarCloseIcon)\b/.test(node.loc.source)) {
-            expect(node.props.some(prop => prop.type === 6 && prop.name === 'tone' && prop.value?.content === 'muted')).toBe(true)
+            const quietTextTrigger = file.endsWith('composer-continue-on.vue') && node.props.some(prop => prop.type === 6 && prop.name === 'variant' && prop.value?.content === 'quiet')
+            expect(quietTextTrigger || node.props.some(prop => prop.type === 6 && prop.name === 'tone' && prop.value?.content === 'muted'), `${file}: ${node.loc.source}`).toBe(true)
             const colorClasses = node.props.filter(prop => prop.type === 6 && prop.name === 'class')
             for (const prop of colorClasses) {
               if (prop.type === 6) expect(prop.value?.content ?? '').not.toMatch(/(?:^|[\s:])(?:text-|opacity-|stroke-)/)

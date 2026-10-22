@@ -31,7 +31,8 @@ vi.mock('@felinic/ui', () => ({
   toast: { error: vi.fn() },
 }))
 
-vi.mock('lucide-vue-next', () => ({
+vi.mock('lucide-vue-next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('lucide-vue-next')>(),
   Binary: EmptyComponent('Binary'),
   Settings: EmptyComponent('Settings'),
   Trash2: EmptyComponent('Trash2'),

@@ -43,7 +43,8 @@ vi.mock('@/composables/useProviderModelCatalog', () => ({
   useProviderModelCatalog: () => ({ syncProviderModelCatalog: vi.fn() }),
 }))
 
-vi.mock('lucide-vue-next', () => ({
+vi.mock('lucide-vue-next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('lucide-vue-next')>(),
   KeyRound: () => h('span'),
   RefreshCw: () => h('span'),
 }))

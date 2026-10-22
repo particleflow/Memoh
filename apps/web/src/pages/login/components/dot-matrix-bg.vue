@@ -103,9 +103,10 @@ function sampleTrack(track: KeyframeTrack, frame: number, comp = 0): number {
   const frames = track.frames!
   if (!frames.length) return 0
   let i = 0
-  while (i < frames.length - 1 && frames[i + 1].t <= frame) i++
+  while (i < frames.length - 1 && (frames[i + 1]?.t ?? Infinity) <= frame) i++
   const a = frames[i]
   const b = frames[Math.min(i + 1, frames.length - 1)]
+  if (!a || !b) return 0
   if (a.t === b.t) {
     const v = a.v
     return typeof v === 'number' ? v : (v[comp] ?? 0)
@@ -320,7 +321,7 @@ function render(now: number) {
   const gain = isDark ? GAIN_DARK : GAIN_LIGHT
   for (let pixel = 0; pixel < cols * rows; pixel++) {
     const offset = pixel * 4
-    const raw = fieldData[offset + 3] / 255
+    const raw = (fieldData[offset + 3] ?? 0) / 255
     const level = raw <= 0.04 ? 0 : Math.min(LEVELS, Math.round(raw * LEVELS))
     maskData[offset + 3] = Math.round((level / LEVELS) * gain * 255)
   }

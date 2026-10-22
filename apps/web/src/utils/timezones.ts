@@ -60,7 +60,10 @@ if (typeof window !== 'undefined') {
   let i = 0
   const warmChunk = () => {
     const end = Math.min(i + 40, timezones.length)
-    for (; i < end; i++) getUtcOffsetLabel(timezones[i])
+    for (; i < end; i++) {
+      const timezone = timezones[i]
+      if (timezone !== undefined) getUtcOffsetLabel(timezone)
+    }
     if (i < timezones.length) scheduleIdle(warmChunk)
   }
   scheduleIdle(warmChunk)

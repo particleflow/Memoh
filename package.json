@@ -53,7 +53,8 @@
       ]
     },
     "overrides": {
-      "@memohai/icon": "workspace:*"
+      "@memohai/icon": "workspace:*",
+      "vue": "3.5.40"
     }
   }
 }

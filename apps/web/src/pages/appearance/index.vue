@@ -447,9 +447,11 @@ const shikiThemeDarkSelection = computed<string>({
   set: (value) => setShikiTheme('dark', value as BundledTheme),
 })
 
-const currentColorScheme = computed(() =>
-  colorSchemes.find(scheme => scheme.id === colorScheme.value) ?? colorSchemes[0],
-)
+const currentColorScheme = computed(() => {
+  const scheme = colorSchemes.find(item => item.id === colorScheme.value) ?? colorSchemes[0]
+  if (!scheme) throw new Error('No color scheme is defined')
+  return scheme
+})
 
 function previewSwatches(scheme: ColorSchemeOption) {
   return isDark.value ? scheme.darkSwatches : scheme.swatches

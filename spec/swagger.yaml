@@ -12316,6 +12316,16 @@ paths:
       description: Frontend callback page calls this to exchange the authorization
         code for access/refresh tokens
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: MCP connection ID
+        in: path
+        name: id
+        required: true
+        type: string
       - description: Authorization code and state
         in: body
         name: payload

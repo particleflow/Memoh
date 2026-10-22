@@ -150,7 +150,7 @@
               >
                 <Checkbox
                   :model-value="selectedCompat.includes(opt.value)"
-                  @update:model-value="(val: boolean) => toggleCompat(opt.value, val)"
+                  @update:model-value="(val) => toggleCompat(opt.value, val === true)"
                 />
                 {{ $t(`models.compatibility.${opt.value}`) }}
               </label>
@@ -429,7 +429,12 @@ async function addModel() {
     type,
     description: form.values.description,
     dimensions: dimensions ?? (isEdit ? fallback!.config?.dimensions : undefined),
-    contextWindow: form.values.context_window ?? (isEdit ? fallback!.config?.context_window : undefined),
+    // A cleared input holds ''. That removes the stored context window, so it
+    // must not fall through to the edit fallback below.
+    contextWindow: form.values.context_window === ''
+      ? undefined
+      : (typeof form.values.context_window === 'number' ? form.values.context_window : undefined)
+        ?? (isEdit ? fallback!.config?.context_window : undefined),
     maxOutputTokens: (typeof form.values.max_output_tokens === 'number' ? form.values.max_output_tokens : undefined)
       ?? (isEdit ? fallback!.config?.max_output_tokens : undefined),
     compatibilities: selectedCompat.value,
@@ -457,7 +462,9 @@ async function addModel() {
         if (modelUUID) {
           return updateModel({ id: modelUUID, data })
         }
-        return updateModelByLegacyModelID({ modelId: fallback!.model_id, data })
+        const legacyModelId = fallback?.model_id
+        if (!legacyModelId) throw new Error('model identifier is missing')
+        return updateModelByLegacyModelID({ modelId: legacyModelId, data })
       }
       return (async () => {
         const providerId = props.id ?? await props.ensureProviderId?.()

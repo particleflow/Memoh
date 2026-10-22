@@ -10021,7 +10021,16 @@ export type PostBotsByBotIdMcpByIdOauthExchangeData = {
      * Authorization code and state
      */
     body: HandlersOauthExchangeRequest;
-    path?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * MCP connection ID
+         */
+        id: string;
+    };
     query?: never;
     url: '/bots/{bot_id}/mcp/{id}/oauth/exchange';
 };

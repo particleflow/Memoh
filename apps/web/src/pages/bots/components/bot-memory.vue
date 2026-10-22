@@ -383,10 +383,10 @@
 
 <script setup lang="ts">
 import { Brain, CalendarDays, Plus, RefreshCw, Search, Trash2, X } from 'lucide-vue-next'
-import type { DateRange } from 'reka-ui'
+import type { DateRange } from '@felinic/ui'
 import { DateFormatter, getLocalTimeZone, today } from '@internationalized/date'
 import { until, useIntersectionObserver } from '@vueuse/core'
-import { computed, ref, watch } from 'vue'
+import { computed, ref, shallowRef, watch } from 'vue'
 import {
   Button,
   Textarea,
@@ -503,7 +503,7 @@ const graphRef = ref<InstanceType<typeof MemoryGraph> | null>(null)
 
 const compactPopoverOpen = ref(false)
 const compactRatio = ref('0.5')
-const compactDecayRange = ref<DateRange | undefined>({ start: today(getLocalTimeZone()), end: today(getLocalTimeZone()) })
+const compactDecayRange = shallowRef<DateRange | undefined>({ start: today(getLocalTimeZone()), end: today(getLocalTimeZone()) })
 const compactDecayFormatter = new DateFormatter(locale.value, { dateStyle: 'medium' })
 const compactDecayLabel = computed(() => {
   if (!compactDecayRange.value?.start) return ''
