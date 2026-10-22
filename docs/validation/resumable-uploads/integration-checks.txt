@@ -1,0 +1,12 @@
+Integration checks on implementation commit 2472cbbaea9308a458a6ee31ae4b7a8e9aa43a0f, 2026-10-21:
+PASS conflict-free rebase on verified main a819c75ed94ae06a3a8196e9416302b18d8dd34f; both reviewed PR8 patches identical by git range-diff
+PASS related-package ordinary and full race suites, including agenvo/computertask
+PASS current-source Server build and isolated startup/readiness/authentication
+PASS Swagger/SDK regeneration with zero tracked diff and SDK typecheck
+PASS golangci-lint 2.10.1 --new-from-rev=origin/main for media/handlers/storage/server/core/agenvo/computertask (exit 0, no findings)
+PASS existing configuration/override and upload-limit tests
+PASS real cross-origin OPTIONS and generated SDK non-UTF8 Blob upload/readback
+PASS real HTTP 200/512 MiB, restart at 16 MiB, resumed final SHA readback
+PASS fresh real UI picker and pending 1200000-byte text preview; no Send/model invocation
+PASS official Agent core guard and zero changes to Agent/PiJSON/database packages relative to new main
+No NAS, production directory/volume, Windows client, or physical-power-loss test was performed.

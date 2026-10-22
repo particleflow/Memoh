@@ -189,6 +189,46 @@ func (p *Originals) Put(ctx context.Context, key string, reader io.Reader) error
 	return p.syncDirectory(root, dir)
 }
 
+// EnsureDurable completes file and directory barriers after an interrupted
+// publication. Reopening/verifying a hash alone cannot establish this guarantee.
+func (p *Originals) EnsureDurable(ctx context.Context, key string) error {
+	bot, name, _, err := mediaKey(key)
+	if err != nil {
+		return err
+	}
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	// This also syncs the configured root's ancestry and the Bot entry.
+	root, err := p.botRoot(bot, true)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = root.Close() }()
+	f, err := root.Open(name)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = f.Close() }()
+	info, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() {
+		return errors.New("media object is not a regular file")
+	}
+	if err := p.syncFile(f); err != nil {
+		return err
+	}
+	if err := p.syncDirectory(root, path.Dir(name)); err != nil {
+		return err
+	}
+	if err := p.syncDirectory(root, "."); err != nil {
+		return err
+	}
+	return ctx.Err()
+}
+
 func (p *Originals) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 	bot, name, expected, err := mediaKey(key)
 	if err != nil {

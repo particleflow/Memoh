@@ -31,6 +31,13 @@ type Provider interface {
 	AccessPath(ctx context.Context, key string) string
 }
 
+// DurabilityEnsurer repairs a possibly interrupted publication before a caller
+// acknowledges an existing object or discards its last staging copy. Open alone
+// proves readability, not that a prior rename's directory entry was synced.
+type DurabilityEnsurer interface {
+	EnsureDurable(ctx context.Context, key string) error
+}
+
 // AccessPathEnsurer is implemented by providers that can materialize an object
 // into consumer-addressable storage before returning its path.
 type AccessPathEnsurer interface {
