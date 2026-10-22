@@ -18,34 +18,61 @@ func TestWindowsNativePublicationReceiptBoundary(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { _ = p.Close() })
-	j := newJob([]byte("receipt-boundary"))
-	ref := Reference{OperationID: j.OperationID, BotID: j.BotID, ContentHash: j.Spec.SHA256, SizeBytes: j.Spec.SizeBytes, Mime: j.Spec.Mime}
-	for i := 1; i <= 128; i++ {
-		ref.DeliveryID = fmt.Sprintf("fence-%03d", i)
+	var refs []Reference
+	for i := range 160 {
+		ref := metadataReference(fmt.Sprintf("native-fence-%03d", i))
+		refs = append(refs, ref)
 		if out, err := p.Resolve(t.Context(), ref, true); err != nil || out != OutcomeCanceled {
-			t.Fatalf("receipt %d: %s %v", i, out, err)
+			t.Fatal(i, out, err)
 		}
 	}
-	if err := p.Close(); err != nil {
-		t.Fatal(err)
-	}
+	_ = p.Close()
 	p, err = q.OpenNativePublication(authorize)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if out, err := p.Resolve(t.Context(), ref, true); err != nil || out != OutcomeCanceled {
-		t.Fatal("128th replay after reopen at capacity", out, err)
+	defer func() { _ = p.Close() }()
+	for _, ref := range refs {
+		if out, err := p.Resolve(t.Context(), ref, false); err != nil || out != OutcomeCanceled {
+			t.Fatal("retained tombstone", out, err)
+		}
 	}
-	ref.DeliveryID = "fence-129"
-	if out, err := p.Resolve(t.Context(), ref, true); !errors.Is(err, ErrCapacity) || out != "" {
-		t.Fatal("129th fence must fail without acknowledgment", out, err)
+	conflict := refs[0]
+	conflict.OperationID = "different-operation"
+	if _, err := p.Resolve(t.Context(), conflict, true); !errors.Is(err, ErrPublicationConflict) {
+		t.Fatal("same ID conflict", err)
 	}
-	if _, err := p.root.Lstat(publicationKey(ref) + ".journal"); !errors.Is(err, os.ErrNotExist) {
-		t.Fatal("rejected fence consumed a receipt", err)
+}
+
+func TestWindowsNativePublicationBucketBudget(t *testing.T) {
+	q := nativeQueue(t, nativeFixtureRoot(t, false))
+	p, err := q.OpenNativePublication(func(ctx context.Context, _ Reference) error { return ctx.Err() })
+	if err != nil {
+		t.Fatal(err)
 	}
-	if out, err := p.Resolve(t.Context(), ref, false); err != nil || out != OutcomeAbsent {
-		t.Fatal("rejected fence fabricated cancellation", out, err)
+	defer func() { _ = p.Close() }()
+	var refs []Reference
+	for n := 0; len(refs) < publicationReceipts+1; n++ {
+		ref := metadataReference(fmt.Sprintf("same-bucket-%d", n))
+		bucket, _ := publicationBucket(publicationKey(ref) + ".journal")
+		if bucket == 0 {
+			refs = append(refs, ref)
+		}
+	}
+	for _, ref := range refs[:publicationReceipts] {
+		if out, err := p.Resolve(t.Context(), ref, true); err != nil || out != OutcomeCanceled {
+			t.Fatal(out, err)
+		}
+	}
+	last := refs[publicationReceipts]
+	if out, err := p.Resolve(t.Context(), last, true); !errors.Is(err, ErrCapacity) || out != "" {
+		t.Fatal("bucket quota", out, err)
+	}
+	if out, err := p.Resolve(t.Context(), last, false); err != nil || out != OutcomeAbsent {
+		t.Fatal("failed reservation fabricated fence", out, err)
+	}
+	if out, err := p.Resolve(t.Context(), refs[0], true); err != nil || out != OutcomeCanceled {
+		t.Fatal("full budget blocked replay", out, err)
 	}
 }
 

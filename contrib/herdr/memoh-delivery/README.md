@@ -224,5 +224,28 @@ receipt and seal), supports original-ID inspect/admission without producer
 bytes, and never deletes unknown evidence. It has 256 deterministic buckets,
 each capped at 1 MiB framed metadata and 1024 files (filesystem overhead extra).
 Bucket exhaustion fails with capacity and preserves the source journal. There
-is no automatic history deletion. Native publication's separate 128-object and
-retained-byte limits remain unchanged; this does not make downloads unbounded.
+is no automatic history deletion. Native publication keeps its separate retained-byte budget; plugin 0.7 adds
+explicit publication metadata migration described below. Downloads remain bounded.
+
+## Publication metadata maintenance (0.7.0)
+
+`migrate-publications` upgrades the existing private publication locator v1 through
+closed maintenance state v0 to v2. Stop all old writers and save a complete raw
+state backup first. Queue locator v3 is required; use the separate history action
+first when upgrading a v2 queue. Ordinary publication opens reject old or pending
+layouts. No installer, credential or NAS call is added by this action.
+
+The action returns `{"publication_layout":0,"migration":"pending"}` while more
+finite maintenance is required, and `{"publication_layout":2,"migration":"complete"}`
+when the metadata layout is ready. Each call copies or removes at most 16 old
+journal paths, after synchronizing the destination first. Final files, their
+identity and original published/fenced records remain retained. Do not infer a
+successful download from the maintenance result.
+
+Locator v2's explicit defaults are 64 buckets of at most 128 records, each journal
+at most 64 KiB (512 MiB maximum journal metadata plus filesystem/cache overhead).
+A full bucket returns capacity and never evicts a proof. Objects retain the
+separate existing byte limit, default CLI 256 MiB; Queue Retire does not free them.
+See `docs/delivery-publication-metadata.md` for accounting, crash and rollback
+boundaries. Larger sustainable object storage and ownership-based cleanup remain
+unimplemented. This component does not perform endpoint installation or upgrades.
