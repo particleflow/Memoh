@@ -6,6 +6,26 @@ This normal merge combines `cec5f22d0931f63b97d8d27a1eccf0873c51b734`
 Both histories are retained. This work resolves compatibility conflicts; it does
 not extend the CrossBot product surface or change the official Agent runtime.
 
+## Evidence availability correction
+
+The tested product remains `9bd82f57d66846a6d6c36c3515f0344acf16a9f7`.
+This documentation-only follow-up publishes previously retained evidence; no
+product test or business execution was rerun for this follow-up. The repository's
+`*.log` ignore rule had omitted the eight linked log files from the fixed tree.
+The reviewed files now use `.txt` names and are added individually; the related
+local image-fixture retry output is also linked.
+
+[The evidence manifest](evidence-manifest.json) records each published hash,
+retained source hash, derivation and redaction status. Eight files preserve the
+retained text-log bytes. Go JSON-derived files contain decoded `Output` fields,
+not the original JSON stream bytes; the combined Range file deliberately selects
+the two named tests. The corresponding JSON stream hashes and selection rules
+are recorded. The SDK transcript is a **redacted copy**, replacing one local
+repository-root path, adding a notice and removing one terminal blank line.
+Its original is retained privately,
+and its original and published hashes differ as documented. No credentials,
+private network addresses, real user text or private server logs are included.
+
 ## Six conflict resolutions
 
 | File | Resolution |
@@ -28,17 +48,17 @@ parents remain. [Migration evidence](migration-preservation.json) compares every
 
 - `go test -p 3 -run '^$' ./...`: all 218 package output lines completed, exit 0.
   This is a compile check, not execution of every repository test.
-  [Raw output](go-compile-raw.log).
+  [Raw output](go-compile-raw.txt).
 - Actual PG, integration build tag and nonempty isolated DSN: **20 passed, zero
   skipped**. Pattern: `Test(BotDelegationPostgres|ComputerDeliveryPostgres|ComputerTransfer|SessionTasksPostgres)`.
   The full formal chain, canonical init-only snapshot and 170→171→172→173 path
   execute. New assertions retain exact existing runtime credentials and operation
   JSON across 172→173, plus the legacy-writer guard and delegation forced RLS.
-  [Original Go output](pg-go-raw.log).
+  [Go output decoded from captured JSON](pg-go-output.txt).
 - New task-transfer HTTP test: exact Range bytes/Content-Range, 416/no-store,
   size conflict, mismatched hash, revocation and anonymous rejection. Existing
   CrossBot JWT/scoped-original tests pass alongside it.
-  [Raw output](range-combined-raw.log), [race output](range-race-raw.log).
+  [Selected Go test output](range-combined-output.txt), [race output](range-race-raw.txt).
 - Twelve related Go packages passed, with 3,130 pass events and 65 explicit skips
   (counts include subtests). Most skipped cases require separate application PG
   environment variables; the opt-in media volume benchmark is also skipped.
@@ -49,19 +69,20 @@ parents remain. [Migration evidence](migration-preservation.json) compares every
   fixtures. The seven tests passed after removing proxy variables for that test
   process; their real TCP connection is explicitly redirected to `httptest` by
   the existing fixture. No paid image provider was called.
-- SDK `tsc` passed. [Output](sdk-typecheck-raw.log).
+  [Local retry output](tool-local-retry-output.txt) is decoded from the retained Go JSON.
+- SDK `tsc` passed. [Redacted output](sdk-typecheck-redacted.txt).
 - Full Web typecheck **failed** with the same 153 diagnostic headers as the saved
   exact a68 baseline: zero added/removed. [Comparison](web-typecheck-comparison.json).
 - Normal handler/DB lint passed, as did integration-tag incremental lint
   against 834. [Command results](check-results.json).
 - Integration-tag full DB lint **failed** with 18 diagnostics in seven files,
-  all byte-identical to 834. [Raw lint](pg-lint-raw.log),
+  all byte-identical to 834. [Raw lint](pg-lint-raw.txt),
   [unchanged-file comparison](pg-lint-existing-files.json). The incremental check
   against 834 passed. This does not claim the full integration lint is green.
 
 The first new HTTP fixture attempt reused an upload delivery ID for download
 and received the expected immutable-identity conflict. The fixture now gives
-independent downloads their own identity. [First attempt](range-fixture-first-attempt.log)
+independent downloads their own identity. [First attempt](range-fixture-first-attempt-output.txt)
 is retained; no product authorization was weakened to make it pass.
 
 ## Real application and UI
@@ -83,7 +104,7 @@ One fresh synthetic business execution verifies the combined application's new
 input → specialist send → final supervisor attachment chain, original owners,
 exact attachment counts, reopen identity, terminal/empty-queue observations,
 Range/If-Range/HEAD/416 and anonymous rejection. Attachments contain only 31 and
-40 bytes. [Raw output](native-combination-raw.log),
+40 bytes. [Raw output](native-combination-raw.txt),
 [structured result](native-combination-results.json). A separate actual API
 revocation/restoration check denies both scoped originals with 404/no-store and
 restores exact bytes under the same explicit grant permissions.

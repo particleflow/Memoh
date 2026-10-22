@@ -1,0 +1,16 @@
+=== RUN   TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage
+--- PASS: TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage (0.00s)
+=== RUN   TestGenerateDashScopeQwenImageUsesProviderDefaultSizeWhenUnspecified
+--- PASS: TestGenerateDashScopeQwenImageUsesProviderDefaultSizeWhenUnspecified (0.00s)
+=== RUN   TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL
+--- PASS: TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL (0.00s)
+=== RUN   TestImageResultToGeneratedImageRejectsNonImageURL
+--- PASS: TestImageResultToGeneratedImageRejectsNonImageURL (0.00s)
+=== RUN   TestImageResultToGeneratedImageRejectsSpoofedImageContentType
+--- PASS: TestImageResultToGeneratedImageRejectsSpoofedImageContentType (0.00s)
+=== RUN   TestFetchGeneratedImageRejectsEmptyBody
+--- PASS: TestFetchGeneratedImageRejectsEmptyBody (0.00s)
+=== RUN   TestFetchGeneratedImageTruncatesLargeErrorBody
+--- PASS: TestFetchGeneratedImageTruncatesLargeErrorBody (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/tool	0.041s
