@@ -184,6 +184,8 @@ type oauthExchangeRequest struct {
 // @Summary Exchange OAuth authorization code for tokens
 // @Description Frontend callback page calls this to exchange the authorization code for access/refresh tokens
 // @Tags mcp
+// @Param bot_id path string true "Bot ID"
+// @Param id path string true "MCP connection ID"
 // @Param payload body oauthExchangeRequest true "Authorization code and state"
 // @Success 200 {object} map[string]bool
 // @Failure 400 {object} server.Problem

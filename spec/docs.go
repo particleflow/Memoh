@@ -6830,6 +6830,20 @@ const docTemplate = `{
                 "summary": "Exchange OAuth authorization code for tokens",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "MCP connection ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "Authorization code and state",
                         "name": "payload",
                         "in": "body",

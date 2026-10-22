@@ -2,6 +2,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createApp, defineComponent, h, nextTick, ref } from 'vue'
 import type { Slots } from 'vue'
+import type { ProvidersGetResponse } from '@memohai/sdk'
 
 const mocks = vi.hoisted(() => ({
   postProvidersFromTemplate: vi.fn(),
@@ -69,14 +70,17 @@ vi.mock('./components/model-list.vue', () => ({
     setup: () => () => h('div', { 'data-testid': 'model-list' }),
   }),
 }))
-vi.mock('lucide-vue-next', () => ({
+vi.mock('lucide-vue-next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('lucide-vue-next')>(),
   Trash2: () => h('span'),
 }))
 
-vi.mock('@felinic/ui', async () => {
+vi.mock('@felinic/ui', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@felinic/ui')>()
   const { defineComponent: define, h: createElement } = await import('vue')
   const Passthrough = (_props: Record<string, unknown>, { slots }: { slots: Slots }) => h('div', slots.default?.())
   return {
+    ...original,
     Button: Passthrough,
     ConfirmPopover: Passthrough,
     SettingsShell: Passthrough,
@@ -119,7 +123,7 @@ describe('provider draft enable', () => {
 
   it('keeps a template draft local when enabling before save', async () => {
     const ModelSetting = (await import('./model-setting.vue')).default
-    const provider = ref({
+    const provider = ref<ProvidersGetResponse | undefined>({
       provider_template_id: 'template-newapi',
       name: 'New API',
       client_type: 'openai-completions',
@@ -151,7 +155,7 @@ describe('provider draft enable', () => {
     ;(root.querySelector('[data-testid="provider-enable"]') as HTMLButtonElement).click()
     await flushPromises()
 
-    expect(provider.value.enable).toBe(true)
+    expect(provider.value?.enable).toBe(true)
     expect(mocks.postProvidersFromTemplate).not.toHaveBeenCalled()
     expect(mocks.postProvidersByIdImportModels).not.toHaveBeenCalled()
     expect(mocks.putProvidersById).not.toHaveBeenCalled()

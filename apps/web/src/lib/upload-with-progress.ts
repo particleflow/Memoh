@@ -61,9 +61,11 @@ export function uploadWithProgress<T>(options: UploadOptions): Promise<T> {
         resolve(parsed as T)
         return
       }
-      const detail
-        = (parsed && typeof parsed === 'object'
-          && ((parsed as { message?: string }).message || (parsed as { error?: string }).error))
+      const body = parsed && typeof parsed === 'object' ? parsed : undefined
+      const message = body && 'message' in body ? body.message : undefined
+      const error = body && 'error' in body ? body.error : undefined
+      const detail = (typeof message === 'string' && message)
+        || (typeof error === 'string' && error)
         || `Request failed with status ${xhr.status}`
       reject(new Error(detail))
     }

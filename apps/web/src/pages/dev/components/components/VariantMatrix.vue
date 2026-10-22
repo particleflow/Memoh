@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="Variant extends string, Size extends string">
 // Renders a component across a variant × size grid. Variant/size keys are
 // passed in explicitly (see lib/variant-specs.ts) — cva 0.7.1 doesn't expose
 // its config for runtime introspection.
@@ -6,8 +6,8 @@
 // The default scoped slot receives `{ variant, size }` (size is undefined when
 // no sizes are supplied).
 const props = withDefaults(defineProps<{
-  variants: string[]
-  sizes?: string[]
+  variants: readonly Variant[]
+  sizes?: readonly Size[]
   /** Axis label shown above each row, e.g. 'variant' or 'orientation'. */
   axisLabel?: string
   /** Sizes a given variant doesn't support, e.g. { outline: ['sm'] } — those
@@ -17,7 +17,7 @@ const props = withDefaults(defineProps<{
   axisLabel: 'variant',
 })
 
-function cellsFor(variant: string): (string | undefined)[] {
+function cellsFor(variant: Variant): (Size | undefined)[] {
   if (!props.sizes?.length)
     return [undefined]
   const excluded = props.excludeSizes?.[variant] ?? []

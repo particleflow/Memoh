@@ -3,7 +3,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createApp, h, nextTick } from 'vue'
 
-vi.mock('lucide-vue-next', () => ({
+vi.mock('lucide-vue-next', async (importOriginal) => ({
+  ...await importOriginal<typeof import('lucide-vue-next')>(),
   Settings: () => h('span', { 'data-testid': 'settings-icon' }),
 }))
 

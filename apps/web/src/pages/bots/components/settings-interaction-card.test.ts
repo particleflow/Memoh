@@ -217,11 +217,13 @@ describe('settings interaction default Agent selector', () => {
   })
 
 	it('hides Agents whose provider setup is incomplete', async () => {
+		const configuredAgent = botAgents[1]
+		if (!configuredAgent) throw new Error('configured Agent fixture is missing')
 		const form = createForm()
 		const { app, root } = await mountCard(form, {
 			botAgents: [
 				{ ...botAgents[0], agent_credential_id: undefined },
-				botAgents[1],
+				configuredAgent,
 				{ ...botAgents[2], metadata: { provider: 'custom-agent', managed: {} } },
 			],
 		})
