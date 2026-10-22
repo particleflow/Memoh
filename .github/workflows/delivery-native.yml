@@ -35,7 +35,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Execute native tests
-        run: go test -count=1 -v -timeout=5m ./internal/transferclient
+        run: go test -count=1 -v -timeout=5m ./internal/transferclient ./cmd/transferqueue
       - name: Execute native publication with PostgreSQL
         run: ./scripts/test-native-delivery-postgres.ps1
       - name: Build reviewed binary bundle

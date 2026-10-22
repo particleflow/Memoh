@@ -342,16 +342,43 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	client.CloseIdleConnections()
 	job.DeliveryID, job.SnapshotID = "native-second-download", "native-second-download"
 	ref.DeliveryID = job.DeliveryID
-	client, err = transferclient.NewDeviceTask(https.URL, job, "download", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
-	if err != nil {
+	// Run the actual configured finite command boundary, reopening all native
+	// handles each invocation. Only TLS trust and device verifier are fixtures.
+	_ = publication.Close()
+	_ = queue.Close()
+	configRoot := nativeDeliveryPrivateRoot(t)
+	configJSON, _ := json.Marshal(map[string]any{"version": 1, "origin": https.URL, "source_root": ""})
+	if err := os.WriteFile(filepath.Join(configRoot, "transfer.json"), configJSON, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	defer client.CloseIdleConnections()
-	if err := queue.Admit(ctx, "download", job, nil); err != nil {
+	if err := os.WriteFile(filepath.Join(configRoot, "device.credential"), []byte("isolated-transfer-fixture"), 0o600); err != nil {
 		t.Fatal(err)
 	}
+	getenv := func(key string) string {
+		if key == "HERDR_PLUGIN_CONFIG_DIR" {
+			return configRoot
+		}
+		if key == "HERDR_PLUGIN_STATE_DIR" {
+			return root
+		}
+		return ""
+	}
+	job.Task = pgDeviceTask(id)
+	invoke := func(kind string) transferclient.QueueStatus {
+		t.Helper()
+		now := time.Now()
+		if status.AssociationDue.After(now) {
+			now = status.AssociationDue
+		}
+		result, err := transferclient.InvokeConfiguredHerdr(ctx, getenv, "native-pg-fixture-v1", transferclient.QueueLimits{Jobs: 4, Bytes: 8 << 20, JournalBytes: 1 << 20, Workers: 1}, transferclient.ConfiguredAction{Kind: kind, DeliveryID: job.DeliveryID, Job: job}, https.Client(), now)
+		if err != nil {
+			t.Fatal("configured finite action", kind, err)
+		}
+		return result
+	}
+	status = invoke("enqueue-download")
 	for range 12 {
-		status = step(client.DeliveryBinding(publication))
+		status = invoke("advance-next")
 		if status.Associated {
 			break
 		}
@@ -360,6 +387,8 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	if !status.Associated {
 		t.Fatal("same device did not deliver second file", status)
 	}
+	queue = openQueue()
+	publication = openPublication()
 	reader, err = publication.OpenPublished(ctx, ref)
 	if err != nil {
 		t.Fatal(err)
@@ -368,5 +397,14 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	_ = reader.Close()
 	if err != nil || string(got) != string(data) {
 		t.Fatal("second file integrity", err)
+	}
+	_ = publication.Close()
+	_ = queue.Close()
+	job.DeliveryID, job.SnapshotID = "native-cross-target", "native-cross-target"
+	job.Task.TargetID = uuid.NewString()
+	status = invoke("enqueue-download")
+	status = invoke("advance")
+	if status.Job.Phase != "blocked" || status.Job.ErrorCode != "authorization" || status.Associated {
+		t.Fatal("configured device crossed PostgreSQL target scope", status)
 	}
 }

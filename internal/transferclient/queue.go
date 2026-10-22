@@ -17,6 +17,8 @@ var (
 // are correlation only until the host's authorized registration endpoint binds
 // them on the server. No secret or physical filesystem path belongs here.
 type Job struct {
+	Task            DeviceTask `json:"device_task,omitzero"`
+	HostBinding     string     `json:"host_binding,omitempty"`
 	Version         int        `json:"version"`
 	DeliveryID      string     `json:"delivery_id"`
 	BotID           string     `json:"bot_id"`

@@ -98,35 +98,35 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	return q.save(journal, r)
 }
 
-func (q *DiskQueue) capacity(add int64) error {
+func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 	dir, err := q.root.Open(".")
 	if err != nil {
-		return ErrStore
+		return nil, ErrStore
 	}
 	defer func() { _ = dir.Close() }()
 	entries, err := dir.ReadDir(q.limits.Jobs*5 + 136)
 	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*5+136 {
-		return ErrCapacity
+		return nil, ErrCapacity
 	}
-	count, total := 0, int64(0)
+	var records []QueueStatus
 	for _, e := range entries {
 		if !strings.HasSuffix(e.Name(), ".journal") {
 			continue
 		}
 		id := strings.TrimSuffix(e.Name(), ".journal")
 		if !validID(id) {
-			return ErrStore
+			return nil, ErrStore
 		}
 		f, err := q.physicalFile(e.Name(), os.O_RDONLY, 0o600)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		var head [36]byte
 		_, err = io.ReadFull(f, head[:])
 		size := int64(binary.BigEndian.Uint32(head[:4]))
 		if err != nil || size < 1 || size > 16384 {
 			_ = f.Close()
-			return ErrStore
+			return nil, ErrStore
 		}
 		body := make([]byte, int(size))
 		_, err = io.ReadFull(f, body)
@@ -134,9 +134,20 @@ func (q *DiskQueue) capacity(add int64) error {
 		sum := sha256.Sum256(body)
 		var r QueueStatus
 		if err != nil || !bytes.Equal(sum[:], head[4:]) || json.Unmarshal(body, &r) != nil || !q.validRecord(r, r.Job.DeliveryID) || queueName(r.Job.DeliveryID+".journal") != e.Name() {
-			return ErrStore
+			return nil, ErrStore
 		}
-		count++
+		records = append(records, r)
+	}
+	return records, nil
+}
+
+func (q *DiskQueue) capacity(add int64) error {
+	records, err := q.admissions()
+	if err != nil {
+		return err
+	}
+	total := int64(0)
+	for _, r := range records {
 		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes
 		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
@@ -144,7 +155,7 @@ func (q *DiskQueue) capacity(add int64) error {
 		total += reserved
 	}
 	add += snapshotTreeBytes(add) + admissionFileBytes
-	if count >= q.limits.Jobs || add > q.limits.Bytes-total {
+	if len(records) >= q.limits.Jobs || add > q.limits.Bytes-total {
 		return ErrCapacity
 	}
 	return queueFreeSpace(q.root, add+total)
