@@ -13,6 +13,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/background"
 	"github.com/felinics/memoh/internal/agent/toolexec"
+	"github.com/felinics/memoh/internal/imagejob"
 )
 
 const (
@@ -27,13 +28,18 @@ const (
 
 // BackgroundProvider exposes background task observation and control tools.
 type BackgroundProvider struct {
-	bgManager *background.Manager
+	imageResults func(context.Context, SessionContext, []string) ([]imagejob.Result, error)
+	bgManager    *background.Manager
 }
 
 func NewBackgroundProvider(_ *slog.Logger, bgManager *background.Manager) *BackgroundProvider {
 	return &BackgroundProvider{
 		bgManager: bgManager,
 	}
+}
+
+func (p *BackgroundProvider) SetImageResults(fn func(context.Context, SessionContext, []string) ([]imagejob.Result, error)) {
+	p.imageResults = fn
 }
 
 func (*BackgroundProvider) Usage(_ context.Context, _ SessionContext, available AvailableTools) string {
@@ -257,7 +263,7 @@ func emitWaitProgress(sendProgress func(sdk.ToolOutput), payload map[string]any)
 	}
 }
 
-func (p *BackgroundProvider) execGetBackgroundStatus(_ context.Context, session SessionContext, args taskArgs) (any, error) {
+func (p *BackgroundProvider) execGetBackgroundStatus(ctx context.Context, session SessionContext, args taskArgs) (any, error) {
 	taskID := strings.TrimSpace(args.TaskID)
 	if taskID == "" {
 		return nil, errors.New("task_id is required")
@@ -266,7 +272,22 @@ func (p *BackgroundProvider) execGetBackgroundStatus(_ context.Context, session 
 	if task == nil {
 		return nil, fmt.Errorf("task %s not found", taskID)
 	}
-	return backgroundStatusMap(session, task.Snapshot()), nil
+	snapshot := task.Snapshot()
+	result := backgroundStatusMap(session, snapshot)
+	if len(snapshot.ImageTaskIDs) > 0 {
+		if p.imageResults == nil {
+			return nil, imagejob.ErrDenied
+		}
+		images, err := p.imageResults(ctx, session, snapshot.ImageTaskIDs)
+		if err != nil {
+			return nil, err
+		}
+		result["image_tasks"] = images
+		if refs := imageResultRefs(images); len(refs) > 0 {
+			result["artifact_refs"] = refs
+		}
+	}
+	return result, nil
 }
 
 func (p *BackgroundProvider) execKillBackground(_ context.Context, session SessionContext, args taskArgs) (any, error) {

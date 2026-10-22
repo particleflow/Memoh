@@ -444,10 +444,10 @@ func (s *RemoteWorkspaceService) target(ctx context.Context, record dbstore.BotR
 		if config, err := agenvo.DecodeTarget(record.RuntimeProviderConfig); err == nil && config.Agent != (agenvo.AgentProfile{}) {
 			target.Capabilities = append(target.Capabilities, "herdr_pi_task")
 		}
-		target.Status = WorkspaceTargetStatusOffline
-		if s.agenvo != nil && s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig) == nil {
-			target.Status = WorkspaceTargetStatusOnline
-			target.Online = true
+		target.Status = "connection_unavailable"
+		if s.agenvo != nil {
+			target.Status = agenvo.Availability(s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig))
+			target.Online = target.Status == WorkspaceTargetStatusOnline
 		}
 	case s.runtimes == nil:
 		target.Status = WorkspaceTargetStatusOffline

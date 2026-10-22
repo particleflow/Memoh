@@ -1,6 +1,7 @@
 package computertask
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
@@ -307,11 +309,114 @@ func parseResult(t *testing.T, raw []byte) Result {
 	return v.Computer
 }
 
+func TestStandardMCPPreflightFailureHasNonRetryableStructuredFacts(t *testing.T) {
+	source, store, transport, _ := setupBatch(t)
+	source.service.authorize = func(context.Context, toolcontext.ComputerBinding, string, string, string) error {
+		return fmt.Errorf("private diagnostic SECRET: %w", ErrPreflightUnavailable)
+	}
+	client := standardClient(t, source, "pc-a", false)
+	response, err := client.CallTool(t.Context(), &sdkmcp.CallToolParams{Name: "computer_task_submit", Arguments: map[string]any{"kind": "herdr_pi_task", "task": "Compute synthetic 42", "work_dir": "."}})
+	if err != nil || !response.IsError {
+		t.Fatalf("MCP preflight result=%v err=%v", response, err)
+	}
+	wire, err := json.Marshal(response.StructuredContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var facts map[string]any
+	if err := json.Unmarshal(wire, &facts); err != nil {
+		t.Fatal(err)
+	}
+	retry, ok := facts["retry"].(map[string]any)
+	if !ok || facts["ok"] != false || facts["code"] != "computer.connection_unavailable" || facts["phase"] != "preflight" || facts["operation_created"] != false || facts["business_dispatched"] != false || retry["automatic"] != false || retry["requires"] != "verified_connection_recovery" {
+		t.Fatalf("preflight machine contract=%s", wire)
+	}
+	if _, exists := facts["computer"]; exists {
+		t.Fatal("invented operation receipt")
+	}
+	if _, exists := facts["operation_id"]; exists {
+		t.Fatal("invented operation ID")
+	}
+	if len(response.Content) != 1 {
+		t.Fatal("missing MCP text fallback")
+	}
+	text, ok := response.Content[0].(*sdkmcp.TextContent)
+	if !ok || text.Text != string(wire) {
+		t.Fatal("MCP text and structured facts differ")
+	}
+	if strings.Contains(string(wire), "SECRET") || len(store.records) != 0 || len(transport.calls) != 0 || transport.runs != 0 {
+		t.Fatal("private diagnostic leaked or preflight dispatched work")
+	}
+}
+
+func TestStandardMCPPreflightFailurePreservesUnknownOperation(t *testing.T) {
+	source, store, transport, _ := setupBatch(t)
+	transport.lost, transport.missing = true, true
+	var unavailable atomic.Bool
+	authorize := source.service.authorize
+	source.service.authorize = func(ctx context.Context, b toolcontext.ComputerBinding, target, kind, task string) error {
+		if unavailable.Load() {
+			return ErrPreflightUnavailable
+		}
+		return authorize(ctx, b, target, kind, task)
+	}
+	client := standardClient(t, source, "pc-a", false)
+	args := map[string]any{"kind": "herdr_pi_task", "task": "Compute synthetic 42", "work_dir": "."}
+	old := parseResult(t, invoke(t, client, "computer_task_submit", args, true))
+	if old.ID == "" || old.State != "unknown" || transport.runs != 1 {
+		t.Fatal("fixture did not persist the single uncertain dispatch")
+	}
+	snapshot := func() []byte {
+		t.Helper()
+		store.mu.Lock()
+		defer store.mu.Unlock()
+		raw, err := json.Marshal(store.records)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return raw
+	}
+	before, calls := snapshot(), len(transport.calls)
+	unavailable.Store(true)
+	// Deliberately hostile client retries exercise the server boundary; these
+	// are not automatic retries or permission to resubmit a real unknown task.
+	for _, task := range []string{"Compute synthetic 42", "A different synthetic task"} {
+		for _, explicit := range []bool{false, true} {
+			retryArgs := map[string]any{"kind": "herdr_pi_task", "task": task, "work_dir": "."}
+			if explicit {
+				retryArgs["target_id"] = "pc-a"
+			}
+			raw := invoke(t, client, "computer_task_submit", retryArgs, true)
+			var facts map[string]any
+			if err := json.Unmarshal(raw, &facts); err != nil {
+				t.Fatal(err)
+			}
+			retry, ok := facts["retry"].(map[string]any)
+			if !ok || facts["code"] != "computer.connection_unavailable" || facts["operation_created"] != false || facts["business_dispatched"] != false || retry["automatic"] != false {
+				t.Fatalf("missing current-call preflight facts: %s", raw)
+			}
+			if !bytes.Equal(before, snapshot()) || len(transport.calls) != calls || transport.runs != 1 {
+				t.Fatal("failed preflight changed the old record/revision or redispatched")
+			}
+		}
+	}
+	// Restoring connectivity is not permission to forget the unresolved claim.
+	unavailable.Store(false)
+	got := parseResult(t, invoke(t, client, "computer_task_submit", args, false))
+	if got.ID != old.ID || got.State != "unknown" {
+		t.Fatal("recovered connection did not retain the original unknown receipt")
+	}
+	blocked := parseResult(t, invoke(t, client, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "A different synthetic task"}, true))
+	if blocked.ID != old.ID || blocked.BlockedByOperation != old.ID || !bytes.Equal(before, snapshot()) || len(transport.calls) != calls || transport.runs != 1 {
+		t.Fatal("connection recovery released the old slot or dispatched another task")
+	}
+}
+
 func TestStandardMCPTrustedPCBindingAndSingleTask(t *testing.T) {
 	source, _, f := setup(t)
 	c := standardClient(t, source, "pc-a", false)
 	tools, err := c.ListTools(t.Context(), nil)
-	if err != nil || len(tools.Tools) != 6 {
+	if err != nil || len(tools.Tools) != 9 {
 		t.Fatalf("tools=%v err=%v", tools, err)
 	}
 	listing := invoke(t, c, "computer_targets", map[string]any{}, false)
@@ -361,7 +466,7 @@ func TestStandardMCPUnknownIsDurableAndCancellationDoesNotKill(t *testing.T) {
 		t.Fatalf("cancel=%+v runs=%d", cancel, f.runs)
 	}
 	store.revoked = true
-	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_cancel", "computer_task_artifact"} {
+	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_cancel", "computer_task_artifact", "computer_task_logs"} {
 		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, true)
 	}
 }

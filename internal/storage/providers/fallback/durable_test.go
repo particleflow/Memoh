@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -11,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/storage"
 	"github.com/felinics/memoh/internal/storage/providers/localfs"
 )
 
@@ -124,5 +126,35 @@ func TestDurablePreservesLegacyAndFailsClosedOnOriginalWriteFailure(t *testing.T
 	}
 	if _, err := broken.Open(ctx, key); err == nil {
 		t.Fatal("served legacy bytes while original storage was unavailable")
+	}
+}
+
+func TestDurableVerifiedRangeImportsLegacyButNeverMasksCorruption(t *testing.T) {
+	ctx := t.Context()
+	payload := []byte("legacy range synthetic original")
+	hash := fmt.Sprintf("%x", sha256.Sum256(payload))
+	key := "bot-a/" + hash[:2] + "/" + hash + ".txt"
+	workspace, spill := newMemoryProvider("/data"), newMemoryProvider("")
+	spill.values[key] = payload
+	root := t.TempDir()
+	p := NewDurable(workspace, localfs.NewOriginals(root), spill)
+	r, err := p.OpenVerifiedRange(ctx, key)
+	if errors.Is(err, storage.ErrVerifiedRangeUnsupported) {
+		t.Skip("filesystem/OS retains the legacy complete verification path")
+	}
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := io.ReadAll(r)
+	_ = r.Close()
+	if err != nil || !bytes.Equal(got, payload) || !bytes.Equal(spill.values[key], payload) {
+		t.Fatal("legacy range migration lost bytes", err)
+	}
+	if err := os.WriteFile(filepath.Join(root, key), []byte("corrupt canonical copy"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if r, err := p.OpenVerifiedRange(ctx, key); err == nil {
+		_ = r.Close()
+		t.Fatal("canonical corruption fell back to a valid legacy copy")
 	}
 }

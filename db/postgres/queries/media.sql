@@ -126,3 +126,13 @@ WHERE a.team_id = public.memoh_current_team_id() AND m.team_id = public.memoh_cu
 
 -- name: DeleteMessageAssets :exec
 DELETE FROM bot_history_message_assets WHERE team_id = public.memoh_current_team_id() AND message_id = sqlc.arg(message_id);
+
+-- name: SessionHasMediaAsset :one
+SELECT EXISTS (
+  SELECT 1 FROM bot_history_message_assets asset
+  JOIN bot_history_messages message ON message.id = asset.message_id AND message.team_id = asset.team_id
+  WHERE asset.team_id = public.memoh_current_team_id()
+    AND message.bot_id = sqlc.arg(bot_id)
+    AND message.session_id = sqlc.arg(session_id)
+    AND asset.content_hash = sqlc.arg(content_hash)
+);

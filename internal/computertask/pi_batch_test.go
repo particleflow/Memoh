@@ -80,6 +80,31 @@ type batchTransport struct {
 	pending                                          string
 	rejectRead                                       bool
 	pageOffsets                                      []int
+	completion                                       []byte
+	noCompletion                                     bool
+	completionAttempt                                string
+	logReads                                         int
+}
+
+func (f *batchTransport) projectCompletion() {
+	if f.progress.CompletionVersion == 0 || f.noCompletion || !f.receipt.Started {
+		f.receipt.Completion = nil
+		return
+	}
+	parsed := agenvo.VerifyPiJSON(bytes.NewReader(f.stdout), f.progress.PiSessionID, "synthetic", "synthetic-model", f.receipt.ExitCode)
+	if f.receipt.Stdout.Size > 64<<20 {
+		parsed = agenvo.PiJSONResult{Outcome: "output_limit"}
+	}
+	if parsed.Outcome == "invalid_protocol" {
+		parsed.Output, parsed.StopReason, parsed.Truncated = "", "", false
+	}
+	p := f.progress
+	if f.completionAttempt != "" {
+		p.Attempt = f.completionAttempt
+	}
+	f.completion, _ = json.Marshal(agenvo.BatchCompletion{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Stdout: f.receipt.Stdout, Result: parsed})
+	meta := batchFile("result.json", f.completion)
+	f.receipt.Completion = &meta
 }
 
 func syntheticPiStream(session, reason string) []byte {
@@ -126,6 +151,7 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 		f.t.Fatalf("wrong device mapping: %v", target)
 	}
 	f.calls = append(f.calls, method)
+	f.projectCompletion()
 	body := map[string]any{}
 	switch method {
 	case "workspace.create":
@@ -179,6 +205,12 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 			data := f.stdout
 			if strings.Contains(script, "/stderr.txt\"") {
 				data = f.stderr
+			}
+			if strings.Contains(script, "/stdout.jsonl\"") || strings.Contains(script, "/stderr.txt\"") {
+				f.logReads++
+			}
+			if strings.Contains(script, "/result.json\"") {
+				data = f.completion
 			}
 			if strings.Contains(script, "/receipt.json\"") {
 				data, _ = json.Marshal(f.receipt)
@@ -321,6 +353,18 @@ func batchResultUntilReady(t *testing.T, c *sdkmcp.ClientSession, id string) Res
 	return Result{}
 }
 
+func batchLogsUntilReady(t *testing.T, c *sdkmcp.ClientSession, id string) Result {
+	t.Helper()
+	for range 10 {
+		r := parseResult(t, invoke(t, c, "computer_task_logs", map[string]any{"operation_id": id}, false))
+		if r.DiagnosticsState == "ready" {
+			return r
+		}
+	}
+	t.Fatal("bounded diagnostic collection did not finish")
+	return Result{}
+}
+
 func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
 	source, _, f, a := setupBatch(t)
 	f.hiddenFrame = true // Recover the durable receipt after terminal eviction.
@@ -347,7 +391,11 @@ func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
 	if got.State != "completed" || !got.ProcessStopped || got.ExitCode == nil || *got.ExitCode != 0 || got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {
 		t.Fatalf("result=%+v", got)
 	}
-	if got.StdoutHash != f.receipt.Stdout.Hash || got.StderrHash != f.receipt.Stderr.Hash || f.reads < 3 {
+	if got.StdoutHash != "" || got.StderrHash != "" || f.logReads != 0 || len(a.data) != 0 || got.DiagnosticsState != "not_collected" {
+		t.Fatal("small completion depended on diagnostic log transfer")
+	}
+	got = batchLogsUntilReady(t, c, r.ID)
+	if got.StdoutHash != f.receipt.Stdout.Hash || got.StderrHash != f.receipt.Stderr.Hash || got.PiResult.Outcome != "succeeded" {
 		t.Fatal("missing paged ready refs")
 	}
 	if !bytes.Equal(a.data[got.StderrHash], f.stderr) {
@@ -393,7 +441,7 @@ func TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest(t *test
 	}
 	store.revoked = true
 	before := len(f.calls)
-	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_artifact", "computer_task_cancel"} {
+	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_artifact", "computer_task_cancel", "computer_task_logs"} {
 		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, true)
 	}
 	if before != len(f.calls) {
@@ -402,14 +450,17 @@ func TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest(t *test
 }
 
 func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
-	for _, mode := range []string{"exit0_error", "nonzero", "output_limit", "bad_hash", "reused_control", "storage_failure", "wrong_receipt", "revoked_mid_read"} {
+	for _, mode := range []string{"exit0_error", "nonzero", "aborted", "output_limit", "bad_hash", "reused_control", "wrong_receipt", "revoked_mid_read", "missing_completion", "other_attempt"} {
 		t.Run(mode, func(t *testing.T) {
-			source, store, f, a := setupBatch(t)
+			source, store, f, _ := setupBatch(t)
 			if mode == "exit0_error" {
 				f.reason = "error"
 			}
 			if mode == "nonzero" {
 				f.exit = 7
+			}
+			if mode == "aborted" {
+				f.reason = "aborted"
 			}
 			c := standardClient(t, source, "pc-a", false)
 			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
@@ -420,14 +471,16 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 				f.corrupt = true
 			case "reused_control":
 				f.changedPane = true
-			case "storage_failure":
-				a.fail = true
+			case "missing_completion":
+				f.noCompletion = true
+			case "other_attempt":
+				f.completionAttempt = strings.Repeat("f", 32)
 			case "wrong_receipt":
 				f.receipt.RequestHash = strings.Repeat("0", 64)
 			case "revoked_mid_read":
 				f.onPage = func() { store.revoked = true }
 			}
-			wantError := mode != "exit0_error" && mode != "nonzero" && mode != "output_limit"
+			wantError := mode != "exit0_error" && mode != "nonzero" && mode != "output_limit" && mode != "aborted"
 			raw := invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, wantError)
 			if strings.Contains(string(raw), "PRIVATE-") {
 				t.Fatal("private cause leaked")
@@ -438,13 +491,16 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 					got = batchResultUntilReady(t, c, r.ID)
 				}
 				outcome := "failed"
+				if mode == "aborted" {
+					outcome = "aborted"
+				}
 				if mode == "output_limit" {
 					outcome = "output_limit"
 				}
 				if got.PiResult == nil || got.PiResult.Outcome != outcome || !got.ProcessStopped {
 					t.Fatalf("failed invocation=%+v", got)
 				}
-				if mode == "output_limit" && (f.reads != 0 || got.StdoutHash != "" || got.StderrHash != "") {
+				if mode == "output_limit" && (f.logReads != 0 || got.StdoutHash != "" || got.StderrHash != "") {
 					t.Fatal("oversized output imported")
 				}
 			} else {
@@ -459,6 +515,9 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 				if mode == "wrong_receipt" && persisted.State == "completed" {
 					t.Fatal("unrelated receipt released slot")
 				}
+			}
+			if mode == "other_attempt" || mode == "missing_completion" {
+				invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, true)
 			}
 			if f.runs != 1 {
 				t.Fatal("automatic Pi retry")
@@ -503,6 +562,10 @@ func TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs(t *testing.T) {
 				f.receipt.ExitCode = 125
 			}
 			got := batchResultUntilReady(t, c, r.ID)
+			if f.logReads != 0 {
+				t.Fatal("empty-output result fetched logs")
+			}
+			got = batchLogsUntilReady(t, c, r.ID)
 			want := map[string]string{"stderr": "succeeded", "stdout": "invalid_protocol", "not_started": "not_started"}[mode]
 			if !got.ProcessStopped || got.PiResult == nil || got.PiResult.Outcome != want {
 				t.Fatalf("empty output=%+v", got)
@@ -534,7 +597,11 @@ func TestStandardMCPPiBatchDelayedFramesWithinVendorLimits(t *testing.T) {
 			f.stderr = []byte(strings.Repeat("z", 6000))
 			f.receipt.Stderr = batchFile("stderr.txt", f.stderr)
 			got := batchResultUntilReady(t, c, r.ID)
-			if got.PiResult.Outcome != "succeeded" || got.StderrHash != f.receipt.Stderr.Hash || f.maxLines > 500 || f.runs != 1 || f.reads != 5 {
+			if got.PiResult.Outcome != "succeeded" || got.StderrHash != "" || f.logReads != 0 || f.reads != 2 {
+				t.Fatal("completion required more than receipt and small result")
+			}
+			got = batchLogsUntilReady(t, c, r.ID)
+			if got.PiResult.Outcome != "succeeded" || got.StderrHash != f.receipt.Stderr.Hash || f.maxLines > 500 || f.runs != 1 || f.reads != 6 {
 				t.Fatalf("result or single read dispatch contract: result=%+v runs=%d reads=%d lines=%d", got, f.runs, f.reads, f.maxLines)
 			}
 			if columns == 16384 && f.oversized == 0 {
@@ -603,6 +670,9 @@ func TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart(t *testing.T
 	_ = json.Unmarshal(old.Details, &d)
 	attempt := d.Batch.Progress.Attempt
 	d.Batch.Progress.LayoutVersion = 0 // Historical JSON had no layout_version.
+	d.Batch.Progress.CompletionVersion = 0
+	f.progress.CompletionVersion = 0
+	f.receipt.Completion = nil
 	d.Batch.Receipt = &f.receipt
 	d.Batch.Files = []BatchTransfer{
 		{Meta: stdout, Offset: stdout.Size, ReadyHash: stdout.Hash, Chunks: []BatchChunk{{Hash: stdout.Hash, Size: stdout.Size}}},
@@ -676,5 +746,37 @@ func TestStandardMCPPiBatchCompleteReceiptBudgetWithLongNativeIDs(t *testing.T) 
 	got := batchResultUntilReady(t, c, r.ID)
 	if got.PiResult.Outcome != "succeeded" || f.runs != 1 {
 		t.Fatal("receipt recovery was truncated by a data-page budget")
+	}
+}
+
+func TestCompactResultIndependentOfLogStorageAndSurvivesRestart(t *testing.T) {
+	source, store, f, a := setupBatch(t)
+	a.fail = true // Media outage must not withhold the small semantic result.
+	c := standardClient(t, source, "pc-a", false)
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	f.corrupt = true
+	first := parseResult(t, invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, true))
+	if !first.ProcessStopped || first.PiResult != nil || f.runs != 1 {
+		t.Fatal("read failure altered invocation evidence")
+	}
+	f.corrupt = false
+	restarted := NewSource(NewService(store, store, source.service.relay, a, source.service.authorize))
+	resumed := standardClient(t, restarted, "pc-a", false)
+	got := batchResultUntilReady(t, resumed, r.ID)
+	if got.PiResult.Outcome != "succeeded" || f.logReads != 0 || len(a.data) != 0 || f.runs != 1 {
+		t.Fatal("summary required log storage or redispatched")
+	}
+	invoke(t, resumed, "computer_task_logs", map[string]any{"operation_id": r.ID}, true)
+	failedLogs := parseResult(t, invoke(t, resumed, "computer_task_result", map[string]any{"operation_id": r.ID}, false))
+	if failedLogs.PiResult == nil || failedLogs.PiResult.Outcome != "succeeded" || failedLogs.StdoutHash != "" || f.runs != 1 {
+		t.Fatal("diagnostic failure overwrote semantic result")
+	}
+	before := len(f.calls)
+	store.revoked = true
+	for _, tool := range []string{"computer_task_result", "computer_task_get", "computer_task_logs", "computer_task_artifact"} {
+		invoke(t, resumed, tool, map[string]any{"operation_id": r.ID}, true)
+	}
+	if len(f.calls) != before {
+		t.Fatal("revoked diagnostic request reached PC")
 	}
 }

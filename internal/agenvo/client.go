@@ -144,6 +144,9 @@ func (c *Client) relay(ctx context.Context, scope Scope, expected Target, method
 	code := "return await call(" + string(target) + "," + string(name) + "," + string(args) + ");"
 	raw, err := c.callTool(ctx, current.ConnectionID, "execute", map[string]any{"code": code})
 	if err != nil {
+		if errors.Is(err, ErrAuthenticationUnavailable) {
+			return Receipt{}, errors.Join(ErrUnknown, ErrAuthenticationUnavailable)
+		}
 		return Receipt{}, ErrUnknown
 	}
 	value, err := decodeToolResult(raw)
@@ -155,6 +158,9 @@ func (c *Client) relay(ctx context.Context, scope Scope, expected Target, method
 		return Receipt{}, ErrUnknown
 	}
 	if receipt.Error != nil {
+		if availability := nativeAvailability(receipt); availability != nil {
+			return receipt, errors.Join(ErrRejected, availability)
+		}
 		if receipt.Execution == "rejected" || receipt.Execution == "not_started" {
 			return receipt, ErrRejected
 		}

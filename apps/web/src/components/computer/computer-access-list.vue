@@ -73,7 +73,7 @@
               class="size-1.5 rounded-full"
               :class="row.online ? 'bg-success' : 'bg-accent-gray-border'"
             />
-            {{ row.online ? t('runtimes.status.online') : t('runtimes.status.offline') }}
+            {{ t(`runtimes.status.${row.availability}`) }}
           </span>
           <Switch
             :model-value="overrides.get(row.key) ?? row.enabled"
@@ -117,6 +117,7 @@
 </template>
 
 <script setup lang="ts">
+import { runtimeAvailability } from '@/utils/workspace-target'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuery } from '@pinia/colada'
@@ -161,7 +162,7 @@ type AccessRow = {
   targetId?: string
 } & (
   | { kind: 'bot', avatarUrl?: string }
-  | { kind: 'runtime', online: boolean }
+  | { kind: 'runtime', online: boolean, availability: string }
 )
 
 const { t } = useI18n()
@@ -216,6 +217,7 @@ const rows = computed<AccessRow[]>(() => {
       runtimeId: runtime.id,
       name: runtime.name || runtime.hostname || runtime.id,
       online: runtime.online ?? false,
+      availability: runtimeAvailability(runtime),
       enabled: !!grant,
       targetId: grant?.target_id,
     }]

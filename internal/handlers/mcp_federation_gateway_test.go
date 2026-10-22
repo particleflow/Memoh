@@ -1,8 +1,11 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -13,6 +16,39 @@ import (
 
 	mcpgw "github.com/felinics/memoh/internal/mcp"
 )
+
+func TestFederationCallMarksObserved401AfterSuccessfulInitialization(t *testing.T) {
+	for _, status := range []int{http.StatusUnauthorized, http.StatusBadGateway} {
+		t.Run(http.StatusText(status), func(t *testing.T) {
+			server := newTestMCPServer()
+			handler := sdkmcp.NewStreamableHTTPHandler(func(*http.Request) *sdkmcp.Server { return server }, nil)
+			var rejected atomic.Int32
+			httpServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodPost {
+					raw, _ := io.ReadAll(r.Body)
+					_ = r.Body.Close()
+					r.Body = io.NopCloser(bytes.NewReader(raw))
+					var request struct {
+						Method string `json:"method"`
+					}
+					_ = json.Unmarshal(raw, &request)
+					if request.Method == "tools/call" {
+						rejected.Add(1)
+						http.Error(w, "PRIVATE 401", status)
+						return
+					}
+				}
+				handler.ServeHTTP(w, r)
+			}))
+			defer httpServer.Close()
+			gateway := &MCPFederationGateway{client: httpServer.Client()}
+			_, err := gateway.CallHTTPConnectionTool(t.Context(), mcpgw.Connection{Config: map[string]any{"url": httpServer.URL}}, "echo", map[string]any{"query": "synthetic"})
+			if rejected.Load() == 0 || err == nil || IsMCPAuthenticationUnavailable(err) != (status == http.StatusUnauthorized) {
+				t.Fatalf("classification failed: status=%d err=%v", status, err)
+			}
+		})
+	}
+}
 
 func TestFederationEndpointGuardChecksRedirectBeforeCredentialsOrEffect(t *testing.T) {
 	var calls atomic.Int32

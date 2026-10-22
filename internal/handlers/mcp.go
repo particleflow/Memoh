@@ -85,6 +85,7 @@ func (h *MCPHandler) List(c echo.Context) error {
 }
 
 // Create godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Create MCP connection
 // @Description Create a MCP connection for a bot
 // @Tags mcp
@@ -119,6 +120,7 @@ func (h *MCPHandler) Create(c echo.Context) error {
 }
 
 // Get godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Get MCP connection
 // @Description Get a MCP connection by ID
 // @Tags mcp
@@ -156,6 +158,7 @@ func (h *MCPHandler) Get(c echo.Context) error {
 }
 
 // Update godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Update MCP connection
 // @Description Update a MCP connection by ID
 // @Tags mcp
@@ -201,6 +204,7 @@ func (h *MCPHandler) Update(c echo.Context) error {
 }
 
 // Delete godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Delete MCP connection
 // @Description Delete a MCP connection by ID
 // @Tags mcp
@@ -256,6 +260,7 @@ type ProbeResponse struct {
 }
 
 // Probe godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Probe MCP connection
 // @Description Probe a MCP connection to discover tools and verify connectivity
 // @Tags mcp
@@ -330,6 +335,7 @@ func (h *MCPHandler) Probe(c echo.Context) error {
 }
 
 // Import godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Import MCP connections
 // @Description Batch import MCP connections from standard mcpServers format. Existing connections (matched by name) get config updated with is_active preserved. New connections are created as active.
 // @Tags mcp
@@ -368,6 +374,7 @@ type BatchDeleteRequest struct {
 }
 
 // BatchDelete godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Batch delete MCP connections
 // @Description Delete multiple MCP connections by IDs.
 // @Tags mcp
@@ -403,6 +410,7 @@ func (h *MCPHandler) BatchDelete(c echo.Context) error {
 }
 
 // Export godoc
+// @Param bot_id path string true "Bot ID"
 // @Summary Export MCP connections
 // @Description Export all MCP connections for a bot in standard mcpServers format.
 // @Tags mcp

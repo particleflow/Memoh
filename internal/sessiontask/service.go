@@ -73,20 +73,29 @@ type Task struct {
 	TaskID    string `json:"task_id" validate:"required" format:"uuid"`
 	SessionID string `json:"session_id" validate:"required" format:"uuid"`
 	// ParentSessionID is the requested aggregation root, not a rewritten owner.
-	ParentSessionID      string    `json:"parent_session_id" validate:"required" format:"uuid"`
-	CreatedAt            time.Time `json:"created_at" validate:"required"`
-	UpdatedAt            time.Time `json:"updated_at" validate:"required"`
-	Status               string    `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected"`
-	Summary              string    `json:"summary" validate:"required"`
-	ContentAvailable     bool      `json:"content_available" validate:"required"`
-	AttachmentsAvailable bool      `json:"attachments_available" validate:"required"`
-	TargetID             string    `json:"target_id,omitempty" format:"uuid"`
-	OperationKind        string    `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
-	Revision             string    `json:"revision,omitempty"`
-	CancelRequested      *bool     `json:"cancel_requested,omitempty"`
-	ProcessState         string    `json:"process_state,omitempty" enums:"unknown,exited,not_started"`
-	PiResult             string    `json:"pi_result,omitempty" enums:"unknown,not_applicable"`
-	BusinessState        string    `json:"business_state,omitempty" enums:"unknown"`
+	ParentSessionID      string         `json:"parent_session_id" validate:"required" format:"uuid"`
+	CreatedAt            time.Time      `json:"created_at" validate:"required"`
+	UpdatedAt            time.Time      `json:"updated_at" validate:"required"`
+	Status               string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected"`
+	Summary              string         `json:"summary" validate:"required"`
+	ContentAvailable     bool           `json:"content_available" validate:"required"`
+	AttachmentsAvailable bool           `json:"attachments_available" validate:"required"`
+	TargetID             string         `json:"target_id,omitempty" format:"uuid"`
+	OperationKind        string         `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
+	Revision             string         `json:"revision,omitempty"`
+	CancelRequested      *bool          `json:"cancel_requested,omitempty"`
+	ProcessState         string         `json:"process_state,omitempty" enums:"unknown,exited,not_started"`
+	PiResult             string         `json:"pi_result,omitempty" enums:"unknown,not_applicable,succeeded,failed,aborted,incomplete,not_started,invalid_protocol,output_limit"`
+	BusinessState        string         `json:"business_state,omitempty" enums:"unknown"`
+	ResultSummary        *ResultSummary `json:"result_summary,omitempty"`
+}
+
+// ResultSummary is an allowlisted final assistant text projection, not logs or
+// general-purpose secret redaction. Clients render Text as plain untrusted text.
+type ResultSummary struct {
+	Text      string `json:"text" validate:"required"`
+	Truncated bool   `json:"truncated" validate:"required"`
+	Source    string `json:"source" validate:"required" enums:"pi_final_assistant"`
 }
 
 type Page struct {
@@ -285,11 +294,12 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 	if err != nil || r.TargetFingerprint == "" || r.TargetFingerprint != agenvo.TargetFingerprint(target) {
 		return Task{}, ErrUnavailable
 	}
-	// Decode only the approved scalar facts. Never deserialize or forward
-	// arbitrary output, observation, raw JSONL, metadata, hashes or URLs.
+	// Decode only approved persisted facts. Top-level output, observations,
+	// raw JSONL, transfer refs and arbitrary metadata are not display content.
 	var facts struct {
-		Kind     string `json:"kind"`
-		ExitCode *int   `json:"exit_code"`
+		Kind     string            `json:"kind"`
+		ExitCode *int              `json:"exit_code"`
+		Batch    *persistedPiFacts `json:"batch"`
 	}
 	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &facts) != nil {
 		return Task{}, ErrUnavailable
@@ -319,6 +329,9 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 			t.Status = "process_exited"
 			t.ProcessState = "exited"
 		}
+	}
+	if facts.Kind == "herdr_pi_task" && r.State == "completed" {
+		projectPiFacts(&t, facts.Batch)
 	}
 	t.Summary = "Computer receipt recorded; business completion is unverified."
 	if r.CancelRequested {

@@ -6232,6 +6232,13 @@ const docTemplate = `{
                 "summary": "Create MCP connection",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "MCP payload",
                         "name": "payload",
                         "in": "body",
@@ -6284,6 +6291,13 @@ const docTemplate = `{
                 "summary": "Batch delete MCP connections",
                 "parameters": [
                     {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "IDs to delete",
                         "name": "payload",
                         "in": "body",
@@ -6325,6 +6339,15 @@ const docTemplate = `{
                     "mcp"
                 ],
                 "summary": "Export MCP connections",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -6361,6 +6384,13 @@ const docTemplate = `{
                 ],
                 "summary": "Import MCP connections",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "description": "mcpServers dict",
                         "name": "payload",
@@ -6522,6 +6552,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP ID",
                         "name": "id",
                         "in": "path",
@@ -6568,6 +6605,13 @@ const docTemplate = `{
                 ],
                 "summary": "Update MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP ID",
@@ -6627,6 +6671,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP ID",
                         "name": "id",
                         "in": "path",
@@ -6674,6 +6725,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6718,6 +6776,13 @@ const docTemplate = `{
                 ],
                 "summary": "Discover OAuth configuration for MCP server",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -6803,10 +6868,23 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current authorization transaction receipt ID",
+                        "name": "authorization_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -6841,6 +6919,13 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
                         "description": "MCP connection ID",
                         "name": "id",
                         "in": "path",
@@ -6868,6 +6953,13 @@ const docTemplate = `{
                 ],
                 "summary": "Probe MCP connection",
                 "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
                     {
                         "type": "string",
                         "description": "MCP connection ID",
@@ -15225,6 +15317,77 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/providers/{id}/model-discovery": {
+            "get": {
+                "description": "Uses the existing team's provider configuration server-side. GET-only: no inference, embedding probe, import or OAuth refresh. Only explicit exact-ID provider-template declarations are reported; undeclared model capabilities remain unknown. Adapter implementation is separate from model support. The SDK listing is not guaranteed exhaustive. OAuth and non-LLM adapters are unsupported.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "providers"
+                ],
+                "summary": "Read upstream model metadata without importing or probing models",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/providers.DiscoverModelsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "501": {
+                        "description": "Not Implemented",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -26765,6 +26928,9 @@ const docTemplate = `{
         "mcp.AuthorizeResult": {
             "type": "object",
             "properties": {
+                "authorization_id": {
+                    "type": "string"
+                },
                 "authorization_url": {
                     "type": "string"
                 }
@@ -26867,11 +27033,25 @@ const docTemplate = `{
                 }
             }
         },
+        "mcp.OAuthAuthorization": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "mcp.OAuthStatus": {
             "type": "object",
             "properties": {
                 "auth_server": {
                     "type": "string"
+                },
+                "authorization": {
+                    "$ref": "#/definitions/mcp.OAuthAuthorization"
                 },
                 "callback_url": {
                     "type": "string"
@@ -27270,6 +27450,100 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                }
+            }
+        },
+        "providers.DiscoverModelsResponse": {
+            "type": "object",
+            "properties": {
+                "adapter": {
+                    "$ref": "#/definitions/providers.DiscoveryAdapter"
+                },
+                "completeness": {
+                    "type": "string",
+                    "enum": [
+                        "unknown"
+                    ]
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/providers.DiscoveredModel"
+                    }
+                }
+            }
+        },
+        "providers.DiscoveredModel": {
+            "type": "object",
+            "properties": {
+                "capabilities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/providers.DiscoveryCapability"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "providers.DiscoveryAdapter": {
+            "type": "object",
+            "properties": {
+                "images_edit": {
+                    "type": "boolean"
+                },
+                "images_generation": {
+                    "type": "boolean"
+                },
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "memoh_adapter"
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "openai-completions",
+                        "openai-responses",
+                        "anthropic-messages",
+                        "google-generative-ai",
+                        "opencode-go"
+                    ]
+                }
+            }
+        },
+        "providers.DiscoveryCapability": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "enum": [
+                        "vision",
+                        "tool-call",
+                        "image-output",
+                        "image-edit",
+                        "reasoning",
+                        "file-input"
+                    ]
+                },
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "provider_template",
+                        "unknown"
+                    ]
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "declared",
+                        "unknown"
+                    ]
                 }
             }
         },
@@ -28251,6 +28525,28 @@ const docTemplate = `{
                 }
             }
         },
+        "sessiontask.ResultSummary": {
+            "type": "object",
+            "required": [
+                "source",
+                "text",
+                "truncated"
+            ],
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "pi_final_assistant"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "sessiontask.Task": {
             "type": "object",
             "required": [
@@ -28301,7 +28597,14 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "unknown",
-                        "not_applicable"
+                        "not_applicable",
+                        "succeeded",
+                        "failed",
+                        "aborted",
+                        "incomplete",
+                        "not_started",
+                        "invalid_protocol",
+                        "output_limit"
                     ]
                 },
                 "process_state": {
@@ -28311,6 +28614,9 @@ const docTemplate = `{
                         "exited",
                         "not_started"
                     ]
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/sessiontask.ResultSummary"
                 },
                 "revision": {
                     "type": "string"
@@ -28850,6 +29156,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "arch": {
+                    "type": "string"
+                },
+                "availability": {
                     "type": "string"
                 },
                 "capabilities": {
