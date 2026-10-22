@@ -31,6 +31,17 @@ func NewUserRuntimeHandler(log *slog.Logger, service *userruntime.Service) *User
 }
 
 func (h *UserRuntimeHandler) Register(e *echo.Echo) {
+	// Apply before global JWT middleware and route selection so account device
+	// responses, including namespace 401/404/405s, share the same cache policy.
+	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			path := echo.GetPath(c.Request())
+			if path == "/users/me/runtimes" || strings.HasPrefix(path, "/users/me/runtimes/") {
+				c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
+			}
+			return next(c)
+		}
+	})
 	g := e.Group("/users/me/runtimes")
 	g.POST("", h.Create)
 	g.GET("", h.List)

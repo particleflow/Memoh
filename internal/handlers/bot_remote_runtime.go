@@ -69,6 +69,17 @@ func NewBotRemoteRuntimeHandler(
 }
 
 func (h *BotRemoteRuntimeHandler) Register(e *echo.Echo) {
+	// Private device state must not be cached, including JWT/session rejection
+	// and routing errors that never reach a handler in this namespace.
+	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			parts := strings.SplitN(echo.GetPath(c.Request()), "/", 5)
+			if len(parts) >= 4 && parts[0] == "" && parts[1] == "bots" && parts[3] == "workspace-targets" {
+				c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
+			}
+			return next(c)
+		}
+	})
 	g := e.Group("/bots/:bot_id/workspace-targets")
 	g.GET("", h.List)
 	g.PUT("/remotes/:runtime_id", h.Mount)
