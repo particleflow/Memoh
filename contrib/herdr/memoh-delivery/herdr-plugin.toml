@@ -1,6 +1,6 @@
 id = "memoh.delivery"
 name = "Memoh delivery storage"
-version = "0.5.0"
+version = "0.6.0"
 min_herdr_version = "0.9.5"
 description = "Finite native delivery queue using a configured reusable device identity"
 platforms = ["windows"]
@@ -34,3 +34,9 @@ id = "lifecycle-summary"
 title = "Read delivery lifecycle summary"
 contexts = ["workspace"]
 command = ["./transferqueue.exe", "-action", "lifecycle-summary"]
+
+[[actions]]
+id = "migrate-history"
+title = "Migrate delivery history"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "migrate-history"]

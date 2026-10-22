@@ -44,6 +44,7 @@ type DiskQueue struct {
 	limits      QueueLimits
 	releaseHook func(string)
 	journalHook func(string)
+	historyHook func(string)
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
@@ -74,6 +75,10 @@ func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 }
 
 func openHerdrQueue(getenv func(string) string, revision string, limits QueueLimits, readOnly bool) (*DiskQueue, error) {
+	return openQueueLayout(getenv, revision, limits, readOnly, false, nil)
+}
+
+func openQueueLayout(getenv func(string) string, revision string, limits QueueLimits, readOnly, migrate bool, hook func(string)) (*DiskQueue, error) {
 	if getenv == nil || !validID(revision) || limits.Jobs < 1 || limits.Jobs > 128 || limits.Bytes < 1 || limits.Bytes > 1<<40 || limits.JournalBytes < 65536 || limits.JournalBytes > 8<<20 || limits.Workers < 1 || limits.Workers > 4 {
 		return nil, ErrInvalid
 	}
@@ -120,7 +125,7 @@ func openHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		_ = root.Close()
 		return nil, err
 	}
-	q := &DiskQueue{root: root, guard: guard, revision: revision, limits: limits, readOnly: readOnly}
+	q := &DiskQueue{root: root, guard: guard, revision: revision, limits: limits, readOnly: readOnly, historyHook: hook}
 	ok := false
 	defer func() {
 		if !ok {
@@ -139,7 +144,7 @@ func openHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		Version        int
 		Revision, Path string
 		Limits         QueueLimits
-	}{2, revision, path, limits})
+	}{3, revision, path, limits})
 	if err != nil {
 		return nil, ErrInvalid
 	}
@@ -173,6 +178,12 @@ func openHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 	if err != nil || len(want) > 4096 {
 		return nil, ErrStore
 	}
+	if migrate && len(actual) != 0 {
+		if err := q.migrateLocator(f, actual, want); err != nil {
+			return nil, err
+		}
+		actual = want
+	}
 	if readOnly && !bytes.Equal(actual, want) {
 		return nil, ErrVersion
 	}
@@ -182,12 +193,16 @@ func openHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		}
 	} else if !bytes.Equal(actual, want) {
 		var old struct{ Version int }
-		if json.Unmarshal(actual, &old) == nil && old.Version != 2 {
+		if json.Unmarshal(actual, &old) == nil && old.Version != 3 {
 			return nil, ErrVersion
 		}
 		return nil, ErrStore
 	}
 	if !readOnly {
+		// Repair a lost migration-file sync before any new layout mutation.
+		if err := f.Sync(); err != nil {
+			return nil, ErrStore
+		}
 		if err := syncQueueDir(root); err != nil {
 			return nil, err
 		}
@@ -278,7 +293,7 @@ func (q *DiskQueue) worker() (*os.File, error) {
 // Confirmed delivery journals may be compacted with a synced release witness.
 // Only an incomplete final frame is truncated on reopen. Full corrupt frames,
 // wrong versions and journal exhaustion fail closed. No rename per checkpoint.
-func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
+func (q *DiskQueue) loadActive(id string) (QueueStatus, *os.File, error) {
 	if q.readOnly {
 		return q.readOnlyRecord(id)
 	}

@@ -54,6 +54,18 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	if errors.Is(recordErr, os.ErrNotExist) {
 		_, recordErr = q.root.Lstat(queueName(job.DeliveryID + ".release"))
 	}
+	if errors.Is(recordErr, os.ErrNotExist) {
+		_, history, found, historyErr := q.readHistory(job.DeliveryID)
+		if history != nil {
+			_ = history.Close()
+		}
+		if historyErr != nil {
+			return historyErr
+		}
+		if found {
+			recordErr = nil
+		}
+	}
 	switch {
 	case recordErr == nil:
 		var existing QueueStatus

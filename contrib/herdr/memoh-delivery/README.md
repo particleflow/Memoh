@@ -158,8 +158,11 @@ the existing eight-job /
 256 MiB total snapshot limit. Finite host actions automatically release only
 confirmed committed queue payloads and retain the original delivery/receipt.
 Unknown, canceled and blocked jobs are not automatically cleared. The compact
-receipt catalog stops new admissions at 1024 records; proofs are never silently
-evicted. See `docs/delivery-queue-retention.md` for recovery and upgrade bounds.
+active catalog remains bounded at 1024 records; confirmed released records move
+to the same queue's queryable, bounded terminal history. Proofs are never silently
+evicted. Version 0.6 requires locator v3: stop old writers, back up the complete
+state, then invoke `migrate-history` before normal actions on a v2 queue.
+See `docs/delivery-terminal-history.md` for budgets, recovery and rollback bounds.
 Each finite hook still handles at most one manifest; later task queries/host
 actions continue remaining work. Multi-file aggregate `partial` preserves each
 committed reference; it does not mean all files delivered. Recovery from a crash
@@ -199,3 +202,27 @@ remain expiring review artifacts, not a durable installation/update channel.
 Do not silently substitute a new archive for an older pinned consumer hash or
 change extraction allowlists without a versioned handoff. Durable distribution
 must be reviewed separately; no release or production installation occurs here.
+
+## Terminal history maintenance (0.6.0)
+
+The fixed `migrate-history` action uses `HERDR_PLUGIN_STATE_DIR` and the existing
+`native-profile-v1` limits. No network credential or source file is required.
+It changes only queue locator v2 to v3 after saving and syncing the exact old
+locator; it then archives at most 16 confirmed released records. Repeated
+maintenance and normal finite advancement drain the remaining eligible records.
+Success outputs `{"queue_layout":3,"history":"enabled"}`; it does not claim all
+old records have moved. Failure uses the existing lifecycle classification.
+
+Stop **all** old CLI/plugin writers and take a full raw state backup first.
+Migration checks active worker locks but cannot revoke idle handles in an old
+process. Normal v3 opens reject v2, and v2 binaries reject the new locator. Do not
+edit the version back or run mixed writers. Existing roots/configuration and NAS
+schema 171/172 are unchanged. This component action is not a host updater.
+
+History holds the complete original terminal record (task/attempt/reference,
+receipt and seal), supports original-ID inspect/admission without producer
+bytes, and never deletes unknown evidence. It has 256 deterministic buckets,
+each capped at 1 MiB framed metadata and 1024 files (filesystem overhead extra).
+Bucket exhaustion fails with capacity and preserves the source journal. There
+is no automatic history deletion. Native publication's separate 128-object and
+retained-byte limits remain unchanged; this does not make downloads unbounded.
