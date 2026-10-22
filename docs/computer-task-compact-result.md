@@ -91,6 +91,39 @@ receipt-hash phase; a pending receipt remains unknown to a bounded caller.
 
 ## Validation checkpoint
 
+### Connection preflight classification
+
+An Agent submission checks the existing target policy through the workspace
+resolver. For Agenvo this includes a read-only `workspace.list` probe. A failed
+connection probe used to become a workspace-offline error and then a generic
+conversation denial. This could mislead a caller into changing the target or
+retrying with an omitted target, although no operation had been claimed.
+
+The host authorizer now reports a separate preflight-unavailable error for
+that offline result. It states that no operation was created and that the
+existing connection must be checked before another submission. It does not
+infer OAuth expiration from arbitrary transport errors, expose private causes,
+change grants, or alter unknown outcomes after a business dispatch.
+
+The real tool source, authorizer, workspace resolver and Agenvo probe are
+covered together with a synthetic failing transport. Explicit and inferred PC
+targets in a native root conversation both reproduce the old error; missing
+binding, mismatched session, another selected PC and each missing permission
+remain rejected. Every case asserts zero ledger claims; rejected authority
+also asserts zero probe calls. The injected private diagnostic stays out of
+the tool response.
+
+The current server and Web app were exercised at localhost ports 18080/18082
+with a synthetic offline relay. The expanded tool response shows the corrected
+preflight message, with unchanged relay business counters and no browser
+errors. The scripted provider's `SYNTHETIC_FAILURE` final reply is its expected
+stop on a failed tool, not a real-model routing or successful-PC-task result.
+This verification does not renew or validate any production OAuth connection.
+
+![Synthetic preflight failure in the running Web app](validation/compact-result-preflight-web.png)
+
+### Protocol and integration checks
+
 - Actual Bash envelope plus actual embedded Node helper: task remains stdin
   data, exact session arguments, nonzero exit, atomic completion and receipt,
   exclusive attempt/session, matching restored read paths. Missing Node does
