@@ -55,7 +55,13 @@ func EnqueueProducer(ctx context.Context, getenv func(string) string, revision s
 	if !matches {
 		return QueueStatus{}, ErrBinding
 	}
-	return InvokeConfiguredHerdr(ctx, getenv, revision, limits, action, transport, now)
+	status, err := InvokeConfiguredHerdr(ctx, getenv, revision, limits, action, transport, now)
+	// Preserve correlation even when capacity rejects admission before a journal
+	// exists. This is metadata, never evidence that admission succeeded.
+	if status.Job.DeliveryID == "" {
+		status.Job = action.Job
+	}
+	return status, err
 }
 
 // CollectProducer handles at most one closed manifest and a bounded number of

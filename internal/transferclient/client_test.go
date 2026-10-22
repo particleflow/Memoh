@@ -182,7 +182,7 @@ func (s testStore) save(j Job) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(s.path, raw, 0o600)
+	return os.WriteFile(s.path, raw, 0o600) // #nosec G703 -- storeJob fixes this fixture path under t.TempDir; job data cannot select it.
 }
 
 func advance(t *testing.T, c *Client, s testStore, src frozen) Job {

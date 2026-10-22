@@ -71,6 +71,7 @@ type batchTransport struct {
 	progress                                         agenvo.BatchProgress
 	receipt                                          agenvo.BatchReceipt
 	stdout, stderr                                   []byte
+	producerFeedback                                 []byte
 	control                                          string
 	missing, hiddenFrame, corrupt, changedPane, lost bool
 	reason                                           string
@@ -197,6 +198,10 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 			limit := agenvo.BatchPageBytes
 			if strings.Contains(script, "/receipt.json\"") {
 				limit = 4096 // Separate complete-receipt budget, not data-page size.
+			}
+			if strings.Contains(script, "/delivery-feedback.json\"") {
+				data = f.producerFeedback
+				limit = 8192
 			}
 			if count > limit || offset > len(data) {
 				f.t.Fatal("page exceeds bounds")

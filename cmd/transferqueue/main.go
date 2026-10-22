@@ -38,6 +38,18 @@ func run() int {
 	limits := transferclient.QueueLimits{Jobs: 8, Bytes: 256 << 20, JournalBytes: 8 << 20, Workers: 1}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
+	// Reserve a bounded tail of the same invocation for advisory persistence.
+	workCtx, stopWork := context.WithTimeout(ctx, 115*time.Second)
+	defer stopWork()
+	publish := func(status transferclient.QueueStatus) string {
+		if status.Job.Task.Attempt == "" {
+			return ""
+		}
+		if transferclient.PublishProducerFeedback(ctx, getenv, "native-profile-v1", limits, status.Job, time.Now()) != nil {
+			return "unavailable"
+		}
+		return "recorded"
+	}
 	if *kind == "probe" {
 		q, err := transferclient.OpenHerdrQueue(getenv, "native-profile-v1", limits)
 		if err != nil {
@@ -62,14 +74,15 @@ func run() int {
 				fmt.Fprintln(os.Stderr, "invalid delivery metadata")
 				return 2
 			}
-			status, err = transferclient.EnqueueProducer(ctx, getenv, "native-profile-v1", limits, bytes.NewReader(input), nil, time.Now())
+			status, err = transferclient.EnqueueProducer(workCtx, getenv, "native-profile-v1", limits, bytes.NewReader(input), nil, time.Now())
 		case "collect-result":
-			status, err = transferclient.CollectProducer(ctx, getenv, "native-profile-v1", limits, nil, time.Now())
+			status, err = transferclient.CollectProducer(workCtx, getenv, "native-profile-v1", limits, nil, time.Now())
 		case "advance-results":
-			status, err = transferclient.AdvanceProducer(ctx, getenv, "native-profile-v1", limits, nil, time.Now())
+			status, err = transferclient.AdvanceProducer(workCtx, getenv, "native-profile-v1", limits, nil, time.Now())
 		}
+		feedback := publish(status)
 		if errors.Is(err, transferclient.ErrProducerSource) {
-			_ = writeStatusWithSource(status, "unavailable")
+			_ = writeStatusWithFeedback(status, "unavailable", feedback)
 			return 1
 		}
 		if errors.Is(err, transferclient.ErrNoWork) {
@@ -77,10 +90,10 @@ func run() int {
 			return 0
 		}
 		if err != nil {
-			fmt.Println(`{"state":"pending_or_unavailable"}`)
+			_ = json.NewEncoder(os.Stdout).Encode(map[string]string{"state": "pending_or_unavailable", "feedback_status": feedback})
 			return 1
 		}
-		return writeStatus(status)
+		return writeStatusWithFeedback(status, "", feedback)
 	}
 	action := transferclient.ConfiguredAction{Kind: *kind, DeliveryID: *id}
 	if *kind == "enqueue-upload" || *kind == "enqueue-download" {
@@ -95,7 +108,8 @@ func run() int {
 			action.DeliveryID = input.Job.DeliveryID
 		}
 	}
-	status, err := transferclient.InvokeConfiguredHerdr(ctx, getenv, "native-profile-v1", limits, action, nil, time.Now())
+	status, err := transferclient.InvokeConfiguredHerdr(workCtx, getenv, "native-profile-v1", limits, action, nil, time.Now())
+	feedback := publish(status)
 	if errors.Is(err, transferclient.ErrNoWork) {
 		fmt.Println(`{"state":"idle"}`)
 		return 0
@@ -113,11 +127,11 @@ func run() int {
 		case errors.Is(err, transferclient.ErrCapacity):
 			code = "capacity"
 		}
-		_ = json.NewEncoder(os.Stdout).Encode(map[string]string{"state": code})
+		_ = json.NewEncoder(os.Stdout).Encode(map[string]string{"state": code, "feedback_status": feedback})
 		return 1
 	}
 	// Bounded status/reference only. No source locator or execution task metadata.
-	return writeStatus(status)
+	return writeStatusWithFeedback(status, "", feedback)
 }
 
 type admissionInput struct {
@@ -149,12 +163,9 @@ func readAdmission(ctx context.Context, input io.Reader) (admissionInput, error)
 	}
 }
 
-func writeStatus(s transferclient.QueueStatus) int {
-	return writeStatusWithSource(s, "")
-}
-
-func writeStatusWithSource(s transferclient.QueueStatus, source string) int {
+func writeStatusWithFeedback(s transferclient.QueueStatus, source, feedback string) int {
 	out := struct {
+		Feedback    string                    `json:"feedback_status,omitempty"`
 		Source      string                    `json:"source_collection,omitempty"`
 		Payload     string                    `json:"payload_state,omitempty"`
 		Delivery    string                    `json:"delivery_id"`
@@ -165,7 +176,7 @@ func writeStatusWithSource(s transferclient.QueueStatus, source string) int {
 		Association string                    `json:"association_state,omitempty"`
 		Error       string                    `json:"error_code,omitempty"`
 		Reference   *transferclient.Reference `json:"reference,omitempty"`
-	}{source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
+	}{feedback, source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
 	if json.NewEncoder(os.Stdout).Encode(out) != nil {
 		return 1
 	}

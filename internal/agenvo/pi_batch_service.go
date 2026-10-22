@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/felinics/memoh/internal/deliverymeta"
 )
 
 type batchPane struct {
@@ -204,12 +206,18 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	if name == "receipt.json" {
 		limit = batchReceiptBytes
 	}
-	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt") {
+	if name == deliverymeta.ProducerFeedbackName {
+		limit = deliverymeta.FeedbackMaxBytes
+	}
+	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt" && name != deliverymeta.ProducerFeedbackName) {
 		return nil, ErrUnsupported
 	}
 	c, target, err := s.Client(ctx, scope)
 	if err != nil {
 		return nil, err
+	}
+	if name == deliverymeta.ProducerFeedbackName && (p.Producer == nil || p.Producer.Task.RootHash != deliverymeta.RootHash(target.WorkDir)) {
+		return nil, ErrTargetChanged
 	}
 	nonce := strings.ReplaceAll(uuid.NewString(), "-", "")
 	script, err := batchReadScript(p, target, name, offset, count, nonce)
