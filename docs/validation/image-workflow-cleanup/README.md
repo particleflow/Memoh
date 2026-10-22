@@ -47,10 +47,13 @@ callback or just schema inspection.
 A rebuilt running server plus real Web also processes four legacy calls in one
 fresh synthetic conversation: four explicit tool errors, two chat requests,
 zero image API requests, no page errors. [Rejection evidence](strict-result.png).
-The existing Web aggregate caption counts calls by tool name and says "Generated
-4 media files" even for these failed calls; that caption is not success evidence.
-The actual tool errors and zero image-provider requests establish rejection.
-This separate display defect is not concealed or fixed by changing the Agent core.
+The screenshot records the pre-fix Web caption "Generated 4 media files" despite
+four failures. That caption is not success evidence; actual tool errors and zero
+image-provider requests establish rejection. A separate UI commit corrects the
+caption to invocation/outcome counts; see [current UI evidence](../tool-summary-outcomes/README.md).
+The guard additionally rejects null-valued legacy fields and a top-level null,
+with zero provider requests. These four additions extend the original six-case
+regression without changing the accepted prompt/size contract.
 
 ## Ordinary subagents and attachments
 

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { createApp, defineComponent, h, nextTick } from 'vue'
+import { createApp, defineComponent, h, nextTick, reactive } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ContentBlock, ThinkingBlock as ThinkingBlockType, ToolCallBlock as ToolCallBlockType } from '@/store/chat-list'
@@ -71,6 +71,7 @@ function mountGroup(items: ContentBlock[], active: boolean | undefined, showExec
             thought: 'Thought',
             steps: '{count} steps',
             fragmentSeparator: ', ',
+            outcomes: { failed: '{count} failed', pending: '{count} pending' },
             phase: {
               browse: { ing: 'Exploring', done: 'Explored' },
               edit: { ing: 'Editing', done: 'Edited' },
@@ -88,7 +89,7 @@ function mountGroup(items: ContentBlock[], active: boolean | undefined, showExec
               commands: '{count} commands',
               messages: '{count} messages',
               schedules: '{count} schedules',
-              media: '{count} media files',
+              media: '{count} media call | {count} media calls',
               agents: '{count} agents',
               steps: '{count} step | {count} steps',
               sites: '{count} sites',
@@ -394,5 +395,64 @@ describe('shared process titles', () => {
     const root = mountGroup([reasoning(2003), block], true)
     expect(headerText(root)).toBe('List models')
     expect(nowLine(root)?.textContent).toBe('List models')
+  })
+})
+
+
+describe('media invocation summaries', () => {
+  function image(result: unknown, running = false): ToolCallBlockType {
+    return { ...toolBlock('generate_image', { prompt: 'Synthetic image' }, running), result }
+  }
+
+  it('reports every failed call without claiming files were generated', () => {
+    const root = mountGroup([
+      image({ isError: true, content: 'Rejected request' }),
+      image({ structuredContent: { isError: true, content: 'Rejected request' } }),
+      image({ isError: true }),
+      image({ isError: true }),
+    ], false)
+    expect(headerText(root)).toBe('4 media calls, 4 failed')
+    expect(headerText(root)).not.toMatch(/Generated|files/)
+  })
+
+  it('counts calls, not files, when successful and failed results are mixed', () => {
+    const root = mountGroup([
+      image({ content_hash: 'synthetic-ready-hash', status: 'ready' }),
+      image({ isError: true, content: 'Unavailable' }),
+    ], false)
+    expect(headerText(root)).toBe('2 media calls, 1 failed')
+  })
+
+  it('updates the pending count when a late success arrives after the turn ends', async () => {
+    const items = reactive<ContentBlock[]>([
+      image({ content_hash: 'synthetic-ready-hash', status: 'ready' }),
+      image(null, true),
+    ])
+    const root = mountGroup(items, false)
+    expect(headerText(root)).toBe('2 media calls, 1 pending')
+    expect(nowLine(root)).toBeNull()
+    items[1] = image({ content_hash: 'synthetic-late-hash', status: 'ready' })
+    await nextTick()
+    expect(headerText(root)).toBe('2 media calls')
+    expect(headerText(root)).not.toMatch(/Generated|files|pending/)
+  })
+
+  it('does not treat a missing reply as success or count transcription as a file', () => {
+    const root = mountGroup([
+      { ...image(null), done: false },
+      { ...toolBlock('transcribe_audio', {}), result: 'A transcript mentioning an error is still text.' },
+    ], true)
+    expect(headerText(root)).toBe('2 media calls, 1 pending')
+    expect(headerText(root)).not.toContain('failed')
+  })
+
+  it('keeps media failures visible in a group led by other tools', () => {
+    const root = mountGroup([
+      toolBlock('exec', { command: 'echo synthetic' }),
+      toolBlock('exec', { command: 'echo synthetic' }),
+      image({ isError: true }),
+    ], false)
+    expect(headerText(root)).toContain('1 media call, 1 failed')
+    expect(headerText(root)).not.toContain('files')
   })
 })

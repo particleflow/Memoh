@@ -1141,10 +1141,14 @@
         "commands": "{count} コマンド",
         "messages": "{count} 件のメッセージ",
         "schedules": "{count} 件のスケジュール",
-        "media": "{count} 個のメディアファイル",
+        "media": "メディア呼び出し {count} 件",
         "agents": "{count} のAgent",
         "steps": "{count} ステップ",
         "sites": "{count} 件のサイト"
+      },
+      "outcomes": {
+        "failed": "失敗 {count} 件",
+        "pending": "応答待ち {count} 件"
       },
       "fragmentSeparator": "、"
     },
