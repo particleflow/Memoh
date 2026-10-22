@@ -40,6 +40,12 @@ It does not create an Agent/workspace/pane, replay the original task, or switch
 `request_id`, `mode` and `task`. Callers cannot supply target/native references
 or session paths. There is no default mode:
 
+The caller must save the intent UUID **before** sending, retain the exact
+arguments, and reuse that UUID after a timeout/lost response. Generating a new
+UUID for the same intent is not a retry: after an accepted receipt it can send a
+duplicate new instruction. Server deduplication cannot infer intent equivalence
+across different UUIDs.
+
 | Mode | Precondition and meaning |
 | --- | --- |
 | `current_agent` | Send a new instruction to the currently verified name/kind/workspace/pane/terminal association. Logical session metadata may be missing or changed; the response says so. |
@@ -53,16 +59,20 @@ retroactively. `session_relation` is `unbound`, `unavailable`, `changed` or
 results. Follow-up prompt text is not stored in this ledger, only its fingerprint.
 
 Read the selected `followup.state` for this input. Top-level operation state
-still describes the original operation. `followups` exposes the bounded history;
+still describes the original operation, not this round. `followups` exposes the bounded history;
 `computer_task_get` reads it without remote effects. All follow-up results keep
 `business_outcome=unknown`, `continuity_verified=false`,
 `atomic_identity_guaranteed=false` and `strict_resume_available=false`. Acceptance
-is not business completion, file delivery, or proof of original Pi conversation
+is not proof that this round's business result has been collected, business
+completion, file delivery, or proof of original Pi conversation
 continuity. UI wiring and real PC acceptance remain separate work.
 
 ## Durable dispatch and uncertainty
 
-The original operation's existing JSON holds at most 64 follow-up records:
+The original operation's existing JSON has a **cumulative hard limit of 64**
+follow-up records. Every reserved request consumes capacity, including one that
+later becomes rejected; this is not indefinite follow-up or a rolling window.
+Each record contains:
 request UUID, fingerprint, initiating run, mode, progress, optional private
 session observation and completion baseline. No schema migration is needed.
 The writer patches only this key, retaining original operation/workspace/delivery
@@ -134,12 +144,42 @@ missing/replaced/unready Agents, authority changes and cancellation around
 dispatch. They do not execute Pi or establish real PC acceptance. Existing
 PostgreSQL tests separately cover the reused durable CAS, ownership and RLS.
 
+The product semantics are frozen at `fd8fe44f13ea250a1dbefe6c1628f3b27b042106`;
+the next increment changes only tests, the CI gate and this documentation.
+The earlier seven-green Go CI run did **not** select
+`TestComputerOperationsMigrationAndDurableIsolation` in its PostgreSQL step.
+Its success is therefore not evidence that the operation CAS/RLS test ran in
+CI (that test had only been run locally).
+
+Go CI now appends a separate **Require computer operation CAS and RLS (no skips)**
+step using `scripts/test-computer-operations-postgres.sh`. It requires a DSN and
+parses Go's JSON test events for the exact test's PASS, rejecting missing
+selection, SKIP and failed/skipped subtests. The test creates its own database
+and exercises concurrent claims, stale revisions, reconstruction, owner scopes
+and a non-superuser RLS role. Its schema rollback never targets the service's
+shared database. This tests the actual SQL contract underlying the application
+ledger; it does not claim a full native follow-up against a real PC.
+
+Additional controlled application tests use two separate Service instances and
+a read barrier: both capture the same revision before either can reserve. They
+cover the same UUID, distinct UUIDs, and competing requests for slot 64 with both
+accepted and rejected outcomes. Exactly one reservation dispatches; old history
+survives and rejected slot 64 still prevents slot 65. Dispatch-save response-loss
+tests commit the dispatching record before dropping its acknowledgement: no
+prompt is sent. They separately cover durable rejection and failed finalization,
+where the persisted dispatching record stays unknown across reconstruction and
+blocks a new UUID. None of these tests changes product behavior or adds recovery.
+
+When combining Go workflows, append this gate while retaining **all** existing
+memory/file-ref/delegation/transport and other contract gates. Do not replace
+the combined workflow with this older baseline's workflow file.
+
 Validation commands:
 
 ```sh
 go test -p 3 -race -count=1 ./internal/agenvo ./internal/computertask ./internal/toolcontext ./cmd/internal/core ./internal/agent/application
 go test -p 3 -race -count=1 ./internal/agent/tool -run '^Test(Computer|Agenvo|PCSession)'
-go test -p 3 -race -tags=integration -count=1 -v ./internal/db -run '^TestComputerOperationsMigrationAndDurableIsolation$'
+bash scripts/test-computer-operations-postgres.sh # requires TEST_POSTGRES_DSN
 bash scripts/check-agent-core-boundary.sh HEAD
 git diff --check
 ```

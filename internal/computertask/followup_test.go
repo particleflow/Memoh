@@ -281,19 +281,36 @@ func (s followupFaultStore) SaveComputerOperation(ctx context.Context, r dbstore
 }
 
 func TestNativeFollowupPersistenceFailuresDoNotRepeatInput(t *testing.T) {
-	for _, fault := range []string{"reservation_lost", "dispatch_save_failed", "final_save_failed", "final_response_lost"} {
+	for _, fault := range []string{"reservation_lost", "dispatch_save_failed", "dispatch_response_lost", "dispatch_response_lost_unsettled", "final_save_failed", "final_response_lost"} {
 		t.Run(fault, func(t *testing.T) {
 			source, store, f, initial := followupFixture(t, true)
+			dispatchCommitted := false
 			source.service.store = followupFaultStore{ComputerOperationStore: store, save: func(ctx context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {
 				var d Details
 				if err := json.Unmarshal(r.Details, &d); err != nil {
 					t.Fatal(err)
 				}
 				state := d.Followups[len(d.Followups)-1].Progress.State
-				if fault == "dispatch_save_failed" && state == "dispatching" || fault == "final_save_failed" && state == "accepted" {
+				if fault == "dispatch_save_failed" && state == "dispatching" || fault == "final_save_failed" && state == "accepted" || fault == "dispatch_response_lost_unsettled" && state == "rejected" {
 					return r, errors.New("PRIVATE synthetic persistence failure")
 				}
 				next, err := store.SaveComputerOperation(ctx, r)
+				if strings.HasPrefix(fault, "dispatch_response_lost") && state == "dispatching" {
+					if err != nil {
+						t.Fatal(err)
+					}
+					// The dispatch intent really committed; only the response is lost.
+					persisted, readErr := store.ReadComputerOperation(ctx, r)
+					if readErr != nil || persisted.Revision != r.Revision+1 {
+						t.Fatal("dispatching write did not commit")
+					}
+					var committed Details
+					if json.Unmarshal(persisted.Details, &committed) != nil || len(committed.Followups) != 1 || committed.Followups[0].Progress.State != "dispatching" {
+						t.Fatal("committed row did not contain dispatching intent")
+					}
+					dispatchCommitted = true
+					return r, errors.New("PRIVATE committed dispatch save response lost")
+				}
 				if fault == "reservation_lost" && state == "reserved" || fault == "final_response_lost" && state == "accepted" {
 					return r, errors.New("PRIVATE synthetic persistence response lost")
 				}
@@ -302,7 +319,7 @@ func TestNativeFollowupPersistenceFailuresDoNotRepeatInput(t *testing.T) {
 			c := standardClient(t, source, "pc-a", false)
 			args := followupArgs(initial.ID, "bound_session")
 			want := "unknown"
-			if fault == "dispatch_save_failed" {
+			if fault == "dispatch_save_failed" || fault == "dispatch_response_lost" {
 				want = "rejected"
 			}
 			if fault == "final_response_lost" {
@@ -314,8 +331,27 @@ func TestNativeFollowupPersistenceFailuresDoNotRepeatInput(t *testing.T) {
 				t.Fatalf("persistence failure reported false success: %s", wire)
 			}
 			calls := slices.Clone(f.methods)
-			source.service.store = store
+			if strings.HasPrefix(fault, "dispatch_response_lost") && (!dispatchCommitted || !slices.Equal(calls, []string{"agent.get"})) {
+				t.Fatal("lost dispatch-save acknowledgement authorized native input")
+			}
+			// Reconstruct from actual saved records, without a live worker or
+			// the fault injector, then repeat the same intent UUID.
+			restarted := NewSource(NewService(store, store, source.service.relay, nil, source.service.authorize))
+			c = standardClient(t, restarted, "pc-a", false)
 			invoke(t, c, "computer_task_followup", args, want != "accepted")
+			if fault == "dispatch_response_lost_unsettled" {
+				var saved Details
+				if err := json.Unmarshal(store.records[initial.ID].Details, &saved); err != nil {
+					t.Fatal(err)
+				}
+				if saved.Followups[0].Progress.State != "dispatching" {
+					t.Fatal("unsettled committed intent was rewritten after restart")
+				}
+				blocked := parseResult(t, invoke(t, c, "computer_task_followup", followupArgs(initial.ID, "current_agent"), true))
+				if blocked.BlockedByRequest != args["request_id"] {
+					t.Fatal("new UUID bypassed unsettled dispatch intent")
+				}
+			}
 			if !slices.Equal(calls, f.methods) {
 				t.Fatal("storage recovery repeated native input")
 			}
