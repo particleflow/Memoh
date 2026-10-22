@@ -46,3 +46,7 @@ func TestWindowsNativeProducerFeedback(t *testing.T) {
 	TestProducerFeedbackScopeAndUnchangedBlock(t)
 	TestProducerFeedbackDeniedFirstAndMiddle(t)
 }
+
+func TestWindowsNativeProducerInvalidManifest(t *testing.T) {
+	TestProducerBadManifestDoesNotStarveValidDelivery(t)
+}

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -71,7 +72,13 @@ func TestProducerClosedManifestRestartAndLostAssociation(t *testing.T) {
 }
 func TestProducerCollectMissingSourceStillAdvances(t *testing.T) { exerciseProducerRecovery(t, true) }
 
-func exerciseProducerRecovery(t *testing.T, missingSource bool) {
+func TestProducerBadManifestDoesNotStarveValidDelivery(t *testing.T) {
+	for _, kind := range []string{"oversize", "malformed", "name-mismatch", "root-mismatch", "trusted-plan"} {
+		t.Run(kind, func(t *testing.T) { exerciseProducerRecovery(t, false, kind) })
+	}
+}
+
+func exerciseProducerRecovery(t *testing.T, missingSource bool, invalidManifest ...string) {
 	t.Helper()
 	f := &fixture{calls: map[string]int{}}
 	var committed atomic.Bool
@@ -105,12 +112,51 @@ func exerciseProducerRecovery(t *testing.T, missingSource bool) {
 	defer https.Close()
 	getenv, c, write := producerFixture(t, https.URL)
 	closed = c
+	if len(invalidManifest) != 0 && (invalidManifest[0] == "root-mismatch" || invalidManifest[0] == "trusted-plan") {
+		candidate := closed
+		candidate.Artifact.SourceRef = "foreign"
+		if candidate.ManifestName() > closed.ManifestName() {
+			closed = candidate
+			write("source", closed.Artifact.SourceRef, []byte("fixture"))
+		}
+	}
 	limits := QueueLimits{Jobs: 2, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}
 	raw, _ := json.Marshal(closed)
+	plan := closed.Plan
+	badName := deliverymeta.ManifestPrefix + strings.Repeat("0", 64)
+	var badRaw []byte
+	if len(invalidManifest) != 0 {
+		switch invalidManifest[0] {
+		case "oversize":
+			badRaw = []byte(strings.Repeat("x", 16385))
+		case "malformed":
+			badRaw = []byte(`{"private":"must-not-be-forwarded"`)
+		case "name-mismatch":
+			badRaw = raw
+		case "root-mismatch", "trusted-plan":
+			foreign := closed
+			foreign.Task.RootHash = strings.Repeat("0", 64)
+			foreign.Artifact.SourceRef = "foreign"
+			if closed.Artifact.SourceRef == "foreign" {
+				foreign.Artifact.SourceRef = "result-one"
+			}
+			badName = foreign.ManifestName()
+			badRaw, _ = json.Marshal(foreign)
+			if invalidManifest[0] == "trusted-plan" {
+				plan = deliverymeta.Plan{Version: 2, Task: closed.Task, Artifacts: []deliverymeta.Artifact{foreign.Artifact, closed.Artifact}}
+				badRaw = []byte(`{"private":"invalid metadata"`)
+			}
+		}
+		if badName >= closed.ManifestName() {
+			t.Fatal("invalid fixture is not first")
+		}
+		write("source", badName, badRaw)
+	}
+	writeProducerContextFixture(t, getenv, plan)
 	write("source", closed.ManifestName(), raw)
 	f.setDrop("PATCH /bots/" + closed.Task.BotID + "/media/uploads/receipt-1")
 	status, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now())
-	if err != nil || !status.Admitted || status.Job.ReceiptID == "" || status.Job.NextAttempt.IsZero() {
+	if (len(invalidManifest) == 0 && err != nil || len(invalidManifest) != 0 && !errors.Is(err, ErrProducerSource)) || !status.Admitted || status.Job.ReceiptID == "" || status.Job.NextAttempt.IsZero() {
 		t.Fatal("first finite action", status.Job.Phase, err)
 	}
 	receipt := status.Job.ReceiptID
@@ -131,11 +177,16 @@ func exerciseProducerRecovery(t *testing.T, missingSource bool) {
 	for range 6 {
 		now := time.Now().Add(time.Hour)
 		status, err = CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), now)
-		if missingSource {
+		switch {
+		case missingSource:
 			if !errors.Is(err, ErrProducerSource) || errors.Is(err, ErrNoWork) {
 				t.Fatal("source error was hidden", err)
 			}
-		} else if err != nil {
+		case len(invalidManifest) != 0:
+			if !errors.Is(err, ErrProducerSource) || errors.Is(err, ErrNoWork) {
+				t.Fatal("invalid collection was hidden", err)
+			}
+		case err != nil:
 			t.Fatal("restart", err)
 		}
 		if status.Associated {
@@ -144,6 +195,37 @@ func exerciseProducerRecovery(t *testing.T, missingSource bool) {
 	}
 	if !status.Associated || status.Job.ReceiptID != receipt || status.Job.OperationID != closed.Task.OperationID || commits.Load() != 1 || f.count("POST /bots/"+closed.Task.BotID+"/media/uploads") != 1 || string(fixtureReady(f)) != "fixture" {
 		t.Fatal("lost original delivery", status.AssociationState, commits.Load())
+	}
+	if len(invalidManifest) != 0 {
+		if err := PublishProducerFeedback(t.Context(), getenv, "fixture", limits, status.Job, time.Now()); err != nil {
+			t.Fatal(err)
+		}
+		report := readProducerFeedbackFixture(t, getenv, plan)
+		if invalidManifest[0] == "trusted-plan" {
+			if len(report.Files) != 2 || report.Files[0].Code != "manifest_invalid" || report.Files[0].Retryable || report.Files[1].DeliveryID != closed.DeliveryID() {
+				t.Fatal("trusted plan error not distinguished")
+			}
+		} else if len(report.Files) != 1 || report.Files[0].DeliveryID != closed.DeliveryID() {
+			t.Fatal("unattributable data assigned to task")
+		}
+		cfg, err := OpenHostConfig(getenv)
+		if err != nil {
+			t.Fatal(err)
+		}
+		file, err := cfg.OpenSource(badName)
+		if err != nil {
+			t.Fatal("bad evidence missing", err)
+		}
+		kept, readErr := io.ReadAll(file)
+		_ = file.Close()
+		_ = cfg.Close()
+		if readErr != nil || !bytes.Equal(kept, badRaw) {
+			t.Fatal("bad evidence changed")
+		}
+		idle, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now())
+		if !errors.Is(err, ErrProducerSource) || !errors.Is(err, ErrProducerManifest) || errors.Is(err, ErrNoWork) || idle.Job.DeliveryID != "" || idle.Associated {
+			t.Fatal("bad-only source guessed identity or success", err)
+		}
 	}
 	if _, err = AdvanceProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now()); !errors.Is(err, ErrNoWork) {
 		t.Fatal("completed job re-executed", err)

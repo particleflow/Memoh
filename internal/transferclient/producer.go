@@ -19,6 +19,10 @@ import (
 // job advanced successfully. It must never be collapsed into an idle success.
 var ErrProducerSource = errors.New("producer source collection unavailable")
 
+// ErrProducerManifest carries no task identity or raw diagnostic. The collector
+// could not safely attribute one or more retained metadata files to an attempt.
+var ErrProducerManifest = errors.New("producer metadata collection contains invalid files")
+
 // ProducerAdmission is the same bounded, non-secret stdin envelope accepted by
 // enqueue-result. Metadata cannot supply credentials or override resolved roots.
 func ProducerAdmission(input io.Reader, revision string) (ConfiguredAction, deliverymeta.Closed, error) {
@@ -64,7 +68,7 @@ func EnqueueProducer(ctx context.Context, getenv func(string) string, revision s
 	return status, err
 }
 
-// CollectProducer handles at most one closed manifest and a bounded number of
+// CollectProducer admits at most one closed manifest and performs bounded
 // advances in the existing host action. The durable queue remains the only
 // transfer state; the manifest is retained on backpressure/incomplete admission.
 func CollectProducer(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, transport *http.Client, now time.Time) (QueueStatus, error) {
@@ -86,23 +90,47 @@ func CollectProducer(ctx context.Context, getenv func(string) string, revision s
 		}
 		return status, errors.Join(ErrProducerSource, err, advanceErr)
 	}
-	if len(names) == 0 {
-		return AdvanceProducer(ctx, getenv, revision, limits, transport, now)
+	var collectionErr error
+	for _, name := range names {
+		if err := ctx.Err(); err != nil {
+			return QueueStatus{}, errors.Join(collectionErr, err)
+		}
+		raw, err := cfg.readProducerManifest(name, revision)
+		if err != nil {
+			// Do not guess identity from malformed bytes or a mismatched filename.
+			// Keep the evidence and inspect the next bounded directory candidate.
+			collectionErr = errors.Join(ErrProducerSource, ErrProducerManifest)
+			continue
+		}
+		status, err := collectProducerManifest(ctx, cfg, getenv, revision, limits, name, raw, transport, now)
+		return status, errors.Join(collectionErr, err)
 	}
-	name := names[0]
-	file, err := cfg.OpenSource(name)
+	// Unattributable source errors must not starve already sealed jobs either.
+	status, advanceErr := AdvanceProducer(ctx, getenv, revision, limits, transport, now)
+	if collectionErr != nil && errors.Is(advanceErr, ErrNoWork) {
+		advanceErr = nil
+	}
+	return status, errors.Join(collectionErr, advanceErr)
+}
+
+func (h *HostConfig) readProducerManifest(name, revision string) ([]byte, error) {
+	file, err := h.OpenSource(name)
 	if err != nil {
-		return QueueStatus{}, err
+		return nil, ErrProducerManifest
 	}
-	raw, err := io.ReadAll(io.LimitReader(file, 16385))
+	raw, readErr := io.ReadAll(io.LimitReader(file, 16385))
 	_ = file.Close()
-	if err != nil || len(raw) > 16384 {
-		return QueueStatus{}, ErrInvalid
+	if readErr != nil || len(raw) > 16384 {
+		return nil, ErrProducerManifest
 	}
 	_, closed, err := ProducerAdmission(bytes.NewReader(raw), revision)
-	if err != nil || name != closed.ManifestName() {
-		return QueueStatus{}, ErrBinding
+	if err != nil || name != closed.ManifestName() || closed.Task.RootHash != deliverymeta.RootHash(h.sourcePath) {
+		return nil, ErrProducerManifest
 	}
+	return raw, nil
+}
+
+func collectProducerManifest(ctx context.Context, cfg *HostConfig, getenv func(string) string, revision string, limits QueueLimits, name string, raw []byte, transport *http.Client, now time.Time) (QueueStatus, error) {
 	// Goes through the exact stdin decoder and existing enqueue implementation.
 	status, err := EnqueueProducer(ctx, getenv, revision, limits, bytes.NewReader(raw), transport, now)
 	if errors.Is(err, ErrCapacity) || errors.Is(err, ErrBusy) {
