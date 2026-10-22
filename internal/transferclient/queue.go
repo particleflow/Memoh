@@ -100,19 +100,21 @@ func stop(j *Job, phase, code string, save Save) error {
 }
 
 func fail(j *Job, err error, now time.Time, save Save) error {
+	if errors.Is(err, ErrAuthorization) {
+		return stop(j, "blocked", "authorization", save)
+	}
 	var h *HTTPError
 	code := "protocol"
 	retry := errors.Is(err, ErrTransport) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)
 	if retry {
 		code = "connection"
 	}
-	if errors.Is(err, ErrAuthorization) {
-		code = "authorization"
-	}
 	if errors.As(err, &h) {
 		switch h.Status {
 		case http.StatusUnauthorized, http.StatusForbidden:
-			code = "authorization"
+			retry, code = false, "authorization"
+		case statusRequestCanceled:
+			retry, code = true, "connection"
 		case http.StatusNotFound:
 			code = "receipt_unavailable"
 		case http.StatusBadRequest:
@@ -223,7 +225,7 @@ func (c *Client) Advance(ctx context.Context, job Job, save Save, source Snapsho
 		r, err := c.Create(ctx, j.BotID, j.Spec)
 		if err != nil {
 			var h *HTTPError
-			if errors.Is(err, ErrAuthorization) || errors.As(err, &h) && h.Status >= 400 && h.Status < 500 && h.Status != http.StatusRequestTimeout {
+			if errors.Is(err, ErrAuthorization) || errors.As(err, &h) && h.Status >= 400 && h.Status < 500 && h.Status != http.StatusRequestTimeout && h.Status != statusRequestCanceled {
 				// A definite rejection can be retried according to its status.
 				if err := stop(j, "queued", "", save); err != nil {
 					return err
