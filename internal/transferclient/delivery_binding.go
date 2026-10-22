@@ -152,7 +152,7 @@ func (c *Client) delivery(ctx context.Context, direction string, ref Reference, 
 	if err != nil {
 		return "", err
 	}
-	if _, err := strconv.ParseUint(out.Revision, 10, 63); err != nil || out.Version != 2 {
+	if _, err := strconv.ParseUint(out.Revision, 10, 63); err != nil || out.Version != 2 && out.Version != 3 {
 		return "", ErrProtocol
 	}
 	switch out.Outcome {
