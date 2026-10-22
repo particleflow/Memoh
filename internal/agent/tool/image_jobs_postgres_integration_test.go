@@ -21,10 +21,12 @@ import (
 	"strings"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
 	"github.com/felinics/memoh/internal/accounts"
+	"github.com/felinics/memoh/internal/agent/background"
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/chat/thread"
@@ -76,8 +78,13 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 		t.Fatal(err)
 	}
 	var calls atomic.Int32
+	var uncertain atomic.Bool
 	fixture := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
+		if uncertain.Load() {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			return
+		}
 		if r.URL.Path != "/images/edits" || r.Method != "POST" {
 			t.Errorf("unexpected image endpoint")
 			w.WriteHeader(400)
@@ -129,14 +136,14 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 	exec(`INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,$5, $4,1,'running','{}','synthetic')`, run, bot, parent, turn, run)
 	message := uuid.NewString()
 	exec(`INSERT INTO bot_history_messages(id,bot_id,session_id,role,content) VALUES($1,$2,$3,'user','[]')`, message, bot, parent)
-	exec(`INSERT INTO bot_history_message_assets(message_id,role,ordinal,content_hash,mime,size_bytes,storage_key) VALUES($1,'attachment',0,$2,'image/png',$3,$4)`, message, original.ContentHash, len(input), original.StorageKey)
+	// The current attachment is in media; its first-step message asset is not committed yet.
 	queries := postgresstore.NewQueriesWithPool(pool, sqlc.New(pool))
 	store := postgresstore.NewWithPool(pool, sqlc.New(pool))
 	authority := &imagejob.Authority{Queries: queries, Accounts: accounts.NewService(nil, store), Bots: bots.NewService(nil, queries), Sessions: thread.NewService(nil, queries, nil)}
 	service := imagejob.New(m, journal, authority.Authorize)
 	tool := NewImageGenProvider(nil, settings.NewService(slog.New(slog.DiscardHandler), queries, nil, nil), models.NewService(slog.New(slog.DiscardHandler), queries), queries, nil, "")
 	tool.SetImageJobs(service, authority)
-	ctx = imagejob.WithOrigin(ctx, imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: run})
+	ctx = imagejob.WithOrigin(ctx, imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: run, InputRefs: []string{original.ContentHash}})
 	var events []ToolStreamEvent
 	parentSession := liveShortcutSession(func(e ToolStreamEvent) { events = append(events, e) })
 	parentSession.BotID, parentSession.UserID, parentSession.SessionID = bot, user, parent
@@ -153,6 +160,13 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 		var result imagejob.Result
 		err = json.Unmarshal(raw, &result)
 		return result, err
+	}
+
+	// An independently admitted context without this attachment cannot infer
+	// permission from a known same-Bot hash before message linking.
+	unboundInput := imagejob.WithOrigin(context.Background(), imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: run})
+	if _, err := invoke(unboundInput, child); err == nil || calls.Load() != 0 {
+		t.Fatal("unknown current attachment dispatched")
 	}
 	var receipt imagejob.Result
 	spawn := &SpawnProvider{logger: slog.New(slog.DiscardHandler), modelResolver: func(context.Context, SessionContext, string, string, string) (resolvedSubagentModel, error) {
@@ -188,6 +202,7 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 	if !bytes.Equal(got, output) {
 		t.Fatal("output readback mismatch")
 	}
+	exec(`INSERT INTO bot_history_message_assets(message_id,role,ordinal,content_hash,mime,size_bytes,storage_key) VALUES($1,'attachment',0,$2,'image/png',$3,$4)`, message, original.ContentHash, len(input), original.StorageKey)
 	// A new child under the same host business turn must return the old receipt.
 	secondChild := uuid.NewString()
 	exec("INSERT INTO bot_sessions(id,bot_id,type,session_mode,parent_session_id,created_by_user_id) VALUES($1,$2,'subagent','subagent',$3,$4)", secondChild, bot, parent, user)
@@ -195,15 +210,122 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 	if err != nil || again.TaskID != receipt.TaskID || calls.Load() != 1 {
 		t.Fatalf("child replay=%+v err=%v calls=%d", again, err, calls.Load())
 	}
+
+	// Real persisted root runs plus the actual outer submit/queue/promotion path.
+	// Only the model runtime and HTTP image provider are synthetic.
+	var lastBackground *BackgroundProvider
+	var lastTask string
+	exec("UPDATE session_runs SET state='completed' WHERE run_id=$1", run)
+	for index, unknown := range []bool{false, true} {
+		t.Run(fmt.Sprintf("queued_root_turn_unknown_%v", unknown), func(t *testing.T) {
+			runB, turnB := uuid.NewString(), uuid.NewString()
+			exec(`INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,$5,$4,$6,'completed','{}','synthetic')`, runB, bot, parent, turnB, runB, index+2)
+			ctxB := imagejob.WithOrigin(context.Background(), imagejob.Origin{BotID: bot, UserID: user, SessionID: parent, RunID: runB})
+			mgr := background.New(nil)
+			queued := NewSpawnProvider(slog.New(slog.DiscardHandler), nil, nil, queries, thread.NewService(nil, queries, nil), mgr)
+			queued.modelResolver = spawn.modelResolver
+			queued.SetSubagentAdmitter(&fakeSubagentAdmitter{})
+			queued.SetImageResults(tool.CollectImageResults)
+			entered, release := make(chan struct{}), make(chan struct{})
+			observed := make(chan imagejob.Result, 2)
+			queued.SetAgent(&mockSpawnAgent{generateFunc: func(c context.Context, cfg SpawnRunConfig, _ func()) (*SpawnResult, error) {
+				if cfg.Query == "first" {
+					close(entered)
+					select {
+					case <-release:
+					case <-c.Done():
+						return nil, c.Err()
+					}
+				}
+				im, e := invoke(c, child)
+				if e != nil {
+					return nil, e
+				}
+				observed <- im
+				return &SpawnResult{Text: "synthetic " + im.State, Persisted: true}, nil
+			}})
+			sess := SessionContext{BotID: bot, UserID: user, SessionID: parent}
+			rec := agentRecord{AgentID: "queued-editor", SessionID: child}
+			first, e := queued.submitAgentTask(ctx, sess, rec, thread.SubagentConfig{}, "first", true)
+			if e != nil {
+				t.Fatal(e)
+			}
+			defer mgr.Kill(asMap(t, first)["task_id"].(string))
+			select {
+			case <-entered:
+			case <-time.After(5 * time.Second):
+				t.Fatal("first child did not start")
+			}
+			second, e := queued.submitAgentTask(ctxB, sess, rec, thread.SubagentConfig{}, "second", true)
+			if e != nil {
+				close(release)
+				t.Fatal(e)
+			}
+			task := asMap(t, second)
+			if task["status"] != "queued" {
+				close(release)
+				t.Fatalf("not queued: %v", task)
+			}
+			uncertain.Store(unknown)
+			before := calls.Load()
+			close(release)
+			waitCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			snap, _, e := mgr.WaitForSessionTask(waitCtx, bot, parent, task["task_id"].(string), 0)
+			if e != nil || snap.Status != background.TaskCompleted {
+				t.Fatalf("queued completion=%+v err=%v", snap, e)
+			}
+			a, b := <-observed, <-observed
+			wantState := "ready"
+			if unknown {
+				wantState = "unknown"
+			}
+			if a.TaskID != receipt.TaskID || b.TaskID == a.TaskID || b.State != wantState || calls.Load() != before+1 {
+				t.Fatalf("root identity mixed: a=%+v b=%+v calls delta=%d", a, b, calls.Load()-before)
+			}
+			replay, e := invoke(ctxB, secondChild)
+			if e != nil || replay.TaskID != b.TaskID || replay.State != wantState || calls.Load() != before+1 {
+				t.Fatalf("B replay=%+v err=%v calls=%d", replay, e, calls.Load())
+			}
+			status := NewBackgroundProvider(nil, mgr)
+			status.SetImageResults(tool.ResolveImageResults)
+			for range 2 {
+				value, e := status.execGetBackgroundStatus(ctxB, sess, taskArgs{TaskID: task["task_id"].(string)})
+				if e != nil {
+					t.Fatal(e)
+				}
+				got := asMap(t, value)
+				images := got["image_tasks"].([]imagejob.Result)
+				if len(images) != 1 || images[0].TaskID != b.TaskID || images[0].State != wantState || images[0].AutomaticRetry {
+					t.Fatalf("untrusted background result: %+v", got)
+				}
+				_, hasRefs := got["artifact_refs"]
+				if hasRefs == unknown {
+					t.Fatalf("ready gate mismatch: %+v", got)
+				}
+			}
+			if calls.Load() != before+1 {
+				t.Fatal("background result repeated model")
+			}
+			if _, e := status.execGetBackgroundStatus(ctxB, SessionContext{BotID: bot, UserID: user, SessionID: other}, taskArgs{TaskID: task["task_id"].(string)}); e == nil {
+				t.Fatal("wrong parent read background image")
+			}
+			lastBackground, lastTask = status, task["task_id"].(string)
+		})
+	}
+	dispatched := calls.Load()
 	// Same Bot and known hash do not authorize another conversation.
-	if _, err := invoke(ctx, other); err == nil || calls.Load() != 1 {
+	if _, err := invoke(ctx, other); err == nil || calls.Load() != dispatched {
 		t.Fatal("unrelated session dispatched")
 	}
 	exec(`UPDATE models SET config='{"compatibilities":["image-output"]}' WHERE id=$1`, modelID)
-	if _, err := invoke(ctx, child); err == nil || calls.Load() != 1 {
+	if _, err := invoke(ctx, child); err == nil || calls.Load() != dispatched {
 		t.Fatal("unsupported edit fell back")
 	}
 	exec("UPDATE users SET is_active=false WHERE id=$1", user)
+	if _, err := lastBackground.execGetBackgroundStatus(ctx, parentSession, taskArgs{TaskID: lastTask}); err == nil {
+		t.Fatal("revoked parent read background image")
+	}
 	if _, err := tool.CollectImageResults(ctx, parentSession, []string{receipt.TaskID}); err == nil || len(events) != 1 {
 		t.Fatal("revoked parent received artifact")
 	}

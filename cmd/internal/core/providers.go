@@ -1134,6 +1134,7 @@ func provideToolProviders(lc fx.Lifecycle, log *slog.Logger, channelRuntime chan
 	fedGateway.SetOAuthService(oauthService)
 	imageProvider := agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, manager, config.DefaultDataMount)
 	spawnProvider := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
+	backgroundProvider := agenttools.NewBackgroundProvider(log, bgManager)
 	if root := strings.TrimSpace(cfg.Files.OriginalsRoot); root != "" {
 		if mediaService == nil || !mediaService.RequiresPersistence() || mediaService.Uploads() == nil {
 			return nil, errors.New("persistent image media storage is unavailable")
@@ -1149,6 +1150,7 @@ func provideToolProviders(lc fx.Lifecycle, log *slog.Logger, channelRuntime chan
 		authority := &imagejob.Authority{Queries: queries, Accounts: accountService, Bots: botService, Sessions: sessionService}
 		imageProvider.SetImageJobs(imagejob.New(mediaService, journal, authority.Authorize), authority)
 		spawnProvider.SetImageResults(imageProvider.CollectImageResults)
+		backgroundProvider.SetImageResults(imageProvider.ResolveImageResults)
 	}
 	return []agenttools.ToolProvider{
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
@@ -1190,7 +1192,7 @@ func provideToolProviders(lc fx.Lifecycle, log *slog.Logger, channelRuntime chan
 		agenttools.NewMemoryProvider(log, memoryRegistry, settingsService, historySessions, hookService),
 		agenttools.NewWebProvider(log, settingsService, searchProviderService),
 		agenttools.NewContainerProvider(log, manager, bgManager, config.DefaultDataMount, hookService),
-		agenttools.NewBackgroundProvider(log, bgManager),
+		backgroundProvider,
 		agenttools.NewBrowserProvider(log, settingsService, nativeWorkspaceBridgeProvider{manager: manager}, displayService, config.DefaultDataMount),
 		agenttools.NewWebFetchProvider(log, settingsService, fetchProviderService),
 		spawnProvider,

@@ -127,7 +127,7 @@ func (*ImageGenProvider) Usage(_ context.Context, _ SessionContext, available Av
 	if !ok {
 		return ""
 	}
-	return usageSection("Cloud image tasks", []string{ref + " uses the Bot image model. Use edit with the original attachment content_hash; generation is not editing. A chat subagent may call this tool and return artifact_refs to the parent. Only ready references are deliverable; result retrieves pending publication without repeating the model. Do not send base64 or a workspace path. Unknown must not be resubmitted with a new child or tool call."})
+	return usageSection("Cloud image tasks", []string{ref + " uses the Bot image model. Use edit with the original attachment content_hash; generation is not editing. A chat subagent may call this tool and return artifact_refs to the parent. Only ready references are deliverable; result retrieves pending publication without repeating the model. Do not send base64 or a workspace path. Unknown must not be resubmitted with a new child or tool call. Background child results are resolved by get_background_status; share ready artifact_refs via the existing send tool using content_hash."})
 }
 
 func (p *ImageGenProvider) SetImageJobs(service *imagejob.Service, authority *imagejob.Authority) {
@@ -189,29 +189,54 @@ func (p *ImageGenProvider) CollectImageResults(ctx context.Context, parent Sessi
 	if len(ids) == 0 {
 		return nil, nil
 	}
+	results, err := p.ResolveImageResults(ctx, parent, ids)
+	if err != nil {
+		return nil, err
+	}
+	refs := imageResultRefs(results)
+	p.deliverImageRefs(parent, "", refs)
+	return refs, nil
+}
+
+// ResolveImageResults performs fresh parent authorization on every observation.
+// Background reads do not emit attachments: the caller can use the existing
+// send tool with the returned content_hash. No model or upload is resubmitted.
+func (p *ImageGenProvider) ResolveImageResults(ctx context.Context, parent SessionContext, ids []string) ([]imagejob.Result, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	if p.imageAuthority == nil || p.imageJobs == nil {
+		return nil, imagejob.ErrDenied
+	}
 	binding, _, err := p.imageAuthority.Bind(ctx, parent.BotID, parent.UserID, parent.SessionID)
 	if err != nil {
 		return nil, err
 	}
-	var refs []imagejob.Artifact
-	seen := map[string]bool{}
+	results := make([]imagejob.Result, 0, len(ids))
 	for _, id := range ids {
 		result, err := p.imageJobs.Result(ctx, binding, id)
 		if err != nil {
 			return nil, err
 		}
-		if result.State != "ready" {
-			return nil, imagejob.ErrDenied
-		}
-		for _, ref := range result.Artifacts {
-			if !seen[ref.ContentHash] {
-				refs = append(refs, ref)
-				seen[ref.ContentHash] = true
+		results = append(results, result)
+	}
+	return results, nil
+}
+
+func imageResultRefs(results []imagejob.Result) []imagejob.Artifact {
+	var refs []imagejob.Artifact
+	seen := map[string]bool{}
+	for _, result := range results {
+		if result.State == "ready" {
+			for _, ref := range result.Artifacts {
+				if !seen[ref.ContentHash] {
+					refs = append(refs, ref)
+					seen[ref.ContentHash] = true
+				}
 			}
 		}
 	}
-	p.deliverImageRefs(parent, "", refs)
-	return refs, nil
+	return refs
 }
 
 func (p *ImageGenProvider) imageAdapter(ctx context.Context, bot string, mode imagejob.Mode) (imagejob.Adapter, error) {

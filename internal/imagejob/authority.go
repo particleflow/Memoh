@@ -35,7 +35,12 @@ type Authority struct {
 // Children inherit the original root run unchanged. The DB run's turn ID is the
 // stable business identity even when a new child is created for the same request.
 type (
-	Origin    struct{ BotID, UserID, SessionID, RunID string }
+	Origin struct {
+		BotID, UserID, SessionID, RunID string
+		// InputRefs are resolved by the authenticated host before model execution.
+		// The first model step may consume them before its user-message assets commit.
+		InputRefs []string
+	}
 	originKey struct{}
 )
 
@@ -46,6 +51,7 @@ func WithOrigin(ctx context.Context, o Origin) context.Context {
 	if _, ok := ctx.Value(originKey{}).(Origin); ok {
 		return ctx
 	}
+	o.InputRefs = append([]string(nil), o.InputRefs...)
 	return context.WithValue(ctx, originKey{}, o)
 }
 
@@ -142,11 +148,38 @@ func (a *Authority) Authorize(ctx context.Context, b Binding, refs []string) err
 				break
 			}
 		}
-		if !found {
+		if !found && !a.currentInput(ctx, b, root, ref) {
 			return ErrDenied
 		}
 	}
 	return nil
+}
+
+// currentInput only covers the current admitted root request while the first
+// model step has not yet committed its user-message asset links. Hashes come
+// from the host's resolved attachments, never from tool arguments. Revalidate
+// the durable root run on each read; another conversation/turn cannot adopt them.
+func (a *Authority) currentInput(ctx context.Context, b Binding, root thread.Thread, ref string) bool {
+	o, ok := ctx.Value(originKey{}).(Origin)
+	if !ok || o.BotID != b.BotID || o.UserID != b.UserID || o.SessionID != root.ID {
+		return false
+	}
+	found := false
+	for _, input := range o.InputRefs {
+		if input == ref {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return false
+	}
+	id, err := db.ParseUUID(o.RunID)
+	if err != nil {
+		return false
+	}
+	run, err := a.Queries.GetSessionRun(ctx, id)
+	return err == nil && uuidString(run.BotID) == b.BotID && uuidString(run.SessionID) == root.ID && uuidString(run.TeamID) == b.TeamID && run.TurnID.Valid
 }
 
 // Results records only IDs emitted by the real image service during this child
@@ -174,7 +207,7 @@ func (r *Results) IDs() []string {
 }
 
 func track(ctx context.Context, result Result) {
-	if result.State != "ready" {
+	if result.Code == "image.blocked_by_task" || (result.State != "ready" && result.State != "publication_pending" && result.State != "unknown") {
 		return
 	}
 	if r, ok := ctx.Value(resultsKey{}).(*Results); ok {

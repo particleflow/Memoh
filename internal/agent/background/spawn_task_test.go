@@ -182,3 +182,49 @@ func TestDetachedAgentRetainsExplicitExecutionBudget(t *testing.T) {
 		t.Fatal("transient caller cancellation leaked into detached task")
 	}
 }
+
+func TestQueuedAgentTaskRetainsSubmittingContext(t *testing.T) {
+	type originKey struct{}
+	mgr := New(nil)
+	a := context.WithValue(context.Background(), originKey{}, "turn-a")
+	b, cancelB := context.WithTimeout(context.WithValue(context.Background(), originKey{}, "turn-b"), time.Hour)
+	deadline, _ := b.Deadline()
+	id, _, err := mgr.StartAgentTask(b, "bot", "root", "editor", "child", "edit", "edit", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancelB()
+	promoted, ok, err := mgr.MarkAgentTaskRunning(a, id)
+	if err != nil || !ok {
+		t.Fatalf("promotion: ok=%v err=%v", ok, err)
+	}
+	defer mgr.CompleteAgentTask(id, AgentTaskResult{Status: TaskCompleted})
+	if promoted.Value(originKey{}) != "turn-b" {
+		t.Fatal("queued task inherited completing turn instead of submitting turn")
+	}
+	if got, ok := promoted.Deadline(); !ok || !got.Equal(deadline) {
+		t.Fatal("submitting execution budget lost")
+	}
+	if promoted.Err() != nil {
+		t.Fatal("transient parent cancellation stopped queued task")
+	}
+}
+
+func TestAgentImageTaskSnapshotCopiesIDs(t *testing.T) {
+	mgr := New(nil)
+	id, _, err := mgr.StartAgentTask(context.Background(), "bot", "root", "editor", "child", "edit", "edit", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ids := []string{"trusted-receipt"}
+	mgr.CompleteAgentTask(id, AgentTaskResult{Status: TaskCompleted, ImageTaskIDs: ids})
+	ids[0] = "caller-modified"
+	first := mgr.Get(id).Snapshot()
+	if first.ImageTaskIDs[0] != "trusted-receipt" {
+		t.Fatal("caller changed stored task IDs")
+	}
+	first.ImageTaskIDs[0] = "snapshot-modified"
+	if mgr.Get(id).Snapshot().ImageTaskIDs[0] != "trusted-receipt" {
+		t.Fatal("snapshot changed stored task IDs")
+	}
+}

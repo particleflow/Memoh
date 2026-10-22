@@ -108,7 +108,12 @@ func (s *Service) allowed(ctx context.Context, b Binding, refs []string) error {
 	return nil
 }
 
-func (s *Service) Submit(ctx context.Context, b Binding, req Request, adapter Adapter) (Result, error) {
+func (s *Service) Submit(ctx context.Context, b Binding, req Request, adapter Adapter) (result Result, err error) {
+	defer func() {
+		if err == nil {
+			track(ctx, result)
+		}
+	}()
 	if req.Key == "" || len(req.Key) > 128 || strings.TrimSpace(req.Prompt) == "" || len(req.Prompt) > 16000 || len(req.Size) > 64 || (req.Mode != Generate && req.Mode != Edit) || (req.Mode == Edit && len(req.InputRefs) != 1) || (req.Mode == Generate && len(req.InputRefs) != 0) {
 		return Result{}, ErrInvalid
 	}

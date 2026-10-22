@@ -23,6 +23,7 @@ const (
 // Task represents a single background task (a container command execution
 // or a spawn subagent batch, per Kind).
 type Task struct {
+	ImageTaskIDs   []string `json:"-"`
 	ID             string
 	Kind           TaskKind
 	BotID          string
@@ -46,6 +47,7 @@ type Task struct {
 	StartedAt      time.Time
 	CompletedAt    time.Time
 
+	queuedContext  context.Context // submitting host context; never inherited from the previous task
 	mu             sync.Mutex
 	cancel         context.CancelFunc
 	stopRequested  bool            // running agent task cancellation awaits its runtime terminal
@@ -78,6 +80,7 @@ const (
 
 // TaskSnapshot is a lock-safe, immutable view of a task for handler/UI code.
 type TaskSnapshot struct {
+	ImageTaskIDs   []string `json:"-"`
 	DeadlineAt     time.Time
 	LastLivenessAt time.Time
 	TaskID         string
@@ -131,6 +134,7 @@ func (t *Task) Snapshot() TaskSnapshot {
 		AgentID:        t.AgentID,
 		AgentSessionID: t.AgentSessionID,
 		AgentMessage:   t.AgentMessage,
+		ImageTaskIDs:   append([]string(nil), t.ImageTaskIDs...),
 		AgentReport:    t.AgentReport,
 		AgentError:     t.AgentError,
 		AgentModelID:   t.AgentModelID,

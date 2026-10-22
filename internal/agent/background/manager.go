@@ -609,6 +609,7 @@ func (m *Manager) Kill(taskID string) error {
 		return nil
 	}
 	task.Status = TaskKilled
+	task.queuedContext = nil
 	task.CompletedAt = time.Now()
 	task.signalChangedLocked()
 	task.mu.Unlock()

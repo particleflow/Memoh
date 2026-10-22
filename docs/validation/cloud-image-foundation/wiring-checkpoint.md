@@ -87,3 +87,9 @@ complete background image workflow or general channel delivery is made.
 No real provider, production image, production credential or NAS deployment was
 used. This checkpoint must not be released before browser acceptance, review
 and the remaining delivery boundaries are resolved.
+
+## Follow-up
+
+The queue, background-result and browser gaps above are historical at b256.
+See [the subsequent increment](background-and-browser.md) for fixes, current
+verification and remaining limitations.

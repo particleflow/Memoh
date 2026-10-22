@@ -431,6 +431,7 @@ type agentRecord struct {
 }
 
 type agentRunResult struct {
+	ImageTaskIDs     []string                       `json:"image_task_ids,omitempty"`
 	Artifacts        []imagejob.Artifact            `json:"artifact_refs,omitempty"`
 	AgentID          string                         `json:"agent_id"`
 	SessionID        string                         `json:"session_id,omitempty"`
@@ -858,6 +859,7 @@ func (p *SpawnProvider) completeAgentRequest(ctx context.Context, key string, re
 		Fork:           req.config.Forked,
 		Status:         status,
 		Report:         result.Text,
+		ImageTaskIDs:   result.ImageTaskIDs,
 		Error:          result.Error,
 	})
 	p.finishAgentRequest(ctx, key, result)
@@ -918,8 +920,8 @@ func (p *SpawnProvider) finishAgentRequest(ctx context.Context, key string, resu
 	go p.runAgentRequest(runCtx, key, next)
 }
 
-func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) agentRunResult {
-	res := agentRunResult{
+func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) (res agentRunResult) {
+	res = agentRunResult{
 		AgentID:   req.agentID,
 		SessionID: req.agentSessionID,
 		TaskID:    req.taskID,
@@ -1033,6 +1035,7 @@ func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) 
 	}
 
 	ctx, imageResults := imagejob.WithResults(ctx)
+	defer func() { res.ImageTaskIDs = imageResults.IDs() }()
 	var lastErr error
 	for attempt := 0; attempt <= subagentMaxRetries; attempt++ {
 		if attempt > 0 {
@@ -1537,6 +1540,9 @@ func agentResultMap(res agentRunResult) map[string]any {
 	}
 	if len(res.Artifacts) > 0 {
 		out["artifact_refs"] = res.Artifacts
+	}
+	if len(res.ImageTaskIDs) > 0 {
+		out["image_task_ids"] = res.ImageTaskIDs
 	}
 	out["fork"] = res.Fork
 	if res.Message != "" {
