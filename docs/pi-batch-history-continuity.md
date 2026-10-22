@@ -105,7 +105,7 @@ The implementation does not copy or replace native Agent per-turn tracing.
   [UI evidence](evidence/pi-batch-continuity/README.md).
 - Full `go test -race ./...` was run and **failed** in four untouched packages:
   seven image URL tests hit the environment proxy's restricted address guard;
-  two container resolv.conf fallback tests hit the read-only runtime filesystem;
+  two container resolv.conf fallback tests observed mode 0600 instead of 0644;
   the bridgesvc cancellation test observed its synthetic child still alive.
   These failures were retained, not repaired or bypassed in this change.
 
