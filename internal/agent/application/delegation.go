@@ -17,6 +17,28 @@ func (s *Service) SetDelegationScope(prepare func(context.Context, ChatRequest) 
 	s.delegationScope = prepare
 }
 
+type delegationResultAssetsKey struct{}
+
+type delegationResultAssets struct {
+	bot, thread, delegation string
+	refs                    []turn.OutboundAssetRef
+}
+
+// WithDelegationResultAssets is for the host's live-authorized ledger projection,
+// never client/model attachment metadata. Rebuilding it at turn admission also
+// covers queued delivery and process restarts without granting a media alias.
+func WithDelegationResultAssets(ctx context.Context, bot, thread, delegation string, refs []turn.OutboundAssetRef) context.Context {
+	return context.WithValue(ctx, delegationResultAssetsKey{}, delegationResultAssets{bot, thread, delegation, append([]turn.OutboundAssetRef(nil), refs...)})
+}
+
+func authorizedDelegationResultAssets(ctx context.Context, cmd turn.StartTurnCommand) []turn.OutboundAssetRef {
+	assets, ok := ctx.Value(delegationResultAssetsKey{}).(delegationResultAssets)
+	if !ok || cmd.DelegationResultID == "" || assets.bot != cmd.BotID || assets.thread != cmd.ThreadID || assets.delegation != cmd.DelegationResultID {
+		return nil
+	}
+	return append([]turn.OutboundAssetRef(nil), assets.refs...)
+}
+
 // EnqueueAuthorizedFollowUp accepts a complete host-authorized turn, including
 // real attachment references. Identity and authorization belong to the ingress,
 // exactly as for EnqueueFollowUp. Acceptance is not execution completion.

@@ -272,3 +272,39 @@ func TestAuthorizedDeliveryIdleToBusyRaceQueuesSameInvocation(t *testing.T) {
 		t.Fatal("race retry executed twice")
 	}
 }
+
+func TestDelegationFinalAssetsRequireHostIdentity(t *testing.T) {
+	cmd := deliveryCommand()
+	refs := []turn.OutboundAssetRef{{ContentHash: "source-original", Role: "attachment", Metadata: map[string]any{"delegation_url": "/scoped/source"}}}
+	ctx := WithDelegationResultAssets(t.Context(), cmd.BotID, cmd.ThreadID, cmd.DelegationResultID, refs)
+	for _, change := range []func(*turn.StartTurnCommand){
+		func(c *turn.StartTurnCommand) { c.BotID = "foreign" },
+		func(c *turn.StartTurnCommand) { c.ThreadID = "foreign" },
+		func(c *turn.StartTurnCommand) { c.DelegationResultID = "foreign" },
+		func(c *turn.StartTurnCommand) { c.DelegationResultID = "" },
+	} {
+		other := cmd
+		change(&other)
+		if len(authorizedDelegationResultAssets(ctx, other)) != 0 {
+			t.Fatal("result assets escaped their host-authorized identity")
+		}
+	}
+	received := make(chan []turn.OutboundAssetRef, 1)
+	service, manager := deliveryApplication(t, sessionledger.New(), testChatStreamerFunc(func(_ context.Context, req ChatRequest) (<-chan StreamChunk, <-chan error) {
+		received <- req.OutboundAssetCollector()
+		chunks := make(chan StreamChunk)
+		errs := make(chan error)
+		close(chunks)
+		close(errs)
+		return chunks, errs
+	}))
+	handle, err := service.StartTurn(ctx, cmd)
+	if err != nil {
+		t.Fatal(err)
+	}
+	drainDeferredTurn(handle)
+	awaitDeliveryIdle(t, manager)
+	if got := <-received; !reflect.DeepEqual(got, refs) {
+		t.Fatalf("final assistant lost authorized originals: %#v", got)
+	}
+}
