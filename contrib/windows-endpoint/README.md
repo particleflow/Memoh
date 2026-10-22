@@ -201,7 +201,7 @@ service or crash supervisor has been selected by this PR.
 
 ## Validation record
 
-Cloud Linux Node v24.19.0: 18 delivery tests and 18 lifecycle state-machine tests passed, including strict inventory,
+Cloud Linux Node v24.19.0: 18 delivery tests and 19 lifecycle state-machine tests passed, including strict inventory,
 configuration isolation, identity/path mismatch, authentication-state redaction,
 interrupted-staging remnants, idempotent publication and retained originals/queue.
 Fixtures contain inert synthetic payloads, not official binary acceptance. The

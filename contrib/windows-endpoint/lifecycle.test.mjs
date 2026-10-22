@@ -176,3 +176,16 @@ test('official stopped snapshot needs attention and is not treated as a crash', 
   assert.equal(lifecycle.state.restarts.length, 0)
   assert.equal(calls.filter(c => c === 'start:connector').length, 1)
 })
+
+
+test('replacement connector never inherits the old process online observation', async t => {
+  const { lifecycle, driver, alive } = await fixture(t)
+  await lifecycle.start(); await lifecycle.tick()
+  assert.equal(lifecycle.snapshot().connection, 'online_snapshot')
+  const start = driver.start
+  driver.start = async c => { await start(c); if (c === 'connector') driver.status = { state: 'connecting' } }
+  alive.delete('connector'); await lifecycle.tick()
+  assert.equal(lifecycle.snapshot().connection, 'connecting')
+  await lifecycle.stop()
+  assert.equal(lifecycle.snapshot().connection, 'stopped')
+})

@@ -220,6 +220,7 @@ export class EndpointLifecycle {
   async start(options = {}) {
     demand(!this.starting && !this.release, 'endpoint_already_owned')
     this.stopping = false
+    this.observedConnection = 'unverified'
     this.starting = this.startOwned(options)
     try { return await this.starting } finally { this.starting = null }
   }
@@ -261,6 +262,7 @@ export class EndpointLifecycle {
     const now = this.clock()
     this.state.restarts = this.state.restarts.filter(t => t > now - this.policy.windowMs)
     if (this.state.restarts.some(t => t > now) || this.state.restarts.length >= this.policy.maxRestarts) return this.attention('restart_budget_exhausted')
+    this.observedConnection = 'recovering'
     this.state.restarts.push(now); await this.save() // budget survives coordinator restart
     if (component === 'herdr') await this.driver.stop('connector')
     else await this.driver.recoverConnectorLock()
@@ -272,6 +274,8 @@ export class EndpointLifecycle {
       if (this.stopping) return
     }
     await this.driver.start('connector'); await this.driver.waitReady('connector')
+    const current = await this.driver.connectorStatus()
+    this.observedConnection = current?.state === 'online' ? 'online_snapshot' : current?.state || 'unverified'
   }
   async tick() {
     if (this.active) return this.active
@@ -279,9 +283,9 @@ export class EndpointLifecycle {
       if (this.stopping || this.state?.phase !== 'running') return this.snapshot()
       try {
         const s = await this.driver.connectorStatus()
+        this.observedConnection = s?.state === 'online' ? 'online_snapshot' : s?.state || 'unverified'
         const reason = connectorAttention(s)
         if (reason) { await this.attention(reason); return this.snapshot() }
-        this.observedConnection = s?.state === 'online' ? 'online_snapshot' : s?.state || 'unverified'
         if (!this.driver.alive('herdr')) await this.recover('herdr')
         else if (!this.driver.alive('connector')) await this.recover('connector')
         else {
@@ -307,6 +311,7 @@ export class EndpointLifecycle {
     try {
       await this.driver.stop('connector')
       await this.driver.stop('herdr')
+      this.observedConnection = 'stopped'
       this.state.phase = 'stopped'; await this.save()
       await this.release(); this.release = null
     } catch (error) { await this.attention(code(error)) }
