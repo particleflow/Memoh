@@ -11,5 +11,5 @@
     "transfer": {"version": "0.3.0", "source": "https://github.com/particleflow/Memoh", "revision": "6ddf61dcd8199758e4110398645c556a3d6d7375", "entry": "transfer/transferqueue.exe"}
   },
   "requiredFiles": ["git/cmd/git.exe", "node_modules/.bin/pi", "node_modules/.bin/pi.cmd", "transfer/herdr-plugin.toml", "transfer/SHA256SUMS.json"],
-  "blockers": ["transfer_candidate_not_qualified", "git_version_not_selected", "official_artifact_hashes_not_locked", "clean_windows_acceptance_pending", "approved_binary_path_update_contract_pending"]
+  "blockers": ["transfer_candidate_not_qualified", "git_version_not_selected", "official_artifact_hashes_not_locked", "clean_windows_acceptance_pending", "approved_binary_path_update_contract_pending", "unified_lifecycle_idle_recovery_missing"]
 }

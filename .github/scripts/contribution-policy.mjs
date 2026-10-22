@@ -9,7 +9,7 @@ export const headings = {
 const sectionNames = new Set([...Object.values(headings), 'Related Issues', 'Environment', 'Model Used', 'Logs', 'Additional Context', 'Proposed Solution', 'Alternatives Considered']);
 
 export const typeLabels = ['bug', 'feat', 'test', 'help'];
-export const ciWorkflows = ['eslint.yml', 'go-ci.yml', 'rust-ci.yml', 'runtime-ci.yml', 'migrations.yml', 'install-ci.yml', 'electron-ci.yml', 'docker-pr.yml', 'contribution-policy-ci.yml'];
+export const ciWorkflows = ['eslint.yml', 'go-ci.yml', 'rust-ci.yml', 'runtime-ci.yml', 'migrations.yml', 'install-ci.yml', 'electron-ci.yml', 'docker-pr.yml', 'contribution-policy-ci.yml', 'windows-endpoint.yml'];
 
 // Exclude code examples from field and checkbox parsing; keep unknown headings inside their containing field.
 export function sections(body = '') {

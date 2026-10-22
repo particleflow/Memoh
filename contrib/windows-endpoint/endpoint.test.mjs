@@ -47,6 +47,7 @@ async function fixture(t) {
   for (const key of ['sourceRoot', 'herdrConfigRoot', 'herdrStateRoot', 'agenvoConfigDir', 'piConfigDir', 'transferConfigDir', 'transferStateDir']) await fs.mkdir(config[key], { recursive: true })
   await json(path.join(config.agenvoConfigDir, 'config.json'), { schema: 1, deviceId: config.deviceId, instances: [{ id: config.instanceId, kind: 'herdr', binary: path.join(root, catalog.components.herdr.entry), cwd: config.sourceRoot, configRoot: config.herdrConfigRoot }] })
   await fs.writeFile(path.join(config.herdrConfigRoot, 'config.toml'), '# synthetic configuration')
+  await json(path.join(config.herdrConfigRoot, 'plugins.json'), [{ plugin_id: 'memoh.delivery', version: catalog.components.transfer.version, enabled: true, plugin_root: path.join(root, 'transfer'), manifest_path: path.join(root, 'transfer/herdr-plugin.toml') }])
   for (const file of [path.join(config.agenvoConfigDir, 'credentials.json'), path.join(config.piConfigDir, 'auth.json'), path.join(config.transferConfigDir, 'device.credential')]) await fs.writeFile(file, 'DO-NOT-DISCLOSE-OR-PARSE-ME')
   await json(path.join(config.transferConfigDir, 'transfer.json'), { version: 1, origin: config.nasOrigin, source_root: config.sourceRoot })
   return { base, root, manifest, config, hash, save }
@@ -58,8 +59,10 @@ test('verified full inventory is still review-only, with explicit blockers', asy
   const result = await doctor(f.config, () => { throw new Error('fixture: no real components') })
   assert.equal(result.ready, false)
   assert.equal(result.activation, 'blocked')
-  for (const key of ['bundle_inventory', 'existing_device_mapping', 'official_agent_configuration', 'transfer_configuration']) assert.equal(result.checks.find(c => c.check === key).state, 'passed')
+  for (const key of ['bundle_inventory', 'existing_device_mapping', 'official_agent_configuration', 'transfer_configuration', 'existing_transfer_plugin']) assert.equal(result.checks.find(c => c.check === key).state, 'passed')
   assert.equal(result.capabilities.desktop, 'unsupported_by_command_connector')
+  assert.equal(result.lifecycle.automaticRecovery, false)
+  assert.equal(result.lifecycle.idleQueueWake, 'missing')
   assert.ok(result.blockers.includes('transfer_candidate_not_qualified'))
   assert.ok(!JSON.stringify(result).includes('DO-NOT-DISCLOSE'))
 })
@@ -168,8 +171,20 @@ test('authentication failure and stale snapshots never turn into readiness or re
   assert.equal(blocked.capabilities.connection, 'authentication_required')
   assert.equal(blocked.ready, false)
   assert.ok(!JSON.stringify(blocked).includes('REDACT-ME'))
+  await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now(), state: 'needs_attention', lastError: '' })
+  assert.equal((await doctor(f.config, () => '')).capabilities.connection, 'needs_attention')
   await json(file, { deviceId: f.config.deviceId, updatedAt: Date.now() - 121000, state: 'connected', lastError: '' })
   assert.equal((await doctor(f.config, () => '')).capabilities.connection, 'authentication_unverified')
+})
+
+test('missing, disabled or incorrectly linked transfer plugin is explicit', async t => {
+  const f = await fixture(t)
+  const file = path.join(f.config.herdrConfigRoot, 'plugins.json')
+  const registry = JSON.parse(await fs.readFile(file, 'utf8'))
+  for (const changed of [[], [{ ...registry[0], enabled: false }], [{ ...registry[0], plugin_root: f.base }]]) {
+    await json(file, changed)
+    assert.equal((await doctor(f.config, () => '')).checks.find(c => c.check === 'existing_transfer_plugin').state, 'blocked')
+  }
 })
 
 test('staging resumes around inert interrupted copies, is idempotent, preserves data', async t => {

@@ -36,6 +36,12 @@ independent review were still pending when this work began. This branch neither
 merges nor cherry-picks it. Main's removed imagejob/model-discovery/edit-result
 paths remain removed. Cross-Bot PR45/173 is outside this change.
 
+The [unattended lifecycle contract](lifecycle.md) records the inspected startup,
+event and reconnect triggers, their limits, and the minimum internal coordinator
+and transfer-owner interface still required. Installing the CLI does not provide
+idle queue retry or automatic crash recovery; users must not be required to keep
+a chat open to drive future recovery. Diagnostics expose this missing capability.
+
 The existing `apps/desktop` Electron app is a hosted-server client with an explicit
 no-companion-server/CLI boundary. `packages/runtime` is the existing separate
 workspace-runtime enrollment product, not a reason to introduce a second Windows
@@ -193,12 +199,18 @@ service or crash supervisor has been selected by this PR.
 
 ## Validation record
 
-Cloud Linux Node v24.19.0: 16 delivery tests passed, including strict inventory,
+Cloud Linux Node v24.19.0: 17 delivery tests passed, including strict inventory,
 configuration isolation, identity/path mismatch, authentication-state redaction,
 interrupted-staging remnants, idempotent publication and retained originals/queue.
 Fixtures contain inert synthetic payloads, not official binary acceptance. The
 Windows CI job runs these same filesystem fixtures and the PowerShell 5.1 bootstrap
-on Windows 2025 / Node 24.14.0; its result must be checked for the final commit.
+on Windows 2025 / Node 24.14.0. The initial 16-test revision passed on both systems
+([run 39821450035](https://github.com/particleflow/Memoh/actions/runs/39821450035));
+the final revision must pass again. Adding this workflow initially tripped the
+repository's exact workflow-count assertion (9 versus 10); the registered CI
+workflow inventory and expected count were updated without weakening the checks.
+Local governance tests additionally require Ruby (absent in this cloud shell);
+GitHub's existing policy job provides that environment.
 
 The Agent core boundary check matches official baseline
 `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`. No files under Agent core,

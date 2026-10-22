@@ -261,6 +261,15 @@ export async function doctor(config, run = probe) {
     requireThat(cfg.version === 1 && cfg.origin === config.nasOrigin && samePath(cfg.source_root, config.sourceRoot), 'transfer_configuration_mismatch')
     requireThat((await regular(path.join(config.transferConfigDir, 'device.credential'))).size > 0, 'transfer_credential_missing')
   })
+  await check('existing_transfer_plugin', async () => {
+    const registry = await readJSON(path.join(config.herdrConfigRoot, 'plugins.json'))
+    requireThat(Array.isArray(registry), 'plugin_registry_invalid')
+    const plugins = registry.filter(p => p.plugin_id === 'memoh.delivery')
+    requireThat(plugins.length === 1, 'transfer_plugin_missing')
+    const plugin = plugins[0]
+    const root = path.join(config.bundleRoot, 'transfer')
+    requireThat(plugin.enabled === true && plugin.version === catalog.components.transfer.version && samePath(plugin.plugin_root, root) && samePath(plugin.manifest_path, path.join(root, 'herdr-plugin.toml')), 'transfer_plugin_mapping_mismatch')
+  })
   let connection = 'authentication_unverified'
   try {
     const status = await readJSON(path.join(config.agenvoConfigDir, 'status.json'))
@@ -268,6 +277,7 @@ export async function doctor(config, run = probe) {
     if (status.deviceId === config.deviceId && Number.isFinite(age) && age >= 0 && age <= 120000) {
       if (['handshake_401', 'handshake_403'].includes(status.lastError)) connection = 'authentication_required'
       else if (status.lastError === 'handshake_426') connection = 'protocol_upgrade_required'
+      else if (status.state === 'needs_attention') connection = 'needs_attention'
       else if (status.state === 'connected') connection = 'connected_snapshot_unverified'
     }
   } catch { /* Optional official status snapshot; absence is unknown, not READY. */ }
@@ -294,6 +304,7 @@ export async function doctor(config, run = probe) {
   return {
     schema: 1, ready: false, activation: 'blocked', checks,
     capabilities: { connection, agent: 'readiness_unverified', desktop: 'unsupported_by_command_connector', transfer: 'native_storage_and_route_unverified' },
+    lifecycle: { owner: 'unified_endpoint', implementation: 'pending', idleQueueWake: 'missing', herdrStartupHook: 'available_one_shot_only', connectorReconnect: 'network_only', automaticRecovery: false },
     blockers: [...catalog.blockers],
     recovery: 'No restart or task resubmission. Authentication failure requires the existing authentication owner.',
   }
