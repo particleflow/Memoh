@@ -39,8 +39,9 @@ the existing directories under the registered target's `work_dir`:
 New operations persist `batch.progress.layout_version: 1` in their existing
 schema 170 JSON details **before** remote mutation. Historical operations with
 the field absent (zero) resolve to exactly the same version 1 paths. Unsupported
-versions fail closed; they do not guess paths, dispatch a task, or release an
-uncertain operation. Receipt format version 1 remains a separate contract.
+versions reject PC IO; they do not guess paths, dispatch a task, or release an
+uncertain operation. Existing verified NAS-cached results remain readable under
+the normal scope checks. Receipt format version 1 remains a separate contract.
 
 The layout uses Bash separators independently of the Go server OS. The configured
 Windows root, including backslashes or forward slashes, remains data and is
@@ -102,3 +103,33 @@ The inspected screenshots show the current running build's
 browser interactions; backend path/hash and durable-state checks above provide
 the storage evidence. Human QA and production validation have not been run for
 this patch.
+
+## Main integration (2026-10-22)
+
+Merged the actual PR #8 main `eeb1fdabf50ec94d48f08302c9da3f5b3811293e`
+into this branch without conflicts or history rewriting. The path implementation
+and tests in `internal/config`, `internal/agenvo` and `internal/computertask`
+are unchanged from reviewed `65f5a2f28320e5656731996e2a89b67edddc0f8c`.
+The small Pi-completion adapter is separate work, not part of this integration.
+
+- Fresh `go test -race` passed for config, agenvo, computertask, media and localfs.
+  This includes relative roots, load-time cwd, legacy layouts, saved byte-offset
+  restoration and unsupported layout rejection. The official core boundary
+  check also passed on the integrated tree.
+- Rebuilt the integrated Server and restored the isolated Vue/PostgreSQL/
+  synthetic-provider environment. Real browser attachment submission and a Pi
+  task completed without page errors. The 43-byte synthetic original downloaded
+  byte-for-byte and its physical SHA-256 matched under the relative configured
+  originals root.
+- The same authenticated browser performed a 1,120-byte resumable upload in two
+  chunks using the PR #8 API, reached `ready`, and read back the exact bytes.
+  Both its journal and verified original were found beneath that same resolved
+  root. No production files, mounts, credentials or schemas were changed.
+- An overly specific browser response matcher missed the SDK's upload URL;
+  the already completed task was reopened and verified read-only, without
+  submitting another Pi task. This was a test capture issue, not a task failure.
+
+[Fresh integrated UI evidence](validation/data-path-integrated-web.png) shows
+the actual attachment and completed synthetic Pi task. The separate hash and
+journal checks establish storage consistency. No new Windows/vendor or real
+model acceptance is claimed.
