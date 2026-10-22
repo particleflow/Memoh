@@ -126,7 +126,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 			return writeFixed(output, `{"state":"idle"}`)
 		}
 		if err != nil {
-			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending_or_unavailable", "feedback_status": feedback})
+			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending_or_unavailable", "feedback_status": feedback, "error_class": transferclient.LifecycleFailure(err).ErrorClass})
 			return 1
 		}
 		return writeStatus(output, status, "", feedback, nil)

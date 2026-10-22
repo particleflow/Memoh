@@ -12,7 +12,10 @@ its original delivery/reference fields. Exit status alone is not a retry or
 delivery decision. `reference` at ready still requires NAS association.
 
 States are `due`, `idle`, `waiting`, `blocked`, `unknown`. Eligible independent
-work wins over unrelated blocked/unknown records. Waiting uses the earliest
+work wins over unrelated stored blocked/unknown records. A storage error that
+blocks the actual pre-advance reclaim pass takes precedence over every due item;
+summary and advance both report unknown/error, preserving the corrupt evidence.
+Waiting uses the earliest
 eligible `max(job.next_attempt, association_due)` without changing that deadline.
 Due, idle, blocked and unknown have a null deadline. Idle covers this existing
 queue only: it does not claim business completion, enumerate new producer

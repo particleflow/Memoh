@@ -261,3 +261,54 @@ func TestLifecycleInvalidTaskDoesNotStarveConfiguredWork(t *testing.T) {
 		t.Fatal(s, err)
 	}
 }
+
+func TestLifecycleCorruptTailBlocksActualAdvance(t *testing.T) {
+	env, q, binding := lifecycleFixture(t)
+	for _, id := range []string{"a-corrupt", "b-due"} {
+		lifecycleAdmit(t, q, id, binding)
+	}
+	f, err := q.file("a-corrupt.journal", os.O_RDWR, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = f.Seek(0, 2); err != nil {
+		t.Fatal(err)
+	}
+	// Complete frame with a wrong checksum: the first admission frame is valid.
+	frame := make([]byte, 37)
+	frame[3] = 1
+	frame[36] = 'x'
+	if _, err = f.Write(frame); err != nil {
+		t.Fatal(err)
+	}
+	if err = f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	_ = f.Close()
+	badBefore, err := q.root.ReadFile(queueName("a-corrupt.journal"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))
+	summary, err := LifecycleSummary(t.Context(), env, "fixture", lifecycleLimits, time.Now())
+	if !errors.Is(err, ErrStore) || summary.State != "unknown" || summary.ErrorClass != "unknown" || summary.NextDueAt != nil {
+		t.Fatal("impossible due work advertised", summary, err)
+	}
+	if !reflect.DeepEqual(before, lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))) {
+		t.Fatal("corrupt evidence changed")
+	}
+	if _, err := AdvanceProducer(t.Context(), env, "fixture", lifecycleLimits, nil, time.Now()); !errors.Is(err, ErrStore) {
+		t.Fatal("actual blocker hidden", err)
+	}
+	bad, err := q.root.ReadFile(queueName("a-corrupt.journal"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(badBefore, bad) {
+		t.Fatal("failed advance erased evidence")
+	}
+	other, err := q.Inspect("b-due")
+	if err != nil || other.Job.Phase != "queued" || other.Job.Attempts != 0 || other.Job.ReceiptID != "" {
+		t.Fatal("unexpected independent mutation", err)
+	}
+}

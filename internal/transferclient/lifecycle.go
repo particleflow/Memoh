@@ -99,6 +99,12 @@ func (q *DiskQueue) lifecycleSummary(ctx context.Context, binding string, now ti
 		r, err := q.Inspect(head.Job.DeliveryID)
 		var next Lifecycle
 		if err != nil && !errors.Is(err, ErrAdmissionPending) {
+			// ReclaimConfirmed must load every non-busy record before selecting
+			// work. A corrupt journal therefore blocks the actual finite action,
+			// even when another record is due. Do not advertise impossible work.
+			if !errors.Is(err, ErrBusy) {
+				return LifecycleFailure(err), err
+			}
 			next = LifecycleFailure(err)
 		} else {
 			next = recordLifecycle(r, binding, now)

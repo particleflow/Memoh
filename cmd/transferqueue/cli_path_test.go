@@ -60,7 +60,7 @@ func TestCLIPathTLSRestartAndLostResponses(t *testing.T) {
 	root := cliPrivateRoot(t)
 	config, state, source := filepath.Join(root, "config"), filepath.Join(root, "state"), filepath.Join(root, "source")
 	for _, path := range []string{config, state, source} {
-		if err := os.Mkdir(path, 0o700); err != nil {
+		if err := cliFixtureDir(path); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -145,7 +145,7 @@ func TestCLIPathTLSRestartAndLostResponses(t *testing.T) {
 	defer server.Close()
 	write := func(path string, raw []byte) {
 		t.Helper()
-		if err := os.WriteFile(path, raw, 0o600); err != nil {
+		if err := cliFixtureWrite(path, raw); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -169,7 +169,7 @@ func TestCLIPathTLSRestartAndLostResponses(t *testing.T) {
 		cmd.Stdout = &output
 		cmd.Stderr = &stderr
 		if err := cmd.Run(); err != nil {
-			t.Fatalf("finite CLI %s failed: %v, %s", action, err, stderr.String())
+			t.Fatalf("finite CLI %s failed: %v, stderr=%s status=%s", action, err, stderr.String(), output.String())
 		}
 		if bytes.Contains(output.Bytes(), []byte("synthetic-cli-device")) || bytes.Contains(output.Bytes(), []byte(source)) || bytes.Contains(output.Bytes(), []byte(server.URL)) {
 			t.Fatal("private configuration leaked")
@@ -231,5 +231,90 @@ func TestCLIPathSummaryMissingConfigurationDoesNotCreateState(t *testing.T) {
 	entries, err := os.ReadDir(root)
 	if err != nil || len(entries) != 0 {
 		t.Fatal("summary initialized state")
+	}
+}
+
+func TestCLIPathCorruptQueueCannotAdvertiseIndependentDue(t *testing.T) {
+	root := cliPrivateRoot(t)
+	config, state := filepath.Join(root, "config"), filepath.Join(root, "state")
+	for _, path := range []string{config, state} {
+		if err := cliFixtureDir(path); err != nil {
+			t.Fatal(err)
+		}
+	}
+	raw, _ := json.Marshal(map[string]any{"version": 1, "origin": "https://fixture.invalid"})
+	if err := cliFixtureWrite(filepath.Join(config, "transfer.json"), raw); err != nil {
+		t.Fatal(err)
+	}
+	if err := cliFixtureWrite(filepath.Join(config, "device.credential"), []byte("synthetic-device")); err != nil {
+		t.Fatal(err)
+	}
+	env := func(key string) string {
+		if key == "HERDR_PLUGIN_CONFIG_DIR" {
+			return config
+		}
+		if key == "HERDR_PLUGIN_STATE_DIR" {
+			return state
+		}
+		return ""
+	}
+	invoke := func(action string, input []byte) (int, []byte) {
+		var output, stderr bytes.Buffer
+		code := runCommand([]string{"-action", action}, bytes.NewReader(input), &output, &stderr, env, nil, time.Now)
+		return code, output.Bytes()
+	}
+	for _, id := range []string{"a-corrupt", "b-due"} {
+		j := transferclient.Job{Version: 1, DeliveryID: id, SnapshotID: id, BotID: "bot", OperationID: "operation", LocatorRevision: "native-profile-v1", Phase: "queued", Spec: transferclient.Spec{SizeBytes: 7, SHA256: strings.Repeat("a", 64), Mime: "text/plain"}, Task: transferclient.DeviceTask{UserID: "user", SessionID: "session", TargetID: "target", RunID: "run", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}}
+		input, _ := json.Marshal(admissionInput{Job: j})
+		if code, raw := invoke("enqueue-download", input); code != 0 {
+			t.Fatalf("admit: %d %s", code, raw)
+		}
+	}
+	queueRoot := filepath.Join(state, "deliveries-v1")
+	entries, err := os.ReadDir(queueRoot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var badPath string
+	for _, entry := range entries {
+		if strings.HasSuffix(entry.Name(), ".journal") {
+			badPath = filepath.Join(queueRoot, entry.Name())
+			break
+		}
+	}
+	if badPath == "" {
+		t.Fatal("missing admitted journal")
+	}
+	f, err := os.OpenFile(badPath, os.O_WRONLY|os.O_APPEND, 0) //nolint:gosec // Existing enumerated journal inside this test's private fixture.
+	if err != nil {
+		t.Fatal(err)
+	}
+	frame := make([]byte, 37)
+	frame[3] = 1
+	frame[36] = 'x'
+	if _, err = f.Write(frame); err != nil {
+		t.Fatal(err)
+	}
+	if err = f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+	_ = f.Close()
+	before, err := os.ReadFile(badPath) //nolint:gosec // Fixed private fixture corruption evidence.
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, action := range []string{"lifecycle-summary", "advance-results"} {
+		code, raw := invoke(action, nil)
+		var out struct {
+			State      string `json:"state"`
+			ErrorClass string `json:"error_class"`
+		}
+		if code != 1 || json.Unmarshal(raw, &out) != nil || out.State != "unknown" || out.ErrorClass != "unknown" {
+			t.Fatalf("impossible due result: %d %s", code, raw)
+		}
+	}
+	after, err := os.ReadFile(badPath) //nolint:gosec // Same private fixture evidence after real CLI dispatch.
+	if err != nil || !bytes.Equal(before, after) {
+		t.Fatal("corrupt proof modified")
 	}
 }

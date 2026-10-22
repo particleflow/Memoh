@@ -16,3 +16,6 @@ func cliPrivateRoot(t *testing.T) string {
 	}
 	return root
 }
+
+func cliFixtureDir(path string) error                { return os.Mkdir(path, 0o700) }
+func cliFixtureWrite(path string, data []byte) error { return os.WriteFile(path, data, 0o600) }
