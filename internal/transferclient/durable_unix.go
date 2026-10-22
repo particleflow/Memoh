@@ -12,6 +12,21 @@ import (
 
 func queuePlatformReady() error { return nil }
 
+func guardQueueRoot(*os.Root) (*os.File, error)     { return nil, nil }
+func queueName(name string) string                  { return name }
+func makeQueueDir(root *os.Root, name string) error { return root.Mkdir(name, 0o700) }
+func openQueueFile(root *os.Root, name string, flags int, mode os.FileMode) (*os.File, error) {
+	f, err := root.OpenFile(name, flags, mode)
+	if err != nil {
+		return nil, ErrStore
+	}
+	return f, nil
+}
+func removeQueueFile(root *os.Root, name string) error { return root.Remove(name) }
+func guardQueueSource(source *os.File) (*os.File, func(), error) {
+	return source, func() {}, nil
+}
+
 func queueFileIdentity(f *os.File) (string, error) {
 	var stat unix.Stat_t
 	if unix.Fstat(int(f.Fd()), &stat) != nil { //nolint:gosec // Fd originates from an open Unix descriptor.

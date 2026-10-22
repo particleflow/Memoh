@@ -36,6 +36,7 @@ type QueueLimits struct {
 // execution receipts and NAS originals remain owned by their existing services.
 type DiskQueue struct {
 	root     *os.Root
+	guard    *os.File
 	revision string
 	limits   QueueLimits
 }
@@ -58,8 +59,8 @@ type QueueStatus struct {
 
 // OpenHerdrQueue accepts Herdr's resolved locator once. Empty, relative,
 // symlinked or relocated roots fail explicitly; no cwd/temp/legacy fallback.
-// On Windows a verified directory durability binding is still required: the
-// platform helper fails closed rather than claiming Linux fixture guarantees.
+// Native validation must succeed before any network work. Windows requires a
+// private local NTFS directory; it never repairs existing ACLs or elevates.
 func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLimits) (*DiskQueue, error) {
 	if getenv == nil || !validID(revision) || limits.Jobs < 1 || limits.Jobs > 128 || limits.Bytes < 1 || limits.Bytes > 1<<40 || limits.JournalBytes < 65536 || limits.JournalBytes > 8<<20 || limits.Workers < 1 || limits.Workers > 4 {
 		return nil, ErrInvalid
@@ -80,7 +81,12 @@ func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		return nil, ErrStore
 	}
 	defer func() { _ = parent.Close() }()
-	if err := parent.Mkdir("deliveries-v1", 0o700); err != nil && !errors.Is(err, os.ErrExist) {
+	parentGuard, err := guardQueueRoot(parent)
+	if err != nil {
+		return nil, err
+	}
+	defer closeQueueGuard(parentGuard)
+	if err := makeQueueDir(parent, "deliveries-v1"); err != nil && !errors.Is(err, os.ErrExist) {
 		return nil, ErrStore
 	}
 	info, err := parent.Lstat("deliveries-v1")
@@ -95,10 +101,16 @@ func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		_ = root.Close()
 		return nil, err
 	}
-	q := &DiskQueue{root: root, revision: revision, limits: limits}
+	guard, err := guardQueueRoot(root)
+	if err != nil {
+		_ = root.Close()
+		return nil, err
+	}
+	q := &DiskQueue{root: root, guard: guard, revision: revision, limits: limits}
 	ok := false
 	defer func() {
 		if !ok {
+			closeQueueGuard(guard)
 			_ = root.Close()
 		}
 	}()
@@ -152,23 +164,39 @@ func OpenHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 		}
 		return nil, ErrStore
 	}
-	if syncQueueDir(root) != nil || syncQueueDir(parent) != nil {
-		return nil, ErrStore
+	if err := syncQueueDir(root); err != nil {
+		return nil, err
+	}
+	if err := syncQueueDir(parent); err != nil {
+		return nil, err
 	}
 	ok = true
 	return q, nil
 }
 
-func (q *DiskQueue) Close() error { return q.root.Close() }
+func (q *DiskQueue) Close() error {
+	closeQueueGuard(q.guard)
+	return q.root.Close()
+}
+
+func closeQueueGuard(f *os.File) {
+	if f != nil {
+		_ = f.Close()
+	}
+}
 
 // All paths below are private layout constants or validated logical IDs.
 func (q *DiskQueue) file(name string, flags int, mode os.FileMode) (*os.File, error) {
+	return q.physicalFile(queueName(name), flags, mode)
+}
+
+func (q *DiskQueue) physicalFile(name string, flags int, mode os.FileMode) (*os.File, error) {
 	if info, err := q.root.Lstat(name); err == nil && !info.Mode().IsRegular() {
 		return nil, ErrStore
 	}
-	f, err := q.root.OpenFile(name, flags, mode)
+	f, err := openQueueFile(q.root, name, flags, mode)
 	if err != nil {
-		return nil, ErrStore
+		return nil, err
 	}
 	if err := checkQueueFile(f); err != nil {
 		_ = f.Close()
