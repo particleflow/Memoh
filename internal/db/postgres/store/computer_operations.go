@@ -136,7 +136,7 @@ func computerIDs(r dbstore.ComputerOperationRecord) ([]pgtype.UUID, error) {
 }
 
 func operationRecord(r dbsqlc.ComputerOperation) dbstore.ComputerOperationRecord {
-	return dbstore.ComputerOperationRecord{ID: r.ID.String(), BotID: r.BotID.String(), SessionID: r.SessionID.String(), UserID: r.UserID.String(), TargetID: r.TargetID.String(), RunID: r.RunID, Fingerprint: r.Fingerprint, TargetFingerprint: r.TargetFingerprint, State: r.State, Details: r.Details, CancelRequested: r.CancelRequested, Revision: r.Revision}
+	return dbstore.ComputerOperationRecord{ID: r.ID.String(), BotID: r.BotID.String(), SessionID: r.SessionID.String(), UserID: r.UserID.String(), TargetID: r.TargetID.String(), RunID: r.RunID, Fingerprint: r.Fingerprint, TargetFingerprint: r.TargetFingerprint, State: r.State, Details: r.Details, CancelRequested: r.CancelRequested, Revision: r.Revision, CreatedAt: r.CreatedAt.Time, UpdatedAt: r.UpdatedAt.Time}
 }
 
 func (s *Store) ClaimComputerOperation(ctx context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, bool, error) {
