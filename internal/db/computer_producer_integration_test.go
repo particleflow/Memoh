@@ -69,6 +69,29 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 		}
 	}
 	closed := deliverymeta.Closed{Plan: deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: id.OperationID, BotID: id.Binding.BotID, UserID: id.Binding.UserID, SessionID: id.Binding.SessionID, TargetID: id.Binding.TargetID, RunID: id.Binding.RunID, Attempt: id.Attempt, Generation: id.Generation, RootHash: deliverymeta.RootHash(source)}, Artifact: deliverymeta.Artifact{SourceRef: "result-one", Mime: ref.Mime}}, Closed: true, SHA256: ref.ContentHash, SizeBytes: ref.SizeBytes}
+
+	// Persist the bounded declaration in the same operation; preserve every
+	// existing ledger key while CAS-updating BatchProgress.
+	scope := dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: id.Binding.BotID, UserID: id.Binding.UserID, SessionID: id.Binding.SessionID}
+	operation, err := store.ReadComputerOperation(ctx, scope)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var details computertask.Details
+	var original map[string]json.RawMessage
+	if json.Unmarshal(operation.Details, &details) != nil || details.Batch == nil || json.Unmarshal(operation.Details, &original) != nil {
+		t.Fatal("original batch absent")
+	}
+	plan := closed.Plan
+	plan.Version = 2
+	plan.Artifacts = []deliverymeta.Artifact{plan.Artifact, {SourceRef: "result-two", Mime: ref.Mime}}
+	plan.Artifact = deliverymeta.Artifact{}
+	details.Batch.Progress.Producer = &plan
+	original["batch"], _ = json.Marshal(details.Batch)
+	operation.Details, _ = json.Marshal(original)
+	if _, err := store.SaveComputerOperation(ctx, operation); err != nil {
+		t.Fatal("plan CAS", err)
+	}
 	raw, _ := json.Marshal(closed)
 	getenv := func(key string) string {
 		switch key {
@@ -79,7 +102,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 		}
 		return ""
 	}
-	limits := transferclient.QueueLimits{Jobs: 2, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}
+	limits := transferclient.QueueLimits{Jobs: 1, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}
 	status, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(raw), https.Client(), time.Now())
 	if err != nil || !status.Admitted {
 		t.Fatal("stdin admission", err)
@@ -116,5 +139,43 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	replay, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(raw), https.Client(), time.Now())
 	if err != nil || !replay.Associated || replay.Job.ReceiptID != status.Job.ReceiptID || creates.Load() != 1 {
 		t.Fatal("replayed producer created new work", err)
+	}
+	// Same installed device credential and original operation, second file. With
+	// Jobs=1 this also requires the first durable association to release capacity.
+	second := closed
+	second.Artifact.SourceRef = "result-two"
+	if err := os.WriteFile(filepath.Join(source, second.Artifact.SourceRef), []byte("synthetic delivery content"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	nextRaw, _ := json.Marshal(second)
+	next, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(nextRaw), https.Client(), time.Now())
+	if err != nil || !next.Admitted {
+		t.Fatal("second admission", err)
+	}
+	for range 15 {
+		next, err = transferclient.AdvanceProducer(ctx, getenv, "fixture", limits, https.Client(), time.Now().Add(time.Hour))
+		if err != nil {
+			t.Fatal("second advance", err)
+		}
+		if next.Associated {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !next.Associated || next.PayloadState != transferclient.PayloadReleased || creates.Load() != 2 || next.Job.ReceiptID == status.Job.ReceiptID {
+		t.Fatal("distinct original per-file receipts lost", err)
+	}
+	operation, err = store.ReadComputerOperation(ctx, scope)
+	if err != nil || json.Unmarshal(operation.Details, &persisted) != nil {
+		t.Fatal("read multiple ledger", err)
+	}
+	if persisted.Ledger.Entries[closed.DeliveryID()].Outcome != "committed" || persisted.Ledger.Entries[second.DeliveryID()].Outcome != "committed" {
+		t.Fatal("partial ledger overwritten")
+	}
+	for _, metadata := range [][]byte{raw, nextRaw} {
+		replay, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(metadata), https.Client(), time.Now())
+		if err != nil || !replay.Associated || creates.Load() != 2 {
+			t.Fatal("repeated multi-file hook duplicated create", err)
+		}
 	}
 }

@@ -60,11 +60,12 @@ type Target struct {
 	AgentProtocol string   `json:"agent_protocol,omitempty"`
 }
 type Submit struct {
-	Artifact *deliverymeta.Artifact `json:"artifact,omitempty"`
-	TargetID string                 `json:"target_id,omitempty"`
-	Kind     string                 `json:"kind"`
-	Task     string                 `json:"task"`
-	WorkDir  string                 `json:"work_dir,omitempty"`
+	Artifact  *deliverymeta.Artifact  `json:"artifact,omitempty"`
+	Artifacts []deliverymeta.Artifact `json:"artifacts,omitempty"`
+	TargetID  string                  `json:"target_id,omitempty"`
+	Kind      string                  `json:"kind"`
+	Task      string                  `json:"task"`
+	WorkDir   string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
 	Batch        *BatchDetails            `json:"batch,omitempty"`
@@ -234,7 +235,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if err := s.authorize(ctx, b, id, in.Kind, in.Task); err != nil {
 		return Result{}, err
 	}
-	if in.Artifact != nil && (!in.Artifact.Valid() || in.Kind != "herdr_pi_task" || target.Agent.ExecutionMode != "pi-json-v1" || in.WorkDir != ".") {
+	if (in.Artifact != nil || in.Artifacts != nil) && (in.Artifact != nil && (in.Artifacts != nil || !in.Artifact.Valid()) || in.Artifacts != nil && !deliverymeta.ValidArtifacts(in.Artifacts) || in.Kind != "herdr_pi_task" || target.Agent.ExecutionMode != "pi-json-v1" || in.WorkDir != ".") {
 		return Result{}, ErrInvalid
 	}
 	operationID := uuid.NewString()
@@ -242,8 +243,14 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
 		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{LayoutVersion: agenvo.BatchLayoutVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
 
-		if in.Artifact != nil {
-			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Artifact: *in.Artifact, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
+		if in.Artifact != nil || in.Artifacts != nil {
+			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
+			if in.Artifact != nil {
+				d.Batch.Progress.Producer.Artifact = *in.Artifact
+			} else {
+				d.Batch.Progress.Producer.Version = 2
+				d.Batch.Progress.Producer.Artifacts = append([]deliverymeta.Artifact(nil), in.Artifacts...)
+			}
 		}
 		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
 			return Result{}, err
@@ -393,7 +400,7 @@ func (s *Service) cancel(ctx context.Context, b toolcontext.ComputerBinding, id 
 	}
 	active := r.State != "completed" && r.State != "not_started" && r.State != "rejected"
 	delivery := producerResult(r, d)
-	if active || delivery != nil && delivery.State == "pending" {
+	if active || delivery != nil && delivery.hasPending() {
 		if active {
 			r.State = "unknown"
 		}

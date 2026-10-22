@@ -13,7 +13,10 @@ import (
 	"github.com/google/uuid"
 )
 
-const ManifestPrefix = "memoh_delivery_"
+const (
+	ManifestPrefix = "memoh_delivery_"
+	MaxArtifacts   = 16
+)
 
 var (
 	reservedName = regexp.MustCompile(`^(COM|LPT)[1-9]$`)
@@ -71,18 +74,73 @@ func RootHash(root string) string {
 }
 
 type Plan struct {
-	Version  int      `json:"version"`
-	Task     Task     `json:"task"`
-	Artifact Artifact `json:"artifact"`
+	Version   int        `json:"version"`
+	Task      Task       `json:"task"`
+	Artifact  Artifact   `json:"artifact"`
+	Artifacts []Artifact `json:"artifacts,omitempty"`
 }
 
-func (p Plan) Valid() bool { return p.Version == 1 && p.Task.Valid() && p.Artifact.Valid() }
+// ValidArtifacts rejects case aliases too: the intended host is Windows.
+func ValidArtifacts(artifacts []Artifact) bool {
+	if len(artifacts) < 1 || len(artifacts) > MaxArtifacts {
+		return false
+	}
+	seen := make(map[string]bool, len(artifacts))
+	for _, a := range artifacts {
+		name := strings.ToLower(a.SourceRef)
+		if !a.Valid() || seen[name] {
+			return false
+		}
+		seen[name] = true
+	}
+	return true
+}
+
+func (p Plan) Valid() bool {
+	if !p.Task.Valid() {
+		return false
+	}
+	switch p.Version {
+	case 1:
+		return p.Artifact.Valid() && len(p.Artifacts) == 0
+	case 2:
+		return p.Artifact == (Artifact{}) && ValidArtifacts(p.Artifacts)
+	default:
+		return false
+	}
+}
+
+// FilePlans expands only declared metadata. Every closed manifest remains the
+// existing version 1 single-file format, with identity independent of list order.
+func (p Plan) FilePlans() []Plan {
+	if !p.Valid() {
+		return nil
+	}
+	if p.Version == 1 {
+		return []Plan{p}
+	}
+	plans := make([]Plan, 0, len(p.Artifacts))
+	for _, artifact := range p.Artifacts {
+		plans = append(plans, Plan{Version: 1, Task: p.Task, Artifact: artifact})
+	}
+	return plans
+}
+
 func (p Plan) DeliveryID() string {
+	if p.Version != 1 {
+		return ""
+	}
 	raw, _ := json.Marshal(struct{ Operation, Attempt, Generation, Source string }{p.Task.OperationID, p.Task.Attempt, p.Task.Generation, p.Artifact.SourceRef})
 	sum := sha256.Sum256(raw)
 	return hex.EncodeToString(sum[:])
 }
-func (p Plan) ManifestName() string { return ManifestPrefix + p.DeliveryID() }
+
+func (p Plan) ManifestName() string {
+	if p.Version != 1 {
+		return ""
+	}
+	return ManifestPrefix + p.DeliveryID()
+}
 
 type Closed struct {
 	Plan
@@ -92,5 +150,5 @@ type Closed struct {
 }
 
 func (c Closed) Valid() bool {
-	return c.Plan.Valid() && c.Closed && hex64.MatchString(c.SHA256) && c.SizeBytes > 0 && c.SizeBytes <= 1<<40
+	return c.Version == 1 && c.Plan.Valid() && c.Closed && hex64.MatchString(c.SHA256) && c.SizeBytes > 0 && c.SizeBytes <= 1<<40
 }

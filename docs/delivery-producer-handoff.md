@@ -1,4 +1,4 @@
-# Single-file producer handoff (candidate, disabled until setup)
+# Bounded producer handoff (candidate, disabled until setup)
 
 This increment connects an explicitly declared Pi JSON result to the existing
 file queue. It does not install Herdr, change Agent or Agenvo, issue per-file
@@ -7,12 +7,14 @@ trust remain the separately approved setup in [device-transfer-setup.md](device-
 
 ## Declaration and ownership
 
-`computer_task_submit` accepts optional `artifact: {source_ref, mime}` for
-`herdr_pi_task` using `pi-json-v1`, with `work_dir: "."`. This first increment
-supports one nonempty file, not a directory or automatic import of logs. The
+`computer_task_submit` accepts either optional `artifact: {source_ref, mime}`
+or `artifacts: [{source_ref, mime}, ...]` (1–16 entries, never both), for
+`herdr_pi_task` using `pi-json-v1`, with `work_dir: "."`. Each entry selects a
+nonempty file; directories and automatic log imports are excluded. The
 source reference is a flat logical filename (letters, digits, underscore,
-hyphen; Windows device names are rejected). The task must write that declared
-file and close all writers before it exits. A pre-existing file prevents Pi from
+hyphen; Windows devices and case-insensitive duplicates are rejected). The task
+must write those declared files and close all writers before it exits. Any
+pre-existing declared file prevents Pi from
 starting; it is not reused as this task's result.
 
 The operation is allocated before dispatch. Its existing `BatchProgress` stores
@@ -34,7 +36,9 @@ private Herdr config directory. No production directories or ACLs are changed.
 
 The existing execution envelope exposes `MEMOH_DELIVERY_CONTEXT_FILE` to the
 process without modifying the prompt or Agent. After Pi exits, it streams
-SHA-256/size for the declared file and closes a bounded JSON manifest. It invokes
+SHA-256/size for each existing declared file and closes one bounded version 1
+JSON manifest per file. A version 2 list lives only in the original BatchProgress;
+its common task identity does not create a group upload or second registry. It invokes
 `herdr plugin action invoke collect-result --plugin memoh.delivery`; hook output
 stays in the existing attempt directory. No file bytes, credential or raw
 transport diagnostics enter argv, terminal receipts or model messages.
@@ -58,10 +62,26 @@ finite action through the verified dedicated control pane, including after the
 business result is complete. It never types into Pi or resubmits the task.
 `pane.run` acceptance is only a wakeup, not delivery evidence. Queue locks and
 original receipt reconciliation handle overlapping or lost wakeups. There is no
-new daemon or timer; pending work needs a later task query or host action.
+new daemon or timer; pending work needs a later task query or host action. One
+hook does not promise to drain every file. Missing/unclosed outputs remain
+observable as `pending` with `closure_or_admission_unknown` in multi-file results;
+they are never fabricated or recovered by rerunning Pi.
+
+The shell closure function and common task metadata are emitted once. Producer
+launches are rejected before dispatch if their encoded command exceeds 30000
+bytes, leaving room below the [Windows process command bound](https://learn.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw).
+Sixteen short declarations are covered; very long task/declaration combinations
+can still be explicitly rejected. No new CLI or dependency is installed.
 
 `Result.delivery` is independent of `pi_result`: only an upload entry committed
 in the original operation's NAS ledger yields `state: delivered` and `reference`.
+Single-file responses keep their existing shape. List declarations return
+`files` with stable per-file delivery IDs/states/references and `total`, `delivered`,
+`pending` counts (zero counts may be omitted). Aggregate `delivered` requires
+every declared file committed; `partial` retains committed references when others
+are pending/failed/canceled. Task queries continue finite wakeups while any file
+is pending, even when the aggregate is partial. Cancellation can fence pending
+files after business completion without retracting committed ones.
 Pending validation, ready uploads, a local receipt, or plugin acceptance cannot
 yield a delivered reference. A persisted operation cancellation fences every
 uncommitted declared upload in the same transaction/revision CAS as reservation
@@ -75,8 +95,8 @@ and target-fingerprint checks. NAS media retention/pinning is unchanged.
 
 ## Explicit limits and remaining integration
 
-- This is a single-file opt-in milestone. Multi-file declarations and automatic
-  admission recovery before a closed manifest exists remain follow-up work. Existing
+- This supports up to sixteen declarations with separate durable receipts.
+  Automatic recovery before a closed manifest exists remains follow-up work. Existing
   `cancel`/`retire` commands retain their reviewed semantics; this patch does not
   claim that `computer_task_cancel` retracts already delivered files.
 - A process crash before the closed manifest is written can leave an execution
@@ -94,7 +114,9 @@ and target-fingerprint checks. NAS media retention/pinning is unchanged.
 - Source enumeration is capped at 4096 entries; malformed manifests fail
   explicitly. Manifests are metadata, not a second task registry. Old binaries
   cannot safely edit operations containing producer metadata; do not mix old
-  and new operation writers when enabling this feature. Existing migrations
+  and new operation writers when enabling this feature. Version 1 single-file
+  declarations remain readable; version 2 list declarations require this code,
+  and older writers must stay stopped. Existing migrations
   171/172 and their rollback restrictions still apply; this increment adds no
   migration or production configuration.
 - Native Windows queue tests use an HTTPS protocol fixture. Linux integration

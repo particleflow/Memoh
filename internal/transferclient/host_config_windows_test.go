@@ -37,3 +37,7 @@ func TestWindowsNativeReleaseUsesJournalIdentity(t *testing.T) {
 		}
 	}
 }
+
+func TestWindowsNativeProducerMultiple(t *testing.T) {
+	TestProducerMultiplePartialRestartAndDeniedFile(t)
+}

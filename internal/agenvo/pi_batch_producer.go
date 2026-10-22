@@ -56,27 +56,51 @@ export MEMOH_DELIVERY_CONTEXT_FILE="$(cygpath -w "$memoh_attempt/producer-contex
 	script = strings.Replace(script, `mkdir "$memoh_attempt" || exit 125`, `mkdir "$memoh_attempt" || exit 125`+"\n"+setup, 1)
 	// A pre-existing export is not evidence from this invocation. Reject before
 	// starting Pi; the ordinary not-started receipt still records that fact.
-	script = strings.Replace(script, `if cd "$memoh_cwd" &&`, fmt.Sprintf(`if [ ! -e "$memoh_root/%s" ] && [ ! -L "$memoh_root/%s" ] && cd "$memoh_cwd" &&`, plan.Artifact.SourceRef, plan.Artifact.SourceRef), 1)
-	prefix := strings.TrimSuffix(string(raw), "}")
-	// The task-root and producer-root configurations must name the same location;
-	// the closed manifest carries only a consistency digest, never a lookup path.
-	closure := fmt.Sprintf(`
-if [ "$memoh_started" = true ] && [ -f "$memoh_root/%s" ] && [ ! -L "$memoh_root/%s" ]; then
-  memoh_result_hash="$(sha256sum -- "$memoh_root/%s")"; memoh_result_hash="${memoh_result_hash%%%% *}"
-  memoh_result_size="$(wc -c < "$memoh_root/%s")"
+	var guards, closures strings.Builder
+	closures.WriteString(producerClosureFunction(plan.Task))
+	for _, file := range plan.FilePlans() {
+		fmt.Fprintf(&guards, `[ ! -e "$memoh_root/%s" ] && [ ! -L "$memoh_root/%s" ] && `, file.Artifact.SourceRef, file.Artifact.SourceRef)
+		artifact, _ := json.Marshal(file.Artifact)
+		fmt.Fprintf(&closures, "memoh_close_result '%s' '%s' '%s'\n", file.Artifact.SourceRef, file.ManifestName(), base64.StdEncoding.EncodeToString(artifact))
+	}
+	script = strings.Replace(script, `if cd "$memoh_cwd" &&`, `if `+guards.String()+`cd "$memoh_cwd" &&`, 1)
+	// One bounded hook per envelope. Remaining manifests stay for later existing
+	// task queries/host actions; never rerun Pi or add a background worker.
+	hook := `
+if [ "$memoh_started" = true ] && command -v herdr >/dev/null; then
+  herdr plugin action invoke collect-result --plugin memoh.delivery > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true
+fi
+`
+	result := script + closures.String() + hook
+	// Leave headroom below Windows CreateProcessW's 32767-character bound.
+	// The connector's existing larger command cap alone is insufficient here.
+	if len(launchBashScript(result, target.BashPath)) > 30000 {
+		return "", ErrUnsupported
+	}
+	return result, nil
+}
+
+func producerClosureFunction(task deliverymeta.Task) string {
+	raw, _ := json.Marshal(task)
+	prefix := `{"version":1,"task":` + string(raw) + `,"artifact":`
+	// Task metadata and the closure body appear once, not once per file. Each
+	// call supplies only validated logical names and base64 artifact metadata.
+	return fmt.Sprintf(`
+memoh_producer_prefix='%s'
+memoh_close_result() {
+  if [ "$memoh_started" != true ] || [ ! -f "$memoh_root/$1" ] || [ -L "$memoh_root/$1" ]; then return; fi
+  memoh_result_hash="$(sha256sum -- "$memoh_root/$1")"; memoh_result_hash="${memoh_result_hash%%%% *}"
+  memoh_result_size="$(wc -c < "$memoh_root/$1")"
   if [ "$memoh_result_size" -gt 0 ]; then
     (
       set -C
       {
-        printf '%%s' '%s' | base64 --decode
+        printf '%%s' "$memoh_producer_prefix" | base64 --decode
+        printf '%%s' "$3" | base64 --decode
         printf ',"closed":true,"sha256":"%%s","size_bytes":%%d}' "$memoh_result_hash" "$memoh_result_size"
-      } > "$memoh_root/%s.tmp"
-    ) && mv -n -- "$memoh_root/%s.tmp" "$memoh_root/%s"
-    if command -v herdr >/dev/null; then
-      herdr plugin action invoke collect-result --plugin memoh.delivery > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true
-    fi
+      } > "$memoh_root/$2.tmp"
+    ) && mv -n -- "$memoh_root/$2.tmp" "$memoh_root/$2"
   fi
-fi
-`, plan.Artifact.SourceRef, plan.Artifact.SourceRef, plan.Artifact.SourceRef, plan.Artifact.SourceRef, base64.StdEncoding.EncodeToString([]byte(prefix)), plan.ManifestName(), plan.ManifestName(), plan.ManifestName())
-	return script + closure, nil
+}
+`, base64.StdEncoding.EncodeToString([]byte(prefix)))
 }

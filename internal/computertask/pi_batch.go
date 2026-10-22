@@ -136,7 +136,7 @@ func (s *Service) observeBatch(ctx context.Context, b toolcontext.ComputerBindin
 		}
 	}
 	// Exit evidence remains valid even when output exceeds the import budget.
-	if delivery := producerResult(r, d); delivery != nil && delivery.State == "pending" && !r.CancelRequested {
+	if delivery := producerResult(r, d); delivery != nil && delivery.hasPending() && !r.CancelRequested {
 		// A finite idempotent wakeup, not a new execution attempt or a scheduler.
 		// Its transport outcome cannot change execution or delivery truth. A later
 		// query repeats this safe wakeup and reads the original ledger after restart.
