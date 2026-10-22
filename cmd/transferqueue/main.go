@@ -28,7 +28,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-history, probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, migrate-history, migrate-publications, probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -38,7 +38,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "migrate-history", "lifecycle-summary", "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -60,6 +60,23 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 			return "unavailable"
 		}
 		return "recorded"
+	}
+	if *kind == "migrate-publications" {
+		q, err := transferclient.OpenHerdrQueue(getenv, "native-profile-v1", limits)
+		if err != nil {
+			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+			return 1
+		}
+		defer func() { _ = q.Close() }()
+		done, err := q.MigrateNativePublication(workCtx)
+		if err != nil {
+			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+			return 1
+		}
+		if done {
+			return writeFixed(output, `{"publication_layout":2,"migration":"complete"}`)
+		}
+		return writeFixed(output, `{"publication_layout":0,"migration":"pending"}`)
 	}
 	if *kind == "migrate-history" {
 		if err := transferclient.MigrateHerdrQueue(workCtx, getenv, "native-profile-v1", limits); err != nil {
