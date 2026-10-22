@@ -12160,6 +12160,11 @@ paths:
     post:
       description: Generate PKCE and return authorization URL for the user to authorize
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
@@ -12191,6 +12196,11 @@ paths:
       description: Probe MCP server URL for OAuth requirements and discover authorization
         server metadata
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id
@@ -12246,6 +12256,11 @@ paths:
     get:
       description: Returns the current OAuth status including whether tokens are available
       parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
       - description: MCP connection ID
         in: path
         name: id

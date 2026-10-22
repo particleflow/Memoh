@@ -9877,6 +9877,10 @@ export type PostBotsByBotIdMcpByIdOauthAuthorizeData = {
     body?: HandlersOauthAuthorizeRequest;
     path: {
         /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
          * MCP connection ID
          */
         id: string;
@@ -9913,6 +9917,10 @@ export type PostBotsByBotIdMcpByIdOauthDiscoverData = {
      */
     body?: HandlersOauthDiscoverRequest;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */
@@ -9977,6 +9985,10 @@ export type PostBotsByBotIdMcpByIdOauthExchangeResponse = PostBotsByBotIdMcpById
 export type GetBotsByBotIdMcpByIdOauthStatusData = {
     body?: never;
     path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
         /**
          * MCP connection ID
          */
