@@ -1,8 +1,11 @@
 # Read-only conversation task validation
 
-Implementation checkpoint: `ea424d52680e9707fb6dfe3a1534db62ff740145`, based on
-main `e6f4999dd294a09b4171fdaae0176714405971d5`. This validation/evidence
-commit changes no implementation. API contract: [session-tasks-api.md](../../session-tasks-api.md).
+Revalidated on 2026-10-22 after integrating actual main
+`a819c75ed94ae06a3a8196e9416302b18d8dd34f` (merged PR #7). The original
+implementation checkpoint is `ea424d52680e9707fb6dfe3a1534db62ff740145`.
+Integration adds a Pi batch projection regression and refreshes these records;
+the task service and frozen mobile API behavior are unchanged.
+API contract: [session-tasks-api.md](../../session-tasks-api.md).
 
 ## Environment and boundaries
 
@@ -21,15 +24,15 @@ commit changes no implementation. API contract: [session-tasks-api.md](../../ses
   The synthetic endpoint is unused. No actual device, model, submission,
   cancellation, media ingestion or task execution was requested.
 - No NAS/Windows production access, new production credentials, server ports,
-  migrations, control plane or Agent changes. No PR7/PR8 code is included.
+  migrations, control plane or Agent changes. PR #7 is now part of the main
+  baseline; unmerged PR #8 code is not included.
 
 ## Automated checks
 
-Passed on the implementation checkpoint:
+Passed again on the integrated source (not reused from the old checkpoint):
 
 ```text
-go test -race -p 3 ./internal/sessiontask ./internal/handlers ./internal/server ./internal/apperror
-go test -race -p 3 ./internal/agenvo ./internal/computertask ./internal/db/postgres/store
+go test -race -count=1 -p 3 ./internal/sessiontask ./internal/handlers ./internal/server ./internal/apperror ./internal/agenvo ./internal/computertask ./internal/db/postgres/store
 go test -tags=integration -p 2 ./internal/db -run TestSessionTasksPostgres -count=1 -v
 go build -p 3 -o <cloud-server> ./cmd/agent
 golangci-lint run ./internal/sessiontask/... ./internal/handlers/... ./internal/db/store/... ./internal/db/postgres/store/... ./cmd/agent/...
@@ -57,14 +60,16 @@ git diff --check
   into persisted data and assert none are returned. Pi result remains unknown
   even if an arbitrary extra JSON property claims success. Cancellation does
   not claim process termination; foreground exit does not claim business success.
+  The added integration regression uses PR #7's nested batch receipt, files,
+  chunks and parsed result shape: these stay outside the summary response,
+  and list/detail leave the stored operation unchanged.
+- Regenerated Swagger and SDK agree with the automatic merge. Both task path
+  definitions and the `sessiontask.Task` / `sessiontask.Page` definitions are
+  identical to the frozen `276c0b54` contract.
 - PostgreSQL integration creates and cleans its own fresh database. It tests
   owned recursive aggregation, sibling/foreign-user/foreign-Bot/team isolation,
   deleted-ancestor filtering, type discrimination and creation-key pagination.
   Schema stays 170; no migration is added or modified.
-- Initial fixture-only failures (SQL parameter casts, duplicate synthetic Bot
-  names and an incomplete Bot query stub) were corrected. The repository's
-  error-field literal guard caught a variable field name; the handler now uses
-  literal `bot_id` and `session_id`. These failures were not counted as passes.
 
 ## Real HTTP and browser checks
 
@@ -72,34 +77,34 @@ The rebuilt real server passed 16 HTTP checks: unauthenticated rejection,
 multi-page traversal, grandchild-owned operation detail under a parent,
 cross-root refusal, PC-A-only aggregation, foreign-PC refusal through a child
 root, unavailable attachments, runtime revocation and restoration, persisted
-unbound selection, primary-PC fallback, explicit NAS selection and immutable
-workdir priority. The operation IDs, revisions, states, cancel flags and
+unbound selection, primary-PC fallback and explicit NAS selection. Workdir
+priority also remains covered by the service tests. The operation IDs, revisions, states, cancel flags and
 details digests were identical before and after all GET requests.
 
-In Chromium, authenticated through the normal login UI and completed the local
-onboarding without configuring a model or creating a workspace. Opened the
+In Chromium, authenticated through the normal login UI using the existing
+local development account. Opened the
 synthetic Bot and parent conversation, expanded its persisted `spawn_agent`
 entry, then clicked `synthetic-agent` to open the actual child conversation in
-the existing right-hand pane. Synthetic history was populated with valid turn
-keys and the actual `spawn_agent` tool name; the initial fixture lacking those
-keys/name did not render the child link and was corrected without source edits.
+the existing right-hand pane. Reused only the previous synthetic history and
+fixtures; no conversation was executed. The first browser assertion timed out
+because it matched an abbreviated sentence exactly. The actual longer child
+message was already visible; correcting the test selector passed without
+application changes.
 
 In the same authenticated running page, imported the generated SDK and called
 both new endpoints. List returned 200, one item and a continuation; detail
 returned 200 with the actual grandchild session ID, `unknown`, cancellation
 intent and both content/attachment availability flags false. No browser page
-errors occurred in the final flow. The initial browser check noted an unavailable
-optional Google Fonts request; it did not prevent UI operation.
+errors occurred in the final flow. Both screenshots below were recaptured and
+inspected on the integrated source.
 
 ![Actual parent conversation in the running Web app](parent.png)
 
 ![Clicking the synthetic spawn entry opens its child in the existing pane](child.png)
 
 These are screenshots of the running application, not a new mobile task UI.
-The toast in the child screenshot is real: the optional Bot workspace image
-is unavailable in this environment. It did not prevent persisted conversation
-reads or the task APIs, but live model execution, actual computer work and
-HarmonyOS UI integration were **not** verified. The mobile client is separate.
+Live model execution, actual computer work and HarmonyOS UI integration were
+**not** verified. The mobile client is separate.
 
 ## Remaining product limits
 

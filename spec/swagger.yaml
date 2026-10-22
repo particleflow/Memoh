@@ -622,6 +622,11 @@ definitions:
     properties:
       config_dir:
         type: string
+      execution_mode:
+        description: |-
+          Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
+          finite official CLI invocations; no automatic protocol fallback occurs.
+        type: string
       model:
         type: string
       path:

@@ -300,6 +300,48 @@ func TestProjectionNeverLeaksAndStatesStayHonest(t *testing.T) {
 	}
 }
 
+func TestPiBatchReceiptsRemainOutsideFrozenSummaryContract(t *testing.T) {
+	f := newFixture()
+	r := f.operations[f.op]
+	r.State = "completed"
+	r.Revision = 7
+	r.CancelRequested = true
+	// PR #7 persists exit evidence, output refs and a parsed Pi result. None
+	// of these extend this API's approved scalar projection implicitly.
+	r.Details = []byte(`{"kind":"herdr_pi_task","exit_code":0,"phase":"pi_succeeded","output":"SECRET",
+		"batch":{"progress":{"request_id":"SECRET","pi_session_id":"SECRET"},
+		"receipt":{"exited":true,"started":true,"exit_code":0,"stdout":{"name":"stdout.jsonl","sha256":"SECRET","size":42}},
+		"files":[{"ready_hash":"SECRET","chunks":[{"hash":"SECRET","size":42}]}],
+		"result":{"outcome":"succeeded","output":"SECRET","reasoning":"SECRET"}}}`)
+	f.operations[f.op] = r
+	page, err := f.service.List(t.Context(), "bot", "user", f.root, 100, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	detail, err := f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, value := range []any{page, detail} {
+		raw, err := json.Marshal(value)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, forbidden := range []string{"SECRET", "succeeded", "batch", "exit_code", "reasoning", "ready_hash", "stdout", "chunks"} {
+			if strings.Contains(string(raw), forbidden) {
+				t.Fatalf("Pi batch detail leaked %q", forbidden)
+			}
+		}
+	}
+	if detail.Status != "unknown" || detail.ProcessState != "unknown" || detail.PiResult != "unknown" || detail.BusinessState != "unknown" || detail.ContentAvailable || detail.AttachmentsAvailable || !*detail.CancelRequested {
+		t.Fatalf("frozen summary contract changed: %+v", detail)
+	}
+	after := f.operations[f.op]
+	if after.State != r.State || after.Revision != r.Revision || after.CancelRequested != r.CancelRequested || string(after.Details) != string(r.Details) {
+		t.Fatal("summary read modified a Pi batch receipt")
+	}
+}
+
 func TestCursorStableAcrossLateStateChangesAndRevocation(t *testing.T) {
 	f := newFixture()
 	first, err := f.service.List(t.Context(), "bot", "user", f.root, 1, "")

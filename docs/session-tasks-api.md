@@ -1,7 +1,9 @@
 # Conversation task summaries (v1)
 
-Base: main `e6f4999dd294a09b4171fdaae0176714405971d5`, schema 170.
-Independent of the unmerged Pi JSON (#7) and resumable upload (#8) changes.
+Original base: main `e6f4999dd294a09b4171fdaae0176714405971d5`, schema 170.
+Integration base: main `a819c75ed94ae06a3a8196e9416302b18d8dd34f`, including
+merged Pi JSON (#7). The frozen task API is unchanged; it does not invoke or
+expose the Pi output/attachment path. Resumable upload (#8) remains separate.
 This API is an HTTP read model, not a scheduler or a new control plane.
 
 ## Frozen HTTP contract
@@ -115,9 +117,11 @@ a runtime is currently executing. A computer `dispatching` receipt is also
 `unknown`; `submitted` means only submission was recorded. Only a persisted
 completed foreground command with an exit receipt projects `process_exited`.
 Neither exit 0 nor cancellation intent proves business completion or that a
-Pi process stopped. Pi protocol verification is not part of main's schema170
-implementation, so Pi remains `unknown`; arbitrary extra receipt fields cannot
-claim success. A later reviewed change may extend the Pi result enum.
+Pi process stopped. This summary projection does not interpret the Pi batch
+receipt or verified result introduced by #7, so Pi remains `unknown` even when
+the underlying computer operation has more evidence. Neither nested batch data
+nor arbitrary extra receipt fields can claim success through this API. A later
+reviewed change may extend the Pi result enum.
 
 V1 intentionally provides safe summaries only. There are no message bodies,
 reasoning, prompts, tool arguments/results, arbitrary titles/metadata, terminal
