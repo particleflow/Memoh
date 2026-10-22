@@ -82,7 +82,11 @@ func run() int {
 		}
 		feedback := publish(status)
 		if errors.Is(err, transferclient.ErrProducerSource) {
-			_ = writeStatusWithFeedback(status, "unavailable", feedback)
+			collection := "unavailable"
+			if errors.Is(err, transferclient.ErrProducerManifest) {
+				collection = "invalid_manifest"
+			}
+			_ = writeStatusWithFeedback(status, collection, feedback)
 			return 1
 		}
 		if errors.Is(err, transferclient.ErrNoWork) {

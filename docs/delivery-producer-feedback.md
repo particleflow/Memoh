@@ -57,3 +57,25 @@ transport and CAS storage. They do not claim a deployed Herdr/PC/NAS route.
 Native Windows CI must execute the storage fixtures; Linux execution or Windows
 cross-compilation alone is not Windows acceptance. Real PC installation, initial
 credentials, trust and production verification remain outside this patch.
+
+## Unattributable collection errors
+
+A retained oversized, malformed, unreadable, filename-mismatched or foreign-root
+manifest cannot supply a trustworthy task identity. The finite collector skips
+such a candidate and tries later names in the existing bounded enumeration
+(maximum 4096 directory entries, at most 16385 bytes read per candidate, existing
+two-minute invocation deadline). It still admits at most one valid manifest and
+uses the existing bounded advance loop. If none is valid, it may advance one
+already sealed queue job. It does not rename, delete, quarantine or import the
+invalid metadata.
+
+Progress on a valid delivery is returned alongside `ErrProducerSource` /
+`ErrProducerManifest`; the CLI exposes `source_collection: invalid_manifest` and
+exits nonzero. This is not idle or a claim that the bad file was delivered. The
+small receipt for a valid job reports only its verified original plan. When that
+plan explicitly declares a different malformed manifest, its existing per-file
+projection can say `manifest_invalid`; unknown unrelated metadata never creates
+a task entry. A source containing only unbound bad metadata therefore still
+cannot stop a particular task's unknown wakeups. That observable unknown remains
+until attribution is established through an existing valid handoff or explicit
+local repair. No task is guessed from a bad body, and no cleanup frees its quota.
