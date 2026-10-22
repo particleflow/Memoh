@@ -108,7 +108,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 		t.Fatal("stdin admission", err)
 	}
 	for range 15 {
-		status, err = transferclient.AdvanceProducer(ctx, getenv, "fixture", limits, https.Client(), time.Now().Add(time.Hour))
+		status, err = transferclient.AdvanceProducer(ctx, getenv, "fixture", limits, https.Client(), producerNextDue(status))
 		if err != nil {
 			t.Fatal("finite advance", err)
 		}
@@ -153,7 +153,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 		t.Fatal("second admission", err)
 	}
 	for range 15 {
-		next, err = transferclient.AdvanceProducer(ctx, getenv, "fixture", limits, https.Client(), time.Now().Add(time.Hour))
+		next, err = transferclient.AdvanceProducer(ctx, getenv, "fixture", limits, https.Client(), producerNextDue(next))
 		if err != nil {
 			t.Fatal("second advance", err)
 		}
@@ -178,4 +178,17 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 			t.Fatal("repeated multi-file hook duplicated create", err)
 		}
 	}
+}
+
+// Advance the fixture clock to the persisted retry time, never reset the job's
+// retry budget. A fixed future timestamp can still be before the next backoff
+// when the asynchronous commit has not finished during the previous call.
+func producerNextDue(status transferclient.QueueStatus) time.Time {
+	now := time.Now()
+	for _, due := range []time.Time{status.Job.NextAttempt, status.AssociationDue} {
+		if due.After(now) {
+			now = due
+		}
+	}
+	return now
 }
