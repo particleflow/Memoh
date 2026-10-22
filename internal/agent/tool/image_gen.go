@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -107,11 +108,29 @@ type generateImageArgs struct {
 
 func (p *ImageGenProvider) imageTools(session SessionContext, description string) []toolexec.Tool {
 	sess := session
-	return []toolexec.Tool{toolexec.Define(ToolGenerateImage().String(), description,
-		func(execCtx *toolexec.ToolExecContext, args generateImageArgs) (sdk.ToolOutput, error) {
+	return []toolexec.Tool{{
+		Name:        ToolGenerateImage().String(),
+		Description: description,
+		Parameters:  toolexec.SchemaFor[generateImageArgs](toolexec.Strict()),
+		Execute: func(execCtx *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
+			// The shared typed decoder tolerates unknown fields. Validate here so
+			// a withdrawn operation cannot silently become a billed generation.
+			var fields map[string]json.RawMessage
+			if err := input.Unmarshal(&fields); err != nil || fields == nil {
+				return sdk.ToolOutput{}, errors.New("generate_image requires an object containing only prompt and size")
+			}
+			for key := range fields {
+				if key != "prompt" && key != "size" {
+					return sdk.ToolOutput{}, errors.New("generate_image accepts only prompt and size")
+				}
+			}
+			args, err := toolexec.DecodeArguments[generateImageArgs](ToolGenerateImage().String(), input)
+			if err != nil {
+				return sdk.ToolOutput{}, err
+			}
 			return toolexec.OutputPair(p.execGenerateImage(execCtx.Context, sess, execCtx.ToolCallID, args))
 		},
-	)}
+	}}
 }
 
 func (*ImageGenProvider) Usage(_ context.Context, session SessionContext, available AvailableTools) string {

@@ -28,6 +28,30 @@ image booleans are withdrawn too; official provider management and the original
 provider-model list/import behavior remain. The unpublished Magpie directory
 experiment is not part of this branch or any release.
 
+## Withdrawn argument rejection
+
+The `generate_image` execution closure validates the raw argument object before
+calling the shared typed decoder. Only exact `prompt` and `size` keys are accepted;
+unknown keys fail as tool errors before provider resolution or invocation. The
+schema also declares `additionalProperties: false`, but runtime enforcement does
+not depend on model/schema compliance. The global decoder and Agent core are unchanged.
+
+The full `toolexec.ExecuteTools` regression reproduced the original problem:
+withdrawn `mode=edit/result`, `input_refs` and `task_id` requests silently generated
+images against the synthetic HTTP provider. After the guard, all six invalid cases
+make zero provider requests; valid prompt-only and prompt/size each make one request
+and publish a ready NAS hash. The test exercises registered tools, configured
+settings/model/provider fixtures and real media persistence, not a replacement
+callback or just schema inspection.
+
+A rebuilt running server plus real Web also processes four legacy calls in one
+fresh synthetic conversation: four explicit tool errors, two chat requests,
+zero image API requests, no page errors. [Rejection evidence](strict-result.png).
+The existing Web aggregate caption counts calls by tool name and says "Generated
+4 media files" even for these failed calls; that caption is not success evidence.
+The actual tool errors and zero image-provider requests establish rejection.
+This separate display defect is not concealed or fixed by changing the Agent core.
+
 ## Ordinary subagents and attachments
 
 `spawn_agent` is wired through `native.NewSpawnAdapter` to the existing in-process
