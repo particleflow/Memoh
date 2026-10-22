@@ -25,6 +25,9 @@ export function connectorAttention(snapshot) {
   if (snapshot?.lastError === 'handshake_426') return 'connector_protocol_upgrade_required'
   if (snapshot?.lastError === 'config_changed_restart_required') return 'connector_configuration_changed'
   if (snapshot?.state === 'needs_attention') return 'connector_needs_attention'
+  // Official connector also stops when its credential file is removed.
+  // A published clean stop is not proof of an accidental process crash.
+  if (snapshot?.state === 'stopped') return 'connector_stopped_requires_attention'
   return null
 }
 
@@ -88,6 +91,10 @@ export class NativeDriver {
   async validate() {
     demand(process.platform === 'win32' && process.arch === 'x64' && typeof this.qualify === 'function', 'qualified_windows_driver_required')
     demand(await this.qualify() === true, 'component_qualification_failed')
+    let credentials
+    try { credentials = await fs.lstat(path.join(this.config.agenvoConfigDir, 'credentials.json')) }
+    catch (e) { throw new LifecycleError(e.code === 'ENOENT' ? 'connector_authentication_required' : 'connector_credentials_unreadable') }
+    demand(credentials.isFile() && !credentials.isSymbolicLink() && credentials.nlink === 1, 'connector_credentials_unreadable')
     const host = await readFile(path.join(this.config.herdrConfigRoot, 'config.toml'))
     const connector = await readFile(path.join(this.config.agenvoConfigDir, 'config.json'))
     const sum = createHash('sha256').update(host).update('\0').update(connector).digest('hex')

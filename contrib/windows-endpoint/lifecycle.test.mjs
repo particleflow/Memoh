@@ -166,3 +166,13 @@ test('stop during startup waits for owned cleanup and never starts connector', a
   assert.equal(lifecycle.release, null)
   assert.equal(lifecycle.state.attention, null)
 })
+
+
+test('official stopped snapshot needs attention and is not treated as a crash', async t => {
+  const { lifecycle, driver, alive, calls } = await fixture(t)
+  await lifecycle.start(); driver.status = { state: 'stopped', lastError: '' }; alive.delete('connector')
+  await lifecycle.tick()
+  assert.equal(lifecycle.state.attention, 'connector_stopped_requires_attention')
+  assert.equal(lifecycle.state.restarts.length, 0)
+  assert.equal(calls.filter(c => c === 'start:connector').length, 1)
+})

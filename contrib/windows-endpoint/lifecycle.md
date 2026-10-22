@@ -131,7 +131,8 @@ One coalesced check recovers components in dependency order, after requalificati
 and unchanged official config fingerprints. Three restart attempts per ten-minute
 window are persisted in the endpoint-owned small journal. Offline live connector
 network retries remain owned by Agenvo. 401/403, protocol upgrade, config changes,
-unknown host observations and exhausted budgets suspend component recovery. An
+a published clean connector stop (including credential deletion), unknown host
+observations and exhausted budgets suspend component recovery. An
 explicit attention acknowledgement never clears the persisted restart budget.
 Normal stop waits for an in-progress check and prevents respawn during backoff.
 
