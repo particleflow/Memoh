@@ -79,7 +79,11 @@ jobs:
         uses: golangci/golangci-lint-action@v9
         with:
           version: v2.10.1
-          only-new-issues: true
+          # Use the checked-out Git history for PRs: the REST diff endpoint
+          # refuses integrated stacks above 20,000 lines. Preserve the same
+          # changed-line lint policy without silently falling back to all code.
+          only-new-issues: ${{ github.event_name != 'pull_request' }}
+          args: ${{ github.event_name == 'pull_request' && format('--new-from-merge-base={0}', github.event.pull_request.base.sha) || '' }}
 
   test:
     name: Test
