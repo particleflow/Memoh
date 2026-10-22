@@ -26,7 +26,7 @@ View fields:
 - `target_session_id`: UUID string, omitted before a target session is persisted.
 - `state`: `accepted | running | unknown | completed | failed`.
 - `delivery_state`: `pending | accepted | unknown | unavailable`. Accepted means
-  the supervisor follow-up queue accepted the result, not that the supervisor
+  the supervisor queue or normal turn admission accepted the result, not that the supervisor
   finished processing it.
 - Optional `summary`: `{text, truncated, source: "assistant_final"}`.
 - `attachments`: array of `{content_hash, mime?, size_bytes?, url?}`. `url` is the
@@ -73,7 +73,9 @@ target original's owner. Both are resolved through `media.Service`; delegation
 creates no per-file ticket, broad media alias, or second copy of NAS bytes.
 
 The supervisor receives a complete follow-up command with actual attachment
-references. The queue invocation and item identity are stable on delivery retry;
+references. Busy sessions enqueue it; idle sessions start an ordinary turn. Both
+paths use the same durable invocation and payload, including after queue loss.
+The queue invocation and item identity are stable on delivery retry;
 retry never calls the specialist. The queued result carries the delegation ID
 for fresh authorization before consumption. Existing queue durability still
 applies: accepted delivery is not proof of receipt after server/Redis loss.

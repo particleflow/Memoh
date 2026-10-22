@@ -22,6 +22,11 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer conn.Release()
+	var initialVersion int
+	var initialDirty bool
+	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&initialVersion, &initialDirty); err != nil || initialVersion < 170 || initialDirty {
+		t.Fatalf("initial schema=%d dirty=%v err=%v", initialVersion, initialDirty, err)
+	}
 	exec := func(sql string, args ...any) {
 		t.Helper()
 		if _, err := conn.Exec(ctx, sql, args...); err != nil {
@@ -127,7 +132,7 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 	}
 	var version int
 	var dirty bool
-	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != 170 || dirty {
+	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != initialVersion || dirty {
 		t.Fatalf("schema=%d dirty=%v err=%v", version, dirty, err)
 	}
 }
