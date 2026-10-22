@@ -27,6 +27,9 @@ var (
 	ErrInvalid   = errors.New("invalid computer task arguments")
 	ErrApproval  = errors.New("computer execution requires approval under the existing target policy")
 	ErrConflict  = errors.New("another unresolved computer operation blocks this task; inspect blocked_by_operation without resubmitting")
+	// Only used before the ledger claim and any business dispatch. It does not
+	// classify an in-flight transport failure, which must remain unknown.
+	ErrPreflightUnavailable = errors.New("computer connection is unavailable before submission; no operation was created; check the existing connection and do not resubmit automatically")
 )
 
 type Registry interface {
