@@ -29,7 +29,7 @@ var (
 	ErrDeliveryRetry    = errors.New("delivery transaction conflicted; resolve before retrying")
 	ErrDeliveryAsset    = errors.New("delivery asset is unavailable or does not match")
 	errVerifyDelivery   = errors.New("verify delivery outside the database transaction")
-	deliveryIDPattern   = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$`)
+	deliveryIDPattern   = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,128}$`)
 	deliveryHash        = regexp.MustCompile(`^[a-f0-9]{64}$`)
 	deliveryAttempt     = regexp.MustCompile(`^[a-f0-9]{32}$`)
 )
@@ -154,7 +154,7 @@ func (s *DeliveryService) apply(ctx context.Context, operation, delivery string,
 		var out DeliveryOutcome
 		err := s.transactions(ctx, func(tx DeliveryTransaction) error {
 			var err error
-			out, err = s.applyInTransaction(ctx, tx, id, delivery, ref, commit, cancel, verified)
+			out, err = applyDeliveryTransaction(ctx, tx, id, delivery, ref, commit, cancel, verified)
 			return err
 		})
 		if err == nil {
@@ -183,7 +183,7 @@ func (s *DeliveryService) apply(ctx context.Context, operation, delivery string,
 	return DeliveryOutcome{}, ErrDeliveryRetry
 }
 
-func (s *DeliveryService) applyInTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, commit, cancel, verified bool) (DeliveryOutcome, error) {
+func applyDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity, delivery string, ref DeliveryRequest, commit, cancel, verified bool) (DeliveryOutcome, error) {
 	if tx.Store == nil || tx.Authorize == nil {
 		return DeliveryOutcome{}, ErrDeliveryBinding
 	}

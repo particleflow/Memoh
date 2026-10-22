@@ -369,6 +369,16 @@ func TestDeliveryUnknownCancellationRemainsFenced(t *testing.T) {
 	}
 }
 
+func TestDeliveryFrozenClientIDCompatibility(t *testing.T) {
+	f, s, ctx, ref := newDeliveryFixture(t)
+	// Same bounded alphabet as transferclient.validID at frozen PR #15.
+	for _, id := range []string{"_result", "-result", strings.Repeat("A", 128)} {
+		if out, err := s.Resolve(ctx, f.id.OperationID, id, ref, true); err != nil || out.Outcome != "canceled" {
+			t.Fatalf("client ID %q: %+v %v", id, out, err)
+		}
+	}
+}
+
 type deliveryZeros struct{}
 
 func (deliveryZeros) Read(p []byte) (int, error) { clear(p); return len(p), nil }
