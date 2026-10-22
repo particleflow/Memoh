@@ -316,7 +316,13 @@ func TestWindowsNativeTLSUploadOutboxAndDownload(t *testing.T) {
 		if r.Associated {
 			break
 		}
-		now := time.Now().Add(time.Hour)
+		now := time.Now()
+		if r.Job.NextAttempt.After(now) {
+			now = r.Job.NextAttempt
+		}
+		if r.AssociationDue.After(now) {
+			now = r.AssociationDue
+		}
 		if committed && !r.Job.CancelRequested {
 			if err := q.RequestCancel(j.DeliveryID); err != nil {
 				t.Fatal(err)
@@ -388,4 +394,42 @@ func TestWindowsNativeTLSUploadOutboxAndDownload(t *testing.T) {
 	if !bytes.Equal(delivered, data) {
 		t.Fatal("Range/hash delivery differs")
 	}
+}
+
+func TestWindowsNativeRejectsLinksAndTraversal(t *testing.T) {
+	path := nativeFixtureRoot(t, false)
+	q := nativeQueue(t, path)
+	for _, name := range []string{"../outside", `a\b`, "stream:ads"} {
+		f, err := nativeAt(q.root, name, windows.GENERIC_READ, windows.FILE_SHARE_READ, windows.FILE_OPEN, windows.FILE_NON_DIRECTORY_FILE, false)
+		if f != nil {
+			_ = f.Close()
+		}
+		if !errors.Is(err, ErrInvalid) {
+			t.Fatal("unsafe component accepted", name, err)
+		}
+	}
+	f, err := q.file("fixture", os.O_CREATE|os.O_RDWR, 0o600)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = f.Close()
+	original := filepath.Join(path, "deliveries-v1", "fixture")
+	alias := filepath.Join(path, "deliveries-v1", "alias")
+	if err := os.Link(original, alias); err != nil {
+		t.Fatal("NTFS hardlink fixture", err)
+	}
+	if linked, err := q.file("alias", os.O_RDONLY, 0o600); err == nil {
+		_ = linked.Close()
+		t.Fatal("hardlink accepted")
+	}
+	t.Run("reparse", func(t *testing.T) {
+		link := filepath.Join(path, "deliveries-v1", "symlink")
+		if err := os.Symlink(original, link); err != nil {
+			t.Skipf("OS does not permit fixture symlink creation; no privilege change: %v", err)
+		}
+		if linked, err := q.file("symlink", os.O_RDONLY, 0o600); err == nil {
+			_ = linked.Close()
+			t.Fatal("reparse file accepted")
+		}
+	})
 }
