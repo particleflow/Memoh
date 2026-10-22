@@ -106,7 +106,13 @@ func nativeAt(root *os.Root, name string, access, share, disposition, options ui
 		return nil, ErrStore
 	}
 	defer func() { _ = parent.Close() }()
-	object, err := windows.NewNTUnicodeString(name)
+	// NT paths represent the root handle itself with an empty object name.
+	// Go os.Root uses the same dot-to-empty conversion in OBJECT_ATTRIBUTES.init.
+	objectName := name
+	if objectName == "." {
+		objectName = ""
+	}
+	object, err := windows.NewNTUnicodeString(objectName)
 	if err != nil {
 		return nil, ErrInvalid
 	}
