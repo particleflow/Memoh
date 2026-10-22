@@ -241,3 +241,8 @@ jobs:
         run: >-
           go test -v -race -tags=integration -count=1 -timeout 90s
           -run '^Test(ConnectorDisconnectFinalizationIsAtomicAndScoped|ComputerDeliveryPostgres.*)$' ./internal/db
+      # Additive gate: retain the other contract steps when merging stacked workflows.
+      - name: Require computer operation CAS and RLS (no skips)
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: bash scripts/test-computer-operations-postgres.sh

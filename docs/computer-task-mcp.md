@@ -48,6 +48,7 @@ that brain on the PC or replacing the workspace runtime.
 | `computer_workspaces` | Bounded native workspace discovery on one authorized PC, with separate authentication/connection/device states. |
 | `computer_task_recover` | Read the original owned operation and observe saved workspace/pane/agent references; no terminal input, log ingestion, resubmission or receipt rewrite. |
 | `computer_task_submit` | Fixed `foreground_bash` or configured `herdr_pi_task`, optionally selecting a returned target. |
+| `computer_task_followup` | One new instruction to the original operation's currently verified native Agent, with explicit current-Agent or matching-session-observation mode and durable request deduplication; no Agent creation or session restoration. |
 | `computer_task_get` | Read a durable receipt, no remote effect. |
 | `computer_task_result` | Read receipt; for Pi, fixed read-only Herdr get/read observation. |
 | `computer_task_cancel` | Record intent; never kill, close or send terminal keys. |
@@ -55,6 +56,10 @@ that brain on the PC or replacing the workspace runtime.
 
 The exact observation contract and native API sources are documented in
 [Native workspace observation](native-workspace-observation.md).
+Native follow-up modes, request states and the remaining get-to-prompt identity
+race are documented in [Native Agent follow-up](native-agent-followup-boundary.md).
+Read `followup.state` for an input receipt; the original operation state and
+terminal output do not prove that follow-up's business outcome.
 
 A selected PC restricts both inventory and calls to that PC, including native
 exec, filesystem/desktop rejection and workdir discovery. A NAS conversation

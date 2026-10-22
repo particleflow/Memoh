@@ -71,6 +71,7 @@ type Submit struct {
 	WorkDir   string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
+	Followups    []FollowupRecord         `json:"followups,omitempty"`
 	Batch        *BatchDetails            `json:"batch,omitempty"`
 	Kind         string                   `json:"kind"`
 	Agent        agenvo.AgentProgress     `json:"agent"`
@@ -83,6 +84,12 @@ type Details struct {
 	Foreground   *agenvo.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
+	NativeAgentName    string                   `json:"native_agent_name,omitempty"`
+	SessionBinding     string                   `json:"session_binding,omitempty"`
+	Followups          []FollowupResult         `json:"followups,omitempty"`
+	Followup           *FollowupResult          `json:"followup,omitempty"`
+	BlockedByRequest   string                   `json:"blocked_by_request,omitempty"`
+	RequestConflict    bool                     `json:"request_conflict,omitempty"`
 	Delivery           *ProducerResult          `json:"delivery,omitempty"`
 	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
 	DiagnosticsState   string                   `json:"diagnostics_state,omitempty"`
@@ -127,6 +134,16 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 	}
 	out := Result{ID: r.ID, TargetID: r.TargetID, State: r.State, Phase: d.Phase, Kind: d.Kind, Output: d.Output, ExitCode: d.ExitCode, Truncated: d.Truncated, Observation: d.Observation, ArtifactHash: d.ArtifactHash, CancelRequested: r.CancelRequested, CleanupRequired: d.Phase != ""}
 	out.Delivery = producerResult(r, d)
+	if d.Batch == nil && d.Agent.Name != "" {
+		out.NativeAgentName, out.WorkspaceID, out.PaneID = d.Agent.Name, d.Agent.WorkspaceID, d.Agent.PaneID
+		out.SessionBinding = "unavailable"
+		if d.Agent.AgentSession.Valid() {
+			out.SessionBinding = "observed"
+		}
+		for _, f := range d.Followups {
+			out.Followups = append(out.Followups, followupResult(f))
+		}
+	}
 	if d.Foreground != nil {
 		out.WorkspaceID, out.PaneID, out.RequestID, out.CleanupRequired = d.Foreground.WorkspaceID, d.Foreground.PaneID, d.Foreground.RequestID, d.Foreground.CleanupRequired
 	}
