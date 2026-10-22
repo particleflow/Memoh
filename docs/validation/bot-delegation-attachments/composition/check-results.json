@@ -1,0 +1,49 @@
+{
+  "sqlc": {
+    "command": "go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate",
+    "exit_code": 0
+  },
+  "swagger": {
+    "command": "(cd internal/handlers && go generate)",
+    "exit_code": 0
+  },
+  "sdk_generate": {
+    "command": "pnpm run generate-sdk",
+    "exit_code": 0
+  },
+  "sdk_typecheck": {
+    "command": "pnpm --filter @memohai/sdk typecheck",
+    "exit_code": 0
+  },
+  "go_compile": {
+    "command": "go test -p 3 -run '^$' ./...",
+    "exit_code": 0
+  },
+  "postgres": {
+    "command": "TEST_POSTGRES_DSN=<private isolated DSN> go test -p 3 -json -count=1 -tags=integration ./internal/db -run 'Test(BotDelegationPostgres|ComputerDeliveryPostgres|ComputerTransfer|SessionTasksPostgres)'",
+    "exit_code": 0
+  },
+  "race": {
+    "command": "go test -p 3 -race -count=1 ./internal/handlers -run 'Test(TaskTransferHTTPOriginalRangeAndRevalidation|BotDelegationJWTSubmitObserveOriginalAndRevocation)$'",
+    "exit_code": 0
+  },
+  "lint": {
+    "command": "mise exec golangci-lint@2.10.1 -- golangci-lint run --allow-parallel-runners ./internal/handlers ./internal/db",
+    "exit_code": 0
+  },
+  "incremental_integration_lint": {
+    "command": "mise exec golangci-lint@2.10.1 -- golangci-lint run --allow-parallel-runners --build-tags integration --new-from-rev 83483850061f4c908c28ff5ef340209cf9e718d5 ./internal/db",
+    "exit_code": 0
+  },
+  "full_integration_lint": {
+    "exit_code": 1,
+    "diagnostics": 18,
+    "all_diagnostic_files_unchanged_from_834": true
+  },
+  "full_web_typecheck": {
+    "exit_code": 2,
+    "diagnostic_headers": 153,
+    "new_vs_a68": 0,
+    "removed_vs_a68": 0
+  }
+}

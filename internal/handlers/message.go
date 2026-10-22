@@ -27,6 +27,7 @@ import (
 	messageevent "github.com/felinics/memoh/internal/chat/event"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
 	session "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/httpx"
 	"github.com/felinics/memoh/internal/media"
@@ -852,11 +853,7 @@ func (h *MessageHandler) authorizeMessageSession(c echo.Context, channelIdentity
 // @Router /bots/{bot_id}/media/{content_hash} [get].
 // @Router /bots/{bot_id}/media/{content_hash} [head].
 func (h *MessageHandler) ServeMedia(c echo.Context) error {
-	channelIdentityID, err := h.requireChannelIdentityID(c)
-	if err != nil {
-		return err
-	}
-	botID, err := httpx.RequiredParam(c, "bot_id")
+	botID, err := h.mediaUploadBot(c)
 	if err != nil {
 		return err
 	}
@@ -864,11 +861,6 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	bot, err := h.authorizeBotAccess(c.Request().Context(), channelIdentityID, botID)
-	if err != nil {
-		return err
-	}
-	botID = bot.ID
 	if h.mediaService == nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "media service not configured")
 	}
@@ -880,11 +872,25 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 		return errs.Wrap(err, "read media asset")
 	}
 	defer func() { _ = reader.Close() }()
-	return serveOriginalMedia(c, reader, asset.Mime, asset.ContentHash, "private, max-age=86400")
+	cacheControl := "private, max-age=86400"
+	if scope := taskTransfer(c); scope != nil {
+		size, err := reader.Seek(0, io.SeekEnd)
+		if err != nil || asset.BotID != botID || size != scope.principal.Reference.SizeBytes || asset.ContentHash != scope.principal.Reference.ContentHash {
+			return deliveryHTTPError(computertask.ErrDeliveryAsset)
+		}
+		if _, err := reader.Seek(0, io.SeekStart); err != nil {
+			return err
+		}
+		if err := checkTaskTransferResponse(c); err != nil {
+			return err
+		}
+		cacheControl = "no-store"
+	}
+	return serveOriginalMedia(c, reader, asset.Mime, asset.ContentHash, cacheControl)
 }
 
-// serveOriginalMedia is shared by owner and delegation-scoped downloads. The
-// caller authorizes and opens the verified original before reaching this helper.
+// serveOriginalMedia is shared by owner, task-transfer and delegation-scoped
+// downloads. The caller authorizes and opens the verified original first.
 func serveOriginalMedia(c echo.Context, reader media.ReadSeekCloser, contentType, hash, cacheControl string) error {
 	if contentType == "" {
 		contentType = "application/octet-stream"

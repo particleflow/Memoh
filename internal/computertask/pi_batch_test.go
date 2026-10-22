@@ -66,10 +66,12 @@ type batchTransport struct {
 	t                                                *testing.T
 	store                                            *fixtureStore
 	runs, reads                                      int
+	producerWakes                                    int
 	calls                                            []string
 	progress                                         agenvo.BatchProgress
 	receipt                                          agenvo.BatchReceipt
 	stdout, stderr                                   []byte
+	producerFeedback                                 []byte
 	control                                          string
 	missing, hiddenFrame, corrupt, changedPane, lost bool
 	reason                                           string
@@ -160,6 +162,13 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 		body = map[string]any{"root_pane": map[string]string{"pane_id": "job", "terminal_id": "job-terminal", "workspace_id": "w-test"}}
 	case "pane.run":
 		command, _ := params["command"].(string)
+		if command == `& { herdr plugin action invoke collect-result --plugin memoh.delivery *> $null }` {
+			if params["paneId"] != "control" {
+				f.t.Fatal("producer wake on Pi pane")
+			}
+			f.producerWakes++
+			return envelope(map[string]any{"session": "synthetic", "result": map[string]string{"type": "accepted"}}), nil
+		}
 		match := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
 		if len(match) != 2 {
 			f.t.Fatal("missing fixed Bash launch")
@@ -221,6 +230,10 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 			limit := agenvo.BatchPageBytes
 			if strings.Contains(script, "/receipt.json\"") {
 				limit = 4096 // Separate complete-receipt budget, not data-page size.
+			}
+			if strings.Contains(script, "/delivery-feedback.json\"") {
+				data = f.producerFeedback
+				limit = 8192
 			}
 			if count > limit || offset > len(data) {
 				f.t.Fatal("page exceeds bounds")

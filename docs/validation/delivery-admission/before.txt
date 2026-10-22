@@ -1,0 +1,7 @@
+--- FAIL: TestAdmissionDeadlineCanResumeSameID (0.00s)
+    admission_review_test.go:31: same-ID recovery failed: delivery store unavailable or corrupt
+--- FAIL: TestPartialAdmissionCancelReleasesCapacity (0.00s)
+    admission_review_test.go:59: partial reservation cannot retire: invalid transfer input
+FAIL
+FAIL	github.com/felinics/memoh/internal/transferclient	0.006s
+FAIL

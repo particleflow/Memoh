@@ -89,6 +89,11 @@ For the PC task author: operation JSON should carry the same Bot-scoped stable
 hash after `ready`; do not treat upload ID, host path or workspace path as the
 original's durable identity. Generated-result registration is a separate gap.
 
+The separately authenticated computer-transfer adapter adds a progress lease for
+new task uploads; see [task upload lifecycle](delivery-upload-lifecycle.md). It
+does not change the fixed-expiry behavior of these generic upload endpoints or
+retroactively change existing receipts.
+
 ## Durability and resource model
 
 Each chunk is streamed with a 256 KiB copy buffer into one private staging file,

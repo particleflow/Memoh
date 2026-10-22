@@ -21,3 +21,10 @@ type ComputerOperationStore interface {
 	ReadComputerOperation(context.Context, ComputerOperationRecord) (ComputerOperationRecord, error)
 	SaveComputerOperation(context.Context, ComputerOperationRecord) (ComputerOperationRecord, error)
 }
+
+// ComputerDeliveryStore changes only the bounded delivery ledger, using the
+// same operation scope and revision CAS as execution receipts.
+type ComputerDeliveryStore interface {
+	ComputerOperationStore
+	SaveComputerDelivery(context.Context, ComputerOperationRecord, JSON) (ComputerOperationRecord, error)
+}

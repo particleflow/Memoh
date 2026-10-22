@@ -1,6 +1,10 @@
 package agenvo
 
-import "path"
+import (
+	"path"
+
+	"github.com/felinics/memoh/internal/deliverymeta"
+)
 
 // BatchLayoutVersion identifies paths within the configured Windows target
 // root, independently of the receipt format and Pi execution protocol.
@@ -20,17 +24,21 @@ func resolveBatchLayout(p BatchProgress) (batchLayout, error) {
 	if (p.LayoutVersion != 0 && p.LayoutVersion != BatchLayoutVersion) || !batchID.MatchString(p.Attempt) || !batchHex.MatchString(p.PiSessionID) {
 		return batchLayout{}, ErrUnsupported
 	}
-	attempts := path.Join(".memoh-computer", "attempts")
+	attempt, ok := deliverymeta.AttemptDirectory(p.Attempt)
+	if !ok {
+		return batchLayout{}, ErrUnsupported
+	}
+	attempts := path.Dir(attempt)
 	return batchLayout{
 		Attempts: attempts,
-		Attempt:  path.Join(attempts, p.Attempt),
+		Attempt:  attempt,
 		Session:  path.Join(".memoh-computer", "sessions", p.PiSessionID),
 	}, nil
 }
 
 func (l batchLayout) resultFile(name string) (string, error) {
 	switch name {
-	case "receipt.json", "stdout.jsonl", "stderr.txt", "result.json":
+	case "receipt.json", "stdout.jsonl", "stderr.txt", "result.json", deliverymeta.ProducerFeedbackName:
 		return path.Join(l.Attempt, name), nil
 	default:
 		return "", ErrUnsupported

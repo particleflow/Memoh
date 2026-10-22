@@ -60,6 +60,8 @@ const (
 )
 
 type FilesConfig struct {
+	// DeviceTransfersEnabled mounts device-authenticated transfers after explicit setup.
+	DeviceTransfersEnabled bool `toml:"device_transfers_enabled"`
 	// OriginalsRoot keeps attachment originals outside disposable workspaces.
 	// Empty preserves the legacy workspace-first storage behavior.
 	// Load resolves a non-empty path against the process working directory.

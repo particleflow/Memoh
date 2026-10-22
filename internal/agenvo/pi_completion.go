@@ -1,6 +1,8 @@
 package agenvo
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	_ "embed"
 	"encoding/base64"
@@ -77,6 +79,19 @@ func ValidateBatchCompletionResult(result PiJSONResult, p BatchProgress, r Batch
 	return nil
 }
 
+// completionAdapterProgram packs only our fixed embedded projector. Node is
+// already an explicit prerequisite. Its built-in zlib keeps combined producer
+// declarations below the Windows command limit without new host dependencies.
+// The original module identity/__filename is retained for its worker thread.
+func completionAdapterProgram() string {
+	var packed bytes.Buffer
+	zipper := gzip.NewWriter(&packed)
+	// bytes.Buffer cannot fail these writes; no task or user bytes enter code.
+	_, _ = zipper.Write([]byte(piResultAdapter))
+	_ = zipper.Close()
+	return fmt.Sprintf("eval(require('node:zlib').gunzipSync(Buffer.from('%s','base64')).toString('utf8'));\n", base64.StdEncoding.EncodeToString(packed.Bytes()))
+}
+
 // The adapter is finite deployment code written into this exclusive attempt,
 // outside Pi's installation/configuration. Node is an explicit preflight
 // requirement; missing Node cannot launch Pi and cannot select another runtime.
@@ -92,7 +107,7 @@ func completionScriptParts(p BatchProgress, target Target) (prepare, preflight, 
 	context, _ := json.Marshal(identity)
 	prepare = fmt.Sprintf(`printf '%%s' '%s' | base64 --decode > "$memoh_attempt/result-reader.cjs"
 printf '%%s' '%s' | base64 --decode > "$memoh_attempt/result-context.json"
-`, base64.StdEncoding.EncodeToString([]byte(piResultAdapter)), base64.StdEncoding.EncodeToString(context))
+`, base64.StdEncoding.EncodeToString([]byte(completionAdapterProgram())), base64.StdEncoding.EncodeToString(context))
 	preflight = ` && command -v node >/dev/null`
 	project = `memoh_result_ready=false
 if [ "$memoh_started" = true ] && node "$memoh_attempt/result-reader.cjs" "$memoh_exit"; then

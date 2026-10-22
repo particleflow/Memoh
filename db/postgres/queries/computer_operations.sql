@@ -17,8 +17,19 @@ WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
 AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id);
 
 -- name: UpdateComputerOperation :one
-UPDATE computer_operations SET state=sqlc.arg(state),details=sqlc.arg(details),
+UPDATE computer_operations SET state=sqlc.arg(state),
+details=CASE WHEN details ? 'delivery_ledger'
+  THEN sqlc.arg(details)::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger')
+  ELSE sqlc.arg(details)::jsonb END,
 cancel_requested=sqlc.arg(cancel_requested),revision=revision+1,updated_at=now()
+WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
+AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
+AND revision=sqlc.arg(revision) RETURNING *;
+
+-- name: UpdateComputerDelivery :one
+UPDATE computer_operations
+SET details=jsonb_set(details, '{delivery_ledger}', sqlc.arg(delivery_ledger)::jsonb),
+revision=revision+1, updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
 AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND revision=sqlc.arg(revision) RETURNING *;

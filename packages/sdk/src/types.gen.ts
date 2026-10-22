@@ -4431,6 +4431,14 @@ export type UserinputUiQuestion = {
     text?: string;
 };
 
+export type UserruntimeChangeTransferCredentialRequest = {
+    /**
+     * Empty means first enrollment. Rotation must name the current credential.
+     */
+    expected_id?: string;
+    expires_at?: string;
+};
+
 export type UserruntimeCreateRuntimeRequest = {
     agenvo?: AgenvoTarget;
     name?: string;
@@ -4452,6 +4460,17 @@ export type UserruntimeRuntime = {
     provider?: string;
     team_id?: string;
     workspace_base?: string;
+};
+
+export type UserruntimeTransferCredentialEnrollment = {
+    credential?: string;
+    credential_id?: string;
+    expires_at?: string;
+};
+
+export type UserruntimeTransferCredentialStatus = {
+    credential_id?: string;
+    expires_at?: string;
 };
 
 export type VideoConfigSchema = {
@@ -19045,6 +19064,126 @@ export type PutUsersMeRuntimesByIdAgenvoAgentResponses = {
 };
 
 export type PutUsersMeRuntimesByIdAgenvoAgentResponse = PutUsersMeRuntimesByIdAgenvoAgentResponses[keyof PutUsersMeRuntimesByIdAgenvoAgentResponses];
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
+    body?: never;
+    path: {
+        /**
+         * Existing Agenvo runtime ID
+         */
+        id: string;
+    };
+    query: {
+        /**
+         * Current non-secret credential ID
+         */
+        expected_id: string;
+    };
+    url: '/users/me/runtimes/{id}/transfer-credential';
+};
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialErrors = {
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialError = DeleteUsersMeRuntimesByIdTransferCredentialErrors[keyof DeleteUsersMeRuntimesByIdTransferCredentialErrors];
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialResponses = {
+    /**
+     * Revoked
+     */
+    204: unknown;
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialData = {
+    body?: never;
+    path: {
+        /**
+         * Existing Agenvo runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/transfer-credential';
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialErrors = {
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialError = GetUsersMeRuntimesByIdTransferCredentialErrors[keyof GetUsersMeRuntimesByIdTransferCredentialErrors];
+
+export type GetUsersMeRuntimesByIdTransferCredentialResponses = {
+    /**
+     * OK
+     */
+    200: UserruntimeTransferCredentialStatus;
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialResponse = GetUsersMeRuntimesByIdTransferCredentialResponses[keyof GetUsersMeRuntimesByIdTransferCredentialResponses];
+
+export type PostUsersMeRuntimesByIdTransferCredentialData = {
+    /**
+     * Expected current credential ID and optional device expiry
+     */
+    body: UserruntimeChangeTransferCredentialRequest;
+    path: {
+        /**
+         * Existing Agenvo runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/transfer-credential';
+};
+
+export type PostUsersMeRuntimesByIdTransferCredentialErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeRuntimesByIdTransferCredentialError = PostUsersMeRuntimesByIdTransferCredentialErrors[keyof PostUsersMeRuntimesByIdTransferCredentialErrors];
+
+export type PostUsersMeRuntimesByIdTransferCredentialResponses = {
+    /**
+     * Created
+     */
+    201: UserruntimeTransferCredentialEnrollment;
+};
+
+export type PostUsersMeRuntimesByIdTransferCredentialResponse = PostUsersMeRuntimesByIdTransferCredentialResponses[keyof PostUsersMeRuntimesByIdTransferCredentialResponses];
 
 export type DeleteUsersByIdData = {
     body?: never;
