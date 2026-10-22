@@ -173,6 +173,15 @@ func (s *Store) SaveComputerOperation(ctx context.Context, r dbstore.ComputerOpe
 	return operationRecord(row), mapQueryErr(err)
 }
 
+func (s *Store) SaveComputerDelivery(ctx context.Context, r dbstore.ComputerOperationRecord, ledger dbstore.JSON) (dbstore.ComputerOperationRecord, error) {
+	ids, err := computerIDs(r)
+	if err != nil {
+		return r, err
+	}
+	row, err := s.queries.UpdateComputerDelivery(ctx, dbsqlc.UpdateComputerDeliveryParams{ID: ids[0], BotID: ids[1], SessionID: ids[2], UserID: ids[3], Revision: r.Revision, DeliveryLedger: ledger})
+	return operationRecord(row), mapQueryErr(err)
+}
+
 func (s *Store) OwnedAgenvoRuntime(ctx context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
 	user, err := db.ParseUUID(owner)
 	if err != nil {
