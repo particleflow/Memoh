@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { createApp, h, nextTick, type App, type Slots } from 'vue'
 import { createPinia } from 'pinia'
-import { PiniaColada } from '@pinia/colada'
+import { PiniaColada, useQueryCache } from '@pinia/colada'
 import type { BotsBot } from '@memohai/sdk'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import BotsPage from './index.vue'
@@ -26,11 +26,14 @@ vi.mock('@felinic/ui', async () => {
     PersonaTile: (props: { name: string }, { attrs }: { attrs: Record<string, unknown> }) =>
       h('button', { ...attrs, 'data-create': '' }, props.name),
     Input: () => h('input'),
+    CalloutBanner: (props: { title: string }, { slots }: { slots: Slots }) =>
+      h('div', { role: 'alert' }, [props.title, slots.default?.()]),
   }
 })
 
 let app: App | undefined
 let host: HTMLDivElement
+let queryCache: ReturnType<typeof useQueryCache>
 async function flush() {
   for (let i = 0; i < 4; i += 1) {
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -43,6 +46,7 @@ async function mount() {
   app = createApp(BotsPage)
   app.config.globalProperties.$t = (key: string) => key
   app.use(createPinia()).use(PiniaColada)
+  queryCache = app.runWithContext(() => useQueryCache())
   app.mount(host)
   await flush()
 }
@@ -53,6 +57,44 @@ afterEach(() => {
 })
 
 describe('Bot list query state', () => {
+  it.each([401, 403, 'network'])('keeps a %s failure separate from an empty list and retries only on request', async (failure) => {
+    mocks.list.mockRejectedValueOnce(new Error(`PRIVATE_RESPONSE_${failure}`))
+    await mount()
+    expect(host.querySelector('[role="alert"]')?.textContent).toContain('common.loadFailed')
+    expect(host.textContent).not.toContain('PRIVATE_RESPONSE')
+    expect(host.textContent).not.toContain('bots.emptyDescription')
+    expect(host.querySelector('[data-create]')).toBeNull()
+    expect(mocks.list).toHaveBeenCalledTimes(1)
+
+    const retryResponse = Promise.withResolvers<{ items: BotsBot[] }>()
+    mocks.list.mockReturnValueOnce(retryResponse.promise)
+    const retry = host.querySelector<HTMLButtonElement>('[role="alert"] button')
+    expect(retry).not.toBeNull()
+    retry?.click()
+    await flush()
+    expect(retry?.disabled).toBe(true)
+    retry?.click()
+    await flush()
+    expect(mocks.list).toHaveBeenCalledTimes(2)
+    retryResponse.resolve({ items: [] })
+    await flush()
+    expect(host.querySelector('[role="alert"]')).toBeNull()
+    expect(host.textContent).toContain('bots.emptyDescription')
+    expect(host.querySelector('[data-create]')).not.toBeNull()
+  })
+
+  it('keeps cached Bots visible with a safe error when a background refresh fails', async () => {
+    mocks.list.mockResolvedValueOnce({ items: [{ id: 'bot-1', name: 'synthetic-bot' }] })
+    await mount()
+    mocks.list.mockRejectedValueOnce(new Error('PRIVATE_RESPONSE'))
+    await expect(queryCache.invalidateQueries({ key: ['bots'] })).rejects.toThrow('PRIVATE_RESPONSE')
+    await flush()
+    expect(host.querySelector('[data-bot="bot-1"]')).not.toBeNull()
+    expect(host.querySelector('[role="alert"]')).not.toBeNull()
+    expect(host.textContent).not.toContain('PRIVATE_RESPONSE')
+    expect(host.textContent).not.toContain('bots.emptyDescription')
+  })
+
   it('shows the skeleton while the first request is pending, then the create entry', async () => {
     const response = Promise.withResolvers<{ items: BotsBot[] }>()
     mocks.list.mockReturnValue(response.promise)

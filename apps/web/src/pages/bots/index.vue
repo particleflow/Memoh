@@ -21,12 +21,27 @@
           {{ $t('sidebar.bots') }}
         </h1>
         <p
-          v-if="!isLoading && allBots.length === 0"
+          v-if="status === 'success' && allBots.length === 0"
           class="mt-1.5 text-[13px] text-muted-foreground"
         >
           {{ $t('bots.emptyDescription') }}
         </p>
       </div>
+
+      <CalloutBanner
+        v-if="status === 'error'"
+        tone="destructive"
+        :title="$t('common.loadFailed')"
+      >
+        <Button
+          variant="outline"
+          size="sm"
+          :disabled="isFetching"
+          @click="refetch()"
+        >
+          {{ $t('common.retry') }}
+        </Button>
+      </CalloutBanner>
 
       <!-- Search only appears once there are enough bots to warrant it. -->
       <div
@@ -60,7 +75,7 @@
       <!-- Bot tiles + the create tile (its companion, so a single bot is never a
            lonely card). The create tile is hidden while filtering. -->
       <div
-        v-else
+        v-else-if="botData"
         class="flex flex-wrap justify-center gap-4"
       >
         <BotCard
@@ -86,7 +101,7 @@
 
       <!-- Bots exist but the search matched none -->
       <p
-        v-if="!isLoading && searchText && filteredBots.length === 0"
+        v-if="status === 'success' && searchText && filteredBots.length === 0"
         class="text-sm text-muted-foreground"
       >
         {{ $t('common.noData') }}
@@ -98,6 +113,7 @@
 <script setup lang="ts">
 import {
   Button,
+  CalloutBanner,
   Input,
   Skeleton,
   SurfaceCard,
@@ -120,7 +136,7 @@ declare global {
 const router = useRouter()
 const searchText = ref('')
 
-const { data: botData, isPending: isLoading } = useQuery(getBotsQuery())
+const { data: botData, status, isPending: isLoading, isLoading: isFetching, refetch } = useQuery(getBotsQuery())
 
 const realBots = computed(() => botData.value?.items ?? [])
 
