@@ -82,6 +82,7 @@ type batchTransport struct {
 	pageOffsets                                      []int
 	completion                                       []byte
 	noCompletion                                     bool
+	completionAttempt                                string
 	logReads                                         int
 }
 
@@ -98,6 +99,9 @@ func (f *batchTransport) projectCompletion() {
 		parsed.Output, parsed.StopReason, parsed.Truncated = "", "", false
 	}
 	p := f.progress
+	if f.completionAttempt != "" {
+		p.Attempt = f.completionAttempt
+	}
 	f.completion, _ = json.Marshal(agenvo.BatchCompletion{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Stdout: f.receipt.Stdout, Result: parsed})
 	meta := batchFile("result.json", f.completion)
 	f.receipt.Completion = &meta
@@ -446,7 +450,7 @@ func TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest(t *test
 }
 
 func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
-	for _, mode := range []string{"exit0_error", "nonzero", "output_limit", "bad_hash", "reused_control", "wrong_receipt", "revoked_mid_read", "missing_completion"} {
+	for _, mode := range []string{"exit0_error", "nonzero", "aborted", "output_limit", "bad_hash", "reused_control", "wrong_receipt", "revoked_mid_read", "missing_completion", "other_attempt"} {
 		t.Run(mode, func(t *testing.T) {
 			source, store, f, _ := setupBatch(t)
 			if mode == "exit0_error" {
@@ -454,6 +458,9 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 			}
 			if mode == "nonzero" {
 				f.exit = 7
+			}
+			if mode == "aborted" {
+				f.reason = "aborted"
 			}
 			c := standardClient(t, source, "pc-a", false)
 			r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
@@ -466,12 +473,14 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 				f.changedPane = true
 			case "missing_completion":
 				f.noCompletion = true
+			case "other_attempt":
+				f.completionAttempt = strings.Repeat("f", 32)
 			case "wrong_receipt":
 				f.receipt.RequestHash = strings.Repeat("0", 64)
 			case "revoked_mid_read":
 				f.onPage = func() { store.revoked = true }
 			}
-			wantError := mode != "exit0_error" && mode != "nonzero" && mode != "output_limit"
+			wantError := mode != "exit0_error" && mode != "nonzero" && mode != "output_limit" && mode != "aborted"
 			raw := invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, wantError)
 			if strings.Contains(string(raw), "PRIVATE-") {
 				t.Fatal("private cause leaked")
@@ -482,6 +491,9 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 					got = batchResultUntilReady(t, c, r.ID)
 				}
 				outcome := "failed"
+				if mode == "aborted" {
+					outcome = "aborted"
+				}
 				if mode == "output_limit" {
 					outcome = "output_limit"
 				}
@@ -503,6 +515,9 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 				if mode == "wrong_receipt" && persisted.State == "completed" {
 					t.Fatal("unrelated receipt released slot")
 				}
+			}
+			if mode == "other_attempt" || mode == "missing_completion" {
+				invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, true)
 			}
 			if f.runs != 1 {
 				t.Fatal("automatic Pi retry")

@@ -27,7 +27,9 @@ stop reason and `agent_settled`. Early errors may be followed by a successful
 retry. Missing/unknown/malformed events, partial final records and invalid UTF-8
 produce `invalid_protocol`. Slash/skill handling with no model run does not
 fabricate success. Only assistant text is projected: thinking, tool bodies and
-error diagnostics are not result content.
+error diagnostics are not result content. This is a structural projection, not
+a general secret redactor: assistant text can itself contain sensitive values.
+It remains subject to the task authorization and ordinary result-handling policy.
 
 ## Separate contracts
 
@@ -48,10 +50,21 @@ solve the separately tracked operation-scoped attachment-download boundary.
 The small result is at most 8 KiB, including escaped JSON, with at most 2 KiB of
 UTF-8 assistant text. Reading it takes at most four existing 2 KiB pages within
 one bounded result call; timeout may still require another **read-only** call.
-No new background worker or infinite tool wait is introduced. The local parser
+No new background service or infinite tool wait is introduced. The local parser
 retains the existing 64 MiB semantic-input ceiling; exceeding it returns
 `output_limit`, not success. Diagnostics have their independent existing limits.
-A large stderr does not gate normal completion.
+A large stderr does not gate normal completion. LF framing retains fresh read
+chunks and assembles a split record only once; it does not repeatedly copy or
+scan the growing prefix of a long line.
+
+The Node projector runs in its own worker thread with a fixed **30-second**
+parent watchdog. Synchronous reads or JSON parsing cannot block that watchdog;
+expiry terminates this helper process only, after Pi has already exited. The
+Bash envelope can then publish exit evidence without a semantic result. The
+service reports unknown and never restarts Pi. The 64 MiB threshold bounds
+semantic parsing, not total file size or elapsed time: hashing can consume more
+bytes. This watchdog does not cap Pi's business runtime or the existing Bash
+receipt-hash phase; a pending receipt remains unknown to a bounded caller.
 
 ## Recovery and trust
 
@@ -92,6 +105,19 @@ A large stderr does not gate normal completion.
   result read failure plus service restart does not dispatch again; revocation,
   cancellation/unknown, corrupt identity, legacy offsets and 500-line vendor
   limits remain covered.
+- Fault follow-up: actual Node interruption during temporary-file writes,
+  before/after atomic rename, and an existing temporary file cannot publish an
+  uncommitted result or rerun the same attempt. These are process-interruption
+  tests, not Windows NTFS/power-loss durability guarantees.
+- Independent instrumentation of actual fs/Buffer operations checks a 63 MiB
+  legal JSONL line and a 65 MiB over-limit line. The valid case read/scanned
+  66,060,787 bytes and copied 66,060,374 bytes, returning `succeeded`; the larger
+  case returned `output_limit`. Input, scans and copy volume are linear rather
+  than approximately 32 GiB of repeated-prefix work. A deliberately blocked
+  worker is terminated by the same watchdog using a shortened test deadline.
+- Service fault cases include another attempt's correctly rehashed completion,
+  abort/error results, missing completion, repeated read-only recovery, and
+  historical full-log offsets. No failure is permission to resubmit.
 - Both packages passed race tests; targeted golangci-lint and Server build
   passed. Official runtime/contextview boundary passed.
 - Current Server and actual Web at the isolated loopback development endpoints
@@ -102,7 +128,9 @@ A large stderr does not gate normal completion.
   There were no stdout/stderr ready refs, diagnostics stayed `not_collected`,
   and no browser page errors occurred.
 
-[Current browser evidence](validation/compact-result-web.png) shows that fresh
+[Current browser evidence after the linear-parser/watchdog fix](validation/compact-result-linear-web.png) shows that fresh
 conversation. This is not autonomous real-model acceptance, real Windows/Git
 Bash/Node/Pi/Magpie acceptance, or proof that arbitrary business tasks succeed.
 Those remain controlled release gates; no production deployment is included.
+The original pre-review screenshot remains at
+[initial compact-result checkpoint](validation/compact-result-web.png).

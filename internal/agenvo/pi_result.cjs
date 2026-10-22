@@ -4,6 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const {Worker, isMainThread, workerData} = require('node:worker_threads');
 
 const MAX_INPUT = 64 * 1024 * 1024;
 const MAX_RESULT = 8192;
@@ -107,30 +108,42 @@ function verifier(expected) {
 
 function summarize(filename, expected, exitCode) {
   const verify = verifier(expected), hash = crypto.createHash('sha256');
-  const fd = fs.openSync(filename, 'r'), buffer = Buffer.alloc(65536);
-  let size = 0, pending = Buffer.alloc(0), overLimit = false;
+  const fd = fs.openSync(filename, 'r');
+  let size = 0, fragments = [], pendingBytes = 0, overLimit = false;
   try {
+    if (!fs.fstatSync(fd).isFile()) throw Error('regular output file required');
     for (;;) {
+      // Each retained fragment owns its buffer. Scan only the new chunk;
+      // concatenate a split record once, when its LF arrives. A long line
+      // therefore has linear scan/copy cost rather than quadratic prefixes.
+      const buffer = Buffer.allocUnsafe(65536);
       const n = fs.readSync(fd, buffer, 0, buffer.length, null);
       if (n === 0) break;
       const chunk = buffer.subarray(0, n); hash.update(chunk); size += n;
-      if (size > MAX_INPUT) { overLimit = true; pending = Buffer.alloc(0); continue; }
-      pending = Buffer.concat([pending, chunk]);
+      if (size > MAX_INPUT) { overLimit = true; fragments = []; pendingBytes = 0; continue; }
       let start = 0, end;
-      while ((end = pending.indexOf(10, start)) !== -1) {
-        verify.line(pending.subarray(start, end)); start = end + 1;
+      while ((end = chunk.indexOf(10, start)) !== -1) {
+        const part = chunk.subarray(start, end);
+        if (fragments.length) {
+          fragments.push(part);
+          verify.line(Buffer.concat(fragments, pendingBytes + part.length));
+          fragments = []; pendingBytes = 0;
+        } else verify.line(part);
+        start = end + 1;
       }
-      pending = pending.subarray(start);
+      if (start < n) {
+        const part = chunk.subarray(start);
+        fragments.push(part); pendingBytes += part.length;
+      }
     }
   } finally { fs.closeSync(fd); }
   return {stdout: {name: 'stdout.jsonl', sha256: hash.digest('hex'), size},
-    result: verify.finish(exitCode, pending.length === 0, overLimit)};
+    result: verify.finish(exitCode, pendingBytes === 0, overLimit)};
 }
 
-function main() {
+function main(code) {
   const dir = __dirname;
   const context = JSON.parse(fs.readFileSync(path.join(dir, 'result-context.json'), 'utf8'));
-  const code = Number(process.argv[2]);
   if (!Number.isInteger(code) || code < 0 || code > 255) throw Error('invalid exit status');
   const {stdout, result} = summarize(path.join(dir, 'stdout.jsonl'), context, code);
   const record = {version: 1, attempt: context.attempt, generation: context.generation,
@@ -151,7 +164,21 @@ function main() {
   fs.renameSync(tmp, ready);
 }
 
-module.exports = {summarize};
+// The parser runs in an owned worker so synchronous file/JSON processing
+// cannot starve the watchdog. Timeout terminates this helper process only:
+// Pi has already exited. The envelope retains exit evidence without claiming
+// semantic success or retrying the business invocation.
+function runWithDeadline(exitCode, deadlineMs = 30000) {
+  const worker = new Worker(__filename, {workerData: {exitCode}});
+  const timer = setTimeout(() => process.exit(1), deadlineMs);
+  worker.once('error', () => { clearTimeout(timer); process.exitCode = 1; });
+  worker.once('exit', code => { clearTimeout(timer); if (code !== 0) process.exitCode = 1; });
+}
+
+module.exports = {summarize, runWithDeadline};
 if (require.main === module) {
-  try { main(); } catch { process.exitCode = 1; } // no raw paths or logs on stdout
+  try {
+    if (isMainThread) runWithDeadline(Number(process.argv[2]));
+    else main(workerData.exitCode);
+  } catch { process.exitCode = 1; } // no raw paths or logs on stdout
 }

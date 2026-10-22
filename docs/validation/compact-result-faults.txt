@@ -1,0 +1,16 @@
+Cloud Linux synthetic-only regression; not Windows/vendor acceptance.
+--- PASS: TestCompactCompletionAtomicWriteInterruption (0.42s)
+--- PASS: TestCompactCompletionLargeDiagnosticsStayLocal (0.08s)
+    pi_completion_fault_test.go:203: input=66060787 read=66060787 scanned=66060787 copied=66060374 outcome=succeeded
+    pi_completion_fault_test.go:203: input=68157939 read=68157939 scanned=67108864 copied=0 outcome=output_limit
+--- PASS: TestCompactCompletionLongLineHasLinearReadAndCopyCost (0.50s)
+--- PASS: TestCompactCompletionWatchdogStopsBlockedParser (0.54s)
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation (0.07s)
+ok  	github.com/felinics/memoh/internal/agenvo	3.869s
+--- PASS: TestStandardMCPPiBatchFailureBoundaries (0.44s)
+--- PASS: TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart (0.37s)
+ok  	github.com/felinics/memoh/internal/computertask	11.613s
+Targeted golangci-lint v2.10.1: passed after a test-path G304 annotation.
+Server build and official runtime/contextview boundary: passed.
+Fresh browser: one dispatch, only result.json read, three scripted model requests, no page errors.
+No stdout/stderr refs; diagnostics not_collected.
