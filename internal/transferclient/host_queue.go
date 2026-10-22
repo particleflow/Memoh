@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/binary"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"io"
@@ -32,6 +31,9 @@ type Associate func(context.Context, string, Reference, io.Reader) error
 func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source *os.File) error {
 	if !job.valid() || job.Phase != "queued" || job.Offset != 0 || job.ReceiptID != "" || job.CancelRequested || job.Attempts != 0 || job.SnapshotID != job.DeliveryID || job.LocatorRevision != q.revision || job.DeliveryID == "admission" || direction != "upload" && direction != "download" {
 		return ErrInvalid
+	}
+	if job.Spec.SizeBytes > q.limits.Bytes {
+		return ErrCapacity
 	}
 	if direction == "upload" {
 		if source == nil {
@@ -60,7 +62,7 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 		return err
 	}
 	defer func() { _ = journal.Close() }()
-	r := QueueStatus{Version: 1, Direction: direction, Job: job, AssociationState: AssociationIdle}
+	r := QueueStatus{Version: 2, Direction: direction, Job: job, AssociationState: AssociationIdle}
 	if err := q.save(journal, r); err != nil {
 		return err
 	}
@@ -82,26 +84,17 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 		if _, err := source.Seek(0, io.SeekStart); err != nil {
 			return ErrSnapshot
 		}
-		h := sha256.New()
-		remaining := job.Spec.SizeBytes
-		buffer := make([]byte, copyBytes)
-		for remaining > 0 {
-			if err := ctx.Err(); err != nil {
-				return err
-			}
-			n, err := io.ReadFull(source, buffer[:min(int64(len(buffer)), remaining)])
-			if err != nil {
-				return ErrSnapshot
-			}
-			if written, err := f.Write(buffer[:n]); err != nil || written != n {
-				return ErrStore
-			}
-			_, _ = h.Write(buffer[:n])
-			remaining -= int64(n)
+		tree, err := q.file(job.DeliveryID+".tree", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+		if err != nil {
+			return err
 		}
-		var extra [1]byte
-		if n, err := source.Read(extra[:]); n != 0 || !errors.Is(err, io.EOF) || hex.EncodeToString(h.Sum(nil)) != job.Spec.SHA256 {
-			return ErrSnapshot
+		defer func() { _ = tree.Close() }()
+		r.Seal, err = sealSnapshot(ctx, source, f, tree, job.Spec)
+		if err != nil {
+			return err
+		}
+		if tree.Chmod(0o400) != nil || tree.Sync() != nil {
+			return ErrStore
 		}
 	}
 	if direction == "upload" && f.Chmod(0o400) != nil {
@@ -120,8 +113,8 @@ func (q *DiskQueue) capacity(add int64) error {
 		return ErrStore
 	}
 	defer func() { _ = dir.Close() }()
-	entries, err := dir.ReadDir(q.limits.Jobs*3 + 136)
-	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*3+136 {
+	entries, err := dir.ReadDir(q.limits.Jobs*4 + 136)
+	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*4+136 {
 		return ErrCapacity
 	}
 	count, total := 0, int64(0)
@@ -153,11 +146,13 @@ func (q *DiskQueue) capacity(add int64) error {
 			return ErrStore
 		}
 		count++
-		if r.Job.Spec.SizeBytes > q.limits.Bytes-total {
+		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes)
+		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
 		}
-		total += r.Job.Spec.SizeBytes
+		total += reserved
 	}
+	add += snapshotTreeBytes(add)
 	if count >= q.limits.Jobs || add > q.limits.Bytes-total {
 		return ErrCapacity
 	}
@@ -218,22 +213,6 @@ func (q *DiskQueue) RequestCancel(id string) error {
 	}
 	r.Job.CancelRequested = true
 	return q.save(f, r)
-}
-
-type diskSnapshot struct {
-	file *os.File
-	job  Job
-}
-
-func (s diskSnapshot) ReadAt(ctx context.Context, ref, revision string, spec Spec, dst []byte, offset int64) error {
-	if ctx.Err() != nil || ref != s.job.SnapshotID || revision != s.job.LocatorRevision || spec != s.job.Spec {
-		return ErrSnapshot
-	}
-	n, err := s.file.ReadAt(dst, offset)
-	if err != nil || n != len(dst) {
-		return ErrSnapshot
-	}
-	return nil
 }
 
 // RunOne is the finite Herdr action body: one job, one exclusive OS lock and
@@ -305,24 +284,15 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		if r.Job.CancelRequested {
 			return client.Advance(ctx, r.Job, save, nil, now)
 		}
-		f, err := q.file(id+".snapshot", os.O_RDONLY, 0o600)
+		source, closeSource, err := q.openSnapshot(r)
 		if err != nil {
-			return err
-		}
-		if err := lockQueueFile(f); err != nil {
-			_ = f.Close()
-			return err
-		}
-		defer unlockClose(f)
-		// Every reopened handle is hash-verified before network mutation. This
-		// deliberately favors correctness; large-file cost must be measured.
-		if err := Verify(ctx, f, r.Job.Spec); err != nil {
-			if ctx.Err() != nil {
-				return fail(&r.Job, ctx.Err(), now, save)
+			if errors.Is(err, ErrSnapshot) {
+				return stop(&r.Job, "blocked", "snapshot_unavailable", save)
 			}
-			return stop(&r.Job, "blocked", "snapshot_unavailable", save)
+			return err
 		}
-		return client.Advance(ctx, r.Job, save, diskSnapshot{f, r.Job}, now)
+		defer closeSource()
+		return client.Advance(ctx, r.Job, save, source, now)
 	}
 	var content io.Reader
 	if r.Direction == "download" {
@@ -398,6 +368,11 @@ func (q *DiskQueue) Retire(id string) error {
 	}
 	if err := q.root.Remove(id + suffix); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return ErrStore
+	}
+	if r.Direction == "upload" {
+		if err := q.root.Remove(id + ".tree"); err != nil && !errors.Is(err, os.ErrNotExist) {
+			return ErrStore
+		}
 	}
 	if syncQueueDir(q.root) != nil {
 		return ErrStore
