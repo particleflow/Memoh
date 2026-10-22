@@ -108,13 +108,26 @@ type MemoryItem struct {
 	UpdatedAt string         `json:"updated_at,omitempty"`
 	Score     float64        `json:"score,omitempty"`
 	Metadata  map[string]any `json:"metadata,omitempty"`
-	BotID     string         `json:"bot_id,omitempty"`
-	AgentID   string         `json:"agent_id,omitempty"`
-	RunID     string         `json:"run_id,omitempty"`
+	// FileRefs is a read-time projection validated against the caller's Bot.
+	// It is never an authorization grant or persisted availability snapshot.
+	FileRefs []MemoryFileRef `json:"file_refs,omitempty"`
+	BotID    string          `json:"bot_id,omitempty"`
+	AgentID  string          `json:"agent_id,omitempty"`
+	RunID    string          `json:"run_id,omitempty"`
 	// SourceMessageIDs is internal provenance. Public HTTP responses must not
 	// expose raw session/message locators; tool projections authorize and render
 	// them explicitly at the request boundary.
 	SourceMessageIDs []string `json:"-"`
+}
+
+// MemoryFileRef exposes only a scoped canonical media locator, not a content
+// integrity or durability verdict. Unavailable references contain status alone,
+// with no untrusted locator or diagnostic.
+type MemoryFileRef struct {
+	Status      string `json:"status" enums:"located,unavailable"`
+	ContentHash string `json:"content_hash,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Mime        string `json:"mime,omitempty"`
 }
 
 type SearchResponse struct {

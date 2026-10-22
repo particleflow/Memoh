@@ -3761,6 +3761,8 @@
       "searchPlaceholder": "Search memory...",
       "newMemory": "New Memory",
       "editMemory": "Edit Memory",
+      "openFile": "Open attachment",
+      "fileUnavailable": "Attachment unavailable. Check the original file and try again.",
       "contentLabel": "Content",
       "contentPlaceholder": "Write the memory content here (Markdown supported)...",
       "totalCount": "Total memories",
