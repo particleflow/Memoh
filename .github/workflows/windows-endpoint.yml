@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: '24.14.0'
       - name: Verify delivery boundary and recovery fixtures
-        run: node --test contrib/windows-endpoint/endpoint.test.mjs
+        run: node --test --test-timeout=30000 contrib/windows-endpoint/endpoint.test.mjs contrib/windows-endpoint/lifecycle.test.mjs
       - name: Verify native PowerShell bootstrap and hash rejection
         if: runner.os == 'Windows'
         shell: powershell
@@ -50,3 +50,8 @@ jobs:
         run: |
           & '${{ runner.temp }}/endpoint official Unicode 空格/node/node.exe' ./contrib/windows-endpoint/official-smoke/verify.mjs '${{ runner.temp }}/endpoint official Unicode 空格'
           if ($LASTEXITCODE -ne 0) { throw 'Official dependency smoke failed' }
+      - name: Exercise unified foreground lifecycle with official components
+        shell: pwsh
+        run: |
+          & '${{ runner.temp }}/endpoint official Unicode 空格/node/node.exe' ./contrib/windows-endpoint/official-smoke/lifecycle.mjs '${{ runner.temp }}/endpoint official Unicode 空格'
+          if ($LASTEXITCODE -ne 0) { throw 'Official lifecycle smoke failed' }

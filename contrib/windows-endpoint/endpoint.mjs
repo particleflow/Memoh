@@ -195,14 +195,14 @@ export async function configure(from, to) {
   return { state: 'references_saved', credentialsRead: false, activation: 'blocked' }
 }
 
-function managedEnvironment(config) {
+export function managedEnvironment(config, inherited = process.env) {
   const root = config.bundleRoot
-  const env = { ...process.env }
+  const env = { ...inherited }
   // Keep the caller's ordinary OS environment but remove shell/runtime injection.
   for (const k of Object.keys(env)) {
     if (/^(PATH|NODE_OPTIONS|NODE_PATH|BASH_ENV|BASH_FUNC_.*|ENV|CDPATH|SHELLOPTS|BASHOPTS|HERDR_.*|XDG_CONFIG_HOME|XDG_STATE_HOME|AGENVO_.*|PI_CODING_AGENT_DIR)$/i.test(k)) delete env[k]
   }
-  const system = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32')
+  const system = path.join(inherited.SystemRoot || 'C:\\Windows', 'System32')
   env.PATH = [path.join(root, 'node'), path.join(root, 'herdr'), path.join(root, 'node_modules/.bin'), path.join(root, 'git/bin'), path.join(root, 'git/usr/bin'), path.join(root, 'git/mingw64/bin'), path.join(root, 'git/cmd'), system, path.join(system, 'WindowsPowerShell/v1.0')].join(path.delimiter)
   env.HERDR_CONFIG_PATH = path.join(config.herdrConfigRoot, 'config.toml')
   env.XDG_CONFIG_HOME = path.dirname(config.herdrConfigRoot)

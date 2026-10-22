@@ -1,11 +1,13 @@
-# Unified endpoint lifecycle contract (not implemented)
+# Unified endpoint lifecycle implementation and remaining contract
 
 Automatic recovery must work without an open chat, repeated result queries or a
 user clicking a transfer action. This is owned by the **one Windows endpoint's
 lifecycle coordinator**, alongside official Herdr and Agenvo process management.
 It does not belong to a separately installed transfer server or a duplicate task
-queue. This PR has no such coordinator yet and reports
-`lifecycle.automaticRecovery:false` / `idleQueueWake:missing` explicitly.
+queue. The internal `lifecycle.mjs` coordinator now implements bounded component
+management. Product activation remains gated; transfer wake is not wired while
+the finite status contract is missing. It reports `ready:false` and
+`transferAutomaticRecovery:false` explicitly.
 
 ## What the inspected hosts actually provide
 
@@ -25,8 +27,7 @@ upstream Agent, Herdr or connector modification is required to resolve this gap.
 
 ## Minimum next implementation boundary
 
-The next delivery milestone should add a single internal coordinator to this
-same endpoint product. It can initially run in the ordinary interactive user
+The internal coordinator belongs to this same endpoint product. It can initially run in the ordinary interactive user
 session; OS login/startup integration is a separate, still unselected deployment
 decision. It must be explicit that closing that coordinator or logging out stops
 its wake guarantee until the product is started again. No startup/task-scheduler
@@ -108,3 +109,62 @@ next explicit product start; restart-on-login is not promised until selected and
 authorized separately. Process termination is not proof of physical power-loss
 recovery. Capacity/log/receipt limits and their evolution remain with the transfer
 owner, not this coordinator.
+
+## Implemented component lifecycle
+
+`EndpointLifecycle` owns one foreground instance, with OS-lifetime named-pipe
+leases for the device identity, Herdr root/session, and connector root. These
+leases accept no commands or data. Herdr API/version compatibility precedes
+connector startup. Every child uses the shared `managedEnvironment`, including
+removal of inherited NODE_PATH, HERDR_* and AGENVO_* pollution. Launch-plan
+`environment` remains only a display overlay and must not be used as a clean env.
+
+Only owned child handles can be stopped. Preexisting hosts and stale locks without
+saved ownership proof require handoff; there is no PID-based adoption or kill.
+An exited owned connector's exact PID and saved lock nonce are checked before
+invoking official `doctor --recover-lock`; the coordinator never deletes its lock.
+Herdr uses official `server stop`. Windows termination of the owned connector is
+not claimed to execute POSIX shutdown handlers; official stale-lock recovery is
+part of stopping it. Failed/uncertain cleanup retains the lease and attention.
+
+One coalesced check recovers components in dependency order, after requalification
+and unchanged official config fingerprints. Three restart attempts per ten-minute
+window are persisted in the endpoint-owned small journal. Offline live connector
+network retries remain owned by Agenvo. 401/403, protocol upgrade, config changes,
+unknown host observations and exhausted budgets suspend component recovery. An
+explicit attention acknowledgement never clears the persisted restart budget.
+Normal stop waits for an in-progress check and prevents respawn during backoff.
+
+The coordinator does not submit Agent prompts, pane commands or business attempts.
+Official interactive restoration is preserved without rewriting config or forcing
+`resume_agents_on_restore=false`. At fixed Herdr 5bd900, the bundled Pi integration
+v9 returns for non-TUI session_start (JSON/RPC/print); builtin Pi restore uses
+`pi --session` without the original prompt or batch wrapper. Ordinary shell restore
+does not replay the old command. These source facts are not proof about installed
+old/custom integration or pending tools. Existing business operation/attempt IDs,
+ledger and unknown outcomes remain authoritative; lifecycle never redispatches.
+
+## Evidence and current boundaries
+
+The unit suite covers ownership, order, coalescing, persisted budgets, auth and
+unknown states, shutdown/backoff and data preservation. Windows CI additionally
+assembles unchanged official binaries from fixed archive hashes/npm integrity,
+uses a loopback TLS relay with an ephemeral synthetic registration, and exercises
+component crashes, original connector network reconnect, real HTTP 401, normal
+stop, a lease-holder process death, and restoration of one ordinary shell command
+without replay. TLS validation stays enabled; no system trust store is changed.
+Results must be read from the exact commit's CI, not inferred from fixture code.
+This is no full Agent business/transfer/GUI/physical-power-loss acceptance test.
+
+Locking the desktop does not establish desktop capability readiness. Logging out
+stops the ordinary user session; no startup registration or service is installed.
+Coordinator process death releases its Windows leases but can leave owned children;
+the next start refuses preexisting Herdr and requires handoff. Automatic orphan
+adoption, active version switching, rollback and uninstall are not implemented.
+The Windows full bundle stays blocked until transfer protocol/artifact qualification
+and application/GUI checks are complete. Staging's interruption fixture precreates
+pending remnants; it does not inject a crash after every write.
+
+The exact requested read-only transfer interface is in
+[transfer-lifecycle-contract.md](transfer-lifecycle-contract.md). It is a proposal,
+not an assumed upstream implementation. No transfer/migration source is changed.

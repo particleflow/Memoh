@@ -4,7 +4,7 @@ import path from 'node:path'
 import { spawn, spawnSync } from 'node:child_process'
 import { setTimeout as delay } from 'node:timers/promises'
 import { once } from 'node:events'
-import { launchPlan, main, verifyToolchain } from '../endpoint.mjs'
+import { launchPlan, main, managedEnvironment, verifyToolchain } from '../endpoint.mjs'
 
 assert.equal(process.platform, 'win32')
 const root = await fs.realpath(process.argv[2])
@@ -44,9 +44,7 @@ try {
   checked('missing_node_pi_bash_rejected_without_path_fallback')
 
   const plan = launchPlan(config)
-  const env = { ...process.env, ...plan.environment }
-  delete env.NODE_OPTIONS
-  delete env.BASH_ENV
+  const env = managedEnvironment(config)
   // No existing registration/authentication is supplied or created.
   const connector = plan.commands[1]
   const stopped = spawnSync(connector.file, connector.args, { env, encoding: 'utf8', timeout: 10000, maxBuffer: 16384 })

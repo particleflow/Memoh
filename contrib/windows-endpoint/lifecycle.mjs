@@ -1,0 +1,305 @@
+import { createHash, randomUUID } from 'node:crypto'
+import * as fs from 'node:fs/promises'
+import net from 'node:net'
+import path from 'node:path'
+import { spawn, spawnSync, execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+import { setTimeout as sleep } from 'node:timers/promises'
+import { catalog, managedEnvironment } from './endpoint.mjs'
+
+// Internal foreground lifecycle. No business dispatch, transfer implementation,
+// network service, OS startup registration, credential editing or second watchdog.
+export class LifecycleError extends Error {
+  constructor(code) { super(code); this.code = code }
+}
+function demand(ok, code) { if (!ok) throw new LifecycleError(code) }
+function code(error) { return error instanceof LifecycleError ? error.code : 'lifecycle_operation_failed' }
+async function readFile(file, limit = 262144) {
+  const s = await fs.lstat(file)
+  demand(s.isFile() && !s.isSymbolicLink() && s.nlink === 1 && s.size <= limit, 'unsafe_lifecycle_input')
+  return fs.readFile(file, 'utf8')
+}
+async function readJSON(file) { return JSON.parse(await readFile(file)) }
+export function connectorAttention(snapshot) {
+  if (['handshake_401', 'handshake_403'].includes(snapshot?.lastError)) return 'connector_authentication_required'
+  if (snapshot?.lastError === 'handshake_426') return 'connector_protocol_upgrade_required'
+  if (snapshot?.lastError === 'config_changed_restart_required') return 'connector_configuration_changed'
+  if (snapshot?.state === 'needs_attention') return 'connector_needs_attention'
+  return null
+}
+
+// Windows named pipes are used only as OS lifetime leases; no commands/data are
+// accepted. Their handles disappear on process death, without PID/file stealing.
+// Unix socket leases support development tests; stale Unix sockets fail closed.
+export async function acquireLeases(keys, directory) {
+  const handles = []
+  try {
+    for (const key of [...new Set(keys)].sort()) {
+      const id = createHash('sha256').update(key.toLowerCase()).digest('hex').slice(0, 32)
+      const address = process.platform === 'win32' ? `\\\\.\\pipe\\memoh-endpoint-${id}` : path.join(directory, `${id}.sock`)
+      const handle = net.createServer({ pauseOnConnect: true }, socket => socket.destroy())
+      await new Promise((resolve, reject) => {
+        handle.once('error', () => reject(new LifecycleError('endpoint_already_owned')))
+        handle.listen({ path: address, exclusive: true }, resolve)
+      })
+      handles.push(handle)
+    }
+  } catch (error) {
+    await Promise.all(handles.map(h => new Promise(resolve => h.close(resolve))))
+    throw error
+  }
+  return async () => Promise.all(handles.map(h => new Promise(resolve => h.close(resolve))))
+}
+
+export class StateStore {
+  constructor(directory, identity) { this.directory = directory; this.identity = identity; this.file = path.join(directory, 'lifecycle.json') }
+  async load() {
+    demand(path.isAbsolute(this.directory) && await fs.realpath(this.directory) === this.directory, 'canonical_state_root_required')
+    let data
+    try { data = await readJSON(this.file) } catch (e) { if (e.code !== 'ENOENT') throw new LifecycleError('lifecycle_state_unreadable') }
+    if (!data) return { schema: 1, identity: this.identity, phase: 'stopped', restarts: [], attention: null }
+    demand(data.schema === 1 && data.identity === this.identity && Array.isArray(data.restarts) && data.restarts.length <= 100 && data.restarts.every(t => Number.isSafeInteger(t) && t >= 0), 'lifecycle_state_mismatch')
+    demand(['stopped', 'starting', 'running', 'stopping', 'needs_attention'].includes(data.phase) && (data.attention === null || /^[a-z_]{1,80}$/.test(data.attention)), 'lifecycle_state_mismatch')
+    return data
+  }
+  async save(data) {
+    // Only this coordinator's small journal; never official session/queue files.
+    try { await readFile(this.file) } catch (e) { if (e.code !== 'ENOENT') throw e }
+    const temporary = path.join(this.directory, `.lifecycle-${randomUUID()}.tmp`)
+    const h = await fs.open(temporary, 'wx')
+    try { await h.writeFile(`${JSON.stringify(data)}\n`); await h.sync() } finally { await h.close() }
+    await fs.rename(temporary, this.file)
+  }
+}
+
+export class NativeDriver {
+  constructor(config, { qualify, inheritedEnvironment = process.env } = {}) {
+    this.config = config
+    this.qualify = qualify
+    // Environment is fully cleaned by the shared product function, not the plan
+    // overlay. Extra environment injection is not exposed to product callers.
+    this.env = managedEnvironment(config, inheritedEnvironment)
+    this.children = new Map()
+    this.node = path.join(config.bundleRoot, catalog.components.node.entry)
+    this.herdr = path.join(config.bundleRoot, catalog.components.herdr.entry)
+    this.connector = path.join(config.bundleRoot, catalog.components.connector.entry)
+    this.fingerprint = null
+  }
+  async validate() {
+    demand(process.platform === 'win32' && process.arch === 'x64' && typeof this.qualify === 'function', 'qualified_windows_driver_required')
+    demand(await this.qualify() === true, 'component_qualification_failed')
+    const host = await readFile(path.join(this.config.herdrConfigRoot, 'config.toml'))
+    const connector = await readFile(path.join(this.config.agenvoConfigDir, 'config.json'))
+    const sum = createHash('sha256').update(host).update('\0').update(connector).digest('hex')
+    demand(!this.fingerprint || this.fingerprint === sum, 'official_configuration_changed')
+    this.fingerprint = sum
+  }
+  command(file, args, timeout = 10000) {
+    const r = spawnSync(file, args, { env: this.env, cwd: this.config.sourceRoot, encoding: 'utf8', timeout, maxBuffer: 16384, windowsHide: true, shell: false })
+    demand(!r.error && r.status === 0, 'official_command_failed')
+    return r.stdout
+  }
+  hostStatus() {
+    let value
+    try { value = JSON.parse(this.command(this.herdr, ['--session', this.config.session, 'status', 'server', '--json'], 3000)) }
+    catch { throw new LifecycleError('herdr_observation_unknown') }
+    demand(typeof value.running === 'boolean', 'herdr_observation_unknown')
+    return value
+  }
+  alive(component) { const c = this.children.get(component); return Boolean(c && !c.exited && !c.error) }
+  async start(component) {
+    demand(!this.alive(component), 'component_already_owned')
+    if (component === 'connector') {
+      try { await fs.lstat(path.join(this.config.agenvoConfigDir, 'run.lock')); throw new LifecycleError('connector_lock_requires_owner') }
+      catch (e) { if (e.code !== 'ENOENT') throw e }
+    }
+    const file = component === 'herdr' ? this.herdr : this.node
+    const args = component === 'herdr' ? ['--session', this.config.session, 'server'] : [this.connector, 'run']
+    const processHandle = spawn(file, args, { env: this.env, cwd: this.config.sourceRoot, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], shell: false })
+    const c = { process: processHandle, startedAt: Date.now(), exited: false, error: false, lock: null }
+    c.done = new Promise(resolve => {
+      processHandle.once('exit', () => { c.exited = true; resolve() })
+      processHandle.once('error', () => { c.error = true; c.exited = true; resolve() })
+    })
+    processHandle.stdout.resume()
+    processHandle.stderr.resume()
+    this.children.set(component, c)
+  }
+  async connectorStatus() {
+    const c = this.children.get('connector')
+    if (!c) return null
+    let s
+    try { s = await readJSON(path.join(this.config.agenvoConfigDir, 'status.json')) } catch { return null }
+    if (s.pid !== c.process.pid || s.deviceId !== this.config.deviceId || s.version !== '0.2.0' || !Number.isSafeInteger(s.updatedAt) || s.updatedAt < c.startedAt || s.updatedAt > Date.now() + 1000) return null
+    if (!['connecting', 'authenticating', 'online', 'offline', 'stopped', 'needs_attention'].includes(s.state)) return null
+    if (!c.lock) {
+      try {
+        const lock = await readJSON(path.join(this.config.agenvoConfigDir, 'run.lock'))
+        if (lock.pid === c.process.pid && typeof lock.nonce === 'string') c.lock = lock
+      } catch { /* No ownership proof means no later lock recovery. */ }
+    }
+    return s
+  }
+  async waitReady(component, timeout = 30000) {
+    const deadline = Date.now() + timeout
+    while (Date.now() < deadline) {
+      demand(this.alive(component), `${component}_startup_exited`)
+      if (component === 'herdr') {
+        try {
+          const s = this.hostStatus()
+          if (s.running && s.version === '0.9.5' && s.endpoint_compatible === true) return
+        } catch { /* Startup only: a socket may not have been published yet. */ }
+      } else {
+        const s = await this.connectorStatus()
+        const attention = connectorAttention(s)
+        demand(!attention, attention)
+        if (s && ['connecting', 'authenticating', 'online', 'offline'].includes(s.state)) return
+      }
+      await sleep(100)
+    }
+    throw new LifecycleError(`${component}_startup_timeout`)
+  }
+  async recoverConnectorLock() {
+    const c = this.children.get('connector')
+    let lock
+    try { lock = await readJSON(path.join(this.config.agenvoConfigDir, 'run.lock')) }
+    catch (e) { if (e.code === 'ENOENT') return; throw new LifecycleError('connector_lock_requires_owner') }
+    demand(c?.exited && c.lock && lock.pid === c.process.pid && lock.nonce === c.lock.nonce, 'connector_lock_requires_owner')
+    // Official recovery only after this exact owned process has exited and the
+    // saved lock nonce still matches. No direct unlink or PID-based termination.
+    try { await promisify(execFile)(this.node, [this.connector, 'doctor', '--recover-lock'], { env: this.env, cwd: this.config.sourceRoot, timeout: 12000, maxBuffer: 16384, windowsHide: true, shell: false }) }
+    catch { throw new LifecycleError('connector_lock_recovery_failed') }
+    try { await fs.lstat(path.join(this.config.agenvoConfigDir, 'run.lock')); throw new LifecycleError('connector_lock_requires_owner') }
+    catch (e) { if (e.code !== 'ENOENT') throw e }
+  }
+  async stop(component) {
+    const c = this.children.get(component)
+    if (!c) return
+    if (this.alive(component)) {
+      if (component === 'herdr') {
+        this.command(this.herdr, ['--session', this.config.session, 'server', 'stop'], 20000)
+      } else {
+        // Windows Node kill terminates this owned child; it does not guarantee
+        // POSIX SIGTERM callbacks. Recover only its proven stale official lock.
+        c.process.kill()
+      }
+      const timer = new AbortController()
+      try {
+        await Promise.race([c.done, sleep(10000, undefined, { signal: timer.signal }).then(() => { throw new LifecycleError(`${component}_stop_unknown`) })])
+      } finally { timer.abort() }
+    }
+    if (component === 'connector') await this.recoverConnectorLock()
+  }
+}
+
+export class EndpointLifecycle {
+  constructor({ driver, store, acquire, clock = Date.now, delay = sleep, policy = {} }) {
+    this.driver = driver; this.store = store; this.acquire = acquire
+    this.clock = clock; this.delay = delay
+    this.policy = { maxRestarts: 3, windowMs: 600000, retryMs: 1000, ...policy }
+    this.active = null; this.stopping = false; this.release = null
+    this.observedConnection = 'unverified'
+  }
+  snapshot() {
+    return { schema: 1, phase: this.state?.phase || 'stopped', attention: this.state?.attention || null, restartsInWindow: this.state?.restarts.length || 0, ready: false,
+      connection: this.observedConnection, agent: 'official_restore_semantics_retained', desktop: 'interactive_session_unverified', transfer: 'lifecycle_interface_pending',
+      lifecycle: { foreground: true, singleInstance: Boolean(this.release), componentRecovery: 'bounded', transferAutomaticRecovery: false, lockedDesktop: 'no_desktop_readiness_claim', loggedOut: 'not_running_no_autostart' } }
+  }
+  async save() { await this.store.save(this.state) }
+  async attention(reason) {
+    this.state.phase = 'needs_attention'; this.state.attention = reason
+    await this.save()
+  }
+  async start({ acknowledgeAttention = false } = {}) {
+    demand(!this.release, 'endpoint_already_owned')
+    this.release = await this.acquire()
+    try {
+      this.state = await this.store.load()
+      if (this.state.attention && !acknowledgeAttention) throw new LifecycleError(this.state.attention)
+      this.state.attention = null
+      this.stopping = false
+      await this.driver.validate()
+      demand(!this.driver.hostStatus().running, 'existing_herdr_requires_handoff')
+      this.state.phase = 'starting'; await this.save()
+      await this.driver.start('herdr'); await this.driver.waitReady('herdr')
+      await this.driver.start('connector'); await this.driver.waitReady('connector')
+      this.state.phase = 'running'; await this.save()
+      return this.snapshot()
+    } catch (error) {
+      if (this.state) await this.attention(code(error))
+      // Partial starts belong to this coordinator only; never adopt/stop an
+      // already-running host. Keep the lease if cleanup has an uncertain result.
+      try {
+        await this.driver.stop('connector'); await this.driver.stop('herdr')
+        await this.release(); this.release = null
+      } catch { if (this.state) await this.attention('startup_cleanup_requires_attention') }
+      throw error
+    }
+  }
+  async recover(component) {
+    const snapshot = await this.driver.connectorStatus()
+    const reason = connectorAttention(snapshot)
+    if (reason) return this.attention(reason)
+    const now = this.clock()
+    this.state.restarts = this.state.restarts.filter(t => t > now - this.policy.windowMs)
+    if (this.state.restarts.some(t => t > now) || this.state.restarts.length >= this.policy.maxRestarts) return this.attention('restart_budget_exhausted')
+    this.state.restarts.push(now); await this.save() // budget survives coordinator restart
+    if (component === 'herdr') await this.driver.stop('connector')
+    else await this.driver.recoverConnectorLock()
+    await this.delay(this.policy.retryMs * this.state.restarts.length)
+    if (this.stopping) return
+    await this.driver.validate()
+    if (component === 'herdr') {
+      await this.driver.start('herdr'); await this.driver.waitReady('herdr')
+      if (this.stopping) return
+    }
+    await this.driver.start('connector'); await this.driver.waitReady('connector')
+  }
+  async tick() {
+    if (this.active) return this.active
+    this.active = (async () => {
+      if (this.stopping || this.state?.phase !== 'running') return this.snapshot()
+      try {
+        const s = await this.driver.connectorStatus()
+        const reason = connectorAttention(s)
+        if (reason) { await this.attention(reason); return this.snapshot() }
+        this.observedConnection = s?.state === 'online' ? 'online_snapshot' : s?.state || 'unverified'
+        if (!this.driver.alive('herdr')) await this.recover('herdr')
+        else if (!this.driver.alive('connector')) await this.recover('connector')
+        else {
+          const host = this.driver.hostStatus()
+          demand(host.running && host.version === '0.9.5' && host.endpoint_compatible === true, 'herdr_observation_unknown')
+        }
+      } catch (error) { await this.attention(code(error)) }
+      return this.snapshot()
+    })()
+    try { return await this.active } finally { this.active = null }
+  }
+  async stop() {
+    this.stopping = true
+    if (this.active) await this.active
+    if (!this.release) return this.snapshot()
+    this.state.phase = 'stopping'; await this.save()
+    try {
+      await this.driver.stop('connector')
+      await this.driver.stop('herdr')
+      this.state.phase = 'stopped'; await this.save()
+      await this.release(); this.release = null
+    } catch (error) { await this.attention(code(error)) }
+    return this.snapshot()
+  }
+  async run(signal) {
+    demand(this.release && this.state?.phase === 'running', 'lifecycle_not_started')
+    try {
+      while (!signal.aborted && this.release) {
+        await this.tick()
+        await this.delay(1000)
+      }
+    } finally { await this.stop() }
+    return this.snapshot()
+  }
+}
+
+export function leaseKeys(config) {
+  return [`device:${config.deviceId}`, `herdr:${config.herdrConfigRoot}:${config.session}`, `connector:${config.agenvoConfigDir}`]
+}
