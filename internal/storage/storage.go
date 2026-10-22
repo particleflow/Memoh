@@ -14,6 +14,8 @@ var (
 	// ErrAccessPathUnavailable means the stored bytes cannot currently be made
 	// addressable in the target consumer's filesystem namespace.
 	ErrAccessPathUnavailable = errors.New("storage object has no consumer-accessible path")
+	// ErrVerifiedRangeUnsupported retains the full-stream verification fallback.
+	ErrVerifiedRangeUnsupported = errors.New("provider cannot verify ranges")
 )
 
 // Provider abstracts object storage operations.
@@ -36,6 +38,23 @@ type Provider interface {
 // proves readability, not that a prior rename's directory entry was synced.
 type DurabilityEnsurer interface {
 	EnsureDurable(ctx context.Context, key string) error
+}
+
+// VerifiedRangeReader binds a stream to a successfully verified content hash.
+// Implementations must verify bytes before returning them, or have verified the
+// entire immutable stream. This is an integrity contract, not authorization or
+// a durability acknowledgement. Callers must still check Bot access each time.
+type VerifiedRangeReader interface {
+	io.ReadSeekCloser
+	VerifiedContentHash() string
+}
+
+// VerifiedRangeOpener optionally avoids repeated full scans for range requests.
+// Unsupported providers retain Open plus full verification. Missing originals
+// may use an existing verified legacy import; integrity or storage errors must
+// fail closed rather than selecting an unchecked copy.
+type VerifiedRangeOpener interface {
+	OpenVerifiedRange(context.Context, string) (VerifiedRangeReader, error)
 }
 
 // AccessPathEnsurer is implemented by providers that can materialize an object

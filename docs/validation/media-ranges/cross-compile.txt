@@ -1,0 +1,3 @@
+/tmp/memoh-localfs-386.test:         ELF 32-bit LSB executable, Intel i386, version 1 (SYSV), statically linked, BuildID[sha1]=f0f724a86e5dbdb4ed66c09bcc3218a63de46522, with debug_info, not stripped
+/tmp/memoh-localfs-windows.test.exe: PE32+ executable for MS Windows 6.01 (console), x86-64, 16 sections
+/tmp/memoh-localfs-darwin.test:      Mach-O 64-bit arm64 executable, flags:<|DYLDLINK|PIE>

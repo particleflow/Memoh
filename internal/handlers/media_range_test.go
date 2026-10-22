@@ -84,6 +84,10 @@ type rangeStreamProvider struct {
 	failRead bool
 }
 
+func (rangeStreamProvider) OpenVerifiedRange(context.Context, string) (storage.VerifiedRangeReader, error) {
+	return nil, storage.ErrVerifiedRangeUnsupported
+}
+
 func (p rangeStreamProvider) Open(ctx context.Context, key string) (io.ReadCloser, error) {
 	reader, err := p.Originals.Open(ctx, key)
 	if err != nil {

@@ -1,0 +1,16 @@
+=== RUN   TestSeekableReadVolume
+=== RUN   TestSeekableReadVolume/200MiB
+    seekable_io_linux_test.go:87: size=209715200 phase=first response_bytes=65536 read_syscall_bytes=210763889 open=367.222962ms total=368.959758ms
+    seekable_io_linux_test.go:87: size=209715200 phase=resume response_bytes=65536 read_syscall_bytes=1048689 open=71.566µs total=3.572646ms
+    seekable_io_linux_test.go:87: size=209715200 phase=new-provider response_bytes=65536 read_syscall_bytes=210763889 open=321.824865ms total=322.766067ms
+    seekable_io_linux_test.go:87: size=209715200 phase=resume-after-new-provider response_bytes=65536 read_syscall_bytes=1048689 open=72.44µs total=2.358947ms
+=== RUN   TestSeekableReadVolume/512MiB
+    seekable_io_linux_test.go:87: size=536870912 phase=first response_bytes=65536 read_syscall_bytes=537919604 open=959.780593ms total=961.033538ms
+    seekable_io_linux_test.go:87: size=536870912 phase=resume response_bytes=65536 read_syscall_bytes=1048692 open=151.464µs total=2.778516ms
+    seekable_io_linux_test.go:87: size=536870912 phase=new-provider response_bytes=65536 read_syscall_bytes=537919612 open=948.989089ms total=950.034829ms
+    seekable_io_linux_test.go:87: size=536870912 phase=resume-after-new-provider response_bytes=65536 read_syscall_bytes=1048692 open=83.519µs total=1.199286ms
+--- PASS: TestSeekableReadVolume (4.47s)
+    --- PASS: TestSeekableReadVolume/200MiB (1.28s)
+    --- PASS: TestSeekableReadVolume/512MiB (3.19s)
+PASS
+ok  	github.com/felinics/memoh/internal/media	4.482s
