@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -18,7 +19,7 @@ import (
 func main() { os.Exit(run()) }
 
 func run() int {
-	kind := flag.String("action", "probe", "probe, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flag.String("action", "probe", "probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flag.String("delivery", "", "logical delivery ID")
 	flag.Parse()
 	if flag.NArg() != 0 {
@@ -26,7 +27,7 @@ func run() int {
 		return 2
 	}
 	switch *kind {
-	case "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		fmt.Fprintln(os.Stderr, "unsupported action")
 		return 2
@@ -49,6 +50,37 @@ func run() int {
 		}
 		fmt.Println(`{"storage":"available","device_configuration":"required","profile":"native-profile-v1"}`)
 		return 0
+	}
+
+	if *kind == "enqueue-result" || *kind == "collect-result" || *kind == "advance-results" {
+		var status transferclient.QueueStatus
+		var err error
+		switch *kind {
+		case "enqueue-result":
+			input, readErr := readBoundedProducer(ctx, os.Stdin)
+			if readErr != nil {
+				fmt.Fprintln(os.Stderr, "invalid delivery metadata")
+				return 2
+			}
+			status, err = transferclient.EnqueueProducer(ctx, getenv, "native-profile-v1", limits, bytes.NewReader(input), nil, time.Now())
+		case "collect-result":
+			status, err = transferclient.CollectProducer(ctx, getenv, "native-profile-v1", limits, nil, time.Now())
+		case "advance-results":
+			status, err = transferclient.AdvanceProducer(ctx, getenv, "native-profile-v1", limits, nil, time.Now())
+		}
+		if errors.Is(err, transferclient.ErrProducerSource) {
+			_ = writeStatusWithSource(status, "unavailable")
+			return 1
+		}
+		if errors.Is(err, transferclient.ErrNoWork) {
+			fmt.Println(`{"state":"idle"}`)
+			return 0
+		}
+		if err != nil {
+			fmt.Println(`{"state":"pending_or_unavailable"}`)
+			return 1
+		}
+		return writeStatus(status)
 	}
 	action := transferclient.ConfiguredAction{Kind: *kind, DeliveryID: *id}
 	if *kind == "enqueue-upload" || *kind == "enqueue-download" {
@@ -118,7 +150,12 @@ func readAdmission(ctx context.Context, input io.Reader) (admissionInput, error)
 }
 
 func writeStatus(s transferclient.QueueStatus) int {
+	return writeStatusWithSource(s, "")
+}
+
+func writeStatusWithSource(s transferclient.QueueStatus, source string) int {
 	out := struct {
+		Source      string                    `json:"source_collection,omitempty"`
 		Delivery    string                    `json:"delivery_id"`
 		Phase       string                    `json:"phase"`
 		Offset      int64                     `json:"offset"`
@@ -127,9 +164,30 @@ func writeStatus(s transferclient.QueueStatus) int {
 		Association string                    `json:"association_state,omitempty"`
 		Error       string                    `json:"error_code,omitempty"`
 		Reference   *transferclient.Reference `json:"reference,omitempty"`
-	}{s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
+	}{source, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
 	if json.NewEncoder(os.Stdout).Encode(out) != nil {
 		return 1
 	}
 	return 0
+}
+
+func readBoundedProducer(ctx context.Context, input io.Reader) ([]byte, error) {
+	type result struct {
+		raw []byte
+		err error
+	}
+	done := make(chan result, 1)
+	go func() {
+		raw, err := io.ReadAll(io.LimitReader(input, 16385))
+		if len(raw) > 16384 {
+			err = transferclient.ErrInvalid
+		}
+		done <- result{raw, err}
+	}()
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case r := <-done:
+		return r.raw, r.err
+	}
 }

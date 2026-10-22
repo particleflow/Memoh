@@ -288,6 +288,13 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 	} else {
 		entry = deliveryEntry{Reference: ref, Scope: scope}
 	}
+	// The durable operation is the cancellation fence for its declared uploads.
+	// Read it in the SAME transaction/revision CAS as reservation and final scan
+	// commit. A delayed exit hook or live old validator cannot publish after the
+	// fence. A committed winner remains queryable; cancellation is not retraction.
+	if r.CancelRequested && details.Batch.Progress.Producer != nil && ref.Direction == "upload" && (!exists || entry.Outcome != "committed") {
+		return DeliveryOutcome{}, ErrDenied
+	}
 	changed, err := mutate(&entry, exists)
 	if err != nil {
 		return DeliveryOutcome{}, err
