@@ -131,13 +131,23 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 		}
 	}
 	t.Cleanup(func() {
-		_, _ = pool.Exec(ctx, "DELETE FROM bots WHERE id=$1", bot)
-		_, _ = pool.Exec(ctx, "DELETE FROM providers WHERE id=$1", providerID)
-		_, _ = pool.Exec(ctx, "DELETE FROM users WHERE id=$1", user)
+		// testing cancels t.Context before Cleanup runs. Keep cleanup bounded,
+		// but independent of that cancellation so repeated runs leave no rows.
+		cleanupCtx, cancel := context.WithTimeout(context.WithoutCancel(baseCtx), 5*time.Second)
+		defer cancel()
+		for _, item := range []struct{ query, id string }{
+			{"DELETE FROM bots WHERE id=$1", bot},
+			{"DELETE FROM providers WHERE id=$1", providerID},
+			{"DELETE FROM users WHERE id=$1", user},
+		} {
+			if _, err := pool.Exec(cleanupCtx, item.query, item.id); err != nil {
+				t.Errorf("clean up image fixture: %v", err)
+			}
+		}
 	})
 	exec("INSERT INTO users(id,username,is_active) VALUES($1,$2,true)", user, "image-fixture-"+user)
 	exec("INSERT INTO team_members(team_id,user_id,role) VALUES($1,$2,'member')", team.DefaultTeamID, user)
-	exec("INSERT INTO bots(id,owner_user_id,name,status) VALUES($1,$2,'image-fixture','ready')", bot, user)
+	exec("INSERT INTO bots(id,owner_user_id,name,status) VALUES($1,$2,$3,'ready')", bot, user, "image-fixture-"+bot)
 	conf, _ := json.Marshal(map[string]any{"base_url": fixture.URL, "api_key": "synthetic-not-a-credential"})
 	exec("INSERT INTO providers(id,name,client_type,config) VALUES($1,$2,'openai-completions',$3)", providerID, "image-fixture-"+providerID, conf)
 	exec(`INSERT INTO models(id,provider_id,model_id,config) VALUES($1,$2,'synthetic-edit-model','{"compatibilities":["image-output","image-edit"]}')`, modelID, providerID)
