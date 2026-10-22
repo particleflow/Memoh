@@ -209,10 +209,27 @@ export class EndpointLifecycle {
   }
   snapshot() {
     return { schema: 1, phase: this.state?.phase || 'stopped', attention: this.state?.attention || null, restartsInWindow: this.state?.restarts.length || 0, ready: false,
+      journal: this.journalError ? 'unavailable' : this.state ? 'observed' : 'unverified', cleanupAttention: this.cleanupError ? code(this.cleanupError) : null,
       connection: this.observedConnection, agent: 'official_restore_semantics_retained', desktop: 'interactive_session_unverified', transfer: 'lifecycle_interface_pending',
       lifecycle: { foreground: true, singleInstance: Boolean(this.release), componentRecovery: 'bounded', transferAutomaticRecovery: false, lockedDesktop: 'no_desktop_readiness_claim', loggedOut: 'not_running_no_autostart' } }
   }
-  async save() { await this.store.save(this.state) }
+  async save() {
+    try { await this.store.save(this.state); this.journalError = null }
+    catch (error) {
+      this.journalError = error
+      const failure = new LifecycleError('lifecycle_state_write_failed')
+      failure.cause = error
+      throw failure
+    }
+  }
+  async cleanupOwned() {
+    this.cleanupError = null
+    for (const component of ['connector', 'herdr']) {
+      try { await this.driver.stop(component) }
+      catch (error) { this.cleanupError ??= error }
+    }
+    if (this.cleanupError) throw this.cleanupError
+  }
   async attention(reason) {
     this.state.phase = 'needs_attention'; this.state.attention = reason
     await this.save()
@@ -242,16 +259,24 @@ export class EndpointLifecycle {
       this.state.phase = 'running'; await this.save()
       return this.snapshot()
     } catch (error) {
+      // Journal failures must never skip owned-child cleanup or replace the
+      // original startup error. A failed write remains visible in the snapshot.
       if (this.state) {
-        if (code(error) === 'startup_cancelled') { this.state.phase = 'stopped'; this.state.attention = null; await this.save() }
-        else await this.attention(code(error))
+        try {
+          if (code(error) === 'startup_cancelled') { this.state.phase = 'stopped'; this.state.attention = null; await this.save() }
+          else await this.attention(code(error))
+        } catch { /* Preserve the original failure; continue mandatory cleanup. */ }
       }
-      // Partial starts belong to this coordinator only; never adopt/stop an
-      // already-running host. Keep the lease if cleanup has an uncertain result.
       try {
-        await this.driver.stop('connector'); await this.driver.stop('herdr')
+        await this.cleanupOwned()
         await this.release(); this.release = null
-      } catch { if (this.state) await this.attention('startup_cleanup_requires_attention') }
+      } catch (cleanupError) {
+        this.cleanupError = cleanupError
+        if (this.state) {
+          try { await this.attention('startup_cleanup_requires_attention') }
+          catch { /* Retain lease when cleanup cannot be confirmed, even if disk is full. */ }
+        }
+      }
       throw error
     }
   }
@@ -269,6 +294,7 @@ export class EndpointLifecycle {
     await this.delay(this.policy.retryMs * this.state.restarts.length)
     if (this.stopping) return
     await this.driver.validate()
+    if (this.stopping) return
     if (component === 'herdr') {
       await this.driver.start('herdr'); await this.driver.waitReady('herdr')
       if (this.stopping) return
@@ -292,7 +318,9 @@ export class EndpointLifecycle {
           const host = this.driver.hostStatus()
           demand(host.running && host.version === '0.9.5' && host.endpoint_compatible === true, 'herdr_observation_unknown')
         }
-      } catch (error) { await this.attention(code(error)) }
+      } catch (error) {
+        try { await this.attention(code(error)) } catch { throw error }
+      }
       return this.snapshot()
     })()
     try { return await this.active } finally { this.active = null }
@@ -304,27 +332,47 @@ export class EndpointLifecycle {
     try { return await this.closing } finally { this.closing = null }
   }
   async stopOwned() {
+    let firstError
     if (this.starting) await this.starting.catch(() => {})
-    if (this.active) await this.active
-    if (!this.release) return this.snapshot()
-    this.state.phase = 'stopping'; await this.save()
-    try {
-      await this.driver.stop('connector')
-      await this.driver.stop('herdr')
+    if (this.active) {
+      try { await this.active } catch (error) { firstError = error }
+    }
+    if (!this.release) { if (firstError) throw firstError; return this.snapshot() }
+    if (this.state) {
+      this.state.phase = 'stopping'
+      try { await this.save() } catch (error) { firstError ??= error }
+    }
+    // All owned components are attempted independently of journal availability
+    // and of another component's stop failure. NativeDriver never kills by PID.
+    try { await this.cleanupOwned() } catch (error) { firstError ??= error }
+    if (this.cleanupError) {
+      if (this.state) {
+        try { await this.attention(code(this.cleanupError)) } catch (error) { firstError ??= error }
+      }
+      // Keep the OS lease while any owned-child outcome is uncertain.
+    } else {
       this.observedConnection = 'stopped'
-      this.state.phase = 'stopped'; await this.save()
-      await this.release(); this.release = null
-    } catch (error) { await this.attention(code(error)) }
+      if (this.state) {
+        this.state.phase = 'stopped'
+        if (firstError) this.state.attention = code(firstError)
+        try { await this.save() } catch (error) { firstError ??= error; this.state.attention = code(firstError) }
+      }
+      try { await this.release(); this.release = null } catch (error) { firstError ??= error }
+    }
+    if (firstError) throw firstError
     return this.snapshot()
   }
   async run(signal) {
     demand(this.release && this.state?.phase === 'running', 'lifecycle_not_started')
+    let firstError
     try {
       while (!signal.aborted && this.release) {
         await this.tick()
         await this.delay(1000)
       }
-    } finally { await this.stop() }
+    } catch (error) { firstError = error }
+    finally { try { await this.stop() } catch (error) { firstError ??= error } }
+    if (firstError) throw firstError
     return this.snapshot()
   }
 }

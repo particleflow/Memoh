@@ -134,7 +134,11 @@ network retries remain owned by Agenvo. 401/403, protocol upgrade, config change
 a published clean connector stop (including credential deletion), unknown host
 observations and exhausted budgets suspend component recovery. An
 explicit attention acknowledgement never clears the persisted restart budget.
-Normal stop waits for an in-progress check and prevents respawn during backoff.
+Normal stop waits for an in-progress check and prevents respawn during backoff
+and asynchronous requalification. Journal ENOSPC/EACCES never skips owned-child
+cleanup: both components are attempted, the original failure/cause is preserved,
+and uncertain cleanup retains the OS lease. Failed journal publication is reported
+separately from component shutdown.
 
 The coordinator does not submit Agent prompts, pane commands or business attempts.
 Official interactive restoration is preserved without rewriting config or forcing

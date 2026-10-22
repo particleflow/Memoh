@@ -189,3 +189,60 @@ test('replacement connector never inherits the old process online observation', 
   await lifecycle.stop()
   assert.equal(lifecycle.snapshot().connection, 'stopped')
 })
+
+for (const failureCode of ['ENOSPC', 'EACCES']) {
+  test(`stop cleans all owned children even when journal writes fail with ${failureCode}`, async t => {
+    const { lifecycle, store, alive, calls } = await fixture(t)
+    await lifecycle.start()
+    const original = Object.assign(new Error('synthetic journal failure'), { code: failureCode })
+    store.save = async () => { throw original }
+    await assert.rejects(lifecycle.stop(), error => error.code === 'lifecycle_state_write_failed' && error.cause === original)
+    assert.deepEqual(calls.slice(-2), ['stop:connector', 'stop:herdr'])
+    assert.equal(alive.size, 0)
+    assert.equal(lifecycle.release, null)
+    assert.equal(lifecycle.snapshot().journal, 'unavailable')
+  })
+
+  test(`partial startup preserves original error and cleans up when attention writes fail with ${failureCode}`, async t => {
+    const { lifecycle, store, driver, alive, calls } = await fixture(t)
+    const original = new LifecycleError('connector_startup_exited')
+    const save = store.save.bind(store)
+    store.save = async state => { if (state.phase === 'needs_attention') throw Object.assign(new Error('synthetic'), { code: failureCode }); await save(state) }
+    driver.waitReady = async c => { if (c === 'connector') throw original }
+    await assert.rejects(lifecycle.start(), error => error === original)
+    assert.deepEqual(calls.slice(-2), ['stop:connector', 'stop:herdr'])
+    assert.equal(alive.size, 0)
+    assert.equal(lifecycle.release, null)
+    assert.equal(lifecycle.snapshot().journal, 'unavailable')
+  })
+}
+
+test('failed connector cleanup still stops owned Herdr and retains the lease', async t => {
+  const { lifecycle, driver, alive, calls } = await fixture(t)
+  await lifecycle.start()
+  const stop = driver.stop
+  const original = new LifecycleError('connector_stop_unknown')
+  driver.stop = async c => { if (c === 'connector') { calls.push('stop:connector'); throw original } await stop(c) }
+  try {
+    await assert.rejects(lifecycle.stop(), error => error === original)
+    assert.equal(alive.has('herdr'), false)
+    assert.equal(alive.has('connector'), true)
+    assert.ok(lifecycle.release)
+    assert.equal(lifecycle.snapshot().cleanupAttention, 'connector_stop_unknown')
+  } finally { driver.stop = stop; await lifecycle.stop() }
+})
+
+test('stop during async recovery qualification prevents any replacement spawn', async t => {
+  const { lifecycle, driver, alive, calls } = await fixture(t)
+  await lifecycle.start()
+  let resume, entered
+  const waiting = new Promise(r => { entered = r })
+  driver.validate = async () => new Promise(r => { resume = r; entered() })
+  alive.delete('connector')
+  const tick = lifecycle.tick(); await waiting
+  const stop = lifecycle.stop(); resume(); await Promise.all([tick, stop])
+  assert.equal(calls.filter(c => c === 'start:connector').length, 1)
+  assert.equal(calls.filter(c => c === 'start:herdr').length, 1)
+  assert.equal(alive.size, 0)
+  assert.equal(lifecycle.release, null)
+})
