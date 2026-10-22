@@ -22,6 +22,7 @@ func bindFixtureProducer(t *testing.T, f *deliveryFixture) string {
 	f.record.Details, _ = json.Marshal(d)
 	return p.DeliveryID()
 }
+
 func cancelFixtureProducer(f *deliveryFixture) {
 	f.mu.Lock()
 	defer f.mu.Unlock()

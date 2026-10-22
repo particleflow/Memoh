@@ -48,6 +48,7 @@ func TestProducerCancelStopsRealUploadHandler(t *testing.T) {
 		})
 	}
 }
+
 func producerDenied(err error) bool {
 	var h *transferclient.HTTPError
 	return errors.As(err, &h) && h.Status == http.StatusForbidden
