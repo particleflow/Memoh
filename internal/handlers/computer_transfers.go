@@ -156,6 +156,9 @@ func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) ec
 			return deliveryHTTPError(err)
 		}
 		if err := h.revalidate(bound, p); err != nil {
+			if errors.Is(err, ErrTransferVerificationUnavailable) {
+				return deliveryHTTPError(err)
+			}
 			return deliveryHTTPError(computertask.ErrDenied)
 		}
 		if err := h.base.ReserveTransfer(bound); err != nil {
