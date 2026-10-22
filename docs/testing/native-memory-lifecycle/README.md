@@ -84,7 +84,10 @@ The original green GitHub run did not establish PG coverage: its ordinary test
 job had no DSN; the pgvector job only had `TEST_PGVECTOR_DSN`; the fencing job did
 not run the memory packages. All six affected PG tests therefore skipped. The
 existing fencing job now runs the whole memory suite after full migration, with
-an explicit nonempty-DSN check. Its verbose test log exposes the six real results.
+an explicit nonempty-DSN check and a JSON-result check requiring PASS events for
+all six named PG tests. A skip/missing result fails the step. The checker passed
+against the real 219-pass local log and rejected a control log where one required
+PASS was replaced with SKIP.
 No checks or assertions were disabled, and no schema migrations were changed.
 
 ## Actual application verification

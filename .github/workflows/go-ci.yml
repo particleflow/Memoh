@@ -238,7 +238,27 @@ jobs:
           # The fencing step above applies the server's full migration chain.
           # A missing DSN must fail this step instead of skipping PG fixtures.
           : "${TEST_POSTGRES_DSN:?Native memory tests require the migrated PostgreSQL database}"
-          go test -v -race -count=1 -timeout 90s ./internal/memory/...
+          set -o pipefail
+          go test -json -race -count=1 -timeout 90s ./internal/memory/... | tee memory-postgres-tests.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          required = {
+              "TestPostgresMemoryLifecycleDeleteHealthyRebuild",
+              "TestPostgresMemoryLifecycleDeleteOutageMustNotResurrect",
+              "TestPostgresMemoryLifecycleAuthoredMarkdownForget",
+              "TestPostgresMemoryLifecycleUnreadableProjection",
+              "TestPostgresUpsertNodeConcurrentlyUnionsSourceRefs",
+              "TestPostgresUpsertNodeRejectsConflictingBotScope",
+          }
+          events = [json.loads(line) for line in Path("memory-postgres-tests.jsonl").read_text().splitlines()]
+          passed = {event.get("Test") for event in events if event.get("Action") == "pass"}
+          missing = required - passed
+          if missing:
+              raise SystemExit("Required PostgreSQL tests did not PASS (missing, skipped or failed): " + ", ".join(sorted(missing)))
+          print("Verified PostgreSQL PASS: " + ", ".join(sorted(required)))
+          PY
       - name: Verify atomic connector disconnect and tenant isolation
         env:
           TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable

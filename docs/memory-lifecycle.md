@@ -67,9 +67,10 @@ must match that migrated schema and must not insert the obsolete column. The
 existing `wikistore` fixtures already match it and need no correction or overlay.
 
 The `Session Runtime (PostgreSQL fencing)` Go CI job bootstraps the official
-schema, then runs `go test -v -race -count=1 -timeout 90s ./internal/memory/...`
+schema, then runs `go test -json -race -count=1 -timeout 90s ./internal/memory/...`
 against the same disposable database. Its memory step explicitly rejects a
-missing `TEST_POSTGRES_DSN`, so PG tests cannot silently skip there. Running the
+missing `TEST_POSTGRES_DSN` and checks PASS events for all four lifecycle and
+both wikistore PG tests. Missing or skipped cases fail the step. Running the
 ordinary unit-test job without a database still skips the optional PG tests.
 
 No model credentials are required. These are deterministic lifecycle tests, not
