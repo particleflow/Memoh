@@ -39,8 +39,10 @@ establish that prior history survived.
 5. First use invokes the original `--session-id`; continuation invokes the
    original `--session` with the verified file path. The wrapper snapshots the
    entire pre-invocation file and verifies its prefix again after Pi exits.
-   Only a valid resulting file containing an assistant entry yields a new
-   checkpoint. The receipt records `before`, `after`, and optional evidence.
+   A supported resulting file containing a user or assistant entry can yield a
+   new checkpoint. Pi flushes on either role, so an unfinished first user turn
+   is valid persisted history; no assistant response or completion is implied.
+   The receipt records `before`, `after`, and optional evidence.
 
 The file locator is relative to `resolveBatchLayout`'s existing session directory.
 No absolute host paths or transcript bodies enter operation metadata. Files
@@ -48,6 +50,29 @@ larger than 64 MiB, unknown formats, extra session-directory files, symlinks, an
 ambiguous histories are conservatively unconfirmed. This is a conservative
 structural check plus byte continuity, not a complete duplicate of Pi's schema or
 context projection. Legitimate future formats need deliberate contract review.
+
+Pi's normal no-retained-entries compaction uses its own ID as
+`firstKeptEntryId`; retained-entry compaction must refer to an ancestor on that
+branch. Branch summaries require string `summary` and `fromId` fields. The
+official `fromId: "root"` sentinel and a new root branch are supported. An
+unavailable source reference (including an imported fork) is unconfirmed, not
+repaired. The last entry selects the reloaded branch; conversation entries only
+on an abandoned branch do not confirm a setup-only or empty-summary new root.
+Valid setup-only/empty active branches are unconfirmed, not corrupt. These
+checks follow the pinned `session-manager.ts` and its official
+[`session-context-edit.test.ts`](https://github.com/earendil-works/pi/blob/06a466935536f8c9bcacb2d5efc0fc021be1bdff/packages/coding-agent/test/session-context-edit.test.ts#L129)
+no-retained-entries compaction regression.
+
+`verified` means preserved file bytes and the supported branch structure at the
+check time. It does **not** mean all old messages remain in the current model
+context. Branch switching, compaction and context edits can legitimately omit
+or replace model-visible content while every old byte remains in the file. The
+host does not duplicate or certify Pi's full model-context projection.
+
+The current file limit is **64 MiB**. Exceeding it blocks continuation as a
+resource-limited `unconfirmed` result, not history corruption. There is no
+automatic truncation, rotation or reset and no promise of unlimited long-term
+session management; deliberate operator review is needed at that boundary.
 
 ## Reading results
 
@@ -82,10 +107,13 @@ Loss or rollback of the operation database itself is outside this guarantee.
 Synthetic tests execute the actual generated Bash/Node guard with a synthetic Pi
 process, including creation/resume, prefix damage, unreadable and missing files,
 missing directories, malformed entries, post-run loss, old records, restart,
-duplicates, latest-record selection and scoped PostgreSQL reads. They do not
+duplicates, legal self-referencing compaction, branch summaries/switches,
+user-only first turns, size limits, latest-record selection and scoped PostgreSQL reads. They do not
 prove actual Windows/Herdr/provider behavior or acceptance of a user's objective.
 No real PC/NAS or model provider is contacted. Official upstream source was
 inspected; a real official Pi/Windows runtime was not installed for this task.
+The existing checkout has no official Pi coding-agent/core runtime dependencies,
+so source-derived fixtures are not presented as an executed official Pi test.
 
 Likely overlap with concurrent native Agent tracing work is limited to
 `internal/computertask/service.go`, `observation.go`, `source.go`, the computer
@@ -98,6 +126,10 @@ The implementation does not copy or replace native Agent per-turn tracing.
   `internal/db/postgres/store`, and `internal/sessiontask`.
 - Isolated PostgreSQL integration passed for prior-history scope/latest-record
   selection and the existing concurrent durable-operation/CAS isolation test.
+  `scripts/test-pi-batch-history-postgres.sh` now requires the exact history test
+  to emit PASS, rejecting missing selection, SKIP and skipped/failed subtests.
+  Go CI appends this gate without removing any existing checks. Earlier green
+  CI runs did not select this new history test and do not prove it ran in CI.
 - golangci-lint 2.10.1 passed on changed packages with the fixed baseline filter.
 - Agent runtime/contextview boundary check passed.
 - Cloud server build, authenticated backend/Vite queries, and actual Chromium
@@ -108,6 +140,10 @@ The implementation does not copy or replace native Agent per-turn tracing.
   two container resolv.conf fallback tests observed mode 0600 instead of 0644;
   the bridgesvc cancellation test observed its synthetic child still alive.
   These failures were retained, not repaired or bypassed in this change.
+  A subsequent identical three-test comparison on 834 and the bea6 checkpoint
+  reproduced the two permission failures and the cancellation failure in both.
+  The seven media tests were not repeated; their baseline attribution remains
+  unconfirmed. Unchanged source files alone are not baseline test evidence.
 
 CI, synthetic receipts and UI screenshots do not constitute human QA, official
 Windows runtime compatibility testing, or business acceptance.

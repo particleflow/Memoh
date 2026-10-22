@@ -37,7 +37,8 @@ const file=args.includes('--session')?at('--session'):path.join(dir,'synthetic_'
 const now='2026-10-22T00:00:00.000Z';
 if(!fs.existsSync(file)) fs.writeFileSync(file,JSON.stringify({type:'session',version:3,id:at('--session-id'),timestamp:now,cwd:process.cwd()})+'\n');
 const entries=fs.readFileSync(file,'utf8').trim().split('\n').map(JSON.parse),last=entries.at(-1);
-fs.appendFileSync(file,JSON.stringify({type:'message',id:'entry'+entries.length,parentId:last.type==='session'?null:last.id,timestamp:now,message:{role:'assistant',content:[{type:'text',text:'synthetic'}]}})+'\n');
+const role=fs.existsSync(process.env.SYNTH_USER_ONLY)?'user':'assistant';
+fs.appendFileSync(file,JSON.stringify({type:'message',id:'entry'+entries.length,parentId:last.type==='session'?null:last.id,timestamp:now,message:{role,content:[{type:'text',text:'synthetic'}],timestamp:Date.parse(now)}})+'\n');
 if(fs.existsSync(process.env.SYNTH_DELETE)) fs.unlinkSync(file);
 `,
 	} {
@@ -56,7 +57,7 @@ if(fs.existsSync(process.env.SYNTH_DELETE)) fs.unlinkSync(file);
 		}
 		//nolint:gosec // Generated host envelope, isolated fixture filesystem.
 		cmd := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script)
-		cmd.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_CALLS=" + filepath.Join(dir, "calls"), "SYNTH_DELETE=" + filepath.Join(dir, "delete")}
+		cmd.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_CALLS=" + filepath.Join(dir, "calls"), "SYNTH_DELETE=" + filepath.Join(dir, "delete"), "SYNTH_USER_ONLY=" + filepath.Join(dir, "user-only")}
 		raw, err := cmd.CombinedOutput()
 		if err != nil {
 			return nil, fmt.Errorf("envelope: %w: %s", err, raw)

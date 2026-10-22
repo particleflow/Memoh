@@ -35,20 +35,48 @@ function inspect(file, expected) {
   if (!header || header.type !== 'session' || header.id !== context.id || typeof header.cwd !== 'string' || !header.cwd || !Number.isFinite(Date.parse(header.timestamp))) fail('corrupt');
   // Unknown/older formats require explicit review, never an implicit migration.
   if (header.version !== 3) fail('unconfirmed');
-  const ids = new Set();
-  let assistant = false;
+  const ids = new Map();
+  let conversation = false;
   for (const e of entries) {
     if (!e || typeof e.id !== 'string' || !e.id || ids.has(e.id) || !Number.isFinite(Date.parse(e.timestamp)) || (e.parentId !== null && !ids.has(e.parentId))) fail('corrupt');
     if (!types.has(e.type)) fail('unconfirmed');
     if (e.type === 'message') {
       if (!e.message || typeof e.message.role !== 'string' || !e.message.role) fail('corrupt');
-      assistant ||= e.message.role === 'assistant';
+      conversation ||= ['user', 'assistant'].includes(e.message.role);
     }
-    if (e.type === 'compaction' && (!ids.has(e.firstKeptEntryId) || typeof e.summary !== 'string')) fail('corrupt');
+    // appendCompaction(null) uses its own ID when no earlier entries are kept.
+    if (e.type === 'compaction') {
+      if (typeof e.summary !== 'string' || typeof e.firstKeptEntryId !== 'string' || !Number.isFinite(e.tokensBefore)) fail('corrupt');
+      if (e.firstKeptEntryId !== e.id) {
+        let kept = ids.get(e.parentId);
+        while (kept && kept.id !== e.firstKeptEntryId) kept = ids.get(kept.parentId);
+        if (!kept) fail('unconfirmed'); // Not a retained point on this branch.
+      }
+    }
+    if (e.type === 'branch_summary') {
+      if (typeof e.summary !== 'string' || typeof e.fromId !== 'string' || !e.fromId) fail('corrupt');
+      // branchWithSummary() uses "root" after resetLeaf(). A fork may refer to
+      // an omitted source branch: preserve it, but do not confirm that history.
+      if (e.fromId !== 'root' && !ids.has(e.fromId)) fail('unconfirmed');
+    }
     if (e.type === 'context_edit' && (!ids.has(e.targetId) || !(e.replacement === null || e.replacement && 'content' in e.replacement))) fail('corrupt');
-    ids.add(e.id);
+    ids.set(e.id, e);
   }
-  if (!assistant) fail('unconfirmed'); // Pi only flushes after an assistant message
+  // Pi flushes on the first user OR assistant message, including an unfinished
+  // first turn. A valid setup-only file is unconfirmed, not corrupt.
+  if (!conversation) fail('unconfirmed');
+  // On reload Pi selects the last entry, then follows parentId. Conversation
+  // entries on an abandoned branch alone cannot validate the selected branch.
+  let active = entries.at(-1), supportedBranch = false;
+  while (active) {
+    supportedBranch ||= active.type === 'message' && ['user', 'assistant'].includes(active.message.role)
+      || ['branch_summary', 'compaction'].includes(active.type) && !!active.summary;
+    active = ids.get(active.parentId);
+  }
+  if (!supportedBranch) fail('unconfirmed');
+  // This verifies file bytes and supported branch structure, not Pi's complete
+  // model-context projection: compaction, branching and context edits can omit
+  // old messages without removing their bytes from the session file.
   return { file, size: raw.length, sha256: sha(raw) };
 }
 function names() {

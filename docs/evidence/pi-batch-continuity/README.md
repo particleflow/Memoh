@@ -17,4 +17,9 @@ registry/read UI, not an end-to-end Windows execution or a user's business resul
 The actual generated Bash/Node guard and application dispatch behavior are tested
 separately with synthetic fixtures. This is agent evidence, not human QA.
 
+The backend was rebuilt and this interaction recaptured after the official
+compaction/branch-summary/user-only compatibility corrections. The screenshot
+still demonstrates only the synthetic missing-history task projection; it is
+not a visual test of those session formats or of official Pi on Windows.
+
 ![Synthetic missing-history operation](task-details.png)
