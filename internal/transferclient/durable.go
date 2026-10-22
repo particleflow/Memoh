@@ -191,10 +191,14 @@ func (q *DiskQueue) file(name string, flags int, mode os.FileMode) (*os.File, er
 }
 
 func (q *DiskQueue) physicalFile(name string, flags int, mode os.FileMode) (*os.File, error) {
-	if info, err := q.root.Lstat(name); err == nil && !info.Mode().IsRegular() {
+	return openPrivateFile(q.root, name, flags, mode)
+}
+
+func openPrivateFile(root *os.Root, name string, flags int, mode os.FileMode) (*os.File, error) {
+	if info, err := root.Lstat(name); err == nil && !info.Mode().IsRegular() {
 		return nil, ErrStore
 	}
-	f, err := openQueueFile(q.root, name, flags, mode)
+	f, err := openQueueFile(root, name, flags, mode)
 	if err != nil {
 		return nil, err
 	}
@@ -247,52 +251,63 @@ func (q *DiskQueue) load(id string) (QueueStatus, *os.File, error) {
 	if err != nil {
 		return record, nil, err
 	}
+	end, err := readJournalFrames(f, q.limits.JournalBytes, func(body []byte) error {
+		var next QueueStatus
+		dec := json.NewDecoder(bytes.NewReader(body))
+		dec.DisallowUnknownFields()
+		if dec.Decode(&next) != nil || !q.validRecord(next, id) {
+			return ErrStore
+		}
+		record = next
+		return nil
+	})
+	if err != nil || end == 0 {
+		_ = f.Close()
+		return record, nil, ErrStore
+	}
+	return record, f, nil
+}
+
+// readJournalFrames shares the queue's bounded checksum/fsync recovery format
+// with the same component's publication receipts. Only a torn final frame is
+// truncated. Callers decide whether an entirely uninitialized file is valid.
+func readJournalFrames(f *os.File, limit int64, consume func([]byte) error) (int64, error) {
+	if _, err := f.Seek(0, io.SeekStart); err != nil {
+		return 0, ErrStore
+	}
 	validEnd := int64(0)
 	for {
 		var head [36]byte
 		n, err := io.ReadFull(f, head[:])
-		if errors.Is(err, io.EOF) && n == 0 {
-			break
-		}
-		if errors.Is(err, io.ErrUnexpectedEOF) {
+		if errors.Is(err, io.EOF) && n == 0 || errors.Is(err, io.ErrUnexpectedEOF) {
 			break
 		}
 		if err != nil {
-			_ = f.Close()
-			return record, nil, ErrStore
+			return 0, ErrStore
 		}
 		size := int64(binary.BigEndian.Uint32(head[:4]))
-		if size < 1 || size > 16384 || validEnd+36+size > q.limits.JournalBytes {
-			_ = f.Close()
-			return record, nil, ErrStore
+		if size < 1 || size > 16384 || validEnd+36+size > limit {
+			return 0, ErrStore
 		}
 		body := make([]byte, int(size))
 		if _, err := io.ReadFull(f, body); errors.Is(err, io.ErrUnexpectedEOF) || errors.Is(err, io.EOF) {
 			break
 		} else if err != nil {
-			_ = f.Close()
-			return record, nil, ErrStore
+			return 0, ErrStore
 		}
 		sum := sha256.Sum256(body)
-		var next QueueStatus
-		dec := json.NewDecoder(bytes.NewReader(body))
-		dec.DisallowUnknownFields()
-		if !bytes.Equal(sum[:], head[4:]) || dec.Decode(&next) != nil || !q.validRecord(next, id) {
-			_ = f.Close()
-			return record, nil, ErrStore
+		if !bytes.Equal(sum[:], head[4:]) || consume(body) != nil {
+			return 0, ErrStore
 		}
-		record = next
 		validEnd += 36 + size
 	}
-	if validEnd == 0 || f.Truncate(validEnd) != nil || f.Sync() != nil {
-		_ = f.Close()
-		return record, nil, ErrStore
+	if f.Truncate(validEnd) != nil || f.Sync() != nil {
+		return 0, ErrStore
 	}
 	if _, err := f.Seek(validEnd, io.SeekStart); err != nil {
-		_ = f.Close()
-		return record, nil, ErrStore
+		return 0, ErrStore
 	}
-	return record, f, nil
+	return validEnd, nil
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
@@ -327,8 +342,15 @@ func (q *DiskQueue) save(f *os.File, r QueueStatus) error {
 	if err != nil || len(body) > 16384 {
 		return ErrStore
 	}
+	return appendJournalFrame(f, body, q.limits.JournalBytes)
+}
+
+func appendJournalFrame(f *os.File, body []byte, limit int64) error {
+	if len(body) < 1 || len(body) > 16384 {
+		return ErrStore
+	}
 	end, err := f.Seek(0, io.SeekEnd)
-	if err != nil || end+36+int64(len(body)) > q.limits.JournalBytes {
+	if err != nil || end+36+int64(len(body)) > limit {
 		return ErrCapacity
 	}
 	frame := make([]byte, 36+len(body))

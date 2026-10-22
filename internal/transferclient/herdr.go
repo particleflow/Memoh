@@ -29,6 +29,11 @@ func InvokeHerdr(ctx context.Context, getenv func(string) string, revision strin
 		return QueueStatus{}, err
 	}
 	defer func() { _ = q.Close() }()
+	return q.invokeHerdr(ctx, action, source, client, binding, now)
+}
+
+func (q *DiskQueue) invokeHerdr(ctx context.Context, action HerdrAction, source *os.File, client *Client, binding *AssociationBinding, now time.Time) (QueueStatus, error) {
+	var err error
 	id := action.DeliveryID
 	switch action.Kind {
 	case "enqueue-upload", "enqueue-download":
