@@ -47,13 +47,23 @@ func (s *DeliveryService) RecordTransferReady(ctx context.Context, receipt media
 // TransferReady returns the original proof under fresh request authorization.
 // Absent proof is not proof that a file transfer or commit never happened.
 func (s *DeliveryService) TransferReady(ctx context.Context) (media.Upload, bool, error) {
+	return s.transferReady(ctx, false)
+}
+
+// CommittedTransferReady is the existing ledger's terminal retirement authority.
+// It does not change the wire protocol or treat ready publication as delivery.
+func (s *DeliveryService) CommittedTransferReady(ctx context.Context) (media.Upload, bool, error) {
+	return s.transferReady(ctx, true)
+}
+
+func (s *DeliveryService) transferReady(ctx context.Context, committed bool) (media.Upload, bool, error) {
 	var receipt media.Upload
 	var found bool
 	err := s.transferMutation(ctx, func(e *deliveryEntry, exists bool) (bool, error) {
 		if !exists || e.Transfer == nil || e.Reference.Direction != "upload" {
 			return false, ErrDeliveryBinding
 		}
-		if e.Transfer.Ready != nil {
+		if e.Transfer.Ready != nil && (!committed || e.Outcome == "committed") {
 			receipt, found = *e.Transfer.Ready, true
 		}
 		return false, nil

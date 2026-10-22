@@ -56,3 +56,30 @@ func readMediaUpload(c echo.Context, store *media.UploadStore, owner, bot, id st
 	}
 	return receipt, nil
 }
+
+func finishTaskDelivery(c echo.Context, out computertask.DeliveryOutcome) error {
+	scope := taskTransfer(c)
+	if scope == nil {
+		return nil
+	}
+	if err := checkTaskTransferResponse(c); err != nil {
+		return err
+	}
+	if out.Outcome != "committed" || scope.principal.Reference.Direction != "upload" {
+		return nil
+	}
+	proof, found, err := scope.handler.base.CommittedTransferReady(c.Request().Context())
+	if err != nil {
+		return deliveryHTTPError(err)
+	}
+	if !found {
+		// A legacy committed decision is still authoritative for association,
+		// but does not invent missing receipt evidence for filesystem cleanup.
+		return nil
+	}
+	p := scope.principal
+	if err := scope.handler.files.mediaService.Uploads().RetireTaskReceipt(c.Request().Context(), p.Identity.Binding.UserID, p.Identity.Binding.BotID, proof); err != nil {
+		return resumableError(err)
+	}
+	return checkTaskTransferResponse(c)
+}

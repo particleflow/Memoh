@@ -1,82 +1,98 @@
-# Task upload progress leases
+# Task upload receipt lifecycle
 
-The generic `/bots/{bot_id}/media/uploads` contract remains the fixed 24-hour
-receipt lifetime documented in [resumable uploads](resumable-uploads.md).
-Expired ready receipt collection does not delete the published original. A
-receipt is temporary reconciliation evidence, not the original's identity.
+The generic `/bots/{bot_id}/media/uploads` contract retains its fixed 24-hour
+receipt lifetime from [resumable uploads](resumable-uploads.md). Generic expired
+ready receipt GC never deletes the published original. Task transfer routes
+have a separate retention policy under the same UploadStore, root and quotas.
 
-New uploads through the verified `/internal/computer-transfers` task adapter use
-`UploadStore.CreateTransfer` after the existing operation authorization and
-receipt-creation claim. The private receipt records `progress_lease: 1`; no client
-flag, new endpoint, credential, filesystem root or registry is introduced. The
-method itself is not an authorization mechanism. Ordinary Create and receipts
-without this field retain the old behavior, including existing task receipts.
-No receipt is recreated or silently upgraded.
+## Task evidence and progress
 
-For new task receipts:
+Authorized task Create uses `UploadStore.CreateTransfer`. New private receipts
+record `progress_lease: 2`. The public Upload response is unchanged; no new client
+flag, credential, endpoint, table or root is introduced. Only positive verified
+append progress renews `expires_at`, atomically with the synced offset. First
+Complete also renews it; GET, rejected chunks, failed or repeated Complete and
+cancellation do not. The timestamp does not move backwards.
 
-- Creation reserves the same bounded capacity and sets an initial 24-hour deadline.
-- A verified positive-length append renews the deadline to at least 24 hours from
-  accepted progress. Offset and deadline are saved in the same atomic receipt,
-  after payload fsync. A failed/unknown save is reconciled by the original receipt
-  ID; a visible rename is not acknowledged before directory-sync recovery.
-- First successful original publication changes the receipt to ready and provides
-  at least another 24 hours for completion-response reconciliation and association.
-  Replayed complete does not renew it. This does not prove NAS ledger commitment.
-- GET, rejected/replayed chunks, incomplete/failed completion, canceled requests
-  and cancellation do not renew. The original quota and maximum file size still
-  apply. The deadline never moves backwards when the server clock moves backwards.
-- At the persisted deadline, idle receipts are still inaccessible and collectible.
-  Startup, hourly cleanup and pre-Create cleanup use the same receipt lock and
-  Sweep policy. Busy appends/completions hold that lock until the durable update.
+For task receipts the deadline is progress metadata, **not deletion authority**.
+Startup, hourly and pre-Create Sweep retain uploading, ready and canceled task
+records, including idle/unknown outcomes beyond the deadline. Resume uses the
+original ID and fresh current authorization. An active writer holds the existing
+receipt lock. Prior `progress_lease: 1` records are upgraded to 2 under that lock
+by the same Sweep path without changing offset, deadline or payload. Records
+without a policy remain generic legacy records; their history cannot safely be
+inferred from a hash or filename. Missing legacy evidence is not recreated.
 
-Progress can continue beyond the original creation deadline while each accepted
-chunk arrives before its current inactivity deadline. This is not unlimited
-offline resume: a 24-hour idle gap still expires. There is no total wall-clock
-duration cap on an upload making bounded, positive byte progress; active/session,
-owner and byte quotas remain enforced. Clock jumps forward can still expire an
-idle receipt; monotonic time cannot provide a cross-restart timestamp guarantee.
+The original 128 receipt, 16 active, four per-owner and byte/file/chunk limits
+remain. Unknown or unconfirmed records can cause explicit backpressure. They
+are never evicted to admit new work. Terminal payload leftovers after a crash
+still count toward reserved bytes until safely removed.
 
-## Compatibility and remaining lifecycle work
+## Committed retirement
 
-The public Upload JSON is unchanged. Existing clients already replace their
-cached `expires_at` from each authoritative response and retain the same upload,
-delivery and operation IDs. Existing receipts are not automatically adopted into
-the new policy. Unknown policy versions fail explicitly and are not swept.
+The existing task Commit/Resolve response path obtains
+`CommittedTransferReady` from the authorized operation CAS/ledger. This must be
+the exact server-captured ready proof **and** a durable committed association.
+Ready alone, client assertions, matching original bytes, canceled or pending
+outcomes do not authorize retirement. A committed legacy entry without proof
+remains queryable, but cannot authorize filesystem cleanup.
 
-All writers sharing the originals root must run the same lease-aware version.
-An old writer does not understand the new private policy field and could drop it
-on mutation; mixed-version writing or downgrade with active leased receipts is
-unsupported. Drain such receipts before rollback. This change requires no SQL
-migration and does not move roots, alter production configuration or enable
-device authentication.
+`UploadStore.RetireTaskReceipt` is an internal trusted adapter port, not an HTTP
+proof-submission API. It acquires admission then the permanent receipt lock,
+checks owner/Bot, upload ID, ready state, size, offset, hash, MIME and timestamp,
+then removes only that receipt's temporary payload/temp/JSON, metadata last,
+and syncs the directory. It never touches originals, operation ledger or locks.
+The 65 existing lock stripes remain bounded and are never removed, preventing
+old handles from creating a second lock. In-flight Append/Complete blocks
+retirement; later stale writes find no receipt and cannot resurrect it.
 
-This increment does **not** solve the 128 unexpired NAS receipt limit, retained
-Windows receipt/publication limits, unknown creation after response loss, or
-ready receipts waiting longer than the new reconciliation window for a committed
-NAS association. It does not pin all ready receipts or erase unknown/blocked
-evidence to make capacity. The next retirement step must first persist the exact
-ready proof in the existing authorized operation ledger, then remove only its
-temporary receipt with replay resolving from that durable proof. It must cover
-proof/deletion crash boundaries before enabling automatic turnover.
+Filesystem retirement follows DB commitment. A failed unlink/sync is an error,
+not an acknowledged cleanup; the original authorized Resolve retries it. If
+metadata is already absent, unexplained payload/temp files cause failure;
+otherwise a fresh directory sync reconciles a lost final acknowledgment.
+Corruption and owner/ref mismatch fail without deleting evidence. Response-time
+identity revalidation still applies. The authorization snapshot is not a lease
+that freezes grants throughout filesystem IO; a later revoke denies subsequent
+requests even if safe cleanup of an already committed receipt occurred.
 
-## Evidence scope
+After retirement, task Get, repeated Create/Complete and Commit resolve the
+original exact ID/ref from the existing ledger proof. They do not create a new
+receipt or business operation. Local unconfirmed snapshots remain protected by
+the separate queue rules. Published originals are not pinned by this protocol.
 
-Synthetic virtual-clock tests reproduce the original 23-hour-progress/25-hour
-collection failure and verify all three cleanup call paths, including reopening
-the file store for startup. These exercise the shared Sweep operation; they do
-not claim to start the production FX lifecycle or wait 24 real hours. Failure
-tests cover rejected activity, idle expiry, payload/journal fsync failure,
-unknown post-rename acknowledgement, backward clock movement, legacy expiry and
-expired ready collection with intact original bytes/hash. A real HTTPS task
-handler fixture checks that authorized Create selects the progress policy while
-receipt isolation and revocation remain enforced. Credentials and data are
-synthetic; these are not physical power-cut or real PC-to-NAS acceptance results.
+## Upgrade and scope
 
-A deterministic two-store concurrency regression pauses Append while it holds
-the receipt's OS lock, advances an atomic virtual clock past the old deadline,
-and runs Sweep through the second store. Cleanup must skip the locked receipt.
-After release, accepted progress preserves the same receipt/offset and new
-deadline; a rejected hash supplies no progress and the next Sweep collects the
-expired staging. Both cases run with the race detector. This tests the lock and
-deadline boundary, separately from the all-package race result.
+Run all writers on the same version. Older lease-aware readers reject policy 2;
+older writers that predate policies are unsupported on this root. Do not mix
+writers or downgrade while task-held evidence remains. No SQL migration,
+production directory/configuration change or authentication enablement occurs.
+Rollback requires preserving the ledger and raw receipts, not rewriting policy
+numbers to let an old sweeper discard them.
+
+This NAS increment removes completed temporary receipt pressure, not all scale
+limits. Windows terminal journal history (1024), native publication object/byte
+capacity, 1–16 producer files, unknown Create and original/ledger storage growth
+remain distinct limits. Removing user-owned published objects or unknown
+records is not a capacity solution. Large-file throughput, many-file long runs
+and physical power loss are separate acceptance work.
+
+## Verification
+
+Storage tests cycle 391 tiny synthetic files across store reopenings, check
+bounded staging entries/bytes, original contents, repeated retirement and stale
+write rejection. Separate fixtures fill 128 unconfirmed ready receipts and
+confirm the 129th remains rejected after TTL, without eviction. Deterministic
+Append/Sweep/retirement lock tests cover crossing the deadline while a writer is
+paused. Owner/hash mismatch, corrupted metadata, ENOSPC and lost directory-sync
+acknowledgment fail safely. Generic TTL and original hash checks remain covered.
+
+The formal-migration PostgreSQL integration uses the real stable device registry,
+HTTPS task handlers and async validator across two 12-file batches by default.
+`MEMOH_TEST_RECEIPT_TURNOVER_EXTENDED=1` runs twelve 12-file batches under an
+explicit three-minute test timeout; this is a fixture switch, not product
+configuration. It checks
+original-ID Create/Complete/Commit replay after retirement, server/store restart,
+lost Complete acknowledgment, revocation, cancellation and corrupted cleanup
+with an exact synthetic backup. These tests do not connect to a real PC/NAS or
+perform physical power cuts. Native Windows and CLI evidence is reported
+separately; fixture composition is not production acceptance.

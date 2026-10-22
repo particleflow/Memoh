@@ -98,12 +98,12 @@ func TestTransferUploadAppendCrossesExpiryWithConcurrentSweep(t *testing.T) {
 					t.Fatal("durable progress lost after releasing lock", got, err)
 				}
 			} else {
-				if !errors.Is(err, ErrUploadNotFound) {
-					t.Fatal("failed append extended idle expiry", got, err)
+				if err != nil || got.Offset != 0 || !got.ExpiresAt.Equal(u.ExpiresAt) {
+					t.Fatal("rejected append changed progress", got, err)
 				}
 				for _, suffix := range []string{".json", ".data"} {
-					if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+suffix)); !errors.Is(err, os.ErrNotExist) {
-						t.Fatal("expired idle upload not collected", suffix, err)
+					if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+suffix)); err != nil {
+						t.Fatal("unknown evidence evicted", suffix, err)
 					}
 				}
 			}
