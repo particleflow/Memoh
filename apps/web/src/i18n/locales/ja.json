@@ -1019,6 +1019,9 @@
   },
   "chat": {
     "delegations": {
+      "retryDelivery": "結果の配信を再試行",
+      "deliveryResponse": "配信リクエストの応答",
+      "deliveryRequestUnconfirmed": "配信リクエストの結果を確認できませんでした。再読み込みして状態を確認してください。",
       "title": "専門 Bot への委任",
       "executionGroup": "実行タスク",
       "description": "この会話で許可された Bot への委任です。実行と結果の配信は別の状態で表示します。",

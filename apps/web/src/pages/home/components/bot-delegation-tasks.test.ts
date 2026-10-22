@@ -7,6 +7,7 @@ import type { BotdelegationView } from '@memohai/sdk'
 import en from '@/i18n/locales/en.json'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
 import { useBotDelegations } from '../composables/useBotDelegations'
+import type { BotDelegationDeliveryAction } from '../composables/useBotDelegationDelivery'
 import type { TaskScope } from '../composables/useSessionTasks'
 
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn() }))
@@ -27,7 +28,7 @@ function mountComponent(component: Component, props?: Record<string, unknown>) {
   app.use(createI18n({ legacy: false, locale: 'en', messages: { en } }))
   app.mount(root); mounts.push({ app, root }); return root
 }
-function mount(overrides: { items?: BotdelegationView[], detail?: BotdelegationView, selected?: string, error?: unknown, nextCursor?: string } = {}) {
+function mount(overrides: { items?: BotdelegationView[], detail?: BotdelegationView, selected?: string, error?: unknown, nextCursor?: string, deliveryAction?: BotDelegationDeliveryAction } = {}) {
   return mountComponent(BotDelegationTasks, { items: [], loading: false, ...overrides })
 }
 beforeEach(() => {
@@ -42,6 +43,49 @@ afterEach(() => {
 })
 
 describe('specialist handoff content and states', () => {
+  it('offers delivery retry only to a capable host and respects its pending state', async () => {
+    const retry = vi.fn()
+    const action = ref<BotDelegationDeliveryAction>({ pending: false, disabled: false, retry })
+    const root = mountComponent({ setup: () => () => h(BotDelegationTasks, {
+      items: [], loading: false, selected: task.delegation_id,
+      detail: { ...task, delivery_state: 'unknown' }, deliveryAction: action.value,
+    }) })
+    const button = root.querySelector('button')!
+    expect(button.textContent).toContain(en.chat.delegations.retryDelivery)
+    expect(button.getAttribute('aria-label')).toBe(en.chat.delegations.retryDelivery)
+    button.click(); expect(retry).toHaveBeenCalledTimes(1)
+    action.value = { ...action.value, pending: true }; await nextTick()
+    expect(button.disabled).toBe(true)
+    expect(button.getAttribute('aria-label')).toBe(en.chat.delegations.retryDelivery)
+    button.click(); expect(retry).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps a terminal task with uncertain delivery read-only when its host has no action capability', () => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, delivery_state: 'unknown' } })
+    expect(root.textContent).toContain('Delivery unknown')
+    expect(root.querySelectorAll('button')).toHaveLength(0)
+  })
+
+  it.each(['accepted', 'running', 'unknown'] as const)('hides delivery retry for execution %s even with an action capability', (state) => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, state, delivery_state: 'unknown' }, deliveryAction: { pending: false, disabled: false, retry: vi.fn() } })
+    expect(root.querySelectorAll('button')).toHaveLength(0)
+  })
+
+  it.each([401, 403, 404])('localizes a %s action error without rendering private diagnostics', (status) => {
+    const root = mount({ selected: task.delegation_id, detail: task, deliveryAction: {
+      pending: false, disabled: true, error: { status, code: 'http.forbidden', detail: 'PRIVATE server body', message: 'PRIVATE message' }, retry: vi.fn(),
+    } })
+    expect(root.textContent).not.toContain('PRIVATE')
+    expect(root.textContent).toContain(en.errors.http.forbidden)
+  })
+
+  it('never turns an accepted delivery response into confirmation that the supervisor processed it', () => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, delivery_state: 'unknown' }, deliveryAction: { pending: false, disabled: true, response: task, retry: vi.fn() } })
+    expect(root.textContent).toContain('Delivery request response · Accepted')
+    expect(root.textContent).toContain(en.chat.delegations.deliveryAccepted)
+    expect(root.querySelector('button')?.disabled).toBe(true)
+  })
+
   it('renders only plain final text, keeps execution and delivery separate, and exposes no attachment fallback', () => {
     const root = mount({ selected: task.delegation_id, detail: task })
     expect(root.textContent).toContain('Execution completed')

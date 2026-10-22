@@ -1022,6 +1022,9 @@
   },
   "chat": {
     "delegations": {
+      "retryDelivery": "Retry result delivery",
+      "deliveryResponse": "Delivery request response",
+      "deliveryRequestUnconfirmed": "The delivery request could not be confirmed. Reload to check its state.",
       "title": "Specialist Bot handoffs",
       "executionGroup": "Execution tasks",
       "description": "Authorized Bot handoffs from this conversation. Execution and return delivery have separate states.",

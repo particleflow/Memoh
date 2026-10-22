@@ -83,6 +83,11 @@ export function useBotDelegations(scope: Ref<TaskScope | null>, visible: Ref<boo
     }
   }
 
+  function reload() {
+    invalidate()
+    return refresh()
+  }
+
   function openTask(task: BotdelegationView) {
     if (selected.value === task.delegation_id) return
     invalidate()
@@ -109,5 +114,5 @@ export function useBotDelegations(scope: Ref<TaskScope | null>, visible: Ref<boo
   }, { immediate: true, flush: 'sync' })
   const timer = setInterval(() => { if (!pausePolling(error.value)) void refresh() }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
-  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh }
+  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, reload }
 }
