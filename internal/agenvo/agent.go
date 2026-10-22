@@ -14,13 +14,14 @@ var ErrAgentNotConfigured = errors.New("this computer has no configured Pi provi
 // AgentProgress is a private receipt, persisted before each mutating call.
 // These native references are not accepted from a model or public MCP client.
 type AgentProgress struct {
-	Phase              string  `json:"phase"`
-	Name               string  `json:"name"`
-	WorkspaceID        string  `json:"workspace_id"`
-	PaneID             string  `json:"pane_id"`
-	TerminalID         string  `json:"terminal_id"`
-	BaselineCompletion *uint64 `json:"baseline_completion,omitempty"`
-	PromptSubmitted    bool    `json:"prompt_submitted"`
+	Phase              string            `json:"phase"`
+	Name               string            `json:"name"`
+	WorkspaceID        string            `json:"workspace_id"`
+	PaneID             string            `json:"pane_id"`
+	TerminalID         string            `json:"terminal_id"`
+	BaselineCompletion *uint64           `json:"baseline_completion,omitempty"`
+	PromptSubmitted    bool              `json:"prompt_submitted"`
+	AgentSession       *AgentSessionInfo `json:"agent_session,omitempty"`
 }
 
 type AgentObservation struct {
@@ -36,15 +37,16 @@ type AgentObservation struct {
 }
 
 type agentInfo struct {
-	Name             string  `json:"name"`
-	Agent            string  `json:"agent"`
-	WorkspaceID      string  `json:"workspace_id"`
-	PaneID           string  `json:"pane_id"`
-	TerminalID       string  `json:"terminal_id"`
-	Status           string  `json:"agent_status"`
-	InteractiveReady bool    `json:"interactive_ready"`
-	LaunchPending    bool    `json:"launch_pending"`
-	Completion       *uint64 `json:"completion_seq"`
+	Name             string            `json:"name"`
+	Agent            string            `json:"agent"`
+	WorkspaceID      string            `json:"workspace_id"`
+	PaneID           string            `json:"pane_id"`
+	TerminalID       string            `json:"terminal_id"`
+	Status           string            `json:"agent_status"`
+	InteractiveReady bool              `json:"interactive_ready"`
+	LaunchPending    bool              `json:"launch_pending"`
+	Completion       *uint64           `json:"completion_seq"`
+	AgentSession     *AgentSessionInfo `json:"agent_session,omitempty"`
 }
 
 func (c *Client) agentInfo(ctx context.Context, scope Scope, target Target, p AgentProgress) (agentInfo, bool, error) {
@@ -153,6 +155,11 @@ func (s *Service) SubmitAgent(ctx context.Context, scope Scope, task, workDir st
 		}
 		if !starting && a.InteractiveReady {
 			p.BaselineCompletion = a.Completion
+			// This is optional official metadata, not a native generation or
+			// proof of uninterrupted Pi conversation continuity.
+			if a.AgentSession.Valid() {
+				p.AgentSession = a.AgentSession
+			}
 			break
 		}
 		timer := time.NewTimer(250 * time.Millisecond)
