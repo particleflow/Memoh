@@ -241,6 +241,15 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 		}
 	}
 	if p.Stage == "copy" {
+		if source == nil {
+			return ErrSnapshot
+		}
+		stable, release, err := guardQueueSource(source)
+		if err != nil {
+			return err
+		}
+		defer release()
+		source = stable
 		if err := copyAdmission(ctx, source, data, tree, progress, r.Job, &p, h); err != nil {
 			return err
 		}

@@ -35,6 +35,7 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	if job.Spec.SizeBytes > q.limits.Bytes {
 		return ErrCapacity
 	}
+
 	global, err := q.lock("admission")
 	if err != nil {
 		return err
@@ -47,7 +48,7 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	defer unlockClose(lock)
 	r := QueueStatus{Version: 2, Direction: direction, Job: job, AssociationState: AssociationIdle, AdmissionVersion: 1}
 	var journal *os.File
-	if _, err := q.root.Lstat(job.DeliveryID + ".journal"); err == nil {
+	if _, err := q.root.Lstat(queueName(job.DeliveryID + ".journal")); err == nil {
 		var existing QueueStatus
 		existing, journal, err = q.load(job.DeliveryID)
 		if err != nil {
@@ -116,7 +117,7 @@ func (q *DiskQueue) capacity(add int64) error {
 		if !validID(id) {
 			return ErrStore
 		}
-		f, err := q.file(e.Name(), os.O_RDONLY, 0o600)
+		f, err := q.physicalFile(e.Name(), os.O_RDONLY, 0o600)
 		if err != nil {
 			return err
 		}
@@ -132,7 +133,7 @@ func (q *DiskQueue) capacity(add int64) error {
 		_ = f.Close()
 		sum := sha256.Sum256(body)
 		var r QueueStatus
-		if err != nil || !bytes.Equal(sum[:], head[4:]) || json.Unmarshal(body, &r) != nil || !q.validRecord(r, id) {
+		if err != nil || !bytes.Equal(sum[:], head[4:]) || json.Unmarshal(body, &r) != nil || !q.validRecord(r, r.Job.DeliveryID) || queueName(r.Job.DeliveryID+".journal") != e.Name() {
 			return ErrStore
 		}
 		count++
@@ -360,21 +361,21 @@ func (q *DiskQueue) Retire(id string) error {
 	if r.Direction == "download" {
 		suffix = ".part"
 	}
-	if err := q.root.Remove(id + suffix); err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err := removeQueueFile(q.root, queueName(id+suffix)); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return ErrStore
 	}
 	if r.Direction == "upload" {
-		if err := q.root.Remove(id + ".tree"); err != nil && !errors.Is(err, os.ErrNotExist) {
+		if err := removeQueueFile(q.root, queueName(id+".tree")); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return ErrStore
 		}
 	}
-	if err := q.root.Remove(id + ".admission"); err != nil && !errors.Is(err, os.ErrNotExist) {
+	if err := removeQueueFile(q.root, queueName(id+".admission")); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return ErrStore
 	}
 	if syncQueueDir(q.root) != nil {
 		return ErrStore
 	}
-	if q.root.Remove(id+".journal") != nil || syncQueueDir(q.root) != nil {
+	if removeQueueFile(q.root, queueName(id+".journal")) != nil || syncQueueDir(q.root) != nil {
 		return ErrStore
 	}
 	return nil
