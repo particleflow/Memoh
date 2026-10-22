@@ -152,7 +152,7 @@ func (q *Queries) GetComputerOperation(ctx context.Context, arg GetComputerOpera
 }
 
 const getOwnedAgenvoRuntime = `-- name: GetOwnedAgenvoRuntime :one
-SELECT id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
+SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
 AND id=$1 AND user_id=$2 AND provider='agenvo' AND revoked_at IS NULL
 `
 
@@ -165,6 +165,10 @@ func (q *Queries) GetOwnedAgenvoRuntime(ctx context.Context, arg GetOwnedAgenvoR
 	row := q.db.QueryRow(ctx, getOwnedAgenvoRuntime, arg.ID, arg.UserID)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -222,7 +226,7 @@ const updateAgenvoRuntimeConfig = `-- name: UpdateAgenvoRuntimeConfig :one
 UPDATE user_runtimes SET provider_config=$1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$2 AND user_id=$3
 AND provider='agenvo' AND revoked_at IS NULL AND provider_config=$4
-RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type UpdateAgenvoRuntimeConfigParams struct {
@@ -241,6 +245,10 @@ func (q *Queries) UpdateAgenvoRuntimeConfig(ctx context.Context, arg UpdateAgenv
 	)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,

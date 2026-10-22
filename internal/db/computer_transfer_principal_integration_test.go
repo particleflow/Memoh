@@ -13,8 +13,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/labstack/echo/v4"
-
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
@@ -23,6 +21,7 @@ import (
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/transferclient"
+	"github.com/felinics/memoh/internal/userruntime"
 )
 
 // This is the only synthetic authentication port in the combined tests. No
@@ -91,7 +90,7 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 	t.Helper()
 	log := slog.New(slog.DiscardHandler)
 	p := pgTransferPrincipal(id, "principal-upload", ref)
-	verifier := &pgTransferVerifier{principal: p, device: pgDeviceIdentity(ctx, t, store, id)}
+	verifier := newRegisteredTransferVerifier(ctx, t, store, id)
 	base := computertask.NewPostgresDeliveryService(store, assets)
 	messages := handlers.NewMessageHandler(log, nil, nil, nil, nil)
 	messages.SetMediaService(assets)
@@ -100,9 +99,7 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 		t.Fatal(err)
 	}
 	defer h.Close()
-	e := echo.New()
-	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log) //nolint:contextcheck // Requests supply their own contexts.
-	h.Register(e)                                        //nolint:contextcheck // Registers callbacks; each HTTP request supplies its own context.
+	e := server.NewServer(log, ":0", "isolated-account-secret", h) //nolint:contextcheck // Requests supply their own contexts.
 	var lose atomic.Bool
 	https := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/commit") && lose.Swap(false) {
@@ -114,7 +111,7 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 	}))
 	defer https.Close()
 	job := transferclient.Job{Version: 1, DeliveryID: p.DeliveryID, OperationID: id.OperationID, BotID: id.Binding.BotID, SnapshotID: "fixture", LocatorRevision: "fixture", Phase: "queued", Spec: transferclient.Spec{SizeBytes: ref.SizeBytes, SHA256: ref.ContentHash, Mime: ref.Mime}}
-	client, err := transferclient.NewDeviceTask(https.URL, job, "upload", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+	client, err := transferclient.NewDeviceTask(https.URL, job, "upload", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer " + verifier.token, nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +170,7 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 	// reference/receipt. Recreate that client to model a stopped finite command.
 	job.DeliveryID = "device-second-upload"
 	for range 2 {
-		second, err := transferclient.NewDeviceTask(https.URL, job, "upload", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+		second, err := transferclient.NewDeviceTask(https.URL, job, "upload", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer " + verifier.token, nil })
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -191,8 +188,59 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 		}
 		second.CloseIdleConnections()
 	}
-	verifier.revoked.Store(true)
-	if _, err := binding.Resolve(ctx, "upload", file, false); !errors.As(err, &status) || status.Status != 403 {
+	verifier.revoke(ctx, t)
+	if _, err := binding.Resolve(ctx, "upload", file, false); !errors.As(err, &status) || status.Status != 401 {
 		t.Fatal("revoked principal resolved outcome", err)
+	}
+}
+
+// Uses the real registry verifier. Only credentials and database are synthetic.
+// The notification observes denial; it cannot override authentication results.
+type registeredTransferVerifier struct {
+	handlers.RuntimeDeviceTransferVerifier
+	token          string
+	device         computertask.VerifiedTransferDevice
+	owner, runtime string
+	denied         chan struct{}
+}
+
+func newRegisteredTransferVerifier(ctx context.Context, t *testing.T, store *postgresstore.Store, id computertask.DeliveryIdentity) *registeredTransferVerifier {
+	t.Helper()
+	mount, err := store.GetMount(ctx, id.Binding.BotID, id.Binding.TargetID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	credentials := userruntime.NewTransferCredentials(store, true)
+	status, err := credentials.Status(ctx, mount.RuntimeUserID, mount.RuntimeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	enrollment, err := credentials.Enroll(ctx, mount.RuntimeUserID, mount.RuntimeID, userruntime.ChangeTransferCredentialRequest{ExpectedID: status.CredentialID})
+	if err != nil {
+		t.Fatal(err)
+	}
+	v := &registeredTransferVerifier{RuntimeDeviceTransferVerifier: handlers.RuntimeDeviceTransferVerifier{Credentials: credentials}, token: enrollment.Credential, owner: mount.RuntimeUserID, runtime: mount.RuntimeID, denied: make(chan struct{}, 1)}
+	v.device, err = v.VerifyDevice(ctx, v.token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return v
+}
+
+func (v *registeredTransferVerifier) RevalidateDevice(ctx context.Context, d computertask.VerifiedTransferDevice) error {
+	err := v.RuntimeDeviceTransferVerifier.RevalidateDevice(ctx, d)
+	if err != nil {
+		select {
+		case v.denied <- struct{}{}:
+		default:
+		}
+	}
+	return err
+}
+
+func (v *registeredTransferVerifier) revoke(ctx context.Context, t *testing.T) {
+	t.Helper()
+	if err := v.Credentials.Revoke(ctx, v.owner, v.runtime, v.device.CredentialID); err != nil {
+		t.Fatal(err)
 	}
 }

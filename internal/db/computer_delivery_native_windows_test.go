@@ -21,7 +21,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/labstack/echo/v4"
 	"golang.org/x/sys/windows"
 
 	"github.com/felinics/memoh/internal/agenvo"
@@ -186,7 +185,7 @@ func (p *nativeLostPublication) Publish(ctx context.Context, ref transferclient.
 
 // One Windows process executes the actual NTFS destination, HTTPS handlers,
 // finite asynchronous verifier and PostgreSQL transactions together. Only the
-// incoming execution authenticator is synthetic. Originals are preseeded fixture
+// credentials and TLS trust are synthetic; the device verifier is real. Originals are preseeded fixture
 // bytes: Unix-only upload admission is intentionally not exercised on Windows.
 func TestWindowsNativePostgresDelivery(t *testing.T) {
 	for _, revoke := range []bool{false, true} {
@@ -212,9 +211,7 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	assets.SetRequirePersistence(true)
 	log := slog.New(slog.DiscardHandler)
 	gated := &pgGatedDeliveryAssets{Service: assets, started: make(chan struct{}, 8), release: make(chan struct{})}
-	request := computertask.DeliveryRequest{Version: 1, Direction: "download", ContentHash: hash, SizeBytes: int64(len(data)), Mime: "text/plain"}
-	principal := pgTransferPrincipal(id, "native-pg-download", request)
-	verifier := &pgTransferVerifier{principal: principal, device: pgDeviceIdentity(ctx, t, store, id), denied: make(chan struct{}, 1)}
+	verifier := newRegisteredTransferVerifier(ctx, t, store, id)
 	messages := handlers.NewMessageHandler(log, nil, nil, nil, nil)
 	messages.SetMediaService(assets)
 	h, err := handlers.NewDeviceComputerTransferHandler(ctx, computertask.NewPostgresDeliveryService(store, gated), messages, verifier, log)
@@ -222,9 +219,7 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 		t.Fatal(err)
 	}
 	defer h.Close()
-	e := echo.New()
-	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log) //nolint:contextcheck // Requests provide their own contexts.
-	h.Register(e)                                        //nolint:contextcheck // Registers callbacks; each HTTP request supplies its own context.
+	e := server.NewServer(log, ":0", "isolated-account-secret", h) //nolint:contextcheck // Requests supply their own contexts.
 	var drop atomic.Bool
 	https := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/commit") && drop.Swap(false) {
@@ -238,8 +233,8 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 		e.ServeHTTP(w, r)
 	}))
 	defer https.Close()
-	deviceJob := transferclient.Job{Version: 1, DeliveryID: principal.DeliveryID, BotID: id.Binding.BotID, OperationID: id.OperationID, SnapshotID: principal.DeliveryID, LocatorRevision: "native-pg-fixture-v1", Phase: "queued", Spec: transferclient.Spec{SizeBytes: int64(len(data)), SHA256: hash, Mime: "text/plain"}}
-	client, err := transferclient.NewDeviceTask(https.URL, deviceJob, "download", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+	deviceJob := transferclient.Job{Version: 1, DeliveryID: "native-pg-download", BotID: id.Binding.BotID, OperationID: id.OperationID, SnapshotID: "native-pg-download", LocatorRevision: "native-pg-fixture-v1", Phase: "queued", Spec: transferclient.Spec{SizeBytes: int64(len(data)), SHA256: hash, Mime: "text/plain"}}
+	client, err := transferclient.NewDeviceTask(https.URL, deviceJob, "download", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer " + verifier.token, nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -324,7 +319,9 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	if _, err := store.SaveComputerOperation(ctx, current); err != nil {
 		t.Fatal(err)
 	}
-	verifier.revoked.Store(revoke)
+	if revoke {
+		verifier.revoke(ctx, t)
+	}
 	close(gated.release)
 	if revoke {
 		select {
@@ -377,13 +374,13 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	job.DeliveryID, job.SnapshotID = "native-second-download", "native-second-download"
 	ref.DeliveryID = job.DeliveryID
 	// Run the actual configured finite command boundary, reopening all native
-	// handles each invocation. Only TLS trust and device verifier are fixtures.
+	// handles each invocation. TLS trust is isolated; device authentication uses the real registry.
 	_ = publication.Close()
 	_ = queue.Close()
 	configRoot := nativeDeliveryPrivateRoot(t)
 	configJSON, _ := json.Marshal(map[string]any{"version": 1, "origin": https.URL, "source_root": ""})
 	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "transfer.json"), configJSON)
-	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "device.credential"), []byte("isolated-transfer-fixture"))
+	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "device.credential"), []byte(verifier.token))
 	getenv := func(key string) string {
 		if key == "HERDR_PLUGIN_CONFIG_DIR" {
 			return configRoot

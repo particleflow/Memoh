@@ -13,8 +13,9 @@ import (
 // no shared secret configured).
 func TestFXOptionsValidate(t *testing.T) {
 	cases := map[string]config.Config{
-		"split":    {InternalRPC: config.InternalRPCConfig{SharedSecret: "validate-only"}},
-		"embedded": {},
+		"split":            {InternalRPC: config.InternalRPCConfig{SharedSecret: "validate-only"}},
+		"embedded":         {},
+		"device-transfers": {Files: config.FilesConfig{DeviceTransfersEnabled: true, OriginalsRoot: "/isolated/originals"}},
 	}
 	for name, cfg := range cases {
 		t.Run(name, func(t *testing.T) {
