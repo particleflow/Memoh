@@ -459,6 +459,7 @@ import KeyValueEditor from '@/components/key-value-editor/index.vue'
 import type { KeyValuePair } from '@/components/key-value-editor/index.vue'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { joinShellWords, splitShellWords } from '@/utils/shell-words'
+import { startMCPAuthorizationFlow } from '@/utils/oauth/mcp-authorization-flow'
 import type { McpItem } from './mcp-types'
 
 const props = defineProps<{
@@ -503,9 +504,9 @@ const probing = ref(false)
 const deleting = ref(false)
 const showAdvanced = ref(false)
 let probeAbortController: AbortController | null = null
-// Teardown for an in-flight OAuth flow (poll timer + window message listener), so
-// leaving the detail mid-authorization doesn't leak a 2s interval and a listener.
+// Changing Bot/connection invalidates in-flight OAuth requests and polling.
 let oauthFlowCleanup: (() => void) | null = null
+let oauthGeneration = 0
 
 // OAuth (remote only).
 const probeAuthRequired = ref(false)
@@ -738,6 +739,12 @@ function snapshotFromServer(server: McpItem, draftConnectionType: 'stdio' | 'rem
 }
 
 function seedFromServer(server: McpItem | null) {
+  oauthGeneration++
+  oauthFlowCleanup?.()
+  oauthFlowCleanup = null
+  oauthAuthorizing.value = false
+  oauthDiscovering.value = false
+  oauthStatusLoading.value = false
   if (probeAbortController) {
     probeAbortController.abort()
     probeAbortController = null
@@ -795,11 +802,12 @@ if (props.autoProbe && serverId.value) void handleProbe(serverId.value)
 // Re-seed only when a genuinely different server arrives (a new open session).
 // The create→edit transition is an explicit redirect: the parent remounts this
 // component (fresh key) seeded from the reloaded list, so no id is special here.
-watch(() => props.server?.id, (id) => {
-  if (id && id !== serverId.value) seedFromServer(props.server)
+watch([() => props.botId, () => props.server?.id], () => {
+  seedFromServer(props.server)
 })
 
 onBeforeUnmount(() => {
+  oauthGeneration++
   if (probeAbortController) probeAbortController.abort()
   oauthFlowCleanup?.()
 })
@@ -913,8 +921,9 @@ async function handleToggleActive(value: boolean) {
   }
 }
 
-async function handleProbe(id: string) {
-  if (!id) return
+async function handleProbe(id: string, signal?: AbortSignal): Promise<boolean> {
+  if (!id) return false
+  const botId = props.botId
   probing.value = true
   probeAuthRequired.value = false
   probeAbortController?.abort()
@@ -922,9 +931,13 @@ async function handleProbe(id: string) {
   // flight + OAuth completion re-probe), the older one's finally must not
   // blank the newer one's spinner/controller — only the latest clears.
   const controller = new AbortController()
+  const abort = () => controller.abort()
+  signal?.addEventListener('abort', abort, { once: true })
+  if (signal?.aborted) controller.abort()
   probeAbortController = controller
   try {
-    const { data } = await postBotsByBotIdMcpByIdProbe({ path: { bot_id: props.botId, id } as unknown as { bot_id: string, id: string }, signal: controller.signal, throwOnError: true })
+    const { data } = await postBotsByBotIdMcpByIdProbe({ path: { bot_id: botId, id } as unknown as { bot_id: string, id: string }, signal: controller.signal, throwOnError: true })
+    if (controller.signal.aborted || controller !== probeAbortController || props.botId !== botId || serverId.value !== id) return false
     if (data) {
       status.value = data.status ?? status.value
       tools.value = data.tools ?? []
@@ -933,13 +946,16 @@ async function handleProbe(id: string) {
       sessionProbeResult.value = status.value === 'connected' ? 'ok' : 'error'
     }
     emit('changed')
+    return data?.status === 'connected' && !data.auth_required
   } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') return
+    if ((error instanceof DOMException && error.name === 'AbortError') || controller.signal.aborted || controller !== probeAbortController || props.botId !== botId || serverId.value !== id) return false
     status.value = 'error'
     statusMessage.value = resolveApiErrorMessage(error, t('mcp.probeFailedNetwork'))
     sessionProbeResult.value = 'error'
     emit('changed')
+    return false
   } finally {
+    signal?.removeEventListener('abort', abort)
     if (probeAbortController === controller) {
       probing.value = false
       probeAbortController = null
@@ -971,47 +987,54 @@ function mcpOAuthCallbackUrl() {
   return base.toString()
 }
 
+function oauthContext() {
+  const botId = props.botId
+  const id = serverId.value
+  const generation = oauthGeneration
+  return { botId, id, current: () => props.botId === botId && serverId.value === id && oauthGeneration === generation }
+}
+
 async function loadOAuthStatus() {
-  if (!serverId.value || connectionType.value === 'stdio') {
+  const scope = oauthContext()
+  if (!scope.id || connectionType.value === 'stdio') {
     oauthStatus.value = null
     return
   }
   oauthStatusLoading.value = true
   try {
-    const { data } = await getBotsByBotIdMcpByIdOauthStatus({ path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string }, throwOnError: true })
-    oauthStatus.value = data ?? null
+    const { data } = await getBotsByBotIdMcpByIdOauthStatus({ path: { bot_id: scope.botId, id: scope.id }, throwOnError: true })
+    if (scope.current()) oauthStatus.value = data ?? null
   } catch {
-    oauthStatus.value = null
+    if (scope.current()) oauthStatus.value = null
   } finally {
-    oauthStatusLoading.value = false
+    if (scope.current()) oauthStatusLoading.value = false
   }
 }
 
 async function handleOAuthDiscover(): Promise<boolean> {
-  if (!serverId.value) return false
+  const scope = oauthContext()
+  if (!scope.id) return false
   oauthDiscovering.value = true
   oauthNeedsClientId.value = false
   try {
-    const { data } = await postBotsByBotIdMcpByIdOauthDiscover({ path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string }, throwOnError: true })
+    const { data } = await postBotsByBotIdMcpByIdOauthDiscover({ path: { bot_id: scope.botId, id: scope.id }, throwOnError: true })
+    if (!scope.current()) return false
     if (!data?.registration_endpoint) oauthNeedsClientId.value = true
+    return true
   } catch (error) {
-    toast.error(resolveApiErrorMessage(error, t('mcp.oauth.discoverFailed')))
-    oauthDiscovering.value = false
+    if (scope.current()) toast.error(resolveApiErrorMessage(error, t('mcp.oauth.discoverFailed')))
     return false
+  } finally {
+    if (scope.current()) oauthDiscovering.value = false
   }
-  oauthDiscovering.value = false
-  return true
 }
 
 async function handleOAuthFlow() {
-  if (!serverId.value) return
-  // One flow at a time: restarting re-navigates the same named popup, which
-  // aborts any in-flight callback — and a mid-exchange abort used to burn the
-  // single-use auth code. The button is disabled too; this is the guard.
-  if (oauthDiscovering.value || oauthAuthorizing.value) return
+  const scope = oauthContext()
+  if (!scope.id || oauthDiscovering.value || oauthAuthorizing.value) return
   if (!oauthDiscovered.value) {
     const discovered = await handleOAuthDiscover()
-    if (!discovered) return
+    if (!discovered || !scope.current()) return
     oauthDiscovered.value = true
     if (oauthNeedsClientId.value && !oauthClientId.value.trim()) return
   }
@@ -1019,7 +1042,7 @@ async function handleOAuthFlow() {
   oauthAuthorizing.value = true
   try {
     const { data } = await postBotsByBotIdMcpByIdOauthAuthorize({
-      path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string },
+      path: { bot_id: scope.botId, id: scope.id },
       body: {
         client_id: oauthClientId.value.trim() || undefined,
         client_secret: oauthClientSecret.value.trim() || undefined,
@@ -1027,88 +1050,62 @@ async function handleOAuthFlow() {
       },
       throwOnError: true,
     })
-    if (!data?.authorization_url) throw new Error(t('mcp.oauth.flowInitFailed'))
-
-    const popup = await openOAuthURL(data.authorization_url)
+    if (!scope.current()) return
+    if (!data?.authorization_url || !data.authorization_id) throw new Error(t('mcp.oauth.flowInitFailed'))
+    const authorizationId = data.authorization_id
+    const popup = await openOAuthURL(data.authorization_url, authorizationId)
+    if (!scope.current()) {
+      popup?.close()
+      return
+    }
     if (!popup && !window.api?.desktop?.openExternalUrl) {
-      // window.open returned null: the browser blocked the popup. Fail fast
-      // with a signpost — with no window handle, the poll below has no close
-      // signal and would spin silently for 120s before a generic failure.
-      // (Desktop returns null by design: the URL went to the system browser
-      // and the token poll is the only completion signal.)
       toast.error(t('mcp.oauth.popupBlocked'))
       oauthAuthorizing.value = false
       return
     }
-    let completed = false
-    let pollTimer: ReturnType<typeof setInterval> | undefined
-    const finishOAuth = async (result: 'success' | 'error', error?: string) => {
-      if (completed) return
-      completed = true
-      if (pollTimer) clearInterval(pollTimer)
-      window.removeEventListener('message', onMessage)
+    const finished = () => {
       oauthFlowCleanup = null
       oauthAuthorizing.value = false
-      await loadOAuthStatus()
-      if (result === 'success') {
-        // The flow is done — close the authorization popup if it is still
-        // around (poll-based completion can win the race against the
-        // callback page's own postMessage + self-close). The section row
-        // flips to Authorized in place; nothing else needs to close.
-        popup?.close()
+      void loadOAuthStatus()
+    }
+    const flow = startMCPAuthorizationFlow({
+      authorizationId,
+      popup,
+      isCurrent: scope.current,
+      pollStatus: async (signal) => {
+        const { data: next } = await getBotsByBotIdMcpByIdOauthStatus({
+          path: { bot_id: scope.botId, id: scope.id },
+          query: { authorization_id: authorizationId },
+          signal,
+          throwOnError: true,
+        })
+        return next ?? null
+      },
+      checkConnection: (signal) => handleProbe(scope.id, signal),
+      onSuccess: () => {
+        finished()
         toast.success(t('mcp.oauth.authSuccess'))
-        void handleProbe(serverId.value)
-      } else {
-        toast.error(error || t('mcp.oauth.authFailed'))
-      }
-    }
-    const onMessage = async (event: MessageEvent) => {
-      if (event.data?.type === 'mcp-oauth-callback') {
-        await finishOAuth(event.data.status === 'success' ? 'success' : 'error', event.data.error)
-      }
-    }
-    window.addEventListener('message', onMessage)
-    oauthFlowCleanup = () => {
-      completed = true
-      if (pollTimer) clearInterval(pollTimer)
-      window.removeEventListener('message', onMessage)
-      oauthFlowCleanup = null
-    }
-
-    const startedAt = Date.now()
-    pollTimer = setInterval(() => {
-      if (completed || !serverId.value) return
-      getBotsByBotIdMcpByIdOauthStatus({ path: { bot_id: props.botId, id: serverId.value } as unknown as { bot_id: string, id: string }, throwOnError: true })
-        .then(async ({ data: next }) => {
-          if (completed) return
-          // Completion means the TOKEN LANDED — `configured` is already true
-          // once authorization starts (the endpoint is stored up front), so
-          // polling it fires a false success seconds after the user clicks
-          // Authorize, before they have even consented.
-          if (next?.has_token) {
-            oauthStatus.value = next
-            await finishOAuth('success')
-            return
-          }
-          if (popup?.closed || Date.now() - startedAt > 120_000) await finishOAuth('error')
-        })
-        .catch(() => {
-          if (!completed && (popup?.closed || Date.now() - startedAt > 120_000)) void finishOAuth('error')
-        })
-    }, 2000)
+      },
+      onFailure: (reason) => {
+        finished()
+        toast.error(t(reason === 'failed' ? 'mcp.oauth.authFailed' : reason === 'connection' ? 'mcp.oauth.connectionUnverified' : 'mcp.oauth.authUnconfirmed'))
+      },
+    })
+    oauthFlowCleanup = flow.dispose
   } catch (error) {
+    if (!scope.current()) return
     toast.error(resolveApiErrorMessage(error, t('mcp.oauth.flowInitFailed')))
     oauthAuthorizing.value = false
   }
 }
 
-async function openOAuthURL(url: string): Promise<Window | null> {
+async function openOAuthURL(url: string, authorizationId: string): Promise<Window | null> {
   const desktopOpenExternal = window.api?.desktop?.openExternalUrl
   if (desktopOpenExternal) {
     await desktopOpenExternal(url)
     return null
   }
-  return window.open(url, 'mcp-oauth', 'width=600,height=700')
+  return window.open(url, `mcp-oauth-${authorizationId}`, 'width=600,height=700')
 }
 
 async function handleOAuthRevoke() {

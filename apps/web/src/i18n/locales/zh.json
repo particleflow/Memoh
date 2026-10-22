@@ -2314,6 +2314,8 @@
       "discoverFailed": "OAuth 检测失败",
       "authSuccess": "授权成功",
       "authFailed": "授权失败",
+      "authUnconfirmed": "未能确认本次授权结果。再次授权前请先检查连接。",
+      "connectionUnverified": "授权已保存，但连接尚未验证通过。",
       "scopes": "权限范围",
       "authServer": "授权服务器",
       "clientId": "Client ID",

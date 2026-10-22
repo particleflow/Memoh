@@ -2314,6 +2314,8 @@
       "discoverFailed": "OAuth detection failed",
       "authSuccess": "Authorization successful",
       "authFailed": "Authorization failed",
+      "authUnconfirmed": "Authorization was not confirmed. Check the connection before starting another authorization.",
+      "connectionUnverified": "Authorization was saved, but the connection could not be verified.",
       "scopes": "Scopes",
       "authServer": "Authorization Server",
       "clientId": "Client ID",

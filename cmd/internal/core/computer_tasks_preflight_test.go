@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -23,8 +24,10 @@ type computerPreflightStore struct {
 	dbstore.AgenvoRuntimeStore
 	dbstore.BotRemoteRuntimeBindingStore
 	dbstore.ComputerOperationStore
-	mount  dbstore.BotRemoteRuntimeBindingRecord
-	claims int
+	mount     dbstore.BotRemoteRuntimeBindingRecord
+	operation *dbstore.ComputerOperationRecord
+	claims    int
+	saves     int
 }
 
 func (s *computerPreflightStore) GetMount(_ context.Context, bot, target string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
@@ -50,18 +53,31 @@ func (s *computerPreflightStore) OwnedHTTPMCPConnectionBot(_ context.Context, ow
 
 func (s *computerPreflightStore) ClaimComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, bool, error) {
 	s.claims++
+	if s.operation != nil {
+		return *s.operation, false, nil
+	}
 	return r, false, errors.New("unexpected claim after failed preflight")
+}
+
+func (s *computerPreflightStore) SaveComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {
+	s.saves++
+	r.Revision++
+	s.operation = &r
+	return r, nil
 }
 
 func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 	for _, tc := range []struct {
 		name, target, denied       string
 		missing, mismatch, otherPC bool
+		unknown                    bool
 		want                       error
 		probes                     int
 	}{
 		{name: "native_explicit", target: "44444444-4444-4444-8444-444444444444", want: computertask.ErrPreflightUnavailable, probes: 1},
 		{name: "native_inferred", want: computertask.ErrPreflightUnavailable, probes: 1},
+		{name: "unknown_native_explicit", target: "44444444-4444-4444-8444-444444444444", unknown: true, want: computertask.ErrPreflightUnavailable, probes: 1},
+		{name: "unknown_native_inferred", unknown: true, want: computertask.ErrPreflightUnavailable, probes: 1},
 		{name: "missing_binding", missing: true, want: toolcontext.ErrComputerBinding},
 		{name: "wrong_session", mismatch: true, want: toolcontext.ErrComputerBinding},
 		{name: "other_pc_scope", otherPC: true, target: "44444444-4444-4444-8444-444444444444", want: computertask.ErrDenied},
@@ -78,6 +94,18 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 				t.Fatal(err)
 			}
 			store := &computerPreflightStore{mount: dbstore.BotRemoteRuntimeBindingRecord{ID: "44444444-4444-4444-8444-444444444444", BotID: bot, RuntimeUserID: owner, BotOwnerUserID: owner, RuntimeProvider: agenvo.Provider, RuntimeProviderConfig: raw}}
+			if tc.unknown {
+				store.operation = &dbstore.ComputerOperationRecord{
+					ID: "66666666-6666-4666-8666-666666666666", BotID: bot, UserID: owner,
+					SessionID: "root-session", RunID: "previous-run", TargetID: store.mount.ID,
+					State: "unknown", Revision: 7, CancelRequested: true,
+					Details: dbstore.JSON(`{"kind":"herdr_pi_task","phase":"dispatch_unknown","workspace_id":"synthetic-workspace","pane_id":"synthetic-pane"}`),
+				}
+			}
+			before, err := json.Marshal(store.operation)
+			if err != nil {
+				t.Fatal(err)
+			}
 			probes := 0
 			permissions := computerPermissions{denied: tc.denied}
 			relay := agenvo.NewService(store, permissions, func(_ context.Context, _, _, tool string, args map[string]any) (json.RawMessage, error) {
@@ -126,6 +154,10 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 				t.Fatalf("result=%v err=%v want=%v", result, err, tc.want)
 			}
 			wire, marshalErr := json.Marshal(result)
+			after, recordErr := json.Marshal(store.operation)
+			if recordErr != nil || !bytes.Equal(before, after) || store.saves != 0 {
+				t.Fatal("failed preflight changed an existing operation or its revision")
+			}
 			if marshalErr != nil || strings.Contains(string(wire), "SECRET") || (err != nil && strings.Contains(err.Error(), "SECRET")) || store.claims != 0 || probes != tc.probes {
 				t.Fatalf("error leaked or effect reached: claims=%d probes=%d", store.claims, probes)
 			}

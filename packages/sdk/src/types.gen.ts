@@ -3406,6 +3406,7 @@ export type HooksToolPayload = {
 };
 
 export type McpAuthorizeResult = {
+    authorization_id?: string;
     authorization_url?: string;
 };
 
@@ -3449,8 +3450,14 @@ export type McpMcpServerEntry = {
     url?: string;
 };
 
+export type McpOAuthAuthorization = {
+    id?: string;
+    status?: string;
+};
+
 export type McpOAuthStatus = {
     auth_server?: string;
+    authorization?: McpOAuthAuthorization;
     callback_url?: string;
     configured?: boolean;
     expired?: boolean;
@@ -9975,7 +9982,12 @@ export type GetBotsByBotIdMcpByIdOauthStatusData = {
          */
         id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Current authorization transaction receipt ID
+         */
+        authorization_id?: string;
+    };
     url: '/bots/{bot_id}/mcp/{id}/oauth/status';
 };
 
