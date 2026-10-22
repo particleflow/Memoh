@@ -85,21 +85,21 @@ func TestImageToolPostgresParentChildEditReferences(t *testing.T) {
 			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
-		if r.URL.Path != "/images/edits" || r.Method != "POST" {
+		if r.URL.Path != "/images/edits" || r.Method != http.MethodPost {
 			t.Errorf("unexpected image endpoint")
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		if err := r.ParseMultipartForm(1 << 20); err != nil {
 			t.Error(err)
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		defer r.MultipartForm.RemoveAll()
 		f, _, err := r.FormFile("image[]")
 		if err != nil {
 			t.Error(err)
-			w.WriteHeader(400)
+			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		data, _ := io.ReadAll(f)
