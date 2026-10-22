@@ -217,9 +217,8 @@ func (g *MCPFederationGateway) connectionHTTPClient(ctx context.Context, connect
 	if strings.TrimSpace(connection.AuthType) == "oauth" && g.oauthService != nil {
 		token, err := g.oauthService.GetValidToken(ctx, connection.ID)
 		if err != nil {
-			g.logger.WarnContext(ctx, "failed to get OAuth token for connection",
-				slog.String("connection_id", connection.ID),
-				slog.Any("error", err))
+			attrs := append([]slog.Attr{slog.String("connection_id", connection.ID)}, mcpgw.OAuthTokenFailureAttrs(err)...)
+			g.logger.LogAttrs(ctx, slog.LevelWarn, "failed to get OAuth token for connection", attrs...)
 		} else if token != "" {
 			if headers == nil {
 				headers = map[string]string{}
