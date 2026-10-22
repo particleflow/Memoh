@@ -1,8 +1,13 @@
 # Persisted task result observation
 
-Dependency: compact-result #12, fixed `f38b59c556da0d774d6f5adc089d2fbbfd2dcc4b`,
-on main `75a70fe961808ed5ec2284767cb92ea85f30890f` (#11). This is a stacked,
-read-only HTTP/Web change. No deployment or promotion was performed.
+Dependency: compact-result #12, integrated through
+`2316d2c101e937f21ce8129a845634523fff1358`, on main
+`75a70fe961808ed5ec2284767cb92ea85f30890f` (#11). The initial review/mobile
+checkpoint `20d91381cc107eb917debf4ce6b89c14c5370401` remains in history.
+Merge `44d3a241b50f594079958b06370a50cfc22fe4ec` adds the dependency's
+connection-preflight classification without changing the frozen task API.
+This is a stacked, read-only HTTP/Web change. No deployment or promotion was
+performed.
 
 ## Contract and scope
 
@@ -34,7 +39,7 @@ generation checks reject late responses. Only the generated SDK is called.
 No raw message/media fallback, HTML rendering, URL expansion or file action.
 Mobile implementation is outside this PR.
 
-## Verification (2026-10-22 UTC)
+## Initial checkpoint verification (2026-10-22 UTC, `20d91381`)
 
 - Go race: `internal/sessiontask`, `internal/handlers`, `internal/agenvo`,
   `internal/computertask`, `internal/auth`, `internal/server`, `internal/apperror`.
@@ -73,6 +78,46 @@ Mobile implementation is outside this PR.
   diff is empty. ComputerOperationStore writes, compact JSONL helper and
   migrations have zero diff against #12.
 
+## Dependency integration and identity regression (2026-10-22 UTC)
+
+- Integrated the exact #12 `2316d2c` through a normal merge, without rewriting
+  the initial checkpoint. No change to task routes, schema, fields, cursor or
+  result projection; the frozen mobile contract remains compatible.
+- A mounted-component regression reproduced that an auth-clear notification
+  did not immediately abort a pending detail read. Login emits this notification
+  before replacing the token; same-tab 401 handling need not emit a storage
+  event. The task dialog now directly listens to the existing auth event and
+  closes synchronously, invalidating pending requests before parent teardown.
+- Six real-component tests cover literal HTML/Markdown/URL rendering, a
+  cross-tab token replacement, and login/logout/unauthorized/token-cleared
+  events. Sixteen additional composable cases cover late list/detail successes
+  and failures across identity, Bot, session and PC selection changes. Together
+  with existing lifecycle and API/SSE error suites, 162 tests pass. Mocked
+  requests intentionally settle even after abort to exercise generation guards.
+- Rebuilt/restarted the combined native Server; direct/proxy authenticated
+  readiness passed. Go race and affected Go lint passed for `cmd/internal/core`,
+  `internal/computertask`, `internal/sessiontask`, `internal/handlers`, and
+  `internal/agenvo`, including preflight and real JWT/handler denial/no-store
+  regressions. PostgreSQL owned-tree/cursor integration passed again.
+- Repeated 17 actual HTTP scope/pagination/revocation checks with a displayable
+  completion and 16 list/detail GETs across 8 outcomes. GETs did not change
+  operation state, revision, cancellation or details digests.
+- Current Chromium runtime rendered a synthetic summary containing HTML,
+  script text, Markdown and URLs literally: zero generated active elements,
+  zero probe URL requests, zero script execution and zero page errors. Delayed
+  an actual authorized detail response, emitted the app's auth-clear event,
+  then released the response: the dialog closed and the old summary stayed
+  absent. All three task requests were GET; the ledger digest was unchanged.
+  This is a synthetic auth-event browser check, not a real second-account
+  login or production test. Component tests separately isolate the mounted
+  dialog from parent teardown. The temporary summary was restored afterward.
+- Production Web build, changed-file ESLint and UI guard passed (3 existing UI
+  warnings; existing bundle-size warning). Full Web
+  typecheck still reports **442 errors**, with none in the task component,
+  composable or their tests. This is not an all-green typecheck claim.
+- Agent runtime/contextview still matches official `bf0318c5...` with zero diff.
+  No operation write-path, parser, migration, credential or execution changes.
+
 All fixtures and screenshots are synthetic. No real model, Pi or Windows task
 was launched. The occasional workspace-unreachable toast belongs to the
 unavailable optional local workspace; it is retained in screenshots and does
@@ -92,3 +137,7 @@ are included.
 - [Loading](result-loading.png): actual request delayed, content not fabricated.
 - [Page two](result-page-two.png): real keyset continuation and newest-page return.
 - [Empty](result-empty.png): existing conversation with no task records.
+- [Literal summary](result-literal-summary.png): integrated runtime displays
+  adversarial markup as text without activating it.
+- [Auth clear](result-auth-cleared.png): integrated runtime removes task content
+  and ignores the delayed authorized response after the auth-clear event.

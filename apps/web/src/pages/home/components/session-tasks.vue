@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onScopeDispose, ref } from 'vue'
 import { useDocumentVisibility, useLocalStorage } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
 import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import type { SessiontaskTask } from '@memohai/sdk'
+import { onAuthSessionCleared } from '@/lib/auth-session'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
 
@@ -18,6 +19,10 @@ const scope = computed(() => props.botId && props.sessionId ? {
   bot: props.botId, session: props.sessionId, selection: props.selection, identity: token.value,
 } : null)
 const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh } = useSessionTasks(scope, visible)
+// Login notifies before replacing the token; a same-tab 401 can clear it
+// without a storage event. Close now so pending reads cannot revive content
+// while the parent view/router is still mounted.
+onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
 
 function stateLabel(task: SessiontaskTask) {
   const outcome = task.pi_result
