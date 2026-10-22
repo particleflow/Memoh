@@ -49,6 +49,11 @@ the body to 8 MiB, and requires a model-list array. The call has a 60-second
 deadline, limits returned models to 10,000 and identifiers/names to 1,024 bytes.
 No automatic retry, model inference or database mutation is introduced.
 
+The configured endpoint is a trusted administrator configuration and may be
+self-hosted/private-network. This change is not a general SSRF filter. Checking
+for direct credential reflection in model strings is defense in depth, not a
+guarantee against every possible encoded secret in adversarial metadata.
+
 ## Verification
 
 - `go test -race ./internal/providers ./internal/handlers -run
@@ -88,6 +93,14 @@ encountered temporary disk exhaustion; obsolete generated binaries were removed.
 Neither failure was counted as a pass. No production provider, private image,
 paid API, credential refresh, import, candidate publication or deployment was used.
 Human QA and production-provider discovery remain unperformed.
+
+The first Go CI at `819575f6` caught a new field-error contract violation:
+`TestBadRequestsCarryNoUserText` rejected a textual Echo 400 for an invalid
+provider ID. It was reproduced locally and corrected to the existing
+`apperror.FieldInvalid("id", nil)` contract. The real middleware regression now
+asserts `request.field_invalid`, only the `id` field argument, no input echo,
+and zero provider reads/upstream calls. This is a code correction, not a skipped
+check or a retry of the failing SHA. Discovery/auth/capability behavior is unchanged.
 
 ![Provider detail before discovery](provider-before.png)
 ![Provider detail after discovery and failed upstream read](provider-after.png)
