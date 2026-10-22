@@ -28,3 +28,9 @@ type ComputerDeliveryStore interface {
 	ComputerOperationStore
 	SaveComputerDelivery(context.Context, ComputerOperationRecord, JSON) (ComputerOperationRecord, error)
 }
+
+// ComputerPiHistoryStore reads prior durable continuity evidence within the
+// already claimed computer slot. Implementations must retain unproven records.
+type ComputerPiHistoryStore interface {
+	PreviousComputerPiOperation(context.Context, ComputerOperationRecord, string) (ComputerOperationRecord, error)
+}

@@ -26,6 +26,7 @@ type RecoverySummary struct {
 // Recovery is a read model. It has no transfer, submission or store-write port.
 // Native presence is separate from durable process/Pi/business result facts.
 type Recovery struct {
+	Continuity      *PiContinuity               `json:"continuity,omitempty"`
 	OperationID     string                      `json:"operation_id"`
 	TargetID        string                      `json:"target_id"`
 	State           string                      `json:"state"`
@@ -104,6 +105,7 @@ func (s *Service) recover(ctx context.Context, b toolcontext.ComputerBinding, id
 	out := Recovery{OperationID: r.ID, TargetID: r.TargetID, State: state, ProcessState: "unknown", PiResult: "unknown", BusinessOutcome: "unknown", ResultReason: "receipt_missing", CancelRequested: r.CancelRequested}
 	refs := agenvo.OperationReferences{Workspace: d.Agent.WorkspaceID, Pane: d.Agent.PaneID, Terminal: d.Agent.TerminalID}
 	if batch := d.Batch; batch != nil {
+		out.Continuity = batchContinuity(batch)
 		p := batch.Progress
 		refs = agenvo.OperationReferences{Workspace: p.WorkspaceID, Pane: p.PaneID, Terminal: p.TerminalID, ControlPane: p.ControlPane, ControlTerminal: p.ControlTerminal}
 		out.Attempt, out.PiSessionID = observationHexRef(p.Attempt, 32), observationHexRef(p.PiSessionID, 64)

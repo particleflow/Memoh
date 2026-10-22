@@ -21,6 +21,8 @@ import (
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
 
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/db"
+	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/storage/providers/localfs"
 )
@@ -195,6 +197,13 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 			// More than one page and the old 64KiB relay limit, never in one call.
 			f.stderr = []byte(strings.Repeat("diagnostic 中文\n", 6000))
 			f.receipt = agenvo.BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Exited: true, Started: true, ExitCode: f.exit, Stdout: batchFile("stdout.jsonl", f.stdout), Stderr: batchFile("stderr.txt", f.stderr)}
+			if p.History != nil {
+				before, after := "new", "created"
+				if p.History.Mode == "resume" {
+					before, after = "verified", "verified"
+				}
+				f.receipt.History = &agenvo.BatchHistoryReport{Before: before, After: after, Evidence: &agenvo.BatchHistoryEvidence{File: "synthetic.jsonl", Size: 1024, Hash: strings.Repeat("e", 64)}}
+			}
 			if f.lost {
 				return nil, errors.New("lost dispatch reply")
 			}
@@ -572,6 +581,7 @@ func TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs(t *testing.T) {
 			}
 			if mode == "not_started" {
 				f.receipt.Started = false
+				f.receipt.History = &agenvo.BatchHistoryReport{Before: "not_checked", After: "not_started"}
 				f.receipt.ExitCode = 125
 			}
 			got := batchResultUntilReady(t, c, r.ID)
@@ -792,4 +802,21 @@ func TestCompactResultIndependentOfLogStorageAndSurvivesRestart(t *testing.T) {
 	if len(f.calls) != before {
 		t.Fatal("revoked diagnostic request reached PC")
 	}
+}
+
+func (s *fixtureStore) PreviousComputerPiOperation(_ context.Context, r dbstore.ComputerOperationRecord, session string) (dbstore.ComputerOperationRecord, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var found dbstore.ComputerOperationRecord
+	for _, old := range s.records {
+		var d Details
+		_ = json.Unmarshal(old.Details, &d)
+		if old.ID != r.ID && old.BotID == r.BotID && old.SessionID == r.SessionID && old.UserID == r.UserID && old.TargetID == r.TargetID && d.Batch != nil && d.Batch.Progress.PiSessionID == session && (found.ID == "" || old.CreatedAt.After(found.CreatedAt) || old.CreatedAt.Equal(found.CreatedAt) && old.ID > found.ID) {
+			found = old
+		}
+	}
+	if found.ID == "" {
+		return found, db.ErrNotFound
+	}
+	return found, nil
 }

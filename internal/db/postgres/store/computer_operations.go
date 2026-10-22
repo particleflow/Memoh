@@ -207,3 +207,12 @@ func (s *Store) ConfigureAgenvoRuntime(ctx context.Context, owner, id string, pr
 	row, err := s.queries.UpdateAgenvoRuntimeConfig(ctx, dbsqlc.UpdateAgenvoRuntimeConfigParams{ID: runtime, UserID: user, ExpectedConfig: previous, ProviderConfig: next})
 	return userRuntimeRecord(row), mapQueryErr(err)
 }
+
+func (s *Store) PreviousComputerPiOperation(ctx context.Context, r dbstore.ComputerOperationRecord, session string) (dbstore.ComputerOperationRecord, error) {
+	ids, err := computerIDs(r)
+	if err != nil {
+		return dbstore.ComputerOperationRecord{}, err
+	}
+	row, err := s.queries.PreviousComputerPiOperation(ctx, dbsqlc.PreviousComputerPiOperationParams{ID: ids[0], BotID: ids[1], SessionID: ids[2], UserID: ids[3], TargetID: ids[4], PiSessionID: session})
+	return operationRecord(row), mapQueryErr(err)
+}
