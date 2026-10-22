@@ -1,11 +1,14 @@
 # Persisted task result observation
 
 Dependency: compact-result #12, integrated through
-`2316d2c101e937f21ce8129a845634523fff1358`, on main
+`bcd5ac439b9d7bd320c6dd53edd5e6f9979482a1`, on main
 `75a70fe961808ed5ec2284767cb92ea85f30890f` (#11). The initial review/mobile
 checkpoint `20d91381cc107eb917debf4ce6b89c14c5370401` remains in history.
 Merge `44d3a241b50f594079958b06370a50cfc22fe4ec` adds the dependency's
 connection-preflight classification without changing the frozen task API.
+The next saved checkpoint `7c6fa8a0b5e18f127414d05b0ecbbc9f5c0fd374` adds
+immediate auth-event cleanup and passed Go CI, ESLint and Docker PR. A further
+normal merge integrates #12's `46b4a8a6`/`bcd5ac43` preflight/OAuth diagnostics.
 This is a stacked, read-only HTTP/Web change. No deployment or promotion was
 performed.
 
@@ -117,6 +120,35 @@ Mobile implementation is outside this PR.
   composable or their tests. This is not an all-green typecheck claim.
 - Agent runtime/contextview still matches official `bf0318c5...` with zero diff.
   No operation write-path, parser, migration, credential or execution changes.
+
+## Latest #12 integration (2026-10-22 UTC, `bcd5ac43`)
+
+- Added the exact fixed dependency through another conflict-free merge on the
+  same branch; the `20d91381` and `7c6fa8a0` checkpoints remain ancestors. This
+  adds standard MCP preflight structured errors and bounded OAuth refresh
+  diagnostics from #12. The task routes, result projection, OpenAPI/SDK and
+  frozen mobile contract have zero diff from `20d91381`. Web source is unchanged
+  from `7c6fa8a0`; its 162 passing tests and 442 full-typecheck errors remain the
+  applicable frontend verification, not a claim that typecheck is green.
+- Repeated Go race tests for `cmd/internal/core`, `internal/computertask`,
+  `internal/sessiontask`, `internal/handlers`, `internal/agenvo` and
+  `internal/mcp`: all passed, including standard MCP structured preflight and
+  safe OAuth category/transport/logger regressions. Task authorization,
+  revocation, no-store and GET-no-dispatch tests passed on this combined tree.
+  Affected Go lint passed for the same six package trees.
+- Rebuilt/restarted the native Server; direct and proxy login/readiness passed.
+  Repeated 17 real HTTP permission/pagination/revocation checks and 16 outcome
+  GETs: all passed with unchanged ledger digests and no-store throughout.
+- Repeated current-runtime Chromium list/detail/back/unknown, dark Chinese
+  480px and real synthetic grant revocation checks. Also repeated literal
+  adversarial-summary and delayed-auth-response checks: zero page errors,
+  active content, probe URL requests or GET ledger changes. The literal/auth
+  screenshots below were refreshed from this combined runtime. All temporary
+  synthetic detail/grant mutations were restored.
+- No OAuth credentials were operated on by this task. OAuth request/response
+  behavior is covered by isolated automated fixtures in #12; there was no
+  production credential repair, new task submission or deployment here.
+- Official Agent runtime/contextview boundary remains zero diff.
 
 All fixtures and screenshots are synthetic. No real model, Pi or Windows task
 was launched. The occasional workspace-unreachable toast belongs to the

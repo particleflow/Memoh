@@ -103,6 +103,18 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		return nil, mcp.ErrToolNotFound
 	}
 	if err != nil {
+		if name == "computer_task_submit" && errors.Is(err, ErrPreflightUnavailable) {
+			// These facts describe this call, not the state of any older task.
+			// Do not use this envelope for uncertain claim/dispatch outcomes.
+			out := mcp.BuildToolSuccessResult(map[string]any{
+				"ok": false, "code": "computer.connection_unavailable", "phase": "preflight",
+				"operation_created": false, "business_dispatched": false,
+				"retry":   map[string]any{"automatic": false, "requires": "verified_connection_recovery"},
+				"message": ErrPreflightUnavailable.Error(),
+			})
+			out["isError"] = true
+			return out, nil
+		}
 		if receipt, ok := value.(Result); ok && receipt.ID != "" {
 			out := mcp.BuildToolSuccessResult(map[string]any{"computer": receipt, "error": err.Error()})
 			out["isError"] = true
