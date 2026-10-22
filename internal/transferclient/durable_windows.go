@@ -209,6 +209,11 @@ func openQueueFile(root *os.Root, name string, flags int, _ os.FileMode) (*os.Fi
 			disposition = windows.FILE_CREATE
 		}
 	}
+	// Only verified download staging can be moved into this component's
+	// publication store, through the same pinned handle. Delete sharing stays off.
+	if strings.HasSuffix(name, ".part") {
+		access |= windows.DELETE
+	}
 	share := uint32(windows.FILE_SHARE_READ)
 	// Journal admission reads may overlap another job's append. Its first frame
 	// is immutable; job locks own journal writes. Lock handles must be shareable.

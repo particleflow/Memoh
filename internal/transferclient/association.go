@@ -47,7 +47,7 @@ func associationStateValid(state string) bool {
 }
 
 func transientAssociation(err error) bool {
-	if errors.Is(err, ErrTransport) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+	if errors.Is(err, ErrBusy) || errors.Is(err, ErrTransport) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return true
 	}
 	var h *HTTPError

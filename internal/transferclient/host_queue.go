@@ -320,7 +320,9 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		if _, err := f.Seek(0, io.SeekStart); err != nil {
 			return ErrStore
 		}
-		content = io.LimitReader(f, r.Job.Spec.SizeBytes)
+		source := &publicationSource{SectionReader: io.NewSectionReader(f, 0, r.Job.Spec.SizeBytes), file: f, queue: q, reference: *r.Job.Ready, active: true}
+		defer func() { source.active = false }()
+		content = source
 	}
 	if binding == nil || binding.Commit == nil || binding.Resolve == nil {
 		return ErrBinding
