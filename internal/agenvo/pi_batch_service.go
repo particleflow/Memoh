@@ -183,7 +183,8 @@ var errBatchSnapshotTooLarge = errors.New("batch observation exceeds connector r
 // Metadata checks detect a changed pane but cannot provide Herdr's missing
 // atomic expected-generation operation; no native restart/close safety is claimed.
 func (s *Service) ReadBatchPage(ctx context.Context, scope Scope, p BatchProgress, receipt BatchReceipt, file BatchFile, offset int64) ([]byte, error) {
-	if receipt.Validate(p) != nil || (file != receipt.Stdout && file != receipt.Stderr) || offset < 0 || offset >= file.Size || p.ControlPane == "" || p.ControlPane == p.PaneID {
+	isCompletion := receipt.Completion != nil && file == *receipt.Completion
+	if receipt.Validate(p) != nil || (file != receipt.Stdout && file != receipt.Stderr && !isCompletion) || offset < 0 || offset >= file.Size || p.ControlPane == "" || p.ControlPane == p.PaneID {
 		return nil, ErrUnsupported
 	}
 	count := min(int64(BatchPageBytes), file.Size-offset)
@@ -204,7 +205,7 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	if name == "receipt.json" {
 		limit = batchReceiptBytes
 	}
-	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt") {
+	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt" && name != "result.json") {
 		return nil, ErrUnsupported
 	}
 	c, target, err := s.Client(ctx, scope)

@@ -311,7 +311,7 @@ func TestStandardMCPTrustedPCBindingAndSingleTask(t *testing.T) {
 	source, _, f := setup(t)
 	c := standardClient(t, source, "pc-a", false)
 	tools, err := c.ListTools(t.Context(), nil)
-	if err != nil || len(tools.Tools) != 6 {
+	if err != nil || len(tools.Tools) != 7 {
 		t.Fatalf("tools=%v err=%v", tools, err)
 	}
 	listing := invoke(t, c, "computer_targets", map[string]any{}, false)
@@ -361,7 +361,7 @@ func TestStandardMCPUnknownIsDurableAndCancellationDoesNotKill(t *testing.T) {
 		t.Fatalf("cancel=%+v runs=%d", cancel, f.runs)
 	}
 	store.revoked = true
-	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_cancel", "computer_task_artifact"} {
+	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_cancel", "computer_task_artifact", "computer_task_logs"} {
 		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, true)
 	}
 }
