@@ -47,11 +47,14 @@ func associationStateValid(state string) bool {
 }
 
 func transientAssociation(err error) bool {
+	var h *HTTPError
+	if errors.Is(err, ErrAuthorization) || errors.As(err, &h) && (h.Status == http.StatusUnauthorized || h.Status == http.StatusForbidden) {
+		return false
+	}
 	if errors.Is(err, ErrBusy) || errors.Is(err, ErrTransport) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
 		return true
 	}
-	var h *HTTPError
-	return errors.As(err, &h) && (h.Status == http.StatusRequestTimeout || h.Status == http.StatusTooManyRequests || h.Status >= 500 && h.Status <= 599)
+	return errors.As(err, &h) && (h.Status == statusRequestCanceled || h.Status == http.StatusRequestTimeout || h.Status == http.StatusTooManyRequests || h.Status >= 500 && h.Status <= 599)
 }
 
 func (q *DiskQueue) waitAssociation(f *os.File, r QueueStatus, err error, now time.Time) error {

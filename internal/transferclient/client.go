@@ -117,6 +117,10 @@ type HTTPError struct {
 	RetryAfter time.Duration
 }
 
+// Memoh's error catalog and HTTP boundary use 499 for caller cancellation.
+// It never proves that a mutating request did not reach its commit point.
+const statusRequestCanceled = 499
+
 func (e *HTTPError) Error() string { return fmt.Sprintf("transfer HTTP %d", e.Status) }
 
 func validID(s string) bool {
