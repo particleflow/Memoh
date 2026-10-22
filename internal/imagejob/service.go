@@ -35,7 +35,7 @@ var (
 // Binding comes from the authenticated host, not tool arguments. Authorize must
 // validate it and current Bot/session access on every submission/result read.
 type (
-	Binding   struct{ TeamID, BotID, SessionID, UserID string }
+	Binding   struct{ TeamID, BotID, SessionID, UserID, RootSessionID string }
 	Authorize func(context.Context, Binding, []string) error
 	Input     struct {
 		Data []byte
@@ -90,6 +90,14 @@ func digest(value any) string {
 	return hex.EncodeToString(h[:])
 }
 
+func bindingScope(b Binding) string {
+	if b.RootSessionID != "" {
+		b.SessionID = b.RootSessionID
+		b.RootSessionID = ""
+	}
+	return digest(b)
+}
+
 func (s *Service) allowed(ctx context.Context, b Binding, refs []string) error {
 	if s == nil || s.media == nil || !s.media.RequiresPersistence() || s.media.Uploads() == nil || s.journal == nil || s.authorize == nil || b.TeamID == "" || b.BotID == "" || b.SessionID == "" || b.UserID == "" {
 		return ErrDenied
@@ -133,7 +141,7 @@ func (s *Service) Submit(ctx context.Context, b Binding, req Request, adapter Ad
 	if err := s.allowed(ctx, b, req.InputRefs); err != nil {
 		return Result{}, err
 	}
-	scope := digest(b)
+	scope := bindingScope(b)
 	fingerprint := digest(struct {
 		Request Request
 		Adapter string
@@ -150,6 +158,17 @@ func (s *Service) Submit(ctx context.Context, b Binding, req Request, adapter Ad
 	}
 	if !created {
 		return s.recover(ctx, b, r)
+	}
+	// Admit bounded result storage before the only billable request. A failed
+	// admission is a proven pre-dispatch rejection; never a fabricated recovery.
+	r.UploadID = uuid.NewSHA1(uuid.NameSpaceOID, []byte(scope+"\x00"+r.ID)).String()
+	if _, err := s.media.Uploads().ReserveResult(ctx, scope, b.BotID, r.UploadID, MaxImageBytes); err != nil {
+		r.State = "rejected"
+		_ = s.journal.Save(context.WithoutCancel(ctx), "dispatching", r)
+		return Result{TaskID: r.ID, State: "rejected", Code: "image.storage_admission_failed"}, nil
+	}
+	if err := s.journal.Save(ctx, "dispatching", r); err != nil {
+		return Result{TaskID: r.ID, State: "unknown", Code: "image.journal_unavailable"}, nil
 	}
 	// The durable claim precedes the sole business request. Any uncertain
 	// transport/parse failure keeps the claim, including across process restart.
@@ -192,7 +211,7 @@ func (s *Service) Result(ctx context.Context, b Binding, id string) (Result, err
 	if err := s.allowed(ctx, b, nil); err != nil {
 		return Result{}, err
 	}
-	r, err := s.journal.Read(ctx, digest(b), id)
+	r, err := s.journal.Read(ctx, bindingScope(b), id)
 	if err != nil {
 		return Result{}, ErrDenied
 	}
@@ -202,6 +221,9 @@ func (s *Service) Result(ctx context.Context, b Binding, id string) (Result, err
 func (s *Service) recover(ctx context.Context, b Binding, r media.ImageTaskReceipt) (Result, error) {
 	if err := s.allowed(ctx, b, r.InputRefs); err != nil {
 		return Result{}, err
+	}
+	if r.State == "rejected" {
+		return Result{TaskID: r.ID, State: "rejected", Code: "image.storage_admission_failed"}, nil
 	}
 	if r.State == "publication_pending" {
 		staged, err := s.media.Uploads().Get(ctx, r.Scope, b.BotID, r.UploadID)
@@ -245,7 +267,9 @@ func (s *Service) recover(ctx context.Context, b Binding, r media.ImageTaskRecei
 		}
 		// Cleanup failure cannot undo a durable result or repeat the model.
 		_ = s.media.Uploads().ReleaseResult(ctx, r.Scope, b.BotID, r.UploadID)
-		return Result{TaskID: r.ID, State: "ready", Artifacts: []Artifact{{ContentHash: asset.ContentHash, Mime: asset.Mime, SizeBytes: n}}}, nil
+		result := Result{TaskID: r.ID, State: "ready", Artifacts: []Artifact{{ContentHash: asset.ContentHash, Mime: asset.Mime, SizeBytes: n}}}
+		track(ctx, result)
+		return result, nil
 	}
 	return Result{TaskID: r.ID, State: "unknown", Code: "image.outcome_unknown"}, nil
 }

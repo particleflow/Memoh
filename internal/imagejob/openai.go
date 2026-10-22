@@ -119,5 +119,9 @@ func validateImage(data []byte, mime string) error {
 	if err != nil || (format != "png" && format != "jpeg") || mime != "image/"+format || cfg.Width <= 0 || cfg.Height <= 0 || int64(cfg.Width)*int64(cfg.Height) > 64<<20 {
 		return fmt.Errorf("%w: unsupported image bytes", ErrInvalid)
 	}
+	decoded, decodedFormat, err := image.Decode(bytes.NewReader(data))
+	if err != nil || decodedFormat != format || decoded.Bounds().Dx() != cfg.Width || decoded.Bounds().Dy() != cfg.Height {
+		return ErrInvalid
+	}
 	return nil
 }

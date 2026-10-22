@@ -138,3 +138,23 @@ func TestGeneratedResultStagingSurvivesUploadTTL(t *testing.T) {
 	}
 	_ = r.Close()
 }
+
+func TestImageUploadRootAssemblyRejectsDifferentRoot(t *testing.T) {
+	a, b := t.TempDir(), t.TempDir()
+	ma := NewService(nil, localfs.NewOriginals(a))
+	mb := NewService(nil, localfs.NewOriginals(b))
+	if err := ma.EnableUploads(a); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = ma.Uploads().Close() }()
+	if err := mb.EnableUploads(b); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = mb.Uploads().Close() }()
+	if err := ma.Uploads().VerifyRoot(a); err != nil {
+		t.Fatal(err)
+	}
+	if err := ma.Uploads().VerifyRoot(b); !errors.Is(err, ErrUploadConflict) {
+		t.Fatalf("root mismatch=%v", err)
+	}
+}

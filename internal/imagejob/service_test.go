@@ -6,6 +6,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"image"
 	"image/color"
 	"image/png"
@@ -287,5 +288,113 @@ func TestGenerateIsExplicitAndHasNoEditInput(t *testing.T) {
 	r, err := h.service.Submit(context.Background(), h.binding, request, adapter)
 	if err != nil || r.State != "ready" || calls.Load() != 1 {
 		t.Fatalf("result=%+v err=%v calls=%d", r, err, calls.Load())
+	}
+}
+
+func TestStorageAdmissionRejectsBeforeProvider(t *testing.T) {
+	for _, kind := range []string{"size", "active", "receipts"} {
+		t.Run(kind, func(t *testing.T) {
+			h := harness(t)
+			ctx := context.Background()
+			switch kind {
+			case "size":
+				h.media.SetMaxUploadBytes(MaxImageBytes - 1)
+			case "active":
+				for i := range 16 {
+					_, err := h.media.Uploads().Create(ctx, fmt.Sprintf("owner-%d", i), h.binding.BotID, media.UploadInput{SizeBytes: 1, SHA256: strings.Repeat("0", 64), Mime: "image/png"})
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+			case "receipts":
+				for range 128 {
+					u, err := h.media.Uploads().Create(ctx, "uploads-owner", h.binding.BotID, media.UploadInput{SizeBytes: 1, SHA256: strings.Repeat("0", 64), Mime: "image/png"})
+					if err != nil {
+						t.Fatal(err)
+					}
+					if _, err = h.media.Uploads().Cancel(ctx, "uploads-owner", h.binding.BotID, u.ID); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			a, calls := h.adapter(t, 200)
+			result, err := h.service.Submit(ctx, h.binding, h.request, a)
+			if err != nil || result.State != "rejected" || result.Code != "image.storage_admission_failed" || calls.Load() != 0 {
+				t.Fatalf("result=%+v err=%v calls=%d", result, err, calls.Load())
+			}
+			again, err := h.service.Result(ctx, h.binding, h.request.Key)
+			if err != nil || again.State != "rejected" || calls.Load() != 0 {
+				t.Fatalf("recovery=%+v err=%v", again, err)
+			}
+		})
+	}
+}
+
+func TestRejectsHeaderOnlyImage(t *testing.T) {
+	data := syntheticPNG(t, color.RGBA{R: 255, A: 255})
+	if err := validateImage(data[:33], "image/png"); err == nil {
+		t.Fatal("truncated PNG accepted")
+	}
+}
+
+func TestRootBusinessIdentitySurvivesReplacementChild(t *testing.T) {
+	h := harness(t)
+	h.binding.RootSessionID = "root-conversation"
+	h.service.authorize = func(_ context.Context, b Binding, refs []string) error {
+		if b.BotID != h.binding.BotID || b.UserID != h.binding.UserID || b.RootSessionID != h.binding.RootSessionID {
+			return ErrDenied
+		}
+		for _, ref := range refs {
+			if ref != h.request.InputRefs[0] {
+				return ErrDenied
+			}
+		}
+		return nil
+	}
+	h.request.Key = BusinessKey("persisted-root-turn", h.request)
+	adapter, calls := h.adapter(t, 503)
+	first, err := h.service.Submit(context.Background(), h.binding, h.request, adapter)
+	if err != nil || first.State != "unknown" {
+		t.Fatalf("first=%+v err=%v", first, err)
+	}
+	child := h.binding
+	child.SessionID = "replacement-child"
+	second, err := h.service.Submit(context.Background(), child, h.request, adapter)
+	if err != nil || second.TaskID != first.TaskID || second.State != "unknown" || calls.Load() != 1 {
+		t.Fatalf("second=%+v err=%v calls=%d", second, err, calls.Load())
+	}
+	changed := h.request
+	changed.Prompt = "rephrased uncertain work"
+	changed.Key = BusinessKey("persisted-root-turn", changed)
+	blocked, err := h.service.Submit(context.Background(), child, changed, adapter)
+	if err != nil || blocked.Code != "image.blocked_by_task" || calls.Load() != 1 {
+		t.Fatalf("blocked=%+v err=%v calls=%d", blocked, err, calls.Load())
+	}
+}
+
+type resultQuotaAdapter struct {
+	h     *imageHarness
+	calls int
+}
+
+func (*resultQuotaAdapter) Identity() string   { return "quota-fixture" }
+func (*resultQuotaAdapter) Supports(Mode) bool { return true }
+func (a *resultQuotaAdapter) Invoke(ctx context.Context, _ Mode, _, _ string, _ []Input) (Image, error) {
+	a.calls++
+	for i := range 15 {
+		_, err := a.h.media.Uploads().Create(ctx, fmt.Sprintf("concurrent-%d", i), a.h.binding.BotID, media.UploadInput{SizeBytes: 1, SHA256: strings.Repeat("0", 64), Mime: "image/png"})
+		if err != nil {
+			return Image{}, err
+		}
+	}
+	return Image{Data: a.h.output, Mime: "image/png"}, nil
+}
+
+func TestAdmittedResultPublishesAfterOtherUploadsFillRemainingSlots(t *testing.T) {
+	h := harness(t)
+	a := &resultQuotaAdapter{h: h}
+	result, err := h.service.Submit(context.Background(), h.binding, h.request, a)
+	if err != nil || result.State != "ready" || a.calls != 1 {
+		t.Fatalf("result=%+v err=%v calls=%d", result, err, a.calls)
 	}
 }

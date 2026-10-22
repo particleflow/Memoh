@@ -237,7 +237,7 @@ func (s *UploadStore) owned(owner, bot, id string) (uploadRecord, error) {
 }
 
 func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadInput) (Upload, error) {
-	return s.create(ctx, owner, bot, in, false, "")
+	return s.create(ctx, owner, bot, in, false, "", false)
 }
 
 // CreateResult reuses the existing upload quota, hash and durability protocol.
@@ -247,10 +247,20 @@ func (s *UploadStore) CreateResult(ctx context.Context, owner, bot, id string, i
 	if !validUploadID(id) {
 		return Upload{}, ErrUploadInvalid
 	}
-	return s.create(ctx, owner, bot, in, true, id)
+	return s.create(ctx, owner, bot, in, true, id, false)
 }
 
-func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadInput, retain bool, id string) (Upload, error) {
+// ReserveResult admits the maximum possible response before invoking a billed
+// provider. It uses the same finite upload quota and storage root, not a second
+// spool. This is capacity accounting, not a guarantee against later disk failure.
+func (s *UploadStore) ReserveResult(ctx context.Context, owner, bot, id string, limit int64) (Upload, error) {
+	if !validUploadID(id) {
+		return Upload{}, ErrUploadInvalid
+	}
+	return s.create(ctx, owner, bot, UploadInput{SizeBytes: limit, SHA256: strings.Repeat("0", 64), Mime: "application/octet-stream"}, true, id, true)
+}
+
+func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadInput, retain bool, id string, reserve bool) (Upload, error) {
 	if !validPathComponent(owner) || !validPathComponent(bot) || in.SizeBytes <= 0 || !validSHA(in.SHA256) {
 		return Upload{}, ErrUploadInvalid
 	}
@@ -269,6 +279,23 @@ func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadIn
 	if id != "" {
 		existing, err := s.read(id)
 		if err == nil {
+			if existing.Owner == owner && existing.Bot == bot && existing.RetainResult && existing.State == "reserved" && !reserve {
+				// A reservation already owns quota. Finalization can only shrink it,
+				// and never re-enters quota admission after the paid request.
+				if in.SizeBytes > existing.SizeBytes {
+					return Upload{}, ErrAssetTooLarge
+				}
+				guard, err := s.lock(ctx, id)
+				if err != nil {
+					return Upload{}, err
+				}
+				defer guard()
+				existing.State, existing.SizeBytes, existing.SHA256, existing.Mime = "uploading", in.SizeBytes, in.SHA256, typ
+				if err := s.save(existing); err != nil {
+					return Upload{}, err
+				}
+				return existing.Upload, nil
+			}
 			if existing.Owner != owner || existing.Bot != bot || existing.SHA256 != in.SHA256 || existing.SizeBytes != in.SizeBytes || existing.Mime != typ || !existing.RetainResult {
 				return Upload{}, ErrUploadConflict
 			}
@@ -298,7 +325,7 @@ func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadIn
 		if err != nil {
 			return Upload{}, err
 		}
-		if r.State == "uploading" {
+		if r.State == "uploading" || r.State == "reserved" {
 			active++
 			reserved += r.SizeBytes
 			if r.Owner == owner {
@@ -311,6 +338,9 @@ func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadIn
 	}
 	r := uploadRecord{Upload: Upload{ID: id, State: "uploading", SizeBytes: in.SizeBytes, Mime: typ, ExpiresAt: s.now().Add(UploadTTL)}, Owner: owner, Bot: bot, SHA256: in.SHA256}
 	r.RetainResult = retain
+	if reserve {
+		r.State = "reserved"
+	}
 	if err := s.save(r); err != nil {
 		return Upload{}, err
 	}
@@ -588,4 +618,31 @@ func (s *UploadStore) sweep(ctx context.Context) error {
 		}
 	}
 	return syncRootWith(s.root, s.syncFile)
+}
+
+// VerifyRoot checks that the configured originals location still owns this
+// upload store before another journal is assembled beneath it at startup.
+func (s *UploadStore) VerifyRoot(originalsRoot string) error {
+	parent, err := os.OpenRoot(originalsRoot)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = parent.Close() }()
+	expected, err := parent.OpenRoot(".uploads")
+	if err != nil {
+		return err
+	}
+	defer func() { _ = expected.Close() }()
+	a, err := expected.Stat(".")
+	if err != nil {
+		return err
+	}
+	b, err := s.root.Stat(".")
+	if err != nil {
+		return err
+	}
+	if !os.SameFile(a, b) {
+		return ErrUploadConflict
+	}
+	return nil
 }

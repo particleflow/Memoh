@@ -390,6 +390,30 @@ func (q *Queries) ListStorageProviders(ctx context.Context) ([]StorageProvider, 
 	return items, nil
 }
 
+const sessionHasMediaAsset = `-- name: SessionHasMediaAsset :one
+SELECT EXISTS (
+  SELECT 1 FROM bot_history_message_assets asset
+  JOIN bot_history_messages message ON message.id = asset.message_id AND message.team_id = asset.team_id
+  WHERE asset.team_id = public.memoh_current_team_id()
+    AND message.bot_id = $1
+    AND message.session_id = $2
+    AND asset.content_hash = $3
+)
+`
+
+type SessionHasMediaAssetParams struct {
+	BotID       pgtype.UUID `json:"bot_id"`
+	SessionID   pgtype.UUID `json:"session_id"`
+	ContentHash string      `json:"content_hash"`
+}
+
+func (q *Queries) SessionHasMediaAsset(ctx context.Context, arg SessionHasMediaAssetParams) (bool, error) {
+	row := q.db.QueryRow(ctx, sessionHasMediaAsset, arg.BotID, arg.SessionID, arg.ContentHash)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const upsertBotStorageBinding = `-- name: UpsertBotStorageBinding :one
 INSERT INTO bot_storage_bindings (bot_id, storage_provider_id, base_path)
 VALUES ($1, $2, $3)

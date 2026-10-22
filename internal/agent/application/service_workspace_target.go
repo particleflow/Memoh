@@ -8,6 +8,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/runtime/native"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
 	"github.com/felinics/memoh/internal/workspace"
@@ -30,6 +31,7 @@ func (s *Service) ValidateWorkspaceTarget(ctx context.Context, botID, targetID s
 }
 
 func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) (context.Context, ChatRequest, error) {
+	ctx = imagejob.WithOrigin(ctx, imagejob.Origin{BotID: req.BotID, UserID: req.UserID, SessionID: req.ThreadID, RunID: req.RunID})
 	requestedTargetID := strings.TrimSpace(req.WorkspaceTargetID)
 	bound, hasWorkdir, err := s.resolveSessionWorkdirBinding(ctx, req.BotID, req.ThreadID)
 	if err != nil {
