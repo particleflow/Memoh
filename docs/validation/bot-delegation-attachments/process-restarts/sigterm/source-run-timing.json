@@ -1,0 +1,65 @@
+{
+  "restart": {
+    "queue_restarted": true,
+    "server_restarted": true,
+    "old_pid": 116926,
+    "new_pid": 117403,
+    "queue_started_before": "2026-10-22T19:59:43.49760581Z",
+    "queue_started_after": "2026-10-22T20:28:11.02449027Z"
+  },
+  "busy_client_after_restart": {
+    "run_id": "415d3fc4-5d27-4501-9b6f-5bbf916188c6",
+    "state": "lost",
+    "invocation_id": "8ac95a3b-1beb-4807-b406-2d96f623d2a3",
+    "error_code": "session_runtime.interrupted"
+  },
+  "interrupted_parent_runs": [
+    {
+      "run_id": "415d3fc4-5d27-4501-9b6f-5bbf916188c6",
+      "state": "lost",
+      "invocation_id": "8ac95a3b-1beb-4807-b406-2d96f623d2a3",
+      "error_code": "session_runtime.interrupted"
+    }
+  ],
+  "model_phase_counts": {
+    "initial": 2,
+    "specialist": 3,
+    "held_parent": 2,
+    "followup": 1
+  },
+  "failures": [],
+  "source_run_timing": [
+    {
+      "run_id": "17b16dd0-f343-48c3-b596-c6cfe99f474f",
+      "state": "completed",
+      "invocation_id": "resume:415d3fc4-5d27-4501-9b6f-5bbf916188c6",
+      "error_code": null,
+      "created_at": "2026-10-22T20:28:11.316945+00:00",
+      "updated_at": "2026-10-22T20:28:23.866349+00:00"
+    },
+    {
+      "run_id": "6fb68fa7-f9d6-4055-b8ad-f71c53851ee7",
+      "state": "completed",
+      "invocation_id": "ad031d8c-1e9a-4bb2-b453-d5df2ae6a540",
+      "error_code": null,
+      "created_at": "2026-10-22T20:28:09.428608+00:00",
+      "updated_at": "2026-10-22T20:28:09.72151+00:00"
+    },
+    {
+      "run_id": "415d3fc4-5d27-4501-9b6f-5bbf916188c6",
+      "state": "lost",
+      "invocation_id": "8ac95a3b-1beb-4807-b406-2d96f623d2a3",
+      "error_code": "session_runtime.interrupted",
+      "created_at": "2026-10-22T20:28:09.938374+00:00",
+      "updated_at": "2026-10-22T20:28:10.697334+00:00"
+    },
+    {
+      "run_id": "0af41a7d-5015-47f7-93b7-bf9088e2585d",
+      "state": "completed",
+      "invocation_id": "follow-up:2944f12c-0de8-57a9-a2ab-e1347846a6c9",
+      "error_code": null,
+      "created_at": "2026-10-22T20:28:23.900676+00:00",
+      "updated_at": "2026-10-22T20:28:24.110816+00:00"
+    }
+  ]
+}

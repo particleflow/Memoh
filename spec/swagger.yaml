@@ -1187,6 +1187,116 @@ definitions:
           $ref: '#/definitions/botbackup.SectionSummary'
         type: array
     type: object
+  botdelegation.Attachment:
+    properties:
+      content_hash:
+        type: string
+      mime:
+        type: string
+      size_bytes:
+        type: integer
+      url:
+        type: string
+    type: object
+  botdelegation.AttachmentInput:
+    properties:
+      content_hash:
+        type: string
+    required:
+    - content_hash
+    type: object
+  botdelegation.Input:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/botdelegation.AttachmentInput'
+        type: array
+      message:
+        type: string
+      request_id:
+        format: uuid
+        type: string
+      target_bot_id:
+        format: uuid
+        type: string
+    required:
+    - message
+    - request_id
+    - target_bot_id
+    type: object
+  botdelegation.Page:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/botdelegation.View'
+        type: array
+      next_cursor:
+        type: string
+    required:
+    - items
+    type: object
+  botdelegation.Summary:
+    properties:
+      source:
+        type: string
+      text:
+        type: string
+      truncated:
+        type: boolean
+    type: object
+  botdelegation.View:
+    properties:
+      attachments:
+        items:
+          $ref: '#/definitions/botdelegation.Attachment'
+        type: array
+      created_at:
+        type: string
+      delegation_id:
+        format: uuid
+        type: string
+      delivery_state:
+        enum:
+        - pending
+        - accepted
+        - unknown
+        - unavailable
+        type: string
+      request_id:
+        format: uuid
+        type: string
+      source_session_id:
+        format: uuid
+        type: string
+      state:
+        enum:
+        - accepted
+        - running
+        - unknown
+        - completed
+        - failed
+        type: string
+      summary:
+        $ref: '#/definitions/botdelegation.Summary'
+      target_bot_id:
+        format: uuid
+        type: string
+      target_session_id:
+        format: uuid
+        type: string
+      updated_at:
+        type: string
+    required:
+    - attachments
+    - created_at
+    - delegation_id
+    - delivery_state
+    - request_id
+    - source_session_id
+    - state
+    - target_bot_id
+    - updated_at
+    type: object
   bots.Bot:
     properties:
       avatar_url:
@@ -14423,6 +14533,363 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Get session context lifecycle
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/delegations:
+    get:
+      description: Persisted facts only. Follow nonempty next_cursor even for an empty
+        page. Reads do not dispatch, poll devices or retry delivery.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - default: 20
+        description: Page size 1-100
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque continuation
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/botdelegation.Page'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List authorized Bot handoffs from a conversation
+      tags:
+      - sessions
+    post:
+      consumes:
+      - application/json
+      description: Durable asynchronous handoff. Acceptance is not completion; repeat
+        the same request_id to observe the same task. Attachments reference existing
+        source conversation originals.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Handoff
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/botdelegation.Input'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/botdelegation.View'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Delegate one task to an authorized Bot
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}:
+    get:
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/botdelegation.View'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Observe a Bot handoff and its final visible summary
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/attachments/{content_hash}:
+    get:
+      description: Checks current source ancestry, both Bot grants and the trusted
+        returned reference. No public URL or copied original; authenticated download
+        only.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      - description: Returned content hash
+        in: path
+        name: content_hash
+        required: true
+        type: string
+      - description: Requested byte range
+        in: header
+        name: Range
+        type: string
+      - description: Previously received ETag
+        in: header
+        name: If-Range
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "206":
+          description: Partial Content
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "416":
+          description: Unsatisfiable byte range
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read one original returned by an authorized Bot handoff
+      tags:
+      - sessions
+    head:
+      description: Checks current source ancestry, both Bot grants and the trusted
+        returned reference. No public URL or copied original; authenticated download
+        only.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      - description: Returned content hash
+        in: path
+        name: content_hash
+        required: true
+        type: string
+      - description: Requested byte range
+        in: header
+        name: Range
+        type: string
+      - description: Previously received ETag
+        in: header
+        name: If-Range
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "206":
+          description: Partial Content
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "416":
+          description: Unsatisfiable byte range
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read one original returned by an authorized Bot handoff
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery:
+    post:
+      description: Uses the original stable delivery ID. Never reruns the specialist;
+        unknown execution cannot be retried here. Accepted delivery means queued,
+        not supervisor completion.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/botdelegation.View'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Retry only result delivery to the supervisor
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/follow-up-queue:

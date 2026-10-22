@@ -1,0 +1,5 @@
+=== RUN   TestBotDelegationPostgresClaimIsolationAndDescendantAssets
+    bot_delegation_postgres_integration_test.go:28: freshMigratedDB applied the official full migration chain: version=173 dirty=false
+--- PASS: TestBotDelegationPostgresClaimIsolationAndDescendantAssets (1.83s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	1.843s

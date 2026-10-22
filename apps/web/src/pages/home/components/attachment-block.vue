@@ -285,12 +285,15 @@ function handleOpenFile(att: AttachmentItem) {
   if (!url) return
   const name = getDisplayName(att)
   const contentHash = String(att.content_hash ?? '').trim()
+  // resolveUrl above has already validated the path and its matching hash.
+  const delegationUrl = typeof att.metadata?.delegation_url === 'string' ? att.metadata.delegation_url : undefined
   if (openAssetPreview) {
     openAssetPreview({
-      key: contentHash || stableKey(`${name}:${url}`),
+      key: delegationUrl || contentHash || stableKey(`${name}:${url}`),
       name,
       botId: contentHash ? resolveAttBotId(att) : undefined,
       contentHash: contentHash || undefined,
+      delegationUrl,
       src: contentHash ? undefined : url,
     })
     return

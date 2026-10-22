@@ -12,6 +12,7 @@ import (
 // turn. Transport callers should prefer turn.StartTurnCommand; the additional
 // channel and function fields below are strictly in-process runtime state.
 type ChatRequest struct {
+	DelegationResultID       string `json:"-"`
 	discussCurrentSources    []turn.ContextMessageSource
 	discussOmittedSources    []turn.ContextMessageSource
 	discussMessages          []turn.DiscussMessage

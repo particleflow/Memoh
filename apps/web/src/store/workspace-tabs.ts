@@ -1390,6 +1390,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         name: args.name,
         botId: args.botId,
         contentHash: args.contentHash,
+        delegationUrl: args.delegationUrl,
         src: args.src,
       },
     })

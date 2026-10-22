@@ -44,6 +44,10 @@ type resumeContext struct {
 	TokenClaims       map[string]string `json:"token_claims,omitempty"`
 	ChatClaims        map[string]string `json:"chat_claims,omitempty"`
 	DeadlineAt        *time.Time        `json:"deadline_at,omitempty"`
+	// Normalized input references are host-authored: WebSocket admission stores
+	// only an attachment digest, while a tool may run before the first step
+	// commits its user-message asset links. Never use model metadata for this.
+	InputAssetHashes []string `json:"input_asset_hashes,omitempty"`
 	// Version 2 carries an External Discuss batch instead of a query: the
 	// resume admits it again behind its instructions.
 	DiscussMessages       []turn.DiscussMessage       `json:"discuss_messages,omitempty"`
@@ -76,6 +80,11 @@ func (s *Service) recordRunResumeContext(ctx context.Context, req ChatRequest) e
 		CurrentChannel: req.CurrentChannel, ReplyTarget: req.ReplyTarget,
 		ConversationType: req.ConversationType, Model: req.Model, ReasoningEffort: req.ReasoningEffort,
 		WorkspaceTargetID: req.WorkspaceTargetID, SessionType: req.SessionType, ToolHTTPURL: req.ToolHTTPURL,
+	}
+	for _, a := range req.Attachments {
+		if hash := strings.TrimSpace(a.ContentHash); hash != "" {
+			data.InputAssetHashes = append(data.InputAssetHashes, hash)
+		}
 	}
 	var err error
 	if data.TokenClaims, err = s.resumeClaims(req.Token); err != nil {

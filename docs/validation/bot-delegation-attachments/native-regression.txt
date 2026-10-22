@@ -1,0 +1,22 @@
+PASS Bot-owned upload without session/admitted input is rejected
+PASS initial supervisor completes before specialist
+PASS native delegate_to_bot accepts a same-turn new attachment
+PASS specialist completes and result delivery is accepted
+PASS exactly one supervisor follow-up completes
+PASS both original and new output appear in delegation results
+PASS supervisor final assistant preserves both attachment references
+PASS delegation original bytes match 05e4f2914ef7
+PASS anonymous delegation attachment is rejected
+PASS delegation original bytes match ea9ec1e51bc4
+PASS anonymous delegation attachment is rejected
+PASS original owner separation 05e4f2914ef7 expected 200
+PASS original Range request returns 206 and five bytes
+PASS original owner separation 05e4f2914ef7 expected 404
+PASS original owner separation ea9ec1e51bc4 expected 200
+PASS original Range request returns 206 and five bytes
+PASS original owner separation ea9ec1e51bc4 expected 404
+Task server and Valkey restarted, healthy
+PASS 16 HTTP delivery retries preserve task and business execution
+PASS same request after reopening preserves original task and runs
+PASS attachment remains readable after server and queue restart 05e4f2914ef7
+PASS attachment remains readable after server and queue restart ea9ec1e51bc4

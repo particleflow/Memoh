@@ -1,0 +1,126 @@
+{
+  "pg": {
+    "test_events": {
+      "pass": 20
+    },
+    "passed_packages": [
+      "github.com/felinics/memoh/internal/db"
+    ],
+    "failed_packages": [],
+    "skipped_tests": []
+  },
+  "related": {
+    "test_events": {
+      "skip": 65,
+      "pass": 3130
+    },
+    "passed_packages": [
+      "github.com/felinics/memoh/cmd/agent",
+      "github.com/felinics/memoh/cmd/transferqueue",
+      "github.com/felinics/memoh/internal/server",
+      "github.com/felinics/memoh/internal/apperror",
+      "github.com/felinics/memoh/internal/media",
+      "github.com/felinics/memoh/internal/handlers",
+      "github.com/felinics/memoh/internal/botdelegation",
+      "github.com/felinics/memoh/internal/computertask",
+      "github.com/felinics/memoh/internal/userruntime",
+      "github.com/felinics/memoh/internal/transferclient",
+      "github.com/felinics/memoh/internal/agenvo",
+      "github.com/felinics/memoh/internal/agent/application"
+    ],
+    "failed_packages": [
+      "./internal/agent/tools/botdelegation"
+    ],
+    "skipped_tests": [
+      "TestPostgresDiscussBacklogOverBudgetIsAnsweredAndNextRoundContinues",
+      "TestPostgresDiscussBacklogWithoutCompactionIsAnsweredAndRecordsOmission",
+      "TestPostgresDiscussOversizedInputFailsOnceThenNextMessageIsAnswered/70000",
+      "TestPostgresDiscussOversizedInputFailsOnceThenNextMessageIsAnswered/600000",
+      "TestPostgresDiscussImageBacklogKeepsImagesOnTheirMessages",
+      "TestPostgresDiscussOversizedImageInputFailsOnceThenNextMessageIsAnswered",
+      "TestPostgresDiscussImageBacklogYieldsAnsweredHistoryFirst/compaction=false/rounds=10",
+      "TestPostgresDiscussImageBacklogYieldsAnsweredHistoryFirst/compaction=true/rounds=10",
+      "TestPostgresDiscussImageBacklogYieldsAnsweredHistoryFirst/compaction=true/rounds=4",
+      "TestPostgresDiscussImageBacklogYieldsAnsweredHistoryFirst/compaction=false/rounds=4",
+      "TestPostgresDiscussCompactedImageInputIsRecorded",
+      "TestPostgresDiscussCompactionKeepsBatchTextOverImages/rounds=2/images=3/size=1200",
+      "TestPostgresDiscussCompactionKeepsBatchTextOverImages/rounds=4/images=3/size=1200",
+      "TestPostgresDiscussCompactionKeepsBatchTextOverImages/rounds=2/images=5/size=600",
+      "TestPostgresDiscussRecoveryPreservesBatchAcrossCompactorRestart",
+      "TestSeekableReadVolume",
+      "TestPostgresNativeDecisionAcceptanceAndShutdownRecovery/approved",
+      "TestPostgresNativeDecisionAcceptanceAndShutdownRecovery/rejected",
+      "TestPostgresNativeDecisionAcceptanceAndShutdownRecovery/answer",
+      "TestPostgresNativeDecisionAcceptanceAndShutdownRecovery/aborted",
+      "TestPostgresNativeDecisionAcceptanceAndShutdownRecovery/inline",
+      "TestPostgresHistoryResetReplaceImport",
+      "TestPostgresHistoryResetRetiresShutdownResume/session",
+      "TestPostgresHistoryResetRetiresShutdownResume/bot",
+      "TestPostgresHistoryResetClearsRuntimeSnapshot/success/session",
+      "TestPostgresHistoryResetClearsRuntimeSnapshot/success/bot",
+      "TestPostgresHistoryResetClearsRuntimeSnapshot/auth_failure/session",
+      "TestPostgresHistoryResetClearsRuntimeSnapshot/auth_failure/bot",
+      "TestPostgresRedisHistoryResetClearsRuntimeSnapshot",
+      "TestPostgresHistoryResetFailsClosedWhenSnapshotCannotBeCleared/session",
+      "TestPostgresHistoryResetFailsClosedWhenSnapshotCannotBeCleared/bot",
+      "TestPostgresHistoryResetDuringActiveRun/session",
+      "TestPostgresHistoryResetDuringActiveRun/bot",
+      "TestPostgresHistoryResetDrainBackendFailure/session",
+      "TestPostgresHistoryResetDrainBackendFailure/bot",
+      "TestPostgresHistoryResetRetiresOrphanedAdmission/history_cleared",
+      "TestPostgresHistoryResetRetiresOrphanedAdmission/session_deleted",
+      "TestPostgresHistoryResetSubscriberHealsWithoutReleasePass/history_cleared",
+      "TestPostgresHistoryResetSubscriberHealsWithoutReleasePass/session_deleted",
+      "TestPostgresHistoryResetSubscriberHealsWithoutReleasePass/session_deleted,_backend_briefly_unreadable",
+      "TestPostgresHistoryResetClearsEveryBotSession",
+      "TestPostgresAccountAndBotAuthorization",
+      "TestPostgresResumeScopesUseOrdinaryRoleAndPreserveTenantIntoExecution",
+      "TestPostgresRedisDecisionSurvivesGracefulShutdown",
+      "TestAdmitTurnRunRequestUserTurnReachesSubscriber",
+      "TestPostgresProviderUsageSurvivesPersistence/anthropic/stream=false",
+      "TestPostgresProviderUsageSurvivesPersistence/anthropic/stream=true",
+      "TestPostgresProviderUsageSurvivesPersistence/anthropic_tool_round/stream=false",
+      "TestPostgresProviderUsageSurvivesPersistence/anthropic_tool_round/stream=true",
+      "TestPostgresProviderUsageSurvivesPersistence/openai_responses/stream=false",
+      "TestPostgresProviderUsageSurvivesPersistence/openai_responses/stream=true",
+      "TestPostgresProviderUsageMixesProvidersInOneSession",
+      "TestPostgresWSStepHistorySuccess",
+      "TestPostgresWSStepHistoryStop",
+      "TestPostgresWSStepHistoryFailureWithoutSteps",
+      "TestPostgresWSStepHistoryFailureWithAnyCode",
+      "TestPostgresWSStepHistoryUnfencedFailure/auth_failure",
+      "TestPostgresWSStepHistoryUnfencedFailure/context_budget",
+      "TestPostgresWSStepHistoryUnfencedStop",
+      "TestPostgresWSStepHistoryUncodedFailure/steps",
+      "TestPostgresWSStepHistoryUncodedFailure/unfenced",
+      "TestPostgresWSStepHistoryFailureAfterPartialOutput",
+      "TestPostgresWSStepHistoryFailureAfterCommittedStep",
+      "TestPostgresWSStepHistoryFailureAfterCommittedStepWithoutText",
+      "TestPostgresWSStepHistoryIdleTimeout"
+    ]
+  },
+  "tool": {
+    "test_events": {
+      "pass": 415,
+      "fail": 7,
+      "skip": 1
+    },
+    "passed_packages": [],
+    "failed_packages": [
+      "github.com/felinics/memoh/internal/agent/tool"
+    ],
+    "skipped_tests": [
+      "TestCallSearXNGSearchLive"
+    ]
+  },
+  "tool-proxy-free": {
+    "test_events": {
+      "pass": 7
+    },
+    "passed_packages": [
+      "github.com/felinics/memoh/internal/agent/tool"
+    ],
+    "failed_packages": [],
+    "skipped_tests": []
+  }
+}

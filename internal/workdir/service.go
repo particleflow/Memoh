@@ -181,6 +181,9 @@ func (s *Service) List(ctx context.Context, botID string, includeArchived bool) 
 		if toolcontext.CheckComputerTarget(ctx, wd.WorkspaceTargetID) != nil {
 			continue
 		}
+		if toolcontext.CheckDelegationTarget(ctx, botID, wd.WorkspaceTargetID, "workspace_read") != nil {
+			continue
+		}
 		workdirs = append(workdirs, wd)
 	}
 	return workdirs, nil

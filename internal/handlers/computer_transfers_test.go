@@ -232,6 +232,75 @@ func TestTaskTransferHTTPNoAccountFallbackAndScope(t *testing.T) {
 	}
 }
 
+func TestTaskTransferHTTPOriginalRangeAndRevalidation(t *testing.T) {
+	f, verifier, https, client := taskTransferHTTPFixture(t, false)
+	spec := transferclient.Spec{SizeBytes: f.ref.SizeBytes, SHA256: f.ref.ContentHash, Mime: f.ref.Mime}
+	r, err := client.Create(t.Context(), f.id.Binding.BotID, spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = client.Patch(t.Context(), f.id.Binding.BotID, r.ID, 0, []byte("fixture")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = client.Complete(t.Context(), f.id.Binding.BotID, r.ID); err != nil {
+		t.Fatal(err)
+	}
+	verifier.mu.Lock()
+	principal := verifier.grants["one"]
+	principal.Reference.Direction = "download"
+	verifier.grants["one"] = principal
+	verifier.mu.Unlock()
+	for _, tc := range []struct {
+		name, byteRange, wantRange, wantBody string
+		status                               int
+	}{
+		{"range", "bytes=1-3", "bytes 1-3/7", "ixt", 206},
+		{"unsatisfiable", "bytes=7-", "bytes */7", "", 416},
+		{"size-mismatch", "bytes=1-3", "", "", 409},
+		{"hash-mismatch", "bytes=1-3", "", "", 403},
+		{"revoked", "bytes=1-3", "", "", 403},
+		{"anonymous", "bytes=1-3", "", "", 401},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			verifier.mu.Lock()
+			p := principal
+			// Download authority has its own delivery identity; an upload receipt
+			// cannot be rebound to a different direction or declared file size.
+			p.DeliveryID = tc.name
+			if tc.name == "size-mismatch" {
+				p.Reference.SizeBytes++
+			}
+			if tc.name == "hash-mismatch" {
+				p.Reference.ContentHash = strings.Repeat("a", 64)
+			}
+			verifier.grants["one"] = p
+			verifier.mu.Unlock()
+			verifier.revoked.Store(tc.name == "revoked")
+			path := ComputerTransferPrefix + "/" + f.id.OperationID + "/" + p.DeliveryID + "/bots/" + f.id.Binding.BotID + "/media/" + f.ref.ContentHash
+			req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, https.URL+path, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if tc.name != "anonymous" {
+				req.Header.Set("Authorization", "Memoh-Transfer one")
+			}
+			req.Header.Set("Range", tc.byteRange)
+			response, err := https.Client().Do(req) //nolint:gosec // Synthetic loopback TLS fixture only.
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer func() { _ = response.Body.Close() }()
+			body, err := io.ReadAll(response.Body)
+			if err != nil || response.StatusCode != tc.status || response.Header.Get("Content-Range") != tc.wantRange || response.Header.Get("Cache-Control") != "no-store" {
+				t.Fatal("range/status/cache", response.StatusCode, response.Header, err)
+			}
+			if tc.wantBody != "" && string(body) != tc.wantBody {
+				t.Fatal("wrong original bytes")
+			}
+		})
+	}
+}
+
 func TestTaskTransferHTTPPreservesAccountUploadQuota(t *testing.T) {
 	f, verifier, https, _ := taskTransferHTTPFixture(t, false)
 	var clients []*transferclient.Client

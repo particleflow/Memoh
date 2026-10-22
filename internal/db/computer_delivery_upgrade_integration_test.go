@@ -64,6 +64,24 @@ func TestComputerDeliveryPostgresUpgradeFrom170(t *testing.T) {
 	if _, err := pool.Exec(t.Context(), "UPDATE computer_operations SET details=$2 WHERE id=$1", operation, original); sqlState(err) != "23514" {
 		t.Fatal("legacy writer erased ledger", err)
 	}
+	// Compose the transfer schema with CrossBot's next migration. Existing
+	// credentials and the guarded delivery ledger must survive unchanged.
+	exec(`UPDATE user_runtimes SET transfer_credential_id='synthetic-transfer', transfer_credential_digest='synthetic-digest', transfer_target_digest='synthetic-target', transfer_expires_at=now()+interval '1 hour' WHERE id=$1`, runtime)
+	const snapshotSQL = `SELECT jsonb_build_object('runtime',(SELECT to_jsonb(r) FROM user_runtimes r WHERE id=$1),'operation',(SELECT to_jsonb(o) FROM computer_operations o WHERE id=$2))::text`
+	var before, after string
+	if err := pool.QueryRow(t.Context(), snapshotSQL, runtime, operation).Scan(&before); err != nil {
+		t.Fatal(err)
+	}
+	migrateTo(t, dsn, 173)
+	assertTransferSchema(t, pool, 4, 1)
+	assertDelegationSchema(t, pool)
+	if err := pool.QueryRow(t.Context(), snapshotSQL, runtime, operation).Scan(&after); err != nil || before != after {
+		t.Fatal("173 changed existing transfer credentials or delivery state", err)
+	}
+	if _, err := pool.Exec(t.Context(), "UPDATE computer_operations SET details=$2 WHERE id=$1", operation, original); sqlState(err) != "23514" {
+		t.Fatal("173 removed legacy writer guard", err)
+	}
+	t.Log("170 -> 171 -> 172 -> 173: transfer credentials and delivery ledger preserved; guard and delegation RLS present")
 }
 
 func TestComputerDeliveryPostgresCanonicalTransferSchema(t *testing.T) {
@@ -75,6 +93,15 @@ func TestComputerDeliveryPostgresCanonicalTransferSchema(t *testing.T) {
 	}
 	defer pool.Close()
 	assertTransferSchema(t, pool, 4, 1)
+	assertDelegationSchema(t, pool)
+}
+
+func assertDelegationSchema(t *testing.T, pool *pgxpool.Pool) {
+	t.Helper()
+	var secured bool
+	if err := pool.QueryRow(t.Context(), `SELECT relrowsecurity AND relforcerowsecurity FROM pg_class WHERE oid='public.bot_delegations'::regclass`).Scan(&secured); err != nil || !secured {
+		t.Fatal("delegation ledger or forced RLS absent", err)
+	}
 }
 
 func assertTransferSchema(t *testing.T, pool *pgxpool.Pool, columns, triggers int) {

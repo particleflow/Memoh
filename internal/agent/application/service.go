@@ -133,6 +133,7 @@ type Service struct {
 	platformIdentities      PlatformIdentitySource
 	botPermissions          botPermissionChecker
 	workspaceTargets        workspaceTargetResolver
+	delegationScope         func(context.Context, ChatRequest) (context.Context, ChatRequest, error)
 	workdirs                sessionWorkdirResolver
 	pipeline                *timeline.Pipeline
 	streamHTTPClient        *http.Client

@@ -703,6 +703,49 @@ export type BotbackupSummaryResult = {
     sections?: Array<BotbackupSectionSummary>;
 };
 
+export type BotdelegationAttachment = {
+    content_hash?: string;
+    mime?: string;
+    size_bytes?: number;
+    url?: string;
+};
+
+export type BotdelegationAttachmentInput = {
+    content_hash: string;
+};
+
+export type BotdelegationInput = {
+    attachments?: Array<BotdelegationAttachmentInput>;
+    message: string;
+    request_id: string;
+    target_bot_id: string;
+};
+
+export type BotdelegationPage = {
+    items: Array<BotdelegationView>;
+    next_cursor?: string;
+};
+
+export type BotdelegationSummary = {
+    source?: string;
+    text?: string;
+    truncated?: boolean;
+};
+
+export type BotdelegationView = {
+    attachments: Array<BotdelegationAttachment>;
+    created_at: string;
+    delegation_id: string;
+    delivery_state: 'pending' | 'accepted' | 'unknown' | 'unavailable';
+    request_id: string;
+    source_session_id: string;
+    state: 'accepted' | 'running' | 'unknown' | 'completed' | 'failed';
+    summary?: BotdelegationSummary;
+    target_bot_id: string;
+    target_session_id?: string;
+    updated_at: string;
+};
+
 export type BotsBot = {
     avatar_url?: string;
     check_issue_count?: number;
@@ -12487,6 +12530,382 @@ export type GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses = {
 };
 
 export type GetBotsByBotIdSessionsBySessionIdContextLifecycleResponse = GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses[keyof GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsData = {
+    body?: never;
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+    };
+    query?: {
+        /**
+         * Page size 1-100
+         */
+        limit?: number;
+        /**
+         * Opaque continuation
+         */
+        cursor?: string;
+    };
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsError = GetBotsByBotIdSessionsBySessionIdDelegationsErrors[keyof GetBotsByBotIdSessionsBySessionIdDelegationsErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsResponses = {
+    /**
+     * OK
+     */
+    200: BotdelegationPage;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsResponse = GetBotsByBotIdSessionsBySessionIdDelegationsResponses[keyof GetBotsByBotIdSessionsBySessionIdDelegationsResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsData = {
+    /**
+     * Handoff
+     */
+    body: BotdelegationInput;
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsError = PostBotsByBotIdSessionsBySessionIdDelegationsErrors[keyof PostBotsByBotIdSessionsBySessionIdDelegationsErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsResponses = {
+    /**
+     * Accepted
+     */
+    202: BotdelegationView;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsResponse = PostBotsByBotIdSessionsBySessionIdDelegationsResponses[keyof PostBotsByBotIdSessionsBySessionIdDelegationsResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdData = {
+    body?: never;
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdError = GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdErrors[keyof GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponses = {
+    /**
+     * OK
+     */
+    200: BotdelegationView;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponse = GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponses[keyof GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashData = {
+    body?: never;
+    headers?: {
+        /**
+         * Requested byte range
+         */
+        Range?: string;
+        /**
+         * Previously received ETag
+         */
+        'If-Range'?: string;
+    };
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+        /**
+         * Returned content hash
+         */
+        content_hash: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/attachments/{content_hash}';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Unsatisfiable byte range
+     */
+    416: Blob | File;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashError = GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors[keyof GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
+};
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashData = {
+    body?: never;
+    headers?: {
+        /**
+         * Requested byte range
+         */
+        Range?: string;
+        /**
+         * Previously received ETag
+         */
+        'If-Range'?: string;
+    };
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+        /**
+         * Returned content hash
+         */
+        content_hash: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/attachments/{content_hash}';
+};
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Unsatisfiable byte range
+     */
+    416: Blob | File;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashError = HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors[keyof HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors];
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryData = {
+    body?: never;
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryError = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryErrors[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses = {
+    /**
+     * OK
+     */
+    200: BotdelegationView;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponse = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses];
 
 export type GetBotsByBotIdSessionsBySessionIdFollowUpQueueData = {
     body?: never;

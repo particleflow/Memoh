@@ -37,6 +37,13 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 	if s.allowedTeam != "" && cmd.TeamID != s.allowedTeam {
 		return nil, fmt.Errorf("%w: %s", turn.ErrTeamNotServed, cmd.TeamID)
 	}
+	if s.delegationScope != nil {
+		var err error
+		ctx, _, err = s.delegationScope(ctx, chatRequestFromCommand(cmd))
+		if err != nil {
+			return nil, err
+		}
+	}
 	if cmd.Mode == turn.ModeDiscuss && !s.discussRuntimeConfigured() {
 		return nil, errors.New("turn: discuss runtime not configured")
 	}
@@ -72,7 +79,7 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 
 	var (
 		assetMu sync.Mutex
-		assets  []turn.OutboundAssetRef
+		assets  = authorizedDelegationResultAssets(runCtx, cmd)
 	)
 
 	req := chatRequestFromCommand(cmd)

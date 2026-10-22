@@ -50,7 +50,10 @@ const (
 // intentionally excluded — injection goes through RunHandle.Inject and
 // outbound assets through RunHandle.AddOutboundAssets.
 type StartTurnCommand struct {
-	SchemaVersion int
+	// DelegationResultID is set by the host result-delivery ingress and retained
+	// by the existing queue. It is a lookup key, never an authority assertion.
+	DelegationResultID string `json:"delegation_result_id,omitempty"`
+	SchemaVersion      int
 	// NoDefer is reserved for server-owned continuation attempts. A follow-up
 	// that is already being started must surface ErrSessionBusy instead of
 	// re-entering the follow-up queue when it races another admission.

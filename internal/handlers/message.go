@@ -872,6 +872,7 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 		return errs.Wrap(err, "read media asset")
 	}
 	defer func() { _ = reader.Close() }()
+	cacheControl := "private, max-age=86400"
 	if scope := taskTransfer(c); scope != nil {
 		size, err := reader.Seek(0, io.SeekEnd)
 		if err != nil || asset.BotID != botID || size != scope.principal.Reference.SizeBytes || asset.ContentHash != scope.principal.Reference.ContentHash {
@@ -883,18 +884,25 @@ func (h *MessageHandler) ServeMedia(c echo.Context) error {
 		if err := checkTaskTransferResponse(c); err != nil {
 			return err
 		}
+		cacheControl = "no-store"
 	}
-	contentType := asset.Mime
+	return serveOriginalMedia(c, reader, asset.Mime, asset.ContentHash, cacheControl)
+}
+
+// serveOriginalMedia is shared by owner, task-transfer and delegation-scoped
+// downloads. The caller authorizes and opens the verified original first.
+func serveOriginalMedia(c echo.Context, reader media.ReadSeekCloser, contentType, hash, cacheControl string) error {
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
 	c.Response().Header().Set("Content-Type", contentType)
-	if taskTransfer(c) != nil {
-		c.Response().Header().Set("Cache-Control", "no-store")
-	} else {
-		c.Response().Header().Set("Cache-Control", "private, max-age=86400")
+	c.Response().Header().Set("Cache-Control", cacheControl)
+	if cacheControl == "no-store" {
+		// ServeContent removes cache headers on errors (including 416). Scoped
+		// downloads must keep no-store on every status, including those errors.
+		c.Response().Before(func() { c.Response().Header().Set("Cache-Control", "no-store") })
 	}
-	c.Response().Header().Set("ETag", `"`+asset.ContentHash+`"`)
+	c.Response().Header().Set("ETag", `"`+hash+`"`)
 	// OpenSeekable verifies the full original on cold reads and each emitted
 	// block on supported warm reads; authorization above is never cached.
 	// ServeContent owns Range, If-Range, HEAD, 206 and 416 semantics.
