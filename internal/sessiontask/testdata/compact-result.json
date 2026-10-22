@@ -1,0 +1,68 @@
+{
+  "kind": "herdr_pi_task",
+  "phase": "pi_succeeded",
+  "exit_code": 0,
+  "output": "SECRET top-level output",
+  "artifact_hash": "SECRET",
+  "observation": {
+    "thinking": "SECRET",
+    "path": "C:\\SECRET"
+  },
+  "batch": {
+    "progress": {
+      "layout_version": 1,
+      "completion_version": 1,
+      "attempt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "generation": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "request_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "pi_session_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "workspace_id": "synthetic-workspace",
+      "pane_id": "synthetic-pane",
+      "terminal_id": "synthetic-terminal",
+      "phase": "submitted",
+      "control_pane": "synthetic-control",
+      "control_terminal": "synthetic-control-terminal"
+    },
+    "receipt": {
+      "attempt": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "generation": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "request_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "pi_session_id": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "workspace_id": "synthetic-workspace",
+      "pane_id": "synthetic-pane",
+      "terminal_id": "synthetic-terminal",
+      "version": 1,
+      "exited": true,
+      "started": true,
+      "exit_code": 0,
+      "stdout": {
+        "name": "stdout.jsonl",
+        "sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+        "size": 1024
+      },
+      "stderr": {
+        "name": "stderr.txt",
+        "sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "size": 32
+      },
+      "completion": {
+        "name": "result.json",
+        "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+        "size": 512
+      }
+    },
+    "result": {
+      "outcome": "succeeded",
+      "stop_reason": "stop",
+      "output": "Synthetic final answer. \u4e2d\u6587\u3002",
+      "truncated": false,
+      "records": 8,
+      "thinking": "SECRET"
+    },
+    "files": [
+      {
+        "ready_hash": "SECRET"
+      }
+    ]
+  }
+}

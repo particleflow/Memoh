@@ -1018,6 +1018,42 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "tasks": {
+      "title": "任务",
+      "detail": "任务详情",
+      "description": "本会话的任务记录。打开时自动刷新。",
+      "loadFailed": "暂时无法读取任务。",
+      "reload": "重新读取",
+      "result": "最终回复摘要",
+      "unavailable": "暂无可用的最终回复摘要。",
+      "truncated": "摘要已截断。",
+      "businessUnknown": "业务目标尚未独立核验。成果附件暂不可用。",
+      "cancelIntent": "已请求取消，但尚不能据此确认进程终止。",
+      "filteredPage": "本页没有可查看的任务，可继续下一页。",
+      "empty": "暂无任务记录。",
+      "newest": "返回最新",
+      "next": "下一页",
+      "types": {
+        "subagent": "子 Agent",
+        "computer_operation": "电脑任务"
+      },
+      "statuses": {
+        "unknown": "执行状态未知",
+        "submitted": "已记录提交",
+        "process_exited": "进程已退出",
+        "not_started": "未启动",
+        "rejected": "已拒绝"
+      },
+      "outcomes": {
+        "succeeded": "Pi 已完成",
+        "failed": "Pi 失败",
+        "aborted": "Pi 回报已中止",
+        "incomplete": "Pi 结果不完整",
+        "not_started": "Pi 未启动",
+        "invalid_protocol": "Pi 结果无法验证",
+        "output_limit": "Pi 结果超出观察上限"
+      }
+    },
     "uploadingAttachments": "正在上传附件…",
     "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",
     "workspaceLinkUnavailable": "此处无法打开工作区链接，请在有工作区访问权限的 Memoh 对话中打开。",

@@ -28251,6 +28251,28 @@ const docTemplate = `{
                 }
             }
         },
+        "sessiontask.ResultSummary": {
+            "type": "object",
+            "required": [
+                "source",
+                "text",
+                "truncated"
+            ],
+            "properties": {
+                "source": {
+                    "type": "string",
+                    "enum": [
+                        "pi_final_assistant"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "sessiontask.Task": {
             "type": "object",
             "required": [
@@ -28301,7 +28323,14 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "unknown",
-                        "not_applicable"
+                        "not_applicable",
+                        "succeeded",
+                        "failed",
+                        "aborted",
+                        "incomplete",
+                        "not_started",
+                        "invalid_protocol",
+                        "output_limit"
                     ]
                 },
                 "process_state": {
@@ -28311,6 +28340,9 @@ const docTemplate = `{
                         "exited",
                         "not_started"
                     ]
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/sessiontask.ResultSummary"
                 },
                 "revision": {
                     "type": "string"

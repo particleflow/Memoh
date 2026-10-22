@@ -7033,6 +7033,21 @@ definitions:
     required:
     - items
     type: object
+  sessiontask.ResultSummary:
+    properties:
+      source:
+        enum:
+        - pi_final_assistant
+        type: string
+      text:
+        type: string
+      truncated:
+        type: boolean
+    required:
+    - source
+    - text
+    - truncated
+    type: object
   sessiontask.Task:
     properties:
       attachments_available:
@@ -7062,6 +7077,13 @@ definitions:
         enum:
         - unknown
         - not_applicable
+        - succeeded
+        - failed
+        - aborted
+        - incomplete
+        - not_started
+        - invalid_protocol
+        - output_limit
         type: string
       process_state:
         enum:
@@ -7069,6 +7091,8 @@ definitions:
         - exited
         - not_started
         type: string
+      result_summary:
+        $ref: '#/definitions/sessiontask.ResultSummary'
       revision:
         type: string
       session_id:

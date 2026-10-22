@@ -10,6 +10,11 @@ export default [
   // (pinned verbatim; a freshness test diffs them against upstream).
   { ignores: ['**/node_modules/**', '**/dist/**', '**/out/**', '**/cache/**', '**/target/**', '**/.toolkit/**', 'packages/sdk/src/**', 'internal/**/protocolref/**'] },
   {
+    // Go embeds this standalone Node CommonJS helper; it has no ESM loader.
+    files: ['internal/agenvo/pi_result.cjs'],
+    rules: { '@typescript-eslint/no-require-imports': 'off' },
+  },
+  {
     files: ['packages/**/*.{js,jsx,ts,tsx}', 'apps/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parserOptions: {
