@@ -106,6 +106,7 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Run("device-registry", func(t *testing.T) { exerciseDeviceRegistry(ctx, t, store, pool, id) })
 	s := computertask.NewPostgresDeliveryService(store, assets)
 	out, err := s.Commit(ctx, id.OperationID, "result", ref)
 	if err != nil || out.Outcome != "committed" {

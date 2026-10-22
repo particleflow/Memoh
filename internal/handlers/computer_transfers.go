@@ -25,7 +25,7 @@ type ExecutionTransferVerifier interface {
 }
 
 // ComputerTransferHandler mounts only existing file/association handlers behind
-// a verified task principal. It remains unregistered in application providers.
+// a verified task principal. Application registration is explicitly opt-in.
 // A missing verifier yields 503; it never falls back to the account JWT path.
 type ComputerTransferHandler struct {
 	verifier       ExecutionTransferVerifier
@@ -60,6 +60,9 @@ func (h *ComputerTransferHandler) checkIdentity(ctx context.Context, id computer
 		return computertask.ErrDeliveryBinding
 	}
 	if err := h.revalidate(ctx, p); err != nil {
+		if errors.Is(err, ErrTransferVerificationUnavailable) {
+			return err
+		}
 		return computertask.ErrDenied // No raw verifier errors or credentials in HTTP/logs.
 	}
 	return h.base.CheckTransfer(ctx, false)
@@ -129,6 +132,9 @@ func (h *ComputerTransferHandler) guard(action string, next echo.HandlerFunc) ec
 			return apperror.New(apperror.CodeHTTPUnauthorized, nil)
 		}
 		p, err := h.authenticate(c, credential)
+		if errors.Is(err, ErrTransferVerificationUnavailable) {
+			return apperror.New(apperror.CodeHTTPServiceUnavailable, nil)
+		}
 		if err != nil || !p.Valid(time.Now()) {
 			return apperror.New(apperror.CodeHTTPUnauthorized, nil)
 		}

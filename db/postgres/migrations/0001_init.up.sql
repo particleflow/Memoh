@@ -288,6 +288,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_bots_name ON bots(name);
 -- has a short pending window; a ready connection activates it for reconnects.
 -- Activated tokens stay readable so their owner can copy the command again.
 CREATE TABLE IF NOT EXISTS user_runtimes (
+  transfer_credential_id TEXT NOT NULL DEFAULT '',
+  transfer_credential_digest TEXT NOT NULL DEFAULT '',
+  transfer_target_digest TEXT NOT NULL DEFAULT '',
+  transfer_expires_at TIMESTAMPTZ,
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL CHECK (btrim(name) <> ''),
@@ -304,6 +308,9 @@ CREATE TABLE IF NOT EXISTS user_runtimes (
     OR (activated_at IS NOT NULL AND pending_expires_at IS NULL)
   )
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_user_runtimes_transfer_credential
+  ON user_runtimes(transfer_credential_id) WHERE transfer_credential_id <> '';
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_user_runtimes_active_user_name
   ON user_runtimes(user_id, lower(name))

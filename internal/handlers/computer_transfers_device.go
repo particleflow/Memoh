@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"time"
@@ -14,8 +15,10 @@ import (
 	"github.com/felinics/memoh/internal/computertask"
 )
 
+var ErrTransferVerificationUnavailable = errors.New("device verification unavailable")
+
 // DeviceTransferVerifier authenticates a reusable device credential, independent
-// of any file or operation. No production credential store or issuer is supplied.
+// of any file or operation. The application uses the existing runtime registry.
 // ConnectionID belongs to the existing authorized Agenvo connection; its token
 // is NOT accepted as a Memoh credential. Revalidate must check current revocation.
 type DeviceTransferVerifier interface {
@@ -47,6 +50,9 @@ func (h *ComputerTransferHandler) authenticate(c echo.Context, credential string
 		return h.verifier.Verify(ctx, credential)
 	}
 	device, err := h.deviceVerifier.VerifyDevice(ctx, credential)
+	if errors.Is(err, ErrTransferVerificationUnavailable) {
+		return computertask.VerifiedTransfer{}, err
+	}
 	if err != nil || !device.Valid() {
 		return computertask.VerifiedTransfer{}, computertask.ErrDenied
 	}

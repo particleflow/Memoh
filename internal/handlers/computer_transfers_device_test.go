@@ -13,11 +13,15 @@ import (
 )
 
 type deviceVerifierFixture struct {
-	device  computertask.VerifiedTransferDevice
-	revoked atomic.Bool
+	device      computertask.VerifiedTransferDevice
+	revoked     atomic.Bool
+	unavailable atomic.Bool
 }
 
 func (v *deviceVerifierFixture) VerifyDevice(ctx context.Context, secret string) (computertask.VerifiedTransferDevice, error) {
+	if v.unavailable.Load() {
+		return computertask.VerifiedTransferDevice{}, ErrTransferVerificationUnavailable
+	}
 	if secret != "synthetic-reusable-device" {
 		return computertask.VerifiedTransferDevice{}, computertask.ErrDenied
 	}
@@ -49,6 +53,13 @@ func TestDeviceTransferCredentialReuseAndRecovery(t *testing.T) {
 		return c
 	}
 	first := newClient(job, task)
+	v.unavailable.Store(true)
+	_, err := first.Create(t.Context(), job.BotID, job.Spec)
+	var temporary *transferclient.HTTPError
+	if !errors.As(err, &temporary) || temporary.Status != 503 {
+		t.Fatal("verifier outage must be retryable", err)
+	}
+	v.unavailable.Store(false)
 	r, err := first.Create(t.Context(), job.BotID, job.Spec)
 	if err != nil {
 		t.Fatal(err)
