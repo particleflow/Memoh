@@ -210,23 +210,34 @@ export class EndpointLifecycle {
     this.state.phase = 'needs_attention'; this.state.attention = reason
     await this.save()
   }
-  async start({ acknowledgeAttention = false } = {}) {
-    demand(!this.release, 'endpoint_already_owned')
+  async start(options = {}) {
+    demand(!this.starting && !this.release, 'endpoint_already_owned')
+    this.stopping = false
+    this.starting = this.startOwned(options)
+    try { return await this.starting } finally { this.starting = null }
+  }
+  async startOwned({ acknowledgeAttention = false } = {}) {
     this.release = await this.acquire()
     try {
       this.state = await this.store.load()
       if (this.state.attention && !acknowledgeAttention) throw new LifecycleError(this.state.attention)
       this.state.attention = null
-      this.stopping = false
+      demand(!this.stopping, 'startup_cancelled')
       await this.driver.validate()
       demand(!this.driver.hostStatus().running, 'existing_herdr_requires_handoff')
+      demand(!this.stopping, 'startup_cancelled')
       this.state.phase = 'starting'; await this.save()
       await this.driver.start('herdr'); await this.driver.waitReady('herdr')
+      demand(!this.stopping, 'startup_cancelled')
       await this.driver.start('connector'); await this.driver.waitReady('connector')
+      demand(!this.stopping, 'startup_cancelled')
       this.state.phase = 'running'; await this.save()
       return this.snapshot()
     } catch (error) {
-      if (this.state) await this.attention(code(error))
+      if (this.state) {
+        if (code(error) === 'startup_cancelled') { this.state.phase = 'stopped'; this.state.attention = null; await this.save() }
+        else await this.attention(code(error))
+      }
       // Partial starts belong to this coordinator only; never adopt/stop an
       // already-running host. Keep the lease if cleanup has an uncertain result.
       try {
@@ -277,6 +288,12 @@ export class EndpointLifecycle {
   }
   async stop() {
     this.stopping = true
+    if (this.closing) return this.closing
+    this.closing = this.stopOwned()
+    try { return await this.closing } finally { this.closing = null }
+  }
+  async stopOwned() {
+    if (this.starting) await this.starting.catch(() => {})
     if (this.active) await this.active
     if (!this.release) return this.snapshot()
     this.state.phase = 'stopping'; await this.save()

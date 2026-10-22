@@ -149,3 +149,20 @@ test('shared managed environment removes all reserved pollution, not just overla
   assert.equal(env.PATH.includes('polluted'), false)
   assert.equal(env.AGENVO_CONFIG_DIR, '/agenvo')
 })
+
+
+test('stop during startup waits for owned cleanup and never starts connector', async t => {
+  const { lifecycle, driver, alive, calls } = await fixture(t)
+  let resume, entered
+  const ready = new Promise(r => { entered = r })
+  driver.waitReady = async c => { if (c === 'herdr') await new Promise(r => { resume = r; entered() }) }
+  const start = lifecycle.start()
+  const rejected = assert.rejects(start, /startup_cancelled/)
+  await ready
+  const stops = [lifecycle.stop(), lifecycle.stop()]
+  resume(); await Promise.all([rejected, ...stops])
+  assert.equal(calls.includes('start:connector'), false)
+  assert.equal(alive.size, 0)
+  assert.equal(lifecycle.release, null)
+  assert.equal(lifecycle.state.attention, null)
+})
