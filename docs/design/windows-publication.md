@@ -18,6 +18,13 @@ arbitrary workspace destination or physical filename is accepted or returned.
 Every action calls the injected, current host task/destination authorizer. A
 logical operation ID, successful storage probe or local file is not authority.
 
+`InvokeHerdrNativeDelivery` opens the same resolved queue, binds this destination
+to the existing `Client.DeliveryBinding`, invokes the same Herdr action body and
+closes its handles. `advance`/`reconcile` for a download require the current host
+authorizer even before publication. The two-minute invocation budget remains.
+This is an embedding entry point: the shipped probe/inspection command does not
+invent credentials or silently enable network transfer.
+
 ## Protocol
 
 The existing queue verifies a download and holds its private handle throughout
@@ -57,3 +64,12 @@ both sides of rename, durable fence/publish races, reopens and adversarial paths
 Cross-compilation and Linux fixtures do not substitute for those runs. Production
 PC identity, HTTPS, destination consumption/retention and real UI/human acceptance
 remain separate prerequisites. Media Range behavior is unchanged.
+
+The native fixtures use private temporary directories and synthetic loopback TLS.
+They terminate a real child process after prepared fsync, after rename and after
+terminal receipt fsync, then reopen and reconcile cancellation through the queue
+and NAS protocol adapter. Further cases cover competing publishers/cancellation,
+same-delivery replay, stable directory identity, revocation before rename,
+hardlinks/symlinks, a same-content replacement and a destination created after
+the preflight check. Symlink coverage fails explicitly if its isolated fixture
+cannot be created; the tests never enable privileges to make it pass.

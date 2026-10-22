@@ -19,6 +19,7 @@ import (
 )
 
 const (
+	publicationDirectory    = "publications-v1"
 	publicationReceipts     = 128
 	publicationJournalBytes = 64 << 10
 )
@@ -46,10 +47,10 @@ func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*
 	if q == nil || q.root == nil || authorize == nil {
 		return nil, ErrBinding
 	}
-	if err := makeQueueDir(q.root, "publications-v1"); err != nil {
+	if err := makeQueueDir(q.root, publicationDirectory); err != nil {
 		return nil, err
 	}
-	root, err := q.root.OpenRoot("publications-v1")
+	root, err := q.root.OpenRoot(publicationDirectory)
 	if err != nil {
 		return nil, ErrStore
 	}
