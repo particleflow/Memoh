@@ -133,6 +133,9 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 		}
 		seen[stem] = true
 		r, err := q.admissionHead(stem + ".journal")
+		if errors.Is(err, ErrVersion) {
+			return nil, err
+		}
 		if err != nil {
 			q.markJournal("admission_after_head_error")
 			if checkpoint, checkpointErr := q.activeCheckpointHead(stem + ".checkpoint"); checkpointErr == nil {
@@ -190,7 +193,13 @@ func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
 	}
 	dec := json.NewDecoder(bytes.NewReader(body))
 	dec.DisallowUnknownFields()
-	if err != nil || dec.Decode(&r) != nil || !q.validRecord(r, r.Job.DeliveryID) {
+	if err != nil || dec.Decode(&r) != nil {
+		return QueueStatus{}, ErrStore
+	}
+	if r.Version != 2 && r.Version != 3 && r.Version != 4 {
+		return QueueStatus{}, errors.Join(ErrStore, ErrVersion)
+	}
+	if !q.validRecord(r, r.Job.DeliveryID) {
 		return QueueStatus{}, ErrStore
 	}
 	suffix := ".journal"
@@ -325,6 +334,8 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		r.Job.Phase, r.Job.ErrorCode, r.Job.NextAttempt = "canceled", "", time.Time{}
 		return q.save(journal, r)
 	}
+	// Fairness metadata uses the same journal, identity and job lock. It is not a retry deadline.
+	r.LastRun = now.UTC()
 	if r.AssociationState == AssociationInFlight || r.AssociationState == "" && r.AssociationAttempts > 0 && !r.Associated {
 		r.AssociationState = AssociationUnknown
 		if err := q.save(journal, r); err != nil {

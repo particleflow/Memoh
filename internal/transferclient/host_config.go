@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"os"
 	"path/filepath"
@@ -45,12 +46,12 @@ func privateHostRoot(path string) (*os.Root, *os.File, error) {
 	}
 	if err = checkQueueRoot(root); err != nil {
 		_ = root.Close()
-		return nil, nil, ErrBinding
+		return nil, nil, errors.Join(ErrBinding, err)
 	}
 	guard, err := guardQueueRoot(root)
 	if err != nil {
 		_ = root.Close()
-		return nil, nil, ErrBinding
+		return nil, nil, errors.Join(ErrBinding, err)
 	}
 	return root, guard, nil
 }

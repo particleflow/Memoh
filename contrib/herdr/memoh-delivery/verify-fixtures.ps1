@@ -3,9 +3,9 @@ $ErrorActionPreference = 'Stop'
 # production state, credentials, ACL repair, firewall or service changes.
 $bundle = $PSScriptRoot
 $manifest = Get-Content -LiteralPath (Join-Path $bundle 'SHA256SUMS.json') -Raw | ConvertFrom-Json
-$expected = @('transferqueue.exe', 'transferqueue.test.exe', 'herdr-plugin.toml', 'verify-fixtures.ps1', 'README.md', 'transfer.example.json')
+$expected = @('transferqueue.exe', 'transferqueue.test.exe', 'transferqueue-cli.test.exe', 'herdr-plugin.toml', 'verify-fixtures.ps1', 'README.md', 'transfer.example.json')
 $names = @($manifest.files | ForEach-Object { $_.name } | Sort-Object -Unique)
-if ($manifest.files.Count -ne 6 -or $names.Count -ne 6 -or (Compare-Object $expected $names)) {
+if ($manifest.files.Count -ne 7 -or $names.Count -ne 7 -or (Compare-Object $expected $names)) {
     throw 'Incomplete or duplicated bundle manifest'
 }
 if ($manifest.source_commit -notmatch '^[0-9a-f]{40}$') { throw 'Invalid source commit' }
@@ -20,3 +20,8 @@ foreach ($entry in $manifest.files) {
 # fixtures. It does not consume HERDR_PLUGIN_STATE_DIR or remote endpoints.
 & (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNative' '-test.v' '-test.timeout=5m'
 if ($LASTEXITCODE -ne 0) { throw "Native fixture validation failed: $LASTEXITCODE" }
+
+# The CLI test binary invokes its real command dispatcher in fresh processes,
+# with an ephemeral TLS root supplied only by test code. Production has no bypass.
+& (Join-Path $bundle 'transferqueue-cli.test.exe') '-test.run=^TestCLIPath' '-test.v' '-test.timeout=5m'
+if ($LASTEXITCODE -ne 0) { throw "CLI fixture validation failed: $LASTEXITCODE" }

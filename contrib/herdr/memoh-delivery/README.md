@@ -177,3 +177,25 @@ Do not install/link or configure this package against production as part of
 fixture acceptance. The API fault model and limitations are documented in
 `docs/design/windows-native-binding.md` and `docs/design/device-delivery-binding.md`.
 CI success is not real UI or human QA. The PR remains draft pending those checks.
+
+## Lifecycle consumer handoff (0.5.0)
+
+The finite `lifecycle-summary` action and `advance-results` expose the exact
+`memoh.delivery.lifecycle.v1` decision fields documented in
+[delivery-lifecycle-summary](../../../docs/delivery-lifecycle-summary.md).
+The unified lifecycle owner is `particleflow/windows-endpoint`; this plugin does
+not start a daemon or implement endpoint timers. The summary covers admitted
+queue state, not unclosed/unadmitted producer outputs.
+
+The review bundle now has eight members including `SHA256SUMS.json`: it adds
+`transferqueue-cli.test.exe` beside the existing component test binary. Its
+`TestCLIPathTLSRestartAndLostResponses` runs the real CLI dispatch/stdin/JSON in
+fresh processes against a small isolated HTTPS NAS protocol fixture. Trust is
+injected only by test code; production accepts no TLS bypass flag. The test does
+not establish production Server/PG acceptance or physical power-loss behavior.
+
+The manifest pins every payload hash and source commit. GitHub Actions artifacts
+remain expiring review artifacts, not a durable installation/update channel.
+Do not silently substitute a new archive for an older pinned consumer hash or
+change extraction allowlists without a versioned handoff. Durable distribution
+must be reviewed separately; no release or production installation occurs here.

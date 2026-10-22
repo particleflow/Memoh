@@ -193,6 +193,12 @@ func (h *HostConfig) producerManifests() ([]string, error) {
 }
 
 func AdvanceProducer(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, transport *http.Client, now time.Time) (QueueStatus, error) {
+	cfg, err := OpenHostConfig(getenv)
+	if err != nil {
+		return QueueStatus{}, err
+	}
+	binding := cfg.Binding
+	_ = cfg.Close()
 	q, err := OpenHerdrQueue(getenv, revision, limits)
 	if err != nil {
 		return QueueStatus{}, err
@@ -201,7 +207,7 @@ func AdvanceProducer(ctx context.Context, getenv func(string) string, revision s
 		_ = q.Close()
 		return QueueStatus{}, err
 	}
-	id, err := q.nextDue(now)
+	id, err := q.nextDueForBinding(now, binding)
 	_ = q.Close()
 	if err != nil {
 		return QueueStatus{}, err

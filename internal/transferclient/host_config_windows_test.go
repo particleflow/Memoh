@@ -50,3 +50,10 @@ func TestWindowsNativeProducerFeedback(t *testing.T) {
 func TestWindowsNativeProducerInvalidManifest(t *testing.T) {
 	TestProducerBadManifestDoesNotStarveValidDelivery(t)
 }
+
+func TestWindowsNativeLifecycle(t *testing.T) {
+	t.Run("mixed", TestLifecycleReadOnlyMixedDueAndBackoff)
+	t.Run("recovery", TestLifecycleReadOnlyTornAndCheckpoint)
+	t.Run("empty-busy", TestLifecycleEmptyBusyAndClassification)
+	t.Run("fair", TestLifecycleEarliestDueAndFairRotation)
+}
