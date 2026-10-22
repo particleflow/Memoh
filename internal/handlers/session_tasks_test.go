@@ -5,11 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
@@ -146,12 +148,13 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 		if strings.Contains(rec.Body.String(), "SECRET") {
 			t.Fatal("diagnostic/content leak")
 		}
-		if want == 200 && rec.Header().Get("Cache-Control") != "no-store" {
-			t.Fatal("cache may bypass revocation")
+		if rec.Header().Get("Cache-Control") != "no-store" {
+			t.Fatalf("%s %s: status %d missing no-store", method, path, rec.Code)
 		}
 		return rec.Body.String()
 	}
 	call("GET", base, "", 401)
+	call("GET", detail, "", 401)
 	if f.reads != 0 {
 		t.Fatal("unauthenticated read")
 	}
@@ -185,5 +188,81 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 	}
 	if f.relayCalls != 0 || f.op.Revision != 0 {
 		t.Fatal("GET caused an external call or mutation")
+	}
+}
+
+func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
+	e := echo.New()
+	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
+	// Match the production order: JWT is installed globally before handlers
+	// register. Neither missing/invalid JWTs nor revoked accounts reach them.
+	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }, func(_ context.Context, user string) error {
+		if user == taskUser {
+			return errors.New("SECRET revoked account")
+		}
+		return nil
+	}))
+	NewSessionTaskHandler(nil, nil, nil).Register(e)
+	sign := func(secret string, expiry time.Time) string {
+		t.Helper()
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": taskUser, "exp": expiry.Unix()}).SignedString([]byte(secret))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return token
+	}
+	base := "/bots/" + taskBot + "/sessions/" + taskRoot
+	for name, token := range map[string]string{
+		"anonymous": "", "malformed": "invalid",
+		"bad_signature": sign("wrong-secret", time.Now().Add(time.Minute)),
+		"expired":       sign("test-secret", time.Now().Add(-time.Minute)),
+		"revoked":       sign("test-secret", time.Now().Add(time.Minute)),
+	} {
+		t.Run(name, func(t *testing.T) {
+			for _, route := range []struct {
+				path    string
+				noStore bool
+			}{
+				{base + "/tasks", true},
+				{base + "/tasks/", true},
+				{base + "/tasks/computer_operation/" + taskOp, true},
+				{base + "/tasks/computer_operation/" + taskOp + "/attachments", true},
+				{base + "/tasks-extra", false},
+				{base + "/messages", false},
+				{"/other" + base + "/tasks", false},
+			} {
+				req := httptest.NewRequest(http.MethodGet, route.path, nil)
+				if token != "" {
+					req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+				}
+				rec := httptest.NewRecorder()
+				e.ServeHTTP(rec, req)
+				if rec.Code != 401 || rec.Header().Get(echo.HeaderContentType) != "application/problem+json" {
+					t.Fatalf("%s: status=%d type=%s", route.path, rec.Code, rec.Header().Get(echo.HeaderContentType))
+				}
+				if (rec.Header().Get(echo.HeaderCacheControl) == "no-store") != route.noStore {
+					t.Fatalf("%s: wrong cache policy %q", route.path, rec.Header().Get(echo.HeaderCacheControl))
+				}
+				if strings.Contains(rec.Body.String(), "SECRET") {
+					t.Fatal("account diagnostic leaked")
+				}
+			}
+		})
+	}
+	// Existing policies on adjacent routes remain intact for authenticated users.
+	e.GET(base+"/messages", func(c echo.Context) error {
+		c.Response().Header().Set(echo.HeaderCacheControl, "private, max-age=60")
+		return c.NoContent(200)
+	})
+	token, _, err := auth.GenerateToken(taskOwner, "test-secret", time.Minute)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodGet, base+"/messages", nil)
+	req.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+	if rec.Code != 200 || rec.Header().Get(echo.HeaderCacheControl) != "private, max-age=60" {
+		t.Fatal("task policy changed adjacent route response")
 	}
 }

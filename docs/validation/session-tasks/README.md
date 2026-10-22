@@ -9,6 +9,28 @@ The only merge conflicts with PR #8 were generated SDK files, resolved by
 regenerating Swagger and SDK with the merged generator configuration.
 API contract: [session-tasks-api.md](../../session-tasks-api.md).
 
+## Cache policy correction (2026-10-22)
+
+The previous implementation set `Cache-Control: no-store` inside the task
+handler's authorization helper. A request rejected earlier by global JWT
+middleware therefore returned 401 without that header. The existing full
+Echo/JWT/handler test reproduced the failure once its header assertion was
+extended from successful responses to every response.
+
+The task handler now registers a narrowly scoped Echo pre-routing middleware.
+It applies the header before global authentication and route dispatch for the
+`/bots/:bot_id/sessions/:session_id/tasks` namespace, including unsupported
+descendant paths and methods. It uses Echo's own raw-path selection. Adjacent
+message/session paths and similarly named `tasks-extra` paths are unaffected.
+No auth rules, payload fields, SDK definitions or Agent code changed.
+
+Regression coverage exercises the actual JWT middleware and Problem renderer
+through `Echo.ServeHTTP`, not direct handler calls: missing/malformed tokens,
+wrong signatures, expired tokens, revoked accounts, denied Bot grants, hidden
+tasks, invalid parameters and unsupported methods. All task responses carry
+`no-store`; adjacent route policies are preserved. Target resolution and
+receipt mutation assertions still require zero dispatch and unchanged state.
+
 ## Environment and boundaries
 
 - Isolated Linux cloud checkout, native current-source Go Server at
@@ -34,22 +56,21 @@ API contract: [session-tasks-api.md](../../session-tasks-api.md).
 Passed again on the integrated source (not reused from the old checkpoint):
 
 ```text
-go test -race -count=1 -p 3 ./internal/sessiontask ./internal/handlers ./internal/server ./internal/apperror ./internal/agenvo ./internal/computertask ./internal/db/postgres/store ./internal/media ./internal/storage/providers/localfs
+go test -race -count=1 -p 3 ./internal/sessiontask ./internal/handlers ./internal/auth ./internal/server ./internal/apperror
 go test -tags=integration -p 2 ./internal/db -run TestSessionTasksPostgres -count=1 -v
 go build -p 3 -o <cloud-server> ./cmd/agent
-golangci-lint run ./internal/sessiontask/... ./internal/handlers/... ./internal/db/store/... ./internal/db/postgres/store/... ./cmd/agent/...
-go generate ./internal/handlers
-pnpm run generate-sdk
+golangci-lint run ./internal/handlers/...
 pnpm --filter @memohai/sdk typecheck
 NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run apps/web/src/utils/api-error.test.ts apps/web/src/composables/api/sse-error.test.ts --maxWorkers=3
-pnpm lint
 bash scripts/check-agent-core-boundary.sh
 git diff --check
 ```
 
-- Frontend error tests: 2 files, 123 tests passed. ESLint: 0 errors and 18
-  existing warnings. Generated SDK files are intentionally ignored by ESLint;
-  a direct SDK lint invocation reported that, then normal repository lint ran.
+- Frontend error tests: 2 files, 123 tests passed. The prior `1efb4a0b`
+  integration also passed the Agenvo/computer/media/localfs race suites and
+  broader Go lint, plus repository ESLint (0 errors, 18 existing warnings).
+  This header-only correction changes no frontend, generated files or DB code;
+  its rerun commands above target the HTTP/auth boundary and task regressions.
 - Authorization tests cover user/Bot/session/PC mismatch, intermediate
   ownership/deletion/cycles, inherited PC scope, target grant/source permission
   revocation, changed registration, malformed selection metadata, primary
@@ -75,13 +96,14 @@ git diff --check
 
 ## Real HTTP and browser checks
 
-The rebuilt real server passed 16 HTTP checks: unauthenticated rejection,
+The rebuilt real server passed 17 HTTP checks: unauthenticated list/detail rejection,
 multi-page traversal, grandchild-owned operation detail under a parent,
 cross-root refusal, PC-A-only aggregation, foreign-PC refusal through a child
 root, unavailable attachments, runtime revocation and restoration, persisted
 unbound selection, primary-PC fallback and explicit NAS selection. Workdir
 priority also remains covered by the service tests. The operation IDs, revisions, states, cancel flags and
-details digests were identical before and after all GET requests.
+details digests were identical before and after all GET requests. Every checked
+response, including 401/404, carried `Cache-Control: no-store`.
 
 In Chromium, authenticated through the normal login UI using the existing
 local development account. Opened the
@@ -99,6 +121,9 @@ returned 200 with the actual grandchild session ID, `unknown`, cancellation
 intent and both content/attachment availability flags false. No browser page
 errors occurred in the final flow. Both screenshots below were recaptured and
 inspected on the integrated source.
+The same page also fetched the task list without authorization and task detail
+with an invalid JWT through the real Vite proxy: both returned 401 with
+`Cache-Control: no-store`.
 
 ![Actual parent conversation in the running Web app](parent.png)
 

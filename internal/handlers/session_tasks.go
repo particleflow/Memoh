@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -25,13 +26,23 @@ func NewSessionTaskHandler(service *sessiontask.Service, bots *bots.Service, acc
 }
 
 func (h *SessionTaskHandler) Register(e *echo.Echo) {
+	// Global JWT middleware can reject before a route handler runs. Apply the
+	// task response policy before routing/auth, including namespace 404/405s.
+	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			parts := strings.SplitN(echo.GetPath(c.Request()), "/", 7)
+			if len(parts) >= 6 && parts[0] == "" && parts[1] == "bots" && parts[2] != "" && parts[3] == "sessions" && parts[4] != "" && parts[5] == "tasks" {
+				c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
+			}
+			return next(c)
+		}
+	})
 	g := e.Group("/bots/:bot_id/sessions/:session_id/tasks")
 	g.GET("", h.List)
 	g.GET("/:task_type/:task_id", h.Get)
 }
 
 func (h *SessionTaskHandler) authorize(c echo.Context) (string, error) {
-	c.Response().Header().Set("Cache-Control", "no-store")
 	user, err := RequireChannelIdentityID(c)
 	if err != nil {
 		return "", err
