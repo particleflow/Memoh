@@ -1,0 +1,75 @@
+{
+  "checks": [
+    {
+      "command": [
+        "bash",
+        "scripts/check-agent-core-boundary.sh",
+        "acd9f21122a99efd66f8af98e8abd48122084545"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "18b599e2a878c119142d8016b73e7ef5385b0f7b",
+        "acd9f21122a99efd66f8af98e8abd48122084545",
+        "--",
+        "db/postgres/migrations",
+        "spec",
+        "packages/sdk",
+        "internal/agent/runtime",
+        "internal/contextview",
+        "packages/runtime",
+        ".github/workflows"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--exit-code",
+        "6e477b42280f19d57b883ee9267703f25f27bb15",
+        "acd9f21122a99efd66f8af98e8abd48122084545",
+        "--",
+        "internal/transferclient",
+        "cmd/transferqueue",
+        "contrib/herdr/memoh-delivery"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "18b599e2a878c119142d8016b73e7ef5385b0f7b",
+        "acd9f21122a99efd66f8af98e8abd48122084545"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "6e477b42280f19d57b883ee9267703f25f27bb15",
+        "acd9f21122a99efd66f8af98e8abd48122084545"
+      ],
+      "exit_code": 0
+    },
+    {
+      "command": [
+        "git",
+        "merge-base",
+        "--is-ancestor",
+        "65c7c11a00dd48eeea6ee1bbbb4cc7317c57e466",
+        "acd9f21122a99efd66f8af98e8abd48122084545"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "exit_code": 0
+}

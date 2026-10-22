@@ -1,0 +1,308 @@
+{
+  "boundary": {
+    "checks": [
+      {
+        "command": [
+          "bash",
+          "scripts/check-agent-core-boundary.sh",
+          "acd9f21122a99efd66f8af98e8abd48122084545"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--exit-code",
+          "18b599e2a878c119142d8016b73e7ef5385b0f7b",
+          "acd9f21122a99efd66f8af98e8abd48122084545",
+          "--",
+          "db/postgres/migrations",
+          "spec",
+          "packages/sdk",
+          "internal/agent/runtime",
+          "internal/contextview",
+          "packages/runtime",
+          ".github/workflows"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "diff",
+          "--exit-code",
+          "6e477b42280f19d57b883ee9267703f25f27bb15",
+          "acd9f21122a99efd66f8af98e8abd48122084545",
+          "--",
+          "internal/transferclient",
+          "cmd/transferqueue",
+          "contrib/herdr/memoh-delivery"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "merge-base",
+          "--is-ancestor",
+          "18b599e2a878c119142d8016b73e7ef5385b0f7b",
+          "acd9f21122a99efd66f8af98e8abd48122084545"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "merge-base",
+          "--is-ancestor",
+          "6e477b42280f19d57b883ee9267703f25f27bb15",
+          "acd9f21122a99efd66f8af98e8abd48122084545"
+        ],
+        "exit_code": 0
+      },
+      {
+        "command": [
+          "git",
+          "merge-base",
+          "--is-ancestor",
+          "65c7c11a00dd48eeea6ee1bbbb4cc7317c57e466",
+          "acd9f21122a99efd66f8af98e8abd48122084545"
+        ],
+        "exit_code": 0
+      }
+    ],
+    "exit_code": 0
+  },
+  "desktop-type": {
+    "check": "desktop-type",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/desktop",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:00:37Z",
+    "elapsed_seconds": 8.052
+  },
+  "go-botdelegation": {
+    "check": "go-botdelegation",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "180s",
+      "./internal/botdelegation"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:09:36Z",
+    "elapsed_seconds": 2.517,
+    "named_test_events": {
+      "pass": 45
+    }
+  },
+  "go-delivery": {
+    "check": "go-delivery",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "180s",
+      "-run",
+      "Delegat|AuthorizedDelivery",
+      "./internal/botdelegation",
+      "./internal/agent/application",
+      "./internal/handlers"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:01:29Z",
+    "elapsed_seconds": 58.738,
+    "named_test_events": {
+      "pass": 7
+    }
+  },
+  "go-transfer": {
+    "check": "go-transfer",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "180s",
+      "./internal/transferclient",
+      "./cmd/transferqueue"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T22:57:41Z",
+    "elapsed_seconds": 30.544,
+    "named_test_events": {
+      "pass": 215
+    }
+  },
+  "pg-delivery": {
+    "check": "pg-delivery",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-tags=integration",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "180s",
+      "-run",
+      "^Test(ConnectorDisconnectFinalizationIsAtomicAndScoped|ComputerDeliveryPostgres.*|BotDelegationPostgres.*|SessionTasksPostgres.*)$",
+      "./internal/db"
+    ],
+    "exit_code": 0,
+    "named_test_events": {
+      "pass": 26
+    }
+  },
+  "sdk-type": {
+    "check": "sdk-type",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/sdk",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:00:34Z",
+    "elapsed_seconds": 2.632
+  },
+  "server-build": {
+    "check": "server-build",
+    "command": [
+      "go",
+      "build",
+      "-p",
+      "1",
+      "-o",
+      "/tmp/memoh-history-server",
+      "./cmd/agent"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:02:27Z",
+    "elapsed_seconds": 5.391
+  },
+  "ui-contract": {
+    "check": "ui-contract",
+    "command": [
+      "node",
+      "scripts/check-ui-contract.mjs"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:01:02Z",
+    "elapsed_seconds": 0.626
+  },
+  "web-build": {
+    "check": "web-build",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "exec",
+      "vite",
+      "build",
+      "--outDir",
+      "/tmp/memoh-history-web-dist"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:01:03Z",
+    "elapsed_seconds": 5.445
+  },
+  "web-eslint": {
+    "check": "web-eslint",
+    "command": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "apps/web"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:00:45Z",
+    "elapsed_seconds": 17.241
+  },
+  "web-full": {
+    "check": "web-full",
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--project",
+      "web",
+      "--maxWorkers=2",
+      "--testTimeout=15000"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T22:58:29Z",
+    "elapsed_seconds": 95.43
+  },
+  "web-targeted": {
+    "check": "web-targeted",
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--maxWorkers=2",
+      "--testTimeout=15000",
+      "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts",
+      "apps/web/src/pages/home/composables/useBotDelegations.test.ts",
+      "apps/web/src/pages/home/composables/useSessionTasks.test.ts",
+      "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts",
+      "apps/web/src/pages/home/components/session-tasks.test.ts",
+      "apps/web/src/lib/api-client.test.ts",
+      "apps/web/src/utils/api-error.test.ts",
+      "apps/web/src/composables/api/sse-error.test.ts"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T22:58:21Z",
+    "elapsed_seconds": 8.704
+  },
+  "web-type": {
+    "check": "web-type",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:00:05Z",
+    "elapsed_seconds": 29.689
+  },
+  "windows-compile": {
+    "check": "windows-compile",
+    "command": [
+      "go",
+      "test",
+      "-c",
+      "-o",
+      "/tmp/memoh-history-transfer-windows.test.exe",
+      "./internal/transferclient"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:02:33Z",
+    "elapsed_seconds": 12.231
+  }
+}

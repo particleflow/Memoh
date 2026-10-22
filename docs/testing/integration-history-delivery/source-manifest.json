@@ -1,0 +1,82 @@
+{
+  "base": "18b599e2a878c119142d8016b73e7ef5385b0f7b",
+  "product_commit": "acd9f21122a99efd66f8af98e8abd48122084545",
+  "product_tree": "22fab01d81508cb54551101f5b040f7167643137",
+  "merge_parents": [
+    "b9336cd09d282562b4aafe4fcb6a53f308ac14f8",
+    "65c7c11a00dd48eeea6ee1bbbb4cc7317c57e466"
+  ],
+  "official_core_baseline": "bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046",
+  "api_paths": 275,
+  "api_http_operations": 360,
+  "changed_paths_from_base": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.vue",
+    "apps/web/src/pages/home/components/session-tasks.test.ts",
+    "apps/web/src/pages/home/components/session-tasks.vue",
+    "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts",
+    "apps/web/src/pages/home/composables/useBotDelegationDelivery.ts",
+    "apps/web/src/pages/home/composables/useBotDelegations.ts",
+    "cmd/transferqueue/cli_path_test.go",
+    "cmd/transferqueue/main.go",
+    "contrib/herdr/memoh-delivery/README.md",
+    "contrib/herdr/memoh-delivery/herdr-plugin.toml",
+    "docs/delivery-queue-retention.md",
+    "docs/delivery-terminal-history.md",
+    "docs/validation/web-bot-delegation-delivery/README.md",
+    "docs/validation/web-bot-delegation-delivery/baseline-observer-tests-node25.txt",
+    "docs/validation/web-bot-delegation-delivery/eslint-final.txt",
+    "docs/validation/web-bot-delegation-delivery/evidence-sha256.json",
+    "docs/validation/web-bot-delegation-delivery/probe-accessibility.txt",
+    "docs/validation/web-bot-delegation-delivery/readonly-ui.txt",
+    "docs/validation/web-bot-delegation-delivery/related-tests-final.txt",
+    "docs/validation/web-bot-delegation-delivery/source-manifest.json",
+    "docs/validation/web-bot-delegation-delivery/typecheck-baseline.txt",
+    "docs/validation/web-bot-delegation-delivery/typecheck-comparison.json",
+    "docs/validation/web-bot-delegation-delivery/typecheck-final.txt",
+    "docs/validation/web-bot-delegation-delivery/ui-contract-final.txt",
+    "docs/validation/web-bot-delegation-delivery/ui-denial.txt",
+    "docs/validation/web-bot-delegation-delivery/ui-final.txt",
+    "docs/validation/web-bot-delegation-delivery/ui/dark-narrow-zh.png",
+    "docs/validation/web-bot-delegation-delivery/ui/readonly-host.png",
+    "docs/validation/web-bot-delegation-delivery/ui/real-revocation-denied.png",
+    "docs/validation/web-bot-delegation-delivery/ui/real-revocation.json",
+    "docs/validation/web-bot-delegation-delivery/ui/results.json",
+    "docs/validation/web-bot-delegation-delivery/ui/retry-accepted.png",
+    "docs/validation/web-bot-delegation-delivery/ui/retry-available.png",
+    "docs/validation/web-bot-delegation-delivery/ui/retry-pending.png",
+    "docs/validation/web-bot-delegation-delivery/web-build.txt",
+    "internal/transferclient/durable.go",
+    "internal/transferclient/history.go",
+    "internal/transferclient/history_migration.go",
+    "internal/transferclient/history_migration_test.go",
+    "internal/transferclient/history_test.go",
+    "internal/transferclient/host_queue.go",
+    "internal/transferclient/producer_feedback.go",
+    "internal/transferclient/retention.go",
+    "internal/transferclient/retention_test.go"
+  ],
+  "schema": {
+    "integration_web_types": {
+      "version": 173,
+      "dirty": false,
+      "read_only_observation": true
+    },
+    "integration_memory_files_types": {
+      "version": 173,
+      "dirty": false,
+      "read_only_observation": true
+    }
+  },
+  "migration_blobs": {
+    "db/postgres/migrations/0171_computer_delivery_guard.down.sql": "f27385c4b3d591e98432c2d99e002ca690984423",
+    "db/postgres/migrations/0171_computer_delivery_guard.up.sql": "e1b4dab84302124424109387f543f6a293ea3d77",
+    "db/postgres/migrations/0172_runtime_transfer_credentials.down.sql": "ca3a724652b58c37bc927fe69037e72c93ef5fe2",
+    "db/postgres/migrations/0172_runtime_transfer_credentials.up.sql": "3581b5125e05b776d4a5230a57a07a97d09907d7",
+    "db/postgres/migrations/0173_bot_delegations.down.sql": "bf955299d4bf53ebd6ae6ecd7daa34cc08bc14a4",
+    "db/postgres/migrations/0173_bot_delegations.up.sql": "178736d98126cd12c0a6da2ea0a37188f15c78ad"
+  }
+}

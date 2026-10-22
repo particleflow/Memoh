@@ -1,0 +1,383 @@
+{
+  "syntheticSeed": true,
+  "mockedAPI": false,
+  "heldActualPOSTResponse": true,
+  "posts": 1,
+  "requestProof": {
+    "method": "POST",
+    "emptyBody": true,
+    "sameLogin": true
+  },
+  "response": {
+    "status": 200,
+    "execution": "completed",
+    "delivery": "accepted"
+  },
+  "runLedgerUnchanged": true,
+  "runCount": 1,
+  "runStatuses": [
+    "failed"
+  ],
+  "readonlyHost": {
+    "buttons": 0,
+    "apiRequests": 0
+  },
+  "pageErrors": [],
+  "responses": [
+    {
+      "path": "/src/composables/api/useChat.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useWorkdirs.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.types.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.chat-api.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.message-api.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.ws.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useApps.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useBot.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChatExamples.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useScheduleRuns.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useWorkspaceDependencies.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useAppStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/sse-error.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useDisplayPrepareStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useStarterPrompts.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useWorkdirs.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.chat-api.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.types.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.ws.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChat.message-api.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useBot.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useApps.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useChatExamples.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useScheduleRuns.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useWorkspaceDependencies.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useAppStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useDisplayPrepareStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useStarterPrompts.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/sse-error.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/integration-memory",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/workdirs",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container",
+      "status": 404,
+      "method": "GET"
+    },
+    {
+      "path": "/api/ping",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/models",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/agents",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/model-preference-seed",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/skills/catalog",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/providers",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/workspace-targets",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container/fs/list",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/events",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/starter-prompts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/queue",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/messages",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/status",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/messages",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/tasks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container/fs/list",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useBotCreateStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/botCreateTerminal.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useContainerStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations/e3a54ce6-9493-597a-ad29-a6f25c1e1cb7",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/src/composables/api/useWorkspaceDependencyStream.ts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations/e3a54ce6-9493-597a-ad29-a6f25c1e1cb7/delivery",
+      "status": 200,
+      "method": "POST"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations/e3a54ce6-9493-597a-ad29-a6f25c1e1cb7",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/container/fs/list",
+      "status": 503,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/11111111-2222-4333-8444-555555555555/sessions/33333333-4444-4555-8666-777777777777/delegations/e3a54ce6-9493-597a-ad29-a6f25c1e1cb7",
+      "status": 200,
+      "method": "GET"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "check": "windows-compile",
+  "command": [
+    "go",
+    "test",
+    "-c",
+    "-o",
+    "/tmp/memoh-history-transfer-windows.test.exe",
+    "./internal/transferclient"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:02:33Z",
+  "elapsed_seconds": 12.231
+}

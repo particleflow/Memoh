@@ -1,0 +1,18 @@
+{
+  "check": "go-botdelegation",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "180s",
+    "./internal/botdelegation"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:09:36Z",
+  "elapsed_seconds": 2.517
+}

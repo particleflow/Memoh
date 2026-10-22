@@ -1,0 +1,17 @@
+$ bash scripts/check-agent-core-boundary.sh acd9f21122a99efd66f8af98e8abd48122084545
+Agent runtime and contextview match official baseline bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046
+exit_code=0
+$ git diff --exit-code 18b599e2a878c119142d8016b73e7ef5385b0f7b acd9f21122a99efd66f8af98e8abd48122084545 -- db/postgres/migrations spec packages/sdk internal/agent/runtime internal/contextview packages/runtime .github/workflows
+exit_code=0
+$ git diff --exit-code 6e477b42280f19d57b883ee9267703f25f27bb15 acd9f21122a99efd66f8af98e8abd48122084545 -- internal/transferclient cmd/transferqueue contrib/herdr/memoh-delivery
+exit_code=0
+$ git merge-base --is-ancestor 18b599e2a878c119142d8016b73e7ef5385b0f7b acd9f21122a99efd66f8af98e8abd48122084545
+exit_code=0
+$ git merge-base --is-ancestor 6e477b42280f19d57b883ee9267703f25f27bb15 acd9f21122a99efd66f8af98e8abd48122084545
+exit_code=0
+$ git merge-base --is-ancestor 65c7c11a00dd48eeea6ee1bbbb4cc7317c57e466 acd9f21122a99efd66f8af98e8abd48122084545
+exit_code=0
+internal/agent/runtime official=b21040a32c089642c2d0fdd312b19635e72fb38a integrated=b21040a32c089642c2d0fdd312b19635e72fb38a
+internal/contextview official=7ef779cf08a7117978de05ab75425897ad61928e integrated=7ef779cf08a7117978de05ab75425897ad61928e
+packages/runtime official=49f09a39168dd07e2759f0a3b6449eb8684b125b integrated=49f09a39168dd07e2759f0a3b6449eb8684b125b
+OpenAPI path count=275; spec and SDK byte-identical to base

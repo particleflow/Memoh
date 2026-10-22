@@ -1,0 +1,436 @@
+=== RUN   TestActiveJournalBoundedAcrossProgress
+--- PASS: TestActiveJournalBoundedAcrossProgress (5.15s)
+=== RUN   TestActiveJournalProcessCrash
+=== RUN   TestActiveJournalProcessCrash/after_record
+--- PASS: TestActiveJournalProcessCrash/after_record (0.03s)
+=== RUN   TestActiveJournalProcessCrash/after_checkpoint
+--- PASS: TestActiveJournalProcessCrash/after_checkpoint (0.02s)
+=== RUN   TestActiveJournalProcessCrash/after_truncate
+--- PASS: TestActiveJournalProcessCrash/after_truncate (0.02s)
+=== RUN   TestActiveJournalProcessCrash/after_compact
+--- PASS: TestActiveJournalProcessCrash/after_compact (0.02s)
+=== RUN   TestActiveJournalProcessCrash/after_finish
+--- PASS: TestActiveJournalProcessCrash/after_finish (0.02s)
+--- PASS: TestActiveJournalProcessCrash (0.10s)
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint/partial
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint/partial (0.01s)
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint/checksum
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint/checksum (0.00s)
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint/identity
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint/identity (0.00s)
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint (0.01s)
+=== RUN   TestActiveJournalPreservesUnknownAssociation
+=== RUN   TestActiveJournalPreservesUnknownAssociation/create_unknown
+--- PASS: TestActiveJournalPreservesUnknownAssociation/create_unknown (0.00s)
+=== RUN   TestActiveJournalPreservesUnknownAssociation/association_unknown
+--- PASS: TestActiveJournalPreservesUnknownAssociation/association_unknown (0.00s)
+--- PASS: TestActiveJournalPreservesUnknownAssociation (0.00s)
+=== RUN   TestActiveJournalLegacyReadAndFullBoundary
+--- PASS: TestActiveJournalLegacyReadAndFullBoundary (0.01s)
+=== RUN   TestActiveJournalMaximumRecordEnvelope
+--- PASS: TestActiveJournalMaximumRecordEnvelope (0.01s)
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence/empty
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence/empty (0.00s)
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence/checksum
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence/checksum (0.00s)
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence/version
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence/version (0.00s)
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence (0.00s)
+=== RUN   TestAdmissionReadDuringActiveCompaction
+--- PASS: TestAdmissionReadDuringActiveCompaction (0.01s)
+=== RUN   TestAdmissionDeadlineCanResumeSameID
+--- PASS: TestAdmissionDeadlineCanResumeSameID (0.00s)
+=== RUN   TestPartialAdmissionCancelReleasesCapacity
+--- PASS: TestPartialAdmissionCancelReleasesCapacity (0.00s)
+=== RUN   TestAdmissionBoundedLargeFileAndIdempotency
+--- PASS: TestAdmissionBoundedLargeFileAndIdempotency (1.12s)
+=== RUN   TestAdmissionDeadlineProgressAndRetryStorageBound
+--- PASS: TestAdmissionDeadlineProgressAndRetryStorageBound (0.23s)
+=== RUN   TestAdmissionCrashAfterCheckpoint
+--- PASS: TestAdmissionCrashAfterCheckpoint (0.21s)
+=== RUN   TestAdmissionTornSlotAndChangedSource
+=== RUN   TestAdmissionTornSlotAndChangedSource/torn-latest
+--- PASS: TestAdmissionTornSlotAndChangedSource/torn-latest (0.18s)
+=== RUN   TestAdmissionTornSlotAndChangedSource/changed-tail
+--- PASS: TestAdmissionTornSlotAndChangedSource/changed-tail (0.10s)
+=== RUN   TestAdmissionTornSlotAndChangedSource/tree-tamper
+--- PASS: TestAdmissionTornSlotAndChangedSource/tree-tamper (0.11s)
+=== RUN   TestAdmissionTornSlotAndChangedSource/cancel
+--- PASS: TestAdmissionTornSlotAndChangedSource/cancel (0.07s)
+--- PASS: TestAdmissionTornSlotAndChangedSource (0.45s)
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume/9
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume/9 (0.07s)
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume/15
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume/15 (0.06s)
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume (0.16s)
+=== RUN   TestHerdrEnqueueDeadlineReportsResumableReservation
+--- PASS: TestHerdrEnqueueDeadlineReportsResumableReservation (0.09s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/both-slots-corrupt
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/both-slots-corrupt (0.01s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/legacy
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/legacy (0.01s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/identity
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/identity (0.01s)
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly (0.02s)
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline (0.05s)
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled (0.05s)
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable (0.10s)
+=== RUN   TestAssociationReviewCancelMustReconcileLostCommit
+--- PASS: TestAssociationReviewCancelMustReconcileLostCommit (0.05s)
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit (0.06s)
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve (0.06s)
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit (0.11s)
+=== RUN   TestAssociationReviewRetryPauseCanBeReconciled
+--- PASS: TestAssociationReviewRetryPauseCanBeReconciled (0.24s)
+=== RUN   TestAssociationReviewCancelWithoutFenceRemainsUnknown
+--- PASS: TestAssociationReviewCancelWithoutFenceRemainsUnknown (0.08s)
+=== RUN   TestAssociationReviewCancelBeforeCommitDoesNotRegister
+--- PASS: TestAssociationReviewCancelBeforeCommitDoesNotRegister (0.05s)
+=== RUN   TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing
+--- PASS: TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing (0.06s)
+=== RUN   TestAssociationReviewProcessCrashAfterInFlight
+--- PASS: TestAssociationReviewProcessCrashAfterInFlight (0.08s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/200
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/200 (0.07s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/499
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/499 (0.42s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/401
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/401 (0.30s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/403
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/403 (0.29s)
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization (1.09s)
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay/create
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay/create (0.01s)
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay/patch
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay/patch (0.01s)
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay/complete
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay/complete (0.01s)
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay (0.04s)
+=== RUN   TestHTTP499DownloadRetainsRangeAndHash
+--- PASS: TestHTTP499DownloadRetainsRangeAndHash (0.02s)
+=== RUN   TestHTTP499RetryIsBoundedAndAuthorizationStaysBlocked
+--- PASS: TestHTTP499RetryIsBoundedAndAuthorizationStaysBlocked (0.13s)
+=== RUN   TestLostPatchAndCompleteRecoverFromDurableReceipt
+--- PASS: TestLostPatchAndCompleteRecoverFromDurableReceipt (0.03s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/lost-response
+--- PASS: TestUnknownCreateNeverBlindlyRepeats/lost-response (0.01s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/crash-before-receipt-save
+--- PASS: TestUnknownCreateNeverBlindlyRepeats/crash-before-receipt-save (0.01s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/save-before-create-fails
+--- PASS: TestUnknownCreateNeverBlindlyRepeats/save-before-create-fails (0.01s)
+--- PASS: TestUnknownCreateNeverBlindlyRepeats (0.03s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/quota
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/quota (0.08s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/revoked
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/revoked (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/expired
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/expired (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/source-change
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/source-change (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/receipt-mismatch
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/receipt-mismatch (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/checksum
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/checksum (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/size-limit
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/size-limit (0.01s)
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange (0.14s)
+=== RUN   TestCancellationLossAndPublicationRace
+=== RUN   TestCancellationLossAndPublicationRace/false
+--- PASS: TestCancellationLossAndPublicationRace/false (0.02s)
+=== RUN   TestCancellationLossAndPublicationRace/true
+--- PASS: TestCancellationLossAndPublicationRace/true (0.01s)
+--- PASS: TestCancellationLossAndPublicationRace (0.03s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics
+=== RUN   TestStrictTransportAndBoundedDiagnostics/redirect
+--- PASS: TestStrictTransportAndBoundedDiagnostics/redirect (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics/large-json
+--- PASS: TestStrictTransportAndBoundedDiagnostics/large-json (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics/private-error
+--- PASS: TestStrictTransportAndBoundedDiagnostics/private-error (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics/untrusted-cert
+2026/10/22 22:57:54 http: TLS handshake error from 127.0.0.1:49714: remote error: tls: bad certificate
+--- PASS: TestStrictTransportAndBoundedDiagnostics/untrusted-cert (0.10s)
+--- PASS: TestStrictTransportAndBoundedDiagnostics (0.13s)
+=== RUN   TestDownloadResumeAndValidation
+=== RUN   TestDownloadResumeAndValidation/ok
+--- PASS: TestDownloadResumeAndValidation/ok (0.01s)
+=== RUN   TestDownloadResumeAndValidation/wrong-prefix
+--- PASS: TestDownloadResumeAndValidation/wrong-prefix (0.01s)
+=== RUN   TestDownloadResumeAndValidation/full-on-resume
+--- PASS: TestDownloadResumeAndValidation/full-on-resume (0.01s)
+=== RUN   TestDownloadResumeAndValidation/wrong-range
+--- PASS: TestDownloadResumeAndValidation/wrong-range (0.01s)
+=== RUN   TestDownloadResumeAndValidation/wrong-etag
+--- PASS: TestDownloadResumeAndValidation/wrong-etag (0.01s)
+=== RUN   TestDownloadResumeAndValidation/truncated
+--- PASS: TestDownloadResumeAndValidation/truncated (0.01s)
+=== RUN   TestDownloadResumeAndValidation/revoked
+--- PASS: TestDownloadResumeAndValidation/revoked (0.01s)
+=== RUN   TestDownloadResumeAndValidation/disk-full
+--- PASS: TestDownloadResumeAndValidation/disk-full (0.01s)
+=== RUN   TestDownloadResumeAndValidation/checkpoint-failure
+--- PASS: TestDownloadResumeAndValidation/checkpoint-failure (0.01s)
+--- PASS: TestDownloadResumeAndValidation (0.09s)
+=== RUN   TestVerifyBoundsAndCancellation
+--- PASS: TestVerifyBoundsAndCancellation (0.00s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence
+=== RUN   TestDeliveryBindingLocalCancelEvidence/unknown-local
+--- PASS: TestDeliveryBindingLocalCancelEvidence/unknown-local (0.00s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/absent-does-not-fence
+--- PASS: TestDeliveryBindingLocalCancelEvidence/absent-does-not-fence (0.00s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/published-wins
+--- PASS: TestDeliveryBindingLocalCancelEvidence/published-wins (0.01s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/fenced
+--- PASS: TestDeliveryBindingLocalCancelEvidence/fenced (0.01s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/conflicting-histories
+--- PASS: TestDeliveryBindingLocalCancelEvidence/conflicting-histories (0.01s)
+--- PASS: TestDeliveryBindingLocalCancelEvidence (0.03s)
+=== RUN   TestDeliveryBindingRequiresLocalStore
+--- PASS: TestDeliveryBindingRequiresLocalStore (0.00s)
+=== RUN   TestTerminalHistoryExplicitMigrationAndBackup
+--- PASS: TestTerminalHistoryExplicitMigrationAndBackup (0.04s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/busy
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/busy (0.03s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/revision
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/revision (0.04s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/limits
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/limits (0.04s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/backup
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/backup (0.04s)
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch (0.15s)
+=== RUN   TestTerminalHistoryMigrationProcessCrash
+=== RUN   TestTerminalHistoryMigrationProcessCrash/locator_after_backup
+--- PASS: TestTerminalHistoryMigrationProcessCrash/locator_after_backup (0.05s)
+=== RUN   TestTerminalHistoryMigrationProcessCrash/locator_after_write
+--- PASS: TestTerminalHistoryMigrationProcessCrash/locator_after_write (0.06s)
+=== RUN   TestTerminalHistoryMigrationProcessCrash/locator_after_sync
+--- PASS: TestTerminalHistoryMigrationProcessCrash/locator_after_sync (0.04s)
+--- PASS: TestTerminalHistoryMigrationProcessCrash (0.15s)
+=== RUN   TestTerminalHistoryMigrationFiniteBatch
+--- PASS: TestTerminalHistoryMigrationFiniteBatch (0.06s)
+=== RUN   TestTerminalHistoryConcurrentIdentityAndPermanentLock
+--- PASS: TestTerminalHistoryConcurrentIdentityAndPermanentLock (0.03s)
+=== RUN   TestTerminalHistoryBeyondCatalogBoundAndOriginalID
+--- PASS: TestTerminalHistoryBeyondCatalogBoundAndOriginalID (2.70s)
+=== RUN   TestTerminalHistoryUnknownIsNeverArchived
+--- PASS: TestTerminalHistoryUnknownIsNeverArchived (0.04s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/partial
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/partial (0.03s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/different-ref
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/different-ref (0.03s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/different-attempt
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/different-attempt (0.03s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/corrupt
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/corrupt (0.03s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/source-missing-partial
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/source-missing-partial (0.03s)
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies (0.16s)
+=== RUN   TestTerminalHistoryBucketBudgetPreservesSource
+--- PASS: TestTerminalHistoryBucketBudgetPreservesSource (0.62s)
+=== RUN   TestTerminalHistoryProcessCrash
+=== RUN   TestTerminalHistoryProcessCrash/before_target_sync
+--- PASS: TestTerminalHistoryProcessCrash/before_target_sync (0.06s)
+=== RUN   TestTerminalHistoryProcessCrash/after_target_sync
+--- PASS: TestTerminalHistoryProcessCrash/after_target_sync (0.04s)
+=== RUN   TestTerminalHistoryProcessCrash/after_source_remove
+--- PASS: TestTerminalHistoryProcessCrash/after_source_remove (0.05s)
+=== RUN   TestTerminalHistoryProcessCrash/after_source_sync
+--- PASS: TestTerminalHistoryProcessCrash/after_source_sync (0.05s)
+--- PASS: TestTerminalHistoryProcessCrash (0.21s)
+=== RUN   TestConfiguredHostSecretsPathsAndRecovery
+--- PASS: TestConfiguredHostSecretsPathsAndRecovery (0.01s)
+=== RUN   TestDiskQueueRestartSnapshotAndOutbox
+--- PASS: TestDiskQueueRestartSnapshotAndOutbox (0.07s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/hash
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/hash (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/quota
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/quota (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/torn
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/torn (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/corrupt
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/corrupt (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/symlink
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/symlink (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/hardlink
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/hardlink (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/locator
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/locator (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/revision
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/revision (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/journal-full
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/journal-full (0.17s)
+--- PASS: TestDiskQueueAdmissionAndJournalFailures (0.18s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/cancel
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/cancel (0.01s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/unknown
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/unknown (0.01s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/revoke
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/revoke (0.12s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/budget
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/budget (0.22s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change (0.00s)
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation (0.37s)
+=== RUN   TestBlockedDownloadCanCancelWithoutNetwork
+--- PASS: TestBlockedDownloadCanCancelWithoutNetwork (0.01s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/resume
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/resume (0.02s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/revoke
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/revoke (0.01s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/corrupt
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/corrupt (0.01s)
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization (0.05s)
+=== RUN   TestDiskQueueProcessCrashReleasesLock
+--- PASS: TestDiskQueueProcessCrashReleasesLock (0.01s)
+=== RUN   TestLifecycleReadOnlyMixedDueAndBackoff
+--- PASS: TestLifecycleReadOnlyMixedDueAndBackoff (0.02s)
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint/torn
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint/torn (0.00s)
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint/checkpoint
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint/checkpoint (0.00s)
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint/corrupt
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint/corrupt (0.00s)
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint (0.01s)
+=== RUN   TestLifecycleEmptyBusyAndClassification
+--- PASS: TestLifecycleEmptyBusyAndClassification (0.00s)
+=== RUN   TestLifecycleEarliestDueAndFairRotation
+--- PASS: TestLifecycleEarliestDueAndFairRotation (0.02s)
+=== RUN   TestLifecycleInvalidTaskDoesNotStarveConfiguredWork
+--- PASS: TestLifecycleInvalidTaskDoesNotStarveConfiguredWork (0.01s)
+=== RUN   TestLifecycleCorruptTailBlocksActualAdvance
+--- PASS: TestLifecycleCorruptTailBlocksActualAdvance (0.01s)
+=== RUN   TestProducerFeedbackScopeAndUnchangedBlock
+--- PASS: TestProducerFeedbackScopeAndUnchangedBlock (0.01s)
+=== RUN   TestProducerMultiplePartialRestartAndDeniedFile
+--- PASS: TestProducerMultiplePartialRestartAndDeniedFile (0.29s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-0
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-0 (0.12s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-1
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-1 (0.21s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-0
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-0 (0.29s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1 (0.29s)
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle (0.91s)
+=== RUN   TestProducerClosedManifestRestartAndLostAssociation
+--- PASS: TestProducerClosedManifestRestartAndLostAssociation (0.11s)
+=== RUN   TestProducerCollectMissingSourceStillAdvances
+--- PASS: TestProducerCollectMissingSourceStillAdvances (0.10s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/oversize
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/oversize (0.10s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/malformed
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/malformed (0.11s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/name-mismatch
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/name-mismatch (0.11s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/root-mismatch
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/root-mismatch (0.11s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/trusted-plan
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/trusted-plan (0.11s)
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery (0.55s)
+=== RUN   TestProducerInputAndRootFailClosed
+--- PASS: TestProducerInputAndRootFailClosed (0.00s)
+=== RUN   TestProducerConfigurationCannotChangeBetweenCheckAndAdmission
+--- PASS: TestProducerConfigurationCannotChangeBetweenCheckAndAdmission (0.00s)
+=== RUN   TestProducerMissingSourceWithoutQueueIsNotIdleSuccess
+--- PASS: TestProducerMissingSourceWithoutQueueIsNotIdleSuccess (0.00s)
+=== RUN   TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins
+--- PASS: TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins (0.01s)
+=== RUN   TestCancellationBeforeAdmission
+--- PASS: TestCancellationBeforeAdmission (0.00s)
+=== RUN   TestDownloadFullCheckpointRechecksAuthorization
+--- PASS: TestDownloadFullCheckpointRechecksAuthorization (0.01s)
+=== RUN   TestCreateQuotaRejectionCanRetryButUnknownCannot
+--- PASS: TestCreateQuotaRejectionCanRetryButUnknownCannot (0.01s)
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity/1
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity/1 (0.04s)
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity/2
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity/2 (0.04s)
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity (0.08s)
+=== RUN   TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered
+--- PASS: TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered (0.04s)
+=== RUN   TestQueueReleaseProcessCrash
+=== RUN   TestQueueReleaseProcessCrash/after_intent
+--- PASS: TestQueueReleaseProcessCrash/after_intent (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_payload
+--- PASS: TestQueueReleaseProcessCrash/after_payload (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_receipt
+--- PASS: TestQueueReleaseProcessCrash/after_receipt (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_truncate
+--- PASS: TestQueueReleaseProcessCrash/after_truncate (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_compact
+--- PASS: TestQueueReleaseProcessCrash/after_compact (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_finish
+--- PASS: TestQueueReleaseProcessCrash/after_finish (0.05s)
+--- PASS: TestQueueReleaseProcessCrash (0.29s)
+=== RUN   TestQueueReleaseReceiptCatalogBound
+--- PASS: TestQueueReleaseReceiptCatalogBound (0.72s)
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit/cancel
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit/cancel (0.04s)
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit/legacy-commit
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit/legacy-commit (0.04s)
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit (0.08s)
+=== RUN   TestSealedSnapshotLinearReadsAcrossReopen
+    snapshot_test.go:78: 64 MiB, 8 reopened chunk handles: data=67108864 proof=12288 bytes; plus one 32-byte root check per open
+--- PASS: TestSealedSnapshotLinearReadsAcrossReopen (0.45s)
+=== RUN   TestSnapshotSchemaRejectsLegacyWithoutFallback
+--- PASS: TestSnapshotSchemaRejectsLegacyWithoutFallback (0.00s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/1
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/1 (0.00s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/1048593
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/1048593 (0.02s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/3145745
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/3145745 (0.03s)
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads (0.05s)
+=== RUN   TestSealedSnapshotTamperAndIdentity
+=== RUN   TestSealedSnapshotTamperAndIdentity/data
+--- PASS: TestSealedSnapshotTamperAndIdentity/data (0.02s)
+=== RUN   TestSealedSnapshotTamperAndIdentity/proof
+--- PASS: TestSealedSnapshotTamperAndIdentity/proof (0.02s)
+=== RUN   TestSealedSnapshotTamperAndIdentity/root
+--- PASS: TestSealedSnapshotTamperAndIdentity/root (0.01s)
+=== RUN   TestSealedSnapshotTamperAndIdentity/identity
+--- PASS: TestSealedSnapshotTamperAndIdentity/identity (0.02s)
+--- PASS: TestSealedSnapshotTamperAndIdentity (0.06s)
+=== RUN   TestSnapshotDeadlinePreservesUploadResume
+--- PASS: TestSnapshotDeadlinePreservesUploadResume (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	19.884s
+=== RUN   TestCLIPathChild
+--- PASS: TestCLIPathChild (0.00s)
+=== RUN   TestCLIPathTLSRestartAndLostResponses
+--- PASS: TestCLIPathTLSRestartAndLostResponses (6.22s)
+=== RUN   TestCLIPathSummaryMissingConfigurationDoesNotCreateState
+--- PASS: TestCLIPathSummaryMissingConfigurationDoesNotCreateState (0.00s)
+=== RUN   TestCLIPathCorruptQueueCannotAdvertiseIndependentDue
+--- PASS: TestCLIPathCorruptQueueCannotAdvertiseIndependentDue (0.01s)
+=== RUN   TestCLIPathHistoryMigration
+--- PASS: TestCLIPathHistoryMigration (0.00s)
+=== RUN   TestAdmissionMetadataDeadlineAndBounds
+--- PASS: TestAdmissionMetadataDeadlineAndBounds (0.02s)
+PASS
+ok  	github.com/felinics/memoh/cmd/transferqueue	7.268s

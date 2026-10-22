@@ -1,0 +1,62 @@
+=== RUN   TestBotDelegationPostgresClaimIsolationAndDescendantAssets
+    bot_delegation_postgres_integration_test.go:28: freshMigratedDB applied the official full migration chain: version=173 dirty=false
+--- PASS: TestBotDelegationPostgresClaimIsolationAndDescendantAssets (2.48s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/device-registry
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/device-registry (0.13s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-chat
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-chat (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_read
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_read (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_write
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_write (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_exec
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_exec (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/caller-inactive
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/caller-inactive (0.00s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/membership-inactive
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/membership-inactive (0.00s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/owner-inactive
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/owner-inactive (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/runtime-revoked
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/runtime-revoked (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/session-reassigned
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/session-reassigned (0.01s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/https-queue-handoff
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/https-queue-handoff (0.21s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/task-principal-http
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/task-principal-http (0.78s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/lost-response
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= lost-response
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/lost-response (4.04s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/client-killed-before-checkpoint
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= client-killed-before-checkpoint
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/client-killed-before-checkpoint (2.60s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/no-proof-gap
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= no-proof-gap
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/no-proof-gap (1.96s)
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli (9.28s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/receipt-turnover
+    computer_delivery_integration_test.go:229: batch 1 completed
+    computer_delivery_integration_test.go:229: batch 2 completed
+    computer_delivery_integration_test.go:229: 24 files, 2 operation batches/reopenings; committed staging retired, canceled evidence retained, exact replay and original bytes verified
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/receipt-turnover (15.46s)
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/producer-multiple-files
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/producer-multiple-files (1.35s)
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (30.10s)
+=== RUN   TestComputerDeliveryPostgresCanceledContext
+--- PASS: TestComputerDeliveryPostgresCanceledContext (0.00s)
+=== RUN   TestComputerDeliveryPostgresUpgradeFrom170
+    computer_delivery_upgrade_integration_test.go:84: 170 -> 171 -> 172 -> 173: transfer credentials and delivery ledger preserved; guard and delegation RLS present
+--- PASS: TestComputerDeliveryPostgresUpgradeFrom170 (2.64s)
+=== RUN   TestComputerDeliveryPostgresCanonicalTransferSchema
+--- PASS: TestComputerDeliveryPostgresCanonicalTransferSchema (0.85s)
+=== RUN   TestComputerDeliveryPostgresTransferCredentialMigration
+--- PASS: TestComputerDeliveryPostgresTransferCredentialMigration (2.42s)
+=== RUN   TestConnectorDisconnectFinalizationIsAtomicAndScoped
+--- PASS: TestConnectorDisconnectFinalizationIsAtomicAndScoped (2.52s)
+=== RUN   TestSessionTasksPostgresOwnedTreeAndStableCursor
+--- PASS: TestSessionTasksPostgresOwnedTreeAndStableCursor (2.48s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	44.558s

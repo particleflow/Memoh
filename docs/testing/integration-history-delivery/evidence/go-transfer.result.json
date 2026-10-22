@@ -1,0 +1,19 @@
+{
+  "check": "go-transfer",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "180s",
+    "./internal/transferclient",
+    "./cmd/transferqueue"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T22:57:41Z",
+  "elapsed_seconds": 30.544
+}
