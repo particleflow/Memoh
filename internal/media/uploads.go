@@ -55,6 +55,10 @@ type uploadRecord struct {
 	Owner  string `json:"owner"`
 	Bot    string `json:"bot"`
 	SHA256 string `json:"sha256" validate:"required"`
+	// RetainResult is server-only: a paid provider result is not an abandoned
+	// browser upload. Keep its bounded staging/receipt until its task journal
+	// has durably recorded the ready artifact. HTTP clients cannot set it.
+	RetainResult bool `json:"retain_result,omitempty"`
 }
 
 // UploadStore journals acknowledged offsets beneath the configured originals
@@ -226,13 +230,27 @@ func (s *UploadStore) owned(owner, bot, id string) (uploadRecord, error) {
 	if err != nil {
 		return r, err
 	}
-	if r.Owner != owner || r.Bot != bot || !s.now().Before(r.ExpiresAt) {
+	if r.Owner != owner || r.Bot != bot || (!r.RetainResult && !s.now().Before(r.ExpiresAt)) {
 		return r, ErrUploadNotFound
 	}
 	return r, nil
 }
 
 func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadInput) (Upload, error) {
+	return s.create(ctx, owner, bot, in, false, "")
+}
+
+// CreateResult reuses the existing upload quota, hash and durability protocol.
+// Pending results still consume its finite admission quota; they never trigger
+// another provider request just because normal browser-upload TTL elapsed.
+func (s *UploadStore) CreateResult(ctx context.Context, owner, bot, id string, in UploadInput) (Upload, error) {
+	if !validUploadID(id) {
+		return Upload{}, ErrUploadInvalid
+	}
+	return s.create(ctx, owner, bot, in, true, id)
+}
+
+func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadInput, retain bool, id string) (Upload, error) {
 	if !validPathComponent(owner) || !validPathComponent(bot) || in.SizeBytes <= 0 || !validSHA(in.SHA256) {
 		return Upload{}, ErrUploadInvalid
 	}
@@ -248,6 +266,20 @@ func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadIn
 		return Upload{}, err
 	}
 	defer unlock()
+	if id != "" {
+		existing, err := s.read(id)
+		if err == nil {
+			if existing.Owner != owner || existing.Bot != bot || existing.SHA256 != in.SHA256 || existing.SizeBytes != in.SizeBytes || existing.Mime != typ || !existing.RetainResult {
+				return Upload{}, ErrUploadConflict
+			}
+			return existing.Upload, nil
+		}
+		if !errors.Is(err, ErrUploadNotFound) {
+			return Upload{}, err
+		}
+	} else {
+		id = uuid.NewString()
+	}
 	if err := s.sweep(ctx); err != nil {
 		return Upload{}, err
 	}
@@ -277,11 +309,32 @@ func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadIn
 	if count >= maxUploadSessions || active >= maxActiveUploads || owned >= maxOwnerUploads || reserved+in.SizeBytes > 4*s.media.MaxUploadBytes() {
 		return Upload{}, ErrUploadQuota
 	}
-	r := uploadRecord{Upload: Upload{ID: uuid.NewString(), State: "uploading", SizeBytes: in.SizeBytes, Mime: typ, ExpiresAt: s.now().Add(UploadTTL)}, Owner: owner, Bot: bot, SHA256: in.SHA256}
+	r := uploadRecord{Upload: Upload{ID: id, State: "uploading", SizeBytes: in.SizeBytes, Mime: typ, ExpiresAt: s.now().Add(UploadTTL)}, Owner: owner, Bot: bot, SHA256: in.SHA256}
+	r.RetainResult = retain
 	if err := s.save(r); err != nil {
 		return Upload{}, err
 	}
 	return r.Upload, nil
+}
+
+// ReleaseResult restores normal receipt expiry only after a caller has durably
+// saved its ready task reference. It never deletes the canonical original.
+func (s *UploadStore) ReleaseResult(ctx context.Context, owner, bot, id string) error {
+	unlock, err := s.lock(ctx, id)
+	if err != nil {
+		return err
+	}
+	defer unlock()
+	r, err := s.owned(owner, bot, id)
+	if err != nil {
+		return err
+	}
+	if r.State != "ready" {
+		return ErrUploadConflict
+	}
+	r.RetainResult = false
+	r.ExpiresAt = s.now().Add(UploadTTL)
+	return s.save(r)
 }
 
 func (s *UploadStore) Get(ctx context.Context, owner, bot, id string) (Upload, error) {
@@ -517,7 +570,7 @@ func (s *UploadStore) sweep(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
-			if s.now().Before(r.ExpiresAt) {
+			if r.RetainResult || s.now().Before(r.ExpiresAt) {
 				if r.State == "ready" || r.State == "canceled" {
 					return s.remove(id + ".data")
 				}
