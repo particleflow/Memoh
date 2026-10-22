@@ -76,7 +76,12 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	assets := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+	mediaRoot := t.TempDir()
+	assets := media.NewService(nil, localfs.NewOriginals(mediaRoot))
+	if err := assets.EnableUploads(mediaRoot); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = assets.Uploads().Close() }()
 	assets.SetRequirePersistence(true)
 	asset, err := assets.Ingest(ctx, media.IngestInput{BotID: bot, Mime: "text/plain", Reader: strings.NewReader("synthetic delivery content"), MaxBytes: 1024})
 	if err != nil {
@@ -217,6 +222,7 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 			t.Fatalf("late commit: %v", err)
 		}
 	}
+	t.Run("https-queue-handoff", func(t *testing.T) { exerciseDeliveryHandoff(ctx, t, store, assets, id, ref) })
 	// No outcome changes when the connection owner becomes unavailable.
 	exec("DELETE FROM mcp_connections WHERE id=$1", connection)
 	if _, err := s.Resolve(ctx, id.OperationID, "result", ref, false); err == nil {

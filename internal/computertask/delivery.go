@@ -243,7 +243,7 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 	} else {
 		ledger.Version, ledger.Entries = version, map[string]deliveryEntry{}
 	}
-	if ledger.Version != version && !(version == 2 && ledger.Version == 1) {
+	if ledger.Version != version && (version != 2 || ledger.Version != 1) {
 		return DeliveryOutcome{}, ErrDeliveryVersion
 	}
 	if ledger.Entries == nil || len(ledger.Entries) > maxDeliveries {

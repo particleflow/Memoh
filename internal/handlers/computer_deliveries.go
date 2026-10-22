@@ -84,11 +84,12 @@ func (h *ComputerDeliveryHandler) commit(c echo.Context) error {
 	}
 	var out computertask.DeliveryOutcome
 	var err error
-	if h.async != nil {
+	switch {
+	case h.async != nil:
 		out, err = h.async.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref.DeliveryRequest, ref.Publication)
-	} else if h.service != nil && ref.Publication == "" {
+	case h.service != nil && ref.Publication == "":
 		out, err = h.service.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref.DeliveryRequest)
-	} else {
+	default:
 		err = computertask.ErrDeliveryBinding
 	}
 	if err != nil {
@@ -108,11 +109,12 @@ func (h *ComputerDeliveryHandler) resolve(c echo.Context) error {
 	}
 	var out computertask.DeliveryOutcome
 	var err error
-	if h.async != nil {
+	switch {
+	case h.async != nil:
 		out, err = h.async.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Publication, req.Cancel)
-	} else if h.service != nil && req.Publication == "" {
+	case h.service != nil && req.Publication == "":
 		out, err = h.service.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Cancel)
-	} else {
+	default:
 		err = computertask.ErrDeliveryBinding
 	}
 	if err != nil {

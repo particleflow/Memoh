@@ -179,7 +179,7 @@ func (s *AsyncDeliveryService) transact(ctx context.Context, id DeliveryIdentity
 
 func (s *AsyncDeliveryService) verify(ctx context.Context, id DeliveryIdentity, delivery string, ref DeliveryRequest, epoch string, until time.Time) error {
 	ctx, cancel := context.WithDeadline(ctx, until)
-	stop := context.AfterFunc(s.life, cancel)
+	stop := context.AfterFunc(s.life, cancel) //nolint:contextcheck // Also honor the independently owned server lifetime.
 	defer stop()
 	defer cancel()
 	if err := s.check(ctx, id); err != nil {
@@ -190,7 +190,7 @@ func (s *AsyncDeliveryService) verify(ctx context.Context, id DeliveryIdentity, 
 	// persisting a failed scan after its cooperative deadline. Shutdown leaves
 	// the lease for a later process to reconcile instead of extending lifetime.
 	finish, done := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
-	stopFinish := context.AfterFunc(s.life, done)
+	stopFinish := context.AfterFunc(s.life, done) //nolint:contextcheck // Link server shutdown without extending its lifetime.
 	defer stopFinish()
 	defer done()
 	if checkErr := s.check(finish, id); checkErr != nil {

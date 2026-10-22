@@ -46,7 +46,7 @@ func asyncFixture(t *testing.T) (*deliveryFixture, *AsyncDeliveryService, *delay
 	return f, s, a, ctx, ref
 }
 
-func awaitDelivery(t *testing.T, s *AsyncDeliveryService, ctx context.Context, id, key string, ref DeliveryRequest, want string) {
+func awaitDelivery(ctx context.Context, t *testing.T, s *AsyncDeliveryService, id, key string, ref DeliveryRequest, want string) {
 	t.Helper()
 	deadline := time.NewTimer(3 * time.Second)
 	defer deadline.Stop()
@@ -105,7 +105,7 @@ func TestAsyncDeliveryOutlivesRequestAndReconcilesLostFinish(t *testing.T) {
 	f.mu.Unlock()
 	close(a.release)
 	s.wg.Wait() // Finish committed but its acknowledgement was lost.
-	awaitDelivery(t, s, ctx, f.id.OperationID, "result", ref, "committed")
+	awaitDelivery(ctx, t, s, f.id.OperationID, "result", ref, "committed")
 }
 
 func TestAsyncDeliveryLostAdmissionRecoversAfterRestart(t *testing.T) {
@@ -136,7 +136,7 @@ func TestAsyncDeliveryLostAdmissionRecoversAfterRestart(t *testing.T) {
 	}
 	<-a.started
 	close(a.release)
-	awaitDelivery(t, restarted, ctx, f.id.OperationID, "result", ref, "committed")
+	awaitDelivery(ctx, t, restarted, f.id.OperationID, "result", ref, "committed")
 }
 
 func TestAsyncDeliveryCancelAndRevokeDuringScan(t *testing.T) {
@@ -219,7 +219,7 @@ func TestAsyncDownloadRequiresLocalPublicationOutcome(t *testing.T) {
 		t.Fatalf("NAS retracted local publication: %v", err)
 	}
 	close(a.release)
-	awaitDelivery(t, s, ctx, f.id.OperationID, "result", ref, "committed")
+	awaitDelivery(ctx, t, s, f.id.OperationID, "result", ref, "committed")
 	out, err = s.Resolve(ctx, f.id.OperationID, "other", ref, "fenced", true)
 	if err != nil || out.Outcome != "canceled" {
 		t.Fatalf("local fence: %+v %v", out, err)
