@@ -25,6 +25,7 @@ type followupTransport struct {
 	afterGet func()
 	onPrompt func()
 	methods  []string
+	prompts  []string
 }
 
 func (f *followupTransport) call(ctx context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
@@ -75,6 +76,7 @@ func (f *followupTransport) call(ctx context.Context, owner, connection, tool st
 	if f.onPrompt != nil {
 		f.onPrompt()
 	}
+	f.prompts = append(f.prompts, params["text"].(string))
 	switch f.fault {
 	case "lost":
 		return nil, errors.New("PRIVATE lost response after input")
@@ -111,6 +113,7 @@ func followupFixture(t *testing.T, session bool) (*Source, *fixtureStore, *follo
 	c := standardClient(t, source, "pc-a", false)
 	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "synthetic original task"}, false))
 	f.methods = nil
+	f.prompts = nil
 	return source, store, f, r
 }
 

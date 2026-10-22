@@ -44,9 +44,12 @@ func TestNativeFollowupSameRevisionCASAndCapacity(t *testing.T) {
 		existing int
 		sameID   bool
 		rejected bool
+		changed  string
 	}{
 		{name: "same_intent_same_revision", sameID: true},
 		{name: "different_intents_same_revision"},
+		{name: "same_uuid_different_task_same_revision", existing: 1, sameID: true, changed: "task"},
+		{name: "same_uuid_different_mode_same_revision", existing: 1, sameID: true, changed: "mode"},
 		{name: "63_to_64_accepted", existing: maxFollowups - 1},
 		{name: "63_to_64_rejected_still_consumes_capacity", existing: maxFollowups - 1, rejected: true},
 	} {
@@ -86,6 +89,12 @@ func TestNativeFollowupSameRevisionCASAndCapacity(t *testing.T) {
 			if tc.sameID {
 				inputs[1] = inputs[0]
 			}
+			switch tc.changed {
+			case "task":
+				inputs[1].Task = "a different synthetic instruction under the same UUID"
+			case "mode":
+				inputs[1].Mode = "current_agent"
+			}
 			type outcome struct {
 				result Result
 				err    error
@@ -120,12 +129,14 @@ func TestNativeFollowupSameRevisionCASAndCapacity(t *testing.T) {
 					t.Fatal("race replaced original operation")
 				}
 				switch {
-				case errors.Is(out.err, agenvo.ErrUnknown):
+				case tc.changed != "" && errors.Is(out.err, ErrInvalid) && out.result.RequestConflict:
+					conflicts++
+				case tc.changed == "" && errors.Is(out.err, agenvo.ErrUnknown):
 					conflicts++
 				case tc.rejected && errors.Is(out.err, agenvo.ErrRejected), !tc.rejected && out.err == nil:
 					winners++
 				default:
-					t.Fatalf("unexpected race outcome: %v", out.err)
+					t.Fatalf("unexpected race outcome: %v, request_conflict=%v", out.err, out.result.RequestConflict)
 				}
 			}
 			if winners != 1 || conflicts != 1 || !slices.Equal(transport.methods, []string{"agent.get", "agent.prompt"}) {
@@ -152,10 +163,23 @@ func TestNativeFollowupSameRevisionCASAndCapacity(t *testing.T) {
 			}
 			restarted := NewService(store, store, source.service.relay, nil, source.service.authorize)
 			duplicate := inputs[0]
-			duplicate.RequestID = last.RequestID
+			loser := inputs[1]
+			if last.Fingerprint == fingerprint(inputs[1]) {
+				duplicate, loser = inputs[1], inputs[0]
+			}
+			if last.Fingerprint != fingerprint(duplicate) || last.Mode != duplicate.Mode || !slices.Equal(transport.prompts, []string{duplicate.Task}) {
+				t.Fatal("winner's durable intent did not match the single delivered prompt")
+			}
 			got, duplicateErr := restarted.followup(ctx, b, duplicate)
 			if got.Followup == nil || got.Followup.State != want || (duplicateErr != nil) != tc.rejected {
 				t.Fatal("restart did not reuse the winning receipt")
+			}
+			if tc.changed != "" {
+				ledger := observationSnapshot(t, store)
+				conflict, err := restarted.followup(ctx, b, loser)
+				if !errors.Is(err, ErrInvalid) || !conflict.RequestConflict || !slices.Equal(ledger, observationSnapshot(t, store)) {
+					t.Fatal("different intent under the same UUID lost its conflict or rewrote the winner")
+				}
 			}
 			if tc.existing == maxFollowups-1 {
 				next := duplicate

@@ -153,7 +153,16 @@ func (s *Service) followup(ctx context.Context, b toolcontext.ComputerBinding, i
 		if readErr != nil {
 			return Result{}, readErr
 		}
-		return followupResponse(current, details, in.RequestID), agenvo.ErrUnknown
+		out := followupResponse(current, details, in.RequestID)
+		for _, old := range details.Followups {
+			if old.RequestID == in.RequestID && old.Fingerprint != requestHash {
+				// Apply the same intent check as initial deduplication: the
+				// CAS winner's receipt does not accept different arguments.
+				out.RequestConflict = true
+				return out, ErrInvalid
+			}
+		}
+		return out, agenvo.ErrUnknown
 	}
 	r = claimed
 	work, cancel := context.WithTimeout(agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint), 35*time.Second)

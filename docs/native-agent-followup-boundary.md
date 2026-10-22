@@ -144,8 +144,9 @@ missing/replaced/unready Agents, authority changes and cancellation around
 dispatch. They do not execute Pi or establish real PC acceptance. Existing
 PostgreSQL tests separately cover the reused durable CAS, ownership and RLS.
 
-The product semantics are frozen at `fd8fe44f13ea250a1dbefe6c1628f3b27b042106`;
-the next increment changes only tests, the CI gate and this documentation.
+The product baseline is `fd8fe44f13ea250a1dbefe6c1628f3b27b042106`.
+Checkpoint `7c2ee45b526cc8db75f13fe360ae95a4283ccb00` changed only tests,
+the CI gate and documentation, and remains in history.
 The earlier seven-green Go CI run did **not** select
 `TestComputerOperationsMigrationAndDurableIsolation` in its PostgreSQL step.
 Its success is therefore not evidence that the operation CAS/RLS test ran in
@@ -169,6 +170,17 @@ tests commit the dispatching record before dropping its acknowledgement: no
 prompt is sent. They separately cover durable rejection and failed finalization,
 where the persisted dispatching record stays unknown across reconstruction and
 blocks a new UUID. None of these tests changes product behavior or adds recovery.
+
+A subsequent narrow correction also compares fingerprints after a failed CAS
+reload, matching initial deduplication. If another Service won with the same
+UUID but different task or mode, the loser returns `request_conflict=true` and
+the existing invalid-request error, never an unqualified receipt for that other
+intent. Two additional same-revision barrier cases first reproduced the missing
+conflict on the checkpoint, then passed with the correction. They verify that
+only the winner's task is sent once, the persisted mode/fingerprint belong to
+that winner, earlier entries survive, and retrying the loser neither rewrites
+the ledger nor sends input. No schema, restoration or other dispatch semantics
+changed; the non-skipping PostgreSQL gate is retained.
 
 When combining Go workflows, append this gate while retaining **all** existing
 memory/file-ref/delegation/transport and other contract gates. Do not replace
