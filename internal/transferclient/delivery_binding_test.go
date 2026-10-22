@@ -16,6 +16,7 @@ type publicationFixture struct{ outcome AssociationOutcome }
 func (p publicationFixture) Resolve(context.Context, Reference, bool) (AssociationOutcome, error) {
 	return p.outcome, nil
 }
+
 func (p publicationFixture) Publish(context.Context, Reference, io.Reader) (AssociationOutcome, error) {
 	return p.outcome, nil
 }

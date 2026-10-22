@@ -56,7 +56,7 @@ func exerciseDeliveryHandoff(ctx context.Context, t *testing.T, store *postgress
 	t.Helper()
 	log := slog.New(slog.DiscardHandler)
 	gated := &pgGatedDeliveryAssets{Service: assets, started: make(chan struct{}, 8), release: make(chan struct{})}
-	async, err := computertask.NewAsyncDeliveryService(t.Context(), computertask.NewPostgresDeliveryService(store, gated), func(ctx context.Context, candidate computertask.DeliveryIdentity) error {
+	async, err := computertask.NewAsyncDeliveryService(ctx, computertask.NewPostgresDeliveryService(store, gated), func(ctx context.Context, candidate computertask.DeliveryIdentity) error {
 		if candidate != id {
 			return computertask.ErrDeliveryBinding
 		}
@@ -67,12 +67,12 @@ func exerciseDeliveryHandoff(ctx context.Context, t *testing.T, store *postgress
 	}
 	defer async.Close()
 	e := echo.New()
-	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log)
+	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log) //nolint:contextcheck // Installs a handler; requests supply their own contexts.
 	handlers.NewAsyncComputerDeliveryHandler(async).Register(e)
 	messages := handlers.NewMessageHandler(log, nil, nil, bots.NewService(log, postgresstore.NewQueries(store.SQLC())), accounts.NewService(log, store))
 	messages.SetMediaService(assets)
 	messages.Register(e)
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc { //nolint:contextcheck // Fixture identity is bound to each incoming request, not setup context.
 		return func(c echo.Context) error {
 			if c.Request().Header.Get("Authorization") != "Bearer isolated-delivery-fixture" {
 				return echo.NewHTTPError(http.StatusForbidden)
@@ -327,11 +327,14 @@ func (p *pgLocalPublication) Publish(ctx context.Context, ref transferclient.Ref
 }
 
 func (p *pgLocalPublication) persist(name string, data io.Reader) error {
+	if name != "published" && name != "fenced" {
+		return transferclient.ErrBinding
+	}
 	f, err := os.CreateTemp(p.root, "pending-")
 	if err != nil {
 		return err
 	}
-	defer func() { _ = f.Close(); _ = os.Remove(f.Name()) }()
+	defer func() { _ = f.Close(); _ = os.Remove(f.Name()) }() //nolint:gosec // The name comes from CreateTemp in this fixture-owned directory.
 	if _, err := io.Copy(f, io.LimitReader(data, 1024)); err != nil {
 		return err
 	}
@@ -341,7 +344,7 @@ func (p *pgLocalPublication) persist(name string, data io.Reader) error {
 	if err := f.Close(); err != nil {
 		return err
 	}
-	if err := os.Rename(f.Name(), filepath.Join(p.root, name)); err != nil {
+	if err := os.Rename(f.Name(), filepath.Join(p.root, name)); err != nil { //nolint:gosec // Fixture-owned TempDir and the two validated literal names above.
 		return err
 	}
 	dir, err := os.Open(p.root)

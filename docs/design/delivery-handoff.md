@@ -103,3 +103,10 @@ wait for two full scans; it does not reduce those reads, pin files, bound a
 stalled kernel I/O call, or prove a network/disk throughput ceiling. Real source,
 NAS and network benchmarks and approved HTTPS/PC identity remain acceptance
 prerequisites.
+
+The unchanged Media Range GET still performs full verification before its first
+response bytes. A slow NAS may exceed the Windows two-minute invocation budget
+there. This increment fixes association Commit admission only; Range preflight
+requires a separately reviewed Media change or a bounded verified-handle reuse
+contract. No timeout bypass, unverified download, or blanket large-file readiness
+is claimed. The current permission to leave Media unchanged remains in force.
