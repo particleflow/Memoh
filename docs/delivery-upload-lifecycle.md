@@ -72,3 +72,11 @@ expired ready collection with intact original bytes/hash. A real HTTPS task
 handler fixture checks that authorized Create selects the progress policy while
 receipt isolation and revocation remain enforced. Credentials and data are
 synthetic; these are not physical power-cut or real PC-to-NAS acceptance results.
+
+A deterministic two-store concurrency regression pauses Append while it holds
+the receipt's OS lock, advances an atomic virtual clock past the old deadline,
+and runs Sweep through the second store. Cleanup must skip the locked receipt.
+After release, accepted progress preserves the same receipt/offset and new
+deadline; a rejected hash supplies no progress and the next Sweep collects the
+expired staging. Both cases run with the race detector. This tests the lock and
+deadline boundary, separately from the all-package race result.
