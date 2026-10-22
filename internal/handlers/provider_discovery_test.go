@@ -17,6 +17,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -125,6 +126,14 @@ func TestProviderDiscoveryRealHTTPAuthAndSanitization(t *testing.T) {
 	request(path, chat, 403)
 	if q.reads.Load() != 0 || calls.Load() != 0 {
 		t.Fatal("unauthorized request read provider or contacted upstream")
+	}
+	invalidID := request("/providers/not-a-uuid/model-discovery", token, http.StatusBadRequest)
+	var problem server.Problem
+	if json.Unmarshal(invalidID, &problem) != nil || problem.Code != string(apperror.CodeRequestFieldInvalid) || problem.Args["field"] != "id" || len(problem.Args) != 1 || strings.Contains(string(invalidID), "not-a-uuid") {
+		t.Fatal("invalid provider ID did not use the field error contract")
+	}
+	if q.reads.Load() != 0 || calls.Load() != 0 {
+		t.Fatal("invalid provider ID read provider or contacted upstream")
 	}
 	request("/providers/22222222-2222-4222-8222-222222222222/model-discovery", token, 404)
 	if calls.Load() != 0 {

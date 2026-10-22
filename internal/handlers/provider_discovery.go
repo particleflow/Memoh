@@ -7,6 +7,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/providers"
@@ -51,7 +52,7 @@ func (h *ProvidersHandler) DiscoverModels(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, "provider discovery requires an account session")
 	}
 	if _, err := db.ParseUUID(c.Param("id")); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, "invalid provider ID")
+		return apperror.FieldInvalid("id", nil)
 	}
 	result, err := h.service.DiscoverModels(c.Request().Context(), c.Param("id"))
 	if err == nil {
