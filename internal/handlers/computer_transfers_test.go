@@ -149,7 +149,7 @@ func TestTaskTransferHTTPUploadAndReceiptIsolation(t *testing.T) {
 	if !errors.As(err, &status) || status.Status != 403 {
 		t.Fatal("same-account same-hash receipt crossed delivery", err)
 	}
-	if receipt, err := client.Patch(t.Context(), f.id.Binding.BotID, created.ID, 0, []byte("fixture")); err != nil || receipt.Offset != spec.SizeBytes {
+	if receipt, err := client.Patch(t.Context(), f.id.Binding.BotID, created.ID, 0, []byte("fixture")); err != nil || receipt.Offset != spec.SizeBytes || !receipt.ExpiresAt.After(created.ExpiresAt) {
 		t.Fatal(receipt, err)
 	}
 	if receipt, err := client.Complete(t.Context(), f.id.Binding.BotID, created.ID); err != nil || receipt.State != "ready" || receipt.ContentHash != spec.SHA256 {
