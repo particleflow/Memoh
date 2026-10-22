@@ -4396,6 +4396,7 @@ export type UserruntimeCreateRuntimeRequest = {
 
 export type UserruntimeRuntime = {
     arch?: string;
+    availability?: string;
     capabilities?: Array<string>;
     client_version?: string;
     created_at?: string;

@@ -27,6 +27,9 @@ func provideAgenvoService(store *postgresstore.Store, connections *mcp.Connectio
 		}
 		result, err := gateway.CallHTTPConnectionTool(ctx, connection, tool, args)
 		if err != nil {
+			if handlers.IsMCPAuthenticationUnavailable(err) {
+				return nil, agenvo.ErrAuthenticationUnavailable
+			}
 			return nil, err
 		}
 		return json.Marshal(result["result"])

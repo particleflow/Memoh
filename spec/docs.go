@@ -28928,6 +28928,9 @@ const docTemplate = `{
                 "arch": {
                     "type": "string"
                 },
+                "availability": {
+                    "type": "string"
+                },
                 "capabilities": {
                     "type": "array",
                     "items": {

@@ -7499,6 +7499,8 @@ definitions:
     properties:
       arch:
         type: string
+      availability:
+        type: string
       capabilities:
         items:
           type: string

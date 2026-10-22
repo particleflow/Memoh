@@ -675,6 +675,9 @@
     "status": {
       "online": "オンライン",
       "offline": "オフライン",
+      "authentication_unavailable": "認証を利用できません",
+      "connection_unavailable": "接続状態を確認できません",
+      "runtime_unavailable": "ネイティブサービスを利用できません",
       "revoked": "アクセス解除済み",
       "owner_mismatch": "利用できません",
       "client_update_required": "更新が必要です"
@@ -4540,7 +4543,8 @@
     "register": "接続して Bot を選択",
     "noConnections": "この Bot に有効な HTTP MCP 接続がありません。MCP 設定で Agenvo を設定してください。",
     "noDevices": "この接続に Herdr インスタンスが見つかりません。",
-    "capability": "Agenvo · コマンドのみ",
+    "capability": "Agenvo · コマンド",
+    "agentCapability": "Agenvo · Pi タスクとコマンド",
     "completed": "フォアグラウンドコマンドが完了しました。標準出力とエラーテキストをまとめて表示します。",
     "uncertain": "コマンドの結果が不明、または拒否されました。待機を停止しても Windows 上の実行は終了しません。再試行前に確認してください。",
     "retained": "ワークスペース {id} は手動確認のため保持され、自動終了されていません。",

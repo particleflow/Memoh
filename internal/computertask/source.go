@@ -29,6 +29,8 @@ func (*Source) ListTools(context.Context, mcp.ToolSessionContext) ([]mcp.ToolDes
 	}
 	id := schema(map[string]any{"operation_id": text("Receipt ID returned by computer_task_submit in this conversation.")}, "operation_id")
 	return []mcp.ToolDescriptor{
+		{Name: "computer_workspaces", Description: "List existing native workspaces on one currently authorized computer. Read-only metadata; no cwd, terminal output, new workspace, task execution or automatic retry. A selected-PC conversation can query only that PC; NAS scope still requires a Bot grant. Native status is not task success. A truncated list has no implied continuation cursor.", InputSchema: schema(map[string]any{"target_id": text("Memoh computer target ID from computer_targets; omit only when unambiguous.")})},
+		{Name: "computer_task_recover", Description: "Find this conversation's original operation and observe its stored native references using read-only workspace/pane/agent metadata. Return verified persisted Pi facts separately from current native presence; missing receipts or reused/missing panes remain unknown with a reason. Never resubmits, creates a control pane, types into a terminal, imports logs, rewrites a receipt or infers business success. Authentication unavailable is not proof the device is offline.", InputSchema: id},
 		{Name: "computer_targets", Description: "List authorized Agenvo Windows computers in this conversation. A PC conversation sees only that PC; a NAS conversation sees only Bot grants. Reports configured capabilities, not a live GUI or full filesystem runtime.", InputSchema: schema(map[string]any{})},
 		{Name: "computer_task_submit", Description: "Submit once to an authorized computer using its registered Agenvo/Herdr mapping. foreground_bash executes Bash; herdr_pi_task starts configured Pi/provider through Herdr. No raw methods, device IDs, GUI or fallback. Omit target only when selection is unambiguous. Unknown is not permission to resubmit: query the returned receipt.", InputSchema: schema(map[string]any{"target_id": text("Memoh computer target ID from computer_targets; never an Agenvo device ID."), "kind": map[string]any{"type": "string", "enum": []string{"foreground_bash", "herdr_pi_task"}}, "task": text("Bash command or Pi task intent, according to kind."), "work_dir": text("Root-relative working directory, default '.'.")}, "kind", "task")},
 		{Name: "computer_task_get", Description: "Read this conversation's durable task receipt without repeating a submission.", InputSchema: id},
@@ -70,6 +72,23 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 	}
 	var value any
 	switch name {
+	case "computer_workspaces":
+		var input struct {
+			TargetID string `json:"target_id"`
+		}
+		if err = decodeArguments(args, &input); err == nil {
+			value, err = s.service.workspaces(ctx, b, input.TargetID)
+		}
+	case "computer_task_recover":
+		var input struct {
+			ID string `json:"operation_id"`
+		}
+		if err = decodeArguments(args, &input); err == nil {
+			if input.ID == "" {
+				return nil, ErrInvalid
+			}
+			value, err = s.service.recover(ctx, b, input.ID)
+		}
 	case "computer_targets":
 		if len(args) != 0 {
 			return nil, ErrInvalid

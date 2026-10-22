@@ -678,6 +678,9 @@
     "status": {
       "online": "在线",
       "offline": "离线",
+      "authentication_unavailable": "认证不可用",
+      "connection_unavailable": "连接状态未确认",
+      "runtime_unavailable": "原生服务不可用",
       "revoked": "已移除权限",
       "owner_mismatch": "已不可用",
       "client_update_required": "需要更新"
@@ -4546,7 +4549,8 @@
     "register": "连接并选择 Bot",
     "noConnections": "此 Bot 没有已启用的 HTTP MCP 连接，请先在其 MCP 设置中配置 Agenvo。",
     "noDevices": "此连接未发现 Herdr 实例。",
-    "capability": "Agenvo · 仅命令",
+    "capability": "Agenvo · 命令",
+    "agentCapability": "Agenvo · Pi 任务与命令",
     "completed": "前台命令已完成，输出合并了标准输出和错误文本。",
     "uncertain": "命令结果未确定或被拒绝。停止等待不会终止 Windows 执行，请先检查再决定是否重试。",
     "retained": "工作区 {id} 已保留以供人工检查，未自动关闭。",

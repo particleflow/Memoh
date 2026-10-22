@@ -45,6 +45,10 @@ func (g *MCPFederationGateway) SetOAuthService(svc *mcpgw.OAuthService) {
 // session with 401 Unauthorized.
 var errMCPUnauthorized = errors.New("mcp server requires authorization")
 
+// IsMCPAuthenticationUnavailable exposes only an observed HTTP 401 marker.
+// No transport error text or OAuth response body participates in this decision.
+func IsMCPAuthenticationUnavailable(err error) bool { return errors.Is(err, errMCPUnauthorized) }
+
 func (g *MCPFederationGateway) ListHTTPConnectionTools(ctx context.Context, connection mcpgw.Connection) ([]mcpgw.ToolDescriptor, error) {
 	session, status, err := g.connectStreamableSession(ctx, connection)
 	if err != nil {
@@ -59,7 +63,7 @@ func (g *MCPFederationGateway) ListHTTPConnectionTools(ctx context.Context, conn
 }
 
 func (g *MCPFederationGateway) CallHTTPConnectionTool(ctx context.Context, connection mcpgw.Connection, toolName string, args map[string]any) (map[string]any, error) {
-	session, _, err := g.connectStreamableSession(ctx, connection)
+	session, status, err := g.connectStreamableSession(ctx, connection)
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +73,7 @@ func (g *MCPFederationGateway) CallHTTPConnectionTool(ctx context.Context, conne
 		Arguments: args,
 	})
 	if err != nil {
-		return nil, err
+		return nil, status.annotate(err)
 	}
 	return wrapSDKToolResult(result)
 }

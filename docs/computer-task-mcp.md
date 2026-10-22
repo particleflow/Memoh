@@ -45,11 +45,16 @@ that brain on the PC or replacing the workspace runtime.
 | Tool | Effect |
 | --- | --- |
 | `computer_targets` | Bot-authorized Agenvo targets within conversation scope; no raw connector/device/instance identifiers. Availability is explicitly not probed. |
+| `computer_workspaces` | Bounded native workspace discovery on one authorized PC, with separate authentication/connection/device states. |
+| `computer_task_recover` | Read the original owned operation and observe saved workspace/pane/agent references; no terminal input, log ingestion, resubmission or receipt rewrite. |
 | `computer_task_submit` | Fixed `foreground_bash` or configured `herdr_pi_task`, optionally selecting a returned target. |
 | `computer_task_get` | Read a durable receipt, no remote effect. |
 | `computer_task_result` | Read receipt; for Pi, fixed read-only Herdr get/read observation. |
 | `computer_task_cancel` | Record intent; never kill, close or send terminal keys. |
 | `computer_task_artifact` | Persist a bounded terminal snapshot through the existing media service and expose its content hash only after opening/validating the stored bytes. |
+
+The exact observation contract and native API sources are documented in
+[Native workspace observation](native-workspace-observation.md).
 
 A selected PC restricts both inventory and calls to that PC, including native
 exec, filesystem/desktop rejection and workdir discovery. A NAS conversation

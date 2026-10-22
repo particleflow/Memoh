@@ -678,6 +678,9 @@
     "status": {
       "online": "Online",
       "offline": "Offline",
+      "authentication_unavailable": "Authentication unavailable",
+      "connection_unavailable": "Connection unverified",
+      "runtime_unavailable": "Native service unavailable",
       "revoked": "Access removed",
       "owner_mismatch": "No longer available",
       "client_update_required": "Update required"
@@ -4546,7 +4549,8 @@
     "register": "Connect and choose Bots",
     "noConnections": "No active HTTP MCP connection on this Bot. Configure Agenvo in its MCP settings first.",
     "noDevices": "No Herdr instances found on this connection.",
-    "capability": "Agenvo · commands only",
+    "capability": "Agenvo · commands",
+    "agentCapability": "Agenvo · Pi tasks and commands",
     "completed": "Foreground command completed. Output combines stdout and error text.",
     "uncertain": "Command outcome is unknown or rejected. Stopping the wait does not stop Windows execution. Inspect it before retrying.",
     "retained": "Workspace {id} is retained for manual inspection; it was not closed automatically.",
