@@ -190,6 +190,11 @@ are listed there. `*.output.txt` is a decoded Go `Output`-field view; the matchi
 `.log` contains the complete JSONL with only those path substitutions. Neither is
 mislabelled as an unmodified private original when bytes differ.
 
+The final whitespace check flags blank lines at EOF in six exported command logs
+and one trailing space emitted by Vite. Those bytes are deliberately retained;
+they are evidence-format whitespace, not product-source errors. The product-only
+diff has no whitespace errors. No formatter was run over captured command output.
+
 Only selected synthetic check output and screenshots are included. Private server
 logs, fixture credentials, request headers, configuration, environment dumps and
 raw database contents are excluded. Screenshots contain only seeded synthetic
