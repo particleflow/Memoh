@@ -139,3 +139,37 @@ The small Pi-completion adapter is separate work, not part of this integration.
 only the newly completed synthetic Pi task. The separate attachment hash and
 journal checks establish storage consistency. No new Windows/vendor or real
 model acceptance is claimed.
+
+## Session-task main integration (2026-10-22)
+
+Normally merged main `43d2509f6e4f70c565af0bc310a3b3e3068a0780`, which
+contains PR #9, into this branch. There were no conflicts. The path production
+code and tests are unchanged from `e08579ca`; PR #12's compact-result adapter
+is not included. PR #9's task projection/authorization/no-store implementation
+and PR #8's resumable-upload implementation remain byte-for-byte equal to main.
+
+- Race regressions passed for config, agenvo, computertask, sessiontask, media
+  and `internal/storage/providers/localfs`. Targeted HTTP regressions covered
+  task authorization/no-store and resumable-upload transport. An initial test
+  command used an incorrect localfs package path; the real package was then
+  tested successfully, without changing source to accommodate the command.
+- The isolated PostgreSQL `TestSessionTasksPostgresOwnedTreeAndStableCursor`
+  regression passed against a fresh migrated test database. It did not use or
+  modify production data. Runtime/contextview still match the official baseline.
+- Rebuilt and ran the integrated Server with the existing Vue/PostgreSQL cloud
+  fixture. The real browser selected a synthetic chat attachment without
+  sending a model request; no JavaScript errors occurred. Authenticated HTTP
+  separately uploaded/read back a 39-byte original and a 1,680-byte two-chunk
+  resumable original, verifying offsets, ready state and SHA-256. Both originals
+  and the resumable journal were verified under the same relative-configured
+  originals root. This does not claim a new full chat-send or Pi invocation.
+- The current HTTP task route returned 200 for an owned, empty synthetic
+  conversation. Unauthenticated, invalid-query and unknown-task-route responses
+  returned 401/400/404 with `Cache-Control: no-store`. No model or PC business
+  task was dispatched or replayed during these integration checks.
+
+[Current integrated browser evidence](validation/data-path-main9-web.png) shows
+the unsent synthetic attachment draft, not a new successful task. Existing task
+content remains governed by PR #9's conservative projection; this path patch
+does not add Pi summaries or attachments to that API. NAS candidate acceptance
+is a separate release gate.
