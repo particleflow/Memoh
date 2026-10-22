@@ -52,9 +52,10 @@ type Upload struct {
 
 type uploadRecord struct {
 	Upload
-	Owner  string `json:"owner"`
-	Bot    string `json:"bot"`
-	SHA256 string `json:"sha256" validate:"required"`
+	Owner         string `json:"owner"`
+	Bot           string `json:"bot"`
+	SHA256        string `json:"sha256" validate:"required"`
+	ProgressLease int    `json:"progress_lease,omitempty"`
 }
 
 // UploadStore journals acknowledged offsets beneath the configured originals
@@ -173,7 +174,7 @@ func (s *UploadStore) read(id string) (uploadRecord, error) {
 	if err := json.NewDecoder(io.LimitReader(f, 4096)).Decode(&r); err != nil {
 		return r, err
 	}
-	if r.ID != id || r.SizeBytes <= 0 || r.Offset < 0 || r.Offset > r.SizeBytes || !validSHA(r.SHA256) {
+	if r.ID != id || r.SizeBytes <= 0 || r.Offset < 0 || r.Offset > r.SizeBytes || !validSHA(r.SHA256) || r.ProgressLease < 0 || r.ProgressLease > 1 {
 		return r, ErrUploadInvalid
 	}
 	// A prior process may have renamed this journal and failed before its
@@ -233,6 +234,17 @@ func (s *UploadStore) owned(owner, bot, id string) (uploadRecord, error) {
 }
 
 func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadInput) (Upload, error) {
+	return s.create(ctx, owner, bot, in, 0)
+}
+
+// CreateTransfer is called only after the task adapter has authorized and claimed
+// the delivery. It retains the ordinary wire contract, but gives new task uploads
+// a durable inactivity lease. This method does not establish task authorization.
+func (s *UploadStore) CreateTransfer(ctx context.Context, owner, bot string, in UploadInput) (Upload, error) {
+	return s.create(ctx, owner, bot, in, 1)
+}
+
+func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadInput, progressLease int) (Upload, error) {
 	if !validPathComponent(owner) || !validPathComponent(bot) || in.SizeBytes <= 0 || !validSHA(in.SHA256) {
 		return Upload{}, ErrUploadInvalid
 	}
@@ -277,7 +289,7 @@ func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadIn
 	if count >= maxUploadSessions || active >= maxActiveUploads || owned >= maxOwnerUploads || reserved+in.SizeBytes > 4*s.media.MaxUploadBytes() {
 		return Upload{}, ErrUploadQuota
 	}
-	r := uploadRecord{Upload: Upload{ID: uuid.NewString(), State: "uploading", SizeBytes: in.SizeBytes, Mime: typ, ExpiresAt: s.now().Add(UploadTTL)}, Owner: owner, Bot: bot, SHA256: in.SHA256}
+	r := uploadRecord{Upload: Upload{ID: uuid.NewString(), State: "uploading", SizeBytes: in.SizeBytes, Mime: typ, ExpiresAt: s.now().Add(UploadTTL)}, Owner: owner, Bot: bot, SHA256: in.SHA256, ProgressLease: progressLease}
 	if err := s.save(r); err != nil {
 		return Upload{}, err
 	}
@@ -352,10 +364,20 @@ func (s *UploadStore) Append(ctx context.Context, owner, bot, id string, offset,
 	// Leave the bytes intact; the next operation consults the journal.
 	acknowledged = true
 	r.Offset += size
+	s.renewProgressLease(&r)
 	if err := s.save(r); err != nil {
 		return Upload{}, err
 	}
 	return r.Upload, nil
+}
+
+// Offset and expiry share one atomic durable receipt write. Reads, rejected
+// chunks, replayed completion and cancellation never extend the lease. A clock
+// adjustment backwards must not shorten an already acknowledged deadline.
+func (s *UploadStore) renewProgressLease(r *uploadRecord) {
+	if deadline := s.now().Add(UploadTTL); r.ProgressLease == 1 && deadline.After(r.ExpiresAt) {
+		r.ExpiresAt = deadline
+	}
 }
 
 func (s *UploadStore) payload(r uploadRecord) (*os.File, error) {
@@ -419,6 +441,7 @@ func (s *UploadStore) Complete(ctx context.Context, owner, bot, id string) (Uplo
 	}
 	r.State = "ready"
 	r.ContentHash = r.SHA256
+	s.renewProgressLease(&r)
 	if err := s.save(r); err != nil {
 		return Upload{}, err
 	}

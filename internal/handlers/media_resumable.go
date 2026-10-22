@@ -83,7 +83,11 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 		}
 		return c.JSON(http.StatusCreated, result)
 	}
-	result, err := store.Create(c.Request().Context(), owner, bot, in)
+	create := store.Create
+	if taskTransfer(c) != nil {
+		create = store.CreateTransfer
+	}
+	result, err := create(c.Request().Context(), owner, bot, in)
 	if err != nil {
 		if scope := taskTransfer(c); scope != nil && (errors.Is(err, media.ErrUploadQuota) || errors.Is(err, media.ErrUploadInvalid) || errors.Is(err, media.ErrAssetTooLarge) || errors.Is(err, media.ErrUploadBusy)) {
 			// These refusals occur before UploadStore.save. Other errors can mean
