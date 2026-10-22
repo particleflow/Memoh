@@ -1,0 +1,9 @@
+goos: linux
+goarch: amd64
+pkg: github.com/felinics/memoh/internal/transferclient
+cpu: INTEL(R) XEON(R) PLATINUM 8573C
+BenchmarkDurableAdmissionResume-4   	       1	2377817447 ns/op	 225.78 MB/s	 8760024 B/op	    3520 allocs/op
+BenchmarkDurableAdmissionResume-4   	       1	1430492886 ns/op	 375.30 MB/s	 8719904 B/op	    2925 allocs/op
+BenchmarkDurableAdmissionResume-4   	       1	1937970112 ns/op	 277.03 MB/s	 8709528 B/op	    2916 allocs/op
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	8.466s

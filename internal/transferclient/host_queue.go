@@ -35,15 +35,6 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	if job.Spec.SizeBytes > q.limits.Bytes {
 		return ErrCapacity
 	}
-	if direction == "upload" {
-		if source == nil {
-			return ErrSnapshot
-		}
-		info, err := source.Stat()
-		if err != nil || !info.Mode().IsRegular() || info.Size() != job.Spec.SizeBytes {
-			return ErrSnapshot
-		}
-	}
 	global, err := q.lock("admission")
 	if err != nil {
 		return err
@@ -54,52 +45,51 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 		return err
 	}
 	defer unlockClose(lock)
-	if err := q.capacity(job.Spec.SizeBytes); err != nil {
-		return err
-	}
-	journal, err := q.file(job.DeliveryID+".journal", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = journal.Close() }()
-	r := QueueStatus{Version: 2, Direction: direction, Job: job, AssociationState: AssociationIdle}
-	if err := q.save(journal, r); err != nil {
-		return err
-	}
-	if err := syncQueueDir(q.root); err != nil {
+	r := QueueStatus{Version: 2, Direction: direction, Job: job, AssociationState: AssociationIdle, AdmissionVersion: 1}
+	var journal *os.File
+	if _, err := q.root.Lstat(job.DeliveryID + ".journal"); err == nil {
+		var existing QueueStatus
+		existing, journal, err = q.load(job.DeliveryID)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = journal.Close() }()
+		if existing.Direction != direction || !sameAdmission(existing.Job, job) || existing.Job.CancelRequested {
+			return ErrInvalid
+		}
+		if existing.Admitted {
+			return nil
+		}
+		if existing.AdmissionVersion != 1 {
+			return ErrVersion
+		}
+		r = existing
+	} else if !errors.Is(err, os.ErrNotExist) {
 		return ErrStore
+	} else {
+		if err := q.capacity(job.Spec.SizeBytes); err != nil {
+			return err
+		}
+		journal, err = q.file(job.DeliveryID+".journal", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = journal.Close() }()
+		if err := q.save(journal, r); err != nil {
+			return err
+		}
+		if err := syncQueueDir(q.root); err != nil {
+			return ErrStore
+		}
 	}
-	// Failed/interrupted admission retains its reservation. Explicit cleanup is
-	// needed; never mistake a partial snapshot for an admitted job on restart.
-	suffix := ".snapshot"
-	if direction == "download" {
-		suffix = ".part"
+	if direction == "upload" {
+		return q.resumeAdmission(ctx, r, journal, source)
 	}
-	f, err := q.file(job.DeliveryID+suffix, os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+	f, err := q.file(job.DeliveryID+".part", os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = f.Close() }()
-	if direction == "upload" {
-		if _, err := source.Seek(0, io.SeekStart); err != nil {
-			return ErrSnapshot
-		}
-		tree, err := q.file(job.DeliveryID+".tree", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = tree.Close() }()
-		r.Seal, err = sealSnapshot(ctx, source, f, tree, job.Spec)
-		if err != nil {
-			return err
-		}
-		if tree.Chmod(0o400) != nil || tree.Sync() != nil {
-			return ErrStore
-		}
-	}
-	if direction == "upload" && f.Chmod(0o400) != nil {
-		return ErrStore
-	}
 	if f.Sync() != nil || syncQueueDir(q.root) != nil {
 		return ErrStore
 	}
@@ -113,8 +103,8 @@ func (q *DiskQueue) capacity(add int64) error {
 		return ErrStore
 	}
 	defer func() { _ = dir.Close() }()
-	entries, err := dir.ReadDir(q.limits.Jobs*4 + 136)
-	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*4+136 {
+	entries, err := dir.ReadDir(q.limits.Jobs*5 + 136)
+	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*5+136 {
 		return ErrCapacity
 	}
 	count, total := 0, int64(0)
@@ -146,13 +136,13 @@ func (q *DiskQueue) capacity(add int64) error {
 			return ErrStore
 		}
 		count++
-		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes)
+		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes
 		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
 		}
 		total += reserved
 	}
-	add += snapshotTreeBytes(add)
+	add += snapshotTreeBytes(add) + admissionFileBytes
 	if count >= q.limits.Jobs || add > q.limits.Bytes-total {
 		return ErrCapacity
 	}
@@ -174,8 +164,8 @@ func (q *DiskQueue) Inspect(id string) (QueueStatus, error) {
 		return QueueStatus{}, err
 	}
 	defer func() { _ = f.Close() }()
-	if !r.Admitted {
-		return r, ErrSnapshot
+	if !r.Admitted && r.Job.Phase != "canceled" {
+		return r, ErrAdmissionPending
 	}
 	return r, nil
 }
@@ -212,6 +202,10 @@ func (q *DiskQueue) RequestCancel(id string) error {
 		r.AssociationBlocked = false
 	}
 	r.Job.CancelRequested = true
+	if !r.Admitted {
+		r.Job.Phase = "canceled"
+		r.AssociationState = AssociationCanceled
+	}
 	return q.save(f, r)
 }
 
@@ -242,7 +236,7 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 	}
 	defer func() { _ = journal.Close() }()
 	if !r.Admitted {
-		return ErrSnapshot
+		return ErrAdmissionPending
 	}
 	if !r.Associated && r.Direction == "download" && r.Job.CancelRequested && r.Job.Phase != "ready" {
 		r.Job.Phase, r.Job.ErrorCode, r.Job.NextAttempt = "canceled", "", time.Time{}
@@ -373,6 +367,9 @@ func (q *DiskQueue) Retire(id string) error {
 		if err := q.root.Remove(id + ".tree"); err != nil && !errors.Is(err, os.ErrNotExist) {
 			return ErrStore
 		}
+	}
+	if err := q.root.Remove(id + ".admission"); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return ErrStore
 	}
 	if syncQueueDir(q.root) != nil {
 		return ErrStore
