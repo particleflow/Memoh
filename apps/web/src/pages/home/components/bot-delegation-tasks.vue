@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Button, DialogDescription, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import type { BotdelegationView } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
 import { delegationAPIUnsupported } from '../composables/useBotDelegations'
@@ -40,7 +40,6 @@ function taskLabel(task: BotdelegationView) {
 </script>
 
 <template>
-  <DialogDescription>{{ t('chat.delegations.description') }}</DialogDescription>
   <Empty v-if="error">
     <EmptyDescription>{{ errorMessage }}</EmptyDescription>
     <Button

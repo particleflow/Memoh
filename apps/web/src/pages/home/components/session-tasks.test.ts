@@ -124,6 +124,18 @@ describe('task detail identity and rendering boundary', () => {
     expect(api.delegationDetail).not.toHaveBeenCalled()
   })
 
+  it('keeps the Web shell description and restores trigger focus on Escape', async () => {
+    await open('delegations')
+    const dialog = document.querySelector('[role=dialog]')!
+    expect(document.getElementById(dialog.getAttribute('aria-labelledby')!)?.textContent).toBe(en.chat.tasks.detail)
+    expect(document.getElementById(dialog.getAttribute('aria-describedby')!)?.textContent).toBe(en.chat.delegations.description)
+    expect(dialog.contains(document.activeElement)).toBe(true)
+    document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settled(); await vi.advanceTimersByTimeAsync(300); await nextTick()
+    expect(document.querySelector('[role=dialog]')).toBeNull()
+    expect(document.activeElement).toBe(button('Tasks'))
+  })
+
   it('closes specialist detail and ignores its late reply after same-tab logout', async () => {
     let finish!: (value: { data: BotdelegationView }) => void
     api.delegationDetail.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))

@@ -80,6 +80,7 @@ function taskLabel(task: SessiontaskTask) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="delegations">
+            <DialogDescription>{{ t('chat.delegations.description') }}</DialogDescription>
             <BotDelegationTasks
               :items="delegations"
               :detail="delegationDetail"

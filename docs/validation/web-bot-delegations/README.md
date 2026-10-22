@@ -35,7 +35,9 @@ has no mutation API and does not grant access: the server still authorizes reads
   existing warnings. `check-agent-core-boundary.sh` passed against official
   `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`.
 - Whole Web typecheck still fails with the same 150 diagnostics before and after
-  this increment, compared line by line. No `any`, suppression, relaxed strictness,
+  this increment on its PR #45 base, compared line by line. This was not a
+  main851 baseline: the later isolated comparison found 145 on main851 and
+  NAS834; see [full diagnostics and ancestry](TYPECHECK.md). No `any`, suppression, relaxed strictness,
   or disabled typecheck was added. The existing PR #45 scoped-gallery test has
   five of those diagnostics; this observer does not edit it.
 - Node 24 test runs disable its experimental process-global WebStorage so jsdom
@@ -99,3 +101,67 @@ Confirm that observing never dispatches another task. Attachment delivery must
 pass its own backend validation before enabling any observer download action.
 No NAS changes, paid model request, production credential, or Agent core change
 is part of this increment.
+
+
+## Shared body contract for Web and native-dialog hosts
+
+`apps/web/src/pages/home/components/bot-delegation-tasks.vue` is now a body-only
+component. It does not inject Reka DialogRoot, own a modal, fetch data, grant
+access, cancel work, or offer downloads. The Web shell in `session-tasks.vue`
+keeps its existing Dialog/Panel/Header and owns its `DialogDescription`.
+A Harmony native HTML dialog can embed the same body without that context.
+
+| Prop | Type / meaning |
+| --- | --- |
+| `items` | `BotdelegationView[]`, current list page |
+| `detail` | optional `BotdelegationView`, current detail |
+| `selected` | optional delegation ID, detail selection |
+| `cursor`, `nextCursor` | optional opaque cursor strings for this reader only |
+| `loading` | boolean, a read is in progress |
+| `error` | optional `unknown`, localized through existing API error helpers |
+
+Events: `openTask(task: BotdelegationView)`, `page(cursor?: string)`, and
+`refresh()`. Wire these to the same `useBotDelegations(scope, visible)` methods;
+pass its returned refs as props. `scope` is `Ref<TaskScope | null>` with `bot`,
+`session`, `selection` (workspace selection), and `identity` from the authenticated
+host. `visible` is `Ref<boolean>` and must reflect the active tab/dialog as well
+as page visibility. Set it false on close/cancel or host hiding; clear scope on
+auth loss. Do not share cursors with `useSessionTasks`. The reader handles
+abort/generation checks, identity changes and visible polling; a host must not
+add a second polling loop or interpret Reload as business retry.
+
+The host owns accessible title/description and focus lifecycle. Web uses its
+existing DialogTitle/DialogDescription. A native dialog supplies a visible
+heading/paragraph and matching `aria-labelledby` / `aria-describedby`, calls
+`showModal()` / `close()`, and updates visibility on native `close`/`cancel`.
+Use `chat.delegations.title` and `chat.delegations.description` for that native
+heading/description. No extra ticket, permission, device or credential prop is
+introduced. Backend authorization remains mandatory.
+
+Two mounted Vue tests exercise the real body and same reader in Web/Reka and
+native HTML dialog containers, including list → detail, description references
+and no links/images. A separate Web-shell test verifies Escape restores the
+Tasks trigger. The two changed view suites pass 24 tests; all four task reader/view suites
+pass 74 tests. The final shared-body worktree still has the identical 150
+compiler diagnostics of PR54 667, with no added or removed diagnostic.
+
+Fresh Chromium verification on the running local Web app exercised both hosts
+with synthetic readonly API responses: four delegation GETs, zero mutations,
+zero page exceptions, visible final summary as plain text, and no downloads.
+Web preserved its focus trap and Escape restoration. In the native-dialog
+fixture, Tab may reach browser chrome (normal HTML dialog behavior), but never
+an outside page control; Shift-Tab returns inside and Escape restores the opener.
+The native screenshot verifies the shared body, not a shipped Harmony screen or
+HAP. The temporary fixture module was removed after verification.
+
+- [Existing Web shell with shared body](shared-body-web.png)
+- [Native HTML dialog fixture with the same body](shared-body-native-dialog.png)
+
+The body still requires Vue/i18n and the shared UI library; only the DialogRoot
+dependency was removed. Harmony integration and real delegation backend
+acceptance remain separate work. Attachment downloads stay disabled.
+
+Final changed-file ESLint and Web build passed. The UI contract passed with its
+three existing warnings, and the runtime/contextview official-baseline check
+passed. The build retains its existing large-chunk warning. A successful build
+or reporting CI does not turn the failing whole-Web typecheck into a pass.
