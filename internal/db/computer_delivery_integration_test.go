@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/felinics/memoh/internal/agenvo"
@@ -126,6 +127,23 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	}
 	if got, err := s.Resolve(ctx, id.OperationID, "result", ref, true); err != nil || got.Outcome != "committed" {
 		t.Fatalf("cancel after execution write: %+v %v", got, err)
+	}
+
+	// Exercise the pre-association SQL shape with a current revision. An old
+	// writer must get an explicit failure, not erase the durable ledger.
+	before := current.Revision
+	_, err = runtimePool.Exec(ctx, "UPDATE computer_operations SET details=$1, revision=revision+1 WHERE id=$2 AND revision=$3", details, id.OperationID, before)
+	var guardError *pgconn.PgError
+	if !errors.As(err, &guardError) || guardError.Code != "23514" {
+		t.Fatalf("old writer was not rejected: %v", err)
+	}
+	after, err := store.ReadComputerOperation(ctx, op)
+	if err != nil || after.Revision != before || string(after.Details) != string(current.Details) {
+		t.Fatalf("rejected writer changed facts: %+v %v", after, err)
+	}
+	_, err = runtimePool.Exec(ctx, "UPDATE computer_operations SET details=jsonb_set(details,'{delivery_ledger,version}','0') WHERE id=$1", id.OperationID)
+	if !errors.As(err, &guardError) || guardError.Code != "23514" {
+		t.Fatalf("ledger downgrade accepted: %v", err)
 	}
 
 	// Transactions must not silently fall back when only a query handle exists.
