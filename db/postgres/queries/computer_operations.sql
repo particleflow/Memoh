@@ -53,3 +53,13 @@ UPDATE user_runtimes SET provider_config=sqlc.arg(provider_config),updated_at=no
 WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id)
 AND provider='agenvo' AND revoked_at IS NULL AND provider_config=sqlc.arg(expected_config)
 RETURNING *;
+
+-- name: PreviousComputerPiOperation :one
+-- Called only after owning the unsettled slot. A missing receipt in the latest
+-- operation is evidence of uncertainty, never permission to search past it.
+SELECT * FROM computer_operations
+WHERE team_id=public.memoh_current_team_id() AND bot_id=sqlc.arg(bot_id)
+AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
+AND target_id=sqlc.arg(target_id) AND id<>sqlc.arg(id)
+AND details->'batch'->'progress'->>'pi_session_id'=sqlc.arg(pi_session_id)::text
+ORDER BY created_at DESC, id DESC LIMIT 1;

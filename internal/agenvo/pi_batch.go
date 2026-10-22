@@ -14,20 +14,21 @@ import (
 // BatchProgress is owned by the durable operation. Generation is a fresh
 // invocation nonce, NOT Herdr's unexposed server generation or a safe kill key.
 type BatchProgress struct {
-	CompletionVersion int                `json:"completion_version,omitempty"`
-	Producer          *deliverymeta.Plan `json:"producer,omitempty"`
-	LayoutVersion     int                `json:"layout_version,omitempty"`
-	Attempt           string             `json:"attempt"`
-	Generation        string             `json:"generation"`
-	RequestHash       string             `json:"request_hash"`
-	PiSessionID       string             `json:"pi_session_id"`
-	Phase             string             `json:"phase"`
-	WorkspaceID       string             `json:"workspace_id"`
-	PaneID            string             `json:"pane_id"`
-	TerminalID        string             `json:"terminal_id"`
-	RequestID         string             `json:"request_id,omitempty"`
-	ControlPane       string             `json:"control_pane"`
-	ControlTerminal   string             `json:"control_terminal"`
+	History           *BatchHistoryExpectation `json:"history,omitempty"`
+	CompletionVersion int                      `json:"completion_version,omitempty"`
+	Producer          *deliverymeta.Plan       `json:"producer,omitempty"`
+	LayoutVersion     int                      `json:"layout_version,omitempty"`
+	Attempt           string                   `json:"attempt"`
+	Generation        string                   `json:"generation"`
+	RequestHash       string                   `json:"request_hash"`
+	PiSessionID       string                   `json:"pi_session_id"`
+	Phase             string                   `json:"phase"`
+	WorkspaceID       string                   `json:"workspace_id"`
+	PaneID            string                   `json:"pane_id"`
+	TerminalID        string                   `json:"terminal_id"`
+	RequestID         string                   `json:"request_id,omitempty"`
+	ControlPane       string                   `json:"control_pane"`
+	ControlTerminal   string                   `json:"control_terminal"`
 }
 
 type BatchFile struct {
@@ -37,20 +38,21 @@ type BatchFile struct {
 }
 
 type BatchReceipt struct {
-	Version     int        `json:"version"`
-	Attempt     string     `json:"attempt"`
-	Generation  string     `json:"generation"`
-	RequestHash string     `json:"request_hash"`
-	PiSessionID string     `json:"pi_session_id"`
-	WorkspaceID string     `json:"workspace_id"`
-	PaneID      string     `json:"pane_id"`
-	TerminalID  string     `json:"terminal_id"`
-	Exited      bool       `json:"exited"`
-	Started     bool       `json:"started"`
-	ExitCode    int        `json:"exit_code"`
-	Stdout      BatchFile  `json:"stdout"`
-	Stderr      BatchFile  `json:"stderr"`
-	Completion  *BatchFile `json:"completion,omitempty"`
+	History     *BatchHistoryReport `json:"history,omitempty"`
+	Version     int                 `json:"version"`
+	Attempt     string              `json:"attempt"`
+	Generation  string              `json:"generation"`
+	RequestHash string              `json:"request_hash"`
+	PiSessionID string              `json:"pi_session_id"`
+	WorkspaceID string              `json:"workspace_id"`
+	PaneID      string              `json:"pane_id"`
+	TerminalID  string              `json:"terminal_id"`
+	Exited      bool                `json:"exited"`
+	Started     bool                `json:"started"`
+	ExitCode    int                 `json:"exit_code"`
+	Stdout      BatchFile           `json:"stdout"`
+	Stderr      BatchFile           `json:"stderr"`
+	Completion  *BatchFile          `json:"completion,omitempty"`
 }
 
 var (
@@ -60,11 +62,11 @@ var (
 
 func (p BatchProgress) valid() bool {
 	_, err := resolveBatchLayout(p)
-	return err == nil && (p.CompletionVersion == 0 || p.CompletionVersion == BatchCompletionVersion) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation)
+	return err == nil && p.History.valid() && (p.CompletionVersion == 0 || p.CompletionVersion == BatchCompletionVersion) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation)
 }
 
 func (r BatchReceipt) Validate(p BatchProgress) error {
-	if !p.valid() || r.Version != 1 || r.Attempt != p.Attempt || r.Generation != p.Generation || r.RequestHash != p.RequestHash || r.PiSessionID != p.PiSessionID || r.WorkspaceID != p.WorkspaceID || r.PaneID != p.PaneID || r.TerminalID != p.TerminalID || !r.Exited || r.ExitCode < 0 || r.ExitCode > 255 {
+	if !p.valid() || !r.History.valid(p, r.Started) || r.Version != 1 || r.Attempt != p.Attempt || r.Generation != p.Generation || r.RequestHash != p.RequestHash || r.PiSessionID != p.PiSessionID || r.WorkspaceID != p.WorkspaceID || r.PaneID != p.PaneID || r.TerminalID != p.TerminalID || !r.Exited || r.ExitCode < 0 || r.ExitCode > 255 {
 		return ErrUnknown
 	}
 	for i, f := range []BatchFile{r.Stdout, r.Stderr} {
@@ -106,6 +108,16 @@ func batchScript(p BatchProgress, target Target, cwd, task string) (string, erro
 	encoded, _ := json.Marshal(identity)
 	prefix := strings.TrimSuffix(string(encoded), "}")
 	prepare, preflight, project, completion := completionScriptParts(p, target)
+	historyPrepare, historyBefore, historyAfter, historyReceipt := historyScriptParts(p)
+	prepare += historyPrepare
+	if p.History != nil && preflight == "" {
+		preflight = ` && command -v node >/dev/null`
+	}
+	completion += historyReceipt
+	sessionPrepare := `mkdir -p "$memoh_session"`
+	if p.History != nil && p.History.Mode != "first" {
+		sessionPrepare = `if [ ! -e "$memoh_session" ]; then memoh_history='{"before":"missing","after":"not_started"}'; fi`
+	}
 	script := fmt.Sprintf(`set -euo pipefail
 umask 077
 case "$(uname -s)" in MINGW*_NT-*|MSYS_NT-*) ;; *) exit 125 ;; esac
@@ -116,8 +128,9 @@ memoh_root="$(cygpath -u "$memoh_root")"
 memoh_cwd="$(cygpath -u "$memoh_cwd")"
 memoh_attempt="$memoh_root/%s"
 memoh_session="$memoh_root/%s"
-mkdir -p "$memoh_root/%s" "$memoh_session"
+mkdir -p "$memoh_root/%s"
 mkdir "$memoh_attempt" || exit 125
+%s
 %s
 printf '%%s' '%s' | base64 --decode > "$memoh_attempt/prompt.txt"
 : > "$memoh_attempt/stdout.jsonl"
@@ -130,12 +143,13 @@ if cd "$memoh_cwd" && command -v pi >/dev/null%s && mkdir "$memoh_session/lock" 
   printf '%%s' '%s' > "$memoh_session/lock/owner"
   memoh_provider=%s; memoh_provider="${memoh_provider%%.}"
   memoh_model=%s; memoh_model="${memoh_model%%.}"
-  memoh_started=true
+  memoh_session_args=(--session-id '%s')
+%s  memoh_started=true
   set +e
-  pi --mode json --provider "$memoh_provider" --model "$memoh_model" --session-dir "$(cygpath -w "$memoh_session")" --session-id '%s' < "$memoh_attempt/prompt.txt" > "$memoh_attempt/stdout.jsonl" 2> "$memoh_attempt/stderr.txt"
+  pi --mode json --provider "$memoh_provider" --model "$memoh_model" --session-dir "$(cygpath -w "$memoh_session")" "${memoh_session_args[@]}" < "$memoh_attempt/prompt.txt" > "$memoh_attempt/stdout.jsonl" 2> "$memoh_attempt/stderr.txt"
   memoh_exit=$?
   set -e
-fi
+%sfi
 memoh_out_hash="$(sha256sum "$memoh_attempt/stdout.jsonl")"; memoh_out_hash="${memoh_out_hash%%%% *}"
 memoh_err_hash="$(sha256sum "$memoh_attempt/stderr.txt")"; memoh_err_hash="${memoh_err_hash%%%% *}"
 memoh_out_size="$(wc -c < "$memoh_attempt/stdout.jsonl")"
@@ -156,7 +170,7 @@ fi
 printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
-`, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, prepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
+`, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
 	return producerEnvelope(script, p, target)
 }
 

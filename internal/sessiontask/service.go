@@ -334,6 +334,9 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 		projectPiFacts(&t, facts.Batch)
 	}
 	t.Summary = "Computer receipt recorded; business completion is unverified."
+	if facts.Kind == "herdr_pi_task" {
+		t.Summary = "Pi receipt recorded; current history continuity and business completion are unverified."
+	}
 	if r.CancelRequested {
 		t.Summary = "Cancellation requested; this does not confirm that the process stopped."
 	}

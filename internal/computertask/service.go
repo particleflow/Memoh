@@ -90,6 +90,7 @@ type Result struct {
 	Followup           *FollowupResult          `json:"followup,omitempty"`
 	BlockedByRequest   string                   `json:"blocked_by_request,omitempty"`
 	RequestConflict    bool                     `json:"request_conflict,omitempty"`
+	Continuity         *PiContinuity            `json:"continuity,omitempty"`
 	Delivery           *ProducerResult          `json:"delivery,omitempty"`
 	PiResult           *agenvo.PiJSONResult     `json:"pi_result,omitempty"`
 	DiagnosticsState   string                   `json:"diagnostics_state,omitempty"`
@@ -148,6 +149,7 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 		out.WorkspaceID, out.PaneID, out.RequestID, out.CleanupRequired = d.Foreground.WorkspaceID, d.Foreground.PaneID, d.Foreground.RequestID, d.Foreground.CleanupRequired
 	}
 	if d.Batch != nil {
+		out.Continuity = batchContinuity(d.Batch)
 		out.WorkspaceID, out.PaneID, out.RequestID = d.Batch.Progress.WorkspaceID, d.Batch.Progress.PaneID, d.Batch.Progress.RequestID
 		out.ProcessStopped = d.Batch.Receipt != nil && d.Batch.Receipt.Validate(d.Batch.Progress) == nil
 		out.PiResult = d.Batch.Result
@@ -275,7 +277,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	operationID := uuid.NewString()
 	d := Details{Kind: in.Kind}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
-		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{History: &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "unconfirmed"}, LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
 
 		if in.Artifact != nil || in.Artifacts != nil {
 			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
@@ -347,6 +349,30 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		return result(r, d), runErr
 	}
 	if d.Batch != nil {
+		history, historyErr := s.batchHistoryExpectation(work, r, d.Batch.Progress)
+		d.Batch.Progress.History = history
+		if historyErr != nil {
+			d.Phase = "pi_continuity_unconfirmed"
+			if err := save("unknown"); err != nil {
+				return result(r, d), err
+			}
+			return result(r, d), historyErr
+		}
+		if history.Mode == "unconfirmed" {
+			d.Phase = "pi_continuity_unconfirmed"
+			if err := save("not_started"); err != nil {
+				return result(r, d), err
+			}
+			return result(r, d), nil
+		}
+		// Validate the final command, including the bounded persisted evidence.
+		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
+			d.Phase = "pi_continuity_unconfirmed"
+			if saveErr := save("not_started"); saveErr != nil {
+				return result(r, d), saveErr
+			}
+			return result(r, d), err
+		}
 		p, runErr := s.relay.SubmitBatch(work, scope(b, id), in.Task, in.WorkDir, d.Batch.Progress, func(p agenvo.BatchProgress) error {
 			d.Batch.Progress = p
 			d.Phase = p.Phase

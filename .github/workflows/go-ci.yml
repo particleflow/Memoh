@@ -311,3 +311,8 @@ jobs:
         env:
           TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
         run: bash scripts/test-computer-operations-postgres.sh
+      # Add this gate without replacing any existing integration contracts.
+      - name: Require Pi batch history scope and latest evidence (no skips)
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: bash scripts/test-pi-batch-history-postgres.sh
