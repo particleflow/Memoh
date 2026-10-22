@@ -12,6 +12,7 @@ import (
 // BatchProgress is owned by the durable operation. Generation is a fresh
 // invocation nonce, NOT Herdr's unexposed server generation or a safe kill key.
 type BatchProgress struct {
+	LayoutVersion   int    `json:"layout_version,omitempty"`
 	Attempt         string `json:"attempt"`
 	Generation      string `json:"generation"`
 	RequestHash     string `json:"request_hash"`
@@ -53,7 +54,8 @@ var (
 )
 
 func (p BatchProgress) valid() bool {
-	return batchID.MatchString(p.Attempt) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && batchHex.MatchString(p.PiSessionID)
+	_, err := resolveBatchLayout(p)
+	return err == nil && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash)
 }
 
 func (r BatchReceipt) Validate(p BatchProgress) error {
@@ -79,7 +81,11 @@ func shellData(s string) string {
 // is a file connected to stdin, never shell source or a command-line option.
 // Directory creation is exclusive; neither duplicate delivery nor a stale
 // session lock can start Pi twice. Crashed locks are deliberately not stolen.
-func batchScript(p BatchProgress, target Target, cwd, task string) string {
+func batchScript(p BatchProgress, target Target, cwd, task string) (string, error) {
+	layout, err := resolveBatchLayout(p)
+	if err != nil {
+		return "", err
+	}
 	r := BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Exited: true}
 	raw, _ := json.Marshal(r)
 	// The immutable identity is JSON-encoded by Go. Dynamic fields below are
@@ -99,9 +105,9 @@ memoh_root=%s; memoh_root="${memoh_root%%.}"
 memoh_cwd=%s; memoh_cwd="${memoh_cwd%%.}"
 memoh_root="$(cygpath -u "$memoh_root")"
 memoh_cwd="$(cygpath -u "$memoh_cwd")"
-memoh_attempt="$memoh_root/.memoh-computer/attempts/%s"
-memoh_session="$memoh_root/.memoh-computer/sessions/%s"
-mkdir -p "$memoh_root/.memoh-computer/attempts" "$memoh_session"
+memoh_attempt="$memoh_root/%s"
+memoh_session="$memoh_root/%s"
+mkdir -p "$memoh_root/%s" "$memoh_session"
 mkdir "$memoh_attempt" || exit 125
 printf '%%s' '%s' | base64 --decode > "$memoh_attempt/prompt.txt"
 : > "$memoh_attempt/stdout.jsonl"
@@ -138,7 +144,7 @@ fi
 printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
-`, shellData(target.WorkDir), shellData(cwd), p.Attempt, p.PiSessionID, base64.StdEncoding.EncodeToString([]byte(task)), p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, base64.StdEncoding.EncodeToString([]byte(prefix)), p.Generation, p.Generation)
+`, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, base64.StdEncoding.EncodeToString([]byte(task)), p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, base64.StdEncoding.EncodeToString([]byte(prefix)), p.Generation, p.Generation), nil
 }
 
 // launchBashScript shares the verified PowerShell-only launch boundary without

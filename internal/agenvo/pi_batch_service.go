@@ -29,7 +29,11 @@ func ValidateBatchRequest(p BatchProgress, target Target, workDir, task string) 
 		return err
 	}
 	p.WorkspaceID, p.PaneID, p.TerminalID = strings.Repeat("x", 256), strings.Repeat("x", 256), strings.Repeat("x", 256)
-	if len(launchBashScript(batchScript(p, target, cwd, task), target.BashPath)) > 48000 {
+	script, err := batchScript(p, target, cwd, task)
+	if err != nil {
+		return err
+	}
+	if len(launchBashScript(script, target.BashPath)) > 48000 {
 		return ErrUnsupported
 	}
 	return nil
@@ -89,7 +93,11 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 	if len(p.PaneID) > 256 || len(p.WorkspaceID) > 256 || len(p.TerminalID) > 256 {
 		return p, ErrUnknown
 	}
-	command := launchBashScript(batchScript(p, target, cwd, task), target.BashPath)
+	script, err := batchScript(p, target, cwd, task)
+	if err != nil {
+		return p, err
+	}
+	command := launchBashScript(script, target.BashPath)
 	// Agenvo's official pane.run contract has a 48,000-character limit.
 	if len(command) > 48000 {
 		return p, ErrUnsupported
@@ -203,6 +211,11 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	if err != nil {
 		return nil, err
 	}
+	nonce := strings.ReplaceAll(uuid.NewString(), "-", "")
+	script, err := batchReadScript(p, target, name, offset, count, nonce)
+	if err != nil {
+		return nil, err
+	}
 	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
 	if err != nil {
 		if errors.Is(err, ErrRejected) {
@@ -217,17 +230,6 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != p.ControlPane || info.Pane.Terminal != p.ControlTerminal || info.Pane.Workspace != p.WorkspaceID {
 		return nil, ErrTargetChanged
 	}
-	nonce := strings.ReplaceAll(uuid.NewString(), "-", "")
-	script := fmt.Sprintf(`set -euo pipefail
-memoh_root=%s; memoh_root="${memoh_root%%.}"
-memoh_root="$(cygpath -u "$memoh_root")"
-memoh_file="$memoh_root/.memoh-computer/attempts/%s/%s"
-printf '\r\nMEMOH_FILE_%s:'
-if test -f "$memoh_file"; then
-  dd if="$memoh_file" bs=1 skip=%d count=%d status=none | base64 -w 0
-fi
-printf ':END_FILE_%s\r\n'
-`, shellData(target.WorkDir), p.Attempt, name, nonce, offset, count, nonce)
 	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": launchBashScript(script, target.BashPath)})
 	if err != nil {
 		if errors.Is(err, ErrRejected) {
@@ -287,4 +289,25 @@ printf ':END_FILE_%s\r\n'
 		case <-timer.C:
 		}
 	}
+}
+
+func batchReadScript(p BatchProgress, target Target, name string, offset, count int64, nonce string) (string, error) {
+	layout, err := resolveBatchLayout(p)
+	if err != nil {
+		return "", err
+	}
+	file, err := layout.resultFile(name)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf(`set -euo pipefail
+memoh_root=%s; memoh_root="${memoh_root%%.}"
+memoh_root="$(cygpath -u "$memoh_root")"
+memoh_file="$memoh_root/%s"
+printf '\r\nMEMOH_FILE_%s:'
+if test -f "$memoh_file"; then
+  dd if="$memoh_file" bs=1 skip=%d count=%d status=none | base64 -w 0
+fi
+printf ':END_FILE_%s\r\n'
+`, shellData(target.WorkDir), file, nonce, offset, count, nonce), nil
 }

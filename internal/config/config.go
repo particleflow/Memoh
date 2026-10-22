@@ -62,6 +62,7 @@ const (
 type FilesConfig struct {
 	// OriginalsRoot keeps attachment originals outside disposable workspaces.
 	// Empty preserves the legacy workspace-first storage behavior.
+	// Load resolves a non-empty path against the process working directory.
 	OriginalsRoot string `toml:"originals_root"`
 	// MaxUploadBytes bounds each HTTP attachment; zero uses the 200 MiB default.
 	MaxUploadBytes int64 `toml:"max_upload_bytes"`
@@ -1108,6 +1109,9 @@ func (cfg *Config) applyBridgeTLSEnvOverrides() {
 }
 
 func (cfg *Config) resolvePaths() {
+	if strings.TrimSpace(cfg.Files.OriginalsRoot) != "" {
+		cfg.Files.OriginalsRoot = absPath(cfg.Files.OriginalsRoot)
+	}
 	cfg.Container.DataRoot = cfg.Container.DataRootPath()
 	cfg.Container.RuntimeDir = cfg.Container.RuntimePath()
 	cfg.Container.BridgePath = cfg.Container.BridgeBinaryPath()
