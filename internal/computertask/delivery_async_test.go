@@ -228,3 +228,17 @@ func TestAsyncDownloadRequiresLocalPublicationOutcome(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestAsyncDeliveryVerificationDeadlineStaysFailed(t *testing.T) {
+	f, s, _, ctx, ref := asyncFixture(t)
+	s.lease = 50 * time.Millisecond
+	out, err := s.Commit(ctx, f.id.OperationID, "slow", ref, "")
+	if err != nil || out.Outcome != "pending" {
+		t.Fatalf("submit: %+v %v", out, err)
+	}
+	awaitDelivery(ctx, t, s, f.id.OperationID, "slow", ref, "failed")
+	out, err = s.Commit(ctx, f.id.OperationID, "slow", ref, "")
+	if err != nil || out.Outcome != "failed" {
+		t.Fatalf("deadline became absent or restarted: %+v %v", out, err)
+	}
+}

@@ -183,3 +183,28 @@ func TestComputerDeliveryHTTPSFixture(t *testing.T) {
 		t.Fatalf("TLS fixture: %d %s %v", resp.StatusCode, data, err)
 	}
 }
+
+func TestAsyncComputerDeliveryHTTPRequiresBoundBot(t *testing.T) {
+	f, e := deliveryHTTPServer(t)
+	assets := media.NewService(nil, localfs.NewOriginals(t.TempDir()))
+	base := computertask.NewDeliveryService(func(context.Context, func(computertask.DeliveryTransaction) error) error {
+		f.calls++
+		return computertask.ErrDenied
+	}, assets)
+	async, err := computertask.NewAsyncDeliveryService(t.Context(), base, func(context.Context, computertask.DeliveryIdentity) error { return nil }, slog.New(slog.DiscardHandler))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer async.Close()
+	NewAsyncComputerDeliveryHandler(async).Register(e)
+	path := "/internal/computer-deliveries/" + f.id.OperationID + "/bound/"
+	body, _ := json.Marshal(f.ref)
+	for _, bot := range []string{"", uuid.NewString(), f.id.Binding.BotID} {
+		request := strings.TrimSuffix(string(body), "}") + `,"bot_id":"` + bot + `"}`
+		before := f.calls
+		deliveryHTTPRequest(t, e, "POST", path+"commit", request, 403)
+		if (f.calls > before) != (bot == f.id.Binding.BotID) {
+			t.Fatal("mismatched Bot reached store")
+		}
+	}
+}

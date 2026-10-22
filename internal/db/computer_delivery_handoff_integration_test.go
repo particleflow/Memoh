@@ -173,7 +173,11 @@ func exerciseDeliveryHandoff(ctx context.Context, t *testing.T, store *postgress
 	if status.AssociationState != transferclient.AssociationUnknown || status.Associated {
 		t.Fatalf("lost submit: %+v", status)
 	}
-	<-gated.started
+	select {
+	case <-gated.started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("accepted scan did not start")
+	}
 	// Simultaneous execution receipt updates use the same CAS while a scan runs.
 	operation, err := store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: id.Binding.BotID, SessionID: id.Binding.SessionID, UserID: id.Binding.UserID})
 	if err != nil {

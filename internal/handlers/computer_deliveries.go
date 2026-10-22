@@ -11,6 +11,7 @@ import (
 
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/computertask"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 // ComputerDeliveryHandler is a candidate host adapter, not an application
@@ -78,6 +79,7 @@ func (h *ComputerDeliveryHandler) commit(c echo.Context) error {
 	var ref struct {
 		computertask.DeliveryRequest
 		Publication string `json:"publication,omitempty"`
+		BotID       string `json:"bot_id,omitempty"`
 	}
 	if err := readDeliveryBody(c, &ref); err != nil {
 		return err
@@ -86,8 +88,11 @@ func (h *ComputerDeliveryHandler) commit(c echo.Context) error {
 	var err error
 	switch {
 	case h.async != nil:
+		if b, ok := toolcontext.HostComputerBinding(c.Request().Context()); !ok || b.BotID != ref.BotID {
+			return deliveryHTTPError(computertask.ErrDeliveryBinding)
+		}
 		out, err = h.async.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref.DeliveryRequest, ref.Publication)
-	case h.service != nil && ref.Publication == "":
+	case h.service != nil && ref.Publication == "" && ref.BotID == "":
 		out, err = h.service.Commit(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), ref.DeliveryRequest)
 	default:
 		err = computertask.ErrDeliveryBinding
@@ -103,6 +108,7 @@ func (h *ComputerDeliveryHandler) resolve(c echo.Context) error {
 		computertask.DeliveryRequest
 		Cancel      bool   `json:"cancel"`
 		Publication string `json:"publication,omitempty"`
+		BotID       string `json:"bot_id,omitempty"`
 	}
 	if err := readDeliveryBody(c, &req); err != nil {
 		return err
@@ -111,8 +117,11 @@ func (h *ComputerDeliveryHandler) resolve(c echo.Context) error {
 	var err error
 	switch {
 	case h.async != nil:
+		if b, ok := toolcontext.HostComputerBinding(c.Request().Context()); !ok || b.BotID != req.BotID {
+			return deliveryHTTPError(computertask.ErrDeliveryBinding)
+		}
 		out, err = h.async.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Publication, req.Cancel)
-	case h.service != nil && req.Publication == "":
+	case h.service != nil && req.Publication == "" && req.BotID == "":
 		out, err = h.service.Resolve(c.Request().Context(), c.Param("operation_id"), c.Param("delivery_id"), req.DeliveryRequest, req.Cancel)
 	default:
 		err = computertask.ErrDeliveryBinding

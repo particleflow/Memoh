@@ -21,7 +21,9 @@ bindings fail closed. Synthetic fixtures are not production authentication.
 
 Persist `pending` before scanning Media, using the existing operation revision
 CAS and a versioned delivery ledger. Use the existing in-process `job` unit
-with bounded concurrency, a finite deadline and a persisted lease epoch.
+with two concurrent scans, a ten-minute cooperative deadline and a persisted
+lease epoch. At most three lease claims are allowed per delivery; exhausted or
+failed verification requires explicit diagnosis, not a new delivery ID retry.
 Commit returns promptly; Resolve reports pending, committed, canceled or failed.
 An unknown database commit is an error, never absence. Request cancellation
 does not cancel accepted verification. A process crash leaves a queryable
@@ -46,7 +48,8 @@ and reject later publication after a fence. Both use the same host job lock and
 destination ownership checks. No new destination root or local registry is
 introduced here. Missing destination binding is an error.
 
-The queue adapter checks server authorization before publishing. It sends a
+The queue adapter checks server authorization before publishing. The candidate request includes a Bot ID which must equal the verified host
+binding (the ID grants no authority). It sends a
 published attestation only after local publication is durable, and a fenced
 attestation only after local cancellation is durable. A lost publication reply
 is resolved locally before asking the NAS to cancel. The server requires these
@@ -76,3 +79,27 @@ deadlines, restart/lease recovery, cancellation races, revocation during scans,
 concurrent execution receipt CAS, old SQL rejection, and local publication
 unknown/cancel races. Production HTTPS, real PC identity and destination binding,
 Windows acceptance, runtime/UI screenshots and human QA remain outstanding.
+
+## Candidate protocol and evidence
+
+The async handler keeps request reference version 1 and adds required `bot_id`
+and optional `publication`. Responses use version 2; synchronous version-1
+responses are rejected by the new queue adapter. All routes remain unregistered
+in the application. Request bodies are limited to 4096 bytes and all candidate
+responses use no-store. Queue journal version 2 and its single resolved Herdr
+state directory remain unchanged; no second task state service is added.
+
+`computer_delivery_handoff_integration_test.go` uses an isolated PostgreSQL role
+without RLS bypass, the actual Media upload/Range and association handlers, TLS
+certificate verification, and the actual disk queue. Its credential verifier
+and local publication store are explicitly synthetic. Its local store is a
+Linux fixture, not a Windows destination adapter or a production ACL contract.
+The native Windows runner separately exercises the existing queue binding; it
+does not prove a deployed Herdr plugin has authenticated or published a file.
+
+No new numeric throughput claim is made. The prior cached local Media benchmark
+still applies only to disk verification. Async admission removes the caller's
+wait for two full scans; it does not reduce those reads, pin files, bound a
+stalled kernel I/O call, or prove a network/disk throughput ceiling. Real source,
+NAS and network benchmarks and approved HTTPS/PC identity remain acceptance
+prerequisites.

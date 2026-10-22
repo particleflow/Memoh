@@ -104,7 +104,11 @@ func (c *Client) DeliveryBinding(publication LocalPublication) *AssociationBindi
 				// association is submitted even if the original request never arrived.
 				return c.delivery(ctx, direction, ref, true, false, "published")
 			case OutcomeCanceled:
-				return c.delivery(ctx, direction, ref, false, true, "fenced")
+				out, err := c.delivery(ctx, direction, ref, false, true, "fenced")
+				if err == nil && out != OutcomeCanceled {
+					return "", ErrProtocol
+				}
+				return out, err
 			case OutcomeAbsent:
 				if cancel {
 					return OutcomePending, nil
@@ -127,13 +131,14 @@ func (c *Client) delivery(ctx context.Context, direction string, ref Reference, 
 	}
 	body, _ := json.Marshal(struct {
 		Version     int    `json:"version"`
+		BotID       string `json:"bot_id"`
 		Direction   string `json:"direction"`
 		ContentHash string `json:"content_hash"`
 		SizeBytes   int64  `json:"size_bytes"`
 		Mime        string `json:"mime"`
 		Publication string `json:"publication,omitempty"`
 		Cancel      bool   `json:"cancel,omitempty"`
-	}{1, direction, ref.ContentHash, ref.SizeBytes, ref.Mime, publication, cancel})
+	}{1, ref.BotID, direction, ref.ContentHash, ref.SizeBytes, ref.Mime, publication, cancel})
 	action := "resolve"
 	if commit {
 		action = "commit"
