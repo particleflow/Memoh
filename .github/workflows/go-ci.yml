@@ -22,7 +22,7 @@ on:
       - ".github/workflows/go-ci.yml"
   pull_request:
     # Stacked feature PRs need the same validation before their base is merged.
-    branches: ["main", "feat/**", "fix/**"]
+    branches: ["main", "feat/**", "fix/**", "integrate/**"]
     paths:
       - "**/*.go"
       - "go.mod"
