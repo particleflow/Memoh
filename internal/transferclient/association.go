@@ -74,6 +74,7 @@ func (q *DiskQueue) finishAssociation(f *os.File, r QueueStatus, outcome Associa
 	case OutcomeCommitted:
 		r.Associated = true
 		r.AssociationState = AssociationCommitted
+		r.Version, r.PayloadState = 3, PayloadReleasePending
 	case OutcomeCanceled:
 		r.AssociationState = AssociationCanceled
 		r.Job.Phase = "canceled"

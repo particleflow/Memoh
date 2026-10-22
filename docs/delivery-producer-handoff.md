@@ -75,9 +75,8 @@ and target-fingerprint checks. NAS media retention/pinning is unchanged.
 
 ## Explicit limits and remaining integration
 
-- This is a single-file opt-in milestone. Multi-file declarations, automatic
-  retention/retirement of acknowledged local jobs and automatic admission
-  recovery before a closed manifest exists remain follow-up work. Existing
+- This is a single-file opt-in milestone. Multi-file declarations and automatic
+  admission recovery before a closed manifest exists remain follow-up work. Existing
   `cancel`/`retire` commands retain their reviewed semantics; this patch does not
   claim that `computer_task_cancel` retracts already delivered files.
 - A process crash before the closed manifest is written can leave an execution
@@ -88,8 +87,10 @@ and target-fingerprint checks. NAS media retention/pinning is unchanged.
   pre-admission manifest.
 - Current installed-command limits remain eight jobs / 256 MiB total snapshots,
   with bounded journals and one worker. Capacity keeps the manifest and allows
-  existing work to advance. Explicit retirement is currently required to free
-  acknowledged entries. No throughput or unlimited-file claim is made.
+  existing work to advance. Confirmed committed entries release their payloads
+  during finite host actions, retaining bounded idempotency metadata; see
+  [queue retention](delivery-queue-retention.md). No throughput or unlimited-file
+  claim is made.
 - Source enumeration is capped at 4096 entries; malformed manifests fail
   explicitly. Manifests are metadata, not a second task registry. Old binaries
   cannot safely edit operations containing producer metadata; do not mix old

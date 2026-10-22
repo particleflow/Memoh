@@ -163,6 +163,10 @@ func AdvanceProducer(ctx context.Context, getenv func(string) string, revision s
 	if err != nil {
 		return QueueStatus{}, err
 	}
+	if err = q.ReclaimConfirmed(ctx); err != nil {
+		_ = q.Close()
+		return QueueStatus{}, err
+	}
 	id, err := q.nextDue(now)
 	_ = q.Close()
 	if err != nil {

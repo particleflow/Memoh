@@ -156,6 +156,7 @@ func writeStatus(s transferclient.QueueStatus) int {
 func writeStatusWithSource(s transferclient.QueueStatus, source string) int {
 	out := struct {
 		Source      string                    `json:"source_collection,omitempty"`
+		Payload     string                    `json:"payload_state,omitempty"`
 		Delivery    string                    `json:"delivery_id"`
 		Phase       string                    `json:"phase"`
 		Offset      int64                     `json:"offset"`
@@ -164,7 +165,7 @@ func writeStatusWithSource(s transferclient.QueueStatus, source string) int {
 		Association string                    `json:"association_state,omitempty"`
 		Error       string                    `json:"error_code,omitempty"`
 		Reference   *transferclient.Reference `json:"reference,omitempty"`
-	}{source, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
+	}{source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
 	if json.NewEncoder(os.Stdout).Encode(out) != nil {
 		return 1
 	}

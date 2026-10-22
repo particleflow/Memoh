@@ -48,14 +48,19 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	defer unlockClose(lock)
 	r := QueueStatus{Version: 2, Direction: direction, Job: job, AssociationState: AssociationIdle, AdmissionVersion: 1}
 	var journal *os.File
-	if _, err := q.root.Lstat(queueName(job.DeliveryID + ".journal")); err == nil {
+	_, recordErr := q.root.Lstat(queueName(job.DeliveryID + ".journal"))
+	if errors.Is(recordErr, os.ErrNotExist) {
+		_, recordErr = q.root.Lstat(queueName(job.DeliveryID + ".release"))
+	}
+	switch {
+	case recordErr == nil:
 		var existing QueueStatus
 		existing, journal, err = q.load(job.DeliveryID)
 		if err != nil {
 			return err
 		}
 		defer func() { _ = journal.Close() }()
-		if existing.Direction != direction || !sameAdmission(existing.Job, job) || existing.Job.CancelRequested {
+		if existing.Direction != direction || !sameAdmission(existing.Job, job) || existing.Job.CancelRequested && !existing.Associated {
 			return ErrInvalid
 		}
 		if existing.Admitted {
@@ -65,9 +70,9 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 			return ErrVersion
 		}
 		r = existing
-	} else if !errors.Is(err, os.ErrNotExist) {
+	case !errors.Is(recordErr, os.ErrNotExist):
 		return ErrStore
-	} else {
+	default:
 		if err := q.capacity(job.Spec.SizeBytes); err != nil {
 			return err
 		}
@@ -104,41 +109,73 @@ func (q *DiskQueue) admissions() ([]QueueStatus, error) {
 		return nil, ErrStore
 	}
 	defer func() { _ = dir.Close() }()
-	entries, err := dir.ReadDir(q.limits.Jobs*5 + 136)
-	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*5+136 {
+	entries, err := dir.ReadDir(q.limits.Jobs*5 + maxQueueRecords*2 + 136)
+	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*5+maxQueueRecords*2+136 {
 		return nil, ErrCapacity
 	}
 	var records []QueueStatus
+	seen := make(map[string]bool)
 	for _, e := range entries {
-		if !strings.HasSuffix(e.Name(), ".journal") {
+		stem, ok := strings.CutSuffix(e.Name(), ".journal")
+		if !ok {
+			stem, ok = strings.CutSuffix(e.Name(), ".release")
+		}
+		if !ok || seen[stem] {
 			continue
 		}
-		id := strings.TrimSuffix(e.Name(), ".journal")
-		if !validID(id) {
+		if !validID(stem) {
 			return nil, ErrStore
 		}
-		f, err := q.physicalFile(e.Name(), os.O_RDONLY, 0o600)
+		seen[stem] = true
+		r, err := q.admissionHead(stem + ".journal")
+		if err != nil {
+			// Compaction can leave the original journal empty/torn. Only the
+			// synced, fully confirmed sibling can recover its original identity.
+			r, err = q.admissionHead(stem + ".release")
+		}
 		if err != nil {
 			return nil, err
-		}
-		var head [36]byte
-		_, err = io.ReadFull(f, head[:])
-		size := int64(binary.BigEndian.Uint32(head[:4]))
-		if err != nil || size < 1 || size > 16384 {
-			_ = f.Close()
-			return nil, ErrStore
-		}
-		body := make([]byte, int(size))
-		_, err = io.ReadFull(f, body)
-		_ = f.Close()
-		sum := sha256.Sum256(body)
-		var r QueueStatus
-		if err != nil || !bytes.Equal(sum[:], head[4:]) || json.Unmarshal(body, &r) != nil || !q.validRecord(r, r.Job.DeliveryID) || queueName(r.Job.DeliveryID+".journal") != e.Name() {
-			return nil, ErrStore
 		}
 		records = append(records, r)
 	}
 	return records, nil
+}
+
+// Caller owns the admission lock. Other job writers only append; compaction
+// also requires this lock. Read one bounded frame instead of every journal.
+func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
+	var r QueueStatus
+	f, err := q.physicalFile(name, os.O_RDONLY, 0o600)
+	if err != nil {
+		return r, err
+	}
+	defer func() { _ = f.Close() }()
+	var head [36]byte
+	_, err = io.ReadFull(f, head[:])
+	size := int64(binary.BigEndian.Uint32(head[:4]))
+	if err != nil || size < 1 || size > 16384 {
+		return r, ErrStore
+	}
+	body := make([]byte, int(size))
+	_, err = io.ReadFull(f, body)
+	sum := sha256.Sum256(body)
+	dec := json.NewDecoder(bytes.NewReader(body))
+	dec.DisallowUnknownFields()
+	if err != nil || !bytes.Equal(sum[:], head[4:]) || dec.Decode(&r) != nil || !q.validRecord(r, r.Job.DeliveryID) {
+		return QueueStatus{}, ErrStore
+	}
+	suffix := ".journal"
+	if strings.HasSuffix(name, ".release") {
+		suffix = ".release"
+		st, err := f.Stat()
+		if err != nil || st.Size() != size+36 || r.PayloadState != PayloadReleased {
+			return QueueStatus{}, ErrStore
+		}
+	}
+	if queueName(r.Job.DeliveryID+suffix) != name {
+		return QueueStatus{}, ErrStore
+	}
+	return r, nil
 }
 
 func (q *DiskQueue) capacity(add int64) error {
@@ -147,7 +184,12 @@ func (q *DiskQueue) capacity(add int64) error {
 		return err
 	}
 	total := int64(0)
+	active := 0
 	for _, r := range records {
+		if r.PayloadState == PayloadReleased {
+			continue
+		}
+		active++
 		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes
 		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
@@ -155,7 +197,7 @@ func (q *DiskQueue) capacity(add int64) error {
 		total += reserved
 	}
 	add += snapshotTreeBytes(add) + admissionFileBytes
-	if len(records) >= q.limits.Jobs || add > q.limits.Bytes-total {
+	if len(records) >= maxQueueRecords || active >= q.limits.Jobs || add > q.limits.Bytes-total {
 		return ErrCapacity
 	}
 	return queueFreeSpace(q.root, add+total)
@@ -346,9 +388,13 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 // Retire releases only acknowledged delivery bytes or confirmed cancellation.
 // It never touches NAS originals. Stable striped lock files remain to prevent
 // unlink/recreate lock races; failed/unknown jobs require explicit reconciliation.
-// The producer must never reuse a delivery ID for different content; the host's
-// registration endpoint retains the durable idempotency binding after retirement.
+// Confirmed deliveries keep the compact local receipt as well as the NAS binding.
+// The producer must never reuse a delivery ID for different content.
 func (q *DiskQueue) Retire(id string) error {
+	return q.retire(context.Background(), id)
+}
+
+func (q *DiskQueue) retire(ctx context.Context, id string) error {
 	if !validID(id) || id == "admission" {
 		return ErrInvalid
 	}
@@ -367,6 +413,9 @@ func (q *DiskQueue) Retire(id string) error {
 		return err
 	}
 	_ = journal.Close()
+	if confirmedDelivery(r) {
+		return q.releaseConfirmedLocked(ctx, id)
+	}
 	if !r.Associated && r.Job.Phase != "canceled" {
 		return ErrInvalid
 	}

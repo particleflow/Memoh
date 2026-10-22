@@ -60,7 +60,7 @@ func (q *DiskQueue) invokeHerdr(ctx context.Context, action HerdrAction, source 
 	case "cancel":
 		err = q.RequestCancel(id)
 	case "retire":
-		return QueueStatus{}, q.Retire(id)
+		return QueueStatus{}, q.retire(ctx, id)
 	case "inspect":
 	default:
 		return QueueStatus{}, ErrInvalid
@@ -74,5 +74,12 @@ func (q *DiskQueue) invokeHerdr(ctx context.Context, action HerdrAction, source 
 		}
 		return QueueStatus{}, err
 	}
-	return q.Inspect(id)
+	status, err := q.Inspect(id)
+	if err == nil && (action.Kind == "advance" || action.Kind == "reconcile") && confirmedDelivery(status) {
+		if err = q.ReleaseConfirmed(ctx, id); err != nil {
+			return status, err
+		}
+		return q.Inspect(id)
+	}
+	return status, err
 }
