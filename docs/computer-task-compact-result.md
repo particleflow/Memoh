@@ -1,6 +1,6 @@
 # Compact Pi completion results
 
-This is a separate, unshipped follow-up to the versioned path resolver in PR #11.
+This is a separate, unshipped follow-up to the merged versioned path resolver in PR #11.
 It does not change Pi, Memoh's Agent runtime/contextview, the configured provider,
 MCP/skills settings, task authorization, or production storage locations.
 
@@ -134,3 +134,43 @@ Bash/Node/Pi/Magpie acceptance, or proof that arbitrary business tasks succeed.
 Those remain controlled release gates; no production deployment is included.
 The original pre-review screenshot remains at
 [initial compact-result checkpoint](validation/compact-result-web.png).
+## Integration with current main (2026-10-22)
+
+Normally merged main `75a70fe961808ed5ec2284767cb92ea85f30890f`, containing
+PR #8 resumable uploads, PR #9 task summaries and PR #11 path consistency.
+There were no conflicts or history rewrites. The compact-result implementation
+and its tests remain byte-for-byte equal to reviewed `c07a82b0`; main's config,
+media/localfs and task-summary implementations remain unchanged. The PR is now
+based on main and remains draft. Runtime/contextview still match the official
+`bf0318c5` baseline.
+
+Fresh integration checks passed:
+
+- Race tests for config, agenvo, computertask, sessiontask, media and localfs,
+  including long-line parsing, the bounded parser watchdog, interrupted atomic
+  result writes, correlation failures and legacy saved-offset recovery.
+- Task authorization/no-store and upload/resumable HTTP regressions, plus the
+  isolated PostgreSQL owned-tree/stable-cursor test.
+- A rebuilt cloud Server and the real Web UI with synthetic model/Agenvo
+  endpoints: one new synthetic batch dispatch, three scripted provider requests,
+  only `result.json` recovered, a correlated `succeeded` result, no stdout/stderr
+  references and `diagnostics_state=not_collected`. The mock transport executes
+  the embedded Node projector over synthetic Pi JSONL. This is not real Windows,
+  Pi/Magpie or autonomous model acceptance.
+- The same current application selected an unsent synthetic attachment and
+  separately verified authenticated HTTP upload/readback of a 38-byte original
+  and a 1,610-byte two-chunk resumable upload. SHA-256, saved offsets, ready state,
+  physical originals and the upload journal matched the configured relative
+  root. The owned empty task list returned 200; 401/400/404 error responses kept
+  no-store. These storage checks dispatched no model or computer task.
+
+[Current synthetic compact-result flow](validation/compact-result-integrated-web.png)
+and [current attachment draft](validation/compact-result-integrated-storage.png)
+are actual browser captures, not proof of vendor/production acceptance. Earlier
+screenshots and fault evidence remain historical checkpoints. No existing real
+operation was replayed.
+
+PR #9 deliberately keeps Pi outcome/content unavailable in its task-summary
+HTTP projection. A valid compact result through the MCP task API does not
+silently extend that mobile-facing contract. Controlled Windows acceptance and
+any candidate release remain separate from this cloud integration evidence.
