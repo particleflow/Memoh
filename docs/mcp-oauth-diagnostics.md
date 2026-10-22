@@ -61,3 +61,25 @@ server used text logs. Existing output was verified read-only; no task was
 submitted again to repair the verifier.
 
 ![Synthetic OAuth preflight failure in the running Web app](validation/compact-result-oauth-diagnostic-web.png)
+
+## Existing unknown operation regression
+
+The real source/host authorizer/workspace resolver is tested with an existing
+unknown record, an earlier run and a nonzero revision. Both explicit and inferred
+target submissions fail at the synthetic connection probe without claiming,
+saving, changing the old record/revision or issuing any business method.
+A separate standard MCP HTTP client test first creates one synthetic uncertain
+Pi dispatch, then exercises same/different task attempts with an unavailable
+connection. The complete ledger snapshot stays unchanged. After synthetic
+connection recovery, the same request returns the old unknown receipt and a
+different request returns its explicit conflict; neither dispatches again.
+These are adversarial fixture calls, not an automatic retry policy.
+
+Race tests and lint pass for the core and computer-task packages. The current
+unchanged application was reopened read-only and the previous synthetic error
+expanded; no new chat, task or OAuth authorization was started. This screenshot
+shows the current-call error contract only. The new automated tests establish
+the unknown-record invariant; the screenshot does not establish that invariant
+or real Windows task completion.
+
+![Read-only review of the existing synthetic preflight error](validation/unknown-preflight-regression-web.png)
