@@ -44,6 +44,9 @@ func EnqueueProducer(ctx context.Context, getenv func(string) string, revision s
 		return QueueStatus{}, err
 	}
 	matches := cfg.sourcePath != "" && deliverymeta.RootHash(cfg.sourcePath) == closed.Task.RootHash
+	// Bind the exact configuration used for the root-consistency check. The
+	// existing admission boundary rejects a concurrent configuration change.
+	action.Job.HostBinding = cfg.Binding
 	_ = cfg.Close()
 	if !matches {
 		return QueueStatus{}, ErrBinding

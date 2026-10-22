@@ -150,3 +150,25 @@ func TestProducerInputAndRootFailClosed(t *testing.T) {
 		t.Fatal("traversal")
 	}
 }
+
+func TestProducerConfigurationCannotChangeBetweenCheckAndAdmission(t *testing.T) {
+	getenv, closed, write := producerFixture(t, "https://fixture.invalid")
+	raw, _ := json.Marshal(closed)
+	stateReads := 0
+	changing := func(key string) string {
+		if key == "HERDR_PLUGIN_STATE_DIR" {
+			stateReads++
+			if stateReads == 2 {
+				// The consistency check has returned. Change the resolved export location
+				// just before the existing queue/admission boundary rereads configuration.
+				changed, _ := json.Marshal(hostConfigWire{Version: 1, Origin: "https://fixture.invalid", SourceRoot: configFixtureRoot(t)})
+				write(getenv("HERDR_PLUGIN_CONFIG_DIR"), "transfer.json", changed)
+			}
+		}
+		return getenv(key)
+	}
+	_, err := EnqueueProducer(t.Context(), changing, "fixture", QueueLimits{Jobs: 1, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}, bytes.NewReader(raw), nil, time.Now())
+	if !errors.Is(err, ErrVersion) {
+		t.Fatal("configuration changed silently", err)
+	}
+}
