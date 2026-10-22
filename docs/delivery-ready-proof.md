@@ -33,16 +33,17 @@ unknown delivery is not eligible for cleanup.
 
 Media publication and the operation database are separate transactions. If the
 server stops between them, the original scoped staging receipt can still be
-captured on retry while it exists. If it has expired before capture, neither a
+captured on retry while it exists. New task-held receipts survive TTL; for a
+historical generic receipt that expired before capture, neither a
 matching hash on disk nor a reserved ledger entry proves completion. That case
 stays `receipt_unavailable`: automatic mutation stops, lifecycle/producer feedback
 report unknown, and source/snapshot/journal evidence stays intact. A database
 commit whose acknowledgment is lost is also unknown until a fresh read confirms
 the proof; it is not blindly retried as a new business operation.
 
-No permanent staging-receipt retention or quota bypass is added. The 128 receipt
-limit and ready staging TTL still apply; safe capacity turnover is a later
-increment using this proof and the committed ledger. Proof entries are bounded
+The proof itself does not bypass the 128 receipt limit. The subsequent
+[task receipt lifecycle](delivery-upload-lifecycle.md) holds unconfirmed task
+evidence and retires temporary receipts only after committed association. Proof entries are bounded
 by the existing 128 deliveries/operation and 2 MiB operation limit. Physical power
 loss, real PC/NAS trust configuration and production installation are not covered
 by the isolated tests.
@@ -59,8 +60,8 @@ The `ready-proof-cli` subtest of
 formal migration chain, a NOBYPASSRLS PostgreSQL role, real device registry,
 Server/Media handlers, TLS and the production CLI built from the tested source.
 It drops a successful Complete response, or kills only the isolated CLI process
-after server proof commit and before client checkpoint. It then expires the
-synthetic staging receipt via real Sweep, recreates the server/Media objects,
+after server proof commit and before client checkpoint. It marks the synthetic receipt as historical generic policy (0), expires it
+via real Sweep, recreates the server/Media objects,
 and invokes fresh CLI processes. Both cases associate the original delivery with
 one Create and one Complete. The no-proof cross-store interruption keeps unknown
 feedback, journal/snapshot and source payload, without new uploads or commits.

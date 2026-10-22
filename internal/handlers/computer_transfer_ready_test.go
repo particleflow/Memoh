@@ -28,6 +28,8 @@ func expireReadyFixture(t *testing.T, root, id string, uploads *media.UploadStor
 	if json.Unmarshal(raw, &fields) != nil || string(fields["state"]) != `"ready"` {
 		t.Fatal("not a ready fixture")
 	}
+	// Simulate a historical generic receipt: new task receipts never expire before confirmation.
+	fields["progress_lease"] = json.RawMessage(`0`)
 	fields["expires_at"], _ = json.Marshal(time.Now().Add(-time.Hour))
 	raw, _ = json.Marshal(fields)
 	if err := os.WriteFile(path, raw, 0o600); err != nil {

@@ -279,6 +279,8 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 	if json.Unmarshal(staging, &fields) != nil || string(fields["state"]) != `"ready"` {
 		t.Fatal("not ready")
 	}
+	// Simulate a historical generic receipt: new task receipts never expire before confirmation.
+	fields["progress_lease"] = json.RawMessage(`0`)
 	fields["expires_at"], _ = json.Marshal(time.Now().Add(-time.Hour))
 	staging, _ = json.Marshal(fields)
 	write(path, staging)

@@ -174,7 +174,7 @@ func (s *UploadStore) read(id string) (uploadRecord, error) {
 	if err := json.NewDecoder(io.LimitReader(f, 4096)).Decode(&r); err != nil {
 		return r, err
 	}
-	if r.ID != id || r.SizeBytes <= 0 || r.Offset < 0 || r.Offset > r.SizeBytes || !validSHA(r.SHA256) || r.ProgressLease < 0 || r.ProgressLease > 1 {
+	if r.ID != id || r.SizeBytes <= 0 || r.Offset < 0 || r.Offset > r.SizeBytes || !validSHA(r.SHA256) || r.ProgressLease < 0 || r.ProgressLease > 2 {
 		return r, ErrUploadInvalid
 	}
 	// A prior process may have renamed this journal and failed before its
@@ -227,7 +227,7 @@ func (s *UploadStore) owned(owner, bot, id string) (uploadRecord, error) {
 	if err != nil {
 		return r, err
 	}
-	if r.Owner != owner || r.Bot != bot || !s.now().Before(r.ExpiresAt) {
+	if r.Owner != owner || r.Bot != bot || r.ProgressLease == 0 && !s.now().Before(r.ExpiresAt) {
 		return r, ErrUploadNotFound
 	}
 	return r, nil
@@ -239,9 +239,10 @@ func (s *UploadStore) Create(ctx context.Context, owner, bot string, in UploadIn
 
 // CreateTransfer is called only after the task adapter has authorized and claimed
 // the delivery. It retains the ordinary wire contract, but gives new task uploads
-// a durable inactivity lease. This method does not establish task authorization.
+// a progress lease and holds unconfirmed evidence until explicit committed
+// retirement. The deadline never evicts a task receipt. This establishes no authority.
 func (s *UploadStore) CreateTransfer(ctx context.Context, owner, bot string, in UploadInput) (Upload, error) {
-	return s.create(ctx, owner, bot, in, 1)
+	return s.create(ctx, owner, bot, in, 2)
 }
 
 func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadInput, progressLease int) (Upload, error) {
@@ -277,6 +278,15 @@ func (s *UploadStore) create(ctx context.Context, owner, bot string, in UploadIn
 		r, err := s.read(strings.TrimSuffix(entry.Name(), ".json"))
 		if err != nil {
 			return Upload{}, err
+		}
+		if r.State != "uploading" {
+			// A crash after ready save but before payload unlink must not make
+			// those bytes disappear from reservation accounting.
+			if _, err := s.root.Lstat(r.ID + ".data"); err == nil {
+				reserved += r.SizeBytes
+			} else if !errors.Is(err, os.ErrNotExist) {
+				return Upload{}, err
+			}
 		}
 		if r.State == "uploading" {
 			active++
@@ -375,7 +385,7 @@ func (s *UploadStore) Append(ctx context.Context, owner, bot, id string, offset,
 // chunks, replayed completion and cancellation never extend the lease. A clock
 // adjustment backwards must not shorten an already acknowledged deadline.
 func (s *UploadStore) renewProgressLease(r *uploadRecord) {
-	if deadline := s.now().Add(UploadTTL); r.ProgressLease == 1 && deadline.After(r.ExpiresAt) {
+	if deadline := s.now().Add(UploadTTL); r.ProgressLease > 0 && deadline.After(r.ExpiresAt) {
 		r.ExpiresAt = deadline
 	}
 }
@@ -539,6 +549,17 @@ func (s *UploadStore) sweep(ctx context.Context) error {
 			r, err := s.read(id)
 			if err != nil {
 				return err
+			}
+			if r.ProgressLease > 0 {
+				// Upgrade the prior task lease under the same permanent lock.
+				// Older binaries reject policy 2 instead of silently collecting it.
+				if r.ProgressLease == 1 {
+					r.ProgressLease = 2
+					return s.save(r)
+				}
+				// Unknown, canceled and ready-but-uncommitted task records are
+				// not admission victims. Only RetireTaskReceipt can free a slot.
+				return nil
 			}
 			if s.now().Before(r.ExpiresAt) {
 				if r.State == "ready" || r.State == "canceled" {

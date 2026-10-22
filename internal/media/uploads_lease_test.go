@@ -56,8 +56,8 @@ func TestTransferUploadProgressSurvivesOriginalExpiry(t *testing.T) {
 			if err := s.Sweep(ctx); err != nil {
 				t.Fatal(err)
 			}
-			if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".json")); !errors.Is(err, os.ErrNotExist) {
-				t.Fatal("task ready receipt became permanent", err)
+			if got, err := s.Get(ctx, "owner", "bot", u.ID); err != nil || got != ready {
+				t.Fatal("uncommitted task ready evidence expired", got, err)
 			}
 		})
 	}
@@ -116,15 +116,18 @@ func TestTransferUploadLeaseRequiresDurableForwardProgress(t *testing.T) {
 				t.Fatal("no durable forward progress, but offset/lease changed", got, err)
 			}
 			now = u.ExpiresAt
-			if _, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, ErrUploadNotFound) {
-				t.Fatal("idle deadline not enforced", err)
+			if after, err := s.Get(ctx, "owner", "bot", u.ID); err != nil || after != got {
+				t.Fatal("idle unknown receipt changed", after, err)
 			}
 			if err := s.Sweep(ctx); err != nil {
 				t.Fatal(err)
 			}
-			for _, suffix := range []string{".json", ".data"} {
-				if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+suffix)); !errors.Is(err, os.ErrNotExist) {
-					t.Fatal("idle staging not collected", err)
+			if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".json")); err != nil {
+				t.Fatal("idle unknown evidence collected", err)
+			}
+			if failure != "cancel" {
+				if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".data")); err != nil {
+					t.Fatal("unknown payload collected", err)
 				}
 			}
 		})
@@ -192,7 +195,7 @@ func TestTransferUploadUnknownLeasePolicyFailsClosed(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	r.ProgressLease = 2
+	r.ProgressLease = 3
 	if err := s.save(r); err != nil {
 		t.Fatal(err)
 	}
@@ -217,7 +220,7 @@ func createTransferUpload(ctx context.Context, t *testing.T, s *UploadStore, b [
 	return u
 }
 
-func TestExpiredReadyReceiptCollectionPreservesOriginal(t *testing.T) {
+func TestReceiptRetentionPreservesOriginal(t *testing.T) {
 	for _, policy := range []struct {
 		name   string
 		create func(context.Context, *testing.T, *UploadStore, []byte) Upload
@@ -249,11 +252,15 @@ func TestExpiredReadyReceiptCollectionPreservesOriginal(t *testing.T) {
 				} else if err := s.Sweep(ctx); err != nil {
 					t.Fatal(err)
 				}
-				if _, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, ErrUploadNotFound) {
-					t.Fatal("expired receipt remained addressable", err)
-				}
-				if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".json")); !errors.Is(err, os.ErrNotExist) {
-					t.Fatal("expired receipt was not collected", err)
+				if policy.name == "legacy" {
+					if _, err := s.Get(ctx, "owner", "bot", u.ID); !errors.Is(err, ErrUploadNotFound) {
+						t.Fatal("legacy TTL changed", err)
+					}
+					if _, err := os.Stat(filepath.Join(root, ".uploads", u.ID+".json")); !errors.Is(err, os.ErrNotExist) {
+						t.Fatal("legacy GC changed", err)
+					}
+				} else if got, err := s.Get(ctx, "owner", "bot", u.ID); err != nil || got != ready {
+					t.Fatal("uncommitted ready evidence collected", got, err)
 				}
 				reader, _, err := svc.Open(ctx, "bot", ready.ContentHash)
 				if err != nil {

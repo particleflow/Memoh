@@ -143,3 +143,44 @@ func TestTransferReadyCancellationBeforeProof(t *testing.T) {
 		t.Fatal("cancellation fabricated ready proof", err)
 	}
 }
+
+func TestCommittedTransferReadyRequiresTerminalAuthorizedProof(t *testing.T) {
+	f, s, ctx, p, ready := readyProofFixture(t)
+	if err := s.RecordTransferReady(ctx, ready); err != nil {
+		t.Fatal(err)
+	}
+	if _, found, err := s.CommittedTransferReady(ctx); err != nil || found {
+		t.Fatal("ready alone authorized retirement", found, err)
+	}
+	async, err := NewAsyncDeliveryService(t.Context(), s, func(context.Context, DeliveryIdentity) error { return nil }, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer async.Close()
+	if _, err := async.Commit(ctx, p.Identity.OperationID, p.DeliveryID, p.Reference, ""); err != nil {
+		t.Fatal(err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for {
+		out, err := async.Resolve(ctx, p.Identity.OperationID, p.DeliveryID, p.Reference, "", false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if out.Outcome == "committed" {
+			break
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("commit did not finish")
+		}
+		time.Sleep(time.Millisecond)
+	}
+	revision := f.record.Revision
+	got, found, err := s.CommittedTransferReady(ctx)
+	if err != nil || !found || !sameTransferReady(got, ready) || f.record.Revision != revision {
+		t.Fatal("committed proof lost or changed", found, err)
+	}
+	f.revoked = true
+	if _, found, err := s.CommittedTransferReady(ctx); !errors.Is(err, ErrDenied) || found {
+		t.Fatal("retirement bypassed fresh authorization", found, err)
+	}
+}

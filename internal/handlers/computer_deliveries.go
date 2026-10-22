@@ -100,6 +100,9 @@ func (h *ComputerDeliveryHandler) commit(c echo.Context) error {
 	if err != nil {
 		return deliveryHTTPError(err)
 	}
+	if err := finishTaskDelivery(c, out); err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, out)
 }
 
@@ -128,6 +131,9 @@ func (h *ComputerDeliveryHandler) resolve(c echo.Context) error {
 	}
 	if err != nil {
 		return deliveryHTTPError(err)
+	}
+	if err := finishTaskDelivery(c, out); err != nil {
+		return err
 	}
 	return c.JSON(http.StatusOK, out)
 }
