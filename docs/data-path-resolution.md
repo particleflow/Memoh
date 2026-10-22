@@ -117,19 +117,25 @@ The small Pi-completion adapter is separate work, not part of this integration.
   restoration and unsupported layout rejection. The official core boundary
   check also passed on the integrated tree.
 - Rebuilt the integrated Server and restored the isolated Vue/PostgreSQL/
-  synthetic-provider environment. Real browser attachment submission and a Pi
-  task completed without page errors. The 43-byte synthetic original downloaded
-  byte-for-byte and its physical SHA-256 matched under the relative configured
-  originals root.
+  synthetic-provider environment. The 43-byte browser-uploaded original
+  downloaded byte-for-byte and its physical SHA-256 matched under the relative
+  configured originals root.
 - The same authenticated browser performed a 1,120-byte resumable upload in two
   chunks using the PR #8 API, reached `ready`, and read back the exact bytes.
   Both its journal and verified original were found beneath that same resolved
   root. No production files, mounts, credentials or schemas were changed.
-- An overly specific browser response matcher missed the SDK's upload URL;
-  the already completed task was reopened and verified read-only, without
-  submitting another Pi task. This was a test capture issue, not a task failure.
+- Evidence correction: the first capture reopened a historical conversation;
+  it did not prove a fresh Pi result. The new run had failed before any provider
+  request because this restored environment lacked its test workspace bridge.
+  Restoring the official bridge also required matching the developer service UID.
+  Both failed attempts were checked before submitting a fresh synthetic task.
+- The fresh browser run then completed with exactly one new batch dispatch,
+  seven synthetic-provider requests, a correlated `succeeded` result, and zero
+  page errors. The screenshot now shows its unique integration-test prompt.
+  The seven requests still include the existing full-log recovery flow; the
+  independent compact-result work is not included here.
 
 [Fresh integrated UI evidence](validation/data-path-integrated-web.png) shows
-the actual attachment and completed synthetic Pi task. The separate hash and
+only the newly completed synthetic Pi task. The separate attachment hash and
 journal checks establish storage consistency. No new Windows/vendor or real
 model acceptance is claimed.
