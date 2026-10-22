@@ -62,16 +62,16 @@ func checkPrivateHandle(h windows.Handle) error {
 	}
 	owner, _, err := sd.Owner()
 	if err != nil || owner == nil || !owner.Equals(user.User.Sid) {
-		return ErrStore
+		return errors.Join(ErrStore, ErrPermission)
 	}
 	acl, _, err := sd.DACL()
 	if err != nil || acl == nil || acl.AceCount == 0 {
-		return ErrStore
+		return errors.Join(ErrStore, ErrPermission)
 	}
 	for i := uint32(0); i < uint32(acl.AceCount); i++ {
 		var ace *windows.ACCESS_ALLOWED_ACE
 		if windows.GetAce(acl, i, &ace) != nil || ace == nil || ace.Header.AceSize < 16 {
-			return ErrStore
+			return errors.Join(ErrStore, ErrPermission)
 		}
 		// Reject callback/object/conditional ACEs we do not implement, even if the
 		// current token happens to have access. Deny ACEs cannot broaden access.
@@ -79,15 +79,15 @@ func checkPrivateHandle(h windows.Handle) error {
 			continue
 		}
 		if ace.Header.AceType != windows.ACCESS_ALLOWED_ACE_TYPE {
-			return ErrStore
+			return errors.Join(ErrStore, ErrPermission)
 		}
 		sid := (*windows.SID)(unsafe.Pointer(&ace.SidStart)) //nolint:gosec // GetAce returns an OS-validated ACE; header and SID length are checked.
 		if !sid.IsValid() || sid.Len()+8 > int(ace.Header.AceSize) {
-			return ErrStore
+			return errors.Join(ErrStore, ErrPermission)
 		}
 		text := sid.String()
 		if !sid.Equals(user.User.Sid) && text != "S-1-5-18" && text != "S-1-5-32-544" {
-			return ErrStore
+			return errors.Join(ErrStore, ErrPermission)
 		}
 	}
 	runtime.KeepAlive(sd)

@@ -214,12 +214,16 @@ func (q *DiskQueue) saveReceipt(f *os.File, r QueueStatus) error {
 
 func (q *DiskQueue) loadReleaseReceipt(id string) (QueueStatus, *os.File, error) {
 	var r QueueStatus
-	f, err := q.file(id+".release", os.O_RDWR, 0o600)
+	flags := os.O_RDWR
+	if q.readOnly {
+		flags = os.O_RDONLY
+	}
+	f, err := q.file(id+".release", flags, 0o600)
 	if err != nil {
 		return r, nil, err
 	}
 	count := 0
-	_, err = readJournalFrames(f, releaseReceiptBytes, func(raw []byte) error {
+	_, err = readJournalFramesMode(f, releaseReceiptBytes, !q.readOnly, func(raw []byte) error {
 		dec := json.NewDecoder(bytes.NewReader(raw))
 		dec.DisallowUnknownFields()
 		if dec.Decode(&r) != nil || !q.validRecord(r, id) || r.PayloadState != PayloadReleased {

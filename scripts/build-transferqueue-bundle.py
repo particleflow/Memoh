@@ -20,6 +20,7 @@ out.mkdir(parents=True, exist_ok=False)
 env = dict(os.environ, GOOS="windows", GOARCH=args.arch, CGO_ENABLED="0")
 subprocess.run(["go", "build", "-trimpath", "-o", str(out / "transferqueue.exe"), "./cmd/transferqueue"], env=env, check=True)
 subprocess.run(["go", "test", "-trimpath", "-c", "-o", str(out / "transferqueue.test.exe"), "./internal/transferclient"], env=env, check=True)
+subprocess.run(["go", "test", "-trimpath", "-c", "-o", str(out / "transferqueue-cli.test.exe"), "./cmd/transferqueue"], env=env, check=True)
 for name in ("herdr-plugin.toml", "verify-fixtures.ps1", "README.md", "transfer.example.json"):
     shutil.copyfile(Path("contrib/herdr/memoh-delivery") / name, out / name)
 sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()

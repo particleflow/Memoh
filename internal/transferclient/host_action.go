@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"sort"
 	"time"
 )
 
@@ -39,7 +38,12 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 	}
 	local := HerdrAction{Kind: action.Kind, DeliveryID: action.DeliveryID, Job: action.Job}
 	if action.Kind == "advance-next" {
-		id, err := q.nextDue(now)
+		cfg, err := OpenHostConfig(getenv)
+		if err != nil {
+			return QueueStatus{}, err
+		}
+		id, err := q.nextDueForBinding(now, cfg.Binding)
+		_ = cfg.Close()
 		if err != nil {
 			return QueueStatus{}, err
 		}
@@ -113,6 +117,10 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 // A single bounded selection, not a worker loop. Locks remain owned by RunOne;
 // a race with another invocation returns busy and never runs duplicate work.
 func (q *DiskQueue) nextDue(now time.Time) (string, error) {
+	return q.nextDueForBinding(now, "")
+}
+
+func (q *DiskQueue) nextDueForBinding(now time.Time, binding string) (string, error) {
 	global, err := q.lock("admission")
 	if err != nil {
 		return "", err
@@ -122,7 +130,8 @@ func (q *DiskQueue) nextDue(now time.Time) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	sort.Slice(records, func(i, j int) bool { return records[i].Job.DeliveryID < records[j].Job.DeliveryID })
+	var selected QueueStatus
+	var selectedAt time.Time
 	for _, admission := range records {
 		r, err := q.Inspect(admission.Job.DeliveryID)
 		if errors.Is(err, ErrBusy) || errors.Is(err, ErrAdmissionPending) {
@@ -131,10 +140,21 @@ func (q *DiskQueue) nextDue(now time.Time) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		if !r.Admitted || r.Associated || r.AssociationBlocked || r.Job.Phase == "blocked" || r.Job.Phase == "canceled" || r.Job.Phase == "create_unknown" || now.Before(r.Job.NextAttempt) || now.Before(r.AssociationDue) {
+		if !recordEligible(r) || recordDue(r).After(now) || binding != "" && (r.Job.HostBinding != binding || !r.Job.Task.valid()) {
 			continue
 		}
-		return r.Job.DeliveryID, nil
+		// A persisted backoff wins once due. Continuously runnable jobs rotate
+		// by the last finite attempt, with an ID tie-breaker for untouched jobs.
+		at := recordDue(r)
+		if r.LastRun.After(at) {
+			at = r.LastRun
+		}
+		if selected.Job.DeliveryID == "" || at.Before(selectedAt) || at.Equal(selectedAt) && r.Job.DeliveryID < selected.Job.DeliveryID {
+			selected, selectedAt = r, at
+		}
+	}
+	if selected.Job.DeliveryID != "" {
+		return selected.Job.DeliveryID, nil
 	}
 	return "", ErrNoWork
 }

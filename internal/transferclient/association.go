@@ -60,6 +60,7 @@ func transientAssociation(err error) bool {
 func (q *DiskQueue) waitAssociation(f *os.File, r QueueStatus, err error, now time.Time) error {
 	// Blocked pauses automatic attempts; unknown/retry_commit is retained.
 	// It is never evidence that the server did not commit.
+	r.AssociationError = lifecycleErrorClass(err)
 	r.AssociationBlocked = !transientAssociation(err) || r.AssociationAttempts >= 12
 	if !r.AssociationBlocked {
 		r.AssociationDue = now.Add(min(time.Second*time.Duration(1<<r.AssociationAttempts), 5*time.Minute))
@@ -69,6 +70,7 @@ func (q *DiskQueue) waitAssociation(f *os.File, r QueueStatus, err error, now ti
 
 func (q *DiskQueue) finishAssociation(f *os.File, r QueueStatus, outcome AssociationOutcome) error {
 	r.AssociationDue = time.Time{}
+	r.AssociationError = ""
 	r.AssociationBlocked = false
 	switch outcome {
 	case OutcomeCommitted:

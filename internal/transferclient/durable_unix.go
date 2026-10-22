@@ -18,7 +18,7 @@ func makeQueueDir(root *os.Root, name string) error { return root.Mkdir(name, 0o
 func openQueueFile(root *os.Root, name string, flags int, mode os.FileMode) (*os.File, error) {
 	f, err := root.OpenFile(name, flags, mode)
 	if err != nil {
-		return nil, ErrStore
+		return nil, errors.Join(ErrStore, err)
 	}
 	return f, nil
 }
@@ -51,7 +51,7 @@ func checkQueueRoot(root *os.Root) error {
 	defer func() { _ = f.Close() }()
 	var stat unix.Stat_t
 	if unix.Fstat(int(f.Fd()), &stat) != nil || stat.Uid != uint32(os.Getuid()) || stat.Mode&0o077 != 0 { //nolint:gosec // OS descriptors and Unix UIDs have native int/uid_t range.
-		return ErrStore
+		return errors.Join(ErrStore, ErrPermission)
 	}
 	return nil
 }
