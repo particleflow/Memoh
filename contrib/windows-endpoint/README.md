@@ -38,8 +38,9 @@ paths remain removed. Cross-Bot PR45/173 is outside this change.
 
 The [unattended lifecycle contract](lifecycle.md) records the inspected startup,
 event and reconnect triggers, their limits, and the minimum internal coordinator
-and transfer-owner interface still required. Installing the CLI does not provide
-idle queue retry or automatic crash recovery; users must not be required to keep
+and the implemented internal component coordinator. Transfer-owner status and
+finite wake integration remain pending. Installing the CLI does not provide
+idle queue retry; users must not be required to keep
 a chat open to drive future recovery. Diagnostics expose this missing capability.
 
 The existing `apps/desktop` Electron app is a hosted-server client with an explicit
@@ -182,7 +183,8 @@ service or crash supervisor has been selected by this PR.
 3. Exercise real Agent/relay/desktop/transfer readiness separately. Verify
    authentication expiry produces an authentication state, existing offline
    reconnect, process exit/recovery and session reconciliation without replaying
-   unknown business operations. Process supervision remains an explicit gap.
+   unknown business operations. Internal component supervision is implemented in `lifecycle.mjs`; product
+   activation, orphan handoff and transfer wake integration remain gated.
 4. Coordinate stopped-state update/rollback and interruption at every publication
    step; preserve credentials, sessions, queues, originals and undelivered results.
    Uninstall must be ownership-based and preserve user data by default.
@@ -199,7 +201,7 @@ service or crash supervisor has been selected by this PR.
 
 ## Validation record
 
-Cloud Linux Node v24.19.0: 17 delivery tests passed, including strict inventory,
+Cloud Linux Node v24.19.0: 18 delivery tests and 16 lifecycle state-machine tests passed, including strict inventory,
 configuration isolation, identity/path mismatch, authentication-state redaction,
 interrupted-staging remnants, idempotent publication and retained originals/queue.
 Fixtures contain inert synthetic payloads, not official binary acceptance. The
@@ -221,7 +223,11 @@ release selection. The job removes the runner's tool PATH and exercises the same
 version/Bash probes used by `doctor`, missing Node/Pi/Bash, version mismatch,
 unconfigured connector exit, and isolated official Herdr API start, explicit
 restart after process termination, and graceful stop. It installs no service and
-creates no credentials. Transfer and unattended recovery remain excluded. A
+creates no credentials in the initial dependency smoke. The separate lifecycle
+fixture uses only ephemeral synthetic TLS/registration data, never user credentials.
+It exercises component recovery, original connector reconnect, 401 attention,
+shutdown and one ordinary shell restoration without replay. Transfer remains
+excluded, and the exact commit CI must pass before these checks count as evidence. A
 successful result is dependency/lifecycle smoke evidence, not full bundle, GUI,
 physical power loss or production acceptance.
 
@@ -245,3 +251,13 @@ application test may reuse the user-identified clean-main workspace image
 `ghcr.io/particleflow/workspace@sha256:bb086c5ab393cca91a769b8a21a22730cfc7bd2697dfef5ad815eba79bd2e9b4`
 after verifying its registry provenance; this task has not used it or claimed UI
 acceptance from it.
+
+The delivery subtree has no imports from Memoh backend/Agent/queue sources and
+can become a separate delivery repository after authorization. Move its own files
+and Windows workflow together, retaining origin/revision/hash locks. Keep
+`internal/transferclient`, shared `deliverymeta`, NAS protocol and migrations in
+Memoh; consume reviewed transfer bundle artifacts plus a versioned CLI contract.
+The current seven-day CI artifact retention is not a stable install/rollback
+channel. Cross-repository compatibility CI and durable, immutable artifact
+publication are prerequisites, not reasons to copy queue source or create a third
+repository. No repository move is performed here.

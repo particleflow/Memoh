@@ -34,9 +34,9 @@ async function verify(root) {
   await fs.writeFile(path.join(data, 'empty-openssl.cnf'), '')
   const generated = spawnSync(openssl, ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', key, '-out', cert, '-days', '1', '-subj', '/CN=localhost', '-addext', 'subjectAltName=DNS:localhost,IP:127.0.0.1'], { encoding: 'utf8', timeout: 15000, env: { ...process.env, OPENSSL_CONF: path.join(data, 'empty-openssl.cnf') } })
   assert.equal(generated.status, 0, 'Ephemeral certificate generation failed')
-  const { WebSocketServer } = await import(pathToFileURL(path.join(root, 'node_modules/ws/index.js')))
+  const { default: WebSocket } = await import(pathToFileURL(path.join(root, 'node_modules/ws/index.js')))
   const relay = https.createServer({ cert: await fs.readFile(cert), key: await fs.readFile(key) }, (_req, res) => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ protocol: 1, ownerConfigured: true })) })
-  const sockets = new Set(), wss = new WebSocketServer({ noServer: true })
+  const sockets = new Set(), wss = new WebSocket.Server({ noServer: true })
   let rejectAuth = false, welcomes = 0
   relay.on('upgrade', (req, socket, head) => {
     if (rejectAuth) { socket.end('HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n'); return }
@@ -63,7 +63,7 @@ async function verify(root) {
   async function until(predicate, message, timeout = 30000) {
     const end = Date.now() + timeout
     while (Date.now() < end) { if (await predicate()) return; await delay(100) }
-    throw new Error(message)
+    throw new Error(`${message}: ${JSON.stringify(lifecycle.snapshot())}`)
   }
   async function tickUntil(predicate, message) { await until(async () => { await lifecycle.tick(); return predicate() }, message) }
   async function killOwned(component) {
