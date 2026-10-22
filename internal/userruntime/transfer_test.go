@@ -18,6 +18,7 @@ type unavailableTransferStore struct {
 func (s unavailableTransferStore) ReadRuntimeTransfer(context.Context, string) (dbstore.RuntimeTransferRecord, error) {
 	return dbstore.RuntimeTransferRecord{}, s.err
 }
+
 func TestTransferVerifierStorageFailureIsNotRevocation(t *testing.T) {
 	credential := "mft_11111111-1111-4111-8111-111111111111." + strings.Repeat("a", 64)
 	for _, tc := range []struct{ failure, want error }{{context.DeadlineExceeded, ErrTransferUnavailable}, {errors.New("isolated storage failure"), ErrTransferUnavailable}, {db.ErrNotFound, ErrTransferCredential}} {
