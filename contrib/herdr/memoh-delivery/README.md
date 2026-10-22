@@ -30,19 +30,85 @@ it validates/initializes its queue only under `HERDR_PLUGIN_STATE_DIR`, requirin
 an existing private local NTFS parent. Its fixed `native-profile-v1` quota profile
 is immutable in the locator. It never repairs ACLs, changes roots or falls back.
 
-The executable also exposes finite local `inspect`, `cancel`, and `retire` actions
-with `-delivery <logical-id>`. The production upload/download enqueue, advance
-and authorized result registration binding is still missing: the library's
-`InvokeHerdr` accepts those injected ports, and isolated native fixtures exercise
-them. Neither operation_id, this manifest, nor a successful storage probe grants
-server authority. The probe explicitly reports `transfer_binding: required`.
+The executable exposes finite `enqueue-upload`, `enqueue-download`, `advance`,
+`advance-next`, `reconcile`, `inspect`, `cancel`, and `retire` actions. Except for
+`advance-next`, later actions select `-delivery <logical-id>`. The manifest's
+`advance-delivery` runs exactly one due job and exits. It does not poll, schedule,
+reset retry budgets, create a business attempt, or run a background service.
+Herdr/Agenvo can invoke the installed command through its existing command path;
+no connector or Agent core change is needed. Input acceptance alone is not a
+completion receipt.
 
-Do not install/link this package or run the storage probe against production as
-part of fixture acceptance. Actual Herdr installation, an approved scoped Memoh
-credential provider, authenticated HTTPS route, and atomic task/storage
-Commit/Resolve binding must be reviewed separately. No broad Bot token, Agenvo
-OAuth substitution, insecure TLS option or credential argv/config is provided.
+## One-time connection checklist (not executed by this package)
 
-The documented API fault model, limitations and official references are in
-`docs/design/windows-native-binding.md` in the source repository. CI fixture
-success is not real UI or human QA. The PR remains draft pending required checks.
+1. Approve the Memoh HTTPS origin and its valid hostname/certificate trust. The
+   helper requires HTTPS and normal certificate verification. Existing HTTP is
+   not encryption and cannot be configured as a shortcut.
+2. Configure the Server's `DeviceTransferVerifier` for the already paired
+   connection/device/instance. The verifier port and synthetic tests exist; a
+   production credential backend/record is **not included or enabled**. Decide
+   its lifetime, revoke and rotate procedure once, then configure one reusable
+   purpose-specific device credential. Do not use a PC account JWT, broad Bot
+   token or the Agenvo control/OAuth credential. No per-file token or pairing is
+   required. Missing verifier means unavailable, never account-auth fallback.
+3. After installation approval, install this bundle through the existing Herdr
+   plugin mechanism, without a service. Herdr supplies `HERDR_PLUGIN_CONFIG_DIR`
+   and `HERDR_PLUGIN_STATE_DIR`. Both must already be private local NTFS folders
+   belonging to the invoking user. The helper validates and refuses unsuitable
+   locations; it does not repair ACLs, elevate or configure trust.
+4. Privately create `transfer.json` in that config directory from the packaged
+   `transfer.example.json`, and a separate private `device.credential` containing
+   only the approved opaque credential (optional final newline). This package
+   does not create either real file. Secret files never go into the repository,
+   bundle, argv, model context or terminal output. Rotation replaces that same
+   private credential through the approved administrative process. Requests read
+   it afresh; server revocation is checked on every request and after scans.
+5. For uploads only, configure `source_root` to the producer's approved private
+   NTFS export directory. It must not overlap config or queue state. Producers
+   close output writers and supply one logical filename (`source_ref`, letters,
+   digits, underscore or hyphen), declared hash/size/MIME and existing task
+   selectors. Downloads publish under the existing queue's retained native
+   publication store; no arbitrary overwrite destination is exposed.
+
+`transfer.json` is resolved once per invocation. Its digest is recorded in the
+existing queue journal. Changing the endpoint or source root (even formatting)
+requires explicit drain/migration; old jobs fail `configuration_changed`, never
+silently switch directories or send their credential to a different endpoint.
+The queue's `native-profile-v1` limits remain 8 jobs, 256 MiB reserved bytes,
+8 MiB per journal and one worker. This finite profile is not a claimed maximum
+protocol file size; changing quotas requires a reviewed locator migration.
+
+## Producer and finite-command handoff
+
+Enqueue reads **metadata only** from stdin, at most 16 KiB within the two-minute
+command budget. The trusted local producer supplies `job` (version 1), including
+`delivery_id`, `snapshot_id` (same ID), `bot_id`, `operation_id`,
+`locator_revision: native-profile-v1`, `phase: queued`, `spec` and `device_task`.
+The latter contains `user_id`, `session_id`, `target_id`, `run_id`, `attempt` and
+`generation` from the existing operation handoff. Add `source_ref` for uploads.
+Do not put a credential or file bytes in this JSON. These IDs are lookup
+selectors, not authorization; the Server verifies them against its current
+operation, Bot permissions and authenticated device.
+
+Reinvoke the same enqueue/ID/metadata after admission timeout to resume sealing;
+do not invent a new ID. Completed admission uses its immutable snapshot even if
+the producer file or export directory has since been removed. New or incomplete
+upload admission still requires the original authorized source. Once admitted,
+invoke `advance` or the fixed manifest
+`advance-delivery` action. Each call performs bounded work then exits; the existing
+host owns when to invoke again. Backoff and unknown outcomes persist in the
+queue. `cancel` records intent; subsequent advance reconciles publication/remote
+commit and can report that delivery already won. `reconcile` is an explicit
+recovery action, not a retry-budget reset. The original create-unknown protocol
+fence remains; never guess a new receipt after uncertain creation.
+
+CLI stdout contains bounded phase/offset/association/reference data only. It is
+not execution success and does not contain source locations, credentials, file
+bytes or full logs. Automated producer-to-stdin wiring and the real PC/NAS
+connection still require deployment-specific acceptance; the cloud tests use
+synthetic identity and isolated TLS/PG/NTFS.
+
+Do not install/link or configure this package against production as part of
+fixture acceptance. The API fault model and limitations are documented in
+`docs/design/windows-native-binding.md` and `docs/design/device-delivery-binding.md`.
+CI success is not real UI or human QA. The PR remains draft pending those checks.

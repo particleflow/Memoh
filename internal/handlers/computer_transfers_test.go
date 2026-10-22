@@ -54,6 +54,7 @@ func (v *transferVerifierFixture) Revalidate(ctx context.Context, _ computertask
 type taskTransferFixtureOptions struct {
 	assets  func(*media.Service) computertask.DeliveryAssets
 	request func(*http.Request)
+	device  func(computertask.DeliveryIdentity, agenvo.Target) DeviceTransferVerifier
 }
 
 func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransferFixtureOptions) (*deliveryHTTPFixture, *transferVerifierFixture, *httptest.Server, *transferclient.Client) {
@@ -97,6 +98,10 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransfe
 	}
 	log := slog.New(slog.DiscardHandler)
 	h, err := NewComputerTransferHandler(t.Context(), base, &MessageHandler{mediaService: assets}, verifier, log)
+	if option.device != nil {
+		h.Close()
+		h, err = NewDeviceComputerTransferHandler(t.Context(), base, &MessageHandler{mediaService: assets}, option.device(f.id, f.target), log)
+	}
 	if err != nil {
 		t.Fatal(err)
 	}

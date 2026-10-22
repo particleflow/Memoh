@@ -1,8 +1,8 @@
 id = "memoh.delivery"
 name = "Memoh delivery storage"
-version = "0.1.0"
+version = "0.2.0"
 min_herdr_version = "0.9.5"
-description = "Finite native queue validation; transport identity and task registration require host binding"
+description = "Finite native delivery queue using a configured reusable device identity"
 platforms = ["windows"]
 
 [[actions]]
@@ -10,6 +10,12 @@ id = "verify-storage"
 title = "Verify native delivery storage"
 contexts = ["workspace"]
 command = ["./transferqueue.exe", "-action", "probe"]
+
+[[actions]]
+id = "advance-delivery"
+title = "Advance one due delivery"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "advance-next"]
 
 [[actions]]
 id = "fixture-check"

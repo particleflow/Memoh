@@ -224,6 +224,13 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 	if err != nil {
 		return DeliveryOutcome{}, err
 	}
+	if p, ok := VerifiedTransferFromContext(ctx); ok && p.Device != (VerifiedTransferDevice{}) {
+		// Request selectors are not authority. Bind this authenticated device to
+		// the freshly authorized target in the same transaction as the ledger CAS.
+		if p.Device.ConnectionID != target.ConnectionID || p.Device.DeviceID != target.DeviceID || p.Device.InstanceID != target.InstanceID {
+			return DeliveryOutcome{}, ErrDenied
+		}
+	}
 	b := id.Binding
 	r, err := tx.Store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID})
 	if err != nil {

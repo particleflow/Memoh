@@ -1,5 +1,9 @@
 # Task-scoped file adapter and bootstrap proposal
 
+> Bootstrap update: `device-delivery-binding.md` supersedes per-file grant, new
+> pairing and native attestation proposals below. A configured device credential
+> can serve multiple deliveries; the 15-minute limit is internal request scope.
+
 This candidate remains unregistered in production. It adds no credential issuer,
 device registration, daemon, listener, Agent change, filesystem root or security
 configuration. Its HTTP verifier is an injected port; tests provide synthetic

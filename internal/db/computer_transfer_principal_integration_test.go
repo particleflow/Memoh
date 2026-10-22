@@ -15,6 +15,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -28,8 +29,40 @@ import (
 // account JWT or trusted identity is manually injected into HTTP contexts.
 type pgTransferVerifier struct {
 	principal computertask.VerifiedTransfer
+	device    computertask.VerifiedTransferDevice
 	revoked   atomic.Bool
 	denied    chan struct{}
+}
+
+func (v *pgTransferVerifier) VerifyDevice(ctx context.Context, credential string) (computertask.VerifiedTransferDevice, error) {
+	if credential != "isolated-transfer-fixture" {
+		return computertask.VerifiedTransferDevice{}, computertask.ErrDenied
+	}
+	return v.device, ctx.Err()
+}
+
+func (v *pgTransferVerifier) RevalidateDevice(ctx context.Context, device computertask.VerifiedTransferDevice) error {
+	if device != v.device {
+		return computertask.ErrDenied
+	}
+	return v.Revalidate(ctx, v.principal)
+}
+
+func pgDeviceIdentity(ctx context.Context, t *testing.T, store *postgresstore.Store, id computertask.DeliveryIdentity) computertask.VerifiedTransferDevice {
+	t.Helper()
+	mount, err := store.GetMount(ctx, id.Binding.BotID, id.Binding.TargetID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	target, err := agenvo.DecodeTarget(mount.RuntimeProviderConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return computertask.VerifiedTransferDevice{CredentialID: "fixture-device", ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID}
+}
+
+func pgDeviceTask(id computertask.DeliveryIdentity) transferclient.DeviceTask {
+	return transferclient.DeviceTask{UserID: id.Binding.UserID, SessionID: id.Binding.SessionID, TargetID: id.Binding.TargetID, RunID: id.Binding.RunID, Attempt: id.Attempt, Generation: id.Generation}
 }
 
 func (v *pgTransferVerifier) Verify(ctx context.Context, credential string) (computertask.VerifiedTransfer, error) {
@@ -58,11 +91,11 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 	t.Helper()
 	log := slog.New(slog.DiscardHandler)
 	p := pgTransferPrincipal(id, "principal-upload", ref)
-	verifier := &pgTransferVerifier{principal: p}
+	verifier := &pgTransferVerifier{principal: p, device: pgDeviceIdentity(ctx, t, store, id)}
 	base := computertask.NewPostgresDeliveryService(store, assets)
 	messages := handlers.NewMessageHandler(log, nil, nil, nil, nil)
 	messages.SetMediaService(assets)
-	h, err := handlers.NewComputerTransferHandler(ctx, base, messages, verifier, log)
+	h, err := handlers.NewDeviceComputerTransferHandler(ctx, base, messages, verifier, log)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -80,7 +113,8 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 		e.ServeHTTP(w, r)
 	}))
 	defer https.Close()
-	client, err := transferclient.NewTask(https.URL, id.OperationID, p.DeliveryID, https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+	job := transferclient.Job{Version: 1, DeliveryID: p.DeliveryID, OperationID: id.OperationID, BotID: id.Binding.BotID, SnapshotID: "fixture", LocatorRevision: "fixture", Phase: "queued", Spec: transferclient.Spec{SizeBytes: ref.SizeBytes, SHA256: ref.ContentHash, Mime: ref.Mime}}
+	client, err := transferclient.NewDeviceTask(https.URL, job, "upload", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,6 +168,28 @@ func exerciseTaskTransferPrincipal(ctx context.Context, t *testing.T, store *pos
 		case <-deadline.C:
 			t.Fatal("scoped async result never committed")
 		}
+	}
+	// A second delivery uses the identical credential, with its own immutable
+	// reference/receipt. Recreate that client to model a stopped finite command.
+	job.DeliveryID = "device-second-upload"
+	for range 2 {
+		second, err := transferclient.NewDeviceTask(https.URL, job, "upload", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+		if err != nil {
+			t.Fatal(err)
+		}
+		receipt, err := second.Create(ctx, job.BotID, job.Spec)
+		if err != nil || receipt.ID == r.ID {
+			t.Fatal("second device delivery", err)
+		}
+		if job.ReceiptID != "" && receipt.ID != job.ReceiptID {
+			t.Fatal("reopen replaced receipt")
+		}
+		job.ReceiptID = receipt.ID
+		_, err = second.Get(ctx, job.BotID, r.ID)
+		if !errors.As(err, &status) || status.Status != 403 {
+			t.Fatal("cross delivery receipt", err)
+		}
+		second.CloseIdleConnections()
 	}
 	verifier.revoked.Store(true)
 	if _, err := binding.Resolve(ctx, "upload", file, false); !errors.As(err, &status) || status.Status != 403 {

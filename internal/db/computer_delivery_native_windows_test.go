@@ -136,6 +136,40 @@ func nativeDeliveryPrivateRoot(t *testing.T) string {
 	return resolved
 }
 
+// Explicit owner at creation, as in the queue primitive. The runner's default
+// owner for an ordinary os.WriteFile can be its administrators group; inheritance
+// of a private DACL alone does not establish the required invoking-user owner.
+func nativeDeliveryPrivateFile(t *testing.T, path string, data []byte) {
+	t.Helper()
+	user, err := windows.GetCurrentProcessToken().GetTokenUser()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sid := user.User.Sid.String()
+	sd, err := windows.SecurityDescriptorFromString("O:" + sid + "D:P(A;;FA;;;" + sid + ")(A;;FA;;;SY)(A;;FA;;;BA)")
+	if err != nil {
+		t.Fatal(err)
+	}
+	sa := windows.SecurityAttributes{SecurityDescriptor: sd}
+	sa.Length = uint32(unsafe.Sizeof(sa))
+	ptr, err := windows.UTF16PtrFromString(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	h, err := windows.CreateFile(ptr, windows.GENERIC_READ|windows.GENERIC_WRITE, windows.FILE_SHARE_READ, &sa, windows.CREATE_NEW, windows.FILE_ATTRIBUTE_NORMAL, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f := os.NewFile(uintptr(h), "synthetic-device-configuration")
+	defer func() { _ = f.Close() }()
+	if _, err := f.Write(data); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.Sync(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 type nativeLostPublication struct {
 	*transferclient.NativePublication
 	lose bool
@@ -180,10 +214,10 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	gated := &pgGatedDeliveryAssets{Service: assets, started: make(chan struct{}, 8), release: make(chan struct{})}
 	request := computertask.DeliveryRequest{Version: 1, Direction: "download", ContentHash: hash, SizeBytes: int64(len(data)), Mime: "text/plain"}
 	principal := pgTransferPrincipal(id, "native-pg-download", request)
-	verifier := &pgTransferVerifier{principal: principal, denied: make(chan struct{}, 1)}
+	verifier := &pgTransferVerifier{principal: principal, device: pgDeviceIdentity(ctx, t, store, id), denied: make(chan struct{}, 1)}
 	messages := handlers.NewMessageHandler(log, nil, nil, nil, nil)
 	messages.SetMediaService(assets)
-	h, err := handlers.NewComputerTransferHandler(ctx, computertask.NewPostgresDeliveryService(store, gated), messages, verifier, log)
+	h, err := handlers.NewDeviceComputerTransferHandler(ctx, computertask.NewPostgresDeliveryService(store, gated), messages, verifier, log)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -204,7 +238,8 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 		e.ServeHTTP(w, r)
 	}))
 	defer https.Close()
-	client, err := transferclient.NewTask(https.URL, id.OperationID, principal.DeliveryID, https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
+	deviceJob := transferclient.Job{Version: 1, DeliveryID: principal.DeliveryID, BotID: id.Binding.BotID, OperationID: id.OperationID, SnapshotID: principal.DeliveryID, LocatorRevision: "native-pg-fixture-v1", Phase: "queued", Spec: transferclient.Spec{SizeBytes: int64(len(data)), SHA256: hash, Mime: "text/plain"}}
+	client, err := transferclient.NewDeviceTask(https.URL, deviceJob, "download", pgDeviceTask(id), https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -229,7 +264,7 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 			if candidate != ref {
 				return transferclient.ErrAuthorization
 			}
-			return verifier.Revalidate(ctx, principal)
+			return verifier.RevalidateDevice(ctx, verifier.device)
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -336,5 +371,70 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 	_ = reader.Close()
 	if err != nil || string(got) != string(data) {
 		t.Fatal("published bytes differ", err)
+	}
+	// Same device credential, second native destination and persisted CAS entry.
+	client.CloseIdleConnections()
+	job.DeliveryID, job.SnapshotID = "native-second-download", "native-second-download"
+	ref.DeliveryID = job.DeliveryID
+	// Run the actual configured finite command boundary, reopening all native
+	// handles each invocation. Only TLS trust and device verifier are fixtures.
+	_ = publication.Close()
+	_ = queue.Close()
+	configRoot := nativeDeliveryPrivateRoot(t)
+	configJSON, _ := json.Marshal(map[string]any{"version": 1, "origin": https.URL, "source_root": ""})
+	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "transfer.json"), configJSON)
+	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "device.credential"), []byte("isolated-transfer-fixture"))
+	getenv := func(key string) string {
+		if key == "HERDR_PLUGIN_CONFIG_DIR" {
+			return configRoot
+		}
+		if key == "HERDR_PLUGIN_STATE_DIR" {
+			return root
+		}
+		return ""
+	}
+	job.Task = pgDeviceTask(id)
+	invoke := func(kind string) transferclient.QueueStatus {
+		t.Helper()
+		now := time.Now()
+		if status.AssociationDue.After(now) {
+			now = status.AssociationDue
+		}
+		result, err := transferclient.InvokeConfiguredHerdr(ctx, getenv, "native-pg-fixture-v1", transferclient.QueueLimits{Jobs: 4, Bytes: 8 << 20, JournalBytes: 1 << 20, Workers: 1}, transferclient.ConfiguredAction{Kind: kind, DeliveryID: job.DeliveryID, Job: job}, https.Client(), now)
+		if err != nil {
+			t.Fatal("configured finite action", kind, err)
+		}
+		return result
+	}
+	status = invoke("enqueue-download")
+	for range 12 {
+		status = invoke("advance-next")
+		if status.Associated {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
+	if !status.Associated {
+		t.Fatal("same device did not deliver second file", status)
+	}
+	queue = openQueue()
+	publication = openPublication()
+	reader, err = publication.OpenPublished(ctx, ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err = io.ReadAll(reader)
+	_ = reader.Close()
+	if err != nil || string(got) != string(data) {
+		t.Fatal("second file integrity", err)
+	}
+	_ = publication.Close()
+	_ = queue.Close()
+	job.DeliveryID, job.SnapshotID = "native-cross-target", "native-cross-target"
+	job.Task.TargetID = uuid.NewString()
+	status = invoke("enqueue-download")
+	status = invoke("advance")
+	if status.Job.Phase != "blocked" || status.Job.ErrorCode != "authorization" || status.Associated {
+		t.Fatal("configured device crossed PostgreSQL target scope", status)
 	}
 }

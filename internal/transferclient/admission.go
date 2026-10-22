@@ -39,7 +39,7 @@ type admissionProgress struct {
 }
 
 func sameAdmission(a, b Job) bool {
-	return a.DeliveryID == b.DeliveryID && a.BotID == b.BotID && a.OperationID == b.OperationID && a.SnapshotID == b.SnapshotID && a.LocatorRevision == b.LocatorRevision && a.Spec == b.Spec
+	return a.HostBinding == b.HostBinding && a.Task == b.Task && a.DeliveryID == b.DeliveryID && a.BotID == b.BotID && a.OperationID == b.OperationID && a.SnapshotID == b.SnapshotID && a.LocatorRevision == b.LocatorRevision && a.Spec == b.Spec
 }
 
 func admissionBinding(job Job) string {
