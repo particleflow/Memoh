@@ -79,6 +79,15 @@ func New(base string, client *http.Client, auth Authorization) (*Client, error) 
 	return &Client{base: strings.TrimRight(base, "/"), http: h, auth: auth}, nil
 }
 
+// NewTask uses the explicit task-authenticated adapter namespace. The original
+// file protocol is unchanged, and credentials still come from the approved host.
+func NewTask(base, operation, delivery string, client *http.Client, auth Authorization) (*Client, error) {
+	if !validID(operation) || !validID(delivery) {
+		return nil, ErrInvalid
+	}
+	return New(strings.TrimRight(base, "/")+"/internal/computer-transfers/"+operation+"/"+delivery, client, auth)
+}
+
 func (c *Client) CloseIdleConnections() { c.http.CloseIdleConnections() }
 
 type Spec struct {

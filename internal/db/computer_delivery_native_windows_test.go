@@ -19,15 +19,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/sys/windows"
 
-	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/agenvo"
-	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/computertask"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -158,6 +155,13 @@ func (p *nativeLostPublication) Publish(ctx context.Context, ref transferclient.
 // incoming execution authenticator is synthetic. Originals are preseeded fixture
 // bytes: Unix-only upload admission is intentionally not exercised on Windows.
 func TestWindowsNativePostgresDelivery(t *testing.T) {
+	for _, revoke := range []bool{false, true} {
+		t.Run(map[bool]string{false: "commit", true: "revoke-during-scan"}[revoke], func(t *testing.T) { nativePostgresDelivery(t, revoke) })
+	}
+}
+
+func nativePostgresDelivery(t *testing.T, revoke bool) {
+	t.Helper()
 	store, id, ctx := nativeDeliveryDatabase(t)
 	data := []byte("native NTFS and real PostgreSQL delivery")
 	sum := sha256.Sum256(data)
@@ -174,42 +178,19 @@ func TestWindowsNativePostgresDelivery(t *testing.T) {
 	assets.SetRequirePersistence(true)
 	log := slog.New(slog.DiscardHandler)
 	gated := &pgGatedDeliveryAssets{Service: assets, started: make(chan struct{}, 8), release: make(chan struct{})}
-	async, err := computertask.NewAsyncDeliveryService(ctx, computertask.NewPostgresDeliveryService(store, gated), func(ctx context.Context, candidate computertask.DeliveryIdentity) error {
-		if candidate != id {
-			return computertask.ErrDeliveryBinding
-		}
-		return ctx.Err()
-	}, log)
+	request := computertask.DeliveryRequest{Version: 1, Direction: "download", ContentHash: hash, SizeBytes: int64(len(data)), Mime: "text/plain"}
+	principal := pgTransferPrincipal(id, "native-pg-download", request)
+	verifier := &pgTransferVerifier{principal: principal, denied: make(chan struct{}, 1)}
+	messages := handlers.NewMessageHandler(log, nil, nil, nil, nil)
+	messages.SetMediaService(assets)
+	h, err := handlers.NewComputerTransferHandler(ctx, computertask.NewPostgresDeliveryService(store, gated), messages, verifier, log)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer async.Close()
+	defer h.Close()
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(log) //nolint:contextcheck // Requests provide their own contexts.
-	handlers.NewAsyncComputerDeliveryHandler(async).Register(e)
-	messages := handlers.NewMessageHandler(log, nil, nil, bots.NewService(log, postgresstore.NewQueries(store.SQLC())), accounts.NewService(log, store))
-	messages.SetMediaService(assets)
-	messages.Register(e)
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc { //nolint:contextcheck // Explicit synthetic verifier binds each request separately.
-		return func(c echo.Context) error {
-			if c.Request().Header.Get("Authorization") != "Bearer isolated-native-postgres-fixture" {
-				return echo.NewHTTPError(http.StatusForbidden)
-			}
-			bound, err := toolcontext.WithComputerBinding(c.Request().Context(), id.Binding)
-			if err != nil {
-				return err
-			}
-			bound, err = computertask.WithDeliveryIdentity(bound, id)
-			if err != nil {
-				return err
-			}
-			c.SetRequest(c.Request().WithContext(bound))
-			// Legacy Media's account context is supplied only by this test double.
-			// No production JWT is exchanged for attempt authority.
-			c.Set("user", &jwt.Token{Valid: true, Claims: jwt.MapClaims{"sub": id.Binding.UserID, "user_id": id.Binding.UserID}})
-			return next(c)
-		}
-	})
+	h.Register(e)                                        //nolint:contextcheck // Registers callbacks; each HTTP request supplies its own context.
 	var drop atomic.Bool
 	https := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, "/commit") && drop.Swap(false) {
@@ -223,7 +204,7 @@ func TestWindowsNativePostgresDelivery(t *testing.T) {
 		e.ServeHTTP(w, r)
 	}))
 	defer https.Close()
-	client, err := transferclient.New(https.URL, https.Client(), func(context.Context) (string, error) { return "Bearer isolated-native-postgres-fixture", nil })
+	client, err := transferclient.NewTask(https.URL, id.OperationID, principal.DeliveryID, https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer isolated-transfer-fixture", nil })
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -248,7 +229,7 @@ func TestWindowsNativePostgresDelivery(t *testing.T) {
 			if candidate != ref {
 				return transferclient.ErrAuthorization
 			}
-			return ctx.Err()
+			return verifier.Revalidate(ctx, principal)
 		})
 		if err != nil {
 			t.Fatal(err)
@@ -308,10 +289,38 @@ func TestWindowsNativePostgresDelivery(t *testing.T) {
 	if _, err := store.SaveComputerOperation(ctx, current); err != nil {
 		t.Fatal(err)
 	}
+	verifier.revoked.Store(revoke)
 	close(gated.release)
-	request := computertask.DeliveryRequest{Version: 1, Direction: "download", ContentHash: hash, SizeBytes: int64(len(data)), Mime: "text/plain"}
-	awaitRemoteDelivery(ctx, t, async, id.OperationID, job.DeliveryID, request, "committed")
-	status = step(client.DeliveryBinding(publication))
+	if revoke {
+		select {
+		case <-verifier.denied:
+		case <-time.After(5 * time.Second):
+			t.Fatal("worker did not recheck revoked principal after scan")
+		}
+		status = step(client.DeliveryBinding(publication))
+		if status.Associated || !status.AssociationBlocked || status.Job.Phase != "ready" {
+			t.Fatal("revocation fabricated delivery/cancellation", status)
+		}
+		current, err = store.ReadComputerOperation(ctx, op)
+		var details struct {
+			Ledger struct {
+				Entries map[string]struct {
+					Outcome string `json:"outcome"`
+				} `json:"entries"`
+			} `json:"delivery_ledger"`
+		}
+		if err != nil || json.Unmarshal(current.Details, &details) != nil || details.Ledger.Entries[job.DeliveryID].Outcome != "pending" {
+			t.Fatal("revoked scan committed its result", err)
+		}
+		return
+	}
+	for range 12 {
+		status = step(client.DeliveryBinding(publication))
+		if status.Associated {
+			break
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
 	if !status.Associated || !status.Job.CancelRequested || status.Job.Phase == "canceled" {
 		t.Fatalf("published NTFS winner lost: %+v", status)
 	}

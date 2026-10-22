@@ -8,6 +8,12 @@ on:
       - 'scripts/build-transferqueue-bundle.py'
       - '.github/workflows/delivery-native.yml'
       - 'internal/db/computer_delivery_native_windows_test.go'
+      - 'internal/db/computer_transfer_principal_integration_test.go'
+      - 'internal/computertask/delivery*.go'
+      - 'internal/computertask/transfer_principal*.go'
+      - 'internal/handlers/computer_transfers*.go'
+      - 'internal/handlers/media*.go'
+      - 'internal/handlers/message.go'
       - 'scripts/test-native-delivery-postgres.ps1'
   workflow_dispatch:
 permissions:
