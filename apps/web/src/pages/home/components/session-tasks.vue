@@ -3,22 +3,31 @@ import { computed, onScopeDispose, ref } from 'vue'
 import { useDocumentVisibility, useLocalStorage } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
-import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
 import type { SessiontaskTask } from '@memohai/sdk'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
+import { useBotDelegations } from '../composables/useBotDelegations'
+import BotDelegationTasks from './bot-delegation-tasks.vue'
 
 const props = defineProps<{ botId: string, sessionId: string, selection: string, visible: boolean }>()
 const { t } = useI18n()
 const token = useLocalStorage('token', '')
 const open = ref(false)
+const group = ref('execution')
 const documentVisibility = useDocumentVisibility()
 const visible = computed(() => open.value && props.visible && documentVisibility.value === 'visible')
 const scope = computed(() => props.botId && props.sessionId ? {
   bot: props.botId, session: props.sessionId, selection: props.selection, identity: token.value,
 } : null)
-const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh } = useSessionTasks(scope, visible)
+const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh } = useSessionTasks(scope, computed(() => visible.value && group.value === 'execution'))
+const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = useBotDelegations(scope, computed(() => visible.value && group.value === 'delegations'))
+const hasSelection = computed(() => group.value === 'delegations' ? !!delegationSelected.value : !!selected.value)
+function goBack() {
+  if (group.value === 'delegations') backDelegation()
+  else back()
+}
 // Login notifies before replacing the token; a same-tab 401 can clear it
 // without a storage event. Close now so pending reads cannot revive content
 // while the parent view/router is still mounted.
@@ -53,115 +62,141 @@ function taskLabel(task: SessiontaskTask) {
     </DialogTrigger>
     <DialogPanel view-swap>
       <DialogViewHeader
-        :centered="!!selected || items.length > 0"
-        :show-back="!!selected"
+        :centered="hasSelection || items.length > 0 || delegations.length > 0"
+        :show-back="hasSelection"
         :back-label="t('common.back')"
-        @back="back"
+        @back="goBack"
       >
-        {{ selected ? t('chat.tasks.detail') : t('chat.tasks.title') }}
+        {{ hasSelection ? t('chat.tasks.detail') : t('chat.tasks.title') }}
       </DialogViewHeader>
       <DialogBody class="space-y-4">
-        <DialogDescription>{{ t('chat.tasks.description') }}</DialogDescription>
-        <Empty v-if="error">
-          <EmptyDescription>{{ resolveApiErrorMessage(error, t('chat.tasks.loadFailed')) }}</EmptyDescription>
-          <Button
-            variant="outline"
-            @click="refresh"
-          >
-            {{ t('chat.tasks.reload') }}
-          </Button>
-        </Empty>
-        <InlineLoadingRow v-else-if="loading && !detail && !items.length">
-          {{ t('common.loading') }}
-        </InlineLoadingRow>
-        <template v-else-if="selected">
-          <section
-            v-if="detail"
-            class="space-y-4"
-          >
-            <div class="space-y-1">
-              <h3 class="text-label font-medium">
-                {{ taskLabel(detail) }}
-              </h3>
-              <p class="text-body">
-                {{ stateLabel(detail) }}
-              </p>
-              <p
-                v-if="detail.cancel_requested"
-                class="text-body text-muted-foreground"
+        <Tabs v-model="group">
+          <TabsList v-if="!hasSelection">
+            <TabsTrigger value="execution">
+              {{ t('chat.delegations.executionGroup') }}
+            </TabsTrigger>
+            <TabsTrigger value="delegations">
+              {{ t('chat.delegations.title') }}
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="delegations">
+            <BotDelegationTasks
+              :items="delegations"
+              :detail="delegationDetail"
+              :selected="delegationSelected"
+              :cursor="delegationCursor"
+              :next-cursor="delegationNext"
+              :loading="delegationLoading"
+              :error="delegationError"
+              @open-task="openDelegation"
+              @page="delegationPage"
+              @refresh="refreshDelegations"
+            />
+          </TabsContent>
+          <TabsContent value="execution">
+            <DialogDescription>{{ t('chat.tasks.description') }}</DialogDescription>
+            <Empty v-if="error">
+              <EmptyDescription>{{ resolveApiErrorMessage(error, t('chat.tasks.loadFailed')) }}</EmptyDescription>
+              <Button
+                variant="outline"
+                @click="refresh"
               >
-                {{ t('chat.tasks.cancelIntent') }}
-              </p>
-            </div>
-            <div class="space-y-2">
-              <h3 class="text-label font-medium">
-                {{ t('chat.tasks.result') }}
-              </h3>
-              <!-- Plain text: never interpret links, HTML or embedded media. -->
-              <p
-                v-if="detail.content_available && detail.result_summary"
-                class="whitespace-pre-wrap break-words text-body"
+                {{ t('chat.tasks.reload') }}
+              </Button>
+            </Empty>
+            <InlineLoadingRow v-else-if="loading && !detail && !items.length">
+              {{ t('common.loading') }}
+            </InlineLoadingRow>
+            <template v-else-if="selected">
+              <section
+                v-if="detail"
+                class="space-y-4"
               >
-                {{ detail.result_summary.text }}
-              </p>
-              <p
-                v-else
-                class="text-body text-muted-foreground"
+                <div class="space-y-1">
+                  <h3 class="text-label font-medium">
+                    {{ taskLabel(detail) }}
+                  </h3>
+                  <p class="text-body">
+                    {{ stateLabel(detail) }}
+                  </p>
+                  <p
+                    v-if="detail.cancel_requested"
+                    class="text-body text-muted-foreground"
+                  >
+                    {{ t('chat.tasks.cancelIntent') }}
+                  </p>
+                </div>
+                <div class="space-y-2">
+                  <h3 class="text-label font-medium">
+                    {{ t('chat.tasks.result') }}
+                  </h3>
+                  <!-- Plain text: never interpret links, HTML or embedded media. -->
+                  <p
+                    v-if="detail.content_available && detail.result_summary"
+                    class="whitespace-pre-wrap break-words text-body"
+                  >
+                    {{ detail.result_summary.text }}
+                  </p>
+                  <p
+                    v-else
+                    class="text-body text-muted-foreground"
+                  >
+                    {{ t('chat.tasks.unavailable') }}
+                  </p>
+                  <p
+                    v-if="detail.result_summary?.truncated"
+                    class="text-body text-muted-foreground"
+                  >
+                    {{ t('chat.tasks.truncated') }}
+                  </p>
+                </div>
+                <p class="text-body text-muted-foreground">
+                  {{ t('chat.tasks.businessUnknown') }}
+                </p>
+              </section>
+            </template>
+            <template v-else>
+              <Empty v-if="!items.length">
+                <EmptyDescription>{{ nextCursor ? t('chat.tasks.filteredPage') : t('chat.tasks.empty') }}</EmptyDescription>
+              </Empty>
+              <Item
+                v-for="item in items"
+                :key="`${item.task_type}:${item.task_id}`"
+                as="button"
+                type="button"
+                size="sm"
+                class="w-full text-left"
+                @click="openTask(item)"
               >
-                {{ t('chat.tasks.unavailable') }}
-              </p>
-              <p
-                v-if="detail.result_summary?.truncated"
-                class="text-body text-muted-foreground"
+                <ItemContent>
+                  <ItemTitle>{{ taskLabel(item) }}</ItemTitle>
+                  <ItemDescription>{{ stateLabel(item) }}</ItemDescription>
+                </ItemContent>
+              </Item>
+              <div
+                v-if="cursor || nextCursor"
+                class="flex flex-wrap gap-2"
               >
-                {{ t('chat.tasks.truncated') }}
-              </p>
-            </div>
-            <p class="text-body text-muted-foreground">
-              {{ t('chat.tasks.businessUnknown') }}
-            </p>
-          </section>
-        </template>
-        <template v-else>
-          <Empty v-if="!items.length">
-            <EmptyDescription>{{ nextCursor ? t('chat.tasks.filteredPage') : t('chat.tasks.empty') }}</EmptyDescription>
-          </Empty>
-          <Item
-            v-for="item in items"
-            :key="`${item.task_type}:${item.task_id}`"
-            as="button"
-            type="button"
-            size="sm"
-            class="w-full text-left"
-            @click="openTask(item)"
-          >
-            <ItemContent>
-              <ItemTitle>{{ taskLabel(item) }}</ItemTitle>
-              <ItemDescription>{{ stateLabel(item) }}</ItemDescription>
-            </ItemContent>
-          </Item>
-          <div
-            v-if="cursor || nextCursor"
-            class="flex flex-wrap gap-2"
-          >
-            <Button
-              v-if="cursor"
-              variant="ghost"
-              :disabled="loading"
-              @click="page()"
-            >
-              {{ t('chat.tasks.newest') }}
-            </Button>
-            <Button
-              v-if="nextCursor"
-              variant="outline"
-              :disabled="loading"
-              @click="page(nextCursor)"
-            >
-              {{ t('chat.tasks.next') }}
-            </Button>
-          </div>
-        </template>
+                <Button
+                  v-if="cursor"
+                  variant="ghost"
+                  :disabled="loading"
+                  @click="page()"
+                >
+                  {{ t('chat.tasks.newest') }}
+                </Button>
+                <Button
+                  v-if="nextCursor"
+                  variant="outline"
+                  :disabled="loading"
+                  @click="page(nextCursor)"
+                >
+                  {{ t('chat.tasks.next') }}
+                </Button>
+              </div>
+            </template>
+          </TabsContent>
+        </Tabs>
       </DialogBody>
     </DialogPanel>
   </Dialog>

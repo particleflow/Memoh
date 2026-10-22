@@ -114,6 +114,12 @@ jobs:
         run: node --test scripts/display-prepare-lock.test.mjs
       - name: Test display input and clipboard regressions
         run: pnpm test --run --testTimeout=15000 apps/web/src/composables/display-text-input.test.ts apps/web/src/composables/useDisplayClipboard.test.ts apps/web/src/composables/display-clipboard.test.ts apps/web/src/composables/useBotDisplayConnection.test.ts apps/web/src/utils/api-error.test.ts apps/web/src/composables/api/sse-error.test.ts
+      - name: Test task observation and Bot management
+        env:
+          # jsdom owns browser storage; Node 24's experimental process-global
+          # storage has no backing file and is not the application DOM.
+          NODE_OPTIONS: --no-experimental-webstorage
+        run: pnpm test --run --testTimeout=15000 apps/web/src/pages/home/composables/useBotDelegations.test.ts apps/web/src/pages/home/composables/useSessionTasks.test.ts apps/web/src/pages/home/components/bot-delegation-tasks.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/bots/index.test.ts apps/web/src/pages/bots/new.test.ts apps/web/src/pages/bots/detail.not-found.test.ts apps/web/src/pages/bots/components/bot-network.test.ts
       - name: Test server entrypoint
         run: pnpm test --run --project docker
       - name: Run Vitest

@@ -2,14 +2,16 @@
 import { createApp, nextTick } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { SessiontaskTask } from '@memohai/sdk'
+import type { BotdelegationView, SessiontaskTask } from '@memohai/sdk'
 import { notifyAuthSessionCleared } from '@/lib/auth-session'
 import en from '@/i18n/locales/en.json'
 import SessionTasks from './session-tasks.vue'
 
-const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn() }))
+const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
+  getBotsByBotIdSessionsBySessionIdDelegations: api.delegations,
+  getBotsByBotIdSessionsBySessionIdDelegationsByDelegationId: api.delegationDetail,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId: api.detail,
 }))
 
@@ -20,6 +22,11 @@ const task: SessiontaskTask = {
   summary: 'receipt', content_available: true, attachments_available: false, pi_result: 'succeeded',
   result_summary: { text, truncated: false, source: 'pi_final_assistant' },
 }
+const delegation: BotdelegationView = {
+  delegation_id: 'handoff-a', request_id: 'request-a', source_session_id: 'parent', target_bot_id: 'specialist-a',
+  state: 'completed', delivery_state: 'accepted', attachments: [], created_at: '2026-10-22T00:00:00Z', updated_at: '2026-10-22T00:00:00Z',
+  summary: { text: 'Specialist final reply', source: 'assistant_final' },
+}
 let app: ReturnType<typeof createApp> | undefined
 let root: HTMLDivElement
 async function settled() { await nextTick(); await vi.advanceTimersByTimeAsync(50); await nextTick() }
@@ -29,7 +36,7 @@ function button(label: string | RegExp) {
   expect(found).toBeDefined()
   return found!
 }
-async function open() {
+async function open(group = 'execution') {
   root = document.createElement('div')
   document.body.append(root)
   app = createApp(SessionTasks, { botId: 'bot', sessionId: 'parent', selection: 'pc-a', visible: true })
@@ -38,7 +45,12 @@ async function open() {
   await settled()
   button('Tasks').click()
   await settled()
-  button(/Computer task/).click()
+  if (group === 'delegations') {
+    const tab = [...document.querySelectorAll('[role=tab]')].find(el => el.textContent?.includes('Specialist Bot handoffs'))!
+    tab.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+    await settled()
+    button(/Target Bot/).click()
+  } else button(/Computer task/).click()
   await settled()
 }
 
@@ -50,12 +62,38 @@ describe('task detail identity and rendering boundary', () => {
     localStorage.setItem('token', 'synthetic-identity')
     api.list.mockReset().mockResolvedValue({ data: { items: [task] } })
     api.detail.mockReset().mockResolvedValue({ data: task })
+    api.delegations.mockReset().mockResolvedValue({ data: { items: [delegation] } })
+    api.delegationDetail.mockReset().mockResolvedValue({ data: delegation })
   })
   afterEach(() => {
     app?.unmount()
     root?.remove()
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  })
+
+  it('opens the specialist group without polling the hidden execution group', async () => {
+    await open('delegations')
+    expect(document.body.textContent).toContain('Specialist final reply')
+    expect(api.delegations).toHaveBeenCalledTimes(1)
+    expect(api.list).toHaveBeenCalledTimes(1)
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(api.list).toHaveBeenCalledTimes(1)
+    expect(api.delegationDetail).toHaveBeenCalledTimes(2)
+  })
+
+  it('closes specialist detail and ignores its late reply after same-tab logout', async () => {
+    let finish!: (value: { data: BotdelegationView }) => void
+    api.delegationDetail.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    await open('delegations')
+    const signal = api.delegationDetail.mock.lastCall![0].signal as AbortSignal
+    notifyAuthSessionCleared('logout')
+    expect(signal.aborted).toBe(true)
+    finish({ data: delegation }); await settled()
+    expect(document.querySelector('[role=dialog]')).toBeNull()
+    expect(document.body.textContent).not.toContain('Specialist final reply')
+    await vi.advanceTimersByTimeAsync(15000)
+    expect(api.delegationDetail).toHaveBeenCalledTimes(1)
   })
 
   it('renders HTML, Markdown and URLs literally without active elements', async () => {
