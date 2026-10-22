@@ -20,6 +20,10 @@ that redirect.
 - Real Colada component regression: 401, 403, network failure, manual retry,
   in-flight retry suppression, and cached-data refresh failure. The three
   initial-error cases failed against the previous component.
+  These component cases use ordinary rejected Errors labelled 401/403;
+  they prove error rendering and non-disclosure, not HTTP authorization.
+  Actual response handling is covered by the API-client suite and browser
+  redirect check below.
 - Bot list and existing API-client suite: 19 tests passed. The API-client
   suite also covers credential clearing and stale 401 responses.
 - Changed-source lint and UI contract guard passed (three existing warnings).
@@ -46,6 +50,9 @@ The real component/Colada regression reproduced an `undefined.value` exception
 on its first transient-status poll. It now uses the existing `isLoading` ref,
 which represents a request in flight. A pending request is not polled again;
 resolved non-transient status and unmount stop the timer.
+The fixture uses the advertised `ready` state and checks the rendered Connected
+label. Persistent failure with cached transient status still causes a read every
+five seconds; this patch does not implement backoff or change polling policy.
 
 Network and desktop mutations now accept the generated `SettingsUpsertRequest`
 instead of a partial read-response DTO. In particular, a nullable read setting

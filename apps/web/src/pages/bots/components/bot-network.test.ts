@@ -11,7 +11,9 @@ const mocks = vi.hoisted(() => ({
   settings: vi.fn(),
   save: vi.fn(),
 }))
-vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({ t: (key: string) => key === 'bots.settings.networkState.connected' ? 'Connected' : key }),
+}))
 vi.mock('@memohai/sdk', () => ({
   getBotsByBotIdSettings: mocks.settings,
   putBotsByBotIdSettings: mocks.save,
@@ -90,8 +92,9 @@ describe('network settings query contract', () => {
     expect(mocks.status).toHaveBeenCalledTimes(2)
     await vi.advanceTimersByTimeAsync(10000)
     expect(mocks.status).toHaveBeenCalledTimes(2)
-    refresh.resolve({ state: 'connected' })
+    refresh.resolve({ state: 'ready' })
     await flush()
+    expect(host.textContent).toContain('Connected')
     await vi.advanceTimersByTimeAsync(10000)
     expect(mocks.status).toHaveBeenCalledTimes(2)
   })
@@ -106,7 +109,7 @@ describe('network settings query contract', () => {
   })
 
   it('saves only network request fields without copying nullable read-only settings', async () => {
-    mocks.status.mockResolvedValue({ state: 'connected' })
+    mocks.status.mockResolvedValue({ state: 'ready' })
     await mount()
     host.querySelector<HTMLButtonElement>('[data-toggle]')?.click()
     await flush()
