@@ -102,7 +102,7 @@ func newLifecyclePG(t *testing.T) *lifecyclePGFixture {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = p.Exec(t.Context(), "INSERT INTO bots(id,team_id,owner_user_id,name,type) VALUES($1,$2,$3,$4,'personal')", f.bots[i], team.DefaultTeamID, u, "synthetic-"+f.bots[i])
+		_, err = p.Exec(t.Context(), "INSERT INTO bots(id,team_id,owner_user_id,name) VALUES($1,$2,$3,$4)", f.bots[i], team.DefaultTeamID, u, "synthetic-"+f.bots[i])
 		if err != nil {
 			t.Fatal(err)
 		}

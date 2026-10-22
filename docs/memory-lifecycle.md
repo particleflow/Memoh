@@ -61,8 +61,16 @@ schema, then run:
 go test -race -count=1 ./internal/memory/adapters/builtin -run 'Lifecycle|Projection|AuthorityIsUnavailable|DeleteAllPreservesOriginals'
 ```
 
+Initialize the database using the server's **full migration chain**, not by
+loading `0001_init.up.sql` alone. Migration 0033 removes `bots.type`; fixtures
+must match that migrated schema and must not insert the obsolete column. The
+existing `wikistore` fixtures already match it and need no correction or overlay.
+
+The `Session Runtime (PostgreSQL fencing)` Go CI job bootstraps the official
+schema, then runs `go test -v -race -count=1 -timeout 90s ./internal/memory/...`
+against the same disposable database. Its memory step explicitly rejects a
+missing `TEST_POSTGRES_DSN`, so PG tests cannot silently skip there. Running the
+ordinary unit-test job without a database still skips the optional PG tests.
+
 No model credentials are required. These are deterministic lifecycle tests, not
-measurements of natural-language forgetting or embedding relevance. The existing
-`wikistore` integration tests at the pinned base require a separate fixture-only
-correction for two Bot inserts missing the required `type` column; that unrelated
-fixture issue is not a memory implementation failure and is not fixed here.
+measurements of natural-language forgetting or embedding relevance.

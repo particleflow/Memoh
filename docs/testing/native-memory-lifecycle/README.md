@@ -33,12 +33,11 @@ present. This is stronger than simply constructing a second runtime in one proce
 
 ## Validation scope
 
-- `go test -race ./internal/memory/...`: **219 test/subtest pass events**, no skips.
-  This uses an external fixture-only Go overlay correcting two existing
-  `wikistore` Bot inserts that omit required `type='personal'`. Unmodified baseline
-  fixtures fail SQLSTATE 23502; do not interpret the result as a clean raw suite.
-  Earlier baseline 212 becomes 219: remove one obsolete file-fallback expectation,
-  add four unit and four PG lifecycle tests.
+- `go test -json -race -count=1 -timeout 90s ./internal/memory/...` against the
+  full migrated schema: **219 test/subtest pass events**, no skips, **no overlay**.
+  All four lifecycle PG tests and both existing wikistore PG tests ran. Earlier
+  baseline 212 becomes 219: remove one obsolete file-fallback expectation, add
+  four unit and four PG lifecycle tests.
 - `go test -race ./internal/apperror/... ./internal/server/... ./internal/handlers/...`:
   **1,147 test/subtest pass events**.
 - Focused existing tool/handler memory boundary selection: **42 pass events**
@@ -56,6 +55,37 @@ Model actions were scripted locally; embedding was a fixed local three-dimension
 HTTP response against real pgvector. No natural-language accuracy, real semantic
 relevance, paid model call, or permanent erasure guarantee was measured. Bot-shared
 content remains Bot-shared; user attribution is not a new per-user ACL.
+
+## Schema correction and CI coverage
+
+The initial 219-pass result used a database initialized only from
+`0001_init.up.sql`. That database had a required `bots.type` column and no
+`schema_migrations` table. It was not the current official schema, so that result
+and its fixture overlay are withdrawn as current-schema acceptance evidence.
+The two original wikistore fixtures were correct; adding `type` to them would
+have been wrong. The new lifecycle fixture's obsolete `type` insert was the bug.
+
+A new disposable `memory_lifecycle_ci` database was initialized with the same
+`dbtest.MigratePostgresUp` full embedded migration chain used by the PostgreSQL
+fencing CI job. It reports version **170**, `dirty=false`, and no `bots.type`
+column (removed in migration 0033). Before fixing the fixture, all four new PG
+lifecycle tests failed SQLSTATE 42703; both unchanged wikistore tests passed.
+After removing the obsolete column from the new fixture, all 219 memory tests
+passed directly, without any overlay.
+
+The main/candidate before-fix deletion reproductions, compatibility samples, and
+separate-process/PG-restart test were repeated against that full migrated schema.
+Historical reproductions use the pinned runtime/storefs files plus an external
+synthetic harness; these are separate from the **unmodified checked-in test run**
+reported above. The actual UI database independently reports version 170 and no
+`bots.type`; the UI interactions and screenshots were repeated as well.
+
+The original green GitHub run did not establish PG coverage: its ordinary test
+job had no DSN; the pgvector job only had `TEST_PGVECTOR_DSN`; the fencing job did
+not run the memory packages. All six affected PG tests therefore skipped. The
+existing fencing job now runs the whole memory suite after full migration, with
+an explicit nonempty-DSN check. Its verbose test log exposes the six real results.
+No checks or assertions were disabled, and no schema migrations were changed.
 
 ## Actual application verification
 
