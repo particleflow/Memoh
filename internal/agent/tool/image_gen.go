@@ -10,9 +10,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"path"
 	"strings"
-	"time"
 
 	alibabaimages "github.com/felinics/twilight/provider/alibabacloud/images"
 	openaiimages "github.com/felinics/twilight/provider/openai/images"
@@ -21,15 +19,14 @@ import (
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/models"
-	"github.com/felinics/memoh/internal/models/modelretry"
 	"github.com/felinics/memoh/internal/providers"
 	"github.com/felinics/memoh/internal/settings"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
 
 const (
-	imageGenDir            = "/data/generated-images"
 	maxGeneratedImageBytes = 50 << 20
 	maxImageErrorBodyBytes = 512
 )
@@ -53,12 +50,14 @@ func (e *imageModelTextResponseError) Error() string {
 }
 
 type ImageGenProvider struct {
-	logger     *slog.Logger
-	settings   *settings.Service
-	models     *models.Service
-	queries    dbstore.Queries
-	containers bridge.Provider
-	dataMount  string
+	logger         *slog.Logger
+	settings       *settings.Service
+	models         *models.Service
+	queries        dbstore.Queries
+	containers     bridge.Provider
+	dataMount      string
+	imageJobs      *imagejob.Service
+	imageAuthority *imagejob.Authority
 }
 
 func NewImageGenProvider(
@@ -97,7 +96,7 @@ func (p *ImageGenProvider) Tools(ctx context.Context, session SessionContext) ([
 	if strings.TrimSpace(botSettings.ImageModelID) == "" {
 		return nil, nil
 	}
-	description := "Generate an image from a text description using the configured image generation model. Returns the workspace file path of the generated image."
+	description := "Generate or edit an image with the Bot configured image model, or read an existing image task result. Edit requires authorized input_refs and an explicitly edit-capable model. Returns ready NAS artifact_refs, never workspace paths or inline image data. Unknown or publication_pending: use mode=result and task_id; never resubmit the business request."
 	if session.CanUseLocalMessagingShortcut() {
 		description += " The generated image is automatically shown to the user in the current conversation."
 	} else {
@@ -107,8 +106,11 @@ func (p *ImageGenProvider) Tools(ctx context.Context, session SessionContext) ([
 }
 
 type generateImageArgs struct {
-	Prompt string `json:"prompt" jsonschema:"Detailed description of the image to generate"`
-	Size   string `json:"size,omitempty" jsonschema:"Optional image size, e.g. 1024x1024, 1792x1024, 1024x1792. Leave empty to use the provider default."`
+	Prompt    string   `json:"prompt,omitempty" jsonschema:"Description of the requested generation or edit. Required except for result retrieval."`
+	Mode      string   `json:"mode,omitempty" jsonschema:"generate (default), edit, or result; editing never falls back to generation."`
+	InputRefs []string `json:"input_refs,omitempty" jsonschema:"Exactly one authorized original content_hash for edit; none for generation."`
+	TaskID    string   `json:"task_id,omitempty" jsonschema:"Existing task_id for mode=result; never starts a model request."`
+	Size      string   `json:"size,omitempty" jsonschema:"Optional image size, e.g. 1024x1024, 1792x1024, 1024x1792. Leave empty to use the provider default."`
 }
 
 func (p *ImageGenProvider) imageTools(session SessionContext, description string) []toolexec.Tool {
@@ -120,174 +122,175 @@ func (p *ImageGenProvider) imageTools(session SessionContext, description string
 	)}
 }
 
-func (*ImageGenProvider) Usage(_ context.Context, session SessionContext, available AvailableTools) string {
-	genRef, ok := available.Ref(ToolGenerateImage())
+func (*ImageGenProvider) Usage(_ context.Context, _ SessionContext, available AvailableTools) string {
+	ref, ok := available.Ref(ToolGenerateImage())
 	if !ok {
 		return ""
 	}
-	sendRef, hasSend := available.Ref(ToolSend())
-	var items []string
-	if session.CanUseLocalMessagingShortcut() {
-		items = append(items, genRef+" already shows the generated image to the user in the current conversation; do not send it there again.")
-		if hasSend {
-			items = append(items, "To share a generated image with another channel or person, call "+sendRef+" with the returned path in `attachments`.")
-		}
-	} else if hasSend {
-		items = append(items, genRef+" only saves the image to the workspace; the user never sees it automatically. Share it by calling "+sendRef+" with the returned path in `attachments`.")
-	}
-	return usageSection("Image generation", items)
+	return usageSection("Cloud image tasks", []string{ref + " uses the Bot image model. Use edit with the original attachment content_hash; generation is not editing. A chat subagent may call this tool and return artifact_refs to the parent. Only ready references are deliverable; result retrieves pending publication without repeating the model. Do not send base64 or a workspace path. Unknown must not be resubmitted with a new child or tool call. Background child results are resolved by get_background_status; share ready artifact_refs via the existing send tool using content_hash."})
+}
+
+func (p *ImageGenProvider) SetImageJobs(service *imagejob.Service, authority *imagejob.Authority) {
+	p.imageJobs, p.imageAuthority = service, authority
 }
 
 func (p *ImageGenProvider) execGenerateImage(ctx context.Context, session SessionContext, toolCallID string, args generateImageArgs) (any, error) {
-	botID := strings.TrimSpace(session.BotID)
-	if botID == "" {
-		return nil, errors.New("bot_id is required")
+	if p.imageJobs == nil || p.imageAuthority == nil {
+		return nil, imagejob.ErrDenied
 	}
-	prompt := strings.TrimSpace(args.Prompt)
-	if prompt == "" {
-		return nil, errors.New("prompt is required")
-	}
-	size := strings.TrimSpace(args.Size)
-
-	botSettings, err := p.settings.GetBot(ctx, botID)
+	binding, turn, err := p.imageAuthority.Bind(ctx, session.BotID, session.UserID, session.SessionID)
 	if err != nil {
-		return nil, errors.New("failed to load bot settings")
+		return nil, err
 	}
-	imageModelID := strings.TrimSpace(botSettings.ImageModelID)
-	if imageModelID == "" {
-		return nil, errors.New("no image generation model configured")
-	}
-
-	modelResp, err := p.models.GetByID(ctx, imageModelID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load image model: %w", err)
-	}
-	if !modelResp.Enable {
-		return nil, fmt.Errorf("image model %s is disabled", modelResp.ModelID)
-	}
-	if !modelResp.HasCompatibility(models.CompatImageOutput) {
-		return nil, errors.New("configured model does not support image generation")
-	}
-
-	provider, err := models.FetchProviderByID(ctx, p.queries, modelResp.ProviderID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load model provider: %w", err)
-	}
-	if !provider.Enable {
-		return nil, fmt.Errorf("image model provider %s is disabled", provider.Name)
-	}
-
-	authResolver := providers.NewService(nil, p.queries, "")
-	creds, err := authResolver.ResolveModelCredentials(ctx, provider)
-	if err != nil {
-		return nil, fmt.Errorf("failed to resolve provider credentials: %w", err)
-	}
-
-	image, err := p.generateImage(ctx, provider, creds.APIKey, modelResp.ModelID, prompt, size)
-	if err != nil {
-		var textResp *imageModelTextResponseError
-		if errors.As(err, &textResp) {
-			return map[string]any{
-				"model_response": textResp.text,
-				"note":           "the image model returned a text response instead of an image",
-			}, nil
+	var result imagejob.Result
+	if args.Mode == "result" {
+		if args.TaskID == "" || args.Prompt != "" || len(args.InputRefs) != 0 {
+			return nil, imagejob.ErrInvalid
 		}
-		return nil, fmt.Errorf("image generation failed: %w", err)
-	}
-	imgBytes := image.Data
-
-	ext := "png"
-	switch {
-	case strings.Contains(image.MediaType, "jpeg"), strings.Contains(image.MediaType, "jpg"):
-		ext = "jpg"
-	case strings.Contains(image.MediaType, "webp"):
-		ext = "webp"
-	}
-
-	imageDir := strings.TrimRight(p.dataMount, "/") + strings.TrimPrefix(imageGenDir, "/data")
-	if resolver, ok := p.containers.(bridge.WorkspaceInfoProvider); ok {
-		if info, err := resolver.WorkspaceInfo(ctx, botID); err == nil &&
-			info.Backend == bridge.WorkspaceBackendRemote &&
-			strings.TrimSpace(info.DefaultWorkDir) != "" {
-			imageDir = strings.TrimRight(info.DefaultWorkDir, "/") + "/generated-images"
+		result, err = p.imageJobs.Result(ctx, binding, args.TaskID)
+	} else {
+		mode := imagejob.Mode(args.Mode)
+		if mode == "" {
+			mode = imagejob.Generate
+		}
+		if args.TaskID != "" {
+			return nil, imagejob.ErrInvalid
+		}
+		req := imagejob.Request{Mode: mode, Prompt: strings.TrimSpace(args.Prompt), Size: strings.TrimSpace(args.Size), InputRefs: args.InputRefs}
+		req.Key = imagejob.BusinessKey(turn, req)
+		var adapter imagejob.Adapter
+		adapter, err = p.imageAdapter(ctx, session.BotID, mode)
+		if err == nil {
+			result, err = p.imageJobs.Submit(ctx, binding, req, adapter)
 		}
 	}
-	containerPath := fmt.Sprintf("%s/%d.%s", imageDir, time.Now().UnixMilli(), ext)
-
-	if p.containers == nil {
-		return p.unsavedImageResult(session, toolCallID, image, "Image generated, but the workspace is not reachable, so the file was not saved"), nil
+	if err != nil {
+		return nil, err
 	}
-
-	client, clientErr := p.containers.MCPClient(ctx, botID)
-	if clientErr != nil {
-		return p.unsavedImageResult(session, toolCallID, image, "Image generated, but the workspace is not reachable, so the file was not saved"), nil
-	}
-
-	if writeErr := client.WriteFile(ctx, containerPath, imgBytes); writeErr != nil {
-		return p.unsavedImageResult(session, toolCallID, image, fmt.Sprintf("Image generated (failed to save: %s)", writeErr.Error())), nil
-	}
-
-	result := map[string]any{
-		"path":       containerPath,
-		"media_type": image.MediaType,
-		"size_bytes": len(imgBytes),
-	}
-	if p.deliverGeneratedImage(session, toolCallID, Attachment{
-		Type: "image",
-		Path: containerPath,
-		Name: path.Base(containerPath),
-		Mime: image.MediaType,
-		Size: int64(len(imgBytes)),
-	}) {
-		result["delivered"] = "current_conversation"
-	}
+	p.deliverImageRefs(session, toolCallID, result.Artifacts)
 	return result, nil
 }
 
-// deliverGeneratedImage shows the generated image to the user in the current
-// conversation via the live agent stream, mirroring how speak delivers
-// same-conversation voice attachments. Non-interactive runs return false and
-// rely on the model sharing the returned path through the send tool.
-func (*ImageGenProvider) deliverGeneratedImage(session SessionContext, toolCallID string, att Attachment) bool {
-	if !session.CanUseLocalMessagingShortcut() {
-		return false
+func (*ImageGenProvider) deliverImageRefs(session SessionContext, toolCallID string, refs []imagejob.Artifact) {
+	if !session.CanUseLocalMessagingShortcut() || len(refs) == 0 {
+		return
 	}
-	session.Emitter(ToolStreamEvent{
-		Type:        StreamEventAttachment,
-		ToolCallID:  toolCallID,
-		Attachments: []Attachment{att},
-	})
-	return true
+	attachments := make([]Attachment, 0, len(refs))
+	for _, ref := range refs {
+		attachments = append(attachments, Attachment{Type: "image", ContentHash: ref.ContentHash, Mime: ref.Mime, Size: ref.SizeBytes, Name: "image"})
+	}
+	session.Emitter(ToolStreamEvent{Type: StreamEventAttachment, ToolCallID: toolCallID, Attachments: attachments})
 }
 
-// unsavedImageResult handles images that could not be persisted to the
-// workspace: deliver them to the user inline when the live stream allows it,
-// otherwise fall back to returning the image content to the model.
-func (p *ImageGenProvider) unsavedImageResult(session SessionContext, toolCallID string, image generatedImage, text string) map[string]any {
-	if p.deliverGeneratedImage(session, toolCallID, Attachment{
-		Type: "image",
-		URL:  fmt.Sprintf("data:%s;base64,%s", image.MediaType, base64.StdEncoding.EncodeToString(image.Data)),
-		Mime: image.MediaType,
-		Size: int64(len(image.Data)),
-	}) {
-		return map[string]any{
-			"delivered":  "current_conversation",
-			"media_type": image.MediaType,
-			"size_bytes": len(image.Data),
-			"note":       text,
+// CollectImageResults uses the parent's fresh DB authorization, not a copied
+// child binding or untrusted child text. The only IDs supplied here were tracked
+// by the image service in this particular child invocation.
+func (p *ImageGenProvider) CollectImageResults(ctx context.Context, parent SessionContext, ids []string) ([]imagejob.Artifact, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	results, err := p.ResolveImageResults(ctx, parent, ids)
+	if err != nil {
+		return nil, err
+	}
+	refs := imageResultRefs(results)
+	p.deliverImageRefs(parent, "", refs)
+	return refs, nil
+}
+
+// ResolveImageResults performs fresh parent authorization on every observation.
+// Background reads do not emit attachments: the caller can use the existing
+// send tool with the returned content_hash. No model or upload is resubmitted.
+func (p *ImageGenProvider) ResolveImageResults(ctx context.Context, parent SessionContext, ids []string) ([]imagejob.Result, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	if p.imageAuthority == nil || p.imageJobs == nil {
+		return nil, imagejob.ErrDenied
+	}
+	binding, _, err := p.imageAuthority.Bind(ctx, parent.BotID, parent.UserID, parent.SessionID)
+	if err != nil {
+		return nil, err
+	}
+	results := make([]imagejob.Result, 0, len(ids))
+	for _, id := range ids {
+		result, err := p.imageJobs.Result(ctx, binding, id)
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+	return results, nil
+}
+
+func imageResultRefs(results []imagejob.Result) []imagejob.Artifact {
+	var refs []imagejob.Artifact
+	seen := map[string]bool{}
+	for _, result := range results {
+		if result.State == "ready" {
+			for _, ref := range result.Artifacts {
+				if !seen[ref.ContentHash] {
+					refs = append(refs, ref)
+					seen[ref.ContentHash] = true
+				}
+			}
 		}
 	}
-	return map[string]any{
-		"content": []map[string]any{
-			{"type": "text", "text": text},
-			{"type": "image", "data": base64.StdEncoding.EncodeToString(image.Data), "mimeType": image.MediaType},
-		},
+	return refs
+}
+
+func (p *ImageGenProvider) imageAdapter(ctx context.Context, bot string, mode imagejob.Mode) (imagejob.Adapter, error) {
+	setting, err := p.settings.GetBot(ctx, bot)
+	if err != nil || setting.ImageModelID == "" {
+		return nil, imagejob.ErrUnsupported
 	}
+	model, err := p.models.GetByID(ctx, setting.ImageModelID)
+	if err != nil || !model.Enable || !model.HasCompatibility(models.CompatImageOutput) {
+		return nil, imagejob.ErrUnsupported
+	}
+	provider, err := models.FetchProviderByID(ctx, p.queries, model.ProviderID)
+	if err != nil || !provider.Enable {
+		return nil, imagejob.ErrUnsupported
+	}
+	canEdit := model.HasCompatibility(models.CompatImageEdit) && (provider.ClientType == string(models.ClientTypeOpenAICompletions) || provider.ClientType == string(models.ClientTypeOpenAIResponses))
+	if mode == imagejob.Edit && !canEdit {
+		return nil, imagejob.ErrUnsupported
+	}
+	credentials, err := providers.NewService(nil, p.queries, "").ResolveModelCredentials(ctx, provider)
+	if err != nil {
+		return nil, imagejob.ErrDenied
+	}
+	base := providers.ProviderConfigString(provider, "base_url")
+	identity := setting.ImageModelID + "/" + model.ProviderID + "/" + model.ModelID + "/" + base
+	if canEdit {
+		return imagejob.NewOpenAIAdapter(identity, model.ModelID, base, credentials.APIKey, models.NewProviderHTTPClient(models.DefaultProviderRequestTimeout), true, true)
+	}
+	return &configuredGenerationAdapter{identity: identity, invoke: func(ctx context.Context, prompt, size string) (generatedImage, error) {
+		return p.generateImage(ctx, provider, credentials.APIKey, model.ModelID, prompt, size)
+	}}, nil
+}
+
+type configuredGenerationAdapter struct {
+	identity string
+	invoke   func(context.Context, string, string) (generatedImage, error)
+}
+
+func (a *configuredGenerationAdapter) Identity() string { return a.identity }
+func (*configuredGenerationAdapter) Supports(mode imagejob.Mode) bool {
+	return mode == imagejob.Generate
+}
+
+func (a *configuredGenerationAdapter) Invoke(ctx context.Context, mode imagejob.Mode, prompt, size string, inputs []imagejob.Input) (imagejob.Image, error) {
+	if mode != imagejob.Generate || len(inputs) != 0 {
+		return imagejob.Image{}, imagejob.ErrUnsupported
+	}
+	im, err := a.invoke(ctx, prompt, size)
+	return imagejob.Image{Data: im.Data, Mime: im.MediaType}, err
 }
 
 // generateImage asks the image model for one image. A generated image may be
 // billed even when the call that produced it fails, so a call is made again
-// only after a rate-limit answer, which proves no image was made. The
+// never inside this adapter. The
 // DashScope task API is not retried at all: its create and poll requests fail
 // alike, and creating the task again after a failed poll would generate a
 // second image.
@@ -361,7 +364,7 @@ func generateDashScopeImage(ctx context.Context, httpClient *http.Client, baseUR
 	return imageResultToGeneratedImage(ctx, httpClient, result)
 }
 
-func generateOpenAIImagesImage(ctx context.Context, logger *slog.Logger, httpClient *http.Client, baseURL, apiKey, modelID, prompt, size string) (generatedImage, error) {
+func generateOpenAIImagesImage(ctx context.Context, _ *slog.Logger, httpClient *http.Client, baseURL, apiKey, modelID, prompt, size string) (generatedImage, error) {
 	opts := []openaiimages.Option{
 		openaiimages.WithAPIKey(apiKey),
 		openaiimages.WithHTTPClient(httpClient),
@@ -371,22 +374,14 @@ func generateOpenAIImagesImage(ctx context.Context, logger *slog.Logger, httpCli
 	}
 	provider := openaiimages.New(opts...)
 	imageModel := provider.GenerationModel(modelID)
-	result, err := modelretry.Do(ctx, logger, "tool.image_gen", modelretry.Config{}, modelretry.RateLimited,
-		func(ctx context.Context) (*sdk.ImageResult, error) {
-			return sdk.GenerateImage(ctx,
-				sdk.WithImageGenerationModel(imageModel),
-				sdk.WithImagePrompt(prompt),
-				sdk.WithImageSize(size),
-				sdk.WithImageN(1),
-			)
-		})
+	result, err := sdk.GenerateImage(ctx, sdk.WithImageGenerationModel(imageModel), sdk.WithImagePrompt(prompt), sdk.WithImageSize(size), sdk.WithImageN(1))
 	if err != nil {
 		return generatedImage{}, err
 	}
 	return imageResultToGeneratedImage(ctx, httpClient, result)
 }
 
-func generateChatImage(ctx context.Context, logger *slog.Logger, provider sqlc.Provider, apiKey, modelID, prompt, size string) (generatedImage, error) {
+func generateChatImage(ctx context.Context, _ *slog.Logger, provider sqlc.Provider, apiKey, modelID, prompt, size string) (generatedImage, error) {
 	if strings.TrimSpace(size) == "" {
 		size = "1024x1024"
 	}
@@ -410,8 +405,7 @@ func generateChatImage(ctx context.Context, logger *slog.Logger, provider sqlc.P
 		System:   system,
 		Messages: messages,
 	}
-	result, err := modelretry.Do(ctx, logger, "tool.image_gen", modelretry.Config{}, modelretry.RateLimited,
-		func(ctx context.Context) (sdk.ModelResult, error) { return sdkModel.Generate(ctx, request) })
+	result, err := sdkModel.Generate(ctx, request)
 	if err != nil {
 		return generatedImage{}, err
 	}

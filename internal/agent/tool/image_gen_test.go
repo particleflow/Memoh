@@ -14,6 +14,7 @@ import (
 
 	sdk "github.com/felinics/twilight/sdk"
 
+	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/models"
 )
 
@@ -393,85 +394,39 @@ func liveShortcutSession(emitter StreamEmitter) SessionContext {
 	}
 }
 
-func TestImageGenProviderUsageGatesRegisteredTools(t *testing.T) {
-	t.Parallel()
-
-	provider := &ImageGenProvider{}
-	background := SessionContext{}
-
-	if got := provider.Usage(context.Background(), background, AvailableTools{}); got != "" {
-		t.Fatalf("Usage without available tools = %q, want empty", got)
+func TestImageGenUsageExplainsRefsAndRecovery(t *testing.T) {
+	p := &ImageGenProvider{}
+	if p.Usage(context.Background(), SessionContext{}, AvailableTools{}) != "" {
+		t.Fatal("usage without tools")
 	}
-	if got := provider.Usage(context.Background(), background, availableToolsForTest(ToolGenerateImage())); got != "" {
-		t.Fatalf("Usage without send tool or live stream = %q, want empty", got)
-	}
-
-	got := provider.Usage(context.Background(), background, availableToolsForTest(ToolGenerateImage(), ToolSend()))
-	assertUsageItemsAreBulleted(t, got)
-	if !strings.Contains(got, "`generate_image`") || !strings.Contains(got, "`send`") || !strings.Contains(got, "attachments") {
-		t.Fatalf("Usage without live stream should tell the model to share images via send attachments, got:\n%s", got)
-	}
-
-	live := liveShortcutSession(func(ToolStreamEvent) {})
-	got = provider.Usage(context.Background(), live, availableToolsForTest(ToolGenerateImage(), ToolSend()))
-	assertUsageItemsAreBulleted(t, got)
-	if !strings.Contains(got, "already shows") {
-		t.Fatalf("Usage with live stream should say the image is shown automatically, got:\n%s", got)
-	}
-	if !strings.Contains(got, "`send`") {
-		t.Fatalf("Usage with live stream should still cover cross-conversation sharing via send, got:\n%s", got)
+	usage := p.Usage(context.Background(), SessionContext{}, availableToolsForTest(ToolGenerateImage()))
+	for _, want := range []string{"content_hash", "artifact_refs", "Unknown", "result"} {
+		if !strings.Contains(usage, want) {
+			t.Fatalf("usage lacks %s", want)
+		}
 	}
 }
 
-func TestDeliverGeneratedImageEmitsOnlyOnLiveShortcutSessions(t *testing.T) {
-	t.Parallel()
-
-	provider := &ImageGenProvider{}
-	att := Attachment{Type: "image", Path: "/data/generated-images/1.png", Mime: "image/png"}
-
+func TestDeliverImageRefsOnlyOnLiveShortcut(t *testing.T) {
+	p := &ImageGenProvider{}
+	ref := imagejob.Artifact{ContentHash: strings.Repeat("a", 64), Mime: "image/png", SizeBytes: 64}
 	var events []ToolStreamEvent
-	live := liveShortcutSession(func(evt ToolStreamEvent) { events = append(events, evt) })
-	if !provider.deliverGeneratedImage(live, "call-1", att) {
-		t.Fatal("deliverGeneratedImage on a live chat session should deliver")
+	live := liveShortcutSession(func(e ToolStreamEvent) { events = append(events, e) })
+	p.deliverImageRefs(live, "call-1", []imagejob.Artifact{ref})
+	if len(events) != 1 || len(events[0].Attachments) != 1 || events[0].Attachments[0].ContentHash != ref.ContentHash || events[0].Attachments[0].Path != "" || events[0].Attachments[0].URL != "" {
+		t.Fatalf("invalid attachment event: %+v", events)
 	}
-	if len(events) != 1 || events[0].Type != StreamEventAttachment {
-		t.Fatalf("events = %+v, want one attachment event", events)
-	}
-	if events[0].ToolCallID != "call-1" {
-		t.Fatalf("tool call id = %q, want call-1", events[0].ToolCallID)
-	}
-	if len(events[0].Attachments) != 1 || events[0].Attachments[0].Path != att.Path {
-		t.Fatalf("attachments = %+v, want the generated image path", events[0].Attachments)
-	}
-
-	background := liveShortcutSession(func(ToolStreamEvent) { t.Fatal("background session must not emit") })
-	background.SessionType = "schedule"
-	if provider.deliverGeneratedImage(background, "call-1", att) {
-		t.Fatal("deliverGeneratedImage on a background session should not deliver")
+	live.SessionType = "subagent"
+	p.deliverImageRefs(live, "call-2", []imagejob.Artifact{ref})
+	if len(events) != 1 {
+		t.Fatal("child directly delivered")
 	}
 }
 
-func TestUnsavedImageResultDeliversInlineOrReturnsContent(t *testing.T) {
-	t.Parallel()
-
-	provider := &ImageGenProvider{}
-	img := generatedImage{Data: testPNGBytes, MediaType: "image/png"}
-
-	var events []ToolStreamEvent
-	live := liveShortcutSession(func(evt ToolStreamEvent) { events = append(events, evt) })
-	result := provider.unsavedImageResult(live, "call-2", img, "not saved")
-	if result["delivered"] != "current_conversation" {
-		t.Fatalf("result = %+v, want delivered current_conversation", result)
-	}
-	if len(events) != 1 || len(events[0].Attachments) != 1 {
-		t.Fatalf("events = %+v, want one attachment event", events)
-	}
-	if !strings.HasPrefix(events[0].Attachments[0].URL, "data:image/png;base64,") {
-		t.Fatalf("attachment URL = %q, want data URL", events[0].Attachments[0].URL)
-	}
-
-	result = provider.unsavedImageResult(SessionContext{}, "call-2", img, "not saved")
-	if _, ok := result["content"]; !ok {
-		t.Fatalf("result = %+v, want inline content fallback for non-live sessions", result)
+func TestImageToolMissingServiceHasNoLegacyFallback(t *testing.T) {
+	p := &ImageGenProvider{}
+	_, err := p.execGenerateImage(context.Background(), SessionContext{}, "call", generateImageArgs{Prompt: "synthetic"})
+	if !errors.Is(err, imagejob.ErrDenied) {
+		t.Fatalf("err=%v", err)
 	}
 }

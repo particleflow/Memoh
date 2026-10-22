@@ -25,6 +25,7 @@ import (
 	sessionpkg "github.com/felinics/memoh/internal/chat/thread"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/hooks"
+	"github.com/felinics/memoh/internal/imagejob"
 	"github.com/felinics/memoh/internal/models"
 	"github.com/felinics/memoh/internal/oauthctx"
 	"github.com/felinics/memoh/internal/providers"
@@ -275,6 +276,7 @@ type subagentModelResolver func(
 
 // SpawnProvider exposes managed subagent control tools.
 type SpawnProvider struct {
+	imageResults   func(context.Context, SessionContext, []string) ([]imagejob.Artifact, error)
 	agent          SpawnAgent
 	settings       *settings.Service
 	models         *models.Service
@@ -312,6 +314,10 @@ func NewSpawnProvider(
 	}
 	p.modelResolver = p.resolveModel
 	return p
+}
+
+func (p *SpawnProvider) SetImageResults(fn func(context.Context, SessionContext, []string) ([]imagejob.Artifact, error)) {
+	p.imageResults = fn
 }
 
 func (p *SpawnProvider) SetAgent(a SpawnAgent) {
@@ -425,6 +431,8 @@ type agentRecord struct {
 }
 
 type agentRunResult struct {
+	ImageTaskIDs     []string                       `json:"image_task_ids,omitempty"`
+	Artifacts        []imagejob.Artifact            `json:"artifact_refs,omitempty"`
 	AgentID          string                         `json:"agent_id"`
 	SessionID        string                         `json:"session_id,omitempty"`
 	TaskID           string                         `json:"task_id,omitempty"`
@@ -851,6 +859,7 @@ func (p *SpawnProvider) completeAgentRequest(ctx context.Context, key string, re
 		Fork:           req.config.Forked,
 		Status:         status,
 		Report:         result.Text,
+		ImageTaskIDs:   result.ImageTaskIDs,
 		Error:          result.Error,
 	})
 	p.finishAgentRequest(ctx, key, result)
@@ -911,8 +920,8 @@ func (p *SpawnProvider) finishAgentRequest(ctx context.Context, key string, resu
 	go p.runAgentRequest(runCtx, key, next)
 }
 
-func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) agentRunResult {
-	res := agentRunResult{
+func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) (res agentRunResult) {
+	res = agentRunResult{
 		AgentID:   req.agentID,
 		SessionID: req.agentSessionID,
 		TaskID:    req.taskID,
@@ -1025,6 +1034,8 @@ func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) 
 		return p.persistMessages(context.WithoutCancel(persistCtx), req, result, !req.messagePersisted)
 	}
 
+	ctx, imageResults := imagejob.WithResults(ctx)
+	defer func() { res.ImageTaskIDs = imageResults.IDs() }()
 	var lastErr error
 	for attempt := 0; attempt <= subagentMaxRetries; attempt++ {
 		if attempt > 0 {
@@ -1122,6 +1133,14 @@ func (p *SpawnProvider) runSubagentTask(ctx context.Context, req *agentRequest) 
 				return res
 			}
 			res.Text = genResult.Text
+			if p.imageResults != nil {
+				refs, deliveryErr := p.imageResults(ctx, req.parentSession, imageResults.IDs())
+				if deliveryErr != nil {
+					res.fail(errors.New("image result delivery unavailable; completed image tasks must not be resubmitted"))
+					return res
+				}
+				res.Artifacts = refs
+			}
 			return res
 		}
 		lastErr = err
@@ -1518,6 +1537,12 @@ func agentResultMap(res agentRunResult) map[string]any {
 	}
 	if res.Provider != "" {
 		out["provider"] = res.Provider
+	}
+	if len(res.Artifacts) > 0 {
+		out["artifact_refs"] = res.Artifacts
+	}
+	if len(res.ImageTaskIDs) > 0 {
+		out["image_task_ids"] = res.ImageTaskIDs
 	}
 	out["fork"] = res.Fork
 	if res.Message != "" {

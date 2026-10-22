@@ -54,6 +54,7 @@ type SpawnBranch struct {
 
 // AgentTaskResult is the terminal output for one managed subagent run.
 type AgentTaskResult struct {
+	ImageTaskIDs   []string `json:"-"`
 	AgentID        string
 	AgentSessionID string
 	Message        string
@@ -96,6 +97,9 @@ func (m *Manager) StartAgentTask(parentCtx context.Context, botID, sessionID, ag
 		cancel:         cancel,
 		changed:        make(chan struct{}),
 	}
+	if queued {
+		task.queuedContext = parentCtx
+	}
 	m.tasks[taskID] = task
 	m.mu.Unlock()
 
@@ -116,31 +120,36 @@ func (m *Manager) StartAgentTask(parentCtx context.Context, botID, sessionID, ag
 // MarkAgentTaskRunning transitions a queued managed agent task into running
 // and returns the cancelable run context. If the task was killed while queued,
 // ok is false and no run should start.
-func (m *Manager) MarkAgentTaskRunning(parentCtx context.Context, taskID string) (context.Context, bool, error) {
-	ctx, cancel := detachedTaskContext(parentCtx)
+func (m *Manager) MarkAgentTaskRunning(_ context.Context, taskID string) (context.Context, bool, error) {
 	m.mu.Lock()
 	task := m.tasks[taskID]
 	m.mu.Unlock()
 	if task == nil || task.Kind != KindAgent {
-		cancel()
 		return nil, false, fmt.Errorf("agent task %s not found", taskID)
 	}
 	task.mu.Lock()
 	if task.Status == TaskKilled {
+		task.queuedContext = nil
 		task.mu.Unlock()
-		cancel()
 		return nil, false, nil
 	}
 	if task.Status != TaskQueued {
 		task.mu.Unlock()
-		cancel()
-		return nil, false, fmt.Errorf("agent task %s is not queued (status: %s)", taskID, task.Status)
+		return nil, false, fmt.Errorf("agent task %s is not queued", taskID)
 	}
+	if task.queuedContext == nil {
+		task.mu.Unlock()
+		return nil, false, fmt.Errorf("agent task %s has no submitting context", taskID)
+	}
+	// Retain the submitting request's trusted identity and explicit deadline,
+	// but detach its transient cancellation exactly as for a nonqueued task.
+	// The completing task's context can belong to an entirely different turn.
+	ctx, cancel := detachedTaskContext(task.queuedContext)
+	task.queuedContext = nil
 	task.Status = TaskRunning
 	task.cancel = cancel
 	task.signalChangedLocked()
 	task.mu.Unlock()
-
 	m.emitTaskEvent(task, TaskEventStarted, "", "")
 	return ctx, true, nil
 }
@@ -172,6 +181,7 @@ func (m *Manager) CompleteAgentTask(taskID string, result AgentTaskResult) {
 	}
 	task.CompletedAt = time.Now()
 	task.Status = status
+	task.ImageTaskIDs = append([]string(nil), result.ImageTaskIDs...)
 	task.AgentReport = result.Report
 	task.AgentError = result.Error
 	task.AgentModelID = result.ModelID

@@ -281,6 +281,7 @@ type Queries interface {
 	GetScheduleByID(ctx context.Context, id pgtype.UUID) (dbsqlc.Schedule, error)
 	GetSearchProviderByID(ctx context.Context, id pgtype.UUID) (dbsqlc.SearchProvider, error)
 	GetSearchProviderByName(ctx context.Context, name string) (dbsqlc.SearchProvider, error)
+	SessionHasMediaAsset(context.Context, dbsqlc.SessionHasMediaAssetParams) (bool, error)
 	GetSessionByID(ctx context.Context, id pgtype.UUID) (dbsqlc.BotSession, error)
 	GetTurnAgentTurnID(ctx context.Context, arg dbsqlc.GetTurnAgentTurnIDParams) (string, error)
 	SetRoundAgentTurnID(ctx context.Context, arg dbsqlc.SetRoundAgentTurnIDParams) (int64, error)
