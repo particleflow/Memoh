@@ -19,7 +19,7 @@ on:
       - "internal/agent/view/*postgres_integration_test.go"
       - "internal/workspacedeps/*integration_test.go"
   pull_request:
-    branches: [main]
+    branches: [main, feat/delivery-integration-base]
     paths:
       - ".github/workflows/migrations.yml"
       - "sqlc.yaml"
