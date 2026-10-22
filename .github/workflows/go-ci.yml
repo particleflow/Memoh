@@ -306,3 +306,8 @@ jobs:
               raise SystemExit("Required PostgreSQL tests did not PASS: " + ", ".join(sorted(missing)))
           print("Verified PostgreSQL PASS: " + ", ".join(sorted(required)))
           PY
+      # Additive gate: retain the other contract steps when merging stacked workflows.
+      - name: Require computer operation CAS and RLS (no skips)
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: bash scripts/test-computer-operations-postgres.sh
