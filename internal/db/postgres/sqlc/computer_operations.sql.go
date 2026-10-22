@@ -222,6 +222,56 @@ func (q *Queries) ListComputerConnectionEndpoints(ctx context.Context, connectio
 	return items, nil
 }
 
+const previousComputerPiOperation = `-- name: PreviousComputerPiOperation :one
+SELECT id, team_id, bot_id, session_id, user_id, target_id, run_id, fingerprint, target_fingerprint, state, details, cancel_requested, revision, created_at, updated_at FROM computer_operations
+WHERE team_id=public.memoh_current_team_id() AND bot_id=$1
+AND session_id=$2 AND user_id=$3
+AND target_id=$4 AND id<>$5
+AND details->'batch'->'progress'->>'pi_session_id'=$6::text
+ORDER BY created_at DESC, id DESC LIMIT 1
+`
+
+type PreviousComputerPiOperationParams struct {
+	BotID       pgtype.UUID `json:"bot_id"`
+	SessionID   pgtype.UUID `json:"session_id"`
+	UserID      pgtype.UUID `json:"user_id"`
+	TargetID    pgtype.UUID `json:"target_id"`
+	ID          pgtype.UUID `json:"id"`
+	PiSessionID string      `json:"pi_session_id"`
+}
+
+// Called only after owning the unsettled slot. A missing receipt in the latest
+// operation is evidence of uncertainty, never permission to search past it.
+func (q *Queries) PreviousComputerPiOperation(ctx context.Context, arg PreviousComputerPiOperationParams) (ComputerOperation, error) {
+	row := q.db.QueryRow(ctx, previousComputerPiOperation,
+		arg.BotID,
+		arg.SessionID,
+		arg.UserID,
+		arg.TargetID,
+		arg.ID,
+		arg.PiSessionID,
+	)
+	var i ComputerOperation
+	err := row.Scan(
+		&i.ID,
+		&i.TeamID,
+		&i.BotID,
+		&i.SessionID,
+		&i.UserID,
+		&i.TargetID,
+		&i.RunID,
+		&i.Fingerprint,
+		&i.TargetFingerprint,
+		&i.State,
+		&i.Details,
+		&i.CancelRequested,
+		&i.Revision,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateAgenvoRuntimeConfig = `-- name: UpdateAgenvoRuntimeConfig :one
 UPDATE user_runtimes SET provider_config=$1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$2 AND user_id=$3
