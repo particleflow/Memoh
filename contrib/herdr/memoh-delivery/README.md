@@ -105,12 +105,13 @@ commit and can report that delivery already won. `reconcile` is an explicit
 recovery action, not a retry-budget reset. The original create-unknown protocol
 fence remains; never guess a new receipt after uncertain creation.
 
-## Single-file task producer
+## Bounded task producer
 
-The optional task declaration `artifact: {source_ref, mime}` is available for
+The optional task declaration `artifact: {source_ref, mime}`, or `artifacts` with
+1–16 distinct entries (never both), is available for
 `herdr_pi_task` / `pi-json-v1` at `work_dir: "."`. The registered task root must
 match the existing private `source_root`; a mismatch fails explicitly. Write and
-close the declared file before Pi exits. The envelope supplies non-secret
+close the declared files before Pi exits. The envelope supplies non-secret
 `MEMOH_DELIVERY_CONTEXT_FILE`, closes a metadata manifest, and invokes the fixed
 `collect-result` action. This does not change Agent code or its prompt.
 
@@ -122,14 +123,17 @@ result queries can wake finite advancement through the dedicated control pane.
 No host timer or daemon is added. NAS `delivery.reference` is available to the
 parent task only after committed association, separately from Pi completion.
 
-This first increment has one file per declaration and the existing eight-job /
+The bounded list retains one stable delivery/closed manifest per file, within
+the existing eight-job /
 256 MiB total snapshot limit. Finite host actions automatically release only
 confirmed committed queue payloads and retain the original delivery/receipt.
 Unknown, canceled and blocked jobs are not automatically cleared. The compact
 receipt catalog stops new admissions at 1024 records; proofs are never silently
 evicted. See `docs/delivery-queue-retention.md` for recovery and upgrade bounds.
-Multi-file production and recovery from a crash before a closed manifest exists
-are not complete. A pending delivery is not a
+Each finite hook still handles at most one manifest; later task queries/host
+actions continue remaining work. Multi-file aggregate `partial` preserves each
+committed reference; it does not mean all files delivered. Recovery from a crash
+before a closed manifest exists is still pending/unknown and never reruns Pi. A pending delivery is not a
 successful file transfer, and task cancellation does not retract delivery.
 
 CLI stdout contains bounded phase/offset/association/reference data only. It is

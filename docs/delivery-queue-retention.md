@@ -67,7 +67,6 @@ Server/PostgreSQL producer tests and native PostgreSQL download-publication test
 remain separate integration combinations. No production credential, installed
 Herdr route, real PC-to-NAS transfer or UI/human acceptance is implied.
 
-The producer remains single-file in this increment. A crash before its closed
-manifest exists remains observably pending/unknown and never reruns Pi to guess
-an output. A later increment will add bounded multiple declarations and aggregate
-state while keeping these original per-file receipt and cleanup rules.
+The producer supports bounded multiple declarations while preserving these
+per-file receipts and cleanup rules. A crash before a closed manifest exists
+remains observably pending/unknown and never reruns Pi to guess an output.

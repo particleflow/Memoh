@@ -46,6 +46,12 @@ func (producerPermissions) HasBotPermission(context.Context, string, string, str
 }
 
 func TestProducerOriginalOperationAndFiniteWake(t *testing.T) {
+	t.Run("single", func(t *testing.T) { exerciseProducerWake(t, false) })
+	t.Run("multiple", func(t *testing.T) { exerciseProducerWake(t, true) })
+}
+
+func exerciseProducerWake(t *testing.T, multiple bool) {
+	t.Helper()
 	source, store, transport, _ := setupBatch(t)
 	binding := toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "producer-run"}
 	mount := store.mounts["pc-a"]
@@ -58,6 +64,10 @@ func TestProducerOriginalOperationAndFiniteWake(t *testing.T) {
 		t.Fatal(err)
 	}
 	input := Submit{Kind: "herdr_pi_task", Task: "write declared result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}}
+	if multiple {
+		input.Artifacts = []deliverymeta.Artifact{*input.Artifact, {SourceRef: "second", Mime: "text/plain"}}
+		input.Artifact = nil
+	}
 	first, err := source.service.submit(ctx, binding, input)
 	if err != nil {
 		t.Fatal(err)
@@ -100,5 +110,40 @@ func TestProducerOriginalOperationAndFiniteWake(t *testing.T) {
 	store.revoked = true
 	if _, err = source.service.observe(ctx, binding, first.ID, true); err == nil || transport.producerWakes != wakes+1 {
 		t.Fatal("revoked target was used")
+	}
+}
+
+func TestProducerMultipleLedgerPartialAndCancellation(t *testing.T) {
+	r := dbstore.ComputerOperationRecord{ID: uuid.NewString(), BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "fixture"}
+	p := &deliverymeta.Plan{Version: 2, Task: deliverymeta.Task{OperationID: r.ID, BotID: r.BotID, UserID: r.UserID, SessionID: r.SessionID, TargetID: r.TargetID, RunID: r.RunID, Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32), RootHash: deliverymeta.RootHash(`C:\Fixture`)}, Artifacts: []deliverymeta.Artifact{{SourceRef: "first", Mime: "text/plain"}, {SourceRef: "second", Mime: "text/plain"}, {SourceRef: "third", Mime: "text/plain"}}}
+	d := Details{Batch: &BatchDetails{Progress: agenvo.BatchProgress{Attempt: p.Task.Attempt, Generation: p.Task.Generation, Producer: p}}}
+	entries := map[string]deliveryEntry{}
+	read := func() *ProducerResult {
+		r.Details, _ = json.Marshal(map[string]any{"delivery_ledger": deliveryLedger{Version: 3, Entries: entries}})
+		return producerResult(r, d)
+	}
+	out := read()
+	if out.State != "pending" || out.Total != 3 || out.Pending != 3 || out.Files[0].Stage != "closure_or_admission_unknown" {
+		t.Fatal("pre-closure falsely completed", out)
+	}
+	files := p.FilePlans()
+	entry := deliveryEntry{Reference: DeliveryRequest{Version: 1, Direction: "upload", ContentHash: strings.Repeat("c", 64), SizeBytes: 7, Mime: "text/plain"}, Scope: strings.Repeat("d", 64), At: time.Now(), Outcome: "committed"}
+	entries[files[0].DeliveryID()] = entry
+	out = read()
+	if out.State != "partial" || out.Delivered != 1 || out.Pending != 2 || !out.hasPending() || out.Reference != nil || out.Files[0].Reference == nil || out.Files[1].Reference != nil {
+		t.Fatal("partial delivery lost", out)
+	}
+	r.CancelRequested = true
+	out = read()
+	if out.State != "partial" || out.Delivered != 1 || out.Pending != 0 || out.hasPending() || out.Files[0].State != "delivered" || out.Files[1].State != "canceled" {
+		t.Fatal("cancel retracted commit", out)
+	}
+	// Commit can have won each CAS before the observed cancellation.
+	for _, file := range files {
+		entries[file.DeliveryID()] = entry
+	}
+	out = read()
+	if out.State != "delivered" || out.Delivered != 3 || out.Pending != 0 {
+		t.Fatal("committed winners lost", out)
 	}
 }
