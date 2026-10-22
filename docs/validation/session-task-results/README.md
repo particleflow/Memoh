@@ -1,7 +1,7 @@
 # Persisted task result observation
 
 Dependency: compact-result #12, integrated through
-`bcd5ac439b9d7bd320c6dd53edd5e6f9979482a1`, on main
+`31e44e637855867a085ac3dccc8df5f18e4503d5`, on main
 `75a70fe961808ed5ec2284767cb92ea85f30890f` (#11). The initial review/mobile
 checkpoint `20d91381cc107eb917debf4ce6b89c14c5370401` remains in history.
 Merge `44d3a241b50f594079958b06370a50cfc22fe4ec` adds the dependency's
@@ -9,6 +9,9 @@ connection-preflight classification without changing the frozen task API.
 The next saved checkpoint `7c6fa8a0b5e18f127414d05b0ecbbc9f5c0fd374` adds
 immediate auth-event cleanup and passed Go CI, ESLint and Docker PR. A further
 normal merge integrates #12's `46b4a8a6`/`bcd5ac43` preflight/OAuth diagnostics.
+That `a0c1c938` source/candidate checkpoint remains preserved. Merge
+`98dd7a210f06339c3448749b4666c0210580b258` integrates the fixed `31e44e63`
+dependency, followed by the narrow OAuth SDK path-declaration correction below.
 This is a stacked, read-only HTTP/Web change. No deployment or promotion was
 performed.
 
@@ -20,8 +23,8 @@ assistant text. They do not collect results from a PC. Old records remain
 unknown; no complete log, artifact URL, cancel/retry action or new migration.
 The original operation store write paths, JSONL helper and official Agent core
 are unchanged. One shared pure validator was extracted from #12's Go adapter.
-The CommonJS helper has a file-specific ESLint import exception; its contents
-are unchanged.
+The CommonJS helper uses #12's file-specific whitelist for four Node builtins;
+its contents are unchanged.
 
 The source tree had no Web consumer of this task API. The Web increment composes
 existing Dialog/Item primitives next to the conversation controls:
@@ -121,7 +124,7 @@ Mobile implementation is outside this PR.
 - Agent runtime/contextview still matches official `bf0318c5...` with zero diff.
   No operation write-path, parser, migration, credential or execution changes.
 
-## Latest #12 integration (2026-10-22 UTC, `bcd5ac43`)
+## Earlier #12 integration (2026-10-22 UTC, `bcd5ac43`)
 
 - Added the exact fixed dependency through another conflict-free merge on the
   same branch; the `20d91381` and `7c6fa8a0` checkpoints remain ancestors. This
@@ -149,6 +152,47 @@ Mobile implementation is outside this PR.
   behavior is covered by isolated automated fixtures in #12; there was no
   production credential repair, new task submission or deployment here.
 - Official Agent runtime/contextview boundary remains zero diff.
+
+## Current #12 integration (2026-10-22 UTC, `31e44e63`)
+
+- Preserved `a0c1c938` and merged the exact fixed dependency on the same branch.
+  This includes the unknown-operation/preflight regression and current OAuth
+  transaction verification. There were two textual conflicts: the CommonJS
+  lint exception now uses #12's stricter builtin whitelist, and the SDK index
+  was regenerated from combined OpenAPI rather than choosing either side.
+- Contract comparison against `20d91381`: both task GET paths and all three
+  task definitions are identical, as are the 13 generated task SDK declarations.
+  All three task locale blocks and the task component/composable, including
+  identity cleanup and late-response guards, are unchanged. OAuth definitions
+  coexist with task-result definitions in the generated SDK.
+- Full Web typecheck first exposed four new OAuth caller errors because three
+  existing routes omitted their required `bot_id` path annotation. Added only
+  those three annotations (discover, authorize, status), regenerated Swagger
+  and SDK, and reran SDK/Web typechecks. SDK passes; Web returns to exactly the
+  prior **442 diagnostics**, compared after removing shifted line numbers.
+  This corrects documentation/types, not authentication behavior, and does not
+  make the full Web typecheck green.
+- Go race passed for core, computertask, sessiontask, handlers, agenvo, mcp,
+  apperror and server. Affected Go lint passed. The combined frontend suite has
+  **173 passing tests**, covering task identity/late-response behavior, OAuth
+  transaction flow, API auth and API/SSE errors. ESLint has zero errors and 18
+  existing warnings; UI guard passes with 3 existing warnings. SDK typecheck
+  and production Web build pass.
+- Rebuilt/restarted the actual native Server with current Vite source at
+  `http://127.0.0.1:18082`; direct/proxy authenticated readiness passed. All 33
+  actual task HTTP checks passed, including scope, revocation, pagination,
+  outcomes, no-store and unchanged ledger digests. Chromium repeated task
+  list/detail/back/unknown, Chinese dark 480px, grant revocation, literal markup
+  and delayed-auth-response checks. No page errors, active summary elements,
+  probe URL requests or task GET writes. Fresh literal/auth screenshots were
+  captured and inspected; synthetic mutations were restored.
+- OAuth-specific automated tests ran, but this integration does not claim
+  production OAuth verification. Task-route no-store results are not evidence
+  for the separate OAuth namespace. No credentials, grants, database schema,
+  operation write paths or Agent core were changed by the integration fix.
+- This checkpoint is for integration review and ordinary PR CI only. No new
+  candidate workflow was dispatched; the earlier `a0c1c938` candidate remains
+  separate. No merge into main, promotion or deployment was performed.
 
 All fixtures and screenshots are synthetic. No real model, Pi or Windows task
 was launched. The occasional workspace-unreachable toast belongs to the
