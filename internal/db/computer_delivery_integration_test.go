@@ -225,6 +225,7 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	}
 	t.Run("https-queue-handoff", func(t *testing.T) { exerciseDeliveryHandoff(ctx, t, store, assets, id, ref) })
 	t.Run("task-principal-http", func(t *testing.T) { exerciseTaskTransferPrincipal(ctx, t, store, assets, id, ref) })
+	t.Run("ready-proof-cli", func(t *testing.T) { exerciseReadyProofCLI(ctx, t, store, id, ref) })
 	t.Run("producer-multiple-files", func(t *testing.T) { exerciseProducerHandoff(ctx, t, store, assets, id, ref) })
 	_, err = runtimePool.Exec(ctx, "UPDATE computer_operations SET details=jsonb_set(details,'{delivery_ledger,version}','2') WHERE id=$1", id.OperationID)
 	if !errors.As(err, &guardError) || guardError.Code != "23514" {

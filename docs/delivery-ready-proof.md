@@ -20,6 +20,9 @@ return the persisted ready result even after the staging receipt expires. The
 receipt's original `expires_at` is retained; it is the staging expiry, not a new
 lease or proof lifetime. The client already accepts ready results with that
 timestamp. No extra upload, delivery, attempt or Pi invocation is created.
+Automatic queue recovery here assumes its original upload ID was checkpointed
+before completion. The separate unknown-Create case is unchanged and never
+automatically reissued.
 
 Ready proves prior publication, not successful association, continued existence
 of the original, or retention pinning. The existing async Commit still verifies
@@ -43,3 +46,23 @@ increment using this proof and the committed ledger. Proof entries are bounded
 by the existing 128 deliveries/operation and 2 MiB operation limit. Physical power
 loss, real PC/NAS trust configuration and production installation are not covered
 by the isolated tests.
+
+## Verification boundaries
+
+`TestTransferReadyUnknownCASAndRestart` models a committed operation transaction
+with a lost acknowledgment, including real context cancellation/deadline error
+types. `TestTaskTransferReadyProofAfterStagingGC` uses real task HTTP handlers,
+Media and Sweep, with a synthetic expired receipt clock; its DB is a fixture.
+
+The `ready-proof-cli` subtest of
+`TestComputerDeliveryPostgresAuthorizationCASAndPreservation` uses the full
+formal migration chain, a NOBYPASSRLS PostgreSQL role, real device registry,
+Server/Media handlers, TLS and the production CLI built from the tested source.
+It drops a successful Complete response, or kills only the isolated CLI process
+after server proof commit and before client checkpoint. It then expires the
+synthetic staging receipt via real Sweep, recreates the server/Media objects,
+and invokes fresh CLI processes. Both cases associate the original delivery with
+one Create and one Complete. The no-proof cross-store interruption keeps unknown
+feedback, journal/snapshot and source payload, without new uploads or commits.
+This is a POSIX NAS/CLI fixture; native Windows tests remain separate, and a
+process kill is not evidence of physical power-loss behavior.
