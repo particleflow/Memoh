@@ -14,7 +14,8 @@ as a substitute for that receipt.
 - The authenticated status endpoint accepts that ID and returns `pending`,
   `succeeded`, `failed` or `unknown`. The ID is an observation selector, not a
   credential. Both start and status verify the Bot/connection association in
-  addition to Bot access. Status responses use `Cache-Control: no-store`.
+  addition to Bot access. OAuth transaction and callback responses use
+  `Cache-Control: no-store`, including authentication and routing errors.
 - `succeeded` means this code exchange saved its tokens and enabled OAuth for
   the connection. It does not mean the remote MCP connection is usable. The
   callback page says authorization was saved; Web then checks the connection.
@@ -69,3 +70,30 @@ Pi task completing.
 The screenshots show the running application. They do not replace the backend
 regressions or constitute human QA. The synthetic Bot's unrelated workspace
 creation status is not part of this authorization check.
+
+## Cache policy before authentication
+
+Setting the header inside the status handler missed requests rejected by global
+JWT middleware. The policy now runs in Echo Pre, using the existing task API
+pattern. It covers `/bots/:bot_id/mcp/:id/oauth` and its descendants, plus
+`/oauth/mcp/callback` and `/api/oauth/mcp/callback` and their descendants.
+Adjacent names such as `oauth-extra` and `callback-extra` are excluded. This
+does not change authentication, scopes, registered clients or response bodies.
+
+`TestMCPOAuthNoStoreThroughServerMiddleware` starts an actual HTTP listener with
+`server.NewServerWithSessionValidator`. It reproduces the old anonymous 401
+without a cache policy and verifies the fix for absent, malformed, bad-signature,
+expired and revoked sessions; authorized 200 and unknown receipts; invalid
+receipt IDs; cross-Bot/connection 404; method 405; and both public callbacks.
+Rejected requests never read OAuth token storage. Stored synthetic credentials
+and private account diagnostics are absent from responses.
+
+The rebuilt development server and actual Web settings page at
+`http://127.0.0.1:18082` returned `no-store` for the UI's status read and separate
+authenticated unknown/invalid receipt and anonymous requests (200/400/401),
+plus a namespace 404. No authorization transaction or business task was started.
+The screenshot shows the settings page; the browser response-header assertions
+and server regressions establish cache behavior. This does not resolve or
+diagnose a remote authorization server's HTTP 400.
+
+![Current settings page used for response-header verification](validation/oauth-nostore-settings.png)

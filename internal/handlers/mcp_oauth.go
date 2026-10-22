@@ -37,6 +37,21 @@ func NewMCPOAuthHandler(oauthService *mcp.OAuthService, connService *mcp.Connect
 }
 
 func (h *MCPOAuthHandler) Register(e *echo.Echo) {
+	// JWT/session rejection and routing errors happen before the handlers.
+	// Keep OAuth transaction responses out of caches on those paths as well.
+	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			path := echo.GetPath(c.Request())
+			parts := strings.SplitN(path, "/", 7)
+			transaction := len(parts) >= 6 && parts[0] == "" && parts[1] == "bots" && parts[2] != "" && parts[3] == "mcp" && parts[4] != "" && parts[5] == "oauth"
+			callback := path == "/oauth/mcp/callback" || strings.HasPrefix(path, "/oauth/mcp/callback/") ||
+				path == "/api/oauth/mcp/callback" || strings.HasPrefix(path, "/api/oauth/mcp/callback/")
+			if transaction || callback {
+				c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
+			}
+			return next(c)
+		}
+	})
 	group := e.Group("/bots/:bot_id/mcp/:id/oauth")
 	group.POST("/discover", h.Discover)
 	group.POST("/authorize", h.Authorize)
@@ -256,7 +271,6 @@ func (h *MCPOAuthHandler) Callback(c echo.Context) error {
 // @Failure 404 {object} server.Problem
 // @Router /bots/{bot_id}/mcp/{id}/oauth/status [get].
 func (h *MCPOAuthHandler) Status(c echo.Context) error {
-	c.Response().Header().Set("Cache-Control", "no-store")
 	userID, err := h.requireChannelIdentityID(c)
 	if err != nil {
 		return err
