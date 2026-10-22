@@ -67,7 +67,7 @@ async function verify(root) {
     throw new Error(`${message}: ${JSON.stringify(lifecycle.snapshot())}`)
   }
   // Observations do not drive recovery. Only the product's own run loop calls tick.
-  async function observeUntil(predicate, message) { await until(predicate, message) }
+  async function observeUntil(predicate, message) { await until(() => !lifecycle.active && predicate(), message) }
   async function killOwned(component) {
     const child = driver.children.get(component)
     child.process.kill(); await child.done
