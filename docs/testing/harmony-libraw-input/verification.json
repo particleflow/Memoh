@@ -1,0 +1,39 @@
+{
+  "sourceCommit": "59126ace1e408baff5fb790aa41732c6414f2617",
+  "version": "0.22.2",
+  "officialSource": "https://www.libraw.org/data/LibRaw-0.22.2.tar.gz",
+  "lockSHA256": "0148c26115f0b88b111ca86ba0339a020d51a702d198072c2bca61a0adcec129",
+  "archiveBytes": 1682962,
+  "archiveSHA256": "de86b035655accff8d4010f1a221fdf50d353cb7b1422ba26f14a0db92612cfa",
+  "verifiedFiles": 244,
+  "unpackedBytes": 7763312,
+  "licenses": {
+    "LICENSE.CDDL": "0e3098d2d54a12434715f6679ea408d57da5e8d613c385c58ecc6fe5d30cc81f",
+    "LICENSE.LGPL": "eea173a556abac0370461e57e12aab266894ea6be3874c2be05fd87871f75449"
+  },
+  "sourceInputEntries": 94,
+  "dependencyCheckPassed": true,
+  "nativeInputEnumerationPassed": true,
+  "nativeResourcePreflight": {
+    "status": "blocked",
+    "missingFirstPath": "mobile/harmony/app/entry/src/main/resources/rawfile/source-build.json"
+  },
+  "missingGeneratedInputs": [
+    "mobile/harmony/app/entry/src/main/resources/rawfile/source-build.json",
+    "mobile/harmony/app/entry/src/main/resources/rawfile/raw-codec-license.txt",
+    "mobile/harmony/materials/source-build.json"
+  ],
+  "toolchainPreflight": {
+    "status": "blocked",
+    "error": "Official Linux CLT/SDK not installed: missing SDK package metadata",
+    "metadata": "validation/harmony/.build/commandline-tools/command-line-tools/sdk/default/openharmony/ets/oh-uni-package.json"
+  },
+  "CLTArchiveName": "commandline-tools-linux-x64-26.0.0.851.zip",
+  "CLTArchiveBytesFromHistoricalRecord": 2348063309,
+  "CLTArchiveSHA256FromHistoricalRecord": "ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082",
+  "sdkDownloadRetried": false,
+  "compilerExecuted": false,
+  "HAPProduced": false,
+  "webBuildOrTestsRepeated": false,
+  "sourceCodeChanged": false
+}
