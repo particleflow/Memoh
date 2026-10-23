@@ -82,10 +82,16 @@ func New(base string, client *http.Client, auth Authorization) (*Client, error) 
 // NewTask uses the explicit task-authenticated adapter namespace. The original
 // file protocol is unchanged, and credentials still come from the approved host.
 func NewTask(base, operation, delivery string, client *http.Client, auth Authorization) (*Client, error) {
-	if !validID(operation) || !validID(delivery) || ValidateAPIBase(base) != nil {
+	if !validID(operation) || !validID(delivery) {
 		return nil, ErrInvalid
 	}
-	return New(strings.TrimRight(base, "/")+"/internal/computer-transfers/"+operation+"/"+delivery, client, auth)
+	c, err := New(base, client, auth)
+	if err != nil {
+		return nil, err
+	}
+	// The configured-base limit excludes this fixed namespace and bounded IDs.
+	c.base += "/internal/computer-transfers/" + operation + "/" + delivery
+	return c, nil
 }
 
 func (c *Client) CloseIdleConnections() { c.http.CloseIdleConnections() }
