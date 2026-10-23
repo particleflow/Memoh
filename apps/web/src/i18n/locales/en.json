@@ -1022,6 +1022,9 @@
   },
   "chat": {
     "delegations": {
+      "openTasks": "View downstream tasks",
+      "downstreamTitle": "Specialist Bot tasks",
+      "downstreamDescription": "Execution tasks recorded under this specialist session. Access is checked by the server; this view does not provide live logs or a runnable queue.",
       "retryDelivery": "Retry result delivery",
       "deliveryResponse": "Delivery request response",
       "deliveryRequestUnconfirmed": "The delivery request could not be confirmed. Reload to check its state.",
@@ -1055,6 +1058,8 @@
       }
     },
     "tasks": {
+      "unsupported": "This server does not support task observation yet.",
+      "inaccessible": "This conversation or task is no longer accessible.",
       "title": "Tasks",
       "detail": "Task details",
       "description": "Recorded tasks in this conversation. This view updates while open.",

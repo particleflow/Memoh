@@ -61,7 +61,7 @@ describe('specialist handoff content and states', () => {
   })
 
   it('keeps a terminal task with uncertain delivery read-only when its host has no action capability', () => {
-    const root = mount({ selected: task.delegation_id, detail: { ...task, delivery_state: 'unknown' } })
+    const root = mount({ selected: task.delegation_id, detail: { ...task, delivery_state: 'unknown', target_session_id: 'specialist-session' } })
     expect(root.textContent).toContain('Delivery unknown')
     expect(root.querySelectorAll('button')).toHaveLength(0)
   })

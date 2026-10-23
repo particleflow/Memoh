@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { createApp, nextTick } from 'vue'
+import { createApp, h, nextTick, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { BotdelegationView, SessiontaskTask } from '@memohai/sdk'
@@ -76,6 +76,78 @@ describe('task detail identity and rendering boundary', () => {
     root?.remove()
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  })
+
+  it('opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch', async () => {
+    api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'specialist-session' } })
+    await open('delegations')
+    const trigger = button(en.chat.delegations.openTasks)
+    trigger.click(); trigger.click(); await settled()
+    expect(api.list.mock.lastCall![0].path).toEqual({ bot_id: 'specialist-a', session_id: 'specialist-session' })
+    expect(api.list).toHaveBeenCalledTimes(2)
+    button(/Computer task/).click(); await settled()
+    expect(api.detail.mock.lastCall![0].path).toEqual({ bot_id: 'specialist-a', session_id: 'specialist-session', task_type: 'computer_operation', task_id: 'operation' })
+    await vi.advanceTimersByTimeAsync(5000); await settled()
+    expect(document.body.textContent).toContain(text)
+    expect(api.delegationDetail.mock.calls.length).toBeGreaterThan(1)
+    expect(api.list).toHaveBeenCalledTimes(2)
+    const back = () => (document.querySelector('[aria-label="Back"]') as HTMLButtonElement).click()
+    back(); await settled()
+    expect(document.body.textContent).not.toContain(text)
+    expect(document.body.textContent).toContain(en.chat.delegations.downstreamTitle)
+    back(); await settled()
+    expect(document.body.textContent).toContain('Specialist final reply')
+    expect(document.body.textContent).not.toContain(en.chat.delegations.downstreamTitle)
+    expect(api.retryDelivery).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { error: { status: 404, code: 'http.not_found' }, expected: en.chat.tasks.unsupported },
+    { error: { status: 404, code: 'session.not_found' }, expected: en.chat.tasks.inaccessible },
+    { error: { status: 403, code: 'http.forbidden' }, expected: en.errors.http.forbidden },
+    { error: { status: 401, code: 'http.unauthorized' }, expected: en.errors.http.unauthorized },
+    { error: { status: 503, code: 'workspace.unreachable' }, expected: en.errors.workspace.unreachable },
+    { error: new TypeError('PRIVATE_NETWORK'), expected: en.common.networkError },
+  ])('distinguishes downstream read failure from an empty task list: $expected', async ({ error, expected }) => {
+    api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'specialist-session' } })
+    await open('delegations')
+    api.list.mockRejectedValueOnce(error)
+    button(en.chat.delegations.openTasks).click(); await settled()
+    expect(document.body.textContent).toContain(expected)
+    expect(document.body.textContent).not.toContain(en.chat.tasks.empty)
+    expect(document.body.textContent).not.toContain('PRIVATE_NETWORK')
+    expect(api.retryDelivery).not.toHaveBeenCalled()
+  })
+
+  it('does not invent a specialist session for an accepted handoff without one', async () => {
+    await open('delegations')
+    expect(document.body.textContent).not.toContain(en.chat.delegations.openTasks)
+    expect(api.list).toHaveBeenCalledTimes(1)
+  })
+
+  it.each(['relation-denied', 'logout', 'scope-changed'])('retires downstream content and ignores a late response after %s', async (reason) => {
+    api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'specialist-session' } })
+    const props = ref({ botId: 'bot', sessionId: 'parent', selection: 'pc-a', visible: true })
+    root = document.createElement('div'); document.body.append(root)
+    app = createApp({ setup: () => () => h(SessionTasks, props.value) })
+    app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root)
+    await settled(); button('Tasks').click(); await settled()
+    await selectGroup('Specialist Bot handoffs'); button(/Target Bot/).click(); await settled()
+    let finish!: (value: { data: { items: SessiontaskTask[] } }) => void
+    api.list.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    button(en.chat.delegations.openTasks).click(); await settled()
+    const signal = api.list.mock.lastCall![0].signal as AbortSignal
+    if (reason === 'relation-denied') {
+      api.delegationDetail.mockRejectedValue({ status: 404, code: 'session.not_found', detail: 'PRIVATE' })
+      await vi.advanceTimersByTimeAsync(5000)
+    } else if (reason === 'logout') notifyAuthSessionCleared('logout')
+    else props.value = { ...props.value, botId: 'other-bot', sessionId: 'other-session' }
+    await settled(); expect(signal.aborted).toBe(true)
+    finish({ data: { items: [{ ...task, task_id: 'late-private-task' }] } }); await settled()
+    expect(document.body.textContent).not.toContain('late-pri')
+    expect(document.body.textContent).not.toContain(en.chat.delegations.downstreamTitle)
+    expect(document.body.textContent).not.toContain('PRIVATE')
+    expect(api.retryDelivery).not.toHaveBeenCalled()
   })
 
   it('wires the shared retry action through the existing SDK and never reports supervisor completion', async () => {

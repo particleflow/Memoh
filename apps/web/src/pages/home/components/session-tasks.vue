@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { computed, onScopeDispose, ref } from 'vue'
+import { computed, onScopeDispose, ref, shallowRef, watch } from 'vue'
 import { useDocumentVisibility, useLocalStorage } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
-import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
-import type { SessiontaskTask } from '@memohai/sdk'
+import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
 import { onAuthSessionCleared } from '@/lib/auth-session'
-import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
 import { useBotDelegations } from '../composables/useBotDelegations'
 import { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
+import SessionTaskResults from './session-task-results.vue'
 
 const props = defineProps<{ botId: string, sessionId: string, selection: string, visible: boolean }>()
 const { t } = useI18n()
@@ -27,30 +26,42 @@ const delegationVisible = computed(() => visible.value && group.value === 'deleg
 const delegationReader = useBotDelegations(scope, delegationVisible)
 const deliveryAction = useBotDelegationDelivery(scope, delegationVisible, delegationReader)
 const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = delegationReader
-const hasSelection = computed(() => group.value === 'delegations' ? !!delegationSelected.value : !!selected.value)
+const specialist = shallowRef<{ bot: string, session: string, delegation: string }>()
+const specialistScope = computed(() => specialist.value && scope.value ? {
+  bot: specialist.value.bot, session: specialist.value.session,
+  selection: specialist.value.delegation, identity: scope.value.identity,
+} : null)
+const specialistVisible = computed(() => visible.value && !!specialist.value)
+const specialistReader = useSessionTasks(specialistScope, specialistVisible)
+const { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist } = specialistReader
+const hasSelection = computed(() => !!specialist.value || (group.value === 'delegations' ? !!delegationSelected.value : !!selected.value))
+function openSpecialistTasks() {
+  if (specialist.value) return
+  const task = delegationDetail.value
+  if (!task?.target_session_id || task.delegation_id !== delegationSelected.value || delegationError.value) return
+  specialist.value = { bot: task.target_bot_id, session: task.target_session_id, delegation: task.delegation_id }
+}
+watch([scope, visible, group], () => { specialist.value = undefined }, { flush: 'sync' })
+// Keep the original delegation read active: losing that authorized relation must
+// retire downstream content too, even if a target GET finishes later.
+watch([delegationDetail, delegationError], () => {
+  const current = specialist.value
+  if (current && (delegationError.value || delegationDetail.value?.delegation_id !== current.delegation
+    || delegationDetail.value?.target_bot_id !== current.bot || delegationDetail.value?.target_session_id !== current.session)) {
+    specialist.value = undefined
+  }
+}, { flush: 'sync' })
 function goBack() {
-  if (group.value === 'delegations') backDelegation()
+  if (specialist.value) {
+    if (specialistSelected.value) backSpecialistTask()
+    else specialist.value = undefined
+  } else if (group.value === 'delegations') backDelegation()
   else back()
 }
 // Login notifies before replacing the token; a same-tab 401 can clear it
 // without a storage event. Close now so pending reads cannot revive content
 // while the parent view/router is still mounted.
 onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
-
-function stateLabel(task: SessiontaskTask) {
-  const outcome = task.pi_result
-  const known = ['succeeded', 'failed', 'aborted', 'incomplete', 'not_started', 'invalid_protocol', 'output_limit']
-  if (outcome && known.includes(outcome)) {
-    const result = t(`chat.tasks.outcomes.${outcome}`)
-    return task.process_state === 'exited' ? `${t('chat.tasks.statuses.process_exited')} · ${result}` : result
-  }
-  const status = ['submitted', 'process_exited', 'not_started', 'rejected'].includes(task.status) ? task.status : 'unknown'
-  return t(`chat.tasks.statuses.${status}`)
-}
-
-function taskLabel(task: SessiontaskTask) {
-  return `${t(`chat.tasks.types.${task.task_type}`)} · ${task.task_id.slice(0, 8)}`
-}
 </script>
 
 <template>
@@ -71,10 +82,28 @@ function taskLabel(task: SessiontaskTask) {
         :back-label="t('common.back')"
         @back="goBack"
       >
-        {{ hasSelection ? t('chat.tasks.detail') : t('chat.tasks.title') }}
+        {{ specialist ? t('chat.delegations.downstreamTitle') : hasSelection ? t('chat.tasks.detail') : t('chat.tasks.title') }}
       </DialogViewHeader>
       <DialogBody class="space-y-4">
-        <Tabs v-model="group">
+        <template v-if="specialist">
+          <DialogDescription>{{ t('chat.delegations.downstreamDescription') }}</DialogDescription>
+          <SessionTaskResults
+            :items="specialistItems"
+            :detail="specialistDetail"
+            :selected="specialistSelected"
+            :cursor="specialistCursor"
+            :next-cursor="specialistNext"
+            :loading="specialistLoading"
+            :error="specialistError"
+            @open-task="openSpecialistTask"
+            @page="specialistPage"
+            @refresh="refreshSpecialist"
+          />
+        </template>
+        <Tabs
+          v-else
+          v-model="group"
+        >
           <TabsList v-if="!hasSelection">
             <TabsTrigger value="execution">
               {{ t('chat.delegations.executionGroup') }}
@@ -94,6 +123,7 @@ function taskLabel(task: SessiontaskTask) {
               :loading="delegationLoading"
               :error="delegationError"
               :delivery-action="deliveryAction"
+              :tasks-action="delegationDetail?.target_session_id ? openSpecialistTasks : undefined"
               @open-task="openDelegation"
               @page="delegationPage"
               @refresh="refreshDelegations"
@@ -101,106 +131,18 @@ function taskLabel(task: SessiontaskTask) {
           </TabsContent>
           <TabsContent value="execution">
             <DialogDescription>{{ t('chat.tasks.description') }}</DialogDescription>
-            <Empty v-if="error">
-              <EmptyDescription>{{ resolveApiErrorMessage(error, t('chat.tasks.loadFailed')) }}</EmptyDescription>
-              <Button
-                variant="outline"
-                @click="refresh"
-              >
-                {{ t('chat.tasks.reload') }}
-              </Button>
-            </Empty>
-            <InlineLoadingRow v-else-if="loading && !detail && !items.length">
-              {{ t('common.loading') }}
-            </InlineLoadingRow>
-            <template v-else-if="selected">
-              <section
-                v-if="detail"
-                class="space-y-4"
-              >
-                <div class="space-y-1">
-                  <h3 class="text-label font-medium">
-                    {{ taskLabel(detail) }}
-                  </h3>
-                  <p class="text-body">
-                    {{ stateLabel(detail) }}
-                  </p>
-                  <p
-                    v-if="detail.cancel_requested"
-                    class="text-body text-muted-foreground"
-                  >
-                    {{ t('chat.tasks.cancelIntent') }}
-                  </p>
-                </div>
-                <div class="space-y-2">
-                  <h3 class="text-label font-medium">
-                    {{ t('chat.tasks.result') }}
-                  </h3>
-                  <!-- Plain text: never interpret links, HTML or embedded media. -->
-                  <p
-                    v-if="detail.content_available && detail.result_summary"
-                    class="whitespace-pre-wrap break-words text-body"
-                  >
-                    {{ detail.result_summary.text }}
-                  </p>
-                  <p
-                    v-else
-                    class="text-body text-muted-foreground"
-                  >
-                    {{ t('chat.tasks.unavailable') }}
-                  </p>
-                  <p
-                    v-if="detail.result_summary?.truncated"
-                    class="text-body text-muted-foreground"
-                  >
-                    {{ t('chat.tasks.truncated') }}
-                  </p>
-                </div>
-                <p class="text-body text-muted-foreground">
-                  {{ t('chat.tasks.businessUnknown') }}
-                </p>
-              </section>
-            </template>
-            <template v-else>
-              <Empty v-if="!items.length">
-                <EmptyDescription>{{ nextCursor ? t('chat.tasks.filteredPage') : t('chat.tasks.empty') }}</EmptyDescription>
-              </Empty>
-              <Item
-                v-for="item in items"
-                :key="`${item.task_type}:${item.task_id}`"
-                as="button"
-                type="button"
-                size="sm"
-                class="w-full text-left"
-                @click="openTask(item)"
-              >
-                <ItemContent>
-                  <ItemTitle>{{ taskLabel(item) }}</ItemTitle>
-                  <ItemDescription>{{ stateLabel(item) }}</ItemDescription>
-                </ItemContent>
-              </Item>
-              <div
-                v-if="cursor || nextCursor"
-                class="flex flex-wrap gap-2"
-              >
-                <Button
-                  v-if="cursor"
-                  variant="ghost"
-                  :disabled="loading"
-                  @click="page()"
-                >
-                  {{ t('chat.tasks.newest') }}
-                </Button>
-                <Button
-                  v-if="nextCursor"
-                  variant="outline"
-                  :disabled="loading"
-                  @click="page(nextCursor)"
-                >
-                  {{ t('chat.tasks.next') }}
-                </Button>
-              </div>
-            </template>
+            <SessionTaskResults
+              :items="items"
+              :detail="detail"
+              :selected="selected"
+              :cursor="cursor"
+              :next-cursor="nextCursor"
+              :loading="loading"
+              :error="error"
+              @open-task="openTask"
+              @page="page"
+              @refresh="refresh"
+            />
           </TabsContent>
         </Tabs>
       </DialogBody>

@@ -1022,6 +1022,9 @@
   },
   "chat": {
     "delegations": {
+      "openTasks": "查看下游任务",
+      "downstreamTitle": "专业 Bot 的任务",
+      "downstreamDescription": "此专业 Bot 会话记录的执行任务。访问权限由服务端校验；此视图不提供实时日志或可调度队列。",
       "retryDelivery": "重试结果投递",
       "deliveryResponse": "投递请求响应",
       "deliveryRequestUnconfirmed": "尚未确认此次投递请求的结果，请重新读取状态。",
@@ -1055,6 +1058,8 @@
       }
     },
     "tasks": {
+      "unsupported": "此服务器尚不支持任务观察。",
+      "inaccessible": "无法再访问此会话或任务。",
       "title": "任务",
       "detail": "任务详情",
       "description": "本会话的任务记录。打开时自动刷新。",
