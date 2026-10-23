@@ -105,7 +105,7 @@ func (h *SessionTaskHandler) List(c echo.Context) error {
 
 // Get godoc
 // @Summary Read a safe task summary within an owned conversation
-// @Description Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Attachments and execution content are unavailable in this version.
+// @Description Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"

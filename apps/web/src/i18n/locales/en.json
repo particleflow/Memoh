@@ -1055,7 +1055,9 @@
         "accepted": "Accepted",
         "unknown": "Delivery unknown",
         "unavailable": "Unavailable"
-      }
+      },
+      "downloadResult": "Download result {hash}",
+      "downloadFailed": "Could not prepare the download. Reload the view and check access."
     },
     "tasks": {
       "unsupported": "This server does not support task observation yet.",
@@ -1083,7 +1085,15 @@
         "submitted": "Submission recorded",
         "process_exited": "Process exited",
         "not_started": "Not started",
-        "rejected": "Rejected"
+        "rejected": "Rejected",
+        "accepted": "Accepted; waiting to run",
+        "running": "Running",
+        "waiting_decision": "Waiting for a decision",
+        "finishing": "Finishing",
+        "completed": "Run completed",
+        "failed": "Run failed",
+        "aborted": "Run aborted",
+        "lost": "Execution lost; result unknown"
       },
       "outcomes": {
         "succeeded": "Pi completed",
@@ -1093,7 +1103,9 @@
         "not_started": "Pi not started",
         "invalid_protocol": "Pi result could not be verified",
         "output_limit": "Pi result exceeded the observation limit"
-      }
+      },
+      "visibleOutput": "Latest visible assistant output",
+      "pollingOutput": "Updated by polling while this view is open. Shows persisted visible assistant text from this run, not reasoning or full logs."
     },
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",

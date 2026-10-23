@@ -237,6 +237,21 @@ describe('task detail identity and rendering boundary', () => {
     expect(api.delegationDetail).toHaveBeenCalledTimes(1)
   })
 
+  it('projects the child own completed run, then removes its output when the next run is pending', async () => {
+    const child: SessiontaskTask = { ...task, task_type: 'subagent', task_id: 'child', status: 'completed', run_id: 'own-run', pi_result: undefined, process_state: undefined, result_summary: { text: 'child own output', source: 'subagent_assistant', truncated: false } }
+    api.list.mockResolvedValue({ data: { items: [child] } })
+    api.detail.mockResolvedValue({ data: child })
+    await open('execution', false)
+    button(/Subagent/).click(); await settled()
+    expect(document.body.textContent).toContain('Run completed')
+    expect(document.body.textContent).toContain('child own output')
+    expect(document.body.textContent).toContain('Updated by polling')
+    api.detail.mockResolvedValue({ data: { ...child, status: 'accepted', run_id: 'next-run', content_available: false, result_summary: undefined } })
+    await vi.advanceTimersByTimeAsync(5000); await settled()
+    expect(document.body.textContent).toContain('Accepted; waiting to run')
+    expect(document.body.textContent).not.toContain('child own output')
+  })
+
   it('renders HTML, Markdown and URLs literally without active elements', async () => {
     await open()
     const dialog = document.querySelector('[role="dialog"]')!

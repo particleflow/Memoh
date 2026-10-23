@@ -7,6 +7,7 @@ import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBod
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { useSessionTasks } from '../composables/useSessionTasks'
 import { useBotDelegations } from '../composables/useBotDelegations'
+import { useBotDelegationDownload } from '../composables/useBotDelegationDownload'
 import { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
 import SessionTaskResults from './session-task-results.vue'
@@ -25,6 +26,7 @@ const { items, detail, selected, cursor, nextCursor, loading, error, openTask, b
 const delegationVisible = computed(() => visible.value && group.value === 'delegations')
 const delegationReader = useBotDelegations(scope, delegationVisible)
 const deliveryAction = useBotDelegationDelivery(scope, delegationVisible, delegationReader)
+const downloadAction = useBotDelegationDownload(scope, delegationVisible, delegationReader)
 const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = delegationReader
 const specialist = shallowRef<{ bot: string, session: string, delegation: string }>()
 const specialistScope = computed(() => specialist.value && scope.value ? {
@@ -123,6 +125,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
               :loading="delegationLoading"
               :error="delegationError"
               :delivery-action="deliveryAction"
+              :download-action="downloadAction"
               :tasks-action="delegationDetail?.target_session_id ? openSpecialistTasks : undefined"
               @open-task="openDelegation"
               @page="delegationPage"

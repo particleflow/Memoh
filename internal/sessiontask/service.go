@@ -76,10 +76,11 @@ type Task struct {
 	ParentSessionID      string         `json:"parent_session_id" validate:"required" format:"uuid"`
 	CreatedAt            time.Time      `json:"created_at" validate:"required"`
 	UpdatedAt            time.Time      `json:"updated_at" validate:"required"`
-	Status               string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected"`
+	Status               string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected,accepted,running,waiting_decision,finishing,completed,failed,aborted,lost"`
 	Summary              string         `json:"summary" validate:"required"`
 	ContentAvailable     bool           `json:"content_available" validate:"required"`
 	AttachmentsAvailable bool           `json:"attachments_available" validate:"required"`
+	RunID                string         `json:"run_id,omitempty" format:"uuid"`
 	TargetID             string         `json:"target_id,omitempty" format:"uuid"`
 	OperationKind        string         `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
 	Revision             string         `json:"revision,omitempty"`
@@ -90,12 +91,13 @@ type Task struct {
 	ResultSummary        *ResultSummary `json:"result_summary,omitempty"`
 }
 
-// ResultSummary is an allowlisted final assistant text projection, not logs or
-// general-purpose secret redaction. Clients render Text as plain untrusted text.
+// ResultSummary is allowlisted visible assistant text, not logs or general
+// secret redaction. Source distinguishes a computer final result from a child
+// run's latest persisted text (which can still be running). Render as plain text.
 type ResultSummary struct {
 	Text      string `json:"text" validate:"required"`
 	Truncated bool   `json:"truncated" validate:"required"`
-	Source    string `json:"source" validate:"required" enums:"pi_final_assistant"`
+	Source    string `json:"source" validate:"required" enums:"pi_final_assistant,subagent_assistant"`
 }
 
 type Page struct {
@@ -281,7 +283,7 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 		if c.ID != c.SessionID || c.ID == parent || p[0].Type != Subagent {
 			return Task{}, ErrUnavailable
 		}
-		return t, nil
+		return s.projectSubagent(ctx, bot, c.SessionID, t)
 	}
 	if c.Type != ComputerOperation {
 		return Task{}, ErrUnavailable

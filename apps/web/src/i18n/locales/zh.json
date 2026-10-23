@@ -1055,7 +1055,9 @@
         "accepted": "已受理",
         "unknown": "投递状态未知",
         "unavailable": "无法投递"
-      }
+      },
+      "downloadResult": "下载成果 {hash}",
+      "downloadFailed": "无法准备下载，请刷新视图并检查访问权限。"
     },
     "tasks": {
       "unsupported": "此服务器尚不支持任务观察。",
@@ -1083,7 +1085,15 @@
         "submitted": "已记录提交",
         "process_exited": "进程已退出",
         "not_started": "未启动",
-        "rejected": "已拒绝"
+        "rejected": "已拒绝",
+        "accepted": "已接收，等待执行",
+        "running": "执行中",
+        "waiting_decision": "等待决定",
+        "finishing": "正在结束",
+        "completed": "本轮运行完成",
+        "failed": "本轮运行失败",
+        "aborted": "本轮已中止",
+        "lost": "执行失联，结果未知"
       },
       "outcomes": {
         "succeeded": "Pi 已完成",
@@ -1093,7 +1103,9 @@
         "not_started": "Pi 未启动",
         "invalid_protocol": "Pi 结果无法验证",
         "output_limit": "Pi 结果超出观察上限"
-      }
+      },
+      "visibleOutput": "最近可见的助手输出",
+      "pollingOutput": "打开此视图时轮询更新。仅显示本轮已保存的可见助手文本，不包含推理或完整日志。"
     },
     "uploadingAttachments": "正在上传附件…",
     "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",

@@ -1,0 +1,76 @@
+✓ patched dependencies verified against installed content
+
+ RUN  v4.1.10 /workspace/Memoh/apps/web
+
+(node:939855) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ src/pages/home/components/session-tasks.test.ts (22 tests | 22 failed) 20ms
+     × opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch 6ms
+     × distinguishes downstream read failure from an empty task list: 'This server does not support task obs…' 1ms
+     × distinguishes downstream read failure from an empty task list: 'This conversation or task is no longe…' 1ms
+     × distinguishes downstream read failure from an empty task list: 'You do not have permission to perform…' 1ms
+     × distinguishes downstream read failure from an empty task list: 'Sign in to continue.' 1ms
+     × distinguishes downstream read failure from an empty task list: 'The workspace could not be reached.' 0ms
+     × distinguishes downstream read failure from an empty task list: 'Network connection failed. Check your…' 0ms
+     × does not invent a specialist session for an accepted handoff without one 1ms
+     × retires downstream content and ignores a late response after relation-denied 1ms
+     × retires downstream content and ignores a late response after logout 1ms
+     × retires downstream content and ignores a late response after scope-changed 1ms
+     × wires the shared retry action through the existing SDK and never reports supervisor completion 0ms
+     × opens the specialist group without polling the hidden execution group 1ms
+     × keeps delegation page two and execution task cursors separate across tab round trips 1ms
+     × keeps the Web shell description and restores trigger focus on Escape 1ms
+     × closes specialist detail and ignores its late reply after same-tab logout 1ms
+     × renders HTML, Markdown and URLs literally without active elements 1ms
+     × invalidates pending detail when another tab replaces the identity token 0ms
+     × closes and aborts on login before any token update or parent unmount 1ms
+     × closes and aborts on logout before any token update or parent unmount 0ms
+     × closes and aborts on unauthorized before any token update or parent unmount 0ms
+     × closes and aborts on token-cleared before any token update or parent unmount 1ms
+(node:939856) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 22 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'This server does not support task obs…'
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'This conversation or task is no longe…'
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'You do not have permission to perform…'
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'Sign in to continue.'
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'The workspace could not be reached.'
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'Network connection failed. Check your…'
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > does not invent a specialist session for an accepted handoff without one
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-denied
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after logout
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after scope-changed
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > wires the shared retry action through the existing SDK and never reports supervisor completion
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > opens the specialist group without polling the hidden execution group
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps delegation page two and execution task cursors separate across tab round trips
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps the Web shell description and restores trigger focus on Escape
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes specialist detail and ignores its late reply after same-tab logout
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > renders HTML, Markdown and URLs literally without active elements
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > invalidates pending detail when another tab replaces the identity token
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on login before any token update or parent unmount
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on logout before any token update or parent unmount
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on unauthorized before any token update or parent unmount
+ FAIL  src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on token-cleared before any token update or parent unmount
+TypeError: localStorage.clear is not a function
+ ❯ src/pages/home/components/session-tasks.test.ts:66:18
+     64|     vi.useFakeTimers()
+     65|     vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {…
+     66|     localStorage.clear()
+       |                  ^
+     67|     localStorage.setItem('token', 'synthetic-identity')
+     68|     api.retryDelivery.mockReset().mockResolvedValue({ data: delegation…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/22]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  22 failed | 58 passed (80)
+   Start at  09:14:32
+   Duration  4.17s (transform 5.11s, setup 0ms, import 7.59s, tests 372ms, environment 966ms)
+
+undefined
+/workspace/Memoh/apps/web:
+ ERR_PNPM_RECURSIVE_EXEC_FIRST_FAIL  Command failed with exit code 1: vitest run src/pages/home/composables/useSessionTasks.test.ts src/pages/home/composables/useBotDelegationDownload.test.ts src/pages/home/components/session-tasks.test.ts src/pages/home/components/bot-delegation-tasks.test.ts

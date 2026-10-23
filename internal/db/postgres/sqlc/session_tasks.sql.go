@@ -11,6 +11,31 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getSubagentRunVisibleMessage = `-- name: GetSubagentRunVisibleMessage :one
+SELECT CASE WHEN octet_length(content::text) <= 1048576 THEN content ELSE 'null'::jsonb END::jsonb AS content
+FROM bot_history_messages
+WHERE team_id=public.memoh_current_team_id()
+  AND bot_id=$1::uuid AND session_id=$2::uuid
+  AND run_id=$3::uuid AND turn_visible=true
+ORDER BY turn_position DESC, turn_message_seq DESC, created_at DESC, id DESC
+LIMIT 1
+`
+
+type GetSubagentRunVisibleMessageParams struct {
+	BotID     pgtype.UUID `json:"bot_id"`
+	SessionID pgtype.UUID `json:"session_id"`
+	RunID     pgtype.UUID `json:"run_id"`
+}
+
+// Read the latest visible message within this run; hidden messages are filtered.
+// Never substitute content from an earlier run. Bound the projection envelope.
+func (q *Queries) GetSubagentRunVisibleMessage(ctx context.Context, arg GetSubagentRunVisibleMessageParams) ([]byte, error) {
+	row := q.db.QueryRow(ctx, getSubagentRunVisibleMessage, arg.BotID, arg.SessionID, arg.RunID)
+	var content []byte
+	err := row.Scan(&content)
+	return content, err
+}
+
 const listSessionTaskCandidates = `-- name: ListSessionTaskCandidates :many
 WITH RECURSIVE owned AS (
   SELECT s.id, ARRAY[s.id] AS visited

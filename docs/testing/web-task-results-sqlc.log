@@ -1,0 +1,18 @@
+go: github.com/sqlc-dev/sqlc@v1.31.1 requires go >= 1.26.0; switching to go1.26.10
+# github.com/sqlc-dev/sqlc/internal/engine/sqlite/parser
+compile: writing output: write $WORK/b542/_pkg_.a: no space left on device
+github.com/sqlc-dev/sqlc/internal/engine/sqlite/analyzer: write /tmp/go-build3869632583/b543/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/multierr: write /tmp/go-build3869632583/b544/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/sql/lang: write /tmp/go-build3869632583/b545/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/sql/rewrite: write /tmp/go-build3869632583/b546/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/sql/validate: write /tmp/go-build3869632583/b547/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/x/expander: write /tmp/go-build3869632583/b548/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/config/convert: write /tmp/go-build3869632583/b549/importcfg: no space left on device
+github.com/sqlc-dev/doubleclick/token: write /tmp/go-build3869632583/b552/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/ext: write /tmp/go-build3869632583/b556/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/ext/process: write /tmp/go-build3869632583/b557/importcfg: no space left on device
+github.com/tetratelabs/wazero/internal/wasip1: write /tmp/go-build3869632583/b560/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/remote: write /tmp/go-build3869632583/b561/importcfg: no space left on device
+runtime/trace: write /tmp/go-build3869632583/b563/importcfg: no space left on device
+github.com/sqlc-dev/sqlc/internal/vet: write /tmp/go-build3869632583/b564/importcfg: no space left on device
+golang.org/x/sync/errgroup: write /tmp/go-build3869632583/b565/importcfg: no space left on device
