@@ -260,8 +260,7 @@ func (s *Service) ObserveAgent(ctx context.Context, scope Scope, p AgentProgress
 	if err != nil {
 		return obs, err
 	}
-	obs.Status, obs.Starting, obs.InteractiveReady = a.Status, starting, a.InteractiveReady
-	obs.Status = nativeState(a.Status)
+	obs.Status, obs.Starting, obs.InteractiveReady = nativeState(a.Status), starting, a.InteractiveReady
 	obs.SessionRelation = agentSessionRelation(p.AgentSession, a.AgentSession)
 	if a.AgentSession.Valid() {
 		obs.AgentSession = a.AgentSession

@@ -12,7 +12,7 @@ func TestLoadNativeObservationCapacity(t *testing.T) {
 	for _, limit := range []int{-1, 0, 1, 32, 128, 129} {
 		t.Run(strconv.Itoa(limit), func(t *testing.T) {
 			path := filepath.Join(t.TempDir(), "config.toml")
-			if err := os.WriteFile(path, []byte(fmt.Sprintf("[computer_tasks]\nnative_observation_limit = %d\n", limit)), 0600); err != nil {
+			if err := os.WriteFile(path, []byte(fmt.Sprintf("[computer_tasks]\nnative_observation_limit = %d\n", limit)), 0o600); err != nil {
 				t.Fatal(err)
 			}
 			cfg, err := Load(path)
