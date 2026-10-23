@@ -229,6 +229,7 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 	t.Run("receipt-turnover", func(t *testing.T) { exerciseReceiptTurnover(ctx, t, store, pool, id) })
 	t.Run("producer-multiple-files", func(t *testing.T) { exerciseProducerHandoff(ctx, t, store, assets, id, ref) })
 	t.Run("real-route-roundtrip", func(t *testing.T) { exerciseRealRouteRoundTrip(ctx, t, store, id) })
+	t.Run("api-base-prefix", func(t *testing.T) { exerciseFileAPIBase(ctx, t, store, assets, id, ref) })
 	_, err = runtimePool.Exec(ctx, "UPDATE computer_operations SET details=jsonb_set(details,'{delivery_ledger,version}','2') WHERE id=$1", id.OperationID)
 	if !errors.As(err, &guardError) || guardError.Code != "23514" {
 		t.Fatalf("old v2 writer downgraded principal ledger: %v", err)

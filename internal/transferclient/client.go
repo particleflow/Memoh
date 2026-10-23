@@ -14,7 +14,6 @@ import (
 	"io"
 	"mime"
 	"net/http"
-	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -49,8 +48,8 @@ type Client struct {
 // certificate and hostname. Test roots belong only in an isolated TLS fixture.
 // Redirects and cookie jars are disabled, and requests have a finite deadline.
 func New(base string, client *http.Client, auth Authorization) (*Client, error) {
-	u, err := url.Parse(base)
-	if err != nil || u.Scheme != "https" || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || auth == nil {
+	u, err := parseAPIBase(base)
+	if err != nil || auth == nil {
 		return nil, ErrInvalid
 	}
 	h := http.Client{Timeout: 150 * time.Second}
@@ -83,7 +82,7 @@ func New(base string, client *http.Client, auth Authorization) (*Client, error) 
 // NewTask uses the explicit task-authenticated adapter namespace. The original
 // file protocol is unchanged, and credentials still come from the approved host.
 func NewTask(base, operation, delivery string, client *http.Client, auth Authorization) (*Client, error) {
-	if !validID(operation) || !validID(delivery) {
+	if !validID(operation) || !validID(delivery) || ValidateAPIBase(base) != nil {
 		return nil, ErrInvalid
 	}
 	return New(strings.TrimRight(base, "/")+"/internal/computer-transfers/"+operation+"/"+delivery, client, auth)
