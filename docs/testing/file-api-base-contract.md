@@ -46,7 +46,7 @@ An isolated CA-verified HTTPS listener mounts the actual Server at `/api` using
 `http.StripPrefix`. Only that path rewrite is a fixture; authentication, handlers,
 PostgreSQL authorization/CAS/ledger, uploads and Media storage are real. The test
 uses the existing disposable database and NOBYPASSRLS runtime role. Synthetic
-identities, credentials and 25-byte content stay within the fixture.
+identities, credentials and 26-byte content stay within the fixture.
 
 The existing client performs limits, Create, Get, PATCH, Complete, Commit and
 Resolve through `/api/internal/computer-transfers/...`. Every expected route is

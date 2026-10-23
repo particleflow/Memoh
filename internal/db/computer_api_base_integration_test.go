@@ -38,7 +38,13 @@ func exerciseFileAPIBase(ctx context.Context, t *testing.T, store *postgresstore
 	endpoint := server.NewServer(log, ":0", "isolated-api-base", h) //nolint:contextcheck // HTTP requests supply their own contexts.
 	var mu sync.Mutex
 	paths := map[string]bool{}
-	mounted := http.StripPrefix("/api", endpoint)
+	seen := map[apiBaseReadRequest]bool{}
+	mounted := http.StripPrefix("/api", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		seen[apiBaseReadRequest{r.Method, r.URL.Path, r.URL.RawQuery, r.Header.Get("Range"), r.Header.Get("If-Range")}] = true
+		mu.Unlock()
+		endpoint.ServeHTTP(w, r)
+	}))
 	https := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		paths[r.Method+" "+r.URL.Path] = true
@@ -98,6 +104,16 @@ func exerciseFileAPIBase(ctx context.Context, t *testing.T, store *postgresstore
 			timer.Stop()
 			t.Fatal("prefixed verification did not finish")
 		}
+	}
+	t.Run("download-range-head-query", func(t *testing.T) {
+		exerciseAPIBaseDownload(ctx, t, assets, id, job, https.URL+"/api", https.Client(), verifier.token, func(want apiBaseReadRequest) bool {
+			mu.Lock()
+			defer mu.Unlock()
+			return seen[want]
+		})
+	})
+	if out, err := binding.Resolve(ctx, "upload", ref, false); err != nil || out != transferclient.OutcomeCommitted {
+		t.Fatal("downloads changed original upload association", err)
 	}
 	file := "/api/internal/computer-transfers/" + job.OperationID + "/" + job.DeliveryID + "/bots/" + job.BotID + "/media"
 	association := "/api/internal/computer-transfers/" + job.OperationID + "/" + job.DeliveryID + "/internal/computer-deliveries/" + job.OperationID + "/" + job.DeliveryID
