@@ -8,7 +8,9 @@ import {
 import type { ChatAttachment, UIAttachment } from '@/composables/api/useChat'
 import type { VoiceSubmission } from './harmony-voice'
 import { shallowReactive, toRaw } from 'vue'
-import { createApiFetch } from '@/lib/api-client'
+import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { normalizeDelegationPath } from './harmony-service-url'
+import { saveNativeOriginal } from './harmony-download'
 
 const digest = async (bytes: ArrayBuffer) => Array.from(
   new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
@@ -110,8 +112,24 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
   if (!/^[a-f0-9]{64}$/.test(hash) || referenceBot(attachment) !== botId) {
     throw new Error('原件引用不完整')
   }
-  const { data: bytes, response } = await getBotsByBotIdMediaByContentHash({
-    path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: true })
+  let bytes: unknown
+  let response: Response
+  const scope = attachment.metadata?.delegation_url
+  if (scope !== undefined) {
+    const path = normalizeDelegationPath(scope as string, hash)
+    const token = sdkAuthQuery().token
+    if (!token) throw new Error('原件授权不可用')
+    response = await createApiFetch()(sdkApiUrl({ url: path }), {
+      method: 'GET', signal, redirect: 'error', headers: { authorization: 'Bearer ' + token },
+    })
+    if (response.status !== 200) throw new Error('委派原件访问失败')
+    bytes = await response.arrayBuffer()
+  } else {
+    const result = await getBotsByBotIdMediaByContentHash({
+      path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: true })
+    bytes = result.data
+    response = result.response
+  }
   if (response.status !== 200) throw new Error('原件响应不完整')
   if (!(bytes instanceof ArrayBuffer) || (typeof attachment.size === 'number' && bytes.byteLength !== attachment.size)
     || await digest(bytes) !== hash) throw new Error('原件校验未通过')
@@ -129,6 +147,15 @@ function saveBlob(blob: Blob, name: string): void {
 }
 
 export async function saveOriginal(attachment: UIAttachment): Promise<void> {
+  if ((window as Window & { begoniaNative?: unknown }).begoniaNative) {
+    const botId = referenceBot(attachment)
+    const hash = String(attachment.content_hash ?? '')
+    const scope = attachment.metadata?.delegation_url
+    if (scope !== undefined) normalizeDelegationPath(scope as string, hash)
+    if (!Number.isSafeInteger(attachment.size) || (attachment.size ?? 0) <= 0) throw new Error('原件大小不完整')
+    await saveNativeOriginal(botId, hash, attachment.size!, attachment.name || 'file', undefined, scope as string | undefined)
+    return
+  }
   saveBlob(await originalBlob(attachment), attachment.name || 'file')
 }
 

@@ -1,12 +1,12 @@
-// Production adapter + actual patched 5900 store, with controlled SDK/XHR boundaries.
+// Production adapter + actual pinned client store, with controlled SDK/XHR boundaries.
 // No live API, model, NAS or native device is exercised.
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import { execFileSync } from 'node:child_process'
 import { stripTypeScriptTypes } from 'node:module'
 const sources = JSON.parse(execFileSync(process.env.PYTHON || 'python3', ['-B', '-c', `
-import json,tarfile
-with tarfile.open('mobile/.build/memoh-web/official-context.tar') as t:
+import json,tarfile,os
+with tarfile.open(os.environ.get('HARMONY_WEB_CONTEXT','mobile/.build/memoh-web/official-context.tar')) as t:
  print(json.dumps({p:t.extractfile('apps/web/src/store/chat/'+p+'.ts').read().decode() for p in ['send','view-registry','views']}))
 `], { encoding: 'utf8' }))
 function executable(source, names, scope) {
@@ -16,6 +16,8 @@ function executable(source, names, scope) {
 }
 const hash = async bytes => Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('hex')
 const originals = new Map(), calls = []
+const scopedCalls = [], nativeSaves = [], host = {}
+let scopedStatus = 200
 let limit = 209715200, holdUpload = false, activeXHR, readStatus, corrupt = false, badReceipt = false
 class XHR {
   upload = {}; status = 201; statusText = 'Created'; responseURL = ''; headers = new Headers()
@@ -46,7 +48,16 @@ class XHR {
   abort() { this.onabort() }
 }
 const scope = {
-  createApiFetch: value => value, shallowReactive: value => value, toRaw: value => value, XMLHttpRequest: XHR,
+  createApiFetch: value => value ?? (async (url, options) => {
+    scopedCalls.push({ url, options })
+    return new Response(scopedStatus === 200 ? file : null, { status: scopedStatus })
+  }),
+  sdkApiUrl: ({ url }) => 'https://synthetic.invalid/api' + url,
+  sdkAuthQuery: () => ({ token: 'synthetic-test-only' }),
+  normalizeDelegationPath: executable(fs.readFileSync('mobile/memoh/harmony-service-url.ts','utf8'),
+    ['normalizeDelegationPath'], {}).normalizeDelegationPath,
+  saveNativeOriginal: async (...args) => { nativeSaves.push(args) }, window: host,
+  shallowReactive: value => value, toRaw: value => value, XMLHttpRequest: XHR,
   getBotsByBotIdContainerFsRead: () => { throw Error('workspace is not original storage') },
   getBotsByBotIdContainerFsDownload: () => { throw Error('workspace is not original storage') },
   getBotsByBotIdMediaLimits: async options => {
@@ -72,7 +83,7 @@ const scope = {
   },
 }
 const adapter = executable(fs.readFileSync('mobile/memoh/harmony-files.ts','utf8'),
- ['prepareSubmission','prepareAttachment','UnknownWrite','verifyAttachmentReferences','attachmentForWire','originalBlob'],scope)
+ ['prepareSubmission','prepareAttachment','UnknownWrite','verifyAttachmentReferences','attachmentForWire','originalBlob','saveOriginal'],scope)
 const { prepareSubmission, UnknownWrite } = adapter
 const file = new File(['UPLOAD_SYNTHETIC\nsecond line'], 'example.txt', {type:'text/plain'})
 const selected = [file], first = prepareSubmission('bot-a',selected); selected.length=0
@@ -82,6 +93,30 @@ assert.equal(ready[0].metadata.harmony_transfer,'ready');assert.equal(calls.filt
 assert.equal(first.attachments[0].metadata.harmony_upload_wire_loaded,activeXHR.body.size)
 assert.ok(activeXHR.body.size>file.size)
 assert.equal(await hash(await (await adapter.originalBlob(ready[0])).arrayBuffer()),ready[0].content_hash)
+const scopedBot = '10000000-0000-4000-8000-000000000001'
+const scopedPath = `/bots/${scopedBot}/sessions/20000000-0000-4000-8000-000000000002/delegations/30000000-0000-4000-8000-000000000003/attachments/${ready[0].content_hash}`
+const delegated = { ...ready[0], bot_id: scopedBot, metadata: { bot_id: scopedBot, delegation_url: scopedPath } }
+const ordinaryReads = calls.filter(x => x[0] === 'get').length
+assert.equal(await hash(await (await adapter.originalBlob(delegated)).arrayBuffer()), ready[0].content_hash)
+assert.equal(scopedCalls[0].url, 'https://synthetic.invalid/api' + scopedPath)
+assert.equal(scopedCalls[0].options.headers.authorization, 'Bearer synthetic-test-only')
+assert.equal(scopedCalls[0].options.redirect, 'error')
+for (const status of [401, 403, 302]) {
+  scopedStatus = status
+  await assert.rejects(adapter.originalBlob(delegated))
+}
+scopedStatus = 200
+for (const invalid of [null, '', 'https://other.invalid' + scopedPath, scopedPath + '?token=invalid']) {
+  const before = scopedCalls.length
+  await assert.rejects(adapter.originalBlob({ ...delegated, metadata: { ...delegated.metadata, delegation_url: invalid } }))
+  assert.equal(scopedCalls.length, before)
+}
+host.begoniaNative = {}
+await adapter.saveOriginal(delegated)
+assert.equal(nativeSaves.length, 1)
+assert.deepEqual(nativeSaves[0], [scopedBot, ready[0].content_hash, file.size, file.name, undefined, scopedPath])
+delete host.begoniaNative
+assert.equal(calls.filter(x => x[0] === 'get').length, ordinaryReads, 'delegated denial never falls back to ordinary Bot/hash')
 await prepareSubmission('bot-a',[new File([file],'renamed.bin',{type:file.type})]).prepareAttachments(c.signal)
 assert.equal(calls.filter(x=>x[0]==='post').length,1,'same Bot/hash reuses original across filenames')
 await prepareSubmission('bot-b',[file]).prepareAttachments(c.signal)
@@ -165,8 +200,8 @@ assert.equal(calls.filter(x=>x[0]==='post').length,postCount)
 originals.set(activeXHR.key,activeXHR.bytes);holdUpload=false
 await prepareSubmission('bot-a',[pendingFile]).prepareAttachments(c.signal)
 assert.equal(calls.filter(x=>x[0]==='post').length,postCount,'confirmed lost receipt recovers without retransmission')
-const result={targetCommit:'5900e4c1fd5b2bf43c470eb2b29ad090a67e7dfa',productionAdapter:true,productionStore:true,
+const result={targetCommit:JSON.parse(fs.readFileSync('config/memoh_web.lock.json','utf8')).commit,productionAdapter:true,productionStore:true,
  limitsFailClosed:true,singleMultipartFile:true,hashReceiptAndReadback:true,botIsolation:true,
  unknownWriteReconciliation:true,cancelledModelMessages:0,duplicateReadyMessages:0,explicitReferencesGated:true,
- independentText:true,videoType:true,networkRequests:0,nativeDevice:false}
+ independentText:true,videoType:true,delegatedReadAndSaveScope:true,scopedDenialNoFallback:true,networkRequests:0,nativeDevice:false}
 console.log(JSON.stringify(result))

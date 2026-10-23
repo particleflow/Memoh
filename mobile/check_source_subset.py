@@ -28,8 +28,11 @@ allowed = {item['path'] for item in entries} | {
     'mobile/client/tests/unit/service-config.test.cjs',
     'mobile/SHARED-OBSERVATION.md', 'mobile/BUILD-REPRODUCTION.md',
 }
-files = {p.relative_to(REPO).as_posix() for p in HERE.rglob('*')
-         if p.is_file() and '__pycache__' not in p.parts}
+# Check the publishable source set without traversing generated dependency trees.
+# Include untracked, non-ignored files so accidental source additions still fail.
+files = set(subprocess.check_output(
+    ['git', 'ls-files', '--cached', '--others', '--exclude-standard', '-z', '--', 'mobile'],
+    cwd=REPO).decode('utf8').rstrip('\0').split('\0'))
 assert files == allowed, {'unexpected': sorted(files - allowed), 'missing': sorted(allowed - files)}
 config = json.loads((HERE / 'client/config/memoh_client.json').read_text())
 assert config['apiOrigin'] == '' and config['hapDownloadUrl'] == ''

@@ -20,15 +20,17 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "d92fbc6fd1b2a4d574b0d8ffe27bd5a2b598154fc83ddcc54fe67f90105082f7",
+      "sha256": "5f22d9990691eb3dc913c5011d2e823afcfecde70b812f8b1feb1abef4101aa6",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
         "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
-        "Recovery follow-up after 6a2a3b1: pin five existing scoped-attachment modules and three upstream tests from dfc7cf5; reject baseline drift and expose attachment-only source preparation without the missing builder."
+        "Recovery follow-up after 6a2a3b1: pin five existing scoped-attachment modules and three upstream tests from dfc7cf5; reject baseline drift and expose attachment-only source preparation without the missing builder.",
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
-      "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1"
+      "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
+      "unified40fBaseSHA256": "d92fbc6fd1b2a4d574b0d8ffe27bd5a2b598154fc83ddcc54fe67f90105082f7"
     },
     {
       "path": "mobile/client/mobile/client_config.py",
@@ -434,11 +436,15 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
+      "sha256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
-      "archiveCheckpointSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c"
+      "archiveCheckpointSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
+      "unified40fBaseSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
+      "preparationChanges": [
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
+      ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
@@ -973,11 +979,15 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63",
+      "sha256": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
-      "archiveCheckpointSHA256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63"
+      "archiveCheckpointSHA256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63",
+      "unified40fBaseSHA256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63",
+      "preparationChanges": [
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
+      ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-voice-geometry.ts",
@@ -1073,11 +1083,15 @@
     },
     {
       "path": "mobile/client/tests/stage2/memoh_upload_preparation_checks.mjs",
-      "sha256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d",
+      "sha256": "c6823f5294491373a94df75538ed18a4db170703c0a9e17643c8d09e4e1295f1",
       "origin": "Additional source test recovered verbatim from the user-provided 5900 checkpoint; not listed in the old 72-path omission register.",
       "licenseReview": "Clean user-provided project test under existing repository terms; no new license assignment.",
       "archiveOriginalSHA256": "d5fdb140d9318a8f6e9bd6dfbb927a56cf7f75902a96410af3f86c32047bfd6f",
-      "archiveCheckpointSHA256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d"
+      "archiveCheckpointSHA256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d",
+      "unified40fBaseSHA256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d",
+      "preparationChanges": [
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
+      ]
     },
     {
       "path": "mobile/client/tests/stage2/native_voice_result_checks.cjs",
@@ -1446,5 +1460,18 @@
       "mobile/client/tests/stage2/native_voice_result_checks.cjs"
     ],
     "repositoryTextNormalizationFiles": 40
+  },
+  "unified40fAlignment": {
+    "baseCommit": "163774003827af2ab3fc1785f9324e2c571884b4",
+    "targetCommit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+    "modifiedReviewedEntries": [
+      "mobile/client/config/memoh_web.lock.json",
+      "mobile/client/mobile/build_memoh_web.py",
+      "mobile/client/mobile/memoh/harmony-files.ts",
+      "mobile/client/tests/stage2/memoh_upload_preparation_checks.mjs"
+    ],
+    "webTypecheckAndBuildPassed": true,
+    "resources": 783,
+    "nativeHAPCompiled": false
   }
 }
