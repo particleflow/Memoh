@@ -1,0 +1,7 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/real-route-roundtrip
+    computer_delivery_integration_test.go:231: real HTTPS Server/PG/filesystem: CLI upload 9800163 bytes, lost PATCH response -> same receipt, Create/Complete/Commit=1; library download Range resumed at 8394902, full content/hash match; CLI Linux publication unavailable; byte/job budgets and attempt/revoke checks enforced
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (11.97s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/real-route-roundtrip (6.88s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	13.041s
