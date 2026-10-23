@@ -1,0 +1,48 @@
+=== RUN   TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback
+--- PASS: TestAgenvoTargetExecDoesNotUseBridgeOrNativeFallback (0.00s)
+=== RUN   TestResolveToolTargetRejectsNativeReadback
+--- PASS: TestResolveToolTargetRejectsNativeReadback (0.00s)
+=== RUN   TestNativeWorkdirSessionCanUseAuthorizedPCWithoutCarryingNativeDirectory
+--- PASS: TestNativeWorkdirSessionCanUseAuthorizedPCWithoutCarryingNativeDirectory (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":"edit"}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":"edit"} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":"result"}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":"result"} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","input_refs":["synthetic-hash"]}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","input_refs":["synthetic-hash"]} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","task_id":"synthetic-task"}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","task_id":"synthetic-task"} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":"edit","input_refs":["synthetic-hash"]}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":"edit","input_refs":["synthetic-hash"]} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","unexpected":null}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","unexpected":null} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":null}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","mode":null} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","input_refs":null}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","input_refs":null} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","task_id":null}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","task_id":null} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/null
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/null (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic"}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic"} (0.00s)
+=== RUN   TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","size":"1024x1024"}
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider/{"prompt":"synthetic","size":"1024x1024"} (0.00s)
+--- PASS: TestImageToolRejectsWithdrawnArgumentsBeforeProvider (0.01s)
+=== RUN   TestGenerateOpenAIImagesImageDoesNotRetryRateLimit
+=== PAUSE TestGenerateOpenAIImagesImageDoesNotRetryRateLimit
+=== RUN   TestGenerateOpenAIImagesImageDoesNotRetryServerError
+=== PAUSE TestGenerateOpenAIImagesImageDoesNotRetryServerError
+=== RUN   TestExecGenerateImageRelaysChatFallbackTextAsResult
+--- PASS: TestExecGenerateImageRelaysChatFallbackTextAsResult (0.00s)
+=== RUN   TestImageGenerationRouting
+=== PAUSE TestImageGenerationRouting
+=== CONT  TestGenerateOpenAIImagesImageDoesNotRetryRateLimit
+=== CONT  TestGenerateOpenAIImagesImageDoesNotRetryServerError
+=== CONT  TestImageGenerationRouting
+--- PASS: TestImageGenerationRouting (0.00s)
+--- PASS: TestGenerateOpenAIImagesImageDoesNotRetryRateLimit (0.00s)
+--- PASS: TestGenerateOpenAIImagesImageDoesNotRetryServerError (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/tool	1.056s

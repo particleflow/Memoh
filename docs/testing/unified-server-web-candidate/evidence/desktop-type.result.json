@@ -1,0 +1,13 @@
+{
+  "check": "desktop-type",
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@memohai/desktop",
+    "typecheck"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T04:34:13Z",
+  "elapsed_seconds": 7.484
+}

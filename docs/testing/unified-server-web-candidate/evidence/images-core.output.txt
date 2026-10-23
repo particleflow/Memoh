@@ -1,0 +1,254 @@
+go: downloading github.com/sasha-s/go-deadlock v0.3.6
+go: downloading github.com/petermattis/goid v0.0.0-20260113132338-7c7de50cc741
+=== RUN   TestProductionResolverPreservesLegacyDefault
+--- PASS: TestProductionResolverPreservesLegacyDefault (0.01s)
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/settings_failure
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/settings_failure (0.00s)
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_model
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_model (0.00s)
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/model_query_failure
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/model_query_failure (0.00s)
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_provider
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_provider (0.00s)
+=== RUN   TestLegacyDiscoveryDefersLookupFailuresUntilExecution/provider_query_failure
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution/provider_query_failure (0.00s)
+--- PASS: TestLegacyDiscoveryDefersLookupFailuresUntilExecution (0.01s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/null
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/null (0.00s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"unsupported","model_mode":"omit"}
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"unsupported","model_mode":"omit"} (0.00s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"openai-images","model_mode":"omit"}
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{"protocol":"openai-images","model_mode":"omit"} (0.00s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/null
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/null (0.00s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"unsupported","model_mode":"omit"}
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"unsupported","model_mode":"omit"} (0.00s)
+=== RUN   TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"openai-images","model_mode":"omit"}
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{"protocol":"openai-images","model_mode":"omit"} (0.00s)
+--- PASS: TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution (0.00s)
+=== RUN   TestAttachmentShortcutKeepsExistingSessionRules
+=== RUN   TestAttachmentShortcutKeepsExistingSessionRules/no_reply_target
+--- PASS: TestAttachmentShortcutKeepsExistingSessionRules/no_reply_target (0.00s)
+=== RUN   TestAttachmentShortcutKeepsExistingSessionRules/subagent
+--- PASS: TestAttachmentShortcutKeepsExistingSessionRules/subagent (0.00s)
+--- PASS: TestAttachmentShortcutKeepsExistingSessionRules (0.01s)
+=== RUN   TestEditDisabledBeforeHTTP
+--- PASS: TestEditDisabledBeforeHTTP (0.00s)
+=== RUN   TestDeniedConversationDoesNotOpenExistingHash
+--- PASS: TestDeniedConversationDoesNotOpenExistingHash (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider
+=== RUN   TestModelArgumentsCannotChooseProvider/base_url
+--- PASS: TestModelArgumentsCannotChooseProvider/base_url (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/endpoint
+--- PASS: TestModelArgumentsCannotChooseProvider/endpoint (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/api_key
+--- PASS: TestModelArgumentsCannotChooseProvider/api_key (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/protocol
+--- PASS: TestModelArgumentsCannotChooseProvider/protocol (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/model
+--- PASS: TestModelArgumentsCannotChooseProvider/model (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/model_mode
+--- PASS: TestModelArgumentsCannotChooseProvider/model_mode (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/bot_id
+--- PASS: TestModelArgumentsCannotChooseProvider/bot_id (0.00s)
+=== RUN   TestModelArgumentsCannotChooseProvider/session_id
+--- PASS: TestModelArgumentsCannotChooseProvider/session_id (0.00s)
+--- PASS: TestModelArgumentsCannotChooseProvider (0.00s)
+=== RUN   TestEditMultipartConfiguredModelAndMask
+--- PASS: TestEditMultipartConfiguredModelAndMask (0.01s)
+=== RUN   TestTimeoutIsUnknownWithoutRetry
+--- PASS: TestTimeoutIsUnknownWithoutRetry (0.02s)
+=== RUN   TestExplicitConfig
+=== RUN   TestExplicitConfig/absent
+--- PASS: TestExplicitConfig/absent (0.00s)
+=== RUN   TestExplicitConfig/omit
+--- PASS: TestExplicitConfig/omit (0.00s)
+=== RUN   TestExplicitConfig/configured
+--- PASS: TestExplicitConfig/configured (0.00s)
+=== RUN   TestExplicitConfig/null
+--- PASS: TestExplicitConfig/null (0.00s)
+=== RUN   TestExplicitConfig/unknown_protocol
+--- PASS: TestExplicitConfig/unknown_protocol (0.00s)
+=== RUN   TestExplicitConfig/missing_mode
+--- PASS: TestExplicitConfig/missing_mode (0.00s)
+=== RUN   TestExplicitConfig/unknown_field
+--- PASS: TestExplicitConfig/unknown_field (0.00s)
+--- PASS: TestExplicitConfig (0.00s)
+=== RUN   TestGenerateBytesAndAttachment
+=== RUN   TestGenerateBytesAndAttachment/omit
+    provider_test.go:159: mode=omit POST=1 original_sha256=9dd42cb5b6cf10108a0d444072c822e7d827890f20f6a3fcc7561651754cc809 persisted_bytes=77
+--- PASS: TestGenerateBytesAndAttachment/omit (0.00s)
+=== RUN   TestGenerateBytesAndAttachment/configured
+    provider_test.go:159: mode=configured POST=1 original_sha256=9dd42cb5b6cf10108a0d444072c822e7d827890f20f6a3fcc7561651754cc809 persisted_bytes=77
+--- PASS: TestGenerateBytesAndAttachment/configured (0.00s)
+--- PASS: TestGenerateBytesAndAttachment (0.01s)
+=== RUN   TestNativeSupervisorAndSubagentImageChain
+=== RUN   TestNativeSupervisorAndSubagentImageChain/subagent_false
+    provider_test.go:262: real native loop + synthetic HTTP: chat=3 generation=1 edit=1; source=41d814e38ac6b138cd68e4ffbebc69ba5d7c86fc8787578b9c6ec92425ce7098 output=bc937c4cdb23543f341630b625aa71515b19683f06a81e939f13afad2deb0bd3
+--- PASS: TestNativeSupervisorAndSubagentImageChain/subagent_false (0.02s)
+=== RUN   TestNativeSupervisorAndSubagentImageChain/subagent_true
+    provider_test.go:262: real native loop + synthetic HTTP: chat=3 generation=1 edit=1; source=41d814e38ac6b138cd68e4ffbebc69ba5d7c86fc8787578b9c6ec92425ce7098 output=bc937c4cdb23543f341630b625aa71515b19683f06a81e939f13afad2deb0bd3
+--- PASS: TestNativeSupervisorAndSubagentImageChain/subagent_true (0.02s)
+--- PASS: TestNativeSupervisorAndSubagentImageChain (0.04s)
+=== RUN   TestUnknownNeverAutomaticallyRetries
+=== RUN   TestUnknownNeverAutomaticallyRetries/429
+--- PASS: TestUnknownNeverAutomaticallyRetries/429 (0.00s)
+=== RUN   TestUnknownNeverAutomaticallyRetries/500
+--- PASS: TestUnknownNeverAutomaticallyRetries/500 (0.00s)
+=== RUN   TestUnknownNeverAutomaticallyRetries/redirect
+--- PASS: TestUnknownNeverAutomaticallyRetries/redirect (0.00s)
+=== RUN   TestUnknownNeverAutomaticallyRetries/disconnect
+--- PASS: TestUnknownNeverAutomaticallyRetries/disconnect (0.00s)
+=== RUN   TestUnknownNeverAutomaticallyRetries/invalid_base64
+--- PASS: TestUnknownNeverAutomaticallyRetries/invalid_base64 (0.00s)
+=== RUN   TestUnknownNeverAutomaticallyRetries/url_only
+--- PASS: TestUnknownNeverAutomaticallyRetries/url_only (0.00s)
+--- PASS: TestUnknownNeverAutomaticallyRetries (0.01s)
+=== RUN   TestInvalidInputsNeverDispatch
+=== RUN   TestInvalidInputsNeverDispatch/null
+--- PASS: TestInvalidInputsNeverDispatch/null (0.00s)
+=== RUN   TestInvalidInputsNeverDispatch/{"prompt":"synthetic","model":"override"}
+--- PASS: TestInvalidInputsNeverDispatch/{"prompt":"synthetic","model":"override"} (0.00s)
+=== RUN   TestInvalidInputsNeverDispatch/{"prompt":""}
+--- PASS: TestInvalidInputsNeverDispatch/{"prompt":""} (0.00s)
+=== RUN   TestInvalidInputsNeverDispatch/{"prompt":"synthetic","mode":"edit"}
+--- PASS: TestInvalidInputsNeverDispatch/{"prompt":"synthetic","mode":"edit"} (0.00s)
+--- PASS: TestInvalidInputsNeverDispatch (0.01s)
+=== RUN   TestStorageFailureDoesNotRegenerate
+--- PASS: TestStorageFailureDoesNotRegenerate (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/imagecapability	1.193s
+=== RUN   TestRegistryProviderTemplatesKeepAllProviderFiles
+--- PASS: TestRegistryProviderTemplatesKeepAllProviderFiles (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/old_fence
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/old_fence (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/unclaimed
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/unclaimed (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/terminal
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/terminal (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/lost
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/lost (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/accepted_before_authenticated_resume
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/accepted_before_authenticated_resume (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_bot
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_bot (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_team
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_team (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_session
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_session (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_user
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_user (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/ownerless
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/ownerless (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/deleted
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/deleted (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/malformed_input
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/malformed_input (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_model_metadata
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_model_metadata (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_submitted_input_without_host_references
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_submitted_input_without_host_references (0.00s)
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission (0.00s)
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code (0.00s)
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex (0.00s)
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/native_explicit
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/native_explicit (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/native_inferred
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/native_inferred (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_explicit
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_explicit (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_inferred
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_inferred (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/missing_binding
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/missing_binding (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/wrong_session
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/wrong_session (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/other_pc_scope
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/other_pc_scope (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/read_denied
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/read_denied (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/write_denied
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/write_denied (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/exec_denied
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/exec_denied (0.00s)
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial (0.00s)
+=== RUN   TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall
+--- PASS: TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall (0.00s)
+=== RUN   TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundary
+--- PASS: TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundary (0.00s)
+=== RUN   TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation
+--- PASS: TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation (0.00s)
+=== RUN   TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget
+--- PASS: TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build (0.00s)
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess (0.00s)
+=== RUN   TestHostPreservesUpstreamWorkspaceBehavior
+--- PASS: TestHostPreservesUpstreamWorkspaceBehavior (0.00s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/success
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=3 send=1 steps=2 mode=success original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/success (0.10s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/revoked
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=revoked original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/revoked (0.08s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/foreign_reference
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=foreign_reference original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/foreign_reference (0.07s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/missing_reference
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=missing_reference original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/missing_reference (0.07s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/unknown
+    image_capability_spawn_test.go:293: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=2 send=0 steps=2 mode=unknown original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/unknown (0.07s)
+--- PASS: TestImageCapabilityActualSpawnAndParentSend (0.40s)
+=== RUN   TestImageCapabilityUsesCurrentBotAndSessionAuthority
+--- PASS: TestImageCapabilityUsesCurrentBotAndSessionAuthority (0.00s)
+=== RUN   TestACPToolProvidersIncludeAskUser
+--- PASS: TestACPToolProvidersIncludeAskUser (0.00s)
+=== RUN   TestAgentLimitsFromConfigUsesCustomValues
+--- PASS: TestAgentLimitsFromConfigUsesCustomValues (0.00s)
+=== RUN   TestAgentLoopReselectModeFromConfigDefaultsToActiveWhenUnrecognized
+2026/10/23 04:35:26 WARN unrecognized agent.context_loop_reselect value; defaulting to active value=bogus
+--- PASS: TestAgentLoopReselectModeFromConfigDefaultsToActiveWhenUnrecognized (0.00s)
+=== RUN   TestAgentLoopReselectModeFromConfigHonorsShadow
+--- PASS: TestAgentLoopReselectModeFromConfigHonorsShadow (0.00s)
+=== RUN   TestProvideAgentWiresLoopReselectMode
+--- PASS: TestProvideAgentWiresLoopReselectMode (0.00s)
+=== RUN   TestLazyLLMCompactResolvesModelWithRequestBotID
+--- PASS: TestLazyLLMCompactResolvesModelWithRequestBotID (0.00s)
+=== RUN   TestConfigureMemoryProviderRegistryLoadsPersistedProviderOnCacheMiss
+--- PASS: TestConfigureMemoryProviderRegistryLoadsPersistedProviderOnCacheMiss (0.00s)
+=== RUN   TestValidateDriverDependencies
+=== RUN   TestValidateDriverDependencies/real_declarations_pass
+--- PASS: TestValidateDriverDependencies/real_declarations_pass (0.00s)
+=== RUN   TestValidateDriverDependencies/drivers_without_a_declaration_are_ignored
+--- PASS: TestValidateDriverDependencies/drivers_without_a_declaration_are_ignored (0.00s)
+=== RUN   TestValidateDriverDependencies/nil_catalog
+--- PASS: TestValidateDriverDependencies/nil_catalog (0.00s)
+=== RUN   TestValidateDriverDependencies/dependency_not_in_the_catalog
+--- PASS: TestValidateDriverDependencies/dependency_not_in_the_catalog (0.00s)
+=== RUN   TestValidateDriverDependencies/primary_command_is_not_the_launcher
+--- PASS: TestValidateDriverDependencies/primary_command_is_not_the_launcher (0.00s)
+=== RUN   TestValidateDriverDependencies/dependency_provides_a_different_command
+--- PASS: TestValidateDriverDependencies/dependency_provides_a_different_command (0.00s)
+=== RUN   TestValidateDriverDependencies/runtime_without_a_registered_launcher_command
+--- PASS: TestValidateDriverDependencies/runtime_without_a_registered_launcher_command (0.00s)
+=== RUN   TestValidateDriverDependencies/all_violations_reported_together
+--- PASS: TestValidateDriverDependencies/all_violations_reported_together (0.00s)
+--- PASS: TestValidateDriverDependencies (0.01s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	1.467s

@@ -1,0 +1,174 @@
+{
+  "reason": "Bounded removal of prior Go-generated cache files, no active Go check remains, originals and logs retained",
+  "files": [
+    {
+      "path": "/tmp/agenvo-build-cache/b9/b91d8897704195181ac5951f249162a5e9eb877f7c3f35e0e182f27222b32ef7-d",
+      "bytes": 180943460,
+      "mtime_utc": "2026-10-23T03:15:19Z",
+      "sha256": "b91d8897704195181ac5951f249162a5e9eb877f7c3f35e0e182f27222b32ef7",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/6f/6f31add439ac512782df2a3e25c6eea875dc4cad361ae13c694ca864a7ae0043-d",
+      "bytes": 166436762,
+      "mtime_utc": "2026-10-23T03:21:54Z",
+      "sha256": "6f31add439ac512782df2a3e25c6eea875dc4cad361ae13c694ca864a7ae0043",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/2d/2d9088e56009d6b849b935c97218e77786c40a9100a8964408e653693aa5fe4e-d",
+      "bytes": 35030370,
+      "mtime_utc": "2026-10-23T03:16:25Z",
+      "sha256": "2d9088e56009d6b849b935c97218e77786c40a9100a8964408e653693aa5fe4e",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/9c/9c13b49dfe63f9970a95d50890a25968c7950ef99b6affa7c2689b4463e750f0-d",
+      "bytes": 31151364,
+      "mtime_utc": "2026-10-22T22:11:47Z",
+      "sha256": "9c13b49dfe63f9970a95d50890a25968c7950ef99b6affa7c2689b4463e750f0",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/c4/c4e22cb66deecb33d1e4ff65aa9d243070c0185b926ede0793af383c8305eb5d-d",
+      "bytes": 30590820,
+      "mtime_utc": "2026-10-23T03:16:25Z",
+      "sha256": "c4e22cb66deecb33d1e4ff65aa9d243070c0185b926ede0793af383c8305eb5d",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/5d/5d98e87277c3761fb5e331a2206a85516c7b17e0f8f87dc3899bd93cfaaf3411-d",
+      "bytes": 17290252,
+      "mtime_utc": "2026-10-22T23:59:12Z",
+      "sha256": "5d98e87277c3761fb5e331a2206a85516c7b17e0f8f87dc3899bd93cfaaf3411",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/f1/f186cb28f7f53bb105e91e12a363de1c4ae6369a3b824c3700209b00f1ac15f7-d",
+      "bytes": 17288200,
+      "mtime_utc": "2026-10-22T22:04:02Z",
+      "sha256": "f186cb28f7f53bb105e91e12a363de1c4ae6369a3b824c3700209b00f1ac15f7",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/6e/6ef14945590cdc6a45644f90aef32be2045991945b6dd7199baf7d184ab8e2f6-d",
+      "bytes": 15369524,
+      "mtime_utc": "2026-10-23T00:01:55Z",
+      "sha256": "6ef14945590cdc6a45644f90aef32be2045991945b6dd7199baf7d184ab8e2f6",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/be/be80ce4a03c0f98d5e359f6e22e1c7b2f5d02a42c1b67ba44fca13c30b153416-d",
+      "bytes": 15367470,
+      "mtime_utc": "2026-10-22T22:14:18Z",
+      "sha256": "be80ce4a03c0f98d5e359f6e22e1c7b2f5d02a42c1b67ba44fca13c30b153416",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/29/290fe1720f45d7858877efbfdf96e868e7602942aa266c00178dda0c150f1761-d",
+      "bytes": 15329600,
+      "mtime_utc": "2026-10-23T03:16:29Z",
+      "sha256": "290fe1720f45d7858877efbfdf96e868e7602942aa266c00178dda0c150f1761",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/93/931c5754aeeb2946faba0935173079f22517320de7f596f57294a1aeb9894b7f-d",
+      "bytes": 14055670,
+      "mtime_utc": "2026-10-23T03:16:25Z",
+      "sha256": "931c5754aeeb2946faba0935173079f22517320de7f596f57294a1aeb9894b7f",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/08/08f7a9f055b916a1c54486e09979fe140a596b697ee577237d3512ddb417d63a-d",
+      "bytes": 12147158,
+      "mtime_utc": "2026-10-22T23:59:00Z",
+      "sha256": "08f7a9f055b916a1c54486e09979fe140a596b697ee577237d3512ddb417d63a",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/12/1279112e62947060c82dff276f42a05b545f6471fb0514662c7f93ad0b19cf85-d",
+      "bytes": 12147156,
+      "mtime_utc": "2026-10-22T22:03:44Z",
+      "sha256": "1279112e62947060c82dff276f42a05b545f6471fb0514662c7f93ad0b19cf85",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/46/46335cd285d93557b7cbe15947a7e415714ddb2e94dfb7c791cd0313088e3562-d",
+      "bytes": 12146972,
+      "mtime_utc": "2026-10-22T23:58:15Z",
+      "sha256": "46335cd285d93557b7cbe15947a7e415714ddb2e94dfb7c791cd0313088e3562",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/d2/d22617ebf38799a0c43ef54cc4ffb616a2ede0cd290411eec4f8e353c6f0b464-d",
+      "bytes": 12146970,
+      "mtime_utc": "2026-10-22T22:03:20Z",
+      "sha256": "d22617ebf38799a0c43ef54cc4ffb616a2ede0cd290411eec4f8e353c6f0b464",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/e1/e11428fec078349590f8f3f638a554281187d52c3f79c3a40ce196134b7da13a-d",
+      "bytes": 12146212,
+      "mtime_utc": "2026-10-23T03:14:41Z",
+      "sha256": "e11428fec078349590f8f3f638a554281187d52c3f79c3a40ce196134b7da13a",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/6f/6f2c6543f79cad412c4343fd0568772fa7b7b12b3203a255fa8e177335751e3c-d",
+      "bytes": 11911316,
+      "mtime_utc": "2026-10-22T23:02:35Z",
+      "sha256": "6f2c6543f79cad412c4343fd0568772fa7b7b12b3203a255fa8e177335751e3c",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/b9/b9da4f188e1c325e5450ebf4c869cafcdf5ba001a34db17e5335dd19217fbdf7-d",
+      "bytes": 11907824,
+      "mtime_utc": "2026-10-23T00:11:26Z",
+      "sha256": "b9da4f188e1c325e5450ebf4c869cafcdf5ba001a34db17e5335dd19217fbdf7",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/64/64117ebcf84c0848c066170071d039bd3c40dca73c3da87acf1bfae0ffc1209a-d",
+      "bytes": 11457350,
+      "mtime_utc": "2026-10-22T23:59:07Z",
+      "sha256": "64117ebcf84c0848c066170071d039bd3c40dca73c3da87acf1bfae0ffc1209a",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/e4/e463b8a1eca2548b3b36821e24be242b7d75ea53b5d6370916738e7414c71272-d",
+      "bytes": 11457346,
+      "mtime_utc": "2026-10-22T22:03:54Z",
+      "sha256": "e463b8a1eca2548b3b36821e24be242b7d75ea53b5d6370916738e7414c71272",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/97/974f3ccf7967e6f2f8ff7c45a695a4dea4b8fd0e49c95ae5cd65f3ebfa3a27cd-d",
+      "bytes": 11457100,
+      "mtime_utc": "2026-10-22T22:03:50Z",
+      "sha256": "974f3ccf7967e6f2f8ff7c45a695a4dea4b8fd0e49c95ae5cd65f3ebfa3a27cd",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/03/039694c87c3afc72efc45be0e3acde1a889899dc722d14ed172c10dca30a2364-d",
+      "bytes": 11456786,
+      "mtime_utc": "2026-10-23T03:14:47Z",
+      "sha256": "039694c87c3afc72efc45be0e3acde1a889899dc722d14ed172c10dca30a2364",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/6b/6bf6c9b0ba4c5dc5f32534da81085abe7ab81276a4735adb19eb4acc4f79b27a-d",
+      "bytes": 11021638,
+      "mtime_utc": "2026-10-22T23:58:49Z",
+      "sha256": "6bf6c9b0ba4c5dc5f32534da81085abe7ab81276a4735adb19eb4acc4f79b27a",
+      "kind": "cached-Go-archive"
+    },
+    {
+      "path": "/tmp/agenvo-build-cache/6f/6f35c283787cca696c4bc2009eb25a7e08591a8718d623905cebc5e5002089b7-d",
+      "bytes": 11021316,
+      "mtime_utc": "2026-10-22T23:57:25Z",
+      "sha256": "6f35c283787cca696c4bc2009eb25a7e08591a8718d623905cebc5e5002089b7",
+      "kind": "cached-Go-archive"
+    }
+  ],
+  "bytes": 691278636
+}

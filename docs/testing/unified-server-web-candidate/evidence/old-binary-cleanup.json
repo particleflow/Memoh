@@ -1,0 +1,20 @@
+[
+  {
+    "path": "/tmp/memoh-publication-combined-server",
+    "bytes": 168002150,
+    "sha256": "97c467f135af887eea397c10d867fd50a20f21dd9f7270414619a362b61f110b",
+    "reason": "Prior task-generated rebuildable binary; no active process uses this executable"
+  },
+  {
+    "path": "/tmp/memoh-followup-history-server",
+    "bytes": 168002150,
+    "sha256": "e35e517ee35ae7bef893680ddd83ca2b3a42abe0bc6005735a788d8bc176bab6",
+    "reason": "Prior task-generated rebuildable binary; no active process uses this executable"
+  },
+  {
+    "path": "/tmp/memoh-history-server",
+    "bytes": 167913395,
+    "sha256": "4e4d613d5d127cdb901194bf6bb06fd3b9c8b464ddfb9c8fe28fe9c6dd1517b3",
+    "reason": "Prior task-generated rebuildable binary; no active process uses this executable"
+  }
+]

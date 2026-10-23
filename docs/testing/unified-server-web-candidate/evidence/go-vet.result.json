@@ -1,0 +1,15 @@
+{
+  "check": "go-vet",
+  "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+  "command": [
+    "go",
+    "vet",
+    "./internal/handlers",
+    "./internal/imagecapability",
+    "./cmd/internal/core",
+    "./internal/computertask"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T04:36:44Z",
+  "elapsed_seconds": 29.119
+}

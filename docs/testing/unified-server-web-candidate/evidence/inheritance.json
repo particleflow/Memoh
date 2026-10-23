@@ -1,0 +1,38 @@
+{
+  "base": "a3849eb027d86788780d3ac6b6adc92bbf122db7",
+  "base_tree": "4116f93ff9ce272946da3e81078a9df0e15440f1",
+  "frozen_combination": "f5b162633016ab1e0e594f1fb22217855433791f",
+  "pr66": "892efee385b8b505b5a8d8a7aaf95fb5bfa384d3",
+  "f5_is_ancestor": true,
+  "preview_already_identical": true,
+  "selected_test_files": [
+    "internal/handlers/bot_delegations_test.go",
+    "internal/handlers/computer_transfers_test.go"
+  ],
+  "f5_to_base_files": [
+    "cmd/internal/core/computer_tasks.go",
+    "cmd/internal/core/image_capability.go",
+    "cmd/internal/core/image_capability_spawn_fixture_test.go",
+    "cmd/internal/core/image_capability_spawn_test.go",
+    "cmd/internal/core/image_capability_test.go",
+    "cmd/internal/core/providers.go",
+    "docs/computer-task-mcp.md",
+    "docs/images-capability.md",
+    "docs/native-agent-observation-history.md",
+    "internal/agenvo/agent.go",
+    "internal/computertask/native_evidence.go",
+    "internal/computertask/native_evidence_test.go",
+    "internal/computertask/service.go",
+    "internal/computertask/source.go",
+    "internal/config/computer_tasks.go",
+    "internal/config/computer_tasks_test.go",
+    "internal/config/config.go",
+    "internal/imagecapability/boundaries_test.go",
+    "internal/imagecapability/config.go",
+    "internal/imagecapability/protocol.go",
+    "internal/imagecapability/provider.go",
+    "internal/imagecapability/provider_test.go"
+  ],
+  "prior_test_fixture_difference": "diff --git a/internal/handlers/computer_transfers_test.go b/internal/handlers/computer_transfers_test.go\nindex da40abe3..88bc92a5 100644\n--- a/internal/handlers/computer_transfers_test.go\n+++ b/internal/handlers/computer_transfers_test.go\n@@ -52,6 +52,7 @@ func (v *transferVerifierFixture) Revalidate(ctx context.Context, _ computertask\n }\n \n type taskTransferFixtureOptions struct {\n+\troot    string\n \tassets  func(*media.Service) computertask.DeliveryAssets\n \trequest func(*http.Request)\n \tdevice  func(computertask.DeliveryIdentity, agenvo.Target) DeviceTransferVerifier\n@@ -61,6 +62,9 @@ func taskTransferHTTPFixture(t *testing.T, disabled bool, options ...taskTransfe\n \tt.Helper()\n \tf, _ := deliveryHTTPServer(t)\n \troot := t.TempDir()\n+\tif len(options) > 0 && options[0].root != \"\" {\n+\t\troot = options[0].root\n+\t}\n \tassets := media.NewService(nil, localfs.NewOriginals(root))\n \tassets.SetRequirePersistence(true)\n \tif err := assets.EnableUploads(root); err != nil {",
+  "initial_preflight": "Exact test-file equality assertion failed because current base already includes optional root fixture support. No patch had applied. Preserve that support and apply only the selected If-Range diff."
+}

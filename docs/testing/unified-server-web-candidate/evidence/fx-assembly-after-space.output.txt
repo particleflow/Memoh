@@ -1,0 +1,3 @@
+# github.com/felinics/memoh/cmd/agent.test
+<cloud-go>/pkg/tool/linux_amd64/link: mapping output file failed: no space left on device
+FAIL	github.com/felinics/memoh/cmd/agent [build failed]

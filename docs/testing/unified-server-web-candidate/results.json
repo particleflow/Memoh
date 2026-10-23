@@ -1,0 +1,328 @@
+{
+  "boundary": {
+    "check": "boundary",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "bash",
+      "scripts/check-agent-core-boundary.sh"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:33:34Z",
+    "elapsed_seconds": 0.016
+  },
+  "computer-routing": {
+    "check": "computer-routing",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "240s",
+      "./internal/computertask"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:35:27Z",
+    "elapsed_seconds": 22.785,
+    "named_test_events": {
+      "pass": 295
+    },
+    "skips": []
+  },
+  "desktop-type": {
+    "check": "desktop-type",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/desktop",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:34:13Z",
+    "elapsed_seconds": 7.484
+  },
+  "fx-assembly-after-space": {
+    "check": "fx-assembly-after-space",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "90s",
+      "./cmd/agent",
+      "-run",
+      "^TestFXOptionsValidate$"
+    ],
+    "exit_code": 1,
+    "started_at_utc": "2026-10-23T04:38:47Z",
+    "elapsed_seconds": 59.372,
+    "named_test_events": {},
+    "skips": []
+  },
+  "fx-assembly-link-space": {
+    "check": "fx-assembly-link-space",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "90s",
+      "./cmd/agent",
+      "-run",
+      "^TestFXOptionsValidate$"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:41:05Z",
+    "elapsed_seconds": 8.492,
+    "named_test_events": {
+      "pass": 4
+    },
+    "skips": []
+  },
+  "fx-assembly": {
+    "check": "fx-assembly",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "90s",
+      "./cmd/agent",
+      "-run",
+      "^TestFXOptionsValidate$"
+    ],
+    "exit_code": 1,
+    "started_at_utc": "2026-10-23T04:37:17Z",
+    "elapsed_seconds": 17.521,
+    "named_test_events": {},
+    "skips": []
+  },
+  "go-lint": {
+    "check": "go-lint",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "/tmp/golangci-lint-2.10.1-linux-amd64/golangci-lint",
+      "run",
+      "--concurrency=2",
+      "--new-from-rev=a3849eb027d86788780d3ac6b6adc92bbf122db7",
+      "./internal/handlers"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:41:30Z",
+    "elapsed_seconds": 130.385
+  },
+  "go-vet": {
+    "check": "go-vet",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "vet",
+      "./internal/handlers",
+      "./internal/imagecapability",
+      "./cmd/internal/core",
+      "./internal/computertask"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:36:44Z",
+    "elapsed_seconds": 29.119
+  },
+  "history-pg": {
+    "check": "history-pg",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "bash",
+      "scripts/test-pi-batch-history-postgres.sh"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:36:38Z",
+    "elapsed_seconds": 6.139,
+    "named_test_events": {
+      "pass": 1
+    },
+    "skips": []
+  },
+  "http-range": {
+    "check": "http-range",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "240s",
+      "./internal/handlers",
+      "-run",
+      "Test(BotDelegation|ComputerTransfer|TaskTransfer|GeneratedContracts)"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:33:34Z",
+    "elapsed_seconds": 71.535,
+    "named_test_events": {
+      "pass": 28
+    },
+    "skips": []
+  },
+  "images-core": {
+    "check": "images-core",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "240s",
+      "./internal/imagecapability",
+      "./cmd/internal/core"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:34:45Z",
+    "elapsed_seconds": 41.536,
+    "named_test_events": {
+      "pass": 119
+    },
+    "skips": []
+  },
+  "legacy-tools": {
+    "check": "legacy-tools",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "120s",
+      "./internal/agent/tool",
+      "-run",
+      "^Test(ImageToolRejectsWithdrawnArgumentsBeforeProvider|ImageGenerationRouting|ExecGenerateImageRelaysChatFallbackTextAsResult|GenerateOpenAIImagesImageDoesNotRetry.*|ResolveToolTargetRejectsNativeReadback|AgenvoTargetExecDoesNotUseBridgeOrNativeFallback|NativeWorkdirSessionCanUseAuthorizedPCWithoutCarryingNativeDirectory)$"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:35:49Z",
+    "elapsed_seconds": 9.109,
+    "named_test_events": {
+      "pass": 20
+    },
+    "skips": []
+  },
+  "operation-pg": {
+    "check": "operation-pg",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "bash",
+      "scripts/test-computer-operations-postgres.sh"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:35:59Z",
+    "elapsed_seconds": 39.116,
+    "named_test_events": {
+      "pass": 1
+    },
+    "skips": []
+  },
+  "sdk-type": {
+    "check": "sdk-type",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/sdk",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:33:38Z",
+    "elapsed_seconds": 2.513
+  },
+  "server-build": {
+    "check": "server-build",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "go",
+      "build",
+      "-p",
+      "1",
+      "-o",
+      "/tmp/memoh-unified-server",
+      "./cmd/agent"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:41:14Z",
+    "elapsed_seconds": 16.213
+  },
+  "ui-affected": {
+    "check": "ui-affected",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--maxWorkers=2",
+      "--testTimeout=15000",
+      "apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts",
+      "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts",
+      "apps/web/src/pages/home/components/dockview/panel-preview.test.ts",
+      "apps/web/src/pages/home/components/session-tasks.test.ts",
+      "apps/web/src/pages/home/composables/useSessionTasks.test.ts"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:34:20Z",
+    "elapsed_seconds": 11.459
+  },
+  "web-build": {
+    "check": "web-build",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "build"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:34:32Z",
+    "elapsed_seconds": 6.471
+  },
+  "web-type": {
+    "check": "web-type",
+    "source_head": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "typecheck"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T04:33:40Z",
+    "elapsed_seconds": 32.496
+  }
+}
