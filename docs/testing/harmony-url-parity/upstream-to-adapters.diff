@@ -1,0 +1,11 @@
+--- upstream-145.txt
++++ adapters-147.txt
+@@ -90,6 +90,8 @@
+ src/lib/api-client.test.ts(284,47): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.
+ src/lib/api-client.test.ts(299,21): error TS2352: Conversion of type 'undefined' to type 'Request' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+ src/lib/api-client.test.ts(299,47): error TS2493: Tuple type '[]' of length '0' has no element at index '0'.
++src/lib/harmony-download.ts(2,10): error TS2459: Module '"@/lib/api-client"' declares 'createApiFetch' locally, but it is not exported.
++src/lib/harmony-download.ts(3,10): error TS2305: Module '"@/lib/auth-session"' has no exported member 'authSessionGeneration'.
+ src/lib/query-cache-persistence.test.ts(23,42): error TS2339: Property 'data' does not exist on type '{}'.
+ src/lib/query-cache-persistence.test.ts(24,34): error TS2339: Property 'data' does not exist on type '{}'.
+ src/lib/query-cache-persistence.test.ts(25,38): error TS2339: Property 'data' does not exist on type '{}'.

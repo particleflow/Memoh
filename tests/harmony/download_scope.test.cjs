@@ -17,9 +17,11 @@ function load(file, imports, globals = {}) {
   return m.exports
 }
 const validator = load('mobile/memoh/harmony-service-url.ts', {})
-const id = '10000000-0000-4000-8000-000000000001', hash = 'a'.repeat(64)
-const origin = 'https://nas.lan/api', scoped = `/bots/${id}/sessions/${id}/delegations/${id}/attachments/${hash}`
-const ordinary = `/bots/${id}/media/${hash}`
+const botId = '10000000-0000-4000-8000-000000000001'
+const sessionId = '20000000-0000-4000-8000-000000000002'
+const delegationId = '30000000-0000-4000-8000-000000000003', hash = 'a'.repeat(64)
+const origin = 'https://nas.lan/api', scoped = `/bots/${botId}/sessions/${sessionId}/delegations/${delegationId}/attachments/${hash}`
+const ordinary = `/bots/${botId}/media/${hash}`
 const calls = [], authResponses = [], listeners = new Set()
 let ordinaryCalls = 0, bridgeStatus = 200, generation = 0, token = 'synthetic-only', changeToken = false
 const host = { begoniaNative: { request: async raw => {
@@ -57,31 +59,31 @@ const adapter = load('mobile/memoh/harmony-download.ts', {
 }, { window: host })
 
 async function main() {
-  await adapter.saveNativeOriginal(id, hash, 1, 'file', undefined, scoped)
+  await adapter.saveNativeOriginal(botId, hash, 1, 'file', undefined, scoped)
   assert.equal(ordinaryCalls, 0)
   assert.equal(calls[0].url, origin + scoped)
   assert.deepEqual(calls.map(q => q.command), ['download.fetch', 'download.save', 'download.abort'])
   calls.length = 0
-  await adapter.saveNativeOriginal(id, hash, 1, 'file')
+  await adapter.saveNativeOriginal(botId, hash, 1, 'file')
   assert.equal(ordinaryCalls, 1)
   assert.equal(calls[0].url, origin + ordinary)
   const invalid = [null, '', [scoped], { path: scoped }, 'https://other.example' + scoped, '//other.example' + scoped,
     scoped + '?token=stale', scoped + '#x', scoped.replace(hash, 'b'.repeat(64)), scoped.replace('/sessions/', '/%73essions/')]
   for (const value of invalid) {
     calls.length = 0
-    await assert.rejects(adapter.saveNativeOriginal(id, hash, 1, 'file', undefined, value), /MEDIA_DOWNLOAD_SCOPE/)
+    await assert.rejects(adapter.saveNativeOriginal(botId, hash, 1, 'file', undefined, value), /MEDIA_DOWNLOAD_SCOPE/)
     assert.equal(calls.length, 0); assert.equal(ordinaryCalls, 1)
   }
   for (const status of [401, 403]) {
     calls.length = 0; bridgeStatus = status
-    await assert.rejects(adapter.saveNativeOriginal(id, hash, 1, 'file', undefined, scoped))
+    await assert.rejects(adapter.saveNativeOriginal(botId, hash, 1, 'file', undefined, scoped))
     assert.equal(authResponses.at(-1), status)
     assert.equal(calls.filter(q => q.command === 'download.fetch').length, 1)
     assert.equal(calls.some(q => q.command === 'download.save'), false)
     assert.equal(ordinaryCalls, 1)
   }
   calls.length = 0; bridgeStatus = 200; changeToken = true
-  await assert.rejects(adapter.saveNativeOriginal(id, hash, 1, 'file', undefined, scoped))
+  await assert.rejects(adapter.saveNativeOriginal(botId, hash, 1, 'file', undefined, scoped))
   assert.equal(calls.some(q => q.command === 'download.save'), false)
   assert.equal(listeners.size, 0)
 
@@ -111,7 +113,7 @@ async function main() {
   })
   const service = new native.NativeMediaDownload({ cacheDir: directory }, () => authorized)
   let sequence = 0
-  const input = url => ({ operation: (++sequence).toString(16).padStart(32, '0'), botId: id,
+  const input = url => ({ operation: (++sequence).toString(16).padStart(32, '0'), botId,
     hash, size: 1, name: 'file', url, authorization: 'Bearer synthetic-only' })
   try {
     for (status of [401, 403]) {
@@ -138,7 +140,7 @@ async function main() {
     assert.equal(requests.length, 0)
   } finally { service.close(); fs.rmSync(directory, { recursive: true, force: true }) }
   console.log(JSON.stringify({ passed: true, malformedScopes: invalid.length, nativeInvalidUrls: 5,
-    scopedWebEnvelope: true, scopedNativeAdmission: true, noBotHashFallbackOnDenial: true,
+    distinctBotSessionDelegationIds: true, scopedWebEnvelope: true, scopedNativeAdmission: true, noBotHashFallbackOnDenial: true,
     unchangedOrdinaryDownload: true, accountChangeRejected: true, redirectsDisabled: true,
     scope: 'Actual TS/ETS routing with controlled SDK/RCP seams; no native integrity, bridge router, TLS or phone acceptance' }))
 }

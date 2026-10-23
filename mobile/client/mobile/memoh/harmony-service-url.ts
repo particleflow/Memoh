@@ -2,6 +2,9 @@
 // No default endpoint or automatic fallback. Explicit LAN endpoints require TLS.
 export function normalizeServiceUrl(value: string, api: boolean = true): string {
   if (!value || value.length > 2048 || value !== value.trim() || /[\\\u0000-\u0020%?#]/.test(value) || !/^https?:\/\//.test(value)) throw new Error('SERVICE_URL_INVALID')
+  const authority = value.replace(/^https?:\/\//, '').split('/')[0] ?? ''
+  const hostPort = /^(?:\[[0-9a-fA-F:]+\]|[A-Za-z0-9.-]+)(?::([0-9]+))?$/.exec(authority)
+  if (!hostPort || (hostPort[1] !== undefined && (Number(hostPort[1]) < 1 || Number(hostPort[1]) > 65535))) throw new Error('SERVICE_URL_INVALID')
   const parsed = new URL(value)
   if (parsed.username || parsed.password || !parsed.hostname || !['http:', 'https:'].includes(parsed.protocol)) throw new Error('SERVICE_URL_INVALID')
   const host = parsed.hostname.toLowerCase()
@@ -11,7 +14,6 @@ export function normalizeServiceUrl(value: string, api: boolean = true): string 
     lan = /^\[f[cd][0-9a-f]{2}:/.test(host)
     if (!lan && !/^\[[23][0-9a-f]{3}:/.test(host)) throw new Error('SERVICE_URL_LOCAL')
   } else if (/^\d+\.\d+\.\d+\.\d+$/.test(host)) {
-    const authority = value.replace(/^https?:\/\//, '').split('/')[0] ?? ''
     if (authority.split(':')[0] !== host) throw new Error('SERVICE_URL_INVALID')
     const n = host.split('.').map((part: string) => Number(part))
     const first = n[0] ?? 0, second = n[1] ?? 0, third = n[2] ?? 0, fourth = n[3] ?? 0

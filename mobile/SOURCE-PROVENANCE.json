@@ -32,13 +32,15 @@
     },
     {
       "path": "mobile/client/mobile/client_config.py",
-      "sha256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc",
+      "sha256": "f2f5df416982d5aebd6051392e64fb5ecba51bb5fff85c00d9c023f1a2391868",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
+        "Follow-up after 14bb9b8: align Python URL path/normalization validation and enforce shared nonempty port range in Python/TS; no private-source reconstruction or route migration."
       ],
-      "endpointScopeBaseSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab"
+      "endpointScopeBaseSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
+      "urlParityBaseSHA256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
@@ -131,13 +133,15 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
-      "sha256": "f663289a3c65c54a4f950fde438519b509283416927dd15f3c24912a6e271153",
+      "sha256": "d1db670652625e4299f712b88b98e4ac2b164834c955d40e5fadd68aeb5d8bd3",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
+        "Follow-up after 14bb9b8: align Python URL path/normalization validation and enforce shared nonempty port range in Python/TS; no private-source reconstruction or route migration."
       ],
-      "endpointScopeBaseSHA256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f"
+      "endpointScopeBaseSHA256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f",
+      "urlParityBaseSHA256": "f663289a3c65c54a4f950fde438519b509283416927dd15f3c24912a6e271153"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service.css",
@@ -693,5 +697,14 @@
       "mobile/client/tests/stage2/harmony_service_config.cjs"
     ],
     "scope": "Explicit configured HTTPS LAN addresses and delegated native download route admission. Shared NAS identity/API-base routing and missing native integration remain pending."
+  },
+  "urlParityFollowup": {
+    "baseCommit": "14bb9b85004477b8a6628572e1dfbee480a9bf5c",
+    "sharedContractCommit": "91149ad7ab5c0d24a57f10e7d9ff1df4b71cf51c",
+    "modifiedReviewedEntries": [
+      "mobile/client/mobile/client_config.py",
+      "mobile/client/mobile/memoh/harmony-service-url.ts"
+    ],
+    "scope": "Existing API/installer fields only; documented mobile path/HTTP/address policy differences remain."
   }
 }

@@ -1,0 +1,88 @@
+{
+  "baseCommit": "14bb9b85004477b8a6628572e1dfbee480a9bf5c",
+  "sharedContract": {
+    "repository": "particleflow/Memoh",
+    "commit": "91149ad7ab5c0d24a57f10e7d9ff1df4b71cf51c",
+    "path": "internal/transferclient/testdata/api-base-v1.json",
+    "fixtureSHA256": "ec9b39d5b16b2655e225cba9eb4e97483001e21b9fdd45ad095074b7e0a68c59",
+    "vectors": 30,
+    "unchangedCopy": true
+  },
+  "focusedValidation": {
+    "pythonEndpointTestMethods": 5,
+    "sharedVectors": 30,
+    "additionalParityCases": 22,
+    "configurationChecks": 74,
+    "distinctRoutingUUIDs": true,
+    "malformedScopes": 10,
+    "invalidNativeURLs": 5,
+    "strictPureConfigTypecheckExitCode": 0,
+    "serviceURLLintExitCode": 0,
+    "manifest": {
+      "reviewedSources": 42,
+      "publicFiles": 51,
+      "missingSources": 72,
+      "pythonSyntaxFiles": 16,
+      "cjsSyntaxFiles": 9
+    }
+  },
+  "policyDifferences": {
+    "bothValidators": [
+      "require /api suffix (root or another suffix rejected)",
+      "retain existing explicit public HTTP compatibility"
+    ],
+    "pythonOnly": [
+      "existing ipaddress destination allowlist rejects documentation IPv6 2001:db8::10; TS permits this syntax"
+    ]
+  },
+  "existingTypecheckEvidence": {
+    "newFullTypecheckRun": false,
+    "webBase": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+    "uiCommit": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+    "attachmentInputCommit": "dfc7cf5104c382ecc622061ce43c3dcd733b7998",
+    "controlAdapterCommit": "84ca0e5d764b9944fc0b6c9b8264562288477744",
+    "candidateAdapterCommit": "14bb9b85004477b8a6628572e1dfbee480a9bf5c",
+    "controlCandidateRawBytesIdentical": true,
+    "originalAttachmentBeforeAfterRawBytesIdentical": true,
+    "normalization": "One literal substitution of the local dependency checkout prefix with <dependency-root>/; original logs retained privately. Diagnostics and line order unchanged.",
+    "logs": [
+      {
+        "originalLogs": [
+          "web-typecheck-before.txt",
+          "web-typecheck-after.txt"
+        ],
+        "originalBytes": 47514,
+        "originalSHA256": "86b1d2623c298f87d9c750f0274d5533d5f4789725d8064e8cfd1d8ca7c6386b",
+        "publishedLog": "upstream-145.txt",
+        "publishedBytes": 47554,
+        "publishedSHA256": "3641f49ea30675f803743acb09fc9e1e0efc391a8822135bb8bc7b3bed5a1c98",
+        "diagnostics": 145
+      },
+      {
+        "originalLogs": [
+          "native-scope-web-typecheck-control.txt",
+          "native-scope-web-typecheck.txt"
+        ],
+        "originalBytes": 47777,
+        "originalSHA256": "e0ccb3b46c81286bc9e63b5afd1c2b3cdae7574a7d46624bed0b85a57c915178",
+        "publishedLog": "adapters-147.txt",
+        "publishedBytes": 47817,
+        "publishedSHA256": "92d0012eba90909e7587c114d4747bc1dab9794d6e72f3b3434de2085458cf40",
+        "diagnostics": 147
+      }
+    ],
+    "diffFile": "upstream-to-adapters.diff",
+    "additionalErrors": [
+      "TS2459 createApiFetch not exported",
+      "TS2305 authSessionGeneration not exported"
+    ],
+    "fullWebTypecheckPassed": false
+  },
+  "remainingBlockers": [
+    "Library helper hosted-apps tools/list HTTP 401: neither source ZIP transferred",
+    "missing overlay builder and native shell inputs",
+    "UI caller delegation_url forwarding and native ServiceUrl generation unverified",
+    "full Web/HAP build, real runtime UI/screenshots and phone-NAS-phone acceptance absent",
+    "automatic LAN-first IPv6 fallback and binding migration not implemented"
+  ]
+}

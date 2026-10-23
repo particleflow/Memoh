@@ -1,5 +1,10 @@
 # Explicit LAN endpoints and native delegated downloads
 
+This records the `14bb9b8` checkpoint. The subsequent
+[URL validation and diagnostic-evidence follow-up](harmony-url-parity.md)
+adopts the shared endpoint vectors and records the remaining mobile policy
+differences; its linked contract supersedes the pending-contract status below.
+
 This follow-up starts from `84ca0e5d764b9944fc0b6c9b8264562288477744`. It changes
 the available client modules; it does not recover the missing ZIP inputs,
 reconstruct the native shell/builder, or add a transport service.
