@@ -11,12 +11,19 @@ their existing behavior.
 ## Meaning of the evidence
 
 A sample records the read start, first observation and recording timestamps,
-Agent status/readiness, optional official `completion_seq` (a decimal string to
-preserve uint64 precision), observed official session metadata, terminal text
+Agent status/readiness, optional official `completion_seq` (a decimal string
+preserving the integer value received by Go), observed official session metadata, terminal text
 fidelity/truncation, and the input request IDs/states saved **before** polling.
 Raw session paths/IDs and historical terminal text stay private in the operation
 record. Public history exposes a session-observed flag and relation to the
 original binding; it never rebinds the original Agent/session.
+
+This does not establish end-to-end uint64 precision. Official Agenvo
+`apps/herdr/src/herdr.ts` parses CLI stdout with `JSON.parse(stdout)`, so a
+sequence above JavaScript's safe integer range can already be rounded before
+Go receives it. The decimal string avoids additional numeric rounding at this
+boundary; it cannot recover upstream rounding. The synthetic Go transport's
+`9007199254740993` case tests only this local preservation of the received value.
 
 `association: sample_only` and `verified_result_ownership: unknown` are explicit.
 Herdr `agent.prompt` returns AgentInfo, not a per-input execution/result ID.
@@ -123,7 +130,8 @@ service and standard MCP HTTP client against synthetic interfaces:
 - Old `done` and newer `working` samples, multiple accepted inputs, duplicate
   samples, old/new exports and service reconstruction from serialized records.
 - Backward/gapped sequence samples, a lost read response, a session change or
-  disappearance, uint64 precision and UTF-8 byte truncation.
+  disappearance, preservation of the received integer representation (not
+  end-to-end uint64 precision) and UTF-8 byte truncation.
 - Repeated/historical exports, immutable legacy hash association, new evidence
   arriving during ingest, corrupted bytes and current authority revocation.
 - User/Bot/session/selected-PC/NAS scopes, full-capacity preservation, configuration
@@ -132,7 +140,17 @@ service and standard MCP HTTP client against synthetic interfaces:
   intent, committed-save response loss without another provider read, and
   failed writes without false evidence.
 
-Local cloud checks completed for this change:
+The historical four-package race, vet and PostgreSQL records below were made
+on the implementation worktree based on `f5b1626`, before the `15845b3`
+checkpoint; they are not full reruns of the later history-page correction.
+That correction reuses ordinary-get operation facts (including cancellation
+and cleanup) while omitting large latest-view fields. Its new JSON regression
+first reproduced false flags, then `go test -json -race ./internal/computertask
+-run '^TestNativeEvidence' -count=1` passed 10 top-level tests (24 named passes
+including subtests, no skips/failures). No four-package, vet, PostgreSQL or
+Actions run was repeated for this correction.
+
+Historical local cloud checks:
 
 - `go test -race ./internal/agenvo ./internal/computertask ./internal/config ./cmd/internal/core -count=1`: agenvo/config/core passed; the catalog description contract initially failed, then `go test -race ./internal/computertask -count=1` passed after preserving the existing follow-up-history wording.
 - `go vet ./internal/agenvo ./internal/computertask ./internal/config ./cmd/internal/core`: passed.

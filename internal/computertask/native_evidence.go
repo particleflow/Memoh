@@ -423,7 +423,13 @@ func (s *Service) nativeHistory(ctx context.Context, b toolcontext.ComputerBindi
 	if offset < 0 || offset >= len(d.NativeEvidence.Observations) && offset != 0 {
 		return Result{}, ErrInvalid
 	}
-	return Result{ID: r.ID, TargetID: r.TargetID, Kind: d.Kind, State: "unknown", NativeEvidence: nativeEvidencePage(d.NativeEvidence, offset)}, nil
+	// Keep the same operation facts as ordinary get. Only omit the large
+	// latest-view fields; zero values would falsely negate cancellation and
+	// cleanup facts when serialized by Result's non-omitempty fields.
+	out := result(r, d)
+	out.Output, out.Observation, out.Followups = "", nil, nil
+	out.NativeEvidence = nativeEvidencePage(d.NativeEvidence, offset)
+	return out, nil
 }
 
 func exportEvidenceResponse(r dbstore.ComputerOperationRecord, d Details, state, selected string) Result {

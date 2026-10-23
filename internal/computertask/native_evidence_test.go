@@ -199,6 +199,10 @@ func TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples(t *testin
 	args := map[string]any{"operation_id": initial.ID}
 	// No event stream is consumed. Backward/gapped sequence samples must not
 	// infer missing rounds, repair history, or assign any input's result.
+	// This synthetic Go transport supplies the integer directly. The decimal
+	// string preserves the received value without additional rounding here;
+	// it cannot recover rounding by Agenvo's upstream JSON.parse(stdout), nor
+	// establish end-to-end uint64 precision above JavaScript's safe range.
 	for _, seq := range []uint64{5, 3, 9007199254740993} {
 		f.seq = &seq
 		wire := invoke(t, client, "computer_task_result", args, false)
@@ -518,5 +522,50 @@ func TestNativeEvidenceExportRetainsObservationArrivingDuringIngest(t *testing.T
 	invoke(t, client, "computer_task_artifact", map[string]any{"operation_id": initial.ID, "observation_id": old.NativeEvidence.LatestObservationID}, false)
 	if !bytes.Equal(before, observationSnapshot(t, store)) || a.ingests != 1 {
 		t.Fatal("repeat export changed history")
+	}
+}
+
+func TestNativeEvidenceHistoryPagePreservesCanceledOperationFacts(t *testing.T) {
+	source, _, f, _, initial := evidenceFixture(t)
+	client := standardClient(t, source, "pc-a", false)
+	args := map[string]any{"operation_id": initial.ID}
+	invoke(t, client, "computer_task_result", args, false)
+	calls := slices.Clone(f.base.methods)
+	invoke(t, client, "computer_task_cancel", args, false)
+	ordinaryWire := invoke(t, client, "computer_task_get", args, false)
+	pageWire := invoke(t, client, "computer_task_get", map[string]any{"operation_id": initial.ID, "history_offset": 0}, false)
+	ordinary, page := parseResult(t, ordinaryWire), parseResult(t, pageWire)
+	if !ordinary.CancelRequested || !ordinary.CleanupRequired || ordinary.ProcessStopped || ordinary.State != "unknown" {
+		t.Fatal("fixture did not retain cancellation intent without proving a stop")
+	}
+	// Inspect the actual JSON: an omitted summary field must not silently
+	// become an explicit false fact about the original operation.
+	facts := func(wire json.RawMessage) string {
+		var value struct {
+			Computer map[string]json.RawMessage `json:"computer"`
+		}
+		if err := json.Unmarshal(wire, &value); err != nil {
+			t.Fatal(err)
+		}
+		selected := map[string]json.RawMessage{}
+		for _, key := range []string{"state", "phase", "cancel_requested", "cleanup_required", "process_stopped", "truncated", "native_agent_name", "workspace_id", "pane_id"} {
+			if raw, ok := value.Computer[key]; ok {
+				selected[key] = raw
+			}
+		}
+		raw, err := json.Marshal(selected)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(raw)
+	}
+	if facts(pageWire) != facts(ordinaryWire) {
+		t.Fatalf("history operation facts = %s; ordinary get = %s", facts(pageWire), facts(ordinaryWire))
+	}
+	if page.NativeEvidence == nil || page.NativeEvidence.Count != 1 || page.Output != "" || page.Observation != nil || len(page.Followups) != 0 {
+		t.Fatal("history page lost evidence or included unbounded latest-view content")
+	}
+	if !slices.Equal(calls, f.base.methods) || len(f.base.prompts) != 0 {
+		t.Fatal("cancel/history lookup contacted or redispatched the Agent")
 	}
 }
