@@ -4,6 +4,7 @@ import {
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId,
   type SessiontaskTask,
 } from '@memohai/sdk'
+import { apiErrorStatus } from '@/utils/api-error'
 
 export interface TaskScope {
   bot: string
@@ -101,7 +102,11 @@ export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boole
     cursor.value = undefined
     void refresh()
   }, { immediate: true, flush: 'sync' })
-  const timer = setInterval(() => { void refresh() }, 5000)
+  // A denial/missing route needs explicit Reload or a changed scope, not a
+  // five-second retry loop. Transient failures can still recover by polling.
+  const timer = setInterval(() => {
+    if (![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh()
+  }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
   return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh }
 }

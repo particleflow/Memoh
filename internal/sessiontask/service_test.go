@@ -27,6 +27,7 @@ type fixture struct {
 	service                     *Service
 	root, child, grandchild, op string
 	primary                     string
+	runs                        map[string]dbstore.SubagentRun
 }
 
 func (f *fixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
@@ -409,4 +410,12 @@ func TestBoundedFilteredPagesStillAdvance(t *testing.T) {
 	if err != nil || len(p.Items) != 0 || p.NextCursor != "" {
 		t.Fatal(p, err)
 	}
+}
+
+func (f *fixture) ReadSubagentRun(_ context.Context, _, session string) (dbstore.SubagentRun, error) {
+	r, ok := f.runs[session]
+	if !ok {
+		return r, db.ErrNotFound
+	}
+	return r, nil
 }

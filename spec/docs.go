@@ -11729,7 +11729,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}": {
             "get": {
-                "description": "Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Attachments and execution content are unavailable in this version.",
+                "description": "Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.",
                 "produces": [
                     "application/json"
                 ],
@@ -29235,7 +29235,8 @@ const docTemplate = `{
                 "source": {
                     "type": "string",
                     "enum": [
-                        "pi_final_assistant"
+                        "pi_final_assistant",
+                        "subagent_assistant"
                     ]
                 },
                 "text": {
@@ -29320,6 +29321,10 @@ const docTemplate = `{
                 "revision": {
                     "type": "string"
                 },
+                "run_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
                 "session_id": {
                     "type": "string",
                     "format": "uuid"
@@ -29331,7 +29336,15 @@ const docTemplate = `{
                         "submitted",
                         "process_exited",
                         "not_started",
-                        "rejected"
+                        "rejected",
+                        "accepted",
+                        "running",
+                        "waiting_decision",
+                        "finishing",
+                        "completed",
+                        "failed",
+                        "aborted",
+                        "lost"
                     ]
                 },
                 "summary": {

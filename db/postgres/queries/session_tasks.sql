@@ -31,3 +31,14 @@ WHERE created_at <= sqlc.arg(snapshot_at)::timestamptz
        (task_type=sqlc.arg(task_type)::text AND task_id=sqlc.arg(task_id)::uuid))
 ORDER BY created_at DESC, task_type DESC, task_id DESC
 LIMIT sqlc.arg(page_size)::integer;
+
+-- name: GetSubagentRunVisibleMessage :one
+-- Never substitute an earlier assistant/run when the newest message is a tool,
+-- oversized or hidden. Only the read projection needs this bounded envelope.
+SELECT CASE WHEN octet_length(content::text) <= 1048576 THEN content ELSE 'null'::jsonb END::jsonb AS content
+FROM bot_history_messages
+WHERE team_id=public.memoh_current_team_id()
+  AND bot_id=sqlc.arg(bot_id)::uuid AND session_id=sqlc.arg(session_id)::uuid
+  AND run_id=sqlc.arg(run_id)::uuid AND turn_visible=true
+ORDER BY turn_position DESC, turn_message_seq DESC, created_at DESC, id DESC
+LIMIT 1;

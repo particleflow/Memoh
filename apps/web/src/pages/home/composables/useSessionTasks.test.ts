@@ -139,6 +139,23 @@ describe('authorization-scoped task view', () => {
     })
   })
 
+  it.each([401, 403, 404])('pauses automatic reads after %i until explicit reload', async (status) => {
+    const { reader } = setup()
+    await settled()
+    reader.openTask(task)
+    await settled()
+    api.detail.mockRejectedValueOnce({ status })
+    await reader.refresh()
+    const calls = api.detail.mock.calls.length
+    await vi.advanceTimersByTimeAsync(20000)
+    expect(api.detail).toHaveBeenCalledTimes(calls)
+    expect(reader.detail.value).toBeUndefined()
+    await reader.refresh()
+    expect(reader.detail.value).toEqual(task)
+    await vi.advanceTimersByTimeAsync(5000)
+    expect(api.detail).toHaveBeenCalledTimes(calls + 2)
+  })
+
   it('clears on every failed refresh and refreshes only while visible', async () => {
     const { reader, visible, owner } = setup()
     await settled()

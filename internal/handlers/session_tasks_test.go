@@ -285,3 +285,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 		t.Fatal("task policy changed adjacent route response")
 	}
 }
+
+func (*taskHTTPFixture) ReadSubagentRun(context.Context, string, string) (dbstore.SubagentRun, error) {
+	return dbstore.SubagentRun{}, db.ErrNotFound
+}

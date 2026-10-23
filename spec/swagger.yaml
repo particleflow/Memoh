@@ -7180,6 +7180,7 @@ definitions:
       source:
         enum:
         - pi_final_assistant
+        - subagent_assistant
         type: string
       text:
         type: string
@@ -7237,6 +7238,9 @@ definitions:
         $ref: '#/definitions/sessiontask.ResultSummary'
       revision:
         type: string
+      run_id:
+        format: uuid
+        type: string
       session_id:
         format: uuid
         type: string
@@ -7247,6 +7251,14 @@ definitions:
         - process_exited
         - not_started
         - rejected
+        - accepted
+        - running
+        - waiting_decision
+        - finishing
+        - completed
+        - failed
+        - aborted
+        - lost
         type: string
       summary:
         type: string
@@ -15692,7 +15704,9 @@ paths:
     get:
       description: Same projection as a list item, with fresh authorization. Unknown
         execution and cancel intent never assert termination or business completion.
-        Attachments and execution content are unavailable in this version.
+        Subagents expose their own latest persisted run and bounded visible assistant
+        text; computer tasks expose verified result summaries. No raw logs or attachment
+        bytes.
       parameters:
       - description: Bot ID
         in: path

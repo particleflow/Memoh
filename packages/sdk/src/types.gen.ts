@@ -4207,7 +4207,7 @@ export type SessiontaskPage = {
 };
 
 export type SessiontaskResultSummary = {
-    source: 'pi_final_assistant';
+    source: 'pi_final_assistant' | 'subagent_assistant';
     text: string;
     truncated: boolean;
 };
@@ -4227,8 +4227,9 @@ export type SessiontaskTask = {
     process_state?: 'unknown' | 'exited' | 'not_started';
     result_summary?: SessiontaskResultSummary;
     revision?: string;
+    run_id?: string;
     session_id: string;
-    status: 'unknown' | 'submitted' | 'process_exited' | 'not_started' | 'rejected';
+    status: 'unknown' | 'submitted' | 'process_exited' | 'not_started' | 'rejected' | 'accepted' | 'running' | 'waiting_decision' | 'finishing' | 'completed' | 'failed' | 'aborted' | 'lost';
     summary: string;
     target_id?: string;
     task_id: string;

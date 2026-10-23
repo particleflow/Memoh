@@ -1052,7 +1052,9 @@
         "accepted": "受付済み",
         "unknown": "配信状態不明",
         "unavailable": "配信不可"
-      }
+      },
+      "downloadResult": "成果をダウンロード {hash}",
+      "downloadFailed": "ダウンロードを準備できません。画面を再読み込みし、アクセス権を確認してください。"
     },
     "tasks": {
       "unsupported": "このサーバーはまだタスクの表示に対応していません。",
@@ -1080,7 +1082,15 @@
         "submitted": "送信を記録済み",
         "process_exited": "プロセス終了",
         "not_started": "未開始",
-        "rejected": "拒否済み"
+        "rejected": "拒否済み",
+        "accepted": "受付済み・実行待ち",
+        "running": "実行中",
+        "waiting_decision": "判断待ち",
+        "finishing": "終了処理中",
+        "completed": "実行完了",
+        "failed": "実行失敗",
+        "aborted": "実行中止",
+        "lost": "実行状態不明"
       },
       "outcomes": {
         "succeeded": "Pi 完了",
@@ -1090,7 +1100,9 @@
         "not_started": "Pi 未開始",
         "invalid_protocol": "Pi の結果を検証できません",
         "output_limit": "Pi の結果が確認上限を超過"
-      }
+      },
+      "visibleOutput": "最新の表示可能な応答",
+      "pollingOutput": "この画面を開いている間は定期的に更新します。この実行で保存された応答のみを表示し、推論や完全なログは含みません。"
     },
     "uploadingAttachments": "添付ファイルをアップロード中…",
     "attachmentUploadTooLarge": "「{name}」はこのサーバーの上限（{limit} バイト）を超えています。小さいファイルを選んでください。",
