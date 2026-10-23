@@ -1,0 +1,23 @@
+{
+  "bots": [
+    {
+      "name": "web-management-supervisor",
+      "status": "ready"
+    },
+    {
+      "name": "web-management-specialist",
+      "status": "ready"
+    }
+  ],
+  "settings": false,
+  "schema": {
+    "version": 173,
+    "dirty": false
+  },
+  "delegation": {
+    "state": "completed",
+    "delivery_state": "accepted",
+    "revision": 6
+  },
+  "run_count": 3
+}

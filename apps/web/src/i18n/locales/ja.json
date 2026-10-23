@@ -1019,6 +1019,9 @@
   },
   "chat": {
     "delegations": {
+      "openTasks": "後続タスクを見る",
+      "downstreamTitle": "専門 Bot のタスク",
+      "downstreamDescription": "この専門 Bot セッションに記録された実行タスクです。アクセス権限はサーバーで確認されます。ライブログや実行待ちキューではありません。",
       "retryDelivery": "結果の配信を再試行",
       "deliveryResponse": "配信リクエストの応答",
       "deliveryRequestUnconfirmed": "配信リクエストの結果を確認できませんでした。再読み込みして状態を確認してください。",
@@ -1052,6 +1055,8 @@
       }
     },
     "tasks": {
+      "unsupported": "このサーバーはまだタスクの表示に対応していません。",
+      "inaccessible": "この会話またはタスクにアクセスできなくなりました。",
       "title": "タスク",
       "detail": "タスクの詳細",
       "description": "この会話のタスク記録。表示中は自動更新されます。",

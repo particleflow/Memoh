@@ -1,0 +1,9 @@
+{
+  "injectedLostAck": true,
+  "responseStatus": 200,
+  "deliveryState": "accepted",
+  "postCount": 1,
+  "unchangedRunRows": true,
+  "unchangedModelCalls": 6,
+  "specialistReruns": 0
+}
