@@ -58,6 +58,8 @@ The exact observation contract and native API sources are documented in
 [Native workspace observation](native-workspace-observation.md).
 Native follow-up modes, request states and the remaining get-to-prompt identity
 race are documented in [Native Agent follow-up](native-agent-followup-boundary.md).
+Bounded native sampling, historical exports and capacity behavior are documented
+in [Native observation history](native-agent-observation-history.md).
 Read `followup.state` for an input receipt; the original operation state and
 terminal output do not prove that follow-up's business outcome.
 

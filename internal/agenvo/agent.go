@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -25,12 +26,18 @@ type AgentProgress struct {
 }
 
 type AgentObservation struct {
-	Status            string `json:"status"`
-	Starting          bool   `json:"starting"`
-	InteractiveReady  bool   `json:"interactive_ready"`
-	CompletionChanged bool   `json:"completion_changed"`
-	Output            string `json:"output"`
-	OutputFidelity    string `json:"output_fidelity"`
+	// AgentSession is private sampled metadata, never a public path/ID or
+	// an atomic binding between the get/read calls and a particular prompt.
+	AgentSession      *AgentSessionInfo `json:"-"`
+	CompletionSeq     string            `json:"completion_seq,omitempty"`
+	SessionRelation   string            `json:"session_relation,omitempty"`
+	Truncated         bool              `json:"truncated"`
+	Status            string            `json:"status"`
+	Starting          bool              `json:"starting"`
+	InteractiveReady  bool              `json:"interactive_ready"`
+	CompletionChanged bool              `json:"completion_changed"`
+	Output            string            `json:"output"`
+	OutputFidelity    string            `json:"output_fidelity"`
 	// No Herdr status, completion sequence or terminal text independently
 	// proves that the requested work succeeded. No lifecycle hook is assumed.
 	TaskSuccessVerified bool `json:"task_success_verified"`
@@ -253,7 +260,17 @@ func (s *Service) ObserveAgent(ctx context.Context, scope Scope, p AgentProgress
 	if err != nil {
 		return obs, err
 	}
-	obs.Status, obs.Starting, obs.InteractiveReady = a.Status, starting, a.InteractiveReady
+	obs.Status, obs.Starting, obs.InteractiveReady = nativeState(a.Status), starting, a.InteractiveReady
+	obs.SessionRelation = agentSessionRelation(p.AgentSession, a.AgentSession)
+	if a.AgentSession.Valid() {
+		obs.AgentSession = a.AgentSession
+	} else if a.AgentSession != nil {
+		obs.SessionRelation = "unverified"
+	}
+	if a.Completion != nil {
+		// Public JSON numbers cannot safely preserve all uint64 sequence values.
+		obs.CompletionSeq = strconv.FormatUint(*a.Completion, 10)
+	}
 	if starting && a.Name == "" {
 		return obs, nil
 	}
@@ -274,6 +291,7 @@ func (s *Service) ObserveAgent(ctx context.Context, scope Scope, p AgentProgress
 	// or use it as a task-completion receipt.
 	obs.Output = *read.Output
 	if len(obs.Output) > 16384 {
+		obs.Truncated = true
 		obs.Output = obs.Output[:16384]
 		for !utf8.ValidString(obs.Output) {
 			obs.Output = obs.Output[:len(obs.Output)-1]
