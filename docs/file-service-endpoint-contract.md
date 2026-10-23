@@ -23,8 +23,20 @@ The endpoint source inspected at
 requires `nasOrigin` to equal a URL's origin, excluding `/api`. Memoh's
 [default app gateway](../docker/nginx-app.conf) serves the UI at the root and
 strips `/api/` before proxying to Server. Therefore, that endpoint validator and
-this default gateway need explicit alignment. This is a source-level integration
-gap, not a claim about a particular production reverse proxy.
+this default gateway need explicit alignment. The endpoint's subsequent
+[real Nginx probe at `46c57fc8`](https://github.com/particleflow/windows-endpoint/blob/46c57fc8c25f9b7d2bd889c02335cf8e9a7d448b/docs/real-integration-gap.md)
+confirmed the root request returned a synthetic SPA with zero upstream requests;
+the `/api` request reached the synthetic upstream once with the original task
+path and query preserved. That HTTP probe establishes default gateway routing,
+not Memoh authorization, TLS or real PC/NAS delivery. It is reused, not rerun.
+
+The producer library already preserved an API prefix before this change. This
+increment fixes its ambiguous-input validation and adds a real Server/PG prefix
+regression; **the endpoint's root-only rejection still requires an endpoint
+change**. For a new configuration, its owner can select the intended complete API
+base once. Existing queues require a separately reviewed binding migration if
+the configured value changes; neither this contract nor accepting `/api` grants
+permission to rewrite `transfer.json`, reset a queue or replay business work.
 
 The mobile follow-up at
 [`14bb9b85`](https://github.com/particleflow/Memoh/blob/14bb9b85004477b8a6628572e1dfbee480a9bf5c/docs/harmony-endpoint-native-scope.md)
