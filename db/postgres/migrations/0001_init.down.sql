@@ -1,3 +1,4 @@
+DROP FUNCTION IF EXISTS public.memoh_guard_computer_delivery() CASCADE;
 DROP TABLE IF EXISTS public.workspace_dependency_catalogs;
 DROP TABLE IF EXISTS public.workspace_dependency_definitions;
 ALTER TABLE IF EXISTS bot_channel_routes DROP CONSTRAINT IF EXISTS fk_bot_channel_routes_active_session;

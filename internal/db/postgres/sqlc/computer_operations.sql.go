@@ -152,7 +152,7 @@ func (q *Queries) GetComputerOperation(ctx context.Context, arg GetComputerOpera
 }
 
 const getOwnedAgenvoRuntime = `-- name: GetOwnedAgenvoRuntime :one
-SELECT id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
+SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
 AND id=$1 AND user_id=$2 AND provider='agenvo' AND revoked_at IS NULL
 `
 
@@ -165,6 +165,10 @@ func (q *Queries) GetOwnedAgenvoRuntime(ctx context.Context, arg GetOwnedAgenvoR
 	row := q.db.QueryRow(ctx, getOwnedAgenvoRuntime, arg.ID, arg.UserID)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -222,7 +226,7 @@ const updateAgenvoRuntimeConfig = `-- name: UpdateAgenvoRuntimeConfig :one
 UPDATE user_runtimes SET provider_config=$1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$2 AND user_id=$3
 AND provider='agenvo' AND revoked_at IS NULL AND provider_config=$4
-RETURNING id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
+RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
 `
 
 type UpdateAgenvoRuntimeConfigParams struct {
@@ -241,6 +245,10 @@ func (q *Queries) UpdateAgenvoRuntimeConfig(ctx context.Context, arg UpdateAgenv
 	)
 	var i UserRuntime
 	err := row.Scan(
+		&i.TransferCredentialID,
+		&i.TransferCredentialDigest,
+		&i.TransferTargetDigest,
+		&i.TransferExpiresAt,
 		&i.ID,
 		&i.UserID,
 		&i.Name,
@@ -257,8 +265,59 @@ func (q *Queries) UpdateAgenvoRuntimeConfig(ctx context.Context, arg UpdateAgenv
 	return i, err
 }
 
+const updateComputerDelivery = `-- name: UpdateComputerDelivery :one
+UPDATE computer_operations
+SET details=jsonb_set(details, '{delivery_ledger}', $1::jsonb),
+revision=revision+1, updated_at=now()
+WHERE team_id=public.memoh_current_team_id() AND id=$2
+AND bot_id=$3 AND session_id=$4 AND user_id=$5
+AND revision=$6 RETURNING id, team_id, bot_id, session_id, user_id, target_id, run_id, fingerprint, target_fingerprint, state, details, cancel_requested, revision, created_at, updated_at
+`
+
+type UpdateComputerDeliveryParams struct {
+	DeliveryLedger []byte      `json:"delivery_ledger"`
+	ID             pgtype.UUID `json:"id"`
+	BotID          pgtype.UUID `json:"bot_id"`
+	SessionID      pgtype.UUID `json:"session_id"`
+	UserID         pgtype.UUID `json:"user_id"`
+	Revision       int64       `json:"revision"`
+}
+
+func (q *Queries) UpdateComputerDelivery(ctx context.Context, arg UpdateComputerDeliveryParams) (ComputerOperation, error) {
+	row := q.db.QueryRow(ctx, updateComputerDelivery,
+		arg.DeliveryLedger,
+		arg.ID,
+		arg.BotID,
+		arg.SessionID,
+		arg.UserID,
+		arg.Revision,
+	)
+	var i ComputerOperation
+	err := row.Scan(
+		&i.ID,
+		&i.TeamID,
+		&i.BotID,
+		&i.SessionID,
+		&i.UserID,
+		&i.TargetID,
+		&i.RunID,
+		&i.Fingerprint,
+		&i.TargetFingerprint,
+		&i.State,
+		&i.Details,
+		&i.CancelRequested,
+		&i.Revision,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const updateComputerOperation = `-- name: UpdateComputerOperation :one
-UPDATE computer_operations SET state=$1,details=$2,
+UPDATE computer_operations SET state=$1,
+details=CASE WHEN details ? 'delivery_ledger'
+  THEN $2::jsonb || jsonb_build_object('delivery_ledger', details->'delivery_ledger')
+  ELSE $2::jsonb END,
 cancel_requested=$3,revision=revision+1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$4
 AND bot_id=$5 AND session_id=$6 AND user_id=$7

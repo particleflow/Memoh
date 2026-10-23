@@ -1,0 +1,16 @@
+{
+  "name": "ui-preview-retry",
+  "command": [
+    "pnpm",
+    "exec",
+    "vitest",
+    "run",
+    "--maxWorkers=2",
+    "--testTimeout=15000",
+    "apps/web/src/pages/home/components/dockview/panel-preview.test.ts"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 0,
+  "elapsed_seconds": 7.502,
+  "started_utc": "2026-10-23T03:17:01Z"
+}

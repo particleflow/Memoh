@@ -14,6 +14,7 @@ import (
 type Originals interface {
 	Stat(context.Context, string, string) (media.Asset, error)
 	Open(context.Context, string, string) (io.ReadCloser, media.Asset, error)
+	OpenSeekable(context.Context, string, string) (media.ReadSeekCloser, media.Asset, error)
 }
 
 type Attachment struct {
@@ -105,6 +106,52 @@ func (s *AttachmentSet) Open(ctx context.Context, hash string, result bool) (io.
 type authorizedReader struct {
 	io.ReadCloser
 	authorize func() error
+}
+
+// OpenSeekable uses the original media service's verified range reader while
+// retaining live delegation authorization on every read and seek.
+func (s *AttachmentSet) OpenSeekable(ctx context.Context, hash string, result bool) (media.ReadSeekCloser, Attachment, error) {
+	owner, err := s.authorize(ctx, hash, result)
+	if err != nil {
+		return nil, Attachment{}, err
+	}
+	r, a, err := s.Originals.OpenSeekable(ctx, owner, hash)
+	if err != nil {
+		return nil, Attachment{}, err
+	}
+	if r == nil || a.BotID != owner || a.ContentHash != hash {
+		if r != nil {
+			_ = r.Close()
+		}
+		return nil, Attachment{}, ErrDenied
+	}
+	check := func() error {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		_, err := s.authorize(ctx, hash, result)
+		return err
+	}
+	return &authorizedSeekReader{ReadSeekCloser: r, authorize: check}, Attachment{ContentHash: hash, Mime: a.Mime, SizeBytes: a.SizeBytes}, nil
+}
+
+type authorizedSeekReader struct {
+	media.ReadSeekCloser
+	authorize func() error
+}
+
+func (r *authorizedSeekReader) Read(p []byte) (int, error) {
+	if err := r.authorize(); err != nil {
+		return 0, err
+	}
+	return r.ReadSeekCloser.Read(p)
+}
+
+func (r *authorizedSeekReader) Seek(offset int64, whence int) (int64, error) {
+	if err := r.authorize(); err != nil {
+		return 0, err
+	}
+	return r.ReadSeekCloser.Seek(offset, whence)
 }
 
 func (r *authorizedReader) Read(p []byte) (int, error) {

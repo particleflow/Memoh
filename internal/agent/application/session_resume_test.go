@@ -51,7 +51,7 @@ func TestResumeContextPreservesDeadlineAndScopesWithoutCredentials(t *testing.T)
 	deadline := time.Now().Add(time.Minute)
 	ctx, cancel := context.WithDeadline(runtimefence.WithContext(t.Context(), runtimefence.Fence{BotID: "bot", SessionID: "session", Token: 7}), deadline)
 	defer cancel()
-	req := ChatRequest{RunID: uuid.NewString(), UserID: "sender", ChatID: "chat", Token: "Bearer " + bearer, ChatToken: "Bearer " + scoped, Query: "do the work"}
+	req := ChatRequest{RunID: uuid.NewString(), UserID: "sender", ChatID: "chat", Token: "Bearer " + bearer, ChatToken: "Bearer " + scoped, Query: "do the work", Attachments: []turn.Attachment{{ContentHash: " input-hash "}, {URL: "https://example.invalid/omitted", Metadata: map[string]any{"content_hash": "forged"}}}}
 	if err := svc.recordRunResumeContext(ctx, req); err != nil {
 		t.Fatal(err)
 	}
@@ -64,6 +64,9 @@ func TestResumeContextPreservesDeadlineAndScopesWithoutCredentials(t *testing.T)
 	}
 	if saved.DeadlineAt == nil || !saved.DeadlineAt.Equal(deadline) || saved.ChatClaims["route_id"] != "route" || saved.TokenClaims["user_id"] != "account" {
 		t.Fatalf("saved context=%+v", saved)
+	}
+	if len(saved.InputAssetHashes) != 1 || saved.InputAssetHashes[0] != "input-hash" {
+		t.Fatalf("normalized input references=%v", saved.InputAssetHashes)
 	}
 	req.ShutdownResume = true
 	if err := svc.recordRunResumeContext(ctx, req); err != nil {

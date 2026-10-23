@@ -1,0 +1,22 @@
+{
+  "generator": "go generate in internal/handlers; pnpm run generate-sdk (openapi-ts 0.99.0)",
+  "openapi_operations": 360,
+  "sdk_operations": 360,
+  "source_operations": {
+    "668b214c7efc4f0336151bd75e1561f766c7fb35": {
+      "operations": 360,
+      "missing": []
+    },
+    "885d865874beac21b2371944144d24af08f3bdee": {
+      "operations": 356,
+      "missing": []
+    },
+    "83483850061f4c908c28ff5ef340209cf9e718d5": {
+      "operations": 354,
+      "missing": []
+    }
+  },
+  "all_seven_files_equal_reviewed_668b": true,
+  "merged_tree": "d18bf008813705f28a96bcd758c98bc846cfd4f0",
+  "product_diff_from_668b": false
+}

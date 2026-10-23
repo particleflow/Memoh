@@ -1,0 +1,13 @@
+{
+  "name": "sdk-before",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@memohai/sdk",
+    "typecheck"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 0,
+  "elapsed_seconds": 3.221,
+  "started_utc": "2026-10-23T03:11:51Z"
+}

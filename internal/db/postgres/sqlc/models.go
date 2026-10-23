@@ -1141,18 +1141,22 @@ type UserProviderOauthToken struct {
 }
 
 type UserRuntime struct {
-	ID               pgtype.UUID        `json:"id"`
-	UserID           pgtype.UUID        `json:"user_id"`
-	Name             string             `json:"name"`
-	ApiToken         string             `json:"api_token"`
-	Provider         string             `json:"provider"`
-	ProviderConfig   []byte             `json:"provider_config"`
-	RevokedAt        pgtype.Timestamptz `json:"revoked_at"`
-	ActivatedAt      pgtype.Timestamptz `json:"activated_at"`
-	PendingExpiresAt pgtype.Timestamptz `json:"pending_expires_at"`
-	CreatedAt        pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
-	TeamID           pgtype.UUID        `json:"team_id"`
+	TransferCredentialID     string             `json:"transfer_credential_id"`
+	TransferCredentialDigest string             `json:"transfer_credential_digest"`
+	TransferTargetDigest     string             `json:"transfer_target_digest"`
+	TransferExpiresAt        pgtype.Timestamptz `json:"transfer_expires_at"`
+	ID                       pgtype.UUID        `json:"id"`
+	UserID                   pgtype.UUID        `json:"user_id"`
+	Name                     string             `json:"name"`
+	ApiToken                 string             `json:"api_token"`
+	Provider                 string             `json:"provider"`
+	ProviderConfig           []byte             `json:"provider_config"`
+	RevokedAt                pgtype.Timestamptz `json:"revoked_at"`
+	ActivatedAt              pgtype.Timestamptz `json:"activated_at"`
+	PendingExpiresAt         pgtype.Timestamptz `json:"pending_expires_at"`
+	CreatedAt                pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt                pgtype.Timestamptz `json:"updated_at"`
+	TeamID                   pgtype.UUID        `json:"team_id"`
 }
 
 type WorkspaceDependencyCatalog struct {

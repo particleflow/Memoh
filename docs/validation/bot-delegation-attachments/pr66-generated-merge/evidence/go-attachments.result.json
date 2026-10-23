@@ -1,0 +1,21 @@
+{
+  "name": "go-attachments",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "240s",
+    "./internal/handlers",
+    "-run",
+    "Test(BotDelegation|ComputerTransfer|TaskTransfer|GeneratedContracts)"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 0,
+  "elapsed_seconds": 57.796,
+  "started_utc": "2026-10-23T03:14:31Z"
+}

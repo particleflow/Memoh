@@ -1,0 +1,9 @@
+[
+  "packages/sdk/src/@pinia/colada.gen.ts",
+  "packages/sdk/src/index.ts",
+  "packages/sdk/src/sdk.gen.ts",
+  "packages/sdk/src/types.gen.ts",
+  "spec/docs.go",
+  "spec/swagger.json",
+  "spec/swagger.yaml"
+]

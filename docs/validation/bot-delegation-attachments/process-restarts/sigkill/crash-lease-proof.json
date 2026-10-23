@@ -1,0 +1,172 @@
+{
+  "method": "SIGKILL",
+  "old_pid": 117403,
+  "queue_restarted": false,
+  "queue_started_before": "2026-10-22T20:28:11.02449027Z",
+  "before_kill": {
+    "observed_at": 1792702634.171828,
+    "redis_time": [
+      "1792702634",
+      "229759"
+    ],
+    "original_lease_pttl_ms": 1574,
+    "leader_lease_pttl_ms": 1529,
+    "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+    "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+    "queue_items": [
+      {
+        "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+        "Status": "accepted",
+        "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+      }
+    ],
+    "original_parent": {
+      "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+      "state": "running",
+      "error_code": null,
+      "fencing_token": 15,
+      "updated_at": "2026-10-22T20:57:13.200474+00:00"
+    }
+  },
+  "signal_sent_at": 1792702634.4634345,
+  "process_dead_at": 1792702634.4641166,
+  "offline_lease_samples": [
+    {
+      "observed_at": 1792702634.6171994,
+      "redis_time": [
+        "1792702634",
+        "676541"
+      ],
+      "original_lease_pttl_ms": 1132,
+      "leader_lease_pttl_ms": 1117,
+      "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+      "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+      "queue_items": [
+        {
+          "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "Status": "accepted",
+          "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+        }
+      ],
+      "original_parent": {
+        "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "state": "running",
+        "error_code": null,
+        "fencing_token": 15,
+        "updated_at": "2026-10-22T20:57:13.200474+00:00"
+      }
+    },
+    {
+      "observed_at": 1792702635.15686,
+      "redis_time": [
+        "1792702635",
+        "208439"
+      ],
+      "original_lease_pttl_ms": 594,
+      "leader_lease_pttl_ms": 576,
+      "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+      "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+      "queue_items": [
+        {
+          "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "Status": "accepted",
+          "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+        }
+      ],
+      "original_parent": {
+        "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "state": "running",
+        "error_code": null,
+        "fencing_token": 15,
+        "updated_at": "2026-10-22T20:57:13.200474+00:00"
+      }
+    },
+    {
+      "observed_at": 1792702635.6943138,
+      "redis_time": [
+        "1792702635",
+        "758065"
+      ],
+      "original_lease_pttl_ms": 45,
+      "leader_lease_pttl_ms": 43,
+      "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+      "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+      "queue_items": [
+        {
+          "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "Status": "accepted",
+          "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+        }
+      ],
+      "original_parent": {
+        "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "state": "running",
+        "error_code": null,
+        "fencing_token": 15,
+        "updated_at": "2026-10-22T20:57:13.200474+00:00"
+      }
+    },
+    {
+      "observed_at": 1792702636.250157,
+      "redis_time": [
+        "1792702636",
+        "299830"
+      ],
+      "original_lease_pttl_ms": -2,
+      "leader_lease_pttl_ms": -2,
+      "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+      "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+      "queue_items": [
+        {
+          "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+          "Status": "accepted",
+          "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+          "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+        }
+      ],
+      "original_parent": {
+        "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "state": "running",
+        "error_code": null,
+        "fencing_token": 15,
+        "updated_at": "2026-10-22T20:57:13.200474+00:00"
+      }
+    }
+  ],
+  "lease_expired_observed_at": 1792702636.250157,
+  "new_server_start_requested_at": 1792702636.498831,
+  "new_pid": 136440,
+  "server_ready_at": 1792702636.6031458,
+  "server_restarted": true,
+  "queue_started_after": "2026-10-22T20:28:11.02449027Z",
+  "after_new_server_ready": {
+    "observed_at": 1792702636.780014,
+    "redis_time": [
+      "1792702636",
+      "845190"
+    ],
+    "original_lease_pttl_ms": -2,
+    "leader_lease_pttl_ms": -2,
+    "generation_sha256": "2a0f29f12462b33be55c10d085c54b360aea7ca594ec555f8641484e18beffb3",
+    "queue_sha256": "cec312170c9b6126e338e21e471e2cf9c4a4242f9faef737462a3f80b324e78c",
+    "queue_items": [
+      {
+        "ID": "4cd89df6-65af-5e79-b581-5ecc4e006e90",
+        "Status": "accepted",
+        "EnqueuedDuringRunID": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+        "InvocationID": "bot-delegation-result:31ae2cf8-6510-433a-9e77-77792d8f62d7"
+      }
+    ],
+    "original_parent": {
+      "run_id": "4554adf4-cab7-42b8-99fe-4a0688a1e853",
+      "state": "running",
+      "error_code": null,
+      "fencing_token": 15,
+      "updated_at": "2026-10-22T20:57:13.200474+00:00"
+    }
+  }
+}

@@ -4431,6 +4431,14 @@ export type UserinputUiQuestion = {
     text?: string;
 };
 
+export type UserruntimeChangeTransferCredentialRequest = {
+    /**
+     * Empty means first enrollment. Rotation must name the current credential.
+     */
+    expected_id?: string;
+    expires_at?: string;
+};
+
 export type UserruntimeCreateRuntimeRequest = {
     agenvo?: AgenvoTarget;
     name?: string;
@@ -4452,6 +4460,17 @@ export type UserruntimeRuntime = {
     provider?: string;
     team_id?: string;
     workspace_base?: string;
+};
+
+export type UserruntimeTransferCredentialEnrollment = {
+    credential?: string;
+    credential_id?: string;
+    expires_at?: string;
+};
+
+export type UserruntimeTransferCredentialStatus = {
+    credential_id?: string;
+    expires_at?: string;
 };
 
 export type VideoConfigSchema = {
@@ -12663,6 +12682,16 @@ export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponse =
 
 export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashData = {
     body?: never;
+    headers?: {
+        /**
+         * Requested byte range
+         */
+        Range?: string;
+        /**
+         * Previously received ETag
+         */
+        'If-Range'?: string;
+    };
     path: {
         /**
          * Supervisor Bot ID
@@ -12703,6 +12732,10 @@ export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachment
      */
     404: ServerProblem;
     /**
+     * Unsatisfiable byte range
+     */
+    416: Blob | File;
+    /**
      * Internal Server Error
      */
     500: ServerProblem;
@@ -12715,6 +12748,84 @@ export type GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachment
      * OK
      */
     200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
+};
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashData = {
+    body?: never;
+    headers?: {
+        /**
+         * Requested byte range
+         */
+        Range?: string;
+        /**
+         * Previously received ETag
+         */
+        'If-Range'?: string;
+    };
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+        /**
+         * Returned content hash
+         */
+        content_hash: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/attachments/{content_hash}';
+};
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Unsatisfiable byte range
+     */
+    416: Blob | File;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashError = HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors[keyof HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashErrors];
+
+export type HeadBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHashResponses = {
+    /**
+     * OK
+     */
+    200: unknown;
+    /**
+     * Partial Content
+     */
+    206: unknown;
 };
 
 export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryData = {
@@ -18953,6 +19064,126 @@ export type PutUsersMeRuntimesByIdAgenvoAgentResponses = {
 };
 
 export type PutUsersMeRuntimesByIdAgenvoAgentResponse = PutUsersMeRuntimesByIdAgenvoAgentResponses[keyof PutUsersMeRuntimesByIdAgenvoAgentResponses];
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
+    body?: never;
+    path: {
+        /**
+         * Existing Agenvo runtime ID
+         */
+        id: string;
+    };
+    query: {
+        /**
+         * Current non-secret credential ID
+         */
+        expected_id: string;
+    };
+    url: '/users/me/runtimes/{id}/transfer-credential';
+};
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialErrors = {
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialError = DeleteUsersMeRuntimesByIdTransferCredentialErrors[keyof DeleteUsersMeRuntimesByIdTransferCredentialErrors];
+
+export type DeleteUsersMeRuntimesByIdTransferCredentialResponses = {
+    /**
+     * Revoked
+     */
+    204: unknown;
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialData = {
+    body?: never;
+    path: {
+        /**
+         * Existing Agenvo runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/transfer-credential';
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialErrors = {
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialError = GetUsersMeRuntimesByIdTransferCredentialErrors[keyof GetUsersMeRuntimesByIdTransferCredentialErrors];
+
+export type GetUsersMeRuntimesByIdTransferCredentialResponses = {
+    /**
+     * OK
+     */
+    200: UserruntimeTransferCredentialStatus;
+};
+
+export type GetUsersMeRuntimesByIdTransferCredentialResponse = GetUsersMeRuntimesByIdTransferCredentialResponses[keyof GetUsersMeRuntimesByIdTransferCredentialResponses];
+
+export type PostUsersMeRuntimesByIdTransferCredentialData = {
+    /**
+     * Expected current credential ID and optional device expiry
+     */
+    body: UserruntimeChangeTransferCredentialRequest;
+    path: {
+        /**
+         * Existing Agenvo runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/transfer-credential';
+};
+
+export type PostUsersMeRuntimesByIdTransferCredentialErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeRuntimesByIdTransferCredentialError = PostUsersMeRuntimesByIdTransferCredentialErrors[keyof PostUsersMeRuntimesByIdTransferCredentialErrors];
+
+export type PostUsersMeRuntimesByIdTransferCredentialResponses = {
+    /**
+     * Created
+     */
+    201: UserruntimeTransferCredentialEnrollment;
+};
+
+export type PostUsersMeRuntimesByIdTransferCredentialResponse = PostUsersMeRuntimesByIdTransferCredentialResponses[keyof PostUsersMeRuntimesByIdTransferCredentialResponses];
 
 export type DeleteUsersByIdData = {
     body?: never;

@@ -1,0 +1,5 @@
+REDACTED COPY: the local repository root is replaced by <repository>.
+Original and published SHA-256 hashes are recorded in evidence-manifest.json.
+
+> @memohai/sdk@0.22.0 typecheck <repository>/packages/sdk
+> tsc --noEmit -p tsconfig.json

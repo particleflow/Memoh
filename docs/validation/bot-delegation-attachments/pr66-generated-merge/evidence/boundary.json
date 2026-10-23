@@ -1,0 +1,27 @@
+{
+  "unchanged_from_668b": [
+    "internal/agent/runtime",
+    "internal/contextview",
+    "packages/runtime",
+    "db/postgres/migrations",
+    "internal/handlers/bot_delegations.go",
+    "internal/handlers/message.go",
+    "internal/botdelegation",
+    "spec",
+    "packages/sdk",
+    "go.mod",
+    "go.sum",
+    "pnpm-lock.yaml"
+  ],
+  "all_unchanged": true,
+  "core_baseline": "bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046",
+  "core_check_exit": 0,
+  "merge_commit": "aaccb9a220f8b4406498aeb5148b6916ed578b3c",
+  "merge_tree": "d18bf008813705f28a96bcd758c98bc846cfd4f0",
+  "current_product_changes": false,
+  "new_tests_only": [
+    "apps/web/src/pages/home/components/dockview/panel-preview.test.ts",
+    "internal/handlers/bot_delegations_test.go",
+    "internal/handlers/computer_transfers_test.go"
+  ]
+}

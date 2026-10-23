@@ -1,0 +1,7 @@
+{
+  "source_commit": "aaccb9a220f8b4406498aeb5148b6916ed578b3c",
+  "health": 200,
+  "method": "HEAD",
+  "existing_isolated_config_reused": true,
+  "production_or_business_writes": false
+}

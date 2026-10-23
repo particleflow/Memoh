@@ -1,0 +1,6 @@
+=== RUN   TestPR10ClientAgainstIntegratedPR8Handlers
+--- PASS: TestPR10ClientAgainstIntegratedPR8Handlers (0.08s)
+=== RUN   TestHerdrActionAgainstMergedUploadHandlers
+--- PASS: TestHerdrActionAgainstMergedUploadHandlers (0.05s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.255s

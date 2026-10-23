@@ -1,0 +1,12 @@
+{
+  "name": "go-lint",
+  "command": [
+    "golangci-lint",
+    "run",
+    "--new-from-rev=668b214c7efc4f0336151bd75e1561f766c7fb35",
+    "./internal/handlers"
+  ],
+  "exit_code": 127,
+  "process_started": false,
+  "reason": "tool not on PATH"
+}

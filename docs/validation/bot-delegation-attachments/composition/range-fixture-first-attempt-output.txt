@@ -1,0 +1,21 @@
+=== RUN   TestBotDelegationJWTSubmitObserveOriginalAndRevocation
+--- PASS: TestBotDelegationJWTSubmitObserveOriginalAndRevocation (0.01s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/range
+    computer_transfers_test.go:288: range/status/cache 409 map[Cache-Control:[no-store] Content-Language:[en] Content-Length:[184] Content-Type:[application/problem+json] Date:[Thu, 22 Oct 2026 21:44:44 GMT]] <nil>
+--- FAIL: TestTaskTransferHTTPOriginalRangeAndRevalidation/range (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/unsatisfiable
+    computer_transfers_test.go:288: range/status/cache 409 map[Cache-Control:[no-store] Content-Language:[en] Content-Length:[184] Content-Type:[application/problem+json] Date:[Thu, 22 Oct 2026 21:44:44 GMT]] <nil>
+--- FAIL: TestTaskTransferHTTPOriginalRangeAndRevalidation/unsatisfiable (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/size-mismatch
+    computer_transfers_test.go:288: range/status/cache 409 map[Cache-Control:[no-store] Content-Language:[en] Content-Length:[184] Content-Type:[application/problem+json] Date:[Thu, 22 Oct 2026 21:44:44 GMT]] <nil>
+--- FAIL: TestTaskTransferHTTPOriginalRangeAndRevalidation/size-mismatch (0.01s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/hash-mismatch
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/hash-mismatch (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/revoked
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/revoked (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/anonymous
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/anonymous (0.00s)
+--- FAIL: TestTaskTransferHTTPOriginalRangeAndRevalidation (0.04s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.109s

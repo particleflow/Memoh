@@ -59,6 +59,7 @@ import DockPanelFrame from './panel-frame.vue'
 import { isTextFile, isImageFile } from '@/components/file-manager/utils'
 import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { resolveApiErrorMessage } from '@/utils/api-error'
+import { resolveUrl } from '../../composables/useMediaGallery'
 import { usePanelVisible } from './use-panel-visible'
 
 // Renders a message attachment (a stored media asset) inside its own dock tab,
@@ -68,7 +69,7 @@ import { usePanelVisible } from './use-panel-visible'
 // the direct source URL it was opened with.
 const props = defineProps<{
   params: {
-    params: { name?: string, botId?: string, contentHash?: string, src?: string }
+    params: { name?: string, botId?: string, contentHash?: string, delegationUrl?: string, src?: string }
     api: DockviewPanelApi
     containerApi: DockviewApi
   }
@@ -83,9 +84,12 @@ const isText = computed(() => isTextFile(name.value))
 const isImage = computed(() => isImageFile(name.value))
 
 const renderUrl = computed(() => {
-  const { botId, contentHash, src } = props.params.params
+  const { botId, contentHash, delegationUrl, src } = props.params.params
   const hash = (contentHash ?? '').trim()
   const owner = (botId ?? '').trim()
+  if (delegationUrl !== undefined) {
+    return resolveUrl({ content_hash: hash, metadata: { delegation_url: delegationUrl } })
+  }
   if (hash && owner) {
     return sdkApiUrl({
       url: '/bots/{bot_id}/media/{content_hash}',

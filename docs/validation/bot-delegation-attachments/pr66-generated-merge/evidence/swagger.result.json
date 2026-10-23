@@ -1,0 +1,11 @@
+{
+  "name": "swagger",
+  "command": [
+    "go",
+    "generate"
+  ],
+  "cwd": "<repo>/internal/handlers",
+  "exit_code": 0,
+  "elapsed_seconds": 2.972,
+  "started_utc": "2026-10-23T03:12:40Z"
+}

@@ -1,0 +1,5 @@
+ok  	github.com/felinics/memoh/internal/botdelegation	0.137s
+ok  	github.com/felinics/memoh/internal/handlers	3.589s
+ok  	github.com/felinics/memoh/internal/agent/application	12.525s
+ok  	github.com/felinics/memoh/cmd/internal/core	0.022s
+ok  	github.com/felinics/memoh/internal/media	2.691s

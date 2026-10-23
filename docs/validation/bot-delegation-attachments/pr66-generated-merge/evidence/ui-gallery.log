@@ -1,0 +1,37 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 <repo>
+
+ ❯ |web| src/pages/home/components/dockview/panel-preview.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/dockview/panel-preview.test.ts [ apps/web/src/pages/home/components/dockview/panel-preview.test.ts ]
+Error: [vitest] No "createI18n" export is defined on the "vue-i18n" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("vue-i18n"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ src/i18n.ts:32:14
+     30| }
+     31|
+     32| const i18n = createI18n<typeof en | typeof zh | typeof ja, Locale>({
+       |              ^
+     33|   locale: getInitialLocale(),
+     34|   legacy: false,
+ ❯ src/store/chat/session-list-init-recovery.ts:3:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  12 passed (12)
+   Start at  03:15:10
+   Duration  8.05s (transform 6.13s, setup 0ms, import 1.06s, tests 55ms, environment 767ms)
+

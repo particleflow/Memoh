@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"log/slog"
 	"net"
+	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v4"
@@ -112,6 +113,11 @@ func shouldSkipJWT(path string) bool {
 	if path == "/" || path == "/ping" || path == "/health" || path == "/ready" || path == "/api/swagger.json" || path == "/auth/login" || path == "/runtimes/connect" {
 		return true
 	}
+	// This namespace authenticates a separate device credential in every route.
+	// Account JWTs are never a fallback; an unconfigured handler returns 503.
+	if strings.HasPrefix(path, "/internal/computer-transfers/") {
+		return true
+	}
 	if strings.HasPrefix(path, "/assets/") {
 		return true
 	}
@@ -167,3 +173,6 @@ func isPublicChannelWebhookPath(path string) bool {
 func isPublicChannelMediaPath(path string) bool {
 	return publicmedia.IsPath(path)
 }
+
+// ServeHTTP exposes the same middleware/route stack to an existing HTTP host.
+func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) { s.echo.ServeHTTP(w, r) }

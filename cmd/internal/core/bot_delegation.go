@@ -20,6 +20,7 @@ import (
 	"github.com/felinics/memoh/internal/boot"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/channel"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
 	"github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/db"
@@ -28,6 +29,7 @@ import (
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/storage"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
 	"github.com/felinics/memoh/internal/workspace"
 )
@@ -100,7 +102,50 @@ func (h *delegationHost) Allowed(ctx context.Context, user, bot, permission stri
 }
 
 func (h *delegationHost) SessionHasAsset(ctx context.Context, bot, session, hash string) (bool, error) {
-	return h.store.SessionHasMediaAsset(ctx, sqlc.SessionHasMediaAssetParams{BotID: db.ParseUUIDOrEmpty(bot), SessionID: db.ParseUUIDOrEmpty(session), ContentHash: hash})
+	params := sqlc.SessionHasMediaAssetParams{BotID: db.ParseUUIDOrEmpty(bot), SessionID: db.ParseUUIDOrEmpty(session), ContentHash: hash}
+	linked, err := h.store.SessionHasMediaAsset(ctx, params)
+	if err != nil || linked {
+		return linked, err
+	}
+	// Native chat commits the user message with the first complete model/tool
+	// step. A tool in that step can therefore precede its history asset link.
+	// Use only the current admitted, fenced input, not arbitrary Bot-owned files
+	// or an old run's input after history was cleared.
+	run, err := h.store.GetLatestSessionRun(ctx, params.SessionID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	s, err := h.store.GetSessionByID(ctx, params.SessionID)
+	if err != nil {
+		return false, err
+	}
+	if admittedDelegationInput(run, s, bot, hash) {
+		return true, nil
+	}
+	// The first step may have committed between the history and run reads.
+	return h.store.SessionHasMediaAsset(ctx, params)
+}
+
+func admittedDelegationInput(run sqlc.SessionRun, s sqlc.BotSession, bot, hash string) bool {
+	if run.BotID.String() != bot || s.BotID != run.BotID || s.ID != run.SessionID || s.TeamID != run.TeamID || s.DeletedAt.Valid || !s.CreatedByUserID.Valid || run.FencingToken <= 0 || run.FencingToken != s.RuntimeFencingToken {
+		return false
+	}
+	switch run.State {
+	case "running", "waiting_decision", "finishing":
+	default:
+		return false
+	}
+	var input struct {
+		Resume struct {
+			Version          int      `json:"version"`
+			UserID           string   `json:"user_id"`
+			InputAssetHashes []string `json:"input_asset_hashes"`
+		} `json:"resume"`
+	}
+	return json.Unmarshal(run.InputJson, &input) == nil && input.Resume.Version == 1 && input.Resume.UserID == s.CreatedByUserID.String() && slices.Contains(input.Resume.InputAssetHashes, hash)
 }
 
 func (h *delegationHost) ResultHasAsset(ctx context.Context, bot, user, root, hash string) (bool, error) {
@@ -193,7 +238,7 @@ func (h *delegationHost) Run(ctx context.Context, r botdelegation.Record, starte
 	if err != nil {
 		return botdelegation.Result{}, "failed", err
 	}
-	cmd := turn.StartTurnCommand{SchemaVersion: 1, NoDefer: true, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.TargetBotID, ChatID: r.Identity.TargetBotID, ThreadID: r.Identity.TargetSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, IdempotencyKey: "bot-delegation:" + r.ID, Query: r.Payload.Message, UserVisibleText: r.Payload.Message, Attachments: attachments, CurrentChannel: "web"}
+	cmd := turn.StartTurnCommand{SchemaVersion: 1, NoDefer: true, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.TargetBotID, ChatID: r.Identity.TargetBotID, ThreadID: r.Identity.TargetSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, IdempotencyKey: "bot-delegation:" + r.ID, Query: r.Payload.Message, UserVisibleText: r.Payload.Message, Attachments: attachments, CurrentChannel: "web", ReplyTarget: r.Identity.TargetBotID}
 	handle, err := h.agent.StartTurn(ctx, cmd)
 	if err != nil {
 		return botdelegation.Result{}, "unknown", err
@@ -261,7 +306,7 @@ func (h *delegationHost) Deliver(ctx context.Context, r botdelegation.Record) er
 	if r.Result.Summary != nil {
 		text += "\n\n" + r.Result.Summary.Text
 	}
-	return h.agent.EnqueueAuthorizedFollowUp(ctx, "bot-delegation-result:"+r.ID, turn.StartTurnCommand{DelegationResultID: r.ID, SchemaVersion: 1, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.SourceBotID, ChatID: r.Identity.SourceBotID, ThreadID: r.Identity.SourceSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, Query: text, UserVisibleText: text, Attachments: attachments, CurrentChannel: "web"})
+	return h.agent.EnqueueAuthorizedFollowUp(ctx, "bot-delegation-result:"+r.ID, turn.StartTurnCommand{DelegationResultID: r.ID, SchemaVersion: 1, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.SourceBotID, ChatID: r.Identity.SourceBotID, ThreadID: r.Identity.SourceSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, Query: text, UserVisibleText: text, Attachments: attachments, CurrentChannel: "web", ReplyTarget: r.Identity.SourceBotID})
 }
 
 type (
@@ -269,9 +314,9 @@ type (
 	delegationMediaKey      struct{}
 )
 
-// Only canonical, already-persisted attachment references from the normal
-// native stream are linked. Raw tool logs, URLs, bytes and arbitrary paths are
-// not imported by delegation. The existing send/media path persists new files.
+// Like the Web/channel ingress, the host normalizes send's stream attachments
+// through the existing media pipeline before linking the final assistant. Input
+// hashes keep their source owner; they are never re-ingested under the specialist.
 func (h *delegationHost) outboundRefs(ctx context.Context, r botdelegation.Record, raw json.RawMessage) ([]messagepkg.AssetRef, error) {
 	var event struct {
 		Type        string           `json:"type"`
@@ -283,11 +328,28 @@ func (h *delegationHost) outboundRefs(ctx context.Context, r botdelegation.Recor
 	if _, err := h.service.Authority.Authorize(ctx, r.Identity); err != nil {
 		return nil, err
 	}
+	ctx, _, err := h.prepare(ctx, application.ChatRequest{BotID: r.Identity.TargetBotID, ThreadID: r.Identity.TargetSessionID, UserID: r.Identity.UserID})
+	if err != nil {
+		return nil, err
+	}
 	refs := []messagepkg.AssetRef{}
 	for _, item := range event.Attachments {
 		b := attachmentpkg.BundleFromMap(item)
 		if b.ContentHash == "" {
-			return nil, storage.ErrAccessPathUnavailable
+			if b.Path != "" {
+				if err := toolcontext.CheckDelegationTarget(ctx, r.Identity.TargetBotID, r.Payload.TargetSelection, bots.PermissionWorkspaceRead); err != nil {
+					return nil, err
+				}
+			}
+			prepared, err := channel.PrepareStreamEvent(ctx, h.media, channel.ChannelConfig{BotID: r.Identity.TargetBotID, ChannelType: "web"}, channel.StreamEvent{Type: channel.StreamEventAttachment, Attachments: []channel.Attachment{channel.AttachmentFromBundle(b)}})
+			if err != nil {
+				return nil, err
+			}
+			attachments := prepared.LogicalEvent().Attachments
+			if len(attachments) != 1 || attachments[0].ContentHash == "" {
+				return nil, storage.ErrAccessPathUnavailable
+			}
+			b = channel.BundleFromAttachment(attachments[0])
 		}
 		var asset media.Asset
 		if slices.Contains(r.Payload.Inputs, b.ContentHash) {
@@ -318,6 +380,15 @@ func (h *delegationHost) prepare(ctx context.Context, req application.ChatReques
 		if err != nil || (r.State != "completed" && r.State != "failed") {
 			return ctx, req, botdelegation.ErrDenied
 		}
+		attachments, err := h.inputAttachments(ctx, r, true)
+		if err != nil {
+			return ctx, req, err
+		}
+		refs := make([]turn.OutboundAssetRef, 0, len(attachments))
+		for _, a := range attachments {
+			refs = append(refs, turn.OutboundAssetRef{ContentHash: a.ContentHash, Mime: a.Mime, SizeBytes: a.Size, Role: "attachment", Ordinal: len(refs), Metadata: a.Metadata})
+		}
+		ctx = application.WithDelegationResultAssets(ctx, req.BotID, req.ThreadID, r.ID, refs)
 	}
 	if req.ThreadID == "" || req.UserID == "" {
 		return ctx, req, nil

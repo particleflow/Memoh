@@ -1,0 +1,126 @@
+{
+  "tested_product_commit": "9bd82f57d66846a6d6c36c3515f0344acf16a9f7",
+  "product_tests_rerun": false,
+  "files": [
+    {
+      "published_file": "go-compile-raw.txt",
+      "published_sha256": "4341861eef4dd1407a33b2642c253be2f3c6cd79db11210caf5c08e688432df6",
+      "published_bytes": 17224,
+      "retained_log": "go-compile-raw.log",
+      "retained_log_sha256": "4341861eef4dd1407a33b2642c253be2f3c6cd79db11210caf5c08e688432df6",
+      "origin_file": "go-compile-raw.log",
+      "origin_sha256": "4341861eef4dd1407a33b2642c253be2f3c6cd79db11210caf5c08e688432df6",
+      "derivation": "byte-for-byte copy of captured command output",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "pg-go-output.txt",
+      "published_sha256": "6ab1fd21bf37a70d645195a6bd6c59075fa5849f26c04aa2e2c5d8ae8b16bbbf",
+      "published_bytes": 3692,
+      "retained_log": "pg-go-raw.log",
+      "retained_log_sha256": "6ab1fd21bf37a70d645195a6bd6c59075fa5849f26c04aa2e2c5d8ae8b16bbbf",
+      "origin_file": "pg-go-events.jsonl",
+      "origin_sha256": "73ed73423495c1406cc320df8236a67953821659e98e48cab96654cc58e4fca6",
+      "derivation": "UTF-8 concatenation of decoded Go test JSON Output fields",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "range-combined-output.txt",
+      "published_sha256": "8ce26518966bf3e515b100987dca2fcd932a6b93031fef8c691a6127162a8756",
+      "published_bytes": 1152,
+      "retained_log": "range-combined-raw.log",
+      "retained_log_sha256": "8ce26518966bf3e515b100987dca2fcd932a6b93031fef8c691a6127162a8756",
+      "origin_file": "related-go-events.jsonl",
+      "origin_sha256": "f4bc7b78a8ac0603d95992482e0730d765371097d8aac5875025092d39fb2ed8",
+      "derivation": "UTF-8 concatenation of decoded Go test JSON Output fields; only Test names with the listed prefixes",
+      "selected_test_prefixes": [
+        "TestTaskTransferHTTPOriginalRangeAndRevalidation",
+        "TestBotDelegationJWTSubmitObserveOriginalAndRevocation"
+      ],
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "range-race-raw.txt",
+      "published_sha256": "30852291057e69bcae42998b6ee1c5ca1869c2d8aff8f60734c63c2758f878f8",
+      "published_bytes": 56,
+      "retained_log": "range-race-raw.log",
+      "retained_log_sha256": "30852291057e69bcae42998b6ee1c5ca1869c2d8aff8f60734c63c2758f878f8",
+      "origin_file": "range-race-raw.log",
+      "origin_sha256": "30852291057e69bcae42998b6ee1c5ca1869c2d8aff8f60734c63c2758f878f8",
+      "derivation": "byte-for-byte copy of captured command output",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "sdk-typecheck-redacted.txt",
+      "published_sha256": "9289ba43961a9d56388d81e360d787bb6b2ad654efa389ad46d96123009dba08",
+      "published_bytes": 239,
+      "retained_log": "sdk-typecheck-raw.log",
+      "retained_log_sha256": "6f2a9a3ae6dee0b3e1a59a2954340e4df29c85dc1666ae226ddcbf102050a73c",
+      "origin_file": "sdk-typecheck-raw.log",
+      "origin_sha256": "6f2a9a3ae6dee0b3e1a59a2954340e4df29c85dc1666ae226ddcbf102050a73c",
+      "derivation": "byte-for-byte copy of captured command output",
+      "selected_test_prefixes": null,
+      "redacted": true,
+      "redaction": "One absolute repository-root path replaced; explanatory header added; terminal blank line removed"
+    },
+    {
+      "published_file": "pg-lint-raw.txt",
+      "published_sha256": "8e2c6cbde79133f03d758a12189d24970e17076f0743f7745b5faeda698c98f2",
+      "published_bytes": 3916,
+      "retained_log": "pg-lint-raw.log",
+      "retained_log_sha256": "8e2c6cbde79133f03d758a12189d24970e17076f0743f7745b5faeda698c98f2",
+      "origin_file": "pg-lint-raw.log",
+      "origin_sha256": "8e2c6cbde79133f03d758a12189d24970e17076f0743f7745b5faeda698c98f2",
+      "derivation": "byte-for-byte copy of captured command output",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "range-fixture-first-attempt-output.txt",
+      "published_sha256": "603302ce8a8d03425b2114efa878b2b486229989279907c6cdee93b28a5a579d",
+      "published_bytes": 1858,
+      "retained_log": "range-fixture-first-attempt.log",
+      "retained_log_sha256": "603302ce8a8d03425b2114efa878b2b486229989279907c6cdee93b28a5a579d",
+      "origin_file": "range-go-events.jsonl",
+      "origin_sha256": "a0a141448a06fc41d788f983c6dac9cbb323561186415a67c89498a17cb81cd7",
+      "derivation": "UTF-8 concatenation of decoded Go test JSON Output fields",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "native-combination-raw.txt",
+      "published_sha256": "581a74193d6329691b6329662afe54068c01e343efb44248a5d17e39ecf70d3e",
+      "published_bytes": 2170,
+      "retained_log": "native-combination-raw.log",
+      "retained_log_sha256": "581a74193d6329691b6329662afe54068c01e343efb44248a5d17e39ecf70d3e",
+      "origin_file": "native-combination-raw.log",
+      "origin_sha256": "581a74193d6329691b6329662afe54068c01e343efb44248a5d17e39ecf70d3e",
+      "derivation": "byte-for-byte copy of captured command output",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    },
+    {
+      "published_file": "tool-local-retry-output.txt",
+      "published_sha256": "91f577c3fe7431f909ca836f9fcbb7b129e7be91c92dcd18c9eb45b7a79c437b",
+      "published_bytes": 1049,
+      "retained_log": "tool-local-retry-raw.log",
+      "retained_log_sha256": "91f577c3fe7431f909ca836f9fcbb7b129e7be91c92dcd18c9eb45b7a79c437b",
+      "origin_file": "tool-proxy-free-go-events.jsonl",
+      "origin_sha256": "07c5a3f290197b743db575ed43082fa9432cff31e07fabd97189b2bd09221b65",
+      "derivation": "UTF-8 concatenation of decoded Go test JSON Output fields",
+      "selected_test_prefixes": null,
+      "redacted": false,
+      "redaction": null
+    }
+  ]
+}

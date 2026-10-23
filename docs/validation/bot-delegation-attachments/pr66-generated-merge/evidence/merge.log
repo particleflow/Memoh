@@ -1,0 +1,15 @@
+Auto-merging packages/sdk/src/@pinia/colada.gen.ts
+CONFLICT (content): Merge conflict in packages/sdk/src/@pinia/colada.gen.ts
+Auto-merging packages/sdk/src/index.ts
+CONFLICT (content): Merge conflict in packages/sdk/src/index.ts
+Auto-merging packages/sdk/src/sdk.gen.ts
+CONFLICT (content): Merge conflict in packages/sdk/src/sdk.gen.ts
+Auto-merging packages/sdk/src/types.gen.ts
+CONFLICT (content): Merge conflict in packages/sdk/src/types.gen.ts
+Auto-merging spec/docs.go
+CONFLICT (content): Merge conflict in spec/docs.go
+Auto-merging spec/swagger.json
+CONFLICT (content): Merge conflict in spec/swagger.json
+Auto-merging spec/swagger.yaml
+CONFLICT (content): Merge conflict in spec/swagger.yaml
+Automatic merge failed; fix conflicts and then commit the result.

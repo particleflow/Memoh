@@ -1,0 +1,86 @@
+=== RUN   TestPersistedPCScopeMapsSameRuntimeWithoutClearingSourceBinding
+--- PASS: TestPersistedPCScopeMapsSameRuntimeWithoutClearingSourceBinding (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/botdelegation	0.010s
+=== RUN   TestComputerBindingThroughRealSubagentAdmissionAndSpawn
+=== RUN   TestComputerBindingThroughRealSubagentAdmissionAndSpawn/persisted-child
+=== RUN   TestComputerBindingThroughRealSubagentAdmissionAndSpawn/unrelated-thread
+--- PASS: TestComputerBindingThroughRealSubagentAdmissionAndSpawn (0.00s)
+    --- PASS: TestComputerBindingThroughRealSubagentAdmissionAndSpawn/persisted-child (0.00s)
+    --- PASS: TestComputerBindingThroughRealSubagentAdmissionAndSpawn/unrelated-thread (0.00s)
+=== RUN   TestBuildContextFragScopePreservesIMTopology
+=== PAUSE TestBuildContextFragScopePreservesIMTopology
+=== RUN   TestBuildContextFragScopeDoesNotInferDirectedReplyFromAnyReplyID
+=== PAUSE TestBuildContextFragScopeDoesNotInferDirectedReplyFromAnyReplyID
+=== RUN   TestDelegationFinalAssetsRequireHostIdentity
+--- PASS: TestDelegationFinalAssetsRequireHostIdentity (0.00s)
+=== RUN   TestReplaceCompactedHistoryRecordsScopesSummaryToConversationNotFirstSender
+=== PAUSE TestReplaceCompactedHistoryRecordsScopesSummaryToConversationNotFirstSender
+=== RUN   TestHistoryScopeFallbackFromChatRequestUsesRequestTopology
+=== PAUSE TestHistoryScopeFallbackFromChatRequestUsesRequestTopology
+=== RUN   TestFrameCacheIsScopedPerBot
+--- PASS: TestFrameCacheIsScopedPerBot (0.73s)
+=== RUN   TestResumeScopeBindingFailsClosed
+--- PASS: TestResumeScopeBindingFailsClosed (0.00s)
+=== RUN   TestPostgresResumeScopesUseOrdinaryRoleAndPreserveTenantIntoExecution
+2026/10/22 20:06:45 INFO interrupted session resumed previous_run_id=654013c3-62be-4d0f-9898-c73d9f6733b5 run_id=run-1 session_id=d425daee-b005-41db-9746-be0add7cf0f8
+2026/10/22 20:06:45 INFO interrupted session resumed previous_run_id=f3cd837a-9226-44f0-aa46-41b744bdd884 run_id=run-2 session_id=5cf24dfb-e32e-44b1-ad12-8e1add2717d9
+--- PASS: TestPostgresResumeScopesUseOrdinaryRoleAndPreserveTenantIntoExecution (0.08s)
+=== RUN   TestResumeContextPreservesDeadlineAndScopesWithoutCredentials
+--- PASS: TestResumeContextPreservesDeadlineAndScopesWithoutCredentials (0.00s)
+=== RUN   TestResumeRejectsInvalidCredentialAndForeignBotScope
+--- PASS: TestResumeRejectsInvalidCredentialAndForeignBotScope (0.00s)
+=== RUN   TestToolApprovalHandlerRejectsComputerScopeWithoutPendingApprovalOrRuntimeFault
+--- PASS: TestToolApprovalHandlerRejectsComputerScopeWithoutPendingApprovalOrRuntimeFault (0.00s)
+=== CONT  TestBuildContextFragScopePreservesIMTopology
+=== CONT  TestReplaceCompactedHistoryRecordsScopesSummaryToConversationNotFirstSender
+=== CONT  TestBuildContextFragScopeDoesNotInferDirectedReplyFromAnyReplyID
+--- PASS: TestBuildContextFragScopeDoesNotInferDirectedReplyFromAnyReplyID (0.00s)
+=== CONT  TestHistoryScopeFallbackFromChatRequestUsesRequestTopology
+--- PASS: TestHistoryScopeFallbackFromChatRequestUsesRequestTopology (0.00s)
+--- PASS: TestReplaceCompactedHistoryRecordsScopesSummaryToConversationNotFirstSender (0.00s)
+--- PASS: TestBuildContextFragScopePreservesIMTopology (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	0.848s
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/old_fence
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/unclaimed
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/terminal
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/lost
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/accepted_before_authenticated_resume
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_bot
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_team
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_session
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_user
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/ownerless
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/deleted
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/malformed_input
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_model_metadata
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_submitted_input_without_host_references
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/old_fence (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/unclaimed (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/terminal (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/lost (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/accepted_before_authenticated_resume (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_bot (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_team (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_session (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_user (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/ownerless (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/deleted (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/malformed_input (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_model_metadata (0.00s)
+    --- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_submitted_input_without_host_references (0.00s)
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope (0.00s)
+    --- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code (0.00s)
+    --- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex (0.00s)
+=== RUN   TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall
+--- PASS: TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall (0.00s)
+=== RUN   TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget
+--- PASS: TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget (0.00s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.017s

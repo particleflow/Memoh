@@ -1,0 +1,13 @@
+{
+  "name": "web-after",
+  "command": [
+    "pnpm",
+    "--filter",
+    "@memohai/web",
+    "typecheck"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 2,
+  "elapsed_seconds": 30.271,
+  "started_utc": "2026-10-23T03:12:48Z"
+}

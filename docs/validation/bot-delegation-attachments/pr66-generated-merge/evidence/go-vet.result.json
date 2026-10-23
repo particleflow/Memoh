@@ -1,0 +1,12 @@
+{
+  "name": "go-vet",
+  "command": [
+    "go",
+    "vet",
+    "./internal/handlers"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 0,
+  "elapsed_seconds": 29.693,
+  "started_utc": "2026-10-23T03:15:54Z"
+}

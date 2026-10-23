@@ -20,6 +20,12 @@ import (
 func TestBotDelegationPostgresClaimIsolationAndDescendantAssets(t *testing.T) {
 	ctx := t.Context()
 	pool := freshMigratedDB(t)
+	var schemaVersion int
+	var dirty bool
+	if err := pool.QueryRow(ctx, "SELECT version, dirty FROM schema_migrations").Scan(&schemaVersion, &dirty); err != nil || schemaVersion < 173 || dirty {
+		t.Fatalf("fresh official migrations: version=%d dirty=%v error=%v", schemaVersion, dirty, err)
+	}
+	t.Logf("freshMigratedDB applied the official full migration chain: version=%d dirty=%v", schemaVersion, dirty)
 	conn, err := pool.Acquire(ctx)
 	if err != nil {
 		t.Fatal(err)

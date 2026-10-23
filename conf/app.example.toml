@@ -9,6 +9,8 @@ timezone = "UTC"
 instance_id = ""
 
 [files]
+# Opt in only after migrations, owner enrollment and verified HTTPS setup.
+device_transfers_enabled = false
 # Per-file HTTP attachment limit in bytes; 0 uses the default 200 MiB.
 # The Web composer reads this limit before uploading. Restart Server after edits.
 max_upload_bytes = 209715200

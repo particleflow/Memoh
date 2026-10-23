@@ -7596,6 +7596,15 @@ definitions:
       text:
         type: string
     type: object
+  userruntime.ChangeTransferCredentialRequest:
+    properties:
+      expected_id:
+        description: Empty means first enrollment. Rotation must name the current
+          credential.
+        type: string
+      expires_at:
+        type: string
+    type: object
   userruntime.CreateRuntimeRequest:
     properties:
       agenvo:
@@ -7636,6 +7645,22 @@ definitions:
       team_id:
         type: string
       workspace_base:
+        type: string
+    type: object
+  userruntime.TransferCredentialEnrollment:
+    properties:
+      credential:
+        type: string
+      credential_id:
+        type: string
+      expires_at:
+        type: string
+    type: object
+  userruntime.TransferCredentialStatus:
+    properties:
+      credential_id:
+        type: string
+      expires_at:
         type: string
     type: object
   video.ConfigSchema:
@@ -14663,11 +14688,23 @@ paths:
         name: content_hash
         required: true
         type: string
+      - description: Requested byte range
+        in: header
+        name: Range
+        type: string
+      - description: Previously received ETag
+        in: header
+        name: If-Range
+        type: string
       produces:
       - application/octet-stream
       responses:
         "200":
           description: OK
+          schema:
+            type: file
+        "206":
+          description: Partial Content
           schema:
             type: file
         "400":
@@ -14686,6 +14723,81 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/server.Problem'
+        "416":
+          description: Unsatisfiable byte range
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read one original returned by an authorized Bot handoff
+      tags:
+      - sessions
+    head:
+      description: Checks current source ancestry, both Bot grants and the trusted
+        returned reference. No public URL or copied original; authenticated download
+        only.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      - description: Returned content hash
+        in: path
+        name: content_hash
+        required: true
+        type: string
+      - description: Requested byte range
+        in: header
+        name: Range
+        type: string
+      - description: Previously received ETag
+        in: header
+        name: If-Range
+        type: string
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "206":
+          description: Partial Content
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "416":
+          description: Unsatisfiable byte range
+          schema:
+            type: string
         "500":
           description: Internal Server Error
           schema:
@@ -20204,6 +20316,106 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Configure Pi on an existing owned Agenvo computer
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/transfer-credential:
+    delete:
+      parameters:
+      - description: Existing Agenvo runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Current non-secret credential ID
+        in: query
+        name: expected_id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Revoked
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Revoke an owned computer file credential with current-ID CAS
+      tags:
+      - user-runtimes
+    get:
+      parameters:
+      - description: Existing Agenvo runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userruntime.TransferCredentialStatus'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read owned computer file credential status (no secret)
+      tags:
+      - user-runtimes
+    post:
+      consumes:
+      - application/json
+      description: Returns the secret once. Existing credentials require expected_id
+        CAS; a lost response requires status read and explicit rotation. Never a per-file
+        action.
+      parameters:
+      - description: Existing Agenvo runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Expected current credential ID and optional device expiry
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userruntime.ChangeTransferCredentialRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/userruntime.TransferCredentialEnrollment'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Enroll or explicitly rotate an owned computer file credential
       tags:
       - user-runtimes
   /users/me/runtimes/agenvo/discover:

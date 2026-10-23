@@ -12,6 +12,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -27,10 +28,11 @@ type BatchTransfer struct {
 	ReadyHash string           `json:"ready_hash,omitempty"`
 }
 type BatchDetails struct {
-	Progress agenvo.BatchProgress `json:"progress"`
-	Receipt  *agenvo.BatchReceipt `json:"receipt,omitempty"`
-	Files    []BatchTransfer      `json:"files,omitempty"`
-	Result   *agenvo.PiJSONResult `json:"result,omitempty"`
+	Feedback *deliverymeta.Feedback `json:"delivery_feedback,omitempty"`
+	Progress agenvo.BatchProgress   `json:"progress"`
+	Receipt  *agenvo.BatchReceipt   `json:"receipt,omitempty"`
+	Files    []BatchTransfer        `json:"files,omitempty"`
+	Result   *agenvo.PiJSONResult   `json:"result,omitempty"`
 }
 
 // storeBatchBytes verifies content-addressed readiness before recording a ref.
@@ -142,6 +144,41 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			return Result{}, err
 		}
 	}
+	// Read an advisory even when a prior block suppresses transfer work. Only a
+	// new correctly correlated local observation can clear that block; missing,
+	// partial or foreign receipts leave the last durable observation unchanged.
+	if delivery := producerResult(r, d); delivery != nil && delivery.hasPending() && !r.CancelRequested {
+		feedback, readErr := s.relay.ReadBatchProducerFeedback(readCtx, scope(b, r.TargetID), batch.Progress)
+		current, currentDetails, err := s.load(ctx, b, r.ID)
+		if err != nil {
+			return Result{}, err
+		}
+		if current.Revision != r.Revision {
+			return result(current, currentDetails), nil
+		}
+		if readErr == nil && feedback != nil && (batch.Feedback == nil || feedback.Hash() != batch.Feedback.Hash()) {
+			batch.Feedback = feedback
+			if err := save(); err != nil {
+				return Result{}, err
+			}
+		}
+	}
+	// Exit evidence remains valid even when output exceeds the import budget.
+	if delivery := producerResult(r, d); delivery != nil && delivery.canAdvance(time.Now()) && !r.CancelRequested {
+		// A finite idempotent wakeup, not a new execution attempt or a scheduler.
+		// Its transport outcome cannot change execution or delivery truth. A later
+		// query repeats this safe wakeup and reads the original ledger after restart.
+		_ = s.relay.AdvanceBatchDelivery(readCtx, scope(b, r.TargetID), batch.Progress)
+		current, currentDetails, err := s.load(ctx, b, r.ID)
+		if err != nil {
+			return Result{}, err
+		}
+		// A concurrent association may have advanced revision. Do not overwrite it
+		// with this observer's stale business details; retry observation next call.
+		if current.Revision != r.Revision {
+			return result(current, currentDetails), nil
+		}
+	}
 	if batch.Progress.CompletionVersion == agenvo.BatchCompletionVersion && !diagnostics {
 		if batch.Result != nil {
 			return result(r, d), nil
@@ -176,7 +213,6 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		}
 		return result(r, d), nil
 	}
-	// Exit evidence remains valid even when output exceeds the import budget.
 	// Release the invocation slot, but do not claim AI success or expose refs.
 	for _, f := range batch.Files {
 		if f.Meta.Size > 64<<20 {

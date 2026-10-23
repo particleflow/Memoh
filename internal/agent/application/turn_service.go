@@ -79,7 +79,7 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 
 	var (
 		assetMu sync.Mutex
-		assets  []turn.OutboundAssetRef
+		assets  = authorizedDelegationResultAssets(runCtx, cmd)
 	)
 
 	req := chatRequestFromCommand(cmd)
