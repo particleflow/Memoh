@@ -1,4 +1,4 @@
-# Real-route transfer round trip (Linux cloud acceptance)
+# Windows/NAS transfer: real-route cloud test evidence
 
 ## Source and scope
 
@@ -33,6 +33,12 @@ fault wrapper preserves the real socket's read-deadline support through
 `Unwrap`; a plain response recorder was rejected by the real handler with 503
 during fixture development, and was corrected without weakening the handler.
 
+The test temporarily builds the existing `cmd/transferqueue` source for the
+Linux cloud test host and invokes that executable from its test-owned directory.
+It introduces no Linux product, service or deployment target, and does not
+install the binary on a NAS. The product objective remains Windows/NAS transfer;
+adding Linux download publication support is not a required follow-up.
+
 The test builds and invokes the production `transferqueue` executable. Existing
 closed producer metadata arrives on stdin. It uploads **9,800,163 bytes**, drops
 the first successfully applied PATCH response, and starts new finite CLI
@@ -46,14 +52,20 @@ invocations using the persisted due time. Assertions require:
   for the same delivery is rejected without replacing the committed proof.
 - The source's bytes, file identity, size and modification time remain unchanged.
 
+This new round-trip scenario drops only the first successful PATCH response.
+It does not drop Complete/Commit responses or restart the server. Earlier ready
+proof tests in the wider PG selection have separate failure scenarios; their
+log entries must not be relabeled as this scenario's coverage.
+
 The same credential and task authorize a download of that uploaded reference.
 The **production download library** receives a truncated real route response
 after more than 8 MiB, saves a fsynced incomplete offset, closes and reopens its
 private staging file, and resumes with the exact persisted Range. The library's
 full SHA-256 verification and an independent byte comparison both pass. The
 NAS original and upload ledger remain intact. A wrong attempt and subsequent
-credential revocation reject further authorized-read checks while preserving
-the staged bytes and source.
+credential revocation reject the `HEAD` authorization check at `offset == size`
+after downloading, while preserving the staged bytes and source. This is not
+revocation during an active response stream.
 
 CLI metadata-only admissions also verify the 256 MiB byte budget and 8/9 active
 job boundary. These are admission checks, not 256 MiB transfers or nine complete
@@ -110,12 +122,27 @@ On the Linux cloud workspace, 2026-10-23 UTC, at the implementation above:
 - Integration-tag incremental lint: exit 0, no findings.
 - `git diff --check`: passed.
 
-Local raw-output SHA-256 (not CI run claims):
+The two original outputs below are published verbatim, without redaction or
+reconstruction. Before copying, their complete contents were reviewed and
+checked for credential markers, URLs/DSNs, private keys, email addresses,
+absolute private paths and UUIDs. They contain test names, source file/line
+references, synthetic byte/count results and elapsed times. No secret or
+private endpoint was found. The published bytes match the original local files;
+there is no distinct redacted-output hash.
+
+These are readable local execution records, not remote CI or independent-run
+claims. Hashes only verify that the published records match the recorded files;
+they are not execution proof on their own. The full output's 25 named PASS lines
+include parent and child tests, not 25 independent end-to-end transfers.
 
 | Output | SHA-256 |
 | --- | --- |
-| Focused race test | `d5f30eefc2610994e756e452fe91e5bef37c252f57832a3d318d2d0b3d36848c` |
-| Full PG selection | `8426d82c1382a22d4c9565f24fb47baa456317c310ac30385e2263e23d845d27` |
+| [Focused race test, original 7 lines](evidence/delivery-real-route-roundtrip/focused.txt) | `d5f30eefc2610994e756e452fe91e5bef37c252f57832a3d318d2d0b3d36848c` |
+| [Full PG selection, original 60 lines](evidence/delivery-real-route-roundtrip/pg-suite.txt) | `8426d82c1382a22d4c9565f24fb47baa456317c310ac30385e2263e23d845d27` |
+
+No tests were rerun to publish these outputs. GitHub CI remains unexecuted:
+the prior single dispatch was rejected with HTTP 422, `Actions has been disabled
+for this repository`. It was not retried for this evidence-only update.
 
 No UI behavior changed or UI/runtime installation was performed in this scoped
 cloud test task. Human QA is outstanding. The separately blocked legacy Media
