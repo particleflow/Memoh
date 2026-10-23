@@ -1,0 +1,35 @@
+{
+  "inspection": "Synthetic tests, static checks and cloud cache diagnostics only; no credentials, private deployment addresses or user data.",
+  "files": [
+    {
+      "file": "image-tests.log",
+      "bytes": 9110,
+      "sha256": "e8faf82c7b5734cfda07973cdf59b68d284ffb9a9cb8922ae6dd2e5b9a8a1567",
+      "transformation": "none"
+    },
+    {
+      "file": "full-lint.log",
+      "bytes": 320,
+      "sha256": "88b39e400e542a2a55f566c57273f8b6f1b133d9c0854c20fb75557d31f6525f",
+      "transformation": "none"
+    },
+    {
+      "file": "core-boundary.log",
+      "bytes": 95,
+      "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+      "transformation": "none"
+    },
+    {
+      "file": "linter-version.log",
+      "bytes": 91,
+      "sha256": "a895dd6979fa80d8f10a8769871d3fdb0b3493fad48a713c9319ea2bf331ebc5",
+      "transformation": "none"
+    },
+    {
+      "file": "scope-audit.json",
+      "bytes": 616,
+      "sha256": "d6c219a993203137404957ff394970580143155121bff02c5b11a2cda37c3e8e",
+      "transformation": "none"
+    }
+  ]
+}

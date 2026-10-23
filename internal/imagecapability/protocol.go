@@ -86,7 +86,10 @@ func invoke(ctx context.Context, client *http.Client, selected selection, apiKey
 	}
 	oneShot := *client
 	oneShot.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	resp, err := oneShot.Do(req)
+	// gosec v2.23.0 misclassifies locally constructed *http.Request values as
+	// external sources. Evidence and the removal condition are recorded in
+	// docs/testing/g704-source-tracking/DECISION.md.
+	resp, err := oneShot.Do(req) // #nosec G704 -- Selected provider config supplies the destination; tool arguments cannot select it and redirects are disabled.
 	if err != nil {
 		return imageBytes{}, err
 	}

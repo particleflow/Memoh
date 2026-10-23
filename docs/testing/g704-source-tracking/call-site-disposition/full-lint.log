@@ -1,0 +1,2 @@
+templates/workspace.go:1: : loading compiled Go files from cache: reading srcfiles list: cache entry not found: open /tmp/agenvo-build-cache/11/11ccb867d16a5d237e538992f98366fbf31bc9c6654672c7b0760a722f8096f7-a: no such file or directory (typecheck)
+// Package templates holds the built-in files seeded into every agent
