@@ -76,6 +76,7 @@ import (
 	"github.com/felinics/memoh/internal/fetchproviders"
 	"github.com/felinics/memoh/internal/handlers"
 	hookspkg "github.com/felinics/memoh/internal/hooks"
+	"github.com/felinics/memoh/internal/imagecapability"
 	"github.com/felinics/memoh/internal/logger"
 	"github.com/felinics/memoh/internal/mcp"
 	mcpfederation "github.com/felinics/memoh/internal/mcp/sources/federation"
@@ -1134,7 +1135,8 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 	channelMessaging := channelmessagingadapter.New(channelRuntime, registry, assetResolver)
 	historySessions := channelthreadadapter.NewLister(sessionService, routeService)
 	fedGateway.SetOAuthService(oauthService)
-	imageProvider := agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService)
+	imageProvider := imagecapability.New(agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService), settingsService, modelsService, queries, mediaService,
+		imageCapabilityAuthorizer(&applicationBotPermissionChecker{bots: botService, accounts: accountService}, sessionService.Get))
 	spawnProvider := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
 	backgroundProvider := agenttools.NewBackgroundProvider(log, bgManager)
 	return []agenttools.ToolProvider{
