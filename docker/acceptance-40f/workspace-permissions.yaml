@@ -1,0 +1,9 @@
+# Optional, explicit deployment permission boundary; NOT permission approval.
+# Privileged nested containerd is inherited from the official deployment model.
+# Do not use this on a production host without a separate risk decision.
+services:
+  server:
+    privileged: true
+# No host PID/network, Docker socket, host devices or CDI directories are added.
+# Nested cgroup compatibility without host PID sharing still requires host QA.
+# If startup fails, stop; do not add privileges or host mounts automatically.
