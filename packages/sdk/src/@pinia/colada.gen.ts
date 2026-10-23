@@ -3210,7 +3210,7 @@ export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdQueryKey = 
 /**
  * Read a safe task summary within an owned conversation
  *
- * Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Attachments and execution content are unavailable in this version.
+ * Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
  */
 export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdQuery = defineQueryOptions<Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdData>, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponse, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdError>((options: Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdData>) => ({
     key: getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdQueryKey(options),

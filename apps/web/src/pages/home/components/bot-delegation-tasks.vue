@@ -5,6 +5,7 @@ import { Button, CalloutBanner, Empty, EmptyDescription, InlineLoadingRow, Item,
 import type { BotdelegationView } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
 import { delegationAPIUnsupported } from '../composables/useBotDelegations'
+import type { BotDelegationDownloadAction } from '../composables/useBotDelegationDownload'
 import type { BotDelegationDeliveryAction } from '../composables/useBotDelegationDelivery'
 
 const props = defineProps<{
@@ -17,6 +18,7 @@ const props = defineProps<{
   error?: unknown
   deliveryAction?: BotDelegationDeliveryAction
   tasksAction?: () => void
+  downloadAction?: BotDelegationDownloadAction
 }>()
 const emit = defineEmits<{
   openTask: [task: BotdelegationView]
@@ -143,14 +145,34 @@ function taskLabel(task: BotdelegationView) {
       >
         {{ t('chat.delegations.noLiveContent') }}
       </p>
-      <!-- Attachment delivery is being verified separately. Never construct a
-           Bot/media fallback URL or imply that a reported reference is downloadable. -->
-      <p
-        v-if="detail.state === 'completed' && detail.attachments.length"
-        class="text-body text-muted-foreground"
-      >
-        {{ t('chat.delegations.attachmentsUnavailable', { count: detail.attachments.length }) }}
-      </p>
+      <template v-if="detail.state === 'completed' && detail.attachments.length">
+        <div
+          v-if="downloadAction"
+          class="space-y-2"
+        >
+          <Button
+            v-for="attachment in detail.attachments"
+            :key="attachment.content_hash"
+            variant="outline"
+            :disabled="loading || downloadAction.pending || !downloadAction.available(attachment)"
+            @click="downloadAction.download(attachment)"
+          >
+            {{ t('chat.delegations.downloadResult', { hash: attachment.content_hash?.slice(0, 12) }) }}
+          </Button>
+          <CalloutBanner
+            v-if="downloadAction.error"
+            tone="warning"
+            size="sm"
+            :description="resolveApiErrorMessage(downloadAction.error, t('chat.delegations.downloadFailed'))"
+          />
+        </div>
+        <p
+          v-else
+          class="text-body text-muted-foreground"
+        >
+          {{ t('chat.delegations.attachmentsUnavailable', { count: detail.attachments.length }) }}
+        </p>
+      </template>
     </div>
   </section>
   <template v-else-if="!selected">

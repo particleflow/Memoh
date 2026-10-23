@@ -1,0 +1,201 @@
+{
+  "realBackend": true,
+  "realPG": true,
+  "syntheticModel": true,
+  "preseededTaskRows": false,
+  "downloadBytes": 7400,
+  "downloadSHA256": "0d346e40c3f898dcec8424c14b0d34a6c003699666be2bd9509d877eabe68219",
+  "child": {
+    "task_type": "subagent",
+    "task_id": "6b324109-a310-41f3-bd67-82f0168da6a4",
+    "session_id": "6b324109-a310-41f3-bd67-82f0168da6a4",
+    "parent_session_id": "9a040c1c-6bab-4327-a428-e6ca7627091e",
+    "created_at": "2026-10-23T09:21:57.466165Z",
+    "updated_at": "2026-10-23T09:21:57.584555Z",
+    "status": "completed",
+    "summary": "Latest child run state; visible assistant text is not business verification.",
+    "content_available": true,
+    "attachments_available": false,
+    "run_id": "c2199aee-236a-4b8c-9e81-30e34bf1573b",
+    "business_state": "unknown",
+    "result_summary": {
+      "text": "DOWNSTREAM_VISIBLE_FINAL_42",
+      "truncated": false,
+      "source": "subagent_assistant"
+    }
+  },
+  "requests": [
+    {
+      "path": "/api/users/me",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/web-management-supervisor",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/ping",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/acp/profiles",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workdirs",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/providers",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/agents",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/models",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/model-preference-seed",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/skills/catalog",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/container/fs/list",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/settings",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/users/me/runtimes",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/workspace-targets",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/events",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/starter-prompts",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa/queue",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/messages",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa/status",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/messages",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa/tasks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa/delegations",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa/delegations/c4f57dc0-e69a-4c42-88a2-a814e600c8c9",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/b95c4b8c-a5ce-4f3f-9acd-2f57a11f01b2/sessions/1bf9edcc-73d5-45fc-871c-74b953a18caa/delegations/c4f57dc0-e69a-4c42-88a2-a814e600c8c9/attachments/0d346e40c3f898dcec8424c14b0d34a6c003699666be2bd9509d877eabe68219",
+      "status": 200,
+      "method": "HEAD"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/9a040c1c-6bab-4327-a428-e6ca7627091e/tasks",
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "path": "/api/bots/031128c9-9aca-4b12-9fbc-00cbf7af7e8d/sessions/9a040c1c-6bab-4327-a428-e6ca7627091e/tasks/subagent/6b324109-a310-41f3-bd67-82f0168da6a4",
+      "status": 200,
+      "method": "GET"
+    }
+  ],
+  "pageErrors": [],
+  "observationPOSTs": 0
+}

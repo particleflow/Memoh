@@ -1,0 +1,6 @@
+=== RUN   TestSessionTasksPostgresLatestChildRunAndMessage
+    session_tasks_postgres_integration_test.go:194: ERROR: inconsistent types deduced for parameter $1 (SQLSTATE 42P08)
+--- FAIL: TestSessionTasksPostgresLatestChildRunAndMessage (0.02s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/db	0.044s
+FAIL

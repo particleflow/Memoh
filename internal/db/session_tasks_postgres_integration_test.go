@@ -3,6 +3,12 @@
 package db_test
 
 import (
+	"context"
+	"errors"
+	"github.com/felinics/memoh/internal/db"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -136,5 +142,93 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 	var dirty bool
 	if err := conn.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || version != startingVersion || dirty {
 		t.Fatalf("schema=%d dirty=%v err=%v", version, dirty, err)
+	}
+}
+
+func TestSessionTasksPostgresLatestChildRunAndMessage(t *testing.T) {
+	ctx := t.Context()
+	dsn := os.Getenv("TEST_POSTGRES_DSN")
+	if dsn == "" {
+		t.Skip("TEST_POSTGRES_DSN is not set")
+	}
+	pool, err := pgxpool.New(ctx, dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	conn, err := pool.Acquire(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Release()
+	tx, err := conn.Begin(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = tx.Rollback(context.Background()) }()
+	var version int
+	var dirty bool
+	if err := tx.QueryRow(ctx, "SELECT version,dirty FROM schema_migrations").Scan(&version, &dirty); err != nil || dirty || version < 173 {
+		t.Fatalf("requires migrated test DB >=173: %d %v %v", version, dirty, err)
+	}
+	exec := func(sql string, args ...any) {
+		t.Helper()
+		if _, err := tx.Exec(ctx, sql, args...); err != nil {
+			t.Fatal(err)
+		}
+	}
+	exec("SELECT set_config('memoh.team_id',$1,true)", team.DefaultTeamID)
+	user, bot, root, child := uuid.NewString(), uuid.NewString(), uuid.NewString(), uuid.NewString()
+	exec("INSERT INTO users(id,username) VALUES($1::uuid,$1::text)", user)
+	exec("INSERT INTO team_members(user_id) VALUES($1)", user)
+	exec("INSERT INTO bots(id,owner_user_id,name) VALUES($1::uuid,$2,$1::text)", bot, user)
+	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id,type) VALUES($1,$2,$3,'chat')", root, bot, user)
+	exec("INSERT INTO bot_sessions(id,bot_id,created_by_user_id,parent_session_id,type) VALUES($1,$2,$3,$4,'subagent')", child, bot, user, root)
+	s := postgresstore.NewWithQueries(dbsqlc.New(tx))
+	addRun := func(session, state string, pos int) string {
+		t.Helper()
+		id := uuid.NewString()
+		exec("INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint,created_at) VALUES($1::uuid,$2,$3,($1::uuid)::text,$1::uuid,$4::bigint,$5,'{}','synthetic',now()+($4::bigint * interval '1 second'))", id, bot, session, pos, state)
+		return id
+	}
+	parent := addRun(root, "completed", 1)
+	if _, err := s.ReadSubagentRun(ctx, bot, child); !errors.Is(err, db.ErrNotFound) {
+		t.Fatal("parent run substituted", parent, err)
+	}
+	first := addRun(child, "completed", 2)
+	exec(`INSERT INTO bot_history_messages(bot_id,session_id,run_id,role,content,turn_id,turn_position,turn_message_seq,turn_visible) VALUES($1,$2,$3,'assistant','{"role":"assistant","content":"CHILD_FIRST"}',$3,2,2,true)`, bot, child, first)
+	r, err := s.ReadSubagentRun(ctx, bot, child)
+	if err != nil || r.RunID != first || r.State != "completed" || !strings.Contains(string(r.Content), "CHILD_FIRST") {
+		t.Fatal(r, err)
+	}
+	second := addRun(child, "accepted", 3)
+	r, err = s.ReadSubagentRun(ctx, bot, child)
+	if err != nil || r.RunID != second || r.State != "accepted" || len(r.Content) != 0 {
+		t.Fatal("old result reused", r, err)
+	}
+	exec(`INSERT INTO bot_history_messages(bot_id,session_id,run_id,role,content,turn_id,turn_position,turn_message_seq,turn_visible) VALUES($1,$2,$3,'assistant','{"role":"assistant","content":"CHILD_SECOND"}',$3,3,2,true)`, bot, child, second)
+	exec("UPDATE session_runs SET state='completed' WHERE run_id=$1", second)
+	// A new reader after completion needs no in-memory task manager.
+	s = postgresstore.NewWithQueries(dbsqlc.New(tx))
+	r, err = s.ReadSubagentRun(ctx, bot, child)
+	if err != nil || r.RunID != second || r.State != "completed" || !strings.Contains(string(r.Content), "CHILD_SECOND") {
+		t.Fatal(r, err)
+	}
+	exec("UPDATE bot_history_messages SET turn_visible=false WHERE run_id=$1", second)
+	r, err = s.ReadSubagentRun(ctx, bot, child)
+	if err != nil || len(r.Content) != 0 {
+		t.Fatal("hidden message leaked", r, err)
+	}
+	if _, err := s.ReadSubagentRun(ctx, uuid.NewString(), child); !errors.Is(err, db.ErrNotFound) {
+		t.Fatal("foreign bot", err)
+	}
+	exec("SELECT set_config('memoh.team_id',$1,true)", uuid.NewString())
+	if _, err := s.ReadSubagentRun(ctx, bot, child); !errors.Is(err, db.ErrNotFound) {
+		t.Fatal("foreign team", err)
+	}
+	exec("SELECT set_config('memoh.team_id',$1,true)", team.DefaultTeamID)
+	exec("UPDATE session_runs SET error_code='history_reset' WHERE run_id=$1", second)
+	if _, err := s.ReadSubagentRun(ctx, bot, child); !errors.Is(err, db.ErrNotFound) {
+		t.Fatal("reset fell back to older run", err)
 	}
 }

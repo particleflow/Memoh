@@ -36,7 +36,7 @@ function stateLabel(task: SessiontaskTask) {
     const result = t(`chat.tasks.outcomes.${outcome}`)
     return task.process_state === 'exited' ? `${t('chat.tasks.statuses.process_exited')} · ${result}` : result
   }
-  const status = ['submitted', 'process_exited', 'not_started', 'rejected'].includes(task.status) ? task.status : 'unknown'
+  const status = ['submitted', 'process_exited', 'not_started', 'rejected', 'accepted', 'running', 'waiting_decision', 'finishing', 'completed', 'failed', 'aborted', 'lost'].includes(task.status) ? task.status : 'unknown'
   return t(`chat.tasks.statuses.${status}`)
 }
 
@@ -78,9 +78,15 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.cancelIntent') }}
         </p>
       </div>
+      <p
+        v-if="detail.task_type === 'subagent'"
+        class="text-body text-muted-foreground"
+      >
+        {{ t('chat.tasks.pollingOutput') }}
+      </p>
       <div class="space-y-2">
         <h3 class="text-label font-medium">
-          {{ t('chat.tasks.result') }}
+          {{ t(detail.task_type === 'subagent' ? 'chat.tasks.visibleOutput' : 'chat.tasks.result') }}
         </h3>
         <!-- Plain text: never interpret links, HTML or embedded media. -->
         <p

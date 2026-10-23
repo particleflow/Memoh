@@ -1,0 +1,23 @@
+{
+  "items": [
+    {
+      "task_type": "subagent",
+      "task_id": "92487015-c2c7-4611-be09-2a5d24c67129",
+      "session_id": "92487015-c2c7-4611-be09-2a5d24c67129",
+      "parent_session_id": "54244e5c-ec17-450d-822b-6e5e50bc2f40",
+      "created_at": "2026-10-23T08:43:40.57751Z",
+      "updated_at": "2026-10-23T08:43:40.700485Z",
+      "status": "completed",
+      "summary": "Latest child run state; visible assistant text is not business verification.",
+      "content_available": true,
+      "attachments_available": false,
+      "run_id": "b6d8a3f9-c0da-4c16-a712-7ad630c27b12",
+      "business_state": "unknown",
+      "result_summary": {
+        "text": "DOWNSTREAM_VISIBLE_FINAL_42",
+        "truncated": false,
+        "source": "subagent_assistant"
+      }
+    }
+  ]
+}

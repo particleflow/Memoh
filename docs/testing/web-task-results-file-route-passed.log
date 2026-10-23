@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/web-management-checks/results-file-route.py", line 23, in <module>
+    status,h,denied=request(a['url']);assert status in (403,404) and h.get('cache-control')=='no-store' and b not in denied
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

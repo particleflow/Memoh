@@ -1,0 +1,16 @@
+{
+  "realServer": true,
+  "realPG": true,
+  "realOriginal": true,
+  "hash": "0d346e40c3f898dcec8424c14b0d34a6c003699666be2bd9509d877eabe68219",
+  "bytes": 7400,
+  "full": 200,
+  "matchingIfRange": 206,
+  "staleIfRange": 200,
+  "anonymous": 401,
+  "crossScope": true,
+  "revokedSourceOwnershipStatus": 404,
+  "afterRestore": 200,
+  "runCountUnchanged": true,
+  "businessResubmissions": 0
+}

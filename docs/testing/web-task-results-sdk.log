@@ -1,0 +1,39 @@
+
+> @memohai/monorepo@0.22.0 generate-sdk /workspace/Memoh
+> openapi-ts
+
+[90m@hey-api/openapi-ts v0.99.0[39m
+
+[90m[Job 1] [39m[90m~[39m [36mGenerating...[39m
+[90m[Job 1] [39m[36m  [1] [39m./spec/swagger.json
+[90m[Job 1] [39m❌ [31mFailed with the message:[39m
+[90m[Job 1] [39m[31m  [39mENOSPC: no space left on device, mkdir '/workspace/Memoh/packages/sdk/src/core'
+[90m[root] [39m[36m📄 Crash log saved to:[39m [90m/workspace/Memoh/openapi-ts-error-1792746690903.log[39m
+Unexpected error: JobError
+    at file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:220:39
+    at async Promise.all (index 0)
+    at async createClient (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:211:21)
+    at async Command.<anonymous> (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/run.mjs:35:8)
+    at async Command.parseAsync (file:///workspace/Memoh/node_modules/.pnpm/commander@15.0.0/node_modules/commander/lib/command.js:1113:5)
+    at async runCli (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/run.mjs:39:3) {
+  originalError: {
+    error: Error: ENOSPC: no space left on device, mkdir '/workspace/Memoh/packages/sdk/src/core'
+        at Object.mkdirSync (node:fs:1334:26)
+        at ensureDirSync (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+shared@0.5.0/node_modules/@hey-api/shared/dist/index.mjs:107:31)
+        at generateClientBundle (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/init-D6Y8JFUS.mjs:7118:3)
+        at generateOutput (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:24:115)
+        at createClient$1 (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:153:31)
+        at async file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:213:12
+        at async Promise.all (index 0)
+        at async createClient (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/src-CI9riJdm.mjs:211:21)
+        at async Command.<anonymous> (file:///workspace/Memoh/node_modules/.pnpm/@hey-api+openapi-ts@0.99.0_typescript@6.0.3/node_modules/@hey-api/openapi-ts/dist/run.mjs:35:8)
+        at async Command.parseAsync (file:///workspace/Memoh/node_modules/.pnpm/commander@15.0.0/node_modules/commander/lib/command.js:1113:5) {
+      errno: -28,
+      code: 'ENOSPC',
+      syscall: 'mkdir',
+      path: '/workspace/Memoh/packages/sdk/src/core'
+    },
+    jobIndex: 0
+  }
+}
+ ELIFECYCLE  Command failed with exit code 1.
