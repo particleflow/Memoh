@@ -11,6 +11,8 @@ This is a new follow-up to recovery checkpoint
 `6a2a3b1a8a799114a8e41a66fedc6207e89e4ba1`, not a reconstruction of missing private
 revisions. The 72-path missing-input inventory remains unresolved. No native
 shell, builder, transport service, server or Agent code is recreated here.
+This report records checkpoint `84ca0e5`. The later explicit-LAN and native
+download admission changes are documented in `harmony-endpoint-native-scope.md`.
 
 ## Required existing modules
 
@@ -97,7 +99,7 @@ Changing routes also interacts with endpoint-bound authentication; that work
 must retain a single authenticated service identity and be verified with the
 native configuration code once recovered.
 
-The public `harmony-download.ts` and `NativeMediaDownload.ets` currently accept
+At checkpoint `84ca0e5`, `harmony-download.ts` and `NativeMediaDownload.ets` accept
 only an owner Bot/hash download. They have not been made delegation-aware by this
 Web dependency update. Do not route delegated attachments through that broader
 native interface. Native scoped downloads, LAN/IPv6 selection and a real

@@ -43,7 +43,7 @@ const server=http.createServer((req,res)=>{
  })}}}}
  const picker={DocumentSaveOptions:class{},DocumentViewPicker:class{async save(options){pickerCalls++;assert.ok(options.newFileNames[0]&&!options.newFileNames[0].includes('/'));pickReached?.();if(pickMode==='hold')return new Promise(r=>resolvePicker=r);if(pickMode==='cancel')return[];fs.closeSync(fs.openSync(destination,'w'));return[new URL('file://'+destination).href]}}}
  const base='mobile/harmony/app/entry/src/main/ets/common/',shared=load(base+'NativeMediaFile.ets',{'@kit.CoreFileKit':{fileIo:io},'@kit.CryptoArchitectureKit':kitCrypto})
- const {NativeMediaDownload}=load(base+'NativeMediaDownload.ets',{'@kit.CoreFileKit':{fileIo:io,picker},'@kit.RemoteCommunicationKit':{rcp},'./MemohClientConfig':{MEMOH_ORIGIN:origin},'./NativeMediaFile':shared})
+ const {NativeMediaDownload}=load(base+'NativeMediaDownload.ets',{'@kit.CoreFileKit':{fileIo:io,picker},'@kit.RemoteCommunicationKit':{rcp},'./MemohClientConfig':{MEMOH_ORIGIN:origin},'./NativeMediaFile':shared,'./ServiceUrl':load('mobile/memoh/harmony-service-url.ts',{}, {URL})})
  let authorized=true;const service=new NativeMediaDownload({cacheDir:tmp},()=>authorized)
  const mib=Number(process.argv[2]||200);total=mib*1048576;source=path.join(tmp,'original.bin')
  const fd=fs.openSync(source,'w'),b=Buffer.alloc(262144);for(let at=0;at<total;at+=b.length){b.fill((at/b.length)%251);fs.writeSync(fd,b,0,Math.min(b.length,total-at))}fs.fsyncSync(fd);fs.closeSync(fd);wantHash=fileHash(source)

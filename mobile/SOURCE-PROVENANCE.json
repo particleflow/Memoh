@@ -32,10 +32,13 @@
     },
     {
       "path": "mobile/client/mobile/client_config.py",
-      "sha256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
+      "sha256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
@@ -46,10 +49,13 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
-      "sha256": "d83cb013906eb3e539c6514173d8d43eb42153c5e0aacd7c33db3dbfaadb62e0",
+      "sha256": "e4bb912a682b4f8c4c8a203eecd156fcca44e7382f869429937bb57e6a80f2c5",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "d83cb013906eb3e539c6514173d8d43eb42153c5e0aacd7c33db3dbfaadb62e0"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
@@ -91,17 +97,23 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-download.ts",
-      "sha256": "dc5eff9bb55057d49417aabfb1727c9b41741fa914b8c7f10827a3062a0eeff6",
+      "sha256": "e381a6b00b6a3e7e1923e219e75eb07addb863676300314d58db42799d6f1b15",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "dc5eff9bb55057d49417aabfb1727c9b41741fa914b8c7f10827a3062a0eeff6"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5",
+      "sha256": "898549de7cb385eb07315a71b64e1ffe13fbf7392824703fbf5268713e21fd8f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
@@ -119,10 +131,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
-      "sha256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f",
+      "sha256": "f663289a3c65c54a4f950fde438519b509283416927dd15f3c24912a6e271153",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service.css",
@@ -238,17 +253,23 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_download_frontend.cjs",
-      "sha256": "c7bea31cf803782c8187481d4b07cddaa4010c95310634a0561118a2301b56e6",
+      "sha256": "62bbd011475dc98cac924a90035f5c5faf43fce27ad622cfed8f1ecbdd3bc026",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "c7bea31cf803782c8187481d4b07cddaa4010c95310634a0561118a2301b56e6"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_download.cjs",
-      "sha256": "0bfff8e5d4b2a67a0d9dabf3fa1d1c830fe8a97999d07726c302aaf4b7772103",
+      "sha256": "925fa30a5a258d3c9b0b3233fa9b6e392f9314bec6a518e912e42cda80644cb9",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "0bfff8e5d4b2a67a0d9dabf3fa1d1c830fe8a97999d07726c302aaf4b7772103"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_voice_stream.cjs",
@@ -295,10 +316,13 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
-      "sha256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
+      "sha256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+      ],
+      "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config_ui.py",
@@ -655,5 +679,19 @@
       "mobile/client/mobile/prepare_shared_observation.py"
     ],
     "scope": "New reviewable source-preparation change, not recovery of unavailable later private revisions. The original 42-entry register is retained; the missing 114-entry register is not reconstructed."
+  },
+  "endpointScopeFollowup": {
+    "baseCommit": "84ca0e5d764b9944fc0b6c9b8264562288477744",
+    "modifiedReviewedEntries": [
+      "mobile/client/mobile/client_config.py",
+      "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
+      "mobile/client/mobile/memoh/harmony-download.ts",
+      "mobile/client/mobile/memoh/harmony-entry.ts",
+      "mobile/client/mobile/memoh/harmony-service-url.ts",
+      "mobile/client/tests/stage2/harmony_download_frontend.cjs",
+      "mobile/client/tests/stage2/harmony_native_download.cjs",
+      "mobile/client/tests/stage2/harmony_service_config.cjs"
+    ],
+    "scope": "Explicit configured HTTPS LAN addresses and delegated native download route admission. Shared NAS identity/API-base routing and missing native integration remain pending."
   }
 }

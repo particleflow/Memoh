@@ -1,7 +1,8 @@
 import { getBotsByBotIdMediaByContentHash } from '@memohai/sdk'
-import { createApiFetch, sdkAuthQuery } from '@/lib/api-client'
+import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'
 import { toast } from '@felinic/ui'
+import { normalizeDelegationPath } from './harmony-service-url'
 
 interface DownloadFields { operation?: string; botId?: string; hash?: string; size?: number; name?: string; url?: string; authorization?: string }
 class DownloadHTTPError extends Error {
@@ -23,8 +24,9 @@ async function command<T>(name: string, fields: DownloadFields): Promise<T> {
 
 // The SDK constructs the same authenticated hash request as the ordinary Web
 // client. Its fetch seam passes only the envelope, never file bytes, to native.
-export async function saveNativeOriginal(botId: string, hash: string, size: number, name: string, signal?: AbortSignal): Promise<void> {
+export async function saveNativeOriginal(botId: string, hash: string, size: number, name: string, signal?: AbortSignal, delegationUrl?: string): Promise<void> {
   signal?.throwIfAborted()
+  const scopedPath = delegationUrl === undefined ? undefined : normalizeDelegationPath(delegationUrl, hash)
   const controller = new AbortController(), operation = crypto.randomUUID().replaceAll('-', '')
   const fields = { operation, botId }, generation = authSessionGeneration(), token = sdkAuthQuery().token
   const abort = () => { controller.abort(); void command('download.abort', fields).catch(() => {}) }
@@ -58,8 +60,15 @@ export async function saveNativeOriginal(botId: string, hash: string, size: numb
       // No response body is exposed to WebView. The native cache was verified.
       return new Response(null, { status: 200 })
     }
-    await getBotsByBotIdMediaByContentHash({ path: { bot_id: botId, content_hash: hash },
-      signal: controller.signal, parseAs: 'stream', fetch: createApiFetch(nativeFetch), throwOnError: true })
+    if (scopedPath !== undefined) {
+      const response = await createApiFetch(nativeFetch)(sdkApiUrl({ url: scopedPath }), {
+        method: 'GET', signal: controller.signal, headers: { authorization: 'Bearer ' + token },
+      })
+      if (!response.ok) throw new DownloadHTTPError(response.status)
+    } else {
+      await getBotsByBotIdMediaByContentHash({ path: { bot_id: botId, content_hash: hash },
+        signal: controller.signal, parseAs: 'stream', fetch: createApiFetch(nativeFetch), throwOnError: true })
+    }
     check()
     toast.info('原件已校验，请选择保存位置', { id: notice, action: { label: '取消', onClick: abort }, duration: Infinity })
     await command<boolean>('download.save', fields)

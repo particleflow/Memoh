@@ -3,6 +3,7 @@ import { fileIo as fs, picker } from '@kit.CoreFileKit';
 import { rcp } from '@kit.RemoteCommunicationKit';
 import { MEMOH_ORIGIN } from './MemohClientConfig';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
+import { normalizeDelegationPath } from './ServiceUrl';
 
 export interface MediaDownloadInput { operation: string; botId: string; hash: string; size: number; name: string; url: string; authorization: string; }
 export interface MediaDownloadReady { operation: string; hash: string; size: number; }
@@ -48,9 +49,17 @@ export class NativeMediaDownload {
     return start === 0 && status === 200 && !this.header(headers, 'content-range');
   }
   async fetch(input: MediaDownloadInput): Promise<MediaDownloadReady> {
-    const endpoint = MEMOH_ORIGIN.replace(/\/+$/, '') + '/bots/' + encodeURIComponent(input.botId) + '/media/' + input.hash;
+    const origin = MEMOH_ORIGIN.replace(/\/+$/, '');
+    const ordinary = '/bots/' + encodeURIComponent(input.botId) + '/media/' + input.hash;
+    if (!origin || !input.url.startsWith(origin + '/')) { throw new Error('MEDIA_DOWNLOAD_REQUEST'); }
+    const path = input.url.slice(origin.length);
+    if (path !== ordinary) {
+      try { normalizeDelegationPath(path, input.hash); }
+      catch { throw new Error('MEDIA_DOWNLOAD_REQUEST'); }
+    }
+    const endpoint = origin + path;
     if (!this.authorized() || !/^[a-f0-9]{32}$/.test(input.operation) || !/^[A-Za-z0-9_-]{1,128}$/.test(input.botId) ||
-      !/^[a-f0-9]{64}$/.test(input.hash) || !Number.isSafeInteger(input.size) || input.size <= 0 || input.url !== endpoint ||
+      !/^[a-f0-9]{64}$/.test(input.hash) || !Number.isSafeInteger(input.size) || input.size <= 0 ||
       !/^Bearer [^\s\x00-\x1f]{1,8192}$/.test(input.authorization)) { throw new Error('MEDIA_DOWNLOAD_REQUEST'); }
     if (this.cancelled.has(input.operation)) { throw new Error('MEDIA_DOWNLOAD_CANCELLED'); }
     if (this.states.size) { throw new Error('MEDIA_DOWNLOAD_BUSY'); }

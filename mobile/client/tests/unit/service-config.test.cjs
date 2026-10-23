@@ -9,7 +9,13 @@ check(()=>assert.equal(normal('https://[2606:4700::1111]/api'),'https://[2606:47
 check(()=>assert.equal(normal('https://download.example/releases',false),'https://download.example/releases'))
 check(()=>assert.equal(normal('https://download.example/app-1.0.8.hap',false),'https://download.example/app-1.0.8.hap'))
 for (const host of ['192.0.1.1','198.51.1.1','192.0.0.9','192.0.0.10']) check(()=>assert.equal(normal('https://'+host+'/api'),'https://'+host+'/api'))
-for (const host of ['192.0.0.8','192.0.0.11','192.0.2.1','198.51.100.1','192.168.1.1','198.18.0.1','198.19.255.254']) check(()=>assert.throws(()=>normal('https://'+host+'/api')))
+for (const host of ['192.0.0.8','192.0.0.11','192.0.2.1','198.51.100.1','198.18.0.1','198.19.255.254']) check(()=>assert.throws(()=>normal('https://'+host+'/api')))
+// Deliberately configured LAN service addresses; transport still validates TLS.
+for(const host of ['10.0.0.2','172.16.0.2','172.31.255.254','192.168.1.1','[fd12::1]','[fc12::2]','nas.lan','nas.local']) {
+ check(()=>assert.equal(normal('https://'+host+'/api'),'https://'+host+'/api'))
+ check(()=>assert.throws(()=>normal('http://'+host+'/api')))
+}
+for(const value of ['https://127.0.0.1/api','https://[::1]/api','https://[fe80::1]/api','https://169.254.1.1/api','https://0x0a000002/api','https://167772162/api','https://010.0.0.2/api'])check(()=>assert.throws(()=>normal(value)))
 const cfg=load('mobile/memoh/harmony-service-config.ts',{'./harmony-service-url':validator})
 class Storage{constructor(){this.values=new Map()}get length(){return this.values.size}key(i){return [...this.values.keys()][i]??null}getItem(k){return this.values.get(k)??null}setItem(k,v){this.values.set(k,String(v))}removeItem(k){this.values.delete(k)}}
 const s=new Storage(),tab=new Storage(),a='https://alpha.example/api',b='https://beta.example/api'
@@ -31,6 +37,19 @@ check(()=>assert.equal(s.getItem('token'),null))
 s.setItem('token','synthetic-A');c=cfg.saveServiceConfig(a,'https://download.example/releases',s)
 check(()=>assert.equal(c.resetPending,false));check(()=>assert.equal(s.getItem('token'),'synthetic-A'))
 c=cfg.saveServiceConfig(b,'',s);check(()=>assert.equal(c.resetPending,true));cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
+check(()=>assert.equal(s.getItem('token'),null))
+// A LAN/IPv6 address change cannot silently carry credentials to another origin.
+s.setItem('token','synthetic-current')
+c=cfg.saveServiceConfig('https://192.168.1.1/api','',s)
+check(()=>assert.equal(c.resetPending,true))
+cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
+check(()=>assert.equal(s.getItem('token'),null))
+s.setItem('token','synthetic-lan')
+c=cfg.saveServiceConfig('https://192.168.1.1/api','',s)
+check(()=>assert.equal(c.resetPending,false));check(()=>assert.equal(s.getItem('token'),'synthetic-lan'))
+c=cfg.saveServiceConfig('https://[2606:4700::1111]/api','',s)
+check(()=>assert.equal(c.resetPending,true))
+cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
 check(()=>assert.equal(s.getItem('token'),null))
 s.setItem(cfg.SERVICE_CONFIG_KEY,'{"version":99}');check(()=>assert.throws(()=>cfg.readServiceConfig(s)))
 check(()=>assert.equal(cfg.saveServiceConfig(a,'',s).resetPending,true))

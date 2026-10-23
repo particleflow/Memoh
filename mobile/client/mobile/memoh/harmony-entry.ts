@@ -66,7 +66,7 @@ function form(current: ServiceConfig | null, message = '') {
       location.hash = '#/login'
       location.reload()
     } catch {
-      error.textContent = '无法保存。请使用无账号、查询或片段的公网 HTTP(S) 地址；API 路径须以 /api 结尾，并检查本地存储是否可用。'
+      error.textContent = '无法保存。请使用无账号、查询或片段的服务地址；内网地址须使用 HTTPS，API 路径须以 /api 结尾，并检查本地存储是否可用。'
       submit.disabled = false
     }
   }

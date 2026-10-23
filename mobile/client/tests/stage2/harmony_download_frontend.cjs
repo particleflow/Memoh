@@ -16,8 +16,9 @@ const host={begoniaNative:{request:async raw=>{
  assert.equal(q.command,'download.abort');return'{"ok":true}'
 }}}
 const imports={
+ './harmony-service-url':load('mobile/memoh/harmony-service-url.ts',{}, {URL}),
  '@memohai/sdk':{getBotsByBotIdMediaByContentHash:async options=>{assert.equal(options.parseAs,'stream');assert.equal(options.query,undefined);assert.equal(options.path.bot_id,bot);const response=await options.fetch(new Request(origin+'/bots/'+bot+'/media/'+hash,{headers:{authorization:'Bearer '+token},signal:options.signal}));assert.equal(response.body,null);if(!response.ok)throw Error('SDK denied');return{response}}},
- '@/lib/api-client':{createApiFetch:f=>async(...args)=>{const response=await f(...args);authResponses.push(response.status);return response},sdkAuthQuery:()=>({token})},
+ '@/lib/api-client':{createApiFetch:f=>async(...args)=>{const response=await f(...args);authResponses.push(response.status);return response},sdkApiUrl:({url})=>origin+url,sdkAuthQuery:()=>({token})},
  '@/lib/auth-session':{authSessionGeneration:()=>generation,onAuthSessionCleared:f=>{listeners.add(f);return()=>listeners.delete(f)}},
  '@felinic/ui':{toast:{info:(_message,options)=>{action=options.action.onClick;return'test-notice'},dismiss:()=>{}}}
 }

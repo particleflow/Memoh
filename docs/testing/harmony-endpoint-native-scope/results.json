@@ -1,0 +1,59 @@
+{
+  "baseCommit": "84ca0e5d764b9944fc0b6c9b8264562288477744",
+  "scope": "Explicit HTTPS LAN endpoint validation and native scoped-download admission; shared NAS routing contract pending",
+  "configChecks": {
+    "passed": true,
+    "checks": 74
+  },
+  "pythonEndpointTests": {
+    "passed": true,
+    "methods": 3
+  },
+  "downloadScopeTests": {
+    "passed": true,
+    "malformedScopes": 10,
+    "nativeInvalidUrls": 5,
+    "scoped401And403NoFallback": true,
+    "redirectNoFallback": true,
+    "accountChangeRejected": true,
+    "controlledSDKBridgeAndRCP": true,
+    "nativeFileIntegrityTested": false
+  },
+  "pureConfigurationTypecheck": {
+    "exitCode": 0,
+    "strict": true,
+    "modules": [
+      "harmony-service-url.ts",
+      "harmony-service-config.ts"
+    ]
+  },
+  "adapterESLint": {
+    "exitCode": 0,
+    "files": 2
+  },
+  "fullWebTypecheck": {
+    "passed": false,
+    "control84caAdapterErrors": 147,
+    "currentAdapterErrors": 147,
+    "changedDiagnostics": 0,
+    "originalUpstreamErrors": 145,
+    "additionalPreexistingAdapterRequirements": [
+      "createApiFetch export",
+      "authSessionGeneration export"
+    ]
+  },
+  "incomplete": [
+    "shared NAS identity and API-base contract",
+    "LAN-first IPv6-fallback selection",
+    "recovered UI call-site forwarding delegation_url",
+    "native bridge router and ServiceUrl generation",
+    "Library archive materialization (helper tools/list HTTP 401)",
+    "full Web/HAP build",
+    "native integrity/TLS/real-device behavior",
+    "phone-NAS-phone live transfer",
+    "current runtime screenshots and human QA"
+  ],
+  "newServices": 0,
+  "productionChanges": false,
+  "sdkInstalled": false
+}
