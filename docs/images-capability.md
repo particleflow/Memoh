@@ -122,6 +122,16 @@ the synthetic model's existing SupportsToolCall capability; live attachment
 fixtures supply ReplyTarget. No shortcut, runtime or authorization code is
 changed to accommodate tests.
 
+A separate composition-root test invokes the actual `spawn_agent` tool from
+the supervisor loop. Production Thread creation, application admission, native
+SpawnAdapter, step-commit factory and image DI authorizer run against synthetic
+storage/query ports and the existing in-memory ledger fixture. The child reports
+the persisted hash and the supervisor explicitly calls the ordinary `send`
+tool; the synthetic sender reads identical original bytes. This covers actual
+internal spawn, current permission revocation before opening an existing image,
+foreign/missing references and an unknown result with one image POST and no
+attachment delivery. It is not a PostgreSQL durability or external channel test.
+
 The suite covers omitted/configured model fields, generation and independent
 multipart editing, original-byte/hash round trips, tool visibility, legacy
 fallback/schema uniqueness, managed endpoint/auth selection, disabled editing,
@@ -129,6 +139,6 @@ foreign/malformed references, revoked authority before storage, private error
 suppression, unknown response/timeout handling and persistence failure.
 
 This is synthetic contract/integration evidence, not real paid-provider,
-production chat, child-spawn admission, Web UI, NAS, PC or deployment acceptance.
+production chat, Web UI, NAS, PC or deployment acceptance.
 No live provider configuration is written. The task explicitly excludes service
 trials and broad UI/install/migration changes.
