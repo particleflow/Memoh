@@ -251,15 +251,17 @@ func TestTaskTransferHTTPOriginalRangeAndRevalidation(t *testing.T) {
 	verifier.grants["one"] = principal
 	verifier.mu.Unlock()
 	for _, tc := range []struct {
-		name, byteRange, wantRange, wantBody string
-		status                               int
+		name, byteRange, ifRange, wantRange, wantBody string
+		status                                        int
 	}{
-		{"range", "bytes=1-3", "bytes 1-3/7", "ixt", 206},
-		{"unsatisfiable", "bytes=7-", "bytes */7", "", 416},
-		{"size-mismatch", "bytes=1-3", "", "", 409},
-		{"hash-mismatch", "bytes=1-3", "", "", 403},
-		{"revoked", "bytes=1-3", "", "", 403},
-		{"anonymous", "bytes=1-3", "", "", 401},
+		{"range", "bytes=1-3", "", "bytes 1-3/7", "ixt", 206},
+		{"if-range-matches", "bytes=1-3", `"` + f.ref.ContentHash + `"`, "bytes 1-3/7", "ixt", 206},
+		{"if-range-differs", "bytes=1-3", `"different"`, "", "fixture", 200},
+		{"unsatisfiable", "bytes=7-", "", "bytes */7", "", 416},
+		{"size-mismatch", "bytes=1-3", "", "", "", 409},
+		{"hash-mismatch", "bytes=1-3", "", "", "", 403},
+		{"revoked", "bytes=1-3", `"` + f.ref.ContentHash + `"`, "", "", 403},
+		{"anonymous", "bytes=1-3", `"` + f.ref.ContentHash + `"`, "", "", 401},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			verifier.mu.Lock()
@@ -285,6 +287,7 @@ func TestTaskTransferHTTPOriginalRangeAndRevalidation(t *testing.T) {
 				req.Header.Set("Authorization", "Memoh-Transfer one")
 			}
 			req.Header.Set("Range", tc.byteRange)
+			req.Header.Set("If-Range", tc.ifRange)
 			response, err := https.Client().Do(req) //nolint:gosec // Synthetic loopback TLS fixture only.
 			if err != nil {
 				t.Fatal(err)
