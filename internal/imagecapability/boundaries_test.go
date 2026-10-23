@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log/slog"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"time"
 
 	sdk "github.com/felinics/twilight/sdk"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	tools "github.com/felinics/memoh/internal/agent/tool"
@@ -28,16 +30,19 @@ import (
 
 type catalog struct {
 	dbstore.Queries
-	model    sqlc.Model
-	provider sqlc.Provider
+	model                              sqlc.Model
+	provider                           sqlc.Provider
+	settingsErr, modelErr, providerErr error
 }
 
 func (q *catalog) GetSettingsByBotID(context.Context, pgtype.UUID) (sqlc.GetSettingsByBotIDRow, error) {
-	return sqlc.GetSettingsByBotIDRow{ImageModelID: q.model.ID}, nil
+	return sqlc.GetSettingsByBotIDRow{ImageModelID: q.model.ID}, q.settingsErr
 }
-func (q *catalog) GetModelByID(context.Context, pgtype.UUID) (sqlc.Model, error) { return q.model, nil }
+func (q *catalog) GetModelByID(context.Context, pgtype.UUID) (sqlc.Model, error) {
+	return q.model, q.modelErr
+}
 func (q *catalog) GetProviderByID(context.Context, pgtype.UUID) (sqlc.Provider, error) {
-	return q.provider, nil
+	return q.provider, q.providerErr
 }
 func uuid(value string) pgtype.UUID { var id pgtype.UUID; _ = id.Scan(value); return id }
 
@@ -128,6 +133,116 @@ func TestProductionResolverPreservesLegacyDefault(t *testing.T) {
 	q.provider.Enable = false
 	if _, err := wrapped.Tools(t.Context(), session); err == nil {
 		t.Fatal("disabled provider accepted")
+	}
+}
+
+func TestLegacyDiscoveryDefersLookupFailuresUntilExecution(t *testing.T) {
+	for _, mode := range []string{"settings_failure", "missing_model", "model_query_failure", "missing_provider", "provider_query_failure"} {
+		t.Run(mode, func(t *testing.T) {
+			var calls atomic.Int32
+			p, server := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+				calls.Add(1)
+				if r.URL.Path != "/v1/chat/completions" {
+					t.Error("legacy request protocol changed")
+				}
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"choices":[{"message":{"role":"assistant","content":"synthetic recovered response"},"finish_reason":"stop"}]}`))
+			})
+			cfg, _ := json.Marshal(map[string]any{"base_url": server.URL + "/v1"})
+			q := &catalog{model: sqlc.Model{ID: uuid("00000000-0000-0000-0000-000000000002"), ProviderID: uuid("00000000-0000-0000-0000-000000000003"), ModelID: "synthetic-image", Enable: true, Config: []byte(`{"compatibilities":["image-output"]}`)}, provider: sqlc.Provider{ClientType: "openai-completions", Enable: true, Config: cfg}}
+			switch mode {
+			case "settings_failure":
+				q.settingsErr = errors.New("synthetic settings query failure")
+			case "missing_model":
+				q.modelErr = pgx.ErrNoRows
+			case "model_query_failure":
+				q.modelErr = errors.New("synthetic model query failure")
+			case "missing_provider":
+				q.providerErr = pgx.ErrNoRows
+			case "provider_query_failure":
+				q.providerErr = errors.New("synthetic provider query failure")
+			}
+			log := slog.New(slog.NewTextHandler(io.Discard, nil))
+			settingsSvc, modelsSvc := settings.NewService(log, q, nil, nil), models.NewService(log, q)
+			legacy := tools.NewImageGenProvider(log, settingsSvc, modelsSvc, q, p.media)
+			wrapped := New(legacy, settingsSvc, modelsSvc, q, p.media, nil)
+			session := tools.SessionContext{BotID: "00000000-0000-0000-0000-000000000001", CurrentPlatform: "local", ReplyTarget: "synthetic-conversation", LiveStream: true, Emitter: func(tools.ToolStreamEvent) {}}
+			original, err := legacy.Tools(t.Context(), session)
+			if err != nil {
+				t.Fatal(err)
+			}
+			current, err := wrapped.Tools(t.Context(), session)
+			if err != nil {
+				t.Fatalf("lookup error moved from execution to discovery: %v", err)
+			}
+			a, _ := json.Marshal(original)
+			b, _ := json.Marshal(current)
+			if !bytes.Equal(a, b) {
+				t.Fatal("legacy discovery schema or visibility changed")
+			}
+			if mode == "settings_failure" {
+				if len(current) != 0 {
+					t.Fatal("legacy suppresses settings discovery failure")
+				}
+				return
+			}
+			if len(current) != 1 || current[0].Name != "generate_image" {
+				t.Fatal("configured image ID lost its legacy tool")
+			}
+			available := tools.NewAvailableTools(current)
+			if want := legacy.Usage(t.Context(), session, available); want == "" || wrapped.Usage(t.Context(), session, available) != want {
+				t.Fatal("lookup failure changed legacy usage")
+			}
+			exec := &toolexec.ToolExecContext{Context: t.Context(), ToolCallID: "synthetic-lookup-call"}
+			args := sdk.ParseToolArguments(`{"prompt":"synthetic"}`)
+			if _, err := original[0].Execute(exec, args); err == nil {
+				t.Fatal("legacy should reject unresolved configuration during execution")
+			}
+			if _, err := current[0].Execute(exec, args); err == nil || calls.Load() != 0 {
+				t.Fatal("unresolved configuration did not fail before HTTP")
+			}
+			q.modelErr, q.providerErr = nil, nil
+			out, err := current[0].Execute(exec, args)
+			if err != nil || !strings.Contains(out.String(), "synthetic recovered response") || calls.Load() != 1 {
+				t.Fatalf("same advertised tool did not recover legacy execution: %v", err)
+			}
+		})
+	}
+}
+
+func TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution(t *testing.T) {
+	for _, initiallyUnavailable := range []bool{false, true} {
+		for _, raw := range []string{`null`, `{"protocol":"unsupported","model_mode":"omit"}`, `{"protocol":"openai-images","model_mode":"omit"}`} {
+			t.Run(fmt.Sprintf("unavailable_%v/%s", initiallyUnavailable, raw), func(t *testing.T) {
+				var calls atomic.Int32
+				p, server := fixture(t, func(http.ResponseWriter, *http.Request) { calls.Add(1) })
+				cfg, _ := json.Marshal(map[string]any{"base_url": server.URL + "/v1"})
+				q := &catalog{model: sqlc.Model{ID: uuid("00000000-0000-0000-0000-000000000002"), ProviderID: uuid("00000000-0000-0000-0000-000000000003"), ModelID: "synthetic-image", Enable: true, Config: []byte(`{"compatibilities":["image-output"]}`)}, provider: sqlc.Provider{ClientType: "openai-completions", Enable: true, Config: cfg}}
+				if initiallyUnavailable {
+					q.providerErr = errors.New("synthetic provider query failure")
+				}
+				log := slog.New(slog.NewTextHandler(io.Discard, nil))
+				settingsSvc, modelsSvc := settings.NewService(log, q, nil, nil), models.NewService(log, q)
+				legacy := tools.NewImageGenProvider(log, settingsSvc, modelsSvc, q, p.media)
+				wrapped := New(legacy, settingsSvc, modelsSvc, q, p.media, nil)
+				session := tools.SessionContext{BotID: "00000000-0000-0000-0000-000000000001"}
+				list, err := wrapped.Tools(t.Context(), session)
+				if err != nil || len(list) != 1 {
+					t.Fatalf("legacy tool not advertised: %v", err)
+				}
+				q.providerErr = nil
+				q.provider.Config, _ = json.Marshal(map[string]any{"base_url": server.URL + "/v1", ConfigKey: json.RawMessage(raw)})
+				if _, err := list[0].Execute(&toolexec.ToolExecContext{Context: t.Context()}, sdk.ParseToolArguments(`{"prompt":"synthetic"}`)); err == nil || calls.Load() != 0 {
+					t.Fatal("stale legacy tool dispatched after explicit protocol selection")
+				}
+				if raw == `{"protocol":"openai-images","model_mode":"omit"}` {
+					return
+				}
+				if list, err := wrapped.Tools(t.Context(), session); err == nil || len(list) != 0 {
+					t.Fatal("known invalid explicit configuration fell back to legacy")
+				}
+			})
+		}
 	}
 }
 

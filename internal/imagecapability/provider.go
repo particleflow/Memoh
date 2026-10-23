@@ -80,14 +80,14 @@ func New(fallback tools.ToolProvider, settingsSvc *settings.Service, modelsSvc *
 
 func (p *Provider) Tools(ctx context.Context, session tools.SessionContext) ([]toolexec.Tool, error) {
 	selected, enabled, err := p.resolve(ctx, session.BotID)
+	if !enabled {
+		// Until explicit selection is known, retain legacy discovery: a Bot's
+		// configured image ID exposes the tool even if model/provider lookup
+		// fails. Such failures belong to execution, not tool enumeration.
+		return p.legacyTools(ctx, session)
+	}
 	if err != nil {
 		return nil, err
-	}
-	if !enabled {
-		if p.fallback != nil {
-			return p.fallback.Tools(ctx, session)
-		}
-		return nil, nil
 	}
 	list := []toolexec.Tool{{
 		Name:        "generate_image",
@@ -117,6 +117,36 @@ func (p *Provider) Tools(ctx context.Context, session tools.SessionContext) ([]t
 				return toolexec.OutputPair(p.execute(exec, session, request{Prompt: args.Prompt, Size: args.Size}, args.Images, args.Mask))
 			},
 		})
+	}
+	return list, nil
+}
+
+func (p *Provider) legacyTools(ctx context.Context, session tools.SessionContext) ([]toolexec.Tool, error) {
+	if p.fallback == nil {
+		return nil, nil
+	}
+	list, err := p.fallback.Tools(ctx, session)
+	if err != nil {
+		return nil, err
+	}
+	list = append([]toolexec.Tool(nil), list...)
+	for i := range list {
+		if list[i].Name != "generate_image" {
+			continue
+		}
+		legacy := list[i].Execute
+		list[i].Execute = func(exec *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
+			// A failed lookup during discovery must not allow a recovered or
+			// changed explicit configuration to enter the paid legacy route.
+			_, enabled, err := p.resolve(exec.Context, session.BotID)
+			if err != nil {
+				return sdk.ToolOutput{}, err
+			}
+			if enabled {
+				return sdk.ToolOutput{}, errors.New("image protocol changed; refresh the available tools before execution")
+			}
+			return legacy(exec, input)
+		}
 	}
 	return list, nil
 }
@@ -252,13 +282,13 @@ func (p *Provider) openImage(ctx context.Context, session tools.SessionContext, 
 
 func (p *Provider) Usage(ctx context.Context, session tools.SessionContext, available tools.AvailableTools) string {
 	_, enabled, err := p.resolve(ctx, session.BotID)
-	if err != nil {
-		return ""
-	}
 	if !enabled {
 		if usage, ok := p.fallback.(tools.ToolUsage); ok {
 			return usage.Usage(ctx, session, available)
 		}
+		return ""
+	}
+	if err != nil {
 		return ""
 	}
 	if session.CanUseLocalMessagingShortcut() {

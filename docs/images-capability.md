@@ -44,6 +44,14 @@ OAuth flow. Invalid explicit configuration does not fall back to chat. With no
 `images_api`, the original tool/schema/behavior is used unchanged. Registration
 is a wrapper at the existing slot, not a second same-named tool.
 
+Before explicit selection can be established, discovery retains the legacy
+contract: a configured image ID exposes the legacy tool even when model/provider
+lookup fails, and settings lookup failure keeps the legacy empty tool list.
+Lookup failures are reported at execution. Legacy invocations recheck protocol
+selection before execution; a recovered or changed explicit selection requires
+fresh tool discovery instead of entering the legacy route. Known invalid
+explicit configuration is rejected without legacy fallback.
+
 ## Tool and attachment contracts
 
 `generate_image` accepts `prompt` and optional `size`. It makes one JSON POST
@@ -54,7 +62,9 @@ When enabled, `edit_image` accepts `prompt`, one to four `images` content hashes
 an optional `mask` content hash and optional `size`. It makes a multipart POST:
 `image` for one input, repeated `image[]` for multiple inputs, optional `mask`,
 and the same prompt/n/response-format/model-policy fields. The implementation
-supports this multipart contract, not arbitrary vendor edit dialects.
+supports this multipart contract. It does not implement a JSON `images` array
+edit dialect or establish compatibility with another application's editing
+contract. No real provider editing request has been validated by these tests.
 
 Both tools reject unknown fields, including endpoint, key, model, Bot and session
 overrides. Host admission supplies the Bot/user/session identity. The platform
@@ -64,8 +74,10 @@ is not an authorization grant. Reads stay in that Bot's existing media scope and
 are hash checked before transmission. This change adds no cross-Bot hash alias;
 existing delegation-scoped attachment authorization remains a separate mechanism.
 
-The adapter requests base64 bytes and never follows an output URL. It decodes
-once, checks size/content type, and passes original bytes to `media.Ingest`.
+The adapter requests base64 bytes and never follows an output URL. It base64
+decodes once, checks size and MIME magic bytes, and passes original bytes to
+`media.Ingest`. It does not fully decode the image format or validate structural
+integrity; MIME recognition alone does not establish a complete valid image.
 Existing configured storage, content-addressed naming and attachment events are
 reused. No additional file repository, SQL registration table or workspace path
 is introduced. Input and output byte limits are 50 MiB; combined edit inputs
