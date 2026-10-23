@@ -1,0 +1,76 @@
+package cancelownership
+
+import (
+	"context"
+	"sync"
+)
+
+type Owner struct {
+	ctx    context.Context
+	cancel context.CancelFunc
+}
+
+func (o *Owner) Close() {
+	o.cancel()
+}
+
+func NewSingle(parent context.Context) *Owner {
+	ctx, cancel := context.WithCancel(parent)
+	return &Owner{ctx: ctx, cancel: cancel}
+}
+
+func NewPair(parent context.Context) (*Owner, error) {
+	ctx, cancel := context.WithCancel(parent)
+	owner := &Owner{ctx: ctx, cancel: cancel}
+	return owner, nil
+}
+
+func NewWatched(parent context.Context) (*Owner, error) {
+	ctx, cancel := context.WithCancel(parent)
+	owner := &Owner{ctx: ctx, cancel: cancel}
+	go func() {
+		<-owner.ctx.Done()
+		owner.Close()
+	}()
+	return owner, nil
+}
+
+func UseOwners(parent context.Context) {
+	one := NewSingle(parent)
+	defer one.Close()
+	two, _ := NewPair(parent)
+	defer two.Close()
+	three, _ := NewWatched(parent)
+	defer three.Close()
+}
+
+func DirectCancellation(parent context.Context) {
+	_, cancel := context.WithCancel(parent)
+	defer cancel()
+}
+
+func LostCancellation(parent context.Context) context.Context {
+	ctx, _ := context.WithCancel(parent)
+	return ctx
+}
+
+// OnceOwner models the existing Grok lifetime owner: cancellation is performed
+// by Close, once, inside the sync.Once closure.
+type OnceOwner struct {
+	cancel context.CancelFunc
+	once   sync.Once
+}
+
+func (o *OnceOwner) Close() {
+	o.once.Do(func() { o.cancel() })
+}
+
+func NewOnceOwner(parent context.Context) *OnceOwner {
+	_, cancel := context.WithCancel(parent)
+	return &OnceOwner{cancel: cancel}
+}
+
+func UseOnceOwner(parent context.Context) {
+	owner := NewOnceOwner(parent)
+	defer owner.Close()
+}

@@ -1,0 +1,62 @@
+{
+  "files": [
+    {
+      "file": "README.md",
+      "bytes": 5751,
+      "sha256": "01f32bd6bbf2b398ab224f1fb3db957619fac16a11b5b5be198dc7eee6a77b3a"
+    },
+    {
+      "file": "basic-ownership.log",
+      "bytes": 229,
+      "sha256": "b48bb82c5a998c1c5691a8817460e039cc958880c985c4c28135af0a3d6999cd"
+    },
+    {
+      "file": "basic-probe.go.txt",
+      "bytes": 1091,
+      "sha256": "4f85918da99e8bdf771be289d69e843268c13b04caea3e901b198ea3fc959abf"
+    },
+    {
+      "file": "bounds.go.txt",
+      "bytes": 1335,
+      "sha256": "c919a4550197d3357ed416ef571cded8d72565437993cd110590858193b16d6c"
+    },
+    {
+      "file": "classification.json",
+      "bytes": 16025,
+      "sha256": "a879370c5589b642931be663824ef27e3229d2107de6f8e5518e8a0bfe33d9d0"
+    },
+    {
+      "file": "complete-probe.log",
+      "bytes": 1625,
+      "sha256": "3f8b17237aa3d3c2df814903678feffef4208a58fa5880a78399a7bdf9fe3a05"
+    },
+    {
+      "file": "harness.log",
+      "bytes": 1895,
+      "sha256": "fbc1e860ffc334d8e2c767595b33f5aad71eb686830d1d77b2bce28b0b27912a"
+    },
+    {
+      "file": "indirect.go.txt",
+      "bytes": 718,
+      "sha256": "d539dec9334c8e69ad0890f96b440e12403bc2f4db7a29b781242381c298da89"
+    },
+    {
+      "file": "once-ownership.log",
+      "bytes": 464,
+      "sha256": "4f8bb8cf614fe87556e172778c0b61ee5b96a3f710d0b50245a67fb4b3912fe1"
+    },
+    {
+      "file": "probe.go.txt",
+      "bytes": 1605,
+      "sha256": "a2911a7c3f10b5a57650fbe9f957c4a19d31c9f4bbb096f967effc36f3b147c4"
+    },
+    {
+      "file": "verify.py",
+      "bytes": 2276,
+      "sha256": "4a0d0aca91fbed5b02e66270313574c445dd3ae73090c30d9749f5b26f21096a"
+    }
+  ],
+  "product_changes": false,
+  "rule_changes": false,
+  "ci_dispatches": 0
+}
