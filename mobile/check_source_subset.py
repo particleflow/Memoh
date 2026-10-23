@@ -9,7 +9,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 manifest = json.loads((HERE / 'SOURCE-PROVENANCE.json').read_text())
 entries = manifest['entries']
-assert len(entries) == 42
+assert len(entries) == 116
 assert len({item['path'] for item in entries}) == len(entries)
 for item in entries:
     relative = Path(item['path'])
@@ -43,5 +43,6 @@ for name in sorted(files):
         subprocess.run(['node', '--check', str(path)], check=True)
         cjs_count += 1
 print(json.dumps({'sourceFiles': len(entries), 'heldSources': len(manifest['excludedSourcePaths']),
+                  'unverifiedHistoricalLaterChanges': manifest['archiveRestoration']['historicalLaterChangedFilesUnverified'],
                   'files': len(files), 'pythonSyntax': python_count, 'cjsSyntax': cjs_count,
                   'passed': True, 'fullClientBuild': False}))

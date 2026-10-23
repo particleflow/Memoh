@@ -1,0 +1,24 @@
+{
+  "string": [
+    {
+      "name": "app_name",
+      "value": "Garnet-Assistant"
+    },
+    {
+      "name": "module_desc",
+      "value": "共享聊天与AI助手"
+    },
+    {
+      "name": "internet_reason",
+      "value": "连接聊天与文件服务"
+    },
+    {
+      "name": "microphone_reason",
+      "value": "按下录音后创建待发送语音消息"
+    },
+    {
+      "name": "album_backup_reason",
+      "value": "读取你选择的相册，将新增照片和视频自动备份到你的NAS"
+    }
+  ]
+}

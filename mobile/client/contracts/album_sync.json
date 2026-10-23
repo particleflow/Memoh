@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "status": "DEFERRED_NOT_IMPLEMENTED",
+  "scope": "Same HarmonyOS App, current authenticated Memoh user, direct NAS transfer and selected phone/NAS album pairs. Requirements only; no new synchronization engine or completed implementation is asserted.",
+  "requirement": {
+    "pair": "One stable phone album identity maps to one stable NAS album identity under the current owner. Display names are not identities; no automatic adoption by matching album/file names.",
+    "directions": "Phone and NAS additions and changes converge into the paired album's current media collection. Downloading into the file exchange directory is not phone album convergence.",
+    "processed_media": "Original media album A pairs with phone album A. Processed output album B pairs independently with phone album B. Processing does not overwrite A or substitute B for A.",
+    "membership": "Additions and removals from a paired album's current member set must converge in both directions while preserved original history remains separate. An incomplete scan, revoked permission, unavailable provider or failed request must never be interpreted as a member deletion. This requirement is not satisfied by accumulating every past version in one flat library.",
+    "changes": "Stable logical media identity and current version are distinct from immutable content SHA and preserved historical originals. Concurrent edits must not silently overwrite either version.",
+    "protection": "Retain original history, unknown/in-flight intents and valid leases. Do not infer permission for permanent deletion. Do not assume a platform removeAssets operation only removes a harmless membership link."
+  },
+  "missing": [
+    "Owner-bound NAS album identity and explicit phone/NAS pairing",
+    "Per-album current membership and stable logical-media/version mapping",
+    "Authorized NAS-to-phone media creation/update and association with the exact paired album",
+    "Proven handling of membership removals and concurrent changes without losing original history",
+    "Actual same-App bidirectional convergence, interrupted write recovery, no-echo and space/retirement qualification"
+  ],
+  "priority": "after-usable-transfer-conversation-integration"
+}

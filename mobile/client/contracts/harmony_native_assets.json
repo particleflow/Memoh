@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "scope": "Current Memoh packaged-client lifecycle, theme and foreground voice bridge.",
+  "proxy": "begoniaNative.request(JSON)->Promise<string>",
+  "registration": "synchronous methodList=['request']; asyncMethodList=[]; explicit custom-scheme permission plus synchronous last-calling-frame URL and main-page URL guard",
+  "trusted_document": "begonia-client://app/index.html (optional hash; no query/foreign/about:srcdoc/unknown frame)",
+  "frame_limit": "SDK exposes frame URL, not a top-frame identity. Same-URL packaged iframe identity is not distinguishable; packaged document subframe loads are denied by native interceptor, packaged CSP retains frame restrictions. No runtime frame attestation claimed.",
+  "request": "{version:1,command,state?,themeId?,handle?,offset?}; trusted packaged frame only. Commands do not accept arbitrary filesystem paths or execution.",
+  "commands": {
+    "client.state": "state:'login-page'|'ready'|'failed'; state is the only command field beyond version and command; trusted packaged page only. login-page reports the current Memoh login form; ready and failed report current client readiness. Document load alone does not establish ready. Missing client report after document load has the existing 60s active timer and explicit manual retry; no automatic reload/resend, late valid completion may still recover.",
+    "client.theme": "themeId from contracts/ui_theme.json; apply native surface and system-bar colors without changing conversation or transfer state.",
+    "voice.start": "handle:32 lowercase hex; ready client only. Check/request native microphone permission and capture one foreground 16kHz mono S16LE PCM source for the private WAV and native recognizer.",
+    "voice.status": "handle; return current CaptureStatus {handle,state,durationMs,peaks,text,speechError} for that capture.",
+    "voice.stop": "handle; stop capture and finalize the same WAV, returning CaptureResult with bytes and audible.",
+    "voice.transcribe": "handle; finalize the same captured source and await its native recognition result. No second microphone stream or full-audio replay.",
+    "voice.cancel": "handle; cancel that capture and release its unfinished private source.",
+    "voice.read": "handle,offset; return the bounded private WAV slice for the existing capture. No arbitrary path.",
+    "voice.release": "handle; release the retained capture source."
+  },
+  "voice_source": "The same native copied PCM samples feed WAV, duration/peak measurements and the existing speech worker.",
+  "web_attachments": "Current selected-file preparation, integrity verification, authenticated original reads and native send use the official Memoh SDK. This contract does not assert background/process-death transfer or paired album synchronization.",
+  "requirements": [
+    "contracts/client_capabilities.json",
+    "contracts/folder_source_access.json",
+    "contracts/album_sync.json"
+  ],
+  "acceptance": "Actual source-bound device behavior and remaining limitations belong to docs/CURRENT_STAGE.md."
+}

@@ -1,5 +1,11 @@
 # Reproduction inputs and limits
 
+The original public-subset status below is historical. The
+[archive restoration checkpoint](../docs/harmony-archive-restoration.md) recovers
+all 72 excluded paths and two additional tests. Integration of that older
+builder/native shell with retained newer modules and target `40f0a69` is still
+required; restored path coverage alone is not a successful build.
+
 A clean checkout of this public source subset can run only its source/syntax
 checker and standalone configuration regression. It cannot rebuild the full Web
 or HAP without the 72 excluded inherited source paths listed in the provenance

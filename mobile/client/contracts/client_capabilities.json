@@ -1,0 +1,190 @@
+{
+  "version": 2,
+  "scope": "memoh_native_thin_client",
+  "rule": "Requirements only. Actual current implementation and acceptance remain in docs/CURRENT_STAGE.md.",
+  "identity": {
+    "user": "Memoh native authenticated user",
+    "conversation": "Memoh native Bot and session",
+    "message": "Memoh native turn and message",
+    "asset": "Explicit authorized NAS original identity and version",
+    "presentation": "Official Memoh Vue components, native locale and centralized UI theme"
+  },
+  "sources": [
+    "docs/PLAN.md",
+    "contracts/ui_theme.json"
+  ],
+  "required_now": [
+    {
+      "id": "login_history",
+      "server": "Memoh native user authentication and sessions",
+      "client": "Official Vue login, protected credentials and cold reopening",
+      "accept": "Keep the native Bot/session identity and existing history; no second authentication adapter."
+    },
+    {
+      "id": "conversation_list",
+      "server": "Memoh native Bots and sessions",
+      "client": "Official Bot selection and session list",
+      "accept": "Users can talk directly to the selected Bot; one NAS Bot is the supervisor."
+    },
+    {
+      "id": "ai_session_context",
+      "server": "Memoh native Bot identity and persistent session",
+      "client": "Send directly to the selected native session",
+      "accept": "No supervisor approval or relay is added to ordinary messages; sessions remain isolated."
+    },
+    {
+      "id": "group_mentions_replies",
+      "server": "Native conversation and explicit attachment references",
+      "client": "Preserve native references with the composed text",
+      "accept": "Only explicitly authorized task inputs are handed off; an attachment ID is not an authorization grant."
+    },
+    {
+      "id": "attachment_draft",
+      "server": "NAS original ready/integrity before the native send",
+      "client": "Official editable composer preserves text, selection, references and attachments",
+      "accept": "One explicit mixed send; failed or cancelled preparation sends nothing; duplicate ready or retries do not resubmit."
+    },
+    {
+      "id": "transfer_lifecycle",
+      "server": "NAS original and native attachment identity",
+      "client": "Same-App direct transfer with real cancellation/reopening behavior",
+      "accept": "Do not invent completion, background persistence or recovery; do not reissue an unknown business effect."
+    },
+    {
+      "id": "transfer_progress",
+      "server": "Actual transferred bytes and confirmed total",
+      "client": "Existing controls express measured transfer progress",
+      "accept": "Multipart wire progress is identified as wire bytes; no estimated file-byte or completion claim."
+    },
+    {
+      "id": "asset_ready_integrity",
+      "server": "One NAS original, full byte-size and SHA verification",
+      "client": "Hand exact verified original references to the native send path",
+      "accept": "Current and explicitly referenced attachments must be ready before the corresponding model turn."
+    },
+    {
+      "id": "media_access",
+      "server": "Native Bot authorization and task scope",
+      "client": "Authenticated original preview, download and playback",
+      "accept": "Canonical identity locates bytes; it does not replace authorization, versioning or task-scope acceptance."
+    },
+    {
+      "id": "image_card",
+      "server": "Authenticated verified original content",
+      "client": "Official image gallery with continuous fullscreen zoom and system preset actions",
+      "accept": "Normal image viewing has no permanent toolbar; long press uses native save/share affordances."
+    },
+    {
+      "id": "on_demand_view",
+      "server": "Memoh native authorized media tools",
+      "client": "Retain the selected original and explicit references",
+      "accept": "Only authorized task input is read; no invented private reasoning or image quota."
+    },
+    {
+      "id": "voice_vs_audio_file",
+      "server": "The exact captured recording becomes a NAS attachment before native send",
+      "client": "Hold Mic, same-source transcription and shared mature waveform playback",
+      "accept": "Release feedback precedes native finalization; preserve the real handle, waveform, duration and mixed snapshot. Silent/failed transcription does not append an audio fallback."
+    },
+    {
+      "id": "media_understanding",
+      "server": "Authorized Windows/external derivation returns to NAS before model input",
+      "client": "Correct original/conversion and MIME selection",
+      "accept": "State actual temporal/audio-visual coverage and information loss; images do not prove video understanding."
+    },
+    {
+      "id": "media_playback",
+      "server": "Authorized complete content",
+      "client": "Mature image, audio and video playback/seek",
+      "accept": "Actual content, playback/seek and physical device observation are separate checks."
+    },
+    {
+      "id": "agent_policy",
+      "server": "Memoh native model/runtime configuration through the authorized NAS gateway",
+      "client": "Official independent configuration controls",
+      "accept": "Persist the latest thinking/search combination without mutually disabling controls; no global second Agent pipeline."
+    },
+    {
+      "id": "agent_execution",
+      "server": "Memoh native inference, tools, persistent session and memory integration",
+      "client": "Official native reply, rich content and public reasoning presentation",
+      "accept": "No replacement inference/memory core; live reasoning expands in page flow and finishes collapsed."
+    },
+    {
+      "id": "failure_budget",
+      "server": "Native execution status and explicit task identity",
+      "client": "Reopening and errors preserve the original request/result",
+      "accept": "Unknown outcomes are not retried on another resource; no new grant ledger or dispatch service."
+    },
+    {
+      "id": "device_boundary",
+      "server": "NAS-authorized business state and registered results",
+      "client": "System picker/recording, local grants, save/share and subsequent notification adaptation",
+      "accept": "Phone does not host an Agent; Windows receives authorized computation input only; no heavy NAS fallback."
+    },
+    {
+      "id": "themes",
+      "server": "Centralized theme configuration and native preferences",
+      "client": "Official light, dark, warm and system theme controls",
+      "accept": "Preserve the selected theme across reopening; static selection is separate from measured OS following."
+    },
+    {
+      "id": "result_delivery",
+      "server": "Results return to NAS and pass registration/integrity before delivery",
+      "client": "Same-App original viewing, system saving and cold reopening",
+      "accept": "Reuse the exact completed result; do not rerun Windows or model tasks to verify viewing."
+    }
+  ],
+  "planned_not_implemented": [
+    {
+      "id": "paired_bidirectional_album_sync",
+      "owner": "NAS and system media library",
+      "constraint": "Corresponding phone/NAS albums, memberships and content converge in both directions with phone writeback; deferred until usable transfer foundations. Not implemented by one-way upload."
+    },
+    {
+      "id": "long_term_memory",
+      "owner": "Memoh native memory provider on NAS",
+      "constraint": "Stage 4: separately verify authorized write, cross-session recall, correction and deletion with new synthetic input."
+    },
+    {
+      "id": "durable_tasks",
+      "owner": "Memoh native tasks and events",
+      "constraint": "Stable task identity, real lifecycle, continuation and cancel; native capabilities are not considered connected until actually verified."
+    },
+    {
+      "id": "file_workspace",
+      "owner": "NAS and system transfer",
+      "constraint": "Arbitrary file types, batch mixed input, original roundtrip, recovery, single inventory and space reclamation remain required."
+    },
+    {
+      "id": "pc_gpu_execution",
+      "owner": "Authorized Windows executor through Agenvo/Herdr",
+      "constraint": "Ordinary computation runs programs directly; phone never holds maintenance/admin credentials."
+    },
+    {
+      "id": "image_video_generation",
+      "owner": "Authorized NAS model outlet and qualified external/Windows capability",
+      "constraint": "Generated results join the same NAS registration, authorization, integrity and original saving path."
+    },
+    {
+      "id": "recipient_handoff",
+      "owner": "Memoh native Bot/task authorization and NAS file management",
+      "constraint": "Native Bot/session/task/attachment/version references remain explicit; shared paths do not grant access."
+    },
+    {
+      "id": "table_document_understanding",
+      "owner": "Native authorized tools and file references",
+      "constraint": "Preserve spreadsheet/document processing and follow-up modification requirements without inventing another chat protocol."
+    },
+    {
+      "id": "mobile_network_notifications",
+      "owner": "Stage 5 platform adaptation",
+      "constraint": "Public/mobile networking, notification and daily recovery/performance remain deferred; no new home-network entry is opened."
+    },
+    {
+      "id": "android_followup",
+      "owner": "Shared official frontend and Android platform adapter",
+      "constraint": "Android and natural assistant integration remain required; platform-specific APIs are not claimed portable."
+    }
+  ]
+}

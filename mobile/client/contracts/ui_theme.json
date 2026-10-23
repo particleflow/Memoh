@@ -1,0 +1,525 @@
+{
+  "version": 1,
+  "defaultLight": "light-theme",
+  "defaultDark": "dark-theme",
+  "themes": {
+    "light-theme": {
+      "kind": "light",
+      "name": {
+        "zh-CN": "浅色",
+        "en": "Light"
+      },
+      "colors": {
+        "Background": {
+          "Container": "#F6F8FB",
+          "ContainerHover": "#EDF1F6",
+          "ContainerActive": "#E3E9F1",
+          "ContainerLine": "#D5DEEA",
+          "OnContainer": "#1F2937"
+        },
+        "Surface": {
+          "Container": "#FFFFFF",
+          "ContainerHover": "#F6F8FB",
+          "ContainerActive": "#EDF1F6",
+          "ContainerLine": "#D5DEEA",
+          "OnContainer": "#1F2937"
+        },
+        "SurfaceVariant": {
+          "Container": "#EDF1F6",
+          "ContainerHover": "#E3E9F1",
+          "ContainerActive": "#D5DEEA",
+          "ContainerLine": "#C0CCDD",
+          "OnContainer": "#1F2937"
+        },
+        "Primary": {
+          "Main": "#2563EB",
+          "MainHover": "#1D4ED8",
+          "MainActive": "#1E40AF",
+          "MainLine": "#2563EB",
+          "OnMain": "#FFFFFF",
+          "Container": "#E8F0FF",
+          "ContainerHover": "#D8E6FF",
+          "ContainerActive": "#C4D8FF",
+          "ContainerLine": "#ACC7F5",
+          "OnContainer": "#1D4ED8"
+        },
+        "Secondary": {
+          "Main": "#1F2937",
+          "MainHover": "#354356",
+          "MainActive": "#46556B",
+          "MainLine": "#64748B",
+          "OnMain": "#FFFFFF",
+          "Container": "#EDF1F6",
+          "ContainerHover": "#E3E9F1",
+          "ContainerActive": "#D5DEEA",
+          "ContainerLine": "#BCC8D8",
+          "OnContainer": "#1F2937"
+        },
+        "Success": {
+          "Main": "#1A7650",
+          "MainHover": "#156342",
+          "MainActive": "#105237",
+          "MainLine": "#1A7650",
+          "OnMain": "#FFFFFF",
+          "Container": "#E6F3EB",
+          "ContainerHover": "#D9ECDF",
+          "ContainerActive": "#CCE4D3",
+          "ContainerLine": "#A8CCB9",
+          "OnContainer": "#175739"
+        },
+        "Warning": {
+          "Main": "#8A570D",
+          "MainHover": "#74490B",
+          "MainActive": "#623D09",
+          "MainLine": "#8A570D",
+          "OnMain": "#FFFFFF",
+          "Container": "#FAF0DC",
+          "ContainerHover": "#F4E6C6",
+          "ContainerActive": "#EEDDAB",
+          "ContainerLine": "#D6BD81",
+          "OnContainer": "#69420A"
+        },
+        "Critical": {
+          "Main": "#B63A4D",
+          "MainHover": "#A12D40",
+          "MainActive": "#8D2335",
+          "MainLine": "#B63A4D",
+          "OnMain": "#FFFFFF",
+          "Container": "#FBECEF",
+          "ContainerHover": "#F7DDE3",
+          "ContainerActive": "#F1CBD4",
+          "ContainerLine": "#DFA3B1",
+          "OnContainer": "#902A3B"
+        },
+        "Other": {
+          "FocusRing": "#2563EB",
+          "Shadow": "rgba(24, 39, 61, 0.10)",
+          "Overlay": "rgba(27, 39, 57, 0.28)"
+        }
+      },
+      "muted": "#5E6D82",
+      "fan": {
+        "surface": "#FFFFFF",
+        "opacityNear": 0.94,
+        "opacityFar": 0.0,
+        "featherStart": 0.7,
+        "blurNear": 0,
+        "blurFar": 14
+      },
+      "native": {
+        "background": "#FFFFFF",
+        "content": "#1F2937"
+      },
+      "identityColors": [
+        "#2563EB",
+        "#1F2937",
+        "#1A7650",
+        "#B63A4D",
+        "#8A570D",
+        "#2563EB",
+        "#1A7650",
+        "#1F2937"
+      ],
+      "transferPending": "#DCA925"
+    },
+    "dark-theme": {
+      "kind": "dark",
+      "name": {
+        "zh-CN": "深色",
+        "en": "Dark"
+      },
+      "colors": {
+        "Background": {
+          "Container": "#10151C",
+          "ContainerHover": "#18202A",
+          "ContainerActive": "#232E3C",
+          "ContainerLine": "#344155",
+          "OnContainer": "#EEF3FA"
+        },
+        "Surface": {
+          "Container": "#1A222D",
+          "ContainerHover": "#232E3C",
+          "ContainerActive": "#2B394B",
+          "ContainerLine": "#344155",
+          "OnContainer": "#EEF3FA"
+        },
+        "SurfaceVariant": {
+          "Container": "#232E3C",
+          "ContainerHover": "#2B394B",
+          "ContainerActive": "#344155",
+          "ContainerLine": "#45546A",
+          "OnContainer": "#EEF3FA"
+        },
+        "Primary": {
+          "Main": "#8AB4FF",
+          "MainHover": "#A4C5FF",
+          "MainActive": "#BED5FF",
+          "MainLine": "#8AB4FF",
+          "OnMain": "#10213B",
+          "Container": "#223A5F",
+          "ContainerHover": "#2A4672",
+          "ContainerActive": "#345486",
+          "ContainerLine": "#5379B5",
+          "OnContainer": "#C9DEFF"
+        },
+        "Secondary": {
+          "Main": "#EEF3FA",
+          "MainHover": "#FFFFFF",
+          "MainActive": "#DBE5F2",
+          "MainLine": "#B8C6D8",
+          "OnMain": "#17202C",
+          "Container": "#2B394B",
+          "ContainerHover": "#344155",
+          "ContainerActive": "#3D4D62",
+          "ContainerLine": "#45546A",
+          "OnContainer": "#EEF3FA"
+        },
+        "Success": {
+          "Main": "#89D9B1",
+          "MainHover": "#A3E3C3",
+          "MainActive": "#B9ECD2",
+          "MainLine": "#66BA94",
+          "OnMain": "#102E22",
+          "Container": "#1C4133",
+          "ContainerHover": "#25533F",
+          "ContainerActive": "#2D624C",
+          "ContainerLine": "#447B62",
+          "OnContainer": "#C7EDDA"
+        },
+        "Warning": {
+          "Main": "#E9C38B",
+          "MainHover": "#F1D4AD",
+          "MainActive": "#F8E3C5",
+          "MainLine": "#D9AB65",
+          "OnMain": "#342512",
+          "Container": "#473620",
+          "ContainerHover": "#57452B",
+          "ContainerActive": "#665234",
+          "ContainerLine": "#8B714B",
+          "OnContainer": "#F5E1C4"
+        },
+        "Critical": {
+          "Main": "#F0A7AC",
+          "MainHover": "#F5BEC2",
+          "MainActive": "#F9D1D4",
+          "MainLine": "#D99098",
+          "OnMain": "#38181F",
+          "Container": "#492A32",
+          "ContainerHover": "#59343D",
+          "ContainerActive": "#663E48",
+          "ContainerLine": "#8C5865",
+          "OnContainer": "#FFDDE1"
+        },
+        "Other": {
+          "FocusRing": "#8AB4FF",
+          "Shadow": "rgba(0, 0, 0, 0.32)",
+          "Overlay": "rgba(5, 9, 15, 0.62)"
+        }
+      },
+      "muted": "#A9B6C7",
+      "fan": {
+        "surface": "#1A222D",
+        "opacityNear": 0.94,
+        "opacityFar": 0.0,
+        "featherStart": 0.7,
+        "blurNear": 0,
+        "blurFar": 14
+      },
+      "native": {
+        "background": "#1A222D",
+        "content": "#EEF3FA"
+      },
+      "identityColors": [
+        "#8AB4FF",
+        "#EEF3FA",
+        "#89D9B1",
+        "#F0A7AC",
+        "#E9C38B",
+        "#8AB4FF",
+        "#89D9B1",
+        "#EEF3FA"
+      ],
+      "transferPending": "#E8BE4D"
+    },
+    "warm-theme": {
+      "kind": "light",
+      "name": {
+        "zh-CN": "暖白",
+        "en": "Warm white"
+      },
+      "colors": {
+        "Background": {
+          "Container": "#F8F6F1",
+          "ContainerHover": "#F0EBE3",
+          "ContainerActive": "#E6E1D8",
+          "ContainerLine": "#DAD5CC",
+          "OnContainer": "#302F2D"
+        },
+        "Surface": {
+          "Container": "#FFFCF7",
+          "ContainerHover": "#F8F6F1",
+          "ContainerActive": "#F0EBE3",
+          "ContainerLine": "#DAD5CC",
+          "OnContainer": "#302F2D"
+        },
+        "SurfaceVariant": {
+          "Container": "#F0EBE3",
+          "ContainerHover": "#E6E1D8",
+          "ContainerActive": "#DAD5CC",
+          "ContainerLine": "#C7C2B9",
+          "OnContainer": "#302F2D"
+        },
+        "Primary": {
+          "Main": "#2F64BC",
+          "MainHover": "#2657A9",
+          "MainActive": "#214B91",
+          "MainLine": "#2F64BC",
+          "OnMain": "#FFFFFF",
+          "Container": "#E5ECF6",
+          "ContainerHover": "#D9E4F4",
+          "ContainerActive": "#CDDCEF",
+          "ContainerLine": "#ABBFDF",
+          "OnContainer": "#234F97"
+        },
+        "Secondary": {
+          "Main": "#302F2D",
+          "MainHover": "#354356",
+          "MainActive": "#46556B",
+          "MainLine": "#64748B",
+          "OnMain": "#FFFCF7",
+          "Container": "#F0EBE3",
+          "ContainerHover": "#E6E1D8",
+          "ContainerActive": "#DAD5CC",
+          "ContainerLine": "#BCC8D8",
+          "OnContainer": "#302F2D"
+        },
+        "Success": {
+          "Main": "#1A7650",
+          "MainHover": "#156342",
+          "MainActive": "#105237",
+          "MainLine": "#1A7650",
+          "OnMain": "#FFFFFF",
+          "Container": "#E6F3EB",
+          "ContainerHover": "#D9ECDF",
+          "ContainerActive": "#CCE4D3",
+          "ContainerLine": "#A8CCB9",
+          "OnContainer": "#175739"
+        },
+        "Warning": {
+          "Main": "#8A570D",
+          "MainHover": "#74490B",
+          "MainActive": "#623D09",
+          "MainLine": "#8A570D",
+          "OnMain": "#FFFFFF",
+          "Container": "#FAF0DC",
+          "ContainerHover": "#F4E6C6",
+          "ContainerActive": "#EEDDAB",
+          "ContainerLine": "#D6BD81",
+          "OnContainer": "#69420A"
+        },
+        "Critical": {
+          "Main": "#B63A4D",
+          "MainHover": "#A12D40",
+          "MainActive": "#8D2335",
+          "MainLine": "#B63A4D",
+          "OnMain": "#FFFFFF",
+          "Container": "#FBECEF",
+          "ContainerHover": "#F7DDE3",
+          "ContainerActive": "#F1CBD4",
+          "ContainerLine": "#DFA3B1",
+          "OnContainer": "#902A3B"
+        },
+        "Other": {
+          "FocusRing": "#2F64BC",
+          "Shadow": "rgba(24, 39, 61, 0.10)",
+          "Overlay": "rgba(27, 39, 57, 0.28)"
+        }
+      },
+      "muted": "#6A6761",
+      "fan": {
+        "surface": "#FFFCF7",
+        "opacityNear": 0.94,
+        "opacityFar": 0.0,
+        "featherStart": 0.7,
+        "blurNear": 0,
+        "blurFar": 14
+      },
+      "native": {
+        "background": "#FFFCF7",
+        "content": "#302F2D"
+      },
+      "identityColors": [
+        "#2F64BC",
+        "#302F2D",
+        "#1A7650",
+        "#B63A4D",
+        "#8A570D",
+        "#2F64BC",
+        "#1A7650",
+        "#302F2D"
+      ],
+      "transferPending": "#C99A21"
+    }
+  },
+  "shared": {
+    "fontFamily": "'HarmonyOS Sans SC', 'HarmonyOS Sans', 'InterVariable', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    "radii": {
+      "R0": "0",
+      "R300": "0.5rem",
+      "R400": "0.875rem",
+      "R500": "1rem",
+      "Round": "50%",
+      "Pill": "9999px"
+    },
+    "fontWeight": {
+      "W100": "100",
+      "W200": "200",
+      "W300": "300",
+      "W400": "400",
+      "W500": "500",
+      "W600": "600",
+      "W700": "700",
+      "W800": "800",
+      "W900": "900"
+    },
+    "motion": {
+      "feedbackMs": 140,
+      "enterMs": 240,
+      "exitMs": 180,
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1)"
+    },
+    "voiceMotion": {
+      "enterMs": 260,
+      "actionsDelayMs": 95,
+      "actionsEnterMs": 165,
+      "exitMs": 220,
+      "exitEasing": "cubic-bezier(0.4, 0, 1, 1)",
+      "labelDelayMs": 8,
+      "materialExitMs": 150,
+      "confirmLeadMs": 70,
+      "breathMs": 1600,
+      "rippleMs": 1800,
+      "entryEasing": "cubic-bezier(0.22, 0.72, 0.3, 1)",
+      "meterResponseMs": 85,
+      "injectMs": 840,
+      "injectGatherMs": 90,
+      "injectFallMs": 460,
+      "injectAbsorbMs": 340,
+      "injectRiseEasing": "cubic-bezier(0.16, 0.8, 0.28, 1)",
+      "injectFallEasing": "cubic-bezier(0.45, 0, 0.8, 0.6)",
+      "actionEasing": "cubic-bezier(0.2, 0.72, 0.3, 1)",
+      "releaseFeatherPx": 1.2,
+      "sendSplash": {
+        "totalMs": 780,
+        "absorbMs": 280,
+        "lobeBias": 0.28,
+        "driftPx": 7,
+        "leadingRatio": 0.95,
+        "trailingDelayMs": 8,
+        "trailingOpacity": 0.56,
+        "leanPx": 6
+      },
+      "backdropBlurPx": 3,
+      "injectRisePx": 24,
+      "landingClearancePx": 36
+    },
+    "viewerBackground": "#000000",
+    "transparent": "transparent",
+    "voiceInput": {
+      "handPollMs": 600,
+      "meterPollMs": 200,
+      "edgeInsetPx": 16,
+      "targetWaitMs": 12000,
+      "textRevealMs": 480,
+      "textRevealFrameMs": 24
+    },
+    "composer": {
+      "fieldMaxVisibleRatio": 0.4,
+      "micSizePx": 44,
+      "fieldMinHeightPx": 48,
+      "fieldRadiusPx": 24,
+      "gapPx": 8,
+      "fieldPaddingXPx": 12,
+      "fieldPaddingYPx": 12,
+      "controlsWidthPx": 116,
+      "lineHeightPx": 24,
+      "controlsGapPx": 6,
+      "controlsIconSizePx": 20
+    },
+    "timeline": {
+      "bottomTolerancePx": 2
+    },
+    "media": {
+      "audioWidthPx": 280,
+      "videoWidthPx": 320,
+      "videoMaxHeightPx": 240,
+      "inlineImageMaxPx": 220,
+      "waveHeightPx": 32,
+      "waveBarWidthPx": 3,
+      "waveBarGapPx": 2,
+      "waveBarRadiusPx": 2,
+      "waveMinHeightPx": 2,
+      "voicePaddingYPx": 6,
+      "seekStepSeconds": 0.1,
+      "keyboardSeekSeconds": 5,
+      "seekHitHeightPx": 24,
+      "fileWidthPx": 280,
+      "pressScale": 0.97,
+      "fileBadgeMaxWidthPx": 100,
+      "observerMaxWidthPx": 900,
+      "observerMaxHeightVh": 90,
+      "deliverySizePx": 18,
+      "deliveryDotPx": 5,
+      "deliveryRisePx": 2
+    },
+    "chrome": {
+      "linkUnderlineOffsetEm": 0.18,
+      "outlineOffsetPx": 2,
+      "panelRadiusPx": 16,
+      "roomRowMinHeightPx": 68,
+      "roomRowRadiusPx": 12,
+      "navigationPaddingYPx": 6,
+      "navigationPaddingXPx": 12,
+      "navigationGapPx": 2,
+      "navigationMinWidthPx": 56,
+      "chatActionsPaddingTopPx": 8,
+      "chatActionsPaddingXPx": 16,
+      "chatActionsPaddingBottomPx": 12
+    },
+    "powerColors": {
+      "goku": "#ff6a00",
+      "manager": "#ff6a7f",
+      "founder": "#0000ff",
+      "admin": "#0088ff",
+      "moderator": "#1fd81f",
+      "member": "#91cfdf",
+      "muted": "#888888"
+    },
+    "layers": {
+      "composerControls": 1,
+      "recordingBackdrop": 1500,
+      "recordingComposer": 1501,
+      "recordingFeedback": 1502
+    }
+  },
+  "labels": {
+    "zh-CN": {
+      "appearance": "外观",
+      "system": "跟随系统",
+      "systemDescription": "随系统在浅色和深色之间切换",
+      "theme": "配色主题",
+      "themeDescription": "统一应用内所有界面",
+      "lightPreference": "浅色模式",
+      "darkPreference": "深色模式"
+    },
+    "en": {
+      "appearance": "Appearance",
+      "system": "Follow system",
+      "systemDescription": "Switch between light and dark with your system",
+      "theme": "Color theme",
+      "themeDescription": "Applies consistently throughout the app",
+      "lightPreference": "Light appearance",
+      "darkPreference": "Dark appearance"
+    }
+  }
+}

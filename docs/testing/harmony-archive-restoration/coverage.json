@@ -1,0 +1,752 @@
+{
+  "baseCommit": "b568d81a0287945ebb39bfa031761c1e87ecf6a2",
+  "targetCommit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+  "restored": [
+    {
+      "path": "mobile/client/contracts/album_sync.json",
+      "sha256": "997f4ccf16ae8db0f75a84828c79c25c55cbb790b9a0f787ed1479501ff4bbe5",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "997f4ccf16ae8db0f75a84828c79c25c55cbb790b9a0f787ed1479501ff4bbe5",
+      "archiveCheckpointSHA256": "997f4ccf16ae8db0f75a84828c79c25c55cbb790b9a0f787ed1479501ff4bbe5"
+    },
+    {
+      "path": "mobile/client/contracts/client_capabilities.json",
+      "sha256": "920cb09c442549981aafcac219f8e8dffdeaacd43ce8117276fb74cf76e1deb0",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "fb1c9dc3ec6d6063751b15d9d9aadb7a8795a32c306178787b996afcfbda428d",
+      "archiveCheckpointSHA256": "fb1c9dc3ec6d6063751b15d9d9aadb7a8795a32c306178787b996afcfbda428d",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/contracts/folder_source_access.json",
+      "sha256": "565f4577472e10748d14c26c910deedcde89bfdda439446bcf705b07ab614107",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "565f4577472e10748d14c26c910deedcde89bfdda439446bcf705b07ab614107",
+      "archiveCheckpointSHA256": "565f4577472e10748d14c26c910deedcde89bfdda439446bcf705b07ab614107"
+    },
+    {
+      "path": "mobile/client/contracts/harmony_native_assets.json",
+      "sha256": "959e1961f2c54edfb9637a41b171ac85f3a59b9f7ee1493409b079b57d89123a",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "10b89005ad31932512e5a7435cb44400c74ffac4d826aee30196f983245dadf5",
+      "archiveCheckpointSHA256": "10b89005ad31932512e5a7435cb44400c74ffac4d826aee30196f983245dadf5",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/contracts/matrix_assets.json",
+      "sha256": "0bfa86c6d98dd9e83ec4f57d40434734013ba7eb823d060fdca6612e18f5583d",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "0bfa86c6d98dd9e83ec4f57d40434734013ba7eb823d060fdca6612e18f5583d",
+      "archiveCheckpointSHA256": "0bfa86c6d98dd9e83ec4f57d40434734013ba7eb823d060fdca6612e18f5583d"
+    },
+    {
+      "path": "mobile/client/contracts/ui_theme.json",
+      "sha256": "2b23b0926c700be2535bb0bb6b55370e769e1a4c00fc814d0f298f5921063720",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "44d24c4ab2a088ab55f24cd3e513164dc49e042187557d5ca1a1c653db5b159a",
+      "archiveCheckpointSHA256": "44d24c4ab2a088ab55f24cd3e513164dc49e042187557d5ca1a1c653db5b159a",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/build_memoh_web.py",
+      "sha256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
+      "archiveCheckpointSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
+      "sha256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
+      "archiveCheckpointSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json",
+      "sha256": "64967dedf8c123af0d7f80aa5b560123f77112208c1c77f826d336d7bfddbe2c",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "eff4cbb47121bb254a16dee4017ba66dcb044f18fd0e8e7667cc48ffac99b734",
+      "archiveCheckpointSHA256": "eff4cbb47121bb254a16dee4017ba66dcb044f18fd0e8e7667cc48ffac99b734",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.svg",
+      "sha256": "ea0a3474d61fd09ebdef42dd38dc40b962611f8ad495c747579eb9bb2e311d89",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "804100c2c460662789f7a697f3b9adfceb4680f39f605f57aec23dee30503d0c",
+      "archiveCheckpointSHA256": "804100c2c460662789f7a697f3b9adfceb4680f39f605f57aec23dee30503d0c",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/build-profile.json5",
+      "sha256": "6cef8672b7ddb77c42f1841dd96a9836a48bf6167113560fc836bdb29e6ca8f9",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "2e45295fa009610f73ed73b2023d75459c40771056a40a9a325e3a42df32582d",
+      "archiveCheckpointSHA256": "2e45295fa009610f73ed73b2023d75459c40771056a40a9a325e3a42df32582d",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/code-linter.json5",
+      "sha256": "f557c3bcdb40c64c986bffed9628310cc7a79fb7d2642c1c8b8d265fd92e25ad",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "f557c3bcdb40c64c986bffed9628310cc7a79fb7d2642c1c8b8d265fd92e25ad",
+      "archiveCheckpointSHA256": "f557c3bcdb40c64c986bffed9628310cc7a79fb7d2642c1c8b8d265fd92e25ad"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/build-profile.json5",
+      "sha256": "a1fac60e48146f2dd8ba8cf7fad24ad79e32cd87bfddfe8fef270421430f281d",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "fce5c19fd1889a7b98301df12b012448e0b5a5c785fec38ab8c20ebb925f29e3",
+      "archiveCheckpointSHA256": "fce5c19fd1889a7b98301df12b012448e0b5a5c785fec38ab8c20ebb925f29e3",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/hvigorfile.ts",
+      "sha256": "f547983dcab9c8fff87cc3ddedb22bb98063663c5b8afe18bb32e131311ec289",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "f71679171099cb5c2260ab2a43e38164f169216c217ffdba7d0933e92ca8f733",
+      "archiveCheckpointSHA256": "f71679171099cb5c2260ab2a43e38164f169216c217ffdba7d0933e92ca8f733",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/oh-package-lock.json5",
+      "sha256": "9b11d7aac8bc895dd68e2231756563ed3f7eb79ab16a4fe41eb95329fd0eed39",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "7581d6fa7e064d82b85c243e4917acc0c42c502e1023711233591003288239fe",
+      "archiveCheckpointSHA256": "7581d6fa7e064d82b85c243e4917acc0c42c502e1023711233591003288239fe",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/oh-package.json5",
+      "sha256": "32ee2d24738498f1dc1b7ac66fe837b5d2e764bceac81ff9dd6bae29bf1bd277",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "8d0967ec872c5895a8bdbf24de2f82c9e455dc89e132052b20f8f52091e9c829",
+      "archiveCheckpointSHA256": "8d0967ec872c5895a8bdbf24de2f82c9e455dc89e132052b20f8f52091e9c829",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/CMakeLists.txt",
+      "sha256": "f16dec85ecf9d610f742e08df5009c81b8dd72861df0421b275d6c4f14539485",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "f16dec85ecf9d610f742e08df5009c81b8dd72861df0421b275d6c4f14539485",
+      "archiveCheckpointSHA256": "f16dec85ecf9d610f742e08df5009c81b8dd72861df0421b275d6c4f14539485"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/authority_lock.h",
+      "sha256": "c3d197ffbadd09ab3e93ce2f067aea4949091ef711e5d6f1578e2d22fbc0a048",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "c3d197ffbadd09ab3e93ce2f067aea4949091ef711e5d6f1578e2d22fbc0a048",
+      "archiveCheckpointSHA256": "c3d197ffbadd09ab3e93ce2f067aea4949091ef711e5d6f1578e2d22fbc0a048"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/file_uri.cpp",
+      "sha256": "69a31adc93105e4c7001fab28ade6c9ff9fb26f3c5f964e347a427dcb118608a",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "69a31adc93105e4c7001fab28ade6c9ff9fb26f3c5f964e347a427dcb118608a",
+      "archiveCheckpointSHA256": "69a31adc93105e4c7001fab28ade6c9ff9fb26f3c5f964e347a427dcb118608a"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/folder_publish.h",
+      "sha256": "34dfdbe1c031b8ef4fcd5cecdceda8c929af3aecede7974136408411d3a47911",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "34dfdbe1c031b8ef4fcd5cecdceda8c929af3aecede7974136408411d3a47911",
+      "archiveCheckpointSHA256": "34dfdbe1c031b8ef4fcd5cecdceda8c929af3aecede7974136408411d3a47911"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/media_lease.h",
+      "sha256": "c1e9a6945e29f0d841c71f3e2dae0cd2157807daf47c0186cc52cbd8189d0b45",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "c1e9a6945e29f0d841c71f3e2dae0cd2157807daf47c0186cc52cbd8189d0b45",
+      "archiveCheckpointSHA256": "c1e9a6945e29f0d841c71f3e2dae0cd2157807daf47c0186cc52cbd8189d0b45"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/raw_image.cpp",
+      "sha256": "8ee25c3837e026718db644cb6aa48964a9874a5d8ed306eb550990490416eb7a",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "afcf63f97f722baff12472ba6347ffb3884567bc5db8347e62f91f0519968c1e",
+      "archiveCheckpointSHA256": "afcf63f97f722baff12472ba6347ffb3884567bc5db8347e62f91f0519968c1e",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/types/libbegoniaraw/index.d.ts",
+      "sha256": "7b7ec7cd6f6db97447856d354dbe8bc8cb1233e155fb65cfe27260c2cc0de2d3",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "adb80ab1e63c3fa0c38721691d0795429b751b7cba68c9e8a5d6c50476068e22",
+      "archiveCheckpointSHA256": "adb80ab1e63c3fa0c38721691d0795429b751b7cba68c9e8a5d6c50476068e22",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/types/libbegoniaraw/oh-package.json5",
+      "sha256": "ada20de0dfcb610ebad91c21a5e5d4c2f2f3b24d789e948b4e2fc3416bc8cc7c",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "ada20de0dfcb610ebad91c21a5e5d4c2f2f3b24d789e948b4e2fc3416bc8cc7c",
+      "archiveCheckpointSHA256": "ada20de0dfcb610ebad91c21a5e5d4c2f2f3b24d789e948b4e2fc3416bc8cc7c"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/AssetBackgroundScope.ets",
+      "sha256": "bc7d5981b41de0cc1918ea2f21dc02c39bd3a2c5988f76d18fa671c674f81834",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "bc7d5981b41de0cc1918ea2f21dc02c39bd3a2c5988f76d18fa671c674f81834",
+      "archiveCheckpointSHA256": "bc7d5981b41de0cc1918ea2f21dc02c39bd3a2c5988f76d18fa671c674f81834"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+      "sha256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
+      "archiveCheckpointSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "sha256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
+      "archiveCheckpointSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeExchangeDirectory.ets",
+      "sha256": "31a64277872ae9f71983eed9ed38e570ecabf5a8edfc7ec9d9a04fd2250d234f",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "17039657b2d2b8eed8461f4781a4ddea44a9439f9768875d8df1f11423055ec4",
+      "archiveCheckpointSHA256": "17039657b2d2b8eed8461f4781a4ddea44a9439f9768875d8df1f11423055ec4",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets",
+      "sha256": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab",
+      "archiveCheckpointSHA256": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets",
+      "sha256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+      "archiveCheckpointSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferPolicy.ets",
+      "sha256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
+      "archiveCheckpointSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets",
+      "sha256": "89250720bd8a6ee088787725272f0f6d21daaf850679ecec613b196823544d94",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "2d69a43f09df6542e6b3379c203a52db14096bc512cb00c9cf04f1fbbed42428",
+      "archiveCheckpointSHA256": "2d69a43f09df6542e6b3379c203a52db14096bc512cb00c9cf04f1fbbed42428",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/RawImage.ets",
+      "sha256": "838dcd78274d799234823068f9bd98446c74a43a53d5f3de1c1b8b132ed18e2e",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "ef4519796bf6858b11a0d687f9904d149dfd614320c311a2e884dd27f46df36e",
+      "archiveCheckpointSHA256": "ef4519796bf6858b11a0d687f9904d149dfd614320c311a2e884dd27f46df36e",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
+      "sha256": "db7f752d2685741f23eda9cc99e24508997b18c095ac4dc25f488c9747baf945",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "bb6266a6c5cd31a4bb0371e3004bc4ec22c89d3a831b991d366a50d9ec86ab3f",
+      "archiveCheckpointSHA256": "bb6266a6c5cd31a4bb0371e3004bc4ec22c89d3a831b991d366a50d9ec86ab3f",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/UiTheme.ets",
+      "sha256": "5737ccf5bd46cf4f2c81273835a6869ce2c3acceff31f844767d0567d588ad51",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "1672fc71246e94476c20cffcf2f86942a9130370b4a523e72e605e0810c12dc6",
+      "archiveCheckpointSHA256": "1672fc71246e94476c20cffcf2f86942a9130370b4a523e72e605e0810c12dc6",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceText.ets",
+      "sha256": "2898f4059925e3a99147f323c556111e9a318cf6032c9cf2666cc75b5d35671d",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "ee960b4a0b1e453991edb1eebbdd993484d3754453d7095d0216a2bae7471d80",
+      "archiveCheckpointSHA256": "ee960b4a0b1e453991edb1eebbdd993484d3754453d7095d0216a2bae7471d80",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceTextProtocol.ets",
+      "sha256": "ed1a940341437163bbb0678d98322048f230c12af6bb166fd1c1f3a83e363796",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "84f8e2ebd45b0c55de846ee8b10c3dd96843c3e22ca5dbee9923c1dce5cd7b0e",
+      "archiveCheckpointSHA256": "84f8e2ebd45b0c55de846ee8b10c3dd96843c3e22ca5dbee9923c1dce5cd7b0e",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/ClientAbilityStage.ets",
+      "sha256": "d452dd925c9f99ed91b6ed1d1481bb175e0297f6382b85d8a777dac01f894f9f",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "52770e32fdd1262b2c7e562b0e1bc64200d53f82c353d279426b1daaf56f89fd",
+      "archiveCheckpointSHA256": "52770e32fdd1262b2c7e562b0e1bc64200d53f82c353d279426b1daaf56f89fd",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
+      "sha256": "eff4b39dec5fa5d1fc9e2f6ac4cfbcb42506e68304b9058e88e4f39a212097c3",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
+      "archiveCheckpointSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
+      "sha256": "069bbf45ddb6fff7306f87d4c09979ed370df5b69c13b819022b1cc21b4c41b0",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
+      "archiveCheckpointSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets",
+      "sha256": "f2dae9550bc6a5f4511d54c5e3c014ce06cc3c8400a3b6ae4639b35ec212f0a5",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "a0e228dc16e55439ddae76d4d33ce21e53a6917f9c7fb9ba30fb156363a9154e",
+      "archiveCheckpointSHA256": "a0e228dc16e55439ddae76d4d33ce21e53a6917f9c7fb9ba30fb156363a9154e",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/module.json5",
+      "sha256": "693bbe2692009c271abfdf403530a33c6b608da8e27741624a132b7aca9ac563",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "88c4ed24330f93f9e3ab27b8f9c68134d8cbed84f18fe30db65c3bdbf50a1fbc",
+      "archiveCheckpointSHA256": "88c4ed24330f93f9e3ab27b8f9c68134d8cbed84f18fe30db65c3bdbf50a1fbc",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/color.json",
+      "sha256": "b750c557fd0de5aa061bc7622687d8f7904b1fc3e77a9648fe1209878ad693a4",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "cf74f8ef86f99823f72f96039938a14ea63fbc0f205125383c4f36d8490c8ab1",
+      "archiveCheckpointSHA256": "cf74f8ef86f99823f72f96039938a14ea63fbc0f205125383c4f36d8490c8ab1",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/string.json",
+      "sha256": "8a75f6b44331cd1cd0ed00da3244c817ad82ec51e0d90927bb1451115150a82f",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "652706652754e493338016dbbe8b9af63b4e4c92b8aab7bd7393620117bc54fd",
+      "archiveCheckpointSHA256": "652706652754e493338016dbbe8b9af63b4e4c92b8aab7bd7393620117bc54fd",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.svg",
+      "sha256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
+      "archiveCheckpointSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/main_pages.json",
+      "sha256": "bc475e46a322b2e0aadb08e02011d2c0941e7905304f5e2cf348d8e6b265c3e8",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "4a039edb97869f2b79ed574c929c7a5c95002434d1e4a1aa3e0924ff5fe3777d",
+      "archiveCheckpointSHA256": "4a039edb97869f2b79ed574c929c7a5c95002434d1e4a1aa3e0924ff5fe3777d",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/share_files.json",
+      "sha256": "2d77f506bc8581301725156faf4f8cc2c6152aaa8203b2c0dbbdb00a4d8df2f4",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "2d77f506bc8581301725156faf4f8cc2c6152aaa8203b2c0dbbdb00a4d8df2f4",
+      "archiveCheckpointSHA256": "2d77f506bc8581301725156faf4f8cc2c6152aaa8203b2c0dbbdb00a4d8df2f4"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/hvigor/hvigor-config.json5",
+      "sha256": "986794866eca42f9e1b7ee8f0efe93ccb320d9fd2f9f6240955a87dd16191765",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "ff2bed38cae4b48644ee5a30dc9e8b1d68876aaa7789ceecc7d8866ef24fb8df",
+      "archiveCheckpointSHA256": "ff2bed38cae4b48644ee5a30dc9e8b1d68876aaa7789ceecc7d8866ef24fb8df",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/hvigorfile.ts",
+      "sha256": "2378c5e0c5246005ada73a67e8c9834fa08adb9ffd6fb6c219051456753bed5a",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "c08e821b017d4199cbc2f0d086bb329e27e469e4c7d575f4493dfc2f92c72143",
+      "archiveCheckpointSHA256": "c08e821b017d4199cbc2f0d086bb329e27e469e4c7d575f4493dfc2f92c72143",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/oh-package.json5",
+      "sha256": "68b73facb69fffe75f959bd6d8994ca6c92a2ecd1fb9be436f7f333541a88df7",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "0ae8bb6142a9d1883b5322ee393bf4fd389298ffa213aefbdb304a7e33be1236",
+      "archiveCheckpointSHA256": "0ae8bb6142a9d1883b5322ee393bf4fd389298ffa213aefbdb304a7e33be1236",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/raw-codec.lock.json",
+      "sha256": "0148c26115f0b88b111ca86ba0339a020d51a702d198072c2bca61a0adcec129",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "bb1de8ed9c9af90eeadab0c3a3bdc701ddbd2786ce10273e78d74573abb1e464",
+      "archiveCheckpointSHA256": "bb1de8ed9c9af90eeadab0c3a3bdc701ddbd2786ce10273e78d74573abb1e464",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/authority_lock_runtime.cpp",
+      "sha256": "68818c9120659acf44b6c52c955e864bc74f650855f6d3f3a2ed6db1078da508",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "68818c9120659acf44b6c52c955e864bc74f650855f6d3f3a2ed6db1078da508",
+      "archiveCheckpointSHA256": "68818c9120659acf44b6c52c955e864bc74f650855f6d3f3a2ed6db1078da508"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/folder_handoff_runtime.cpp",
+      "sha256": "20e4c5346cdce4c1808e23c7043afe94e2f88c75b770a31523ca3ab6854ca619",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "20e4c5346cdce4c1808e23c7043afe94e2f88c75b770a31523ca3ab6854ca619",
+      "archiveCheckpointSHA256": "20e4c5346cdce4c1808e23c7043afe94e2f88c75b770a31523ca3ab6854ca619"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/folder_publish_runtime.cpp",
+      "sha256": "0678d4f34face2c3ee30196431c02526f0673d7df776cb945430615c3ee50d5a",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "0678d4f34face2c3ee30196431c02526f0673d7df776cb945430615c3ee50d5a",
+      "archiveCheckpointSHA256": "0678d4f34face2c3ee30196431c02526f0673d7df776cb945430615c3ee50d5a"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/voice_text.cjs",
+      "sha256": "18e40a3352a8bdcb5cc72e5545152479d11f443afe89b97c8378c560bccd9973",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "b07f2e59374345187dd2aaa489cbf089be47a6dda95d75ee05c52c299e7e03f7",
+      "archiveCheckpointSHA256": "18e40a3352a8bdcb5cc72e5545152479d11f443afe89b97c8378c560bccd9973"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/build_api26.py",
+      "sha256": "ddfddc9eb1ebf9b996d35c7ed6cc20a75d599bca8b2237ddd80d9e11fb68c305",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "3e22d0d1d5bc1f14f45de14c7cd091a9ca432d1759833847fe9541adbe8652d5",
+      "archiveCheckpointSHA256": "0aef9a86997979d1a63fa8c3a7ae5e683f6936908b68dfb2509b205d076462ed",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/materials.py",
+      "sha256": "0f3254d796dfdff219c9919802068ffc2f0eaf3ebf87ec948f748a6adcb9d5c7",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "3c2ac248b2e475caa362a6266a323e73d6cf16dca994244c6807bdfcb443c888",
+      "archiveCheckpointSHA256": "3c2ac248b2e475caa362a6266a323e73d6cf16dca994244c6807bdfcb443c888",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/prepare_raw_codec.py",
+      "sha256": "c3604956cbfda21b04f1742565e7fb5483818a80379279c03686e994c97e515c",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "c3604956cbfda21b04f1742565e7fb5483818a80379279c03686e994c97e515c",
+      "archiveCheckpointSHA256": "c3604956cbfda21b04f1742565e7fb5483818a80379279c03686e994c97e515c"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoiceFan.vue",
+      "sha256": "89c6e53702d3bdd11f2a46436d135b034052efc5b42c551bb94ff7c6e98f1d07",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "3e7a3d2f962dd757e52b31d13a5e7e9677f3e7a02f0919e095c833f845c11016",
+      "archiveCheckpointSHA256": "3e7a3d2f962dd757e52b31d13a5e7e9677f3e7a02f0919e095c833f845c11016",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoiceInput.vue",
+      "sha256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
+      "archiveCheckpointSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue",
+      "sha256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "archiveCheckpointSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-files.ts",
+      "sha256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
+      "archiveCheckpointSHA256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-voice-geometry.ts",
+      "sha256": "51909fdf32de1ee8aa55398eff55bb980fe85506fb530abdbceb80f43ffc35be",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "c9f3fcde22cc99c7d7ceb55a6b36bef76158ea34a92299fa3a7f87dd75a8bc42",
+      "archiveCheckpointSHA256": "c9f3fcde22cc99c7d7ceb55a6b36bef76158ea34a92299fa3a7f87dd75a8bc42",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-voice.ts",
+      "sha256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+      "archiveCheckpointSHA256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony.ts",
+      "sha256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
+      "archiveCheckpointSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/lucide.txt",
+      "sha256": "3c57143f22dac950efebf84002e360bba5458c7b90fe583b0667aaaef1a7256e",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "3c57143f22dac950efebf84002e360bba5458c7b90fe583b0667aaaef1a7256e",
+      "archiveCheckpointSHA256": "3c57143f22dac950efebf84002e360bba5458c7b90fe583b0667aaaef1a7256e"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/wavesurfer.txt",
+      "sha256": "0fc992dc27cc34dde78bfeb024b4cadff6320f0dcbee2f1228efaeb533ca1364",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "0fc992dc27cc34dde78bfeb024b4cadff6320f0dcbee2f1228efaeb533ca1364",
+      "archiveCheckpointSHA256": "0fc992dc27cc34dde78bfeb024b4cadff6320f0dcbee2f1228efaeb533ca1364"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/voiceFan.css",
+      "sha256": "3d1ecd4d8d62589d70c3d07ee7d9e3e429c11dc4e715f7af9f72adec2977cae0",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "3d1ecd4d8d62589d70c3d07ee7d9e3e429c11dc4e715f7af9f72adec2977cae0",
+      "archiveCheckpointSHA256": "3d1ecd4d8d62589d70c3d07ee7d9e3e429c11dc4e715f7af9f72adec2977cae0"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/voiceFan.svg",
+      "sha256": "7ceca0d37bef9f6259a202ea5d59cc078d2a8e0e474f810bac7f3f505e83d5ae",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "9f7e5abba5e2337f47a7f8b49041e9fdb570019c0bce89b24d7b003122601e18",
+      "archiveCheckpointSHA256": "9f7e5abba5e2337f47a7f8b49041e9fdb570019c0bce89b24d7b003122601e18",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/package_memoh_web.py",
+      "sha256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "071ddf8f753f9dbe5069768f04dcaaa6cc963ccedc1285196b46a695bfd35639",
+      "archiveCheckpointSHA256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc"
+    },
+    {
+      "path": "mobile/client/tools/artifact_paths.py",
+      "sha256": "1a59aa331ecb394e508cee857998d378b75cdafd13ff9b6d0b1d1abfa07c2424",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "e12864f5ad271bb2199b596ee3afd42248e44a55bd23cb3232e3ae26c3103637",
+      "archiveCheckpointSHA256": "e12864f5ad271bb2199b596ee3afd42248e44a55bd23cb3232e3ae26c3103637",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/validation/harmony/tools/toolchain.py",
+      "sha256": "d74091f36ad273923be81150e7b7202622c0770034323e57901f35f110aeb3bd",
+      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
+      "archiveOriginalSHA256": "2fcede971a66ce782cafd8fd94b2f9273ee0bd7390f8c0d0d7df06852fc1c0d0",
+      "archiveCheckpointSHA256": "f2098cf16e1f7f548c2de35cb089ceed4efd4836e908f438a4d974dd0e7578ca",
+      "preparationChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/memoh_upload_preparation_checks.mjs",
+      "sha256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d",
+      "origin": "Additional source test recovered verbatim from the user-provided 5900 checkpoint; not listed in the old 72-path omission register.",
+      "licenseReview": "Clean user-provided project test under existing repository terms; no new license assignment.",
+      "archiveOriginalSHA256": "d5fdb140d9318a8f6e9bd6dfbb927a56cf7f75902a96410af3f86c32047bfd6f",
+      "archiveCheckpointSHA256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d"
+    },
+    {
+      "path": "mobile/client/tests/stage2/native_voice_result_checks.cjs",
+      "sha256": "ece007ad979abb5df49c6e654330e3dadb973578d77827d7af7a8a28b9adb39f",
+      "origin": "Additional source test recovered verbatim from the user-provided 5900 checkpoint; not listed in the old 72-path omission register.",
+      "licenseReview": "Clean user-provided project test under existing repository terms; no new license assignment.",
+      "archiveOriginalSHA256": "f345735107335e15628363573306c535f8a8fe4e174dde4bc326f8ccaf9c0f04",
+      "archiveCheckpointSHA256": "ece007ad979abb5df49c6e654330e3dadb973578d77827d7af7a8a28b9adb39f"
+    }
+  ],
+  "overlapKeptFromPublicCheckpoint": [
+    {
+      "path": "mobile/client/config/memoh_client.json",
+      "checkpointSHA256": "f9090b005c17e85640e47299e4d983afe7d731bf13bb8b45a0933b30ccc3cf57",
+      "retainedPublicSHA256": "99137240f5107a63328e1f83793b48a2a2cb05b1db84126659f04709b3a2df60",
+      "equal": false
+    },
+    {
+      "path": "mobile/client/config/memoh_runtime.lock.json",
+      "checkpointSHA256": "78fb77eed303915cc17ede4cdf7a259ec414d20aef32a347f0f664f00aa2754b",
+      "retainedPublicSHA256": "181922b065f2375a01b81424017b1b25bcef9903e0782f1484cba8d025bfc798",
+      "equal": false
+    },
+    {
+      "path": "mobile/client/config/memoh_web.lock.json",
+      "checkpointSHA256": "e55fbd22152bc03b962eab2bebb828afb84392060c9598c7ccb7f90aec0dccda",
+      "retainedPublicSHA256": "d92fbc6fd1b2a4d574b0d8ffe27bd5a2b598154fc83ddcc54fe67f90105082f7",
+      "equal": false
+    },
+    {
+      "path": "mobile/client/mobile/client_config.py",
+      "checkpointSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
+      "retainedPublicSHA256": "f2f5df416982d5aebd6051392e64fb5ecba51bb5fff85c00d9c023f1a2391868",
+      "equal": false
+    },
+    {
+      "path": "mobile/client/mobile/prepare_memoh_source.py",
+      "checkpointSHA256": "103fc2500d92ccc233bf6581ba53cd3dfecd1e16113547c1085da9993457a567",
+      "retainedPublicSHA256": "103fc2500d92ccc233bf6581ba53cd3dfecd1e16113547c1085da9993457a567",
+      "equal": true
+    }
+  ],
+  "fullBuildVerified": false,
+  "unverifiedLaterChanges": 19
+}

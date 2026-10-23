@@ -1,0 +1,13 @@
+{
+  "share_files": {
+    "scopes": [
+      { "path": "/el2/base/haps/entry/cache/memoh-downloads", "permission": "r" },
+      { "path": "/el2/base/files/work-exchange", "permission": "r+w" },
+      { "path": "/el2/base/files/matrix-native-media", "permission": "r" },
+      { "path": "/el2/base/haps/entry/files/matrix-native-media", "permission": "r" }
+    ],
+    "sharingOSPath": "/el2/base/files/work-exchange",
+    "sharingOSSubpath": "",
+    "sharingOSPermission": "r+w"
+  }
+}

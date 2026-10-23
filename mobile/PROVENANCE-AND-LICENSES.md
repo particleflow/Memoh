@@ -1,5 +1,14 @@
 # Source and license review
 
+The archive restoration follow-up imports 74 clean user-provided source files
+under the user's explicit publication authorization. This supersedes the
+historical hold decisions below for those exact files. Source origin and both
+archive hashes are recorded per file; later unavailable cloud modifications
+are not inferred. The Memoh-derived builder is not claimed as exclusively
+original. Lucide-derived artwork and WaveSurfer references retain their bundled
+notices, and the existing root LICENSE is unchanged. LibRaw metadata is present;
+its dependency implementation and Huawei SDK/CLT binaries are not vendored.
+
 The per-file register is `SOURCE-PROVENANCE.json`; every listed path is relative
 to this repository. Its hashes describe the imported source, not a release or
 signing record. Cloud additions were checked against development history and

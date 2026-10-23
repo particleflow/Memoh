@@ -1,0 +1,105 @@
+{
+  "version": 1,
+  "api_prefix": "/_synapse/client/nas-assets/v1",
+  "message_property": "cloud.begonia.assets",
+  "asset_states": [
+    "waiting",
+    "syncing",
+    "ready",
+    "failed",
+    "cancelled"
+  ],
+  "supported_mime_types": [
+    "image/png",
+    "image/jpeg",
+    "image/x-adobe-dng",
+    "audio/wav",
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/mp4",
+    "video/mp4",
+    "video/webm",
+    "application/octet-stream"
+  ],
+  "id_format": "32 lowercase hexadecimal characters for asset_id and transfer_id; native Matrix user/room/event IDs remain opaque",
+  "storage_relative_path": "objects/{sha256}.{png|jpg|dng|wav|mp3|ogg|mp4|webm|bin}; audio/mp4 and video/mp4 share the canonical mp4 suffix",
+  "exchange_filename": "{transfer_id}.{png|jpg|dng|wav|mp3|ogg|m4a|mp4|webm|bin}",
+  "reference_text": "[Shared {kind}: asset_id={asset_id}]",
+  "authentication": "native Synapse Matrix Bearer requester; current room membership and authoritative asset-event association",
+  "endpoints": {
+    "PUT /assets/{asset_id}": "Native upload registration: client-chosen 32hex asset_id and {room_id,name,mime_type,size_bytes,sha256,caption?,in_reply_to_event_id?,mentions?,voice_message?}; actual Bearer requester.device_id becomes matrix_device_id, no client device_id accepted. Persist before sending exactly one authoritative native Matrix message with caption/reply/mentions/voice. Same owner/device/normalized payload returns existing Asset; conflicts or unknown unbound message outcome return 409 without message recreation",
+    "PUT /assets/{asset_id}/content": "Native owner and registering Matrix device only; raw original interval with decimal Upload-Offset and exact Content-Length, 1..native_upload_request_max_bytes bytes. The current client submits the whole remaining-file interval. HTTP receives/spools the complete body before asset handling; native_upload_io_max_bytes bounds each storage read/write, not HTTP request size or network-resume granularity. Persist/fsync before KV bytes_received confirmation; replayed confirmed bytes must match and only the unconfirmed suffix may advance. Final exact size/signature/SHA and single-original promotion gate ready; response Upload-Offset is server-confirmed bytes_received. An interrupted unconfirmed HTTP body may require replay of the configured interval",
+    "GET /assets/{asset_id}": "Asset; current room member only, associated original message must remain readable and not redacted. Optional fixed X-Asset-Upload-Protocol=receiver_ranges_v1 requests a transient upload_protocol hint only for the registering owner/device, waiting/syncing native records already bound to the current enabled ReceiverSpace. Recheck root binding and current write authority after the metadata I/O; hint contains kind/session_id/binding/chunk_bytes/task_count, no caller URL, path, source bytes, new message, task or directory. Hints are never persisted in asset KV and do not authorize a later body. Absent opt-in/disabled/legacy/readers/terminal records retain the ordinary Asset response. Unknown protocol or changed binding/capacity fails closed; it never selects legacy as a fallback for a bound receiver record.",
+    "GET /assets/{asset_id}/content": "authenticated original bytes, Content-Length and Range; no permanent chat-media duplicate",
+    "HEAD /assets/{asset_id}/content": "same authenticated ready-original metadata and Range as GET, no body",
+    "GET /assets/{asset_id}/receiver-preflight": "Candidate receiver metadata only: authenticated native owner/registering device/current readable unredacted event; Session-ID must equal the authoritative transfer_id, Content-Range must be one complete static native_upload_io_max_bytes interval (last may be shorter), Upload-Length must match that interval and registered total. Returns asset/transfer/state/range plus X-Receiver-Key and X-Asset-State; never creates a receiver directory, writes bytes, advances offsets, confirms a body or authorizes a future completion. Ready is metadata, not an accepted payload replay. No receiver transport is enabled by this endpoint alone; a later completion must repeat authority/state validation.",
+    "POST /assets/{asset_id}/cancel": "owner can cancel an unready transfer",
+    "GET /ready-events": "authorized ready asset/event references for bot reconciliation; no pixels",
+    "PUT /messages/{message_id}": "One explicit mixed native submission: {room_id,parts:[{body,formatted_body?}|{asset_id,display?:\"file\"}],assets:[{asset_id,...native asset metadata}],mentions?,in_reply_to_event_id?}. Persist all assets and the captured message atomically in existing module KV, create one native Matrix event, bind every asset to that event. Same owner/device/exact payload returns all existing assets; unknown unbound event remains 409 without recreation. Optional display=file changes only the message presentation; original MIME, SHA and object identity are unchanged.",
+    "GET /frontend-body-admit": "Candidate internal full-ingress capacity check, not business authorization: no body, fixed X-Frontend-Generation and gateway-derived X-Frontend-Body-Length. Only a configured dedicated private kernel-limited tmpfs identical to the stock SDK tempdir is accepted; stable root identity/mount/capacity and current free space include held unlinked files. Returns pass/busy in X-Frontend-Pool-State; does not reserve, delete, create tasks or authorize a later asset commit. Public gateway hides this path, actual routes retain Synapse authentication. Default absent/disabled.",
+    "GET /assets/{asset_id}/legacy-admit": "Internal candidate pre-body gate for existing PUT/content + Upload-Offset Tasks; public route hidden. Exact configured generation, native owner/registering Matrix device/current event/membership, authoritative offset/length, shared reservation and kernel-limited SDK body pool. Only legacy_space_binding receipt on existing row: no Task/session/event/offset changes, receiver directory or range negotiation. Receiver-bound assets reject legacy bytes; PUT rechecks after receipt. Physical/whole ingress qualification remains separate."
+  },
+  "asset_fields": [
+    "asset_id",
+    "transfer_id",
+    "user_id",
+    "transport_kind",
+    "matrix_device_id",
+    "room_id",
+    "event_id",
+    "exchange_filename",
+    "name",
+    "mime_type",
+    "size_bytes",
+    "sha256",
+    "state",
+    "bytes_received",
+    "storage_relative_path",
+    "error_code",
+    "caption",
+    "in_reply_to_event_id",
+    "mentions",
+    "voice_message",
+    "message_id"
+  ],
+  "defaults": {
+    "state": "waiting",
+    "event_id": "",
+    "bytes_received": 0,
+    "storage_relative_path": "",
+    "error_code": "",
+    "caption": "",
+    "in_reply_to_event_id": "",
+    "mentions": {}
+  },
+  "invariants": [
+    "One explicit editable mixed message contains all selected text/image/voice/other attachment parts in order; all relevant selected assets must be ready before inference; no model view-count quota",
+    "Synapse module alone owns managed asset state; module-owned storage through public ModuleApi, never private chat-table writes or another asset service",
+    "Native uploads require fsynced server-confirmed segments and exact signature/size/SHA validation before ready; waiting/syncing never trigger inference",
+    "One permanent original by SHA in shared asset storage; exchange copies are removed after successful reconciliation",
+    "New and historical messages carry references only; tools retrieve relevant media on demand",
+    "Native room/event permissions gate both client preview and bot viewing"
+  ],
+  "transport_identity": {
+    "matrix_native": "transport_kind=matrix_native; matrix_device_id comes exclusively from the authenticated Matrix requester; original segments use the existing incoming directory",
+    "registration_payload": "module-owned normalized payload for native registration conflict detection; internal bookkeeping, not a client-controlled field"
+  },
+  "native_upload_recovery": "bytes_received in public ModuleApi KV is the persisted confirmation, never SDK processed. On the next write discard any unconfirmed file tail before appending; missing confirmed bytes fail closed. Promotion after final confirmation can recover from an existing SHA object without creating another original. Cancelled/failed transfers reject upload; redaction and native room/event visibility apply to status, upload and content. A ready retransmission only compares original bytes",
+  "transfer_max_bytes": 536870912,
+  "native_upload_request_max_bytes": 536870912,
+  "native_upload_io_max_bytes": 33554432,
+  "model_max_bytes": 33554432,
+  "voice_message": {
+    "optional": true,
+    "duration_ms": "nonnegative integer from native recorder",
+    "waveform": "native Matrix integer amplitudes, 0..1024",
+    "event_marker": "org.matrix.msc3245.voice",
+    "semantics": "recorded voice is a user message; file-picked audio is an attachment"
+  },
+  "image_send": {
+    "default": "Client chat image: longest edge 2048, JPEG quality 85; PNG retains transparency. Only this encoded file is transmitted and stored under its own size/SHA. No source image is additionally uploaded.",
+    "original": "System PhotoViewPicker isOriginalPhoto=true captures the exact source file instead, preserving its size/SHA. Existing originals remain immutable.",
+    "dng": "Use embedded camera display when available, otherwise mature RAW decoder. Default sends a normal encoded photo; original selection sends DNG."
+  },
+  "message_layout_property": "cloud.begonia.layout"
+}

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "status": "REQUIRED_NOT_CURRENTLY_INTEGRATED",
+  "scope": "Strict same-App file exchange requirements and platform facts. Current implementation and acceptance are recorded in docs/CURRENT_STAGE.md; historical source-bound qualification does not qualify the current Memoh client.",
+  "platform_fact": "Official API26 select-user-file guide explicitly supports Phone DocumentSelectMode.FOLDER from26.0.0. MIXED and authMode retain other device restrictions; old Phone unsupported claims do not apply wholesale",
+  "data_cost_boundary": "Dedicated DOWNLOAD exchange directory is system-visible and writable by normal file operations; not a private vault. Only exchange content goes there; credentials, ledgers, drafts, caches remain private. Existing owned roots/originals and old receipts/leases remain protected. New final target is visible while incomplete; exclusive create never overwrites an existing filename, and uncertain ownership never authorizes deletion.",
+  "requirements": {
+    "selection": "Use the exact system-returned directory grant and stable root identity. No guessed parent path, fabricated document URI or arbitrary Web-provided filesystem path.",
+    "source": "Read only authorized regular local children through a pinned root and opened descriptor. Recheck named/opened identity and source metadata across asynchronous copying; propagate provider and permission failures.",
+    "background": "Background and cross-process transfers, process-death recovery and reopening remain required. A foreground-only upload/download is not a replacement or completed qualification.",
+    "destination": "Exclusive creation must not overwrite an existing file. Persist creating intent and exact target identity before continuing; an uncertain create does not authorize adopting or deleting an existing target.",
+    "resume": "Resume only the same owned root and target after identity, size and prefix validation. Full original size/SHA, current authorization, durable completion receipt and active-lease checks precede exact cache retirement.",
+    "protection": "Preserve originals, drafts, existing grants, unknown or in-flight outcomes and valid leases. User-visible partial output is not an atomic completion claim.",
+    "stop_cancel": "Stopping discovery, system work or a process does not prove cancellation or completion. Reopening must reconcile the same existing identity without duplicating an unknown operation.",
+    "album_boundary": "File exchange is distinct from corresponding phone/NAS album convergence; paired album requirements remain in contracts/album_sync.json."
+  }
+}

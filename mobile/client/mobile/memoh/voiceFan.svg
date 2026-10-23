@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-244 -244 488 488">
+  <title>Voice fan — microphone at 0,0</title>
+  <desc>Editable material, action regions and layout anchors. Color comes exclusively from ui_theme.json. The component renders these paths directly.</desc>
+  <metadata id="voice-geometry">{"center":[0,0],"outerRadius":244,"innerRadius":90,"microphoneRadius":22,"leftAngle":-98,"splitAngle":-55,"rightAngle":-7,"baselineY":-26,"innerRightAngle":-16.791447114588692,"editorInset":12,"editorRadius":36,"editorLeft":30,"editorWidth":364,"editorHeight":48}</metadata>
+  <defs>
+    <!-- Lucide 0.552.0 send/file-text presets, ISC license shipped with the app. -->
+    <g id="__id__-send" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z" />
+      <path d="m21.854 2.147-10.94 10.939" />
+    </g>
+    <g id="__id__-text" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" />
+      <path d="M14 2v5a1 1 0 0 0 1 1h5" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" />
+    </g>
+    <path id="__id__-outline" data-hit="outline" d="M -21.665771 -3.820260 C -18.5 -21.8 -20 -142 -33.958237 -241.625409 A 244 244 0 0 1 242.181261 -29.736120 C 243 -22 244 -12 244 -2 V -2 Q 244 34 208 34 H 54 C 26 34 18.445 19.087 3.820260 21.665771 A 22 22 0 0 1 -21.665771 -3.820260 Z" />
+    <path id="__id__-region-send" data-hit="send" d="M -12.525579 -89.124126 L -33.958237 -241.625409 A 244 244 0 0 1 139.952650 -199.873099 L 51.621879 -73.723684 A 90 90 0 0 0 -12.525579 -89.124126 Z" />
+    <path id="__id__-region-text" data-hit="text" d="M 51.621879 -73.723684 L 139.952650 -199.873099 A 244 244 0 0 1 242.181261 -29.736120 Q 244 -26 238 -26 L 86.162637 -26.000000 A 90 90 0 0 0 51.621879 -73.723684 Z" />
+    <clipPath id="__id__-clip-send"><use href="#__id__-region-send" /></clipPath>
+    <clipPath id="__id__-clip-text"><use href="#__id__-region-text" /></clipPath>
+    <mask id="__id__-mask-send" maskUnits="userSpaceOnUse" x="-244" y="-244" width="488" height="488"><use href="#__id__-region-send" fill="white" filter="url(#__id__-feather)" /></mask>
+    <mask id="__id__-mask-text" maskUnits="userSpaceOnUse" x="-244" y="-244" width="488" height="488"><use href="#__id__-region-text" fill="white" filter="url(#__id__-feather)" /></mask>
+    <clipPath id="__id__-clip"><use href="#__id__-outline" /></clipPath>
+    <clipPath id="__id__-blur-clip" clipPathUnits="objectBoundingBox"><use href="#__id__-outline" transform="translate(.5 .5) scale(.00204918)" /></clipPath>
+    <radialGradient id="__id__-material" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="244">
+      <stop offset="0" stop-color="white" stop-opacity="1" />
+      <stop offset=".55" stop-color="white" stop-opacity="1" /><stop offset=".8" stop-color="white" stop-opacity=".72" />
+      <stop offset="1" stop-color="white" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="__id__-contact" gradientUnits="userSpaceOnUse" x1="18" y1="0" x2="244" y2="0">
+      <stop offset="0" stop-color="white" stop-opacity="1" />
+      <stop offset=".58" stop-color="white" stop-opacity="1" />
+      <stop offset=".86" stop-color="white" stop-opacity=".4" />
+      <stop offset="1" stop-color="white" stop-opacity="0" />
+    </linearGradient>
+    <!-- One surface paint. The collar joins the fan in its opacity field, never as a second color layer. -->
+    <mask id="__id__-surface-mask" maskUnits="userSpaceOnUse" x="-244" y="-244" width="488" height="488" style="mask-type:alpha">
+      <use href="#__id__-outline" fill="url(#__id__-material)" />
+      <circle data-contact="microphone" cx="0" cy="0" r="22" fill="white" />
+      <path data-contact="editor" d="M54 -38 H208 A36 36 0 0 1 244 -2 V-2 A36 36 0 0 1 208 34 H54 A36 36 0 0 1 18 -2 V-2 A36 36 0 0 1 54 -38 Z" fill="url(#__id__-contact)" filter="url(#__id__-contact-feather)" />
+    </mask>
+    <radialGradient id="__id__-selection" cx=".5" cy=".5" r=".5">
+      <stop offset="0" stop-color="var(--ui-accent)" stop-opacity=".38" />
+      <stop offset=".5" stop-color="var(--ui-accent)" stop-opacity=".21" />
+      <stop offset="1" stop-color="var(--ui-accent)" stop-opacity="0" />
+    </radialGradient>
+    <g id="__id__-feedback">
+      <circle class="voice-breath" r="340" fill="url(#__id__-selection)" />
+      <circle class="voice-ripple" r="34" fill="none" stroke="var(--ui-accent)" stroke-width="1.5" filter="url(#__id__-edge)" />
+      <circle class="voice-ripple voice-ripple-late" r="34" fill="none" stroke="var(--ui-accent)" stroke-width="1.5" filter="url(#__id__-edge)" />
+    </g>
+    <filter id="__id__-feather" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter>
+    <filter id="__id__-edge" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.5" /></filter>
+    <filter id="__id__-contact-feather" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="10" /></filter>
+  </defs>
+  <use data-surface="material" href="#__id__-outline" fill="var(--ui-fan-surface)" mask="url(#__id__-surface-mask)" filter="url(#__id__-edge)" />
+  <g clip-path="url(#__id__-clip)">
+    <path d="M -12.525579 -89.124126 A 90 90 0 0 1 86.162637 -26.000000 M 51.621879 -73.723684 L 139.952650 -199.873099" fill="none" stroke="var(--ui-fan-surface)" stroke-opacity=".62" stroke-width="1" />
+  </g>
+  <g data-anchor="send" data-x="41.553275" data-y="-173.081846" />
+  <g data-anchor="text" data-x="156.861616" data-y="-94.251968" />
+  <g data-anchor="indicator" data-x="33.424956" data-y="-39.834311" />
+</svg>
