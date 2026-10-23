@@ -27,8 +27,8 @@ type GetSubagentRunVisibleMessageParams struct {
 	RunID     pgtype.UUID `json:"run_id"`
 }
 
-// Never substitute an earlier assistant/run when the newest message is a tool,
-// oversized or hidden. Only the read projection needs this bounded envelope.
+// Read the latest visible message within this run; hidden messages are filtered.
+// Never substitute content from an earlier run. Bound the projection envelope.
 func (q *Queries) GetSubagentRunVisibleMessage(ctx context.Context, arg GetSubagentRunVisibleMessageParams) ([]byte, error) {
 	row := q.db.QueryRow(ctx, getSubagentRunVisibleMessage, arg.BotID, arg.SessionID, arg.RunID)
 	var content []byte

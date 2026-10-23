@@ -33,8 +33,8 @@ ORDER BY created_at DESC, task_type DESC, task_id DESC
 LIMIT sqlc.arg(page_size)::integer;
 
 -- name: GetSubagentRunVisibleMessage :one
--- Never substitute an earlier assistant/run when the newest message is a tool,
--- oversized or hidden. Only the read projection needs this bounded envelope.
+-- Read the latest visible message within this run; hidden messages are filtered.
+-- Never substitute content from an earlier run. Bound the projection envelope.
 SELECT CASE WHEN octet_length(content::text) <= 1048576 THEN content ELSE 'null'::jsonb END::jsonb AS content
 FROM bot_history_messages
 WHERE team_id=public.memoh_current_team_id()

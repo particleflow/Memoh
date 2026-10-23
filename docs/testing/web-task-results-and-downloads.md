@@ -19,8 +19,10 @@ non-feedback assistant message. Only text parts are projected, at most 16 KiB
 of valid UTF-8, from an envelope bounded at 1 MiB. Reasoning, tool bodies and
 metadata are not exposed. This is not general secret redaction: assistant text
 may itself contain sensitive content and remains behind the existing session
-authorization. Text is rendered literally. A newer tool/non-assistant message
-does not cause fallback to an older assistant message. The view polls persisted
+authorization. Text is rendered literally. Hidden messages are filtered before
+selecting the latest visible message in this run. A visible tool/non-assistant
+message does not cause fallback to an older assistant message; content never
+falls back across runs. The view polls persisted
 output while open; this is neither token streaming nor a full execution log.
 
 Web opts into an optional shared-component download capability. Only a returned
@@ -111,7 +113,7 @@ checkpoints; it was not rerun or relabeled as a pass here.
 | `go build -ldflags='-s -w' -o /tmp/web-management-checks/results-server-final ./cmd/agent` | 0 | [Server build](web-task-results-build-final.log) |
 | sqlc v1.31.1, Swagger and SDK generation | 0; generated files, no hand editing | Generated diff in product commit |
 | `git diff --check` | 0 | No whitespace errors |
-| official `bf0318c5` vs product `internal/agent/runtime`, `internal/agent/contextview`, `packages/runtime` | zero diff | No Agent core change |
+| official `bf0318c5` vs product `internal/agent/runtime`, `internal/contextview`, `packages/runtime` | zero diff | No Agent core change |
 
 The new PG test uses an explicit test DSN, requires an already migrated schema
 173+, and rolls back its entire synthetic fixture transaction. It tests own-run
