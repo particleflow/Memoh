@@ -1,0 +1,40 @@
+{
+  "base": "dfc7cf5104c382ecc622061ce43c3dcd733b7998",
+  "checkpoints": [
+    {
+      "source": "PR69",
+      "source_sha": "3ec5d309a8c8e6dd8917fd4599d6d526d397037d",
+      "merge": "1e725692ea898bcedb524a57a80b1e2e4eafe938",
+      "tree": "fc10b3ba871037d0b6c2e30a9b91d9a3bed9099f",
+      "conflicts": []
+    },
+    {
+      "source": "PR71",
+      "source_sha": "91149ad7ab5c0d24a57f10e7d9ff1df4b71cf51c",
+      "merge": "de6b554e7348bff0a8cb306bea86bc3bc4dd946a",
+      "tree": "c0ae0e509d04d0cfbb388861c654b0f76623e41e",
+      "conflicts": []
+    },
+    {
+      "source": "PR70",
+      "source_sha": "6ace867cd87936347ea8f65f007030fdd6965249",
+      "merge": "0236d3ab868ba9562e4ea9d6bb571c02bfaa2d6a",
+      "tree": "3872974704e3f70921155a0d19e5bbe7ddf26b7f",
+      "conflicts": []
+    },
+    {
+      "source": "PR72 plus wording",
+      "source_sha": "6ccbafa225d7d2988f68b40152bacced13e21785",
+      "merge": "0c54f98f2462d214de40d465b1abb7f3083bdb02",
+      "tree": "0d8d308844aefc334abcf036b78945d7ee750200",
+      "conflicts": []
+    },
+    {
+      "source": "PR73",
+      "source_sha": "24ee5414b4d277e1462212655d6c2655ee36083e",
+      "merge": "3ce1f27cb4ea5c5c1be3be92245ef4008625b518",
+      "tree": "9c913cf6406bc17d623526e834f0442a841fae13",
+      "conflicts": []
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "candidate": "3ce1f27cb4ea5c5c1be3be92245ef4008625b518",
+  "copy_policy": "Exact selected cloud-only synthetic outputs and executed observer script; no path normalization or hidden output decoding. Private server logs/config/token omitted.",
+  "files": [
+    {
+      "path": "unified-management-checkpoints.json",
+      "bytes": 1293,
+      "sha256": "9f0f4c27cbb39449d84ce7ad424ef551b5960bbb906434c482f4ec25747ed3c9"
+    },
+    {
+      "path": "unified-management-source-audit.json",
+      "bytes": 1208,
+      "sha256": "a893bcedea7aa239118216c62c4c5c91507668d374018ab67c7da6d27f47e629"
+    },
+    {
+      "path": "unified-management-runtime-reuse.json",
+      "bytes": 492,
+      "sha256": "b38458105c45983381cb0fb2be4c0a5d5b3da0791db2a3a6f16f2c58ad86fb61"
+    },
+    {
+      "path": "unified-management-api-base.log",
+      "bytes": 3571,
+      "sha256": "9618b1119075fca3094944ffef9c5f6d58cb4c60ad80508dd547d08c76b649d6"
+    },
+    {
+      "path": "unified-management-child-pg.log",
+      "bytes": 181,
+      "sha256": "069dcbc6da2560450c735be4144e180017c5a316f6990f2f09b3b2b76e484a9b"
+    },
+    {
+      "path": "unified-management-task-http.log",
+      "bytes": 1615,
+      "sha256": "68fb741b3bb97a1027d3c359bcaac83f149a67eb6f5da33065b9b5f5a66e6fc3"
+    },
+    {
+      "path": "unified-management-db-compile.log",
+      "bytes": 68,
+      "sha256": "40ec283b69736887f9585254b307843dc1bdf8140041f90c089fd4b0005feba0"
+    },
+    {
+      "path": "unified-management-web-typecheck.log",
+      "bytes": 100,
+      "sha256": "2825b2d730754d45b501c4f141702e8a35d722710342ff383286d8cd317af729"
+    },
+    {
+      "path": "unified-management-sdk-typecheck.log",
+      "bytes": 96,
+      "sha256": "6f2a9a3ae6dee0b3e1a59a2954340e4df29c85dc1666ae226ddcbf102050a73c"
+    },
+    {
+      "path": "unified-management-observe.log",
+      "bytes": 88,
+      "sha256": "abbdd68d9947b66cd1137833608c721ddf94ea315b420154eb58bc0ebf5b05fe"
+    },
+    {
+      "path": "unified-management-browser-proof.json",
+      "bytes": 5702,
+      "sha256": "6962575514c5689999328bf1fd837762a6f79e63a1d6f6c33b9efa8f61eb07e6"
+    },
+    {
+      "path": "unified-management-observe.cjs",
+      "bytes": 3641,
+      "sha256": "ab90de3edc43d8e38f10e5f8220777b64202c44812b283ef974a2b277447703b"
+    },
+    {
+      "path": "unified-management-download.png",
+      "bytes": 102892,
+      "sha256": "d38391c6d26be9d01ed72766649793a47b611187268906db8dec342d180ffe83"
+    },
+    {
+      "path": "unified-management-child-dark-zh.png",
+      "bytes": 45722,
+      "sha256": "bbca722155467dcf22ff8e9ebb974aa240b16a97acba665c40304d74509fd40e"
+    }
+  ]
+}
