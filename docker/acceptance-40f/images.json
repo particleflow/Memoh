@@ -1,0 +1,9 @@
+{
+  "revision": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+  "build_run": "https://github.com/particleflow/Memoh/actions/runs/39960411440",
+  "platforms": ["linux/amd64", "linux/arm64"],
+  "server": "ghcr.io/particleflow/server@sha256:88833a498d9ddb11c001ade9922d1c7e4846b042a160b699996082460776c937",
+  "web": "ghcr.io/particleflow/web@sha256:dccb0f1da7b4d24240fec929c0e6cdb32d81c051abd18c3f011cee3c8b08e27c",
+  "workspace": "ghcr.io/particleflow/workspace@sha256:434dbc42eb7e41c944c1d49f0156df67a63c0acb9dd4db8fd4e24c150230f2bd",
+  "workspace_import_tag": "ghcr.io/particleflow/workspace:sha-40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8"
+}

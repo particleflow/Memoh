@@ -1,0 +1,78 @@
+# This is a template, not runnable credentials. Memoh does NOT expand ${...}.
+# Fill in a private copy, using TOML-escaped values; never commit that copy.
+[log]
+level = "info"
+format = "json"
+
+[server]
+addr = ":8080"
+rpc_listen_addr = ":9090"
+
+[channel]
+addr = ":8081"
+rpc_listen_addr = ":9091"
+
+[internal_rpc]
+server_target = "server:9090"
+channel_target = "channel:9091"
+shared_secret = "REPLACE_WITH_ACCEPTANCE_ONLY_RPC_SECRET"
+
+[admin]
+username = "acceptance"
+password = "REPLACE_WITH_ACCEPTANCE_ONLY_ADMIN_PASSWORD"
+email = "acceptance@example.invalid"
+
+[auth]
+jwt_secret = "REPLACE_WITH_ACCEPTANCE_ONLY_JWT_SECRET"
+jwt_expires_in = "2h"
+agent_credentials_encryption_key = "REPLACE_WITH_ACCEPTANCE_ONLY_BASE64_32_BYTE_KEY"
+
+[database]
+driver = "postgres"
+
+[postgres]
+host = "postgres"
+port = 5432
+user = "acceptance"
+password = "REPLACE_WITH_ACCEPTANCE_ONLY_PG_PASSWORD"
+database = "acceptance"
+sslmode = "disable"
+
+[pgvector]
+enabled = false
+
+[files]
+originals_root = "/opt/memoh/originals"
+max_upload_bytes = 1048576
+
+[container]
+backend = "containerd"
+# Imported from the exact cached digest in images.json, under this fixed tag.
+# The tag is local to the isolated containerd store; no registry lookup occurs.
+default_image = "ghcr.io/particleflow/workspace:sha-40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8"
+image_pull_policy = "never"
+snapshotter = "overlayfs"
+data_root = "/opt/memoh/data"
+bridge_path = "/opt/memoh/runtime/bridge"
+
+[containerd]
+socket_path = "/run/containerd/containerd.sock"
+namespace = "acceptance-40f"
+
+[registry]
+providers_dir = "/app/conf/providers"
+
+[workspace_dependencies]
+offline = true
+
+[webhook_tunnel]
+mode = "disabled"
+
+[connect_it]
+base_url = ""
+api_token = ""
+
+[session_runtime]
+backend = "memory"
+cluster = false
+# Single Server only. This is not a Redis/restart recovery acceptance fixture.
