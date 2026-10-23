@@ -1,6 +1,6 @@
 {
   "candidate": "3ce1f27cb4ea5c5c1be3be92245ef4008625b518",
-  "copy_policy": "Exact selected cloud-only synthetic outputs and executed observer script; no path normalization or hidden output decoding. Private server logs/config/token omitted.",
+  "copy_policy": "Selected cloud-only synthetic outputs remain exact. The observer script has a later import-only lint correction; its entry retains the original executed revision and hash. Private server logs/config/token omitted.",
   "files": [
     {
       "path": "unified-management-checkpoints.json",
@@ -59,8 +59,12 @@
     },
     {
       "path": "unified-management-observe.cjs",
-      "bytes": 3641,
-      "sha256": "ab90de3edc43d8e38f10e5f8220777b64202c44812b283ef974a2b277447703b"
+      "bytes": 3694,
+      "sha256": "5d440a5a9eb2391a6f5ec2b6201aee93c402dadc7bd1e33c7044fe5824bcb790",
+      "original_executed_commit": "8c358cac27922f122315ac9db62d52cc100c8a2a",
+      "original_executed_sha256": "ab90de3edc43d8e38f10e5f8220777b64202c44812b283ef974a2b277447703b",
+      "original_executed_bytes": 3641,
+      "form": "Import-only lint correction; observation assertions unchanged. Original executed source remains at the fixed commit above."
     },
     {
       "path": "unified-management-download.png",

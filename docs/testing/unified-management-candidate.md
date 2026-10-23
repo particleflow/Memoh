@@ -89,8 +89,10 @@ there were no page errors. No model process was started or task reissued. The
 source task was created by a synthetic HTTP model during #72 acceptance, not a
 real paid model or Windows Agent.
 
-The [exact executed observer script](unified-management-observe.cjs) is included
-for review. It expects the existing isolated fixture's state JSON and token file
+The [observer script](unified-management-observe.cjs) is included for review.
+The original executed version remains at commit `8c358cac`; a subsequent lint
+correction changes only module imports. The manifest preserves both versions
+and does not relabel the original output as a later execution. It expects the existing isolated fixture's state JSON and token file
 in `/tmp/web-management-checks`, plus the installed Playwright/Chromium paths.
 Those private input files are not published. It performs reads/downloads only;
 do not recreate or replay the business task to run it. It is a cloud verification

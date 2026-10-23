@@ -147,3 +147,12 @@ The product commit also has a verified bundle there.
   No production invocation, merge, promotion or deployment was performed.
 - Remote Actions were not dispatched or re-enabled; local passes are not remote
   CI results. Human QA is not claimed.
+
+## Later observer import correction
+
+The two published `.cjs` browser scripts use dynamic imports after the unified
+candidate lint check. The original executed versions and their business
+observations remain at commit `8c358cac27922f122315ac9db62d52cc100c8a2a`.
+Only imports changed, including removal of an unused child-process import.
+The historical unknown-state and delivery fault-injection flows were not rerun
+for this correction; no old log or screenshot is presented as a new run.

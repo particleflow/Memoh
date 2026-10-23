@@ -1,7 +1,7 @@
-const fs=require('node:fs'),assert=require('node:assert/strict'),cp=require('node:child_process');const {chromium}=require('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');const root='/tmp/web-management-checks',s=JSON.parse(fs.readFileSync(root+'/business-state.json','utf8'));
+(async()=>{const [{default:fs},{default:assert},{default:cp},{chromium}]=await Promise.all([import('node:fs'),import('node:assert/strict'),import('node:child_process'),import('/opt/codex/runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright/index.mjs')]);const root='/tmp/web-management-checks',s=JSON.parse(fs.readFileSync(root+'/business-state.json','utf8'));
 function sql(q){return cp.execFileSync('docker',['exec','memoh-dev-postgres','psql','-U','memoh','-d','integration_web_types','-At','-v','ON_ERROR_STOP=1','-c',q],{encoding:'utf8'}).trim()}
 function runs(){return JSON.parse(sql(`SELECT coalesce(json_agg(json_build_object('id',run_id,'state',state) ORDER BY run_id),'[]') FROM session_runs WHERE session_id IN ('${s.session}','${s.delegation.target_session_id}');`))}
-(async()=>{const before=runs(),calls=JSON.parse(fs.readFileSync(root+'/model-calls.json','utf8')).length;assert(before.every(x=>x.state==='completed'));
+const before=runs(),calls=JSON.parse(fs.readFileSync(root+'/model-calls.json','utf8')).length;assert(before.every(x=>x.state==='completed'));
 // Explicit isolated lost-ack fault injection. The real completed task/result and
 // durable delivery invocation remain unchanged; this is not another task submit.
 const changed=sql(`UPDATE bot_delegations SET delivery_state='unknown',revision=revision+1 WHERE id='${s.delegation.delegation_id}' AND state='completed' AND delivery_state='accepted' RETURNING id;`);assert(changed.includes(s.delegation.delegation_id));

@@ -1,0 +1,8 @@
+{
+  "base_commit": "8c358cac27922f122315ac9db62d52cc100c8a2a",
+  "working_diff_sha256": "d04356299d4736fe621e7999ef12c30c1ec921716062483db8bf75c604a7af70",
+  "binary_sha256": "8f002cbf1f135d71d2ee0f2f7d2ba499211a4c924fd9f713ecd03bf634dc4802",
+  "health_head": 200,
+  "active_runs_before_restart": 0,
+  "business_resubmissions": 0
+}

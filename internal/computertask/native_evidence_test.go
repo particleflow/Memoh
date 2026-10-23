@@ -78,6 +78,7 @@ func (a *evidenceAssets) Ingest(_ context.Context, in media.IngestInput) (media.
 	}
 	return media.Asset{BotID: in.BotID, ContentHash: hash}, nil
 }
+
 func (a *evidenceAssets) Open(_ context.Context, bot, hash string) (io.ReadCloser, media.Asset, error) {
 	a.opens++
 	data, ok := a.data[hash]
@@ -92,6 +93,7 @@ func (a *evidenceAssets) Open(_ context.Context, bot, hash string) (io.ReadClose
 	}
 	return io.NopCloser(strings.NewReader(data)), media.Asset{BotID: bot, ContentHash: hash}, nil
 }
+
 func evidenceFixture(t *testing.T) (*Source, *fixtureStore, *evidenceTransport, *evidenceAssets, Result) {
 	t.Helper()
 	source, store, base, initial := followupFixture(t, true)
@@ -102,6 +104,7 @@ func evidenceFixture(t *testing.T) (*Source, *fixtureStore, *evidenceTransport, 
 	source.service.assets = a
 	return source, store, f, a, initial
 }
+
 func storedEvidence(t *testing.T, store *fixtureStore, id string) Details {
 	t.Helper()
 	store.mu.Lock()
@@ -112,6 +115,7 @@ func storedEvidence(t *testing.T, store *fixtureStore, id string) Details {
 	}
 	return d
 }
+
 func assertSampleOnly(t *testing.T, r Result) {
 	t.Helper()
 	if r.State != "unknown" || r.ProcessStopped || r.Observation == nil || r.Observation.TaskSuccessVerified {

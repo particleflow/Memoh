@@ -138,7 +138,7 @@ func nativeEvidencePage(ledger *NativeEvidenceLedger, offset int) *NativeEvidenc
 		out.Observations = append(out.Observations, NativeObservationSummary{ID: r.ID, Origin: r.Origin, ReadStartedAt: r.ReadStartedAt, FirstObservedAt: r.FirstObservedAt, RecordedAt: r.RecordedAt, Status: o.Status, CompletionSeq: o.CompletionSeq, Starting: o.Starting, InteractiveReady: o.InteractiveReady, Truncated: o.Truncated, OutputFidelity: o.OutputFidelity, SessionRelation: o.SessionRelation, SessionObserved: r.Session.Valid(), Inputs: r.Inputs, Association: "sample_only", ResultOwnership: "unknown"})
 	}
 	for _, e := range ledger.Exports {
-		if e.ObservationID != selected && !(offset == 0 && e.ObservationID == "") {
+		if e.ObservationID != selected && (offset != 0 || e.ObservationID != "") {
 			continue
 		}
 		out.Exports = append(out.Exports, NativeExportSummary{NativeExportRecord: e, Availability: "not_rechecked", ResultOwnership: "unknown"})

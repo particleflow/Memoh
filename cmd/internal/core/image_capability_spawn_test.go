@@ -114,7 +114,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 				}
 				if r.URL.Path != "/v1/chat/completions" {
 					t.Errorf("unexpected synthetic endpoint %s", r.URL.Path)
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 					return
 				}
 				var req map[string]any

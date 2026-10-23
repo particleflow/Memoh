@@ -69,11 +69,13 @@ func New(fallback tools.ToolProvider, settingsSvc *settings.Service, modelsSvc *
 		if !model.Enable || !provider.Enable || !model.HasCompatibility(models.CompatImageOutput) {
 			return selection{}, true, errors.New("configured image capability is unavailable")
 		}
-		return selection{config: cfg, baseURL: providers.ProviderConfigString(provider, "base_url"), model: model.ModelID,
+		return selection{
+			config: cfg, baseURL: providers.ProviderConfigString(provider, "base_url"), model: model.ModelID,
 			credentials: func(ctx context.Context) (string, error) {
 				credentials, err := providers.NewService(nil, queries, "").ResolveModelCredentials(ctx, provider)
 				return credentials.APIKey, err
-			}}, true, nil
+			},
+		}, true, nil
 	}
 	return p
 }
@@ -222,7 +224,7 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 	if err != nil {
 		return nil, errors.New("image provider authorization is unavailable")
 	}
-	if err := exec.Context.Err(); err != nil {
+	if err := exec.Err(); err != nil {
 		return nil, errors.New("image request was canceled before dispatch")
 	}
 	if err := p.checkAccess(exec.Context, session); err != nil {
@@ -243,8 +245,10 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 	}
 	result := map[string]any{"state": "completed", "content_hash": asset.ContentHash, "media_type": asset.Mime, "size_bytes": asset.SizeBytes, "tool_call_id": exec.ToolCallID}
 	if session.CanUseLocalMessagingShortcut() {
-		session.Emitter(tools.ToolStreamEvent{Type: tools.StreamEventAttachment, ToolCallID: exec.ToolCallID,
-			Attachments: []tools.Attachment{{Type: "image", ContentHash: asset.ContentHash, Mime: asset.Mime, Size: asset.SizeBytes, Name: "image"}}})
+		session.Emitter(tools.ToolStreamEvent{
+			Type: tools.StreamEventAttachment, ToolCallID: exec.ToolCallID,
+			Attachments: []tools.Attachment{{Type: "image", ContentHash: asset.ContentHash, Mime: asset.Mime, Size: asset.SizeBytes, Name: "image"}},
+		})
 		result["delivered"] = "current_conversation"
 	}
 	return result, nil

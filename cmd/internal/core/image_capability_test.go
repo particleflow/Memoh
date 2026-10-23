@@ -40,9 +40,9 @@ func TestImageCapabilityUsesCurrentBotAndSessionAuthority(t *testing.T) {
 	}
 	p.allowed = true
 	for _, alter := range []func(*tools.SessionContext){func(s *tools.SessionContext) { s.BotID = "other" }, func(s *tools.SessionContext) { s.UserID = "other" }, func(s *tools.SessionContext) { s.SessionID = "other" }} {
-		copy := session
-		alter(&copy)
-		if authorize(t.Context(), copy) == nil {
+		changed := session
+		alter(&changed)
+		if authorize(t.Context(), changed) == nil {
 			t.Fatal("identity mismatch accepted")
 		}
 	}

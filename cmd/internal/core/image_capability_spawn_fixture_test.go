@@ -62,21 +62,25 @@ func (q *imageSpawnQueries) GetSettingsByBotID(_ context.Context, id pgtype.UUID
 	}
 	return sqlc.GetSettingsByBotIDRow{ImageModelID: q.model.ID, ChatModelID: q.model.ID}, nil
 }
+
 func (q *imageSpawnQueries) GetModelByID(_ context.Context, id pgtype.UUID) (sqlc.Model, error) {
 	if id != q.model.ID {
 		return sqlc.Model{}, pgx.ErrNoRows
 	}
 	return q.model, nil
 }
+
 func (q *imageSpawnQueries) GetProviderByID(_ context.Context, id pgtype.UUID) (sqlc.Provider, error) {
 	if id != q.provider.ID {
 		return sqlc.Provider{}, pgx.ErrNoRows
 	}
 	return q.provider, nil
 }
+
 func (q *imageSpawnQueries) ListEnabledModelsByType(context.Context, string) ([]sqlc.Model, error) {
 	return []sqlc.Model{q.model}, nil
 }
+
 func (q *imageSpawnQueries) GetSessionByID(_ context.Context, id pgtype.UUID) (sqlc.BotSession, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -86,6 +90,7 @@ func (q *imageSpawnQueries) GetSessionByID(_ context.Context, id pgtype.UUID) (s
 	}
 	return row, nil
 }
+
 func (q *imageSpawnQueries) CreateSession(_ context.Context, in sqlc.CreateSessionParams) (sqlc.BotSession, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -93,6 +98,7 @@ func (q *imageSpawnQueries) CreateSession(_ context.Context, in sqlc.CreateSessi
 	q.sessions[row.ID.String()] = row
 	return row, nil
 }
+
 func (q *imageSpawnQueries) CreateSubagentConfig(_ context.Context, in sqlc.CreateSubagentConfigParams) (sqlc.SubagentConfig, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -100,6 +106,7 @@ func (q *imageSpawnQueries) CreateSubagentConfig(_ context.Context, in sqlc.Crea
 	q.configs[in.SessionID.String()] = row
 	return row, nil
 }
+
 func (q *imageSpawnQueries) GetSubagentConfig(_ context.Context, id pgtype.UUID) (sqlc.SubagentConfig, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -109,6 +116,7 @@ func (q *imageSpawnQueries) GetSubagentConfig(_ context.Context, id pgtype.UUID)
 	}
 	return row, nil
 }
+
 func (q *imageSpawnQueries) ListSubagentSessionsByParent(_ context.Context, id pgtype.UUID) ([]sqlc.BotSession, error) {
 	q.mu.Lock()
 	defer q.mu.Unlock()
@@ -120,9 +128,11 @@ func (q *imageSpawnQueries) ListSubagentSessionsByParent(_ context.Context, id p
 	}
 	return out, nil
 }
+
 func (*imageSpawnQueries) CountMessagesBySession(context.Context, pgtype.UUID) (int64, error) {
 	return 0, nil
 }
+
 func (q *imageSpawnQueries) GetBotByID(ctx context.Context, id pgtype.UUID) (sqlc.GetBotByIDRow, error) {
 	if id.String() != imageSpawnBot {
 		return sqlc.GetBotByIDRow{}, pgx.ErrNoRows
@@ -138,6 +148,7 @@ func (q *imageSpawnQueries) GetBotByID(ctx context.Context, id pgtype.UUID) (sql
 	}
 	return sqlc.GetBotByIDRow{ID: id, OwnerUserID: imageSpawnUUID(owner), Name: "synthetic-image-bot", IsActive: true, Metadata: []byte(`{}`)}, nil
 }
+
 func (*imageSpawnQueries) ListBotUserGrantsForUser(context.Context, sqlc.ListBotUserGrantsForUserParams) ([]sqlc.ListBotUserGrantsForUserRow, error) {
 	return nil, nil
 }
@@ -169,6 +180,7 @@ func (m *imageSpawnMessages) Persist(ctx context.Context, in messagepkg.PersistI
 	m.rows = append(m.rows, row)
 	return row, nil
 }
+
 func (m *imageSpawnMessages) ListBySession(_ context.Context, id string) ([]messagepkg.Message, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -180,6 +192,7 @@ func (m *imageSpawnMessages) ListBySession(_ context.Context, id string) ([]mess
 	}
 	return out, nil
 }
+
 func (m *imageSpawnMessages) PersistAgentStep(ctx context.Context, step messagepkg.AgentStep) ([]messagepkg.Message, error) {
 	var out []messagepkg.Message
 	for _, in := range step.Messages {
@@ -208,6 +221,7 @@ func (*imageSpawnSender) ParseChannelType(raw string) (messaging.Platform, error
 	}
 	return messaging.Platform(raw), nil
 }
+
 func (s *imageSpawnSender) Send(ctx context.Context, bot string, _ messaging.Platform, req messaging.SendRequest) error {
 	if bot != imageSpawnBot || len(req.Message.Attachments) != 1 {
 		return errors.New("unexpected synthetic delivery")
@@ -217,8 +231,8 @@ func (s *imageSpawnSender) Send(ctx context.Context, bot string, _ messaging.Pla
 	if err != nil {
 		return err
 	}
-	defer r.Close()
 	s.bytes, err = io.ReadAll(r)
+	err = errors.Join(err, r.Close())
 	if err == nil {
 		s.calls.Add(1)
 	}

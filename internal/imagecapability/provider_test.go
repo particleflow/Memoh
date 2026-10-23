@@ -116,7 +116,7 @@ func TestGenerateBytesAndAttachment(t *testing.T) {
 			var requests atomic.Int32
 			p, _ := fixture(t, func(w http.ResponseWriter, r *http.Request) {
 				requests.Add(1)
-				if r.Method != "POST" || r.URL.Path != "/v1/images/generations" {
+				if r.Method != http.MethodPost || r.URL.Path != "/v1/images/generations" {
 					t.Error("unexpected protocol")
 				}
 				var body map[string]any
@@ -148,7 +148,11 @@ func TestGenerateBytesAndAttachment(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer rc.Close()
+			defer func() {
+				if cleanupErr := rc.Close(); cleanupErr != nil {
+					t.Error(cleanupErr)
+				}
+			}()
 			got, _ := io.ReadAll(rc)
 			if !bytes.Equal(got, original) || asset.Mime != "image/png" {
 				t.Fatal("original bytes or MIME changed")
@@ -211,13 +215,21 @@ func TestNativeSupervisorAndSubagentImageChain(t *testing.T) {
 						t.Error(err)
 						return
 					}
-					defer r.MultipartForm.RemoveAll()
+					defer func() {
+						if cleanupErr := r.MultipartForm.RemoveAll(); cleanupErr != nil {
+							t.Error(cleanupErr)
+						}
+					}()
 					f, header, err := r.FormFile("image")
 					if err != nil {
 						t.Error(err)
 						return
 					}
-					defer f.Close()
+					defer func() {
+						if cleanupErr := f.Close(); cleanupErr != nil {
+							t.Error(cleanupErr)
+						}
+					}()
 					input, _ := io.ReadAll(f)
 					if !bytes.Equal(input, generated) || header.Header.Get("Content-Type") != "image/png" {
 						t.Error("edit original was changed")
@@ -231,7 +243,7 @@ func TestNativeSupervisorAndSubagentImageChain(t *testing.T) {
 					respondImage(w, edited)
 				default:
 					t.Errorf("unexpected path %s", r.URL.Path)
-					w.WriteHeader(404)
+					w.WriteHeader(http.StatusNotFound)
 				}
 			})
 			a := native.New(native.Deps{})
@@ -254,7 +266,11 @@ func TestNativeSupervisorAndSubagentImageChain(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer rc.Close()
+			defer func() {
+				if cleanupErr := rc.Close(); cleanupErr != nil {
+					t.Error(cleanupErr)
+				}
+			}()
 			data, _ := io.ReadAll(rc)
 			if !bytes.Equal(data, edited) {
 				t.Fatal("edited original changed")
@@ -268,16 +284,16 @@ func TestUnknownNeverAutomaticallyRetries(t *testing.T) {
 	for _, mode := range []string{"429", "500", "redirect", "disconnect", "invalid_base64", "url_only"} {
 		t.Run(mode, func(t *testing.T) {
 			var calls atomic.Int32
-			p, _ := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+			p, _ := fixture(t, func(w http.ResponseWriter, _ *http.Request) {
 				calls.Add(1)
 				switch mode {
 				case "429":
-					w.WriteHeader(429)
+					w.WriteHeader(http.StatusTooManyRequests)
 				case "500":
-					w.WriteHeader(500)
+					w.WriteHeader(http.StatusInternalServerError)
 				case "redirect":
 					w.Header().Set("Location", "/v1/images/generations")
-					w.WriteHeader(307)
+					w.WriteHeader(http.StatusTemporaryRedirect)
 				case "disconnect":
 					conn, _, _ := w.(http.Hijacker).Hijack()
 					_ = conn.Close()
@@ -324,6 +340,7 @@ type failedStorage struct{ storage.Provider }
 func (failedStorage) Put(context.Context, string, io.Reader) error {
 	return errors.New("PRIVATE_STORAGE")
 }
+
 func TestStorageFailureDoesNotRegenerate(t *testing.T) {
 	var calls atomic.Int32
 	data := pngBytes(t, 70)
@@ -333,5 +350,43 @@ func TestStorageFailureDoesNotRegenerate(t *testing.T) {
 	result := call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "generate_image", `{"prompt":"synthetic"}`)
 	if result.IsError || calls.Load() != 1 || !strings.Contains(result.Result.String(), `"storage_state":"unconfirmed"`) || strings.Contains(result.Result.String(), "PRIVATE") {
 		t.Fatal(result.Result.String())
+	}
+}
+
+// Model-controlled text can contain URLs, but only server-managed provider
+// configuration chooses the network destination. Exercise the real HTTP path.
+func TestModelContentDoesNotSelectDestination(t *testing.T) {
+	var destinationCalls, otherCalls atomic.Int32
+	other := httptest.NewServer(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		otherCalls.Add(1)
+	}))
+	t.Cleanup(other.Close)
+	prompt := "Use " + other.URL + "/private?token=synthetic-not-a-credential"
+	p, _ := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+		destinationCalls.Add(1)
+		if r.Method != http.MethodPost || r.URL.Path != "/v1/images/generations" || r.URL.RawQuery != "" {
+			t.Error("model content changed request routing")
+		}
+		data, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		if r.ContentLength != int64(len(data)) {
+			t.Error("request body length changed")
+		}
+		var body request
+		if err := json.Unmarshal(data, &body); err != nil || body.Prompt != prompt {
+			t.Error("model content was not preserved as request data")
+		}
+		respondImage(w, pngBytes(t, 23))
+	})
+	args, err := json.Marshal(request{Prompt: prompt})
+	if err != nil {
+		t.Fatal(err)
+	}
+	result := call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "generate_image", string(args))
+	if result.IsError || !strings.Contains(result.Result.String(), `"state":"completed"`) || destinationCalls.Load() != 1 || otherCalls.Load() != 0 {
+		t.Fatal("configured destination isolation failed", result.Result.String())
 	}
 }

@@ -257,7 +257,7 @@ func emitWaitProgress(sendProgress func(sdk.ToolOutput), payload map[string]any)
 	}
 }
 
-func (p *BackgroundProvider) execGetBackgroundStatus(ctx context.Context, session SessionContext, args taskArgs) (any, error) {
+func (p *BackgroundProvider) execGetBackgroundStatus(_ context.Context, session SessionContext, args taskArgs) (any, error) {
 	taskID := strings.TrimSpace(args.TaskID)
 	if taskID == "" {
 		return nil, errors.New("task_id is required")

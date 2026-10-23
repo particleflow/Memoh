@@ -38,9 +38,11 @@ type catalog struct {
 func (q *catalog) GetSettingsByBotID(context.Context, pgtype.UUID) (sqlc.GetSettingsByBotIDRow, error) {
 	return sqlc.GetSettingsByBotIDRow{ImageModelID: q.model.ID}, q.settingsErr
 }
+
 func (q *catalog) GetModelByID(context.Context, pgtype.UUID) (sqlc.Model, error) {
 	return q.model, q.modelErr
 }
+
 func (q *catalog) GetProviderByID(context.Context, pgtype.UUID) (sqlc.Provider, error) {
 	return q.provider, q.providerErr
 }
@@ -83,7 +85,7 @@ func TestProductionResolverPreservesLegacyDefault(t *testing.T) {
 		q.provider.Config, _ = json.Marshal(cfg)
 	}
 	setConfig(false)
-	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	log := slog.New(slog.DiscardHandler)
 	settingsSvc := settings.NewService(log, q, nil, nil)
 	modelsSvc := models.NewService(log, q)
 	legacy := tools.NewImageGenProvider(log, settingsSvc, modelsSvc, q, p.media)
@@ -162,7 +164,7 @@ func TestLegacyDiscoveryDefersLookupFailuresUntilExecution(t *testing.T) {
 			case "provider_query_failure":
 				q.providerErr = errors.New("synthetic provider query failure")
 			}
-			log := slog.New(slog.NewTextHandler(io.Discard, nil))
+			log := slog.New(slog.DiscardHandler)
 			settingsSvc, modelsSvc := settings.NewService(log, q, nil, nil), models.NewService(log, q)
 			legacy := tools.NewImageGenProvider(log, settingsSvc, modelsSvc, q, p.media)
 			wrapped := New(legacy, settingsSvc, modelsSvc, q, p.media, nil)
@@ -221,7 +223,7 @@ func TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution(t *testing.T) {
 				if initiallyUnavailable {
 					q.providerErr = errors.New("synthetic provider query failure")
 				}
-				log := slog.New(slog.NewTextHandler(io.Discard, nil))
+				log := slog.New(slog.DiscardHandler)
 				settingsSvc, modelsSvc := settings.NewService(log, q, nil, nil), models.NewService(log, q)
 				legacy := tools.NewImageGenProvider(log, settingsSvc, modelsSvc, q, p.media)
 				wrapped := New(legacy, settingsSvc, modelsSvc, q, p.media, nil)
@@ -306,6 +308,7 @@ func (s *observedStorage) Open(ctx context.Context, key string) (io.ReadCloser, 
 	s.opens++
 	return s.Originals.Open(ctx, key)
 }
+
 func (s *observedStorage) ListPrefix(ctx context.Context, key string) ([]string, error) {
 	s.lists++
 	return s.Originals.ListPrefix(ctx, key)
@@ -343,14 +346,18 @@ func TestModelArgumentsCannotChooseProvider(t *testing.T) {
 func TestEditMultipartConfiguredModelAndMask(t *testing.T) {
 	data, mask := pngBytes(t, 21), pngBytes(t, 22)
 	p, _ := fixture(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/v1/images/edits" || r.Method != "POST" {
+		if r.URL.Path != "/v1/images/edits" || r.Method != http.MethodPost {
 			t.Error("wrong edit protocol")
 		}
 		if err := r.ParseMultipartForm(1 << 20); err != nil {
 			t.Error(err)
 			return
 		}
-		defer r.MultipartForm.RemoveAll()
+		defer func() {
+			if cleanupErr := r.MultipartForm.RemoveAll(); cleanupErr != nil {
+				t.Error(cleanupErr)
+			}
+		}()
 		if r.FormValue("model") != "synthetic-selected-image-model" || len(r.MultipartForm.File["image[]"]) != 2 {
 			t.Error("configured multipart fields lost")
 		}
@@ -393,7 +400,7 @@ func TestEditMultipartConfiguredModelAndMask(t *testing.T) {
 
 func TestTimeoutIsUnknownWithoutRetry(t *testing.T) {
 	var calls atomic.Int32
-	p, _ := fixture(t, func(w http.ResponseWriter, r *http.Request) {
+	p, _ := fixture(t, func(_ http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
 		_, _ = io.Copy(io.Discard, r.Body)
 		select {

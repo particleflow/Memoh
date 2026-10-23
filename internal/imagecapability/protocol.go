@@ -86,6 +86,8 @@ func invoke(ctx context.Context, client *http.Client, selected selection, apiKey
 	}
 	oneShot := *client
 	oneShot.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	// #nosec G704 -- The destination comes only from server-managed provider config
+	// validated by parseConfig; tool arguments cannot select it and redirects are disabled.
 	resp, err := oneShot.Do(req)
 	if err != nil {
 		return imageBytes{}, err
