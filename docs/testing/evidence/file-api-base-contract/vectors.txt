@@ -1,0 +1,64 @@
+=== RUN   TestAPIBaseContractVectors
+=== RUN   TestAPIBaseContractVectors/https-root
+=== RUN   TestAPIBaseContractVectors/https-api-prefix
+=== RUN   TestAPIBaseContractVectors/https-nested-prefix
+=== RUN   TestAPIBaseContractVectors/existing-trailing-slash
+=== RUN   TestAPIBaseContractVectors/explicit-port
+=== RUN   TestAPIBaseContractVectors/configured-private-ipv4
+=== RUN   TestAPIBaseContractVectors/configured-private-name
+=== RUN   TestAPIBaseContractVectors/configured-ipv6
+=== RUN   TestAPIBaseContractVectors/configured-ula-ipv6
+=== RUN   TestAPIBaseContractVectors/http
+=== RUN   TestAPIBaseContractVectors/relative
+=== RUN   TestAPIBaseContractVectors/empty-host
+=== RUN   TestAPIBaseContractVectors/userinfo
+=== RUN   TestAPIBaseContractVectors/query
+=== RUN   TestAPIBaseContractVectors/empty-query
+=== RUN   TestAPIBaseContractVectors/fragment
+=== RUN   TestAPIBaseContractVectors/empty-fragment
+=== RUN   TestAPIBaseContractVectors/dot-parent
+=== RUN   TestAPIBaseContractVectors/dot-current
+=== RUN   TestAPIBaseContractVectors/encoded-parent
+=== RUN   TestAPIBaseContractVectors/encoded-separator
+=== RUN   TestAPIBaseContractVectors/double-separator
+=== RUN   TestAPIBaseContractVectors/double-root-separator
+=== RUN   TestAPIBaseContractVectors/backslash
+=== RUN   TestAPIBaseContractVectors/leading-space
+=== RUN   TestAPIBaseContractVectors/path-space
+=== RUN   TestAPIBaseContractVectors/zero-port
+=== RUN   TestAPIBaseContractVectors/overflow-port
+=== RUN   TestAPIBaseContractVectors/empty-port
+=== RUN   TestAPIBaseContractVectors/ipv6-zone
+--- PASS: TestAPIBaseContractVectors (0.01s)
+    --- PASS: TestAPIBaseContractVectors/https-root (0.00s)
+    --- PASS: TestAPIBaseContractVectors/https-api-prefix (0.00s)
+    --- PASS: TestAPIBaseContractVectors/https-nested-prefix (0.00s)
+    --- PASS: TestAPIBaseContractVectors/existing-trailing-slash (0.00s)
+    --- PASS: TestAPIBaseContractVectors/explicit-port (0.00s)
+    --- PASS: TestAPIBaseContractVectors/configured-private-ipv4 (0.00s)
+    --- PASS: TestAPIBaseContractVectors/configured-private-name (0.00s)
+    --- PASS: TestAPIBaseContractVectors/configured-ipv6 (0.00s)
+    --- PASS: TestAPIBaseContractVectors/configured-ula-ipv6 (0.00s)
+    --- PASS: TestAPIBaseContractVectors/http (0.00s)
+    --- PASS: TestAPIBaseContractVectors/relative (0.00s)
+    --- PASS: TestAPIBaseContractVectors/empty-host (0.00s)
+    --- PASS: TestAPIBaseContractVectors/userinfo (0.00s)
+    --- PASS: TestAPIBaseContractVectors/query (0.00s)
+    --- PASS: TestAPIBaseContractVectors/empty-query (0.00s)
+    --- PASS: TestAPIBaseContractVectors/fragment (0.00s)
+    --- PASS: TestAPIBaseContractVectors/empty-fragment (0.00s)
+    --- PASS: TestAPIBaseContractVectors/dot-parent (0.00s)
+    --- PASS: TestAPIBaseContractVectors/dot-current (0.00s)
+    --- PASS: TestAPIBaseContractVectors/encoded-parent (0.00s)
+    --- PASS: TestAPIBaseContractVectors/encoded-separator (0.00s)
+    --- PASS: TestAPIBaseContractVectors/double-separator (0.00s)
+    --- PASS: TestAPIBaseContractVectors/double-root-separator (0.00s)
+    --- PASS: TestAPIBaseContractVectors/backslash (0.00s)
+    --- PASS: TestAPIBaseContractVectors/leading-space (0.00s)
+    --- PASS: TestAPIBaseContractVectors/path-space (0.00s)
+    --- PASS: TestAPIBaseContractVectors/zero-port (0.00s)
+    --- PASS: TestAPIBaseContractVectors/overflow-port (0.00s)
+    --- PASS: TestAPIBaseContractVectors/empty-port (0.00s)
+    --- PASS: TestAPIBaseContractVectors/ipv6-zone (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	1.023s
