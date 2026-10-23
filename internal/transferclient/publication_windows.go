@@ -9,27 +9,14 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"golang.org/x/sys/windows"
 )
-
-const (
-	publicationDirectory    = "publications-v1"
-	publicationReceipts     = 128
-	publicationJournalBytes = 64 << 10
-)
-
-type publicationRecord struct {
-	Version   int       `json:"version"`
-	Reference Reference `json:"reference"`
-	State     string    `json:"state"`
-	FileID    string    `json:"file_id,omitempty"`
-}
 
 // NativePublication owns retained, private NTFS artifacts inside the existing
 // Herdr locator. It is opened/closed per finite invocation, never a service.
@@ -39,11 +26,18 @@ type NativePublication struct {
 	queue     *DiskQueue
 	root      *os.Root
 	guard     *os.File
+	metadata  *publicationMetadata
 	authorize PublicationAuthorization
 	hook      func(string) // Unexported process-crash injection, nil outside tests.
 }
 
 func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*NativePublication, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	return q.openNativePublication(ctx, authorize, false, nil)
+}
+
+func (q *DiskQueue) openNativePublication(ctx context.Context, authorize PublicationAuthorization, maintenance bool, hook func(string)) (*NativePublication, error) {
 	if q == nil || q.root == nil || authorize == nil {
 		return nil, ErrBinding
 	}
@@ -54,7 +48,8 @@ func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*
 	if err != nil {
 		return nil, ErrStore
 	}
-	p := &NativePublication{queue: q, root: root, authorize: authorize}
+	p := &NativePublication{queue: q, root: root, authorize: authorize, hook: hook}
+	p.metadata = &publicationMetadata{root: root, objectBytes: q.limits.Bytes, hook: p.mark}
 	good := false
 	defer func() {
 		if !good {
@@ -80,7 +75,7 @@ func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*
 		Revision string `json:"revision"`
 		Bytes    int64  `json:"bytes"`
 		Receipts int    `json:"receipts"`
-	}{1, identity, q.revision, q.limits.Bytes, publicationReceipts})
+	}{2, identity, q.revision, q.limits.Bytes, publicationReceipts})
 	flags := os.O_RDWR
 	if _, err := root.Lstat("locator"); errors.Is(err, os.ErrNotExist) {
 		dir, err := root.Open(".")
@@ -106,8 +101,17 @@ func (q *DiskQueue) OpenNativePublication(authorize PublicationAuthorization) (*
 		return nil, ErrStore
 	}
 	if len(actual) == 0 && flags&os.O_EXCL != 0 {
+		// Persist the complete empty catalog before accepting locator v2. A
+		// later missing bucket/cache must never look like an unused namespace.
+		if err := p.metadata.initialize(ctx, true); err != nil {
+			return nil, err
+		}
 		if _, err := f.Write(want); err != nil || f.Sync() != nil {
 			return nil, ErrStore
+		}
+	} else if maintenance {
+		if err := p.prepareMigration(f, actual, want); err != nil {
+			return nil, err
 		}
 	} else if !bytes.Equal(actual, want) {
 		return nil, ErrVersion
@@ -139,14 +143,6 @@ func (p *NativePublication) lock() (*os.File, error) {
 	return f, nil
 }
 
-func publicationKey(ref Reference) string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(ref.DeliveryID)))
-}
-
-func validPublicationReference(ref Reference) bool {
-	return validID(ref.DeliveryID) && validID(ref.OperationID) && validID(ref.BotID) && (Spec{SizeBytes: ref.SizeBytes, SHA256: ref.ContentHash, Mime: ref.Mime}).valid()
-}
-
 func (p *NativePublication) check(ctx context.Context, ref Reference) error {
 	if p == nil || p.authorize == nil || ctx == nil || !validPublicationReference(ref) {
 		return ErrBinding
@@ -157,103 +153,17 @@ func (p *NativePublication) check(ctx context.Context, ref Reference) error {
 	return p.authorize(ctx, ref)
 }
 
-func (p *NativePublication) read(name string) (publicationRecord, *os.File, error) {
-	var record publicationRecord
-	if _, err := p.root.Lstat(name); errors.Is(err, os.ErrNotExist) {
-		return record, nil, nil
-	} else if err != nil {
-		return record, nil, ErrStore
-	}
-	f, err := openPrivateFile(p.root, name, os.O_RDWR, 0o600)
-	if err != nil {
-		return record, nil, err
-	}
-	_, err = readJournalFrames(f, publicationJournalBytes, func(body []byte) error {
-		var next publicationRecord
-		dec := json.NewDecoder(bytes.NewReader(body))
-		dec.DisallowUnknownFields()
-		if dec.Decode(&next) != nil || next.Version != 1 || !validPublicationReference(next.Reference) || publicationKey(next.Reference)+".journal" != name || len(next.FileID) > 128 {
-			return ErrStore
-		}
-		if next.State != "prepared" && next.State != "published" && next.State != "fenced" {
-			return ErrStore
-		}
-		if next.State != "fenced" && next.FileID == "" {
-			return ErrStore
-		}
-		if record.Version == 0 {
-			if next.State == "published" {
-				return ErrStore
-			}
-		} else if record.State != "prepared" || next.State == "prepared" || next.Reference != record.Reference || next.FileID != record.FileID {
-			return ErrStore
-		}
-		record = next
-		return nil
-	})
-	if err != nil {
-		_ = f.Close()
-		return record, nil, err
-	}
-	return record, f, nil // Empty/torn first frame has never authorized rename.
+func (p *NativePublication) read(ctx context.Context, name string) (publicationRecord, *os.File, error) {
+	return p.metadata.read(ctx, name)
 }
 
-func (p *NativePublication) save(f *os.File, record publicationRecord) error {
-	body, err := json.Marshal(record)
-	if err != nil {
-		return ErrStore
-	}
-	if err := appendJournalFrame(f, body, publicationJournalBytes); err != nil {
-		return err
-	}
-	return syncQueueDir(p.root)
+func (p *NativePublication) save(ctx context.Context, f *os.File, r publicationRecord) error {
+	return p.metadata.save(ctx, f, r)
 }
 
-func (p *NativePublication) capacity(ref Reference, state string) error {
-	dir, err := p.root.Open(".")
-	if err != nil {
-		return ErrStore
-	}
-	entries, readErr := dir.ReadDir(publicationReceipts*2 + 3)
-	_ = dir.Close()
-	if readErr != nil && !errors.Is(readErr, io.EOF) || len(entries) >= publicationReceipts*2+3 {
-		return ErrCapacity
-	}
-	count, total := 0, int64(0)
-	for _, entry := range entries {
-		if !strings.HasSuffix(entry.Name(), ".journal") {
-			continue
-		}
-		if entry.Name() == publicationKey(ref)+".journal" {
-			continue
-		}
-		r, f, err := p.read(entry.Name())
-		if f != nil {
-			_ = f.Close()
-		}
-		if err != nil || r.Version == 0 {
-			return ErrStore
-		}
-		count++
-		if r.State != "fenced" {
-			if r.Reference.SizeBytes > p.queue.limits.Bytes-total {
-				return ErrCapacity
-			}
-			total += r.Reference.SizeBytes
-		}
-	}
-	if count >= publicationReceipts {
-		return ErrCapacity
-	}
-	if state != "fenced" && ref.SizeBytes > p.queue.limits.Bytes-total {
-		return ErrCapacity
-	}
-	return queueFreeSpace(p.root, publicationJournalBytes) // Rename reuses admitted bytes.
-}
-
-func (p *NativePublication) record(ref Reference, state, fileID string) (publicationRecord, *os.File, error) {
+func (p *NativePublication) record(ctx context.Context, ref Reference, state, fileID string) (publicationRecord, *os.File, error) {
 	key := publicationKey(ref)
-	r, f, err := p.read(key + ".journal")
+	r, f, err := p.read(ctx, key+".journal")
 	if err != nil {
 		return r, nil, err
 	}
@@ -270,20 +180,20 @@ func (p *NativePublication) record(ref Reference, state, fileID string) (publica
 		}
 		return r, nil, ErrPublicationConflict
 	}
-	if err := p.capacity(ref, state); err != nil {
+	if err := p.metadata.reserve(ctx, ref, state); err != nil {
 		if f != nil {
 			_ = f.Close()
 		}
 		return r, nil, err
 	}
 	if f == nil {
-		f, err = openPrivateFile(p.root, key+".journal", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
+		f, err = p.metadata.create(ref)
 	}
 	if err != nil {
 		return r, nil, err
 	}
 	r = publicationRecord{Version: 1, Reference: ref, State: state, FileID: fileID}
-	if err := p.save(f, r); err != nil {
+	if err := p.save(ctx, f, r); err != nil {
 		_ = f.Close()
 		return r, nil, err
 	}
@@ -322,7 +232,7 @@ func (p *NativePublication) Publish(ctx context.Context, ref Reference, reader i
 	if err := source.file.Sync(); err != nil {
 		return "", ErrStore
 	}
-	r, f, err := p.record(ref, "prepared", identity)
+	r, f, err := p.record(ctx, ref, "prepared", identity)
 	if err != nil {
 		return "", err
 	}
@@ -338,7 +248,7 @@ func (p *NativePublication) Publish(ctx context.Context, ref Reference, reader i
 	}
 	if atDestination {
 		if r.State == "prepared" {
-			if err := p.finish(source.file, f, r); err != nil {
+			if err := p.finish(ctx, source.file, f, r); err != nil {
 				return "", err
 			}
 		}
@@ -355,19 +265,19 @@ func (p *NativePublication) Publish(ctx context.Context, ref Reference, reader i
 		return "", err
 	}
 	p.mark("after_rename")
-	if err := p.finish(source.file, f, r); err != nil {
+	if err := p.finish(ctx, source.file, f, r); err != nil {
 		return "", err
 	}
 	p.mark("after_commit")
 	return OutcomeCommitted, nil
 }
 
-func (p *NativePublication) finish(object, journal *os.File, r publicationRecord) error {
+func (p *NativePublication) finish(ctx context.Context, object, journal *os.File, r publicationRecord) error {
 	if object.Chmod(0o400) != nil || syncQueueDir(p.root) != nil || syncQueueDir(p.queue.root) != nil {
 		return ErrStore
 	}
 	r.State = "published"
-	return p.save(journal, r)
+	return p.save(ctx, journal, r)
 }
 
 func (p *NativePublication) object(ctx context.Context, r publicationRecord) (*os.File, error) {
@@ -421,7 +331,7 @@ func (p *NativePublication) Resolve(ctx context.Context, ref Reference, cancel b
 		return "", err
 	}
 	defer unlockClose(lock)
-	r, f, err := p.read(publicationKey(ref) + ".journal")
+	r, f, err := p.read(ctx, publicationKey(ref)+".journal")
 	if err != nil {
 		return "", err
 	}
@@ -438,7 +348,7 @@ func (p *NativePublication) Resolve(ctx context.Context, ref Reference, cancel b
 		if f != nil {
 			_ = f.Close()
 		}
-		_, f, err := p.record(ref, "fenced", "")
+		_, f, err := p.record(ctx, ref, "fenced", "")
 		if f != nil {
 			_ = f.Close()
 		}
@@ -466,7 +376,7 @@ func (p *NativePublication) Resolve(ctx context.Context, ref Reference, cancel b
 			return "", err
 		}
 		if r.State == "prepared" {
-			if err := p.finish(object, f, r); err != nil {
+			if err := p.finish(ctx, object, f, r); err != nil {
 				return "", err
 			}
 		}
@@ -493,7 +403,7 @@ func (p *NativePublication) Resolve(ctx context.Context, ref Reference, cancel b
 		return "", err
 	}
 	r.State = "fenced"
-	if err := p.save(f, r); err != nil {
+	if err := p.save(ctx, f, r); err != nil {
 		return "", err
 	}
 	return OutcomeCanceled, nil
@@ -510,7 +420,7 @@ func (p *NativePublication) OpenPublished(ctx context.Context, ref Reference) (i
 		return nil, err
 	}
 	defer unlockClose(lock)
-	r, f, err := p.read(publicationKey(ref) + ".journal")
+	r, f, err := p.read(ctx, publicationKey(ref)+".journal")
 	if f != nil {
 		_ = f.Close()
 	}
