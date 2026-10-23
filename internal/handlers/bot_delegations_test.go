@@ -249,10 +249,11 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 	if body := call("GET", view.Attachments[0].URL, taskUser, "", 200).Body.String(); body != "synthetic original" {
 		t.Fatal("returned different original")
 	}
-	callRange := func(method, user, value string, status int, contentRange, body string) {
+	callRange := func(method, user, value, ifRange string, status int, contentRange, body string) {
 		t.Helper()
 		req := httptest.NewRequest(method, view.Attachments[0].URL, nil)
 		req.Header.Set("Range", value)
+		req.Header.Set("If-Range", ifRange)
 		if user != "" {
 			token, _, err := auth.GenerateToken(user, "synthetic", time.Minute)
 			if err != nil {
@@ -269,11 +270,13 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 			t.Fatalf("scoped range bytes=%q want=%q", rec.Body.String(), body)
 		}
 	}
-	callRange("GET", taskUser, "bytes=2-6", 206, "bytes 2-6/18", "nthet")
-	callRange("GET", taskUser, "bytes=-4", 206, "bytes 14-17/18", "inal")
-	callRange("GET", taskUser, "bytes=18-", 416, "bytes */18", "")
-	callRange("HEAD", taskUser, "", 200, "", "")
-	callRange("GET", "", "bytes=2-6", 401, "", "")
+	callRange("GET", taskUser, "bytes=2-6", "", 206, "bytes 2-6/18", "nthet")
+	callRange("GET", taskUser, "bytes=-4", "", 206, "bytes 14-17/18", "inal")
+	callRange("GET", taskUser, "bytes=2-6", `"`+delegationHash+`"`, 206, "bytes 2-6/18", "nthet")
+	callRange("GET", taskUser, "bytes=2-6", `"different"`, 200, "", "synthetic original")
+	callRange("GET", taskUser, "bytes=18-", "", 416, "bytes */18", "")
+	callRange("HEAD", taskUser, "", "", 200, "", "")
+	callRange("GET", "", "bytes=2-6", `"`+delegationHash+`"`, 401, "", "")
 	before := f.row.Revision
 	for range 3 {
 		call("GET", base, taskUser, "", 200)
@@ -286,7 +289,7 @@ func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 	call("GET", strings.Replace(detail, taskRoot, taskChild, 1), taskUser, "", 404)
 	call("GET", detail+"/attachments/"+strings.Repeat("b", 64), taskUser, "", 404)
 	f.allowed = false
-	callRange("GET", taskUser, "bytes=2-6", 404, "", "")
+	callRange("GET", taskUser, "bytes=2-6", `"`+delegationHash+`"`, 404, "", "")
 	call("GET", detail, taskUser, "", 404)
 	call("GET", view.Attachments[0].URL, taskUser, "", 404)
 	call("POST", detail+"/delivery", taskUser, "", 404)
