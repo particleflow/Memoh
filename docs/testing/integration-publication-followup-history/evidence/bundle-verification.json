@@ -1,0 +1,37 @@
+{
+  "source_commit": "f679723e2612a486811ac65b41ab0b4339be5b22",
+  "arch": "amd64",
+  "files": [
+    {
+      "name": "README.md",
+      "sha256": "9470e491ab6e139f245c3e13afa5479f80bf5a00a5fcfade9b75edc8b2470cb4"
+    },
+    {
+      "name": "herdr-plugin.toml",
+      "sha256": "f8c61c294eb8e6b27423b82816ccc3dd2ba07f21c73e7c34440071cf3d0a14e9"
+    },
+    {
+      "name": "transfer.example.json",
+      "sha256": "87b63a52b124ef3103ecc232faa8ce9688fe6aa24e851086b6d9e274ecb2b0dd"
+    },
+    {
+      "name": "transferqueue-cli.test.exe",
+      "sha256": "5b7d462e872572e226b763bc6f39e978f5deb43e86f030b747c86c50c771499c"
+    },
+    {
+      "name": "transferqueue.exe",
+      "sha256": "05cf2ce93e92eba4098ad117e9d080a0f35d28f434a65666e793ba2d5c5304c7"
+    },
+    {
+      "name": "transferqueue.test.exe",
+      "sha256": "55b34bb3d7b7ec8d0e1341f4e0ed05418d1a09f6d153bb2392c68d766490473f"
+    },
+    {
+      "name": "verify-fixtures.ps1",
+      "sha256": "5da7e28adac03470cd5adac6c3bd33e85a8121c0ff8761a84dd7e1e9739295a4"
+    }
+  ],
+  "all_sha256_match": true,
+  "pe_files": 3,
+  "execution": "not run on Windows"
+}

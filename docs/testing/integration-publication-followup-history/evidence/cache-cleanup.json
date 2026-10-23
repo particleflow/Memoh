@@ -1,0 +1,16 @@
+{
+  "scope": "two identified generated Go cache files only",
+  "removed": [
+    {
+      "cache_file": "f1f10a36650f41ffed70ad51884ff677abb918e8fdf1f8aca6ca267ab9b0c5a9-d",
+      "bytes": 139707920,
+      "sha256": "f1f10a36650f41ffed70ad51884ff677abb918e8fdf1f8aca6ca267ab9b0c5a9"
+    },
+    {
+      "cache_file": "27cd8b5712ce80eaa5eaf572e8a8f497a04669f77b66b0fa0c6f12260cc5372c-d",
+      "bytes": 181073314,
+      "sha256": "27cd8b5712ce80eaa5eaf572e8a8f497a04669f77b66b0fa0c6f12260cc5372c"
+    }
+  ],
+  "business_data_removed": false
+}
