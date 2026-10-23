@@ -1,0 +1,50 @@
+{
+  "product_head": "ff1400fef7eb1710ca060904e91637a53a0dc8f3",
+  "base": "dfc7cf5104c382ecc622061ce43c3dcd733b7998",
+  "checks": [
+    {
+      "log": "web-management-ui-final.log",
+      "command": "pnpm exec vitest run --maxWorkers=2 --testTimeout=15000 apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/home/components/bot-delegation-tasks.test.ts",
+      "exit_code": 0,
+      "passed": 45
+    },
+    {
+      "log": "web-management-web-type-final.log",
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit_code": 0
+    },
+    {
+      "log": "web-management-lint-final.log",
+      "command": "pnpm exec eslint <five changed Vue/TS files>",
+      "exit_code": 0
+    },
+    {
+      "log": "web-management-ui-contract.log",
+      "command": "node scripts/check-ui-contract.mjs",
+      "exit_code": 0
+    },
+    {
+      "log": "web-management-build-final.log",
+      "command": "pnpm --filter @memohai/web exec vite build --outDir /tmp/web-management-checks/web-dist-final",
+      "exit_code": 0
+    },
+    {
+      "log": "web-management-core-boundary.log",
+      "command": "bash scripts/check-agent-core-boundary.sh",
+      "exit_code": 0
+    }
+  ],
+  "runtime": {
+    "backend_source": "7e6bc3a892be2c08ec6d3f0c39892768099b96b9; dfc changes only evidence",
+    "backend_sha256": "0d5743d12745c5e594aa52034e69b10775a0730e946b838091f1ba52d1af72b7",
+    "database": "isolated PostgreSQL schema173 clean",
+    "queue": "single-process memory backend, not Valkey restart acceptance",
+    "provider": "loopback deterministic SSE substitute",
+    "pc_calls": 0,
+    "paid_calls": 0
+  },
+  "known_secret_exact_scan": {
+    "matches": 0,
+    "note": "not a guarantee against arbitrary encoded secrets"
+  }
+}
