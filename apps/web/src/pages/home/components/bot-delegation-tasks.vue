@@ -16,6 +16,7 @@ const props = defineProps<{
   loading: boolean
   error?: unknown
   deliveryAction?: BotDelegationDeliveryAction
+  tasksAction?: () => void
 }>()
 const emit = defineEmits<{
   openTask: [task: BotdelegationView]
@@ -76,6 +77,14 @@ function taskLabel(task: BotdelegationView) {
         {{ t('chat.delegations.deliveryAccepted') }}
       </p>
     </div>
+    <Button
+      v-if="tasksAction && detail.target_session_id"
+      variant="outline"
+      :disabled="loading"
+      @click="tasksAction()"
+    >
+      {{ t('chat.delegations.openTasks') }}
+    </Button>
     <div
       v-if="deliveryAction && (((detail.state === 'completed' || detail.state === 'failed') && detail.delivery_state !== 'accepted') || deliveryAction.response || deliveryAction.error)"
       class="space-y-2"

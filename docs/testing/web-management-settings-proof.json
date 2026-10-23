@@ -1,0 +1,8 @@
+{
+  "actualUIWrite": true,
+  "actualHTTPReadback": true,
+  "reloadPersisted": true,
+  "field": "show_tool_calls_in_im",
+  "before": false,
+  "after": true
+}
