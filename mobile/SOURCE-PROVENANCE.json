@@ -1,0 +1,647 @@
+{
+  "schema": 1,
+  "sourceCheckpoint": "1.0.11-dev.deliverybe686",
+  "memohWebBase": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+  "scope": "Reviewed source-only subset; inherited build prerequisites and generated artifacts excluded.",
+  "entries": [
+    {
+      "path": "mobile/client/config/memoh_client.json",
+      "sha256": "99137240f5107a63328e1f83793b48a2a2cb05b1db84126659f04709b3a2df60",
+      "origin": "reviewed empty configuration or public source pin metadata",
+      "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/config/memoh_runtime.lock.json",
+      "sha256": "181922b065f2375a01b81424017b1b25bcef9903e0782f1484cba8d025bfc798",
+      "origin": "reviewed empty configuration or public source pin metadata",
+      "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/config/memoh_web.lock.json",
+      "sha256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
+      "origin": "reviewed empty configuration or public source pin metadata",
+      "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
+      "preparationChanges": [
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088"
+    },
+    {
+      "path": "mobile/client/mobile/client_config.py",
+      "sha256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
+      "sha256": "b1d037faf3d4e46b75149bd6d21ea05dc551f3aea143979ef5fa80ad502ea354",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
+      "sha256": "d83cb013906eb3e539c6514173d8d43eb42153c5e0aacd7c33db3dbfaadb62e0",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+      "sha256": "6ac68daf2586570fa45a23dc4633f071fd4ee6aaa71699d752d3c767bdd8e190",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoiceTransfer.ets",
+      "sha256": "de67c974ac2ac468cd66fcf043043e3d49e831e4d561535848dff36dcd684d01",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyAttachments.vue",
+      "sha256": "76c32eee1fab3df81d24fd2c9ac6b333eb7655d1a4b54db9330f1ecdc13c3cac",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyTasks.vue",
+      "sha256": "a962d3b2196bf506a7cc1bd98bff0e55d546b6a2f7fd4f702a728a47d2d962cc",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "94486a5f932269a8f7580339257860558f9d63e641927e4b7b8a8dfc2fa0257a"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-chat-scope.ts",
+      "sha256": "f9771e87af2351cd613db96157760ffbc30dd6372871cff35b5555e1730882f7",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-download.ts",
+      "sha256": "dc5eff9bb55057d49417aabfb1727c9b41741fa914b8c7f10827a3062a0eeff6",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-entry.ts",
+      "sha256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
+      "sha256": "dc5a56bc974a76c6c96c190a0829eaa2d26d051f3e090a491f834cd9f7917460",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-service-config.ts",
+      "sha256": "caa18e21b183038c2c300f19c48fc098a5dbe7790f6d500a3563b3cd05238f99",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
+      "sha256": "7546393a7edf9d7de5349c4a39fd00e73d5e57a3cb346b8b260f78f963ec0a2f",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-service.css",
+      "sha256": "0541596f1aab1824a4ce09a5a8f91fede16b458e1592b6377876e1e2e8c8bd6e",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-tasks-sdk.ts",
+      "sha256": "6037fb299486ed0ed2ab7e7523841b4aab8c5f6780d0c4c0619f3c6aaa0416aa",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-tasks.ts",
+      "sha256": "390c61427d902caa456c81a9dc39d5238c3743d2283efc54222f2e981cce5398",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/noble-hashes.txt",
+      "sha256": "4f221aee6e072336700c408c68ab3b96a3fc09f6aebe6f48f1bd99e5ef13faec",
+      "origin": "third-party license notice",
+      "licenseReview": "@noble/hashes 2.2.0 MIT notice preserved verbatim; dependency implementation excluded.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/prepare_memoh_source.py",
+      "sha256": "103fc2500d92ccc233bf6581ba53cd3dfecd1e16113547c1085da9993457a567",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/prepare_shared_observation.py",
+      "sha256": "bfc8d0a1b2055753ca4cdb60878ebf47a94a368f6d13b08b6d5ff7dd2c69547c",
+      "origin": "project addition for local shared-observation integration",
+      "licenseReview": "No new license assignment; fixed shared modules remain upstream dependencies, not copied source files.",
+      "preparationChanges": [
+        "Explicit shared-observation build integration and fresh-checkout receipt handling"
+      ],
+      "checkpointSHA256": "affc851d383002e441da0b3ea43a121bb230f122e369be2028c1c7f9d82dc86d"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_106_migration_ui.py",
+      "sha256": "920e561326bd0bcc170ba24d0237e50b9309e7c1abdd3070ba15492dc3e494fa",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "3a8270c7378b8bc3d0466e35fd9374514737eb08b6a43736759a7f5385d598d2"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_auth_persistence.py",
+      "sha256": "e98c9eb1aff86e9ec429b5aba5dbaedff01e6840ee776bef42d9d94489daa43b",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "e7ab24ea3e5cca52004fdab72f6c87fb426cd56888b3d5bb751fdb4abd234b98"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_auth_race.cjs",
+      "sha256": "7cd5dc0c16e9964ccdbf722e8d4393fb2494f073fee16866954b86eb120cc00d",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_bot_navigation.py",
+      "sha256": "9571516031260eaa61a5c2fb771c55e162c6525454324bd5c287a5051ea54d93",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "b03d5cd59b739663e5bb3f335ccf14c7d75c36be8b18815a281fcfb815fa1644"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_combined_ui.py",
+      "sha256": "5ea747354461ef1f3b108502101704daa452624ddeee1289419ebe18ab1fb7a7",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "5bea27185b4a9513e83d99f105518362a789958c3c157fd5a1087ff6900042ff"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_delegations_ui.py",
+      "sha256": "625a25a128f8c47b7b933529842cae28c3b3ce21c0c6aa7aad7ad3218968926c",
+      "origin": "project addition for local shared-observation integration",
+      "licenseReview": "No new license assignment; fixed shared modules remain upstream dependencies, not copied source files.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_delivery_ui.py",
+      "sha256": "b1fe8a8244ebcb826ade70b3a17f0b6a8c5439d6c4c416cc97f875f23aa3bfce",
+      "origin": "Cloud-developed synthetic browser regression for the existing Harmony host and pinned shared result-delivery action",
+      "licenseReview": "Follows existing project ownership; no third-party implementation copied here.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_download_frontend.cjs",
+      "sha256": "c7bea31cf803782c8187481d4b07cddaa4010c95310634a0561118a2301b56e6",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_native_download.cjs",
+      "sha256": "0bfff8e5d4b2a67a0d9dabf3fa1d1c830fe8a97999d07726c302aaf4b7772103",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_native_voice_stream.cjs",
+      "sha256": "128a3d7ad637881936ec3874f721dc89d8ac5c0b21432c605a16092932910657",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_r1_upgrade_ui.py",
+      "sha256": "13e7d00ad1cf64a7ea41b9b058fe41e3e2e43c257bb52f2a912492d817d01f69",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "616cfe23457b7a5d581dca84a52ec6fbd2caf12cae5e6bece2b78d0e80d0049f"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
+      "sha256": "ebea635c6403ce0ef0cf43ec925a5b45b99fe6a683745751f8b15b319bff56aa",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_resumable_frontend.cjs",
+      "sha256": "7dcce3df1570020536294fbbbd32ee7872a6d0b533f8d736a54ff580358f646c",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_resumable_ui.py",
+      "sha256": "86d9365a901006da9ca9500b39aa478033066168e862424503e0706912629e54",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "0e6338413a318f899f4fc15bf348670a525decdde99373833bf7e09df59c2264"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
+      "sha256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_service_config_ui.py",
+      "sha256": "281bdd11058344f7ad4a77467c071744558322adbdc2549b16ffaf5358455161",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths"
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_task_lifecycle_ui.py",
+      "sha256": "1003192f3cc077cfb030854960634bbd48de5f6647b1ccec8a400fb128221def",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths"
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_task_results_ui.py",
+      "sha256": "2e262b82cc29285ca05aad3490bada6fac011fbb56fe4fa771527a9e5f94c0bd",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "8878cfe389436c9aec0c30f11cffef9f6530fa2539f44484448b41f912b93b44"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_tasks.cjs",
+      "sha256": "39ce93b0e2f899a99e6bcbfa260a767b1d414a99ea050e6b103b0fc5b072265a",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_voice_style_ui.py",
+      "sha256": "84527361e0033fe80a356a9e416c3c2b0b5b2ae901db3281ea6bf3c632241c7f",
+      "origin": "project client addition developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+      ],
+      "checkpointSHA256": "5a56e906f57970883ce331c580ca9ce9006d6bf959c0715c20846997f18878e2"
+    }
+  ],
+  "excludedSourcePaths": [
+    {
+      "path": "mobile/client/contracts/album_sync.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/contracts/client_capabilities.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/contracts/folder_source_access.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/contracts/harmony_native_assets.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/contracts/matrix_assets.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/contracts/ui_theme.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/build_memoh_web.py",
+      "reason": "Contains upstream Web patch context and derived replacements; requires attribution and license reconciliation."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.svg",
+      "reason": "Inherited graphical asset: original or third-party derivation not established."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/build-profile.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/code-linter.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/build-profile.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/hvigorfile.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/oh-package-lock.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/oh-package.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/CMakeLists.txt",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/authority_lock.h",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/file_uri.cpp",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/folder_publish.h",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/media_lease.h",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/raw_image.cpp",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/types/libbegoniaraw/index.d.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/types/libbegoniaraw/oh-package.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/AssetBackgroundScope.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeExchangeDirectory.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferPolicy.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/RawImage.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/UiTheme.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceText.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceTextProtocol.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/ClientAbilityStage.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/module.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/color.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/string.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.svg",
+      "reason": "Inherited graphical asset: original or third-party derivation not established."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/main_pages.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/share_files.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/hvigor/hvigor-config.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/hvigorfile.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/oh-package.json5",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/raw-codec.lock.json",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/authority_lock_runtime.cpp",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/folder_handoff_runtime.cpp",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/folder_publish_runtime.cpp",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/voice_text.cjs",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/build_api26.py",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/materials.py",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/prepare_raw_codec.py",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoiceFan.vue",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoiceInput.vue",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-files.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-voice-geometry.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-voice.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony.ts",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/lucide.txt",
+      "reason": "Notice belongs to dependencies/assets not imported in this subset; preserved in the original project."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/wavesurfer.txt",
+      "reason": "Notice belongs to dependencies/assets not imported in this subset; preserved in the original project."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/voiceFan.css",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/mobile/memoh/voiceFan.svg",
+      "reason": "Inherited graphical asset: original or third-party derivation not established."
+    },
+    {
+      "path": "mobile/client/mobile/package_memoh_web.py",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/tools/artifact_paths.py",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    },
+    {
+      "path": "mobile/client/validation/harmony/tools/toolchain.py",
+      "reason": "Inherited source: individual authorship and redistribution basis not established in this import."
+    }
+  ],
+  "excludedClasses": [
+    "HAP/ZIP and generated Web resources",
+    "SDK/CLT and dependencies",
+    "caches, logs, screenshots and runtime data",
+    "signing materials",
+    "private configurations, addresses, account identifiers and credentials",
+    "private handoff records and unlisted files"
+  ],
+  "sourceCommit": "a01a3ec207326987d13b857f5b11c97f3511c6d4",
+  "sharedObservationCommit": "be6862497a58a01ef8c6f4168f02d5624cd44061"
+}

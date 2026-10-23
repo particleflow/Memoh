@@ -1,0 +1,102 @@
+{
+  "version": "deployed-6ddf61dc",
+  "commit": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+  "archive": "tests/.isolated/memoh-6ddf61dc-complete.tar.gz",
+  "archiveSHA256": "473c5956c9691b54b5a4151ef0b9cececb1dc406a3076f7401abd744a36152f1",
+  "archivePrefix": "Memoh-6ddf61dc/",
+  "buildRecipe": "docker/Dockerfile.web",
+  "buildTarget": "builder",
+  "nativeDependencies": {
+    "wavesurfer.js": {
+      "version": "8.0.2",
+      "integrity": "sha512-REv2U0DvZIm/i4K61qA7OZ3dGjFNtZFbh0PGRJ4EPcCU3Vs2tiPzIVFw1jipapIQnib76OPH2T8ARNSW47jN+w==",
+      "license": "BSD-3-Clause"
+    },
+    "@noble/hashes": {
+      "version": "2.2.0",
+      "integrity": "sha512-IYqDGiTXab6FniAgnSdZwgWbomxpy9FtYvLKs7wCUs2a8RkITG+DFGO1DM9cr+E3/RgADRpFjrKVaJ1z6sjtEg==",
+      "license": "MIT",
+      "reuse": "Already present in pinned upstream pnpm lock; promoted to a direct web dependency"
+    }
+  },
+  "repository": "https://github.com/particleflow/Memoh",
+  "sourceArchives": [
+    {
+      "repository": "particleflow/Memoh",
+      "commit": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/6ddf61dcd8199758e4110398645c556a3d6d7375",
+      "archiveSHA256": "b92b9665acafd5a10ed8fb0b0dc6f51b465046950b1dfcd9a38eb991e3157f58",
+      "archivePrefix": "Memoh-6ddf61dcd8199758e4110398645c556a3d6d7375/",
+      "destination": ""
+    },
+    {
+      "repository": "felinics/ui",
+      "commit": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+      "archiveURL": "https://codeload.github.com/felinics/ui/tar.gz/f69402a55dd87a59c10722fe11507ad8fd7048f5",
+      "archiveSHA256": "55199ba9ad385c32f574906bda4fd43f21c106b6acb58f9e977d0da27222a4a9",
+      "archivePrefix": "ui-f69402a55dd87a59c10722fe11507ad8fd7048f5/",
+      "destination": "packages/ui/"
+    }
+  ],
+  "sharedObservation": {
+    "commit": "be6862497a58a01ef8c6f4168f02d5624cd44061",
+    "files": {
+      "apps/web/src/pages/home/components/bot-delegation-tasks.vue": "191e72f26d45afd4ed471c1bf972e77520a6101605d08b3b42c81bd94ddc33d1",
+      "apps/web/src/pages/home/composables/useBotDelegations.ts": "523cb081ecf13e449d74a9811e5c82193731d89951632d27889edb9ad1d34e17",
+      "apps/web/src/pages/home/composables/useSessionTasks.ts": "24dc3c1886f7499607a05e31ea720c231f36812e379e84ca6f20a28ac1086ef2",
+      "packages/sdk/src/sdk.gen.ts": "d741abc42c035b3b9e59d252d4c2ca09575bde1ba00db76bf8091ff234036856",
+      "packages/sdk/src/types.gen.ts": "44cb0cbe1cf0eb9e24ccaa7c030da08cf60cc41129727e15ee6184f104915bab",
+      "apps/web/src/i18n/locales/en.json": "338f2e5a1b9421a00a957e7a42f06a05c731adbe2543c996b4a04defc96d7517",
+      "apps/web/src/i18n/locales/zh.json": "d331a7f1606c4b0ff34e110f25860db88c8d344eddef5425c52ad6be5505e88d",
+      "apps/web/src/i18n/locales/ja.json": "acfb517b6dce44b9b1a56862af9dd143038c44fba97fa6c7a111a404465f8297",
+      "apps/web/src/pages/home/composables/useBotDelegationDelivery.ts": "2034d81a80cb976e7ed916e63b8011e76a3cb3060ed05f04f95154134f97fac3",
+      "apps/web/src/pages/home/composables/useBotDelegations.test.ts": "52e99daa28201c110deb2b13454de3783e3b73ce39ca55f1644d298bbdd53155",
+      "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts": "ed382cc0bdeb803c56c064bc4ca790884521131a4bb25a869b8a13a4805d4ed8",
+      "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts": "35f8ba15afeede1c0a2e8ea72b6e2d02c6b7eacc3138ac3f9cfdcd976eb81fb3"
+    },
+    "sharedModules": [
+      "apps/web/src/pages/home/components/bot-delegation-tasks.vue",
+      "apps/web/src/pages/home/composables/useBotDelegations.ts",
+      "apps/web/src/pages/home/composables/useSessionTasks.ts",
+      "apps/web/src/pages/home/composables/useBotDelegationDelivery.ts"
+    ],
+    "baseSDKFiles": {
+      "packages/sdk/src/index.ts": "bbac423430f90bc3a6e9afdb53e91bd5c24f1631a80c6754f26633bb312cbec7",
+      "packages/sdk/src/sdk.gen.ts": "e8520eee77dfd752f3ca8faba2b1e207a5858c583921cb1cde0791fd41988a66",
+      "packages/sdk/src/types.gen.ts": "3b62ca7e3f1dc7976583dbee92b693506e38a5c0cc4b0723bfc7b9ae7900a784",
+      "packages/sdk/src/client.gen.ts": "b325822184abc7aed91c42bb1ea0697bb8ae178833c3fca97f6ec498398c1377"
+    },
+    "types": [
+      "BotdelegationAttachment",
+      "BotdelegationPage",
+      "BotdelegationSummary",
+      "BotdelegationView",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsData",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsErrors",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsError",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsResponses",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsResponse",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdData",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdErrors",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdError",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponses",
+      "GetBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdResponse",
+      "PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryData",
+      "PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryErrors",
+      "PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryError",
+      "PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses",
+      "PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponse"
+    ],
+    "functions": [
+      "getBotsByBotIdSessionsBySessionIdDelegations",
+      "getBotsByBotIdSessionsBySessionIdDelegationsByDelegationId",
+      "postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDelivery"
+    ],
+    "scope": "Shared observation plus explicit result delivery retry; no specialist rerun, followup, cancellation, attachment download or production acceptance.",
+    "testModules": [
+      "apps/web/src/pages/home/composables/useBotDelegations.test.ts",
+      "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts",
+      "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts"
+    ]
+  }
+}

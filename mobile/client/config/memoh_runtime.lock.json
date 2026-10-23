@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "repository": "https://github.com/particleflow/Memoh",
+  "version": "deployed-6ddf61dc",
+  "commit": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+  "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/6ddf61dcd8199758e4110398645c556a3d6d7375",
+  "archiveSHA256": "b92b9665acafd5a10ed8fb0b0dc6f51b465046950b1dfcd9a38eb991e3157f58",
+  "archivePrefix": "Memoh-6ddf61dcd8199758e4110398645c556a3d6d7375/",
+  "files": {
+    "internal/agent/application/service.go": "e37a43e34b523bec35fdea262d5241b3ab203fbfc361b6d0080017ec99ca08c9",
+    "internal/agent/application/turn_service.go": "ba164aaad86d3b6e424c41d713ceaf955b4833da3791eb45a7d10c3a6f9326f0",
+    "internal/agent/runtime/acp/profile/profile.go": "8b25c6592a136113d82947f2e409f1e4947f9b05a3659781532890b1dc44d313",
+    "internal/agent/turn/turn.go": "afa14c9959b79fc505c39ac48952878f35e733311153517f2137f4d66ba78240",
+    "internal/handlers/local_channel.go": "fe91a049cc2d68cc17cef2c6866966ca1d66f3e13bbc5d21824e12b992cbaee5",
+    "internal/agent/application/service_attachments.go": "f7555691fda47ce04f2c8a6522a88c3246f508f799df0aace2c2650f16053466",
+    "go.mod": "3e5edc9f4092cf5368fa6eab5abbfefc568bda2c4cdbb5c2f162703896049969",
+    "go.sum": "21bceb5b93f08750637d76d7eac44544e22a63c3d5e949d328cee214655e3609",
+    "internal/agent/application/turn_admission.go": "870e2246a2cc196c84d712d443f384c603560ff40e22128e8aac71f539a62da0",
+    "internal/agent/turn/types.go": "f3253be1bff394f25e4a1593197ab2e8a3c50108e978b527d0c558ef1f837cf7",
+    "internal/handlers/media_upload.go": "2cad0a5f21c6b22420cb5d0a6095bdeca2acdd700d61e61e82d7d7f180686f92",
+    "internal/handlers/message.go": "2bdfc5233f8022c5e0d8c010d6995aeca128b16228bc0db9bc2a70e9993b40b0",
+    "internal/media/service.go": "f3ae06f06a73339ba1f115fb1743b0dda0fd4250da300aeec66945d3f08a4664",
+    "internal/media/limits.go": "7aa376c809634df87cdccd48c53d6043aba3041fbeb87649c2b22640d73e7443",
+    "internal/media/seekable.go": "550d133adaaed46514c5a07d9ec51a72888a7d7b010891c83b1a44acfcd5a304"
+  },
+  "purpose": "upstream source pin for reproducibility; not a runtime or authorization status record"
+}
