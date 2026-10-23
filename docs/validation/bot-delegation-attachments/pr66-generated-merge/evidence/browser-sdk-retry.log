@@ -1,0 +1,5 @@
+page.evaluate: Object
+    at /tmp/pr66-generated-conflicts/browser.cjs:14:24 {
+  log: [],
+  name: 'Error'
+}

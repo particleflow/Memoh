@@ -1,0 +1,6 @@
+page.evaluate: Error: {"step":"sdk-detail","status":404,"code":"session.not_found","type":"urn:memoh:error:session.not_found"}
+    at eval (eval at evaluate (:311:30), <anonymous>:1:1018)
+    at async <anonymous>:337:30
+    at /tmp/pr66-generated-conflicts/browser.cjs:14:24 {
+  log: []
+}

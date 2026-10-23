@@ -1,0 +1,14 @@
+{
+  "name": "go-lint-existing",
+  "command": [
+    "/tmp/golangci-lint-2.10.1-linux-amd64/golangci-lint",
+    "run",
+    "--concurrency=2",
+    "--new-from-rev=668b214c7efc4f0336151bd75e1561f766c7fb35",
+    "./internal/handlers"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 1,
+  "elapsed_seconds": 20.186,
+  "started_utc": "2026-10-23T03:18:58Z"
+}

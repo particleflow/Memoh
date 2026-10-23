@@ -1,0 +1,1 @@
+Initial git switch --track failed because this checkout fetch configuration tracks main only. HEAD remained f5b16263 while index/worktree exactly matched 668b214c (tree d18bf008813705f28a96bcd758c98bc846cfd4f0). Both equality checks passed; a no-track local branch was then created at the exact 668b214c commit. No reset, discarded edits, remote ref rewrite or source changes.

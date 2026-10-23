@@ -1,0 +1,242 @@
+{
+  "go-attachments": {
+    "name": "go-attachments",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "240s",
+      "./internal/handlers",
+      "-run",
+      "Test(BotDelegation|ComputerTransfer|TaskTransfer|GeneratedContracts)"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 57.796,
+    "started_utc": "2026-10-23T03:14:31Z",
+    "named_test_events": {
+      "pass": 25
+    }
+  },
+  "go-lint-after-space": {
+    "name": "go-lint-after-space",
+    "command": [
+      "/tmp/golangci-lint-2.10.1-linux-amd64/golangci-lint",
+      "run",
+      "--concurrency=2",
+      "--new-from-rev=668b214c7efc4f0336151bd75e1561f766c7fb35",
+      "./internal/handlers"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 129.341,
+    "started_utc": "2026-10-23T03:21:37Z"
+  },
+  "go-lint-existing": {
+    "name": "go-lint-existing",
+    "command": [
+      "/tmp/golangci-lint-2.10.1-linux-amd64/golangci-lint",
+      "run",
+      "--concurrency=2",
+      "--new-from-rev=668b214c7efc4f0336151bd75e1561f766c7fb35",
+      "./internal/handlers"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 1,
+    "elapsed_seconds": 20.186,
+    "started_utc": "2026-10-23T03:18:58Z"
+  },
+  "go-lint": {
+    "name": "go-lint",
+    "command": [
+      "golangci-lint",
+      "run",
+      "--new-from-rev=668b214c7efc4f0336151bd75e1561f766c7fb35",
+      "./internal/handlers"
+    ],
+    "exit_code": 127,
+    "process_started": false,
+    "reason": "tool not on PATH"
+  },
+  "go-vet": {
+    "name": "go-vet",
+    "command": [
+      "go",
+      "vet",
+      "./internal/handlers"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 29.693,
+    "started_utc": "2026-10-23T03:15:54Z"
+  },
+  "sdk-after": {
+    "name": "sdk-after",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/sdk",
+      "typecheck"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 2.605,
+    "started_utc": "2026-10-23T03:12:45Z"
+  },
+  "sdk-before": {
+    "name": "sdk-before",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/sdk",
+      "typecheck"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 3.221,
+    "started_utc": "2026-10-23T03:11:51Z"
+  },
+  "sdk-generate": {
+    "name": "sdk-generate",
+    "command": [
+      "pnpm",
+      "run",
+      "generate-sdk"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 1.845,
+    "started_utc": "2026-10-23T03:12:43Z"
+  },
+  "server-build": {
+    "name": "server-build",
+    "command": [
+      "go",
+      "build",
+      "-p",
+      "1",
+      "-o",
+      "/tmp/memoh-pr66-contract-server",
+      "./cmd/agent"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 12.813,
+    "started_utc": "2026-10-23T03:16:24Z"
+  },
+  "swagger": {
+    "name": "swagger",
+    "command": [
+      "go",
+      "generate"
+    ],
+    "cwd": "<repo>/internal/handlers",
+    "exit_code": 0,
+    "elapsed_seconds": 2.972,
+    "started_utc": "2026-10-23T03:12:40Z"
+  },
+  "ui-gallery": {
+    "name": "ui-gallery",
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--maxWorkers=2",
+      "--testTimeout=15000",
+      "apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts",
+      "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts",
+      "apps/web/src/pages/home/components/dockview/panel-preview.test.ts"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 1,
+    "elapsed_seconds": 8.822,
+    "started_utc": "2026-10-23T03:15:10Z"
+  },
+  "ui-preview-lint": {
+    "name": "ui-preview-lint",
+    "command": [
+      "pnpm",
+      "exec",
+      "eslint",
+      "apps/web/src/pages/home/components/dockview/panel-preview.test.ts"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 3.692,
+    "started_utc": "2026-10-23T03:17:09Z"
+  },
+  "ui-preview-retry": {
+    "name": "ui-preview-retry",
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--maxWorkers=2",
+      "--testTimeout=15000",
+      "apps/web/src/pages/home/components/dockview/panel-preview.test.ts"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 7.502,
+    "started_utc": "2026-10-23T03:17:01Z"
+  },
+  "web-after": {
+    "name": "web-after",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "typecheck"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 2,
+    "elapsed_seconds": 30.271,
+    "started_utc": "2026-10-23T03:12:48Z"
+  },
+  "web-before": {
+    "name": "web-before",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "typecheck"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 2,
+    "elapsed_seconds": 28.461,
+    "started_utc": "2026-10-23T03:11:55Z"
+  },
+  "web-build": {
+    "name": "web-build",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "build"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 0,
+    "elapsed_seconds": 6.749,
+    "started_utc": "2026-10-23T03:15:18Z"
+  },
+  "web-final": {
+    "name": "web-final",
+    "command": [
+      "pnpm",
+      "--filter",
+      "@memohai/web",
+      "typecheck"
+    ],
+    "cwd": "<repo>",
+    "exit_code": 2,
+    "elapsed_seconds": 27.081,
+    "started_utc": "2026-10-23T03:17:12Z"
+  }
+}

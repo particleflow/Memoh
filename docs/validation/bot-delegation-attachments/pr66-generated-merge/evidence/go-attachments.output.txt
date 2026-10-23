@@ -1,0 +1,54 @@
+=== RUN   TestBotDelegationJWTSubmitObserveOriginalAndRevocation
+--- PASS: TestBotDelegationJWTSubmitObserveOriginalAndRevocation (0.01s)
+=== RUN   TestTaskTransferCapacityQueueRecovery
+--- PASS: TestTaskTransferCapacityQueueRecovery (0.45s)
+=== RUN   TestTaskTransferHTTPUploadAndReceiptIsolation
+--- PASS: TestTaskTransferHTTPUploadAndReceiptIsolation (0.03s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/disabled
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/disabled (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/account-jwt
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/account-jwt (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/operation
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/operation (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/delivery
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/delivery (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/bot
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/bot (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/file
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/file (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/direction
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/direction (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/expired
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/expired (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/missing
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/missing (0.01s)
+=== RUN   TestTaskTransferHTTPNoAccountFallbackAndScope/routing
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope/routing (0.01s)
+--- PASS: TestTaskTransferHTTPNoAccountFallbackAndScope (0.11s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/range
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/range (0.02s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/if-range-matches
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/if-range-matches (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/if-range-differs
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/if-range-differs (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/unsatisfiable
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/unsatisfiable (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/size-mismatch
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/size-mismatch (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/hash-mismatch
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/hash-mismatch (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/revoked
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/revoked (0.00s)
+=== RUN   TestTaskTransferHTTPOriginalRangeAndRevalidation/anonymous
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation/anonymous (0.00s)
+--- PASS: TestTaskTransferHTTPOriginalRangeAndRevalidation (0.05s)
+=== RUN   TestTaskTransferHTTPPreservesAccountUploadQuota
+--- PASS: TestTaskTransferHTTPPreservesAccountUploadQuota (0.07s)
+=== RUN   TestGeneratedContractsCarryEveryMutationKind
+=== PAUSE TestGeneratedContractsCarryEveryMutationKind
+=== CONT  TestGeneratedContractsCarryEveryMutationKind
+--- PASS: TestGeneratedContractsCarryEveryMutationKind (0.09s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.885s

@@ -1,0 +1,13 @@
+{
+  "name": "ui-preview-lint",
+  "command": [
+    "pnpm",
+    "exec",
+    "eslint",
+    "apps/web/src/pages/home/components/dockview/panel-preview.test.ts"
+  ],
+  "cwd": "<repo>",
+  "exit_code": 0,
+  "elapsed_seconds": 3.692,
+  "started_utc": "2026-10-23T03:17:09Z"
+}

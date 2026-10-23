@@ -1,0 +1,1 @@
+golangci-lint was not found on the sourced environment PATH; process was not started. Searching existing installed tools, without installing or changing dependencies.

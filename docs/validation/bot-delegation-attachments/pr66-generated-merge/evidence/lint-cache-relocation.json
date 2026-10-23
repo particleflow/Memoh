@@ -1,0 +1,7 @@
+{
+  "source": "/workspace/.memoh-cloud/cache/golangci-lint",
+  "destination": "/tmp/pr66-generated-conflicts/preserved-golangci-lint-cache",
+  "files": 10661,
+  "all_hashes_match": true,
+  "old_path_retained_as_symlink": true
+}
