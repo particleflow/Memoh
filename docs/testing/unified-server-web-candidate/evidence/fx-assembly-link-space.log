@@ -1,0 +1,20 @@
+{"Time":"2026-10-23T04:41:12.978672754Z","Action":"start","Package":"github.com/felinics/memoh/cmd/agent"}
+{"Time":"2026-10-23T04:41:13.040541398Z","Action":"run","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate"}
+{"Time":"2026-10-23T04:41:13.040578354Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate","Output":"=== RUN   TestFXOptionsValidate\n"}
+{"Time":"2026-10-23T04:41:13.040618775Z","Action":"run","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/device-transfers"}
+{"Time":"2026-10-23T04:41:13.040624323Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/device-transfers","Output":"=== RUN   TestFXOptionsValidate/device-transfers\n"}
+{"Time":"2026-10-23T04:41:13.08277644Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/device-transfers","Output":"--- PASS: TestFXOptionsValidate/device-transfers (0.04s)\n"}
+{"Time":"2026-10-23T04:41:13.082817622Z","Action":"pass","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/device-transfers","Elapsed":0.04}
+{"Time":"2026-10-23T04:41:13.082831704Z","Action":"run","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/split"}
+{"Time":"2026-10-23T04:41:13.082834197Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/split","Output":"=== RUN   TestFXOptionsValidate/split\n"}
+{"Time":"2026-10-23T04:41:13.113206385Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/split","Output":"--- PASS: TestFXOptionsValidate/split (0.03s)\n"}
+{"Time":"2026-10-23T04:41:13.113240786Z","Action":"pass","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/split","Elapsed":0.03}
+{"Time":"2026-10-23T04:41:13.113250301Z","Action":"run","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/embedded"}
+{"Time":"2026-10-23T04:41:13.11325667Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/embedded","Output":"=== RUN   TestFXOptionsValidate/embedded\n"}
+{"Time":"2026-10-23T04:41:13.14150686Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/embedded","Output":"--- PASS: TestFXOptionsValidate/embedded (0.03s)\n"}
+{"Time":"2026-10-23T04:41:13.141906432Z","Action":"pass","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate/embedded","Elapsed":0.03}
+{"Time":"2026-10-23T04:41:13.141921715Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate","Output":"--- PASS: TestFXOptionsValidate (0.10s)\n"}
+{"Time":"2026-10-23T04:41:13.141926062Z","Action":"pass","Package":"github.com/felinics/memoh/cmd/agent","Test":"TestFXOptionsValidate","Elapsed":0.1}
+{"Time":"2026-10-23T04:41:13.141928135Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Output":"PASS\n"}
+{"Time":"2026-10-23T04:41:14.147941673Z","Action":"output","Package":"github.com/felinics/memoh/cmd/agent","Output":"ok  \tgithub.com/felinics/memoh/cmd/agent\t1.169s\n"}
+{"Time":"2026-10-23T04:41:14.147991648Z","Action":"pass","Package":"github.com/felinics/memoh/cmd/agent","Elapsed":1.169}
