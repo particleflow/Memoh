@@ -8,7 +8,7 @@ handler, route, configuration, migration or Agent implementation changes here.
 ## Actual request coverage
 
 The existing `api-base-prefix` fixture already uploads and associates a synthetic
-25-byte file through the actual Server, stable-device registry verifier,
+26-byte file through the actual Server, stable-device registry verifier,
 full-migration PostgreSQL/NOBYPASSRLS role and filesystem Media provider. The new
 subtest reuses that same HTTPS listener and original file. `/api` is stripped by
 the existing `http.StripPrefix` mount; authentication and file responses still
@@ -90,7 +90,9 @@ golangci-lint run --build-tags=integration \
 TLS remains verified using only the test process's HTTPS fixture transport; no
 OS trust, credential provisioning or production data is changed. Initial free
 space was about 2.2 GiB in `/workspace` and 4.8 GiB in `/tmp`; the transferred
-fixture is 25 bytes, not a throughput or large-file test.
+fixture is 26 bytes, not a throughput or large-file test. This also corrects the
+earlier evidence document's prose count of 25; the original fixture literal,
+size assertions and recorded logs have not changed.
 
 There is no new Windows/native/mobile/UI acceptance, real Nginx run, LAN/IPv6
 selector or old HostBinding migration. The separately recorded Windows Nginx
