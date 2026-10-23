@@ -1,0 +1,618 @@
+internal/agent/runtime/grok/server.go:92:45: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	mountCtx, mountCancel := context.WithCancel(ctx)
+	                                           ^
+internal/agent/tool/subagent_step_persist_test.go:401:38: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	runCtx, cancel := context.WithCancel(ctx)
+	                                    ^
+internal/agent/view/uimessage_background.go:24:21: G602: slice index out of range (gosec)
+			message := &turns[turnIdx].Messages[messageIdx]
+			                 ^
+internal/agenvo/pi_batch_history_test.go:123:23: G703: Path traversal via taint analysis (gosec)
+			return os.WriteFile(file, b, 0o600)
+			                   ^
+internal/agenvo/pi_batch_history_test.go:152:23: G703: Path traversal via taint analysis (gosec)
+			return os.WriteFile(filepath.Join(filepath.Dir(file), "duplicate.jsonl"), b, 0o600)
+			                   ^
+internal/config/config_test.go:540:24: G703: Path traversal via taint analysis (gosec)
+	if err := os.WriteFile(configPath, []byte(rendered), 0o600); err != nil {
+	                      ^
+internal/display/clipboard.go:272:32: G115: integer overflow conversion rune -> byte (gosec)
+			latin1 = append(latin1, byte(r))
+			                            ^
+internal/display/clipboard_test.go:210:48: G115: integer overflow conversion int32 -> uint32 (gosec)
+		binary.BigEndian.PutUint32(header[4:], uint32(size))
+		                                             ^
+internal/handlers/mcp_oauth_diagnostics_test.go:60:19: G120: Parsing form data without limiting request body size can allow memory exhaustion (use http.MaxBytesReader) (gosec)
+				if r.ParseForm() != nil || r.Form.Get("grant_type") != "refresh_token" {
+				              ^
+internal/handlers/message.go:523:17: G602: slice index out of range (gosec)
+			msg := &turns[turnIdx].Messages[msgIdx]
+			             ^
+internal/handlers/message.go:576:17: G602: slice index out of range (gosec)
+			msg := &turns[turnIdx].Messages[msgIdx]
+			             ^
+internal/media/uploads.go:77:23: G703: Path traversal via taint analysis (gosec)
+	if err := os.MkdirAll(originalsRoot, 0o750); err != nil {
+	                     ^
+internal/memory/adapters/builtin/lifecycle_postgres_integration_test.go:152:23: G122: Filesystem operation in filepath.Walk/WalkDir callback uses race-prone path; consider root-scoped APIs (e.g. os.Root) to prevent symlink TOCTOU traversal (gosec)
+			b, e := os.ReadFile(p) // #nosec G304 -- walking only the synthetic t.TempDir fixture.
+			                   ^
+internal/providers/service_test.go:683:24: G120: Parsing form data without limiting request body size can allow memory exhaustion (use http.MaxBytesReader) (gosec)
+		if err := r.ParseForm(); err != nil {
+		                     ^
+internal/settings/tool_approval_test.go:127:22: G602: slice index out of range (gosec)
+		if left[i] != right[i] {
+		                   ^
+internal/storage/providers/localfs/originals_test.go:59:41: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	cancelCtx, cancel := context.WithCancel(ctx)
+	                                       ^
+internal/workspacedeps/service.go:141:51: G118: context cancellation function returned by WithCancel/WithTimeout/WithDeadline is not called (gosec)
+	shutdownCtx, shutdownCancel := context.WithCancel(context.Background())
+	                                                 ^
+internal/workspacedeps/service_test.go:628:20: G602: slice index out of range (gosec)
+		if got[i] != want[i] {
+		                 ^
+internal/agent/application/service_run_lifecycle.go:378:26: nilness: impossible condition: non-nil == nil (govet)
+	existingReady := getErr == nil
+	                        ^
+internal/auth/jwt_test.go:115:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+	                          ^
+internal/auth/jwt_test.go:141:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/chat-route", nil)
+	                          ^
+internal/auth/jwt_test.go:171:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, "/protected", nil)
+			                          ^
+internal/auth/jwt_test.go:182:48: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	                                              ^
+internal/channel/adapters/line/inbound_error_test.go:48:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/channels/line/webhook/cfg", strings.NewReader(body))
+	                          ^
+internal/channel/adapters/line/inbound_test.go:115:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/channels/line/webhook/cfg", strings.NewReader(testLineTextCallback("event-invalid")))
+	                          ^
+internal/channel/adapters/line/inbound_test.go:131:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/channels/line/webhook/cfg", nil)
+	                          ^
+internal/channel/adapters/line/inbound_test.go:160:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/channels/line/webhook/cfg", strings.NewReader(body))
+	                          ^
+internal/channel/adapters/wechatoa/inbound_handler_test.go:46:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	return httptest.NewRequest(http.MethodPost, "/channels/wechatoa/webhook/cfg-1?"+q.Encode(), strings.NewReader(body))
+	                          ^
+internal/channel/adapters/wechatoa/inbound_handler_test.go:97:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/channels/wechatoa/webhook/cfg-1?timestamp=1700000000&nonce=nonce-1&signature=forged", strings.NewReader(testWechatTextXML))
+	                          ^
+internal/channel/adapters/wechatoa/inbound_handler_test.go:129:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, "/channels/wechatoa/webhook/cfg-1?"+tc.query, nil)
+			                          ^
+internal/channel/adapters/weixin/qr_handler_test.go:44:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+	                          ^
+internal/channel/webhook_handler_failure_test.go:30:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{}`)))
+	                                    ^
+internal/channel/webhook_handler_failure_test.go:125:48: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodPost, "/", nil), httptest.NewRecorder())
+	                                              ^
+internal/handlers/acp_runtime_test.go:186:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/sessions/"+sessionID+"/acp-runtime", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:261:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions/"+sessionID+"/acp-runtime", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:318:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions/"+sessionID+"/acp-runtime", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:364:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions/"+sessionID+"/acp-runtime", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:482:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:561:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:635:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:686:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:728:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:764:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:797:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:843:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:883:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:920:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/acp_runtime_test.go:960:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/acp-runtimes/rt_gone", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:1076:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodDelete, "/bots/"+botID+"/acp-runtimes/rt_gone", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:1110:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodDelete, "/bots/"+botID+"/acp-runtimes/rt_gone", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:1149:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/sessions/"+sessionID+"/acp-runtime", nil)
+	                          ^
+internal/handlers/acp_runtime_test.go:1170:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/acp-runtime", nil)
+		                          ^
+internal/handlers/acp_runtime_test.go:1180:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodPost, "http://127.0.0.1:18080/acp-runtime", nil)
+		                          ^
+internal/handlers/acp_runtime_test.go:1191:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodPost, "https://memoh.example/acp-runtime", nil)
+		                          ^
+internal/handlers/acp_runtime_test.go:1275:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(
+			                          ^
+internal/handlers/acp_test.go:17:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/acp/profiles", nil)
+	                          ^
+internal/handlers/answer_exits_test.go:53:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, "/", nil).WithContext(tc.ctx)
+			                          ^
+internal/handlers/bot_agents_test.go:145:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(method, path, reader)
+	                          ^
+internal/handlers/bot_delegations_test.go:191:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(method, path, strings.NewReader(body))
+		                          ^
+internal/handlers/bot_delegations_test.go:254:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(method, view.Attachments[0].URL, nil)
+		                          ^
+internal/handlers/c2_errors_test.go:43:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, target, strings.NewReader(body))
+	                          ^
+internal/handlers/computer_deliveries_test.go:109:26: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	r := httptest.NewRequest(method, path, strings.NewReader(body))
+	                        ^
+internal/handlers/connectors_oauth_client_test.go:172:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
+	                          ^
+internal/handlers/containerd_browser_test.go:105:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "http://127.0.0.1/bots/bot-1/container/browser/sessions", nil)
+	                          ^
+internal/handlers/containerd_browser_test.go:175:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "http://session.browser.localhost/hello?name=memoh", bytes.NewBufferString("payload"))
+	                          ^
+internal/handlers/containerd_removal_test.go:40:57: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		ctx := testAuthContext(echo.New(), httptest.NewRequest(method, target, nil), rec, ownerID)
+		                                                      ^
+internal/handlers/field_error_test.go:26:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(method, "/", strings.NewReader(body))
+	                          ^
+internal/handlers/local_channel_test.go:1339:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/quick-actions/execute", body)
+	                          ^
+internal/handlers/local_channel_test.go:1393:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/quick-actions/execute", body)
+	                          ^
+internal/handlers/local_channel_test.go:1494:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/local/messages", body)
+	                          ^
+internal/handlers/local_channel_test.go:1591:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/ws", nil)
+	                          ^
+internal/handlers/mcp_oauth_callback_test.go:25:50: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	ctx := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/oauth/mcp/callback", nil), rec)
+	                                                ^
+internal/handlers/mcp_oauth_callback_test.go:44:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/oauth/mcp/callback?code=c&state=s", nil)
+	                          ^
+internal/handlers/mcp_oauth_errors_test.go:64:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
+	                          ^
+internal/handlers/mcp_oauth_errors_test.go:203:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, "/auth/callback?code=c&state=s", nil)
+			                          ^
+internal/handlers/mcp_tools_test.go:318:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/bot-1/tools", nil)
+	                          ^
+internal/handlers/mcp_tools_test.go:363:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/bot-1/tools", nil)
+	                          ^
+internal/handlers/media_range_test.go:45:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(tc.method, url, nil)
+			                          ^
+internal/handlers/media_range_test.go:73:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	                          ^
+internal/handlers/media_range_test.go:121:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/media/"+asset.ContentHash, nil)
+			                          ^
+internal/handlers/media_range_test.go:165:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/media/"+strings.Repeat("a", 64), nil)
+		                          ^
+internal/handlers/media_resumable_test.go:32:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(method, path, bytes.NewReader(body))
+		                          ^
+internal/handlers/media_resumable_test.go:92:51: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			unauthorized.ServeHTTP(rec, httptest.NewRequest(method, target, bytes.NewReader(data)))
+			                                               ^
+internal/handlers/media_resumable_test.go:126:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/bots/"+invocationTestBotID+"/media/uploads", strings.NewReader(`{}`)))
+	                                    ^
+internal/handlers/media_resumable_test.go:131:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/media/limits", nil))
+	                                    ^
+internal/handlers/media_resumable_transport_test.go:217:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPatch, "/bots/"+invocationTestBotID+"/media/uploads/"+u.ID, body)
+	                          ^
+internal/handlers/media_upload_test.go:72:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+invocationTestBotID+"/media", reader)
+	                          ^
+internal/handlers/media_upload_test.go:98:41: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(limits, httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/media/limits", nil))
+	                                       ^
+internal/handlers/media_upload_test.go:261:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodPost, "/bots/"+invocationTestBotID+"/media", body)
+			                          ^
+internal/handlers/media_upload_test.go:268:40: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/media/limits", nil))
+			                                    ^
+internal/handlers/media_upload_test.go:295:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodPost, "/bots/"+invocationTestBotID+"/media", &body)
+			                          ^
+internal/handlers/memory_authz_test.go:143:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(tt.method, "/bots/"+botID+"/memory/"+tt.escapedMemoryID, bytes.NewBufferString(tt.body))
+			                          ^
+internal/handlers/message_activity_test.go:98:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodGet, "/bots/"+activityTestBotID+"/sessions/events", nil).WithContext(ctx)
+		                          ^
+internal/handlers/message_activity_test.go:131:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+activityTestBotID+"/sessions/events", nil).WithContext(ctx)
+	                          ^
+internal/handlers/message_activity_test.go:164:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+activityTestBotID+"/sessions/events", nil).WithContext(ctx)
+	                          ^
+internal/handlers/message_activity_test.go:210:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodDelete, "/bots/"+activityTestBotID+"/messages?session_id="+sessionID, nil)
+			                          ^
+internal/handlers/message_activity_test.go:273:31: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+				req := httptest.NewRequest(http.MethodDelete, "/bots/"+activityTestBotID+"/messages?session_id="+sessionID, nil)
+				                          ^
+internal/handlers/message_stream_route_test.go:32:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		                          ^
+internal/handlers/message_stream_route_test.go:52:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/bot-1/messages", nil)
+	                          ^
+internal/handlers/models_reasoning_test.go:156:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/providers/"+providerID+"/models", nil)
+	                          ^
+internal/handlers/not_found_codes_test.go:125:48: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	                                              ^
+internal/handlers/not_found_codes_test.go:177:48: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodPost, "/", nil), httptest.NewRecorder())
+	                                              ^
+internal/handlers/not_found_codes_test.go:227:54: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := testAuthContext(echo.New(), httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder(), "user-1")
+	                                                    ^
+internal/handlers/not_found_codes_test.go:235:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	                          ^
+internal/handlers/not_found_codes_test.go:245:54: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := testAuthContext(echo.New(), httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder(), uuid.NewString())
+	                                                    ^
+internal/handlers/not_found_codes_test.go:254:48: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder())
+	                                              ^
+internal/handlers/not_found_codes_test.go:267:54: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := testAuthContext(echo.New(), httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder(), invocationTestOwnerID)
+	                                                    ^
+internal/handlers/not_found_codes_test.go:296:54: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := testAuthContext(echo.New(), httptest.NewRequest(http.MethodGet, "/?session_id="+invocationTestSessionA+"&external_message_id=m1", nil), httptest.NewRecorder(), invocationTestOwnerID)
+	                                                    ^
+internal/handlers/not_found_codes_test.go:312:48: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	c := echo.New().NewContext(httptest.NewRequest(http.MethodPost, "/", nil), httptest.NewRecorder())
+	                                              ^
+internal/handlers/original_media_test.go:87:40: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet,
+			                                    ^
+internal/handlers/probe_errors_test.go:111:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, target, nil))
+	                                    ^
+internal/handlers/provider_errors_test.go:35:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(method, target, strings.NewReader(body))
+	                          ^
+internal/handlers/public_media_test.go:30:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, signedPublicMediaPath(publicmedia.OriginalPath("line", "bot-1", asset.ContentHash, "image.png")), nil)
+	                          ^
+internal/handlers/public_media_test.go:50:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, signedPublicMediaPath(publicmedia.PreviewPath("line", "bot-1", asset.ContentHash)), nil)
+	                          ^
+internal/handlers/public_media_test.go:73:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, signedPublicMediaPath(publicmedia.PreviewPath("telegram", "bot-1", asset.ContentHash)), nil)
+	                          ^
+internal/handlers/public_media_test.go:100:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, signedPublicMediaPath(publicmedia.OriginalPath("line", "bot-1", asset.ContentHash, "image.png")), nil)
+	                          ^
+internal/handlers/public_media_test.go:130:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, signedPublicMediaPath(publicmedia.PreviewPath("line", "bot-1", asset.ContentHash)), nil)
+	                          ^
+internal/handlers/public_media_test.go:143:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, publicmedia.PreviewPath("line", "bot-1", asset.ContentHash), nil)
+	                          ^
+internal/handlers/public_media_test.go:162:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, path, nil)
+	                          ^
+internal/handlers/public_media_test.go:179:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/channels/line/public/media/bot-1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/preview.jpg", nil)
+	                          ^
+internal/handlers/request_field_errors_d_test.go:24:97: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))(err, e.NewContext(httptest.NewRequest(http.MethodGet, "/", nil), rec))
+	                                                                                               ^
+internal/handlers/request_field_errors_g1_test.go:38:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodPost, tc.target, strings.NewReader(tc.body))
+			                          ^
+internal/handlers/request_field_errors_test.go:16:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(s))
+		                          ^
+internal/handlers/request_field_errors_test.go:28:40: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		{"video path id", httptest.NewRequest(http.MethodGet, "/", nil), map[string]string{"id": " "}, (&VideoHandler{}).GetProvider, apperror.CodeRequestFieldRequired, "id"},
+		                                     ^
+internal/handlers/request_field_errors_test.go:33:46: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		{"oauth callback code", httptest.NewRequest(http.MethodGet, "/?state=s", nil), nil, (&ProviderOAuthHandler{}).Callback, apperror.CodeRequestFieldRequired, "code"},
+		                                           ^
+internal/handlers/request_field_errors_test.go:34:47: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		{"oauth callback state", httptest.NewRequest(http.MethodGet, "/?code=c", nil), nil, (&ProviderOAuthHandler{}).Callback, apperror.CodeRequestFieldRequired, "state"},
+		                                            ^
+internal/handlers/request_field_errors_test.go:35:50: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		{"supermarket icon digest", httptest.NewRequest(http.MethodGet, "/", nil), map[string]string{"digest": "short"}, (&SupermarketHandler{}).GetRegistrySkillIcon, apperror.CodeRequestFieldInvalid, "digest"},
+		                                               ^
+internal/handlers/schedule_test.go:94:47: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			c := testAuthContext(e, httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder(), userID)
+			                                           ^
+internal/handlers/sentinel_status_test.go:59:47: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			c := testAuthContext(e, httptest.NewRequest(http.MethodGet, "/", nil), rec, uuid.NewString())
+			                                           ^
+internal/handlers/sentinel_status_test.go:119:41: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			c := e.NewContext(httptest.NewRequest(http.MethodGet, tc.target, nil), httptest.NewRecorder())
+			                                     ^
+internal/handlers/session_context_lifecycle_test.go:110:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(
+	                          ^
+internal/handlers/session_create_test.go:400:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions", bytes.NewBufferString(body))
+	                          ^
+internal/handlers/session_delete_test.go:228:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodDelete, "/bots/"+botID+"/sessions/"+sessionID, nil)
+	                          ^
+internal/handlers/session_info_budget_plan_provider_test.go:74:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+lifecycleTestBotID+"/sessions/"+lifecycleTestSessionID+"/status?model_id="+modelB.String(), nil)
+	                          ^
+internal/handlers/session_info_composition_test.go:190:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+lifecycleTestBotID+"/sessions/"+lifecycleTestSessionID+"/status", nil)
+	                          ^
+internal/handlers/session_info_composition_test.go:308:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+lifecycleTestBotID+"/sessions/"+lifecycleTestSessionID+"/status", nil)
+	                          ^
+internal/handlers/session_info_composition_test.go:384:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+lifecycleTestBotID+"/sessions/"+lifecycleTestSessionID+"/status", nil)
+	                          ^
+internal/handlers/session_invocation_test.go:132:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+invocationTestBotID+"/sessions/"+sessionID+"/invocations/"+invocationID, nil)
+	                          ^
+internal/handlers/session_list_test.go:97:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, target, nil)
+	                          ^
+internal/handlers/session_queue_test.go:56:50: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	steerContext := e.NewContext(httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(body)), httptest.NewRecorder())
+	                                                ^
+internal/handlers/session_queue_test.go:63:51: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	followContext := e.NewContext(httptest.NewRequest(http.MethodPut, "/", bytes.NewReader(body)), httptest.NewRecorder())
+	                                                 ^
+internal/handlers/session_queue_test.go:131:47: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			c := testAuthContext(e, httptest.NewRequest(http.MethodGet, "/", nil), httptest.NewRecorder(), "user-1")
+			                                           ^
+internal/handlers/session_tasks_test.go:136:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(method, path, nil)
+		                          ^
+internal/handlers/session_tasks_test.go:253:31: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+				req := httptest.NewRequest(http.MethodGet, route.path, nil)
+				                          ^
+internal/handlers/session_tasks_test.go:280:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, base+"/messages", nil)
+	                          ^
+internal/handlers/session_update_test.go:841:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPatch, "/bots/"+botID+"/sessions/"+sessionID, bytes.NewBufferString(body))
+	                          ^
+internal/handlers/session_update_test.go:853:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/sessions/"+sessionID, nil)
+	                          ^
+internal/handlers/sse_headers_test.go:20:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	                          ^
+internal/handlers/supermarket_skills_test.go:42:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/supermarket/skills?registry=memoh&limit=50", nil)
+	                          ^
+internal/handlers/supermarket_skills_test.go:77:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodGet, test.path, nil)
+		                          ^
+internal/handlers/supermarket_skills_test.go:110:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/supermarket/registries/registry/apps/app/releases/"+revision, nil)
+	                          ^
+internal/handlers/supermarket_skills_test.go:142:32: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	request := httptest.NewRequest(http.MethodGet, "/supermarket/artifacts/icon/"+digestText, nil)
+	                              ^
+internal/handlers/supermarket_skills_test.go:183:32: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	request := httptest.NewRequest(http.MethodGet, "/supermarket/artifacts/icon/"+digestText, nil)
+	                              ^
+internal/handlers/supermarket_skills_test.go:294:41: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+				e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+				                                    ^
+internal/handlers/test_error_handlers_test.go:46:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, target, nil))
+	                                    ^
+internal/handlers/token_usage_test.go:92:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/token-usage?from=2026-05-01&to=2026-05-02&session_type=acp_agent", nil)
+	                          ^
+internal/handlers/token_usage_test.go:137:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/token-usage/records?from=2026-05-01&to=2026-05-02&session_type=acp_agent", nil)
+	                          ^
+internal/handlers/token_usage_test.go:179:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/token-usage/records?from=2026-05-01&to=2026-05-02&session_type=discuss", nil)
+	                          ^
+internal/handlers/token_usage_test.go:205:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/"+botID+"/token-usage/records?from=2026-05-01&to=2026-05-02&session_type=conversation", nil)
+	                          ^
+internal/handlers/tool_approval_test.go:50:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/bot-1/tool-approvals/approval-1/approve", strings.NewReader(`{"control_id":"control-1","option_id":"allow-once"}`))
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:46:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:104:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:151:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:214:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:267:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:343:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/users/me", nil)
+	                          ^
+internal/handlers/users_create_bot_stream_test.go:365:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{
+	                          ^
+internal/handlers/workspace_dependencies_test.go:1084:77: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	if err := h.ListWorkspaceDependencyCatalog(e.NewContext(httptest.NewRequest(http.MethodGet, "/workspace-dependencies", nil), rec)); err != nil {
+	                                                                           ^
+internal/handlers/workspace_dependencies_test.go:1104:74: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	err := h.ListWorkspaceDependencyCatalog(e.NewContext(httptest.NewRequest(http.MethodGet, "/workspace-dependencies", nil), httptest.NewRecorder()))
+	                                                                        ^
+internal/handlers/workspace_management_request_test.go:17:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{"workspace_target_id":`+value+`}`))
+			                          ^
+internal/handlers/workspace_management_request_test.go:51:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodGet, "/bots/x/apps?workspace_target_id="+value, nil)
+		                          ^
+internal/handlers/workspace_stream_failure_test.go:184:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots", strings.NewReader(`{"name":"ready-bot","display_name":"Ready Bot","acl_preset":"allow_all","wait_for_ready":true}`))
+	                          ^
+internal/handlers/workspace_stream_test.go:118:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/container", strings.NewReader(body))
+	                          ^
+internal/httpx/request_fields_test.go:28:41: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			c := e.NewContext(httptest.NewRequest(http.MethodGet, tc.target, nil), httptest.NewRecorder())
+			                                     ^
+internal/httpx/request_id_context_test.go:39:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/probe", nil))
+	                                    ^
+internal/httpx/request_id_context_test.go:82:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/probe", nil)
+	                          ^
+internal/httpx/request_id_context_test.go:114:38: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/probe", nil))
+	                                    ^
+internal/server/cors_upload_test.go:15:33: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		request := httptest.NewRequest(http.MethodOptions, "/bots/bot/media/uploads/upload", nil)
+		                              ^
+internal/server/error_handler_test.go:178:55: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			res := serveBoundary(t, tc.err, httptest.NewRequest(method, tc.path, body))
+			                                                   ^
+internal/server/error_handler_test.go:214:63: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	res := serveBoundary(t, context.Canceled, httptest.NewRequest(http.MethodGet, "/probe", nil).WithContext(ctx))
+	                                                             ^
+internal/server/error_handler_test.go:230:78: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	res := serveBoundary(t, errors.New("synthetic failure"), httptest.NewRequest(http.MethodHead, "/probe", nil))
+	                                                                            ^
+internal/server/error_handler_test.go:247:50: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	res := serveBoundary(t, nil, httptest.NewRequest(http.MethodGet, "/panic", nil))
+	                                                ^
+internal/server/error_handler_test.go:263:50: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	res := serveBoundary(t, nil, httptest.NewRequest(http.MethodGet, "/written", nil))
+	                                                ^
+internal/server/error_handler_test.go:281:55: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			res := serveBoundary(t, tc.err, httptest.NewRequest(http.MethodGet, "/probe", nil))
+			                                                   ^
+internal/server/error_handler_test.go:305:50: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	res := serveBoundary(t, nil, httptest.NewRequest(http.MethodGet, "/probe", nil))
+	                                                ^
+internal/server/error_handler_test.go:331:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodPost, "/bind", strings.NewReader(tc.body))
+			                          ^
+internal/server/request_log_test.go:90:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, target, nil)
+			                          ^
+internal/server/request_log_test.go:131:64: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	srv.echo.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/health", nil))
+	                                                              ^
+internal/server/request_log_test.go:175:66: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			srv.echo.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, tc.path, nil))
+			                                                              ^
+internal/server/request_log_test.go:230:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodGet, "/stream", nil)
+			                          ^
+internal/server/server_test.go:94:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	                          ^
+internal/server/server_test.go:133:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	                          ^
+internal/server/upgrade_test.go:168:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	                          ^
+internal/telemetry/echo_test.go:69:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	serve(t, httptest.NewRequest(http.MethodGet, "/bots/bot-1", nil), func(c echo.Context) error {
+	                            ^
+internal/telemetry/echo_test.go:89:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/bot-1", nil)
+	                          ^
+internal/telemetry/echo_test.go:109:37: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	rec := serve(t, httptest.NewRequest(http.MethodGet, "/bots/bot-1", nil), func(c echo.Context) error {
+	                                   ^
+internal/telemetry/echo_test.go:127:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	serve(t, httptest.NewRequest(http.MethodGet, "/bots/bot-1?token=synthetic-secret", nil), func(c echo.Context) error {
+	                            ^
+internal/telemetry/echo_test.go:246:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodGet, "/bots/bot-1?token=synthetic-secret", nil)
+	                          ^
+internal/telemetry/echo_test.go:276:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	serve(t, httptest.NewRequest("PURGE", "/bots/bot-1", nil), func(c echo.Context) error {
+	                            ^
+internal/telemetry/echo_test.go:306:39: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			rec := serve(t, httptest.NewRequest(http.MethodGet, tc.path, nil), handler)
+			                                   ^
+internal/telemetry/echo_test.go:326:32: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	upgrade := httptest.NewRequest(http.MethodGet, "/bots/bot-1", nil)
+	                              ^
+internal/telemetry/echo_test.go:330:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	serve(t, httptest.NewRequest(http.MethodHead, "/health", nil), func(c echo.Context) error {
+	                            ^
+internal/telemetry/echo_test.go:354:32: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			serve(t, httptest.NewRequest(http.MethodGet, "/bots/bot-1", nil), func(c echo.Context) error {
+			                            ^
+internal/workspace/bridge/client_test.go:510:29: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+		req := httptest.NewRequest(http.MethodPost, "/mcp?q=1", strings.NewReader("ping"))
+		                          ^
+internal/workspace/bridge/client_test.go:587:30: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+			req := httptest.NewRequest(http.MethodPost, "/mcp", strings.NewReader("ping")).WithContext(reqCtx)
+			                          ^
+internal/workspace/bridge/client_test.go:637:28: net/http/httptest.NewRequest must not be called. use net/http/httptest.NewRequestWithContext (noctx)
+	req := httptest.NewRequest(http.MethodPost, target, strings.NewReader("ping"))
+	                          ^

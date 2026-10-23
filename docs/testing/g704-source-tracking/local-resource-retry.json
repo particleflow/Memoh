@@ -1,0 +1,13 @@
+{
+  "previous_exit": 137,
+  "previous_output": "Process killed before emitting diagnostics",
+  "cgroup_memory_events": "low 0\nhigh 0\nmax 36642\noom 6\noom_kill 3\noom_group_kill 0\n",
+  "cgroup_memory_max": "17179869184",
+  "retry_env": {
+    "GOMEMLIMIT": "2GiB",
+    "GOGC": "50",
+    "GOMAXPROCS": "2"
+  },
+  "lint_rules_unchanged": true,
+  "timestamp_utc": "2026-10-23T10:58:32Z"
+}

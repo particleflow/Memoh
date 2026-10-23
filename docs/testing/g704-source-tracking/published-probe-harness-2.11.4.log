@@ -1,0 +1,29 @@
+../../g704-probe-bhspol01/probe.go:17:18: G704: SSRF via taint analysis (gosec)
+ return client.Do(req)
+                 ^
+../../g704-probe-bhspol01/probe.go:22:17: G704: SSRF via taint analysis (gosec)
+ return http.Get(incoming.URL.Query().Get("destination"))
+                ^
+../../g704-probe-bhspol01/probe.go:22:17: G704: SSRF via taint analysis (gosec)
+ return http.Get(incoming.URL.Query().Get("destination"))
+                ^
+{
+  "analysis_only": true,
+  "network_requests": 0,
+  "runs": [
+    {
+      "version": "2.10.1",
+      "exit_code": 1,
+      "constant_destination_flagged": true,
+      "untrusted_destination_flagged": true,
+      "g704_count": 2
+    },
+    {
+      "version": "2.11.4",
+      "exit_code": 1,
+      "constant_destination_flagged": false,
+      "untrusted_destination_flagged": true,
+      "g704_count": 1
+    }
+  ]
+}

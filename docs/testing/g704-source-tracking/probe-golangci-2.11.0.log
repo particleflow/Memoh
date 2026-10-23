@@ -1,0 +1,3 @@
+../g704-investigation/probe/probe.go:22:17: G704: SSRF via taint analysis (gosec)
+ return http.Get(incoming.URL.Query().Get("destination"))
+                ^

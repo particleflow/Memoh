@@ -1,0 +1,23 @@
+// Package probe is only analyzed. None of these functions is executed.
+package probe
+
+import (
+ "context"
+ "net/http"
+ "strings"
+ "time"
+)
+
+// ConstantDestination has no external URL source or provider-specific data.
+func ConstantDestination(ctx context.Context) (*http.Response, error) {
+ req, err := http.NewRequestWithContext(ctx, http.MethodPost,
+  "https://example.invalid/v1/images/generations", strings.NewReader("{}"))
+ if err != nil { return nil, err }
+ client := &http.Client{Timeout: time.Second, CheckRedirect: func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }}
+ return client.Do(req)
+}
+
+// UntrustedDestination is the negative control that must remain detectable.
+func UntrustedDestination(incoming *http.Request) (*http.Response, error) {
+ return http.Get(incoming.URL.Query().Get("destination"))
+}

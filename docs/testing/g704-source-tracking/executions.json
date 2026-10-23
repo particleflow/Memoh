@@ -1,0 +1,51 @@
+{
+  "product_base": "1369312252d0f55cd6e35a058927f921a80a753b",
+  "product_changes": false,
+  "lint_config_changes": false,
+  "ci_pin_changed": false,
+  "new_workflow_dispatches": 0,
+  "local_checks": [
+    {
+      "name": "published differential probe",
+      "exit_code": 0,
+      "log": "published-probe-harness.log"
+    },
+    {
+      "name": "full 2.11.0 initial cache attempt",
+      "exit_code": 1,
+      "log": "full-lint-2.11.0.log"
+    },
+    {
+      "name": "full 2.11.0 separate cache attempt",
+      "exit_code": 137,
+      "log": "full-lint-2.11.0-fresh-analysis-cache.log"
+    },
+    {
+      "name": "full 2.11.0 bounded memory",
+      "exit_code": 1,
+      "log": "full-lint-2.11.0-bounded-memory.log"
+    },
+    {
+      "name": "official runtime/contextview boundary",
+      "exit_code": 0,
+      "log": "core-boundary.log"
+    },
+    {
+      "name": "full 2.11.4 bounded memory",
+      "exit_code": 1,
+      "log": "full-lint-2.11.4-bounded-memory.log"
+    },
+    {
+      "name": "2.11.4 differential probe",
+      "exit_code": 0,
+      "log": "published-probe-harness-2.11.4.log"
+    }
+  ],
+  "full_lint_command": "golangci-lint run --concurrency 2 ./...",
+  "resource_env": {
+    "GOMEMLIMIT": "2GiB",
+    "GOGC": "50",
+    "GOMAXPROCS": "2"
+  },
+  "pending_ci_upgrade": "Not performed: full lint compatibility failed; no rules or core code relaxed."
+}

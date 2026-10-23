@@ -1,0 +1,6 @@
+{
+  "official_release": "https://github.com/golangci/golangci-lint/releases/tag/v2.11.0",
+  "archive": "golangci-lint-2.11.0-linux-amd64.tar.gz",
+  "sha256": "aa447ac6d1a647e0c84ab729c3b051ce28e488db978d5ea6a2342c9e1701def2",
+  "official_checksum_match": true
+}
