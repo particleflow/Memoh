@@ -36,17 +36,23 @@ def verify_snapshot(snapshot):
     files = {p.relative_to(ROOT).as_posix(): sha(p) for p in inputs()}
     assert snapshot['files'] == files, 'Formal source set or digest drift'
     assert snapshot['sourceSha256'] == hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest(), 'Invalid source identity'
+    encoded = (json.dumps(snapshot, ensure_ascii=False, indent=2) + '\n').encode('utf-8')
+    for path in (BASE / 'materials/source-build.json', BASE / 'app/entry/src/main/resources/rawfile/source-build.json'):
+        assert checked(path).read_bytes() == encoded, 'Generated source metadata drift'
     package = checked(ROOT / 'mobile/.build/memoh-web/resource-package.json')
     assert snapshot['webResources'] == {'path': package.relative_to(ROOT).as_posix(), 'sha256': sha(package)}, 'Packaged Web input drift'
     verify_web_package()
     return [ROOT / name for name in files]
 
-def verify_web_package():
+def current_web_package():
     directory = str(checked(ROOT / 'mobile'))
     if directory not in sys.path:
         sys.path.insert(0, directory)
     from package_memoh_web import verify_current_package
-    package = verify_current_package()
+    return verify_current_package()
+
+def verify_web_package():
+    package = current_web_package()
     verify_rawfile_resources(package)
     return package
 
@@ -55,8 +61,8 @@ def verify_rawfile_resources(package):
     rawfile = checked(BASE / 'app/entry/src/main/resources/rawfile')
     expected = {'client-web/' + name: digest for name, digest in package['resources'].items()}
     expected['ui-theme.json'] = sha(checked(ROOT / 'contracts/ui_theme.json'))
-    expected.update({name: sha(checked(rawfile / name))
-                     for name in ('source-build.json', 'raw-codec-license.txt')})
+    expected['source-build.json'] = sha(checked(rawfile / 'source-build.json'))
+    expected['raw-codec-license.txt'] = hashlib.sha256(raw_license_bytes()).hexdigest()
     actual = {}
     for path in rawfile.rglob('*'):
         checked(path)
@@ -65,13 +71,27 @@ def verify_rawfile_resources(package):
     assert actual == expected, 'Physical rawfile set or digest drift'
     return expected
 
-def inputs():
+def raw_dependency():
     lock = json.loads((BASE / 'raw-codec.lock.json').read_text(encoding='utf-8'))
     dependency = checked(ROOT / lock['directory'])
     assert dependency.resolve().is_relative_to(BASE / '.build')
     assert not any(p.is_symlink() or p.is_junction() for p in dependency.rglob('*')), 'RAW dependency link forbidden'
     actual = {p.relative_to(dependency).as_posix(): sha(p) for p in dependency.rglob('*') if p.is_file()}
     assert actual == lock['files'], 'Pinned RAW decoder source drift or missing dependency'
+    return lock, dependency
+
+def raw_license_bytes():
+    lock, dependency = raw_dependency()
+    parts = [('LibRaw ' + lock['version'] + '\nSource: ' + lock['source'] +
+              '\nArchive SHA256: ' + lock['archive_sha256'] + '\n').encode('utf-8')]
+    for name in ['COPYRIGHT', *lock['licenses']]:
+        path = checked(dependency / name)
+        assert path.is_relative_to(dependency) and name in lock['files'], 'Unpinned RAW license'
+        parts.extend([('\n===== ' + name + ' =====\n').encode('utf-8'), path.read_bytes()])
+    return b'\n'.join(parts)
+
+def inputs():
+    raw_dependency()
     files = set()
     for directory, dirs, names in os.walk(BASE, followlinks=False):
         current = Path(directory)
@@ -106,7 +126,11 @@ def main():
     metadata = [checked(BASE / 'materials/source-build.json'),
                 checked(BASE / 'app/entry/src/main/resources/rawfile/source-build.json')]
     package = checked(ROOT / 'mobile/.build/memoh-web/resource-package.json')
-    verify_web_package()
+    # Validate existing Web and dependency inputs before generating native
+    # metadata. Full rawfile/snapshot checks run after all three outputs exist.
+    current_web_package()
+    license_path = checked(BASE / 'app/entry/src/main/resources/rawfile/raw-codec-license.txt')
+    license_path.write_bytes(raw_license_bytes())
     files = {p.relative_to(ROOT).as_posix(): sha(p) for p in inputs()}
     identity = hashlib.sha256(json.dumps(files, sort_keys=True).encode()).hexdigest()
     snapshot = {'sourceSha256': identity, 'files': files, 'scope': 'formal-shared-chat-client',
@@ -118,6 +142,7 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     for p in metadata:
         p.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    verify_snapshot(snapshot)
     raw = [{'path': n, 'sha256': h, 'bytes': (ROOT/n).stat().st_size,
             'rawBytesBase64': base64.b64encode((ROOT/n).read_bytes()).decode('ascii')} for n,h in files.items()]
     (output/'current-source-raw.json').write_text(json.dumps(raw, indent=2)+'\n', encoding='utf-8')

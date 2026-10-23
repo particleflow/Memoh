@@ -81,7 +81,8 @@ The historical CLT SHA256 is
 `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`.
 LibRaw 0.22.2 was subsequently materialized from the locked official source and
 all 244 files verified; see [dependency input evidence](harmony-libraw-input.md).
-That follow-up also records missing generated native resource inputs. No SDK/CLT
+The later [metadata bootstrap correction](harmony-materials-bootstrap.md)
+generates and verifies the previously missing native resource inputs. No SDK/CLT
 or dependency binary is published here.
 
 ArkTS/native C++ compilation, HAP production/signing, Harmony permission/TLS

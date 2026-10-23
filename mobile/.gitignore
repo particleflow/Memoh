@@ -32,3 +32,7 @@ client/mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets
 client/mobile/harmony/app/entry/src/main/ets/common/WebResourceManifest.ets
 client/mobile/harmony/app/entry/src/main/resources/rawfile/client-web/
 client/mobile/harmony/app/entry/src/main/resources/rawfile/ui-theme.json
+# Generated from verified inputs by harmony/tools/materials.py.
+client/mobile/harmony/materials/source-build.json
+client/mobile/harmony/app/entry/src/main/resources/rawfile/source-build.json
+client/mobile/harmony/app/entry/src/main/resources/rawfile/raw-codec-license.txt

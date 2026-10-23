@@ -941,14 +941,16 @@
     },
     {
       "path": "mobile/client/mobile/harmony/tools/materials.py",
-      "sha256": "0f3254d796dfdff219c9919802068ffc2f0eaf3ebf87ec948f748a6adcb9d5c7",
-      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
+      "sha256": "22d66cbe794092342ce38429bc01fcf80a7f9d613983b17bb749001a6c05bad6",
+      "origin": "Recovered from the user-provided 5900 source checkpoint, then repaired for first-time native metadata generation; historical inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3c2ac248b2e475caa362a6266a323e73d6cf16dca994244c6807bdfcb443c888",
       "archiveCheckpointSHA256": "3c2ac248b2e475caa362a6266a323e73d6cf16dca994244c6807bdfcb443c888",
       "preparationChanges": [
-        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
-      ]
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "Generate LibRaw notices from verified locked files before source binding, then verify both generated metadata copies and complete rawfile integrity. New bootstrap repair, not recovered 5a7 identity."
+      ],
+      "bootstrapBaseSHA256": "0f3254d796dfdff219c9919802068ffc2f0eaf3ebf87ec948f748a6adcb9d5c7"
     },
     {
       "path": "mobile/client/mobile/harmony/tools/prepare_raw_codec.py",
@@ -1500,5 +1502,15 @@
     "resourcePackageVerified": true,
     "nativeCompilerExecuted": false,
     "historicalLaterCloudChangesUnverified": 19
+  },
+  "nativeMetadataBootstrap": {
+    "baseCommit": "56d73c830eeba03583f8b30508d0932351c8a680",
+    "modifiedSourcePaths": [
+      "mobile/client/mobile/harmony/tools/materials.py"
+    ],
+    "generatedMetadataCopies": 2,
+    "sourceInputs": 95,
+    "tests": 9,
+    "nativeCompilerExecuted": false
   }
 }

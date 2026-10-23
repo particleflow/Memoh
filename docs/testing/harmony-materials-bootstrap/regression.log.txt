@@ -1,0 +1,14 @@
+test_both_metadata_copies_are_verified (__main__.MaterialsBootstrap.test_both_metadata_copies_are_verified) ... ok
+test_clean_generation_binds_actual_files_and_license_bytes (__main__.MaterialsBootstrap.test_clean_generation_binds_actual_files_and_license_bytes) ... ok
+test_current_native_source_changes_require_new_snapshot (__main__.MaterialsBootstrap.test_current_native_source_changes_require_new_snapshot) ... ok
+test_generated_license_tampering_is_rejected (__main__.MaterialsBootstrap.test_generated_license_tampering_is_rejected) ... ok
+test_locked_license_tampering_stops_before_generation (__main__.MaterialsBootstrap.test_locked_license_tampering_stops_before_generation) ... ok
+test_partial_previous_generation_is_replaced_from_current_inputs (__main__.MaterialsBootstrap.test_partial_previous_generation_is_replaced_from_current_inputs) ... ok
+test_repeat_generation_is_deterministic_without_old_metadata (__main__.MaterialsBootstrap.test_repeat_generation_is_deterministic_without_old_metadata) ... ok
+test_unknown_rawfile_is_not_adopted_by_new_snapshot (__main__.MaterialsBootstrap.test_unknown_rawfile_is_not_adopted_by_new_snapshot) ... ok
+test_web_package_tampering_stops_before_generation (__main__.MaterialsBootstrap.test_web_package_tampering_stops_before_generation) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 34.441s
+
+OK

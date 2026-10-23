@@ -1,0 +1,31 @@
+{
+  "baseCommit": "56d73c830eeba03583f8b30508d0932351c8a680",
+  "sourceIdentitySHA256": "655585a7a296ce7b273d5315bd40cb9118ea6d59abefc547f3709963226b5754",
+  "sourceFiles": 95,
+  "metadataCopiesIdentical": true,
+  "generatedFiles": {
+    "mobile/harmony/materials/source-build.json": {
+      "sha256": "2d26578a0dc39898eb12167cd2b9cb88cc751944415a4f7952277f5bec62ee11",
+      "bytes": 12170
+    },
+    "mobile/harmony/app/entry/src/main/resources/rawfile/source-build.json": {
+      "sha256": "2d26578a0dc39898eb12167cd2b9cb88cc751944415a4f7952277f5bec62ee11",
+      "bytes": 12170
+    },
+    "mobile/harmony/app/entry/src/main/resources/rawfile/raw-codec-license.txt": {
+      "sha256": "18cca3c964b4df76e43b73b9cfa67ddec074581cd2b075203ee6414c4b43934f",
+      "bytes": 42681
+    }
+  },
+  "regressionTests": 9,
+  "regressionPassed": true,
+  "fixtures": "Disposable copy of actual source, verified Web package and locked LibRaw; no old three generated files, fabricated receipts or SDK mocks",
+  "buildEntrySourcePreflightPassed": true,
+  "buildEntryStopPhase": "toolchain_preflight",
+  "missingTool": "validation/harmony/.build/commandline-tools/command-line-tools/bin/hvigorw",
+  "officialApi26Compile": false,
+  "HAPProduced": false,
+  "webBuildRepeated": false,
+  "existingFeatureTestsRepeated": false,
+  "SDKAcquisitionRetried": false
+}

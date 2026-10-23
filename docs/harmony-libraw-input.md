@@ -1,5 +1,9 @@
 # Verified LibRaw build input
 
+The generated-input order issue recorded below is subsequently resolved by
+[the first-time metadata correction](harmony-materials-bootstrap.md). The LibRaw
+verification and SDK acquisition requirements remain valid.
+
 The existing `prepare_raw_codec.py` restored the dependency at source checkpoint
 `59126ace1e408baff5fb790aa41732c6414f2617`. It fetched only the locked
 [official LibRaw 0.22.2 source](https://www.libraw.org/data/LibRaw-0.22.2.tar.gz)
