@@ -269,13 +269,15 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_download.cjs",
-      "sha256": "925fa30a5a258d3c9b0b3233fa9b6e392f9314bec6a518e912e42cda80644cb9",
+      "sha256": "573ee2f0f4f335a6d52c5757122ba57733ace0bf66e0847ef2d2ec538e1b8234",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
       ],
-      "endpointScopeBaseSHA256": "0bfff8e5d4b2a67a0d9dabf3fa1d1c830fe8a97999d07726c302aaf4b7772103"
+      "endpointScopeBaseSHA256": "0bfff8e5d4b2a67a0d9dabf3fa1d1c830fe8a97999d07726c302aaf4b7772103",
+      "nativeIntegrationBaseSHA256": "925fa30a5a258d3c9b0b3233fa9b6e392f9314bec6a518e912e42cda80644cb9"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_native_voice_stream.cjs",
@@ -322,13 +324,15 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
-      "sha256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c",
+      "sha256": "a59b50b405fdb38c2db6125fe0f6aebf9aef3b45e605779deca1c7f4fe82314f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
       ],
-      "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe"
+      "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
+      "nativeIntegrationBaseSHA256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config_ui.py",
@@ -436,15 +440,17 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
+      "sha256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
       "archiveCheckpointSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
       "unified40fBaseSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
       "preparationChanges": [
-        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
-      ]
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content.",
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+      ],
+      "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3"
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
@@ -630,14 +636,16 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
-      "sha256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde",
+      "sha256": "39be155e6a864f9fe73f084bd7473388f2d8f251001cdf476b1ecf500de7b93e",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
       "archiveCheckpointSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
       "preparationChanges": [
-        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
-      ]
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+      ],
+      "nativeIntegrationBaseSHA256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeExchangeDirectory.ets",
@@ -1053,11 +1061,15 @@
     },
     {
       "path": "mobile/client/mobile/package_memoh_web.py",
-      "sha256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc",
+      "sha256": "4456876c563d010b4808f3692741f3d77b5d70f2347c73792b93a300c63d4f37",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "071ddf8f753f9dbe5069768f04dcaaa6cc963ccedc1285196b46a695bfd35639",
-      "archiveCheckpointSHA256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc"
+      "archiveCheckpointSHA256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc",
+      "nativeIntegrationBaseSHA256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc",
+      "preparationChanges": [
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+      ]
     },
     {
       "path": "mobile/client/tools/artifact_paths.py",
@@ -1473,5 +1485,20 @@
     "webTypecheckAndBuildPassed": true,
     "resources": 783,
     "nativeHAPCompiled": false
+  },
+  "nativeIntegration": {
+    "baseCommit": "732f09d8f25893b63f5b2d5ba6d35c5f3d28fd15",
+    "modifiedSourcePaths": [
+      "mobile/client/tests/stage2/harmony_native_download.cjs",
+      "mobile/client/tests/stage2/harmony_service_config.cjs",
+      "mobile/client/mobile/build_memoh_web.py",
+      "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "mobile/client/mobile/package_memoh_web.py"
+    ],
+    "webResources": 786,
+    "webTypecheckPassed": true,
+    "resourcePackageVerified": true,
+    "nativeCompilerExecuted": false,
+    "historicalLaterCloudChangesUnverified": 19
   }
 }

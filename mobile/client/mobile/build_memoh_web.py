@@ -39,7 +39,8 @@ def inputs():
         'mobile/memoh/licenses/lucide.txt', 'mobile/memoh/licenses/wavesurfer.txt',
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
-        'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts')]
+        'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts',
+        'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css')]
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
 
@@ -49,7 +50,7 @@ def verify_modules(modules):
     assert all(sha(ROOT / name) == digest for name, digest in modules.items()), 'Upstream archive drift'
 
 
-def context_archive(lock, base=BASE):
+def context_archive(lock, base=BASE, platform='harmony'):
     entry_name = json.loads((ROOT / 'config/memoh_client.json').read_text())['productName'] or 'Memoh'
     assert isinstance(entry_name, str) and entry_name.strip(), 'Product entry name is required'
     warm = json.loads((ROOT / 'contracts/ui_theme.json').read_text())['themes']['warm-theme']
@@ -712,6 +713,12 @@ function close() {''', 1),
     ]
     patches = {}
     context = base / 'official-context.tar'
+    if platform == 'harmony':
+        changes['apps/web/index.html'].append(('/src/main.ts', '/src/lib/harmony-entry.ts', 1))
+        changes['apps/web/src/main.ts'].extend([
+            ("import { setupApiClient }", "import { readServiceConfig } from './lib/harmony-service-config'\nimport { setupApiClient }", 1),
+            ('setupApiClient({', "const service = readServiceConfig()\nif (!service || service.resetPending) throw new Error('SERVICE_CONFIG_REQUIRED')\nsetupApiClient({\n  baseUrl: service.apiOrigin,", 1),
+        ])
     with tarfile.open(ROOT / lock['archive'], 'r:gz') as source, tarfile.open(context, 'w') as target:
         for member in source:
             assert member.name.startswith(lock['archivePrefix']) or member.name.rstrip('/') == lock['archivePrefix'].rstrip('/')
@@ -763,6 +770,9 @@ function close() {''', 1),
             'harmony.ts', 'harmony-files.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
             'harmony-download.ts', 'harmony-service-url.ts')}
+        if platform == 'harmony':
+            for name in ('harmony-entry.ts', 'harmony-service-config.ts', 'harmony-service.css'):
+                host_sources[name] = ROOT / 'mobile/memoh' / name
         host_sources['harmony-theme.json'] = ROOT / 'contracts/ui_theme.json'
         for name, path in host_sources.items():
             data = path.read_bytes()
@@ -847,9 +857,10 @@ def main():
     modules = {lock['archive']: lock['archiveSHA256']}
     verify_modules(modules)
     before = inputs()
-    context, patches = context_archive(lock, base)
-    config = read_config(require_api=args.platform == 'harmony')
-    api_url = config['apiOrigin'] if args.platform == 'harmony' else '/api'
+    context, patches = context_archive(lock, base, args.platform)
+    # Native selects the validated API base at runtime before importing main.
+    # No server address or credential is baked into the distributable.
+    api_url = '/api'
     if args.builder == 'native':
         native_build(base, context, patches, lock, before, modules, api_url, args.platform, args.pnpm)
         return

@@ -1,5 +1,8 @@
 # Restored client Web build against the unified candidate
 
+Current follow-up: [runtime configuration and native download source integration](harmony-native-integration.md). Web packaging is verified; native compilation and phone acceptance remain blocked.
+
+
 This follows source restoration commit `163774003827af2ab3fc1785f9324e2c571884b4`
 and pins Memoh `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8` with UI
 `f69402a55dd87a59c10722fe11507ad8fd7048f5`. The existing recovered overlay builder

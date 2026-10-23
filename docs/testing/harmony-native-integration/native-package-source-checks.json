@@ -1,0 +1,11 @@
+{
+  "resources": 786,
+  "runtimeConfigPreserved": true,
+  "generatedValidatorDriftRejected": true,
+  "packageVerifiedAfterRestore": true,
+  "nativeCompileExecuted": false,
+  "SDKMetadataPresent": false,
+  "CLTVersion": "26.0.0.851",
+  "SDKVersion": "26.0.0.105",
+  "API": 26
+}

@@ -62,7 +62,13 @@ for (const host of ['192.0.0.8','192.0.0.11','192.0.2.1','198.51.100.1','198.18.
 const nativeConfig=load('mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets',{'./ServiceUrl':nativeValidator})
 const policy=load('mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets',{'@kit.ArkWeb':{webview:{}},'@kit.ArkTS':{url:{URL:{parseURL:v=>new URL(v)}}},'./WebResourceManifest':{WEB_RESOURCES:{}},'./MemohClientConfig':nativeConfig})
 const events=[];class Media{close(){events.push('close')}prepare(){events.push('prepare')}}
-const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':nativeConfig,'./NativeVoice':{NativeVoice:Media},'./NativeVoiceTransfer':{NativeVoiceTransfer:Media},'./NativeMediaDownload':{NativeMediaDownload:Media},'./NativeResumableUpload':{NativeResumableUpload:Media}})
+const downloads=[];class Download extends Media{
+ constructor(context,authorized){super();this.authorized=authorized}
+ async fetch(input){assert.equal(this.authorized(),true);downloads.push(['fetch',input]);return{operation:input.operation,hash:input.hash,size:input.size}}
+ async save(operation,botId){assert.equal(this.authorized(),true);downloads.push(['save',operation,botId]);return true}
+ abort(operation,botId){downloads.push(['abort',operation,botId])}
+}
+const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':nativeConfig,'./NativeVoice':{NativeVoice:Media},'./NativeMediaDownload':{NativeMediaDownload:Download}})
 let frame='begonia-client://app/index.html';const controller={getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=>frame,registerJavaScriptProxy(){},deleteJavaScriptRegister(){}}
 const bridge=new NativeClient(controller,s=>events.push(s),async()=>{},{});bridge.register()
 async function call(command,rest={}){return JSON.parse(await bridge.request(JSON.stringify({version:1,command,...rest})))}
@@ -74,8 +80,25 @@ async function call(command,rest={}){return JSON.parse(await bridge.request(JSON
  check(()=>assert.equal(policy.memohRequest('wss://alpha.example/api/bots/b/chat'),true))
  for(const wrong of [b+'/bots/b/media','https://alpha.example/api-other/media','https://download.example/api/media','https://user@alpha.example/api/media','https://alpha.example/api/%2fsecret'])check(()=>assert.equal(policy.memohRequest(wrong),false))
  await call('client.state',{state:'ready'})
+ const bot='11111111-1111-4111-8111-111111111111',session='22222222-2222-4222-8222-222222222222',delegation='33333333-3333-4333-8333-333333333333'
+ const input={operation:'a'.repeat(32),botId:bot,hash:'b'.repeat(64),size:123,name:'original.bin',url:a+'/bots/'+bot+'/sessions/'+session+'/delegations/'+delegation+'/attachments/'+'b'.repeat(64),authorization:'Bearer synthetic-test-only'}
+ const fetched=await call('download.fetch',input)
+ check(()=>assert.equal(fetched.data.hash,input.hash));check(()=>assert.deepEqual(JSON.parse(JSON.stringify(downloads[0][1])),input))
+ check(()=>assert.equal(downloads[0][1].url.includes('/sessions/'+session+'/delegations/'+delegation+'/'),true))
+ assert.equal((await call('download.save',input)).data,true);checks++
+ assert.equal((await call('download.abort',input)).ok,true);checks++
+ check(()=>assert.equal(downloads[1][1],input.operation));check(()=>assert.equal(downloads[1][2],bot))
+ const count=downloads.length
+ assert.equal((await call('download.fetch',{...input,authorization:null})).ok,false);checks++
+ check(()=>assert.equal(downloads.length,count))
+ frame='https://attacker.example';assert.equal((await call('download.fetch',input)).ok,false);checks++
+ frame='begonia-client://app/index.html'
+ await call('client.state',{state:'login-page'})
+ assert.equal((await call('download.fetch',input)).ok,false);checks++
+ check(()=>assert.equal(downloads.length,count))
+ await call('client.state',{state:'ready'})
  assert.equal((await call('client.configure',{apiOrigin:b})).ok,false);checks++
- await call('client.configuration');check(()=>assert.equal(nativeConfig.MEMOH_ORIGIN,''));check(()=>assert.ok(events.slice(-5,-1).every(e=>e==='close')))
+ await call('client.configuration');check(()=>assert.equal(nativeConfig.MEMOH_ORIGIN,''));check(()=>assert.deepEqual(events.slice(-3),['close','close','login-page']))
  assert.equal((await call('client.configure',{apiOrigin:b})).ok,true);checks++
  check(()=>assert.equal(policy.memohRequest(a+'/bots/b/media'),false))
  check(()=>assert.equal(policy.memohRequest(b+'/bots/b/media'),true))

@@ -1,0 +1,19 @@
+{
+  "actualHarmonyWebBuild": true,
+  "viewport": "412x915",
+  "emptyConfigForm": true,
+  "privateHTTPRejectedWithoutStorage": true,
+  "explicitHTTPSConfigured": true,
+  "loginSettingsReturnsToConfig": true,
+  "tokenPresent": false,
+  "pageExceptions": [],
+  "blockedSyntheticRequests": 0,
+  "nativeBridgeExecuted": false,
+  "authenticatedNAS": false,
+  "scope": "Browser preview of actual packaged Web; synthetic endpoint intercepted, no OS Kits or phone acceptance",
+  "screenshots": [
+    "native-config-empty.png",
+    "native-config-lan-validation.png",
+    "native-config-login-preview.png"
+  ]
+}

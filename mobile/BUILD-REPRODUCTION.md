@@ -1,5 +1,8 @@
 # Reproduction inputs and limits
 
+Current follow-up: [runtime configuration and native download source integration](../docs/harmony-native-integration.md). Web packaging is verified; native compilation and phone acceptance remain blocked.
+
+
 The original public-subset status below is historical. The
 [archive restoration checkpoint](../docs/harmony-archive-restoration.md) recovers
 all 72 excluded paths and two additional tests. Integration of that older

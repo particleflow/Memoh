@@ -3,8 +3,8 @@ const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http
 const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
 const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'harmony-download-')),positions=new Map()
 let maxRead=0,maxWrite=0,maxChunk=0,readCalls=0,copyHook,shortWrite=false,diskFail=false,failCleanup=false
-function read(fd,b,o={}){maxRead=Math.max(maxRead,b.byteLength);readCalls++;const at=positions.get(fd)||0;return new Promise((resolve,reject)=>fs.read(fd,new Uint8Array(b),0,o.length??b.byteLength,at,(e,n)=>{positions.set(fd,at+(n||0));copyHook?.();e?reject(e):resolve(n)}))}
-function write(fd,b,o={}){maxWrite=Math.max(maxWrite,b.byteLength);if(diskFail)throw Error('ENOSPC');const at=positions.get(fd)||0,len=Math.min(o.length??b.byteLength,shortWrite?8191:Infinity),n=fs.writeSync(fd,new Uint8Array(b),0,len,at);positions.set(fd,at+n);return n}
+function read(fd,b,o={}){maxRead=Math.max(maxRead,b.byteLength);readCalls++;const at=o.offset??positions.get(fd)??0;return new Promise((resolve,reject)=>fs.read(fd,new Uint8Array(b),0,o.length??b.byteLength,at,(e,n)=>{positions.set(fd,at+(n||0));copyHook?.();e?reject(e):resolve(n)}))}
+function write(fd,b,o={}){maxWrite=Math.max(maxWrite,b.byteLength);if(diskFail)throw Error('ENOSPC');const at=o.offset??positions.get(fd)??0,len=Math.min(o.length??b.byteLength,shortWrite?8191:Infinity),n=fs.writeSync(fd,new Uint8Array(b),0,len,at);positions.set(fd,at+n);return n}
 const io={OpenMode:{READ_ONLY:0,WRITE_ONLY:1,READ_WRITE:2,CREATE:64,TRUNC:512,NOFOLLOW:131072},WhenceType:{SEEK_SET:0},
  openSync:(p,m)=>{const fd=fs.openSync(p.startsWith('file:')?new URL(p):p,m);positions.set(fd,0);return{fd}},
  open:async(p,m)=>io.openSync(p,m),closeSync:f=>{const fd=typeof f==='number'?f:f.fd;positions.delete(fd);fs.closeSync(fd)},
@@ -12,18 +12,19 @@ const io={OpenMode:{READ_ONLY:0,WRITE_ONLY:1,READ_WRITE:2,CREATE:64,TRUNC:512,NO
  fsyncSync:fd=>fs.fsyncSync(fd),truncateSync:(fd,n)=>{if(failCleanup)throw Error('EIO');fs.ftruncateSync(fd,n)},accessSync:p=>fs.existsSync(p),mkdirSync:p=>fs.mkdirSync(p),unlinkSync:p=>fs.unlinkSync(p)}
 const kitCrypto={cryptoFramework:{createMd:()=>{const h=crypto.createHash('sha256');return{update:async({data})=>h.update(data),digest:async()=>({data:new Uint8Array(h.digest())})}}}}
 function load(file,imports,globals={}){const code=ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;const m={exports:{}};vm.runInNewContext(code,{exports:m.exports,require:n=>{assert.ok(n in imports,n);return imports[n]},ArrayBuffer,Uint8Array,Map,Set,Promise,Error,...globals});return m.exports}
-let mode='normal',total=0,wantHash='',source='',requests=[],pickerCalls=0,pickMode='save',resolvePicker,pickReached
+let delegatedPath='',measureTimer;let mode='normal',total=0,wantHash='',source='',requests=[],pickerCalls=0,pickMode='save',resolvePicker,pickReached
 const destination=path.join(tmp,'saved.bin'),sourceSmall=path.join(tmp,'small.bin')
 function fileHash(p){const h=crypto.createHash('sha256'),f=fs.openSync(p,'r'),b=Buffer.alloc(262144);try{for(let n;(n=fs.readSync(f,b,0,b.length,null))>0;)h.update(b.subarray(0,n));return h.digest('hex')}finally{fs.closeSync(f)}}
 const server=http.createServer((req,res)=>{
  requests.push(req.headers.range);assert.equal(req.headers.authorization,'Bearer synthetic-test-only');assert.equal(req.headers['if-range'],'"'+wantHash+'"')
- assert.equal(req.url,'/api/bots/bot-a/media/'+wantHash);const start=Number(/^bytes=(\d+)-$/.exec(req.headers.range)[1]);
+ assert.equal(req.url,delegatedPath||'/api/bots/bot-a/media/'+wantHash);const start=Number(/^bytes=(\d+)-$/.exec(req.headers.range)[1]);
  let status=(mode==='ignore-range'||(mode==='resume-ignored'&&start>0))?200:206,begin=status===200?0:start
  const headers={'content-length':total-begin,'etag':'"'+wantHash+'"','content-type':'application/octet-stream'}
  if(status===206)headers['content-range']='bytes '+begin+'-'+(total-1)+'/'+total
  if(mode==='wrong-range')headers['content-range']='bytes 1-'+(total-1)+'/'+total
  if(mode==='wrong-etag')headers.etag='"'+'0'.repeat(64)+'"'
  if(mode==='unauthorized')status=401
+ if(mode==='forbidden')status=403
  if(mode==='redirect'){status=302;headers.location='http://127.0.0.1:1/leak';}
  res.writeHead(status,headers)
  if(mode==='hold'){res.flushHeaders();return}
@@ -50,11 +51,18 @@ const server=http.createServer((req,res)=>{
  let seq=0;const input=()=>({operation:(++seq).toString(16).padStart(32,'0'),botId:'bot-a',hash:wantHash,size:total,name:'test.bin',url:origin+'/bots/bot-a/media/'+wantHash,authorization:'Bearer synthetic-test-only'})
  const cacheEmpty=()=>assert.deepEqual(fs.readdirSync(path.join(tmp,'memoh-original-downloads')),[])
  global.gc?.();const baseline=process.memoryUsage(),peak={...baseline};let samples=0
- const measure=()=>{samples++;const m=process.memoryUsage();for(const k of Object.keys(m))peak[k]=Math.max(peak[k],m[k])},timer=setInterval(measure,10),started=Date.now()
+ const measure=()=>{samples++;const m=process.memoryUsage();for(const k of Object.keys(m))peak[k]=Math.max(peak[k],m[k])},timer=measureTimer=setInterval(measure,10),started=Date.now()
  const q=input(),ready=await service.fetch(q);assert.equal(ready.hash,wantHash);assert.equal(pickerCalls,0);assert.equal(await service.save(q.operation,q.botId),true);measure();clearInterval(timer)
  assert.equal(fs.statSync(destination).size,total);assert.equal(fileHash(destination),wantHash);cacheEmpty();const milliseconds=Date.now()-started,largeRequests=[...requests]
  // All remaining checks use real 1 MiB originals and the same production class.
  fs.writeFileSync(sourceSmall,Buffer.alloc(1048576,83));source=sourceSmall;total=1048576;wantHash=fileHash(source)
+ const bot='11111111-1111-4111-8111-111111111111',session='22222222-2222-4222-8222-222222222222',delegation='33333333-3333-4333-8333-333333333333'
+ delegatedPath='/api/bots/'+bot+'/sessions/'+session+'/delegations/'+delegation+'/attachments/'+wantHash
+ const scoped=()=>({...input(),botId:bot,url:origin+delegatedPath.slice(4)})
+ const scopedOK=scoped();await service.fetch(scopedOK);await service.save(scopedOK.operation,bot);assert.equal(fileHash(destination),wantHash);cacheEmpty()
+ for(const denied of ['unauthorized','forbidden','redirect']){mode=denied;const count=requests.length;await assert.rejects(service.fetch(scoped()));assert.equal(requests.length,count+1);cacheEmpty()}
+ mode='normal';const invalid=scoped();invalid.url+='?token=forbidden';const count=requests.length;await assert.rejects(service.fetch(invalid),/REQUEST/);assert.equal(requests.length,count)
+ delegatedPath=''
  for(const bad of ['wrong-range','wrong-etag','unauthorized','redirect']){mode=bad;await assert.rejects(service.fetch(input()));cacheEmpty()}
  mode='normal';const wrong=input();wrong.hash='0'.repeat(64);wrong.url=origin+'/bots/bot-a/media/'+wrong.hash;const trueHash=wantHash;wantHash=wrong.hash;await assert.rejects(service.fetch(wrong),/MEDIA_SHA_MISMATCH/);wantHash=trueHash;cacheEmpty()
  mode='resume';requests=[];const r=input();await service.fetch(r);assert.deepEqual(requests,['bytes=0-','bytes=262144-']);await service.save(r.operation,r.botId);assert.equal(fileHash(destination),wantHash);cacheEmpty()
@@ -72,6 +80,6 @@ const server=http.createServer((req,res)=>{
  diskFail=true;await assert.rejects(service.fetch(input()),/ENOSPC/);diskFail=false;cacheEmpty()
  const corrupt=input();await service.fetch(corrupt);const cache=path.join(tmp,'memoh-original-downloads',corrupt.operation+'.part'),corruptFD=fs.openSync(cache,'r+');fs.writeSync(corruptFD,Buffer.from([7]),0,1,0);fs.closeSync(corruptFD);await assert.rejects(service.save(corrupt.operation,corrupt.botId),/SHA_MISMATCH/);assert.equal(fs.statSync(destination).size,0);cacheEmpty()
  assert.ok(maxRead<=262144&&maxWrite<=262144);assert.equal(positions.size,0)
- console.log(JSON.stringify({scope:'Actual native source with Node FS/crypto/RCP/picker adapters; real disk and controlled local HTTP, not Harmony device runtime',mib,bytes:mib*1048576,baseline,peak,samples,milliseconds,maxRead,maxWrite,maxNetworkCallback:maxChunk,largeRequests,readCalls,fullSavedHashVerified:true,noFileBytesInWebView:true,rangeResume:true,rangeIgnoredAtZeroAccepted:true,rangeIgnoredOnResumeRejected:true,invalidHeadersRejected:true,hashMismatchRejected:true,crossBotRejected:true,wrongEndpointRejected:true,cancelDuringNetwork:true,cancelBeforeStart:true,cancelDuringCopy:true,authWhilePickerRejected:true,pickerDismissal:true,shortWritesHandled:true,diskFailureCleanup:true,cleanupIOFailureSurfacedWithNoDescriptorLeak:true,cacheMutationRejected:true,allDescriptorsClosed:true,partialTargetsClearedWhenFilesystemAllows:true}))
+ console.log(JSON.stringify({scope:'Actual native source with Node FS/crypto/RCP/picker adapters; real disk and controlled local HTTP, not Harmony device runtime',mib,bytes:mib*1048576,baseline,peak,samples,milliseconds,maxRead,maxWrite,maxNetworkCallback:maxChunk,largeRequests,readCalls,fullSavedHashVerified:true,noFileBytesInWebView:true,scopedOriginalSaved:true,scopedDenialNoBroadFallback:true,rangeResume:true,rangeIgnoredAtZeroAccepted:true,rangeIgnoredOnResumeRejected:true,invalidHeadersRejected:true,hashMismatchRejected:true,crossBotRejected:true,wrongEndpointRejected:true,cancelDuringNetwork:true,cancelBeforeStart:true,cancelDuringCopy:true,authWhilePickerRejected:true,pickerDismissal:true,shortWritesHandled:true,diskFailureCleanup:true,cleanupIOFailureSurfacedWithNoDescriptorLeak:true,cacheMutationRejected:true,allDescriptorsClosed:true,partialTargetsClearedWhenFilesystemAllows:true}))
  service.close()
-})().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>{server.closeAllConnections();server.close();fs.rmSync(tmp,{recursive:true,force:true})})
+})().catch(e=>{console.error(e);process.exitCode=1}).finally(()=>{clearInterval(measureTimer);server.closeAllConnections();server.close();fs.rmSync(tmp,{recursive:true,force:true})})
