@@ -994,5 +994,6 @@
   "licensesUnchanged": [
     "LICENSE",
     "mobile/client/mobile/memoh/licenses/noble-hashes.txt"
-  ]
+  ],
+  "checkpointCommit": "6a2a3b1a8a799114a8e41a66fedc6207e89e4ba1"
 }

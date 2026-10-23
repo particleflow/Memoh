@@ -97,6 +97,43 @@
       "apps/web/src/pages/home/composables/useBotDelegations.test.ts",
       "apps/web/src/pages/home/composables/useBotDelegationDelivery.test.ts",
       "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts"
-    ]
+    ],
+    "delegatedAttachments": {
+      "commit": "dfc7cf5104c382ecc622061ce43c3dcd733b7998",
+      "baseCommit": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+      "scope": "Preserve delegation-scoped attachment URLs through gallery, preview and tab restoration; no broader Bot/hash fallback for delegated references.",
+      "modules": [
+        "apps/web/src/pages/home/composables/useMediaGallery.ts",
+        "apps/web/src/pages/home/components/attachment-block.vue",
+        "apps/web/src/pages/home/composables/useFileManagerProvider.ts",
+        "apps/web/src/store/workspace-tabs.ts",
+        "apps/web/src/pages/home/components/dockview/panel-asset.vue"
+      ],
+      "testModules": [
+        "apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts",
+        "apps/web/src/pages/home/components/attachment-block.test.ts",
+        "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts"
+      ],
+      "baseFiles": {
+        "apps/web/src/pages/home/composables/useMediaGallery.ts": "491273a1558ed3135cb76996d18a8a1f004499d8dd6bdb7cb82b3bdfc29ac25d",
+        "apps/web/src/pages/home/components/attachment-block.vue": "88069a035a1e1b82e96cf8a5bcad691ca9f75ed381eefc03f4aa3af03b33fc42",
+        "apps/web/src/pages/home/composables/useFileManagerProvider.ts": "3e0435343435e039362963e5ff50af7f31bc84dc26e1ec2919dd1504b1c27217",
+        "apps/web/src/store/workspace-tabs.ts": "734c29e9ca0f1174965693a1333b898bd5197999b55c174d42279629e113e944",
+        "apps/web/src/pages/home/components/dockview/panel-asset.vue": "72c648b7dcd1cd08de6d23e43388c7abb9fc08a0355a9027181626b524cf99df",
+        "apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts": null,
+        "apps/web/src/pages/home/components/attachment-block.test.ts": "0ee86307195d5d57bc994678068a39cfa6aec896aee777d977cab48f49e0bf89",
+        "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts": null
+      },
+      "files": {
+        "apps/web/src/pages/home/composables/useMediaGallery.ts": "f58ec2bf7395ba50eab2c106873bf941df4909d8a2907bba6866bbf378cecd7e",
+        "apps/web/src/pages/home/components/attachment-block.vue": "e18409ebd3b615e3578839871361756a2a093e378764cd12241499a9994eab77",
+        "apps/web/src/pages/home/composables/useFileManagerProvider.ts": "80dd7403a79d88ac976d8e4a9369048e9478a7f70915f4664bb06e052d7d456e",
+        "apps/web/src/store/workspace-tabs.ts": "d59e4a528b4308fac5c1fa04035754e81a354be291e98584d3028c3683b066ce",
+        "apps/web/src/pages/home/components/dockview/panel-asset.vue": "c7019425035f5d51f3d6bc8bbdaa6f544ded973b66cb84df017d810ffb858fd3",
+        "apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts": "04c1b651f18b8bcfaa73fd8f4e295ecd1c1d3d260186994394d368cff1b8928b",
+        "apps/web/src/pages/home/components/attachment-block.test.ts": "d184d1742a90ee1c54405e33584c1887e6cf10969f49428dc7bf636de63d2f9c",
+        "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts": "523c65949f9cd69914594c9076899e7b3e060b3980fd7a24bfe77129613beb83"
+      }
+    }
   }
 }

@@ -17,8 +17,44 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def prepare_delegated_attachments(checkout, repository, lock):
+    """Read exact upstream modules after validating every baseline input."""
+    for name, expected in lock['baseFiles'].items():
+        path = checkout / name
+        if path.is_symlink():
+            raise ValueError('Linked attachment input: ' + name)
+        if expected is None:
+            if path.exists():
+                raise ValueError('Expected absent attachment input: ' + name)
+        elif not path.is_file() or sha(path.read_bytes()) != expected:
+            raise ValueError('Attachment baseline drift: ' + name)
+    writes = {}
+    for name, expected in lock['files'].items():
+        data = subprocess.check_output(
+            ['git', '-C', str(repository), 'show', lock['commit'] + ':' + name])
+        if sha(data) != expected:
+            raise ValueError('Attachment dependency drift: ' + name)
+        writes[checkout / name] = data
+    return writes
+
+
+def apply_delegated_attachments(checkout, repository):
+    """Apply only the scoped-attachment dependency to the unmodified Web base."""
+    lock = json.loads((ROOT / 'config/memoh_web.lock.json').read_text())
+    attachments = lock['sharedObservation']['delegatedAttachments']
+    writes = prepare_delegated_attachments(checkout, repository, attachments)
+    for path, data in writes.items():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+    return {'delegatedAttachments': attachments,
+            'outputFiles': {path.relative_to(checkout).as_posix(): sha(data)
+                            for path, data in writes.items()}}
+
+
 def apply(checkout, repository):
     lock = json.loads((ROOT / 'config/memoh_web.lock.json').read_text())['sharedObservation']
+    attachments = lock['delegatedAttachments']
+    attachment_writes = prepare_delegated_attachments(checkout, repository, attachments)
     commit = lock['commit']
     upstream = {}
     for name, digest in lock['files'].items():
@@ -51,7 +87,8 @@ def apply(checkout, repository):
                  "import type { Options } from './sdk.gen';\n"
                  "import type { ServerProblem } from './types.gen';\n\n"
                  + '\n\n'.join(declarations) + '\n')
-    writes = {checkout / 'packages/sdk/src/harmony-delegation.gen.ts': generated.encode()}
+    writes = dict(attachment_writes)
+    writes[checkout / 'packages/sdk/src/harmony-delegation.gen.ts'] = generated.encode()
     index = checkout / 'packages/sdk/src/index.ts'
     writes[index] = index.read_bytes() + b"\nexport * from './harmony-delegation.gen';\n"
     for name in [*lock['sharedModules'], *lock.get('testModules', [])]:
@@ -70,6 +107,7 @@ def apply(checkout, repository):
         path.write_bytes(data)
     return {'sharedCommit': commit, 'inputFiles': lock['files'],
             'baseSDKFiles': lock['baseSDKFiles'], 'sdkFunctions': lock['functions'],
+            'delegatedAttachments': attachments,
             'outputFiles': {path.relative_to(checkout).as_posix(): sha(data)
                             for path, data in writes.items()}}
 
@@ -84,7 +122,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--checkout', type=Path, required=True)
     parser.add_argument('--repository', type=Path, required=True)
+    parser.add_argument('--attachments-only', action='store_true',
+                        help='Validate/apply only scoped attachments on the raw pinned Web base; no build')
     args = parser.parse_args()
-    receipt = apply(args.checkout.resolve(), args.repository.resolve())
+    runner = apply_delegated_attachments if args.attachments_only else apply
+    receipt = runner(args.checkout.resolve(), args.repository.resolve())
     verify(args.checkout.resolve(), receipt)
     print(json.dumps(receipt, indent=2))

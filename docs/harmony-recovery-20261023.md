@@ -1,10 +1,13 @@
 # Harmony source recovery checkpoint
 
-This recovery branch preserves the 51 public client files from
+The fixed recovery checkpoint `6a2a3b1a8a799114a8e41a66fedc6207e89e4ba1`
+preserves the 51 public client files from
 `8184928c3746175b56b398be76f054c00d5e4b40` byte-for-byte. It adds evidence only;
 it does not reconstruct the unavailable private Git history or introduce a new
 client. The source inventory and per-path gaps are in
 `harmony-recovery-20261023.json`. Existing license notices are unchanged.
+This report describes that fixed checkpoint. Subsequent source-preparation work
+is recorded separately in `harmony-attachment-scope.md`.
 
 ## Input coverage
 

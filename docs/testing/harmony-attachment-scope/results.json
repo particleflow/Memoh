@@ -1,0 +1,43 @@
+{
+  "baseline": {
+    "commit": "6ddf61dcd8199758e4110398645c556a3d6d7375",
+    "ui": "f69402a55dd87a59c10722fe11507ad8fd7048f5"
+  },
+  "source": "dfc7cf5104c382ecc622061ce43c3dcd733b7998",
+  "upstreamTests": {
+    "before": 108,
+    "after": 121,
+    "afterFiles": 5,
+    "passed": true
+  },
+  "preparationTests": {
+    "count": 5,
+    "passed": true
+  },
+  "fullWebTypecheck": {
+    "passed": false,
+    "beforeErrors": 145,
+    "afterErrors": 145,
+    "newDiagnosticsIgnoringLineShifts": [],
+    "removedDiagnosticsIgnoringLineShifts": [],
+    "exitCodeBefore": 2,
+    "exitCodeAfter": 2
+  },
+  "fullSharedPreparation": {
+    "passed": false,
+    "reason": "Original lock expects a preprocessed packages/sdk/src/types.gen.ts hash; raw pinned base does not match. Missing builder step was not reconstructed."
+  },
+  "nativeBuild": false,
+  "phoneNasRoundtrip": false,
+  "lanPriorityIPv6Fallback": false,
+  "humanQA": false,
+  "eslint": {
+    "exitCode": 0,
+    "files": 8
+  },
+  "uiContract": {
+    "exitCode": 0,
+    "warnings": 3,
+    "warningFilesChanged": false
+  }
+}

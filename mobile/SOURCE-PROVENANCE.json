@@ -20,13 +20,15 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
+      "sha256": "d92fbc6fd1b2a4d574b0d8ffe27bd5a2b598154fc83ddcc54fe67f90105082f7",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
-        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
+        "Recovery follow-up after 6a2a3b1: pin five existing scoped-attachment modules and three upstream tests from dfc7cf5; reject baseline drift and expose attachment-only source preparation without the missing builder."
       ],
-      "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088"
+      "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
+      "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1"
     },
     {
       "path": "mobile/client/mobile/client_config.py",
@@ -159,13 +161,15 @@
     },
     {
       "path": "mobile/client/mobile/prepare_shared_observation.py",
-      "sha256": "bfc8d0a1b2055753ca4cdb60878ebf47a94a368f6d13b08b6d5ff7dd2c69547c",
+      "sha256": "18c5fb32708a8318cde51217906d890ed494fdf66b7f2d644d9b2b13c2428544",
       "origin": "project addition for local shared-observation integration",
       "licenseReview": "No new license assignment; fixed shared modules remain upstream dependencies, not copied source files.",
       "preparationChanges": [
-        "Explicit shared-observation build integration and fresh-checkout receipt handling"
+        "Explicit shared-observation build integration and fresh-checkout receipt handling",
+        "Recovery follow-up after 6a2a3b1: pin five existing scoped-attachment modules and three upstream tests from dfc7cf5; reject baseline drift and expose attachment-only source preparation without the missing builder."
       ],
-      "checkpointSHA256": "affc851d383002e441da0b3ea43a121bb230f122e369be2028c1c7f9d82dc86d"
+      "checkpointSHA256": "affc851d383002e441da0b3ea43a121bb230f122e369be2028c1c7f9d82dc86d",
+      "recoveryBaseSHA256": "bfc8d0a1b2055753ca4cdb60878ebf47a94a368f6d13b08b6d5ff7dd2c69547c"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_106_migration_ui.py",
@@ -643,5 +647,13 @@
     "private handoff records and unlisted files"
   ],
   "sourceCommit": "a01a3ec207326987d13b857f5b11c97f3511c6d4",
-  "sharedObservationCommit": "be6862497a58a01ef8c6f4168f02d5624cd44061"
+  "sharedObservationCommit": "be6862497a58a01ef8c6f4168f02d5624cd44061",
+  "recoveryFollowup": {
+    "baseCommit": "6a2a3b1a8a799114a8e41a66fedc6207e89e4ba1",
+    "modifiedPaths": [
+      "mobile/client/config/memoh_web.lock.json",
+      "mobile/client/mobile/prepare_shared_observation.py"
+    ],
+    "scope": "New reviewable source-preparation change, not recovery of unavailable later private revisions. The original 42-entry register is retained; the missing 114-entry register is not reconstructed."
+  }
 }
