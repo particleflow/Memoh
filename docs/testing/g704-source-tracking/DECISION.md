@@ -64,7 +64,7 @@ runtime/browser evidence at `13693122` remains the product checkpoint; no new UI
 or live-provider acceptance is inferred from these synthetic tests. Record local
 results and the exact subsequent Go CI head/run separately, and retain failures.
 
-## Completed local checks and full-check environment failure
+## Local checks, historical cache failure and subsequent success
 
 - `go test -p 2 -count=1 -v ./internal/imagecapability`: exit 0, 17 top-level
   tests and 44 subtests passed, zero failures/skips. See the complete
@@ -79,12 +79,24 @@ results and the exact subsequent Go CI head/run separately, and retain failures.
   [failure output](call-site-disposition/full-lint.log) is retained. A bounded
   `go list -a -p 2 -compiled -export -json ./templates` cache rebuild exited 0;
   the missing prior index remained absent. One complete lint retry with a fresh
-  analyzer cache was started; no further cache-repair loop is authorized.
+  analyzer cache was started and subsequently **completed with exit 0 in
+  637.016 seconds**. Its original [stdout/stderr log](call-site-disposition/full-lint-rebuilt-cache.log)
+  is empty (zero bytes); the [execution record](call-site-disposition/full-lint-rebuilt-cache.json)
+  carries the command, exit code and duration. The empty log alone is not used as
+  proof of success. No further cache repair or test rerun was performed.
 
-The source and regression checkpoint can be submitted while that bounded retry
-finishes. Complete verification uses the existing Go workflow at the submitted
-SHA, without changing its checks or triggering unrelated workflows. A started
-local command or remote workflow is not a successful check. Its actual terminal
-result and run URL must accompany the handoff. The copied evidence files are
-unaltered; their [manifest](call-site-disposition/manifest.json) records sizes and
-hashes. They contain synthetic data and non-secret cloud cache diagnostics only.
+The product checkpoint `f7479c56f9d9e67be0ddff2ef73bcc6d0b952f75` was submitted
+while that bounded retry was running. Both the local success and the subsequent
+[Go CI run 39947915759](https://github.com/particleflow/Memoh/actions/runs/39947915759)
+are now terminal: the single dispatched attempt completed with **7/7 successful
+jobs** on that exact SHA. No workflow or rule was changed. See the
+[completion handoff](call-site-disposition/COMPLETION.md) for the frozen product
+head, independently reviewed remote-lint timing, evidence provenance and remaining
+business acceptance boundaries.
+
+The original failure and its [manifest](call-site-disposition/manifest.json) are
+unchanged. Newly published completion files have a separate
+[manifest](call-site-disposition/completion-manifest.json); all copied files are
+unaltered and contain only synthetic data, non-secret cloud cache diagnostics or
+public GitHub run metadata. This documentation-only follow-up does not rerun tests
+or dispatch another workflow.

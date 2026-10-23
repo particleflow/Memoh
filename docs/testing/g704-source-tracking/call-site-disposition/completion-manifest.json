@@ -1,0 +1,31 @@
+{
+  "tested_product_head": "f7479c56f9d9e67be0ddff2ef73bcc6d0b952f75",
+  "tested_product_tree": "db371bfae38c0f6d2f4e7581cac63a1d211939ca",
+  "inspection": "Reviewed existing files: no credentials, request headers, private deployment addresses or user data. Cloud tool paths and public CI identifiers are retained.",
+  "files": [
+    {
+      "file": "full-lint-rebuilt-cache.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "transformation": "none"
+    },
+    {
+      "file": "full-lint-rebuilt-cache.json",
+      "bytes": 232,
+      "sha256": "4958b28ac1d640eebb457f9cb55be581e16f180781914335378aa4a64ae1b73e",
+      "transformation": "none"
+    },
+    {
+      "file": "ci-run.json",
+      "bytes": 374,
+      "sha256": "1b7994ffdfb79f14813704acb49edab0a037d8dd8a13bc5b5109cbfd3f45b0d2",
+      "transformation": "none"
+    },
+    {
+      "file": "ci-jobs.json",
+      "bytes": 6993,
+      "sha256": "01769f93681c7c15bc644841ca3a7014fe46f915df2c2ea564731fca0495ffea",
+      "transformation": "none"
+    }
+  ]
+}

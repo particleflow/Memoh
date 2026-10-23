@@ -1,0 +1,1 @@
+{"conclusion":"success","created_at":"2026-10-23T11:42:04Z","event":"workflow_dispatch","head_branch":"fix/golangci-g704-source-tracking","head_sha":"f7479c56f9d9e67be0ddff2ef73bcc6d0b952f75","html_url":"https://github.com/particleflow/Memoh/actions/runs/39947915759","id":39947915759,"name":"Go CI","run_attempt":1,"status":"completed","updated_at":"2026-10-23T11:49:18Z"}

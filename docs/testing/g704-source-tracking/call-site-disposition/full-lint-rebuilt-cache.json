@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/tmp/golangci-lint-2.10.1-linux-amd64/golangci-lint",
+    "run",
+    "--concurrency",
+    "2",
+    "./..."
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 637.016,
+  "rules_changed": false,
+  "packages": "./..."
+}
