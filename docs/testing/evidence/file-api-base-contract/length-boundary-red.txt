@@ -1,0 +1,21 @@
+=== RUN   TestTaskAPIBaseLengthBoundary
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-false
+    api_base_test.go:41: valid 2047-byte API base rejected by task suffix: invalid transfer input
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-true
+    api_base_test.go:41: valid 2047-byte API base rejected by task suffix: invalid transfer input
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-false
+    api_base_test.go:41: valid 2048-byte API base rejected by task suffix: invalid transfer input
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-true
+    api_base_test.go:41: valid 2048-byte API base rejected by task suffix: invalid transfer input
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-false
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-true
+--- FAIL: TestTaskAPIBaseLengthBoundary (0.00s)
+    --- FAIL: TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-false (0.00s)
+    --- FAIL: TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-true (0.00s)
+    --- FAIL: TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-false (0.00s)
+    --- FAIL: TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-true (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-false (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-true (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/transferclient	0.005s
+FAIL

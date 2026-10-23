@@ -1,0 +1,32 @@
+=== RUN   TestTaskAPIBaseLengthBoundary
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-false
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-true
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-false
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-true
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-false
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-true
+--- PASS: TestTaskAPIBaseLengthBoundary (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-false (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-true (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-false (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-true (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-false (0.00s)
+    --- PASS: TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-true (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/query-at-limit
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/operation-path
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/delivery-path
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/operation-too-long
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/delivery-too-long
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/missing-auth
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/insecure-transport
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/query-at-limit (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/operation-path (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/delivery-path (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/operation-too-long (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/delivery-too-long (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/missing-auth (0.00s)
+    --- PASS: TestTaskAPIBaseBoundaryPreservesChecks/insecure-transport (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	1.120s

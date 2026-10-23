@@ -62,8 +62,9 @@ its existing route namespace without losing the configured prefix.
 - No query or fragment, including empty `?` or `#` delimiters; no whitespace,
   control characters, backslashes, percent escapes or IPv6 zone identifiers.
 - Path segments contain ASCII letters/digits or `-._~`; no `.` or `..` segment
-  and no doubled separator. The parsed client prefix is bounded to 2048 bytes,
-  including the task namespace when constructing a task client.
+  and no doubled separator. The configured API base is bounded to 2048 bytes;
+  the internally appended task namespace and two validated IDs (at most 128
+  bytes each) do not consume that configuration limit.
 - Explicitly configured private IPv4, private names and ULA IPv6 are accepted.
   Acceptance performs no DNS lookup, probe or authorization. TLS still verifies
   the configured hostname/IP against the server certificate. Redirects remain
@@ -141,3 +142,15 @@ shared syntax tests. It does not implement mobile persistence, Windows routing
 UI, LAN/IPv6 failover, a new Linux product, or a complete phone/PC/NAS acceptance.
 The existing Windows queue and publication implementation remain the endpoint
 components; no Linux publication binding is needed to establish this contract.
+
+The follow-up on product base `f7479c56f9d9e67be0ddff2ef73bcc6d0b952f75` fixes
+the task constructor's duplicate length check: `New` validates the original
+configuration and TLS policy before the fixed namespace and validated IDs are
+appended. Local [red](testing/evidence/file-api-base-contract/length-boundary-red.txt)
+and [green](testing/evidence/file-api-base-contract/length-boundary-green.txt)
+outputs cover 2047/2048/2049 bytes, trailing slash, ID bounds and unchanged
+authorization/TLS rejection (13 subcases; race 1.120 s). The affected
+[library race run](testing/evidence/file-api-base-contract/length-library-race.txt)
+passed in 49.128 s; incremental lint passed. These are constructor/library
+checks, not a long-URL gateway, Windows or production acceptance. No PG or
+completed business integration tests were rerun for this correction.
