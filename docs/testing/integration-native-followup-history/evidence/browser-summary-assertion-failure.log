@@ -1,0 +1,10 @@
+locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByText('Pi receipt recorded; current history continuity and business completion are unverified.', { exact: true }) to be visible
+
+    at /tmp/integration-followup-history-checks/browser.cjs:12:232 {
+  log: [
+    "  - waiting for getByText('Pi receipt recorded; current history continuity and business completion are unverified.', { exact: true }) to be visible"
+  ],
+  name: 'TimeoutError'
+}

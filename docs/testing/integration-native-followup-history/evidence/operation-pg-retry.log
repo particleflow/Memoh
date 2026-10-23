@@ -1,0 +1,9 @@
+{"Time":"2026-10-23T00:00:55.782399527Z","Action":"start","Package":"github.com/felinics/memoh/internal/db"}
+{"Time":"2026-10-23T00:00:55.828872651Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation"}
+{"Time":"2026-10-23T00:00:55.828936577Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"=== RUN   TestComputerOperationsMigrationAndDurableIsolation\n"}
+{"Time":"2026-10-23T00:00:58.569257764Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"--- PASS: TestComputerOperationsMigrationAndDurableIsolation (2.74s)\n"}
+{"Time":"2026-10-23T00:00:58.569379537Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Elapsed":2.74}
+{"Time":"2026-10-23T00:00:58.569399267Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"PASS\n"}
+{"Time":"2026-10-23T00:00:59.573733324Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"ok  \tgithub.com/felinics/memoh/internal/db\t3.791s\n"}
+{"Time":"2026-10-23T00:00:59.573785503Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Elapsed":3.791}
+Required computer operation PostgreSQL CAS/ownership/RLS test passed without skips

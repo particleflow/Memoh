@@ -1,0 +1,7 @@
+Auto-merging .github/workflows/go-ci.yml
+CONFLICT (content): Merge conflict in .github/workflows/go-ci.yml
+Auto-merging internal/computertask/service.go
+CONFLICT (content): Merge conflict in internal/computertask/service.go
+Auto-merging internal/computertask/source.go
+CONFLICT (content): Merge conflict in internal/computertask/source.go
+Automatic merge failed; fix conflicts and then commit the result.

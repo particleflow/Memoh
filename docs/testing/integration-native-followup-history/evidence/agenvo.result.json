@@ -1,0 +1,18 @@
+{
+  "check": "agenvo",
+  "command": [
+    "go",
+    "test",
+    "-json",
+    "-race",
+    "-count=1",
+    "-p",
+    "1",
+    "-timeout",
+    "240s",
+    "./internal/agenvo"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-22T23:57:22Z",
+  "elapsed_seconds": 17.249
+}

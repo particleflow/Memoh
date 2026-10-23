@@ -1,0 +1,157 @@
+{
+  "agenvo-account-pg": {
+    "check": "agenvo-account-pg",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-run",
+      "^TestPostgresAccountAndBotAuthorization$",
+      "./internal/agenvo"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T00:05:01Z",
+    "elapsed_seconds": 3.035,
+    "named_test_events": {
+      "pass": 1
+    }
+  },
+  "agenvo": {
+    "check": "agenvo",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "240s",
+      "./internal/agenvo"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:57:22Z",
+    "elapsed_seconds": 17.249,
+    "named_test_events": {
+      "pass": 195,
+      "skip": 1
+    }
+  },
+  "computertask": {
+    "check": "computertask",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "240s",
+      "./internal/computertask"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:58:03Z",
+    "elapsed_seconds": 37.638,
+    "named_test_events": {
+      "pass": 271
+    }
+  },
+  "history-pg": {
+    "check": "history-pg",
+    "command": [
+      "bash",
+      "scripts/test-pi-batch-history-postgres.sh"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T00:00:59Z",
+    "elapsed_seconds": 6.345,
+    "named_test_events": {
+      "pass": 1
+    }
+  },
+  "operation-pg-retry": {
+    "check": "operation-pg-retry",
+    "command": [
+      "bash",
+      "scripts/test-computer-operations-postgres.sh"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T00:00:53Z",
+    "elapsed_seconds": 6.567,
+    "named_test_events": {
+      "pass": 1
+    }
+  },
+  "operation-pg": {
+    "check": "operation-pg",
+    "command": [
+      "bash",
+      "scripts/test-computer-operations-postgres.sh"
+    ],
+    "exit_code": 1,
+    "started_at_utc": "2026-10-22T23:58:43Z",
+    "elapsed_seconds": 38.13,
+    "named_test_events": {
+      "fail": 1
+    }
+  },
+  "server-build": {
+    "check": "server-build",
+    "command": [
+      "go",
+      "build",
+      "-p",
+      "1",
+      "-o",
+      "/tmp/memoh-followup-history-server",
+      "./cmd/agent"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-23T00:01:35Z",
+    "elapsed_seconds": 28.868
+  },
+  "sessiontask": {
+    "check": "sessiontask",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-p",
+      "1",
+      "-timeout",
+      "120s",
+      "./internal/sessiontask"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:58:40Z",
+    "elapsed_seconds": 2.882,
+    "named_test_events": {
+      "pass": 54
+    }
+  },
+  "ui-tasks": {
+    "check": "ui-tasks",
+    "command": [
+      "pnpm",
+      "exec",
+      "vitest",
+      "run",
+      "--maxWorkers=2",
+      "--testTimeout=15000",
+      "apps/web/src/pages/home/components/session-tasks.test.ts",
+      "apps/web/src/pages/home/composables/useSessionTasks.test.ts"
+    ],
+    "exit_code": 0,
+    "started_at_utc": "2026-10-22T23:58:41Z",
+    "elapsed_seconds": 9.227
+  }
+}

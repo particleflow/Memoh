@@ -1,0 +1,10 @@
+{
+  "check": "operation-pg-retry",
+  "command": [
+    "bash",
+    "scripts/test-computer-operations-postgres.sh"
+  ],
+  "exit_code": 0,
+  "started_at_utc": "2026-10-23T00:00:53Z",
+  "elapsed_seconds": 6.567
+}

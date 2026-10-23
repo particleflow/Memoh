@@ -1,0 +1,4 @@
+=== RUN   TestPostgresAccountAndBotAuthorization
+--- PASS: TestPostgresAccountAndBotAuthorization (0.06s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	1.090s

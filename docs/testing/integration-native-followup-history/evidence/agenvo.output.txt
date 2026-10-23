@@ -1,0 +1,401 @@
+=== RUN   TestAgentFollowupIdentityBoundary
+=== RUN   TestAgentFollowupIdentityBoundary/unchanged
+    agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to original; receipt validation error=<nil>
+--- PASS: TestAgentFollowupIdentityBoundary/unchanged (0.00s)
+=== RUN   TestAgentFollowupIdentityBoundary/reused_before_get
+    agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to replacement; receipt validation error=<nil>
+--- PASS: TestAgentFollowupIdentityBoundary/reused_before_get (0.00s)
+=== RUN   TestAgentFollowupIdentityBoundary/reused_after_get
+    agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to replacement; receipt validation error=<nil>
+--- PASS: TestAgentFollowupIdentityBoundary/reused_after_get (0.00s)
+=== RUN   TestAgentFollowupIdentityBoundary/changed_after_get
+    agent_identity_boundary_test.go:88: get matched stored references; prompt delivered to replacement; receipt validation error=agenvo operation outcome is unknown; do not repeat the operation
+--- PASS: TestAgentFollowupIdentityBoundary/changed_after_get (0.00s)
+--- PASS: TestAgentFollowupIdentityBoundary (0.01s)
+=== RUN   TestAgentFixedProcedureUsesConfiguredPiAndNeverInfersTaskSuccess
+--- PASS: TestAgentFixedProcedureUsesConfiguredPiAndNeverInfersTaskSuccess (0.01s)
+=== RUN   TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown
+=== RUN   TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/starting
+--- PASS: TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/starting (0.03s)
+=== RUN   TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/accepted
+--- PASS: TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/accepted (0.00s)
+=== RUN   TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/lost
+--- PASS: TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/lost (0.00s)
+=== RUN   TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/persist
+--- PASS: TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown/persist (0.00s)
+--- PASS: TestAgentStartingTimeoutAcceptedAndLostPromptRemainUnknown (0.03s)
+=== RUN   TestAgentPromptReceiptRejectsMalformedAndNativeFailures
+=== RUN   TestAgentPromptReceiptRejectsMalformedAndNativeFailures/native-rejection
+--- PASS: TestAgentPromptReceiptRejectsMalformedAndNativeFailures/native-rejection (0.00s)
+=== RUN   TestAgentPromptReceiptRejectsMalformedAndNativeFailures/native-unproven
+--- PASS: TestAgentPromptReceiptRejectsMalformedAndNativeFailures/native-unproven (0.00s)
+=== RUN   TestAgentPromptReceiptRejectsMalformedAndNativeFailures/partial-input
+--- PASS: TestAgentPromptReceiptRejectsMalformedAndNativeFailures/partial-input (0.00s)
+=== RUN   TestAgentPromptReceiptRejectsMalformedAndNativeFailures/wrong-type
+--- PASS: TestAgentPromptReceiptRejectsMalformedAndNativeFailures/wrong-type (0.00s)
+=== RUN   TestAgentPromptReceiptRejectsMalformedAndNativeFailures/missing-result
+--- PASS: TestAgentPromptReceiptRejectsMalformedAndNativeFailures/missing-result (0.00s)
+--- PASS: TestAgentPromptReceiptRejectsMalformedAndNativeFailures (0.01s)
+=== RUN   TestBashScriptExecutionSemantics
+=== RUN   TestBashScriptExecutionSemantics/normal_unicode
+--- PASS: TestBashScriptExecutionSemantics/normal_unicode (0.01s)
+=== RUN   TestBashScriptExecutionSemantics/stderr_does_not_abort
+--- PASS: TestBashScriptExecutionSemantics/stderr_does_not_abort (0.01s)
+=== RUN   TestBashScriptExecutionSemantics/nonzero
+--- PASS: TestBashScriptExecutionSemantics/nonzero (0.01s)
+=== RUN   TestBashScriptExecutionSemantics/drains_excess_without_sigpipe
+--- PASS: TestBashScriptExecutionSemantics/drains_excess_without_sigpipe (0.01s)
+=== RUN   TestBashScriptExecutionSemantics/incomplete_utf8_suffix
+--- PASS: TestBashScriptExecutionSemantics/incomplete_utf8_suffix (0.01s)
+=== RUN   TestBashScriptExecutionSemantics/syntax_error_is_nonzero
+--- PASS: TestBashScriptExecutionSemantics/syntax_error_is_nonzero (0.01s)
+--- PASS: TestBashScriptExecutionSemantics (0.07s)
+=== RUN   TestBashHostGuardRejectsLinuxBeforeUserCommand
+--- PASS: TestBashHostGuardRejectsLinuxBeforeUserCommand (0.00s)
+=== RUN   TestBashLauncherQuotesOneExplicitPathAndDoesNotExitPane
+--- PASS: TestBashLauncherQuotesOneExplicitPathAndDoesNotExitPane (0.00s)
+=== RUN   TestBashCompletionRejectsInvalidOutputAndExit
+--- PASS: TestBashCompletionRejectsInvalidOutputAndExit (0.00s)
+=== RUN   TestBashFrameStartsAfterObservedTerminalResidue
+--- PASS: TestBashFrameStartsAfterObservedTerminalResidue (0.01s)
+=== RUN   TestBashBusinessOutputCannotSupplyCompletionFrame
+--- PASS: TestBashBusinessOutputCannotSupplyCompletionFrame (0.01s)
+=== RUN   TestBashFailureFramesHaveTheSameBoundary
+--- PASS: TestBashFailureFramesHaveTheSameBoundary (0.00s)
+=== RUN   TestExecuteRequiresNonceBoundCompletionAndKeepsExitCode
+--- PASS: TestExecuteRequiresNonceBoundCompletionAndKeepsExitCode (0.00s)
+=== RUN   TestExecuteRejectsCrossBotMountBeforeAnyRemoteCall
+--- PASS: TestExecuteRejectsCrossBotMountBeforeAnyRemoteCall (0.00s)
+=== RUN   TestExecuteRechecksGrantAfterSubmission
+--- PASS: TestExecuteRechecksGrantAfterSubmission (0.00s)
+=== RUN   TestExecuteLostSubmissionResponseNeverRetriesOrReportsSuccess
+--- PASS: TestExecuteLostSubmissionResponseNeverRetriesOrReportsSuccess (0.00s)
+=== RUN   TestExecuteNativeRejectionInsideSuccessfulMCPResult
+--- PASS: TestExecuteNativeRejectionInsideSuccessfulMCPResult (0.00s)
+=== RUN   TestExecuteCancellationRetainsUncertainWorkspace
+--- PASS: TestExecuteCancellationRetainsUncertainWorkspace (0.00s)
+=== RUN   TestExecuteRetainsWorkspaceWithoutUnsafeClose
+--- PASS: TestExecuteRetainsWorkspaceWithoutUnsafeClose (0.00s)
+=== RUN   TestExecuteIdlePromptIsNotCompletion
+--- PASS: TestExecuteIdlePromptIsNotCompletion (0.01s)
+=== RUN   TestUnsupportedExecOptionsNeverReachRelay
+--- PASS: TestUnsupportedExecOptionsNeverReachRelay (0.00s)
+=== RUN   TestUnavailableTargetHasNoNativeFallback
+--- PASS: TestUnavailableTargetHasNoNativeFallback (0.00s)
+=== RUN   TestCompletionRejectsMalformedOrAmbiguousEvidence
+--- PASS: TestCompletionRejectsMalformedOrAmbiguousEvidence (0.00s)
+=== RUN   TestWorkspaceObservationBoundedProjection
+=== RUN   TestWorkspaceObservationBoundedProjection/large
+--- PASS: TestWorkspaceObservationBoundedProjection/large (0.01s)
+=== RUN   TestWorkspaceObservationBoundedProjection/duplicate
+--- PASS: TestWorkspaceObservationBoundedProjection/duplicate (0.01s)
+=== RUN   TestWorkspaceObservationBoundedProjection/null
+--- PASS: TestWorkspaceObservationBoundedProjection/null (0.00s)
+=== RUN   TestWorkspaceObservationBoundedProjection/private_status
+--- PASS: TestWorkspaceObservationBoundedProjection/private_status (0.01s)
+=== RUN   TestWorkspaceObservationBoundedProjection/wrong_session
+--- PASS: TestWorkspaceObservationBoundedProjection/wrong_session (0.01s)
+--- PASS: TestWorkspaceObservationBoundedProjection (0.03s)
+=== RUN   TestProbeAvailabilityRequiresTypedEvidence
+=== RUN   TestProbeAvailabilityRequiresTypedEvidence/auth
+--- PASS: TestProbeAvailabilityRequiresTypedEvidence/auth (0.00s)
+=== RUN   TestProbeAvailabilityRequiresTypedEvidence/text_is_not_evidence
+--- PASS: TestProbeAvailabilityRequiresTypedEvidence/text_is_not_evidence (0.00s)
+=== RUN   TestProbeAvailabilityRequiresTypedEvidence/offline
+--- PASS: TestProbeAvailabilityRequiresTypedEvidence/offline (0.00s)
+=== RUN   TestProbeAvailabilityRequiresTypedEvidence/runtime
+--- PASS: TestProbeAvailabilityRequiresTypedEvidence/runtime (0.00s)
+=== RUN   TestProbeAvailabilityRequiresTypedEvidence/uncertain
+--- PASS: TestProbeAvailabilityRequiresTypedEvidence/uncertain (0.00s)
+--- PASS: TestProbeAvailabilityRequiresTypedEvidence (0.00s)
+=== RUN   TestBatchHistoryOfficialSummaryForms
+=== RUN   TestBatchHistoryOfficialSummaryForms/compaction-self
+--- PASS: TestBatchHistoryOfficialSummaryForms/compaction-self (0.26s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/compaction-retained
+--- PASS: TestBatchHistoryOfficialSummaryForms/compaction-retained (0.26s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/compaction-missing-kept
+--- PASS: TestBatchHistoryOfficialSummaryForms/compaction-missing-kept (0.22s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-root
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-root (0.27s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-from-reset-root
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-from-reset-root (0.29s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-earlier-parent
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-earlier-parent (0.26s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-missing-fields
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-missing-fields (0.23s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-missing-summary
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-missing-summary (0.28s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-missing-from
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-missing-from (0.27s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-unavailable-source
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-unavailable-source (0.24s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-empty-summary-with-parent
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-empty-summary-with-parent (0.29s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-empty-root-summary
+--- PASS: TestBatchHistoryOfficialSummaryForms/branch-empty-root-summary (0.29s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/detached-setup-leaf
+--- PASS: TestBatchHistoryOfficialSummaryForms/detached-setup-leaf (0.23s)
+=== RUN   TestBatchHistoryOfficialSummaryForms/new-user-branch
+--- PASS: TestBatchHistoryOfficialSummaryForms/new-user-branch (0.27s)
+--- PASS: TestBatchHistoryOfficialSummaryForms (3.67s)
+=== RUN   TestBatchHistoryUserOnlyFirstTurnCanResume
+--- PASS: TestBatchHistoryUserOnlyFirstTurnCanResume (0.25s)
+=== RUN   TestBatchHistoryResourceLimitIsUnconfirmed
+--- PASS: TestBatchHistoryResourceLimitIsUnconfirmed (0.22s)
+=== RUN   TestBatchHistoryFirstResumeAndDuplicate
+--- PASS: TestBatchHistoryFirstResumeAndDuplicate (0.28s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/missing
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/missing (0.23s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/whole-directory-missing
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/whole-directory-missing (0.16s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/empty
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/empty (0.22s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/truncated
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/truncated (0.23s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/same-size-rewrite
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/same-size-rewrite (0.22s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/malformed-tail
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/malformed-tail (0.23s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/broken-parent
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/broken-parent (0.24s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/unreadable
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/unreadable (0.23s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/duplicate-file
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/duplicate-file (0.23s)
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles (2.00s)
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy/post-loss
+--- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy/post-loss (0.12s)
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy/first
+--- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy/first (0.22s)
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy/unconfirmed
+--- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy/unconfirmed (0.22s)
+--- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy (0.57s)
+=== RUN   TestBatchHistoryReceiptRequiresFileEvidence
+--- PASS: TestBatchHistoryReceiptRequiresFileEvidence (0.12s)
+=== RUN   TestBatchHistoryStaleLockNeverStolen
+--- PASS: TestBatchHistoryStaleLockNeverStolen (0.16s)
+=== RUN   TestBatchProducerClosesOnlyDeclaredResult
+--- PASS: TestBatchProducerClosesOnlyDeclaredResult (0.05s)
+=== RUN   TestBatchProducerClosesMultipleResultsWithoutRerun
+--- PASS: TestBatchProducerClosesMultipleResultsWithoutRerun (0.06s)
+=== RUN   TestBatchProducerMaximumCountAndCommandBound
+--- PASS: TestBatchProducerMaximumCountAndCommandBound (0.01s)
+=== RUN   TestBatchProducerCompactCompletionCommandBound
+--- PASS: TestBatchProducerCompactCompletionCommandBound (0.03s)
+=== RUN   TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt
+=== RUN   TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/legacy
+--- PASS: TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/legacy (0.11s)
+=== RUN   TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/versioned-backslashes
+--- PASS: TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/versioned-backslashes (0.10s)
+=== RUN   TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/versioned-slashes
+--- PASS: TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/versioned-slashes (0.09s)
+=== RUN   TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/compact-result
+--- PASS: TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt/compact-result (0.21s)
+--- PASS: TestBatchEnvelopeUsesStdinAtomicReceiptAndExclusiveAttempt (0.51s)
+=== RUN   TestBatchLayoutRejectsUnsupportedVersionAndPaths
+--- PASS: TestBatchLayoutRejectsUnsupportedVersionAndPaths (0.00s)
+=== RUN   TestCompactCompletionAtomicWriteInterruption
+=== RUN   TestCompactCompletionAtomicWriteInterruption/partial_tmp
+--- PASS: TestCompactCompletionAtomicWriteInterruption/partial_tmp (0.11s)
+=== RUN   TestCompactCompletionAtomicWriteInterruption/before_rename
+--- PASS: TestCompactCompletionAtomicWriteInterruption/before_rename (0.12s)
+=== RUN   TestCompactCompletionAtomicWriteInterruption/after_rename
+--- PASS: TestCompactCompletionAtomicWriteInterruption/after_rename (0.12s)
+=== RUN   TestCompactCompletionAtomicWriteInterruption/existing_tmp
+--- PASS: TestCompactCompletionAtomicWriteInterruption/existing_tmp (0.11s)
+--- PASS: TestCompactCompletionAtomicWriteInterruption (0.47s)
+=== RUN   TestCompactCompletionLargeDiagnosticsStayLocal
+--- PASS: TestCompactCompletionLargeDiagnosticsStayLocal (0.10s)
+=== RUN   TestCompactCompletionLongLineHasLinearReadAndCopyCost
+=== RUN   TestCompactCompletionLongLineHasLinearReadAndCopyCost/66060288
+    pi_completion_fault_test.go:204: input=66060787 read=66060787 scanned=66060787 copied=66060374 outcome=succeeded
+--- PASS: TestCompactCompletionLongLineHasLinearReadAndCopyCost/66060288 (0.29s)
+=== RUN   TestCompactCompletionLongLineHasLinearReadAndCopyCost/68157440
+    pi_completion_fault_test.go:204: input=68157939 read=68157939 scanned=67108864 copied=0 outcome=output_limit
+--- PASS: TestCompactCompletionLongLineHasLinearReadAndCopyCost/68157440 (0.17s)
+--- PASS: TestCompactCompletionLongLineHasLinearReadAndCopyCost (0.45s)
+=== RUN   TestCompactCompletionWatchdogStopsBlockedParser
+--- PASS: TestCompactCompletionWatchdogStopsBlockedParser (0.54s)
+=== RUN   TestPiCompletionOfficialProtocolProjection
+=== RUN   TestPiCompletionOfficialProtocolProjection/normal
+--- PASS: TestPiCompletionOfficialProtocolProjection/normal (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/error_exit_zero
+--- PASS: TestPiCompletionOfficialProtocolProjection/error_exit_zero (0.03s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/nonzero
+--- PASS: TestPiCompletionOfficialProtocolProjection/nonzero (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/aborted
+--- PASS: TestPiCompletionOfficialProtocolProjection/aborted (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/length
+--- PASS: TestPiCompletionOfficialProtocolProjection/length (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/tool_round
+--- PASS: TestPiCompletionOfficialProtocolProjection/tool_round (0.05s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/retry_success
+--- PASS: TestPiCompletionOfficialProtocolProjection/retry_success (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/empty_slash_no_run
+--- PASS: TestPiCompletionOfficialProtocolProjection/empty_slash_no_run (0.03s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/missing_settled
+--- PASS: TestPiCompletionOfficialProtocolProjection/missing_settled (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/partial_line
+--- PASS: TestPiCompletionOfficialProtocolProjection/partial_line (0.03s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/wrong_provider
+--- PASS: TestPiCompletionOfficialProtocolProjection/wrong_provider (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/wrong_session
+--- PASS: TestPiCompletionOfficialProtocolProjection/wrong_session (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/invalid_utf8
+--- PASS: TestPiCompletionOfficialProtocolProjection/invalid_utf8 (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/after_settled
+--- PASS: TestPiCompletionOfficialProtocolProjection/after_settled (0.03s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/private_thinking
+--- PASS: TestPiCompletionOfficialProtocolProjection/private_thinking (0.04s)
+=== RUN   TestPiCompletionOfficialProtocolProjection/bounded_text
+--- PASS: TestPiCompletionOfficialProtocolProjection/bounded_text (0.05s)
+--- PASS: TestPiCompletionOfficialProtocolProjection (0.61s)
+=== RUN   TestCompactEnvelopePreflightAndProjectionFailure
+=== RUN   TestCompactEnvelopePreflightAndProjectionFailure/missing_node
+--- PASS: TestCompactEnvelopePreflightAndProjectionFailure/missing_node (0.04s)
+=== RUN   TestCompactEnvelopePreflightAndProjectionFailure/projection_failed
+--- PASS: TestCompactEnvelopePreflightAndProjectionFailure/projection_failed (0.04s)
+--- PASS: TestCompactEnvelopePreflightAndProjectionFailure (0.08s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/attempt
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/attempt (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/generation
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/generation (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/request_hash
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/request_hash (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/pi_session_id
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/pi_session_id (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/workspace_id
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/workspace_id (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/pane_id
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/pane_id (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/terminal_id
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/terminal_id (0.00s)
+=== RUN   TestCompactCompletionWireBudgetAndCorrelation/stdout
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation/stdout (0.00s)
+--- PASS: TestCompactCompletionWireBudgetAndCorrelation (0.08s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/success
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/success (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/exit0_error
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/exit0_error (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/exit0_aborted
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/exit0_aborted (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/exit0_length
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/exit0_length (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/nonzero
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/nonzero (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/partial_final_line
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/partial_final_line (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/missing_agent_end
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/missing_agent_end (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/missing_turn_end
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/missing_turn_end (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/unknown_event
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/unknown_event (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/duplicate_settled
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/duplicate_settled (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/agent_end_is_not_final
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/agent_end_is_not_final (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/wrong_session
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/wrong_session (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/provider_fallback
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/provider_fallback (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/not_jsonl
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/not_jsonl (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/empty
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/empty (0.00s)
+=== RUN   TestPiJSONRequiresFinalSemanticEvidence/incomplete_tool
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence/incomplete_tool (0.00s)
+--- PASS: TestPiJSONRequiresFinalSemanticEvidence (0.00s)
+=== RUN   TestPiJSONRetriesAndBoundedPreview
+--- PASS: TestPiJSONRetriesAndBoundedPreview (0.01s)
+=== RUN   TestPostgresAccountAndBotAuthorization
+    postgres_test.go:21: requires isolated migrated PostgreSQL test database
+--- SKIP: TestPostgresAccountAndBotAuthorization (0.00s)
+=== RUN   TestAgentProfileUpdatesExistingOwnerRegistrationWithoutCredentialsOrGrants
+--- PASS: TestAgentProfileUpdatesExistingOwnerRegistrationWithoutCredentialsOrGrants (0.00s)
+=== RUN   TestServiceComputerScopeRejectsAuthorizedOtherPCBeforeRelay
+--- PASS: TestServiceComputerScopeRejectsAuthorizedOtherPCBeforeRelay (0.00s)
+=== RUN   TestServiceRegistrationProbesAndDoesNotCreateGrants
+--- PASS: TestServiceRegistrationProbesAndDoesNotCreateGrants (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/no_user
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/no_user (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/no_permission
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/no_permission (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/other_bot
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/other_bot (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/other_mount
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/other_mount (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/revoked
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/revoked (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/owner_changed
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/owner_changed (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/wrong_provider
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/wrong_provider (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/source_revoked
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/source_revoked (0.00s)
+=== RUN   TestServiceRejectsAuthorizationFailuresBeforeRelay/invalid_config
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay/invalid_config (0.00s)
+--- PASS: TestServiceRejectsAuthorizationFailuresBeforeRelay (0.00s)
+=== RUN   TestServiceRevocationAfterSubmissionBlocksReads
+--- PASS: TestServiceRevocationAfterSubmissionBlocksReads (0.00s)
+=== RUN   TestServiceDoesNotRegisterForeignOrOfflineSource
+--- PASS: TestServiceDoesNotRegisterForeignOrOfflineSource (0.00s)
+=== RUN   TestServiceRequiresExplicitWindowsBashExecutable
+--- PASS: TestServiceRequiresExplicitWindowsBashExecutable (0.00s)
+=== RUN   TestDiscoveryFiltersPrivateMetadataAndNonHerdrInstances
+--- PASS: TestDiscoveryFiltersPrivateMetadataAndNonHerdrInstances (0.00s)
+=== RUN   TestResolveWorkDir
+=== RUN   TestResolveWorkDir/C:\Synthetic/
+--- PASS: TestResolveWorkDir/C:\Synthetic/ (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/.
+--- PASS: TestResolveWorkDir/C:\Synthetic/. (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/a/../b
+--- PASS: TestResolveWorkDir/C:\Synthetic/a/../b (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/中文/child
+--- PASS: TestResolveWorkDir/C:\Synthetic/中文/child (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/c:/synthetic/child
+--- PASS: TestResolveWorkDir/C:\Synthetic/c:/synthetic/child (0.00s)
+=== RUN   TestResolveWorkDir/D:\Moved/child
+--- PASS: TestResolveWorkDir/D:\Moved/child (0.00s)
+=== RUN   TestResolveWorkDir/C:\/child
+--- PASS: TestResolveWorkDir/C:\/child (0.00s)
+=== RUN   TestResolveWorkDir/\\synthetic-host\share\root/child
+--- PASS: TestResolveWorkDir/\\synthetic-host\share\root/child (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/../escape
+--- PASS: TestResolveWorkDir/C:\Synthetic/../escape (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/a/../../escape
+--- PASS: TestResolveWorkDir/C:\Synthetic/a/../../escape (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/C:\Synthetic-other
+--- PASS: TestResolveWorkDir/C:\Synthetic/C:\Synthetic-other (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/C:\Synthetic\..\escape
+--- PASS: TestResolveWorkDir/C:\Synthetic/C:\Synthetic\..\escape (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/D:\Synthetic
+--- PASS: TestResolveWorkDir/C:\Synthetic/D:\Synthetic (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/C:child
+--- PASS: TestResolveWorkDir/C:\Synthetic/C:child (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/\child
+--- PASS: TestResolveWorkDir/C:\Synthetic/\child (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic//child
+--- PASS: TestResolveWorkDir/C:\Synthetic//child (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/child:stream
+--- PASS: TestResolveWorkDir/C:\Synthetic/child:stream (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/.._\escape
+--- PASS: TestResolveWorkDir/C:\Synthetic/.._\escape (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/child.\escape
+--- PASS: TestResolveWorkDir/C:\Synthetic/child.\escape (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/\\?\C:\Synthetic
+--- PASS: TestResolveWorkDir/C:\Synthetic/\\?\C:\Synthetic (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/child\x00
+--- PASS: TestResolveWorkDir/C:\Synthetic/child\x00 (0.00s)
+=== RUN   TestResolveWorkDir/C:\Synthetic/child_
+--- PASS: TestResolveWorkDir/C:\Synthetic/child_ (0.00s)
+=== RUN   TestResolveWorkDir/relative-root/child
+--- PASS: TestResolveWorkDir/relative-root/child (0.00s)
+--- PASS: TestResolveWorkDir (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	11.524s

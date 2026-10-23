@@ -1,0 +1,8 @@
+{"Time":"2026-10-23T00:05:03.624840542Z","Action":"start","Package":"github.com/felinics/memoh/internal/agenvo"}
+{"Time":"2026-10-23T00:05:03.643771907Z","Action":"run","Package":"github.com/felinics/memoh/internal/agenvo","Test":"TestPostgresAccountAndBotAuthorization"}
+{"Time":"2026-10-23T00:05:03.643841171Z","Action":"output","Package":"github.com/felinics/memoh/internal/agenvo","Test":"TestPostgresAccountAndBotAuthorization","Output":"=== RUN   TestPostgresAccountAndBotAuthorization\n"}
+{"Time":"2026-10-23T00:05:03.707012875Z","Action":"output","Package":"github.com/felinics/memoh/internal/agenvo","Test":"TestPostgresAccountAndBotAuthorization","Output":"--- PASS: TestPostgresAccountAndBotAuthorization (0.06s)\n"}
+{"Time":"2026-10-23T00:05:03.707052024Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agenvo","Test":"TestPostgresAccountAndBotAuthorization","Elapsed":0.06}
+{"Time":"2026-10-23T00:05:03.707098734Z","Action":"output","Package":"github.com/felinics/memoh/internal/agenvo","Output":"PASS\n"}
+{"Time":"2026-10-23T00:05:04.714904848Z","Action":"output","Package":"github.com/felinics/memoh/internal/agenvo","Output":"ok  \tgithub.com/felinics/memoh/internal/agenvo\t1.090s\n"}
+{"Time":"2026-10-23T00:05:04.714951348Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agenvo","Elapsed":1.09}
