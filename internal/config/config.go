@@ -71,6 +71,7 @@ type FilesConfig struct {
 }
 
 type Config struct {
+	ComputerTasks         ComputerTasksConfig         `toml:"computer_tasks"`
 	Files                 FilesConfig                 `toml:"files"`
 	Log                   LogConfig                   `toml:"log"`
 	Server                ServerConfig                `toml:"server"`
@@ -989,6 +990,9 @@ func Load(path string) (Config, error) {
 }
 
 func (cfg Config) validate() error {
+	if cfg.ComputerTasks.NativeObservationLimit < 0 || cfg.ComputerTasks.NativeObservationLimit > 128 {
+		return errors.New("computer_tasks.native_observation_limit must be between 0 and 128")
+	}
 	if cfg.Files.MaxUploadBytes < 0 || cfg.Files.MaxUploadBytes > (1<<53)-1 {
 		return errors.New("files.max_upload_bytes must be between 0 and 9007199254740991")
 	}

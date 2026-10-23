@@ -44,15 +44,16 @@ type Assets interface {
 type Authorize func(context.Context, toolcontext.ComputerBinding, string, string, string) error
 
 type Service struct {
-	store     dbstore.ComputerOperationStore
-	registry  Registry
-	relay     *agenvo.Service
-	assets    Assets
-	authorize Authorize
+	nativeObservationLimit int
+	store                  dbstore.ComputerOperationStore
+	registry               Registry
+	relay                  *agenvo.Service
+	assets                 Assets
+	authorize              Authorize
 }
 
 func NewService(store dbstore.ComputerOperationStore, registry Registry, relay *agenvo.Service, assets Assets, authorize Authorize) *Service {
-	return &Service{store: store, registry: registry, relay: relay, assets: assets, authorize: authorize}
+	return &Service{store: store, registry: registry, relay: relay, assets: assets, authorize: authorize, nativeObservationLimit: 32}
 }
 
 type Target struct {
@@ -71,19 +72,21 @@ type Submit struct {
 	WorkDir   string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
-	Followups    []FollowupRecord         `json:"followups,omitempty"`
-	Batch        *BatchDetails            `json:"batch,omitempty"`
-	Kind         string                   `json:"kind"`
-	Agent        agenvo.AgentProgress     `json:"agent"`
-	Output       string                   `json:"output,omitempty"`
-	ExitCode     *int                     `json:"exit_code,omitempty"`
-	Truncated    bool                     `json:"truncated"`
-	Observation  *agenvo.AgentObservation `json:"observation,omitempty"`
-	ArtifactHash string                   `json:"artifact_hash,omitempty"`
-	Phase        string                   `json:"phase"`
-	Foreground   *agenvo.Result           `json:"foreground,omitempty"`
+	NativeEvidence *NativeEvidenceLedger    `json:"native_evidence,omitempty"`
+	Followups      []FollowupRecord         `json:"followups,omitempty"`
+	Batch          *BatchDetails            `json:"batch,omitempty"`
+	Kind           string                   `json:"kind"`
+	Agent          agenvo.AgentProgress     `json:"agent"`
+	Output         string                   `json:"output,omitempty"`
+	ExitCode       *int                     `json:"exit_code,omitempty"`
+	Truncated      bool                     `json:"truncated"`
+	Observation    *agenvo.AgentObservation `json:"observation,omitempty"`
+	ArtifactHash   string                   `json:"artifact_hash,omitempty"`
+	Phase          string                   `json:"phase"`
+	Foreground     *agenvo.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
+	NativeEvidence     *NativeEvidenceResult    `json:"native_evidence,omitempty"`
 	NativeAgentName    string                   `json:"native_agent_name,omitempty"`
 	SessionBinding     string                   `json:"session_binding,omitempty"`
 	Followups          []FollowupResult         `json:"followups,omitempty"`
@@ -136,6 +139,7 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 	out := Result{ID: r.ID, TargetID: r.TargetID, State: r.State, Phase: d.Phase, Kind: d.Kind, Output: d.Output, ExitCode: d.ExitCode, Truncated: d.Truncated, Observation: d.Observation, ArtifactHash: d.ArtifactHash, CancelRequested: r.CancelRequested, CleanupRequired: d.Phase != ""}
 	out.Delivery = producerResult(r, d)
 	if d.Batch == nil && d.Agent.Name != "" {
+		out.NativeEvidence = nativeEvidenceResult(d.NativeEvidence)
 		out.NativeAgentName, out.WorkspaceID, out.PaneID = d.Agent.Name, d.Agent.WorkspaceID, d.Agent.PaneID
 		out.SessionBinding = "unavailable"
 		if d.Agent.AgentSession.Valid() {
@@ -425,6 +429,9 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 	if json.Unmarshal(r.Details, &d) != nil {
 		return r, d, agenvo.ErrUnknown
 	}
+	if d.NativeEvidence != nil {
+		d.NativeEvidence.Limit = s.nativeObservationLimit
+	}
 	return r, d, nil
 }
 
@@ -437,18 +444,7 @@ func (s *Service) observe(ctx context.Context, b toolcontext.ComputerBinding, id
 		return s.observeBatch(ctx, b, r, d)
 	}
 	if refresh && d.Kind == "herdr_pi_task" && d.Agent.Name != "" && r.State != "rejected" {
-		obs, observeErr := s.relay.ObserveAgent(agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint), scope(b, r.TargetID), d.Agent)
-		if observeErr != nil {
-			return result(r, d), observeErr
-		}
-		d.Observation = &obs
-		d.Output = obs.Output
-		r.State = "unknown" // observation is not a verified task receipt
-		r.Details, _ = json.Marshal(d)
-		r, err = s.store.SaveComputerOperation(ctx, r)
-		if err != nil {
-			return Result{}, agenvo.ErrUnknown
-		}
+		return s.observeNative(ctx, b, r.ID)
 	}
 	return result(r, d), nil
 }
@@ -473,10 +469,16 @@ func (s *Service) cancel(ctx context.Context, b toolcontext.ComputerBinding, id 
 	return result(r, d), nil // no atomic safe stop contract; never send kill/close/keys
 }
 
-func (s *Service) artifact(ctx context.Context, b toolcontext.ComputerBinding, id string) (Result, error) {
+func (s *Service) artifactForObservation(ctx context.Context, b toolcontext.ComputerBinding, id, observationID string) (Result, error) {
 	r, d, err := s.load(ctx, b, id)
 	if err != nil {
 		return Result{}, err
+	}
+	if d.Batch == nil && d.Kind == "herdr_pi_task" && d.Agent.Name != "" {
+		return s.exportNative(ctx, b, r.ID, observationID)
+	}
+	if observationID != "" {
+		return Result{}, ErrInvalid
 	}
 	if d.Batch != nil {
 		if d.Batch.Result == nil {
