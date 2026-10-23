@@ -1,1 +1,1 @@
-PASS 9 scoped import-policy probes; unsupported modules and unrelated files still rejected
+PASS 9 forbidden require probes and 4 permitted dynamic import probes; no lint policy changed

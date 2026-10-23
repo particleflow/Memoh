@@ -1,0 +1,4 @@
+=== RUN   TestModelContentDoesNotSelectDestination
+--- PASS: TestModelContentDoesNotSelectDestination (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/imagecapability	1.068s

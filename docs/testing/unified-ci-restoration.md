@@ -1,7 +1,9 @@
 # Unified candidate CI restoration and lint corrections
 
 The frozen candidate remains `8c358cac27922f122315ac9db62d52cc100c8a2a` on
-`integrate/unified-server-web-management`. Corrections live on the independent
+`integrate/unified-server-web-management`. The intermediate `882116121d25f4e0395a13b4e276f8beb0da267d` checkpoint is
+superseded: its two lint exceptions were removed by an additive commit, not
+history rewriting. Corrections live on the independent
 `fix/unified-candidate-ci-imports` branch. No release, image publication, main
 merge, workflow-permission change or deployment was performed.
 
@@ -27,29 +29,32 @@ forced by changing workflow source or creating a PR. No publishing workflow ran.
 - Three published browser scripts now use dynamic imports; an unused import is
   removed. Their assertions are unchanged. Original executed sources remain in
   the frozen candidate; old logs are not relabeled as a new execution.
-- The embedded `pi_history.cjs` CLI retains CommonJS. The existing ESLint policy
-  now explicitly allows only its four Node builtins in that exact file. The rule
-  remains enabled elsewhere and still rejects other modules in that file.
-  [Nine executable positive/negative probes](ci-import-policy.mjs) verify this.
+- The embedded `pi_history.cjs` CLI now loads its four Node builtins using
+  dynamic imports inside an async entry point. It remains the same finite `.cjs`
+  host helper, not Pi/Agent core. Its history validation and reports are unchanged.
+  ESLint configuration is byte-identical to the frozen candidate: no new
+  whitelist, ignore or disabled rule. [Thirteen executable probes](ci-import-policy.mjs)
+  require nine `require()` inputs to fail and four dynamic imports to pass.
 - Go fixture cleanup failures are checked. Formatting, named HTTP constants,
   discard logger, shadowed builtin naming and unused parameter fixes preserve
   assertions and runtime semantics. The equivalent native evidence predicate
   keeps the same scope/history selection.
-- G704 reports the Images API request whose address comes from server-managed
-  provider configuration. `parseConfig` validates its HTTP(S) shape; strict tool
-  decoding rejects endpoint/model/authority fields; redirects remain disabled.
-  A single rule-specific annotation records this established trust boundary,
-  following the existing configured-provider adapter convention. No global
-  security rule or check is disabled. This is **not** a claim that configured
-  private endpoints are blocked or that administrators cannot configure them.
+- **G704 remains unresolved and still fails the unchanged check.** It reports
+  `internal/imagecapability/protocol.go:89`, the existing `Do(req)`. This file is
+  byte-identical to the frozen candidate. The intermediate narrow suppression
+  and exploratory body-construction change were both removed. No linter
+  exception or check-policy change remains.
+  Source review shows destination selection from server-managed provider config,
+  strict tool-argument decoding and redirects disabled. A real-HTTP regression
+  verifies that a URL embedded in prompt text cannot select another server.
+  This supports analysis, not green lint or a general SSRF protection claim.
+  Configured private endpoints are intentionally supported. The remaining
+  diagnostic needs a reviewed decision on the configured-provider trust boundary,
+  not a blind private-network ban, hidden indirection or rule suppression.
   The exact analyzer is gosec v2.23.0 from golangci-lint v2.10.1; its
   [G704 configuration](https://github.com/securego/gosec/blob/v2.23.0/analyzers/ssrf.go)
-  treats the request object as the sink. An exploratory body-construction change
-  did not resolve the report and was discarded; final HTTP behavior is unchanged.
-  A new real-HTTP test places another server URL in model-controlled prompt text:
-  only the configured destination receives one POST, the other receives zero,
-  and content length and prompt bytes are preserved. This annotation requires
-  review with these boundaries, not a claim of general SSRF sanitization.
+  treats the request object as a sink. Investigation used no production
+  credentials or paid provider calls.
 
 The [original Go lint errors](unified-ci-go-lint-original-excerpt.log) remain
 readable. No official Agent core, API schema, migration, provider configuration,
@@ -57,15 +62,17 @@ credential, storage policy or legacy-media P1 code was changed.
 
 ## Local checks on the correction
 
-- `golangci-lint run ./internal/imagecapability ./internal/computertask ./internal/agent/tool ./cmd/internal/core`: exit 0 after corrections. The preceding attempt retained G704 and exited 1; that failure is not counted as success.
+- Final `golangci-lint run ./...`: **exit 1**, only G704 remains. [Current output](unified-ci-go-lint-current.log). Earlier targeted/full passes on the superseded exception-bearing checkpoint are not final acceptance.
 - Focused race regressions: [29 top-level PASS](unified-ci-focused-go.log), exit 0, no skips. These include internal spawn using synthetic HTTP models, native evidence and background wrapper behavior.
 - Remaining protocol/authorization/storage/timeout regressions: [11 top-level PASS](unified-ci-protocol-boundaries.log), exit 0, no skips. No paid provider was called.
 - Repository ESLint: [0 errors, 20 existing warnings](unified-ci-eslint-local.log), exit 0. Warnings remain visible.
-- [Nine import-policy probes](unified-ci-import-policy.log), exit 0. Syntax checks passed for all three browser scripts.
+- [Thirteen import-policy probes](unified-ci-import-policy.log), exit 0. Syntax checks passed for the host history helper and all three browser scripts.
+- Final host-history race regression: [8 top-level PASS](unified-ci-history.log), exit 0, no skips; package 19.692 s. These execute real Node/Bash with synthetic session files.
+- Final unchanged-protocol destination regression: [1 PASS](unified-ci-routing.log), exit 0, no skips; second HTTP server receives zero requests.
 - The official runtime/contextview boundary script passed; `packages/runtime` is also unchanged. Frozen branches were not moved.
 
-A fresh `go build -p 2 -o /tmp/web-management-checks/ci-lint-server ./cmd/agent`
-exited 0. The isolated server was replaced only after verifying zero active
+A fresh `go build -p 2 -o /tmp/web-management-checks/ci-no-exemption-server ./cmd/agent`
+exited 0. After removing the exceptions, the isolated server was replaced only after verifying zero active
 runs; [its binary and source-diff hashes](unified-ci-runtime.json) identify the
 build and health HEAD returned 200. The existing Web remained at the unchanged
 candidate source. [Current-binary browser observation](unified-ci-browser.log)
@@ -87,8 +94,19 @@ cleanup occurred. Scratch regained approximately 5.9 GiB before checks; the
 root filesystem remains full. It needs supported environment storage repair,
 not deletion of application data. This limits new local database workloads.
 
-Legacy media P1 remains unresolved and held. OAuth recovery, real PC acceptance,
+The remaining G704 lint failure blocks claiming this correction is fully green. Legacy media P1 remains unresolved and held. OAuth recovery, real PC acceptance,
 and the missing original mobile overlay/native shell remain separate blockers.
 The Windows source contact is `a6908728` with `/api` support; the mobile source
 contact is `b568d81`. Those contact points are parent handoff facts, not new
 local device verification. A passing candidate check does not approve release.
+
+
+## Full root filesystem: checkpoint preservation
+
+Writing an additional selected log copy returned `ENOSPC`. No source, database
+or raw evidence was removed. The existing authorized scratch filesystem still
+had capacity, so a same-environment shared Git checkout under
+`/tmp/web-management-checks/ci-write-checkout` preserves the correction and
+reviewable evidence. The original working tree remains in place with its diff
+also saved as a patch. No new execution environment, credentials or production
+path was introduced. The root filesystem still needs platform storage repair.

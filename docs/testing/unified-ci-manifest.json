@@ -1,10 +1,10 @@
 {
-  "form": "Selected original synthetic local logs and current-browser evidence; initial GitHub summaries are structured metadata; Go lint excerpt explicitly removes job prefixes. No private configs or server logs copied.",
+  "form": "Selected original synthetic local logs and current-browser evidence; GitHub summaries are structured metadata; Go lint excerpt explicitly removes job prefixes. No private configs or server logs copied.",
   "files": [
     {
       "path": "unified-ci-browser-proof.json",
       "bytes": 5702,
-      "sha256": "c4ead54865a6b13547054565be40b057e783b4f990cdc6de146730fabb2c620d"
+      "sha256": "f05d5b7b374ffbe6bfb518dbeac0bf219924edf65d05f3c127788876cf9328a9"
     },
     {
       "path": "unified-ci-browser.log",
@@ -13,8 +13,8 @@
     },
     {
       "path": "unified-ci-child.png",
-      "bytes": 45497,
-      "sha256": "1ed0a9d5cf6a669d5867ed232de70c96dd1626b7d6546765346f4b4951793255"
+      "bytes": 45510,
+      "sha256": "63f27657076c78bf9fdc9ca7e7e21f8f8af308f35efde738b1086fb8013b32e7"
     },
     {
       "path": "unified-ci-download.png",
@@ -32,14 +32,24 @@
       "sha256": "27b75be45f691743fd123059e868abafaa507b17d4824a8d43b5cb812b24cb84"
     },
     {
+      "path": "unified-ci-go-lint-current.log",
+      "bytes": 138,
+      "sha256": "b87b62e2a258ee94de6a49042457eb1bd0b8f8103ba985771f69ecb49e4dd88a"
+    },
+    {
       "path": "unified-ci-go-lint-original-excerpt.log",
       "bytes": 3247,
       "sha256": "7145cf6986829880e62795494214ebbea6b7a8ef3b151554f00cb9914885d5d0"
     },
     {
+      "path": "unified-ci-history.log",
+      "bytes": 4932,
+      "sha256": "0e6fff2c6945da0f98cb4586f4ed0f93dcb2c962b2863afd98192fc451c803b0"
+    },
+    {
       "path": "unified-ci-import-policy.log",
-      "bytes": 91,
-      "sha256": "7d320b760c9ac0d0708fdf30ba2733e60681e3a7f56c4138c1b35d89f5e04352"
+      "bytes": 94,
+      "sha256": "68f06ccc96b095790767ba8f6c37b29c18f8496783cb8da4609b9d368efe2dcc"
     },
     {
       "path": "unified-ci-initial-results.json",
@@ -52,9 +62,14 @@
       "sha256": "30cf991628063360f5589162fe87d2bba9876da0ab54788c4fdc4c5d58247733"
     },
     {
+      "path": "unified-ci-routing.log",
+      "bytes": 178,
+      "sha256": "cbaffba2584d5ac602c0c714bd5bffc4bccd7f6f4c5d6635f294cd2664e7bcd8"
+    },
+    {
       "path": "unified-ci-runtime.json",
       "bytes": 332,
-      "sha256": "f3f0816b4ddf674572cca7e353cab12fb18084f22201d815051d1c728d83a361"
+      "sha256": "4de4a8c3f130e9e368721d7baee5c93ce456f799072bf0418573058a4f74c0b5"
     }
   ]
 }

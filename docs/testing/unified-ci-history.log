@@ -1,0 +1,70 @@
+=== RUN   TestBatchHistoryOfficialSummaryForms
+=== RUN   TestBatchHistoryOfficialSummaryForms/compaction-self
+=== RUN   TestBatchHistoryOfficialSummaryForms/compaction-retained
+=== RUN   TestBatchHistoryOfficialSummaryForms/compaction-missing-kept
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-root
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-from-reset-root
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-earlier-parent
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-missing-fields
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-missing-summary
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-missing-from
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-unavailable-source
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-empty-summary-with-parent
+=== RUN   TestBatchHistoryOfficialSummaryForms/branch-empty-root-summary
+=== RUN   TestBatchHistoryOfficialSummaryForms/detached-setup-leaf
+=== RUN   TestBatchHistoryOfficialSummaryForms/new-user-branch
+--- PASS: TestBatchHistoryOfficialSummaryForms (4.75s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/compaction-self (0.36s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/compaction-retained (0.42s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/compaction-missing-kept (0.37s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-root (0.37s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-from-reset-root (0.33s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-earlier-parent (0.33s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-missing-fields (0.27s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-missing-summary (0.30s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-missing-from (0.31s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-unavailable-source (0.33s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-empty-summary-with-parent (0.35s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/branch-empty-root-summary (0.32s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/detached-setup-leaf (0.29s)
+    --- PASS: TestBatchHistoryOfficialSummaryForms/new-user-branch (0.39s)
+=== RUN   TestBatchHistoryUserOnlyFirstTurnCanResume
+--- PASS: TestBatchHistoryUserOnlyFirstTurnCanResume (0.41s)
+=== RUN   TestBatchHistoryResourceLimitIsUnconfirmed
+--- PASS: TestBatchHistoryResourceLimitIsUnconfirmed (0.72s)
+=== RUN   TestBatchHistoryFirstResumeAndDuplicate
+--- PASS: TestBatchHistoryFirstResumeAndDuplicate (0.97s)
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/missing
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/whole-directory-missing
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/empty
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/truncated
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/same-size-rewrite
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/malformed-tail
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/broken-parent
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/unreadable
+=== RUN   TestBatchHistoryDamageBlocksWithoutTouchingFiles/duplicate-file
+--- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles (7.62s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/missing (1.00s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/whole-directory-missing (0.56s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/empty (0.59s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/truncated (0.81s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/same-size-rewrite (1.07s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/malformed-tail (0.99s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/broken-parent (0.62s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/unreadable (0.81s)
+    --- PASS: TestBatchHistoryDamageBlocksWithoutTouchingFiles/duplicate-file (1.16s)
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy/post-loss
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy/first
+=== RUN   TestBatchHistoryPostInvocationLossAndUnknownLegacy/unconfirmed
+--- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy (3.03s)
+    --- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy/post-loss (0.73s)
+    --- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy/first (1.31s)
+    --- PASS: TestBatchHistoryPostInvocationLossAndUnknownLegacy/unconfirmed (1.00s)
+=== RUN   TestBatchHistoryReceiptRequiresFileEvidence
+--- PASS: TestBatchHistoryReceiptRequiresFileEvidence (0.49s)
+=== RUN   TestBatchHistoryStaleLockNeverStolen
+--- PASS: TestBatchHistoryStaleLockNeverStolen (0.66s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	19.692s

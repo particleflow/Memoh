@@ -1,7 +1,7 @@
 {
   "base_commit": "8c358cac27922f122315ac9db62d52cc100c8a2a",
-  "working_diff_sha256": "d04356299d4736fe621e7999ef12c30c1ec921716062483db8bf75c604a7af70",
-  "binary_sha256": "8f002cbf1f135d71d2ee0f2f7d2ba499211a4c924fd9f713ecd03bf634dc4802",
+  "working_diff_sha256": "98d297dcaf90e451cec397eeab145bf2f16e67a0fb9459901542cdca57d66ae6",
+  "binary_sha256": "5fd145592d2e7b16dab1be0160d1118b9e51e69a9e7b4b8ba6c84047f31952e7",
   "health_head": 200,
   "active_runs_before_restart": 0,
   "business_resubmissions": 0

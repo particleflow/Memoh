@@ -20,16 +20,6 @@ export default [
     },
   },
   {
-    // The history reader is also embedded and launched as a finite .cjs CLI.
-    // Its four Node builtins are explicit; other require() imports still fail.
-    files: ['internal/agenvo/pi_history.cjs'],
-    rules: {
-      '@typescript-eslint/no-require-imports': ['error', {
-        allow: ['^node:(?:fs|path|crypto|util)$'],
-      }],
-    },
-  },
-  {
     files: ['packages/**/*.{js,jsx,ts,tsx}', 'apps/**/*.{js,jsx,ts,tsx}'],
     languageOptions: {
       parserOptions: {
