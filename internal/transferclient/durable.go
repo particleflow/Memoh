@@ -45,12 +45,17 @@ type DiskQueue struct {
 	releaseHook func(string)
 	journalHook func(string)
 	historyHook func(string)
+	budgetBase  int64 // Nonzero only for explicitly upgraded locator v4.
+	openSource  func(string) (*os.File, error)
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
 // authorized registration accepted the stable reference, not task completion.
 type QueueStatus struct {
 	Version             int           `json:"version"`
+	Registered          bool          `json:"registered,omitempty"`
+	Activated           bool          `json:"activated,omitempty"`
+	Source              *QueuedSource `json:"source,omitempty"`
 	LastRun             time.Time     `json:"last_run_at,omitzero"`
 	PayloadState        string        `json:"payload_state,omitempty"`
 	Direction           string        `json:"direction"`
@@ -79,6 +84,10 @@ func openHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 }
 
 func openQueueLayout(getenv func(string) string, revision string, limits QueueLimits, readOnly, migrate bool, hook func(string)) (*DiskQueue, error) {
+	return openQueueLayoutMode(getenv, revision, limits, readOnly, migrate, false, hook)
+}
+
+func openQueueLayoutMode(getenv func(string) string, revision string, limits QueueLimits, readOnly, migrate, budgetMigration bool, hook func(string)) (*DiskQueue, error) {
 	if getenv == nil || !validID(revision) || limits.Jobs < 1 || limits.Jobs > 128 || limits.Bytes < 1 || limits.Bytes > 1<<40 || limits.JournalBytes < 65536 || limits.JournalBytes > 8<<20 || limits.Workers < 1 || limits.Workers > 4 {
 		return nil, ErrInvalid
 	}
@@ -177,6 +186,17 @@ func openQueueLayout(getenv func(string) string, revision string, limits QueueLi
 	actual, err := io.ReadAll(io.LimitReader(f, 4097))
 	if err != nil || len(want) > 4096 {
 		return nil, ErrStore
+	}
+	budgetHandled, err := q.openBudgetLocator(f, actual, want, budgetMigration)
+	if err != nil {
+		return nil, err
+	}
+	if budgetHandled {
+		if migrate {
+			return nil, ErrVersion // History v2->v3 must precede budget v4.
+		}
+		// Only the explicit budget journal can explain this locator version.
+		actual = want
 	}
 	if migrate && len(actual) != 0 {
 		if err := q.migrateLocator(f, actual, want); err != nil {
@@ -330,7 +350,7 @@ func (q *DiskQueue) loadJournal(id string) (QueueStatus, *os.File, error) {
 		if dec.Decode(&next) != nil {
 			return ErrStore
 		}
-		if next.Version != 2 && next.Version != 3 && next.Version != 4 {
+		if next.Version != 2 && next.Version != 3 && next.Version != 4 && next.Version != 5 {
 			return ErrVersion
 		}
 		if !q.validRecord(next, id) {
@@ -396,7 +416,7 @@ func readJournalFramesMode(f *os.File, limit int64, repair bool, consume func([]
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
-	if r.Version != 2 && r.Version != 3 && r.Version != 4 {
+	if r.Version != 2 && r.Version != 3 && r.Version != 4 && r.Version != 5 {
 		return false
 	}
 	if r.PayloadState != "" || r.Version == 3 {
@@ -405,7 +425,13 @@ func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
 		}
 	}
 
-	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || r.Job.Spec.SizeBytes > q.limits.Bytes {
+	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || !r.Registered && r.Job.Spec.SizeBytes > q.limits.Bytes {
+		return false
+	}
+	if r.Registered && (r.Source == nil || !r.Source.valid() || r.Direction != "upload" || r.Admitted && !r.Activated) {
+		return false
+	}
+	if !r.Registered && (r.Source != nil || r.Activated) {
 		return false
 	}
 	if r.Admitted && r.Direction == "upload" && !r.Seal.valid() {
@@ -439,7 +465,7 @@ func (q *DiskQueue) save(f *os.File, r QueueStatus) error {
 	}
 	// Fence old queue writers before creating a compaction witness. Every later
 	// write retains this version, including terminal receipt compaction.
-	r.Version = 4
+	r.Version = recordVersion(r)
 	body, err := json.Marshal(r)
 	if err != nil || len(body) > 16384 {
 		return ErrStore
@@ -451,7 +477,7 @@ func (q *DiskQueue) save(f *os.File, r QueueStatus) error {
 	if err != nil {
 		return ErrStore
 	}
-	if r.PayloadState == "" && stat.Size() >= min(int64(65536), q.limits.JournalBytes/2) {
+	if r.PayloadState == "" && (r.Registered && r.Associated || stat.Size() >= min(int64(65536), q.limits.JournalBytes/2)) {
 		return q.compactActiveJournal(f, r)
 	}
 	return nil

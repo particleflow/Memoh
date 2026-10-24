@@ -3,6 +3,7 @@
 package db_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/google/uuid"
@@ -81,7 +82,68 @@ func TestComputerDeliveryPostgresUpgradeFrom170(t *testing.T) {
 	if _, err := pool.Exec(t.Context(), "UPDATE computer_operations SET details=$2 WHERE id=$1", operation, original); sqlState(err) != "23514" {
 		t.Fatal("173 removed legacy writer guard", err)
 	}
-	t.Log("170 -> 171 -> 172 -> 173: transfer credentials and delivery ledger preserved; guard and delegation RLS present")
+	// Preserve opaque historical receipt fields, including unknown work. Upgrade
+	// is part of ordinary migrations, never a user-operated queue migration.
+	legacy := `{"version":4,"entries":{"ready_history":{"outcome":"committed","transfer":{"upload_id":"original_receipt","ready":{"content_hash":"original_hash","size_bytes":42}}},"unknown_history":{"outcome":"reserved","transfer":{"creating":true}}}}`
+	exec(`UPDATE computer_operations SET details=jsonb_set(details,'{delivery_ledger}',$2::jsonb) WHERE id=$1`, operation, legacy)
+	var legacyDetails string
+	if err := pool.QueryRow(t.Context(), `SELECT details::text FROM computer_operations WHERE id=$1`, operation).Scan(&legacyDetails); err != nil {
+		t.Fatal(err)
+	}
+	migrateTo(t, dsn, 174)
+	checkRows := func() {
+		t.Helper()
+		var preserved bool
+		if err := pool.QueryRow(t.Context(), `SELECT jsonb_object_agg(delivery_id,entry)=$2::jsonb->'entries' AND bool_and(version=4) FROM computer_delivery_entries WHERE operation_id=$1`, operation, legacy).Scan(&preserved); err != nil || !preserved {
+			t.Fatal("legacy entries changed", err)
+		}
+		if err := pool.QueryRow(t.Context(), `SELECT details->'delivery_ledger'='{"version":5,"storage":"rows"}'::jsonb AND details-'delivery_ledger'=$2::jsonb-'delivery_ledger' AND revision=7 AND cancel_requested FROM computer_operations WHERE id=$1`, operation, legacyDetails).Scan(&preserved); err != nil || !preserved {
+			t.Fatal("operation identity changed", err)
+		}
+	}
+	checkRows()
+	if _, err := pool.Exec(t.Context(), `UPDATE computer_operations SET details=jsonb_set(details,'{delivery_ledger}',$2::jsonb) WHERE id=$1`, operation, legacy); sqlState(err) != "23514" {
+		t.Fatal("old JSON writer accepted", err)
+	}
+	up, err := os.ReadFile("../../db/postgres/migrations/0174_computer_delivery_entries.up.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	exec(string(up))
+	checkRows()
+	migrateTo(t, dsn, 173)
+	var restored string
+	if err := pool.QueryRow(t.Context(), `SELECT details::text FROM computer_operations WHERE id=$1`, operation).Scan(&restored); err != nil || restored != legacyDetails {
+		t.Fatal("lossless rollback changed history", err)
+	}
+	migrateTo(t, dsn, 174)
+	checkRows()
+	// A future downgrade must explicitly reject data that old writers cannot
+	// represent, retaining all rows and the enabled security policy on failure.
+	down, err := os.ReadFile("../../db/postgres/migrations/0174_computer_delivery_entries.down.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Row layout can retain old v1 download evidence alongside newer uploads;
+	// old JSON ledgers cannot describe those versions independently.
+	exec(`INSERT INTO computer_delivery_entries(team_id,operation_id,delivery_id,version,entry) SELECT team_id,operation_id,'legacy_download',1,'{"reference":{"direction":"download"},"outcome":"canceled"}'::jsonb FROM computer_delivery_entries WHERE operation_id=$1 AND delivery_id='unknown_history'`, operation)
+	if _, err := pool.Exec(t.Context(), string(down)); sqlState(err) != "23514" {
+		t.Fatal("mixed proof rollback accepted", err)
+	}
+	exec(`DELETE FROM computer_delivery_entries WHERE operation_id=$1 AND delivery_id='legacy_download'`, operation)
+	exec(`INSERT INTO computer_delivery_entries(team_id,operation_id,delivery_id,version,entry) SELECT team_id,operation_id,'retained_'||g,version,entry FROM computer_delivery_entries CROSS JOIN generate_series(1,129) g WHERE operation_id=$1 AND delivery_id='unknown_history'`, operation)
+	if _, err := pool.Exec(t.Context(), string(down)); sqlState(err) != "23514" {
+		t.Fatal("lossy rollback accepted", err)
+	}
+	var count int
+	if err := pool.QueryRow(t.Context(), `SELECT count(*) FROM computer_delivery_entries WHERE operation_id=$1`, operation).Scan(&count); err != nil || count != 131 {
+		t.Fatal("rollback discarded history", err, count)
+	}
+	var secured bool
+	if err := pool.QueryRow(t.Context(), `SELECT relrowsecurity AND relforcerowsecurity FROM pg_class WHERE oid='computer_delivery_entries'::regclass`).Scan(&secured); err != nil || !secured {
+		t.Fatal("rollback changed RLS", err)
+	}
+	t.Log("170 -> 174, repeat-up, down/up: old receipt/unknown payloads and operation revision retained; old writer and lossy rollback rejected")
 }
 
 func TestComputerDeliveryPostgresCanonicalTransferSchema(t *testing.T) {

@@ -334,16 +334,14 @@ func nativePostgresDelivery(t *testing.T, revoke bool) {
 			t.Fatal("revocation fabricated delivery/cancellation", status)
 		}
 		current, err = store.ReadComputerOperation(ctx, op)
-		var details struct {
-			Ledger struct {
-				Entries map[string]struct {
-					Outcome string `json:"outcome"`
-				} `json:"entries"`
-			} `json:"delivery_ledger"`
+		stored, readErr := store.ReadComputerDeliveryEntry(ctx, current, job.DeliveryID)
+		var entry struct {
+			Outcome string `json:"outcome"`
 		}
-		if err != nil || json.Unmarshal(current.Details, &details) != nil || details.Ledger.Entries[job.DeliveryID].Outcome != "pending" {
-			t.Fatal("revoked scan committed its result", err)
+		if err != nil || readErr != nil || json.Unmarshal(stored.Data, &entry) != nil || entry.Outcome != "pending" {
+			t.Fatal("revoked scan committed its result", err, readErr)
 		}
+
 		return
 	}
 	for range 12 {

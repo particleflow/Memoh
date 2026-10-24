@@ -87,29 +87,26 @@ func (q *DiskQueue) lifecycleSummary(ctx context.Context, binding string, now ti
 		return LifecycleFailure(err), err
 	}
 	defer unlockClose(global)
-	records, err := q.admissions()
-	if err != nil {
-		return LifecycleFailure(err), err
-	}
 	result := lifecycle("idle", "none", time.Time{})
-	for _, head := range records {
+	err = q.visitAdmissions(func(head QueueStatus) error {
 		if err := ctx.Err(); err != nil {
-			return LifecycleFailure(err), err
+			return err
 		}
 		r, err := q.Inspect(head.Job.DeliveryID)
 		var next Lifecycle
 		if err != nil && !errors.Is(err, ErrAdmissionPending) {
-			// ReclaimConfirmed must load every non-busy record before selecting
-			// work. A corrupt journal therefore blocks the actual finite action,
-			// even when another record is due. Do not advertise impossible work.
 			if !errors.Is(err, ErrBusy) {
-				return LifecycleFailure(err), err
+				return err
 			}
 			next = LifecycleFailure(err)
 		} else {
 			next = recordLifecycle(r, binding, now)
 		}
 		result = combineLifecycle(result, next)
+		return nil
+	})
+	if err != nil {
+		return LifecycleFailure(err), err
 	}
 	return result, nil
 }
@@ -122,7 +119,7 @@ func recordDue(r QueueStatus) time.Time {
 }
 
 func recordEligible(r QueueStatus) bool {
-	return r.Admitted && !r.Associated && !r.AssociationBlocked && r.Job.Phase != "blocked" && r.Job.Phase != "canceled" && r.Job.Phase != "create_unknown" && r.Job.Phase != "creating"
+	return (r.Admitted || r.Registered) && !r.Associated && !r.AssociationBlocked && r.Job.Phase != "blocked" && r.Job.Phase != "canceled" && r.Job.Phase != "create_unknown" && r.Job.Phase != "creating"
 }
 
 func recordLifecycle(r QueueStatus, binding string, now time.Time) Lifecycle {
@@ -189,7 +186,7 @@ func (q *DiskQueue) readOnlyRecord(id string) (QueueStatus, *os.File, error) {
 	}
 	r, f, journalErr := q.loadJournal(id)
 	if journalErr == nil {
-		if errors.Is(err, errCheckpointIncomplete) && r.Version != 4 {
+		if errors.Is(err, errCheckpointIncomplete) && r.Version != 4 && r.Version != 5 {
 			_ = f.Close()
 			return QueueStatus{}, nil, ErrStore
 		}

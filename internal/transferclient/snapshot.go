@@ -127,15 +127,25 @@ func (q *DiskQueue) openSnapshot(r QueueStatus) (Snapshot, func(), error) {
 	if !r.Seal.valid() {
 		return nil, nil, ErrSnapshot
 	}
-	data, err := q.file(r.Job.DeliveryID+".snapshot", os.O_RDONLY, 0o600)
-	if err != nil {
-		return nil, nil, err
+	var data *os.File
+	var closeData func()
+	var err error
+	if r.Registered {
+		data, closeData, err = q.registeredSource(r)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		data, err = q.file(r.Job.DeliveryID+".snapshot", os.O_RDONLY, 0o600)
+		if err != nil {
+			return nil, nil, err
+		}
+		if err := lockQueueFile(data); err != nil {
+			_ = data.Close()
+			return nil, nil, err
+		}
+		closeData = func() { unlockClose(data) }
 	}
-	if err := lockQueueFile(data); err != nil {
-		_ = data.Close()
-		return nil, nil, err
-	}
-	closeData := func() { unlockClose(data) }
 	tree, err := q.file(r.Job.DeliveryID+".tree", os.O_RDONLY, 0o600)
 	if err != nil {
 		closeData()
@@ -158,7 +168,7 @@ func (q *DiskQueue) openSnapshot(r QueueStatus) (Snapshot, func(), error) {
 		return nil, nil, ErrSnapshot
 	}
 	dataInfo, err := data.Stat()
-	if err != nil || dataInfo.Size() != r.Job.Spec.SizeBytes || dataInfo.Mode().Perm()&0o222 != 0 {
+	if err != nil || dataInfo.Size() != r.Job.Spec.SizeBytes || !r.Registered && dataInfo.Mode().Perm()&0o222 != 0 {
 		closeBoth()
 		return nil, nil, ErrSnapshot
 	}

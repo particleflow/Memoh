@@ -1,0 +1,25 @@
+Historical CI failure for the withdrawn additional-declaration experiment.
+Source head: bb582ec1680c4e23552857af7fd1d698cb555dcf
+Run: https://github.com/particleflow/Memoh/actions/runs/40100974269
+Job: https://github.com/particleflow/Memoh/actions/runs/40100974269/job/120892863652
+The following is a verbatim excerpt, not the complete job log:
+
+2026-10-24T14:10:32.3494118Z === RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+2026-10-24T14:10:35.1538482Z === RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery
+2026-10-24T14:10:44.3704243Z     computer_delivery_integration_test.go:236: original interrupted delivery did not resume
+2026-10-24T14:10:44.4824575Z --- FAIL: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (12.13s)
+2026-10-24T14:10:44.4825679Z     --- FAIL: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery (9.24s)
+2026-10-24T14:10:44.4826843Z FAIL
+2026-10-24T14:10:44.4970716Z FAIL	github.com/felinics/memoh/internal/db	12.179s
+2026-10-24T14:10:44.5036846Z FAIL
+2026-10-24T14:10:44.5395380Z ##[error]Process completed with exit code 1.
+
+The job's subsequent scoped-delegation, CAS/RLS and Pi-history steps were
+skipped. Six other Go jobs succeeded. Native, Docker and contribution runs
+succeeded, which does not make this head all-green.
+
+Source review found that the expanded 18-file fixture still used at most
+eight global queue advances when checking the interrupted first file. The
+log lacks selected IDs for those calls, so the cause was not established.
+The scope correction restores the existing three-file test instead of
+weakening assertions or continuing the unrequired experiment.

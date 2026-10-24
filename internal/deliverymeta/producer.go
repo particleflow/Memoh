@@ -15,7 +15,8 @@ import (
 
 const (
 	ManifestPrefix = "memoh_delivery_"
-	MaxArtifacts   = 16
+	// MaxArtifacts bounds one declaration/feedback/closed page, not the total backlog.
+	MaxArtifacts = 16
 )
 
 var (

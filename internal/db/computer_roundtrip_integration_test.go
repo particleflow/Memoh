@@ -206,8 +206,8 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 		return status
 	}
 	raw, _ := json.Marshal(closed)
-	if out := invoke("enqueue-result", "", raw, 0); string(out["admitted"]) != "true" {
-		t.Fatal("producer not admitted")
+	if out := invoke("enqueue-result", "", raw, 0); string(out["registered"]) != "true" || string(out["admitted"]) == "true" {
+		t.Fatal("producer metadata was not registered before indexing")
 	}
 	first := invoke("advance-results", "", nil, 0)
 	if string(first["state"]) != `"waiting"` {
@@ -249,15 +249,11 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 		if err != nil {
 			t.Fatal(err)
 		}
-		var d struct {
-			Ledger struct {
-				Entries map[string]json.RawMessage `json:"entries"`
-			} `json:"delivery_ledger"`
+		stored, err := store.ReadComputerDeliveryEntry(ctx, current, closed.DeliveryID())
+		if err != nil {
+			t.Fatal(err)
 		}
-		if json.Unmarshal(current.Details, &d) != nil {
-			t.Fatal("invalid durable ledger")
-		}
-		entry := d.Ledger.Entries[closed.DeliveryID()]
+		entry := json.RawMessage(stored.Data)
 		var proof struct {
 			Outcome  string `json:"outcome"`
 			Transfer struct {

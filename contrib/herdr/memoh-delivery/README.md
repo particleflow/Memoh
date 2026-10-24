@@ -57,8 +57,9 @@ bounded failure messages; never send originals, full production logs or secrets.
 The manifest uses Herdr v0.9.5's existing argv action mechanism. No startup worker
 or timer is registered. `verify-storage` invokes `transferqueue.exe -action probe`:
 it validates/initializes its queue only under `HERDR_PLUGIN_STATE_DIR`, requiring
-an existing private local NTFS parent. Its fixed `native-profile-v1` quota profile
-is immutable in the locator. It never repairs ACLs, changes roots or falls back.
+an existing private local NTFS parent. Its `native-profile-v1` locator binds the
+resolved root and legacy quota profile. New upload registration does not require
+changing that profile. It never repairs ACLs, changes roots or falls back.
 
 The executable exposes finite `enqueue-upload`, `enqueue-download`, `advance`,
 `advance-next`, `reconcile`, `inspect`, `cancel`, and `retire` actions. Explicit
@@ -107,9 +108,60 @@ completion receipt.
 existing queue journal. Changing the endpoint or source root (even formatting)
 requires explicit drain/migration; old jobs fail `configuration_changed`, never
 silently switch directories or send their credential to a different endpoint.
-The queue's `native-profile-v1` limits remain 8 jobs, 256 MiB reserved bytes,
-8 MiB per journal and one worker. This finite profile is not a claimed maximum
-protocol file size; changing quotas requires a reviewed locator migration.
+## Metadata-first uploads (plugin 0.9)
+
+New upload enqueue persists the existing job identity, expected complete hash,
+size and a private logical source reference plus file identity/mtime. It does
+not hash/copy file bytes, reserve their aggregate size, or consume a transfer
+slot. `registered: true` acknowledges this durable registration; `admitted: true`
+still means the block index has been verified and transfer can proceed. This is
+an additive CLI status field, not a new Server or phone wire protocol.
+
+The existing finite `advance-results`/`advance` action performs source indexing
+and upload. It reads at most 64 MiB per indexing step, resumes the persisted hash
+state, and reuses the existing 1 MiB block-proof tree. It writes no second full
+source copy. Transfer buffers remain at most 8 MiB, with one worker in the
+installed profile. Pending metadata has no aggregate content-byte or file-count
+quota. Directory reads are paged; only selected files allocate index scratch.
+Actual metadata/index disk exhaustion remains an explicit capacity failure with
+records retained. This does not promise unlimited disk or zero indexing cost.
+
+Windows holds the existing validated source handle without write/delete sharing
+during each finite call. Reopens verify identity, size and modification time;
+block proofs verify bytes even if those attributes were preserved. Source change
+or loss records `source_changed`/`source_missing`, keeps the original job/receipt
+and index, and never creates a new business attempt or silently changes versions.
+User sources are never deleted. NAS durable association permits release of the
+queue-owned index/checkpoint and keeps the original queryable receipt.
+
+Existing v2/v3/v4 snapshot journals remain readable, and previously sealed
+snapshots keep their old source-independent semantics. New registrations use
+queue record v5 in the same layout/root and unchanged locator/HostBinding.
+No budget edit or `migrate-budget` is needed to enqueue large upload metadata.
+Older binaries reject v5 records; a normal endpoint package update must replace
+old finite writers, not run both versions. Rollback must retain the state and
+use a reader supporting v5; it cannot reinterpret indexed sources as snapshots.
+
+The historical 8-job/256 MiB reservation profile and optional
+`queue-budget.json` are retained only for legacy snapshot/download/publication
+compatibility. They no longer limit new upload registration or source size.
+This increment does **not** remove the separate download/publication constraints,
+Server `[files].max_upload_bytes` default of 200 MiB, or task manifest/ledger
+limits. Consequently metadata registration is not a claim that 10,000 GiB files
+have been transferred or that every three-end product constraint is solved.
+
+The Server still requires the complete hash before Create. Closed producer
+metadata already supplies that hash; active indexing verifies it in another
+bounded read before networking. Upload then reads requested blocks from the
+source. These necessary reads have not been disguised as zero overhead; no BEP
+compatibility or embedded Syncthing engine is claimed by this increment.
+
+The Linux scale regression uses 10,000 distinct sparse 1 GiB source files for
+metadata only. Smaller cross-platform fixtures cover source changes, cancellation,
+worker exclusion, process exit before registration acknowledgement, original-ID
+replay, and lost PATCH response without a snapshot. The existing real Server/PG/
+CLI process recovery tests retain their hash/receipt/Commit assertions. None of
+these tests establishes physical power-loss durability or real PC/NAS bandwidth.
 
 ## Producer and finite-command handoff
 
@@ -123,22 +175,21 @@ Do not put a credential or file bytes in this JSON. These IDs are lookup
 selectors, not authorization; the Server verifies them against its current
 operation, Bot permissions and authenticated device.
 
-Reinvoke the same enqueue/ID/metadata after admission timeout to resume sealing;
-do not invent a new ID. Completed admission uses its immutable snapshot even if
-the producer file or export directory has since been removed. New or incomplete
-upload admission still requires the original authorized source. Once admitted,
-invoke `advance` or the fixed manifest
-`advance-delivery` action. Each call performs bounded work then exits; the existing
-host owns when to invoke again. Backoff and unknown outcomes persist in the
+Replaying enqueue uses the original metadata and identity. The collector consumes
+a closed manifest only after durable registration; indexing can then resume via
+`advance-results` without resubmitting the manifest. Pending indexing remains
+runnable in lifecycle summary. Old incomplete snapshot admissions retain their
+existing same-input recovery path. Each call performs bounded work then exits;
+the existing host owns when to invoke again. Backoff and unknown outcomes persist in the
 queue. `cancel` records intent; subsequent advance reconciles publication/remote
 commit and can report that delivery already won. `reconcile` is an explicit
 recovery action, not a retry-budget reset. The original create-unknown protocol
 fence remains; never guess a new receipt after uncertain creation.
 
-## Bounded task producer
+## Bounded task producer and metadata pages
 
 The optional task declaration `artifact: {source_ref, mime}`, or `artifacts` with
-1–16 distinct entries (never both), is available for
+1–16 distinct entries in the existing declaration (never both), is available for
 `herdr_pi_task` / `pi-json-v1` at `work_dir: "."`. The registered task root must
 match the existing private `source_root`; a mismatch fails explicitly. Write and
 close the declared files before Pi exits. The envelope supplies non-secret
@@ -148,20 +199,38 @@ close the declared files before Pi exits. The envelope supplies non-secret
 `enqueue-result` accepts only bounded closed metadata on stdin. The official
 Herdr CLI does not forward arbitrary stdin: its fixed `collect-result` action
 opens the manifest through the configured root and feeds that same decoder.
-After durable admission the original snapshot/receipt are reused; repeated task
+After durable registration the original source version/receipt are reused; repeated task
 result queries can wake finite advancement through the dedicated control pane.
 No host timer or daemon is added. NAS `delivery.reference` is available to the
 parent task only after committed association, separately from Pi completion.
 
-The bounded list retains one stable delivery/closed manifest per file, within
-the existing eight-job /
-256 MiB total snapshot limit. Finite host actions automatically release only
-confirmed committed queue payloads and retain the original delivery/receipt.
-Unknown, canceled and blocked jobs are not automatically cleared. The compact
-active catalog remains bounded at 1024 records; confirmed released records move
-to the same queue's queryable, bounded terminal history. Proofs are never silently
-evicted. Version 0.6 requires locator v3: stop old writers, back up the complete
-state, then invoke `migrate-history` before normal actions on a v2 queue.
+The component CLI also accepts `-action enqueue-results` with a version 1
+`ClosedPage` on stdin: 1–16 existing version 1 closed-file records, all bound to
+the same original Task. Sixteen bounds one message, not the task's total file
+count. Submit subsequent pages through the same finite component; never put a
+whole backlog into argv, one JSON ledger or the model conversation. Per-file
+`registered` acknowledgements are durable registration, not delivery success.
+A partial response has exit code 1; independent valid files still register.
+Replay the same page after interruption or lost output; do not invent an attempt
+or change delivery IDs. No full source copy or network call occurs in this action.
+The unified endpoint consumes this internal interface; it is not a manual user
+workflow. Herdr's existing action API still cannot forward arbitrary stdin, and
+this change does not claim that a native plugin RPC can do so.
+
+The original Pi `artifact`/`artifacts` declaration and its bounded aggregate
+remain compatible and cover that declared page only. Automatic generation and
+submission of arbitrarily many Pi result pages is not added here. The authorized
+`computer_task_get` query accepts `delivery_after` (empty string for page 1,
+then `next_after`) to read the same NAS ledger, at most 16 entries per response.
+Use existing exact Commit/Resolve for individual in-flight status. `has_more`
+means more currently stored rows, not that all producer output has arrived.
+See [the page contract and migration evidence](../../../docs/testing/transfer-ledger-pages.md).
+
+Each file retains one stable delivery/closed manifest. New upload metadata does
+not consume the legacy eight-job/256 MiB snapshot reservation. Finite host actions
+release only confirmed committed queue scratch; unknown, canceled and blocked
+evidence and user sources remain intact. Existing terminal history is still
+queryable and has its separately documented storage bounds.
 See `docs/delivery-terminal-history.md` for budgets, recovery and rollback bounds.
 Each finite hook still handles at most one manifest; later task queries/host
 actions continue remaining work. Multi-file aggregate `partial` preserves each

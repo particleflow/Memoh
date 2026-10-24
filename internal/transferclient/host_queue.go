@@ -117,64 +117,94 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	return q.save(journal, r)
 }
 
-func (q *DiskQueue) admissions() ([]QueueStatus, error) {
+// visitAdmissions enumerates the existing journal layout in fixed-size pages.
+// Pending metadata has no count/aggregate payload quota and is never loaded as
+// one in-memory catalog. Witnesses are visited only when the journal is absent.
+func (q *DiskQueue) visitAdmissions(visit func(QueueStatus) error) error {
 	dir, err := q.root.Open(".")
 	if err != nil {
-		return nil, ErrStore
+		return ErrStore
 	}
 	defer func() { _ = dir.Close() }()
-	entries, err := dir.ReadDir(q.limits.Jobs*6 + maxQueueRecords*2 + 136)
-	if err != nil && !errors.Is(err, io.EOF) || len(entries) >= q.limits.Jobs*6+maxQueueRecords*2+136 {
-		return nil, ErrCapacity
-	}
-	var records []QueueStatus
-	seen := make(map[string]bool)
-	for _, e := range entries {
-		stem, ok := strings.CutSuffix(e.Name(), ".journal")
-		if !ok {
-			stem, ok = strings.CutSuffix(e.Name(), ".release")
+	for {
+		entries, readErr := dir.ReadDir(64)
+		if readErr != nil && !errors.Is(readErr, io.EOF) {
+			return ErrStore
 		}
-		if !ok {
-			stem, ok = strings.CutSuffix(e.Name(), ".checkpoint")
-		}
-		if !ok || seen[stem] {
-			continue
-		}
-		if !validID(stem) {
-			return nil, ErrStore
-		}
-		seen[stem] = true
-		r, err := q.admissionHead(stem + ".journal")
-		if errors.Is(err, ErrVersion) {
-			return nil, err
-		}
-		if err != nil {
-			q.markJournal("admission_after_head_error")
-			if checkpoint, checkpointErr := q.activeCheckpointHead(stem + ".checkpoint"); checkpointErr == nil {
-				r, err = checkpoint.Record, nil
-			} else if errors.Is(err, errAdmissionFrame) {
-				// A job-locked compactor can finish between the short/changed
-				// first-frame read and witness lookup. If the witness is now
-				// absent, reread the journal ONCE; only a fully validated frame
-				// restores the reservation. Never reinterpret a persistent
-				// corrupt frame, wrong version or unsafe path as empty capacity.
-				if _, witnessErr := q.root.Lstat(stem + ".checkpoint"); errors.Is(witnessErr, os.ErrNotExist) {
-					q.markJournal("admission_retry_head")
-					r, err = q.admissionHead(stem + ".journal")
+		for _, e := range entries {
+			stem, journal := strings.CutSuffix(e.Name(), ".journal")
+			if !journal {
+				var ok bool
+				stem, ok = strings.CutSuffix(e.Name(), ".release")
+				if !ok {
+					stem, ok = strings.CutSuffix(e.Name(), ".checkpoint")
+				}
+				if !ok {
+					continue
+				}
+				if _, err := q.root.Lstat(stem + ".journal"); err == nil {
+					continue
+				} else if !errors.Is(err, os.ErrNotExist) {
+					return ErrStore
 				}
 			}
+			if !validID(stem) {
+				return ErrStore
+			}
+			r, err := q.admissionHead(stem + ".journal")
+			if errors.Is(err, ErrVersion) {
+				return err
+			}
+			if err != nil {
+				q.markJournal("admission_after_head_error")
+				if checkpoint, checkpointErr := q.activeCheckpointHead(stem + ".checkpoint"); checkpointErr == nil {
+					r, err = checkpoint.Record, nil
+				} else if errors.Is(err, errAdmissionFrame) {
+					// A job-locked compactor can finish between the short/changed
+					// first-frame read and witness lookup. If the witness is now
+					// absent, reread the journal ONCE; only a fully validated frame
+					// restores the reservation. Never reinterpret a persistent
+					// corrupt frame, wrong version or unsafe path as empty capacity.
+					if _, witnessErr := q.root.Lstat(stem + ".checkpoint"); errors.Is(witnessErr, os.ErrNotExist) {
+						q.markJournal("admission_retry_head")
+						r, err = q.admissionHead(stem + ".journal")
+					}
+				}
+			}
+			if err != nil {
+				// Compaction can leave the original journal empty/torn. Only the
+				// synced, fully confirmed sibling can recover its original identity.
+				r, err = q.admissionHead(stem + ".release")
+			}
+			if err != nil {
+				return err
+			}
+
+			if err := visit(r); err != nil {
+				return err
+			}
 		}
-		if err != nil {
-			// Compaction can leave the original journal empty/torn. Only the
-			// synced, fully confirmed sibling can recover its original identity.
-			r, err = q.admissionHead(stem + ".release")
+		if errors.Is(readErr, io.EOF) {
+			return nil
 		}
-		if err != nil {
-			return nil, err
+	}
+}
+
+func (q *DiskQueue) admissions() ([]QueueStatus, error) {
+	var records []QueueStatus
+	err := q.visitAdmissions(func(r QueueStatus) error {
+		// Registered uploads own no payload copy. Their active work is bounded
+		// by worker locks, not a cumulative source-byte or backlog-count quota.
+		// A committed registered record is compacted before acknowledgement,
+		// making interrupted release discoverable without replaying all pending
+		// journals or taking job locks while a caller already owns a stripe.
+		if r.Registered && !r.Associated {
+			return nil
 		}
 		records = append(records, r)
-	}
-	return records, nil
+		return nil
+	})
+	return records, err
 }
 
 // Caller owns the admission lock, excluding creation and terminal release.
@@ -208,7 +238,7 @@ func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
 	if err != nil || dec.Decode(&r) != nil {
 		return QueueStatus{}, ErrStore
 	}
-	if r.Version != 2 && r.Version != 3 && r.Version != 4 {
+	if r.Version != 2 && r.Version != 3 && r.Version != 4 && r.Version != 5 {
 		return QueueStatus{}, errors.Join(ErrStore, ErrVersion)
 	}
 	if !q.validRecord(r, r.Job.DeliveryID) {
@@ -236,11 +266,14 @@ func (q *DiskQueue) capacity(add int64) error {
 	total := int64(0)
 	active := 0
 	for _, r := range records {
-		if r.PayloadState == PayloadReleased {
+		if r.Registered || r.PayloadState == PayloadReleased {
 			continue
 		}
 		active++
-		reserved := r.Job.Spec.SizeBytes + snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes
+		reserved := snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes
+		if !r.Registered {
+			reserved += r.Job.Spec.SizeBytes
+		}
 		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
 		}
@@ -268,7 +301,7 @@ func (q *DiskQueue) Inspect(id string) (QueueStatus, error) {
 		return QueueStatus{}, err
 	}
 	defer func() { _ = f.Close() }()
-	if !r.Admitted && r.Job.Phase != "canceled" {
+	if !r.Admitted && !r.Registered && r.Job.Phase != "canceled" {
 		return r, ErrAdmissionPending
 	}
 	return r, nil
@@ -339,6 +372,15 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		return err
 	}
 	defer func() { _ = journal.Close() }()
+	if r.Registered && !r.Admitted {
+		r, err = q.prepareRegistered(ctx, r, journal, now)
+		if err != nil {
+			return err
+		}
+		if r.Job.Phase == "blocked" || r.Job.Phase == "canceled" {
+			return nil
+		}
+	}
 	if !r.Admitted {
 		return ErrAdmissionPending
 	}
@@ -372,6 +414,9 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		}
 	}
 	save := func(j Job) error {
+		if r.Registered && j.ErrorCode == "snapshot_unavailable" {
+			j.ErrorCode = "source_changed"
+		}
 		next := r
 		next.Job = j
 		if err := q.save(journal, next); err != nil {
@@ -386,6 +431,13 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		}
 		source, closeSource, err := q.openSnapshot(r)
 		if err != nil {
+			if r.Registered && (errors.Is(err, ErrSnapshot) || errors.Is(err, errSourceMissing)) {
+				code := "source_changed"
+				if errors.Is(err, errSourceMissing) {
+					code = "source_missing"
+				}
+				return stop(&r.Job, "blocked", code, save)
+			}
 			if errors.Is(err, ErrSnapshot) {
 				return stop(&r.Job, "blocked", "snapshot_unavailable", save)
 			}

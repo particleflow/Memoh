@@ -1,0 +1,23 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/lost-response
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= lost-response
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/client-killed-before-checkpoint
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= client-killed-before-checkpoint
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/no-proof-gap
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= no-proof-gap
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/producer-multiple-files
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery
+    computer_delivery_integration_test.go:232: file=0 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:232: file=1 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:232: file=2 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:232: CLI killed after durable offset=16777216, local checkpoint=8388608; reopened NAS modules; transient rejections=2; two independent files committed before recovery; original receipt and ledger replay preserved
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (19.90s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli (8.92s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/lost-response (3.91s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/client-killed-before-checkpoint (2.78s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/no-proof-gap (1.84s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/producer-multiple-files (0.64s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery (8.28s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	19.918s

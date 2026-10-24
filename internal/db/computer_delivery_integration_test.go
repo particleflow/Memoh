@@ -176,6 +176,9 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 			if _, err := s.Commit(ctx, id.OperationID, "result", ref); err == nil {
 				t.Fatal("revoked replay accepted")
 			}
+			if _, err := s.Page(ctx, id.OperationID, ""); !errors.Is(err, computertask.ErrDenied) {
+				t.Fatal("revoked page accepted", err)
+			}
 			exec(`UPDATE bot_user_grants SET permissions='["chat","workspace_read","workspace_write","workspace_exec"]' WHERE bot_id=$1`, bot)
 		})
 	}
@@ -223,12 +226,14 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 			t.Fatalf("late commit: %v", err)
 		}
 	}
+	t.Run("entry-pages", func(t *testing.T) { exerciseDeliveryEntryPages(ctx, t, store, s, id, ref) })
 	t.Run("https-queue-handoff", func(t *testing.T) { exerciseDeliveryHandoff(ctx, t, store, assets, id, ref) })
 	t.Run("task-principal-http", func(t *testing.T) { exerciseTaskTransferPrincipal(ctx, t, store, assets, id, ref) })
 	t.Run("ready-proof-cli", func(t *testing.T) { exerciseReadyProofCLI(ctx, t, store, id, ref) })
 	t.Run("receipt-turnover", func(t *testing.T) { exerciseReceiptTurnover(ctx, t, store, pool, id) })
 	t.Run("producer-multiple-files", func(t *testing.T) { exerciseProducerHandoff(ctx, t, store, assets, id, ref) })
 	t.Run("real-route-roundtrip", func(t *testing.T) { exerciseRealRouteRoundTrip(ctx, t, store, id) })
+	t.Run("batch-process-recovery", func(t *testing.T) { exerciseBatchProcessRecovery(ctx, t, store, id) })
 	t.Run("api-base-prefix", func(t *testing.T) { exerciseFileAPIBase(ctx, t, store, assets, id, ref) })
 	_, err = runtimePool.Exec(ctx, "UPDATE computer_operations SET details=jsonb_set(details,'{delivery_ledger,version}','2') WHERE id=$1", id.OperationID)
 	if !errors.As(err, &guardError) || guardError.Code != "23514" {
