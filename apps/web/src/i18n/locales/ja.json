@@ -2128,6 +2128,12 @@
     "iconPlaceholder": "アイコンURLまたは識別子 (オプション)",
     "enable": "有効にする",
     "enableHint": "利用可能なモデル一覧には、有効なプロバイダーのモデルのみが表示されます。",
+    "imageReferences": {
+      "label": "参照画像の入力を許可",
+      "description": "この Bot がアクセスできる画像参照を1〜4枚使用できます。プロバイダーが OpenAI Images の参照画像リクエストに対応している場合のみ有効にしてください。",
+      "protocolRequired": "参照画像を許可する前に OpenAI Images を選択してください。",
+      "legacyPolicy": "参照画像を有効にするには、保存済みの画像ポリシーを移行する必要があります。既存のモデルとエンコード設定は維持されています。"
+    },
     "imagesProtocol": {
       "label": "画像生成プロトコル",
       "description": "Bot に設定された画像モデルを使用します。保存済みの他の画像設定は維持されます。",

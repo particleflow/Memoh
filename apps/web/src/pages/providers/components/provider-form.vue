@@ -164,6 +164,31 @@
         </FormField>
 
         <FormField
+          v-if="supportsImagesProtocol(form.values.client_type)"
+          v-slot="{ value, handleChange, errorMessage }"
+          name="images_edits"
+        >
+          <SettingsRow
+            stack="sm"
+            :label="$t('provider.imageReferences.label')"
+            :description="$t('provider.imageReferences.description')"
+          >
+            <FormItem>
+              <FormControl>
+                <Switch
+                  :model-value="value === true"
+                  :disabled="editLoading || form.values.images_protocol !== 'openai-images'"
+                  :aria-label="$t('provider.imageReferences.label')"
+                  :aria-invalid="!!errorMessage"
+                  @update:model-value="handleChange"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </SettingsRow>
+        </FormField>
+
+        <FormField
           v-if="supportsPromptCache(form.values.client_type)"
           v-slot="{ value, handleChange, errorMessage }"
           name="prompt_cache_ttl"
@@ -418,6 +443,7 @@ import {
   SelectTrigger,
   SelectValue,
   Spinner,
+  Switch,
 } from '@felinic/ui'
 import { KeyRound, RefreshCw } from 'lucide-vue-next'
 import { ErrorIcon } from '@memohai/icon/ui'
@@ -604,7 +630,22 @@ const providerSchema = toTypedSchema(z.object({
   client_type: z.string().min(1, t('provider.clientTypeRequired')),
   prompt_cache_ttl: z.enum(['5m', '1h', 'off']).optional(),
   images_protocol: z.enum(['preserve', 'openai-images']).optional(),
+  images_edits: z.boolean().optional(),
 }).superRefine((value, ctx) => {
+  const images = storedImagesConfig()
+  // Enabling references must not silently migrate an older paid-request policy.
+  // Unrelated edits retain the existing config and its server-side validation.
+  if (supportsImagesProtocol(value.client_type) && value.images_edits === true && images?.edits !== true) {
+    if (value.images_protocol !== 'openai-images') {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['images_edits'], message: t('provider.imageReferences.protocolRequired') })
+    } else if (images && (
+      ('model_mode' in images && images.model_mode !== 'configured')
+      || ('edit_encoding' in images && images.edit_encoding !== 'json-images')
+      || ('model_mode' in images && !('edit_encoding' in images))
+    )) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['images_edits'], message: t('provider.imageReferences.legacyPolicy') })
+    }
+  }
   const existingSecret = getStoredSecret(
     props.provider?.config as Record<string, unknown> | undefined,
   )
@@ -635,6 +676,7 @@ type ProviderFormValues = {
   api_key?: string
   prompt_cache_ttl?: PromptCacheTtl
   images_protocol?: ImagesProtocol
+  images_edits?: boolean
 }
 
 // Last-known-server snapshot: a same-provider background refetch (window
@@ -663,6 +705,7 @@ watch(() => props.provider, (provider, previous) => {
     api_key: '',
     prompt_cache_ttl: normalizeCacheTtl(cfg?.prompt_cache_ttl as string | undefined),
     images_protocol: storedImagesConfig()?.protocol === 'openai-images' ? 'openai-images' : 'preserve',
+    images_edits: storedImagesConfig()?.edits === true,
   }
   applyClientTypeDefaults(next)
   const switched = (provider.id ?? provider.provider_template_id)
@@ -693,12 +736,14 @@ const hasChanges = computed(() => {
     base_url: values.base_url,
     prompt_cache_ttl: normalizeCacheTtl(values.prompt_cache_ttl),
     images_protocol: values.images_protocol,
+    images_edits: values.images_edits === true,
   }) !== JSON.stringify({
     name: synced.value.name,
     client_type: synced.value.client_type,
     base_url: synced.value.base_url,
     prompt_cache_ttl: normalizeCacheTtl(synced.value.prompt_cache_ttl),
     images_protocol: synced.value.images_protocol,
+    images_edits: synced.value.images_edits === true,
   })
   // The key box is write-only: any non-empty content IS a change to save.
   return baseChanged || Boolean(values.api_key?.trim())
@@ -726,11 +771,17 @@ function buildPayload(value: ProviderFormValues): Record<string, unknown> {
   if (supportsPromptCache(value.client_type)) {
     config.prompt_cache_ttl = normalizeCacheTtl(value.prompt_cache_ttl)
   }
-  // Provider config is shallow-merged. Change only the selected protocol;
-  // preserve existing image policies and never round-trip a masked API key.
+  // Provider config is shallow-merged. Retain sibling image policies and
+  // write only explicit protocol/reference changes; never round-trip a key.
+  const images = storedImagesConfig()
+  const referencesChanged = (value.images_edits === true) !== (images?.edits === true)
   if (supportsImagesProtocol(value.client_type) && value.images_protocol === 'openai-images'
-    && storedImagesConfig()?.protocol !== 'openai-images') {
-    config.images_api = { ...storedImagesConfig(), protocol: 'openai-images' }
+    && (images?.protocol !== 'openai-images' || referencesChanged)) {
+    config.images_api = {
+      ...images,
+      protocol: 'openai-images',
+      ...(referencesChanged ? { edits: value.images_edits === true } : {}),
+    }
   }
   const payload: Record<string, unknown> = {
     name: value.name?.trim() ?? '',
@@ -777,6 +828,7 @@ const onSubmit = form.handleSubmit(async (value) => {
     api_key: '',
     prompt_cache_ttl: normalizeCacheTtl(value.prompt_cache_ttl),
     images_protocol: value.images_protocol,
+    images_edits: value.images_edits === true,
   }
   synced.value = saved
   form.resetForm({ values: { ...saved } })
