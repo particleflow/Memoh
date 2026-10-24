@@ -36,10 +36,14 @@ func ProducerAdmission(input io.Reader, revision string) (ConfiguredAction, deli
 	if decoder.Decode(&closed) != nil || decoder.Decode(new(any)) != io.EOF || !closed.Valid() || !validID(revision) {
 		return ConfiguredAction{}, closed, ErrInvalid
 	}
+	return producerAction(closed, revision), closed, nil
+}
+
+func producerAction(closed deliverymeta.Closed, revision string) ConfiguredAction {
 	t := closed.Task
 	id := closed.DeliveryID()
 	job := Job{Version: 1, DeliveryID: id, SnapshotID: id, BotID: t.BotID, OperationID: t.OperationID, LocatorRevision: revision, Phase: "queued", Spec: Spec{SizeBytes: closed.SizeBytes, SHA256: closed.SHA256, Mime: closed.Artifact.Mime}, Task: DeviceTask{UserID: t.UserID, SessionID: t.SessionID, TargetID: t.TargetID, RunID: t.RunID, Attempt: t.Attempt, Generation: t.Generation}}
-	return ConfiguredAction{Kind: "enqueue-upload", DeliveryID: id, Job: job, SourceRef: closed.Artifact.SourceRef}, closed, nil
+	return ConfiguredAction{Kind: "enqueue-upload", DeliveryID: id, Job: job, SourceRef: closed.Artifact.SourceRef}
 }
 
 func EnqueueProducer(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, input io.Reader, transport *http.Client, now time.Time) (QueueStatus, error) {
@@ -157,15 +161,8 @@ func collectProducerManifest(ctx context.Context, cfg *HostConfig, getenv func(s
 }
 
 func (h *HostConfig) producerManifests() ([]string, error) {
-	if h.sourcePath == "" {
-		return nil, ErrBinding
-	}
-	if h.sources == nil {
-		var err error
-		h.sources, h.sourceGuard, err = privateHostRoot(h.sourcePath)
-		if err != nil {
-			return nil, err
-		}
+	if err := h.openSources(); err != nil {
+		return nil, err
 	}
 	dir, err := h.sources.Open(".")
 	if err != nil {

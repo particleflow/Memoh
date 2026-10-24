@@ -64,46 +64,7 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 	defer func() { _ = cfg.Close() }()
 	q.openSource = cfg.OpenSource
 	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" {
-		if local.Job.HostBinding != "" && local.Job.HostBinding != cfg.Binding {
-			return QueueStatus{}, ErrVersion
-		}
-		local.Job.HostBinding = cfg.Binding
-		// Validate selectors without obtaining or transmitting any credential.
-		direction := "upload"
-		if action.Kind == "enqueue-download" {
-			direction = "download"
-		}
-		c, err := NewDeviceTask(cfg.Origin, local.Job, direction, local.Job.Task, transport, cfg.Authorization)
-		if err != nil {
-			return QueueStatus{}, err
-		}
-		c.CloseIdleConnections()
-		if direction == "upload" {
-			if action.DeliveryID != local.Job.DeliveryID {
-				return QueueStatus{}, ErrInvalid
-			}
-			registered, err := q.RegisterUpload(ctx, local.Job, action.SourceRef, cfg.OpenSource)
-			if err != nil || registered.Registered || registered.Admitted {
-				return registered, err
-			}
-			// An old partially sealed admission keeps its existing recovery protocol.
-		}
-		if existing, err := q.Inspect(action.DeliveryID); err == nil && existing.Admitted {
-			// Admit rechecks immutable metadata under the job lock. A sealed
-			// snapshot no longer depends on the producer file or directory.
-			return q.invokeHerdr(ctx, local, nil, nil, nil, now)
-		}
-		var source *os.File
-		if direction == "upload" {
-			source, err = cfg.OpenSource(action.SourceRef)
-			if err != nil {
-				return QueueStatus{}, err
-			}
-			defer func() { _ = source.Close() }()
-		} else if action.SourceRef != "" {
-			return QueueStatus{}, ErrInvalid
-		}
-		return q.invokeHerdr(ctx, local, source, nil, nil, now)
+		return q.enqueueConfigured(ctx, cfg, action, transport, now)
 	}
 	status, err := q.Inspect(action.DeliveryID)
 	if err != nil {
@@ -123,6 +84,53 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 	}
 	defer closeBinding()
 	return q.invokeHerdr(ctx, local, nil, c, binding, now)
+}
+
+// One opened configuration/queue can admit a bounded producer page. The same
+// validation and legacy recovery path are used by single-file callers.
+func (q *DiskQueue) enqueueConfigured(ctx context.Context, cfg *HostConfig, action ConfiguredAction, transport *http.Client, now time.Time) (QueueStatus, error) {
+	local := HerdrAction{Kind: action.Kind, DeliveryID: action.DeliveryID, Job: action.Job}
+	var err error
+	if local.Job.HostBinding != "" && local.Job.HostBinding != cfg.Binding {
+		return QueueStatus{}, ErrVersion
+	}
+	local.Job.HostBinding = cfg.Binding
+	// Validate selectors without obtaining or transmitting any credential.
+	direction := "upload"
+	if action.Kind == "enqueue-download" {
+		direction = "download"
+	}
+	c, err := NewDeviceTask(cfg.Origin, local.Job, direction, local.Job.Task, transport, cfg.Authorization)
+	if err != nil {
+		return QueueStatus{}, err
+	}
+	c.CloseIdleConnections()
+	if direction == "upload" {
+		if action.DeliveryID != local.Job.DeliveryID {
+			return QueueStatus{}, ErrInvalid
+		}
+		registered, err := q.RegisterUpload(ctx, local.Job, action.SourceRef, cfg.OpenSource)
+		if err != nil || registered.Registered || registered.Admitted {
+			return registered, err
+		}
+		// An old partially sealed admission keeps its existing recovery protocol.
+	}
+	if existing, err := q.Inspect(action.DeliveryID); err == nil && existing.Admitted {
+		// Admit rechecks immutable metadata under the job lock. A sealed
+		// snapshot no longer depends on the producer file or directory.
+		return q.invokeHerdr(ctx, local, nil, nil, nil, now)
+	}
+	var source *os.File
+	if direction == "upload" {
+		source, err = cfg.OpenSource(action.SourceRef)
+		if err != nil {
+			return QueueStatus{}, err
+		}
+		defer func() { _ = source.Close() }()
+	} else if action.SourceRef != "" {
+		return QueueStatus{}, ErrInvalid
+	}
+	return q.invokeHerdr(ctx, local, source, nil, nil, now)
 }
 
 // A single bounded selection, not a worker loop. Locks remain owned by RunOne;

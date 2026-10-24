@@ -165,12 +165,22 @@ func (h *HostConfig) OpenSource(ref string) (*os.File, error) {
 	if h.sourcePath == "" || !validID(ref) {
 		return nil, ErrBinding
 	}
+	if err := h.openSources(); err != nil {
+		return nil, err
+	}
+	return openPrivateFile(h.sources, ref, os.O_RDONLY, 0)
+}
+
+func (h *HostConfig) openSources() error {
+	if h.sourcePath == "" {
+		return ErrBinding
+	}
 	if h.sources == nil {
 		var err error
 		h.sources, h.sourceGuard, err = privateHostRoot(h.sourcePath)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return openPrivateFile(h.sources, ref, os.O_RDONLY, 0)
+	return nil
 }

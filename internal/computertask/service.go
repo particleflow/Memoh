@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/media"
@@ -432,6 +433,19 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 	if d.NativeEvidence != nil {
 		d.NativeEvidence.Limit = s.nativeObservationLimit
 	}
+	if rows, ok := s.store.(dbstore.ComputerDeliveryEntryStore); ok && d.Batch != nil && d.Batch.Progress.Producer != nil {
+		r.DeliveryEntries = make(map[string]dbstore.ComputerDeliveryEntry)
+		for _, plan := range d.Batch.Progress.Producer.FilePlans() {
+			entry, err := rows.ReadComputerDeliveryEntry(ctx, r, plan.DeliveryID())
+			if errors.Is(err, db.ErrNotFound) {
+				continue
+			}
+			if err != nil {
+				return r, d, err
+			}
+			r.DeliveryEntries[plan.DeliveryID()] = entry
+		}
+	}
 	return r, d, nil
 }
 
@@ -456,7 +470,9 @@ func (s *Service) cancel(ctx context.Context, b toolcontext.ComputerBinding, id 
 	}
 	active := r.State != "completed" && r.State != "not_started" && r.State != "rejected"
 	delivery := producerResult(r, d)
-	if active || delivery != nil && delivery.hasPending() {
+	// A later producer page may not have reached NAS yet. Persist intent for a
+	// completed batch too; absence of a current page is not proof of no delivery.
+	if active || d.Batch != nil || delivery != nil && delivery.hasPending() {
 		if active {
 			r.State = "unknown"
 		}

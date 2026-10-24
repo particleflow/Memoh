@@ -170,7 +170,9 @@ func (s *Store) SaveComputerOperation(ctx context.Context, r dbstore.ComputerOpe
 		return r, err
 	}
 	row, err := s.queries.UpdateComputerOperation(ctx, dbsqlc.UpdateComputerOperationParams{ID: ids[0], BotID: ids[1], SessionID: ids[2], UserID: ids[3], State: r.State, Details: r.Details, CancelRequested: r.CancelRequested, Revision: r.Revision})
-	return operationRecord(row), mapQueryErr(err)
+	out := operationRecord(row)
+	out.DeliveryEntries = r.DeliveryEntries
+	return out, mapQueryErr(err)
 }
 
 func (s *Store) SaveComputerDelivery(ctx context.Context, r dbstore.ComputerOperationRecord, ledger dbstore.JSON) (dbstore.ComputerOperationRecord, error) {

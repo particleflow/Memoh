@@ -250,9 +250,21 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 		raw, _ := json.Marshal(file)
 		return invoke("enqueue-result", "", raw)
 	}
-	if string(admit(files[0])["registered"]) != "true" {
-		t.Fatal("first file not registered")
+	admitPage := func(files []deliverymeta.Closed) {
+		t.Helper()
+		raw, _ := json.Marshal(deliverymeta.ClosedPage{Version: 1, Files: files})
+		out := invoke("enqueue-results", "", raw)
+		var items []transferclient.ProducerPageFile
+		if json.Unmarshal(out["files"], &items) != nil || len(items) != len(files) {
+			t.Fatal("page registration result")
+		}
+		for i, item := range items {
+			if !item.Registered || item.DeliveryID != files[i].DeliveryID() {
+				t.Fatal("page changed original delivery")
+			}
+		}
 	}
+	admitPage(files[:1])
 	child := command("advance-results", "", nil)
 	var childOut, childErr bytes.Buffer
 	child.Stdout, child.Stderr = &childOut, &childErr
@@ -308,11 +320,9 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 	if out := invoke("advance-results", "", nil); string(out["state"]) != `"waiting"` || rejected.Load() != 1 {
 		t.Fatal("temporary failure did not retain a retryable original delivery")
 	}
-	for _, file := range files[1:] {
-		if string(admit(file)["registered"]) != "true" {
-			t.Fatal("independent file not registered")
-		}
-	}
+	admitPage(files[1:])
+	admitPage(files[:1]) // Lost page output/restart uses the original receipt.
+	admitPage(files[1:])
 	waitDue := func() {
 		t.Helper()
 		summary := invoke("lifecycle-summary", "", nil)
@@ -355,15 +365,13 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 		if err != nil {
 			t.Fatal(err)
 		}
-		var d struct {
-			Ledger struct {
-				Entries map[string]json.RawMessage `json:"entries"`
-			} `json:"delivery_ledger"`
-		}
-		if json.Unmarshal(op.Details, &d) != nil {
-			t.Fatal("invalid ledger")
-		}
+		entries := make(map[string]json.RawMessage)
 		for _, file := range files {
+			stored, err := store.ReadComputerDeliveryEntry(ctx, op, file.DeliveryID())
+			if err != nil {
+				t.Fatal(err)
+			}
+			entries[file.DeliveryID()] = json.RawMessage(stored.Data)
 			var proof struct {
 				Outcome   string                       `json:"outcome"`
 				Reference computertask.DeliveryRequest `json:"reference"`
@@ -375,11 +383,11 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 			factsMu.Lock()
 			upload := facts[file.DeliveryID()].upload
 			factsMu.Unlock()
-			if json.Unmarshal(d.Ledger.Entries[file.DeliveryID()], &proof) != nil || proof.Outcome != "committed" || proof.Reference.ContentHash != file.SHA256 || proof.Reference.SizeBytes != file.SizeBytes || proof.Transfer.ID != upload.ID || proof.Transfer.Ready.ContentHash != file.SHA256 || proof.Transfer.Ready.SizeBytes != file.SizeBytes {
+			if json.Unmarshal(entries[file.DeliveryID()], &proof) != nil || proof.Outcome != "committed" || proof.Reference.ContentHash != file.SHA256 || proof.Reference.SizeBytes != file.SizeBytes || proof.Transfer.ID != upload.ID || proof.Transfer.Ready.ContentHash != file.SHA256 || proof.Transfer.Ready.SizeBytes != file.SizeBytes {
 				t.Fatal("committed original ID/reference/receipt not preserved")
 			}
 		}
-		return d.Ledger.Entries
+		return entries
 	}
 	proofs := assertLedger()
 	for i, file := range files {

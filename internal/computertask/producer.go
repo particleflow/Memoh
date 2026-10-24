@@ -85,12 +85,27 @@ func producerResult(r dbstore.ComputerOperationRecord, d Details) *ProducerResul
 		return out
 	}
 	ledger := stored.Ledger
-	if ledger != nil && (ledger.Version < 1 || ledger.Version > transferLedgerVersion || len(ledger.Entries) > maxDeliveries || ledger.Entries == nil) {
+	rowLayout := ledger != nil && ledger.Version == 5
+	if rowLayout && r.DeliveryEntries == nil {
+		return out // Missing projection is unknown, never an absent delivery.
+	}
+	if !rowLayout && ledger != nil && (ledger.Version < 1 || ledger.Version > transferLedgerVersion || len(ledger.Entries) > maxDeliveries || ledger.Entries == nil) {
 		return out
 	}
 	plans := p.FilePlans()
 	for i, plan := range plans {
-		file := producerFile(r, plan, ledger)
+		selected := ledger
+		if rowLayout {
+			selected = nil
+			if stored, found := r.DeliveryEntries[plan.DeliveryID()]; found {
+				var entry deliveryEntry
+				if json.Unmarshal(stored.Data, &entry) != nil || !validStoredDeliveryEntry(stored.DeliveryID, entry, stored.Version) {
+					return out
+				}
+				selected = &deliveryLedger{Version: stored.Version, Entries: map[string]deliveryEntry{stored.DeliveryID: entry}}
+			}
+		}
+		file := producerFile(r, plan, selected)
 		if file.State == "pending" && d.Batch.Feedback != nil && d.Batch.Feedback.ValidFor(*p) {
 			local := d.Batch.Feedback.Files[i]
 			file.State, file.Stage, file.Retryable, file.RetryAt = local.State, local.Code, local.Retryable, local.RetryAt

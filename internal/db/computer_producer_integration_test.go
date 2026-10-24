@@ -124,17 +124,22 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	if err != nil {
 		t.Fatal(err)
 	}
-	var persisted struct {
-		Ledger struct {
-			Entries map[string]struct {
-				Outcome   string
-				Reference computertask.DeliveryRequest
-			} `json:"entries"`
-		} `json:"delivery_ledger"`
+	readReference := func(id string) computertask.DeliveryRequest {
+		t.Helper()
+		stored, err := store.ReadComputerDeliveryEntry(ctx, op, id)
+		var entry struct {
+			Outcome   string
+			Reference computertask.DeliveryRequest
+		}
+		if err != nil || json.Unmarshal(stored.Data, &entry) != nil || entry.Outcome != "committed" {
+			t.Fatal("NAS ledger reference absent", err)
+		}
+		return entry.Reference
 	}
-	if json.Unmarshal(op.Details, &persisted) != nil || persisted.Ledger.Entries[closed.DeliveryID()].Outcome != "committed" || persisted.Ledger.Entries[closed.DeliveryID()].Reference != ref {
-		t.Fatal("NAS ledger reference absent")
+	if readReference(closed.DeliveryID()) != ref {
+		t.Fatal("NAS reference changed")
 	}
+
 	// Replaying the closed handoff after restart uses the existing sealed job.
 	replay, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(raw), https.Client(), time.Now())
 	if err != nil || !replay.Associated || replay.Job.ReceiptID != status.Job.ReceiptID || creates.Load() != 1 {
@@ -164,13 +169,10 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	if !next.Associated || next.PayloadState != transferclient.PayloadReleased || creates.Load() != 2 || next.Job.ReceiptID == status.Job.ReceiptID {
 		t.Fatal("distinct original per-file receipts lost", err)
 	}
-	operation, err = store.ReadComputerOperation(ctx, scope)
-	if err != nil || json.Unmarshal(operation.Details, &persisted) != nil {
-		t.Fatal("read multiple ledger", err)
-	}
-	if persisted.Ledger.Entries[closed.DeliveryID()].Outcome != "committed" || persisted.Ledger.Entries[second.DeliveryID()].Outcome != "committed" {
+	if readReference(closed.DeliveryID()) != ref || readReference(second.DeliveryID()) != ref {
 		t.Fatal("partial ledger overwritten")
 	}
+
 	for _, metadata := range [][]byte{raw, nextRaw} {
 		replay, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(metadata), https.Client(), time.Now())
 		if err != nil || !replay.Associated || creates.Load() != 2 {

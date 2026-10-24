@@ -176,6 +176,9 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 			if _, err := s.Commit(ctx, id.OperationID, "result", ref); err == nil {
 				t.Fatal("revoked replay accepted")
 			}
+			if _, err := s.Page(ctx, id.OperationID, ""); !errors.Is(err, computertask.ErrDenied) {
+				t.Fatal("revoked page accepted", err)
+			}
 			exec(`UPDATE bot_user_grants SET permissions='["chat","workspace_read","workspace_write","workspace_exec"]' WHERE bot_id=$1`, bot)
 		})
 	}
@@ -223,6 +226,7 @@ func TestComputerDeliveryPostgresAuthorizationCASAndPreservation(t *testing.T) {
 			t.Fatalf("late commit: %v", err)
 		}
 	}
+	t.Run("entry-pages", func(t *testing.T) { exerciseDeliveryEntryPages(ctx, t, store, s, id, ref) })
 	t.Run("https-queue-handoff", func(t *testing.T) { exerciseDeliveryHandoff(ctx, t, store, assets, id, ref) })
 	t.Run("task-principal-http", func(t *testing.T) { exerciseTaskTransferPrincipal(ctx, t, store, assets, id, ref) })
 	t.Run("ready-proof-cli", func(t *testing.T) { exerciseReadyProofCLI(ctx, t, store, id, ref) })

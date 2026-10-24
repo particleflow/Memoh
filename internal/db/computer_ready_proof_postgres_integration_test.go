@@ -241,22 +241,17 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 		if err != nil {
 			t.Fatal(err)
 		}
-		var d struct {
-			Ledger struct {
-				Version int `json:"version"`
-				Entries map[string]struct {
-					Outcome  string `json:"outcome"`
-					Transfer struct {
-						ID    string        `json:"upload_id"`
-						Ready *media.Upload `json:"ready"`
-					} `json:"transfer"`
-				} `json:"entries"`
-			} `json:"delivery_ledger"`
+		stored, err := store.ReadComputerDeliveryEntry(ctx, r, closed.DeliveryID())
+		var e struct {
+			Outcome  string `json:"outcome"`
+			Transfer struct {
+				ID    string        `json:"upload_id"`
+				Ready *media.Upload `json:"ready"`
+			} `json:"transfer"`
 		}
-		if json.Unmarshal(r.Details, &d) != nil || d.Ledger.Version != 4 {
-			t.Fatal("proof ledger version")
+		if err != nil || stored.Version != 4 || json.Unmarshal(stored.Data, &e) != nil {
+			t.Fatal("proof entry version", err)
 		}
-		e := d.Ledger.Entries[closed.DeliveryID()]
 		if e.Transfer.Ready == nil {
 			return media.Upload{}, e.Transfer.ID, e.Outcome, false
 		}

@@ -1,0 +1,18 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-chat
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_read
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_write
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_exec
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages
+    computer_delivery_integration_test.go:229: ledger metadata=257 pages=17 operation_json_bytes=512 elapsed=694.236286ms; restart/CAS/repeated page/late insert/original IDs preserved; one small underlying asset, not bulk network transfer
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (4.54s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-chat (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_read (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_write (0.02s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_exec (0.02s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages (0.75s)
+=== RUN   TestComputerDeliveryPostgresUpgradeFrom170
+    computer_delivery_upgrade_integration_test.go:146: 170 -> 174, repeat-up, down/up: old receipt/unknown payloads and operation revision retained; old writer and lossy rollback rejected
+--- PASS: TestComputerDeliveryPostgresUpgradeFrom170 (3.03s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	8.645s
