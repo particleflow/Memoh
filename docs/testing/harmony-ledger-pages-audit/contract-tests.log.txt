@@ -1,0 +1,44 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <harmony-workspace>/client-observation-validation
+
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > tasks existing HTTP page contract > reads only the requested bounded page and does not accumulate or drain the queue 11ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > tasks existing HTTP page contract > continues an empty filtered page without interpreting it as exhaustion 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > tasks existing HTTP page contract > clears stale content on a later-page failure and reloads the same cursor 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > tasks existing HTTP page contract > retains the current page when returning from a task detail in the same mounted view 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > tasks existing HTTP page contract > starts a fresh authorized first page after disposal/remount, without claiming durable cursor recovery 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > tasks existing HTTP page contract > preserves individual failed or incomplete outcomes without an aggregate completion result 2ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > delegations existing HTTP page contract > reads only the requested bounded page and does not accumulate or drain the queue 2ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > delegations existing HTTP page contract > continues an empty filtered page without interpreting it as exhaustion 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > delegations existing HTTP page contract > clears stale content on a later-page failure and reloads the same cursor 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > delegations existing HTTP page contract > retains the current page when returning from a task detail in the same mounted view 2ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > delegations existing HTTP page contract > starts a fresh authorized first page after disposal/remount, without claiming durable cursor recovery 1ms
+ ✓ |web| src/pages/home/composables/ledger-page-compatibility.audit.test.ts > delegations existing HTTP page contract > preserves individual failed or incomplete outcomes without an aggregate completion result 1ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > offers delivery retry only to a capable host and respects its pending state 46ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > keeps a terminal task with uncertain delivery read-only when its host has no action capability 9ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > hides delivery retry for execution accepted even with an action capability 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > hides delivery retry for execution running even with an action capability 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > hides delivery retry for execution unknown even with an action capability 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > localizes a 401 action error without rendering private diagnostics 6ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > localizes a 403 action error without rendering private diagnostics 4ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > localizes a 404 action error without rendering private diagnostics 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > never turns an accepted delivery response into confirmation that the supervisor processed it 5ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > renders only plain final text, keeps execution and delivery separate, and exposes no attachment fallback 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote accepted or stale summary fields to a completed result 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote running or stale summary fields to a completed result 1ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote unknown or stale summary fields to a completed result 1ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote failed or stale summary fields to a completed result 1ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > distinguishes a successful empty list from unsupported and inaccessible APIs 7ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > keeps empty filtered pages pageable 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'http.unauthorized' without exposing server text 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'http.forbidden' without exposing server text 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'workspace.unreachable' without exposing server text 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'http.internal_server_error' without exposing server text 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not describe a network failure as an empty queue or unsupported API 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > shared body in a web dialog host > mounts the same reader/body with host-owned accessible title and description 149ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > shared body in a native dialog host > mounts the same reader/body with host-owned accessible title and description 7ms
+
+ Test Files  2 passed (2)
+      Tests  35 passed (35)
+   Start at  13:37:06
+   Duration  8.49s (transform 5.84s, setup 0ms, import 7.74s, tests 295ms, environment 822ms)

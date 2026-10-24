@@ -1,0 +1,82 @@
+{
+  "clientSourceCommit": "7ceca0e3eecbc83f0f8edd11be73e711e377d125",
+  "previousEvidenceCommit": "cb243506759245bea723e1f0ae34933c5cd120ae",
+  "fixedServerCommit": "0f4a4ae8b615098f8a4f34cf187160c37c689996",
+  "fixedGitBlobsVerified": [
+    {
+      "path": "docs/testing/transfer-ledger-pages.md",
+      "sha": "5cc9d50cb10caa0daf3dfc647437b59601185dfc"
+    },
+    {
+      "path": "internal/handlers/session_tasks.go",
+      "sha": "941ee89a3e31f94abb760180691fc8c5e1d5502a"
+    },
+    {
+      "path": "internal/sessiontask/service.go",
+      "sha": "fc3a9becc66306d29e4a0c51312f8c42780d0f9e"
+    },
+    {
+      "path": "internal/handlers/bot_delegations.go",
+      "sha": "0d3d8413853f06fdbf370ecc257e614658768453"
+    },
+    {
+      "path": "internal/computertask/source.go",
+      "sha": "4d57d9d20b4344737b9a8de2a20f2d202522d989"
+    },
+    {
+      "path": "internal/botdelegation/service.go",
+      "sha": "c36b5f86824bf45ffb9dead67dfb333f5f2a184f"
+    }
+  ],
+  "serverComparison": {
+    "internal/sessiontask/service.go": {
+      "fixedSHA256": "7bd069fb90f9510b7cfa6f6754c59ef768266fe91d2bae8eea599b798f8d4c10",
+      "builtBaseSHA256": "7bd069fb90f9510b7cfa6f6754c59ef768266fe91d2bae8eea599b798f8d4c10",
+      "equal": true
+    },
+    "internal/handlers/session_tasks.go": {
+      "fixedSHA256": "bb5dc7aa83ba35b6382caea6eb127c434979fe6aa20b8b7f305b4a0354e44967",
+      "builtBaseSHA256": "bb5dc7aa83ba35b6382caea6eb127c434979fe6aa20b8b7f305b4a0354e44967",
+      "equal": true
+    },
+    "internal/handlers/bot_delegations.go": {
+      "fixedSHA256": "30ef62f8903427082a4f7b0de8928dd9e1cdfd057b734118c47afef2efacef1c",
+      "builtBaseSHA256": "30ef62f8903427082a4f7b0de8928dd9e1cdfd057b734118c47afef2efacef1c",
+      "equal": true
+    },
+    "internal/botdelegation/service.go": {
+      "fixedSHA256": "e56fadb31e1aa0c7602b6e2d0089febfc29c299675f640a3d03594572f918c0e",
+      "builtBaseSHA256": "e56fadb31e1aa0c7602b6e2d0089febfc29c299675f640a3d03594572f918c0e",
+      "equal": true
+    },
+    "internal/computertask/source.go": {
+      "fixedSHA256": "14aa4f74d494c65f89e583f67338e56cb6dc0cb670cf3e226daf8a4822e039bb",
+      "builtBaseSHA256": "86c41b14c05dcd505bf57077e50389479f449c1ef0fc0a923064c7efb5c8e29c",
+      "equal": false
+    }
+  },
+  "testedClientModules": {
+    "apps/web/src/pages/home/composables/useSessionTasks.ts": "bbc1a41b77445d67f1187038fc1934b717093e0479450f83d8b49540b88aa23e",
+    "apps/web/src/pages/home/composables/useBotDelegations.ts": "523cb081ecf13e449d74a9811e5c82193731d89951632d27889edb9ad1d34e17",
+    "apps/web/src/pages/home/components/session-tasks.vue": "83dec587c7fe7f6360a91b44ccd5d1b8d6d921a90a01e7535e85a1d228172128",
+    "apps/web/src/pages/home/components/session-task-results.vue": "f23fcb485db4472156ddf778033a4d68ee307d5ace626b3a226f9b7f96ca0e26",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.vue": "bf06e08835191f4edbdf7b476b42126aa2840d4dfed1e7ac740ac2ad68848e0b"
+  },
+  "checks": {
+    "passed": 35,
+    "failed": 0,
+    "customReadContractCases": 12,
+    "existingDelegationComponentCases": 23,
+    "sourceComparison": true,
+    "sdkMocked": true,
+    "nativeDeviceRuntime": false,
+    "serverProcessRestart": false,
+    "componentDisposalRemount": true,
+    "durablePagePosition": false
+  },
+  "productChanges": false,
+  "hapRebuilt": false,
+  "rawLogSHA256": "0e4bf3d8e39ab1c24aa766f2e7ee987a3e4c924f3697db5a7fec32f4882b1cea",
+  "auditSourceSHA256": "8f4f7f04e393de419643aafe0c2f83bad0dd752e38a1d0182f8f3ef75f2a4239",
+  "conclusion": "No changed mobile HTTP contract. Existing 20-item task/delegation pages remain compatible; the new 16-entry computer_task_get delivery ledger is not consumed by this phone UI. Remount/restart has no persisted page position; it starts a new authorized first page."
+}
