@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/url"
-	"strings"
 
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/models"
@@ -19,10 +18,8 @@ import (
 const ConfigKey = "images_api"
 
 type Config struct {
-	Protocol     string `json:"protocol"`
-	ModelMode    string `json:"model_mode"`
-	Edits        bool   `json:"edits,omitempty"`
-	EditEncoding string `json:"edit_encoding,omitempty"`
+	Protocol string `json:"protocol"`
+	Edits    bool   `json:"edits,omitempty"`
 }
 
 func parseConfig(provider sqlc.Provider) (Config, bool, error) {
@@ -34,16 +31,24 @@ func parseConfig(provider sqlc.Provider) (Config, bool, error) {
 	if !enabled {
 		return Config{}, false, nil
 	}
-	var cfg Config
+	// Read old policies explicitly; an upgrade must not silently change a paid request.
+	var stored struct {
+		Config
+		ModelMode    json.RawMessage `json:"model_mode"`
+		EditEncoding json.RawMessage `json:"edit_encoding"`
+	}
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&cfg); err != nil || cfg.Protocol != "openai-images" || (cfg.ModelMode != "configured" && cfg.ModelMode != "omit") {
-		return Config{}, true, errors.New("images_api requires protocol openai-images and model_mode configured or omit")
+	if err := decoder.Decode(&stored); err != nil || stored.Protocol != "openai-images" {
+		return Config{}, true, errors.New("images_api requires protocol openai-images")
 	}
-	switch cfg.EditEncoding {
-	case "", "multipart", "json-images":
-	default:
-		return Config{}, true, errors.New("images_api edit_encoding must be multipart or json-images")
+	var modelMode, editEncoding string
+	if stored.ModelMode != nil && (json.Unmarshal(stored.ModelMode, &modelMode) != nil || modelMode != "configured") {
+		return Config{}, true, errors.New("legacy images_api model policy requires administrator migration to the configured Bot image model; no image request was sent")
+	}
+	if (stored.EditEncoding != nil && (json.Unmarshal(stored.EditEncoding, &editEncoding) != nil || editEncoding != "json-images")) ||
+		(stored.Edits && stored.ModelMode != nil && stored.EditEncoding == nil) {
+		return Config{}, true, errors.New("legacy images_api encoding requires administrator migration to JSON references; no image request was sent")
 	}
 	switch models.ClientType(provider.ClientType) {
 	case models.ClientTypeOpenAICompletions, models.ClientTypeOpenAIResponses:
@@ -54,9 +59,5 @@ func parseConfig(provider sqlc.Provider) (Config, bool, error) {
 	if err != nil || u.Hostname() == "" || (u.Scheme != "http" && u.Scheme != "https") || u.User != nil || u.RawQuery != "" || u.Fragment != "" {
 		return Config{}, true, errors.New("images_api requires an explicit HTTP base URL without userinfo, query or fragment")
 	}
-	return cfg, true, nil
-}
-
-func endpoint(base, operation string) string {
-	return strings.TrimRight(base, "/") + "/images/" + operation
+	return stored.Config, true, nil
 }

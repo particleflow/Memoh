@@ -75,7 +75,7 @@ func imageSpawnLastTool(req map[string]any) string {
 // Exercise the actual spawn tool and application admission, not a hand-written
 // child RunConfig. Storage ports are synthetic; this is not a PostgreSQL gate.
 func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
-	for _, mode := range []string{"success", "revoked", "foreign_reference", "missing_reference", "unknown"} {
+	for _, mode := range []string{"success", "reference_success", "revoked", "foreign_reference", "missing_reference", "unknown"} {
 		t.Run(mode, func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 			defer cancel()
@@ -92,7 +92,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if mode == "revoked" {
+			if mode == "revoked" || mode == "reference_success" {
 				if _, err := store.Ingest(ctx, media.IngestInput{BotID: imageSpawnBot, Mime: "image/png", Reader: bytes.NewReader(original.Bytes())}); err != nil {
 					t.Fatal(err)
 				}
@@ -102,8 +102,23 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 			q.allowed.Store(true)
 			var parentCalls, childCalls, imagePosts atomic.Int32
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.URL.Path == "/v1/images/generations" {
+				if r.URL.Path == "/v1/images/generations" || r.URL.Path == "/v1/images/edits" {
 					imagePosts.Add(1)
+					var wire map[string]any
+					if err := json.NewDecoder(r.Body).Decode(&wire); err != nil {
+						t.Error(err)
+						return
+					}
+					if wire["model"] != q.model.ModelID || wire["n"] != float64(1) || wire["response_format"] != "b64_json" || r.Header.Get("Content-Type") != "application/json" {
+						t.Error("Bot model/provider selection did not reach SDK")
+					}
+					if mode == "reference_success" {
+						refs, ok := wire["images"].([]any)
+						if !ok || len(refs) != 1 || refs[0].(map[string]any)["image_url"] != "data:image/png;base64,"+base64.StdEncoding.EncodeToString(original.Bytes()) || r.URL.Path != "/v1/images/edits" {
+							t.Error("authorized reference not sent by SDK")
+						}
+					}
+
 					if mode == "unknown" {
 						w.WriteHeader(http.StatusServiceUnavailable)
 						return
@@ -141,7 +156,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 							q.allowed.Store(false)
 						}
 						name, args := "generate_image", map[string]any{"prompt": "synthetic child image"}
-						if mode == "foreign_reference" || mode == "missing_reference" || mode == "revoked" {
+						if mode == "foreign_reference" || mode == "missing_reference" || mode == "revoked" || mode == "reference_success" {
 							ref := foreign.ContentHash
 							if mode == "missing_reference" {
 								ref = strings.Repeat("a", 64)
@@ -156,7 +171,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 						t.Error("child unexpectedly retried its turn")
 					}
 					output := imageSpawnLastTool(req)
-					if mode == "success" {
+					if mode == "success" || mode == "reference_success" {
 						if !strings.Contains(output, hash) || !strings.Contains(output, "completed") {
 							t.Errorf("child has no persisted reference: %s", output)
 						}
@@ -191,7 +206,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 				}
 				if n == 2 {
 					output := imageSpawnLastTool(req)
-					if mode == "success" {
+					if mode == "success" || mode == "reference_success" {
 						if !strings.Contains(output, "synthetic child reference "+hash) {
 							t.Errorf("child report missing from supervisor: %s", output)
 						}
@@ -206,7 +221,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 			}))
 			t.Cleanup(server.Close)
 			q.model = sqlc.Model{ID: imageSpawnUUID(imageSpawnModel), ProviderID: imageSpawnUUID(imageSpawnProvider), ModelID: "synthetic-model", Type: "chat", Enable: true, Config: []byte(`{"compatibilities":["tool-call","image-output"]}`)}
-			cfg, _ := json.Marshal(map[string]any{"base_url": server.URL + "/v1", imagecapability.ConfigKey: imagecapability.Config{Protocol: "openai-images", ModelMode: "omit", Edits: true}})
+			cfg, _ := json.Marshal(map[string]any{"base_url": server.URL + "/v1", imagecapability.ConfigKey: imagecapability.Config{Protocol: "openai-images", Edits: true}})
 			q.provider = sqlc.Provider{ID: imageSpawnUUID(imageSpawnProvider), Name: "synthetic-provider", ClientType: "openai-completions", Enable: true, Config: cfg}
 			q.sessions[imageSpawnParent] = sqlc.BotSession{ID: imageSpawnUUID(imageSpawnParent), BotID: imageSpawnUUID(imageSpawnBot), Type: "chat", SessionMode: "chat", RuntimeType: "model", Metadata: []byte(`{}`), RuntimeMetadata: []byte(`{}`)}
 			log := slog.New(slog.DiscardHandler)
@@ -274,7 +289,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 				t.Fatalf("child steps not committed through application factory: %d", steps)
 			}
 			wantPosts := int32(0)
-			if mode == "success" || mode == "unknown" {
+			if mode == "success" || mode == "reference_success" || mode == "unknown" {
 				wantPosts = 1
 			}
 			if imagePosts.Load() != wantPosts {
@@ -283,7 +298,7 @@ func TestImageCapabilityActualSpawnAndParentSend(t *testing.T) {
 			if mode == "revoked" && storage.opens.Load() != 0 {
 				t.Fatal("revoked child opened an existing current-Bot image")
 			}
-			if mode == "success" {
+			if mode == "success" || mode == "reference_success" {
 				if sender.calls.Load() != 1 || sender.hash != hash || !bytes.Equal(sender.bytes, original.Bytes()) || parentCalls.Load() != 3 {
 					t.Fatal("supervisor send changed or lost original reference/bytes")
 				}
