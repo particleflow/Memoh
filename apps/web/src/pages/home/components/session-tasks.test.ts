@@ -125,7 +125,44 @@ describe('task detail identity and rendering boundary', () => {
     expect(api.list).toHaveBeenCalledTimes(1)
   })
 
-  it.each(['relation-denied', 'logout', 'scope-changed'])('retires downstream content and ignores a late response after %s', async (reason) => {
+  it.each([
+    { cause: new TypeError('PRIVATE_TRANSIENT_NETWORK'), recovery: 'reload' },
+    { cause: new TypeError('PRIVATE_TRANSIENT_NETWORK'), recovery: 'poll' },
+    { cause: { status: 503, code: 'http.unavailable', detail: 'PRIVATE_UPSTREAM' }, recovery: 'reload' },
+    { cause: { status: 503, code: 'http.unavailable', detail: 'PRIVATE_UPSTREAM' }, recovery: 'poll' },
+  ])('resumes the same downstream detail after a transient parent read failure via $recovery without redispatch', async ({ cause, recovery }) => {
+    const relation = { ...delegation, target_session_id: 'specialist-session' }
+    api.delegationDetail.mockResolvedValue({ data: relation })
+    await open('delegations')
+    button(en.chat.delegations.openTasks).click(); await settled()
+    button(/Computer task/).click(); await settled()
+    expect(document.body.textContent).toContain(text)
+
+    api.delegationDetail.mockRejectedValue(cause)
+    await vi.advanceTimersByTimeAsync(5000); await settled()
+    expect(document.body.textContent).toContain(en.chat.delegations.downstreamTitle)
+    expect(document.body.textContent).not.toContain(text)
+    expect(document.body.textContent).not.toContain('PRIVATE_')
+    expect(document.body.textContent).not.toContain(en.chat.tasks.empty)
+    const childReads = api.list.mock.calls.length + api.detail.mock.calls.length
+    await vi.advanceTimersByTimeAsync(5000); await settled()
+    expect(api.list.mock.calls.length + api.detail.mock.calls.length).toBe(childReads)
+
+    api.delegationDetail.mockResolvedValue({ data: relation })
+    api.detail.mockResolvedValue({ data: { ...task, status: 'waiting_decision', pi_result: undefined,
+      content_available: false, result_summary: undefined } })
+    if (recovery === 'reload') button(en.chat.tasks.reload).click()
+    else await vi.advanceTimersByTimeAsync(5000)
+    await settled()
+    expect(document.body.textContent).toContain(en.chat.delegations.downstreamTitle)
+    expect(document.body.textContent).toContain(en.chat.tasks.statuses.waiting_decision)
+    expect(document.body.textContent).not.toContain(text)
+    expect(api.detail.mock.lastCall![0].path).toEqual({ bot_id: 'specialist-a', session_id: 'specialist-session', task_type: 'computer_operation', task_id: 'operation' })
+    expect(api.list).toHaveBeenCalledTimes(2)
+    expect(api.retryDelivery).not.toHaveBeenCalled()
+  })
+
+  it.each(['relation-denied', 'relation-unauthorized', 'relation-forbidden', 'relation-changed', 'logout', 'scope-changed'])('retires downstream content and ignores a late response after %s', async (reason) => {
     api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'specialist-session' } })
     const props = ref({ botId: 'bot', sessionId: 'parent', selection: 'pc-a', visible: true })
     root = document.createElement('div'); document.body.append(root)
@@ -137,8 +174,12 @@ describe('task detail identity and rendering boundary', () => {
     api.list.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
     button(en.chat.delegations.openTasks).click(); await settled()
     const signal = api.list.mock.lastCall![0].signal as AbortSignal
-    if (reason === 'relation-denied') {
-      api.delegationDetail.mockRejectedValue({ status: 404, code: 'session.not_found', detail: 'PRIVATE' })
+    if (reason.startsWith('relation-')) {
+      if (reason === 'relation-changed') api.delegationDetail.mockResolvedValue({ data: { ...delegation, target_session_id: 'another-session' } })
+      else api.delegationDetail.mockRejectedValue({
+        status: reason === 'relation-unauthorized' ? 401 : reason === 'relation-forbidden' ? 403 : 404,
+        code: 'session.not_found', detail: 'PRIVATE',
+      })
       await vi.advanceTimersByTimeAsync(5000)
     } else if (reason === 'logout') notifyAuthSessionCleared('logout')
     else props.value = { ...props.value, botId: 'other-bot', sessionId: 'other-session' }

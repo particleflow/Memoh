@@ -5,8 +5,9 @@ import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
 import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
 import { onAuthSessionCleared } from '@/lib/auth-session'
+import { apiErrorStatus } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
-import { useBotDelegations } from '../composables/useBotDelegations'
+import { delegationAPIUnsupported, useBotDelegations } from '../composables/useBotDelegations'
 import { useBotDelegationDownload } from '../composables/useBotDelegationDownload'
 import { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
@@ -34,7 +35,11 @@ const specialistScope = computed(() => specialist.value && scope.value ? {
   selection: specialist.value.delegation, identity: scope.value.identity,
 } : null)
 const specialistVisible = computed(() => visible.value && !!specialist.value)
-const specialistReader = useSessionTasks(specialistScope, specialistVisible)
+const specialistPaused = computed(() => !!specialist.value && (!!delegationError.value
+  || delegationDetail.value?.delegation_id !== specialist.value.delegation
+  || delegationDetail.value?.target_bot_id !== specialist.value.bot
+  || delegationDetail.value?.target_session_id !== specialist.value.session))
+const specialistReader = useSessionTasks(specialistScope, specialistVisible, specialistPaused)
 const { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist } = specialistReader
 const hasSelection = computed(() => !!specialist.value || (group.value === 'delegations' ? !!delegationSelected.value : !!selected.value))
 function openSpecialistTasks() {
@@ -44,15 +49,24 @@ function openSpecialistTasks() {
   specialist.value = { bot: task.target_bot_id, session: task.target_session_id, delegation: task.delegation_id }
 }
 watch([scope, visible, group], () => { specialist.value = undefined }, { flush: 'sync' })
-// Keep the original delegation read active: losing that authorized relation must
-// retire downstream content too, even if a target GET finishes later.
+// Revalidate the original relation throughout observation. Transient failures
+// pause and clear downstream content; a denial or changed relation retires the
+// navigation too. Neither path can revive a pending response from the old read.
 watch([delegationDetail, delegationError], () => {
   const current = specialist.value
-  if (current && (delegationError.value || delegationDetail.value?.delegation_id !== current.delegation
-    || delegationDetail.value?.target_bot_id !== current.bot || delegationDetail.value?.target_session_id !== current.session)) {
+  if (!current) return
+  const denied = delegationAPIUnsupported(delegationError.value)
+    || [401, 403, 404].includes(apiErrorStatus(delegationError.value) ?? 0)
+  const relation = delegationDetail.value
+  if (denied || (relation && (relation.delegation_id !== current.delegation
+    || relation.target_bot_id !== current.bot || relation.target_session_id !== current.session))) {
     specialist.value = undefined
   }
 }, { flush: 'sync' })
+function reloadSpecialist() {
+  if (specialistPaused.value) void refreshDelegations()
+  else void refreshSpecialist()
+}
 function goBack() {
   if (specialist.value) {
     if (specialistSelected.value) backSpecialistTask()
@@ -95,11 +109,11 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             :selected="specialistSelected"
             :cursor="specialistCursor"
             :next-cursor="specialistNext"
-            :loading="specialistLoading"
-            :error="specialistError"
+            :loading="specialistLoading || (specialistPaused && delegationLoading)"
+            :error="delegationError || specialistError"
             @open-task="openSpecialistTask"
             @page="specialistPage"
-            @refresh="refreshSpecialist"
+            @refresh="reloadSpecialist"
           />
         </template>
         <Tabs

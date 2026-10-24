@@ -1,0 +1,81 @@
+{
+  "base": "7bcbba5ac85a2ba0769b48ed8d4334db4b7806f7",
+  "format": "Exact selected synthetic local outputs and screenshots; private config, token, full server logs and database contents are excluded. No log redaction or decoding applied.",
+  "artifacts": [
+    {
+      "file": "red-ui.log",
+      "bytes": 2879,
+      "sha256": "89d90489b9d8f8a843b23ca8b3fbf00c9c658519151f6b6fa90a4c16a5813d07"
+    },
+    {
+      "file": "ui-final.log",
+      "bytes": 321,
+      "sha256": "40139ae34f73e4fc1c4ac960cac05613c18b76fddf912480c25af9ff43252283"
+    },
+    {
+      "file": "web-typecheck-final.log",
+      "bytes": 116,
+      "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+    },
+    {
+      "file": "sdk-typecheck.log",
+      "bytes": 112,
+      "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+    },
+    {
+      "file": "eslint.log",
+      "bytes": 317,
+      "sha256": "6d95a0e85e0192c4eb3a6077b5a9feef4def0a6367344240c4caf7327f9dac4f"
+    },
+    {
+      "file": "ui-contract.log",
+      "bytes": 1169,
+      "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec"
+    },
+    {
+      "file": "web-build.log",
+      "bytes": 106319,
+      "sha256": "8fb0c40f53dd1bc38bb5fa8bcc1029cdbbd896ddbb61efd81dd870a3c6592a58"
+    },
+    {
+      "file": "core-boundary.log",
+      "bytes": 95,
+      "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
+    },
+    {
+      "file": "browser-first.log",
+      "bytes": 527,
+      "sha256": "4eb574466a968411297d7e84d1815ae60af1c5052836a3172986ae70b58c78eb"
+    },
+    {
+      "file": "browser-final.log",
+      "bytes": 353,
+      "sha256": "224e8cdd43d4039f25ed2c19e8dc48336c9a4b98ffbb7ffe1309a012a0235fb1"
+    },
+    {
+      "file": "browser-proof.json",
+      "bytes": 14764,
+      "sha256": "51978a936aeadec5ca95f4f555f5df7a09d6118a2bd3479b7d078eb2c7c8dbd9"
+    },
+    {
+      "file": "browser-reconnect.mjs",
+      "bytes": 6306,
+      "sha256": "b8611139444b7a8df8cb68bdec071827ab566ef0ee524905494f60adef985001"
+    },
+    {
+      "file": "browser-offline.png",
+      "bytes": 84004,
+      "sha256": "643413fbda93906bc43b979356ca5a3a9c30cf5a4950eb637cb81c71d47cd30f"
+    },
+    {
+      "file": "browser-recovered.png",
+      "bytes": 96923,
+      "sha256": "8765b0444da304835de1b2fcadf78e329c6435f6a16fc5c02d63e465eb4c04fc"
+    },
+    {
+      "file": "browser-denied.png",
+      "bytes": 82258,
+      "sha256": "8f579e3e4ca865f387a300df4b40b9c6fdb8d6f9a2d882d670c0de48e8b98d20"
+    }
+  ]
+}

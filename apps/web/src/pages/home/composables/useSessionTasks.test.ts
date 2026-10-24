@@ -21,8 +21,9 @@ function setup() {
   scopes.push(owner)
   const scope = ref<TaskScope | null>({ bot: 'bot', session: 'parent', selection: 'pc-a', identity: 'synthetic' })
   const visible = ref(true)
-  const reader = owner.run(() => useSessionTasks(scope, visible))!
-  return { owner, scope, visible, reader }
+  const paused = ref(false)
+  const reader = owner.run(() => useSessionTasks(scope, visible, paused))!
+  return { owner, scope, visible, paused, reader }
 }
 async function settled() { await Promise.resolve(); await Promise.resolve() }
 function deferred<T>() {
@@ -86,6 +87,62 @@ describe('authorization-scoped task view', () => {
     reader.page()
     await settled()
     expect(reader.cursor.value).toBeUndefined()
+  })
+
+  it.each(['success', 'rejection'] as const)('pauses reads and discards a late %s before resuming the selected detail', async (outcome) => {
+    const { reader, paused } = setup()
+    await settled()
+    reader.openTask(task)
+    await settled()
+    const old = deferred<{ data: SessiontaskTask }>()
+    api.detail.mockReturnValueOnce(old.promise)
+    void reader.refresh()
+    const signal = api.detail.mock.lastCall![0].signal as AbortSignal
+    paused.value = true
+    expect(signal.aborted).toBe(true)
+    expect(reader.detail.value).toBeUndefined()
+    expect(reader.items.value).toEqual([])
+    expect(reader.selected.value?.task_id).toBe(task.task_id)
+    await reader.refresh()
+    await vi.advanceTimersByTimeAsync(20000)
+    expect(api.detail).toHaveBeenCalledTimes(2)
+
+    const fresh = { ...task, status: 'waiting_decision', result_summary: undefined }
+    api.detail.mockResolvedValue({ data: fresh })
+    paused.value = false
+    await settled()
+    if (outcome === 'success') old.resolve({ data: task })
+    else old.reject({ status: 403 })
+    await settled()
+    expect(reader.detail.value).toEqual(fresh)
+    expect(reader.error.value).toBeUndefined()
+    expect(api.list).toHaveBeenCalledTimes(1)
+    expect(api.detail).toHaveBeenCalledTimes(3)
+  })
+
+  it('keeps the current page during a pause but erases navigation on a scope change', async () => {
+    const { reader, paused, scope } = setup()
+    await settled()
+    reader.page('opaque-page-two')
+    await settled()
+    paused.value = true
+    expect(reader.cursor.value).toBe('opaque-page-two')
+    paused.value = false
+    await settled()
+    expect(api.list.mock.lastCall![0].query.cursor).toBe('opaque-page-two')
+    reader.openTask(task)
+    await settled()
+    paused.value = true
+    scope.value = { ...scope.value!, identity: 'another-identity' }
+    expect(reader.selected.value).toBeUndefined()
+    expect(reader.cursor.value).toBeUndefined()
+    const calls = api.list.mock.calls.length + api.detail.mock.calls.length
+    await vi.advanceTimersByTimeAsync(10000)
+    expect(api.list.mock.calls.length + api.detail.mock.calls.length).toBe(calls)
+    paused.value = false
+    await settled()
+    expect(api.list.mock.lastCall![0].query.cursor).toBeUndefined()
+    expect(reader.detail.value).toBeUndefined()
   })
 
   describe.each(['identity', 'bot', 'session', 'selection'] as const)('%s changes', (field) => {
