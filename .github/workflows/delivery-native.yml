@@ -39,8 +39,15 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Execute native tests
-        run: go test -count=1 -v -timeout=5m ./internal/transferclient ./cmd/transferqueue
+      # Filesystem durability/catalog tests can exceed one package's aggregate
+      # five-minute budget. These complementary selectors retain every test;
+      # the per-process timeout and the overall job budget remain unchanged.
+      - name: Execute transfer contracts except Windows-prefixed cases
+        run: go test -count=1 -v -timeout=5m -skip '^TestWindows' ./internal/transferclient
+      - name: Execute Windows-prefixed transfer contracts
+        run: go test -count=1 -v -timeout=5m -run '^TestWindows' ./internal/transferclient
+      - name: Execute complete CLI contracts
+        run: go test -count=1 -v -timeout=5m ./cmd/transferqueue
       - name: Execute native publication with PostgreSQL
         run: ./scripts/test-native-delivery-postgres.ps1
       - name: Build reviewed binary bundle
