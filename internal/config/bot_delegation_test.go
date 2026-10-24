@@ -14,8 +14,11 @@ func TestLoadBotDelegationExecutionTimeout(t *testing.T) {
 		want    time.Duration
 		invalid bool
 	}{
-		{"", 30 * time.Minute, false}, {"2h", 2 * time.Hour, false},
-		{"0s", 0, false}, {"-1s", 0, true}, {"later", 0, true},
+		{"", 30 * time.Minute, false},
+		{"2h", 2 * time.Hour, false},
+		{"0s", 0, false},
+		{"-1s", 0, true},
+		{"later", 0, true},
 	} {
 		t.Run(tc.value, func(t *testing.T) {
 			file := filepath.Join(t.TempDir(), "config.toml")

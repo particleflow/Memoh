@@ -1,7 +1,7 @@
 package config
 
 import (
-	"fmt"
+	"errors"
 	"strings"
 	"time"
 )
@@ -19,7 +19,7 @@ func (c BotDelegationConfig) ExecutionTimeoutDuration() (time.Duration, error) {
 	}
 	duration, err := time.ParseDuration(value)
 	if err != nil || duration < 0 {
-		return 0, fmt.Errorf("bot_delegation.execution_timeout must be a non-negative duration")
+		return 0, errors.New("bot_delegation.execution_timeout must be a non-negative duration")
 	}
 	return duration, nil
 }
