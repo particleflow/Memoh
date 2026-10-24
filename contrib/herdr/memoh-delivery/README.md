@@ -58,8 +58,8 @@ The manifest uses Herdr v0.9.5's existing argv action mechanism. No startup work
 or timer is registered. `verify-storage` invokes `transferqueue.exe -action probe`:
 it validates/initializes its queue only under `HERDR_PLUGIN_STATE_DIR`, requiring
 an existing private local NTFS parent. Its `native-profile-v1` locator binds the
-resolved root and quota profile. Byte-budget changes require the explicit action
-below. It never repairs ACLs, changes roots or falls back.
+resolved root and legacy quota profile. New upload registration does not require
+changing that profile. It never repairs ACLs, changes roots or falls back.
 
 The executable exposes finite `enqueue-upload`, `enqueue-download`, `advance`,
 `advance-next`, `reconcile`, `inspect`, `cancel`, and `retire` actions. Explicit
@@ -108,70 +108,60 @@ completion receipt.
 existing queue journal. Changing the endpoint or source root (even formatting)
 requires explicit drain/migration; old jobs fail `configuration_changed`, never
 silently switch directories or send their credential to a different endpoint.
-The queue's `native-profile-v1` defaults remain 8 jobs, 256 MiB reserved bytes,
-8 MiB per journal and one worker. This finite profile is not a claimed maximum
-protocol file size; changing quotas requires a reviewed locator migration.
+## Metadata-first uploads (plugin 0.9)
 
-## Configurable byte budget (plugin 0.8)
+New upload enqueue persists the existing job identity, expected complete hash,
+size and a private logical source reference plus file identity/mtime. It does
+not hash/copy file bytes, reserve their aggregate size, or consume a transfer
+slot. `registered: true` acknowledges this durable registration; `admitted: true`
+still means the block index has been verified and transfer can proceed. This is
+an additive CLI status field, not a new Server or phone wire protocol.
 
-The endpoint owns an optional private `queue-budget.json` under the **existing**
-`HERDR_PLUGIN_CONFIG_DIR`. It has no separate root, credential or task registry.
-Leave `transfer.json` byte-for-byte unchanged so its existing endpoint/source
-binding and all original task/attempt IDs continue to match. Example policy:
+The existing finite `advance-results`/`advance` action performs source indexing
+and upload. It reads at most 64 MiB per indexing step, resumes the persisted hash
+state, and reuses the existing 1 MiB block-proof tree. It writes no second full
+source copy. Transfer buffers remain at most 8 MiB, with one worker in the
+installed profile. Pending metadata has no aggregate content-byte or file-count
+quota. Directory reads are paged; only selected files allocate index scratch.
+Actual metadata/index disk exhaustion remains an explicit capacity failure with
+records retained. This does not promise unlimited disk or zero indexing cost.
 
-```json
-{"version":1,"bytes":8589934592}
-```
+Windows holds the existing validated source handle without write/delete sharing
+during each finite call. Reopens verify identity, size and modification time;
+block proofs verify bytes even if those attributes were preserved. Source change
+or loss records `source_changed`/`source_missing`, keeps the original job/receipt
+and index, and never creates a new business attempt or silently changes versions.
+User sources are never deleted. NAS durable association permits release of the
+queue-owned index/checkpoint and keeps the original queryable receipt.
 
-`bytes` is an integer from 1 through 1099511627776 (1 TiB). This example expresses
-8 GiB, without allocating it. The setting bounds total active queue reservations,
-including snapshot-tree/admission metadata; independently it bounds retained
-native publication objects. It is not a per-file promise or a RAM buffer size.
-Jobs (8), journal bytes (8 MiB), workers (1), and per-call work/time budgets stay
-unchanged. Each admission also checks available storage. Missing policy uses the
-historical 256 MiB default; invalid, oversized, unsafe or unreadable policy fails
-explicitly, with no fallback. There is no per-invocation quota flag or override.
+Existing v2/v3/v4 snapshot journals remain readable, and previously sealed
+snapshots keep their old source-independent semantics. New registrations use
+queue record v5 in the same layout/root and unchanged locator/HostBinding.
+No budget edit or `migrate-budget` is needed to enqueue large upload metadata.
+Older binaries reject v5 records; a normal endpoint package update must replace
+old finite writers, not run both versions. Rollback must retain the state and
+use a reader supporting v5; it cannot reinterpret indexed sources as snapshots.
 
-A fresh queue binds the configured budget at creation. For an **existing** queue:
+The historical 8-job/256 MiB reservation profile and optional
+`queue-budget.json` are retained only for legacy snapshot/download/publication
+compatibility. They no longer limit new upload registration or source size.
+This increment does **not** remove the separate download/publication constraints,
+Server `[files].max_upload_bytes` default of 200 MiB, or task manifest/ledger
+limits. Consequently metadata registration is not a claim that 10,000 GiB files
+have been transferred or that every three-end product constraint is solved.
 
-1. Stop all CLI/plugin writers, including idle old-version processes, and retain
-   a complete raw backup of the existing state. Preserve originals and config.
-2. With the old budget, finish any required `migrate-history` (queue v2 to v3) and
-   `migrate-publications` (publication v1 to v2) using their existing procedures.
-3. Set the larger byte budget in the same config directory and invoke
-   `transferqueue.exe -action migrate-budget` (also a finite plugin action).
-   Ordinary open refuses a policy/locator mismatch and never reinitializes it.
-4. Resume only with the upgraded binary and matching policy. Lost responses or
-   process exits are reconciled by repeating that same migration action.
+The Server still requires the complete hash before Create. Closed producer
+metadata already supplies that hash; active indexing verifies it in another
+bounded read before networking. Upload then reads requested blocks from the
+source. These necessary reads have not been disguised as zero overhead; no BEP
+compatibility or embedded Syncthing engine is claimed by this increment.
 
-The migration preserves the original locator fields, sets queue locator v4 and
-existing publication locator v3, and records monotonic byte increases in one
-64 KiB bounded, checksummed/fsynced journal beside the original locator. It reuses
-the queue framing and admission/worker/publication locks. The single-byte gates
-exclude old binaries; locks do not revoke idle old handles, hence the stop rule.
-Only incomplete final frames can be repaired; complete corruption fails closed.
-No job, payload, published file, receipt, unknown record or cancellation tombstone
-is removed. The original layout backup is still required; the migration journal
-is not a backup of the user's data. Repeated increases use the same action; a
-decrease, identity mismatch or full migration journal fails explicitly. A normal
-config rollback is not supported after migration; do not restore an old writer
-over newer state. History/publication layout migrations precede this budget gate.
-
-The NAS Server limit is independent: `[files].max_upload_bytes` in the existing
-Server `config.toml` defaults to 200 MiB (`0` means default, not unlimited).
-Changing that field and restarting Server needs no source change, but does not
-raise the PC queue budget. Both limits and actual free space must fit the file
-and its concurrent copies. The source, snapshot, upload staging and pending NAS
-original can coexist. Snapshot admission uses 1 MiB blocks, at most 64 MiB copied
-per finite invocation, and transfer chunks remain at most 8 MiB; a larger quota
-does not introduce a whole-file memory allocation. Continue the same admission
-input after `pending`; this change adds no background worker or automatic wake.
-
-Tests express 8/16 GiB policies with small synthetic files and cover original-ID
-recovery, insufficient quota, rejected configuration changes, interrupted budget
-migration and native publication/tombstone preservation. They are not multi-GiB
-throughput, physical power-loss, or real PC-to-NAS acceptance. Actual large-file
-validation still requires sufficient isolated storage and the coordinated host.
+The Linux scale regression uses 10,000 distinct sparse 1 GiB source files for
+metadata only. Smaller cross-platform fixtures cover source changes, cancellation,
+worker exclusion, process exit before registration acknowledgement, original-ID
+replay, and lost PATCH response without a snapshot. The existing real Server/PG/
+CLI process recovery tests retain their hash/receipt/Commit assertions. None of
+these tests establishes physical power-loss durability or real PC/NAS bandwidth.
 
 ## Producer and finite-command handoff
 
@@ -185,18 +175,12 @@ Do not put a credential or file bytes in this JSON. These IDs are lookup
 selectors, not authorization; the Server verifies them against its current
 operation, Bot permissions and authenticated device.
 
-Reinvoke the same enqueue/ID/metadata after admission timeout to resume sealing;
-do not invent a new ID. When the 64 MiB copy budget leaves a durable admission
-checkpoint, `enqueue-result` and `collect-result` exit 1 with `state: pending`
-and `error_class: transient`. Continue the same enqueue/collect input; this
-does not mean that `advance-results` can upload the unsealed snapshot. The
-collector retains the closed manifest until admission completes. Completed
-admission uses its immutable snapshot even if
-the producer file or export directory has since been removed. New or incomplete
-upload admission still requires the original authorized source. Once admitted,
-invoke `advance` or the fixed manifest
-`advance-delivery` action. Each call performs bounded work then exits; the existing
-host owns when to invoke again. Backoff and unknown outcomes persist in the
+Replaying enqueue uses the original metadata and identity. The collector consumes
+a closed manifest only after durable registration; indexing can then resume via
+`advance-results` without resubmitting the manifest. Pending indexing remains
+runnable in lifecycle summary. Old incomplete snapshot admissions retain their
+existing same-input recovery path. Each call performs bounded work then exits;
+the existing host owns when to invoke again. Backoff and unknown outcomes persist in the
 queue. `cancel` records intent; subsequent advance reconciles publication/remote
 commit and can report that delivery already won. `reconcile` is an explicit
 recovery action, not a retry-budget reset. The original create-unknown protocol
@@ -215,20 +199,16 @@ close the declared files before Pi exits. The envelope supplies non-secret
 `enqueue-result` accepts only bounded closed metadata on stdin. The official
 Herdr CLI does not forward arbitrary stdin: its fixed `collect-result` action
 opens the manifest through the configured root and feeds that same decoder.
-After durable admission the original snapshot/receipt are reused; repeated task
+After durable registration the original source version/receipt are reused; repeated task
 result queries can wake finite advancement through the dedicated control pane.
 No host timer or daemon is added. NAS `delivery.reference` is available to the
 parent task only after committed association, separately from Pi completion.
 
-The bounded list retains one stable delivery/closed manifest per file, within
-the existing eight-job /
-256 MiB total snapshot limit. Finite host actions automatically release only
-confirmed committed queue payloads and retain the original delivery/receipt.
-Unknown, canceled and blocked jobs are not automatically cleared. The compact
-active catalog remains bounded at 1024 records; confirmed released records move
-to the same queue's queryable, bounded terminal history. Proofs are never silently
-evicted. Version 0.6 requires locator v3: stop old writers, back up the complete
-state, then invoke `migrate-history` before normal actions on a v2 queue.
+Each file retains one stable delivery/closed manifest. New upload metadata does
+not consume the legacy eight-job/256 MiB snapshot reservation. Finite host actions
+release only confirmed committed queue scratch; unknown, canceled and blocked
+evidence and user sources remain intact. Existing terminal history is still
+queryable and has its separately documented storage bounds.
 See `docs/delivery-terminal-history.md` for budgets, recovery and rollback bounds.
 Each finite hook still handles at most one manifest; later task queries/host
 actions continue remaining work. Multi-file aggregate `partial` preserves each

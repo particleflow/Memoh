@@ -112,15 +112,6 @@ func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int) {
 	defer func() { _ = q.Close() }()
 	report := readProducerFeedbackFixture(t, getenv, plan)
 	for i, file := range files {
-		if slots == 1 && i > deniedPosition {
-			if report.Files[i].Code != "capacity_blocked" || report.Files[i].Retryable {
-				t.Fatal("full blocked slot not reported", report.Files[i])
-			}
-			if remotes[file.DeliveryID()].upload.count("POST /bots/"+file.Task.BotID+"/media/uploads") != 0 {
-				t.Fatal("unadmitted file uploaded")
-			}
-			continue
-		}
 		r, err := q.Inspect(file.DeliveryID())
 		if err != nil || r.Job.OperationID != operation {
 			t.Fatal("original operation lost", err)
@@ -153,18 +144,12 @@ func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int) {
 		t.Fatal(err)
 	}
 	defer func() { _ = cfg.Close() }()
-	for i, file := range files {
+	for _, file := range files {
 		source, err := cfg.OpenSource(file.Artifact.SourceRef)
 		if err != nil {
 			t.Fatal("user source deleted", err)
 		}
 		_ = source.Close()
-		if slots == 1 && i > deniedPosition {
-			if _, err := cfg.sources.Lstat(file.ManifestName()); err != nil {
-				t.Fatal("unadmitted evidence removed", err)
-			}
-			continue
-		}
 		if _, err := cfg.sources.Lstat(file.ManifestName()); !errors.Is(err, os.ErrNotExist) {
 			t.Fatal("manifest not consumed", err)
 		}

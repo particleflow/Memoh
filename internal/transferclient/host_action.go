@@ -31,7 +31,7 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		return QueueStatus{}, err
 	}
 	defer func() { _ = q.Close() }()
-	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" || action.Kind == "advance-next" {
+	if action.Kind == "enqueue-download" || action.Kind == "advance-next" {
 		if err := q.ReclaimConfirmed(ctx); err != nil {
 			return QueueStatus{}, err
 		}
@@ -62,6 +62,7 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		return QueueStatus{}, err
 	}
 	defer func() { _ = cfg.Close() }()
+	q.openSource = cfg.OpenSource
 	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" {
 		if local.Job.HostBinding != "" && local.Job.HostBinding != cfg.Binding {
 			return QueueStatus{}, ErrVersion
@@ -77,6 +78,16 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 			return QueueStatus{}, err
 		}
 		c.CloseIdleConnections()
+		if direction == "upload" {
+			if action.DeliveryID != local.Job.DeliveryID {
+				return QueueStatus{}, ErrInvalid
+			}
+			registered, err := q.RegisterUpload(ctx, local.Job, action.SourceRef, cfg.OpenSource)
+			if err != nil || registered.Registered || registered.Admitted {
+				return registered, err
+			}
+			// An old partially sealed admission keeps its existing recovery protocol.
+		}
 		if existing, err := q.Inspect(action.DeliveryID); err == nil && existing.Admitted {
 			// Admit rechecks immutable metadata under the job lock. A sealed
 			// snapshot no longer depends on the producer file or directory.
@@ -126,32 +137,33 @@ func (q *DiskQueue) nextDueForBinding(now time.Time, binding string) (string, er
 		return "", err
 	}
 	defer unlockClose(global)
-	records, err := q.admissions()
-	if err != nil {
-		return "", err
-	}
 	var selected QueueStatus
 	var selectedAt time.Time
-	for _, admission := range records {
+	err = q.visitAdmissions(func(admission QueueStatus) error {
 		r, err := q.Inspect(admission.Job.DeliveryID)
 		if errors.Is(err, ErrBusy) || errors.Is(err, ErrAdmissionPending) {
-			continue
+			return nil
 		}
 		if err != nil {
-			return "", err
+			return err
 		}
 		if !recordEligible(r) || recordDue(r).After(now) || binding != "" && (r.Job.HostBinding != binding || !r.Job.Task.valid()) {
-			continue
+			return nil
 		}
-		// A persisted backoff wins once due. Continuously runnable jobs rotate
-		// by the last finite attempt, with an ID tie-breaker for untouched jobs.
 		at := recordDue(r)
 		if r.LastRun.After(at) {
 			at = r.LastRun
 		}
-		if selected.Job.DeliveryID == "" || at.Before(selectedAt) || at.Equal(selectedAt) && r.Job.DeliveryID < selected.Job.DeliveryID {
+		// Finish already activated files before opening another temporary index.
+		active := r.Admitted || r.Activated
+		selectedActive := selected.Admitted || selected.Activated
+		if selected.Job.DeliveryID == "" || active && !selectedActive || active == selectedActive && (at.Before(selectedAt) || at.Equal(selectedAt) && r.Job.DeliveryID < selected.Job.DeliveryID) {
 			selected, selectedAt = r, at
 		}
+		return nil
+	})
+	if err != nil {
+		return "", err
 	}
 	if selected.Job.DeliveryID != "" {
 		return selected.Job.DeliveryID, nil

@@ -142,7 +142,7 @@ func collectProducerManifest(ctx context.Context, cfg *HostConfig, getenv func(s
 		}
 		return status, err
 	}
-	if err != nil || !status.Admitted {
+	if err != nil || !status.Admitted && !status.Registered {
 		return status, err
 	}
 	// Admission fsync precedes consuming the manifest. Lost acknowledgement or a
@@ -172,20 +172,21 @@ func (h *HostConfig) producerManifests() ([]string, error) {
 		return nil, ErrBinding
 	}
 	defer func() { _ = dir.Close() }()
-	// Bound directory enumeration too. An oversized export directory fails
-	// explicitly; no fallback root, unbounded walk or arbitrary result import.
-	entries, err := dir.ReadDir(4097)
-	if err != nil && !errors.Is(err, io.EOF) {
-		return nil, ErrStore
-	}
-	if len(entries) > 4096 {
-		return nil, ErrCapacity
-	}
+	// Enumerate in bounded pages; directory size is not a submission quota.
 	var names []string
-	for _, entry := range entries {
-		name := entry.Name()
-		if strings.HasPrefix(name, deliverymeta.ManifestPrefix) && len(name) == len(deliverymeta.ManifestPrefix)+64 && validID(name) {
-			names = append(names, name)
+	for {
+		entries, err := dir.ReadDir(64)
+		if err != nil && !errors.Is(err, io.EOF) {
+			return nil, ErrStore
+		}
+		for _, entry := range entries {
+			name := entry.Name()
+			if strings.HasPrefix(name, deliverymeta.ManifestPrefix) && len(name) == len(deliverymeta.ManifestPrefix)+64 && validID(name) {
+				names = append(names, name)
+			}
+		}
+		if errors.Is(err, io.EOF) {
+			break
 		}
 	}
 	sort.Strings(names)
@@ -223,6 +224,9 @@ func advanceProducerID(ctx context.Context, getenv func(string) string, revision
 		var err error
 		status, err = InvokeConfiguredHerdr(ctx, getenv, revision, limits, ConfiguredAction{Kind: "advance", DeliveryID: id}, transport, now)
 		if err != nil {
+			if errors.Is(err, ErrAdmissionPending) {
+				return status, nil
+			}
 			return status, err
 		}
 		if status.Associated || status.AssociationBlocked || status.Job.Phase == "blocked" || status.Job.Phase == "canceled" || status.Job.Phase == "create_unknown" || status.Job.NextAttempt.After(now) || status.AssociationDue.After(now) {

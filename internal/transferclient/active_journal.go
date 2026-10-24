@@ -24,7 +24,7 @@ type activeCheckpoint struct {
 // record precedes this witness, so old readers fail closed before any truncate.
 // No payload, receipt identity, retry budget or association evidence is removed.
 func (q *DiskQueue) compactActiveJournal(journal *os.File, r QueueStatus) error {
-	if r.Version != 4 || r.PayloadState != "" || !q.validRecord(r, r.Job.DeliveryID) {
+	if (r.Version != 4 && r.Version != 5) || r.PayloadState != "" || !q.validRecord(r, r.Job.DeliveryID) {
 		return ErrInvalid
 	}
 	q.markJournal("after_record")
@@ -125,7 +125,7 @@ func (q *DiskQueue) activeCheckpointHead(name string) (activeCheckpoint, error) 
 	}
 	id := witness.Record.Job.DeliveryID
 	recordBody, recordErr := json.Marshal(witness.Record)
-	if recordErr != nil || len(recordBody) > 16384 || witness.Record.Version != 4 || witness.Record.PayloadState != "" || !q.validRecord(witness.Record, id) || queueName(id+".checkpoint") != name {
+	if recordErr != nil || len(recordBody) > 16384 || (witness.Record.Version != 4 && witness.Record.Version != 5) || witness.Record.PayloadState != "" || !q.validRecord(witness.Record, id) || queueName(id+".checkpoint") != name {
 		return activeCheckpoint{}, ErrStore
 	}
 	journal, err := q.file(id+".journal", os.O_RDONLY, 0o600)
@@ -152,7 +152,7 @@ func (q *DiskQueue) recoverActiveJournal(id string) (QueueStatus, *os.File, bool
 		if readErr != nil {
 			return QueueStatus{}, nil, true, readErr
 		}
-		if r.Version != 4 {
+		if r.Version != 4 && r.Version != 5 {
 			_ = f.Close()
 			return QueueStatus{}, nil, true, ErrStore
 		}

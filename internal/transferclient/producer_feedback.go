@@ -150,7 +150,6 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 	}
 	statuses := make(map[string]QueueStatus, len(heads))
 	readErrors := make(map[string]string)
-	runnable := false
 	for _, head := range heads {
 		if err := ctx.Err(); err != nil {
 			return report, err
@@ -159,7 +158,6 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 		if r.PayloadState != PayloadReleased {
 			r, err = q.Inspect(head.Job.DeliveryID)
 			if err != nil && !errors.Is(err, ErrAdmissionPending) {
-				runnable = true
 				readErrors[head.Job.DeliveryID] = "queue_unavailable"
 				if errors.Is(err, ErrBusy) {
 					readErrors[head.Job.DeliveryID] = "queue_busy"
@@ -168,8 +166,6 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 			}
 		}
 		statuses[r.Job.DeliveryID] = r
-		local := queueFeedback(r, cfg.Binding, now)
-		runnable = runnable || local.Retryable || r.Associated && r.PayloadState != PayloadReleased
 	}
 	for _, file := range plan.FilePlans() {
 		if code := readErrors[file.DeliveryID()]; code != "" {
@@ -203,21 +199,13 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 		if err == nil {
 			raw, readErr := io.ReadAll(io.LimitReader(source, 16385))
 			_ = source.Close()
-			action, closed, parseErr := ProducerAdmission(bytes.NewReader(raw), q.revision)
+			_, closed, parseErr := ProducerAdmission(bytes.NewReader(raw), q.revision)
 			if readErr != nil || parseErr != nil || closed.Task != plan.Task || closed.Artifact != file.Artifact {
 				local.State, local.Code = "blocked", "manifest_invalid"
 			} else {
 				local.State, local.Code, local.Retryable = "pending", "queued", true
 				local.Change = feedbackChange(closed)
-				if err := q.capacity(action.Job.Spec.SizeBytes); err != nil {
-					if !errors.Is(err, ErrCapacity) {
-						return report, err
-					}
-					local.State, local.Code, local.Retryable = "blocked", "capacity_blocked", false
-					if runnable {
-						local.State, local.Code, local.Retryable, local.RetryAt = "pending", "capacity_wait", true, now.Add(30*time.Second)
-					}
-				}
+
 			}
 		}
 		report.Files = append(report.Files, local)

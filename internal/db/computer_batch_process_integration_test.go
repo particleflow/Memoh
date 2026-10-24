@@ -250,8 +250,8 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 		raw, _ := json.Marshal(file)
 		return invoke("enqueue-result", "", raw)
 	}
-	if string(admit(files[0])["admitted"]) != "true" {
-		t.Fatal("first file not admitted")
+	if string(admit(files[0])["registered"]) != "true" {
+		t.Fatal("first file not registered")
 	}
 	child := command("advance-results", "", nil)
 	var childOut, childErr bytes.Buffer
@@ -309,8 +309,8 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 		t.Fatal("temporary failure did not retain a retryable original delivery")
 	}
 	for _, file := range files[1:] {
-		if string(admit(file)["admitted"]) != "true" {
-			t.Fatal("independent file not admitted")
+		if string(admit(file)["registered"]) != "true" {
+			t.Fatal("independent file not registered")
 		}
 	}
 	waitDue := func() {

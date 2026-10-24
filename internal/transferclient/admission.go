@@ -27,6 +27,7 @@ const (
 // The journal binds this protocol before any source bytes are copied.
 type admissionProgress struct {
 	Version      int        `json:"version"`
+	Indexed      bool       `json:"indexed,omitempty"`
 	Sequence     uint64     `json:"sequence"`
 	Binding      string     `json:"binding"`
 	Stage        string     `json:"stage"`
@@ -101,7 +102,7 @@ func readAdmission(f *os.File, job Job) (admissionProgress, error) {
 }
 
 func saveAdmission(f, data, tree *os.File, p *admissionProgress, h hash.Hash) error {
-	if data.Sync() != nil || tree.Sync() != nil {
+	if !p.Indexed && data.Sync() != nil || tree.Sync() != nil {
 		return ErrStore
 	}
 	var err error
@@ -178,7 +179,7 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 		return ErrStore
 	}
 	h := sha256.New()
-	p := admissionProgress{Version: 1, Binding: admissionBinding(r.Job), Stage: "copy"}
+	p := admissionProgress{Version: 1, Indexed: r.Registered, Binding: admissionBinding(r.Job), Stage: "copy"}
 	fresh := info.Size() == 0
 	if !fresh {
 		if info.Size() != admissionFileBytes {
@@ -188,6 +189,9 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 		if err != nil {
 			return err
 		}
+		if p.Indexed != r.Registered {
+			return ErrStore
+		}
 		if h.(encoding.BinaryUnmarshaler).UnmarshalBinary(p.HashState) != nil {
 			return ErrStore
 		}
@@ -195,7 +199,11 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 	// A sealed checkpoint precedes readonly metadata. Reopening may finish the
 	// same transition after interruption; it never alters an admitted snapshot.
 	if p.Stage == "sealed" {
-		for _, suffix := range []string{".snapshot", ".tree"} {
+		suffixes := []string{".tree"}
+		if !r.Registered {
+			suffixes = append(suffixes, ".snapshot")
+		}
+		for _, suffix := range suffixes {
 			f, err := q.file(id+suffix, os.O_RDONLY, 0o600)
 			if err != nil {
 				return err
@@ -207,18 +215,23 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 			}
 		}
 	}
-	data, err := q.file(id+".snapshot", os.O_CREATE|os.O_RDWR, 0o600)
-	if err != nil {
-		return err
+	data := source
+	if !r.Registered {
+		data, err = q.file(id+".snapshot", os.O_CREATE|os.O_RDWR, 0o600)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = data.Close() }()
+	} else if source == nil {
+		return ErrSnapshot
 	}
-	defer func() { _ = data.Close() }()
 	tree, err := q.file(id+".tree", os.O_CREATE|os.O_RDWR, 0o600)
 	if err != nil {
 		return err
 	}
 	defer func() { _ = tree.Close() }()
 	if fresh {
-		if data.Truncate(0) != nil || tree.Truncate(0) != nil || progress.Truncate(admissionFileBytes) != nil || syncQueueDir(q.root) != nil {
+		if !r.Registered && data.Truncate(0) != nil || tree.Truncate(0) != nil || progress.Truncate(admissionFileBytes) != nil || syncQueueDir(q.root) != nil {
 			return ErrStore
 		}
 		if err := saveAdmission(progress, data, tree, &p, h); err != nil {
@@ -231,7 +244,7 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 			identity string
 		}{{data, p.Offset, p.DataIdentity}, {tree, p.TreeBytes, p.TreeIdentity}} {
 			info, err := v.f.Stat()
-			if err != nil || info.Size() < v.size || v.f.Truncate(v.size) != nil {
+			if err != nil || info.Size() < v.size || (!r.Registered || v.f != data) && v.f.Truncate(v.size) != nil {
 				return ErrStore
 			}
 			identity, err := queueFileIdentity(v.f)
@@ -250,8 +263,12 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 		}
 		defer release()
 		source = stable
-		if err := copyAdmission(ctx, source, data, tree, progress, r.Job, &p, h); err != nil {
+		copyErr := copyAdmission(ctx, source, data, tree, progress, r.Job, &p, h)
+		if err := sameSourceAfterRead(r, source); err != nil {
 			return err
+		}
+		if copyErr != nil {
+			return copyErr
 		}
 	}
 	if p.Stage == "tree" {
@@ -268,7 +285,7 @@ func (q *DiskQueue) resumeAdmission(ctx context.Context, r QueueStatus, journal,
 		return ErrSnapshot
 	}
 	r.Seal = &SnapshotSeal{Version: 1, Root: hex.EncodeToString(root[:]), DataIdentity: p.DataIdentity, TreeIdentity: p.TreeIdentity}
-	if data.Chmod(0o400) != nil || tree.Chmod(0o400) != nil || data.Sync() != nil || tree.Sync() != nil || syncQueueDir(q.root) != nil {
+	if !r.Registered && (data.Chmod(0o400) != nil || data.Sync() != nil) || tree.Chmod(0o400) != nil || tree.Sync() != nil || syncQueueDir(q.root) != nil {
 		return ErrStore
 	}
 	r.Admitted = true
@@ -303,8 +320,10 @@ func copyAdmission(ctx context.Context, source, data, tree, progress *os.File, j
 		if _, err := source.ReadAt(buffer[:length], p.Offset); err != nil {
 			return ErrSnapshot
 		}
-		if n, err := data.WriteAt(buffer[:length], p.Offset); err != nil || int64(n) != length {
-			return ErrStore
+		if !p.Indexed {
+			if n, err := data.WriteAt(buffer[:length], p.Offset); err != nil || int64(n) != length {
+				return ErrStore
+			}
 		}
 		leaf := blockDigest(p.Offset/snapshotBlockBytes, buffer[:length])
 		if n, err := tree.WriteAt(leaf[:], p.TreeBytes); err != nil || n != sha256.Size {

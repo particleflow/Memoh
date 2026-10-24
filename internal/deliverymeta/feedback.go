@@ -73,7 +73,7 @@ func (f FileFeedback) Valid() bool {
 			return false
 		}
 		switch f.Code {
-		case "authorization", "protocol", "receipt_unavailable", "input_or_checksum", "file_limit", "retry_budget", "receipt_mismatch", "resumable_unavailable", "snapshot_unavailable", "configuration_changed", "capacity_blocked", "manifest_invalid":
+		case "authorization", "protocol", "receipt_unavailable", "input_or_checksum", "file_limit", "retry_budget", "receipt_mismatch", "resumable_unavailable", "snapshot_unavailable", "source_changed", "source_missing", "configuration_changed", "capacity_blocked", "manifest_invalid":
 			return true
 		}
 	case "unknown":
