@@ -1,0 +1,15 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 <existing-validation-workspace>
+
+···········stderr | src/pages/providers/model-setting-cache.test.ts > Provider save display-cache consistency > waits for the provider refresh and flushes the existing sanitized cache before reporting saved
+[@pinia/colada]: useQueryCache() was called outside of an injection context (component setup, store, navigation guard) You will get a warning about "inject" being used incorrectly from Vue. Make sure to use it only in allowed places.
+See https://vuejs.org/guide/reusability/composables.html#usage-restrictions
+[Vue warn]: inject() can only be used inside setup() or functional components.
+
+···
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  19:54:49
+   Duration  2.22s (transform 1.26s, setup 0ms, import 416ms, tests 1.81s, environment 1.52s)

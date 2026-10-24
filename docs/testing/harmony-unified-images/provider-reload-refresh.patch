@@ -1,0 +1,8 @@
+--- a/apps/web/src/pages/providers/models-panel.vue
++++ b/apps/web/src/pages/providers/models-panel.vue
+@@ -29,2 +29,5 @@
+   key: () => ['providers'],
++  // Disk display snapshots omit secrets; refresh even a recent snapshot before
++  // the form treats an absent masked Key as a missing server credential.
++  refetchOnMount: 'always',
+   query: async () => {

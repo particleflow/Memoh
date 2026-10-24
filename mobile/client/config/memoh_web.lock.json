@@ -1,9 +1,9 @@
 {
-  "version": "unified-9e6c470",
-  "commit": "9e6c47076bc507e0555002b73d3567297d914939",
-  "archive": "tests/.isolated/memoh-9e6c470-complete.tar.gz",
-  "archiveSHA256": "2c75ded797cfb9f7946e4dc165189bf5efa9d6b05e1d3a324cdb6f49ef58b592",
-  "archivePrefix": "Memoh-9e6c470/",
+  "version": "unified-51b19cb",
+  "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+  "archive": "tests/.isolated/memoh-51b19cb-complete.tar.gz",
+  "archiveSHA256": "860c9535bcb0058bc659bd97dc35ac31116a49cbd2b67b639f027e681bc3ef64",
+  "archivePrefix": "Memoh-51b19cb/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "9e6c47076bc507e0555002b73d3567297d914939",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/9e6c47076bc507e0555002b73d3567297d914939",
-      "archiveSHA256": "615a10f733e42996ef0a4d7cd33c166aca50642232ba7fa95ff3ae1eb4d8d1b1",
-      "archivePrefix": "Memoh-9e6c47076bc507e0555002b73d3567297d914939/",
+      "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+      "archiveSHA256": "10d028682d79d165c9310c945f79c8c0331acb5c06746a1f1a65a526ef3d22c9",
+      "archivePrefix": "Memoh-51b19cbeb76e9803eb8d4b614cfabb03ef18cc73/",
       "destination": ""
     },
     {
@@ -137,8 +137,8 @@
     }
   },
   "downstreamObservation": {
-    "commit": "9e6c47076bc507e0555002b73d3567297d914939",
-    "scope": "Shared native task observation, retained interactive follow-up and provider Images controls are present directly in the pinned complete upstream source; existing Harmony host adaptations remain separate.",
+    "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+    "scope": "Shared native task observation/continuation, truthful image-tool reference display and native Provider Images/reference controls are present directly in the pinned source. The equivalent upstream Provider cache fix replaces the former phone adaptation.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {
         "baseSHA256": "9a47a427fd3fbaba77f4fece7935ad13d2072b58c0bb9eacfe690effe59a0251",

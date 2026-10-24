@@ -1,0 +1,14 @@
+{
+  "refreshFailureCase": false,
+  "ordinarySaveOmitsKeyAndImages": true,
+  "explicitImagesPreservesPolicies": true,
+  "quickReloadRetainsChoice": true,
+  "diskCacheStripsKey": true,
+  "loginCalls": 1,
+  "loginRetained": true,
+  "referenceToggleRepeatedSaveReload": true,
+  "realChatImageReferenceStatesNoMediaGuessOrRegeneration": true,
+  "pageErrors": [],
+  "nativeDevice": false,
+  "liveAPI": false
+}

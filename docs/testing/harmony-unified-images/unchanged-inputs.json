@@ -1,0 +1,21 @@
+{
+  "protectedPhoneInputs": {
+    "mobile/client/config/memoh_client.json": "99137240f5107a63328e1f83793b48a2a2cb05b1db84126659f04709b3a2df60",
+    "mobile/client/mobile/memoh/harmony-files.ts": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
+    "mobile/client/mobile/memoh/harmony-download.ts": "e381a6b00b6a3e7e1923e219e75eb07addb863676300314d58db42799d6f1b15",
+    "mobile/client/mobile/memoh/harmony-entry.ts": "898549de7cb385eb07315a71b64e1ffe13fbf7392824703fbf5268713e21fd8f",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "caa18e21b183038c2c300f19c48fc098a5dbe7790f6d500a3563b3cd05238f99",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c",
+    "mobile/client/mobile/harmony/app/entry/src/main/module.json5": "693bbe2692009c271abfdf403530a33c6b608da8e27741624a132b7aca9ac563"
+  },
+  "sharedTaskSDKAndLoginFilesUnchanged": [
+    "apps/web/src/pages/home/composables/useNativeTask.ts",
+    "apps/web/src/pages/home/composables/useComputerTaskObservation.ts",
+    "apps/web/src/pages/home/composables/useSessionTasks.ts",
+    "apps/web/src/pages/home/components/session-tasks.vue",
+    "apps/web/src/pages/home/components/session-task-results.vue",
+    "packages/sdk/src/sdk.gen.ts",
+    "packages/sdk/src/types.gen.ts",
+    "apps/web/src/store/user.ts"
+  ]
+}

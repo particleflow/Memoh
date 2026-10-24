@@ -1,0 +1,25 @@
+{
+  "sourceBase": "b1d0915277f205e888d095c4b2194140dc840860",
+  "sharedSource": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+  "targetedTests": 85,
+  "providerRegressionExecutions": 14,
+  "uniqueTests": 96,
+  "typecheckExitCode": 0,
+  "targetedLintExitCode": 0,
+  "browserPassed": true,
+  "realAPI": false,
+  "humanQA": false,
+  "nativeBuild": false,
+  "newHAP": false,
+  "protectedPhoneInputs": 7,
+  "unchangedSharedTaskSDKLoginFiles": 8,
+  "contextFilesChecked": 6296,
+  "contextDifferencesOnlyExistingTestAdapters": 4,
+  "privacyReview": {
+    "credentialPatternFindings": 0,
+    "screenshots": "Synthetic values only, visually inspected",
+    "privateRuntimeConfigIncluded": false,
+    "sdkOrHAPIncluded": false
+  },
+  "historicalUnverifiedChanges": 19
+}

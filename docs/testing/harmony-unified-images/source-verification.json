@@ -1,0 +1,14 @@
+{
+  "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+  "tree": "9397d804d30d10b4d4cfa06961385cddf92dc5cf",
+  "verifiedGitBlobs": 5843,
+  "componentArchiveSHA256": "10d028682d79d165c9310c945f79c8c0331acb5c06746a1f1a65a526ef3d22c9",
+  "combinedArchiveSHA256": "860c9535bcb0058bc659bd97dc35ac31116a49cbd2b67b639f027e681bc3ef64",
+  "uiPinUnchanged": true,
+  "dependencyLockUnchanged": true,
+  "hostPatchCount": 45,
+  "priorValidationChangesVerified": true,
+  "validationDirectoryAndDependenciesReused": true,
+  "hostPatchScope": "44 existing platform seams plus one providers-query mount refresh; the former save-cache patch is now identical upstream and removed locally.",
+  "finalContextSHA256": "9e80a1498171b7921846ad1f06b3463310b864bd2449f95f334c3eca9a4b7d7b"
+}

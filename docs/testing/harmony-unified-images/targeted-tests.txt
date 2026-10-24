@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 <existing-validation-workspace>
+
+
+ Test Files  5 passed (5)
+      Tests  85 passed (85)
+   Start at  19:46:56
+   Duration  14.90s (transform 19.83s, setup 0ms, import 25.32s, tests 4.65s, environment 4.73s)

@@ -2,6 +2,7 @@
 
 Usage: python3 provider-cache-browser.py http://127.0.0.1:4181 OUTPUT_DIR
 Add --refresh-failure to reject the post-save catalog refresh once until checked.
+Add --reference-toggle and --image-results for the shared 51b19cb controls.
 """
 import json
 import sys
@@ -21,6 +22,8 @@ assert urlsplit(f.base).hostname in ('127.0.0.1', 'localhost')
 out = Path(sys.argv[2]).resolve()
 out.mkdir(parents=True, exist_ok=True)
 failure_case = '--refresh-failure' in sys.argv
+reference_case = '--reference-toggle' in sys.argv
+image_case = '--image-results' in sys.argv
 reject_refresh = False
 failed_reads = 0
 writes = []
@@ -30,10 +33,32 @@ provider = {
     'enable': True, 'config': {'base_url': 'https://provider.example.invalid/v1',
     'api_key': 'synthetic********', 'images_api': {'protocol': 'previous-protocol', 'edits': True}},
 }
+session_id = '22222222-2222-4222-8222-222222222222'
+session = {'id': session_id, 'bot_id': f.bot_id, 'type': 'chat',
+           'title': 'Synthetic image references', 'metadata': {}}
+image_results = [
+    {'state': 'completed', 'content_hash': 'a' * 64, 'delivered': 'current_conversation'},
+    {'state': 'unknown', 'content_hash': 'b' * 64, 'retryable': False},
+    {'state': 'generated', 'storage_state': 'unconfirmed', 'retryable': False},
+]
+turns = [{'id': f'synthetic-turn-{i}', 'turn_id': f'synthetic-turn-{i}',
+          'turn_position': i + 1, 'role': 'assistant', 'timestamp': '2026-10-24T10:00:00Z',
+          'messages': [{'id': i + 1, 'type': 'tool', 'name': 'generate_image',
+                        'input': {'prompt': f'Synthetic image {i + 1}'},
+                        'tool_call_id': f'synthetic-call-{i}', 'running': False,
+                        'output': {'structuredContent': result}}]}
+         for i, result in enumerate(image_results)]
 
 
 def api(path, request):
     global reject_refresh, failed_reads
+    if image_case:
+        if path == f'/bots/{f.bot_id}/sessions':
+            return 200, {'items': [session]}
+        if path == f'/bots/{f.bot_id}/sessions/{session_id}':
+            return 200, session
+        if path == f'/bots/{f.bot_id}/messages':
+            return 200, {'items': turns}
     if path == '/providers':
         if reject_refresh:
             failed_reads += 1
@@ -54,13 +79,35 @@ def api(path, request):
 
 
 f.extra_api_handler = api
+
+
+def idle_runtime(socket):
+    if urlsplit(socket.url).hostname in ('127.0.0.1', 'localhost'):
+        # Vite's intercepted development heartbeat is not the chat protocol.
+        socket.on_message(lambda message: None)
+        return
+    def receive(message):
+        event = json.loads(message)
+        assert event['type'] in ('runtime_subscribe', 'runtime_unsubscribe'), event['type']
+        if event['type'] == 'runtime_subscribe':
+            assert event['session_id'] == session_id
+            socket.send(json.dumps({
+                'type': 'runtime_snapshot', 'session_id': session_id,
+                'epoch': 'synthetic-epoch', 'seq': 1,
+                'snapshot': {'bot_id': f.bot_id, 'session_id': session_id,
+                             'epoch': 'synthetic-epoch', 'seq': 1,
+                             'updated_at': '2026-10-24T10:00:00Z'},
+            }))
+    socket.on_message(receive)
+
+
 with tempfile.TemporaryDirectory(prefix='provider-cache-', dir=out) as directory, sync_playwright() as pw:
     context = pw.chromium.launch_persistent_context(
         str(Path(directory) / 'profile'), executable_path='/usr/bin/chromium', headless=True,
         viewport={'width': 390, 'height': 844}, locale='zh-CN', service_workers='block',
         args=['--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=127.0.0.1;localhost'])
     context.route('**/*', f.intercept)
-    context.route_web_socket('**/*', lambda socket: socket.on_message(lambda message: None))
+    context.route_web_socket('**/*', idle_runtime)
     context.add_init_script("localStorage.setItem('locale','zh')")
     page = context.new_page()
     page.on('pageerror', lambda error: f.page_errors.append(str(error)))
@@ -97,14 +144,60 @@ with tempfile.TemporaryDirectory(prefix='provider-cache-', dir=out) as directory
     assert 'OpenAI Images' in protocol.inner_text()
     assert page.locator('input[type=password]').input_value() == ''
     assert f.fingerprint(page) == identity and f.counts['login'] == 1
+    if reference_case:
+        references = page.locator('button[role=switch][aria-label="允许参考图输入"]')
+        assert references.get_attribute('aria-checked') == 'true'
+        references.click()
+        page.locator('form button[type=submit]').click()
+        page.wait_for_timeout(700)
+        assert len(writes) == 3
+        assert writes[-1]['config']['images_api'] == {'protocol': 'openai-images', 'edits': False}
+        page.reload(wait_until='domcontentloaded')
+        references.wait_for()
+        assert references.get_attribute('aria-checked') == 'false'
+        page.locator('form input[type=text]').first.fill('Repeated Synthetic Save')
+        page.locator('form button[type=submit]').click()
+        page.wait_for_timeout(700)
+        assert len(writes) == 4 and 'images_api' not in writes[-1].get('config', {})
+        assert 'api_key' not in writes[-1].get('config', {})
+        references.click()
+        page.locator('form button[type=submit]').click()
+        page.wait_for_timeout(700)
+        assert len(writes) == 5
+        assert writes[-1]['config']['images_api'] == {'protocol': 'openai-images', 'edits': True}
+        page.reload(wait_until='domcontentloaded')
+        references.wait_for()
+        assert references.get_attribute('aria-checked') == 'true'
+        assert page.locator('input[type=password]').input_value() == ''
+        assert f.fingerprint(page) == identity and f.counts['login'] == 1
     page.evaluate("document.querySelector('#app').__vue_app__.config.globalProperties.$pinia._s.get('settings').theme='dark'")
     page.wait_for_function("document.documentElement.classList.contains('dark')")
     page.wait_for_timeout(2000)  # Let the existing theme transition finish before capture.
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.screenshot(path=str(out / 'provider-current.png'))
+    if image_case:
+        page.goto(f.base + '/#/', wait_until='domcontentloaded')
+        f.wait_chat(page)
+        page.wait_for_function("document.querySelector('#app').__vue_app__.config.globalProperties.$pinia._s.has('workspace-tabs')")
+        page.evaluate("id=>document.querySelector('#app').__vue_app__.config.globalProperties.$pinia._s.get('workspace-tabs').openSessionChat({sessionId:id,title:'Synthetic image references'})", session_id)
+        page.wait_for_function("document.querySelectorAll('.tool-header-row').length === 3")
+        for row in page.locator('.tool-header-row').all():
+            row.click()
+        page.get_by_text('图片附件已返回当前对话。', exact=True).wait_for()
+        page.get_by_text('图像结果尚未确认，请勿自动重新生成。', exact=True).wait_for()
+        page.get_by_text('已返回图像数据，但文件保存尚未确认。请勿通过重新生成来重试交付。', exact=True).wait_for()
+        assert 'a' * 64 in page.locator('body').inner_text()
+        assert 'b' * 64 not in page.locator('body').inner_text()
+        assert not any('/media/' in event['path'] for event in f.api_events)
+        assert not any(event['method'] == 'POST' and event['path'] != '/auth/login' for event in f.api_events)
+        page.wait_for_timeout(350)
+        assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        page.screenshot(path=str(out / 'image-tool-references.png'))
     result = {'refreshFailureCase': failure_case, 'ordinarySaveOmitsKeyAndImages': True,
               'explicitImagesPreservesPolicies': True, 'quickReloadRetainsChoice': True,
               'diskCacheStripsKey': True, 'loginCalls': f.counts['login'], 'loginRetained': True,
+              'referenceToggleRepeatedSaveReload': reference_case,
+              'realChatImageReferenceStatesNoMediaGuessOrRegeneration': image_case,
               'pageErrors': f.page_errors, 'nativeDevice': False, 'liveAPI': False}
     (out / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps(result), flush=True)

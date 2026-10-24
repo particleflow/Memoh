@@ -6,7 +6,7 @@ source commit and native source fingerprint. Reproduction instructions:
 https://github.com/particleflow/Memoh/blob/recovery/harmony-source-20261023/mobile/BUILD-REPRODUCTION.md
 
 Memoh shared Web/SDK source:
-https://github.com/particleflow/Memoh/tree/9e6c47076bc507e0555002b73d3567297d914939
+https://github.com/particleflow/Memoh/tree/51b19cbeb76e9803eb8d4b614cfabb03ef18cc73
 Original upstream: https://github.com/felinics/Memoh
 The upstream root AGPL-3.0 text is preserved in memoh.txt. The root package.json
 also contains an ISC field; this notice does not replace or resolve those terms.
