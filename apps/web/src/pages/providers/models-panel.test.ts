@@ -11,6 +11,8 @@ const mocks = vi.hoisted(() => ({
   templatesLoading: undefined as unknown as Ref<boolean>,
   route: { query: {} as Record<string, string> },
   replace: vi.fn(),
+  realQueries: false,
+  fetchProviders: vi.fn(),
 }))
 
 vi.mock('vue-router', () => ({
@@ -18,7 +20,8 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ replace: mocks.replace }),
 }))
 
-vi.mock('@pinia/colada', async () => {
+vi.mock('@pinia/colada', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@pinia/colada')>()
   const { ref } = await import('vue')
   mocks.providerData = ref()
   mocks.providersLoading = ref(false)
@@ -26,7 +29,10 @@ vi.mock('@pinia/colada', async () => {
   mocks.templateData = ref()
   mocks.templatesLoading = ref(false)
   return {
-    useQuery: ({ key }: { key: () => string[] }) => {
+    ...actual,
+    useQuery: (options: { key: () => string[], query: () => Promise<unknown> }) => {
+      if (mocks.realQueries) return actual.useQuery(options)
+      const { key } = options
       if (key()[0] === 'providers') return { data: mocks.providerData, isLoading: mocks.providersLoading }
       if (key()[0] === 'provider-templates') return { data: mocks.templateData, isLoading: mocks.templatesLoading }
       return { data: mocks.modelData, isLoading: ref(false) }
@@ -36,7 +42,7 @@ vi.mock('@pinia/colada', async () => {
 
 vi.mock('@memohai/sdk', () => ({
   getModels: vi.fn(),
-  getProviders: vi.fn(),
+  getProviders: mocks.fetchProviders,
   getProviderTemplates: vi.fn(),
 }))
 
@@ -143,6 +149,7 @@ async function mountPage() {
   const root = document.createElement('div')
   document.body.append(root)
   // The container page owns the search box; the panel only receives its query.
+  // eslint-disable-next-line vue/one-component-per-file -- Existing route-state test mount.
   const app = createApp(ModelsPanel, { searchQuery: '' })
   app.mount(root)
   await nextTick()
@@ -161,12 +168,76 @@ describe('models panel route state', () => {
     mocks.modelData.value = []
     mocks.templateData.value = []
     mocks.templatesLoading.value = false
+    mocks.realQueries = false
+    mocks.fetchProviders.mockReset()
     mocks.route.query = {}
     mocks.replace.mockReset()
   })
 
   afterEach(() => {
     document.body.innerHTML = ''
+  })
+
+  it.each(['success', 'failure', 'missing-key'] as const)('refreshes a fresh sanitized snapshot on mount (%s)', async (outcome) => {
+    mocks.realQueries = true
+    mocks.route.query = { provider: 'provider-one' }
+    const { createPinia } = await import('pinia')
+    const { hydrateQueryCache, PiniaColada, useQueryCache } = await import('@pinia/colada')
+    const { QUERY_CACHE_STORAGE_KEY, saveQueryCacheToDiskNow } = await import('@/lib/query-cache-persistence')
+    const { getModels, getProviderTemplates } = await import('@memohai/sdk')
+    vi.mocked(getModels).mockResolvedValue({ data: [] } as never)
+    vi.mocked(getProviderTemplates).mockResolvedValue({ data: [] } as never)
+    const fresh = { id: 'provider-one', name: 'Fresh provider', client_type: 'openai-completions', config: { api_key: 'synthetic********' } }
+    const seed = createPinia()
+    // eslint-disable-next-line vue/one-component-per-file -- Independent cache owner before reload.
+    const seedApp = createApp({ render: () => null }).use(seed).use(PiniaColada)
+    const seedCache = seedApp.runWithContext(() => useQueryCache())
+    seedCache.setQueryData(['providers'], [{ ...fresh, name: 'Cached provider' }])
+    const values = new Map<string, string>()
+    const storage: Storage = {
+      get length() { return values.size },
+      clear: () => values.clear(),
+      key: (index: number) => [...values.keys()][index] ?? null,
+      removeItem: (key: string) => { values.delete(key) },
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { values.set(key, value) },
+    }
+    saveQueryCacheToDiskNow(seedCache, storage)
+    const disk = storage.getItem(QUERY_CACHE_STORAGE_KEY)!
+    expect(disk).not.toContain('api_key')
+    expect(disk).not.toContain('synthetic********')
+
+    let resolve!: (value: unknown) => void
+    let reject!: (reason: Error) => void
+    mocks.fetchProviders.mockImplementation(() => new Promise((yes, no) => { resolve = yes; reject = no }))
+    const root = document.createElement('div')
+    document.body.append(root)
+    const pinia = createPinia()
+    // Freshness is intentionally long: the mount must refresh, not wait for age.
+    // eslint-disable-next-line vue/one-component-per-file -- New app restores the serialized cache.
+    const app = createApp(ModelsPanel, { searchQuery: '' }).use(pinia).use(PiniaColada, { queryOptions: { staleTime: Infinity } })
+    const cache = app.runWithContext(() => useQueryCache())
+    hydrateQueryCache(cache, JSON.parse(disk))
+    app.mount(root)
+    try {
+      await vi.waitFor(() => expect(mocks.fetchProviders).toHaveBeenCalledOnce())
+      expect(root.textContent).toContain('Cached provider')
+      expect(cache.getQueryData<typeof fresh[]>(['providers'])?.[0]?.config).not.toHaveProperty('api_key')
+      if (outcome === 'failure') reject(new Error('Synthetic catalog unavailable'))
+      else resolve({ data: [outcome === 'success' ? fresh : { ...fresh, config: {} }] })
+      await vi.waitFor(() => expect(cache.getEntries({ key: ['providers'] })[0]?.asyncStatus.value).toBe('idle'))
+      if (outcome === 'success') {
+        expect(root.textContent).toContain('Fresh provider')
+        expect(cache.getQueryData<typeof fresh[]>(['providers'])?.[0]?.config.api_key).toBe('synthetic********')
+      } else {
+        expect(cache.getQueryData<typeof fresh[]>(['providers'])?.[0]?.config).not.toHaveProperty('api_key')
+      }
+      saveQueryCacheToDiskNow(cache, storage)
+      expect(storage.getItem(QUERY_CACHE_STORAGE_KEY) ?? '').not.toContain('api_key')
+      expect(mocks.fetchProviders).toHaveBeenCalledOnce()
+    } finally {
+      app.unmount()
+    }
   })
 
   it.each(['providers', 'templates'] as const)('keeps cached cards mounted while %s refresh', async (source) => {

@@ -1,0 +1,188 @@
+=== RUN   TestSessionTaskNativeHTTPAuthorityAndStrictInput
+--- PASS: TestSessionTaskNativeHTTPAuthorityAndStrictInput (0.00s)
+=== RUN   TestSessionTaskObservationHTTPHostBindingAndLateRevocation
+--- PASS: TestSessionTaskObservationHTTPHostBindingAndLateRevocation (0.00s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/anonymous
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/malformed
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/bad_signature
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/expired
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/revoked
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/anonymous (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/malformed (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/bad_signature (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/expired (0.00s)
+    --- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/revoked (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.026s
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/same_intent_same_revision
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/different_intents_same_revision
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_task_same_revision
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_mode_same_revision
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_accepted
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_rejected_still_consumes_capacity
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity (0.04s)
+    --- PASS: TestNativeFollowupSameRevisionCASAndCapacity/same_intent_same_revision (0.01s)
+    --- PASS: TestNativeFollowupSameRevisionCASAndCapacity/different_intents_same_revision (0.01s)
+    --- PASS: TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_task_same_revision (0.00s)
+    --- PASS: TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_mode_same_revision (0.00s)
+    --- PASS: TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_accepted (0.01s)
+    --- PASS: TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_rejected_still_consumes_capacity (0.01s)
+=== RUN   TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate
+=== RUN   TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/native
+=== RUN   TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/batch
+--- PASS: TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate (0.03s)
+    --- PASS: TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/native (0.01s)
+    --- PASS: TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/batch (0.02s)
+=== RUN   TestNativeFollowupReusesAgentAndRetainsOperationHistory
+--- PASS: TestNativeFollowupReusesAgentAndRetainsOperationHistory (0.02s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/bound_match
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/bound_changed
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/bound_missing
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/legacy_bound
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/current_changed
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/current_missing
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/legacy_current
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/no_extension
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume (0.05s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/bound_match (0.01s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/bound_changed (0.01s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/bound_missing (0.01s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/legacy_bound (0.01s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/current_changed (0.01s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/current_missing (0.01s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/legacy_current (0.00s)
+    --- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/no_extension (0.01s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/lost
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/partial
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/malformed
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/session_during_prompt
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/metadata_lost_during_prompt
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/reference_during_prompt
+--- PASS: TestNativeFollowupUnknownNeverRedispatches (0.05s)
+    --- PASS: TestNativeFollowupUnknownNeverRedispatches/lost (0.01s)
+    --- PASS: TestNativeFollowupUnknownNeverRedispatches/partial (0.01s)
+    --- PASS: TestNativeFollowupUnknownNeverRedispatches/malformed (0.01s)
+    --- PASS: TestNativeFollowupUnknownNeverRedispatches/session_during_prompt (0.01s)
+    --- PASS: TestNativeFollowupUnknownNeverRedispatches/metadata_lost_during_prompt (0.01s)
+    --- PASS: TestNativeFollowupUnknownNeverRedispatches/reference_during_prompt (0.01s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/missing
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/replaced
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/blocked
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/starting
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/wrong_session
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/rejected
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput (0.05s)
+    --- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/missing (0.01s)
+    --- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/replaced (0.01s)
+    --- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/blocked (0.01s)
+    --- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/starting (0.01s)
+    --- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/wrong_session (0.01s)
+    --- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/rejected (0.01s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/reservation_lost
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_save_failed
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost_unsettled
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_save_failed
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_response_lost
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput (0.05s)
+    --- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/reservation_lost (0.01s)
+    --- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_save_failed (0.01s)
+    --- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost (0.01s)
+    --- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost_unsettled (0.01s)
+    --- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_save_failed (0.01s)
+    --- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_response_lost (0.02s)
+=== RUN   TestNativeFollowupConcurrentRequestsHaveOneDispatchOwner
+--- PASS: TestNativeFollowupConcurrentRequestsHaveOneDispatchOwner (0.00s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority
+=== RUN   TestNativeFollowupRechecksExistingAuthority/none
+=== RUN   TestNativeFollowupRechecksExistingAuthority/nas
+=== RUN   TestNativeFollowupRechecksExistingAuthority/user
+=== RUN   TestNativeFollowupRechecksExistingAuthority/bot
+=== RUN   TestNativeFollowupRechecksExistingAuthority/session
+=== RUN   TestNativeFollowupRechecksExistingAuthority/selected_pc
+=== RUN   TestNativeFollowupRechecksExistingAuthority/revoked
+=== RUN   TestNativeFollowupRechecksExistingAuthority/grant_removed
+=== RUN   TestNativeFollowupRechecksExistingAuthority/registration
+=== RUN   TestNativeFollowupRechecksExistingAuthority/public
+=== RUN   TestNativeFollowupRechecksExistingAuthority/idle
+=== RUN   TestNativeFollowupRechecksExistingAuthority/expired
+=== RUN   TestNativeFollowupRechecksExistingAuthority/forged_target
+=== RUN   TestNativeFollowupRechecksExistingAuthority/policy
+--- PASS: TestNativeFollowupRechecksExistingAuthority (0.05s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/none (0.01s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/nas (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/user (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/bot (0.01s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/session (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/selected_pc (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/revoked (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/grant_removed (0.01s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/registration (0.01s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/public (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/idle (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/expired (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/forged_target (0.00s)
+    --- PASS: TestNativeFollowupRechecksExistingAuthority/policy (0.00s)
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_get
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/policy_after_get
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_get
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_prompt
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_prompt
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch (0.03s)
+    --- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_get (0.01s)
+    --- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/policy_after_get (0.00s)
+    --- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_get (0.01s)
+    --- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_prompt (0.01s)
+    --- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_prompt (0.01s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/batch
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/initial_unknown
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/cancel
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/limit
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/missing_mode
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_id
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_session
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput (0.05s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/batch (0.01s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/initial_unknown (0.01s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/cancel (0.01s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/limit (0.01s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/missing_mode (0.01s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_id (0.01s)
+    --- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_session (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/none
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/nas
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/user
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/bot
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/session
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/selected_pc
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/revoked
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/grant_removed
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/registration_session
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant (0.02s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/none (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/nas (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/user (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/bot (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/session (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/selected_pc (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/revoked (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/grant_removed (0.00s)
+    --- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/registration_session (0.00s)
+=== RUN   TestNativeContentReadOnlyBoundedAndRevocation
+--- PASS: TestNativeContentReadOnlyBoundedAndRevocation (0.01s)
+=== RUN   TestNativeViewFollowupKeepsOperationRunAndUnknownDedup
+--- PASS: TestNativeViewFollowupKeepsOperationRunAndUnknownDedup (0.00s)
+=== RUN   TestNativeContentBatchUnsupportedWithoutRemoteIO
+--- PASS: TestNativeContentBatchUnsupportedWithoutRemoteIO (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	0.480s

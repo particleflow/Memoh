@@ -1121,6 +1121,71 @@
           "failed": "交付失败",
           "unknown": "交付状态未知"
         }
+      },
+      "observation": {
+        "title": "当前电脑观察",
+        "description": "仅在此任务可见时轮询原生元数据。观察结果不证明任务完成、历史恢复或实时输出。",
+        "unsupported": "此服务器尚不支持电脑观察。",
+        "loadFailed": "无法读取电脑观察。",
+        "agentState": "原生 Agent：{state}",
+        "receivedAt": "最近收到响应：{time}",
+        "availability": {
+          "online": "电脑连接可用",
+          "offline": "电脑明确报告离线",
+          "authentication_unavailable": "电脑连接认证不可用",
+          "runtime_unavailable": "Herdr 不可用",
+          "connection_unavailable": "电脑连接不可用",
+          "unknown": "电脑连接状态未知"
+        },
+        "states": {
+          "working": "工作中",
+          "idle": "空闲",
+          "blocked": "等待／受阻",
+          "done": "原生状态已结束（任务成果未核实）",
+          "unknown": "未知"
+        },
+        "match": {
+          "observed": "本次观察匹配到原任务引用。",
+          "mismatch": "原终端身份已变化，追踪尚未确认；未重新派发任务。",
+          "unknown": "尚无法确认原任务引用。"
+        },
+        "fields": {
+          "target_id": "电脑目标",
+          "workspace_id": "Herdr 工作区",
+          "pane_id": "执行窗格",
+          "pi_session_id": "已记录 Pi 会话"
+        },
+        "refresh": "刷新电脑观察"
+      },
+      "native": {
+        "title": "原生 Agent 内容与续接",
+        "notice": "这是有界、未验证的终端样本，可能含工具输出；不是完整日志，也不证明本条指令成功。",
+        "open": "查看终端样本",
+        "unsupported": "此服务器尚不支持原生任务内容。",
+        "failed": "未能取得内容或指令状态。再次发送前请先核对原请求。",
+        "batch": "此任务不是原生交互 Agent；这里不支持批处理 Pi 续接。",
+        "truncated": "已截短",
+        "bounded": "仅近期样本",
+        "empty": "尚无终端文本。",
+        "sequence": "原生完成序号：{sequence}（不是逐指令结果）",
+        "unavailable": "原 Agent 当前不可用；不会把旧样本显示为当前内容。",
+        "refresh": "刷新内容与请求状态",
+        "pending": "指令结果尚未确认。保留请求 {id}，不会发送新指令。",
+        "mode": "会话选择",
+        "bound": "要求匹配已观测的逻辑会话",
+        "current": "使用当前关联的 Agent",
+        "modeNotice": "当前 Agent 模式不要求逻辑会话连续；两种模式均不保证原子身份绑定或恢复历史。",
+        "instruction": "新指令",
+        "invalid": "请输入不含 NUL、UTF-8 编码不超过 32,000 字节的指令。",
+        "send": "发送一条指令",
+        "results": {
+          "accepted": "输入已接受；工作完成及输出归属仍未验证。",
+          "rejected": "输入被拒绝；原任务结果保持不变。",
+          "unsupported": "此任务不支持续接。",
+          "blocked": "此前尚未确认的指令阻止了本次请求。",
+          "conflict": "此请求 ID 已用于其他指令。",
+          "unknown": "输入是否送达未知。请核对同一请求，不要换新 ID 重发。"
+        }
       }
     },
     "uploadingAttachments": "正在上传附件…",
@@ -1582,7 +1647,12 @@
         "noContent": "无内容",
         "contentTruncated": "预览已截断，完整写入大小：{bytes} 字节。",
         "noTasks": "暂无任务",
-        "noImage": "暂无图像",
+        "noImage": "未返回图片预览或文件引用。",
+        "imageReference": "文件引用",
+        "imageSaved": "图像已保存。",
+        "imageReturned": "图片附件已返回当前对话。",
+        "imageUnconfirmed": "图像结果尚未确认，请勿自动重新生成。",
+        "imageStorageUnconfirmed": "已返回图像数据，但文件保存尚未确认。请勿通过重新生成来重试交付。",
         "noResults": "暂无结果",
         "noPreview": "暂无预览",
         "noContacts": "暂无联系人",
@@ -2089,6 +2159,12 @@
     "iconPlaceholder": "图标 URL 或标识（可选）",
     "enable": "启用",
     "enableHint": "只有启用的供应商的模型才会出现在可用模型列表中",
+    "imageReferences": {
+      "label": "允许参考图输入",
+      "description": "允许使用当前 Bot 有权访问的 1–4 张图片引用。仅在服务商支持 OpenAI Images 参考图请求时开启。",
+      "protocolRequired": "请先选择 OpenAI Images 协议，再允许参考图输入。",
+      "legacyPolicy": "当前图片策略需要迁移后才能开启参考图输入，已有模型和编码设置保持不变。"
+    },
     "imagesProtocol": {
       "label": "图片生成协议",
       "description": "使用 Bot 已配置的图片模型，保留其他已保存的图片选项。",

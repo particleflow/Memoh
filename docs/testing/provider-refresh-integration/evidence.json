@@ -1,0 +1,57 @@
+{
+  "product_head": "6c3de5e9ea1b2fcba07cc82fcf8879045a764f67",
+  "checks": [
+    {
+      "file": "ui.txt",
+      "exit_code": 0,
+      "original_sha256": "2b0a9dafbc87f9b16201d7799ffa398ea5a0a2ee2037c844a3e42eedbe577523",
+      "published_sha256": "27b15ed18aec7e643519c604576470cc00850fb393da61635f87da5beae2782f",
+      "bytes": 312,
+      "normalization": [
+        "local repository path normalized"
+      ]
+    },
+    {
+      "file": "types.txt",
+      "exit_code": 0,
+      "original_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "published_sha256": "1d2837098ea0f9a4d8ee73d52e7cc1dba8e59720f8adc921c7d9d097f45fea5e",
+      "bytes": 96,
+      "normalization": [
+        "local repository path normalized"
+      ]
+    },
+    {
+      "file": "lint.txt",
+      "exit_code": 0,
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "published_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "normalization": []
+    },
+    {
+      "file": "browser.txt",
+      "exit_code": 0,
+      "original_sha256": "0b060682e5d13b5869a40626ab5403d5c5ce7a553be3e685e57b1fd452598790",
+      "published_sha256": "0b060682e5d13b5869a40626ab5403d5c5ce7a553be3e685e57b1fd452598790",
+      "bytes": 365,
+      "normalization": []
+    },
+    {
+      "file": "build.txt",
+      "exit_code": 0,
+      "original_sha256": "69a575c93797131d33ebcc7f58e9c4e1d82d24e4e5be3bc53531a79b61afba42",
+      "published_sha256": "9c956cccca8ca45a1c4127bfab97bfe0d4fa0b0f815a86ef489f3dbecc30c687",
+      "bytes": 1502,
+      "normalization": [
+        "last 18 lines; full original log retained locally"
+      ]
+    }
+  ],
+  "screenshot": {
+    "file": "quick-refresh-saved.png",
+    "sha256": "ef98e49f552a0b1560f1f096ec8b9dc109d815dfea73849c316b5bce91468fd4",
+    "bytes": 92726,
+    "data": "synthetic Provider only; inspected"
+  }
+}

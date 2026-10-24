@@ -1,0 +1,57 @@
+[
+  {
+    "local_log": "go-http.log",
+    "bytes": 226,
+    "sha256": "00f80b933ec732b5aba3eda879ff4f7e4a120841a28349b66a8d4641fc380a75"
+  },
+  {
+    "local_log": "go-http-final.log",
+    "bytes": 1800,
+    "sha256": "fbb906dbacd2fbf5a8b1b9e0a03087c9028cca7fcdbcc2a25297dccff4ba4bd4"
+  },
+  {
+    "local_log": "ui-final.log",
+    "bytes": 1370,
+    "sha256": "a46f6996a453ebf3c0c30def4f96b9cdb5ca5544938f4cc2adada01483872a53"
+  },
+  {
+    "local_log": "ui-confirm.log",
+    "bytes": 2255,
+    "sha256": "85ba7d672377611dacf5b0b3862412b2bda2bcfeb15f36e08c5b88086d479b45"
+  },
+  {
+    "local_log": "typecheck-final.log",
+    "bytes": 586,
+    "sha256": "6b9a05ba65aed1430a47e4175cb81343350d56b4150aa847b627cc7611ff3b90"
+  },
+  {
+    "local_log": "mcp-fixture.log",
+    "bytes": 669,
+    "sha256": "4aca0075fde8a0ceba250d31316f5d47ed3797a2e1f8f536a70bcc2ccead6adb"
+  },
+  {
+    "local_log": "mcp-fixture-final.log",
+    "bytes": 576,
+    "sha256": "35daa157bb52dca5af9daa269541dd5ccb48a4c7d8b4ce451b898ead38007870"
+  },
+  {
+    "local_log": "initial-browser.log",
+    "bytes": 677,
+    "sha256": "e683233e3bacbd22250f8801a4882422d76a595f97c81281d43eebaa16fd5a23"
+  },
+  {
+    "local_log": "go-lint.log",
+    "bytes": 164,
+    "sha256": "4d31dbd42ed27354402950b28c08c63717b3a52e3c730eae885ed12bf21b05ad"
+  },
+  {
+    "local_log": "go-lint-task-cache.log",
+    "bytes": 125,
+    "sha256": "54200a0fc1fb494437092b4facda4f521027a0ec27fce4315b6a2e85ae9339e6"
+  },
+  {
+    "local_log": "loader-list.err",
+    "bytes": 6398,
+    "sha256": "b0b74fcdf6725dbc8572b369db4472e3095c035cb537031557bfe0e2f0745760"
+  }
+]

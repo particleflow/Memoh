@@ -2,6 +2,9 @@
 import { computed, inject, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import NativeTaskContent from './native-task-content.vue'
+import type { NativeTaskView } from '../composables/useNativeTask'
+import type { ComputerTaskObservationView } from '../composables/useComputerTaskObservation'
 import type { ComputerTaskDeliveryView } from '../composables/useComputerTaskDeliveries'
 import AttachmentBlock from './attachment-block.vue'
 import MediaGalleryLightbox, { type MediaGalleryItem } from './media-gallery-lightbox.vue'
@@ -22,6 +25,8 @@ const props = defineProps<{
   loading: boolean
   error?: unknown
   deliveries?: ComputerTaskDeliveryView
+  observation?: ComputerTaskObservationView
+  nativeTask?: NativeTaskView
 }>()
 const emit = defineEmits<{
   openTask: [task: SessiontaskTask]
@@ -29,7 +34,7 @@ const emit = defineEmits<{
   refresh: []
   assetOpened: []
 }>()
-const { t } = useI18n()
+const { t, te } = useI18n()
 // Use the same attachment resolver, preview host and browser download as chat.
 // No task credential or per-file preflight: native media rechecks Bot access.
 const preview = inject(openAssetPreviewKey, undefined)
@@ -63,6 +68,11 @@ watch(mediaItems, (items, previous) => {
 })
 
 const errorMessage = computed(() => readError(props.error, 'chat.tasks.unsupported', 'chat.tasks.loadFailed'))
+const observationError = computed(() => readError(props.observation?.error, 'chat.tasks.observation.unsupported', 'chat.tasks.observation.loadFailed'))
+function nativeLabel(group: string, value?: string) {
+  const key = `chat.tasks.observation.${group}.${value ?? 'unknown'}`
+  return te(key) ? t(key) : t(`chat.tasks.observation.${group}.unknown`)
+}
 const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.unsupported', 'chat.tasks.files.loadFailed'))
 function readError(error: unknown, unsupported: string, fallback: string) {
   const code = parseMemohError(error)?.code
@@ -121,6 +131,66 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.cancelIntent') }}
         </p>
       </div>
+      <NativeTaskContent
+        v-if="detail.task_type === 'computer_operation' && nativeTask"
+        :view="nativeTask"
+        :operation-id="detail.task_id"
+      />
+      <section
+        v-if="detail.task_type === 'computer_operation' && observation"
+        class="space-y-2"
+        :aria-label="t('chat.tasks.observation.title')"
+      >
+        <h3 class="text-label font-medium">
+          {{ t('chat.tasks.observation.title') }}
+        </h3>
+        <p class="text-body text-muted-foreground">
+          {{ t('chat.tasks.observation.description') }}
+        </p>
+        <p
+          v-if="observation.error"
+          class="text-body"
+        >
+          {{ observationError }}
+        </p>
+        <InlineLoadingRow v-else-if="observation.loading && !observation.data">
+          {{ t('common.loading') }}
+        </InlineLoadingRow>
+        <template v-else-if="observation.data">
+          <p class="text-body">
+            {{ nativeLabel('availability', observation.data.native?.availability) }}
+          </p>
+          <p class="text-body">
+            {{ t('chat.tasks.observation.agentState', { state: nativeLabel('states', observation.data.native?.agent_status) }) }}
+          </p>
+          <p class="text-body text-muted-foreground">
+            {{ nativeLabel('match', observation.data.native?.reference_match) }}
+          </p>
+          <dl class="space-y-1 text-body break-all">
+            <div
+              v-for="field in ['target_id', 'workspace_id', 'pane_id', 'pi_session_id'] as const"
+              :key="field"
+            >
+              <template v-if="observation.data[field]">
+                <dt class="text-muted-foreground">
+                  {{ t(`chat.tasks.observation.fields.${field}`) }}
+                </dt>
+                <dd>{{ observation.data[field] }}</dd>
+              </template>
+            </div>
+          </dl>
+          <p class="text-body text-muted-foreground">
+            {{ t('chat.tasks.observation.receivedAt', { time: observation.receivedAt }) }}
+          </p>
+        </template>
+        <Button
+          variant="outline"
+          :disabled="observation.loading"
+          @click="observation.refresh()"
+        >
+          {{ t('chat.tasks.observation.refresh') }}
+        </Button>
+      </section>
       <p
         v-if="detail.task_type === 'subagent'"
         class="text-body text-muted-foreground"

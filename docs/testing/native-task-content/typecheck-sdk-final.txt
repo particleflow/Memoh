@@ -1,0 +1,3 @@
+
+> @memohai/sdk@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/packages/sdk
+> tsc --noEmit -p tsconfig.json

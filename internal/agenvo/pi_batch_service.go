@@ -142,24 +142,32 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 
 // ObserveBatch never types into Pi, including after timeout or cancellation.
 func (s *Service) ObserveBatch(ctx context.Context, scope Scope, p BatchProgress) (*BatchReceipt, error) {
+	return s.ObserveBatchWithReader(ctx, scope, p, nil)
+}
+
+// ObserveBatchWithReader keeps receipt validation bound to original execution,
+// while an optional durable reader supplies only the immutable file channel.
+func (s *Service) ObserveBatchWithReader(ctx context.Context, scope Scope, p BatchProgress, reader *BatchRecoveryReader) (*BatchReceipt, error) {
 	if !p.valid() || p.PaneID == "" || p.TerminalID == "" {
 		return nil, ErrUnknown
 	}
-	c, target, err := s.Client(ctx, scope)
-	if err != nil {
-		return nil, err
-	}
-	text, err := c.readBatchPane(ctx, scope, target, p.PaneID, 20)
-	if err != nil && !errors.Is(err, errBatchSnapshotTooLarge) {
-		return nil, err
-	}
-	receipt, err := parseBatchReceipt(text, p)
-	if err != nil || receipt != nil {
-		return receipt, err
+	if reader == nil {
+		c, target, err := s.Client(ctx, scope)
+		if err != nil {
+			return nil, err
+		}
+		text, err := c.readBatchPane(ctx, scope, target, p.PaneID, 20)
+		if err != nil && !errors.Is(err, errBatchSnapshotTooLarge) {
+			return nil, err
+		}
+		receipt, err := parseBatchReceipt(text, p)
+		if err != nil || receipt != nil {
+			return receipt, err
+		}
 	}
 	// A terminal snapshot may have lost the frame. Read the immutable receipt
 	// through the separate control pane; never type a status query into Pi.
-	raw, err := s.readBatchFile(ctx, scope, p, "receipt.json", 0, batchReceiptBytes)
+	raw, err := s.readBatchFileWithReader(ctx, scope, p, reader, "receipt.json", 0, batchReceiptBytes)
 	if err != nil || len(raw) == 0 {
 		return nil, err
 	}
@@ -185,12 +193,17 @@ var errBatchSnapshotTooLarge = errors.New("batch observation exceeds connector r
 // Metadata checks detect a changed pane but cannot provide Herdr's missing
 // atomic expected-generation operation; no native restart/close safety is claimed.
 func (s *Service) ReadBatchPage(ctx context.Context, scope Scope, p BatchProgress, receipt BatchReceipt, file BatchFile, offset int64) ([]byte, error) {
+	return s.ReadBatchPageWithReader(ctx, scope, p, nil, receipt, file, offset)
+}
+
+// ReadBatchPageWithReader never substitutes reader identity into the receipt.
+func (s *Service) ReadBatchPageWithReader(ctx context.Context, scope Scope, p BatchProgress, reader *BatchRecoveryReader, receipt BatchReceipt, file BatchFile, offset int64) ([]byte, error) {
 	isCompletion := receipt.Completion != nil && file == *receipt.Completion
 	if receipt.Validate(p) != nil || (file != receipt.Stdout && file != receipt.Stderr && !isCompletion) || offset < 0 || offset >= file.Size || p.ControlPane == "" || p.ControlPane == p.PaneID {
 		return nil, ErrUnsupported
 	}
 	count := min(int64(BatchPageBytes), file.Size-offset)
-	data, err := s.readBatchFile(ctx, scope, p, file.Name, offset, count)
+	data, err := s.readBatchFileWithReader(ctx, scope, p, reader, file.Name, offset, count)
 	if err != nil {
 		return nil, err
 	}
@@ -203,6 +216,10 @@ func (s *Service) ReadBatchPage(ctx context.Context, scope Scope, p BatchProgres
 // readBatchFile issues a bounded, fixed read on the dedicated control shell.
 // An absent receipt is a complete empty response, not evidence of termination.
 func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgress, name string, offset, count int64) ([]byte, error) {
+	return s.readBatchFileWithReader(ctx, scope, p, nil, name, offset, count)
+}
+
+func (s *Service) readBatchFileWithReader(ctx context.Context, scope Scope, p BatchProgress, reader *BatchRecoveryReader, name string, offset, count int64) ([]byte, error) {
 	limit := int64(BatchPageBytes)
 	if name == "receipt.json" {
 		limit = batchReceiptBytes
@@ -212,6 +229,13 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	}
 	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt" && name != "result.json" && name != deliverymeta.ProducerFeedbackName) {
 		return nil, ErrUnsupported
+	}
+	workspace, pane, terminal := p.WorkspaceID, p.ControlPane, p.ControlTerminal
+	if reader != nil {
+		if !reader.valid(p) {
+			return nil, ErrUnknown
+		}
+		workspace, pane, terminal = reader.WorkspaceID, reader.PaneID, reader.TerminalID
 	}
 	c, target, err := s.Client(ctx, scope)
 	if err != nil {
@@ -225,7 +249,7 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 	if err != nil {
 		return nil, err
 	}
-	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
+	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": pane})
 	if err != nil {
 		if errors.Is(err, ErrRejected) {
 			return nil, ErrUnknown
@@ -236,10 +260,16 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 		Type string    `json:"type"`
 		Pane batchPane `json:"pane"`
 	}
-	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != p.ControlPane || info.Pane.Terminal != p.ControlTerminal || info.Pane.Workspace != p.WorkspaceID {
+	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != pane || info.Pane.Workspace != workspace || !batchReaderID(info.Pane.Terminal) {
 		return nil, ErrTargetChanged
 	}
-	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": launchBashScript(script, target.BashPath)})
+	if info.Pane.Terminal != terminal {
+		if reader == nil {
+			return nil, ErrBatchControlChanged
+		}
+		return nil, ErrTargetChanged // never replace a changed recovery reader
+	}
+	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": pane, "command": launchBashScript(script, target.BashPath)})
 	if err != nil {
 		if errors.Is(err, ErrRejected) {
 			return nil, ErrUnknown
@@ -251,7 +281,7 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 		// Do not expand into old history while this response is delayed.
 		// Only this nonce's exact end marker permits growing the snapshot.
 		// Herdr counts rendered rows even for recent-unwrapped.
-		text, err := c.readBatchPane(ctx, scope, target, p.ControlPane, lines)
+		text, err := c.readBatchPane(ctx, scope, target, pane, lines)
 		if errors.Is(err, errBatchSnapshotTooLarge) {
 			// Old terminal history can exceed 64 KiB even for a legal row
 			// count. Narrow only the read; never retype the control command.

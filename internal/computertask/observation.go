@@ -90,7 +90,10 @@ func (s *Service) workspaces(ctx context.Context, b toolcontext.ComputerBinding,
 	return WorkspaceDiscovery{TargetID: id, WorkspaceObservations: observation}, nil
 }
 
-func (s *Service) recover(ctx context.Context, b toolcontext.ComputerBinding, id string) (Recovery, error) {
+// Recover performs the existing read-only native observation for a host-owned
+// binding. HTTP adapters must derive that binding from authenticated ownership,
+// never from client headers or native reference arguments.
+func (s *Service) Recover(ctx context.Context, b toolcontext.ComputerBinding, id string) (Recovery, error) {
 	r, d, err := s.load(ctx, b, id)
 	if err != nil {
 		return Recovery{}, err

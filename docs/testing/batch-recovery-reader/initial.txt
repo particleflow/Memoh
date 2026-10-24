@@ -1,0 +1,15 @@
+# github.com/felinics/memoh/internal/computertask [github.com/felinics/memoh/internal/computertask.test]
+internal/computertask/pi_batch_reader_test.go:107:6: recoveryFixture redeclared in this block
+	internal/computertask/observation_test.go:94:6: other declaration of recoveryFixture
+internal/computertask/pi_batch_reader_test.go:120:24: remote.record undefined (type *observationTransport has no field or method record)
+internal/computertask/pi_batch_reader_test.go:123:12: remote.lost undefined (type *observationTransport has no field or method lost)
+internal/computertask/pi_batch_reader_test.go:125:12: remote.malformed undefined (type *observationTransport has no field or method malformed)
+internal/computertask/pi_batch_reader_test.go:132:12: remote.onCreate undefined (type *observationTransport has no field or method onCreate)
+internal/computertask/pi_batch_reader_test.go:134:20: remote.record undefined (type *observationTransport has no field or method record)
+internal/computertask/pi_batch_reader_test.go:142:86: original.ID undefined (type string has no field or method ID)
+internal/computertask/pi_batch_reader_test.go:146:86: original.ID undefined (type string has no field or method ID)
+internal/computertask/pi_batch_reader_test.go:151:14: remote.creates undefined (type *observationTransport has no field or method creates)
+internal/computertask/pi_batch_reader_test.go:151:40: remote.readerRuns undefined (type *observationTransport has no field or method readerRuns)
+internal/computertask/pi_batch_reader_test.go:151:40: too many errors
+FAIL	github.com/felinics/memoh/internal/computertask [build failed]
+FAIL

@@ -1121,6 +1121,71 @@
           "failed": "Delivery failed",
           "unknown": "Delivery status unknown"
         }
+      },
+      "observation": {
+        "title": "Current computer observation",
+        "description": "Polls native metadata while this task is visible. These observations do not confirm task completion, restored history, or live output.",
+        "unsupported": "This server does not support computer observation yet.",
+        "loadFailed": "Computer observation could not be loaded.",
+        "agentState": "Native Agent: {state}",
+        "receivedAt": "Last response received at {time}",
+        "availability": {
+          "online": "Computer connection available",
+          "offline": "Computer reported offline",
+          "authentication_unavailable": "Computer connection authentication unavailable",
+          "runtime_unavailable": "Herdr unavailable",
+          "connection_unavailable": "Computer connection unavailable",
+          "unknown": "Computer connection unknown"
+        },
+        "states": {
+          "working": "Working",
+          "idle": "Idle",
+          "blocked": "Waiting / blocked",
+          "done": "Native done (task result unverified)",
+          "unknown": "Unknown"
+        },
+        "match": {
+          "observed": "Original task references matched at this observation.",
+          "mismatch": "The original terminal identity changed. Tracking is unconfirmed; the task has not been restarted.",
+          "unknown": "Original task references could not be confirmed."
+        },
+        "fields": {
+          "target_id": "Computer target",
+          "workspace_id": "Herdr workspace",
+          "pane_id": "Execution pane",
+          "pi_session_id": "Recorded Pi session"
+        },
+        "refresh": "Refresh computer"
+      },
+      "native": {
+        "title": "Native Agent content and follow-up",
+        "notice": "This is a bounded, unverified terminal sample. It can include tool output; it is not a full log or proof that this instruction succeeded.",
+        "open": "Open terminal sample",
+        "unsupported": "This server does not support native task content yet.",
+        "failed": "Content or instruction status could not be retrieved. Check the existing request before sending again.",
+        "batch": "This task is not an interactive native Agent. Batch Pi continuation is unavailable here.",
+        "truncated": "Truncated",
+        "bounded": "Recent sample only",
+        "empty": "No terminal text returned.",
+        "sequence": "Native completion sequence: {sequence} (not a per-instruction result)",
+        "unavailable": "The original Agent is currently unavailable; no old sample is presented as current.",
+        "refresh": "Refresh content and request status",
+        "pending": "Instruction outcome remains unresolved. Request {id} is retained; no new instruction will be sent.",
+        "mode": "Session selection",
+        "bound": "Require the observed logical session",
+        "current": "Use the currently associated Agent",
+        "modeNotice": "Current Agent mode does not require logical-session continuity. Neither mode guarantees atomic identity or restores history.",
+        "instruction": "New instruction",
+        "invalid": "Enter an instruction within 32,000 UTF-8 bytes, without NUL.",
+        "send": "Send one instruction",
+        "results": {
+          "accepted": "Input accepted. Work completion and output ownership remain unverified.",
+          "rejected": "Input was rejected; this does not change previous task results.",
+          "unsupported": "Follow-up is not supported for this task.",
+          "blocked": "An earlier unresolved instruction blocks this request.",
+          "conflict": "This request ID belongs to a different instruction.",
+          "unknown": "Input delivery is unknown. Check the same request; do not resend with a new ID."
+        }
       }
     },
     "uploadingAttachments": "Uploading attachments…",
@@ -1570,7 +1635,12 @@
         "noContent": "No content",
         "contentTruncated": "Preview truncated. Full write size: {bytes} bytes.",
         "noTasks": "No tasks",
-        "noImage": "No image",
+        "noImage": "No image preview or file reference was returned.",
+        "imageReference": "File reference",
+        "imageSaved": "Image saved.",
+        "imageReturned": "Image attachment returned to this conversation.",
+        "imageUnconfirmed": "Image result is unconfirmed. Do not automatically generate again.",
+        "imageStorageUnconfirmed": "Image bytes were returned, but file storage is unconfirmed. Do not generate again to retry delivery.",
         "noResults": "No results",
         "noPreview": "No preview",
         "noContacts": "No contacts",
@@ -2089,6 +2159,12 @@
     "iconPlaceholder": "Icon URL or identifier (optional)",
     "enable": "Enable",
     "enableHint": "Only models from enabled providers appear in the available model list",
+    "imageReferences": {
+      "label": "Allow reference images",
+      "description": "Allow 1–4 image references accessible to this Bot. Enable only when the provider supports reference-image requests through OpenAI Images.",
+      "protocolRequired": "Select OpenAI Images before allowing reference images.",
+      "legacyPolicy": "The stored image policy must be migrated before reference images can be enabled. Existing model and encoding settings have been preserved."
+    },
     "imagesProtocol": {
       "label": "Image generation protocol",
       "description": "Uses the Bot's configured image model. Other saved image options are preserved.",

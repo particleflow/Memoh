@@ -384,6 +384,23 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AgenvoAgentObservation = {
+    completion_changed?: boolean;
+    completion_seq?: string;
+    interactive_ready?: boolean;
+    output?: string;
+    output_fidelity?: string;
+    session_relation?: string;
+    starting?: boolean;
+    status?: string;
+    /**
+     * No Herdr status, completion sequence or terminal text independently
+     * proves that the requested work succeeded. No lifecycle hook is assumed.
+     */
+    task_success_verified?: boolean;
+    truncated?: boolean;
+};
+
 export type AgenvoAgentProfile = {
     config_dir?: string;
     /**
@@ -396,12 +413,34 @@ export type AgenvoAgentProfile = {
     provider?: string;
 };
 
+export type AgenvoBatchHistoryEvidence = {
+    file?: string;
+    sha256?: string;
+    size?: number;
+};
+
+export type AgenvoBatchHistoryReport = {
+    after?: string;
+    before?: string;
+    evidence?: AgenvoBatchHistoryEvidence;
+};
+
 export type AgenvoDiscoveredInstance = {
     device_id?: string;
     device_name?: string;
     instance_id?: string;
     name?: string;
     online?: boolean;
+};
+
+export type AgenvoReferenceObservation = {
+    agent_status?: string;
+    availability?: string;
+    control_pane?: string;
+    pane?: string;
+    reason?: string;
+    reference_match?: string;
+    workspace?: string;
 };
 
 export type AgenvoTarget = {
@@ -1179,6 +1218,61 @@ export type ComputertaskDeliveryRequest = {
     mime?: string;
     size_bytes?: number;
     version?: number;
+};
+
+export type ComputertaskFollowupResult = {
+    atomic_identity_guaranteed?: boolean;
+    business_outcome?: string;
+    continuity_verified?: boolean;
+    input_may_have_been_sent?: boolean;
+    mode?: string;
+    prompt_accepted?: boolean;
+    reason?: string;
+    request_id?: string;
+    session_observed?: boolean;
+    session_relation?: string;
+    state?: string;
+    strict_resume_available?: boolean;
+};
+
+export type ComputertaskNativeContent = {
+    availability?: string;
+    followup_available?: boolean;
+    followups?: Array<ComputertaskFollowupResult>;
+    observation?: AgenvoAgentObservation;
+    operation_id?: string;
+    session_binding?: string;
+    supported?: boolean;
+};
+
+export type ComputertaskPiContinuity = {
+    last_invocation?: AgenvoBatchHistoryReport;
+    reason?: string;
+    status?: string;
+};
+
+export type ComputertaskRecovery = {
+    attempt?: string;
+    business_outcome?: string;
+    cancel_requested?: boolean;
+    continuity?: ComputertaskPiContinuity;
+    native?: AgenvoReferenceObservation;
+    operation_id?: string;
+    pane_id?: string;
+    pi_result?: string;
+    pi_session_id?: string;
+    process_state?: string;
+    result_reason?: string;
+    result_summary?: ComputertaskRecoverySummary;
+    state?: string;
+    target_id?: string;
+    workspace_id?: string;
+};
+
+export type ComputertaskRecoverySummary = {
+    source?: string;
+    text?: string;
+    truncated?: boolean;
 };
 
 export type ConnectitAuthMethod = {
@@ -2417,6 +2511,20 @@ export type HandlersModelTokenUsage = {
     model_slug?: string;
     output_tokens?: number;
     provider_name?: string;
+};
+
+export type HandlersNativeTaskFollowupInput = {
+    mode: 'current_agent' | 'bound_session';
+    request_id: string;
+    task: string;
+};
+
+export type HandlersNativeTaskFollowupResponse = {
+    blocked_by_request?: string;
+    followup?: ComputertaskFollowupResult;
+    operation_id?: string;
+    request_conflict?: boolean;
+    state?: string;
 };
 
 export type HandlersPingResponse = {
@@ -13933,6 +14041,60 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses = 
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses];
 
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/content';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponses = {
+    /**
+     * OK
+     */
+    200: ComputertaskNativeContent;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContentResponses];
+
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesData = {
     body?: never;
     path: {
@@ -13995,6 +14157,125 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesRe
 };
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData = {
+    /**
+     * Instruction with retained idempotency ID
+     */
+    body: HandlersNativeTaskFollowupInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupError = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses = {
+    /**
+     * OK
+     */
+    200: HandlersNativeTaskFollowupResponse;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponse = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses = {
+    /**
+     * OK
+     */
+    200: ComputertaskRecovery;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses];
 
 export type DeleteBotsByBotIdSettingsData = {
     body?: never;
