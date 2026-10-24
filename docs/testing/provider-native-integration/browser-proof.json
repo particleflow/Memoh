@@ -1,0 +1,16 @@
+{
+  "realServer": true,
+  "postgres": true,
+  "syntheticProvider": true,
+  "providerModelCalls": 0,
+  "followupPosts": 0,
+  "save": {
+    "http": 200,
+    "unchangedClientType": true,
+    "noCredentialInUpdate": true,
+    "retainedImagePolicies": true
+  },
+  "reload": true,
+  "taskView": false,
+  "errors": []
+}
