@@ -1,0 +1,8 @@
+
+/tmp/memoh-candidate-7bcb-review/docs/testing/upstream-style-cleanup/browser-detail.mjs
+  27:9  error  'parentPath' is assigned a value but never used     @typescript-eslint/no-unused-vars
+  30:9  error  'countChildren' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  32:9  error  'title' is assigned a value but never used          @typescript-eslint/no-unused-vars
+  34:9  error  'missing' is assigned a value but never used        @typescript-eslint/no-unused-vars
+
+✖ 4 problems (4 errors, 0 warnings)

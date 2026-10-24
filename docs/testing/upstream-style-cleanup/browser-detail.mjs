@@ -24,14 +24,10 @@ try {
     const path = new URL(response.url()).pathname
     if (path.startsWith('/api/')) responses.push({ path, method: response.request().method(), status: response.status() })
   })
-  const parentPath = `/api/bots/${state.source}/sessions/${state.session}/delegations/${state.delegation.delegation_id}`
   const childPrefix = `/api/bots/${state.delegation.target_bot_id}/sessions/${state.delegation.target_session_id}/tasks`
   const childPath = `${childPrefix}/${state.task.task_type}/${state.task.task_id}`
-  const countChildren = () => requests.filter(r => r.path.startsWith(childPrefix)).length
   const dialog = page.getByRole('dialog')
-  const title = dialog.getByText('Specialist Bot tasks', { exact: true })
   const text = dialog.getByText('DOWNSTREAM_VISIBLE_FINAL_42', { exact: true })
-  const missing = locator => assert.equal(locator, 0)
   await page.goto('http://127.0.0.1:18102/bot/web-management-supervisor')
   await page.getByText('Web management actual delegation', { exact: true }).first().click()
   await page.getByRole('button', { name: 'Tasks', exact: true }).click()

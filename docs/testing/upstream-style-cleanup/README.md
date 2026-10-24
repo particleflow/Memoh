@@ -71,5 +71,35 @@ input files and this environment's Playwright installation; it is not standalone
 This is source cleanup, not production acceptance or approval to deploy. No main
 merge, image build, tag promotion or NAS/Windows operation was performed. Existing
 production holds remain. There is no further demonstrated removable Images code
-in this change: whether generation interception is redundant still requires the
-upstream path's acceptance; minimal edit support and NAS artifact delivery remain.
+in this change. The upstream chat/SDK path can accept image parts; the separate
+`generate_image` tool's text-only schema does not establish that a reference image
+needs a custom edit extension. PR68/76 necessity remains pending actual
+target-protocol acceptance. No Images behavior or NAS artifact delivery changes.
+
+## Evidence-script lint correction
+
+At head `78541c7954bbc63914426c2cb022d41168002788`, ESLint run
+[40088000489](https://github.com/particleflow/Memoh/actions/runs/40088000489)
+failed its Run ESLint step (job 120854757237); its Test job passed. The log download
+returned Forbidden, so it was not retried or fetched through another route.
+The exact remote diagnostic text is unavailable.
+
+Running ESLint locally on the added browser script reproduced four
+`@typescript-eslint/no-unused-vars` errors: `parentPath`, `countChildren`, `title`,
+and `missing` at the original lines 27, 30, 32 and 34. These declarations were
+left over when the longer reconnect observer was narrowed to a detail read.
+The correction removes only those four unused declarations, preserving every
+interaction and assertion. No product, workflow or lint rule changed.
+
+The [local failure](eslint-fix/local-before.log) is preserved. Full `pnpm lint`
+then [exited 0](eslint-fix/full-lint.log), with zero errors and 20 existing Vue
+test-fixture warnings. The corrected script was rerun against the same current
+server and isolated PG data: [browser output](eslint-fix/browser.log),
+[GET-only proof](eslint-fix/browser-proof.json), and
+[inspected screenshot](eslint-fix/browser-detail.png). No Go tests or builds were
+repeated because this correction has no product diff. Historical test outputs
+above remain unchanged; the manifest reflects the current script and both sets
+of evidence. Remote success is assessed separately on the new pushed head.
+Only surplus EOF blank lines were removed from the three newly published lint-fix
+logs; [provenance](eslint-fix/log-provenance.json) records original and published
+hashes and sizes. The originals remain in the private cloud evidence directory.

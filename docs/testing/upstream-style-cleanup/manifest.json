@@ -40,7 +40,43 @@
     "bytes": 96922
   },
   "browser-detail.mjs": {
-    "sha256": "eb778a0811e4d5cfba7c3c04282645c465214030059692c0e2d2bb33ac54bc3c",
-    "bytes": 3314
+    "sha256": "29ebcf9398e2979aaaf22a67d7f2cc887b5b5f76471ef4336a81f699bae523a9",
+    "bytes": 2975
+  },
+  "eslint-fix/browser-proof.json": {
+    "sha256": "3eeb3c24f956ae757d08d7b1bc8938346453eb3b3edcc2dd2f9db5f857248f32",
+    "bytes": 102
+  },
+  "eslint-fix/browser-detail.png": {
+    "sha256": "8765b0444da304835de1b2fcadf78e329c6435f6a16fc5c02d63e465eb4c04fc",
+    "bytes": 96923
+  },
+  "eslint-fix/browser.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "eslint-fix/browser.log": {
+    "sha256": "c6ffa0c04e9edf349ef133d14ea6403fb3fb759ade960245ee991405c8ba73de",
+    "bytes": 76
+  },
+  "eslint-fix/full-lint.exit": {
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "bytes": 2
+  },
+  "eslint-fix/full-lint.log": {
+    "sha256": "22d5dddf5adf8ea955ec7e43c88847971f0cdb3f41439c78c027b6806ee7fadb",
+    "bytes": 2746
+  },
+  "eslint-fix/local-before.exit": {
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "bytes": 2
+  },
+  "eslint-fix/local-before.log": {
+    "sha256": "70f1a6f04e2ac1dcb26ed8a5c22341514d4526167c1dae668c2b3d35afbb379b",
+    "bytes": 532
+  },
+  "eslint-fix/log-provenance.json": {
+    "sha256": "5064878edbf6436a21bbd8f52227c3eadffb8e85f3ac027e8221e8d7797034fa",
+    "bytes": 1039
   }
 }
