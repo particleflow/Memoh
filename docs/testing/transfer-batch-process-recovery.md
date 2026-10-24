@@ -1,5 +1,65 @@
 # Bounded batch upload process recovery
 
+## CLI trust, original feedback and completed-process reopening
+
+A test-only follow-up starts from restored contract
+`7a20b3af3e92ff3b8c67c10656f71ae29494d028` (production source equals 0f4).
+It extends the existing `TestCLIPathTLSRestartAndLostResponses`; it changes no
+product code, configuration, schema, protocol, Agent or consumer interface.
+The earlier withdrawn extra-declaration experiment and its failed CI remain
+recorded in [the scope correction](transfer-ledger-pages.md).
+
+The existing child test executable invokes the real CLI dispatcher in a fresh
+process for every action. Its only trust injection is an in-process RootCAs
+pool containing the isolated fixture certificate; normal hostname and chain
+validation remain enabled. It is **not** the shipped `transferqueue.exe` or a
+Herdr-host invocation. The NAS side here is an explicit HTTP protocol fixture,
+**not** the real Server/PG fixture described in the later sections.
+
+The follow-up verifies three existing contracts:
+
+1. A certificate trusted for `wrong-host.invalid`, served at the loopback API
+   address, is rejected for hostname mismatch. The trust precondition is
+   independently checked. The CLI stays pending with recorded original-attempt
+   feedback and **zero HTTP requests** reach the handler. No OS trust store,
+   production CA, DNS or TLS-verification setting is changed.
+2. The fixture creates the original single-file `producer-context.json` in the
+   existing private attempt directory, with native private-directory helpers.
+   Enqueue, lost-response recovery and repeated enqueue must return
+   `feedback_status: recorded`. The existing v1 feedback must validate against
+   the exact original Task, PlanHash and delivery ID. It remains advisory:
+   `unknown / awaiting_nas_ledger` after local association is not an independent
+   declaration of authoritative server delivery. Context bytes stay unchanged.
+3. After Complete and Commit responses are lost and recovered, two more rounds
+   of fresh CLI processes run advance, replay the original enqueue, and inspect.
+   Both rounds retain the original task/attempt, durable receipt, committed
+   association and exact reference. Create/Complete/Commit/Resolve stay at one
+   each, PATCH stays at two, and **no additional HTTP request** occurs after
+   completion. The source file is unchanged. This tests transfer tracking;
+   it does not execute Pi or establish Pi-session recovery/business success.
+
+The Windows consumer can reuse the existing action names and v1 JSON unchanged;
+there is no additional-declaration or page-feedback interface to adopt. Receipt
+identity is checked in the durable queue, without exposing it through a new
+CLI field. Existing Native CI and packaged-fixture selection already include
+this test; no workflow or bundle-layout change is needed.
+
+Local Linux check:
+
+```sh
+go test -v -race -count=1 -timeout=90s \
+  -run '^TestCLIPathTLSRestartAndLostResponses$' ./cmd/transferqueue
+```
+
+Result: matching-host 12.77s, wrong-host 3.10s, package 16.885s; no skips.
+[Original output](evidence/transfer-cli-trust-feedback-reopen.txt), SHA-256
+`4d725cc776739dc45b7e571ea1289e84f9c029cad126413707136f5f7257380c`.
+The log contains only synthetic test output and a loopback TLS error, with no
+user secrets or endpoints. Incremental CLI lint against 7a20 exited zero.
+Native Windows CI is tracked separately in PR77; Linux success alone does not
+establish Windows execution, the formal EXE/host path, real NAS or phone routing,
+or physical power-loss durability.
+
 ## Source and retained evidence
 
 Base: `7bcbba5ac85a2ba0769b48ed8d4334db4b7806f7` (includes PR #74).
