@@ -104,7 +104,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	}
 	limits := transferclient.QueueLimits{Jobs: 1, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}
 	status, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(raw), https.Client(), time.Now())
-	if err != nil || !status.Admitted {
+	if err != nil || !status.Registered {
 		t.Fatal("stdin admission", err)
 	}
 	for range 15 {
@@ -140,8 +140,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	if err != nil || !replay.Associated || replay.Job.ReceiptID != status.Job.ReceiptID || creates.Load() != 1 {
 		t.Fatal("replayed producer created new work", err)
 	}
-	// Same installed device credential and original operation, second file. With
-	// Jobs=1 this also requires the first durable association to release capacity.
+	// Same installed device credential and original operation, second file. Jobs=1 limits active processing, not metadata registration.
 	second := closed
 	second.Artifact.SourceRef = "result-two"
 	if err := os.WriteFile(filepath.Join(source, second.Artifact.SourceRef), []byte("synthetic delivery content"), 0o600); err != nil {
@@ -149,7 +148,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	}
 	nextRaw, _ := json.Marshal(second)
 	next, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(nextRaw), https.Client(), time.Now())
-	if err != nil || !next.Admitted {
+	if err != nil || !next.Registered {
 		t.Fatal("second admission", err)
 	}
 	for range 15 {

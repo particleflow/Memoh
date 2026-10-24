@@ -21,7 +21,7 @@ import (
 	"github.com/felinics/memoh/internal/transferclient"
 )
 
-// Admission exceeds the real 64 MiB finite copy budget. Test the real command,
+// Indexing exceeds the real 64 MiB finite read window. Test the real command,
 // durable checkpoint and replay, without network transfer or real credentials.
 func TestProducerAdmissionPendingCanResumeSameDelivery(t *testing.T) {
 	for _, action := range []string{"enqueue-result", "collect-result"} {
@@ -125,21 +125,31 @@ func TestProducerAdmissionPendingCanResumeSameDelivery(t *testing.T) {
 				return q.Inspect(closed.DeliveryID())
 			}
 			pending, err := inspect()
-			if !errors.Is(err, transferclient.ErrAdmissionPending) || pending.Admitted || pending.Job.DeliveryID != closed.DeliveryID() {
+			if err != nil || !pending.Registered || pending.Admitted || pending.Job.DeliveryID != closed.DeliveryID() {
 				t.Fatal("missing durable admission", err)
 			}
 			if action == "collect-result" {
-				if _, err := os.Stat(manifest); err != nil {
-					t.Fatal("pending manifest consumed", err)
+				if _, err := os.Stat(manifest); !errors.Is(err, os.ErrNotExist) {
+					t.Fatal("durably registered manifest not consumed", err)
 				}
 			}
-			if code != 1 || string(status["state"]) != `"pending"` || string(status["error_class"]) != `"transient"` || string(status["feedback_status"]) != `"recorded"` {
-				t.Fatalf("resumable admission reported as unknown: exit=%d state=%s class=%s", code, status["state"], status["error_class"])
+			if code != 0 || string(status["registered"]) != "true" || string(status["feedback_status"]) != `"recorded"` {
+				t.Fatalf("metadata was not acknowledged: exit=%d status=%v", code, status)
+			}
+			if requests.Load() != 0 {
+				t.Fatal("registration/index prefix performed network work")
+			}
+			if action == "enqueue-result" && pending.Activated {
+				t.Fatal("enqueue read source payload")
+			}
+			// Resume through the existing finite host wake, not resubmission/migration.
+			for range 2 {
+				_, _ = invoke("advance-results", nil)
 			}
 			for range 2 {
 				status, code = invoke("enqueue-result", raw)
 				if code != 0 || string(status["admitted"]) != "true" || string(status["delivery_id"]) != `"`+closed.DeliveryID()+`"` {
-					t.Fatal("same-ID admission did not resume/replay", code)
+					t.Fatal("same-ID replay", code)
 				}
 			}
 			sealed, err := inspect()
@@ -153,8 +163,8 @@ func TestProducerAdmissionPendingCanResumeSameDelivery(t *testing.T) {
 			if code != 1 || string(status["state"]) == `"pending"` {
 				t.Fatal("conflicting metadata mislabeled resumable")
 			}
-			if requests.Load() != 0 {
-				t.Fatal("admission performed a network operation")
+			if requests.Load() == 0 {
+				t.Fatal("finite advance never reached transport")
 			}
 		})
 	}

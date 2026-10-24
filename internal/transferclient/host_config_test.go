@@ -80,11 +80,11 @@ func TestConfiguredHostSecretsPathsAndRecovery(t *testing.T) {
 	upload.Spec.SHA256 = hex.EncodeToString(sum[:])
 	uploadAction := ConfiguredAction{Kind: "enqueue-upload", DeliveryID: upload.DeliveryID, Job: upload, SourceRef: "result-one"}
 	sealed, err := InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now())
-	if err != nil || !sealed.Admitted || sealed.Seal == nil {
-		t.Fatal("configured source sealing", err)
+	if err != nil || !sealed.Registered || sealed.Admitted || sealed.Seal != nil {
+		t.Fatal("configured metadata registration", err)
 	}
 	write(source, "result-one", []byte("changed"))
-	// A finished admission keeps the immutable sealed file when source changes.
+	// Metadata replay retains the original version; advance detects source changes.
 	sealedAgain, err := InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now())
 	if err != nil || sealedAgain.Job.Spec != sealed.Job.Spec {
 		t.Fatal("source mutation replaced snapshot", err)
@@ -96,8 +96,8 @@ func TestConfiguredHostSecretsPathsAndRecovery(t *testing.T) {
 		t.Fatal(err)
 	}
 	sealedAgain, err = InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now())
-	if err != nil || !sealedAgain.Admitted || sealedAgain.Job.Spec != sealed.Job.Spec {
-		t.Fatal("sealed recovery depends on deleted producer directory", err)
+	if err != nil || !sealedAgain.Registered || sealedAgain.Job.Spec != sealed.Job.Spec {
+		t.Fatal("metadata recovery depends on deleted producer directory", err)
 	}
 	uploadAction.Job.Task.Attempt = strings.Repeat("c", 32)
 	if _, err := InvokeConfiguredHerdr(t.Context(), getenv, "fixture-v1", limits, uploadAction, nil, time.Now()); !errors.Is(err, ErrInvalid) {

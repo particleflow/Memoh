@@ -193,7 +193,7 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 		return status
 	}
 	raw, _ := json.Marshal(closed)
-	if out := invoke("enqueue-result", raw); string(out["admitted"]) != "true" {
+	if out := invoke("enqueue-result", raw); string(out["registered"]) != "true" {
 		t.Fatal("admission failed", out)
 	}
 	if mode == "client-killed-before-checkpoint" {
@@ -324,9 +324,12 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 		if string(final["associated"]) != "false" || string(final["state"]) != `"unknown"` || string(final["error_code"]) != `"receipt_unavailable"` {
 			t.Fatal("unknown publication fabricated success", final)
 		}
-		snapshot, err := os.ReadFile(filepath.Join(state, "deliveries-v1", closed.DeliveryID()+".snapshot")) //nolint:gosec // Isolated owned snapshot.
+		snapshot, err := os.ReadFile(filepath.Join(source, closed.Artifact.SourceRef)) //nolint:gosec // Isolated original source; the indexed path never duplicates its payload.
 		if err != nil || string(snapshot) != "synthetic delivery content" {
 			t.Fatal("unknown evidence released", err)
+		}
+		if info, err := os.Stat(filepath.Join(state, "deliveries-v1", closed.DeliveryID()+".tree")); err != nil || info.Size() == 0 {
+			t.Fatal("unknown block index removed", err)
 		}
 		feedbackRaw, err := os.ReadFile(filepath.Join(attemptPath, deliverymeta.ProducerFeedbackName)) //nolint:gosec // Isolated producer receipt.
 		if err != nil {

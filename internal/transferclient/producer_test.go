@@ -154,14 +154,42 @@ func exerciseProducerRecovery(t *testing.T, missingSource bool, invalidManifest 
 	}
 	writeProducerContextFixture(t, getenv, plan)
 	write("source", closed.ManifestName(), raw)
+	if missingSource {
+		cfg, err := OpenHostConfig(getenv)
+		if err != nil {
+			t.Fatal(err)
+		}
+		q, err := OpenHerdrQueue(getenv, "fixture", limits)
+		if err != nil {
+			t.Fatal(err)
+		}
+		action, _, err := ProducerAdmission(bytes.NewReader(raw), "fixture")
+		if err != nil {
+			t.Fatal(err)
+		}
+		action.Job.HostBinding = cfg.Binding
+		fsource, err := cfg.OpenSource(closed.Artifact.SourceRef)
+		if err != nil {
+			t.Fatal(err)
+		}
+		err = q.Admit(t.Context(), "upload", action.Job, fsource)
+		_ = fsource.Close()
+		_ = q.Close()
+		_ = cfg.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
 	f.setDrop("PATCH /bots/" + closed.Task.BotID + "/media/uploads/receipt-1")
 	status, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now())
 	if (len(invalidManifest) == 0 && err != nil || len(invalidManifest) != 0 && !errors.Is(err, ErrProducerSource)) || !status.Admitted || status.Job.ReceiptID == "" || status.Job.NextAttempt.IsZero() {
 		t.Fatal("first finite action", status.Job.Phase, err)
 	}
 	receipt := status.Job.ReceiptID
-	// Source changes after sealing; a replayed manifest must recover the snapshot.
-	write("source", "result-one", []byte("changed"))
+	// A replayed manifest must retain its original metadata and receipt.
+	if missingSource {
+		write("source", "result-one", []byte("changed"))
+	}
 	write("source", closed.ManifestName(), raw)
 	if missingSource {
 		cfg, openErr := OpenHostConfig(getenv)

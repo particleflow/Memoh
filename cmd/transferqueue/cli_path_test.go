@@ -182,8 +182,8 @@ func TestCLIPathTLSRestartAndLostResponses(t *testing.T) {
 	}
 	raw, _ := json.Marshal(closed)
 	enqueued := invoke("enqueue-result", "", raw)
-	if string(enqueued["admitted"]) != "true" {
-		t.Fatal("stdin admission failed")
+	if string(enqueued["registered"]) != "true" || string(enqueued["admitted"]) != "false" {
+		t.Fatal("stdin metadata registration failed")
 	}
 	before := invoke("lifecycle-summary", "", nil)
 	if string(before["state"]) != `"due"` || len(before) != 4 {

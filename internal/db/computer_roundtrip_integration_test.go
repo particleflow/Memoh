@@ -206,8 +206,8 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 		return status
 	}
 	raw, _ := json.Marshal(closed)
-	if out := invoke("enqueue-result", "", raw, 0); string(out["admitted"]) != "true" {
-		t.Fatal("producer not admitted")
+	if out := invoke("enqueue-result", "", raw, 0); string(out["registered"]) != "true" || string(out["admitted"]) == "true" {
+		t.Fatal("producer metadata was not registered before indexing")
 	}
 	first := invoke("advance-results", "", nil, 0)
 	if string(first["state"]) != `"waiting"` {

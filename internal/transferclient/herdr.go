@@ -66,7 +66,7 @@ func (q *DiskQueue) invokeHerdr(ctx context.Context, action HerdrAction, source 
 		return QueueStatus{}, ErrInvalid
 	}
 	if err != nil {
-		if (action.Kind == "enqueue-upload" || action.Kind == "enqueue-download") && (errors.Is(err, ErrAdmissionPending) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) {
+		if (action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" || action.Kind == "advance") && (errors.Is(err, ErrAdmissionPending) || errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded)) {
 			status, readErr := q.Inspect(id)
 			if readErr == nil || errors.Is(readErr, ErrAdmissionPending) {
 				return status, err

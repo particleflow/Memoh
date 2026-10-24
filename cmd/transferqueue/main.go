@@ -250,11 +250,12 @@ func writeStatus(output io.Writer, s transferclient.QueueStatus, source, feedbac
 		Phase       string                    `json:"phase"`
 		Offset      int64                     `json:"offset"`
 		Admitted    bool                      `json:"admitted"`
+		Registered  bool                      `json:"registered"`
 		Associated  bool                      `json:"associated"`
 		Association string                    `json:"association_state,omitempty"`
 		Error       string                    `json:"error_code,omitempty"`
 		Reference   *transferclient.Reference `json:"reference,omitempty"`
-	}{summary, feedback, source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
+	}{summary, feedback, source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Registered, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
 	if json.NewEncoder(output).Encode(out) != nil {
 		return 1
 	}
