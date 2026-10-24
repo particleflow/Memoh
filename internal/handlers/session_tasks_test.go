@@ -4,10 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +22,7 @@ import (
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -46,6 +49,8 @@ type taskHTTPFixture struct {
 	registration              agenvo.Target
 	op                        dbstore.ComputerOperationRecord
 	pcScope                   bool
+	entries                   []dbstore.ComputerDeliveryEntry
+	pageReads                 int
 }
 
 func (*taskHTTPFixture) GetBotByID(context.Context, pgtype.UUID) (sqlc.GetBotByIDRow, error) {
@@ -245,6 +250,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 				{base + "/tasks", true},
 				{base + "/tasks/", true},
 				{base + "/tasks/computer_operation/" + taskOp, true},
+				{base + "/tasks/computer_operation/" + taskOp + "/deliveries", true},
 				{base + "/tasks/computer_operation/" + taskOp + "/attachments", true},
 				{base + "/tasks-extra", false},
 				{base + "/messages", false},
@@ -288,4 +294,126 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 
 func (*taskHTTPFixture) ReadSubagentRun(context.Context, string, string) (dbstore.SubagentRun, error) {
 	return dbstore.SubagentRun{}, db.ErrNotFound
+}
+
+func (f *taskHTTPFixture) ListComputerDeliveryEntries(_ context.Context, r dbstore.ComputerOperationRecord, after string, limit int) ([]dbstore.ComputerDeliveryEntry, error) {
+	f.pageReads++
+	if r.ID != taskOp || r.BotID != taskBot || r.UserID != taskUser || r.SessionID != taskChild || limit != 17 {
+		return nil, errors.New("SECRET wrong scope or unbounded page")
+	}
+	cursor, _ := strconv.ParseInt(after, 10, 64)
+	var entries []dbstore.ComputerDeliveryEntry
+	for _, entry := range f.entries {
+		if entry.Ordinal > cursor {
+			entries = append(entries, entry)
+		}
+		if len(entries) == limit {
+			break
+		}
+	}
+	return entries, nil
+}
+
+func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Revision: 42, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET"}`)}
+	for i := range 35 {
+		outcome := "committed"
+		if i == 0 {
+			outcome = "canceled"
+		}
+		data, err := json.Marshal(map[string]any{"reference": computertask.DeliveryRequest{Version: 1, Direction: "upload", ContentHash: strings.Repeat("a", 64), Mime: "text/plain", SizeBytes: 42}, "scope": strings.Repeat("b", 64), "at": time.Now(), "outcome": outcome, "private": "SECRET"})
+		if err != nil {
+			t.Fatal(err)
+		}
+		version := 1
+		if i == 1 {
+			version = 2
+			var pending map[string]any
+			if err := json.Unmarshal(data, &pending); err != nil {
+				t.Fatal(err)
+			}
+			pending["outcome"], pending["lease"], pending["until"], pending["attempts"] = "pending", "private-lease", time.Now().Add(time.Minute), 1
+			data, err = json.Marshal(pending)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+		f.entries = append(f.entries, dbstore.ComputerDeliveryEntry{DeliveryID: fmt.Sprintf("file_%d", i), Ordinal: int64(i + 1), Version: version, Data: data})
+	}
+	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+		f.relayCalls++
+		return nil, errors.New("unexpected dispatch")
+	})
+	e := echo.New()
+	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
+	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
+	NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user")).Register(e)
+	path := "/bots/" + taskBot + "/sessions/" + taskRoot + "/tasks/computer_operation/" + taskOp + "/deliveries"
+	call := func(path, user string, code int) computertask.DeliveryPage {
+		t.Helper()
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		if user != "" {
+			token, _, err := auth.GenerateToken(user, "test-secret", time.Minute)
+			if err != nil {
+				t.Fatal(err)
+			}
+			req.Header.Set("Authorization", "Bearer "+token)
+		}
+		rec := httptest.NewRecorder()
+		e.ServeHTTP(rec, req)
+		if rec.Code != code || rec.Header().Get("Cache-Control") != "no-store" || strings.Contains(rec.Body.String(), "SECRET") {
+			t.Fatalf("status=%d cache=%q body=%s", rec.Code, rec.Header().Get("Cache-Control"), rec.Body.String())
+		}
+		var page computertask.DeliveryPage
+		if code == 200 {
+			if err := json.Unmarshal(rec.Body.Bytes(), &page); err != nil {
+				t.Fatal(err)
+			}
+		}
+		return page
+	}
+	call(path, "", 401)
+	call(path, taskOwner, 404)
+	call(strings.Replace(path, taskBot, taskOwner, 1), taskUser, 404)
+	call(strings.Replace(path, taskRoot, taskOp, 1), taskUser, 404)
+	call(strings.Replace(path, "computer_operation", "subagent", 1), taskUser, 404)
+	if f.pageReads != 0 {
+		t.Fatal("denial queried ledger")
+	}
+	first := call(path, taskUser, 200)
+	if len(first.Files) != 16 || !first.HasMore || first.NextAfter != "16" || first.Revision != "42" || first.Files[0].Reference != nil || first.Files[1].Reference != nil || first.Files[2].Reference == nil {
+		t.Fatalf("wrong first page: %+v", first)
+	}
+	second := call(path+"?after="+first.NextAfter, taskUser, 200)
+	third := call(path+"?after="+second.NextAfter, taskUser, 200)
+	if len(second.Files) != 16 || len(third.Files) != 3 || third.HasMore {
+		t.Fatal("truncated pagination")
+	}
+	late := f.entries[len(f.entries)-1]
+	late.Ordinal, late.DeliveryID = 36, "late-file"
+	f.entries = append(f.entries, late)
+	resumed := call(path+"?after="+third.NextAfter, taskUser, 200)
+	if len(resumed.Files) != 1 || resumed.Files[0].DeliveryID != late.DeliveryID || resumed.HasMore {
+		t.Fatal("late insertion lost")
+	}
+	for _, cursor := range []string{"-1", "01", "9223372036854775808", "other"} {
+		call(path+"?after="+cursor, taskUser, 400)
+	}
+	for _, flag := range []*bool{&f.exec, &f.source, &f.grant, &f.chat} {
+		before := f.pageReads
+		*flag = false
+		code := 404
+		if flag == &f.chat {
+			code = 403
+		}
+		call(path+"?after="+first.NextAfter, taskUser, code)
+		if f.pageReads != before {
+			t.Fatal("revoked continuation read ledger")
+		}
+		*flag = true
+	}
+	if f.relayCalls != 0 || f.op.Revision != 42 {
+		t.Fatal("read dispatched or mutated")
+	}
 }

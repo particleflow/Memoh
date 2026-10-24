@@ -1,0 +1,1664 @@
+=== RUN   TestActiveJournalBoundedAcrossProgress
+=== RUN   TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant
+=== RUN   TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant/#00
+--- PASS: TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant/#00 (0.03s)
+=== RUN   TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant/not-ready
+--- PASS: TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant/not-ready (0.02s)
+=== RUN   TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant/revoked
+--- PASS: TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant/revoked (0.02s)
+--- PASS: TestStandardMCPArtifactRequiresReadyBytesAndCurrentGrant (0.08s)
+=== RUN   TestAsyncDeliveryOutlivesRequestAndReconcilesLostFinish
+--- PASS: TestAsyncDeliveryOutlivesRequestAndReconcilesLostFinish (0.00s)
+=== RUN   TestAsyncDeliveryLostAdmissionRecoversAfterRestart
+--- PASS: TestAsyncDeliveryLostAdmissionRecoversAfterRestart (0.01s)
+=== RUN   TestAsyncDeliveryCancelAndRevokeDuringScan
+=== RUN   TestAsyncDeliveryCancelAndRevokeDuringScan/cancel
+--- PASS: TestAsyncDeliveryCancelAndRevokeDuringScan/cancel (0.00s)
+=== RUN   TestAsyncDeliveryCancelAndRevokeDuringScan/revoke
+--- PASS: TestAsyncDeliveryCancelAndRevokeDuringScan/revoke (0.00s)
+--- PASS: TestAsyncDeliveryCancelAndRevokeDuringScan (0.00s)
+=== RUN   TestAsyncDeliveryBackpressureAndExhaustion
+--- PASS: TestAsyncDeliveryBackpressureAndExhaustion (0.01s)
+=== RUN   TestAsyncDownloadRequiresLocalPublicationOutcome
+--- PASS: TestAsyncDownloadRequiresLocalPublicationOutcome (0.00s)
+=== RUN   TestAsyncDeliveryVerificationDeadlineStaysFailed
+--- PASS: TestAsyncDeliveryVerificationDeadlineStaysFailed (0.05s)
+=== RUN   TestAsyncDeliveryLateLeaseCannotOverwriteTakeover
+=== RUN   TestAsyncDeliveryLateLeaseCannotOverwriteTakeover/old-success-new-failure
+--- PASS: TestAsyncDeliveryLateLeaseCannotOverwriteTakeover/old-success-new-failure (0.00s)
+=== RUN   TestAsyncDeliveryLateLeaseCannotOverwriteTakeover/old-failure-new-success
+--- PASS: TestAsyncDeliveryLateLeaseCannotOverwriteTakeover/old-failure-new-success (0.01s)
+--- PASS: TestAsyncDeliveryLateLeaseCannotOverwriteTakeover (0.01s)
+=== RUN   TestDeliveryCommitResolveAndExecutionSeparation
+--- PASS: TestDeliveryCommitResolveAndExecutionSeparation (0.00s)
+=== RUN   TestDeliveryUnknownCommitReconcilesBeforeCancel
+=== RUN   TestDeliveryUnknownCommitReconcilesBeforeCancel/context_deadline_exceeded
+--- PASS: TestDeliveryUnknownCommitReconcilesBeforeCancel/context_deadline_exceeded (0.00s)
+=== RUN   TestDeliveryUnknownCommitReconcilesBeforeCancel/context_canceled
+--- PASS: TestDeliveryUnknownCommitReconcilesBeforeCancel/context_canceled (0.00s)
+=== RUN   TestDeliveryUnknownCommitReconcilesBeforeCancel/database_transaction_commit_outcome_is_unknown
+--- PASS: TestDeliveryUnknownCommitReconcilesBeforeCancel/database_transaction_commit_outcome_is_unknown (0.00s)
+--- PASS: TestDeliveryUnknownCommitReconcilesBeforeCancel (0.00s)
+=== RUN   TestDeliveryFenceRaceAndLateCommit
+--- PASS: TestDeliveryFenceRaceAndLateCommit (0.01s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/user
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/user (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/session
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/session (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/target
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/target (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/run
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/run (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/operation
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/operation (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/instance
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/instance (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/attempt
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/attempt (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/bot
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/bot (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/device
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/device (0.00s)
+=== RUN   TestDeliveryRejectsCrossScopeAndForgedIdentity/generation
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity/generation (0.00s)
+--- PASS: TestDeliveryRejectsCrossScopeAndForgedIdentity (0.00s)
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries/revoked-before
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries/revoked-before (0.00s)
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries/revoked-after-commit
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries/revoked-after-commit (0.00s)
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries/revoke-on-conflict
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries/revoke-on-conflict (0.00s)
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries/revoke-during-verify
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries/revoke-during-verify (0.00s)
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries/retry-success
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries/retry-success (0.00s)
+=== RUN   TestDeliveryRechecksRevocationAndBoundsCASRetries/retry-exhausted
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries/retry-exhausted (0.00s)
+--- PASS: TestDeliveryRechecksRevocationAndBoundsCASRetries (0.00s)
+=== RUN   TestDeliveryImmutableReferenceLimitsAndVersions
+--- PASS: TestDeliveryImmutableReferenceLimitsAndVersions (1.80s)
+=== RUN   TestDeliveryMediaAndInputValidation
+=== RUN   TestDeliveryMediaAndInputValidation/bot
+--- PASS: TestDeliveryMediaAndInputValidation/bot (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/hash
+--- PASS: TestDeliveryMediaAndInputValidation/hash (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/size
+--- PASS: TestDeliveryMediaAndInputValidation/size (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/mime
+--- PASS: TestDeliveryMediaAndInputValidation/mime (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/direction
+--- PASS: TestDeliveryMediaAndInputValidation/direction (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/id
+--- PASS: TestDeliveryMediaAndInputValidation/id (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/version
+--- PASS: TestDeliveryMediaAndInputValidation/version (0.00s)
+=== RUN   TestDeliveryMediaAndInputValidation/legacy
+--- PASS: TestDeliveryMediaAndInputValidation/legacy (0.00s)
+--- PASS: TestDeliveryMediaAndInputValidation (0.00s)
+=== RUN   TestDeliveryTransactionErrorClassification
+--- PASS: TestDeliveryTransactionErrorClassification (0.00s)
+=== RUN   TestDeliveryUnknownCancellationRemainsFenced
+--- PASS: TestDeliveryUnknownCancellationRemainsFenced (0.00s)
+=== RUN   TestDeliveryFrozenClientIDCompatibility
+--- PASS: TestDeliveryFrozenClientIDCompatibility (0.00s)
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/same_intent_same_revision
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity/same_intent_same_revision (0.03s)
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/different_intents_same_revision
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity/different_intents_same_revision (0.03s)
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_task_same_revision
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_task_same_revision (0.05s)
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_mode_same_revision
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity/same_uuid_different_mode_same_revision (0.02s)
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_accepted
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_accepted (0.03s)
+=== RUN   TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_rejected_still_consumes_capacity
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity/63_to_64_rejected_still_consumes_capacity (0.05s)
+--- PASS: TestNativeFollowupSameRevisionCASAndCapacity (0.21s)
+=== RUN   TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate
+=== RUN   TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/native
+--- PASS: TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/native (0.03s)
+=== RUN   TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/batch
+--- PASS: TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate/batch (0.13s)
+--- PASS: TestIntegratedNativeFollowupAndBatchHistoryRemainSeparate (0.17s)
+=== RUN   TestIntegratedComputerToolCatalogPreservesBothBoundaries
+--- PASS: TestIntegratedComputerToolCatalogPreservesBothBoundaries (0.00s)
+=== RUN   TestNativeFollowupReusesAgentAndRetainsOperationHistory
+--- PASS: TestNativeFollowupReusesAgentAndRetainsOperationHistory (0.07s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/bound_match
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/bound_match (0.05s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/bound_changed
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/bound_changed (0.03s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/bound_missing
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/bound_missing (0.04s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/legacy_bound
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/legacy_bound (0.03s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/current_changed
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/current_changed (0.04s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/current_missing
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/current_missing (0.03s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/legacy_current
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/legacy_current (0.05s)
+=== RUN   TestNativeFollowupSessionModesNeverSilentlyResume/no_extension
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume/no_extension (0.03s)
+--- PASS: TestNativeFollowupSessionModesNeverSilentlyResume (0.29s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/lost
+--- PASS: TestNativeFollowupUnknownNeverRedispatches/lost (0.03s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/partial
+--- PASS: TestNativeFollowupUnknownNeverRedispatches/partial (0.03s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/malformed
+--- PASS: TestNativeFollowupUnknownNeverRedispatches/malformed (0.04s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/session_during_prompt
+--- PASS: TestNativeFollowupUnknownNeverRedispatches/session_during_prompt (0.03s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/metadata_lost_during_prompt
+--- PASS: TestNativeFollowupUnknownNeverRedispatches/metadata_lost_during_prompt (0.03s)
+=== RUN   TestNativeFollowupUnknownNeverRedispatches/reference_during_prompt
+--- PASS: TestNativeFollowupUnknownNeverRedispatches/reference_during_prompt (0.04s)
+--- PASS: TestNativeFollowupUnknownNeverRedispatches (0.21s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/missing
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/missing (0.03s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/replaced
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/replaced (0.03s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/blocked
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/blocked (0.03s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/starting
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/starting (0.02s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/wrong_session
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/wrong_session (0.03s)
+=== RUN   TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/rejected
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput/rejected (0.03s)
+--- PASS: TestNativeFollowupRejectsMissingChangedOrUnreadyAgentBeforeInput (0.16s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/reservation_lost
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/reservation_lost (0.03s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_save_failed
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_save_failed (0.03s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost (0.02s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost_unsettled
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/dispatch_response_lost_unsettled (0.03s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_save_failed
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_save_failed (0.03s)
+=== RUN   TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_response_lost
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput/final_response_lost (0.03s)
+--- PASS: TestNativeFollowupPersistenceFailuresDoNotRepeatInput (0.18s)
+=== RUN   TestNativeFollowupConcurrentRequestsHaveOneDispatchOwner
+--- PASS: TestNativeFollowupConcurrentRequestsHaveOneDispatchOwner (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority
+=== RUN   TestNativeFollowupRechecksExistingAuthority/none
+--- PASS: TestNativeFollowupRechecksExistingAuthority/none (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/nas
+--- PASS: TestNativeFollowupRechecksExistingAuthority/nas (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/user
+--- PASS: TestNativeFollowupRechecksExistingAuthority/user (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/bot
+--- PASS: TestNativeFollowupRechecksExistingAuthority/bot (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/session
+--- PASS: TestNativeFollowupRechecksExistingAuthority/session (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/selected_pc
+--- PASS: TestNativeFollowupRechecksExistingAuthority/selected_pc (0.02s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/revoked
+--- PASS: TestNativeFollowupRechecksExistingAuthority/revoked (0.03s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/grant_removed
+--- PASS: TestNativeFollowupRechecksExistingAuthority/grant_removed (0.02s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/registration
+--- PASS: TestNativeFollowupRechecksExistingAuthority/registration (0.02s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/public
+--- PASS: TestNativeFollowupRechecksExistingAuthority/public (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/idle
+--- PASS: TestNativeFollowupRechecksExistingAuthority/idle (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/expired
+--- PASS: TestNativeFollowupRechecksExistingAuthority/expired (0.02s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/forged_target
+--- PASS: TestNativeFollowupRechecksExistingAuthority/forged_target (0.01s)
+=== RUN   TestNativeFollowupRechecksExistingAuthority/policy
+--- PASS: TestNativeFollowupRechecksExistingAuthority/policy (0.01s)
+--- PASS: TestNativeFollowupRechecksExistingAuthority (0.20s)
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_get
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_get (0.01s)
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/policy_after_get
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/policy_after_get (0.01s)
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_get
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_get (0.01s)
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_prompt
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/grant_after_prompt (0.01s)
+=== RUN   TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_prompt
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch/cancel_after_prompt (0.01s)
+--- PASS: TestNativeFollowupAuthorityChangesDuringDispatch (0.06s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/batch
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/batch (0.02s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/initial_unknown
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/initial_unknown (0.02s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/cancel
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/cancel (0.02s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/limit
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/limit (0.05s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/missing_mode
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/missing_mode (0.02s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_id
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_id (0.02s)
+=== RUN   TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_session
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput/invalid_session (0.02s)
+--- PASS: TestNativeFollowupRejectsUnsupportedHistoryAndInput (0.18s)
+=== RUN   TestStandardMCPUnknownCannotBeRetriedThroughLegacyExec
+--- PASS: TestStandardMCPUnknownCannotBeRetriedThroughLegacyExec (0.01s)
+=== RUN   TestNativeAgentLedgerReconstructionDoesNotResumePrompt
+=== RUN   TestNativeAgentLedgerReconstructionDoesNotResumePrompt/accepted
+--- PASS: TestNativeAgentLedgerReconstructionDoesNotResumePrompt/accepted (0.03s)
+=== RUN   TestNativeAgentLedgerReconstructionDoesNotResumePrompt/lost_receipt
+--- PASS: TestNativeAgentLedgerReconstructionDoesNotResumePrompt/lost_receipt (0.02s)
+--- PASS: TestNativeAgentLedgerReconstructionDoesNotResumePrompt (0.05s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/none
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/none (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/nas
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/nas (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/user
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/user (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/bot
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/bot (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/session
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/session (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/selected_pc
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/selected_pc (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/revoked
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/revoked (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/grant_removed
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/grant_removed (0.01s)
+=== RUN   TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/registration_session
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant/registration_session (0.01s)
+--- PASS: TestNativeAgentRecoveryRechecksOwnerSessionTargetAndGrant (0.10s)
+=== RUN   TestNativeEvidenceRetainsSamplesExportsAndRestart
+--- PASS: TestNativeEvidenceRetainsSamplesExportsAndRestart (0.19s)
+=== RUN   TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples
+--- PASS: TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples (0.10s)
+=== RUN   TestNativeEvidenceCapacityPreservesOldEvidence
+--- PASS: TestNativeEvidenceCapacityPreservesOldEvidence (0.08s)
+=== RUN   TestNativeEvidenceLegacyHashIsNotRelabeled
+--- PASS: TestNativeEvidenceLegacyHashIsNotRelabeled (0.05s)
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/before
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/before (0.04s)
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/after_read
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/after_read (0.05s)
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/after_ingest
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/after_ingest (0.04s)
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/after_open
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/after_open (0.04s)
+=== RUN   TestNativeEvidenceAuthorityRevocationAndExportVerification/corrupt_bytes
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification/corrupt_bytes (0.04s)
+--- PASS: TestNativeEvidenceAuthorityRevocationAndExportVerification (0.21s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/user
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/user (0.02s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/bot
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/bot (0.02s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/session
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/session (0.02s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/selected_pc
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/selected_pc (0.03s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/nas
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/nas (0.03s)
+=== RUN   TestNativeEvidenceReusesScopeForHistoryAndExports/grant_removed
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports/grant_removed (0.03s)
+--- PASS: TestNativeEvidenceReusesScopeForHistoryAndExports (0.15s)
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/conflict
+--- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/conflict (0.04s)
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/committed_response_lost
+--- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/committed_response_lost (0.04s)
+=== RUN   TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/save_failed
+--- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement/save_failed (0.04s)
+--- PASS: TestNativeEvidenceCASRetainsConcurrentMetadataAndLostAcknowledgement (0.13s)
+=== RUN   TestNativeEvidenceCompactPagesWithAllInputReceipts
+--- PASS: TestNativeEvidenceCompactPagesWithAllInputReceipts (0.18s)
+=== RUN   TestNativeEvidenceExportRetainsObservationArrivingDuringIngest
+--- PASS: TestNativeEvidenceExportRetainsObservationArrivingDuringIngest (0.04s)
+=== RUN   TestNativeEvidenceHistoryPagePreservesCanceledOperationFacts
+--- PASS: TestNativeEvidenceHistoryPagePreservesCanceledOperationFacts (0.04s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/#00
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/#00 (0.11s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/authentication
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/authentication (0.14s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/connection
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/connection (0.13s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/offline
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/offline (0.17s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/runtime_unavailable
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/runtime_unavailable (0.13s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/workspace_missing
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/workspace_missing (0.14s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/pane_missing
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/pane_missing (0.19s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/control_missing
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/control_missing (0.14s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/mismatch
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/mismatch (0.14s)
+=== RUN   TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/wrong_session
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords/wrong_session (0.16s)
+--- PASS: TestReadOnlyRecoveryPreservesVerifiedResultsAndOriginalRecords (1.45s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/missing
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/missing (0.15s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/legacy
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/legacy (0.21s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/mismatch
+--- PASS: TestActiveJournalBoundedAcrossProgress (6.94s)
+=== RUN   TestActiveJournalProcessCrash
+=== RUN   TestActiveJournalProcessCrash/after_record
+--- PASS: TestActiveJournalProcessCrash/after_record (0.04s)
+=== RUN   TestActiveJournalProcessCrash/after_checkpoint
+--- PASS: TestActiveJournalProcessCrash/after_checkpoint (0.02s)
+=== RUN   TestActiveJournalProcessCrash/after_truncate
+--- PASS: TestActiveJournalProcessCrash/after_truncate (0.03s)
+=== RUN   TestActiveJournalProcessCrash/after_compact
+--- PASS: TestActiveJournalProcessCrash/after_compact (0.03s)
+=== RUN   TestActiveJournalProcessCrash/after_finish
+--- PASS: TestActiveJournalProcessCrash/after_finish (0.05s)
+--- PASS: TestActiveJournalProcessCrash (0.17s)
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint/partial
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint/partial (0.01s)
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint/checksum
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint/checksum (0.00s)
+=== RUN   TestActiveJournalIncompleteAndCorruptCheckpoint/identity
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint/identity (0.00s)
+--- PASS: TestActiveJournalIncompleteAndCorruptCheckpoint (0.01s)
+=== RUN   TestActiveJournalPreservesUnknownAssociation
+=== RUN   TestActiveJournalPreservesUnknownAssociation/create_unknown
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/mismatch (0.19s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/cancel
+--- PASS: TestActiveJournalPreservesUnknownAssociation/create_unknown (0.01s)
+=== RUN   TestActiveJournalPreservesUnknownAssociation/association_unknown
+--- PASS: TestActiveJournalPreservesUnknownAssociation/association_unknown (0.01s)
+--- PASS: TestActiveJournalPreservesUnknownAssociation (0.01s)
+=== RUN   TestActiveJournalLegacyReadAndFullBoundary
+--- PASS: TestActiveJournalLegacyReadAndFullBoundary (0.03s)
+=== RUN   TestActiveJournalMaximumRecordEnvelope
+--- PASS: TestActiveJournalMaximumRecordEnvelope (0.01s)
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence/empty
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence/empty (0.00s)
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence/checksum
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence/checksum (0.00s)
+=== RUN   TestAdmissionCompactionRetryKeepsCorruptEvidence/version
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence/version (0.00s)
+--- PASS: TestAdmissionCompactionRetryKeepsCorruptEvidence (0.01s)
+=== RUN   TestAdmissionReadDuringActiveCompaction
+--- PASS: TestAdmissionReadDuringActiveCompaction (0.01s)
+=== RUN   TestAdmissionDeadlineCanResumeSameID
+--- PASS: TestAdmissionDeadlineCanResumeSameID (0.00s)
+=== RUN   TestPartialAdmissionCancelReleasesCapacity
+--- PASS: TestPartialAdmissionCancelReleasesCapacity (0.00s)
+=== RUN   TestAdmissionBoundedLargeFileAndIdempotency
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/cancel (0.19s)
+=== RUN   TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/invalid_identity
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt/invalid_identity (0.14s)
+--- PASS: TestReadOnlyRecoveryNeverInfersCompletionOrRewritesLegacyReceipt (0.88s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/bot
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/bot (0.00s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/user
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/user (0.00s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/session
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/session (0.00s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/target
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/target (0.00s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/revoked
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/revoked (0.00s)
+=== RUN   TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/fingerprint
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation/fingerprint (0.00s)
+--- PASS: TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation (0.18s)
+=== RUN   TestBatchHistoryApplicationRestartAndLegacy
+=== RUN   TestBatchHistoryApplicationRestartAndLegacy/verified
+--- PASS: TestBatchHistoryApplicationRestartAndLegacy/verified (0.25s)
+=== RUN   TestBatchHistoryApplicationRestartAndLegacy/legacy
+--- PASS: TestBatchHistoryApplicationRestartAndLegacy/legacy (0.14s)
+=== RUN   TestBatchHistoryApplicationRestartAndLegacy/receipt_missing
+--- PASS: TestBatchHistoryApplicationRestartAndLegacy/receipt_missing (0.14s)
+=== RUN   TestBatchHistoryApplicationRestartAndLegacy/post_loss
+--- PASS: TestBatchHistoryApplicationRestartAndLegacy/post_loss (0.17s)
+=== RUN   TestBatchHistoryApplicationRestartAndLegacy/target_changed
+--- PASS: TestBatchHistoryApplicationRestartAndLegacy/target_changed (0.17s)
+--- PASS: TestBatchHistoryApplicationRestartAndLegacy (0.88s)
+=== RUN   TestBatchHistoryReadFailureAndLatestEvidence
+--- PASS: TestBatchHistoryReadFailureAndLatestEvidence (0.04s)
+=== RUN   TestBatchHistoryLatestUnprovenNeverSearchesPastIt
+--- PASS: TestBatchHistoryLatestUnprovenNeverSearchesPastIt (0.11s)
+=== RUN   TestBatchHistoryRecoveryNeverClaimsCurrentContinuity
+--- PASS: TestBatchHistoryRecoveryNeverClaimsCurrentContinuity (0.15s)
+=== RUN   TestStandardMCPPiBatchCompletesWithReadyHashedResults
+--- PASS: TestAdmissionBoundedLargeFileAndIdempotency (1.64s)
+=== RUN   TestAdmissionDeadlineProgressAndRetryStorageBound
+--- PASS: TestAdmissionDeadlineProgressAndRetryStorageBound (0.30s)
+=== RUN   TestAdmissionCrashAfterCheckpoint
+--- PASS: TestAdmissionCrashAfterCheckpoint (0.22s)
+=== RUN   TestAdmissionTornSlotAndChangedSource
+=== RUN   TestAdmissionTornSlotAndChangedSource/torn-latest
+--- PASS: TestAdmissionTornSlotAndChangedSource/torn-latest (0.20s)
+=== RUN   TestAdmissionTornSlotAndChangedSource/changed-tail
+--- PASS: TestAdmissionTornSlotAndChangedSource/changed-tail (0.10s)
+=== RUN   TestAdmissionTornSlotAndChangedSource/tree-tamper
+--- PASS: TestAdmissionTornSlotAndChangedSource/tree-tamper (0.12s)
+=== RUN   TestAdmissionTornSlotAndChangedSource/cancel
+--- PASS: TestStandardMCPPiBatchCompletesWithReadyHashedResults (1.00s)
+=== RUN   TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest
+--- PASS: TestAdmissionTornSlotAndChangedSource/cancel (0.07s)
+--- PASS: TestAdmissionTornSlotAndChangedSource (0.50s)
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume/9
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume/9 (0.06s)
+=== RUN   TestAdmissionTreeAndReadonlyFinalizationResume/15
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume/15 (0.08s)
+--- PASS: TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest (0.19s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/exit0_error
+--- PASS: TestAdmissionTreeAndReadonlyFinalizationResume (0.17s)
+=== RUN   TestHerdrEnqueueDeadlineReportsResumableReservation
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/exit0_error (0.10s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/nonzero
+--- PASS: TestHerdrEnqueueDeadlineReportsResumableReservation (0.11s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/both-slots-corrupt
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/both-slots-corrupt (0.01s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/legacy
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/legacy (0.01s)
+=== RUN   TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/identity
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly/identity (0.01s)
+--- PASS: TestAdmissionCorruptProgressAndLegacyReservationFailExplicitly (0.02s)
+=== RUN   TestTaskAPIBaseLengthBoundary
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-false
+--- PASS: TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-false (0.00s)
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-true
+--- PASS: TestTaskAPIBaseLengthBoundary/bytes-2047/trailing-true (0.00s)
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-false
+--- PASS: TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-false (0.00s)
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-true
+--- PASS: TestTaskAPIBaseLengthBoundary/bytes-2048/trailing-true (0.00s)
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-false
+--- PASS: TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-false (0.00s)
+=== RUN   TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-true
+--- PASS: TestTaskAPIBaseLengthBoundary/bytes-2049/trailing-true (0.00s)
+--- PASS: TestTaskAPIBaseLengthBoundary (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/query-at-limit
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/query-at-limit (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/operation-path
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/operation-path (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/delivery-path
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/delivery-path (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/operation-too-long
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/operation-too-long (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/delivery-too-long
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/delivery-too-long (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/missing-auth
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/missing-auth (0.00s)
+=== RUN   TestTaskAPIBaseBoundaryPreservesChecks/insecure-transport
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks/insecure-transport (0.00s)
+--- PASS: TestTaskAPIBaseBoundaryPreservesChecks (0.00s)
+=== RUN   TestAPIBaseContractVectors
+=== RUN   TestAPIBaseContractVectors/https-root
+--- PASS: TestAPIBaseContractVectors/https-root (0.00s)
+=== RUN   TestAPIBaseContractVectors/https-api-prefix
+--- PASS: TestAPIBaseContractVectors/https-api-prefix (0.00s)
+=== RUN   TestAPIBaseContractVectors/https-nested-prefix
+--- PASS: TestAPIBaseContractVectors/https-nested-prefix (0.00s)
+=== RUN   TestAPIBaseContractVectors/existing-trailing-slash
+--- PASS: TestAPIBaseContractVectors/existing-trailing-slash (0.00s)
+=== RUN   TestAPIBaseContractVectors/explicit-port
+--- PASS: TestAPIBaseContractVectors/explicit-port (0.00s)
+=== RUN   TestAPIBaseContractVectors/configured-private-ipv4
+--- PASS: TestAPIBaseContractVectors/configured-private-ipv4 (0.00s)
+=== RUN   TestAPIBaseContractVectors/configured-private-name
+--- PASS: TestAPIBaseContractVectors/configured-private-name (0.00s)
+=== RUN   TestAPIBaseContractVectors/configured-ipv6
+--- PASS: TestAPIBaseContractVectors/configured-ipv6 (0.00s)
+=== RUN   TestAPIBaseContractVectors/configured-ula-ipv6
+--- PASS: TestAPIBaseContractVectors/configured-ula-ipv6 (0.00s)
+=== RUN   TestAPIBaseContractVectors/http
+--- PASS: TestAPIBaseContractVectors/http (0.00s)
+=== RUN   TestAPIBaseContractVectors/relative
+--- PASS: TestAPIBaseContractVectors/relative (0.00s)
+=== RUN   TestAPIBaseContractVectors/empty-host
+--- PASS: TestAPIBaseContractVectors/empty-host (0.00s)
+=== RUN   TestAPIBaseContractVectors/userinfo
+--- PASS: TestAPIBaseContractVectors/userinfo (0.00s)
+=== RUN   TestAPIBaseContractVectors/query
+--- PASS: TestAPIBaseContractVectors/query (0.00s)
+=== RUN   TestAPIBaseContractVectors/empty-query
+--- PASS: TestAPIBaseContractVectors/empty-query (0.00s)
+=== RUN   TestAPIBaseContractVectors/fragment
+--- PASS: TestAPIBaseContractVectors/fragment (0.00s)
+=== RUN   TestAPIBaseContractVectors/empty-fragment
+--- PASS: TestAPIBaseContractVectors/empty-fragment (0.00s)
+=== RUN   TestAPIBaseContractVectors/dot-parent
+--- PASS: TestAPIBaseContractVectors/dot-parent (0.00s)
+=== RUN   TestAPIBaseContractVectors/dot-current
+--- PASS: TestAPIBaseContractVectors/dot-current (0.00s)
+=== RUN   TestAPIBaseContractVectors/encoded-parent
+--- PASS: TestAPIBaseContractVectors/encoded-parent (0.00s)
+=== RUN   TestAPIBaseContractVectors/encoded-separator
+--- PASS: TestAPIBaseContractVectors/encoded-separator (0.00s)
+=== RUN   TestAPIBaseContractVectors/double-separator
+--- PASS: TestAPIBaseContractVectors/double-separator (0.00s)
+=== RUN   TestAPIBaseContractVectors/double-root-separator
+--- PASS: TestAPIBaseContractVectors/double-root-separator (0.00s)
+=== RUN   TestAPIBaseContractVectors/backslash
+--- PASS: TestAPIBaseContractVectors/backslash (0.00s)
+=== RUN   TestAPIBaseContractVectors/leading-space
+--- PASS: TestAPIBaseContractVectors/leading-space (0.00s)
+=== RUN   TestAPIBaseContractVectors/path-space
+--- PASS: TestAPIBaseContractVectors/path-space (0.00s)
+=== RUN   TestAPIBaseContractVectors/zero-port
+--- PASS: TestAPIBaseContractVectors/zero-port (0.00s)
+=== RUN   TestAPIBaseContractVectors/overflow-port
+--- PASS: TestAPIBaseContractVectors/overflow-port (0.00s)
+=== RUN   TestAPIBaseContractVectors/empty-port
+--- PASS: TestAPIBaseContractVectors/empty-port (0.00s)
+=== RUN   TestAPIBaseContractVectors/ipv6-zone
+--- PASS: TestAPIBaseContractVectors/ipv6-zone (0.00s)
+--- PASS: TestAPIBaseContractVectors (0.00s)
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/nonzero (0.11s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/aborted
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/deadline (0.07s)
+=== RUN   TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable/canceled (0.09s)
+--- PASS: TestAssociationReviewTimeoutIsUnknownAndRecoverable (0.16s)
+=== RUN   TestAssociationReviewCancelMustReconcileLostCommit
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/aborted (0.12s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/output_limit
+--- PASS: TestAssociationReviewCancelMustReconcileLostCommit (0.06s)
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/output_limit (0.12s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/bad_hash
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/cancel-fences-late-commit (0.08s)
+=== RUN   TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit/commit-before-cancel-resolve (0.07s)
+--- PASS: TestAssociationReviewAbsentQueryDoesNotErasePendingCommit (0.14s)
+=== RUN   TestAssociationReviewRetryPauseCanBeReconciled
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/bad_hash (0.12s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/reused_control
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/reused_control (0.15s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/wrong_receipt
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/wrong_receipt (0.09s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/revoked_mid_read
+--- PASS: TestAssociationReviewRetryPauseCanBeReconciled (0.34s)
+=== RUN   TestAssociationReviewCancelWithoutFenceRemainsUnknown
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/revoked_mid_read (0.10s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/missing_completion
+--- PASS: TestAssociationReviewCancelWithoutFenceRemainsUnknown (0.07s)
+=== RUN   TestAssociationReviewCancelBeforeCommitDoesNotRegister
+--- PASS: TestAssociationReviewCancelBeforeCommitDoesNotRegister (0.05s)
+=== RUN   TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/missing_completion (0.10s)
+=== RUN   TestStandardMCPPiBatchFailureBoundaries/other_attempt
+--- PASS: TestAssociationReviewUnknownDownloadResolvesWithoutRepublishing (0.06s)
+=== RUN   TestAssociationReviewProcessCrashAfterInFlight
+--- PASS: TestAssociationReviewProcessCrashAfterInFlight (0.07s)
+=== RUN   TestBudgetMigrationPreservesIdentityAndUnknown
+--- PASS: TestStandardMCPPiBatchFailureBoundaries/other_attempt (0.13s)
+--- PASS: TestStandardMCPPiBatchFailureBoundaries (1.14s)
+=== RUN   TestStandardMCPPiBatchRejectsOversizeBeforeClaim
+--- PASS: TestBudgetMigrationPreservesIdentityAndUnknown (0.06s)
+=== RUN   TestBudgetMigrationRejectsBusyMismatchAndCapacity
+--- PASS: TestStandardMCPPiBatchRejectsOversizeBeforeClaim (0.06s)
+=== RUN   TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs
+=== RUN   TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs/stderr
+--- PASS: TestBudgetMigrationRejectsBusyMismatchAndCapacity (0.05s)
+=== RUN   TestBudgetMigrationResumesIncompleteAdmission
+--- PASS: TestBudgetMigrationResumesIncompleteAdmission (0.00s)
+=== RUN   TestBudgetMigrationProcessCrashAndTornTail
+=== RUN   TestBudgetMigrationProcessCrashAndTornTail/budget_after_base
+--- PASS: TestBudgetMigrationProcessCrashAndTornTail/budget_after_base (0.05s)
+=== RUN   TestBudgetMigrationProcessCrashAndTornTail/budget_after_gate
+--- PASS: TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs/stderr (0.13s)
+=== RUN   TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs/stdout
+--- PASS: TestBudgetMigrationProcessCrashAndTornTail/budget_after_gate (0.07s)
+=== RUN   TestBudgetMigrationProcessCrashAndTornTail/budget_after_publication
+--- PASS: TestBudgetMigrationProcessCrashAndTornTail/budget_after_publication (0.07s)
+=== RUN   TestBudgetMigrationProcessCrashAndTornTail/budget_after_commit
+--- PASS: TestBudgetMigrationProcessCrashAndTornTail/budget_after_commit (0.05s)
+--- PASS: TestBudgetMigrationProcessCrashAndTornTail (0.25s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/200
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/200 (0.10s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/499
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/499 (0.53s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/401
+--- PASS: TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs/stdout (0.87s)
+=== RUN   TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs/not_started
+--- PASS: TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs/not_started (0.11s)
+--- PASS: TestStandardMCPPiBatchEmptyOutputsDoNotInventMediaRefs (1.10s)
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/401 (0.34s)
+=== RUN   TestHTTP499AssociationReopenCancelAndAuthorization/403
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization/403 (0.30s)
+--- PASS: TestHTTP499AssociationReopenCancelAndAuthorization (1.27s)
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay/create
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay/create (0.01s)
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay/patch
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay/patch (0.02s)
+=== RUN   TestHTTP499AfterMutationReconcilesWithoutBlindReplay/complete
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay/complete (0.01s)
+--- PASS: TestHTTP499AfterMutationReconcilesWithoutBlindReplay (0.04s)
+=== RUN   TestHTTP499DownloadRetainsRangeAndHash
+--- PASS: TestHTTP499DownloadRetainsRangeAndHash (0.01s)
+=== RUN   TestHTTP499RetryIsBoundedAndAuthorizationStaysBlocked
+--- PASS: TestHTTP499RetryIsBoundedAndAuthorizationStaysBlocked (0.14s)
+=== RUN   TestLostPatchAndCompleteRecoverFromDurableReceipt
+--- PASS: TestLostPatchAndCompleteRecoverFromDurableReceipt (0.03s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/lost-response
+--- PASS: TestUnknownCreateNeverBlindlyRepeats/lost-response (0.01s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/crash-before-receipt-save
+--- PASS: TestUnknownCreateNeverBlindlyRepeats/crash-before-receipt-save (0.01s)
+=== RUN   TestUnknownCreateNeverBlindlyRepeats/save-before-create-fails
+--- PASS: TestUnknownCreateNeverBlindlyRepeats/save-before-create-fails (0.01s)
+--- PASS: TestUnknownCreateNeverBlindlyRepeats (0.03s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/quota
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/quota (0.11s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/revoked
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/revoked (0.02s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/expired
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/expired (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/source-change
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/source-change (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/receipt-mismatch
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/receipt-mismatch (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/checksum
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/checksum (0.01s)
+=== RUN   TestRetryAuthorizationExpiryAndSourceChange/size-limit
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange/size-limit (0.01s)
+--- PASS: TestRetryAuthorizationExpiryAndSourceChange (0.18s)
+=== RUN   TestCancellationLossAndPublicationRace
+=== RUN   TestCancellationLossAndPublicationRace/false
+--- PASS: TestCancellationLossAndPublicationRace/false (0.02s)
+=== RUN   TestCancellationLossAndPublicationRace/true
+--- PASS: TestCancellationLossAndPublicationRace/true (0.02s)
+--- PASS: TestCancellationLossAndPublicationRace (0.04s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics
+=== RUN   TestStrictTransportAndBoundedDiagnostics/redirect
+--- PASS: TestStrictTransportAndBoundedDiagnostics/redirect (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics/large-json
+--- PASS: TestStrictTransportAndBoundedDiagnostics/large-json (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics/private-error
+--- PASS: TestStrictTransportAndBoundedDiagnostics/private-error (0.01s)
+=== RUN   TestStrictTransportAndBoundedDiagnostics/untrusted-cert
+2026/10/24 13:37:46 http: TLS handshake error from 127.0.0.1:49754: remote error: tls: bad certificate
+--- PASS: TestStrictTransportAndBoundedDiagnostics/untrusted-cert (0.11s)
+--- PASS: TestStrictTransportAndBoundedDiagnostics (0.15s)
+=== RUN   TestDownloadResumeAndValidation
+=== RUN   TestDownloadResumeAndValidation/ok
+--- PASS: TestDownloadResumeAndValidation/ok (0.03s)
+=== RUN   TestDownloadResumeAndValidation/wrong-prefix
+--- PASS: TestDownloadResumeAndValidation/wrong-prefix (0.02s)
+=== RUN   TestDownloadResumeAndValidation/full-on-resume
+--- PASS: TestDownloadResumeAndValidation/full-on-resume (0.01s)
+=== RUN   TestDownloadResumeAndValidation/wrong-range
+--- PASS: TestDownloadResumeAndValidation/wrong-range (0.01s)
+=== RUN   TestDownloadResumeAndValidation/wrong-etag
+--- PASS: TestDownloadResumeAndValidation/wrong-etag (0.01s)
+=== RUN   TestDownloadResumeAndValidation/truncated
+--- PASS: TestDownloadResumeAndValidation/truncated (0.01s)
+=== RUN   TestDownloadResumeAndValidation/revoked
+--- PASS: TestDownloadResumeAndValidation/revoked (0.01s)
+=== RUN   TestDownloadResumeAndValidation/disk-full
+--- PASS: TestDownloadResumeAndValidation/disk-full (0.01s)
+=== RUN   TestDownloadResumeAndValidation/checkpoint-failure
+--- PASS: TestDownloadResumeAndValidation/checkpoint-failure (0.01s)
+--- PASS: TestDownloadResumeAndValidation (0.10s)
+=== RUN   TestVerifyBoundsAndCancellation
+--- PASS: TestVerifyBoundsAndCancellation (0.00s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence
+=== RUN   TestDeliveryBindingLocalCancelEvidence/unknown-local
+--- PASS: TestDeliveryBindingLocalCancelEvidence/unknown-local (0.00s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/absent-does-not-fence
+--- PASS: TestDeliveryBindingLocalCancelEvidence/absent-does-not-fence (0.00s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/published-wins
+--- PASS: TestDeliveryBindingLocalCancelEvidence/published-wins (0.01s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/fenced
+--- PASS: TestDeliveryBindingLocalCancelEvidence/fenced (0.01s)
+=== RUN   TestDeliveryBindingLocalCancelEvidence/conflicting-histories
+--- PASS: TestDeliveryBindingLocalCancelEvidence/conflicting-histories (0.01s)
+--- PASS: TestDeliveryBindingLocalCancelEvidence (0.03s)
+=== RUN   TestDeliveryBindingRequiresLocalStore
+--- PASS: TestDeliveryBindingRequiresLocalStore (0.00s)
+=== RUN   TestTerminalHistoryExplicitMigrationAndBackup
+--- PASS: TestTerminalHistoryExplicitMigrationAndBackup (0.05s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/busy
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/busy (0.03s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/revision
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/revision (0.03s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/limits
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/limits (0.04s)
+=== RUN   TestTerminalHistoryMigrationRejectsBusyAndMismatch/backup
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch/backup (0.05s)
+--- PASS: TestTerminalHistoryMigrationRejectsBusyAndMismatch (0.15s)
+=== RUN   TestTerminalHistoryMigrationProcessCrash
+=== RUN   TestTerminalHistoryMigrationProcessCrash/locator_after_backup
+--- PASS: TestTerminalHistoryMigrationProcessCrash/locator_after_backup (0.06s)
+=== RUN   TestTerminalHistoryMigrationProcessCrash/locator_after_write
+--- PASS: TestTerminalHistoryMigrationProcessCrash/locator_after_write (0.05s)
+=== RUN   TestTerminalHistoryMigrationProcessCrash/locator_after_sync
+--- PASS: TestTerminalHistoryMigrationProcessCrash/locator_after_sync (0.06s)
+--- PASS: TestTerminalHistoryMigrationProcessCrash (0.16s)
+=== RUN   TestTerminalHistoryMigrationFiniteBatch
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16 (1.60s)
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/43
+--- PASS: TestTerminalHistoryMigrationFiniteBatch (0.09s)
+=== RUN   TestTerminalHistoryConcurrentIdentityAndPermanentLock
+--- PASS: TestTerminalHistoryConcurrentIdentityAndPermanentLock (0.05s)
+=== RUN   TestTerminalHistoryBeyondCatalogBoundAndOriginalID
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/43 (1.43s)
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/44
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/44 (1.49s)
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/80
+--- PASS: TestTerminalHistoryBeyondCatalogBoundAndOriginalID (3.05s)
+=== RUN   TestTerminalHistoryUnknownIsNeverArchived
+--- PASS: TestTerminalHistoryUnknownIsNeverArchived (0.07s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/partial
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/partial (0.04s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/different-ref
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/different-ref (0.03s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/different-attempt
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/different-attempt (0.04s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/corrupt
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/corrupt (0.03s)
+=== RUN   TestTerminalHistoryPartialAndConflictingCopies/source-missing-partial
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies/source-missing-partial (0.03s)
+--- PASS: TestTerminalHistoryPartialAndConflictingCopies (0.18s)
+=== RUN   TestTerminalHistoryBucketBudgetPreservesSource
+--- PASS: TestTerminalHistoryBucketBudgetPreservesSource (0.69s)
+=== RUN   TestTerminalHistoryProcessCrash
+=== RUN   TestTerminalHistoryProcessCrash/before_target_sync
+--- PASS: TestTerminalHistoryProcessCrash/before_target_sync (0.05s)
+=== RUN   TestTerminalHistoryProcessCrash/after_target_sync
+--- PASS: TestTerminalHistoryProcessCrash/after_target_sync (0.05s)
+=== RUN   TestTerminalHistoryProcessCrash/after_source_remove
+--- PASS: TestTerminalHistoryProcessCrash/after_source_remove (0.06s)
+=== RUN   TestTerminalHistoryProcessCrash/after_source_sync
+--- PASS: TestTerminalHistoryProcessCrash/after_source_sync (0.04s)
+--- PASS: TestTerminalHistoryProcessCrash (0.20s)
+=== RUN   TestHostBudgetConfiguration
+--- PASS: TestHostBudgetConfiguration (0.00s)
+=== RUN   TestConfiguredHostSecretsPathsAndRecovery
+--- PASS: TestConfiguredHostSecretsPathsAndRecovery (0.01s)
+=== RUN   TestDiskQueueRestartSnapshotAndOutbox
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/80 (1.41s)
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/240
+--- PASS: TestDiskQueueRestartSnapshotAndOutbox (0.09s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/hash
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/hash (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/quota
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/quota (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/torn
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/torn (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/corrupt
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/corrupt (0.01s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/symlink
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/symlink (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/hardlink
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/hardlink (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/locator
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/locator (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/revision
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/revision (0.00s)
+=== RUN   TestDiskQueueAdmissionAndJournalFailures/journal-full
+--- PASS: TestDiskQueueAdmissionAndJournalFailures/journal-full (0.20s)
+--- PASS: TestDiskQueueAdmissionAndJournalFailures (0.22s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/cancel
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/cancel (0.00s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/unknown
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/unknown (0.01s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/revoke
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/revoke (0.16s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/budget
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/budget (0.30s)
+=== RUN   TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation/snapshot-change (0.00s)
+--- PASS: TestDiskQueueCancelUnknownAndRevokedAssociation (0.49s)
+=== RUN   TestBlockedDownloadCanCancelWithoutNetwork
+--- PASS: TestBlockedDownloadCanCancelWithoutNetwork (0.03s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/resume
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/resume (0.04s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/revoke
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/revoke (0.03s)
+=== RUN   TestDiskQueueDownloadRangeHashAndReauthorization/corrupt
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization/corrupt (0.02s)
+--- PASS: TestDiskQueueDownloadRangeHashAndReauthorization (0.09s)
+=== RUN   TestDiskQueueProcessCrashReleasesLock
+--- PASS: TestDiskQueueProcessCrashReleasesLock (0.01s)
+=== RUN   TestLifecycleReadOnlyMixedDueAndBackoff
+--- PASS: TestLifecycleReadOnlyMixedDueAndBackoff (0.02s)
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint/torn
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint/torn (0.00s)
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint/checkpoint
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint/checkpoint (0.00s)
+=== RUN   TestLifecycleReadOnlyTornAndCheckpoint/corrupt
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint/corrupt (0.00s)
+--- PASS: TestLifecycleReadOnlyTornAndCheckpoint (0.01s)
+=== RUN   TestLifecycleEmptyBusyAndClassification
+--- PASS: TestLifecycleEmptyBusyAndClassification (0.00s)
+=== RUN   TestLifecycleEarliestDueAndFairRotation
+--- PASS: TestLifecycleEarliestDueAndFairRotation (0.02s)
+=== RUN   TestLifecycleInvalidTaskDoesNotStarveConfiguredWork
+--- PASS: TestLifecycleInvalidTaskDoesNotStarveConfiguredWork (0.01s)
+=== RUN   TestLifecycleCorruptTailBlocksActualAdvance
+--- PASS: TestLifecycleCorruptTailBlocksActualAdvance (0.01s)
+=== RUN   TestProducerFeedbackScopeAndUnchangedBlock
+--- PASS: TestProducerFeedbackScopeAndUnchangedBlock (0.01s)
+=== RUN   TestProducerMultiplePartialRestartAndDeniedFile
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/240 (1.42s)
+=== RUN   TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16384
+--- PASS: TestProducerMultiplePartialRestartAndDeniedFile (0.45s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-0
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-0 (0.41s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-1
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-1-denied-1 (0.49s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-0
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-0 (0.40s)
+=== RUN   TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits/16384 (1.49s)
+--- PASS: TestStandardMCPPiBatchDelayedFramesWithinVendorLimits (8.84s)
+=== RUN   TestAgenvoV020PaneReadSchemaBounds
+--- PASS: TestAgenvoV020PaneReadSchemaBounds (0.00s)
+=== RUN   TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation
+--- PASS: TestStandardMCPPiBatchReadRejectionPreservesSubmittedOperation (0.15s)
+=== RUN   TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle/slots-2-denied-1 (0.40s)
+--- PASS: TestProducerFeedbackDeniedFirstAndMiddle (1.69s)
+=== RUN   TestProducerClosedManifestRestartAndLostAssociation
+--- PASS: TestProducerClosedManifestRestartAndLostAssociation (0.16s)
+=== RUN   TestProducerCollectMissingSourceStillAdvances
+--- PASS: TestProducerCollectMissingSourceStillAdvances (0.15s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/oversize
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/oversize (0.15s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/malformed
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/malformed (0.18s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/name-mismatch
+--- PASS: TestStandardMCPPiBatchResumesOldPageOffsetsAfterServiceRestart (0.72s)
+=== RUN   TestStandardMCPPiBatchUnknownLayoutDoesNotReadOrRedispatch
+--- PASS: TestStandardMCPPiBatchUnknownLayoutDoesNotReadOrRedispatch (0.12s)
+=== RUN   TestStandardMCPPiBatchCompleteReceiptBudgetWithLongNativeIDs
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/name-mismatch (0.20s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/root-mismatch
+--- PASS: TestStandardMCPPiBatchCompleteReceiptBudgetWithLongNativeIDs (0.17s)
+=== RUN   TestCompactResultIndependentOfLogStorageAndSurvivesRestart
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/root-mismatch (0.25s)
+=== RUN   TestProducerBadManifestDoesNotStarveValidDelivery/trusted-plan
+--- PASS: TestCompactResultIndependentOfLogStorageAndSurvivesRestart (0.26s)
+=== RUN   TestProducerCancellationFencesExitHookAndQueuedUpload
+=== RUN   TestProducerCancellationFencesExitHookAndQueuedUpload/before-close
+--- PASS: TestProducerCancellationFencesExitHookAndQueuedUpload/before-close (0.00s)
+=== RUN   TestProducerCancellationFencesExitHookAndQueuedUpload/already-enqueued
+--- PASS: TestProducerCancellationFencesExitHookAndQueuedUpload/already-enqueued (0.01s)
+--- PASS: TestProducerCancellationFencesExitHookAndQueuedUpload (0.01s)
+=== RUN   TestProducerCancellationCompetesWithVerifiedCommit
+=== RUN   TestProducerCancellationCompetesWithVerifiedCommit/cancel
+--- PASS: TestProducerCancellationCompetesWithVerifiedCommit/cancel (0.00s)
+=== RUN   TestProducerCancellationCompetesWithVerifiedCommit/commit
+--- PASS: TestProducerCancellationCompetesWithVerifiedCommit/commit (0.00s)
+--- PASS: TestProducerCancellationCompetesWithVerifiedCommit (0.01s)
+=== RUN   TestProducerPageCancellationBeforeAnyPageArrives
+--- PASS: TestProducerPageCancellationBeforeAnyPageArrives (0.00s)
+=== RUN   TestProducerFeedbackStopsUnchangedBlockedWake
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery/trusted-plan (0.21s)
+--- PASS: TestProducerBadManifestDoesNotStarveValidDelivery (0.99s)
+=== RUN   TestProducerInputAndRootFailClosed
+--- PASS: TestProducerInputAndRootFailClosed (0.00s)
+=== RUN   TestProducerConfigurationCannotChangeBetweenCheckAndAdmission
+--- PASS: TestProducerConfigurationCannotChangeBetweenCheckAndAdmission (0.00s)
+=== RUN   TestProducerMissingSourceWithoutQueueIsNotIdleSuccess
+--- PASS: TestProducerMissingSourceWithoutQueueIsNotIdleSuccess (0.00s)
+=== RUN   TestPublicationMetadataMigrationPreservesCompleteHistory
+--- PASS: TestPublicationMetadataMigrationPreservesCompleteHistory (0.10s)
+=== RUN   TestPublicationMetadataMigrationConflictPreservesBothCopies
+--- PASS: TestPublicationMetadataMigrationConflictPreservesBothCopies (0.00s)
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_before_target_sync
+--- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_before_target_sync (0.03s)
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_after_target_sync
+--- PASS: TestProducerFeedbackStopsUnchangedBlockedWake (0.21s)
+=== RUN   TestProducerFeedbackConcurrentCommitAndRevocation
+=== RUN   TestProducerFeedbackConcurrentCommitAndRevocation/commit
+--- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_after_target_sync (0.03s)
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_before_legacy_remove
+--- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_before_legacy_remove (0.04s)
+=== RUN   TestPublicationMetadataMigrationInterruptedCopies/publication_after_legacy_remove
+--- PASS: TestPublicationMetadataMigrationInterruptedCopies/publication_after_legacy_remove (0.05s)
+--- PASS: TestPublicationMetadataMigrationInterruptedCopies (0.15s)
+=== RUN   TestPublicationMetadataMigrationMissingDurableTarget
+--- PASS: TestPublicationMetadataMigrationMissingDurableTarget (0.06s)
+=== RUN   TestPublicationMetadataBeyond128AndReplay
+--- PASS: TestProducerFeedbackConcurrentCommitAndRevocation/commit (0.20s)
+=== RUN   TestProducerFeedbackConcurrentCommitAndRevocation/revoke
+--- PASS: TestProducerFeedbackConcurrentCommitAndRevocation/revoke (0.21s)
+--- PASS: TestProducerFeedbackConcurrentCommitAndRevocation (0.41s)
+=== RUN   TestProducerFeedbackPerFileProgressAndUnknown
+--- PASS: TestProducerFeedbackPerFileProgressAndUnknown (0.01s)
+=== RUN   TestProducerResultRequiresCommittedOriginalLedger
+--- PASS: TestProducerResultRequiresCommittedOriginalLedger (0.00s)
+=== RUN   TestProducerOriginalOperationAndFiniteWake
+=== RUN   TestProducerOriginalOperationAndFiniteWake/single
+--- PASS: TestProducerOriginalOperationAndFiniteWake/single (0.19s)
+=== RUN   TestProducerOriginalOperationAndFiniteWake/multiple
+--- PASS: TestProducerOriginalOperationAndFiniteWake/multiple (0.16s)
+--- PASS: TestProducerOriginalOperationAndFiniteWake (0.35s)
+=== RUN   TestProducerMultipleLedgerPartialAndCancellation
+--- PASS: TestProducerMultipleLedgerPartialAndCancellation (0.00s)
+=== RUN   TestStandardMCPConfiguredHerdrTaskUsesFixedOperationsWithoutRawSearch
+--- PASS: TestStandardMCPConfiguredHerdrTaskUsesFixedOperationsWithoutRawSearch (0.03s)
+=== RUN   TestStandardMCPPreflightFailureHasNonRetryableStructuredFacts
+--- PASS: TestStandardMCPPreflightFailureHasNonRetryableStructuredFacts (0.01s)
+=== RUN   TestStandardMCPPreflightFailurePreservesUnknownOperation
+--- PASS: TestStandardMCPPreflightFailurePreservesUnknownOperation (0.13s)
+=== RUN   TestStandardMCPTrustedPCBindingAndSingleTask
+--- PASS: TestStandardMCPTrustedPCBindingAndSingleTask (0.04s)
+=== RUN   TestStandardMCPUnknownIsDurableAndCancellationDoesNotKill
+--- PASS: TestStandardMCPUnknownIsDurableAndCancellationDoesNotKill (0.03s)
+=== RUN   TestStandardMCPPublicHeadersCannotGrantBinding
+--- PASS: TestStandardMCPPublicHeadersCannotGrantBinding (0.01s)
+=== RUN   TestStandardMCPPersistenceFailureRetainsUnknownReceiptWithoutRedispatch
+--- PASS: TestStandardMCPPersistenceFailureRetainsUnknownReceiptWithoutRedispatch (0.01s)
+=== RUN   TestStandardMCPInvalidWorkdirDoesNotReserveOrDispatch
+--- PASS: TestStandardMCPInvalidWorkdirDoesNotReserveOrDispatch (0.01s)
+=== RUN   TestStandardMCPNASAmbiguityDoesNotGuess
+--- PASS: TestStandardMCPNASAmbiguityDoesNotGuess (0.02s)
+=== RUN   TestStandardMCPPromptFailuresHaveDurableHonestReceipts
+=== RUN   TestStandardMCPPromptFailuresHaveDurableHonestReceipts/rejected
+--- PASS: TestStandardMCPPromptFailuresHaveDurableHonestReceipts/rejected (0.01s)
+=== RUN   TestStandardMCPPromptFailuresHaveDurableHonestReceipts/wrong-type
+--- PASS: TestStandardMCPPromptFailuresHaveDurableHonestReceipts/wrong-type (0.01s)
+=== RUN   TestStandardMCPPromptFailuresHaveDurableHonestReceipts/missing
+--- PASS: TestStandardMCPPromptFailuresHaveDurableHonestReceipts/missing (0.01s)
+--- PASS: TestStandardMCPPromptFailuresHaveDurableHonestReceipts (0.03s)
+=== RUN   TestStandardMCPRegistrationChangeAfterClaimNeverDispatches
+--- PASS: TestStandardMCPRegistrationChangeAfterClaimNeverDispatches (0.01s)
+=== RUN   TestStandardMCPRootRelativePathAndForegroundEvidence
+=== RUN   TestStandardMCPRootRelativePathAndForegroundEvidence/C:\Synthetic
+--- PASS: TestStandardMCPRootRelativePathAndForegroundEvidence/C:\Synthetic (0.01s)
+=== RUN   TestStandardMCPRootRelativePathAndForegroundEvidence/C:\Synthetic.
+--- PASS: TestStandardMCPRootRelativePathAndForegroundEvidence/C:\Synthetic. (0.01s)
+=== RUN   TestStandardMCPRootRelativePathAndForegroundEvidence/C:\Syntheticchild
+--- PASS: TestStandardMCPRootRelativePathAndForegroundEvidence/C:\Syntheticchild (0.01s)
+=== RUN   TestStandardMCPRootRelativePathAndForegroundEvidence/D:\Movedchild
+--- PASS: TestStandardMCPRootRelativePathAndForegroundEvidence/D:\Movedchild (0.01s)
+=== RUN   TestStandardMCPRootRelativePathAndForegroundEvidence/C:\SyntheticC:\Synthetic
+--- PASS: TestStandardMCPRootRelativePathAndForegroundEvidence/C:\SyntheticC:\Synthetic (0.01s)
+--- PASS: TestStandardMCPRootRelativePathAndForegroundEvidence (0.06s)
+=== RUN   TestTransferPrincipalReserveAndReceiptCAS
+--- PASS: TestTransferPrincipalReserveAndReceiptCAS (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime
+=== RUN   TestTransferPrincipalScopeAndLifetime/audience
+--- PASS: TestTransferPrincipalScopeAndLifetime/audience (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/expired
+--- PASS: TestTransferPrincipalScopeAndLifetime/expired (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/future
+--- PASS: TestTransferPrincipalScopeAndLifetime/future (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/long-lived
+--- PASS: TestTransferPrincipalScopeAndLifetime/long-lived (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/device
+--- PASS: TestTransferPrincipalScopeAndLifetime/device (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/instance
+--- PASS: TestTransferPrincipalScopeAndLifetime/instance (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/operation
+--- PASS: TestTransferPrincipalScopeAndLifetime/operation (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/attempt
+--- PASS: TestTransferPrincipalScopeAndLifetime/attempt (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/generation
+--- PASS: TestTransferPrincipalScopeAndLifetime/generation (0.00s)
+=== RUN   TestTransferPrincipalScopeAndLifetime/session
+--- PASS: TestTransferPrincipalScopeAndLifetime/session (0.00s)
+--- PASS: TestTransferPrincipalScopeAndLifetime (0.00s)
+=== RUN   TestTransferPrincipalAsyncReservedAndRevocation
+--- PASS: TestTransferPrincipalAsyncReservedAndRevocation (0.00s)
+=== RUN   TestTransferReadyUnknownCASAndRestart
+=== RUN   TestTransferReadyUnknownCASAndRestart/database_transaction_commit_outcome_is_unknown
+--- PASS: TestTransferReadyUnknownCASAndRestart/database_transaction_commit_outcome_is_unknown (0.00s)
+=== RUN   TestTransferReadyUnknownCASAndRestart/context_deadline_exceeded
+--- PASS: TestTransferReadyUnknownCASAndRestart/context_deadline_exceeded (0.00s)
+=== RUN   TestTransferReadyUnknownCASAndRestart/context_canceled
+--- PASS: TestTransferReadyUnknownCASAndRestart/context_canceled (0.00s)
+--- PASS: TestTransferReadyUnknownCASAndRestart (0.01s)
+=== RUN   TestTransferReadyExactReceiptAndScope
+=== RUN   TestTransferReadyExactReceiptAndScope/receipt
+--- PASS: TestTransferReadyExactReceiptAndScope/receipt (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/size
+--- PASS: TestTransferReadyExactReceiptAndScope/size (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/offset
+--- PASS: TestTransferReadyExactReceiptAndScope/offset (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/hash
+--- PASS: TestTransferReadyExactReceiptAndScope/hash (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/mime
+--- PASS: TestTransferReadyExactReceiptAndScope/mime (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/state
+--- PASS: TestTransferReadyExactReceiptAndScope/state (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/expiry
+--- PASS: TestTransferReadyExactReceiptAndScope/expiry (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/delivery
+--- PASS: TestTransferReadyExactReceiptAndScope/delivery (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/attempt
+--- PASS: TestTransferReadyExactReceiptAndScope/attempt (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/owner
+--- PASS: TestTransferReadyExactReceiptAndScope/owner (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/operation
+--- PASS: TestTransferReadyExactReceiptAndScope/operation (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/hash#01
+--- PASS: TestTransferReadyExactReceiptAndScope/hash#01 (0.00s)
+=== RUN   TestTransferReadyExactReceiptAndScope/size#01
+--- PASS: TestTransferReadyExactReceiptAndScope/size#01 (0.00s)
+--- PASS: TestTransferReadyExactReceiptAndScope (0.01s)
+=== RUN   TestTransferReadyCancellationBeforeProof
+--- PASS: TestTransferReadyCancellationBeforeProof (0.00s)
+=== RUN   TestCommittedTransferReadyRequiresTerminalAuthorizedProof
+2026/10/24 13:37:56 INFO job operation=computer.delivery.verify latency=780.291µs
+--- PASS: TestCommittedTransferReadyRequiresTerminalAuthorizedProof (0.01s)
+PASS
+--- PASS: TestPublicationMetadataBeyond128AndReplay (1.20s)
+=== RUN   TestPublicationMetadataByteBudgetAndStateTransitions
+--- PASS: TestPublicationMetadataByteBudgetAndStateTransitions (0.02s)
+=== RUN   TestPublicationMetadataDirtyRecovery
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_dirty
+--- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_dirty (0.01s)
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_journal_sync
+--- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_journal_sync (0.01s)
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_usage_sync
+--- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_usage_sync (0.01s)
+=== RUN   TestPublicationMetadataDirtyRecovery/metadata_after_clean
+--- PASS: TestPublicationMetadataDirtyRecovery/metadata_after_clean (0.01s)
+--- PASS: TestPublicationMetadataDirtyRecovery (0.06s)
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/empty-journal
+--- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/empty-journal (0.01s)
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-frame
+--- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-frame (0.01s)
+=== RUN   TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-usage
+--- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence/corrupt-usage (0.01s)
+--- PASS: TestPublicationMetadataUnknownAndCorruptionPreserveEvidence (0.03s)
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/directory
+--- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/directory (0.01s)
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/bucket
+--- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/bucket (0.02s)
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/usage
+--- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/usage (0.02s)
+=== RUN   TestPublicationMetadataMissingCatalogNeverMeansAbsent/empty-bucket
+--- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent/empty-bucket (0.02s)
+--- PASS: TestPublicationMetadataMissingCatalogNeverMeansAbsent (0.07s)
+=== RUN   TestPublicationMetadataMissingJournalNeverMeansAbsent
+--- PASS: TestPublicationMetadataMissingJournalNeverMeansAbsent (0.02s)
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership/usage-torn
+--- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership/usage-torn (0.01s)
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership/missing-journal
+--- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership/missing-journal (0.01s)
+=== RUN   TestPublicationMetadataDirtyWitnessPreservesMembership/corrupt-witness
+--- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership/corrupt-witness (0.01s)
+--- PASS: TestPublicationMetadataDirtyWitnessPreservesMembership (0.04s)
+=== RUN   TestPublicationMetadataUntrackedJournalFailsClosed
+--- PASS: TestPublicationMetadataUntrackedJournalFailsClosed (0.01s)
+=== RUN   TestPublicationMetadataFreshInitializationNeverRepairsExistingState
+--- PASS: TestPublicationMetadataFreshInitializationNeverRepairsExistingState (0.01s)
+=== RUN   TestRegisteredProcessExitBeforeAcknowledgement
+--- PASS: TestRegisteredProcessExitBeforeAcknowledgement (0.01s)
+=== RUN   TestRegisteredSourceRestartAndMissingChanges
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/changed
+--- PASS: TestRegisteredSourceRestartAndMissingChanges/changed (0.00s)
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/deleted
+--- PASS: TestRegisteredSourceRestartAndMissingChanges/deleted (0.00s)
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/canceled
+--- PASS: TestRegisteredSourceRestartAndMissingChanges/canceled (0.00s)
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/busy
+--- PASS: TestRegisteredSourceRestartAndMissingChanges/busy (0.00s)
+--- PASS: TestRegisteredSourceRestartAndMissingChanges (0.02s)
+=== RUN   TestRegisteredSourceResumesReceiptWithoutSnapshot
+--- PASS: TestRegisteredSourceResumesReceiptWithoutSnapshot (0.05s)
+=== RUN   TestRegisteredSourceBlockProofRejectsUndetectedChange
+--- PASS: TestRegisteredSourceBlockProofRejectsUndetectedChange (0.02s)
+=== RUN   TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins
+--- PASS: TestKnownReceiptCheckpointFailureRecoversAndServerOffsetWins (0.01s)
+=== RUN   TestCancellationBeforeAdmission
+--- PASS: TestCancellationBeforeAdmission (0.00s)
+=== RUN   TestDownloadFullCheckpointRechecksAuthorization
+--- PASS: TestDownloadFullCheckpointRechecksAuthorization (0.01s)
+=== RUN   TestCreateQuotaRejectionCanRetryButUnknownCannot
+--- PASS: TestCreateQuotaRejectionCanRetryButUnknownCannot (0.01s)
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity/1
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity/1 (0.04s)
+=== RUN   TestQueueReleaseConfirmedFreesJobAndByteCapacity/2
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity/2 (0.04s)
+--- PASS: TestQueueReleaseConfirmedFreesJobAndByteCapacity (0.08s)
+=== RUN   TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered
+--- PASS: TestQueueReleaseNeverTreatsUnknownOrCancelAsDelivered (0.05s)
+=== RUN   TestQueueReleaseProcessCrash
+=== RUN   TestQueueReleaseProcessCrash/after_intent
+--- PASS: TestQueueReleaseProcessCrash/after_intent (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_payload
+--- PASS: TestQueueReleaseProcessCrash/after_payload (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_receipt
+--- PASS: TestQueueReleaseProcessCrash/after_receipt (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_truncate
+--- PASS: TestQueueReleaseProcessCrash/after_truncate (0.04s)
+=== RUN   TestQueueReleaseProcessCrash/after_compact
+--- PASS: TestQueueReleaseProcessCrash/after_compact (0.05s)
+=== RUN   TestQueueReleaseProcessCrash/after_finish
+--- PASS: TestQueueReleaseProcessCrash/after_finish (0.05s)
+--- PASS: TestQueueReleaseProcessCrash (0.29s)
+=== RUN   TestQueueReleaseReceiptCatalogBound
+ok  	github.com/felinics/memoh/internal/computertask	25.024s
+=== RUN   TestFeedbackStrictOriginalBindingAndBound
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/session
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/session (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/attempt
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/attempt (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/bot
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/bot (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/user
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/user (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/target
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/target (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/generation
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/generation (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/duplicate
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/duplicate (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/missing
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/missing (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/delivered
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/delivered (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/raw-error
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/raw-error (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/operation
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/operation (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/run
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/run (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/root
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/root (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/plan
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/plan (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/retry-unknown
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/retry-unknown (0.00s)
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/unknown-backoff
+--- PASS: TestFeedbackStrictOriginalBindingAndBound/unknown-backoff (0.00s)
+--- PASS: TestFeedbackStrictOriginalBindingAndBound (0.03s)
+=== RUN   TestBoundedFilePlanIdentity
+--- PASS: TestBoundedFilePlanIdentity (0.00s)
+=== RUN   TestArtifactRejectsPathsAndWindowsDevices
+--- PASS: TestArtifactRejectsPathsAndWindowsDevices (0.00s)
+PASS
+--- PASS: TestQueueReleaseReceiptCatalogBound (0.82s)
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit/cancel
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit/cancel (0.04s)
+=== RUN   TestQueueReleaseCanceledReservationAndLegacyCommit/legacy-commit
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit/legacy-commit (0.04s)
+--- PASS: TestQueueReleaseCanceledReservationAndLegacyCommit (0.07s)
+=== RUN   TestSealedSnapshotLinearReadsAcrossReopen
+    snapshot_test.go:78: 64 MiB, 8 reopened chunk handles: data=67108864 proof=12288 bytes; plus one 32-byte root check per open
+--- PASS: TestSealedSnapshotLinearReadsAcrossReopen (0.46s)
+=== RUN   TestSnapshotSchemaRejectsLegacyWithoutFallback
+--- PASS: TestSnapshotSchemaRejectsLegacyWithoutFallback (0.00s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/1
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/1 (0.00s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/1048593
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/1048593 (0.01s)
+=== RUN   TestSealedSnapshotOddGeometryAndUnalignedReads/3145745
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads/3145745 (0.04s)
+--- PASS: TestSealedSnapshotOddGeometryAndUnalignedReads (0.05s)
+=== RUN   TestSealedSnapshotTamperAndIdentity
+=== RUN   TestSealedSnapshotTamperAndIdentity/data
+--- PASS: TestSealedSnapshotTamperAndIdentity/data (0.02s)
+=== RUN   TestSealedSnapshotTamperAndIdentity/proof
+--- PASS: TestSealedSnapshotTamperAndIdentity/proof (0.02s)
+=== RUN   TestSealedSnapshotTamperAndIdentity/root
+--- PASS: TestSealedSnapshotTamperAndIdentity/root (0.02s)
+=== RUN   TestSealedSnapshotTamperAndIdentity/identity
+--- PASS: TestSealedSnapshotTamperAndIdentity/identity (0.03s)
+--- PASS: TestSealedSnapshotTamperAndIdentity (0.08s)
+=== RUN   TestSnapshotDeadlinePreservesUploadResume
+--- PASS: TestSnapshotDeadlinePreservesUploadResume (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/deliverymeta	1.051s
+=== RUN   TestCLIBudgetConfigurationAndOldQueueRecovery
+--- PASS: TestCLIBudgetConfigurationAndOldQueueRecovery (0.02s)
+=== RUN   TestCLIPathChild
+--- PASS: TestCLIPathChild (0.00s)
+=== RUN   TestCLIPathTLSRestartAndLostResponses
+ok  	github.com/felinics/memoh/internal/transferclient	27.473s
+=== RUN   TestSeekableOriginalRechecksRevocationOnReadAndSeek
+--- PASS: TestSeekableOriginalRechecksRevocationOnReadAndSeek (0.00s)
+=== RUN   TestHandoffDescribesAndReadsSameOriginalWithoutCopying
+--- PASS: TestHandoffDescribesAndReadsSameOriginalWithoutCopying (0.00s)
+=== RUN   TestHandoffAttachmentRevocationStopsOpenStreamAndFutureMetadata
+--- PASS: TestHandoffAttachmentRevocationStopsOpenStreamAndFutureMetadata (0.00s)
+=== RUN   TestHandoffRejectsUndelegatedHashEvenWhenUserOwnsIt
+--- PASS: TestHandoffRejectsUndelegatedHashEvenWhenUserOwnsIt (0.00s)
+=== RUN   TestResultAttachmentReadsSpecialistOriginalWithBothGrants
+--- PASS: TestResultAttachmentReadsSpecialistOriginalWithBothGrants (0.00s)
+=== RUN   TestAuthorizedSpecialistHandoffKeepsDistinctOwnership
+--- PASS: TestAuthorizedSpecialistHandoffKeepsDistinctOwnership (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/other_user
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/other_user (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_owner
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_owner (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_bot
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_bot (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_team
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_team (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_team
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_team (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/source_grant_revoked
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/source_grant_revoked (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_grant_revoked
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_grant_revoked (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/user_revoked
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/user_revoked (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_cycle
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_cycle (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/forged_root
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/forged_root (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_owner
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_owner (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/cross_bot_parent
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/cross_bot_parent (0.00s)
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation
+=== RUN   TestHandoffComputerIntersectionAndRevocation/selected_other_PC
+--- PASS: TestHandoffComputerIntersectionAndRevocation/selected_other_PC (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/source_revoked
+--- PASS: TestHandoffComputerIntersectionAndRevocation/source_revoked (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/target_revoked
+--- PASS: TestHandoffComputerIntersectionAndRevocation/target_revoked (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/runtime_revoked
+--- PASS: TestHandoffComputerIntersectionAndRevocation/runtime_revoked (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/owner_changed
+--- PASS: TestHandoffComputerIntersectionAndRevocation/owner_changed (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/runtime_changed
+--- PASS: TestHandoffComputerIntersectionAndRevocation/runtime_changed (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/registration_changed
+--- PASS: TestHandoffComputerIntersectionAndRevocation/registration_changed (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/source_exec_revoked
+--- PASS: TestHandoffComputerIntersectionAndRevocation/source_exec_revoked (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/target_exec_revoked
+--- PASS: TestHandoffComputerIntersectionAndRevocation/target_exec_revoked (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation/forged_pair
+--- PASS: TestHandoffComputerIntersectionAndRevocation/forged_pair (0.00s)
+--- PASS: TestHandoffComputerIntersectionAndRevocation (0.00s)
+=== RUN   TestPCSelectionCannotBroadenThroughChildMetadata
+--- PASS: TestPCSelectionCannotBroadenThroughChildMetadata (0.00s)
+=== RUN   TestSingleAttachmentMustBeLinkedToTheCorrectConversationAndRemainAuthorized
+--- PASS: TestSingleAttachmentMustBeLinkedToTheCorrectConversationAndRemainAuthorized (0.00s)
+=== RUN   TestPCTextAndStoredMediaDoNotRequireExecutionPermission
+--- PASS: TestPCTextAndStoredMediaDoNotRequireExecutionPermission (0.00s)
+=== RUN   TestResultCanBelongToOwnedSpecialistDescendant
+--- PASS: TestResultCanBelongToOwnedSpecialistDescendant (0.00s)
+=== RUN   TestDelegationDeadlineIsUnknownAndNeverReexecutes
+--- PASS: TestDelegationDeadlineIsUnknownAndNeverReexecutes (0.02s)
+=== RUN   TestDelegationExecutionContextConfig
+--- PASS: TestDelegationExecutionContextConfig (0.00s)
+=== RUN   TestDelegationPersistsHostRouteNotInputRoute
+--- PASS: TestDelegationPersistsHostRouteNotInputRoute (0.00s)
+=== RUN   TestFinalSummaryAllowlistsFinalAssistantText
+--- PASS: TestFinalSummaryAllowlistsFinalAssistantText (0.00s)
+=== RUN   TestFinalSummaryDoesNotFallBackToEarlierOrToolOutput
+--- PASS: TestFinalSummaryDoesNotFallBackToEarlierOrToolOutput (0.00s)
+=== RUN   TestFinalSummaryPreservesUTF8AtLimit
+--- PASS: TestFinalSummaryPreservesUTF8AtLimit (0.01s)
+=== RUN   TestPersistedPCScopeMapsSameRuntimeWithoutClearingSourceBinding
+--- PASS: TestPersistedPCScopeMapsSameRuntimeWithoutClearingSourceBinding (0.00s)
+=== RUN   TestSubmitDeduplicatesConcurrentRequestsAndGETNeverDispatches
+--- PASS: TestSubmitDeduplicatesConcurrentRequestsAndGETNeverDispatches (0.00s)
+=== RUN   TestUnknownAndDeliveryFailureDoNotRerunBusiness
+=== RUN   TestUnknownAndDeliveryFailureDoNotRerunBusiness/unknown
+--- PASS: TestUnknownAndDeliveryFailureDoNotRerunBusiness/unknown (0.00s)
+=== RUN   TestUnknownAndDeliveryFailureDoNotRerunBusiness/completed
+--- PASS: TestUnknownAndDeliveryFailureDoNotRerunBusiness/completed (0.00s)
+--- PASS: TestUnknownAndDeliveryFailureDoNotRerunBusiness (0.00s)
+=== RUN   TestTextAndSingleOriginalReturnThenRevocation
+--- PASS: TestTextAndSingleOriginalReturnThenRevocation (0.00s)
+=== RUN   TestRetryDeliveryNeverRunsSpecialistAgain
+--- PASS: TestRetryDeliveryNeverRunsSpecialistAgain (0.00s)
+=== RUN   TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget
+--- PASS: TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget (0.14s)
+PASS
+ok  	github.com/felinics/memoh/internal/botdelegation	1.230s
+--- PASS: TestCLIPathTLSRestartAndLostResponses (6.28s)
+=== RUN   TestCLIPathSummaryMissingConfigurationDoesNotCreateState
+--- PASS: TestCLIPathSummaryMissingConfigurationDoesNotCreateState (0.00s)
+=== RUN   TestCLIPathCorruptQueueCannotAdvertiseIndependentDue
+--- PASS: TestCLIPathCorruptQueueCannotAdvertiseIndependentDue (0.02s)
+=== RUN   TestCLIPathHistoryMigration
+--- PASS: TestCLIPathHistoryMigration (0.00s)
+=== RUN   TestAdmissionMetadataDeadlineAndBounds
+--- PASS: TestAdmissionMetadataDeadlineAndBounds (0.02s)
+=== RUN   TestProducerAdmissionPendingCanResumeSameDelivery
+=== RUN   TestProducerAdmissionPendingCanResumeSameDelivery/enqueue-result
+--- PASS: TestProducerAdmissionPendingCanResumeSameDelivery/enqueue-result (0.29s)
+=== RUN   TestProducerAdmissionPendingCanResumeSameDelivery/collect-result
+--- PASS: TestProducerAdmissionPendingCanResumeSameDelivery/collect-result (0.29s)
+--- PASS: TestProducerAdmissionPendingCanResumeSameDelivery (0.58s)
+=== RUN   TestCLIProducerPageChild
+--- PASS: TestCLIProducerPageChild (0.00s)
+=== RUN   TestCLIPathProducerPagesRestartAndPartialFailure
+=== RUN   TestCLIPathProducerPagesRestartAndPartialFailure/0
+--- PASS: TestCLIPathProducerPagesRestartAndPartialFailure/0 (4.21s)
+=== RUN   TestCLIPathProducerPagesRestartAndPartialFailure/7
+--- PASS: TestCLIPathProducerPagesRestartAndPartialFailure/7 (4.19s)
+--- PASS: TestCLIPathProducerPagesRestartAndPartialFailure (8.40s)
+PASS
+ok  	github.com/felinics/memoh/cmd/transferqueue	16.343s
+=== RUN   TestPersistedCompletionProjection
+=== RUN   TestPersistedCompletionProjection/success
+--- PASS: TestPersistedCompletionProjection/success (0.00s)
+=== RUN   TestPersistedCompletionProjection/failed
+--- PASS: TestPersistedCompletionProjection/failed (0.00s)
+=== RUN   TestPersistedCompletionProjection/aborted
+--- PASS: TestPersistedCompletionProjection/aborted (0.00s)
+=== RUN   TestPersistedCompletionProjection/incomplete
+--- PASS: TestPersistedCompletionProjection/incomplete (0.00s)
+=== RUN   TestPersistedCompletionProjection/invalid_protocol
+--- PASS: TestPersistedCompletionProjection/invalid_protocol (0.00s)
+=== RUN   TestPersistedCompletionProjection/output_limit
+--- PASS: TestPersistedCompletionProjection/output_limit (0.00s)
+=== RUN   TestPersistedCompletionProjection/not_started
+--- PASS: TestPersistedCompletionProjection/not_started (0.00s)
+=== RUN   TestPersistedCompletionProjection/empty_final
+--- PASS: TestPersistedCompletionProjection/empty_final (0.00s)
+=== RUN   TestPersistedCompletionProjection/truncated
+--- PASS: TestPersistedCompletionProjection/truncated (0.00s)
+=== RUN   TestPersistedCompletionProjection/legacy
+--- PASS: TestPersistedCompletionProjection/legacy (0.00s)
+=== RUN   TestPersistedCompletionProjection/future_version
+--- PASS: TestPersistedCompletionProjection/future_version (0.00s)
+=== RUN   TestPersistedCompletionProjection/missing_receipt
+=== RUN   TestRegistryProviderTemplatesKeepAllProviderFiles
+--- PASS: TestRegistryProviderTemplatesKeepAllProviderFiles (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission
+--- PASS: TestPersistedCompletionProjection/missing_receipt (0.00s)
+=== RUN   TestPersistedCompletionProjection/wrong_attempt
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/old_fence
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/old_fence (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/unclaimed
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/unclaimed (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/terminal
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/terminal (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/lost
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/lost (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/accepted_before_authenticated_resume
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/accepted_before_authenticated_resume (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_bot
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_bot (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_team
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_team (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_session
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_session (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_user
+--- PASS: TestPersistedCompletionProjection/wrong_attempt (0.00s)
+=== RUN   TestPersistedCompletionProjection/wrong_session
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/other_user (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/ownerless
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/ownerless (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/deleted
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/deleted (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/malformed_input
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/malformed_input (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_model_metadata
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_model_metadata (0.00s)
+=== RUN   TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_submitted_input_without_host_references
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission/only_submitted_input_without_host_references (0.00s)
+--- PASS: TestDelegationPendingInputRequiresCurrentOwnedAdmission (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute
+=== RUN   TestDelegationHostRestoresOriginalRoute/channel
+--- PASS: TestPersistedCompletionProjection/wrong_session (0.00s)
+--- PASS: TestDelegationHostRestoresOriginalRoute/channel (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/route
+--- PASS: TestDelegationHostRestoresOriginalRoute/route (0.00s)
+=== RUN   TestPersistedCompletionProjection/no_exit
+=== RUN   TestDelegationHostRestoresOriginalRoute/recipient
+--- PASS: TestDelegationHostRestoresOriginalRoute/recipient (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/chat
+--- PASS: TestDelegationHostRestoresOriginalRoute/chat (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/bot
+--- PASS: TestDelegationHostRestoresOriginalRoute/bot (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/owner
+--- PASS: TestDelegationHostRestoresOriginalRoute/owner (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/team
+--- PASS: TestDelegationHostRestoresOriginalRoute/team (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/route#01
+--- PASS: TestDelegationHostRestoresOriginalRoute/route#01 (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/platform
+--- PASS: TestDelegationHostRestoresOriginalRoute/platform (0.00s)
+=== RUN   TestDelegationHostRestoresOriginalRoute/empty-recipient
+--- PASS: TestDelegationHostRestoresOriginalRoute/empty-recipient (0.00s)
+--- PASS: TestDelegationHostRestoresOriginalRoute (0.00s)
+=== RUN   TestDelegationLegacyAndChangedReturnRoutes
+=== RUN   TestDelegationLegacyAndChangedReturnRoutes/recipient
+--- PASS: TestDelegationLegacyAndChangedReturnRoutes/recipient (0.00s)
+=== RUN   TestDelegationLegacyAndChangedReturnRoutes/route
+--- PASS: TestDelegationLegacyAndChangedReturnRoutes/route (0.00s)
+=== RUN   TestDelegationLegacyAndChangedReturnRoutes/channel-config
+--- PASS: TestDelegationLegacyAndChangedReturnRoutes/channel-config (0.00s)
+=== RUN   TestDelegationLegacyAndChangedReturnRoutes/version
+--- PASS: TestDelegationLegacyAndChangedReturnRoutes/version (0.00s)
+--- PASS: TestPersistedCompletionProjection/no_exit (0.00s)
+=== RUN   TestPersistedCompletionProjection/pending_result
+--- PASS: TestDelegationLegacyAndChangedReturnRoutes (0.00s)
+=== RUN   TestDelegationLocalChannelCompatibility
+=== RUN   TestDelegationLocalChannelCompatibility/#00
+--- PASS: TestDelegationLocalChannelCompatibility/#00 (0.00s)
+=== RUN   TestDelegationLocalChannelCompatibility/local
+--- PASS: TestDelegationLocalChannelCompatibility/local (0.00s)
+=== RUN   TestDelegationLocalChannelCompatibility/web
+--- PASS: TestDelegationLocalChannelCompatibility/web (0.00s)
+=== RUN   TestDelegationLocalChannelCompatibility/cli
+--- PASS: TestDelegationLocalChannelCompatibility/cli (0.00s)
+--- PASS: TestDelegationLocalChannelCompatibility (0.00s)
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/claude-code (0.00s)
+=== RUN   TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex
+--- PASS: TestPersistedCompletionProjection/pending_result (0.00s)
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope/codex (0.00s)
+--- PASS: TestComputerOriginalDriversReachLauncherWithPCTaskScope (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial
+=== RUN   TestPersistedCompletionProjection/missing_completion
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/native_explicit
+--- PASS: TestPersistedCompletionProjection/missing_completion (0.00s)
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/native_explicit (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/native_inferred
+=== RUN   TestPersistedCompletionProjection/bad_success
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/native_inferred (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_explicit
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_explicit (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_inferred
+--- PASS: TestPersistedCompletionProjection/bad_success (0.00s)
+=== RUN   TestPersistedCompletionProjection/oversized
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/unknown_native_inferred (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/missing_binding
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/missing_binding (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/wrong_session
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/wrong_session (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/other_pc_scope
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/other_pc_scope (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/read_denied
+--- PASS: TestPersistedCompletionProjection/oversized (0.00s)
+=== RUN   TestPersistedCompletionProjection/forged_outcome
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/read_denied (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/write_denied
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/write_denied (0.00s)
+=== RUN   TestComputerTaskPreflightFailureIsNotConversationDenial/exec_denied
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial/exec_denied (0.00s)
+--- PASS: TestPersistedCompletionProjection/forged_outcome (0.00s)
+=== RUN   TestPersistedCompletionProjection/too_few_records
+--- PASS: TestComputerTaskPreflightFailureIsNotConversationDenial (0.01s)
+=== RUN   TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall
+--- PASS: TestComputerScopeBlocksUnscopedConnectorCatalogAndStaleCall (0.00s)
+=== RUN   TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundary
+--- PASS: TestComputerTaskAuthorizationKeepsForegroundPolicyAndAgentPermissionBoundary (0.00s)
+=== RUN   TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation
+--- PASS: TestDelegatedNASRetainsCloudConnectorsAndRechecksRevocation (0.00s)
+=== RUN   TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget
+--- PASS: TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/codex (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/claude-code (0.00s)
+=== RUN   TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess/grok-build (0.00s)
+--- PASS: TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess (0.00s)
+--- PASS: TestPersistedCompletionProjection/too_few_records (0.00s)
+=== RUN   TestHostPreservesUpstreamWorkspaceBehavior
+--- PASS: TestHostPreservesUpstreamWorkspaceBehavior (0.00s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/success
+=== RUN   TestPersistedCompletionProjection/invalid_with_text
+--- PASS: TestPersistedCompletionProjection/invalid_with_text (0.00s)
+--- PASS: TestPersistedCompletionProjection (0.03s)
+=== RUN   TestResultProjectionWhitelistAndNoWrite
+--- PASS: TestResultProjectionWhitelistAndNoWrite (0.00s)
+=== RUN   TestLateCompletionIsLiveWithoutChangingPaginationKeys
+--- PASS: TestLateCompletionIsLiveWithoutChangingPaginationKeys (0.00s)
+=== RUN   TestParentAggregatesOwnedDescendantsWithoutChangingOwnership
+--- PASS: TestParentAggregatesOwnedDescendantsWithoutChangingOwnership (0.00s)
+=== RUN   TestScopeAndRevocation
+=== RUN   TestScopeAndRevocation/user
+--- PASS: TestScopeAndRevocation/user (0.00s)
+=== RUN   TestScopeAndRevocation/bot
+--- PASS: TestScopeAndRevocation/bot (0.00s)
+=== RUN   TestScopeAndRevocation/parent
+--- PASS: TestScopeAndRevocation/parent (0.00s)
+=== RUN   TestScopeAndRevocation/child_user
+--- PASS: TestScopeAndRevocation/child_user (0.00s)
+=== RUN   TestScopeAndRevocation/child_bot
+--- PASS: TestScopeAndRevocation/child_bot (0.00s)
+=== RUN   TestScopeAndRevocation/child_deleted
+--- PASS: TestScopeAndRevocation/child_deleted (0.00s)
+=== RUN   TestScopeAndRevocation/foreign_session
+--- PASS: TestScopeAndRevocation/foreign_session (0.00s)
+=== RUN   TestScopeAndRevocation/pc_mismatch
+--- PASS: TestScopeAndRevocation/pc_mismatch (0.00s)
+=== RUN   TestScopeAndRevocation/pc_grant_revoked
+--- PASS: TestScopeAndRevocation/pc_grant_revoked (0.00s)
+=== RUN   TestScopeAndRevocation/root_grant_revoked
+--- PASS: TestScopeAndRevocation/root_grant_revoked (0.00s)
+=== RUN   TestScopeAndRevocation/registration_changed
+--- PASS: TestScopeAndRevocation/registration_changed (0.00s)
+=== RUN   TestScopeAndRevocation/child_broadens
+--- PASS: TestScopeAndRevocation/child_broadens (0.00s)
+=== RUN   TestScopeAndRevocation/cycle
+--- PASS: TestScopeAndRevocation/cycle (0.00s)
+=== RUN   TestScopeAndRevocation/receipt_user
+--- PASS: TestScopeAndRevocation/receipt_user (0.00s)
+=== RUN   TestScopeAndRevocation/receipt_bot
+--- PASS: TestScopeAndRevocation/receipt_bot (0.00s)
+--- PASS: TestScopeAndRevocation (0.00s)
+=== RUN   TestSelectedPCInheritedThroughChildren
+--- PASS: TestSelectedPCInheritedThroughChildren (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/id
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/id (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/snapshot
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/snapshot (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/primary
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/primary (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/malformed
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/malformed (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/conflicting
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/conflicting (0.00s)
+=== RUN   TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/workdir_precedence
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS/workdir_precedence (0.00s)
+--- PASS: TestUnboundSelectionAndPrimaryNeverBecomeImplicitNAS (0.00s)
+=== RUN   TestProjectionNeverLeaksAndStatesStayHonest
+--- PASS: TestProjectionNeverLeaksAndStatesStayHonest (0.00s)
+=== RUN   TestPiBatchReceiptsRemainOutsideFrozenSummaryContract
+--- PASS: TestPiBatchReceiptsRemainOutsideFrozenSummaryContract (0.00s)
+=== RUN   TestCursorStableAcrossLateStateChangesAndRevocation
+--- PASS: TestCursorStableAcrossLateStateChangesAndRevocation (0.00s)
+=== RUN   TestBoundedFilteredPagesStillAdvance
+--- PASS: TestBoundedFilteredPagesStillAdvance (0.01s)
+=== RUN   TestSubagentUsesOwnRunAndVisibleText
+--- PASS: TestSubagentUsesOwnRunAndVisibleText (0.00s)
+=== RUN   TestSubagentTextProjectionIsBoundedAndNotRawLogs
+--- PASS: TestSubagentTextProjectionIsBoundedAndNotRawLogs (0.01s)
+PASS
+    image_capability_spawn_test.go:308: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=3 send=1 steps=2 mode=success original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/success (0.12s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/reference_success
+    image_capability_spawn_test.go:308: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=3 send=1 steps=2 mode=reference_success original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/reference_success (0.10s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/revoked
+    image_capability_spawn_test.go:308: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=revoked original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/revoked (0.10s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/foreign_reference
+    image_capability_spawn_test.go:308: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=foreign_reference original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/foreign_reference (0.13s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/missing_reference
+    image_capability_spawn_test.go:308: actual spawn admission=1 child_session=1 child_chat=2 image_POST=0 parent_chat=2 send=0 steps=2 mode=missing_reference original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/missing_reference (0.12s)
+=== RUN   TestImageCapabilityActualSpawnAndParentSend/unknown
+    image_capability_spawn_test.go:308: actual spawn admission=1 child_session=1 child_chat=2 image_POST=1 parent_chat=2 send=0 steps=2 mode=unknown original_sha256=8f9aae64d410eb9a9ba7a115fec22c431cf937a2a5ca6010dfbca344f8e2dfff
+--- PASS: TestImageCapabilityActualSpawnAndParentSend/unknown (0.12s)
+--- PASS: TestImageCapabilityActualSpawnAndParentSend (0.69s)
+=== RUN   TestImageCapabilityUsesCurrentBotAndSessionAuthority
+--- PASS: TestImageCapabilityUsesCurrentBotAndSessionAuthority (0.00s)
+=== RUN   TestACPToolProvidersIncludeAskUser
+--- PASS: TestACPToolProvidersIncludeAskUser (0.00s)
+=== RUN   TestAgentLimitsFromConfigUsesCustomValues
+--- PASS: TestAgentLimitsFromConfigUsesCustomValues (0.00s)
+=== RUN   TestAgentLoopReselectModeFromConfigDefaultsToActiveWhenUnrecognized
+2026/10/24 13:38:29 WARN unrecognized agent.context_loop_reselect value; defaulting to active value=bogus
+--- PASS: TestAgentLoopReselectModeFromConfigDefaultsToActiveWhenUnrecognized (0.00s)
+=== RUN   TestAgentLoopReselectModeFromConfigHonorsShadow
+--- PASS: TestAgentLoopReselectModeFromConfigHonorsShadow (0.00s)
+=== RUN   TestProvideAgentWiresLoopReselectMode
+--- PASS: TestProvideAgentWiresLoopReselectMode (0.00s)
+=== RUN   TestLazyLLMCompactResolvesModelWithRequestBotID
+--- PASS: TestLazyLLMCompactResolvesModelWithRequestBotID (0.00s)
+=== RUN   TestConfigureMemoryProviderRegistryLoadsPersistedProviderOnCacheMiss
+--- PASS: TestConfigureMemoryProviderRegistryLoadsPersistedProviderOnCacheMiss (0.00s)
+=== RUN   TestValidateDriverDependencies
+=== RUN   TestValidateDriverDependencies/real_declarations_pass
+--- PASS: TestValidateDriverDependencies/real_declarations_pass (0.00s)
+=== RUN   TestValidateDriverDependencies/drivers_without_a_declaration_are_ignored
+--- PASS: TestValidateDriverDependencies/drivers_without_a_declaration_are_ignored (0.00s)
+=== RUN   TestValidateDriverDependencies/nil_catalog
+--- PASS: TestValidateDriverDependencies/nil_catalog (0.00s)
+=== RUN   TestValidateDriverDependencies/dependency_not_in_the_catalog
+--- PASS: TestValidateDriverDependencies/dependency_not_in_the_catalog (0.00s)
+=== RUN   TestValidateDriverDependencies/primary_command_is_not_the_launcher
+--- PASS: TestValidateDriverDependencies/primary_command_is_not_the_launcher (0.00s)
+=== RUN   TestValidateDriverDependencies/dependency_provides_a_different_command
+--- PASS: TestValidateDriverDependencies/dependency_provides_a_different_command (0.00s)
+=== RUN   TestValidateDriverDependencies/runtime_without_a_registered_launcher_command
+--- PASS: TestValidateDriverDependencies/runtime_without_a_registered_launcher_command (0.00s)
+=== RUN   TestValidateDriverDependencies/all_violations_reported_together
+--- PASS: TestValidateDriverDependencies/all_violations_reported_together (0.00s)
+--- PASS: TestValidateDriverDependencies (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/sessiontask	1.105s
+ok  	github.com/felinics/memoh/cmd/internal/core	1.774s

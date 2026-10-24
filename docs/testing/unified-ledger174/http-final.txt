@@ -1,0 +1,18 @@
+=== RUN   TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch
+--- PASS: TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch (0.01s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/anonymous
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/anonymous (0.00s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/malformed
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/malformed (0.00s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/bad_signature
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/bad_signature (0.00s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/expired
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/expired (0.00s)
+=== RUN   TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/revoked
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace/revoked (0.00s)
+--- PASS: TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace (0.01s)
+=== RUN   TestSessionTaskDeliveryPagesAuthorizeEveryRequest
+--- PASS: TestSessionTaskDeliveryPagesAuthorizeEveryRequest (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.088s

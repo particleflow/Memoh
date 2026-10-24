@@ -140,5 +140,6 @@ func exerciseDeliveryEntryPages(ctx context.Context, t *testing.T, store *postgr
 			t.Fatal("same ID conflict accepted", err)
 		}
 	}
+	t.Run("session-http-pages", func(t *testing.T) { exerciseSessionDeliveryHTTP(ctx, t, store, id, count) })
 	t.Logf("ledger metadata=%d pages=%d operation_json_bytes=%d elapsed=%s; restart/CAS/repeated page/late insert/original IDs preserved; one small underlying asset, not bulk network transfer", count, pages, len(r.Details), time.Since(started))
 }

@@ -116,3 +116,11 @@ assertions; the final focused PG and race logs cover those additions.
 - [ledger-pages-full-pg.txt](evidence/ledger-pages-full-pg.txt), SHA256 `0782b0ab53c8b5ac9b3d9f2aab64f0012ab2c7acb54863f6eb76f3074abd37f1`.
 - [ledger-pages-final-pg.txt](evidence/ledger-pages-final-pg.txt), SHA256 `e256b8f741248e80b0d1a36cfee2d0b1e0e9db163950e1ce32592892099549da`.
 - [ledger-pages-final-race.txt](evidence/ledger-pages-final-race.txt), SHA256 `d35a65d259a0cf18ad9c37792df12769f858ae8938915527e9454919fd1b2e13`.
+
+## Unified candidate HTTP projection
+
+The follow-on candidate exposes the same bounded ledger through the existing
+session task HTTP namespace; see [the client contract and integration evidence](unified-ledger174/README.md).
+The original MCP query and transfer credential endpoints are unchanged. The new
+HTTP read route does not provide file download authority or automatically add a
+file browser to Web/phone clients.

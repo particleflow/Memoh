@@ -37,10 +37,20 @@ func readDeliveryPage(ctx context.Context, store dbstore.ComputerDeliveryEntrySt
 			return DeliveryPage{}, ErrInvalid
 		}
 	}
-	out := DeliveryPage{Version: 1, OperationID: r.ID, Revision: strconv.FormatInt(r.Revision, 10), Files: []DeliveryPageFile{}, NextAfter: after}
 	entries, err := store.ListComputerDeliveryEntries(ctx, r, after, deliverymeta.MaxArtifacts+1)
 	if err != nil {
-		return out, err
+		return DeliveryPage{}, err
+	}
+	return ProjectDeliveryPage(r, after, entries, scope)
+}
+
+// ProjectDeliveryPage allowlists persisted delivery facts without performing IO.
+// The caller must authorize the operation and scope its bounded row query first.
+// It exposes neither transfer credentials nor filesystem paths or download URLs.
+func ProjectDeliveryPage(r dbstore.ComputerOperationRecord, after string, entries []dbstore.ComputerDeliveryEntry, scope string) (DeliveryPage, error) {
+	out := DeliveryPage{Version: 1, OperationID: r.ID, Revision: strconv.FormatInt(r.Revision, 10), Files: []DeliveryPageFile{}, NextAfter: after}
+	if len(entries) > deliverymeta.MaxArtifacts+1 {
+		return DeliveryPage{}, ErrDeliveryConflict
 	}
 	out.HasMore = len(entries) > deliverymeta.MaxArtifacts
 	if out.HasMore {

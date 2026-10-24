@@ -2014,6 +2014,45 @@ definitions:
         type: string
       usage: {}
     type: object
+  computertask.DeliveryPage:
+    properties:
+      files:
+        items:
+          $ref: '#/definitions/computertask.DeliveryPageFile'
+        type: array
+      has_more:
+        type: boolean
+      next_after:
+        type: string
+      operation_id:
+        type: string
+      revision:
+        type: string
+      version:
+        type: integer
+    type: object
+  computertask.DeliveryPageFile:
+    properties:
+      delivery_id:
+        type: string
+      reference:
+        $ref: '#/definitions/computertask.DeliveryRequest'
+      state:
+        type: string
+    type: object
+  computertask.DeliveryRequest:
+    properties:
+      content_hash:
+        type: string
+      direction:
+        type: string
+      mime:
+        type: string
+      size_bytes:
+        type: integer
+      version:
+        type: integer
+    type: object
   connectit.AuthMethod:
     properties:
       credential_fields:
@@ -15759,6 +15798,71 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Read a safe task summary within an owned conversation
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries:
+    get:
+      description: Rechecks parent/descendant ownership and current target grants.
+        At most 16 files per page, with opaque next_after and has_more. References
+        appear only after committed delivery; they are not download URLs or authority.
+        has_more=false does not assert task completion or a frozen snapshot; refresh
+        from the first page to observe changes to earlier entries. No device polling
+        or dispatch.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      - description: Opaque next_after from the previous page; omit for first page
+        in: query
+        name: after
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/computertask.DeliveryPage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read one page of persisted computer task file deliveries
       tags:
       - sessions
   /bots/{bot_id}/sessions/events:

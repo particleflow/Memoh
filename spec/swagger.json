@@ -11802,6 +11802,95 @@
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries": {
+            "get": {
+                "description": "Rechecks parent/descendant ownership and current target grants. At most 16 files per page, with opaque next_after and has_more. References appear only after committed delivery; they are not download URLs or authority. has_more=false does not assert task completion or a frozen snapshot; refresh from the first page to observe changes to earlier entries. No device polling or dispatch.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Read one page of persisted computer task file deliveries",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Opaque next_after from the previous page; omit for first page",
+                        "name": "after",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/computertask.DeliveryPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/settings": {
             "get": {
                 "description": "Get agent settings for current user",
@@ -21907,6 +21996,66 @@
                     "type": "string"
                 },
                 "usage": {}
+            }
+        },
+        "computertask.DeliveryPage": {
+            "type": "object",
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computertask.DeliveryPageFile"
+                    }
+                },
+                "has_more": {
+                    "type": "boolean"
+                },
+                "next_after": {
+                    "type": "string"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                }
+            }
+        },
+        "computertask.DeliveryPageFile": {
+            "type": "object",
+            "properties": {
+                "delivery_id": {
+                    "type": "string"
+                },
+                "reference": {
+                    "$ref": "#/definitions/computertask.DeliveryRequest"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.DeliveryRequest": {
+            "type": "object",
+            "properties": {
+                "content_hash": {
+                    "type": "string"
+                },
+                "direction": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                },
+                "version": {
+                    "type": "integer"
+                }
             }
         },
         "connectit.AuthMethod": {

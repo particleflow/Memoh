@@ -12,6 +12,7 @@ import (
 	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/sessiontask"
 )
 
@@ -40,6 +41,7 @@ func (h *SessionTaskHandler) Register(e *echo.Echo) {
 	g := e.Group("/bots/:bot_id/sessions/:session_id/tasks")
 	g.GET("", h.List)
 	g.GET("/:task_type/:task_id", h.Get)
+	g.GET("/:task_type/:task_id/deliveries", h.Deliveries)
 }
 
 func (h *SessionTaskHandler) authorize(c echo.Context) (string, error) {
@@ -132,4 +134,43 @@ func (h *SessionTaskHandler) Get(c echo.Context) error {
 		return taskHTTPError(err)
 	}
 	return c.JSON(http.StatusOK, item)
+}
+
+// Deliveries godoc
+// @Summary Read one page of persisted computer task file deliveries
+// @Description Rechecks parent/descendant ownership and current target grants. At most 16 files per page, with opaque next_after and has_more. References appear only after committed delivery; they are not download URLs or authority. has_more=false does not assert task completion or a frozen snapshot; refresh from the first page to observe changes to earlier entries. No device polling or dispatch.
+// @Tags sessions
+// @Produce json
+// @Param bot_id path string true "Bot ID"
+// @Param session_id path string true "Parent session ID"
+// @Param task_type path string true "Task discriminator" Enums(computer_operation)
+// @Param task_id path string true "Computer operation ID"
+// @Param after query string false "Opaque next_after from the previous page; omit for first page"
+// @Success 200 {object} computertask.DeliveryPage
+// @Failure 400 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 404 {object} server.Problem
+// @Failure 500 {object} server.Problem
+// @Router /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries [get].
+func (h *SessionTaskHandler) Deliveries(c echo.Context) error {
+	user, err := h.authorize(c)
+	if err != nil {
+		return err
+	}
+	if _, err := uuid.Parse(c.Param("task_id")); err != nil {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	record, entries, err := h.service.DeliveryEntries(c.Request().Context(), c.Param("bot_id"), user, c.Param("session_id"), c.Param("task_type"), c.Param("task_id"), c.QueryParam("after"))
+	if errors.Is(err, sessiontask.ErrCursor) {
+		return apperror.FieldInvalid("after", nil)
+	}
+	if err != nil {
+		return taskHTTPError(err)
+	}
+	page, err := computertask.ProjectDeliveryPage(record, c.QueryParam("after"), entries, "")
+	if err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, page)
 }

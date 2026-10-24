@@ -1158,6 +1158,29 @@ export type CompactionLog = {
     usage?: unknown;
 };
 
+export type ComputertaskDeliveryPage = {
+    files?: Array<ComputertaskDeliveryPageFile>;
+    has_more?: boolean;
+    next_after?: string;
+    operation_id?: string;
+    revision?: string;
+    version?: number;
+};
+
+export type ComputertaskDeliveryPageFile = {
+    delivery_id?: string;
+    reference?: ComputertaskDeliveryRequest;
+    state?: string;
+};
+
+export type ComputertaskDeliveryRequest = {
+    content_hash?: string;
+    direction?: string;
+    mime?: string;
+    size_bytes?: number;
+    version?: number;
+};
+
 export type ConnectitAuthMethod = {
     credential_fields?: Array<ConnectitCredentialField>;
     key?: string;
@@ -13909,6 +13932,69 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses = 
 };
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: {
+        /**
+         * Opaque next_after from the previous page; omit for first page
+         */
+        after?: string;
+    };
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses = {
+    /**
+     * OK
+     */
+    200: ComputertaskDeliveryPage;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses];
 
 export type DeleteBotsByBotIdSettingsData = {
     body?: never;
