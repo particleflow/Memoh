@@ -1156,6 +1156,36 @@
           "pi_session_id": "已记录 Pi 会话"
         },
         "refresh": "刷新电脑观察"
+      },
+      "native": {
+        "title": "原生 Agent 内容与续接",
+        "notice": "这是有界、未验证的终端样本，可能含工具输出；不是完整日志，也不证明本条指令成功。",
+        "open": "查看终端样本",
+        "unsupported": "此服务器尚不支持原生任务内容。",
+        "failed": "未能取得内容或指令状态。再次发送前请先核对原请求。",
+        "batch": "此任务不是原生交互 Agent；这里不支持批处理 Pi 续接。",
+        "truncated": "已截短",
+        "bounded": "仅近期样本",
+        "empty": "尚无终端文本。",
+        "sequence": "原生完成序号：{sequence}（不是逐指令结果）",
+        "unavailable": "原 Agent 当前不可用；不会把旧样本显示为当前内容。",
+        "refresh": "刷新内容与请求状态",
+        "pending": "指令结果尚未确认。保留请求 {id}，不会发送新指令。",
+        "mode": "会话选择",
+        "bound": "要求匹配已观测的逻辑会话",
+        "current": "使用当前关联的 Agent",
+        "modeNotice": "当前 Agent 模式不要求逻辑会话连续；两种模式均不保证原子身份绑定或恢复历史。",
+        "instruction": "新指令",
+        "invalid": "请输入不含 NUL、UTF-8 编码不超过 32,000 字节的指令。",
+        "send": "发送一条指令",
+        "results": {
+          "accepted": "输入已接受；工作完成及输出归属仍未验证。",
+          "rejected": "输入被拒绝；原任务结果保持不变。",
+          "unsupported": "此任务不支持续接。",
+          "blocked": "此前尚未确认的指令阻止了本次请求。",
+          "conflict": "此请求 ID 已用于其他指令。",
+          "unknown": "输入是否送达未知。请核对同一请求，不要换新 ID 重发。"
+        }
       }
     },
     "uploadingAttachments": "正在上传附件…",

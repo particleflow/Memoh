@@ -2,6 +2,8 @@
 import { computed, inject, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import NativeTaskContent from './native-task-content.vue'
+import type { NativeTaskView } from '../composables/useNativeTask'
 import type { ComputerTaskObservationView } from '../composables/useComputerTaskObservation'
 import type { ComputerTaskDeliveryView } from '../composables/useComputerTaskDeliveries'
 import AttachmentBlock from './attachment-block.vue'
@@ -24,6 +26,7 @@ const props = defineProps<{
   error?: unknown
   deliveries?: ComputerTaskDeliveryView
   observation?: ComputerTaskObservationView
+  nativeTask?: NativeTaskView
 }>()
 const emit = defineEmits<{
   openTask: [task: SessiontaskTask]
@@ -128,6 +131,11 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.cancelIntent') }}
         </p>
       </div>
+      <NativeTaskContent
+        v-if="detail.task_type === 'computer_operation' && nativeTask"
+        :view="nativeTask"
+        :operation-id="detail.task_id"
+      />
       <section
         v-if="detail.task_type === 'computer_operation' && observation"
         class="space-y-2"

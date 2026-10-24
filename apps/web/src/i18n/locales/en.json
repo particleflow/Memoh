@@ -1156,6 +1156,36 @@
           "pi_session_id": "Recorded Pi session"
         },
         "refresh": "Refresh computer"
+      },
+      "native": {
+        "title": "Native Agent content and follow-up",
+        "notice": "This is a bounded, unverified terminal sample. It can include tool output; it is not a full log or proof that this instruction succeeded.",
+        "open": "Open terminal sample",
+        "unsupported": "This server does not support native task content yet.",
+        "failed": "Content or instruction status could not be retrieved. Check the existing request before sending again.",
+        "batch": "This task is not an interactive native Agent. Batch Pi continuation is unavailable here.",
+        "truncated": "Truncated",
+        "bounded": "Recent sample only",
+        "empty": "No terminal text returned.",
+        "sequence": "Native completion sequence: {sequence} (not a per-instruction result)",
+        "unavailable": "The original Agent is currently unavailable; no old sample is presented as current.",
+        "refresh": "Refresh content and request status",
+        "pending": "Instruction outcome remains unresolved. Request {id} is retained; no new instruction will be sent.",
+        "mode": "Session selection",
+        "bound": "Require the observed logical session",
+        "current": "Use the currently associated Agent",
+        "modeNotice": "Current Agent mode does not require logical-session continuity. Neither mode guarantees atomic identity or restores history.",
+        "instruction": "New instruction",
+        "invalid": "Enter an instruction within 32,000 UTF-8 bytes, without NUL.",
+        "send": "Send one instruction",
+        "results": {
+          "accepted": "Input accepted. Work completion and output ownership remain unverified.",
+          "rejected": "Input was rejected; this does not change previous task results.",
+          "unsupported": "Follow-up is not supported for this task.",
+          "blocked": "An earlier unresolved instruction blocks this request.",
+          "conflict": "This request ID belongs to a different instruction.",
+          "unknown": "Input delivery is unknown. Check the same request; do not resend with a new ID."
+        }
       }
     },
     "uploadingAttachments": "Uploading attachments…",

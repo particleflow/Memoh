@@ -1,0 +1,116 @@
+[
+  {
+    "file": "go-final.txt",
+    "bytes": 14516,
+    "sha256": "10edae38ac4a97c9f34eae70babdd697220bbe54e4f91181fc8274856219385e",
+    "processing": "none",
+    "local_source": "go-final.log"
+  },
+  {
+    "file": "ui-confirm-final.txt",
+    "bytes": 331,
+    "sha256": "b65f527a48381df8589ddb2c4a9ab614f4fe2a3394d3acb6b9409002fdd7edfd",
+    "processing": "none",
+    "local_source": "ui-confirm-final.log"
+  },
+  {
+    "file": "ui-layout-final.txt",
+    "bytes": 321,
+    "sha256": "8db86ccc3b5f81a815484e2299098021b677df2034c7a61a6f3fcac4d7caeba8",
+    "processing": "none",
+    "local_source": "ui-layout-final.log"
+  },
+  {
+    "file": "typecheck-web-final.txt",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "processing": "none",
+    "local_source": "typecheck-web-final.log"
+  },
+  {
+    "file": "typecheck-sdk-final.txt",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "processing": "none",
+    "local_source": "typecheck-sdk-final.log"
+  },
+  {
+    "file": "lint-final.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processing": "none",
+    "local_source": "lint-final.log"
+  },
+  {
+    "file": "format.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processing": "none",
+    "local_source": "format.log"
+  },
+  {
+    "file": "browser-valid.txt",
+    "bytes": 442,
+    "sha256": "71b99bc3aa680a483b02c4931a3c34e4f7c00f5e20dd35bcfed595482a284a60",
+    "processing": "none",
+    "local_source": "browser-valid.log"
+  },
+  {
+    "file": "browser-proof.json",
+    "bytes": 303,
+    "sha256": "53be8bf339fed47187c783a07e1533a819a24915ebaab696ca24272a3e732498",
+    "processing": "none"
+  },
+  {
+    "file": "native-api-proof.json",
+    "bytes": 921,
+    "sha256": "1ee99f46f8540f87680b77faa0a7fd366def95cc0816ea378993bcf8cd2f297d",
+    "processing": "none"
+  },
+  {
+    "file": "ui-contract.txt",
+    "bytes": 1169,
+    "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "processing": "none",
+    "local_source": "ui-contract.log"
+  },
+  {
+    "file": "native-content-accepted.png",
+    "bytes": 106365,
+    "sha256": "c672b00ece233e92914683a1470b236d77e5acb8be169cd4f8b54f93e543d6e2",
+    "processing": "none"
+  },
+  {
+    "file": "native-content-unknown.png",
+    "bytes": 116632,
+    "sha256": "188af90dde10046e39fba53bbee7c43100ebdbfbbfc86f1a2c6c1b674dd93d64",
+    "processing": "none"
+  },
+  {
+    "file": "native-content-narrow.png",
+    "bytes": 52469,
+    "sha256": "803635b8bc2c1215349ab5301e41679138ab6fcf569d18ba92d222ae1def3238",
+    "processing": "none"
+  },
+  {
+    "file": "go-lint-local.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processing": "none",
+    "local_source": "go-lint-local.log"
+  },
+  {
+    "file": "build-server.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "processing": "none",
+    "local_source": "build-server.log"
+  },
+  {
+    "file": "build-web-final.txt",
+    "bytes": 76262,
+    "sha256": "8a27bd518e1e240ab8132aa77f68b15bcd520321260e5b52cc25d2fe6c6e5e91",
+    "processing": "none",
+    "local_source": "build-web-final.log"
+  }
+]

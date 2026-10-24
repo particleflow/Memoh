@@ -4,6 +4,7 @@ import {
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId,
   type SessiontaskTask,
 } from '@memohai/sdk'
+import { useNativeTask } from './useNativeTask'
 import { useComputerTaskObservation } from './useComputerTaskObservation'
 import { useComputerTaskDeliveries } from './useComputerTaskDeliveries'
 import { apiErrorStatus } from '@/utils/api-error'
@@ -122,5 +123,6 @@ export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boole
     && detail.value.task_id === selected.value?.task_id)
   const deliveries = useComputerTaskDeliveries(scope, selected, computerVisible)
   const observation = useComputerTaskObservation(scope, selected, computerVisible)
-  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries, observation }
+  const nativeTask = useNativeTask(scope, selected, computerVisible)
+  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries, observation, nativeTask }
 }

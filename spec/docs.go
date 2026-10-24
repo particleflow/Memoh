@@ -11811,6 +11811,83 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/content": {
+            "get": {
+                "description": "Uses existing agent.get/read without recording evidence or collecting files. A terminal_snapshot_unverified sample can include tool output and is not a complete log, verified assistant answer or task completion. Batch Pi returns supported=false.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Read a bounded native Agent terminal sample",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/computertask.NativeContent"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries": {
             "get": {
                 "description": "Rechecks parent/descendant ownership and current target grants. At most 16 files per page, with opaque next_after and has_more. References appear only after committed delivery; they are not download URLs or authority. has_more=false does not assert task completion or a frozen snapshot; refresh from the first page to observe changes to earlier entries. No device polling or dispatch.",
@@ -11865,6 +11942,101 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/computertask.DeliveryPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup": {
+            "post": {
+                "description": "Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Send one instruction to this task's existing interactive Agent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Instruction with retained idempotency ID",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskFollowupInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskFollowupResponse"
                         }
                     },
                     "400": {
@@ -20108,6 +20280,42 @@ const docTemplate = `{
                 }
             }
         },
+        "agenvo.AgentObservation": {
+            "type": "object",
+            "properties": {
+                "completion_changed": {
+                    "type": "boolean"
+                },
+                "completion_seq": {
+                    "type": "string"
+                },
+                "interactive_ready": {
+                    "type": "boolean"
+                },
+                "output": {
+                    "type": "string"
+                },
+                "output_fidelity": {
+                    "type": "string"
+                },
+                "session_relation": {
+                    "type": "string"
+                },
+                "starting": {
+                    "type": "boolean"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_success_verified": {
+                    "description": "No Herdr status, completion sequence or terminal text independently\nproves that the requested work succeeded. No lifecycle hook is assumed.",
+                    "type": "boolean"
+                },
+                "truncated": {
+                    "type": "boolean"
+                }
+            }
+        },
         "agenvo.AgentProfile": {
             "type": "object",
             "properties": {
@@ -22201,6 +22409,76 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "integer"
+                }
+            }
+        },
+        "computertask.FollowupResult": {
+            "type": "object",
+            "properties": {
+                "atomic_identity_guaranteed": {
+                    "type": "boolean"
+                },
+                "business_outcome": {
+                    "type": "string"
+                },
+                "continuity_verified": {
+                    "type": "boolean"
+                },
+                "input_may_have_been_sent": {
+                    "type": "boolean"
+                },
+                "mode": {
+                    "type": "string"
+                },
+                "prompt_accepted": {
+                    "type": "boolean"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "request_id": {
+                    "type": "string"
+                },
+                "session_observed": {
+                    "type": "boolean"
+                },
+                "session_relation": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "strict_resume_available": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "computertask.NativeContent": {
+            "type": "object",
+            "properties": {
+                "availability": {
+                    "type": "string"
+                },
+                "followup_available": {
+                    "type": "boolean"
+                },
+                "followups": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computertask.FollowupResult"
+                    }
+                },
+                "observation": {
+                    "$ref": "#/definitions/agenvo.AgentObservation"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "session_binding": {
+                    "type": "string"
+                },
+                "supported": {
+                    "type": "boolean"
                 }
             }
         },
@@ -25489,6 +25767,50 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "provider_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskFollowupInput": {
+            "type": "object",
+            "required": [
+                "mode",
+                "request_id",
+                "task"
+            ],
+            "properties": {
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "current_agent",
+                        "bound_session"
+                    ]
+                },
+                "request_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "task": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskFollowupResponse": {
+            "type": "object",
+            "properties": {
+                "blocked_by_request": {
+                    "type": "string"
+                },
+                "followup": {
+                    "$ref": "#/definitions/computertask.FollowupResult"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "request_conflict": {
+                    "type": "boolean"
+                },
+                "state": {
                     "type": "string"
                 }
             }

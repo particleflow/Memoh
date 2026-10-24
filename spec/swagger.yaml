@@ -639,6 +639,32 @@ definitions:
       updated_at:
         type: string
     type: object
+  agenvo.AgentObservation:
+    properties:
+      completion_changed:
+        type: boolean
+      completion_seq:
+        type: string
+      interactive_ready:
+        type: boolean
+      output:
+        type: string
+      output_fidelity:
+        type: string
+      session_relation:
+        type: string
+      starting:
+        type: boolean
+      status:
+        type: string
+      task_success_verified:
+        description: |-
+          No Herdr status, completion sequence or terminal text independently
+          proves that the requested work succeeded. No lifecycle hook is assumed.
+        type: boolean
+      truncated:
+        type: boolean
+    type: object
   agenvo.AgentProfile:
     properties:
       config_dir:
@@ -2087,6 +2113,52 @@ definitions:
         type: integer
       version:
         type: integer
+    type: object
+  computertask.FollowupResult:
+    properties:
+      atomic_identity_guaranteed:
+        type: boolean
+      business_outcome:
+        type: string
+      continuity_verified:
+        type: boolean
+      input_may_have_been_sent:
+        type: boolean
+      mode:
+        type: string
+      prompt_accepted:
+        type: boolean
+      reason:
+        type: string
+      request_id:
+        type: string
+      session_observed:
+        type: boolean
+      session_relation:
+        type: string
+      state:
+        type: string
+      strict_resume_available:
+        type: boolean
+    type: object
+  computertask.NativeContent:
+    properties:
+      availability:
+        type: string
+      followup_available:
+        type: boolean
+      followups:
+        items:
+          $ref: '#/definitions/computertask.FollowupResult'
+        type: array
+      observation:
+        $ref: '#/definitions/agenvo.AgentObservation'
+      operation_id:
+        type: string
+      session_binding:
+        type: string
+      supported:
+        type: boolean
     type: object
   computertask.PiContinuity:
     properties:
@@ -4357,6 +4429,36 @@ definitions:
       output_tokens:
         type: integer
       provider_name:
+        type: string
+    type: object
+  handlers.NativeTaskFollowupInput:
+    properties:
+      mode:
+        enum:
+        - current_agent
+        - bound_session
+        type: string
+      request_id:
+        format: uuid
+        type: string
+      task:
+        type: string
+    required:
+    - mode
+    - request_id
+    - task
+    type: object
+  handlers.NativeTaskFollowupResponse:
+    properties:
+      blocked_by_request:
+        type: string
+      followup:
+        $ref: '#/definitions/computertask.FollowupResult'
+      operation_id:
+        type: string
+      request_conflict:
+        type: boolean
+      state:
         type: string
     type: object
   handlers.PingResponse:
@@ -15886,6 +15988,61 @@ paths:
       summary: Read a safe task summary within an owned conversation
       tags:
       - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/content:
+    get:
+      description: Uses existing agent.get/read without recording evidence or collecting
+        files. A terminal_snapshot_unverified sample can include tool output and is
+        not a complete log, verified assistant answer or task completion. Batch Pi
+        returns supported=false.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/computertask.NativeContent'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read a bounded native Agent terminal sample
+      tags:
+      - sessions
   /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries:
     get:
       description: Rechecks parent/descendant ownership and current target grants.
@@ -15949,6 +16106,73 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Read one page of persisted computer task file deliveries
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup:
+    post:
+      consumes:
+      - application/json
+      description: Retain request_id before sending and across unknown outcomes. Reuses
+        existing authorization, policy and CAS deduplication. No new Agent, batch
+        resume, process stop or task retry. Accepted means input delivery only; state
+        unknown must not be retried with a new ID.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      - description: Instruction with retained idempotency ID
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.NativeTaskFollowupInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.NativeTaskFollowupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Send one instruction to this task's existing interactive Agent
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation:
