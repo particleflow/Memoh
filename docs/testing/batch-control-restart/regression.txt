@@ -1,0 +1,15 @@
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/receipt_not_collected
+    pi_batch_control_restart_test.go:73: KNOWN GAP: unchanged valid receipt/result files remain unreadable after control terminal replacement
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/receipt_only
+    pi_batch_control_restart_test.go:73: KNOWN GAP: unchanged valid receipt/result files remain unreadable after control terminal replacement
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/summary_ready
+    pi_batch_control_restart_test.go:80: KNOWN GAP: cached summary survives; uncollected diagnostics remain unavailable
+=== RUN   TestBatchCompletedControlRestartRecoveryBoundary/all_cached
+--- PASS: TestBatchCompletedControlRestartRecoveryBoundary (0.16s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/receipt_not_collected (0.02s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/receipt_only (0.02s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/summary_ready (0.01s)
+    --- PASS: TestBatchCompletedControlRestartRecoveryBoundary/all_cached (0.10s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	0.174s
