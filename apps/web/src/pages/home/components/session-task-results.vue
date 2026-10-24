@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import type { ComputerTaskDeliveryView } from '../composables/useComputerTaskDeliveries'
+import AttachmentBlock from './attachment-block.vue'
+import MediaGalleryLightbox, { type MediaGalleryItem } from './media-gallery-lightbox.vue'
+import { resolveUrl, isMediaType } from '../composables/useMediaGallery'
+import { openAssetPreviewKey } from '../composables/useFileManagerProvider'
+import type { AttachmentItem } from '@/store/chat-list'
 import { formatFileSize } from '@/components/file-manager/utils'
 import type { SessiontaskTask } from '@memohai/sdk'
 import { apiErrorStatus, isApiErrorCode, parseMemohError, resolveApiErrorMessage } from '@/utils/api-error'
@@ -22,8 +27,41 @@ const emit = defineEmits<{
   openTask: [task: SessiontaskTask]
   page: [cursor?: string]
   refresh: []
+  assetOpened: []
 }>()
 const { t } = useI18n()
+// Use the same attachment resolver, preview host and browser download as chat.
+// No task credential or per-file preflight: native media rechecks Bot access.
+const preview = inject(openAssetPreviewKey, undefined)
+if (preview) provide(openAssetPreviewKey, args => { preview(args); emit('assetOpened') })
+const attachments = computed(() => {
+  const result = new Map<string, AttachmentItem>()
+  if (!props.deliveries?.botId || props.deliveries.error) return result
+  for (const file of props.deliveries.files) {
+    if (file.state !== 'committed' || !file.reference) continue
+    result.set(file.delivery_id!, {
+      type: 'file', name: file.delivery_id, bot_id: props.deliveries.botId,
+      content_hash: file.reference.content_hash, mime: file.reference.mime, size: file.reference.size_bytes,
+    })
+  }
+  return result
+})
+const mediaItems = computed<MediaGalleryItem[]>(() => [...attachments.value.values()]
+  .filter(isMediaType).map(att => ({ src: resolveUrl(att), type: att.mime?.startsWith('video/') ? 'video' : 'image', name: att.name })))
+const mediaHost = ref<HTMLElement>()
+// Keep the existing lightbox in the host's top layer, outside its scroll body.
+const mediaTarget = computed(() => mediaHost.value?.closest<HTMLElement>('dialog, [role="dialog"]') ?? mediaHost.value)
+const mediaIndex = ref<number | null>(null)
+function openMedia(src: string) {
+  const index = mediaItems.value.findIndex(item => item.src === src)
+  mediaIndex.value = index < 0 ? null : index
+}
+watch([() => props.deliveries?.botId, () => props.detail?.task_id, () => props.deliveries?.error], () => { mediaIndex.value = null })
+watch(mediaItems, (items, previous) => {
+  const index = mediaIndex.value
+  if (index !== null && items[index]?.src !== previous[index]?.src) mediaIndex.value = null
+})
+
 const errorMessage = computed(() => readError(props.error, 'chat.tasks.unsupported', 'chat.tasks.loadFailed'))
 const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.unsupported', 'chat.tasks.files.loadFailed'))
 function readError(error: unknown, unsupported: string, fallback: string) {
@@ -158,15 +196,25 @@ function taskLabel(task: SessiontaskTask) {
                 <ItemDescription class="break-all">
                   {{ file.reference.content_hash }}
                 </ItemDescription>
+                <template v-if="attachments.has(file.delivery_id!)">
+                  <AttachmentBlock
+                    :block="{ id: 0, type: 'attachments', attachments: [attachments.get(file.delivery_id!)!] }"
+                    :on-open-media="openMedia"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    as-child
+                  >
+                    <a
+                      :href="resolveUrl(attachments.get(file.delivery_id!)!)"
+                      :download="file.delivery_id"
+                    >{{ t('bots.files.download') }}</a>
+                  </Button>
+                </template>
               </template>
             </ItemContent>
           </Item>
-          <p
-            v-if="deliveries.files.some(file => file.state === 'committed')"
-            class="text-body text-muted-foreground"
-          >
-            {{ t('chat.tasks.files.openUnavailable') }}
-          </p>
         </template>
       </section>
       <p class="text-body text-muted-foreground">
@@ -214,4 +262,12 @@ function taskLabel(task: SessiontaskTask) {
       </Button>
     </div>
   </template>
+  <div ref="mediaHost" />
+  <MediaGalleryLightbox
+    v-if="mediaTarget"
+    :teleport-to="mediaTarget"
+    :items="mediaItems"
+    :open-index="mediaIndex"
+    @update:open-index="mediaIndex = $event"
+  />
 </template>

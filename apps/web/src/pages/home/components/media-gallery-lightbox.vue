@@ -1,5 +1,5 @@
 <template>
-  <Teleport to="body">
+  <Teleport :to="teleportTo">
     <Transition name="lightbox">
       <div
         v-if="isOpen"
@@ -111,8 +111,11 @@ const props = withDefaults(defineProps<{
   // 'dark' is the classic media viewer (sent images). 'frost' is a light,
   // blurred glass scrim for previewing attachments before they're sent.
   appearance?: 'dark' | 'frost'
+  // A native dialog host must keep overlays inside its top layer.
+  teleportTo?: string | HTMLElement
 }>(), {
   appearance: 'dark',
+  teleportTo: 'body',
 })
 
 const overlayClass = computed(() =>

@@ -1111,7 +1111,6 @@
         "empty": "No file deliveries have been recorded.",
         "unsupported": "This server does not support task file observation yet.",
         "loadFailed": "Unable to load task files.",
-        "openUnavailable": "Recorded references are visible. This server does not provide a task-scoped attachment opening link.",
         "upload": "Stored on NAS",
         "download": "Received by PC",
         "states": {

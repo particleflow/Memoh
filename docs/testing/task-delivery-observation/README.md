@@ -13,19 +13,25 @@ server pages while visible. These are file delivery facts, not task/business
 completion. An empty tail does not mean execution succeeded. Pending, reserved,
 failed and canceled entries never expose a reference as a delivered file.
 
-**Opening/downloading a computer-task result is NOT implemented by this patch.**
-The fixed endpoint exposes hash/size/MIME/direction but no authorized attachment
-URL (`internal/computertask/delivery_page.go`). The existing browser attachment
-resolver supports Bot-scoped media and delegation-scoped attachment URLs; the
-former does not revalidate task/session/target scope. The task transport route
-requires a device transfer principal, not the current Web login. Reusing that
-credential, inventing a delegation URL, or widening a task reference to Bot/hash
-would not be a frontend-only fix under the current scope. No such fallback or
-nonfunctional download button was added. Existing conversation attachments and
-specialist delegation attachments keep their current open/download behavior.
-A compatible task-scoped attachment read reference remains the specific missing
-server contract, not a generic file transfer or pagination blocker. No production
-access, permission change, deployment, or denied P1 repair was attempted.
+The initial observation-only checkpoint (`2ce6f81e`) incorrectly treated the
+absence of a task-specific download URL as a required authorization gap. That
+assumption is superseded: the user's existing Bot media permission is the
+intended native access boundary. The current UI maps only committed references
+to chat attachments with the **reader's explicit owner Bot**, and reuses native
+attachment resolution, cards, asset preview, image lightbox and browser download.
+No new server endpoint, task credential, per-file permission or HEAD preflight is
+added. `ServeMedia → mediaUploadBot → authorizeBotAccess` checks the logged-in
+user's `chat` permission; `OpenSeekable(botID, hash)` resolves that Bot's media.
+Revocation, anonymous access and a different Bot still go through that route's
+existing checks. Specialist readers do not fall back to the global supervisor Bot.
+Existing delegation-scoped attachment handling is unchanged.
+
+The API has no original filename. Cards/downloads use the delivery ID as a label,
+not a claimed original name. The native preview host may offer its normal download
+fallback when it cannot identify the file type. A committed delivery is a recorded
+fact; neither a visible link nor reaching the last metadata page proves business
+completion or current download success. There is no production permission change,
+deployment or denied P1 repair in this patch.
 
 ## Shared host contract
 
@@ -41,12 +47,12 @@ access, permission change, deployment, or denied P1 repair was attempted.
   relation error pauses/clears the downstream reader. Scope/identity/selection
   changes abort old requests; late success and failure cannot replace new state.
 - Reads are serial, one bounded server page at a time, via the generated SDK and
-  existing API base/auth. No page button, queue, task submission or byte download
-  is added. Refresh starts at the beginning so earlier state updates are visible.
+  existing API base/auth. No page button, queue or task submission is added. Byte reads occur through
+  the existing media route when native attachment behavior requests them. Refresh starts at the beginning so earlier state updates are visible.
   The last complete view remains during a refresh to preserve scrolling; errors
   clear it. 401/403/404 stop auto polling until explicit reload or scope change.
   Network errors may recover via the existing visible polling behavior.
-- `files`, `loading`, `loaded`, `error`, `refresh()` describe observation only.
+- `botId`, `files`, `loading`, `loaded`, `error`, `refresh()` describe observation only.
   `loaded` means that read reached the current tail, not task completion. Reference
   direction distinguishes NAS receipt from PC receipt. Delivery IDs are labels,
   not claimed original filenames. No local/global persistent cache is introduced.
@@ -102,5 +108,61 @@ originals. Private fixture IDs/token/config and SQL remain outside Git. Screensh
 show synthetic records only. `browser*.mjs` are reproducible read-only observation
 scripts using explicit environment inputs; they require an already-seeded fixture
 JSON (`bot`, `session`, `operation`) and the existing login token file, not a new
-credential. Human QA, real PC execution, real phone integration, task download,
+credential. Human QA, real PC execution, real phone integration,
 NAS deployment and production legacy P1 remain unverified/unresolved.
+
+## Native attachment follow-up (current product)
+
+The unchanged backend runs the fixed `2140d1b` executable against the retained
+isolated synthetic PG database. Web uses this worktree's current source. A second
+69-byte 1×1 PNG was uploaded through native Media and one metadata row appended
+to the same **test-owned** operation: now 19 rows, 17 committed references to two
+assets, one pending, one failed. No business submission, PC execution, model call,
+new identity or production access occurred.
+
+- `native-tests-verified.txt`: six related Vitest files; final 95 tests, exit 0.
+- `native-typecheck-verified.txt`, `native-build-verified.txt`: exit 0. Build retains
+  its existing >500 kB chunk warning.
+- `native-lint-verified.txt`: exit 0, five multiple-component test-fixture warnings
+  (two existing in session-tasks and three in shared-body mount tests). No suppression.
+- `native-ui-contract.txt`: exit 0; three existing contract warnings retained.
+- `native-media-auth.txt`: actual loopback HTTP tests, exit 0: full/Range/If-Range/
+  HEAD integrity, anonymous 401, wrong-Bot 404, revoked-user 403 then restored 206.
+  Test identities/permissions are synthetic; the implementation was not changed.
+- `native-browser-pass2.txt` / `native-browser-proof.json`: real Web → JWT Server
+  → PG / native Media; downloaded text bytes and SHA-256 match the original,
+  uploaded PNG decodes in the original lightbox, asset dock opens and closes the
+  task dialog, anonymous native media GET returns 401. Offline recovery and
+  synthetic old-route 404/reload still pass. All are reads of seeded task metadata,
+  not evidence of Pi delivery or a real device task.
+- `native-browser-narrow.txt` / `native-browser-narrow-proof.json`: actual 390px
+  Chinese dark Web detail, without horizontal overflow. Not a Harmony build.
+
+Screenshots: `native-browser-results.png` (committed downloads),
+`native-browser-image.png` (existing lightbox, 1×1 synthetic image),
+`native-browser-open.png` (native dock's unknown-name preview fallback),
+`native-browser-narrow-zh.png` (shared body narrow view). Existing isolated
+workspace availability notices are retained, not presented as fixed here.
+
+The initial native browser harness assumed the browser would not add `.txt` to a
+MIME-derived download filename, then used an incomplete English placeholder
+label. Both harness failures remain in the two initial native logs. A real UI
+failure then exposed the gallery close control being clipped by the task scroll
+body. The native lightbox now accepts an optional teleport target (default still
+`body`); this caller targets its closest dialog, outside the scrolling body and
+inside a native HTML dialog's top layer. The corrected real-browser close click
+passes, without forced clicks. These failures are not hidden by final successes.
+Two initial typecheck logs document fixture/argument fixes; no strictness was
+relaxed. Evidence copies normalize local paths only; originals remain private.
+
+### Shared host integration
+
+Continue passing `reader.deliveries.value`; `botId` comes from that reader scope,
+not a UI-selected global Bot or model argument. The shared body needs no new API
+or mobile-specific downloader. Hosts with an existing `openAssetPreviewKey`
+provider can handle `@asset-opened` to dismiss their task shell (Web does so).
+Without that host, the native attachment component uses its existing browser
+anchor download fallback. Images reuse the existing lightbox inside the closest
+host dialog; downloads use the same resolver/API base/login. The fallback does
+not claim a native phone permission, save dialog or package integration has been
+verified. `reader.back()` remains the navigation contract.

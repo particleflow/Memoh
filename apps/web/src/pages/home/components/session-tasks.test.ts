@@ -6,6 +6,8 @@ import type { BotdelegationView, SessiontaskTask } from '@memohai/sdk'
 import { notifyAuthSessionCleared } from '@/lib/auth-session'
 import en from '@/i18n/locales/en.json'
 import SessionTasks from './session-tasks.vue'
+import { client } from '@memohai/sdk/client'
+vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'wrong-global-bot' }) }))
 
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn(), retryDelivery: vi.fn(), deliveries: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
@@ -64,6 +66,7 @@ describe('task detail identity and rendering boundary', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
+    client.setConfig({ baseUrl: '/api' })
     localStorage.clear()
     localStorage.setItem('token', 'synthetic-identity')
     api.deliveries.mockReset().mockResolvedValue({ data: { version: 1, operation_id: 'operation', files: [], has_more: false } })
@@ -94,8 +97,10 @@ describe('task detail identity and rendering boundary', () => {
     expect(document.body.textContent).toContain(en.chat.tasks.files.states.failed)
     expect(document.body.textContent).toContain(en.chat.tasks.statuses.unknown)
     expect(document.body.textContent).not.toContain(en.chat.tasks.statuses.completed)
-    expect(document.body.textContent).toContain(en.chat.tasks.files.openUnavailable)
-    expect(document.querySelector('[role=dialog]')!.querySelectorAll('a,img,audio,video')).toHaveLength(0)
+    const links = document.querySelector('[role=dialog]')!.querySelectorAll('a')
+    expect(links).toHaveLength(1)
+    expect(links[0]!.getAttribute('href')).toBe(`/api/bots/bot/media/${'a'.repeat(64)}?token=synthetic-identity`)
+    expect(links[0]!.getAttribute('download')).toBe('ready-result')
     expect(api.deliveries.mock.lastCall![0].query.after).toBe('16')
   })
 

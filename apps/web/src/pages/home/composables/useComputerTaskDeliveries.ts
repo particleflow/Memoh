@@ -4,6 +4,7 @@ import { apiErrorStatus } from '@/utils/api-error'
 import type { TaskScope } from './useSessionTasks'
 
 export interface ComputerTaskDeliveryView {
+  botId?: string
   files: ComputertaskDeliveryPageFile[]
   loading: boolean
   loaded: boolean
@@ -11,8 +12,9 @@ export interface ComputerTaskDeliveryView {
   refresh: () => Promise<void>
 }
 
-// Metadata only. A committed hash is not a browser download authority. Each
-// read uses the existing session/task endpoint and is retired with its scope.
+// Task metadata reads retire with their scope. The owner accompanies references
+// so native media reads use this Bot, never a global current-Bot fallback.
+// The media endpoint independently checks the logged-in user's Bot permission.
 export function useComputerTaskDeliveries(scope: Ref<TaskScope | null>, selected: Ref<Pick<SessiontaskTask, 'task_type' | 'task_id'> | undefined>, enabled: Ref<boolean>) {
   const files = shallowRef<ComputertaskDeliveryPageFile[]>([])
   const loading = ref(false)
@@ -92,5 +94,5 @@ export function useComputerTaskDeliveries(scope: Ref<TaskScope | null>, selected
     if (![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh()
   }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
-  return computed<ComputerTaskDeliveryView>(() => ({ files: files.value, loading: loading.value, loaded: loaded.value, error: error.value, refresh }))
+  return computed<ComputerTaskDeliveryView>(() => ({ botId: enabled.value ? scope.value?.bot : undefined, files: files.value, loading: loading.value, loaded: loaded.value, error: error.value, refresh }))
 }

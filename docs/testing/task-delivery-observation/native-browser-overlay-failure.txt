@@ -1,0 +1,67 @@
+PASS native browser download: full bytes/hash match the original NAS media fixture
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByRole('dialog').locator('[data-keyboard-scope="mediaLightbox"]').getByRole('button', { name: 'Close', exact: true })
+    - locator resolved to <button type="button" data-v-22e45302="" aria-label="Close" class="absolute right-4 top-4 z-(--z-raised) rounded-full p-2 transition-colors text-white/80 hover:bg-white/10 hover:text-white">…</button>
+  - attempting click action
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button type="button" data-button="" data-slot="button" aria-label="Close" data-size="icon-sm" data-variant="ghost" data-loading-mode="overlay" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-control font-[450] transition-all disabled:pointer-events-none disabled:opacity-40 data-[loading]:opacity-100 [&_svg]:pointer-events-none [&_svg:not([class*=size-])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer …>…</button> from <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">…</div> subtree intercepts pointer events
+    - retrying click action
+    - waiting 20ms
+    2 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button type="button" data-button="" data-slot="button" aria-label="Close" data-size="icon-sm" data-variant="ghost" data-loading-mode="overlay" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-control font-[450] transition-all disabled:pointer-events-none disabled:opacity-40 data-[loading]:opacity-100 [&_svg]:pointer-events-none [&_svg:not([class*=size-])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer …>…</button> from <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 100ms
+    7 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <button type="button" data-button="" data-slot="button" aria-label="Close" data-size="icon-sm" data-variant="ghost" data-loading-mode="overlay" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-control font-[450] transition-all disabled:pointer-events-none disabled:opacity-40 data-[loading]:opacity-100 [&_svg]:pointer-events-none [&_svg:not([class*=size-])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer …>…</button> from <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">…</div> subtree intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+    - waiting for element to be visible, enabled and stable
+  - element was detached from the DOM, retrying
+
+    at <evidence>/browser-native.mjs:45:63 {
+  log: [
+    `  - waiting for getByRole('dialog').locator('[data-keyboard-scope="mediaLightbox"]').getByRole('button', { name: 'Close', exact: true })`,
+    '    - locator resolved to <button type="button" data-v-22e45302="" aria-label="Close" class="absolute right-4 top-4 z-(--z-raised) rounded-full p-2 transition-colors text-white/80 hover:bg-white/10 hover:text-white">…</button>',
+    '  - attempting click action',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <button type="button" data-button="" data-slot="button" aria-label="Close" data-size="icon-sm" data-variant="ghost" data-loading-mode="overlay" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-control font-[450] transition-all disabled:pointer-events-none disabled:opacity-40 data-[loading]:opacity-100 [&_svg]:pointer-events-none [&_svg:not([class*=size-])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer …>…</button> from <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '    - waiting 20ms',
+    '    2 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <button type="button" data-button="" data-slot="button" aria-label="Close" data-size="icon-sm" data-variant="ghost" data-loading-mode="overlay" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-control font-[450] transition-all disabled:pointer-events-none disabled:opacity-40 data-[loading]:opacity-100 [&_svg]:pointer-events-none [&_svg:not([class*=size-])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer …>…</button> from <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 100ms',
+    '    7 × waiting for element to be visible, enabled and stable',
+    '      - element is visible, enabled and stable',
+    '      - scrolling into view if needed',
+    '      - done scrolling',
+    '      - <button type="button" data-button="" data-slot="button" aria-label="Close" data-size="icon-sm" data-variant="ghost" data-loading-mode="overlay" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-control font-[450] transition-all disabled:pointer-events-none disabled:opacity-40 data-[loading]:opacity-100 [&_svg]:pointer-events-none [&_svg:not([class*=size-])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-ring/30 cursor-pointer …>…</button> from <div data-slot="dialog-header" class="flex flex-col gap-2 text-center sm:text-left">…</div> subtree intercepts pointer events',
+    '    - retrying click action',
+    '      - waiting 500ms',
+    '    - waiting for element to be visible, enabled and stable',
+    '  - element was detached from the DOM, retrying'
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0

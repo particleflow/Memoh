@@ -1111,7 +1111,6 @@
         "empty": "尚无文件交付记录。",
         "unsupported": "当前服务尚不支持查看任务文件。",
         "loadFailed": "无法读取任务文件。",
-        "openUnavailable": "已显示登记的引用；当前服务尚未提供带任务权限校验的附件打开入口。",
         "upload": "已存入 NAS",
         "download": "电脑已接收",
         "states": {
