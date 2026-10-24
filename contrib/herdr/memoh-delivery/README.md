@@ -186,10 +186,10 @@ commit and can report that delivery already won. `reconcile` is an explicit
 recovery action, not a retry-budget reset. The original create-unknown protocol
 fence remains; never guess a new receipt after uncertain creation.
 
-## Bounded task producer
+## Bounded task producer and metadata pages
 
 The optional task declaration `artifact: {source_ref, mime}`, or `artifacts` with
-1–16 distinct entries (never both), is available for
+1–16 distinct entries in the existing declaration (never both), is available for
 `herdr_pi_task` / `pi-json-v1` at `work_dir: "."`. The registered task root must
 match the existing private `source_root`; a mismatch fails explicitly. Write and
 close the declared files before Pi exits. The envelope supplies non-secret
@@ -203,6 +203,28 @@ After durable registration the original source version/receipt are reused; repea
 result queries can wake finite advancement through the dedicated control pane.
 No host timer or daemon is added. NAS `delivery.reference` is available to the
 parent task only after committed association, separately from Pi completion.
+
+The component CLI also accepts `-action enqueue-results` with a version 1
+`ClosedPage` on stdin: 1–16 existing version 1 closed-file records, all bound to
+the same original Task. Sixteen bounds one message, not the task's total file
+count. Submit subsequent pages through the same finite component; never put a
+whole backlog into argv, one JSON ledger or the model conversation. Per-file
+`registered` acknowledgements are durable registration, not delivery success.
+A partial response has exit code 1; independent valid files still register.
+Replay the same page after interruption or lost output; do not invent an attempt
+or change delivery IDs. No full source copy or network call occurs in this action.
+The unified endpoint consumes this internal interface; it is not a manual user
+workflow. Herdr's existing action API still cannot forward arbitrary stdin, and
+this change does not claim that a native plugin RPC can do so.
+
+The original Pi `artifact`/`artifacts` declaration and its bounded aggregate
+remain compatible and cover that declared page only. Automatic generation and
+submission of arbitrarily many Pi result pages is not added here. The authorized
+`computer_task_get` query accepts `delivery_after` (empty string for page 1,
+then `next_after`) to read the same NAS ledger, at most 16 entries per response.
+Use existing exact Commit/Resolve for individual in-flight status. `has_more`
+means more currently stored rows, not that all producer output has arrived.
+See [the page contract and migration evidence](../../../docs/testing/transfer-ledger-pages.md).
 
 Each file retains one stable delivery/closed manifest. New upload metadata does
 not consume the legacy eight-job/256 MiB snapshot reservation. Finite host actions

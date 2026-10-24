@@ -550,6 +550,15 @@ type ChannelLinkCode struct {
 	TeamID                    pgtype.UUID        `json:"team_id"`
 }
 
+type ComputerDeliveryEntry struct {
+	TeamID      pgtype.UUID `json:"team_id"`
+	OperationID pgtype.UUID `json:"operation_id"`
+	DeliveryID  string      `json:"delivery_id"`
+	Ordinal     int64       `json:"ordinal"`
+	Version     int32       `json:"version"`
+	Entry       []byte      `json:"entry"`
+}
+
 type ComputerOperation struct {
 	ID                pgtype.UUID        `json:"id"`
 	TeamID            pgtype.UUID        `json:"team_id"`

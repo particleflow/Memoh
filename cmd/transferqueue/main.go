@@ -14,6 +14,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/transferclient"
 )
 
@@ -28,7 +29,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, enqueue-results, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -38,7 +39,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -56,6 +57,24 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 	// Reserve a bounded tail of the same invocation for advisory persistence.
 	workCtx, stopWork := context.WithTimeout(ctx, 115*time.Second)
 	defer stopWork()
+	if *kind == "enqueue-results" {
+		if *id != "" {
+			return 2
+		}
+		raw, err := readBoundedProducerLimit(ctx, input, deliverymeta.ProducerPageMaxBytes)
+		if err != nil {
+			return 2
+		}
+		page, err := transferclient.EnqueueProducerPage(workCtx, getenv, "native-profile-v1", limits, bytes.NewReader(raw), transport, now())
+		if len(page.Files) == 0 && err != nil {
+			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+			return 1
+		}
+		if json.NewEncoder(output).Encode(page) != nil || err != nil {
+			return 1
+		}
+		return 0
+	}
 	if *kind == "migrate-budget" {
 		if err := transferclient.MigrateHerdrBudget(workCtx, getenv, "native-profile-v1", limits); err != nil {
 			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
@@ -263,14 +282,18 @@ func writeStatus(output io.Writer, s transferclient.QueueStatus, source, feedbac
 }
 
 func readBoundedProducer(ctx context.Context, input io.Reader) ([]byte, error) {
+	return readBoundedProducerLimit(ctx, input, 16384)
+}
+
+func readBoundedProducerLimit(ctx context.Context, input io.Reader, limit int) ([]byte, error) {
 	type result struct {
 		raw []byte
 		err error
 	}
 	done := make(chan result, 1)
 	go func() {
-		raw, err := io.ReadAll(io.LimitReader(input, 16385))
-		if len(raw) > 16384 {
+		raw, err := io.ReadAll(io.LimitReader(input, int64(limit)+1))
+		if len(raw) > limit {
 			err = transferclient.ErrInvalid
 		}
 		done <- result{raw, err}

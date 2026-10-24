@@ -1,0 +1,5 @@
+ok  	github.com/felinics/memoh/internal/computertask	25.683s
+ok  	github.com/felinics/memoh/internal/deliverymeta	1.073s
+ok  	github.com/felinics/memoh/cmd/transferqueue	16.584s
+ok  	github.com/felinics/memoh/internal/transferclient	39.489s
+ok  	github.com/felinics/memoh/internal/db/postgres/store	1.025s

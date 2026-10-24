@@ -103,3 +103,20 @@ func TestProducerCancellationCompetesWithVerifiedCommit(t *testing.T) {
 		})
 	}
 }
+
+func TestProducerPageCancellationBeforeAnyPageArrives(t *testing.T) {
+	f, s, ctx, ref := newDeliveryFixture(t)
+	// No embedded producer declaration: a future bounded page belongs to this
+	// same already-completed operation. An empty NAS ledger is not a cancel gap.
+	first, err := s.Commit(ctx, f.id.OperationID, "already_committed", ref)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cancelFixtureProducer(f)
+	if _, err := s.Commit(ctx, f.id.OperationID, "late_page", ref); !errors.Is(err, ErrDenied) {
+		t.Fatal("late page ignored cancellation", err)
+	}
+	if got, err := s.Resolve(ctx, f.id.OperationID, "already_committed", ref, false); err != nil || got.Outcome != first.Outcome {
+		t.Fatal("cancel retracted earlier commit", err)
+	}
+}

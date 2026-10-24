@@ -14,6 +14,25 @@ type ComputerOperationRecord struct {
 	CancelRequested                               bool
 	Revision                                      int64
 	CreatedAt, UpdatedAt                          time.Time
+	// DeliveryEntries is a bounded read projection, never serialized into Details.
+	DeliveryEntries map[string]ComputerDeliveryEntry
+}
+
+// ComputerDeliveryEntry is one item of the existing operation delivery ledger.
+// Version describes its payload, independently of the physical row layout.
+type ComputerDeliveryEntry struct {
+	Ordinal    int64
+	DeliveryID string
+	Version    int
+	Data       JSON
+}
+
+// ComputerDeliveryEntryStore replaces whole-ledger rewrites with scoped rows.
+// Save must atomically CAS the owning operation and persist this one entry.
+type ComputerDeliveryEntryStore interface {
+	ReadComputerDeliveryEntry(context.Context, ComputerOperationRecord, string) (ComputerDeliveryEntry, error)
+	SaveComputerDeliveryEntry(context.Context, ComputerOperationRecord, ComputerDeliveryEntry) (ComputerOperationRecord, error)
+	ListComputerDeliveryEntries(context.Context, ComputerOperationRecord, string, int) ([]ComputerDeliveryEntry, error)
 }
 
 type ComputerOperationStore interface {
