@@ -19,9 +19,10 @@ import (
 const ConfigKey = "images_api"
 
 type Config struct {
-	Protocol  string `json:"protocol"`
-	ModelMode string `json:"model_mode"`
-	Edits     bool   `json:"edits,omitempty"`
+	Protocol     string `json:"protocol"`
+	ModelMode    string `json:"model_mode"`
+	Edits        bool   `json:"edits,omitempty"`
+	EditEncoding string `json:"edit_encoding,omitempty"`
 }
 
 func parseConfig(provider sqlc.Provider) (Config, bool, error) {
@@ -38,6 +39,11 @@ func parseConfig(provider sqlc.Provider) (Config, bool, error) {
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&cfg); err != nil || cfg.Protocol != "openai-images" || (cfg.ModelMode != "configured" && cfg.ModelMode != "omit") {
 		return Config{}, true, errors.New("images_api requires protocol openai-images and model_mode configured or omit")
+	}
+	switch cfg.EditEncoding {
+	case "", "multipart", "json-images":
+	default:
+		return Config{}, true, errors.New("images_api edit_encoding must be multipart or json-images")
 	}
 	switch models.ClientType(provider.ClientType) {
 	case models.ClientTypeOpenAICompletions, models.ClientTypeOpenAIResponses:

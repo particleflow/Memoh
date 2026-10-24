@@ -29,8 +29,23 @@ type request struct {
 func invoke(ctx context.Context, client *http.Client, selected selection, apiKey string, args request, images []imageBytes, mask *imageBytes) (imageBytes, error) {
 	var body bytes.Buffer
 	contentType, operation := "application/json", "generations"
-	if len(images) == 0 {
+	if len(images) == 0 || selected.config.EditEncoding == "json-images" {
 		wire := map[string]any{"prompt": args.Prompt, "n": 1, "response_format": "b64_json"}
+		if len(images) > 0 {
+			operation = "edits"
+			// This dialect has no established mask contract. The tool rejects
+			// masks before opening inputs; keep this boundary defensive too.
+			if mask != nil {
+				return imageBytes{}, errors.New("mask is unsupported for json-images editing")
+			}
+			refs := make([]map[string]string, 0, len(images))
+			for _, image := range images {
+				refs = append(refs, map[string]string{
+					"image_url": "data:" + image.mime + ";base64," + base64.StdEncoding.EncodeToString(image.data),
+				})
+			}
+			wire["images"] = refs
+		}
 		if selected.config.ModelMode == "configured" {
 			wire["model"] = selected.model
 		}

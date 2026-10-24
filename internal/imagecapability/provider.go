@@ -106,7 +106,7 @@ func (p *Provider) Tools(ctx context.Context, session tools.SessionContext) ([]t
 	if selected.config.Edits {
 		list = append(list, toolexec.Tool{
 			Name:        "edit_image",
-			Description: "Edit existing images through the explicitly enabled Images API. Input images and mask are content_hash references owned by this Bot; raw paths and URLs are not accepted. Returns the persisted original output. Do not automatically repeat an unknown outcome or regenerate to retry file delivery.",
+			Description: "Edit existing images through the explicitly enabled Images API. Input images and mask are content_hash references owned by this Bot; raw paths and URLs are not accepted. Optional masks require multipart editing. Returns the persisted original output. Do not automatically repeat an unknown outcome or regenerate to retry file delivery.",
 			Parameters:  toolexec.SchemaFor[editArgs](toolexec.Strict()),
 			Execute: func(exec *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
 				var args editArgs
@@ -195,6 +195,9 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 	selected, enabled, err := p.resolve(exec.Context, session.BotID)
 	if err != nil || !enabled || (len(refs) > 0 && !selected.config.Edits) {
 		return nil, errors.New("configured image capability is unavailable")
+	}
+	if maskRef != "" && selected.config.EditEncoding == "json-images" {
+		return nil, errors.New("mask is unsupported for json-images editing")
 	}
 	var images []imageBytes
 	var mask *imageBytes

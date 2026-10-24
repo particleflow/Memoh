@@ -36,6 +36,16 @@ capabilities from a hostname.
 - `edits` defaults to false. Enable it only when the provider's editing protocol
   is supported independently of generation. An advertised edit tool is checked
   again at execution, so disabling edits rejects a stale call before HTTP.
+- `edit_encoding` is an optional addition after baseline `40f0a69`. It accepts
+  `multipart` (also the default when absent) or `json-images`. It affects edits
+  only; generation remains JSON. Select it through managed provider configuration,
+  not model tool arguments. Invalid values fail without a protocol fallback.
+
+`model_mode=omit` is a host policy, not an instruction to send a
+`service_default` wire field. This adapter does not send that field. A service's
+host-side default-model switch and its HTTP request fields must be distinguished
+when checking compatibility; omission alone does not prove another service's
+complete request contract.
 
 `image_model_id`, enabled model/provider checks and image-output compatibility
 remain required, including when the wire omits model. Only API-key
@@ -59,12 +69,20 @@ with `prompt`, `n: 1`, `response_format: b64_json`, optional `size`, and model o
 under the configured policy.
 
 When enabled, `edit_image` accepts `prompt`, one to four `images` content hashes,
-an optional `mask` content hash and optional `size`. It makes a multipart POST:
-`image` for one input, repeated `image[]` for multiple inputs, optional `mask`,
-and the same prompt/n/response-format/model-policy fields. The implementation
-supports this multipart contract. It does not implement a JSON `images` array
-edit dialect or establish compatibility with another application's editing
-contract. No real provider editing request has been validated by these tests.
+an optional `mask` content hash and optional `size`. The provider's encoding selects
+one POST contract, with the same prompt/n/response-format/model-policy fields:
+
+- `multipart`: `image` for one input, repeated `image[]` for multiple inputs,
+  optional `mask`. Existing configurations retain this behavior.
+- `json-images`: a JSON `images` array whose entries contain `image_url` data URIs.
+  Each URI uses the verified original bytes and detected MIME type of the existing
+  authorized attachment. No remote image URL is fetched. Masks are rejected before
+  opening inputs, resolving credentials or sending HTTP, because this dialect's
+  mask structure has not been established. Generation is not used as a fallback.
+
+For example, an explicitly supported JSON-edit provider can add
+`"edits": true, "edit_encoding": "json-images"` inside `images_api`. No real
+provider editing request has been validated by these synthetic tests.
 
 Both tools reject unknown fields, including endpoint, key, model, Bot and session
 overrides. Host admission supplies the Bot/user/session identity. The platform
@@ -73,6 +91,9 @@ delegation authority before effects, including before `media.Open`. A known hash
 is not an authorization grant. Reads stay in that Bot's existing media scope and
 are hash checked before transmission. This change adds no cross-Bot hash alias;
 existing delegation-scoped attachment authorization remains a separate mechanism.
+Authorization is Bot/conversation scoped; this adapter does not introduce a
+same-task `request_id`/`artifact_id` ownership ledger or translate such external
+identifiers into local authorization grants.
 
 The adapter requests base64 bytes and never follows an output URL. It base64
 decodes once, checks size and MIME magic bytes, and passes original bytes to
@@ -112,6 +133,14 @@ one invocation**. A new tool call or process restart is not deduplicated by this
 adapter. Resolve unknown outcomes through operator/upstream verification before
 deciding whether a new request is appropriate.
 
+Committed results use the existing native step/message persistence, not a new
+image receipt service. A caller can reuse a completed `content_hash` through the
+existing authorized attachment flow without generating again. The adapter does
+not persist the raw upstream response or reconcile a crash between upstream
+generation, media ingestion and step commit. In particular, an absent completed
+receipt is not evidence that the provider did no work. Gateway response model
+labels are ignored and are not claims about the underlying model version.
+
 ## Verification scope
 
 Tests use synthetic provider HTTP endpoints and synthetic PNGs in temporary
@@ -137,6 +166,14 @@ multipart editing, original-byte/hash round trips, tool visibility, legacy
 fallback/schema uniqueness, managed endpoint/auth selection, disabled editing,
 foreign/malformed references, revoked authority before storage, private error
 suppression, unknown response/timeout handling and persistence failure.
+
+The JSON-edit increment adds focused synthetic HTTP/tool/media tests for explicit
+encoding selection, unchanged default multipart and generation wire contracts,
+single/multiple JSON inputs, omitted/configured model policy, exact original-byte
+storage, ignored gateway model labels, pre-dispatch mask/foreign-reference/access
+rejection, rejected tool-side policy overrides, and one-POST unknown outcomes.
+It does not repeat the prior native-loop, actual-spawn or cross-Bot acceptance
+tests, and does not claim those historical results were run on this increment.
 
 This is synthetic contract/integration evidence, not real paid-provider,
 production chat, Web UI, NAS, PC or deployment acceptance.
