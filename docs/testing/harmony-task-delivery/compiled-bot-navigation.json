@@ -1,0 +1,39 @@
+{
+  "scope": "Actual new compiled Harmony Web bundle, intercepted synthetic API only.",
+  "oldVersion": null,
+  "newVersion": "f6403de-task-deliveries",
+  "baseline": [],
+  "botSettingsRestored": true,
+  "createEntryRestored": true,
+  "cancelWithoutCreate": true,
+  "duplicateSubmitSinglePOST": true,
+  "server403NotBypassed": true,
+  "errorClassifications": [
+    {
+      "apiStatus": 403,
+      "clientRedirectedToChat": false,
+      "loginRetained": true
+    },
+    {
+      "apiStatus": 404,
+      "clientRedirectedToChat": false,
+      "loginRetained": true
+    },
+    {
+      "apiStatus": 500,
+      "clientRedirectedToChat": false,
+      "loginRetained": true
+    }
+  ],
+  "returnedToChat": true,
+  "viewport": "390x844",
+  "nativeDevice": false,
+  "liveAPI": false,
+  "pageErrors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/bots"
+    }
+  ]
+}

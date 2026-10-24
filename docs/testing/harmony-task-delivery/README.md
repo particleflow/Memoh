@@ -65,6 +65,38 @@ are not covered by the native save tests. No cross-process resume is claimed.
 
 This source checkpoint retains `cloud.begonia.workassistant`, version `1.0.7`,
 code `1000007`, existing permissions and login storage. Compilation/package
-evidence will be recorded separately. Browser persistence does not prove an
+evidence is recorded below. Browser persistence does not prove an
 on-device upgrade; signed installation, real device picker/opening, live NAS
 transfer, and end-to-end Bot/Agent execution remain unverified.
+
+
+## Unified unsigned package
+
+Source commit: `f6403deaded6e76c0788aa66cffcaac5fef0badd`.
+One build using the retained official Linux API26 SDK `26.0.0.105` completed
+with compile and qualification exit code 0. The build verified all 786 Web
+resources, the 95-file native source snapshot, compiled ArkTS ABC, LibRaw
+licenses, both native ELF architectures, and unchanged toolchain metadata.
+No SDK download, signing, installation, Windows transfer, or NAS change occurred.
+
+- File: `memoh-harmony-1.0.7-1000007-f6403de-api26-unsigned.hap`
+- Size: `36908394` bytes
+- SHA-256: `da95c24335f6074852cc621edde5b6362a6604239fb582b978817d107fdc964c`
+- Source fingerprint: `4da9a6a6b3147328b685cc1156ebddf4eff8cb21bddeba10b29cbd4893da5239`
+- Identity: `cloud.begonia.workassistant`, `1.0.7`, version code `1000007`.
+  The module/pack metadata and native library bytes match the previous 1.0.7.
+  This code exceeds the reported installed 1.0.6 code `1000006`; successful
+  signed upgrade and retained login on the phone still require device testing.
+
+The new file was saved as a distinct private Library artifact and read back
+using the current official Library flow on the same cloud environment. Exact
+size/SHA-256, byte equality, ZIP CRC and Library identity metadata passed.
+Private Library identity is retained with the artifact and not published here.
+The prior named HAPs, source ZIPs, private configuration and SDK remain intact.
+
+The newly compiled Web bundle also passed actual Chromium Bot list/settings,
+create/cancel, duplicate-submit single request, 403 refusal, 403/404/500 detail
+handling and return-to-chat checks at 390×844 with synthetic API interception.
+No page errors occurred. This checks client behavior, not successful live Bot
+creation or Agent execution. See `compiled-bot-navigation.json`,
+`native-build-summary.json`, and `hap-verification.json`.

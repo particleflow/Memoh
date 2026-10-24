@@ -1,0 +1,45 @@
+{
+  "sourceCommit": "f6403deaded6e76c0788aa66cffcaac5fef0badd",
+  "upstreamCommit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
+  "artifact": {
+    "name": "memoh-harmony-1.0.7-1000007-f6403de-api26-unsigned.hap",
+    "bytes": 36908394,
+    "sha256": "da95c24335f6074852cc621edde5b6362a6604239fb582b978817d107fdc964c"
+  },
+  "app": {
+    "bundleName": "cloud.begonia.workassistant",
+    "versionName": "1.0.7",
+    "versionCode": 1000007
+  },
+  "permissions": [
+    "ohos.permission.INTERNET",
+    "ohos.permission.GET_NETWORK_INFO",
+    "ohos.permission.MICROPHONE",
+    "ohos.permission.DETECT_GESTURE",
+    "ohos.permission.FILE_ACCESS_PERSIST",
+    "ohos.permission.READ_IMAGEVIDEO"
+  ],
+  "reportedInstalledVersionCode": 1000006,
+  "unsigned": true,
+  "sdkVersion": "26.0.0.105",
+  "compileExitCode": 0,
+  "qualificationExitCode": 0,
+  "hapResourceDigestsVerified": true,
+  "zipCRCVerified": true,
+  "sourceIdentitySha256": "4da9a6a6b3147328b685cc1156ebddf4eff8cb21bddeba10b29cbd4893da5239",
+  "sourceFiles": 95,
+  "webResourceCount": 786,
+  "moduleAndPackMetadataUnchanged": true,
+  "nativeLibrariesUnchanged": true,
+  "oldPackagePreserved": "memoh-harmony-1.0.7-1000007-7ceca0e-api26-unsigned.hap",
+  "nativeRuntime": "NOT_EXECUTED",
+  "signedUpgrade": "NOT_EXECUTED",
+  "humanAcceptance": false,
+  "libraryRoundtrip": {
+    "verified": true,
+    "bytes": 36908394,
+    "sha256": "da95c24335f6074852cc621edde5b6362a6604239fb582b978817d107fdc964c",
+    "zipCRCVerified": true,
+    "identityMetadataVerified": true
+  }
+}
