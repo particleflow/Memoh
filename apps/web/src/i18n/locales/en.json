@@ -2154,6 +2154,12 @@
     "iconPlaceholder": "Icon URL or identifier (optional)",
     "enable": "Enable",
     "enableHint": "Only models from enabled providers appear in the available model list",
+    "imageReferences": {
+      "label": "Allow reference images",
+      "description": "Allow 1–4 image references accessible to this Bot. Enable only when the provider supports reference-image requests through OpenAI Images.",
+      "protocolRequired": "Select OpenAI Images before allowing reference images.",
+      "legacyPolicy": "The stored image policy must be migrated before reference images can be enabled. Existing model and encoding settings have been preserved."
+    },
     "imagesProtocol": {
       "label": "Image generation protocol",
       "description": "Uses the Bot's configured image model. Other saved image options are preserved.",

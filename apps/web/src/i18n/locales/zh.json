@@ -2154,6 +2154,12 @@
     "iconPlaceholder": "图标 URL 或标识（可选）",
     "enable": "启用",
     "enableHint": "只有启用的供应商的模型才会出现在可用模型列表中",
+    "imageReferences": {
+      "label": "允许参考图输入",
+      "description": "允许使用当前 Bot 有权访问的 1–4 张图片引用。仅在服务商支持 OpenAI Images 参考图请求时开启。",
+      "protocolRequired": "请先选择 OpenAI Images 协议，再允许参考图输入。",
+      "legacyPolicy": "当前图片策略需要迁移后才能开启参考图输入，已有模型和编码设置保持不变。"
+    },
     "imagesProtocol": {
       "label": "图片生成协议",
       "description": "使用 Bot 已配置的图片模型，保留其他已保存的图片选项。",
