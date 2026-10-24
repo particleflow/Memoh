@@ -1,9 +1,9 @@
 {
-  "version": "unified-91af53f",
-  "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
-  "archive": "tests/.isolated/memoh-91af53f-complete.tar.gz",
-  "archiveSHA256": "92a8d10eacf4cf0fe3d95d45c91afa65b695f756295c96a168bde1a6c712245a",
-  "archivePrefix": "Memoh-91af53f/",
+  "version": "unified-9e6c470",
+  "commit": "9e6c47076bc507e0555002b73d3567297d914939",
+  "archive": "tests/.isolated/memoh-9e6c470-complete.tar.gz",
+  "archiveSHA256": "2c75ded797cfb9f7946e4dc165189bf5efa9d6b05e1d3a324cdb6f49ef58b592",
+  "archivePrefix": "Memoh-9e6c470/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/91af53f43566cb827d1fc58d18102e8ad29383bc",
-      "archiveSHA256": "fd03ab0a295b739102ff831d8876c4c83a43f29b876fdfadf643c6cedf4c2e28",
-      "archivePrefix": "Memoh-91af53f43566cb827d1fc58d18102e8ad29383bc/",
+      "commit": "9e6c47076bc507e0555002b73d3567297d914939",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/9e6c47076bc507e0555002b73d3567297d914939",
+      "archiveSHA256": "615a10f733e42996ef0a4d7cd33c166aca50642232ba7fa95ff3ae1eb4d8d1b1",
+      "archivePrefix": "Memoh-9e6c47076bc507e0555002b73d3567297d914939/",
       "destination": ""
     },
     {
@@ -137,21 +137,21 @@
     }
   },
   "downstreamObservation": {
-    "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
-    "scope": "Shared task observation recovery and task delivery UI are now present directly in the pinned complete upstream source; phone host adaptations remain separate.",
+    "commit": "9e6c47076bc507e0555002b73d3567297d914939",
+    "scope": "Shared native task observation, retained interactive follow-up and provider Images controls are present directly in the pinned complete upstream source; existing Harmony host adaptations remain separate.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {
-        "baseSHA256": "a15d26f7b9a4a7c8069153928634787cae74f6322c5ec924b768a1118bdced13",
-        "sha256": "a15d26f7b9a4a7c8069153928634787cae74f6322c5ec924b768a1118bdced13"
+        "baseSHA256": "9a47a427fd3fbaba77f4fece7935ad13d2072b58c0bb9eacfe690effe59a0251",
+        "sha256": "9a47a427fd3fbaba77f4fece7935ad13d2072b58c0bb9eacfe690effe59a0251"
       },
       "apps/web/src/pages/home/components/session-tasks.vue": {
-        "baseSHA256": "adff082e99ca458cb1e8fd59bc9349052a2122667c2020720f2c9bab9e2a8333",
-        "sha256": "adff082e99ca458cb1e8fd59bc9349052a2122667c2020720f2c9bab9e2a8333"
+        "baseSHA256": "ee5b611e3cae2c8d1133722de9a40c7a1d87be6a42ae58a851d488b269e44413",
+        "sha256": "ee5b611e3cae2c8d1133722de9a40c7a1d87be6a42ae58a851d488b269e44413"
       }
     },
     "regressionTest": {
       "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
-      "sha256": "9846cb4a170cc01335ea0c404b0de0096cf069e676c30eabb56196937ff23087"
+      "sha256": "ceb00e2b12a74a67a13e4ed4e7ae513fe366b998f77e9b52027436919373e487"
     }
   }
 }

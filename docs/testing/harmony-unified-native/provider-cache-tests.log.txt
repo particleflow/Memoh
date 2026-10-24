@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <validation-context>
+
+
+ Test Files  4 passed (4)
+      Tests  28 passed (28)
+   Start at  18:49:12
+   Duration  10.83s (transform 14.93s, setup 0ms, import 1.02s, tests 20.10s, environment 2.52s)

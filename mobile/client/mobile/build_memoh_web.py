@@ -765,6 +765,31 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                   >
                     {{ t('bots.files.download') }}''', 1),
     ]
+    # Provider settings already refresh their query after save. Persist that
+    # refreshed display cache before the save settles, as Bot settings do,
+    # so a quick reload cannot hydrate the previous Images protocol. The
+    # existing persistence helper strips secret fields; auth storage is intact.
+    changes['apps/web/src/pages/providers/model-setting.vue'] = [
+        ("import ProviderIdentityCard from '@/components/provider-identity-card/index.vue'",
+         "import { saveQueryCacheToDiskNow } from '@/lib/query-cache-persistence'\nimport ProviderIdentityCard from '@/components/provider-identity-card/index.vue'", 1),
+        ('''    return result
+  },
+  onSettled: () => {
+    invalidateProviderQueries()
+    queryCache.invalidateQueries({ key: ['provider-templates', 'llm'] })
+  },
+})''', '''    return result
+  },
+  onSettled: async () => {
+    // A failed refresh must not turn an accepted PUT into a failed save.
+    // Failed query entries are omitted by the existing disk serializer.
+    await queryCache.invalidateQueries({ key: ['providers'] }).catch(() => undefined)
+    saveQueryCacheToDiskNow(queryCache)
+    void queryCache.invalidateQueries({ key: ['models'] })
+    void queryCache.invalidateQueries({ key: ['provider-templates', 'llm'] })
+  },
+})''', 1),
+    ]
     patches = {}
     context = base / 'official-context.tar'
     if platform == 'harmony':

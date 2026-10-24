@@ -1,0 +1,12 @@
+{
+  "refreshFailureCase": true,
+  "ordinarySaveOmitsKeyAndImages": true,
+  "explicitImagesPreservesPolicies": true,
+  "quickReloadRetainsChoice": true,
+  "diskCacheStripsKey": true,
+  "loginCalls": 1,
+  "loginRetained": true,
+  "pageErrors": [],
+  "nativeDevice": false,
+  "liveAPI": false
+}

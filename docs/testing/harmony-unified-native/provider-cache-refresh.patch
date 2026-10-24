@@ -1,0 +1,19 @@
+--- a/apps/web/src/pages/providers/model-setting.vue
++++ b/apps/web/src/pages/providers/model-setting.vue
+@@ -72,2 +72,3 @@
+ <script setup lang="ts">
++import { saveQueryCacheToDiskNow } from '@/lib/query-cache-persistence'
+ import ProviderIdentityCard from '@/components/provider-identity-card/index.vue'
+@@ -165,5 +166,9 @@
+   },
+-  onSettled: () => {
+-    invalidateProviderQueries()
+-    queryCache.invalidateQueries({ key: ['provider-templates', 'llm'] })
++  onSettled: async () => {
++    // A failed refresh must not turn an accepted PUT into a failed save.
++    // Failed query entries are omitted by the existing disk serializer.
++    await queryCache.invalidateQueries({ key: ['providers'] }).catch(() => undefined)
++    saveQueryCacheToDiskNow(queryCache)
++    void queryCache.invalidateQueries({ key: ['models'] })
++    void queryCache.invalidateQueries({ key: ['provider-templates', 'llm'] })
+   },

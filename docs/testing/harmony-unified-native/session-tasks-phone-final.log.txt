@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <validation-context>
+
+
+ Test Files  1 passed (1)
+      Tests  34 passed (34)
+   Start at  18:36:14
+   Duration  10.40s (transform 5.42s, setup 0ms, import 7.22s, tests 2.57s, environment 439ms)

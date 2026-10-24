@@ -1,0 +1,7 @@
+{
+  "generator": "mobile/prepare_memoh_source.py (unchanged)",
+  "inputs": "Previously verified component archive bytes, local file URLs for offline validation only",
+  "persistedSourceURLsUnchangedOfficial": true,
+  "byteIdenticalCombinedArchive": true,
+  "sha256": "2c75ded797cfb9f7946e4dc165189bf5efa9d6b05e1d3a324cdb6f49ef58b592"
+}

@@ -1,0 +1,13 @@
+{
+  "scope": "Only current changed public text/source and synthetic screenshot artifacts",
+  "files": 28,
+  "privateValuesPrinted": false,
+  "reviewedSyntheticFixtureMatches": [
+    {
+      "path": "docs/testing/harmony-task-delivery/prepare-platform-tests.py",
+      "category": "signedQuery"
+    }
+  ],
+  "confirmedSensitiveFindings": [],
+  "reviewReason": "All query matches are literal synthetic identity/token values in upstream DOM assertions being adapted to the native-save boundary; they are not credentials."
+}

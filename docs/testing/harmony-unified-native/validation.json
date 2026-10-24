@@ -1,0 +1,30 @@
+{
+  "sharedCommit": "9e6c47076bc507e0555002b73d3567297d914939",
+  "initialTargetedTests": {
+    "passed": 114,
+    "failed": 1,
+    "files": 10
+  },
+  "failure": "Web-only anchor assertion in session-tasks.test.ts; adapted to the existing phone saveOriginal route without changing product code.",
+  "correctedSuite": {
+    "passed": 34,
+    "failed": 0
+  },
+  "distinctTargetedTestsPassed": 115,
+  "webTypecheckExitCode": 0,
+  "targetedLintExitCode": 0,
+  "newNativeCompile": false,
+  "newHap": false,
+  "nativeDevice": false,
+  "liveServer": false,
+  "humanQA": false,
+  "providerCacheRelatedTests": {
+    "passed": 28,
+    "files": 4,
+    "includesPreviouslyRunImagesSuite": true
+  },
+  "postSaveRefreshFailureBrowser": true,
+  "normalQuickReloadBrowser": true,
+  "protectedInputsUnchanged": 7,
+  "hostPatchCount": 45
+}

@@ -1,0 +1,33 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 <validation-context>
+
+ ❯ |web| src/pages/home/components/session-tasks.test.ts (34 tests | 1 failed) 3716ms
+     × shows all recorded files automatically, with pending and failed separate from task completion 484ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > shows all recorded files automatically, with pending and failed separate from task completion
+AssertionError: expected  to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/pages/home/components/session-tasks.test.ts:102:19
+    100|     expect(document.body.textContent).not.toContain(en.chat.tasks.stat…
+    101|     const links = document.querySelector('[role=dialog]')!.querySelect…
+    102|     expect(links).toHaveLength(1)
+       |                   ^
+    103|     expect(links[0]!.getAttribute('href')).toBe(`/api/bots/bot/media/$…
+    104|     expect(links[0]!.getAttribute('download')).toBe('ready-result')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 9 passed (10)
+      Tests  1 failed | 114 passed (115)
+   Start at  18:35:11
+   Duration  22.96s (transform 28.03s, setup 0ms, import 42.88s, tests 6.98s, environment 5.93s)

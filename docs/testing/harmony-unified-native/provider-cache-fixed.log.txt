@@ -1,0 +1,7 @@
+{"providerGET": "previous-protocol"}
+{"controls": [{"tag": "INPUT", "type": "text", "label": "名称", "labelledby": null}, {"tag": "BUTTON", "type": "button", "label": null, "labelledby": null}, {"tag": "INPUT", "type": "text", "label": "接口地址", "labelledby": null}, {"tag": "INPUT", "type": "password", "label": "API 密钥", "labelledby": null}, {"tag": "BUTTON", "type": "button", "label": "图片生成协议", "labelledby": null}], "errors": []}
+{"hiddenAncestors": []}
+{"providerGET": "previous-protocol"}
+{"providerGET": "openai-images"}
+{"stage": "reopened", "savedProtocol": "openai-images", "label": "OpenAI Images", "body": "Synthetic Bot\n我们从哪里开始？\n无\n云端电脑\n模型\nRE\nRenamed Synthetic Provider\n配置\n名称\n客户端类型\nOpenAI Completions\n接口地址\nAPI 密钥\n图片生成协议\n\n使用 Bot 已配置的图片模型，保留其他已保存的图片选项。\n\nOpenAI Images\n测试连接\n保存修改\n模型\n导入模型\n添加模型\n暂无模型\n\n手动添加，或从该服务商导入完整列表。", "errors": []}
+{"ordinarySaveOmitsKeyAndImages": true, "explicitProtocolRetainsOtherPolicies": true, "reopenRetainsChoice": true, "passwordInputBlank": true, "loginCalls": 1, "loginRetained": true, "pageErrors": [], "nativeDevice": false, "liveServer": false}
