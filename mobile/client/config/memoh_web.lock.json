@@ -135,5 +135,23 @@
         "apps/web/src/pages/home/components/dockview/panel-asset.delegation.test.ts": "523c65949f9cd69914594c9076899e7b3e060b3980fd7a24bfe77129613beb83"
       }
     }
+  },
+  "downstreamObservation": {
+    "commit": "0a324013f9fe1beec77ac948d0af8f210194ba52",
+    "scope": "Use the existing shared task UI and SDK; on transient parent read failure clear downstream content and resume the same selection only after reauthorization. No new API, provider configuration or Agent-core change.",
+    "files": {
+      "apps/web/src/pages/home/composables/useSessionTasks.ts": {
+        "baseSHA256": "e514126b082ab3481ebb46398d2787e095ba6b7d8d7e7c7bd3fb6d4fa12f016f",
+        "sha256": "bbc1a41b77445d67f1187038fc1934b717093e0479450f83d8b49540b88aa23e"
+      },
+      "apps/web/src/pages/home/components/session-tasks.vue": {
+        "baseSHA256": "cc10997715327188e3f0b78bafaa8d2f226ea9d9a49f28b82f3d31e1030f9b04",
+        "sha256": "83dec587c7fe7f6360a91b44ccd5d1b8d6d921a90a01e7535e85a1d228172128"
+      }
+    },
+    "regressionTest": {
+      "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
+      "sha256": "6f08be4074d6553425830e7cf31881bcb9f60bc40cbe234e48cf42ed05e45480"
+    }
   }
 }

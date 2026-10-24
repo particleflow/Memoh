@@ -1,0 +1,89 @@
+{
+  "sourceUI": "Vite actual client modules; pinned 40f plus exact PR79 observation modules",
+  "backend": "Synthetic intercepted HTTP only; no live Server/PG or production",
+  "viewport": "390x844",
+  "loginCalls": 1,
+  "reloadAndBrowserProcessRestartRetainLogin": true,
+  "persistedConfigurationUnchanged": true,
+  "delegationToServerReturnedTargetSession": true,
+  "runningAndFailedChildVisibleOutput": true,
+  "deliveryPendingNotAccepted": true,
+  "scopedAttachmentReferenceShown": true,
+  "attachmentBytesDownloaded": false,
+  "transientFailureClearsContentRetainsLocation": true,
+  "manualReloadRestoresSameDetail": true,
+  "parent403RetiresDownstream": true,
+  "taskRequests": [
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/tasks",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/delegations",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/delegations/33333333-3333-4333-8333-333333333333",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/55555555-5555-4555-8555-555555555555/sessions/66666666-6666-4666-8666-666666666666/tasks",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/55555555-5555-4555-8555-555555555555/sessions/66666666-6666-4666-8666-666666666666/tasks/subagent/77777777-7777-4777-8777-777777777777",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/delegations/33333333-3333-4333-8333-333333333333",
+      "method": "GET",
+      "mode": "503"
+    },
+    {
+      "path": "/bots/55555555-5555-4555-8555-555555555555/sessions/66666666-6666-4666-8666-666666666666/tasks/subagent/77777777-7777-4777-8777-777777777777",
+      "method": "GET",
+      "mode": "503"
+    },
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/delegations/33333333-3333-4333-8333-333333333333",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/55555555-5555-4555-8555-555555555555/sessions/66666666-6666-4666-8666-666666666666/tasks/subagent/77777777-7777-4777-8777-777777777777",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/delegations/33333333-3333-4333-8333-333333333333",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/55555555-5555-4555-8555-555555555555/sessions/66666666-6666-4666-8666-666666666666/tasks/subagent/77777777-7777-4777-8777-777777777777",
+      "method": "GET",
+      "mode": "ok"
+    },
+    {
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/22222222-2222-4222-8222-222222222222/delegations/33333333-3333-4333-8333-333333333333",
+      "method": "GET",
+      "mode": "403"
+    },
+    {
+      "path": "/bots/55555555-5555-4555-8555-555555555555/sessions/66666666-6666-4666-8666-666666666666/tasks/subagent/77777777-7777-4777-8777-777777777777",
+      "method": "GET",
+      "mode": "403"
+    }
+  ],
+  "taskMutationRequests": 0,
+  "darkNarrowNoHorizontalOverflow": true,
+  "pageErrors": [],
+  "nativeUpgrade": false,
+  "nativeDevice": false,
+  "humanQA": false
+}

@@ -20,17 +20,19 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "5f22d9990691eb3dc913c5011d2e823afcfecde70b812f8b1feb1abef4101aa6",
+      "sha256": "fe95b261675c36bdbd855727231d167feb1a38599b337a9736dc99fe26a804ef",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
         "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
         "Recovery follow-up after 6a2a3b1: pin five existing scoped-attachment modules and three upstream tests from dfc7cf5; reject baseline drift and expose attachment-only source preparation without the missing builder.",
-        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content.",
+        "Bind the two existing shared observation modules byte-for-byte to PR79 0a324013f9fe1beec77ac948d0af8f210194ba52; retain selected downstream detail across transient parent read failure with fresh authorization. No legacy HarmonyTasks activation or API/provider/auth changes."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
-      "unified40fBaseSHA256": "d92fbc6fd1b2a4d574b0d8ffe27bd5a2b598154fc83ddcc54fe67f90105082f7"
+      "unified40fBaseSHA256": "d92fbc6fd1b2a4d574b0d8ffe27bd5a2b598154fc83ddcc54fe67f90105082f7",
+      "observationAuditBaseSHA256": "5f22d9990691eb3dc913c5011d2e823afcfecde70b812f8b1feb1abef4101aa6"
     },
     {
       "path": "mobile/client/mobile/client_config.py",
@@ -440,7 +442,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
+      "sha256": "0345448acf47251e5d0ff9847189e4d3dd2b8d95516fab9a11bea55dff6793e3",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -448,9 +450,11 @@
       "unified40fBaseSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
       "preparationChanges": [
         "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content.",
-        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
+        "Bind the two existing shared observation modules byte-for-byte to PR79 0a324013f9fe1beec77ac948d0af8f210194ba52; retain selected downstream detail across transient parent read failure with fresh authorization. No legacy HarmonyTasks activation or API/provider/auth changes."
       ],
-      "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3"
+      "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
+      "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff"
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
@@ -1548,5 +1552,22 @@
     "loginPersistenceCodeUnchanged": true,
     "signedUpgradeAndLoginRetention": "NOT_EXECUTED",
     "evidence": "docs/testing/harmony-upgrade-107/verification.json"
+  },
+  "clientObservationFollowup": {
+    "baseRecoveryCommit": "796ed4487167ebc8985d16fa1d9fef6c79eebb39",
+    "baseWebCommit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+    "sharedModuleCandidate": "0a324013f9fe1beec77ac948d0af8f210194ba52",
+    "productFiles": [
+      "mobile/client/config/memoh_web.lock.json",
+      "mobile/client/mobile/build_memoh_web.py"
+    ],
+    "sharedModuleTests": 119,
+    "typecheckExitCode": 0,
+    "browser": "Real Vite client with synthetic intercepted HTTP; not live Server/PG, native device or human QA",
+    "loginCodeChanged": false,
+    "normalReloadAndBrowserRestartLoginCalls": 1,
+    "hapRebuilt": false,
+    "prior107ArtifactIncludesFollowup": false,
+    "evidence": "docs/harmony-observation-recovery.md"
   }
 }

@@ -1,0 +1,66 @@
+{
+  "sourceBase": "796ed4487167ebc8985d16fa1d9fef6c79eebb39",
+  "WebBase": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+  "candidate": "0a324013f9fe1beec77ac948d0af8f210194ba52",
+  "serverTaskContractBytesEqual": true,
+  "generatedSharedModulesByteIdenticalToCandidate": true,
+  "preFixTests": {
+    "failed": 4,
+    "passed": 26
+  },
+  "postFixTests": {
+    "passed": 119,
+    "failed": 0,
+    "files": 5
+  },
+  "typecheckExitCode": 0,
+  "eslintExitCode": 0,
+  "existingServiceConfigChecks": 115,
+  "browserEvidence": "Synthetic HTTP, real client UI; no production or live Server/PG",
+  "screenshotsOpenedAndInspected": true,
+  "uiViewport": "390x844",
+  "normalReloadAndProcessRestartRetainBoundLogin": true,
+  "loginCalls": 1,
+  "parentDeniedDropsChildData": true,
+  "mutationTaskRequests": 0,
+  "original107HAPSHA256": "4912fd74241a0e8109935a4e26a6b93be92fb8e600fc2179f5e7cd3650fa9af9",
+  "original107HAPUnchanged": true,
+  "repackaged": false,
+  "sourceFilesChanged": [
+    "mobile/client/config/memoh_web.lock.json",
+    "mobile/client/mobile/build_memoh_web.py"
+  ],
+  "legacyTaskOverlayUsedByCurrentBuild": false,
+  "loginCodeChanges": false,
+  "nativeDeviceAcceptance": "NOT_EXECUTED",
+  "fullHierarchicalSchedulerOrLiveLogs": "NOT_PROVIDED_BY_EXISTING_CONTRACT",
+  "providerModelMemoryConfigurationChanges": false,
+  "officialAgentCoreChanges": false,
+  "logs": {
+    "shared-before.log": {
+      "originalSHA256": "e608ee4554af5fd767b9391e2a585a405777bf0eaa0887a4e4d519595aa3f6d4",
+      "publicSHA256": "fb73970214b831e2f558312d41263368320791b60ef6dd017d391a464ead1164"
+    },
+    "shared-after.log": {
+      "originalSHA256": "6243aa09a6d264d1fdbc84552ed4116ff5a216df437eeb407b208a922bcd2f1b",
+      "publicSHA256": "a0effe69585b316b7605a73e5d91797b44a2babe808afef7068673250d442e22"
+    },
+    "typecheck.log": {
+      "originalSHA256": "4c40c00add2e3222d166d9f9d30fd27428337aa1be3e94c53cbfe85ad08165d3",
+      "publicSHA256": "16e2c8e449821aeffc7ce60c47201fec6cbae32a25e3d434e73b1ff8ee46513d"
+    },
+    "service-config.log": {
+      "originalSHA256": "d746b750d51b36d3f4c0af8871c6e14759c63db1ac5adf76ba69cd734149e19c",
+      "publicSHA256": "d746b750d51b36d3f4c0af8871c6e14759c63db1ac5adf76ba69cd734149e19c"
+    },
+    "browser-audit.log": {
+      "originalSHA256": "d0b8236278b2b7343a2e8e8e5b92057ce35e03800657e69faac87c441d170709",
+      "publicSHA256": "d0b8236278b2b7343a2e8e8e5b92057ce35e03800657e69faac87c441d170709"
+    },
+    "lint.log": {
+      "originalSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "publicSHA256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    }
+  },
+  "browserFontLimitation": "Vite blocked several optional font assets outside its validation-root allow list; screenshots use available fallback fonts. No allow-list bypass or font-fidelity acceptance is claimed."
+}

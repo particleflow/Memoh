@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <validation-root>
+
+
+ Test Files  5 passed (5)
+      Tests  119 passed (119)
+   Start at  11:27:49
+   Duration  14.34s (transform 16.04s, setup 0ms, import 22.65s, tests 3.18s, environment 1.78s)

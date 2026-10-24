@@ -1,0 +1,12 @@
+{
+  "baseWebCommit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+  "observationCandidate": "0a324013f9fe1beec77ac948d0af8f210194ba52",
+  "changedGeneratedContextFiles": [
+    "apps/web/src/pages/home/components/session-tasks.vue",
+    "apps/web/src/pages/home/composables/useSessionTasks.ts"
+  ],
+  "candidateBytesMatch": true,
+  "apiRoutesChanged": false,
+  "current107PackageUntouched": true,
+  "sourceContextSHA256": "72b44e9a50c1e81295d10db40f6102da31fbf0812920eb9c24a6aee949a4464e"
+}
