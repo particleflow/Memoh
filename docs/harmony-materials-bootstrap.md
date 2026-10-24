@@ -1,5 +1,7 @@
 # First-time native metadata generation
 
+Current checkpoint: [official API26 native compilation and HAP integrity checks passed](harmony-native-api26.md). The new artifact is unsigned; device/runtime acceptance remains unexecuted. Earlier blocked-stage records below are historical.
+
 The recovered `materials.py` checked native rawfiles before it generated
 `source-build.json`, and did not generate `raw-codec-license.txt`. A checkout
 with the verified Web package and LibRaw source could not create its first

@@ -36,3 +36,5 @@ client/mobile/harmony/app/entry/src/main/resources/rawfile/ui-theme.json
 client/mobile/harmony/materials/source-build.json
 client/mobile/harmony/app/entry/src/main/resources/rawfile/source-build.json
 client/mobile/harmony/app/entry/src/main/resources/rawfile/raw-codec-license.txt
+# Native compiler intermediates produced by the official SDK.
+client/mobile/harmony/app/entry/.cxx/

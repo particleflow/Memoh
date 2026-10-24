@@ -1,46 +1,64 @@
-# Reproduction inputs and limits
+# Reproduction inputs and verified build sequence
 
-Current follow-up: [runtime configuration and native download source integration](../docs/harmony-native-integration.md). Web packaging is verified; native compilation and phone acceptance remain blocked.
+The sequence below was exercised against source checkpoint
+`ef3678a86584bf197719d2cd1bcde881fec43d6d`. Official native compilation and all HAP
+integrity checks passed; the resulting artifact is unsigned. See
+[the build report and output hashes](../docs/harmony-native-api26.md).
 
+## Inputs
 
-The original public-subset status below is historical. The
-[archive restoration checkpoint](../docs/harmony-archive-restoration.md) recovers
-all 72 excluded paths and two additional tests. Integration of that older
-builder/native shell with retained newer modules and target `40f0a69` is still
-required; restored path coverage alone is not a successful build.
-
-A clean checkout of this public source subset can run only its source/syntax
-checker and standalone configuration regression. It cannot rebuild the full Web
-or HAP without the 72 excluded inherited source paths listed in the provenance
-register, including the overlay builder, native shell, packaging/toolchain
-helpers and assets. The private full source checkpoint has a clean-export runner;
-that runner is not advertised as functional from this incomplete public subset.
-
-Additional full-build inputs are not vendored here:
-
-- Python 3.12, Node 22.23.3, pnpm 10.27.0 and the dependencies matching the source
-  lockfile. Existing clean tests used a fixed offline store and disabled install
-  scripts; a cache alone is not a portable source package.
-- Memoh `6ddf61dcd8199758e4110398645c556a3d6d7375`, archive SHA256
-  `b92b9665acafd5a10ed8fb0b0dc6f51b465046950b1dfcd9a38eb991e3157f58`.
-- UI `f69402a55dd87a59c10722fe11507ad8fd7048f5`, archive SHA256
-  `55199ba9ad385c32f574906bda4fd43f21c106b6acb58f9e977d0da27222a4a9`.
-  Combined archive SHA256:
-  `473c5956c9691b54b5a4151ef0b9cececb1dc406a3076f7401abd744a36152f1`.
-- Shared Git objects at `be6862497a58a01ef8c6f4168f02d5624cd44061`.
-  `prepare_shared_observation.py` verifies inputs and rejects drift instead of
-  falling back. Existing full build invokes it after a fresh baseline extraction.
-- Playwright 1.62.0, Chromium 154.0.8037.57 and separately supplied historical
-  compiled 1.0.3, 1.0.6 and runtime-config r1 fixtures for browser regressions.
-  These fixtures may require private local configuration and are not in Git.
-- Official Linux x64 CLT 26.0.0.851, SHA256
-  `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`,
-  containing SDK 26.0.0.105 / API26, and LibRaw 0.22.2 archive SHA256
+- Python 3.12 and pnpm 10.27.0. The verified Web run used Node 24.19.0;
+  native compilation used the official CLT's bundled Linux Node.
+- `client/config/memoh_web.lock.json` pins complete public Memoh source at
+  `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8` and UI at
+  `f69402a55dd87a59c10722fe11507ad8fd7048f5`, including component archive hashes.
+  The deterministic combined archive SHA256 is
+  `75fe83655dfed0aecb43cb64d3ea9edec8fd206c46a5f0165ef35719678c62f2`.
+- Official `commandline-tools-linux-x64-26.0.0.851.zip`, 2,348,063,309 bytes,
+  SHA256 `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`,
+  containing SDK API26 / 26.0.0.105. Acquire through the official supported
+  Huawei channel; temporary signed links and vendor binaries are not in Git.
+- LibRaw 0.22.2 source, SHA256
   `de86b035655accff8d4010f1a221fdf50d353cb7b1422ba26f14a0db92612cfa`.
-  These require official acquisition and applicable terms; no signed download
-  links, vendor binaries or credentials are copied.
+  `raw-codec.lock.json` pins its official URL and all 244 source-file hashes.
 
-The actual adapted-Web typecheck was `pnpm --filter @memohai/web typecheck`,
-which expands to `vue-tsc --noEmit -p tsconfig.app.json` in `apps/web`. It does
-not cover every workspace project, ArkTS, the Node/Vite project or raw upstream
-Web. Passing it does not resolve the separately reported raw Web baseline issues.
+## Commands
+
+From `mobile/client`, with the pinned pnpm executable available:
+
+```sh
+python3 mobile/prepare_memoh_source.py
+python3 mobile/build_memoh_web.py --platform harmony --builder native --pnpm /absolute/path/to/pnpm
+python3 mobile/package_memoh_web.py
+python3 mobile/harmony/tools/prepare_raw_codec.py
+python3 mobile/harmony/tools/materials.py
+python3 -B mobile/harmony/tools/build_api26.py --toolchain-root /absolute/path/to/toolchains
+```
+
+The extracted official SDK must be at
+`/absolute/path/to/toolchains/commandline-tools/command-line-tools`.
+The Web builder validates frozen dependency inputs. The packager verifies
+resource hashes and generates its Web manifest and shared URL validator while
+preserving runtime service configuration. No private service address is needed
+for a distributable build. `materials.py` generates the native license bundle
+and both source metadata copies from verified inputs, then verifies the entire
+snapshot before compilation.
+
+The native entry checks the SDK identity, builds both native architectures,
+checks compiled ArkTS ABC and ELF headers, compares every packaged rawfile,
+and rejects source/dependency/toolchain drift. Its report is frozen under
+`client/docs/evidence/development-runs/`; the latest report is also available
+under `client/mobile/harmony/.build/build-report.json`. Generated files and
+compiler caches are excluded from source publication. Reuse matching verified
+inputs when continuing a build; do not repeat completed Web tests just to rerun
+a native stage.
+
+## Remaining qualification
+
+The current build proves that these pinned inputs compile and pass packaging
+integrity checks. It does not establish byte-identical HAP output across future
+runs. A signed installable build requires the appropriate signing material and
+provisioning profile. Phone runtime, permissions/TLS, NAS authentication,
+phone-to-NAS-to-phone transfers and human acceptance have not been exercised.
+The historical 19 later cloud changes remain unidentified; no unavailable 5a7
+source identity or old A11 acceptance is claimed.

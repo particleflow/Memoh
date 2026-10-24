@@ -1,0 +1,38 @@
+{
+  "sourceCommit": "ef3678a86584bf197719d2cd1bcde881fec43d6d",
+  "upstreamWebCommit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+  "sourceIdentitySHA256": "655585a7a296ce7b273d5315bd40cb9118ea6d59abefc547f3709963226b5754",
+  "CLT": {
+    "fileName": "commandline-tools-linux-x64-26.0.0.851.zip",
+    "bytes": 2348063309,
+    "sha256": "ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082",
+    "normalTLS": true,
+    "expandedBytes": 7244704449,
+    "sdkVersion": "26.0.0.105",
+    "sdkAPIVersion": "26"
+  },
+  "HAP": {
+    "fileName": "memoh-harmony-40f0a69-ef3678a-api26-unsigned.hap",
+    "bytes": 36900790,
+    "sha256": "d5b8410e241d2c9e5eaab8ed3945f34474c3745a26ce96e6bf0edd85516032c2",
+    "signed": false,
+    "zipCRCVerified": true
+  },
+  "officialCompileExitCode": 0,
+  "qualificationExitCode": 0,
+  "hapResourceDigestsVerified": true,
+  "architectures": [
+    "libs/arm64-v8a/libbegoniaraw.so",
+    "libs/x86_64/libbegoniaraw.so"
+  ],
+  "compilerInputDrift": false,
+  "toolchainMetadataMismatches": [],
+  "originalPrivateBuildLogSHA256": "ba83d5771e7ecb1fcb1c69a48212862d10729e6ecae5fefed343e2fd6f24597d",
+  "publicNormalizedBuildLogSHA256": "f3c92798897773927ce278d6344290cdbca72acd6caecbfe5c2d6ed4da2fd581",
+  "normalization": "Only task paths, terminal escape sequences and trailing whitespace; private originals retained.",
+  "webBuildRepeated": false,
+  "priorFeatureTestsRepeated": false,
+  "nativeDeviceRuntime": "NOT_EXECUTED",
+  "phoneNASTransfer": "NOT_EXECUTED",
+  "readyForHumanAcceptance": false
+}

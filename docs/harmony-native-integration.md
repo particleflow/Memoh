@@ -1,5 +1,7 @@
 # Restored Harmony runtime configuration and download integration
 
+Current checkpoint: [official API26 native compilation and HAP integrity checks passed](harmony-native-api26.md). The new artifact is unsigned; device/runtime acceptance remains unexecuted. Earlier blocked-stage records below are historical.
+
 This checkpoint follows `732f09d8f25893b63f5b2d5ba6d35c5f3d28fd15` on the
 recovery branch. It retains the recovered native shell and overlay builder,
 pinned to unified Memoh `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`.

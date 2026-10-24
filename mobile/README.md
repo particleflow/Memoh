@@ -1,47 +1,32 @@
-# Harmony client reviewed source subset
+# Recovered Harmony client
 
-This Draft imports the reviewed source additions from frozen client
-`1.0.11-dev.deliverybe686` (versionCode 1000011), source checkpoint
-`a01a3ec207326987d13b857f5b11c97f3511c6d4`. It contains 42 per-file reviewed
-entries and the existing standalone configuration regression. It is a partial
-source import, not a complete independently buildable client or an application
-release. The frozen full source and compiled package were not modified for this
-import. No installation package belongs in this directory.
+The existing client source has been restored and aligned with unified Memoh
+`40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`. The Web build, official API26 native
+compilation and HAP integrity qualification have passed. The new HAP is unsigned;
+installation, physical-device runtime, NAS transfers and human acceptance remain
+unverified. See the [native build checkpoint](../docs/harmony-native-api26.md).
 
-The Web baseline remains Memoh `6ddf61dcd8199758e4110398645c556a3d6d7375` and UI
-`f69402a55dd87a59c10722fe11507ad8fd7048f5`. Only the explicit shared observation
-and result-delivery capability is pinned to
-`be6862497a58a01ef8c6f4168f02d5624cd44061`; this is not adoption of all upstream
-Web, desktop, SDK or Agent changes. Public repository import base is
-`851e8da4284c1f01e7e95f9547b16e7250bf553b`.
+`SOURCE-PROVENANCE.json` records 116 reviewed source entries, their archive
+origins, current hashes and subsequent alignment changes. The two source ZIPs
+restored all 72 formerly excluded paths plus two tests. The historical 19 later
+cloud edits remain unverified; this is not a claim to recover the unavailable
+5a7 Git tree. Original archives and private backups remain preserved.
 
-`SOURCE-PROVENANCE.json` lists exact digests, origins, preparation changes and the
-72 excluded inherited paths. Native shell, Web overlay builder, original helpers
-and assets remain held for attribution review. Missing sources are explicit
-prerequisites, not generated replacements. Existing notices and unresolved
-AGPLv3/ISC upstream metadata are documented in `PROVENANCE-AND-LICENSES.md`.
+The existing native shell, Web overlay builder, packaging helpers and upstream
+license notices are retained. No SDK/CLT binaries, dependency caches, generated
+Web resources, HAP, signing material, private endpoint or account credentials
+belong in this source tree. Runtime service configuration and exact delegation
+attachment authorization are preserved; there is no new transfer service or
+automatic LAN/IPv6 route/token migration.
 
-No SDK, cache, dependencies, generated Web, HAP, signing material, private service
-address, real account data or private handoff records are included. API origin
-and installation download origin are separate runtime settings. Service changes
-invalidate the previous authentication scope. An unbound legacy token is never
-sent to a newly entered service: older installations without a persisted endpoint
-need one explicit configuration/login migration. A bound unchanged endpoint keeps
-login while the server session remains valid; refresh renewal is not invented.
-
-## Subset checks
-
-With Python 3, Node 22 and TypeScript available, run from repository root:
+Follow [BUILD-REPRODUCTION.md](BUILD-REPRODUCTION.md) for the exercised build
+sequence and pinned external inputs. Source inventory verification remains:
 
 ```sh
 python3 mobile/check_source_subset.py
-node mobile/client/tests/unit/service-config.test.cjs
 ```
 
-The latter resolves TypeScript normally or through `HARMONY_TEST_TYPESCRIPT`.
-These offline checks do not require or start a server. Full browser/native
-reproduction has missing and external inputs listed in `BUILD-REPRODUCTION.md`.
-The source import remains a Draft: full deployed-runtime verification, published
-screenshots, signed installation, real Harmony device upgrade and human QA remain
-unverified. Existing synthetic browser/API26 compile evidence is described in
-`REGRESSIONS.md`; it is not proof of those missing steps.
+That command only verifies source hashes and syntax; its `fullClientBuild: false`
+field describes that check, not the separately recorded official compiler run.
+Previous partial-import and blocked-stage evidence remains in Git history and
+linked checkpoint documents; it must not be used as the current build status.

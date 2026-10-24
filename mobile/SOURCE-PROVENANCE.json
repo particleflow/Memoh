@@ -1512,5 +1512,17 @@
     "sourceInputs": 95,
     "tests": 9,
     "nativeCompilerExecuted": false
+  },
+  "nativeAPI26Compilation": {
+    "sourceCommit": "ef3678a86584bf197719d2cd1bcde881fec43d6d",
+    "sourceIdentitySHA256": "655585a7a296ce7b273d5315bd40cb9118ea6d59abefc547f3709963226b5754",
+    "SDKVersion": "26.0.0.105",
+    "compilerExitCode": 0,
+    "qualificationExitCode": 0,
+    "unsignedHAPSHA256": "d5b8410e241d2c9e5eaab8ed3945f34474c3745a26ce96e6bf0edd85516032c2",
+    "unsignedHAPBytes": 36900790,
+    "packagedWebResources": 786,
+    "nativeDeviceRuntime": "NOT_EXECUTED",
+    "historicalLaterCloudChangesUnverified": 19
   }
 }

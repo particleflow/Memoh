@@ -1,5 +1,7 @@
 # Verified LibRaw build input
 
+Current checkpoint: [official API26 native compilation and HAP integrity checks passed](harmony-native-api26.md). The new artifact is unsigned; device/runtime acceptance remains unexecuted. Earlier blocked-stage records below are historical.
+
 The generated-input order issue recorded below is subsequently resolved by
 [the first-time metadata correction](harmony-materials-bootstrap.md). The LibRaw
 verification and SDK acquisition requirements remain valid.
@@ -46,7 +48,7 @@ No compiler, HAP generation, phone or NAS acceptance ran.
 The required historical artifact is `commandline-tools-linux-x64-26.0.0.851.zip`,
 2,348,063,309 bytes, SHA256
 `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`,
-containing SDK API26 / 26.0.0.105. Its historical `/workspace/toolchains` location
+containing SDK API26 / 26.0.0.105. Its historical toolchain directory
 is not a readable backup in this environment; no Library copy is known.
 
 The supported acquisition entry is
