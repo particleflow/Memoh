@@ -39,7 +39,7 @@ The previous Web Tasks panel did **not** consume ledger pages and still only
 shows safe process/result summaries. This change supplies the shared generated
 HTTP contract, not a new per-file Web/phone browser or download button. Native
 Windows auto-paging belongs to its separate client change. Neither the storage
-scale test nor this endpoint proves arbitrary成果 browsing on every client.
+scale test nor this endpoint proves arbitrary file browsing on every client.
 
 ## Executed checks
 
