@@ -1,0 +1,4 @@
+PASS existing real PG delegation -> child task detail; no business dispatch
+PASS real browser offline -> clear output/pause child reads -> automatic same-detail recovery
+PASS parent-only synthetic 503 -> child pause -> explicit read-only reload returns to same detail
+PASS denial retires navigation, no stale output, no observation POST, no page errors
