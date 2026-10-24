@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 <repo>
+
+
+ Test Files  4 passed (4)
+      Tests  76 passed (76)
+   Start at  17:15:28
+   Duration  8.88s (transform 9.15s, setup 0ms, import 12.52s, tests 2.93s, environment 1.22s)
+
