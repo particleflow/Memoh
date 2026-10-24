@@ -122,6 +122,48 @@
         </FormField>
 
         <FormField
+          v-if="supportsImagesProtocol(form.values.client_type)"
+          v-slot="{ value, handleChange, errorMessage }"
+          name="images_protocol"
+        >
+          <SettingsRow
+            stack="sm"
+            :label="$t('provider.imagesProtocol.label')"
+            :description="$t('provider.imagesProtocol.description')"
+          >
+            <FormItem class="w-full sm:w-80">
+              <FormControl>
+                <Select
+                  :model-value="value"
+                  :disabled="editLoading"
+                  @update:model-value="handleChange"
+                >
+                  <SelectTrigger
+                    class="w-full"
+                    :aria-label="$t('provider.imagesProtocol.label')"
+                    :aria-invalid="!!errorMessage"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      v-if="synced.images_protocol !== 'openai-images'"
+                      value="preserve"
+                    >
+                      {{ $t('provider.imagesProtocol.preserve') }}
+                    </SelectItem>
+                    <SelectItem value="openai-images">
+                      {{ $t('provider.imagesProtocol.openaiImages') }}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          </SettingsRow>
+        </FormField>
+
+        <FormField
           v-if="supportsPromptCache(form.values.client_type)"
           v-slot="{ value, handleChange, errorMessage }"
           name="prompt_cache_ttl"
@@ -421,6 +463,19 @@ function getStoredSecret(config: Record<string, unknown> | undefined) {
 
 type PromptCacheTtl = '5m' | '1h' | 'off'
 
+type ImagesProtocol = 'preserve' | 'openai-images'
+
+function supportsImagesProtocol(clientType: string | undefined): boolean {
+  return clientType === 'openai-completions' || clientType === 'openai-responses'
+}
+
+function storedImagesConfig(): Record<string, unknown> | undefined {
+  const value = props.provider?.config?.images_api
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined
+}
+
 function normalizeCacheTtl(value: string | undefined): PromptCacheTtl {
   return value === '1h' || value === 'off' ? value : '5m'
 }
@@ -548,6 +603,7 @@ const providerSchema = toTypedSchema(z.object({
   api_key: z.string().optional(),
   client_type: z.string().min(1, t('provider.clientTypeRequired')),
   prompt_cache_ttl: z.enum(['5m', '1h', 'off']).optional(),
+  images_protocol: z.enum(['preserve', 'openai-images']).optional(),
 }).superRefine((value, ctx) => {
   const existingSecret = getStoredSecret(
     props.provider?.config as Record<string, unknown> | undefined,
@@ -578,6 +634,7 @@ type ProviderFormValues = {
   base_url?: string
   api_key?: string
   prompt_cache_ttl?: PromptCacheTtl
+  images_protocol?: ImagesProtocol
 }
 
 // Last-known-server snapshot: a same-provider background refetch (window
@@ -605,6 +662,7 @@ watch(() => props.provider, (provider, previous) => {
     base_url: (cfg?.base_url as string) ?? '',
     api_key: '',
     prompt_cache_ttl: normalizeCacheTtl(cfg?.prompt_cache_ttl as string | undefined),
+    images_protocol: storedImagesConfig()?.protocol === 'openai-images' ? 'openai-images' : 'preserve',
   }
   applyClientTypeDefaults(next)
   const switched = (provider.id ?? provider.provider_template_id)
@@ -634,11 +692,13 @@ const hasChanges = computed(() => {
     client_type: values.client_type,
     base_url: values.base_url,
     prompt_cache_ttl: normalizeCacheTtl(values.prompt_cache_ttl),
+    images_protocol: values.images_protocol,
   }) !== JSON.stringify({
     name: synced.value.name,
     client_type: synced.value.client_type,
     base_url: synced.value.base_url,
     prompt_cache_ttl: normalizeCacheTtl(synced.value.prompt_cache_ttl),
+    images_protocol: synced.value.images_protocol,
   })
   // The key box is write-only: any non-empty content IS a change to save.
   return baseChanged || Boolean(values.api_key?.trim())
@@ -665,6 +725,12 @@ function buildPayload(value: ProviderFormValues): Record<string, unknown> {
   }
   if (supportsPromptCache(value.client_type)) {
     config.prompt_cache_ttl = normalizeCacheTtl(value.prompt_cache_ttl)
+  }
+  // Provider config is shallow-merged. Change only the selected protocol;
+  // preserve existing image policies and never round-trip a masked API key.
+  if (supportsImagesProtocol(value.client_type) && value.images_protocol === 'openai-images'
+    && storedImagesConfig()?.protocol !== 'openai-images') {
+    config.images_api = { ...storedImagesConfig(), protocol: 'openai-images' }
   }
   const payload: Record<string, unknown> = {
     name: value.name?.trim() ?? '',
@@ -710,6 +776,7 @@ const onSubmit = form.handleSubmit(async (value) => {
     base_url: (config.base_url as string) ?? synced.value.base_url ?? '',
     api_key: '',
     prompt_cache_ttl: normalizeCacheTtl(value.prompt_cache_ttl),
+    images_protocol: value.images_protocol,
   }
   synced.value = saved
   form.resetForm({ values: { ...saved } })
