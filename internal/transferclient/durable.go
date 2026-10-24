@@ -45,6 +45,7 @@ type DiskQueue struct {
 	releaseHook func(string)
 	journalHook func(string)
 	historyHook func(string)
+	budgetBase  int64 // Nonzero only for explicitly upgraded locator v4.
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
@@ -79,6 +80,10 @@ func openHerdrQueue(getenv func(string) string, revision string, limits QueueLim
 }
 
 func openQueueLayout(getenv func(string) string, revision string, limits QueueLimits, readOnly, migrate bool, hook func(string)) (*DiskQueue, error) {
+	return openQueueLayoutMode(getenv, revision, limits, readOnly, migrate, false, hook)
+}
+
+func openQueueLayoutMode(getenv func(string) string, revision string, limits QueueLimits, readOnly, migrate, budgetMigration bool, hook func(string)) (*DiskQueue, error) {
 	if getenv == nil || !validID(revision) || limits.Jobs < 1 || limits.Jobs > 128 || limits.Bytes < 1 || limits.Bytes > 1<<40 || limits.JournalBytes < 65536 || limits.JournalBytes > 8<<20 || limits.Workers < 1 || limits.Workers > 4 {
 		return nil, ErrInvalid
 	}
@@ -177,6 +182,17 @@ func openQueueLayout(getenv func(string) string, revision string, limits QueueLi
 	actual, err := io.ReadAll(io.LimitReader(f, 4097))
 	if err != nil || len(want) > 4096 {
 		return nil, ErrStore
+	}
+	budgetHandled, err := q.openBudgetLocator(f, actual, want, budgetMigration)
+	if err != nil {
+		return nil, err
+	}
+	if budgetHandled {
+		if migrate {
+			return nil, ErrVersion // History v2->v3 must precede budget v4.
+		}
+		// Only the explicit budget journal can explain this locator version.
+		actual = want
 	}
 	if migrate && len(actual) != 0 {
 		if err := q.migrateLocator(f, actual, want); err != nil {
