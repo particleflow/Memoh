@@ -48,6 +48,7 @@ type View struct {
 // Host uses existing Bot chat, sessions, and follow-up delivery. There is no
 // alternate Agent implementation or external job service behind this port.
 type Host interface {
+	SourceRoute(context.Context, Identity) (ReturnRoute, error)
 	Plan(context.Context, Identity, string) ([]DevicePair, string, error)
 	CreateSession(context.Context, Record) (string, error)
 	Run(context.Context, Record, func(string) error) (Result, string, error)
@@ -55,26 +56,27 @@ type Host interface {
 }
 
 type Service struct {
-	Authority    *Authority
-	Ledger       Ledger
-	Originals    Originals
-	Host         Host
-	logger       *slog.Logger
-	active       sync.Map
-	ctx          context.Context
-	cancel       context.CancelFunc
-	wg           sync.WaitGroup
-	cursorCipher cipher.AEAD
-	lifecycle    sync.Mutex
-	closed       bool
+	executionTimeout time.Duration
+	Authority        *Authority
+	Ledger           Ledger
+	Originals        Originals
+	Host             Host
+	logger           *slog.Logger
+	active           sync.Map
+	ctx              context.Context
+	cancel           context.CancelFunc
+	wg               sync.WaitGroup
+	cursorCipher     cipher.AEAD
+	lifecycle        sync.Mutex
+	closed           bool
 }
 
-func NewService(a *Authority, ledger Ledger, originals Originals, log *slog.Logger) *Service {
+func NewService(a *Authority, ledger Ledger, originals Originals, log *slog.Logger, executionTimeout time.Duration) *Service {
 	if log == nil {
 		log = slog.Default()
 	}
 	ctx, cancel := context.WithCancel(context.Background())
-	return &Service{Authority: a, Ledger: ledger, Originals: originals, logger: log, ctx: ctx, cancel: cancel}
+	return &Service{Authority: a, Ledger: ledger, Originals: originals, logger: log, ctx: ctx, cancel: cancel, executionTimeout: executionTimeout}
 }
 
 func (s *Service) Close() {
@@ -126,12 +128,16 @@ func (s *Service) Submit(ctx context.Context, bot, user, session string, in Inpu
 	if err != nil {
 		return View{}, err
 	}
+	returnRoute, err := s.Host.SourceRoute(ctx, b)
+	if err != nil {
+		return View{}, err
+	}
 	canonical, _ := json.Marshal(struct {
 		Target, Message string
 		Inputs          []string
 	}{in.TargetBotID, in.Message, hashes})
 	fp := sha256.Sum256(canonical)
-	r := Record{Identity: b, ID: uuid.NewString(), RequestID: in.RequestID, RunID: uuid.NewString(), Fingerprint: hex.EncodeToString(fp[:]), SourceSelection: selected, State: "accepted", DeliveryState: "pending", Payload: Payload{Message: in.Message, Inputs: hashes, Devices: devices, TargetSelection: target}}
+	r := Record{Identity: b, ID: uuid.NewString(), RequestID: in.RequestID, RunID: uuid.NewString(), Fingerprint: hex.EncodeToString(fp[:]), SourceSelection: selected, State: "accepted", DeliveryState: "pending", Payload: Payload{Message: in.Message, Inputs: hashes, Devices: devices, TargetSelection: target, ReturnRoute: &returnRoute}}
 	r, created, err := s.Ledger.Claim(ctx, r)
 	if err != nil {
 		return View{}, err
@@ -157,10 +163,18 @@ func (s *Service) start(r Record) {
 	job.Go(s.ctx, s.logger, "bot.delegation", job.Options{OwnRequestID: true}, func(jobCtx context.Context) error {
 		defer s.wg.Done()
 		defer s.active.Delete(r.ID)
-		ctx, cancel := context.WithTimeout(jobCtx, 30*time.Minute)
+		ctx, cancel := s.executionContext(jobCtx)
 		defer cancel()
 		return s.execute(ctx, r)
 	})
+}
+
+func (s *Service) executionContext(parent context.Context) (context.Context, context.CancelFunc) {
+	if s.executionTimeout == 0 {
+		// Explicitly disabled outer deadline; shutdown/cancellation still apply.
+		return context.WithCancel(parent)
+	}
+	return context.WithTimeout(parent, s.executionTimeout)
 }
 
 func (s *Service) execute(ctx context.Context, r Record) error {
@@ -181,6 +195,9 @@ func (s *Service) execute(ctx context.Context, r Record) error {
 		return s.notStarted(ctx, r, err)
 	}
 	result, state, runErr := s.Host.Run(ctx, r, func(id string) error { r.RunID = id; var err error; r, err = s.Ledger.Save(ctx, r); return err })
+	if ctx.Err() != nil {
+		state, runErr = "unknown", errors.Join(runErr, ctx.Err())
+	}
 	switch state {
 	case "completed", "failed":
 	default:
@@ -206,6 +223,9 @@ func (s *Service) execute(ctx context.Context, r Record) error {
 		r.DeliveryState = "unavailable"
 	} else if err = s.Host.Deliver(saveCtx, r); err != nil {
 		r.DeliveryState = "unknown"
+		if errors.Is(err, ErrDenied) {
+			r.DeliveryState = "unavailable"
+		}
 	} else {
 		r.DeliveryState = "accepted"
 	}
@@ -262,6 +282,9 @@ func (s *Service) RetryDelivery(ctx context.Context, bot, user, session, id stri
 	}
 	if err = s.Host.Deliver(ctx, r); err != nil {
 		r.DeliveryState = "unknown"
+		if errors.Is(err, ErrDenied) {
+			r.DeliveryState = "unavailable"
+		}
 	} else {
 		r.DeliveryState = "accepted"
 	}

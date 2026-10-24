@@ -53,9 +53,18 @@ func TestBotDelegationPostgresClaimIsolationAndDescendantAssets(t *testing.T) {
 	q := sqlc.New(conn)
 	ledger := botdelegation.NewPostgresLedger(q)
 	r := botdelegation.Record{ID: uuid.NewString(), Identity: botdelegation.Identity{TeamID: team.DefaultTeamID, UserID: user, SourceBotID: source, SourceSessionID: root, SourceRootID: root, TargetBotID: target}, RequestID: uuid.NewString(), RunID: uuid.NewString(), Fingerprint: "synthetic", SourceSelection: "native", Payload: botdelegation.Payload{Message: "synthetic task", TargetSelection: "native"}}
+	returnRoute := botdelegation.ReturnRoute{Version: 1, Channel: "telegram", ChatID: source, RouteID: uuid.NewString(), ReplyTarget: "synthetic-recipient"}
+	r.Payload.ReturnRoute = &returnRoute
 	r, created, err := ledger.Claim(ctx, r)
 	if err != nil || !created {
 		t.Fatalf("claim: %v %v", created, err)
+	}
+	if r.Payload.ReturnRoute == nil || *r.Payload.ReturnRoute != returnRoute {
+		t.Fatal("claim lost persisted return route")
+	}
+	restored, err := ledger.Get(ctx, source, user, root, r.ID)
+	if err != nil || restored.Payload.ReturnRoute == nil || *restored.Payload.ReturnRoute != returnRoute {
+		t.Fatalf("read lost persisted return route: %v", err)
 	}
 	replay := r
 	replay.ID = uuid.NewString()

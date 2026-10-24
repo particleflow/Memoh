@@ -16,10 +16,23 @@ import (
 var ErrConflict = errors.New("delegation request conflicts with an existing handoff")
 
 type Payload struct {
+	ReturnRoute     *ReturnRoute `json:"return_route,omitempty"`
 	Message         string       `json:"message"`
 	Inputs          []string     `json:"inputs"`
 	Devices         []DevicePair `json:"devices"`
 	TargetSelection string       `json:"target_selection"`
+}
+
+// ReturnRoute is a snapshot of the existing host-owned conversation route.
+// It is not part of Input or View and never contains tokens or channel secrets.
+type ReturnRoute struct {
+	Version          int    `json:"version"`
+	Channel          string `json:"channel"`
+	ChatID           string `json:"chat_id"`
+	RouteID          string `json:"route_id,omitempty"`
+	ChannelConfigID  string `json:"channel_config_id,omitempty"`
+	ReplyTarget      string `json:"reply_target"`
+	ConversationType string `json:"conversation_type,omitempty"`
 }
 
 type Result struct {

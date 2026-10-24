@@ -113,6 +113,10 @@ type hostFixture struct {
 	deliverErr                error
 }
 
+func (*hostFixture) SourceRoute(_ context.Context, b Identity) (ReturnRoute, error) {
+	return ReturnRoute{Version: 1, Channel: "web", ChatID: b.SourceBotID, ReplyTarget: b.SourceBotID}, nil
+}
+
 func (*hostFixture) Plan(context.Context, Identity, string) ([]DevicePair, string, error) {
 	return nil, "native", nil
 }
@@ -165,7 +169,7 @@ func serviceFixture(t *testing.T) (*Service, *authorityFixture, *hostFixture, In
 	v.BotID = target
 	f.sessions[v.ID] = v
 	o := &originalFixture{}
-	s := NewService(a, &memoryLedger{records: map[string]Record{}}, o, slog.New(slog.DiscardHandler))
+	s := NewService(a, &memoryLedger{records: map[string]Record{}}, o, slog.New(slog.DiscardHandler), 30*time.Minute)
 	h := &hostFixture{service: s, state: "completed"}
 	s.Host = h
 	t.Cleanup(s.Close)

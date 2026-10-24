@@ -149,6 +149,10 @@ func (f *delegationHTTPFixture) List(_ context.Context, filter botdelegation.Fil
 	return nil, nil
 }
 
+func (*delegationHTTPFixture) SourceRoute(_ context.Context, b botdelegation.Identity) (botdelegation.ReturnRoute, error) {
+	return botdelegation.ReturnRoute{Version: 1, Channel: "web", ChatID: b.SourceBotID, ReplyTarget: b.SourceBotID}, nil
+}
+
 func (*delegationHTTPFixture) Plan(context.Context, botdelegation.Identity, string) ([]botdelegation.DevicePair, string, error) {
 	return nil, "native", nil
 }
@@ -174,7 +178,7 @@ func (f *delegationHTTPFixture) Deliver(context.Context, botdelegation.Record) e
 func TestBotDelegationJWTSubmitObserveOriginalAndRevocation(t *testing.T) {
 	f := &delegationHTTPFixture{allowed: true}
 	a := &botdelegation.Authority{Permissions: f, Sessions: delegationHTTPSessions{f}, Assets: f}
-	service := botdelegation.NewService(a, f, f, slog.New(slog.DiscardHandler))
+	service := botdelegation.NewService(a, f, f, slog.New(slog.DiscardHandler), 30*time.Minute)
 	service.SetCursorSecret("synthetic")
 	service.Host = f
 	t.Cleanup(service.Close)
