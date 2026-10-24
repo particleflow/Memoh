@@ -44,6 +44,10 @@ func (f *recoveryTransport) call(ctx context.Context, owner, connection, tool st
 	if err := json.Unmarshal([]byte("["+strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");")+"]"), &parts); err != nil || len(parts) != 3 {
 		f.base.t.Fatal("invalid relay call")
 	}
+	var target map[string]string
+	if err := json.Unmarshal(parts[0], &target); err != nil || owner != "owner" || connection != "11111111-1111-4111-8111-111111111111" || tool != "execute" || target["deviceId"] != "device-a" || target["instanceId"] != "herdr-a" {
+		f.base.t.Fatal("recovery escaped original relay ownership or target mapping")
+	}
 	var method string
 	var params map[string]any
 	_ = json.Unmarshal(parts[1], &method)
