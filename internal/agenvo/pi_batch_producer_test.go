@@ -2,7 +2,6 @@ package agenvo
 
 import (
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -21,11 +20,7 @@ import (
 // Synthetic Bash utilities, not a Herdr installation or Windows acceptance.
 func TestBatchProducerClosesOnlyDeclaredResult(t *testing.T)          { exerciseBatchProducer(t, false) }
 func TestBatchProducerClosesMultipleResultsWithoutRerun(t *testing.T) { exerciseBatchProducer(t, true) }
-func TestBatchProducerAdditionalClosedPagesWithoutRerun(t *testing.T) {
-	exerciseBatchProducer(t, true, 18)
-}
-
-func exerciseBatchProducer(t *testing.T, multiple bool, pageCount ...int) {
+func exerciseBatchProducer(t *testing.T, multiple bool) {
 	t.Helper()
 	dir := t.TempDir()
 	bin := filepath.Join(dir, "bin")
@@ -49,33 +44,6 @@ func exerciseBatchProducer(t *testing.T, multiple bool, pageCount ...int) {
 		p.Producer.Version = 2
 		p.Producer.Artifacts = []deliverymeta.Artifact{p.Producer.Artifact, {SourceRef: "result_two", Mime: "text/plain"}, {SourceRef: "missing_result", Mime: "text/plain"}}
 		p.Producer.Artifact = deliverymeta.Artifact{}
-	}
-	var pages []deliverymeta.ClosedPage
-	if len(pageCount) != 0 {
-		p.Producer.Artifacts = nil
-		var files []deliverymeta.Closed
-		var producer strings.Builder
-		producer.WriteString("#!/bin/sh\ncat > /dev/null\ntest -f \"$MEMOH_DELIVERY_CONTEXT_FILE\" || exit 1\n")
-		fmt.Fprintf(&producer, "test \"$MEMOH_DELIVERY_PAGE_PREFIX\" = '%s' || exit 1\n", deliverymeta.ProducerPagePrefix)
-		hash := sha256.Sum256([]byte("PRIVATE-OUTPUT-CONTENT"))
-		for i := range pageCount[0] {
-			a := deliverymeta.Artifact{SourceRef: fmt.Sprintf("page_result_%02d", i), Mime: "text/plain"}
-			if i < deliverymeta.MaxArtifacts {
-				p.Producer.Artifacts = append(p.Producer.Artifacts, a)
-			}
-			files = append(files, deliverymeta.Closed{Plan: deliverymeta.Plan{Version: 1, Task: p.Producer.Task, Artifact: a}, Closed: true, SHA256: hex.EncodeToString(hash[:]), SizeBytes: 22})
-			fmt.Fprintf(&producer, "printf 'PRIVATE-OUTPUT-CONTENT' > '%s'\n", a.SourceRef)
-		}
-		for start := 0; start < len(files); start += deliverymeta.MaxArtifacts {
-			page := deliverymeta.ClosedPage{Version: 1, Files: files[start:min(start+deliverymeta.MaxArtifacts, len(files))]}
-			pages = append(pages, page)
-			raw, _ := json.Marshal(page)
-			fmt.Fprintf(&producer, "printf '%%s' '%s' | base64 --decode > '%s'\n", base64.StdEncoding.EncodeToString(raw), page.ManifestName())
-		}
-		producer.WriteString("printf 'run' >> \"$SYNTH_ROOT/pi-count\"\n")
-		if err := os.WriteFile(filepath.Join(bin, "pi"), []byte(producer.String()), 0o700); err != nil { //nolint:gosec // Isolated synthetic executable, not Agent modification.
-			t.Fatal(err)
-		}
 	}
 	target := Target{WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
 	script := batchFixtureScript(t, p, target, target.WorkDir, "create the declared result")
@@ -110,13 +78,6 @@ func exerciseBatchProducer(t *testing.T, multiple bool, pageCount ...int) {
 		sum := sha256.Sum256([]byte(content))
 		if json.Unmarshal(raw, &closed) != nil || !closed.Valid() || !reflect.DeepEqual(closed.Plan, file) || closed.SHA256 != hex.EncodeToString(sum[:]) || closed.SizeBytes != int64(len(content)) {
 			t.Fatal("wrong closed handoff")
-		}
-	}
-	for _, page := range pages {
-		raw := readBatchFixture(t, filepath.Join(dir, page.ManifestName()))
-		decoded, ok := deliverymeta.DecodeClosedPage(raw)
-		if !ok || !reflect.DeepEqual(decoded, page) {
-			t.Fatal("additional closed page did not retain original task")
 		}
 	}
 	// Replaying the existing launch cannot restart Pi, overwrite closed manifests

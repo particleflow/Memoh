@@ -26,17 +26,6 @@ func TestFeedbackStrictOriginalBindingAndBound(t *testing.T) {
 	if _, ok := DecodeFeedback(raw, p); !ok {
 		t.Fatal("valid maximum plan rejected")
 	}
-	page := Plan{Version: 1, Task: p.Task, Artifact: Artifact{SourceRef: "later-page", Mime: "text/plain"}}
-	paged := Feedback{Version: 2, Task: p.Task, PlanHash: PlanHash(p), Page: &page, Files: []FileFeedback{{DeliveryID: page.DeliveryID(), State: "unknown", Code: "awaiting_nas_ledger", Change: strings.Repeat("e", 64)}}}
-	pagedRaw, _ := json.Marshal(paged)
-	if _, ok := DecodeFeedback(pagedRaw, p); !ok {
-		t.Fatal("bound later page rejected")
-	}
-	page.Task.Attempt = strings.Repeat("f", 32)
-	pagedRaw, _ = json.Marshal(paged)
-	if _, ok := DecodeFeedback(pagedRaw, p); ok {
-		t.Fatal("foreign page cleared original scope")
-	}
 	for name, mutate := range map[string]func(*Feedback){
 		"operation":       func(f *Feedback) { f.Task.OperationID = uuid.NewString() },
 		"bot":             func(f *Feedback) { f.Task.BotID = uuid.NewString() },

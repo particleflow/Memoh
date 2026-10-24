@@ -69,8 +69,7 @@ func producerEnvelope(script string, p BatchProgress, target Target) (string, er
 	}
 	raw, _ := json.Marshal(plan)
 	setup := fmt.Sprintf(`printf '%%s' '%s' | base64 --decode > "$memoh_attempt/%s"
-export MEMOH_DELIVERY_CONTEXT_FILE="$(cygpath -w "$memoh_attempt/%s")"
-export MEMOH_DELIVERY_PAGE_PREFIX='%s'`, base64.StdEncoding.EncodeToString(raw), deliverymeta.ProducerContextName, deliverymeta.ProducerContextName, deliverymeta.ProducerPagePrefix)
+export MEMOH_DELIVERY_CONTEXT_FILE="$(cygpath -w "$memoh_attempt/%s")"`, base64.StdEncoding.EncodeToString(raw), deliverymeta.ProducerContextName, deliverymeta.ProducerContextName)
 	script = strings.Replace(script, `mkdir "$memoh_attempt" || exit 125`, `mkdir "$memoh_attempt" || exit 125`+"\n"+setup, 1)
 	// A pre-existing export is not evidence from this invocation. Reject before
 	// starting Pi; the ordinary not-started receipt still records that fact.
@@ -82,10 +81,6 @@ export MEMOH_DELIVERY_PAGE_PREFIX='%s'`, base64.StdEncoding.EncodeToString(raw),
 		fmt.Fprintf(&closures, "memoh_close_result '%s' '%s' '%s'\n", file.Artifact.SourceRef, file.ManifestName(), base64.StdEncoding.EncodeToString(artifact))
 	}
 	script = strings.Replace(script, `if cd "$memoh_cwd" &&`, `if `+guards.String()+`cd "$memoh_cwd" &&`, 1)
-	// The inline declaration is the first page, never a task-total ceiling.
-	// A producer can close additional bounded ClosedPage manifests using the
-	// immutable context's Task and exported prefix. The same collector validates
-	// and registers them; no command expansion, second context or Pi rerun.
 	// One bounded hook per envelope. Remaining manifests stay for later existing
 	// task queries/host actions; never rerun Pi or add a background worker.
 	hook := `

@@ -57,6 +57,9 @@ func PublishProducerFeedback(ctx context.Context, getenv func(string) string, re
 	for _, file := range plan.FilePlans() {
 		boundID = boundID || file.DeliveryID() == job.DeliveryID
 	}
+	if !boundID {
+		return ErrProducerFeedback
+	}
 	q, err := OpenHerdrQueue(getenv, revision, limits)
 	if err != nil {
 		return ErrProducerFeedback
@@ -67,30 +70,12 @@ func PublishProducerFeedback(ctx context.Context, getenv func(string) string, re
 		return err
 	}
 	defer unlockClose(global)
-	anchor := plan
-	if !boundID {
-		// Additional closed pages are declarations in the SAME durable queue.
-		// Never trust a caller-supplied Job alone or change the original context.
-		r, err := q.Inspect(job.DeliveryID)
-		if err != nil || !r.Registered || r.Source == nil || r.Direction != "upload" ||
-			!feedbackTaskMatches(anchor.Task, r.Job) || r.Job.HostBinding != cfg.Binding ||
-			r.Job.Spec != job.Spec || r.Job.DeliveryID != job.DeliveryID {
-			return ErrProducerFeedback
-		}
-		plan = deliverymeta.Plan{Version: 1, Task: anchor.Task, Artifact: deliverymeta.Artifact{SourceRef: r.Source.Ref, Mime: r.Job.Spec.Mime}}
-		if !plan.Valid() || plan.DeliveryID() != job.DeliveryID {
-			return ErrProducerFeedback
-		}
-	}
 	report, err := q.producerFeedback(ctx, cfg, plan, now)
 	if err != nil {
 		return err
 	}
-	if !boundID {
-		report.Version, report.PlanHash, report.Page = 2, deliverymeta.PlanHash(anchor), &plan
-	}
 	raw, err = json.Marshal(report)
-	if err != nil || len(raw) >= deliverymeta.FeedbackMaxBytes || !report.ValidFor(anchor) {
+	if err != nil || len(raw) >= deliverymeta.FeedbackMaxBytes || !report.ValidFor(plan) {
 		return ErrProducerFeedback
 	}
 	// Concurrent publishers share the existing admission lock. Readers reject a

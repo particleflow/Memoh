@@ -147,7 +147,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 	// Read an advisory even when a prior block suppresses transfer work. Only a
 	// new correctly correlated local observation can clear that block; missing,
 	// partial or foreign receipts leave the last durable observation unchanged.
-	if batch.Progress.Producer != nil && !r.CancelRequested {
+	if delivery := producerResult(r, d); delivery != nil && delivery.hasPending() && !r.CancelRequested {
 		feedback, readErr := s.relay.ReadBatchProducerFeedback(readCtx, scope(b, r.TargetID), batch.Progress)
 		current, currentDetails, err := s.load(ctx, b, r.ID)
 		if err != nil {

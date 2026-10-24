@@ -170,27 +170,6 @@ func TestProducerFeedbackConcurrentCommitAndRevocation(t *testing.T) {
 			if transport.producerWakes != 0 || transport.runs != 1 {
 				t.Fatal("stale observer woke transfer or reexecuted business")
 			}
-			if outcome == "commit" {
-				page := plan
-				page.Artifact.SourceRef = "later-page"
-				report.Version, report.Page = 2, &page
-				report.Files[0].DeliveryID = page.DeliveryID()
-				transport.producerFeedback, _ = json.Marshal(report)
-				got, err := source.service.observe(ctx, binding, first.ID, true)
-				if err != nil || got.Delivery == nil || got.Delivery.Scope != "page" || got.Delivery.State != "pending" || got.Delivery.Reference != nil {
-					t.Fatal("completed first page concealed later page", err)
-				}
-				if transport.producerWakes != 1 || transport.runs != 1 {
-					t.Fatal("later page did not wake only transfer")
-				}
-				var preserved struct {
-					Ledger deliveryLedger `json:"delivery_ledger"`
-				}
-				_ = json.Unmarshal(store.records[first.ID].Details, &preserved)
-				if preserved.Ledger.Entries[plan.DeliveryID()].Outcome != "committed" {
-					t.Fatal("new page feedback lost earlier committed history")
-				}
-			}
 		})
 	}
 }

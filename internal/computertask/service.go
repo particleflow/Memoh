@@ -435,11 +435,7 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 	}
 	if rows, ok := s.store.(dbstore.ComputerDeliveryEntryStore); ok && d.Batch != nil && d.Batch.Progress.Producer != nil {
 		r.DeliveryEntries = make(map[string]dbstore.ComputerDeliveryEntry)
-		page := d.Batch.Progress.Producer
-		if f := d.Batch.Feedback; f != nil && f.Version == 2 && f.ValidFor(*page) {
-			page = f.Page
-		}
-		for _, plan := range page.FilePlans() {
+		for _, plan := range d.Batch.Progress.Producer.FilePlans() {
 			entry, err := rows.ReadComputerDeliveryEntry(ctx, r, plan.DeliveryID())
 			if errors.Is(err, db.ErrNotFound) {
 				continue

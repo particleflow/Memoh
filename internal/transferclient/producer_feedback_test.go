@@ -1,7 +1,6 @@
 package transferclient
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -13,46 +12,6 @@ import (
 
 	"github.com/felinics/memoh/internal/deliverymeta"
 )
-
-func TestProducerFeedbackRegisteredPageOutsideInitialDeclaration(t *testing.T) {
-	getenv, first, write := producerFixture(t, "https://fixture.invalid")
-	writeProducerContextFixture(t, getenv, first.Plan)
-	second := first
-	second.Artifact.SourceRef = "second-page-result"
-	write("source", second.Artifact.SourceRef, []byte("fixture"))
-	limits := QueueLimits{Jobs: 1, Bytes: 16384, JournalBytes: 65536, Workers: 1}
-	raw, _ := json.Marshal(deliverymeta.ClosedPage{Version: 1, Files: []deliverymeta.Closed{second}})
-	out, err := EnqueueProducerPage(t.Context(), getenv, "fixture", limits, bytes.NewReader(raw), nil, time.Now())
-	if err != nil || len(out.Files) != 1 || !out.Files[0].Registered {
-		t.Fatal("page not registered", err)
-	}
-	q, err := OpenHerdrQueue(getenv, "fixture", limits)
-	if err != nil {
-		t.Fatal(err)
-	}
-	r, err := q.Inspect(second.DeliveryID())
-	_ = q.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := PublishProducerFeedback(t.Context(), getenv, "fixture", limits, r.Job, time.Now()); err != nil {
-		t.Fatal("registered second page has unavailable feedback", err)
-	}
-	f := readProducerFeedbackFixture(t, getenv, first.Plan)
-	if f.Version != 2 || f.Page == nil || f.Page.DeliveryID() != second.DeliveryID() || f.PlanHash != deliverymeta.PlanHash(first.Plan) {
-		t.Fatal("page lost immutable context binding")
-	}
-	foreign := r.Job
-	foreign.DeliveryID = strings.Repeat("e", 64)
-	if PublishProducerFeedback(t.Context(), getenv, "fixture", limits, foreign, time.Now()) == nil {
-		t.Fatal("self-reported unregistered page accepted")
-	}
-	foreign = r.Job
-	foreign.Spec.SizeBytes++
-	if PublishProducerFeedback(t.Context(), getenv, "fixture", limits, foreign, time.Now()) == nil {
-		t.Fatal("page metadata conflicts with original queue record")
-	}
-}
 
 func writeProducerContextFixture(t *testing.T, getenv func(string) string, plan deliverymeta.Plan) {
 	t.Helper()

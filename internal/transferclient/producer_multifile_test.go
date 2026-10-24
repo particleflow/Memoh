@@ -32,15 +32,7 @@ func TestProducerFeedbackDeniedFirstAndMiddle(t *testing.T) {
 	}
 }
 
-func TestProducerClosedPagesBeyondInitialDeclaration(t *testing.T) {
-	exerciseProducerDeniedPosition(t, -1, 1, 18)
-}
-
-func TestProducerClosedPagePartialAdmissionDoesNotStarve(t *testing.T) {
-	exerciseProducerDeniedPosition(t, -1, 1, 18, 0)
-}
-
-func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int, pageCount ...int) {
+func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int) {
 	t.Helper()
 	type remote struct {
 		upload    *fixture
@@ -85,16 +77,9 @@ func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int, pag
 	files := []deliverymeta.Closed{one, one, one}
 	files[1].Artifact.SourceRef = "result-two"
 	files[2].Artifact.SourceRef = "result-three"
-	if len(pageCount) != 0 {
-		for i := len(files); i < pageCount[0]; i++ {
-			file := one
-			file.Artifact.SourceRef = fmt.Sprintf("result-page-%02d", i)
-			files = append(files, file)
-		}
-	}
 	sort.Slice(files, func(i, j int) bool { return files[i].ManifestName() < files[j].ManifestName() })
 	plan := deliverymeta.Plan{Version: 2, Task: one.Task}
-	for _, file := range files[:min(deliverymeta.MaxArtifacts, len(files))] {
+	for _, file := range files {
 		plan.Artifacts = append(plan.Artifacts, file.Artifact)
 	}
 	writeProducerContextFixture(t, getenv, plan)
@@ -105,40 +90,13 @@ func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int, pag
 		}
 		remotes[file.DeliveryID()] = state
 		write("source", file.Artifact.SourceRef, []byte("fixture"))
-		if len(pageCount) == 0 {
-			raw, _ := json.Marshal(file)
-			write("source", file.ManifestName(), raw)
-		}
-	}
-	if len(pageCount) != 0 {
-		for start := 0; start < len(files); start += deliverymeta.MaxArtifacts {
-			page := deliverymeta.ClosedPage{Version: 1, Files: files[start:min(start+deliverymeta.MaxArtifacts, len(files))]}
-			raw, _ := json.Marshal(page)
-			if start != 0 {
-				raw, _ = json.MarshalIndent(page, "", "  ")
-			}
-			write("source", deliverymeta.ProducerPageName(raw), raw)
-		}
+		raw, _ := json.Marshal(file)
+		write("source", file.ManifestName(), raw)
 	}
 	limits := QueueLimits{Jobs: slots, Bytes: int64(slots) * 16384, JournalBytes: 65536, Workers: 1}
-	missing := -1
-	if len(pageCount) > 1 {
-		missing = pageCount[1]
-		cfg, err := OpenHostConfig(getenv)
-		if err != nil || cfg.openSources() != nil {
-			t.Fatal("source fixture", err)
-		}
-		if err := cfg.sources.Remove(files[missing].Artifact.SourceRef); err != nil {
-			t.Fatal(err)
-		}
-		_ = cfg.Close()
-	}
-	for n := range len(files) * 4 {
-		if n == len(files) && missing >= 0 {
-			write("source", files[missing].Artifact.SourceRef, []byte("fixture"))
-		}
+	for range 12 {
 		status, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now().Add(time.Hour))
-		if err != nil && !errors.Is(err, ErrNoWork) && !errors.Is(err, ErrCapacity) && (missing < 0 || !errors.Is(err, ErrProducerSource)) {
+		if err != nil && !errors.Is(err, ErrNoWork) && !errors.Is(err, ErrCapacity) {
 			t.Fatal("finite hook", err)
 		}
 		if status.Job.DeliveryID != "" {
@@ -176,7 +134,7 @@ func exerciseProducerDeniedPosition(t *testing.T, deniedPosition, slots int, pag
 		write("source", file.ManifestName(), raw)
 	}
 	_ = q.Close()
-	for range len(files) {
+	for range 3 {
 		if _, err := CollectProducer(t.Context(), getenv, "fixture", limits, https.Client(), time.Now().Add(2*time.Hour)); err != nil && !errors.Is(err, ErrNoWork) && !errors.Is(err, ErrCapacity) {
 			t.Fatal("duplicate hook", err)
 		}

@@ -56,20 +56,6 @@ func TestCLIPathProducerPagesRestartAndPartialFailure(t *testing.T) {
 					write(filepath.Join(source, files[i].Artifact.SourceRef), data)
 				}
 			}
-			relative, _ := deliverymeta.AttemptDirectory(task.Attempt)
-			current := source
-			for _, segment := range strings.Split(relative, "/") {
-				current = filepath.Join(current, segment)
-				if err := cliFixtureDir(current); err != nil {
-					t.Fatal(err)
-				}
-			}
-			anchor := deliverymeta.Plan{Version: 2, Task: task}
-			for _, file := range files[:deliverymeta.MaxArtifacts] {
-				anchor.Artifacts = append(anchor.Artifacts, file.Artifact)
-			}
-			anchorRaw, _ := json.Marshal(anchor)
-			write(filepath.Join(current, deliverymeta.ProducerContextName), anchorRaw)
 			invoke := func(page []deliverymeta.Closed, want int) transferclient.ProducerPageResult {
 				t.Helper()
 				raw, _ := json.Marshal(deliverymeta.ClosedPage{Version: 1, Files: page})
@@ -122,11 +108,6 @@ func TestCLIPathProducerPagesRestartAndPartialFailure(t *testing.T) {
 			invoke(conflict, 1)
 			invoke(files[:deliverymeta.MaxArtifacts], 0)
 			invoke(files, 1) // 16 is the wire page size; the already registered 18 persist.
-			foreign := append([]deliverymeta.Closed(nil), files[deliverymeta.MaxArtifacts:]...)
-			for i := range foreign {
-				foreign[i].Task.Generation = strings.Repeat("f", 32)
-			}
-			invoke(foreign, 1) // A valid-looking page cannot replace the original context.
 			getenv := func(k string) string {
 				if k == "HERDR_PLUGIN_CONFIG_DIR" {
 					return config
@@ -145,9 +126,6 @@ func TestCLIPathProducerPagesRestartAndPartialFailure(t *testing.T) {
 				t.Fatal(err)
 			}
 			defer func() { _ = q.Close() }()
-			if _, err := q.Inspect(foreign[0].DeliveryID()); err == nil {
-				t.Fatal("foreign page admitted before original-context validation")
-			}
 			for _, file := range files {
 				r, err := q.Inspect(file.DeliveryID())
 				if err != nil || !r.Registered || r.Job.Spec.SHA256 != file.SHA256 || r.Admitted || r.Job.ReceiptID != "" {
