@@ -70,6 +70,7 @@
 </template>
 
 <script setup lang="ts">
+import { saveQueryCacheToDiskNow } from '@/lib/query-cache-persistence'
 import ProviderIdentityCard from '@/components/provider-identity-card/index.vue'
 import { Button, ConfirmPopover, SettingsShell, Switch } from '@felinic/ui'
 import { Trash2 } from 'lucide-vue-next'
@@ -163,9 +164,13 @@ const { mutateAsync: saveProvider, isLoading: editLoading } = useMutation({
     })
     return result
   },
-  onSettled: () => {
-    invalidateProviderQueries()
-    queryCache.invalidateQueries({ key: ['provider-templates', 'llm'] })
+  onSettled: async () => {
+    // A failed refresh must not turn an accepted PUT into a failed save.
+    // Failed query entries are omitted by the existing disk serializer.
+    await queryCache.invalidateQueries({ key: ['providers'] }).catch(() => undefined)
+    saveQueryCacheToDiskNow(queryCache)
+    void queryCache.invalidateQueries({ key: ['models'] })
+    void queryCache.invalidateQueries({ key: ['provider-templates', 'llm'] })
   },
 })
 
