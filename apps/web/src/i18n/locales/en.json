@@ -1121,6 +1121,41 @@
           "failed": "Delivery failed",
           "unknown": "Delivery status unknown"
         }
+      },
+      "observation": {
+        "title": "Current computer observation",
+        "description": "Polls native metadata while this task is visible. These observations do not confirm task completion, restored history, or live output.",
+        "unsupported": "This server does not support computer observation yet.",
+        "loadFailed": "Computer observation could not be loaded.",
+        "agentState": "Native Agent: {state}",
+        "receivedAt": "Last response received at {time}",
+        "availability": {
+          "online": "Computer connection available",
+          "offline": "Computer reported offline",
+          "authentication_unavailable": "Computer connection authentication unavailable",
+          "runtime_unavailable": "Herdr unavailable",
+          "connection_unavailable": "Computer connection unavailable",
+          "unknown": "Computer connection unknown"
+        },
+        "states": {
+          "working": "Working",
+          "idle": "Idle",
+          "blocked": "Waiting / blocked",
+          "done": "Native done (task result unverified)",
+          "unknown": "Unknown"
+        },
+        "match": {
+          "observed": "Original task references matched at this observation.",
+          "mismatch": "The original terminal identity changed. Tracking is unconfirmed; the task has not been restarted.",
+          "unknown": "Original task references could not be confirmed."
+        },
+        "fields": {
+          "target_id": "Computer target",
+          "workspace_id": "Herdr workspace",
+          "pane_id": "Execution pane",
+          "pi_session_id": "Recorded Pi session"
+        },
+        "refresh": "Refresh computer"
       }
     },
     "uploadingAttachments": "Uploading attachments…",

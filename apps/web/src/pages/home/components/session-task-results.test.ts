@@ -12,6 +12,7 @@ vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'wron
 import { useSessionTasks, type TaskScope } from '../composables/useSessionTasks'
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), files: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
+  getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservation: vi.fn().mockResolvedValue({ data: { operation_id: 'task', native: { availability: 'connection_unavailable' } } }),
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId: api.detail,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries: api.files,
@@ -122,5 +123,39 @@ describe.each(['web', 'native'])('native committed attachment access in %s host'
     deliveries.value = { ...deliveries.value, botId: 'changed', files: [] }
     await nextTick(); await vi.advanceTimersByTimeAsync(400)
     expect(root.querySelector('[data-keyboard-scope="mediaLightbox"]')).toBeNull()
+  })
+})
+
+describe.each(['web', 'native'])('computer observation in %s host', host => {
+  it('keeps native status separate from the task outcome and clears unavailable identity', async () => {
+    root = document.createElement('div'); document.body.append(root)
+    const detail = { task_type: 'computer_operation' as const, task_id: 'operation', session_id: 'session', parent_session_id: 'root', created_at: '', updated_at: '', status: 'submitted' as const, summary: '', content_available: false, attachments_available: false }
+    const observation = ref<import('../composables/useComputerTaskObservation').ComputerTaskObservationView>({
+      loading: false, refresh: vi.fn().mockResolvedValue(undefined), receivedAt: '12:00:00',
+      data: { operation_id: 'operation', target_id: 'synthetic-pc', workspace_id: 'w-observed', pane_id: 'p-observed', state: 'submitted', business_outcome: 'unknown', native: { availability: 'online', agent_status: 'working', reference_match: 'observed' } },
+    })
+    app = createApp({ setup() {
+      const body = () => h(SessionTaskResults, { items: [], detail, selected: detail, loading: false, observation: observation.value })
+      if (host === 'web') return () => h(Dialog, { open: true }, { default: () => h(DialogPanel, {}, { default: () => [
+        h(DialogTitle, {}, { default: () => 'Synthetic task' }), h(DialogDescription, {}, { default: () => 'Synthetic observation' }), body(),
+      ] }) })
+      return () => h('dialog', { open: true, 'aria-label': 'Synthetic task' }, [body()])
+    } })
+    app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root)
+    await nextTick(); await vi.advanceTimersByTimeAsync(50); await nextTick()
+    const dialog = document.querySelector(host === 'web' ? '[role=dialog]' : 'dialog')!
+    expect(dialog.textContent).toContain('Native Agent: Working')
+    expect(dialog.textContent).toContain('w-observed')
+    observation.value = { ...observation.value, data: { ...observation.value.data, native: { availability: 'online', agent_status: 'done', reference_match: 'observed' } } }
+    await nextTick()
+    expect(dialog.textContent).toContain(en.chat.tasks.observation.states.done)
+    expect(dialog.textContent).toContain(en.chat.tasks.statuses.submitted)
+    expect(dialog.textContent).toContain(en.chat.tasks.businessUnknown)
+    observation.value = { ...observation.value, data: undefined, error: { status: 404, code: 'http.not_found' } }
+    await nextTick()
+    expect(dialog.textContent).toContain(en.chat.tasks.observation.unsupported)
+    expect(dialog.textContent).not.toContain('w-observed')
+    const refresh = [...dialog.querySelectorAll('button')].find(button => button.textContent?.includes(en.chat.tasks.observation.refresh))!
+    refresh.click(); expect(observation.value.refresh).toHaveBeenCalledOnce()
   })
 })

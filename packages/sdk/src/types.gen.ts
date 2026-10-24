@@ -396,12 +396,34 @@ export type AgenvoAgentProfile = {
     provider?: string;
 };
 
+export type AgenvoBatchHistoryEvidence = {
+    file?: string;
+    sha256?: string;
+    size?: number;
+};
+
+export type AgenvoBatchHistoryReport = {
+    after?: string;
+    before?: string;
+    evidence?: AgenvoBatchHistoryEvidence;
+};
+
 export type AgenvoDiscoveredInstance = {
     device_id?: string;
     device_name?: string;
     instance_id?: string;
     name?: string;
     online?: boolean;
+};
+
+export type AgenvoReferenceObservation = {
+    agent_status?: string;
+    availability?: string;
+    control_pane?: string;
+    pane?: string;
+    reason?: string;
+    reference_match?: string;
+    workspace?: string;
 };
 
 export type AgenvoTarget = {
@@ -1179,6 +1201,36 @@ export type ComputertaskDeliveryRequest = {
     mime?: string;
     size_bytes?: number;
     version?: number;
+};
+
+export type ComputertaskPiContinuity = {
+    last_invocation?: AgenvoBatchHistoryReport;
+    reason?: string;
+    status?: string;
+};
+
+export type ComputertaskRecovery = {
+    attempt?: string;
+    business_outcome?: string;
+    cancel_requested?: boolean;
+    continuity?: ComputertaskPiContinuity;
+    native?: AgenvoReferenceObservation;
+    operation_id?: string;
+    pane_id?: string;
+    pi_result?: string;
+    pi_session_id?: string;
+    process_state?: string;
+    result_reason?: string;
+    result_summary?: ComputertaskRecoverySummary;
+    state?: string;
+    target_id?: string;
+    workspace_id?: string;
+};
+
+export type ComputertaskRecoverySummary = {
+    source?: string;
+    text?: string;
+    truncated?: boolean;
 };
 
 export type ConnectitAuthMethod = {
@@ -13995,6 +14047,64 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesRe
 };
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation';
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationError = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationErrors];
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses = {
+    /**
+     * OK
+     */
+    200: ComputertaskRecovery;
+};
+
+export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses];
 
 export type DeleteBotsByBotIdSettingsData = {
     body?: never;

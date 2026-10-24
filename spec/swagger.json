@@ -11891,6 +11891,89 @@
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation": {
+            "get": {
+                "description": "Read-only, bounded Herdr metadata via the existing task recovery service. Rechecks parent/descendant ownership and current device grants before and after observation. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Observe a computer task's original native references",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/computertask.Recovery"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/settings": {
             "get": {
                 "description": "Get agent settings for current user",
@@ -20037,6 +20120,34 @@
                 }
             }
         },
+        "agenvo.BatchHistoryEvidence": {
+            "type": "object",
+            "properties": {
+                "file": {
+                    "type": "string"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
+        "agenvo.BatchHistoryReport": {
+            "type": "object",
+            "properties": {
+                "after": {
+                    "type": "string"
+                },
+                "before": {
+                    "type": "string"
+                },
+                "evidence": {
+                    "$ref": "#/definitions/agenvo.BatchHistoryEvidence"
+                }
+            }
+        },
         "agenvo.DiscoveredInstance": {
             "type": "object",
             "properties": {
@@ -20054,6 +20165,32 @@
                 },
                 "online": {
                     "type": "boolean"
+                }
+            }
+        },
+        "agenvo.ReferenceObservation": {
+            "type": "object",
+            "properties": {
+                "agent_status": {
+                    "type": "string"
+                },
+                "availability": {
+                    "type": "string"
+                },
+                "control_pane": {
+                    "type": "string"
+                },
+                "pane": {
+                    "type": "string"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "reference_match": {
+                    "type": "string"
+                },
+                "workspace": {
+                    "type": "string"
                 }
             }
         },
@@ -22055,6 +22192,84 @@
                 },
                 "version": {
                     "type": "integer"
+                }
+            }
+        },
+        "computertask.PiContinuity": {
+            "type": "object",
+            "properties": {
+                "last_invocation": {
+                    "$ref": "#/definitions/agenvo.BatchHistoryReport"
+                },
+                "reason": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.Recovery": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "string"
+                },
+                "business_outcome": {
+                    "type": "string"
+                },
+                "cancel_requested": {
+                    "type": "boolean"
+                },
+                "continuity": {
+                    "$ref": "#/definitions/computertask.PiContinuity"
+                },
+                "native": {
+                    "$ref": "#/definitions/agenvo.ReferenceObservation"
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "pane_id": {
+                    "type": "string"
+                },
+                "pi_result": {
+                    "type": "string"
+                },
+                "pi_session_id": {
+                    "type": "string"
+                },
+                "process_state": {
+                    "type": "string"
+                },
+                "result_reason": {
+                    "type": "string"
+                },
+                "result_summary": {
+                    "$ref": "#/definitions/computertask.RecoverySummary"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "target_id": {
+                    "type": "string"
+                },
+                "workspace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.RecoverySummary": {
+            "type": "object",
+            "properties": {
+                "source": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                },
+                "truncated": {
+                    "type": "boolean"
                 }
             }
         },

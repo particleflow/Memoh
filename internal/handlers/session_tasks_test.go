@@ -129,7 +129,7 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 		f.relayCalls++
 		return nil, errors.New("unexpected dispatch")
 	})
-	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"))
+	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
@@ -226,7 +226,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 		}
 		return nil
 	}))
-	NewSessionTaskHandler(nil, nil, nil).Register(e)
+	NewSessionTaskHandler(nil, nil, nil, nil).Register(e)
 	sign := func(secret string, expiry time.Time) string {
 		t.Helper()
 		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"sub": taskUser, "exp": expiry.Unix()}).SignedString([]byte(secret))
@@ -251,6 +251,7 @@ func TestSessionTaskNoStoreBeforeJWTAndOnlyWithinTaskNamespace(t *testing.T) {
 				{base + "/tasks/", true},
 				{base + "/tasks/computer_operation/" + taskOp, true},
 				{base + "/tasks/computer_operation/" + taskOp + "/deliveries", true},
+				{base + "/tasks/computer_operation/" + taskOp + "/observation", true},
 				{base + "/tasks/computer_operation/" + taskOp + "/attachments", true},
 				{base + "/tasks-extra", false},
 				{base + "/messages", false},
@@ -348,7 +349,7 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
 	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
-	NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user")).Register(e)
+	NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil).Register(e)
 	path := "/bots/" + taskBot + "/sessions/" + taskRoot + "/tasks/computer_operation/" + taskOp + "/deliveries"
 	call := func(path, user string, code int) computertask.DeliveryPage {
 		t.Helper()

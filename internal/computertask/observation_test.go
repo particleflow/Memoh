@@ -235,7 +235,7 @@ func TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation(t *testing.T)
 				store.mounts["pc-a"] = m
 			}
 			before := len(f.methods)
-			_, err := source.service.recover(t.Context(), bad, id)
+			_, err := source.service.Recover(t.Context(), bad, id)
 			store.revoked = false
 			store.mounts["pc-a"] = mount
 			if err == nil || len(f.methods) != before {

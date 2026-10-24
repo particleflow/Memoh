@@ -655,6 +655,24 @@ definitions:
       provider:
         type: string
     type: object
+  agenvo.BatchHistoryEvidence:
+    properties:
+      file:
+        type: string
+      sha256:
+        type: string
+      size:
+        type: integer
+    type: object
+  agenvo.BatchHistoryReport:
+    properties:
+      after:
+        type: string
+      before:
+        type: string
+      evidence:
+        $ref: '#/definitions/agenvo.BatchHistoryEvidence'
+    type: object
   agenvo.DiscoveredInstance:
     properties:
       device_id:
@@ -667,6 +685,23 @@ definitions:
         type: string
       online:
         type: boolean
+    type: object
+  agenvo.ReferenceObservation:
+    properties:
+      agent_status:
+        type: string
+      availability:
+        type: string
+      control_pane:
+        type: string
+      pane:
+        type: string
+      reason:
+        type: string
+      reference_match:
+        type: string
+      workspace:
+        type: string
     type: object
   agenvo.Target:
     properties:
@@ -2052,6 +2087,57 @@ definitions:
         type: integer
       version:
         type: integer
+    type: object
+  computertask.PiContinuity:
+    properties:
+      last_invocation:
+        $ref: '#/definitions/agenvo.BatchHistoryReport'
+      reason:
+        type: string
+      status:
+        type: string
+    type: object
+  computertask.Recovery:
+    properties:
+      attempt:
+        type: string
+      business_outcome:
+        type: string
+      cancel_requested:
+        type: boolean
+      continuity:
+        $ref: '#/definitions/computertask.PiContinuity'
+      native:
+        $ref: '#/definitions/agenvo.ReferenceObservation'
+      operation_id:
+        type: string
+      pane_id:
+        type: string
+      pi_result:
+        type: string
+      pi_session_id:
+        type: string
+      process_state:
+        type: string
+      result_reason:
+        type: string
+      result_summary:
+        $ref: '#/definitions/computertask.RecoverySummary'
+      state:
+        type: string
+      target_id:
+        type: string
+      workspace_id:
+        type: string
+    type: object
+  computertask.RecoverySummary:
+    properties:
+      source:
+        type: string
+      text:
+        type: string
+      truncated:
+        type: boolean
     type: object
   connectit.AuthMethod:
     properties:
@@ -15863,6 +15949,66 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Read one page of persisted computer task file deliveries
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation:
+    get:
+      description: Read-only, bounded Herdr metadata via the existing task recovery
+        service. Rechecks parent/descendant ownership and current device grants before
+        and after observation. No dispatch, terminal input, logs, cancellation, result
+        collection or receipt writes. Native idle/done and matching references never
+        prove business success or restored conversation history.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/computertask.Recovery'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Observe a computer task's original native references
       tags:
       - sessions
   /bots/{bot_id}/sessions/events:

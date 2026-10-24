@@ -1121,6 +1121,41 @@
           "failed": "交付失败",
           "unknown": "交付状态未知"
         }
+      },
+      "observation": {
+        "title": "当前电脑观察",
+        "description": "仅在此任务可见时轮询原生元数据。观察结果不证明任务完成、历史恢复或实时输出。",
+        "unsupported": "此服务器尚不支持电脑观察。",
+        "loadFailed": "无法读取电脑观察。",
+        "agentState": "原生 Agent：{state}",
+        "receivedAt": "最近收到响应：{time}",
+        "availability": {
+          "online": "电脑连接可用",
+          "offline": "电脑明确报告离线",
+          "authentication_unavailable": "电脑连接认证不可用",
+          "runtime_unavailable": "Herdr 不可用",
+          "connection_unavailable": "电脑连接不可用",
+          "unknown": "电脑连接状态未知"
+        },
+        "states": {
+          "working": "工作中",
+          "idle": "空闲",
+          "blocked": "等待／受阻",
+          "done": "原生状态已结束（任务成果未核实）",
+          "unknown": "未知"
+        },
+        "match": {
+          "observed": "本次观察匹配到原任务引用。",
+          "mismatch": "原终端身份已变化，追踪尚未确认；未重新派发任务。",
+          "unknown": "尚无法确认原任务引用。"
+        },
+        "fields": {
+          "target_id": "电脑目标",
+          "workspace_id": "Herdr 工作区",
+          "pane_id": "执行窗格",
+          "pi_session_id": "已记录 Pi 会话"
+        },
+        "refresh": "刷新电脑观察"
       }
     },
     "uploadingAttachments": "正在上传附件…",

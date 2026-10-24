@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -10,20 +11,27 @@ import (
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/accounts"
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/sessiontask"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
-type SessionTaskHandler struct {
-	service  *sessiontask.Service
-	bots     *bots.Service
-	accounts *accounts.Service
+type ComputerTaskObserver interface {
+	Recover(context.Context, toolcontext.ComputerBinding, string) (computertask.Recovery, error)
 }
 
-func NewSessionTaskHandler(service *sessiontask.Service, bots *bots.Service, accounts *accounts.Service) *SessionTaskHandler {
-	return &SessionTaskHandler{service: service, bots: bots, accounts: accounts}
+type SessionTaskHandler struct {
+	computers ComputerTaskObserver
+	service   *sessiontask.Service
+	bots      *bots.Service
+	accounts  *accounts.Service
+}
+
+func NewSessionTaskHandler(service *sessiontask.Service, bots *bots.Service, accounts *accounts.Service, computers ComputerTaskObserver) *SessionTaskHandler {
+	return &SessionTaskHandler{service: service, bots: bots, accounts: accounts, computers: computers}
 }
 
 func (h *SessionTaskHandler) Register(e *echo.Echo) {
@@ -42,6 +50,7 @@ func (h *SessionTaskHandler) Register(e *echo.Echo) {
 	g.GET("", h.List)
 	g.GET("/:task_type/:task_id", h.Get)
 	g.GET("/:task_type/:task_id/deliveries", h.Deliveries)
+	g.GET("/:task_type/:task_id/observation", h.Observe)
 }
 
 func (h *SessionTaskHandler) authorize(c echo.Context) (string, error) {
@@ -173,4 +182,57 @@ func (h *SessionTaskHandler) Deliveries(c echo.Context) error {
 		return err
 	}
 	return c.JSON(http.StatusOK, page)
+}
+
+// Observe godoc
+// @Summary Observe a computer task's original native references
+// @Description Read-only, bounded Herdr metadata via the existing task recovery service. Rechecks parent/descendant ownership and current device grants before and after observation. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history.
+// @Tags sessions
+// @Produce json
+// @Param bot_id path string true "Bot ID"
+// @Param session_id path string true "Owned parent session ID"
+// @Param task_type path string true "Task discriminator" Enums(computer_operation)
+// @Param task_id path string true "Computer operation ID"
+// @Success 200 {object} computertask.Recovery
+// @Failure 400 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 404 {object} server.Problem
+// @Failure 500 {object} server.Problem
+// @Router /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation [get].
+func (h *SessionTaskHandler) Observe(c echo.Context) error {
+	user, err := h.authorize(c)
+	if err != nil {
+		return err
+	}
+	if _, err := uuid.Parse(c.Param("task_id")); err != nil || h.computers == nil {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	ctx := c.Request().Context()
+	bot, parent, kind, id := c.Param("bot_id"), c.Param("session_id"), c.Param("task_type"), c.Param("task_id")
+	binding, err := h.service.ComputerBinding(ctx, bot, user, parent, kind, id)
+	if err != nil {
+		return taskHTTPError(err)
+	}
+	ctx, err = toolcontext.WithComputerBinding(ctx, binding)
+	if err != nil {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	observation, err := h.computers.Recover(ctx, binding, id)
+	if errors.Is(err, computertask.ErrDenied) || errors.Is(err, agenvo.ErrTargetChanged) {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	if err != nil {
+		return err
+	}
+	// Native reads can outlive a parent/child relation or grant. Recheck the
+	// requested root too, not just the operation's own session inside Recover.
+	if _, err := h.authorize(c); err != nil {
+		return err
+	}
+	current, err := h.service.ComputerBinding(ctx, bot, user, parent, kind, id)
+	if err != nil || current != binding {
+		return apperror.New(apperror.CodeSessionNotFound, nil)
+	}
+	return c.JSON(http.StatusOK, observation)
 }

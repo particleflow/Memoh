@@ -90,7 +90,7 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 			if input.ID == "" {
 				return nil, ErrInvalid
 			}
-			value, err = s.service.recover(ctx, b, input.ID)
+			value, err = s.service.Recover(ctx, b, input.ID)
 		}
 	case "computer_targets":
 		if len(args) != 0 {
@@ -182,4 +182,10 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		return nil, err
 	}
 	return mcp.BuildToolSuccessResult(map[string]any{"computer": value}), nil
+}
+
+// Recover exposes the existing read-only task recovery to authenticated host
+// adapters. The binding must be resolved from persisted ownership by the host.
+func (s *Source) Recover(ctx context.Context, binding toolcontext.ComputerBinding, id string) (Recovery, error) {
+	return s.service.Recover(ctx, binding, id)
 }

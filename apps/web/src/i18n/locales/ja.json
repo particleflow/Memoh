@@ -1118,6 +1118,41 @@
           "failed": "受け渡し失敗",
           "unknown": "受け渡し状態不明"
         }
+      },
+      "observation": {
+        "title": "現在のコンピューター観測",
+        "description": "このタスクが表示中の間、ネイティブメタデータを定期取得します。タスク完了、履歴復元、ライブ出力を証明するものではありません。",
+        "unsupported": "このサーバーはコンピューター観測にまだ対応していません。",
+        "loadFailed": "コンピューター観測を取得できませんでした。",
+        "agentState": "ネイティブ Agent：{state}",
+        "receivedAt": "最終応答受信：{time}",
+        "availability": {
+          "online": "コンピューター接続は利用可能",
+          "offline": "コンピューターがオフラインを報告",
+          "authentication_unavailable": "コンピューター接続の認証は利用不可",
+          "runtime_unavailable": "Herdr は利用不可",
+          "connection_unavailable": "コンピューター接続は利用不可",
+          "unknown": "コンピューター接続は不明"
+        },
+        "states": {
+          "working": "動作中",
+          "idle": "待機中",
+          "blocked": "待機／ブロック",
+          "done": "ネイティブ終了（タスク結果は未確認）",
+          "unknown": "不明"
+        },
+        "match": {
+          "observed": "今回の観測で元のタスク参照が一致しました。",
+          "mismatch": "元の端末識別子が変わりました。追跡は未確認で、タスクは再送信されていません。",
+          "unknown": "元のタスク参照を確認できませんでした。"
+        },
+        "fields": {
+          "target_id": "コンピューター対象",
+          "workspace_id": "Herdr ワークスペース",
+          "pane_id": "実行ペイン",
+          "pi_session_id": "記録された Pi セッション"
+        },
+        "refresh": "コンピューター観測を更新"
       }
     },
     "uploadingAttachments": "添付ファイルをアップロード中…",
