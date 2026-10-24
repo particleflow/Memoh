@@ -1,0 +1,72 @@
+[
+  {
+    "file": "inter.txt",
+    "source": "npm:@fontsource-variable/inter@5.2.8/LICENSE",
+    "bytes": 4477,
+    "sha256": "3b0a5fca3d17942cde889069889dedbbbd075e9b599968c82a95f4d944e9b345",
+    "license": "OFL-1.1"
+  },
+  {
+    "file": "instrument-sans.txt",
+    "source": "npm:@fontsource-variable/instrument-sans@5.3.0/LICENSE",
+    "bytes": 4538,
+    "sha256": "c27a3c53c3beed7f5c26853afa15991478ff7145d3754a36b0382f84e10c0d03",
+    "license": "OFL-1.1"
+  },
+  {
+    "file": "misans-package.txt",
+    "source": "npm:misans-vf@1.0.0/LICENSE",
+    "bytes": 11541,
+    "sha256": "542ec8466c3e0b459f0ef2555c8049f790c942ac90f050b5ca7f9f81abd55a54",
+    "license": "Apache-2.0"
+  },
+  {
+    "file": "katex.txt",
+    "source": "npm:katex@0.18.1/LICENSE",
+    "bytes": 1107,
+    "sha256": "766ccc1f306c885aa45542a9846bbd0a505b27a0374f146778171c2254ce18e3",
+    "license": "MIT"
+  },
+  {
+    "file": "llvm-libcxx.txt",
+    "source": "Huawei CLT 26.0.0.851 / SDK 26.0.0.105 native/llvm/NOTICE",
+    "sourceSHA256": "22208a1d78a9271ec1d6eaf7d21db5dda6049ed14af09d7d0f8d7787b6bffb77",
+    "sourceByteRange": [
+      31851,
+      48555
+    ],
+    "bytes": 16704,
+    "sha256": "3f3d1da78246d5c2ffc879f8239d6e856b19ba813b8349cbe48f85bd018ee3af",
+    "license": "Original complete component notice, including Apache-2.0 WITH LLVM-exception and legacy terms"
+  },
+  {
+    "file": "llvm-libcxxabi.txt",
+    "source": "Huawei CLT 26.0.0.851 / SDK 26.0.0.105 native/llvm/NOTICE",
+    "sourceSHA256": "22208a1d78a9271ec1d6eaf7d21db5dda6049ed14af09d7d0f8d7787b6bffb77",
+    "sourceByteRange": [
+      48555,
+      65262
+    ],
+    "bytes": 16707,
+    "sha256": "b043b7c5fdaf8df24b2c3b50f7651e6acfc8bdd73cc152ec5d090b8a7e0ede33",
+    "license": "Original complete component notice, including Apache-2.0 WITH LLVM-exception and legacy terms"
+  },
+  {
+    "file": "misans-original-license.txt",
+    "source": "https://hyperos.mi.com/font-download/MiSans%E5%AD%97%E4%BD%93%E7%9F%A5%E8%AF%86%E4%BA%A7%E6%9D%83%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE.pdf",
+    "conversion": "pdftotext -layout; license wording unchanged",
+    "sourceSHA256": "4a93a27cd2bd81b3b5ecfd0a853144a876fa26938a93a68443c67d74172fcb86",
+    "sha256": "7ef9a9140523baa1b1478966779742cd487b2839d1876c262a0800aeaca3896f",
+    "bytes": 9730,
+    "license": "Original MiSans Font Intellectual Property License Agreement"
+  },
+  {
+    "file": "seti.txt",
+    "source": "https://github.com/microsoft/vscode/blob/main/extensions/theme-seti/ThirdPartyNotices.txt",
+    "sourceGitBlob": "5faf4bb5a8fe00f76db29c92d5f58b8e2a81b0ba",
+    "matchedFontGitBlob": "6a8a3da7cf05b57901a2d75bfc7acf7067438f07",
+    "sha256": "c67ddfeba3a0aaffe9e9f7165c155c06de5c8db609a92b3a1a29ee6ab316a0bb",
+    "bytes": 1763,
+    "license": "Original VS Code Seti notice including MIT attribution"
+  }
+]

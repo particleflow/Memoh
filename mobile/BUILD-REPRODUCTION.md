@@ -1,5 +1,14 @@
 # Reproduction inputs and verified build sequence
 
+The latest unified source/HAP checkpoint is
+`f6403deaded6e76c0788aa66cffcaac5fef0badd`, pinned to shared source
+`91af53f43566cb827d1fc58d18102e8ad29383bc`. Its completed unsigned build and
+resource checks are in [the task-delivery evidence](../docs/testing/harmony-task-delivery/README.md).
+The subsequent notice-only preparation adds verbatim component notices to the
+existing `client-web/licenses/` resources on the next build. It does not alter
+the already built HAP or claim a new package has been compiled. See
+[notice sources and remaining UI licensing evidence](../docs/testing/harmony-release-notices/README.md).
+
 The latest [observation-fix HAP](../docs/harmony-observation-hap.md) was built
 from `7ceca0e3eecbc83f0f8edd11be73e711e377d125` using the same sequence, existing
 SDK and dependency cache. Web resources were rebuilt to include the source fix;
@@ -24,10 +33,10 @@ the reported installed 1.0.6.
 - Python 3.12 and pnpm 10.27.0. The verified Web run used Node 24.19.0;
   native compilation used the official CLT's bundled Linux Node.
 - `client/config/memoh_web.lock.json` pins complete public Memoh source at
-  `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8` and UI at
+  `91af53f43566cb827d1fc58d18102e8ad29383bc` and UI at
   `f69402a55dd87a59c10722fe11507ad8fd7048f5`, including component archive hashes.
   The deterministic combined archive SHA256 is
-  `75fe83655dfed0aecb43cb64d3ea9edec8fd206c46a5f0165ef35719678c62f2`.
+  `92a8d10eacf4cf0fe3d95d45c91afa65b695f756295c96a168bde1a6c712245a`.
 - Official `commandline-tools-linux-x64-26.0.0.851.zip`, 2,348,063,309 bytes,
   SHA256 `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`,
   containing SDK API26 / 26.0.0.105. Acquire through the official supported

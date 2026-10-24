@@ -1,0 +1,11 @@
+{
+  "copiedNoticeFiles": 13,
+  "verbatimByteEquality": true,
+  "sourceInputsBound": 12,
+  "mimeSupported": true,
+  "libraw244SourceIntegrityAndNoticeUnchanged": true,
+  "newNativeCompile": false,
+  "newWebCompile": false,
+  "existingHapModified": false,
+  "testScope": "Actual shared native/Docker notice copier, isolated output only"
+}

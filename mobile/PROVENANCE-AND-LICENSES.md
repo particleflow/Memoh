@@ -1,5 +1,14 @@
 # Source and license review
 
+The release-notice preparation adds nine text-only notice/source-reference
+files and includes the existing noble-hashes notice in the builder's explicit
+notice allowlist. Original terms and copyright text are preserved; this does
+not add dependency code, SDK tools or signing material. The UI pin's upstream
+ownership and unified-release evidence, precise remaining licensing question,
+and notice origins are recorded in
+[the release-notice review](../docs/testing/harmony-release-notices/README.md).
+This follow-up does not retroactively change the recorded unsigned packages.
+
 The archive restoration follow-up imports 74 clean user-provided source files
 under the user's explicit publication authorization. This supersedes the
 historical hold decisions below for those exact files. Source origin and both

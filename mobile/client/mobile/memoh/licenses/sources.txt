@@ -1,0 +1,65 @@
+Memoh Harmony client - component notices and source references
+
+These notices preserve the original terms. They do not assign a new license
+to any component. The release's build record identifies the exact client
+source commit and native source fingerprint. Reproduction instructions:
+https://github.com/particleflow/Memoh/blob/recovery/harmony-source-20261023/mobile/BUILD-REPRODUCTION.md
+
+Memoh shared Web/SDK source:
+https://github.com/particleflow/Memoh/tree/91af53f43566cb827d1fc58d18102e8ad29383bc
+Original upstream: https://github.com/felinics/Memoh
+The upstream root AGPL-3.0 text is preserved in memoh.txt. The root package.json
+also contains an ISC field; this notice does not replace or resolve those terms.
+
+UI component source:
+https://github.com/felinics/ui/tree/f69402a55dd87a59c10722fe11507ad8fd7048f5
+The upstream Memoh release workflow explicitly includes this UI submodule in
+its unified source/npm releases. Its own pinned package has no license field
+or root LICENSE, and its README describes host consumption without explicit
+license terms. This notice records that evidence without inventing a separate
+license or claiming that public visibility alone grants redistribution rights.
+
+Existing declared notices:
+- Lucide/Feather-derived artwork: lucide-voice.txt, retained unchanged.
+- WaveSurfer 8.0.2: wavesurfer.txt, retained unchanged.
+- @noble/hashes 2.2.0: noble-hashes.txt, retained unchanged for the pinned
+  dependency. The current phone digest implementation uses WebCrypto and does
+  not directly import this package; the notice is not a claim that it is bundled.
+
+Fonts and icons in the pinned Web build:
+- @fontsource-variable/inter 5.2.8: inter.txt (SIL OFL 1.1).
+  https://github.com/fontsource/font-files/tree/main/fonts/variable/inter
+- @fontsource-variable/instrument-sans 5.3.0: instrument-sans.txt (SIL OFL 1.1).
+  https://github.com/fontsource/font-files/tree/main/fonts/variable/instrument-sans
+- KaTeX 0.18.1: katex.txt, the original package MIT notice.
+  https://github.com/KaTeX/KaTeX
+- Seti: seti.txt, the original Microsoft VS Code theme-seti third-party notice.
+  https://github.com/microsoft/vscode/tree/main/extensions/theme-seti
+  The packaged font is byte-identical to the upstream Git blob
+  6a8a3da7cf05b57901a2d75bfc7acf7067438f07; the notice blob is
+  5faf4bb5a8fe00f76db29c92d5f58b8e2a81b0ba.
+- This application uses MiSans fonts supplied through misans-vf 1.0.0.
+  https://github.com/Bluemangoo/MiSans-VF
+  misans-package.txt preserves that package's Apache-2.0 text. It is not a
+  replacement for the original font owner's terms. The Xiaomi MiSans Font
+  Intellectual Property License Agreement is preserved separately, without
+  changing its wording, in misans-original-license.txt. Official source:
+  https://hyperos.mi.com/font-download/MiSans%E5%AD%97%E4%BD%93%E7%9F%A5%E8%AF%86%E4%BA%A7%E6%9D%83%E8%AE%B8%E5%8F%AF%E5%8D%8F%E8%AE%AE.pdf
+
+Native runtime:
+- libc++ / libc++abi: llvm-libcxx.txt and llvm-libcxxabi.txt preserve the complete
+  component notice sections from the retained official API26 SDK's
+  native/llvm/NOTICE, including LLVM exceptions and legacy terms. Only license
+  text is included here; SDK and CLT tools are not distributed with the client.
+- LibRaw 0.22.2: the existing raw-codec-license.txt resource contains COPYRIGHT,
+  LICENSE.LGPL and LICENSE.CDDL verbatim from the verified source archive.
+  Official source: https://www.libraw.org/data/LibRaw-0.22.2.tar.gz
+  Source archive SHA-256:
+  de86b035655accff8d4010f1a221fdf50d353cb7b1422ba26f14a0db92612cfa
+  raw-codec.lock.json and CMakeLists.txt record the exact source set and native
+  rebuild inputs. Both license options remain intact; no new license is assigned.
+
+The original source, package versions, notice hashes and extraction boundaries
+are recorded in the repository's notice-origin manifest and source provenance.
+This is a scoped notice supplement, not an assertion that every transitive
+package has received a new or exhaustive license review.

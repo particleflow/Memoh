@@ -24,6 +24,15 @@ from artifact_paths import checked
 BASE = ROOT / 'mobile/.build/memoh-web'
 DIST = BASE / 'official-dist'
 PIN = ROOT / 'config/memoh_web.lock.json'
+NOTICES = {
+    'lucide.txt': 'lucide-voice.txt', 'wavesurfer.txt': 'wavesurfer.txt',
+    'noble-hashes.txt': 'noble-hashes.txt', 'inter.txt': 'inter.txt',
+    'instrument-sans.txt': 'instrument-sans.txt', 'katex.txt': 'katex.txt',
+    'seti.txt': 'seti.txt', 'misans-package.txt': 'misans-package.txt',
+    'misans-original-license.txt': 'misans-original-license.txt',
+    'llvm-libcxx.txt': 'llvm-libcxx.txt', 'llvm-libcxxabi.txt': 'llvm-libcxxabi.txt',
+    'sources.txt': 'sources.txt',
+}
 
 
 def sha(path):
@@ -36,12 +45,22 @@ def inputs():
         'mobile/memoh/harmony-voice.ts', 'mobile/memoh/harmony-voice-geometry.ts',
         'mobile/memoh/HarmonyVoiceInput.vue', 'mobile/memoh/HarmonyVoiceFan.vue', 'mobile/memoh/HarmonyVoicePlayer.vue',
         'mobile/memoh/voiceFan.svg', 'mobile/memoh/voiceFan.css', 'contracts/ui_theme.json',
-        'mobile/memoh/licenses/lucide.txt', 'mobile/memoh/licenses/wavesurfer.txt',
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
         'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts',
         'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css')]
+    files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
+
+
+def package_notices(dist, memoh_license):
+    """Copy reviewed notices verbatim; include them in the normal resource map."""
+    licenses = checked(dist / 'licenses')
+    licenses.mkdir(exist_ok=True)
+    checked(licenses / 'memoh.txt').write_bytes(memoh_license)
+    for source, name in NOTICES.items():
+        checked(licenses / name).write_bytes(
+            checked(ROOT / 'mobile/memoh/licenses' / source).read_bytes())
 
 
 def verify_modules(modules):
@@ -864,11 +883,7 @@ def native_build(base, context, patches, lock, before, modules, api_url, platfor
         assert actual == json.loads(receipt.read_text()), 'Frontend output drift'
         shutil.rmtree(dist)
     shutil.copytree(output, dist)
-    licenses = dist / 'licenses'
-    licenses.mkdir(exist_ok=True)
-    (licenses / 'memoh.txt').write_bytes((checkout / 'LICENSE').read_bytes())
-    for name, source in [('lucide-voice.txt', 'lucide.txt'), ('wavesurfer.txt', 'wavesurfer.txt')]:
-        (licenses / name).write_bytes((ROOT / 'mobile/memoh/licenses' / source).read_bytes())
+    package_notices(dist, (checkout / 'LICENSE').read_bytes())
     resources = {p.relative_to(dist).as_posix(): sha(p) for p in dist.rglob('*') if p.is_file()}
     (base / 'native-output.json').write_text(json.dumps(resources, indent=2) + '\n')
     report.update(exitCode=0, resources=resources)
@@ -946,11 +961,7 @@ def main():
     assert before == inputs(), 'Frontend host inputs changed during build'
     verify_modules(modules)
     with tarfile.open(ROOT / lock['archive'], 'r:gz') as source:
-        license_path = checked(dist / 'licenses/memoh.txt')
-        license_path.parent.mkdir(exist_ok=True)
-        license_path.write_bytes(source.extractfile(lock['archivePrefix'] + 'LICENSE').read())
-    (dist / 'licenses/lucide-voice.txt').write_bytes((ROOT / 'mobile/memoh/licenses/lucide.txt').read_bytes())
-    (dist / 'licenses/wavesurfer.txt').write_bytes((ROOT / 'mobile/memoh/licenses/wavesurfer.txt').read_bytes())
+        package_notices(dist, source.extractfile(lock['archivePrefix'] + 'LICENSE').read())
     image = subprocess.run(docker + ['image', 'inspect', tag, '--format', '{{.Id}}'], capture_output=True, text=True, check=True)
     report['builderImageID'] = image.stdout.strip()
     resources = {p.relative_to(dist).as_posix(): sha(p) for p in dist.rglob('*') if p.is_file()}
