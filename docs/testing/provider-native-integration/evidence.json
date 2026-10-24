@@ -4,28 +4,31 @@
     {
       "file": "ui.log",
       "original_sha256": "6b42e64e3152e4c323f1912cbc61e80fe3d3579f4ce1b2856a027f52539c49e6",
-      "published_sha256": "d656649b2c2695dece66423aebc985af4892fcd5487b51ea7a7b1d167201d187",
-      "bytes": 300,
+      "published_sha256": "a72081d8c54d4fa742125c73cacec7a6a4b205f30b93e6560691ad9bcabf8076",
+      "bytes": 299,
       "normalization": [
-        "/tmp/memoh-candidate-7bcb-review => <repo>"
+        "/tmp/memoh-candidate-7bcb-review => <repo>",
+        "remove final blank lines"
       ]
     },
     {
       "file": "types.log",
       "original_sha256": "a8b9c6936d0eb1c73b26276d98457004d62d58a57849301faa4ebb9030c0f055",
-      "published_sha256": "3a580eafcf22846cf844546a9b363a6e4ce78734c9cd88cd19f2eac33b177e90",
-      "bytes": 176,
+      "published_sha256": "b6be55678ff7c91f3d719ef1e861916e83b9b3bb950ba1b45b8d585cd6c40397",
+      "bytes": 175,
       "normalization": [
-        "/tmp/memoh-candidate-7bcb-review => <repo>"
+        "/tmp/memoh-candidate-7bcb-review => <repo>",
+        "remove final blank lines"
       ]
     },
     {
       "file": "lint.log",
       "original_sha256": "39f1743375f8d4e21d96c3f4c44bf6b023ae88a21eddeae13587d1fe478f5664",
-      "published_sha256": "56fcab7abb47a4299a4444346dd63136f56c20f215ca96eea292f070c534ee39",
-      "bytes": 887,
+      "published_sha256": "829896d3c261b37636a7fea27aa07839d48f01b32d3883211a2bd3b76a825cce",
+      "bytes": 886,
       "normalization": [
-        "/tmp/memoh-candidate-7bcb-review => <repo>"
+        "/tmp/memoh-candidate-7bcb-review => <repo>",
+        "remove final blank lines"
       ]
     },
     {
