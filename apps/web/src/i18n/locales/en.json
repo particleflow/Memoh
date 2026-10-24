@@ -2089,6 +2089,12 @@
     "iconPlaceholder": "Icon URL or identifier (optional)",
     "enable": "Enable",
     "enableHint": "Only models from enabled providers appear in the available model list",
+    "imagesProtocol": {
+      "label": "Image generation protocol",
+      "description": "Uses the Bot's configured image model. Other saved image options are preserved.",
+      "preserve": "Keep existing behavior",
+      "openaiImages": "OpenAI Images"
+    },
     "promptCache": {
       "label": "Prompt Cache",
       "option5m": "5 minutes (default)",

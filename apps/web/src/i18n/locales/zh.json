@@ -2089,6 +2089,12 @@
     "iconPlaceholder": "图标 URL 或标识（可选）",
     "enable": "启用",
     "enableHint": "只有启用的供应商的模型才会出现在可用模型列表中",
+    "imagesProtocol": {
+      "label": "图片生成协议",
+      "description": "使用 Bot 已配置的图片模型，保留其他已保存的图片选项。",
+      "preserve": "保持现有行为",
+      "openaiImages": "OpenAI Images"
+    },
     "promptCache": {
       "label": "Prompt 缓存",
       "option5m": "5 分钟（默认）",

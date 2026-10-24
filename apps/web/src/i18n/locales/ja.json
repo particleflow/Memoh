@@ -2058,6 +2058,12 @@
     "iconPlaceholder": "アイコンURLまたは識別子 (オプション)",
     "enable": "有効にする",
     "enableHint": "利用可能なモデル一覧には、有効なプロバイダーのモデルのみが表示されます。",
+    "imagesProtocol": {
+      "label": "画像生成プロトコル",
+      "description": "Bot に設定された画像モデルを使用します。保存済みの他の画像設定は維持されます。",
+      "preserve": "現在の動作を維持",
+      "openaiImages": "OpenAI Images"
+    },
     "promptCache": {
       "label": "プロンプトキャッシュ",
       "option5m": "5分(デフォルト)",
