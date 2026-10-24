@@ -5,6 +5,14 @@ The sequence below was exercised against source checkpoint
 integrity checks passed; the resulting artifact is unsigned. See
 [the build report and output hashes](../docs/harmony-native-api26.md).
 
+The same native sequence was repeated after the version-only update at
+`8f8dc99761a467d5dafa9dd6e46ab1438d406ab5`, producing `1.0.7 / 1000007` with
+compile and integrity exit codes zero. Existing verified Web/dependency inputs
+were reused and native intermediates were preserved separately before a fresh
+compile. Use [the current unsigned output](../docs/harmony-upgrade-107.md)
+for signing preparation; the earlier 1.0.2 HAP is not an upgrade candidate for
+the reported installed 1.0.6.
+
 ## Inputs
 
 - Python 3.12 and pnpm 10.27.0. The verified Web run used Node 24.19.0;

@@ -1,5 +1,9 @@
 # Official API26 native build checkpoint
 
+This first successful build is preserved as historical compiler evidence.
+Its native version 1.0.2 is below the reported installed 1.0.6; use the
+[subsequent 1.0.7 unsigned build](harmony-upgrade-107.md) for signing preparation.
+
 The recovered Harmony client at `ef3678a86584bf197719d2cd1bcde881fec43d6d`,
 using unified Web candidate `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`, now
 compiles with the official Linux SDK. The existing `build_api26.py` exited zero

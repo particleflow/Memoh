@@ -1,0 +1,136 @@
+{
+  "compiledSourceBase": "4a6bec90fa1607165383a837b392845d2405a7da",
+  "applicationSourceChangedOnly": [
+    "mobile/harmony/app/AppScope/app.json5"
+  ],
+  "upstreamWebCommit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
+  "sourceIdentitySHA256": "078f9e18fda90004e5754b8f7ec86a94820e840bfda89af1ac7013fd88f11283",
+  "previousRecoveryHAP": {
+    "versionName": "1.0.2",
+    "versionCode": 1000002,
+    "sha256": "d5b8410e241d2c9e5eaab8ed3945f34474c3745a26ce96e6bf0edd85516032c2",
+    "preserved": true
+  },
+  "previousInstallableApp": {
+    "evidence": "Trusted parent-thread report; signed HAP/profile not present or inspected in this cloud environment.",
+    "bundleName": "cloud.begonia.workassistant",
+    "versionName": "1.0.6",
+    "versionCode": 1000006,
+    "appIdentifier": "6917618151422994484",
+    "profileIncludesReadImageVideo": true,
+    "authorizedDeviceCount": 1,
+    "certificateValidUntil": "2027-10-03"
+  },
+  "HAP": {
+    "fileName": "memoh-harmony-1.0.7-1000007-40f0a69-api26-unsigned.hap",
+    "bytes": 36900790,
+    "sha256": "4912fd74241a0e8109935a4e26a6b93be92fb8e600fc2179f5e7cd3650fa9af9",
+    "signed": false,
+    "zipCRCVerified": true,
+    "app": {
+      "iconId": 16777217,
+      "minPatchAPIVersion": 0,
+      "debug": true,
+      "targetPatchAPIVersion": 0,
+      "minMinorAPIVersion": 0,
+      "minAPIVersion": 260000026,
+      "icon": "$media:app_icon",
+      "buildMode": "debug",
+      "label": "$string:app_name",
+      "bundleType": "app",
+      "versionName": "1.0.7",
+      "versionCode": 1000007,
+      "appEnvironments": [],
+      "compileSdkType": "HarmonyOS",
+      "labelId": 16777216,
+      "compileSdkVersion": "26.0.0.105",
+      "targetAPIVersion": 260000026,
+      "vendor": "Begonia",
+      "bundleName": "cloud.begonia.workassistant",
+      "apiReleaseType": "Release",
+      "targetMinorAPIVersion": 0
+    },
+    "moduleName": "entry",
+    "mainElement": "EntryAbility",
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.INTERNET"
+      },
+      {
+        "name": "ohos.permission.GET_NETWORK_INFO"
+      },
+      {
+        "reason": "$string:microphone_reason",
+        "reasonId": 16777220,
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "inuse"
+        },
+        "name": "ohos.permission.MICROPHONE"
+      },
+      {
+        "name": "ohos.permission.DETECT_GESTURE"
+      },
+      {
+        "name": "ohos.permission.FILE_ACCESS_PERSIST"
+      },
+      {
+        "reason": "$string:album_backup_reason",
+        "reasonId": 16777218,
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "always"
+        },
+        "name": "ohos.permission.READ_IMAGEVIDEO"
+      }
+    ],
+    "packInfoVersion": {
+      "code": 1000007,
+      "name": "1.0.7"
+    },
+    "appIdentifierPresent": false
+  },
+  "newVersionExceedsPreviousInstallable": true,
+  "permissionsUnchangedFromRecoveryHAP": true,
+  "readImageVideoStillRequested": true,
+  "compiledABCAndNativeLibrariesByteIdentical": true,
+  "allPackagedWebResourcesByteIdentical": true,
+  "changedHAPEntries": [
+    "module.json",
+    "pack.info",
+    "resources/rawfile/source-build.json"
+  ],
+  "officialCompileExitCode": 0,
+  "qualificationExitCode": 0,
+  "hapResourceDigestsVerified": true,
+  "nativeCompilerIntermediatesReused": false,
+  "previousNativeIntermediatesPreserved": true,
+  "webBuildRepeated": false,
+  "signingProfileOrCredentialsModified": false,
+  "nativeUpgradeRuntime": "NOT_EXECUTED",
+  "loginPersistenceAfterPhysicalUpgrade": "NOT_EXECUTED",
+  "phoneNASTransfer": "NOT_EXECUTED",
+  "readyForHumanAcceptance": false,
+  "compiledSourceCommit": "8f8dc99761a467d5dafa9dd6e46ab1438d406ab5",
+  "nativeIntermediatePreservation": "Prior entry/build, entry/.cxx and app/.hvigor outputs moved to private evidence before rebuilding; official tools and dependency caches retained.",
+  "loginPersistenceSourceReview": {
+    "comparison": "New 1.0.7 HAP versus preserved recovery 1.0.2 HAP; not versus the unavailable signed 1.0.6 binary.",
+    "webViewOrigin": "begonia-client://app",
+    "webViewStart": "begonia-client://app/index.html",
+    "serviceConfigKey": "memoh:harmony:service-config:v1",
+    "authStorageKeys": [
+      "token",
+      "user"
+    ],
+    "sourceAndPackagedCodeUnchanged": true,
+    "existingEndpointChangeBehavior": "Explicit service configuration changes invalidate active authentication; an unbound legacy token is not automatically migrated to a user-entered endpoint.",
+    "signed106RuntimeCompatibility": "Not established from the unsigned package."
+  },
+  "originalPrivateBuildLogSHA256": "ec6b7e61436b25564947327eae4823cbd4ea1123246c827385db637581dfe4fb",
+  "publicNormalizedBuildLogSHA256": "e5da9d21660d325f71f60c274b6b2e9ea84c673e68fcdf36ef4a2f6d70f865aa",
+  "normalization": "Only task paths, terminal escape sequences and trailing whitespace; private originals retained."
+}

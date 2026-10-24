@@ -1526,5 +1526,27 @@
     "packagedWebResources": 786,
     "nativeDeviceRuntime": "NOT_EXECUTED",
     "historicalLaterCloudChangesUnverified": 19
+  },
+  "nativeUpgrade107": {
+    "compiledSourceCommit": "8f8dc99761a467d5dafa9dd6e46ab1438d406ab5",
+    "sourceIdentitySHA256": "078f9e18fda90004e5754b8f7ec86a94820e840bfda89af1ac7013fd88f11283",
+    "previousReportedInstallableVersion": "1.0.6 / 1000006",
+    "nativeVersion": "1.0.7 / 1000007",
+    "bundleName": "cloud.begonia.workassistant",
+    "officialCompileExitCode": 0,
+    "qualificationExitCode": 0,
+    "unsignedHAP": {
+      "fileName": "memoh-harmony-1.0.7-1000007-40f0a69-api26-unsigned.hap",
+      "bytes": 36900790,
+      "sha256": "4912fd74241a0e8109935a4e26a6b93be92fb8e600fc2179f5e7cd3650fa9af9",
+      "signed": false
+    },
+    "applicationSourceChanges": [
+      "mobile/harmony/app/AppScope/app.json5"
+    ],
+    "permissionsUnchangedFromRecoveryHAP": true,
+    "loginPersistenceCodeUnchanged": true,
+    "signedUpgradeAndLoginRetention": "NOT_EXECUTED",
+    "evidence": "docs/testing/harmony-upgrade-107/verification.json"
   }
 }

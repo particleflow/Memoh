@@ -4,7 +4,10 @@ The existing client source has been restored and aligned with unified Memoh
 `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`. The Web build, official API26 native
 compilation and HAP integrity qualification have passed. The new HAP is unsigned;
 installation, physical-device runtime, NAS transfers and human acceptance remain
-unverified. See the [native build checkpoint](../docs/harmony-native-api26.md).
+unverified. The current unsigned package is `1.0.7 / 1000007`, above the reported
+installed 1.0.6, with unchanged bundle, permissions and persistence code. See
+the [upgrade preparation evidence](../docs/harmony-upgrade-107.md) and
+[first native build checkpoint](../docs/harmony-native-api26.md).
 
 `SOURCE-PROVENANCE.json` records 116 reviewed source entries, their archive
 origins, current hashes and subsequent alignment changes. The two source ZIPs
