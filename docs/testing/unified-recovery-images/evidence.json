@@ -1,0 +1,149 @@
+{
+  "product_head": "37d429d021bb1ffee672eb36455613e2e1c44ae8",
+  "checks": [
+    {
+      "file": "ui-tests.txt",
+      "command": "NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run apps/web/src/pages/providers/model-setting-cache.test.ts apps/web/src/pages/providers/components/provider-form-images.test.ts apps/web/src/pages/home/components/tool-call-inline.test.ts apps/web/src/pages/home/composables/useComputerTaskObservation.test.ts apps/web/src/pages/home/components/computer-task-observation.test.ts",
+      "exit_code": 0,
+      "original_sha256": "52022f71297a66bb84875b66ecb2a778686ebd97bf958689c0929ebf4320231b",
+      "published_sha256": "81244a6a5ac8fad4060c86a0581965a0ec12d81af849728be9f80063add6f160",
+      "bytes": 314,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "recovery.txt",
+      "command": "go test -count=1 -v ./internal/computertask -run '^TestBatch(CompletedControlRestartRecoveryBoundary|Reader[^P]|ReaderPage)'",
+      "exit_code": 0,
+      "original_sha256": "3b2a5345e4c4c3f1e02fd0a243aac537e563f5a99bc11a815150db68a42359f9",
+      "published_sha256": "3b2a5345e4c4c3f1e02fd0a243aac537e563f5a99bc11a815150db68a42359f9",
+      "bytes": 3791,
+      "normalization": []
+    },
+    {
+      "file": "task-ui.txt",
+      "command": "pnpm exec vitest run apps/web/src/pages/home/components/native-task-content.test.ts apps/web/src/pages/home/components/session-task-results.test.ts",
+      "exit_code": 1,
+      "original_sha256": "3897060d6a93bab280af44a533b4444b0be31899caee269aa612580288d1542d",
+      "published_sha256": "cdb9532c217e768eb595bd8846746f1a5d4654a0ee0301c2bb0d86bac43a7534",
+      "bytes": 3631,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "task-ui-node-compatible.txt",
+      "command": "NODE_OPTIONS=--no-experimental-webstorage pnpm exec vitest run apps/web/src/pages/home/components/native-task-content.test.ts apps/web/src/pages/home/components/session-task-results.test.ts",
+      "exit_code": 0,
+      "original_sha256": "81713b85d346e21babb466ff2ad5446628cad89865ef1348addd01f6122ef79c",
+      "published_sha256": "c4e8ca3138e2e77cf490369cd703a799f1b94c81e5c69fe1cf3f6ab2b2b5b954",
+      "bytes": 301,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "postgres.txt",
+      "command": "MEMOH_AGENVO_TEST_DATABASE_URL=<existing isolated test DB> go test -count=1 -v ./internal/agenvo ./internal/computertask -run '^Test(BatchReaderPostgresPersistenceCAS|PostgresAccountAndBotAuthorization)$'",
+      "exit_code": 0,
+      "original_sha256": "8b6c66edf59a19a953efb03d584ee13bc42b1ea35d508c1b3c9923c89c7e6837",
+      "published_sha256": "8b6c66edf59a19a953efb03d584ee13bc42b1ea35d508c1b3c9923c89c7e6837",
+      "bytes": 334,
+      "normalization": []
+    },
+    {
+      "file": "typecheck.txt",
+      "command": "pnpm --filter @memohai/web typecheck",
+      "exit_code": 0,
+      "original_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "published_sha256": "1d2837098ea0f9a4d8ee73d52e7cc1dba8e59720f8adc921c7d9d097f45fea5e",
+      "bytes": 96,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "sdk-types.txt",
+      "command": "pnpm --filter @memohai/sdk typecheck",
+      "exit_code": 0,
+      "original_sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+      "published_sha256": "587728f506b09309ed8cd6d0c061c150c9eb407c777f86c384f23def3f06ff15",
+      "bytes": 92,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "eslint.txt",
+      "command": "pnpm exec eslint <six changed Vue/TS files>",
+      "exit_code": 0,
+      "original_sha256": "da5fbe09f0fa47b49e626425047ffa4dd961570acebd793cb5d7c1bc6727a913",
+      "published_sha256": "dfc32047d0fdf3f7278e5f0311c9994ce595ed35db1c2e754ef265aacee0fe0c",
+      "bytes": 990,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "ui-contract.txt",
+      "command": "node scripts/check-ui-contract.mjs",
+      "exit_code": 0,
+      "original_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "published_sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "bytes": 1169,
+      "normalization": []
+    },
+    {
+      "file": "build.txt",
+      "command": "pnpm --filter @memohai/web build",
+      "exit_code": 0,
+      "original_sha256": "2ad794bd3a7546ce4ec763930f6f75e3c79cb1c0f6bf453946c128f75c6e5018",
+      "published_sha256": "f784cf64e1757fd269e9c12e88963d824c4bd27de84021970f528536d92cf625",
+      "bytes": 76344,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "browser.txt",
+      "command": "node browser.mjs (real isolated API/PG, synthetic provider)",
+      "exit_code": 1,
+      "original_sha256": "c4cdd5e2959f4c031aec0136daa2a7ce18968dc07a595be5660c76e001f3c432",
+      "published_sha256": "5af22a7545b2f8537d3d467bd547bbe9f850ed5dc51a9f85e6cb060f63412c3d",
+      "bytes": 676,
+      "normalization": [
+        "replace local repository/evidence path only"
+      ]
+    },
+    {
+      "file": "task-browser.txt",
+      "command": "node task-view.mjs (actual existing tasks API, synthetic records)",
+      "exit_code": 0,
+      "original_sha256": "69d6f84602357ff5930515ca30936c9446259482bfde142876b4dee1f67854f7",
+      "published_sha256": "69d6f84602357ff5930515ca30936c9446259482bfde142876b4dee1f67854f7",
+      "bytes": 233,
+      "normalization": []
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "provider-reference-saved.png",
+      "sha256": "1fb08e033c01bca46bd5a088e6ec960a9a1dc02701f2f8ed81f16867cb509e45",
+      "bytes": 92593,
+      "reviewed": "synthetic data only"
+    },
+    {
+      "file": "provider-reference-narrow.png",
+      "sha256": "6dc2548c4c364d63b321925b9539c57cb418d43d852daa17f86cfc9763fa2f2e",
+      "bytes": 46700,
+      "reviewed": "synthetic data only"
+    },
+    {
+      "file": "combined-task-view.png",
+      "sha256": "3c092a35acea0c9325a8e3214c7d3ea1e58cabef7804a6c8f6f359601e007819",
+      "bytes": 105217,
+      "reviewed": "synthetic data only"
+    }
+  ]
+}
