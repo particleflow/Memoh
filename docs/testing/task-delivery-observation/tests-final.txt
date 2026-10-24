@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 <worktree>
+
+
+ Test Files  4 passed (4)
+      Tests  80 passed (80)
+   Start at  15:25:35
+   Duration  8.58s (transform 8.38s, setup 0ms, import 12.06s, tests 2.54s, environment 884ms)
+

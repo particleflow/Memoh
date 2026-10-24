@@ -1,0 +1,49 @@
+{
+  "realServer": true,
+  "realPostgres": true,
+  "seededMetadata": true,
+  "realMediaUpload": true,
+  "taskDispatches": 0,
+  "modelCalls": 0,
+  "downloadImplemented": false,
+  "pageErrors": [],
+  "deliveryRequests": [
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": true
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": true
+    },
+    {
+      "status": 404,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": false
+    },
+    {
+      "status": 200,
+      "method": "GET",
+      "continued": true
+    }
+  ],
+  "offlineRecovery": true,
+  "synthetic404": true
+}

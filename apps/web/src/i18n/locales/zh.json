@@ -1070,7 +1070,7 @@
       "result": "最终回复摘要",
       "unavailable": "暂无可用的最终回复摘要。",
       "truncated": "摘要已截断。",
-      "businessUnknown": "业务目标尚未独立核验。成果附件暂不可用。",
+      "businessUnknown": "业务是否完成仍需核实。",
       "cancelIntent": "已请求取消，但尚不能据此确认进程终止。",
       "filteredPage": "本页没有可查看的任务，可继续下一页。",
       "empty": "暂无任务记录。",
@@ -1105,7 +1105,24 @@
         "output_limit": "Pi 结果超出观察上限"
       },
       "visibleOutput": "最近可见的助手输出",
-      "pollingOutput": "打开此视图时轮询更新。仅显示本轮已保存的可见助手文本，不包含推理或完整日志。"
+      "pollingOutput": "打开此视图时轮询更新。仅显示本轮已保存的可见助手文本，不包含推理或完整日志。",
+      "files": {
+        "title": "任务文件",
+        "empty": "尚无文件交付记录。",
+        "unsupported": "当前服务尚不支持查看任务文件。",
+        "loadFailed": "无法读取任务文件。",
+        "openUnavailable": "已显示登记的引用；当前服务尚未提供带任务权限校验的附件打开入口。",
+        "upload": "已存入 NAS",
+        "download": "电脑已接收",
+        "states": {
+          "pending": "等待交付",
+          "reserved": "交付进行中",
+          "committed": "交付已登记",
+          "canceled": "交付已取消",
+          "failed": "交付失败",
+          "unknown": "交付状态未知"
+        }
+      }
     },
     "uploadingAttachments": "正在上传附件…",
     "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",

@@ -5,6 +5,7 @@ import { useSessionTasks, type TaskScope } from './useSessionTasks'
 
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
+  getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries: vi.fn().mockResolvedValue({ data: { version: 1, operation_id: 'operation', files: [], has_more: false } }),
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId: api.detail,
 }))

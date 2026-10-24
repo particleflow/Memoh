@@ -1,9 +1,10 @@
-import { onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
+import { computed, onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
 import {
   getBotsByBotIdSessionsBySessionIdTasks,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId,
   type SessiontaskTask,
 } from '@memohai/sdk'
+import { useComputerTaskDeliveries } from './useComputerTaskDeliveries'
 import { apiErrorStatus } from '@/utils/api-error'
 
 export interface TaskScope {
@@ -115,5 +116,8 @@ export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boole
     if (![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh()
   }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
-  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh }
+  const deliveries = useComputerTaskDeliveries(scope, selected, computed(() => visible.value && !paused.value
+    && !error.value && !!detail.value && detail.value.task_type === 'computer_operation'
+    && detail.value.task_id === selected.value?.task_id))
+  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries }
 }

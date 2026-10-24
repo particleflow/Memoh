@@ -7,8 +7,9 @@ import { notifyAuthSessionCleared } from '@/lib/auth-session'
 import en from '@/i18n/locales/en.json'
 import SessionTasks from './session-tasks.vue'
 
-const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn(), retryDelivery: vi.fn() }))
+const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), delegations: vi.fn(), delegationDetail: vi.fn(), retryDelivery: vi.fn(), deliveries: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
+  getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries: api.deliveries,
   postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDelivery: api.retryDelivery,
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
   getBotsByBotIdSessionsBySessionIdDelegations: api.delegations,
@@ -65,6 +66,7 @@ describe('task detail identity and rendering boundary', () => {
     vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })
     localStorage.clear()
     localStorage.setItem('token', 'synthetic-identity')
+    api.deliveries.mockReset().mockResolvedValue({ data: { version: 1, operation_id: 'operation', files: [], has_more: false } })
     api.retryDelivery.mockReset().mockResolvedValue({ data: delegation })
     api.list.mockReset().mockResolvedValue({ data: { items: [task] } })
     api.detail.mockReset().mockResolvedValue({ data: task })
@@ -76,6 +78,43 @@ describe('task detail identity and rendering boundary', () => {
     root?.remove()
     vi.unstubAllGlobals()
     vi.useRealTimers()
+  })
+
+  it('shows all recorded files automatically, with pending and failed separate from task completion', async () => {
+    api.detail.mockResolvedValue({ data: { ...task, status: 'unknown', pi_result: undefined } })
+    api.deliveries.mockResolvedValueOnce({ data: { version: 1, operation_id: 'operation', has_more: true, next_after: '16', files: [
+      { delivery_id: 'ready-result', state: 'committed', reference: { version: 1, direction: 'upload', content_hash: 'a'.repeat(64), size_bytes: 42, mime: 'text/plain' } },
+      { delivery_id: 'waiting-result', state: 'pending' },
+    ] } }).mockResolvedValueOnce({ data: { version: 1, operation_id: 'operation', has_more: false, files: [{ delivery_id: 'failed-result', state: 'failed' }] } })
+    await open()
+    expect(document.body.textContent).toContain('ready-result')
+    expect(document.body.textContent).toContain('waiting-result')
+    expect(document.body.textContent).toContain('failed-result')
+    expect(document.body.textContent).toContain(en.chat.tasks.files.states.pending)
+    expect(document.body.textContent).toContain(en.chat.tasks.files.states.failed)
+    expect(document.body.textContent).toContain(en.chat.tasks.statuses.unknown)
+    expect(document.body.textContent).not.toContain(en.chat.tasks.statuses.completed)
+    expect(document.body.textContent).toContain(en.chat.tasks.files.openUnavailable)
+    expect(document.querySelector('[role=dialog]')!.querySelectorAll('a,img,audio,video')).toHaveLength(0)
+    expect(api.deliveries.mock.lastCall![0].query.after).toBe('16')
+  })
+
+  it.each([
+    { status: 404, code: 'http.not_found', expected: en.chat.tasks.files.unsupported },
+    { status: 404, code: 'session.not_found', expected: en.chat.tasks.inaccessible },
+    { status: 403, code: 'http.forbidden', expected: en.errors.http.forbidden },
+  ])('keeps task summary but distinguishes file observation failure: $code', async ({ status, code, expected }) => {
+    api.deliveries.mockRejectedValueOnce({ status, code, detail: 'PRIVATE_FAILURE' })
+    await open()
+    expect(document.body.textContent).toContain(text)
+    expect(document.body.textContent).toContain(expected)
+    expect(document.body.textContent).not.toContain(en.chat.tasks.files.empty)
+    expect(document.body.textContent).not.toContain('PRIVATE_FAILURE')
+    const calls = api.deliveries.mock.calls.length
+    await vi.advanceTimersByTimeAsync(10000)
+    expect(api.deliveries).toHaveBeenCalledTimes(calls)
+    button('Reload view').click(); await settled()
+    expect(document.body.textContent).toContain(en.chat.tasks.files.empty)
   })
 
   it('opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch', async () => {

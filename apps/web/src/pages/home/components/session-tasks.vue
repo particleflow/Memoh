@@ -23,7 +23,7 @@ const visible = computed(() => open.value && props.visible && documentVisibility
 const scope = computed(() => props.botId && props.sessionId ? {
   bot: props.botId, session: props.sessionId, selection: props.selection, identity: token.value,
 } : null)
-const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh } = useSessionTasks(scope, computed(() => visible.value && group.value === 'execution'))
+const { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries } = useSessionTasks(scope, computed(() => visible.value && group.value === 'execution'))
 const delegationVisible = computed(() => visible.value && group.value === 'delegations')
 const delegationReader = useBotDelegations(scope, delegationVisible)
 const deliveryAction = useBotDelegationDelivery(scope, delegationVisible, delegationReader)
@@ -40,7 +40,7 @@ const specialistPaused = computed(() => !!specialist.value && (!!delegationError
   || delegationDetail.value?.target_bot_id !== specialist.value.bot
   || delegationDetail.value?.target_session_id !== specialist.value.session))
 const specialistReader = useSessionTasks(specialistScope, specialistVisible, specialistPaused)
-const { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist } = specialistReader
+const { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist, deliveries: specialistDeliveries } = specialistReader
 const hasSelection = computed(() => !!specialist.value || (group.value === 'delegations' ? !!delegationSelected.value : !!selected.value))
 function openSpecialistTasks() {
   if (specialist.value) return
@@ -111,6 +111,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             :next-cursor="specialistNext"
             :loading="specialistLoading || (specialistPaused && delegationLoading)"
             :error="delegationError || specialistError"
+            :deliveries="specialistDeliveries"
             @open-task="openSpecialistTask"
             @page="specialistPage"
             @refresh="reloadSpecialist"
@@ -156,6 +157,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
               :next-cursor="nextCursor"
               :loading="loading"
               :error="error"
+              :deliveries="deliveries"
               @open-task="openTask"
               @page="page"
               @refresh="refresh"

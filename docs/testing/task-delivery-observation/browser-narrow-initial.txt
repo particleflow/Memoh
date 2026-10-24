@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByText('Task file observation synthetic', { exact: true }).first()
+
+    at <evidence>/browser-narrow.mjs:13:79 {
+  log: [
+    "  - waiting for getByText('Task file observation synthetic', { exact: true }).first()"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0
