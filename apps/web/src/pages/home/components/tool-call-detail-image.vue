@@ -13,9 +13,15 @@
     >
       {{ path }}
     </p>
-    <EmptyRow v-if="!src && !path">
-      {{ t('chat.tools.detail.noImage') }}
+    <EmptyRow v-if="contentHash || (!src && !path)">
+      {{ statusText }}
     </EmptyRow>
+    <p
+      v-if="contentHash"
+      class="text-xs text-muted-foreground font-mono break-all"
+    >
+      {{ t('chat.tools.detail.imageReference') }}: {{ contentHash }}
+    </p>
   </div>
 </template>
 
@@ -23,6 +29,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ToolCallBlock } from '@/store/chat-list'
+import { asRecord, pickString, structuredToolResult } from '@/store/chat-list.normalize'
 import EmptyRow from './tool-detail/empty-row.vue'
 
 const props = defineProps<{ block: ToolCallBlock }>()
@@ -33,27 +40,43 @@ const prompt = computed(() => {
   return (input?.prompt as string) ?? ''
 })
 
-function resolveResult(): Record<string, unknown> | null {
-  if (!props.block.result) return null
-  return props.block.result as Record<string, unknown>
-}
+const result = computed(() => structuredToolResult(props.block.result))
+const state = computed(() => pickString(result.value, 'state'))
+const finished = computed(() => props.block.done && !props.block.running)
+const confirmed = computed(() => finished.value && (!state.value || state.value === 'completed'))
 
-const path = computed(() => {
-  const r = resolveResult()
-  if (!r) return ''
-  const sc = r.structuredContent as Record<string, unknown> | undefined
-  return ((sc ?? r).path as string) ?? ''
+const contentHash = computed(() => {
+  if (!confirmed.value) return ''
+  const hash = pickString(result.value, 'content_hash')
+  return /^[0-9a-f]{64}$/.test(hash) ? hash : ''
 })
 
+// The result has no Bot/session authorization scope. Keep previews in the
+// existing attachment flow; do not invent an asset URL from the current Bot.
+const statusText = computed(() => {
+  if (!finished.value) return t('chat.tools.detail.waitingOutput')
+  if (state.value === 'generated' && result.value.storage_state === 'unconfirmed') {
+    return t('chat.tools.detail.imageStorageUnconfirmed')
+  }
+  if (!confirmed.value) return t('chat.tools.detail.imageUnconfirmed')
+  if (contentHash.value) {
+    return t(result.value.delivered === 'current_conversation'
+      ? 'chat.tools.detail.imageReturned'
+      : 'chat.tools.detail.imageSaved')
+  }
+  return t('chat.tools.detail.noImage')
+})
+
+const path = computed(() => confirmed.value ? pickString(result.value, 'path') : '')
+
 const src = computed(() => {
-  const r = resolveResult()
-  if (!r) return ''
-  const content = r.content as Array<Record<string, unknown>> | undefined
+  if (!confirmed.value) return ''
+  const content = asRecord(props.block.result).content
   if (!Array.isArray(content)) return ''
-  const img = content.find(c => c.type === 'image')
+  const img = content.map(asRecord).find(c => c.type === 'image')
   if (!img) return ''
-  const data = img.data as string | undefined
-  const mime = (img.mimeType as string) || 'image/png'
+  const data = pickString(img, 'data')
+  const mime = pickString(img, 'mimeType') || 'image/png'
   return data ? `data:${mime};base64,${data}` : ''
 })
 </script>
