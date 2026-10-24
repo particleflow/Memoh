@@ -1,9 +1,10 @@
 # Recovered Harmony client
 
-Source follow-up: [task observation recovery](../docs/harmony-observation-recovery.md)
-now carries the current shared Web fix for transient downstream reads. Its
-typecheck and focused/browser checks passed; it is not yet packaged into the
-previously delivered 1.0.7 HAP. Login persistence code remains unchanged.
+The [task observation recovery](../docs/harmony-observation-recovery.md) is now
+included in a [new API26 unsigned HAP](../docs/harmony-observation-hap.md), built
+from `7ceca0e3eecbc83f0f8edd11be73e711e377d125`. Its compile, integrity and private
+Library readback checks passed. The earlier 1.0.7 package remains separate.
+Login persistence code remains unchanged; signing and device acceptance are pending.
 
 The existing client source has been restored and aligned with unified Memoh
 `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`. The Web build, official API26 native

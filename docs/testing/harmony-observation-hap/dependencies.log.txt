@@ -1,0 +1,4 @@
+Scope: 5 of 8 workspace projects
+Lockfile is up to date, resolution step is skipped
+ WARN  Failed to create bin at <harmony-workspace>/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.bin/memoh-runtime. ENOENT: no such file or directory, open '<harmony-workspace>/repo/mobile/client/mobile/.build/memoh-web/checkout/packages/runtime/dist/cli.mjs'
+Done in 1.2s using pnpm v10.27.0

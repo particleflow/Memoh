@@ -1,5 +1,11 @@
 # Reproduction inputs and verified build sequence
 
+The latest [observation-fix HAP](../docs/harmony-observation-hap.md) was built
+from `7ceca0e3eecbc83f0f8edd11be73e711e377d125` using the same sequence, existing
+SDK and dependency cache. Web resources were rebuilt to include the source fix;
+the official native build and all integrity checks passed. Its version remains
+`1.0.7 / 1000007`, above the reported installed 1.0.6. No signing was performed.
+
 The sequence below was exercised against source checkpoint
 `ef3678a86584bf197719d2cd1bcde881fec43d6d`. Official native compilation and all HAP
 integrity checks passed; the resulting artifact is unsigned. See

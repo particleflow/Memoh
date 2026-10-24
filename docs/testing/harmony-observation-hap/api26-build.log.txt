@@ -1,0 +1,305 @@
+ohpm WARN: createDir exception: Error: ENOENT: no such file or directory, mkdir '/home/agent/.ohpm', start remove dirPath: /home/agent/.ohpm
+ohpm WARN: initRc init user .ohpmrc file failed, err: Error: ENOENT: no such file or directory, mkdir '/home/agent/.ohpm'.
+install completed in 0s 59ms
+> hvigor UP-TO-DATE :entry:default@PreBuild...
+> hvigor Finished :entry:default@CreateModuleInfo... after 2 ms
+> hvigor UP-TO-DATE :entry:default@GenerateMetadata...
+> hvigor Finished :entry:default@ConfigureCmake... after 44 ms
+> hvigor UP-TO-DATE :entry:default@MergeProfile...
+> hvigor UP-TO-DATE :entry:default@CreateBuildProfile...
+> hvigor Finished :entry:default@PreCheckSyscap... after 1 ms
+> hvigor Finished :entry:default@GeneratePkgSdkInfo... after 3 ms
+> hvigor Finished :entry:default@ProcessIntegratedHsp... after 1 ms
+> hvigor Finished :entry:default@BuildNativeWithCmake... after 18 ms
+> hvigor UP-TO-DATE :entry:default@MakePackInfo...
+> hvigor Finished :entry:default@SyscapTransform... after 9 ms
+> hvigor UP-TO-DATE :entry:default@GeneratePkgContextInfo...
+> hvigor UP-TO-DATE :entry:default@ProcessProfile...
+> hvigor UP-TO-DATE :entry:default@ProcessRouterMap...
+> hvigor UP-TO-DATE :entry:default@ProcessShareConfig...
+> hvigor Finished :entry:default@ProcessStartupConfig... after 2 ms
+> hvigor UP-TO-DATE :entry:default@ProcessResource...
+> hvigor UP-TO-DATE :entry:default@GenerateLoaderJson...
+> hvigor Finished :entry:default@CompileResource... after 314 ms
+> hvigor Finished :entry:default@BuildJS... after 2 ms
+> hvigor Finished :entry:default@BuildNativeWithNinja... after 156 ms
+> hvigor UP-TO-DATE :entry:default@ProcessLibs...
+> hvigor UP-TO-DATE :entry:default@DoNativeStrip...
+> hvigor UP-TO-DATE :entry:default@CacheNativeLibs...
+> hvigor Finished :entry:default@CompileArkTS... after 4 s 382 ms
+> hvigor Finished :entry:default@GeneratePkgModuleJson... after 2 ms
+> hvigor Finished :entry:default@ProcessCompiledResources... after 1 ms
+> hvigor Finished :entry:default@PackageHap... after 826 ms
+> hvigor Finished :entry:default@PackingCheck... after 13 ms
+> hvigor Finished :entry:default@SignHap... after 2 ms
+> hvigor Finished :entry:default@CollectDebugSymbol... after 1 ms
+> hvigor Finished :entry:assembleHap... after 1 ms
+> hvigor BUILD SUCCESSFUL in 8 s 842 ms
+
+33 tasks in total: 19 executed, 14 up-to-date
+
+> hvigor WARN: Warning: 'app_name' conflict, first declared.
+at <harmony-workspace>/repo/mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json
+but declared again.
+at <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/string.json
+
+> hvigor WARN: WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets:10:26
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets:79:29
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceText.ets:96:22
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:64:29
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:64:85
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:65:19
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:65:63
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:66:23
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:66:92
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:76:33
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:89:24
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:167:21
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:169:23
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:171:44
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:173:20
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:177:8
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:189:36
+ The system capacity of this api 'audio' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:190:26
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:190:52
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:192:25
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:193:38
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:193:79
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:9:71
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:14:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:19:26
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:28:10
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:29:6
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:35:53
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:35:88
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:40:32
+ The system capacity of this api 'createMd' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:40:32
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:43:30
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:45:16
+ The system capacity of this api 'update' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:45:16
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:47:38
+ The system capacity of this api 'digest' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:47:38
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:54:30
+ The system capacity of this api 'createMd' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:54:30
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:55:10
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:59:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:61:14
+ The system capacity of this api 'update' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:61:14
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:63:36
+ The system capacity of this api 'digest' is not supported on all devices
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:63:36
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:65:30
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:35:26
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:35:55
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:71:13
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:71:41
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:73:12
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:77:17
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:83:53
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:127:10
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:132:22
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:148:19
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:149:30
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:158:37
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:158:73
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:159:24
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:162:32
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:22:70
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:58:27
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:87:34
+ 'packing' has been deprecated.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:91:10
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:94:31
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:105:26
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:112:16
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:118:18
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:118:41
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:118:64
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:18:46
+ 'getContext' has been deprecated.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:59:12
+ This API is unavailable to phone.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:81:31
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:83:23
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:84:29
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:85:25
+ 'px2vp' has been deprecated.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:86:34
+ 'px2vp' has been deprecated.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:87:16
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:173:36
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:176:18
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:177:12
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:178:21
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:180:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:225:21
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:9:117
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <harmony-workspace>/repo/mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:68:39
+ Function may throw exceptions. Special handling is required.
+
+
+> hvigor WARN: No signingConfig found for product default
