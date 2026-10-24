@@ -283,7 +283,16 @@ jobs:
           TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
         run: >-
           go test -v -race -tags=integration -count=1 -timeout 90s
-          -run '^Test(ConnectorDisconnectFinalizationIsAtomicAndScoped|ComputerDeliveryPostgres.*)$' ./internal/db
+          -run '^Test(ConnectorDisconnectFinalizationIsAtomicAndScoped|ComputerDeliveryPostgres.*)$'
+          -skip '^TestComputerDeliveryPostgresAuthorizationCASAndPreservation$/^batch-process-recovery$' ./internal/db
+      # Keep the three-file subprocess recovery case in its own bounded process.
+      # The preceding selection excludes only this case, not any existing test.
+      - name: Verify CLI batch process interruption on real PostgreSQL routes
+        env:
+          TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: >-
+          go test -v -race -tags=integration -count=1 -timeout 90s
+          -run '^TestComputerDeliveryPostgresAuthorizationCASAndPreservation$/^batch-process-recovery$' ./internal/db
       - name: Verify scoped delegation and task observation on PostgreSQL
         env:
           TEST_POSTGRES_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
