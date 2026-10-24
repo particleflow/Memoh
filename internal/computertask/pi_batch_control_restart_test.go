@@ -8,9 +8,9 @@ import (
 	"github.com/felinics/memoh/internal/agenvo"
 )
 
-// This is a known-gap regression, not a recovery implementation. The standard
-// MCP/service/relay path is real; Herdr metadata and completed Pi files use the
-// existing synthetic transport. No vendor binary or Windows restart is claimed.
+// The standard MCP/service/relay path is real; Herdr metadata and completed
+// Pi files use a synthetic transport. The prior ed4a checkpoint records the
+// failing boundary. No vendor binary or Windows restart is claimed here.
 func TestBatchCompletedControlRestartRecoveryBoundary(t *testing.T) {
 	for _, stage := range []string{"receipt_not_collected", "receipt_only", "summary_ready", "all_cached"} {
 		t.Run(stage, func(t *testing.T) {
@@ -54,6 +54,10 @@ func TestBatchCompletedControlRestartRecoveryBoundary(t *testing.T) {
 			}
 			store.mu.Lock()
 			before, _ := json.Marshal(store.records[original.ID])
+			var beforeDetails Details
+			if err := json.Unmarshal(store.records[original.ID].Details, &beforeDetails); err != nil {
+				t.Fatal(err)
+			}
 			store.mu.Unlock()
 			filesBefore, _ := json.Marshal([]any{remote.progress, remote.receipt, remote.stdout, remote.stderr, remote.completion})
 			assetsBefore, _ := json.Marshal(assets.data)
@@ -62,36 +66,46 @@ func TestBatchCompletedControlRestartRecoveryBoundary(t *testing.T) {
 			// the terminal incarnation changes and its old scrollback is gone.
 			remote.changedPane, remote.hiddenFrame = true, true
 			remote.control, remote.pending = "", ""
+			reader := installRecoveryTransport(source, remote, original.ID)
 			restarted := NewSource(NewService(store, store, source.service.relay, assets, source.service.authorize))
 			resumed := standardClient(t, restarted, "pc-a", false)
-			uncollected := stage == "receipt_not_collected" || stage == "receipt_only"
-			got := parseResult(t, invoke(t, resumed, "computer_task_result", map[string]any{"operation_id": original.ID}, uncollected))
-			if uncollected {
-				if got.PiResult != nil {
-					t.Fatal("uncollected result was invented")
-				}
-				t.Log("KNOWN GAP: unchanged valid receipt/result files remain unreadable after control terminal replacement")
-			} else {
-				if got.ID != original.ID || got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" || len(remote.calls) != callsBefore {
-					t.Fatal("durable summary should survive without contacting the replacement terminal")
-				}
-				invoke(t, resumed, "computer_task_logs", map[string]any{"operation_id": original.ID}, stage != "all_cached")
-				if stage == "summary_ready" {
-					t.Log("KNOWN GAP: cached summary survives; uncollected diagnostics remain unavailable")
-				} else if len(remote.calls) != callsBefore {
+			got := parseResult(t, invoke(t, resumed, "computer_task_result", map[string]any{"operation_id": original.ID}, false))
+			if got.ID != original.ID || got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {
+				t.Fatal("same completed invocation was not recovered")
+			}
+			if (stage == "summary_ready" || stage == "all_cached") && len(remote.calls) != callsBefore {
+				t.Fatal("cached summary contacted Herdr")
+			}
+			logs := batchLogsUntilReady(t, resumed, original.ID)
+			if logs.StdoutHash != remote.receipt.Stdout.Hash || logs.StderrHash != remote.receipt.Stderr.Hash {
+				t.Fatal("diagnostics were not recovered to the original hashes")
+			}
+			if stage == "all_cached" {
+				if len(remote.calls) != callsBefore || reader.creates != 0 || remote.reads != readsBefore {
 					t.Fatal("already cached diagnostics contacted the restarted peer")
 				}
+			} else if reader.creates != 1 || remote.reads-readsBefore != reader.readerRuns {
+				t.Fatal("reader not created once or original replacement pane received input")
 			}
-			if remote.runs != 1 || remote.reads != readsBefore {
-				t.Fatal("recovery re-dispatched Pi or typed into a replacement terminal")
+			if remote.runs != 1 {
+				t.Fatal("recovery dispatched Pi again")
 			}
 			store.mu.Lock()
 			after, _ := json.Marshal(store.records[original.ID])
 			store.mu.Unlock()
 			filesAfter, _ := json.Marshal([]any{remote.progress, remote.receipt, remote.stdout, remote.stderr, remote.completion})
 			assetsAfter, _ := json.Marshal(assets.data)
-			if !bytes.Equal(before, after) || !bytes.Equal(filesBefore, filesAfter) || !bytes.Equal(assetsBefore, assetsAfter) {
-				t.Fatal("observation changed original identity, receipt, files, offsets or stored references")
+			if !bytes.Equal(filesBefore, filesAfter) {
+				t.Fatal("recovery changed original execution identity, receipt or source files")
+			}
+			if stage == "all_cached" && (!bytes.Equal(before, after) || !bytes.Equal(assetsBefore, assetsAfter)) {
+				t.Fatal("already cached results changed on reread")
+			}
+			_, saved := reader.record()
+			progress, _ := json.Marshal(saved.Batch.Progress)
+			originalProgress, _ := json.Marshal(beforeDetails.Batch.Progress)
+			if !bytes.Equal(progress, originalProgress) || saved.Batch.Receipt.Validate(saved.Batch.Progress) != nil {
+				t.Fatal("reader replaced original persisted execution identity")
 			}
 		})
 	}

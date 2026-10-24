@@ -28,11 +28,12 @@ type BatchTransfer struct {
 	ReadyHash string           `json:"ready_hash,omitempty"`
 }
 type BatchDetails struct {
-	Feedback *deliverymeta.Feedback `json:"delivery_feedback,omitempty"`
-	Progress agenvo.BatchProgress   `json:"progress"`
-	Receipt  *agenvo.BatchReceipt   `json:"receipt,omitempty"`
-	Files    []BatchTransfer        `json:"files,omitempty"`
-	Result   *agenvo.PiJSONResult   `json:"result,omitempty"`
+	RecoveryReader *agenvo.BatchRecoveryReader `json:"recovery_reader,omitempty"`
+	Feedback       *deliverymeta.Feedback      `json:"delivery_feedback,omitempty"`
+	Progress       agenvo.BatchProgress        `json:"progress"`
+	Receipt        *agenvo.BatchReceipt        `json:"receipt,omitempty"`
+	Files          []BatchTransfer             `json:"files,omitempty"`
+	Result         *agenvo.PiJSONResult        `json:"result,omitempty"`
 }
 
 // storeBatchBytes verifies content-addressed readiness before recording a ref.
@@ -119,8 +120,25 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 		r = next
 		return nil
 	}
+	collect := func(read func(*agenvo.BatchRecoveryReader) error) error {
+		return s.collectBatchRead(readCtx, scope(b, r.TargetID), batch, save, read)
+	}
+	readPage := func(file agenvo.BatchFile, offset int64) ([]byte, error) {
+		var raw []byte
+		err := collect(func(reader *agenvo.BatchRecoveryReader) error {
+			var err error
+			raw, err = s.relay.ReadBatchPageWithReader(readCtx, scope(b, r.TargetID), batch.Progress, reader, *batch.Receipt, file, offset)
+			return err
+		})
+		return raw, err
+	}
 	if batch.Receipt == nil {
-		receipt, err := s.relay.ObserveBatch(readCtx, scope(b, r.TargetID), batch.Progress)
+		var receipt *agenvo.BatchReceipt
+		err := collect(func(reader *agenvo.BatchRecoveryReader) error {
+			var err error
+			receipt, err = s.relay.ObserveBatchWithReader(readCtx, scope(b, r.TargetID), batch.Progress, reader)
+			return err
+		})
 		if err != nil {
 			if errors.Is(err, agenvo.ErrUnknown) {
 				return result(r, d), err
@@ -194,7 +212,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			// continuation is needed; failed reads only retry this immutable file.
 			var raw []byte
 			for int64(len(raw)) < meta.Size {
-				page, err := s.relay.ReadBatchPage(readCtx, scope(b, r.TargetID), batch.Progress, *batch.Receipt, *meta, int64(len(raw)))
+				page, err := readPage(*meta, int64(len(raw)))
 				if err != nil {
 					return result(r, d), err
 				}
@@ -240,7 +258,7 @@ func (s *Service) readBatch(ctx context.Context, b toolcontext.ComputerBinding, 
 			if readCtx.Err() != nil {
 				return result(r, d), nil
 			}
-			raw, err := s.relay.ReadBatchPage(readCtx, scope(b, r.TargetID), batch.Progress, *batch.Receipt, f.Meta, f.Offset)
+			raw, err := readPage(f.Meta, f.Offset)
 			if err != nil {
 				if errors.Is(err, agenvo.ErrUnknown) {
 					return result(r, d), err
