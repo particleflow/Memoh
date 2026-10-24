@@ -10,6 +10,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
@@ -18,7 +20,6 @@ import (
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/sessiontask"
 	"github.com/felinics/memoh/internal/toolcontext"
-	"github.com/labstack/echo/v4"
 )
 
 type observationReaderFunc func(context.Context, toolcontext.ComputerBinding, string) (computertask.Recovery, error)
