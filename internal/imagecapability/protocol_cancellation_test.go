@@ -37,7 +37,7 @@ func TestCancellationBeforeAndAfterDispatch(t *testing.T) {
 				cancel()
 			}
 			session := tools.SessionContext{BotID: "synthetic-bot", UserID: "synthetic-user", SessionID: "synthetic-session"}
-			result, err := p.execute(&toolexec.ToolExecContext{Context: ctx, ToolCallID: "synthetic-cancel"}, session, request{Prompt: "synthetic"}, nil, "")
+			result, err := p.execute(&toolexec.ToolExecContext{Context: ctx, ToolCallID: "synthetic-cancel"}, session, request{Prompt: "synthetic"}, nil)
 			if !errors.Is(ctx.Err(), context.Canceled) {
 				t.Fatal("test did not cancel the request context")
 			}

@@ -58,7 +58,7 @@ func fixture(t *testing.T, handler http.HandlerFunc) (*Provider, *httptest.Serve
 		return nil
 	}
 	p.resolve = func(context.Context, string) (selection, bool, error) {
-		return selection{config: Config{Protocol: "openai-images", ModelMode: "omit", Edits: true}, baseURL: server.URL + "/v1", model: "synthetic-selected-image-model", credentials: func(context.Context) (string, error) { return "", nil }}, true, nil
+		return selection{config: Config{Protocol: "openai-images", Edits: true}, baseURL: server.URL + "/v1", model: "synthetic-selected-image-model", credentials: func(context.Context) (string, error) { return "", nil }}, true, nil
 	}
 	return p, server
 }
@@ -88,11 +88,11 @@ func TestExplicitConfig(t *testing.T) {
 		enabled, invalid bool
 	}{
 		{"absent", `{}`, false, false},
-		{"omit", `{"protocol":"openai-images","model_mode":"omit"}`, true, false},
-		{"configured", `{"protocol":"openai-images","model_mode":"configured","edits":true}`, true, false},
+		{"omit", `{"protocol":"openai-images","model_mode":"omit"}`, true, true},
+		{"configured", `{"protocol":"openai-images","model_mode":"configured"}`, true, false},
 		{"null", `null`, true, true},
 		{"unknown_protocol", `{"protocol":"magpie","model_mode":"omit"}`, true, true},
-		{"missing_mode", `{"protocol":"openai-images"}`, true, true},
+		{"native_model", `{"protocol":"openai-images"}`, true, false},
 		{"unknown_field", `{"protocol":"openai-images","model_mode":"omit","url":"https://example.invalid"}`, true, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -110,7 +110,7 @@ func TestExplicitConfig(t *testing.T) {
 }
 
 func TestGenerateBytesAndAttachment(t *testing.T) {
-	for _, mode := range []string{"omit", "configured"} {
+	for _, mode := range []string{"synthetic-selected-image-model", "synthetic-other-image-model"} {
 		t.Run(mode, func(t *testing.T) {
 			original := pngBytes(t, 32)
 			var requests atomic.Int32
@@ -124,10 +124,10 @@ func TestGenerateBytesAndAttachment(t *testing.T) {
 					t.Error(err)
 				}
 				_, hasModel := body["model"]
-				if hasModel != (mode == "configured") || body["prompt"] != "synthetic" || body["n"] != float64(1) || body["response_format"] != "b64_json" {
+				if !hasModel || body["prompt"] != "synthetic" || body["n"] != float64(1) || body["response_format"] != "b64_json" {
 					t.Errorf("wire=%v", body)
 				}
-				if mode == "configured" && body["model"] != "synthetic-selected-image-model" {
+				if body["model"] != mode {
 					t.Error("configured model lost")
 				}
 				respondImage(w, original)
@@ -135,7 +135,7 @@ func TestGenerateBytesAndAttachment(t *testing.T) {
 			resolve := p.resolve
 			p.resolve = func(ctx context.Context, bot string) (selection, bool, error) {
 				s, b, e := resolve(ctx, bot)
-				s.config.ModelMode = mode
+				s.model = mode
 				return s, b, e
 			}
 			var emitted []tools.ToolStreamEvent
@@ -211,34 +211,21 @@ func TestNativeSupervisorAndSubagentImageChain(t *testing.T) {
 					respondImage(w, generated)
 				case "/v1/images/edits":
 					edits.Add(1)
-					if err := r.ParseMultipartForm(1 << 20); err != nil {
+					var body struct {
+						Model  string `json:"model"`
+						Prompt string `json:"prompt"`
+						N      int    `json:"n"`
+						Format string `json:"response_format"`
+						Images []struct {
+							URL string `json:"image_url"`
+						} `json:"images"`
+					}
+					if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 						t.Error(err)
 						return
 					}
-					defer func() {
-						if cleanupErr := r.MultipartForm.RemoveAll(); cleanupErr != nil {
-							t.Error(cleanupErr)
-						}
-					}()
-					f, header, err := r.FormFile("image")
-					if err != nil {
-						t.Error(err)
-						return
-					}
-					defer func() {
-						if cleanupErr := f.Close(); cleanupErr != nil {
-							t.Error(cleanupErr)
-						}
-					}()
-					input, _ := io.ReadAll(f)
-					if !bytes.Equal(input, generated) || header.Header.Get("Content-Type") != "image/png" {
-						t.Error("edit original was changed")
-					}
-					if _, present := r.MultipartForm.Value["model"]; present {
-						t.Error("omitted model sent in edit")
-					}
-					if r.FormValue("prompt") != "synthetic edit" || r.FormValue("response_format") != "b64_json" || r.FormValue("n") != "1" {
-						t.Error("wrong multipart contract")
+					if r.Header.Get("Content-Type") != "application/json" || body.Model != "synthetic-selected-image-model" || body.Prompt != "synthetic edit" || body.N != 1 || body.Format != "b64_json" || len(body.Images) != 1 || body.Images[0].URL != "data:image/png;base64,"+base64.StdEncoding.EncodeToString(generated) {
+						t.Error("SDK reference contract changed")
 					}
 					respondImage(w, edited)
 				default:
@@ -281,12 +268,15 @@ func TestNativeSupervisorAndSubagentImageChain(t *testing.T) {
 }
 
 func TestUnknownNeverAutomaticallyRetries(t *testing.T) {
-	for _, mode := range []string{"429", "500", "redirect", "disconnect", "invalid_base64", "url_only"} {
+	for _, mode := range []string{"201", "429", "500", "redirect", "disconnect", "invalid_base64", "url_only"} {
 		t.Run(mode, func(t *testing.T) {
 			var calls atomic.Int32
 			p, _ := fixture(t, func(w http.ResponseWriter, _ *http.Request) {
 				calls.Add(1)
 				switch mode {
+				case "201":
+					w.WriteHeader(http.StatusCreated)
+					respondImage(w, pngBytes(t, 4))
 				case "429":
 					w.WriteHeader(http.StatusTooManyRequests)
 				case "500":

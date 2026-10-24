@@ -1,181 +1,139 @@
-# Explicit Images capability through platform tools
+# Images SDK through the existing Bot image capability
 
-The platform can opt an existing image-model provider into an explicit Images
-REST contract without changing the native Agent, its chat model, or its runtime.
-The implementation is `internal/imagecapability`; the composition root wraps the
-existing image tool registration through the existing `ToolProvider` interface.
+The platform can explicitly select the Images protocol for an existing provider.
+The Bot still selects its model through the native `image_model_id` setting.
+`internal/imagecapability` implements the existing ToolProvider port; the
+composition root replaces the original image tool in its existing slot. The
+Agent runtime, SDK core, chat model and provider discovery are unchanged.
 
-## Configuration added by this change
+## Managed configuration
 
-The following **new** optional object uses the existing provider `config` map:
+The optional object below belongs to the existing provider `config` map, with
+its existing persistence and management authorization. It is an addition to the
+original Memoh baseline, not an upstream configuration capability.
 
 ```json
 {
   "images_api": {
     "protocol": "openai-images",
-    "model_mode": "omit",
-    "edits": false
+    "edits": true
   }
 }
 ```
 
-This is not a configuration supported by the previous fixed baseline. There is
-no new UI control in this change. Existing provider-management authorization and
-configuration persistence still apply. `base_url` and authentication come from
-that provider's managed configuration, never tool arguments. The base URL must
-include its API prefix, for example the public-format placeholder
-`https://provider.example.invalid/v1`; the adapter appends `/images/generations`
-or `/images/edits`. It does not inspect vendor/model names or guess endpoint
-capabilities from a hostname.
+`protocol` explicitly selects the OpenAI-compatible Images SDK. `edits` defaults
+to false and enables reference-image input only when the provider supports that
+operation. No separate service, model catalog, image editor or configuration
+store is introduced. There is no new UI control in this change.
 
-- `protocol` must be `openai-images`.
-- `model_mode` must explicitly be `configured` or `omit`. `configured` sends the
-  selected image model's provider model ID. `omit` sends no model member/field and
-  delegates model selection to the provider default. The returned receipt does
-  not prove which underlying model the provider selected.
-- `edits` defaults to false. Enable it only when the provider's editing protocol
-  is supported independently of generation. An advertised edit tool is checked
-  again at execution, so disabling edits rejects a stale call before HTTP.
-- `edit_encoding` is an optional addition after baseline `40f0a69`. It accepts
-  `multipart` (also the default when absent) or `json-images`. It affects edits
-  only; generation remains JSON. Select it through managed provider configuration,
-  not model tool arguments. Invalid values fail without a protocol fallback.
+The provider's existing managed `base_url` and credentials supply the endpoint
+and authentication. The URL includes its API prefix, for example
+`https://provider.example.invalid/v1`. The selected enabled model must have
+`image-output` compatibility and belong to an enabled API-key OpenAI-compatible
+provider. Its configured model ID is always used. No vendor, model, private
+address, filesystem path or device is selected by a literal in product code.
+Tool arguments cannot override endpoint, credentials, model, identity or protocol.
 
-`model_mode=omit` is a host policy, not an instruction to send a
-`service_default` wire field. This adapter does not send that field. A service's
-host-side default-model switch and its HTTP request fields must be distinguished
-when checking compatibility; omission alone does not prove another service's
-complete request contract.
+With no `images_api`, the original tool schema and behavior are retained; there
+is only one `generate_image`. Until explicit selection is known, legacy discovery
+still exposes a configured image ID even if model/provider lookup fails. Those
+lookup errors remain execution errors. Known invalid explicit configuration never
+falls back to a potentially billable chat request. Legacy tools recheck selection
+at execution so a recovered lookup cannot accidentally enter the old route.
 
-`image_model_id`, enabled model/provider checks and image-output compatibility
-remain required, including when the wire omits model. Only API-key
-OpenAI-compatible client types are accepted; this adapter does not introduce an
-OAuth flow. Invalid explicit configuration does not fall back to chat. With no
-`images_api`, the original tool/schema/behavior is used unchanged. Registration
-is a wrapper at the existing slot, not a second same-named tool.
+### Existing configuration compatibility
 
-Before explicit selection can be established, discovery retains the legacy
-contract: a configured image ID exposes the legacy tool even when model/provider
-lookup fails, and settings lookup failure keeps the legacy empty tool list.
-Lookup failures are reported at execution. Legacy invocations recheck protocol
-selection before execution; a recovered or changed explicit selection requires
-fresh tool discovery instead of entering the legacy route. Known invalid
-explicit configuration is rejected without legacy fallback.
+The pinned Twilight SDK serializes a model field. It cannot express the earlier
+adapter's omitted-model policy without rewriting the SDK's request. This adapter
+therefore does not silently turn omission into an empty or explicit model:
 
-## Tool and attachment contracts
+- Existing `model_mode: configured` generation configuration remains accepted.
+- Existing `model_mode: configured`, `edits: true`,
+  `edit_encoding: json-images` configuration remains accepted with identical
+  JSON request semantics.
+- `model_mode: omit`, explicit `edit_encoding: multipart`, and the old implicit
+  multipart combination (`model_mode: configured`, `edits: true`, no encoding)
+  fail during configuration resolution before any image HTTP request. Their
+  persisted configuration is left intact. An administrator must verify the
+  native image-model binding and JSON support before removing the obsolete
+  policy fields. There is no automatic rewrite, fallback or regeneration.
+- Invalid or null legacy policy values also fail closed.
 
-`generate_image` accepts `prompt` and optional `size`. It makes one JSON POST
-with `prompt`, `n: 1`, `response_format: b64_json`, optional `size`, and model only
-under the configured policy.
+New configurations need only the protocol and optional reference-input switch;
+there is no extra model-selection workflow. `service_default` is not a wire field.
+Supporting omitted models again would require an explicit SDK capability decision,
+not a hidden transport rewrite.
 
-When enabled, `edit_image` accepts `prompt`, one to four `images` content hashes,
-an optional `mask` content hash and optional `size`. The provider's encoding selects
-one POST contract, with the same prompt/n/response-format/model-policy fields:
+## SDK and attachment contracts
 
-- `multipart`: `image` for one input, repeated `image[]` for multiple inputs,
-  optional `mask`. Existing configurations retain this behavior.
-- `json-images`: a JSON `images` array whose entries contain `image_url` data URIs.
-  Each URI uses the verified original bytes and detected MIME type of the existing
-  authorized attachment. No remote image URL is fetched. Masks are rejected before
-  opening inputs, resolving credentials or sending HTTP, because this dialect's
-  mask structure has not been established. Generation is not used as a fallback.
+The already pinned Twilight commit is
+`f6d0ce1a0e8cfa0fca105b11ba90c705f7dd2396`. Its OpenAI Images provider owns request
+encoding and response parsing via `sdk.GenerateImage` and `sdk.EditImage`.
+`generate_image` accepts `prompt` and optional `size`. It requests one image with
+`response_format: b64_json` and the configured model. When enabled, `edit_image`
+accepts the same text/size plus one to four existing `images` content hashes.
+The host supplies authorized original bytes as data URIs through `sdk.ImageInput.URL`;
+the SDK sends JSON `images[].image_url` to `/images/edits`. No mask or alternative
+encoding strategy is exposed. This is reference-image input, not a manual editor.
 
-For example, an explicitly supported JSON-edit provider can add
-`"edits": true, "edit_encoding": "json-images"` inside `images_api`. No real
-provider editing request has been validated by these synthetic tests.
+Current Bot chat permission, persisted session ownership and delegation authority
+are checked before effects and before each `media.Open`. A hash alone does not
+grant access. Original bytes remain in the Bot's existing media scope and their
+hash is checked before transmission. Foreign/missing references, disabled edits
+and unsupported tool fields are rejected before dispatch. There is no new
+cross-Bot alias, task-specific artifact ledger, raw path or remote-image fetch.
 
-Both tools reject unknown fields, including endpoint, key, model, Bot and session
-overrides. Host admission supplies the Bot/user/session identity. The platform
-rechecks current Bot chat permission, the persisted session-to-Bot binding and
-delegation authority before effects, including before `media.Open`. A known hash
-is not an authorization grant. Reads stay in that Bot's existing media scope and
-are hash checked before transmission. This change adds no cross-Bot hash alias;
-existing delegation-scoped attachment authorization remains a separate mechanism.
-Authorization is Bot/conversation scoped; this adapter does not introduce a
-same-task `request_id`/`artifact_id` ownership ledger or translate such external
-identifiers into local authorization grants.
+The adapter accepts a single base64 byte result, checks size and MIME magic, and
+passes unchanged bytes to the existing `media.Ingest`. It does not fully decode
+the image format or establish structural integrity. Existing storage, content
+hashes and attachment events are reused. The pre-existing 50 MiB input/output
+and combined-input guards remain resource bounds for an individual request,
+not a task-count quota. PNG, JPEG, WebP and GIF are recognized without transcoding.
 
-The adapter requests base64 bytes and never follows an output URL. It base64
-decodes once, checks size and MIME magic bytes, and passes original bytes to
-`media.Ingest`. It does not fully decode the image format or validate structural
-integrity; MIME recognition alone does not establish a complete valid image.
-Existing configured storage, content-addressed naming and attachment events are
-reused. No additional file repository, SQL registration table or workspace path
-is introduced. Input and output byte limits are 50 MiB; combined edit inputs
-including a mask are also bounded by that limit. PNG, JPEG, WebP and GIF content
-types are recognized; bytes are not transcoded.
+A persisted result carries `state: completed`, `content_hash`, `media_type`,
+`size_bytes` and the existing `tool_call_id`. Only the established live-conversation
+shortcut emits an attachment; internal subagents report references and the
+supervisor can call the ordinary `send` tool. Gateway model labels are ignored
+and do not prove the actual underlying model/version.
 
-A confirmed persisted result includes `state: completed`, `content_hash`,
-`media_type`, `size_bytes`, and the existing `tool_call_id`. Only the established
-live-conversation shortcut emits an attachment: it requires the existing
-platform/reply-target/session rules. Internal subagents receive a file reference
-without automatically sending to the parent conversation.
+## HTTP and uncertainty boundaries
 
-## Uncertainty and correlation
+The SDK uses the existing provider HTTP client and timeout. A small transport
+boundary preserves the previous safety behavior: one request, no redirects,
+no replay body, strict HTTP 200 and bounded response reads (including unknown
+content lengths). It contains no request/response JSON or multipart encoder.
+Non-200 bodies are not read; private provider responses never enter tool errors
+or adapter logs. No retry loop or upstream idempotency claim is added.
 
-HTTP redirects, automatic retries and chat fallback are disabled for an explicit
-Images invocation. The request has no replay body or asserted upstream
-idempotency key. A timeout, disconnect, non-200 response, invalid/oversized result
-or unsupported URL-only response returns `state: unknown`, `retryable: false`,
-and no ready content hash. The upstream may already have generated/billed an
-image. Persistence failure returns `state: generated` and
-`storage_state: unconfirmed`, also without a ready reference. These are normal
-structured tool receipts so the model can see uncertainty; they are **not
-successful generation/delivery confirmations**. They instruct the caller not
-to regenerate automatically. Provider error bodies, private URLs, keys and raw
-image bytes are not included in failure receipts or adapter logs.
+Timeout, disconnect, non-200, malformed/oversized output or URL-only output
+returns `state: unknown`, `retryable: false`, without a completed hash. The
+upstream may already have generated/billed an image. Authorization or persistence
+failure after returned bytes yields `state: generated`,
+`storage_state: unconfirmed`. These are normal structured receipts to avoid
+error-triggered retries, not successful delivery confirmations. Never regenerate
+automatically to recover file delivery.
 
-The native tool result/step flow already carries ToolCallID. Returning that same
-ID supports association with the existing call record; it does not establish
-provider receipt, actual underlying model identity or durable deduplication.
-There is no new job/queue/ledger. The guarantee is **no automatic retry within
-one invocation**. A new tool call or process restart is not deduplicated by this
-adapter. Resolve unknown outcomes through operator/upstream verification before
-deciding whether a new request is appropriate.
-
-Committed results use the existing native step/message persistence, not a new
-image receipt service. A caller can reuse a completed `content_hash` through the
-existing authorized attachment flow without generating again. The adapter does
-not persist the raw upstream response or reconcile a crash between upstream
-generation, media ingestion and step commit. In particular, an absent completed
-receipt is not evidence that the provider did no work. Gateway response model
-labels are ignored and are not claims about the underlying model version.
+ToolCallID provides correlation only. There is no durable cross-call or
+cross-process deduplication, raw-response ledger, queue or image job service.
+Completed hashes can be reused through existing authorized delivery. A missing
+receipt does not prove no upstream work happened; unknown outcomes require
+operator/upstream verification before deciding on a new request.
 
 ## Verification scope
 
-Tests use synthetic provider HTTP endpoints and synthetic PNGs in temporary
-roots of the existing media storage. Both supervisor and internal-subagent
-RunConfig modes execute through unmodified `native.Agent.Generate`, real tool
-assembly, SDK chat transport and tool execution. Fixtures explicitly declare
-the synthetic model's existing SupportsToolCall capability; live attachment
-fixtures supply ReplyTarget. No shortcut, runtime or authorization code is
-changed to accommodate tests.
+Synthetic HTTP tests assert the SDK's exact configured-model JSON for generation
+and one/multiple reference images, original-byte/hash persistence, rejected mask
+and policy overrides, unchanged legacy schema/behavior, disabled editing,
+revocation, foreign/missing references, HTTP limits/timeouts and one-POST unknown
+outcomes. Configuration regressions cover retained and rejected legacy policies.
 
-A separate composition-root test invokes the actual `spawn_agent` tool from
-the supervisor loop. Production Thread creation, application admission, native
-SpawnAdapter, step-commit factory and image DI authorizer run against synthetic
-storage/query ports and the existing in-memory ledger fixture. The child reports
-the persisted hash and the supervisor explicitly calls the ordinary `send`
-tool; the synthetic sender reads identical original bytes. This covers actual
-internal spawn, current permission revocation before opening an existing image,
-foreign/missing references and an unknown result with one image POST and no
-attachment delivery. It is not a PostgreSQL durability or external channel test.
+Native-loop tests use the unmodified runtime and SDK chat transport. The separate
+composition-root test exercises actual `spawn_agent` admission, child session,
+production DI authorizer, child image tool, hash report and supervisor `send`.
+It covers generation and reference input plus denial/unknown cases. Its query
+ports and storage ledger are synthetic; it is not a PostgreSQL durability claim.
 
-The suite covers omitted/configured model fields, generation and independent
-multipart editing, original-byte/hash round trips, tool visibility, legacy
-fallback/schema uniqueness, managed endpoint/auth selection, disabled editing,
-foreign/malformed references, revoked authority before storage, private error
-suppression, unknown response/timeout handling and persistence failure.
-
-The JSON-edit increment adds focused synthetic HTTP/tool/media tests for explicit
-encoding selection, unchanged default multipart and generation wire contracts,
-single/multiple JSON inputs, omitted/configured model policy, exact original-byte
-storage, ignored gateway model labels, pre-dispatch mask/foreign-reference/access
-rejection, rejected tool-side policy overrides, and one-POST unknown outcomes.
-It does not repeat the prior native-loop, actual-spawn or cross-Bot acceptance
-tests, and does not claim those historical results were run on this increment.
-
-This is synthetic contract/integration evidence, not real paid-provider,
-production chat, Web UI, NAS, PC or deployment acceptance.
-No live provider configuration is written. The task explicitly excludes service
-trials and broad UI/install/migration changes.
+These tests do not establish real Magpie/paid-model compatibility, NAS/PC/mobile
+acceptance, production configuration or deployment. Runtime/UI and CI evidence
+for each fixed revision belong in its validation record; earlier results must
+not be relabeled as checks of this SDK increment.
