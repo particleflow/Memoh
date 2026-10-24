@@ -47,7 +47,7 @@ Browser screenshots (agent automation, not human QA):
 - [Unknown instruction](native-content-unknown.png): pending UUID and disabled resubmission.
 - [Narrow shared view](native-content-narrow.png): escaped bounded sample and retained unknown request; not a phone binary test.
 
-`evidence.json` lists the published unmodified log/image hashes. Private configs, tokens, full server logs and DB dumps are not published. These logs describe local checks, not GitHub CI; the parent follows exact-head CI through its authorized GitHub connection. This task's previously failed `gh` API authentication was not retried or replaced.
+`evidence.json` lists published hashes and any whitespace-only log normalization; original local hashes are retained for those files. Private configs, tokens, full server logs and DB dumps are not published. These logs describe local checks, not GitHub CI; the parent follows exact-head CI through its authorized GitHub connection. This task's previously failed `gh` API authentication was not retried or replaced.
 
 ### Commands
 

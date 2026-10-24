@@ -8,31 +8,39 @@
   },
   {
     "file": "ui-confirm-final.txt",
-    "bytes": 331,
-    "sha256": "b65f527a48381df8589ddb2c4a9ab614f4fe2a3394d3acb6b9409002fdd7edfd",
-    "processing": "none",
-    "local_source": "ui-confirm-final.log"
+    "bytes": 330,
+    "sha256": "01b4531ea515735fe8ee31ac402b60ee4feb89e8de5be3b5375e287d0c7246a1",
+    "processing": "trailing whitespace and blank EOF lines normalized; content unchanged",
+    "local_source": "ui-confirm-final.log",
+    "local_source_sha256": "b65f527a48381df8589ddb2c4a9ab614f4fe2a3394d3acb6b9409002fdd7edfd",
+    "local_source_bytes": 331
   },
   {
     "file": "ui-layout-final.txt",
-    "bytes": 321,
-    "sha256": "8db86ccc3b5f81a815484e2299098021b677df2034c7a61a6f3fcac4d7caeba8",
-    "processing": "none",
-    "local_source": "ui-layout-final.log"
+    "bytes": 320,
+    "sha256": "b5db1834df21a8b2aa741b4338639182e21a5b785f641273dc45fb8e230314fd",
+    "processing": "trailing whitespace and blank EOF lines normalized; content unchanged",
+    "local_source": "ui-layout-final.log",
+    "local_source_sha256": "8db86ccc3b5f81a815484e2299098021b677df2034c7a61a6f3fcac4d7caeba8",
+    "local_source_bytes": 321
   },
   {
     "file": "typecheck-web-final.txt",
-    "bytes": 116,
-    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
-    "processing": "none",
-    "local_source": "typecheck-web-final.log"
+    "bytes": 115,
+    "sha256": "d7bb68855b8c6825aa409b3a76954d32f634fc10ef28762827a3c7fe9707dfb2",
+    "processing": "trailing whitespace and blank EOF lines normalized; content unchanged",
+    "local_source": "typecheck-web-final.log",
+    "local_source_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "local_source_bytes": 116
   },
   {
     "file": "typecheck-sdk-final.txt",
-    "bytes": 112,
-    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
-    "processing": "none",
-    "local_source": "typecheck-sdk-final.log"
+    "bytes": 111,
+    "sha256": "7e15b1e8626b11308ed8c51337a9fb829398f56a9012cd6051d14c1519cf3888",
+    "processing": "trailing whitespace and blank EOF lines normalized; content unchanged",
+    "local_source": "typecheck-sdk-final.log",
+    "local_source_sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "local_source_bytes": 112
   },
   {
     "file": "lint-final.txt",
@@ -108,9 +116,11 @@
   },
   {
     "file": "build-web-final.txt",
-    "bytes": 76262,
-    "sha256": "8a27bd518e1e240ab8132aa77f68b15bcd520321260e5b52cc25d2fe6c6e5e91",
-    "processing": "none",
-    "local_source": "build-web-final.log"
+    "bytes": 76261,
+    "sha256": "fe1d8193b81dbe1edfbeb391177d6e8eab2dc3eab20c602df3d460158ae6822c",
+    "processing": "trailing whitespace and blank EOF lines normalized; content unchanged",
+    "local_source": "build-web-final.log",
+    "local_source_sha256": "8a27bd518e1e240ab8132aa77f68b15bcd520321260e5b52cc25d2fe6c6e5e91",
+    "local_source_bytes": 76262
   }
 ]
