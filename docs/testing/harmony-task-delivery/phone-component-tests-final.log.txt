@@ -1,0 +1,27 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 <cloud-workspace>/client-observation-validation
+
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > passes a credential-free delegation scope into the asset dock 100ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.txt and preserves size and explicit download 9ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.csv and preserves size and explicit download 13ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size undefined 12ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size -1 6ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size NaN 4ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size Infinity 3ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > still counts known small text files 7ms
+ ✓ |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > skips background task system turns when collecting media 16ms
+ ✓ |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > uses the SDK base URL for stored media assets 2ms
+ ✓ |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > preserves the typed attachment identity and stored hash over a direct URL 1ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > shared task files in web host > uses the same scoped reader and shared body, without requiring a DialogRoot 272ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > shared task files in native host > uses the same scoped reader and shared body, without requiring a DialogRoot 16ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > uses the reader Bot and native preview/download, hides pending refs and clears on denial 33ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > reuses the media lightbox inside the host, then retires it on a scope change 58ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > uses the reader Bot and native preview/download, hides pending refs and clears on denial 22ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > reuses the media lightbox inside the host, then retires it on a scope change 46ms
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  16:31:33
+   Duration  13.37s (transform 17.04s, setup 0ms, import 24.08s, tests 625ms, environment 3.35s)
+

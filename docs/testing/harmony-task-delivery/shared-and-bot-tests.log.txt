@@ -1,0 +1,261 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 <cloud-workspace>/client-observation-validation
+
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > does not navigate after the ready redirect delay when deactivated 238ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > keeps the terminal intact until navigation commits, then resets 24ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > shows only the terminal while installing, then opens the Bot automatically 24ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > advances the dedicated onboarding progress step only after setup is ready 35ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > keeps installation failures on the progress page with a retry and a way out 10ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > offers a workspace retry and leaves the failed Bot behind on continue later 20ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > lets onboarding continue past a failed workspace with the created Bot 6ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > opens the Bot that already owns a taken name instead of stopping at the error 5ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > hides the retry when a resumed Bot turned out to be gone 5ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > resumes the persisted Bot after a refresh instead of returning to the form 28ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > shows the failed workspace after an onboarding refresh without creating again 25ms
+ ✓ |web| src/pages/bots/new-progress.test.ts > bot create progress route > redirects back to the create form when reactivated without an in-memory stream 5ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > makes no hidden requests, polls visible GETs and aborts when closed 14ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > coalesces repeated opens and reload clicks while one read is pending 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > preserves an opaque cursor on an empty filtered page and resets to newest 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > rejects old detail and list responses after bot changes 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > rejects old detail and list responses after session changes 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > rejects old detail and list responses after identity changes 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > rejects old detail and list responses after selection changes 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A bot round trip > ignores old list success responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A bot round trip > ignores old list denial responses from both visits 3ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A bot round trip > ignores old detail success responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A bot round trip > ignores old detail denial responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A session round trip > ignores old list success responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A session round trip > ignores old list denial responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A session round trip > ignores old detail success responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A session round trip > ignores old detail denial responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A identity round trip > ignores old list success responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A identity round trip > ignores old list denial responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A identity round trip > ignores old detail success responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A identity round trip > ignores old detail denial responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A selection round trip > ignores old list success responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A selection round trip > ignores old list denial responses from both visits 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A selection round trip > ignores old detail success responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > A → B → A selection round trip > ignores old detail denial responses after reopening the same A task 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > clears denied content and pauses automatic reads for 'http.unauthorized' 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > clears denied content and pauses automatic reads for 'http.forbidden' 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > clears denied content and pauses automatic reads for 'session.not_found' 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > clears denied content and pauses automatic reads for 'http.not_found' 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > clears a stale success on a network failure and can read again without mutation 1ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > bounds a hung read to 15 seconds 2ms
+ ✓ |web| src/pages/home/composables/useBotDelegations.test.ts > authorized Bot handoff observation > distinguishes unsupported route from a concealed authorization denial 1ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > hides the reasoning footer for supported but uncontrollable models 230ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > offers the catalog maximum and shows the default for an unset preference 22ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > dismisses an open model description when the list scrolls 8ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > passes the configured description to the tooltip 4ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > does not fall back to the label when a model has no description 4ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > renders and emits agent-provided reasoning options without guessing fixed levels 7ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > omits the reasoning footer unless the consumer opts in 4ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > keeps the model list keyboard-navigable 7ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > commits a model selection through the v-model contract 3ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > notifies the host when reselecting the current model by click 4ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > notifies the host when reselecting the current model by keyboard 3ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > shows search starting at 20 available models (19) 11ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > shows search starting at 20 available models (20) 4ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > does not count other model types or the default row toward the search threshold 2ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > keeps search mounted when filtering a large catalog down to one model 4ms
+ ✓ |web| src/pages/bots/components/model-options.test.ts > ModelOptions > can select the default row with the keyboard when search is hidden 3ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > loads fresh detail and erases summary after denial without fallback 10ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > ignores a late authorized response after scope changes or close 3ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > keeps an empty scan page continuation and sends it unchanged 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > pauses reads and discards a late success before resuming the selected detail 2ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > pauses reads and discards a late rejection before resuming the selected detail 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > keeps the current page during a pause but erases navigation on a scope change 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > identity changes > rejects a late list success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > identity changes > rejects a late detail success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > identity changes > ignores a late list rejection after a fresh authorized result 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > identity changes > ignores a late detail rejection after a fresh authorized result 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > bot changes > rejects a late list success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > bot changes > rejects a late detail success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > bot changes > ignores a late list rejection after a fresh authorized result 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > bot changes > ignores a late detail rejection after a fresh authorized result 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > session changes > rejects a late list success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > session changes > rejects a late detail success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > session changes > ignores a late list rejection after a fresh authorized result 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > session changes > ignores a late detail rejection after a fresh authorized result 0ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > selection changes > rejects a late list success without replacing the new scope 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > selection changes > rejects a late detail success without replacing the new scope 0ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > selection changes > ignores a late list rejection after a fresh authorized result 0ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > selection changes > ignores a late detail rejection after a fresh authorized result 0ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > pauses automatic reads after 401 until explicit reload 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > pauses automatic reads after 403 until explicit reload 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > pauses automatic reads after 404 until explicit reload 1ms
+ ✓ |web| src/pages/home/composables/useSessionTasks.test.ts > authorization-scoped task view > clears on every failed refresh and refreshes only while visible 1ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > offers delivery retry only to a capable host and respects its pending state 88ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > keeps a terminal task with uncertain delivery read-only when its host has no action capability 11ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > hides delivery retry for execution accepted even with an action capability 6ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > hides delivery retry for execution running even with an action capability 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > hides delivery retry for execution unknown even with an action capability 4ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > localizes a 401 action error without rendering private diagnostics 8ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > localizes a 403 action error without rendering private diagnostics 6ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > localizes a 404 action error without rendering private diagnostics 6ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > never turns an accepted delivery response into confirmation that the supervisor processed it 8ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > renders only plain final text, keeps execution and delivery separate, and exposes no attachment fallback 4ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote accepted or stale summary fields to a completed result 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote running or stale summary fields to a completed result 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote unknown or stale summary fields to a completed result 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not promote failed or stale summary fields to a completed result 2ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > distinguishes a successful empty list from unsupported and inaccessible APIs 13ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > keeps empty filtered pages pageable 4ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'http.unauthorized' without exposing server text 4ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'http.forbidden' without exposing server text 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'workspace.unreachable' without exposing server text 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > uses localized protocol diagnostics for 'http.internal_server_error' without exposing server text 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > specialist handoff content and states > does not describe a network failure as an empty queue or unsupported API 3ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > shared body in a web dialog host > mounts the same reader/body with host-owned accessible title and description 231ms
+ ✓ |web| src/pages/home/components/bot-delegation-tasks.test.ts > shared body in a native dialog host > mounts the same reader/body with host-owned accessible title and description 13ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > shared task files in web host > uses the same scoped reader and shared body, without requiring a DialogRoot 378ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > shared task files in native host > uses the same scoped reader and shared body, without requiring a DialogRoot 35ms
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > uses the reader Bot and native preview/download, hides pending refs and clears on denial 39ms
+ × |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > reuses the media lightbox inside the host, then retires it on a scope change 19ms
+   → Cannot read properties of null (reading 'closest')
+ ✓ |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > uses the reader Bot and native preview/download, hides pending refs and clears on denial 45ms
+ × |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > reuses the media lightbox inside the host, then retires it on a scope change 14ms
+   → Cannot read properties of null (reading 'closest')
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > shows all recorded files automatically, with pending and failed separate from task completion 524ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps task summary but distinguishes file observation failure: 'http.not_found' 208ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps task summary but distinguishes file observation failure: 'session.not_found' 131ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps task summary but distinguishes file observation failure: 'http.forbidden' 99ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > automatically drains pages serially, strips uncommitted references and does not complete a task 19ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > keeps the completed view during page refreshes, then replaces it atomically 2ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > reads from the start on the next poll for updated entries and late inserts 2ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > clears a partial read on network failure, recovers without a dispatch or user page action 2ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > stops polling after 401 and allows explicit reload 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > stops polling after 403 and allows explicit reload 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > stops polling after 404 and allows explicit reload 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > discards a late resolve across A→B→A, including the same operation ID 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > discards a late reject across A→B→A, including the same operation ID 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > retires in-flight reads when bot changes 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > retires in-flight reads when session changes 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > retires in-flight reads when selection changes 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > retires in-flight reads when identity changes 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > does not read subagents, hidden/denied parents, or after disposal 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > fails closed on invalid page/reference, without looping 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > fails closed on invalid page/reference, without looping 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > fails closed on invalid page/reference, without looping 1ms
+ ✓ |web| src/pages/home/composables/useComputerTaskDeliveries.test.ts > computer delivery metadata observation > fails closed on invalid page/reference, without looping 0ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch 197ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'This server does not support task obs…' 110ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'This conversation or task is no longe…' 127ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'You do not have permission to perform…' 118ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'Sign in to continue.' 108ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'The workspace could not be reached.' 112ms
+ ✓ |web| src/pages/bots/components/settings-interaction-card.test.ts > settings interaction default Agent selector > selects a Bot Agent row and initializes its project defaults 424ms
+ ✓ |web| src/pages/bots/components/settings-interaction-card.test.ts > settings interaction default Agent selector > switches back to Memoh and clears the default Bot Agent binding 13ms
+ ✓ |web| src/pages/bots/components/settings-interaction-card.test.ts > settings interaction default Agent selector > shows a recoverable warning when the saved Bot Agent is unavailable 9ms
+ ✓ |web| src/pages/bots/components/settings-interaction-card.test.ts > settings interaction default Agent selector > hides Agents whose provider setup is incomplete 8ms
+ ✓ |web| src/pages/bots/components/settings-interaction-card.test.ts > settings interaction default Agent selector > judges two Agents of the same provider by their own setup 9ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'Network connection failed. Check your…' 103ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > does not invent a specialist session for an accepted handoff without one 120ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch 107ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch 110ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch 106ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch 119ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-denied 89ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-unauthorized 89ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-forbidden 99ms
+ ✓ |web| src/pages/bots/new.test.ts > bot create page > clears submit loading after handing container creation to the progress route 495ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-changed 83ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after logout 106ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after scope-changed 90ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > wires the shared retry action through the existing SDK and never reports supervisor completion 69ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > opens the specialist group without polling the hidden execution group 74ms
+stdout | src/pages/bots/index.test.ts > Bot list query state > keeps a 401 failure separate from an empty list and retries only on request
+[dev] __previewBots(n): preview the bots grid at n tiles · __previewBots() to restore
+
+stdout | src/pages/bots/index.test.ts > Bot list query state > keeps a 403 failure separate from an empty list and retries only on request
+[dev] __previewBots(n): preview the bots grid at n tiles · __previewBots() to restore
+
+ ✓ |web| src/pages/bots/index.test.ts > Bot list query state > keeps a 401 failure separate from an empty list and retries only on request 76ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps delegation page two and execution task cursors separate across tab round trips 176ms
+stdout | src/pages/bots/index.test.ts > Bot list query state > keeps a network failure separate from an empty list and retries only on request
+[dev] __previewBots(n): preview the bots grid at n tiles · __previewBots() to restore
+
+stdout | src/pages/bots/index.test.ts > Bot list query state > keeps cached Bots visible with a safe error when a background refresh fails
+[dev] __previewBots(n): preview the bots grid at n tiles · __previewBots() to restore
+
+stdout | src/pages/bots/index.test.ts > Bot list query state > shows the skeleton while the first request is pending, then the create entry
+[dev] __previewBots(n): preview the bots grid at n tiles · __previewBots() to restore
+
+ ✓ |web| src/pages/bots/index.test.ts > Bot list query state > keeps a 403 failure separate from an empty list and retries only on request 50ms
+ ✓ |web| src/pages/bots/index.test.ts > Bot list query state > keeps a network failure separate from an empty list and retries only on request 48ms
+ ✓ |web| src/pages/bots/index.test.ts > Bot list query state > keeps cached Bots visible with a safe error when a background refresh fails 26ms
+stdout | src/pages/bots/index.test.ts > Bot list query state > keeps real bots and every requested development preview without undefined entries
+[dev] __previewBots(n): preview the bots grid at n tiles · __previewBots() to restore
+
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps the Web shell description and restores trigger focus on Escape 111ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes specialist detail and ignores its late reply after same-tab logout 67ms
+ ✓ |web| src/pages/bots/index.test.ts > Bot list query state > shows the skeleton while the first request is pending, then the create entry 28ms
+ ✓ |web| src/pages/bots/index.test.ts > Bot list query state > keeps real bots and every requested development preview without undefined entries 23ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > projects the child own completed run, then removes its output when the next run is pending 48ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > renders HTML, Markdown and URLs literally without active elements 79ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > invalidates pending detail when another tab replaces the identity token 75ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on login before any token update or parent unmount 55ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on logout before any token update or parent unmount 79ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on unauthorized before any token update or parent unmount 75ms
+ ✓ |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on token-cleared before any token update or parent unmount 58ms
+ ✓ |web| src/pages/bots/components/compaction-models.test.ts > filterCompactionModels > offers only models the resolver can accept 2ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > passes a credential-free delegation scope into the asset dock 28ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.txt and preserves size and explicit download 7ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.csv and preserves size and explicit download 4ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size undefined 2ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size -1 2ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size NaN 2ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch an attachment with unknown or invalid size Infinity 2ms
+ ✓ |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > still counts known small text files 5ms
+ × |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > skips background task system turns when collecting media 21ms
+   → expected [ { …(4) } ] to deeply equal [ { …(3) } ]
+ ✓ |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > uses the SDK base URL for stored media assets 2ms
+ ✓ |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > preserves the typed attachment identity and stored hash over a direct URL 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > reuses the media lightbox inside the host, then retires it on a scope change
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > reuses the media lightbox inside the host, then retires it on a scope change
+TypeError: Cannot read properties of null (reading 'closest')
+ ❯ src/pages/home/components/session-task-results.test.ts:117:30
+    115|     app.use(createI18n({ legacy: false, locale: 'en', messages: { en }…
+    116|     await nextTick()
+    117|     root.querySelector('img')!.closest('button')!.click(); await nextT…
+       |                              ^
+    118|     expect(root.querySelector('[data-keyboard-scope="mediaLightbox"] i…
+    119|     deliveries.value = { ...deliveries.value, files: [...deliveries.va…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > skips background task system turns when collecting media
+AssertionError: expected [ { …(4) } ] to deeply equal [ { …(3) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "name": undefined,
++     "original": [Function anonymous],
+      "src": "https://example.com/image.png",
+      "type": "image",
+    },
+  ]
+
+ ❯ src/pages/home/composables/useMediaGallery.test.ts:70:33
+     68|
+     69|     expect(() => gallery.items.value).not.toThrow()
+     70|     expect(gallery.items.value).toEqual([
+       |                                 ^
+     71|       {
+     72|         src: 'https://example.com/image.png',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  2 failed | 12 passed (14)
+      Tests  3 failed | 186 passed (189)
+   Start at  16:21:53
+   Duration  20.93s (transform 27.64s, setup 0ms, import 39.36s, tests 7.08s, environment 8.03s)
+

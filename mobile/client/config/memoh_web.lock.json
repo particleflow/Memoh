@@ -1,9 +1,9 @@
 {
-  "version": "unified-40f0a69",
-  "commit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
-  "archive": "tests/.isolated/memoh-40f0a69-complete.tar.gz",
-  "archiveSHA256": "75fe83655dfed0aecb43cb64d3ea9edec8fd206c46a5f0165ef35719678c62f2",
-  "archivePrefix": "Memoh-40f0a69/",
+  "version": "unified-91af53f",
+  "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
+  "archive": "tests/.isolated/memoh-91af53f-complete.tar.gz",
+  "archiveSHA256": "92a8d10eacf4cf0fe3d95d45c91afa65b695f756295c96a168bde1a6c712245a",
+  "archivePrefix": "Memoh-91af53f/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8",
-      "archiveSHA256": "5218262a3c44c3c500390b06cb116809a142004ddb61e2db933fdbe4587010ec",
-      "archivePrefix": "Memoh-40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8/",
+      "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/91af53f43566cb827d1fc58d18102e8ad29383bc",
+      "archiveSHA256": "fd03ab0a295b739102ff831d8876c4c83a43f29b876fdfadf643c6cedf4c2e28",
+      "archivePrefix": "Memoh-91af53f43566cb827d1fc58d18102e8ad29383bc/",
       "destination": ""
     },
     {
@@ -137,21 +137,21 @@
     }
   },
   "downstreamObservation": {
-    "commit": "0a324013f9fe1beec77ac948d0af8f210194ba52",
-    "scope": "Use the existing shared task UI and SDK; on transient parent read failure clear downstream content and resume the same selection only after reauthorization. No new API, provider configuration or Agent-core change.",
+    "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
+    "scope": "Shared task observation recovery and task delivery UI are now present directly in the pinned complete upstream source; phone host adaptations remain separate.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {
-        "baseSHA256": "e514126b082ab3481ebb46398d2787e095ba6b7d8d7e7c7bd3fb6d4fa12f016f",
-        "sha256": "bbc1a41b77445d67f1187038fc1934b717093e0479450f83d8b49540b88aa23e"
+        "baseSHA256": "a15d26f7b9a4a7c8069153928634787cae74f6322c5ec924b768a1118bdced13",
+        "sha256": "a15d26f7b9a4a7c8069153928634787cae74f6322c5ec924b768a1118bdced13"
       },
       "apps/web/src/pages/home/components/session-tasks.vue": {
-        "baseSHA256": "cc10997715327188e3f0b78bafaa8d2f226ea9d9a49f28b82f3d31e1030f9b04",
-        "sha256": "83dec587c7fe7f6360a91b44ccd5d1b8d6d921a90a01e7535e85a1d228172128"
+        "baseSHA256": "adff082e99ca458cb1e8fd59bc9349052a2122667c2020720f2c9bab9e2a8333",
+        "sha256": "adff082e99ca458cb1e8fd59bc9349052a2122667c2020720f2c9bab9e2a8333"
       }
     },
     "regressionTest": {
       "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
-      "sha256": "6f08be4074d6553425830e7cf31881bcb9f60bc40cbe234e48cf42ed05e45480"
+      "sha256": "9846cb4a170cc01335ea0c404b0de0096cf069e676c30eabb56196937ff23087"
     }
   }
 }

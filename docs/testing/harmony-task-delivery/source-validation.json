@@ -1,0 +1,36 @@
+{
+  "upstream": "91af53f43566cb827d1fc58d18102e8ad29383bc",
+  "sourceManifestEntries": 116,
+  "sourceFiles": 125,
+  "historicalLaterEditsUnverified": 19,
+  "firstPass": {
+    "passed": 186,
+    "failed": 3,
+    "files": 14
+  },
+  "affectedAfterPhoneFixes": {
+    "passed": 17,
+    "failed": 0,
+    "files": 3
+  },
+  "typecheck": "PASS",
+  "componentLint": {
+    "errors": 0,
+    "warnings": 6
+  },
+  "uiContract": {
+    "violations": 4,
+    "identicalToOldContext": true,
+    "unchangedFiles": [
+      "HarmonyVoiceInput.vue",
+      "HarmonyVoicePlayer.vue"
+    ]
+  },
+  "newNativeMethods": false,
+  "loginStoreChanges": false,
+  "nativeDevice": false,
+  "liveAPI": false,
+  "humanQA": false,
+  "hapBuiltAtThisCheckpoint": false,
+  "sharedPagination": "All pages aggregated and refreshed; no large-ledger acceptance claimed. Parent explicitly confirmed it does not block the single-attachment build; no phone pagination fork."
+}

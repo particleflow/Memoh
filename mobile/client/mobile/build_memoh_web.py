@@ -510,7 +510,10 @@ function leaveToThumbnail(element: Element) {
   thumbnailTransform(element)
 }
 
-watch(currentItem, (item, _previous, onCleanup) => {
+// Polling can replace the item object without changing its scoped media URL.
+// Keep the verified Blob while that identity and its original-reader mode match.
+watch([() => currentItem.value?.src, () => !!currentItem.value?.original], (_identity, _previous, onCleanup) => {
+  const item = currentItem.value
   if (item && item.src !== motionSource) motionOrigin = null
   let active = true
   let url = ''
@@ -711,24 +714,37 @@ function close() {''', 1),
         ('export function notifyAuthSessionCleared(reason: AuthSessionClearReason) {',
          'let harmonyAuthGeneration = 0\nexport function authSessionGeneration() { return harmonyAuthGeneration }\n\nexport function notifyAuthSessionCleared(reason: AuthSessionClearReason) {\n  harmonyAuthGeneration++', 1),
     ]
-    # Reuse PR79 observation recovery verbatim; keep the existing phone host.
-    changes['apps/web/src/pages/home/composables/useSessionTasks.ts'] = [
-        ("\n// Authorization-scoped content stays in this mounted view only. In particular,\n// a query-cache success must never reappear after a denial or a scope change.\nexport function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boolean>) {\n  const items = shallowRef<SessiontaskTask[]>([])\n  const detail = shallowRef<SessiontaskTask>()\n  const selected = shallowRef<Pick<SessiontaskTask, 'task_type' | 'task_id'>>()\n",
-         "\n// Authorization-scoped content stays in this mounted view only. In particular,\n// a query-cache success must never reappear after a denial or a scope change.\nexport function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boolean>, paused: Ref<boolean> = ref(false)) {\n  const items = shallowRef<SessiontaskTask[]>([])\n  const detail = shallowRef<SessiontaskTask>()\n  const selected = shallowRef<Pick<SessiontaskTask, 'task_type' | 'task_id'>>()\n", 1),
-        ('  }\n\n  async function refresh() {\n    if (!scope.value || !visible.value || loading.value) return\n    const current = scope.value\n    const target = selected.value\n    const epoch = generation\n',
-         '  }\n\n  async function refresh() {\n    if (!scope.value || !visible.value || paused.value || loading.value) return\n    const current = scope.value\n    const target = selected.value\n    const epoch = generation\n', 1),
-        ("    cursor.value = undefined\n    void refresh()\n  }, { immediate: true, flush: 'sync' })\n  // A denial/missing route needs explicit Reload or a changed scope, not a\n  // five-second retry loop. Transient failures can still recover by polling.\n  const timer = setInterval(() => {\n",
-         "    cursor.value = undefined\n    void refresh()\n  }, { immediate: true, flush: 'sync' })\n  // A temporarily unavailable parent relation clears content and aborts reads,\n  // but can retain navigation within this same visible identity/scope. Resuming\n  // requires the host to revalidate that relation, then reads the task afresh.\n  watch(paused, () => {\n    invalidate()\n    void refresh()\n  }, { flush: 'sync' })\n  // A denial/missing route needs explicit Reload or a changed scope, not a\n  // five-second retry loop. Transient failures can still recover by polling.\n  const timer = setInterval(() => {\n", 1),
-    ]
-    changes['apps/web/src/pages/home/components/session-tasks.vue'] = [
-        ("import { ListTree } from 'lucide-vue-next'\nimport { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'\nimport { onAuthSessionCleared } from '@/lib/auth-session'\nimport { useSessionTasks } from '../composables/useSessionTasks'\nimport { useBotDelegations } from '../composables/useBotDelegations'\nimport { useBotDelegationDownload } from '../composables/useBotDelegationDownload'\nimport { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'\nimport BotDelegationTasks from './bot-delegation-tasks.vue'\n",
-         "import { ListTree } from 'lucide-vue-next'\nimport { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'\nimport { onAuthSessionCleared } from '@/lib/auth-session'\nimport { apiErrorStatus } from '@/utils/api-error'\nimport { useSessionTasks } from '../composables/useSessionTasks'\nimport { delegationAPIUnsupported, useBotDelegations } from '../composables/useBotDelegations'\nimport { useBotDelegationDownload } from '../composables/useBotDelegationDownload'\nimport { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'\nimport BotDelegationTasks from './bot-delegation-tasks.vue'\n", 1),
-        ("  selection: specialist.value.delegation, identity: scope.value.identity,\n} : null)\nconst specialistVisible = computed(() => visible.value && !!specialist.value)\nconst specialistReader = useSessionTasks(specialistScope, specialistVisible)\nconst { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist } = specialistReader\nconst hasSelection = computed(() => !!specialist.value || (group.value === 'delegations' ? !!delegationSelected.value : !!selected.value))\nfunction openSpecialistTasks() {\n",
-         "  selection: specialist.value.delegation, identity: scope.value.identity,\n} : null)\nconst specialistVisible = computed(() => visible.value && !!specialist.value)\nconst specialistPaused = computed(() => !!specialist.value && (!!delegationError.value\n  || delegationDetail.value?.delegation_id !== specialist.value.delegation\n  || delegationDetail.value?.target_bot_id !== specialist.value.bot\n  || delegationDetail.value?.target_session_id !== specialist.value.session))\nconst specialistReader = useSessionTasks(specialistScope, specialistVisible, specialistPaused)\nconst { items: specialistItems, detail: specialistDetail, selected: specialistSelected, cursor: specialistCursor, nextCursor: specialistNext, loading: specialistLoading, error: specialistError, openTask: openSpecialistTask, back: backSpecialistTask, page: specialistPage, refresh: refreshSpecialist } = specialistReader\nconst hasSelection = computed(() => !!specialist.value || (group.value === 'delegations' ? !!delegationSelected.value : !!selected.value))\nfunction openSpecialistTasks() {\n", 1),
-        ("  specialist.value = { bot: task.target_bot_id, session: task.target_session_id, delegation: task.delegation_id }\n}\nwatch([scope, visible, group], () => { specialist.value = undefined }, { flush: 'sync' })\n// Keep the original delegation read active: losing that authorized relation must\n// retire downstream content too, even if a target GET finishes later.\nwatch([delegationDetail, delegationError], () => {\n  const current = specialist.value\n  if (current && (delegationError.value || delegationDetail.value?.delegation_id !== current.delegation\n    || delegationDetail.value?.target_bot_id !== current.bot || delegationDetail.value?.target_session_id !== current.session)) {\n    specialist.value = undefined\n  }\n}, { flush: 'sync' })\nfunction goBack() {\n  if (specialist.value) {\n    if (specialistSelected.value) backSpecialistTask()\n",
-         "  specialist.value = { bot: task.target_bot_id, session: task.target_session_id, delegation: task.delegation_id }\n}\nwatch([scope, visible, group], () => { specialist.value = undefined }, { flush: 'sync' })\n// Revalidate the original relation throughout observation. Transient failures\n// pause and clear downstream content; a denial or changed relation retires the\n// navigation too. Neither path can revive a pending response from the old read.\nwatch([delegationDetail, delegationError], () => {\n  const current = specialist.value\n  if (!current) return\n  const denied = delegationAPIUnsupported(delegationError.value)\n    || [401, 403, 404].includes(apiErrorStatus(delegationError.value) ?? 0)\n  const relation = delegationDetail.value\n  if (denied || (relation && (relation.delegation_id !== current.delegation\n    || relation.target_bot_id !== current.bot || relation.target_session_id !== current.session))) {\n    specialist.value = undefined\n  }\n}, { flush: 'sync' })\nfunction reloadSpecialist() {\n  if (specialistPaused.value) void refreshDelegations()\n  else void refreshSpecialist()\n}\nfunction goBack() {\n  if (specialist.value) {\n    if (specialistSelected.value) backSpecialistTask()\n", 1),
-        ('            :selected="specialistSelected"\n            :cursor="specialistCursor"\n            :next-cursor="specialistNext"\n            :loading="specialistLoading"\n            :error="specialistError"\n            @open-task="openSpecialistTask"\n            @page="specialistPage"\n            @refresh="refreshSpecialist"\n          />\n        </template>\n        <Tabs\n',
-         '            :selected="specialistSelected"\n            :cursor="specialistCursor"\n            :next-cursor="specialistNext"\n            :loading="specialistLoading || (specialistPaused && delegationLoading)"\n            :error="delegationError || specialistError"\n            @open-task="openSpecialistTask"\n            @page="specialistPage"\n            @refresh="reloadSpecialist"\n          />\n        </template>\n        <Tabs\n', 1),
+    # A task body can mount without the dock provider. Reuse the same native
+    # save path as the asset preview instead of the Web-only anchor fallback.
+    changes['apps/web/src/pages/home/components/attachment-block.vue'].extend([
+        ("import { originalBlob, saveOriginal } from '@/lib/harmony-files'",
+         "import { originalBlob, saveOriginal } from '@/lib/harmony-files'\nimport { toast } from '@felinic/ui'", 1),
+        ("  const a = document.createElement('a')\n  a.href = url\n  a.download = name || 'file'\n  a.click()",
+         "  void saveOriginal(att).catch(() => { toast.error('原件未保存，请重试') })", 1),
+    ])
+    # The complete shared source already includes observation recovery and task
+    # delivery UI. Keep image originals on the existing verified phone path.
+    changes['apps/web/src/pages/home/components/session-task-results.vue'] = [
+        ("import { resolveUrl, isMediaType }", "import { originalBlob, saveOriginal } from '@/lib/harmony-files'\nimport { toast } from '@felinic/ui'\nimport { resolveUrl, isMediaType }", 1),
+        ('// Use the same attachment resolver, preview host and browser download as chat.',
+         '// Use the same attachment resolver, preview host and verified save path as chat.', 1),
+        ('const mediaItems = computed<MediaGalleryItem[]>', '''async function saveTaskOriginal(id: string) {
+  const attachment = attachments.value.get(id)
+  if (!attachment) return
+  try { await saveOriginal(attachment) }
+  catch { toast.error(t('bots.files.downloadFailed')) }
+}
+const mediaItems = computed<MediaGalleryItem[]>''', 1),
+        (".filter(isMediaType).map(att => ({ src: resolveUrl(att), type: att.mime?.startsWith('video/') ? 'video' : 'image', name: att.name })))",
+         ".filter(isMediaType).map(att => ({ src: resolveUrl(att), type: att.mime?.startsWith('video/') ? 'video' : 'image', name: att.name, original: att.mime?.startsWith('video/') ? undefined : () => originalBlob(att) })))", 1),
+        ('''                    as-child
+                  >
+                    <a
+                      :href="resolveUrl(attachments.get(file.delivery_id!)!)"
+                      :download="file.delivery_id"
+                    >{{ t('bots.files.download') }}</a>''', '''                    @click="saveTaskOriginal(file.delivery_id!)"
+                  >
+                    {{ t('bots.files.download') }}''', 1),
     ]
     patches = {}
     context = base / 'official-context.tar'

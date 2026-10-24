@@ -1,0 +1,10 @@
+{
+  "commit": "91af53f43566cb827d1fc58d18102e8ad29383bc",
+  "sourceArchiveSHA256": "fd03ab0a295b739102ff831d8876c4c83a43f29b876fdfadf643c6cedf4c2e28",
+  "sourceArchiveBytes": 31542066,
+  "gitBlobChecks": 5738,
+  "uiArchiveReused": true,
+  "combinedSHA256": "92a8d10eacf4cf0fe3d95d45c91afa65b695f756295c96a168bde1a6c712245a",
+  "combinedBytes": 32090092,
+  "packageDependenciesChanged": false
+}
