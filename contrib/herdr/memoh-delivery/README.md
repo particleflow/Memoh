@@ -124,7 +124,12 @@ selectors, not authorization; the Server verifies them against its current
 operation, Bot permissions and authenticated device.
 
 Reinvoke the same enqueue/ID/metadata after admission timeout to resume sealing;
-do not invent a new ID. Completed admission uses its immutable snapshot even if
+do not invent a new ID. When the 64 MiB copy budget leaves a durable admission
+checkpoint, `enqueue-result` and `collect-result` exit 1 with `state: pending`
+and `error_class: transient`. Continue the same enqueue/collect input; this
+does not mean that `advance-results` can upload the unsealed snapshot. The
+collector retains the closed manifest until admission completes. Completed
+admission uses its immutable snapshot even if
 the producer file or export directory has since been removed. New or incomplete
 upload admission still requires the original authorized source. Once admitted,
 invoke `advance` or the fixed manifest

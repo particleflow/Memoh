@@ -149,6 +149,13 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		if errors.Is(err, transferclient.ErrNoWork) {
 			return writeFixed(output, `{"state":"idle"}`)
 		}
+		if errors.Is(err, transferclient.ErrAdmissionPending) {
+			// The immutable admission has a durable checkpoint. Continue the
+			// same enqueue/collect input; this is not an unknown remote outcome
+			// or a runnable upload for advance-results yet.
+			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending", "feedback_status": feedback, "error_class": "transient"})
+			return 1
+		}
 		if err != nil {
 			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending_or_unavailable", "feedback_status": feedback, "error_class": transferclient.LifecycleFailure(err).ErrorClass})
 			return 1
