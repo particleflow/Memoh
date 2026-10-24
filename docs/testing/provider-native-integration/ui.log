@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 <repo>
+
+
+ Test Files  8 passed (8)
+      Tests  98 passed (98)
+   Start at  18:13:42
+   Duration  20.02s (transform 24.78s, setup 0ms, import 39.84s, tests 7.83s, environment 5.27s)
+

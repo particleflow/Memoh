@@ -1,0 +1,11 @@
+node:internal/process/promises:332
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+page.waitForResponse: Timeout 18000ms exceeded while waiting for event "response"
+    at <task-output>/browser.mjs:49:24 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0

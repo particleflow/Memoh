@@ -1,0 +1,18 @@
+PASS existing Provider form PUT 200; explicit Images protocol; existing policies retained; no API key submitted
+PASS actual GET and browser reload retain selected protocol, address, masked key and policies; password stays blank
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 18000ms exceeded.
+Call log:
+  - waiting for getByRole('button').filter({ hasText: '6ccf3710' })
+
+    at <task-output>/browser.mjs:82:84 {
+  log: [
+    "  - waiting for getByRole('button').filter({ hasText: '6ccf3710' })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0
