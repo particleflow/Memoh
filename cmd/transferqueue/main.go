@@ -14,6 +14,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/transferclient"
 )
 
@@ -28,7 +29,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-history, migrate-publications, probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, enqueue-results, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -38,7 +39,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -46,12 +47,41 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 	// Resolve the official host locations once. No cwd or legacy fallback.
 	locations := map[string]string{"HERDR_PLUGIN_CONFIG_DIR": env("HERDR_PLUGIN_CONFIG_DIR"), "HERDR_PLUGIN_STATE_DIR": env("HERDR_PLUGIN_STATE_DIR")}
 	getenv := func(key string) string { return locations[key] }
-	limits := transferclient.QueueLimits{Jobs: 8, Bytes: 256 << 20, JournalBytes: 8 << 20, Workers: 1}
+	limits, err := transferclient.LoadHostQueueLimits(getenv)
+	if err != nil {
+		_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+		return 1
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	// Reserve a bounded tail of the same invocation for advisory persistence.
 	workCtx, stopWork := context.WithTimeout(ctx, 115*time.Second)
 	defer stopWork()
+	if *kind == "enqueue-results" {
+		if *id != "" {
+			return 2
+		}
+		raw, err := readBoundedProducerLimit(ctx, input, deliverymeta.ProducerPageMaxBytes)
+		if err != nil {
+			return 2
+		}
+		page, err := transferclient.EnqueueProducerPage(workCtx, getenv, "native-profile-v1", limits, bytes.NewReader(raw), transport, now())
+		if len(page.Files) == 0 && err != nil {
+			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+			return 1
+		}
+		if json.NewEncoder(output).Encode(page) != nil || err != nil {
+			return 1
+		}
+		return 0
+	}
+	if *kind == "migrate-budget" {
+		if err := transferclient.MigrateHerdrBudget(workCtx, getenv, "native-profile-v1", limits); err != nil {
+			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+			return 1
+		}
+		return writeFixed(output, `{"budget_migration":"complete"}`)
+	}
 	publish := func(status transferclient.QueueStatus) string {
 		if status.Job.Task.Attempt == "" {
 			return ""
@@ -149,6 +179,13 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		if errors.Is(err, transferclient.ErrNoWork) {
 			return writeFixed(output, `{"state":"idle"}`)
 		}
+		if errors.Is(err, transferclient.ErrAdmissionPending) {
+			// The immutable admission has a durable checkpoint. Continue the
+			// same enqueue/collect input; this is not an unknown remote outcome
+			// or a runnable upload for advance-results yet.
+			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending", "feedback_status": feedback, "error_class": "transient"})
+			return 1
+		}
 		if err != nil {
 			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending_or_unavailable", "feedback_status": feedback, "error_class": transferclient.LifecycleFailure(err).ErrorClass})
 			return 1
@@ -232,11 +269,12 @@ func writeStatus(output io.Writer, s transferclient.QueueStatus, source, feedbac
 		Phase       string                    `json:"phase"`
 		Offset      int64                     `json:"offset"`
 		Admitted    bool                      `json:"admitted"`
+		Registered  bool                      `json:"registered"`
 		Associated  bool                      `json:"associated"`
 		Association string                    `json:"association_state,omitempty"`
 		Error       string                    `json:"error_code,omitempty"`
 		Reference   *transferclient.Reference `json:"reference,omitempty"`
-	}{summary, feedback, source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
+	}{summary, feedback, source, s.PayloadState, s.Job.DeliveryID, s.Job.Phase, s.Job.Offset, s.Admitted, s.Registered, s.Associated, s.AssociationState, s.Job.ErrorCode, s.Job.Ready}
 	if json.NewEncoder(output).Encode(out) != nil {
 		return 1
 	}
@@ -244,14 +282,18 @@ func writeStatus(output io.Writer, s transferclient.QueueStatus, source, feedbac
 }
 
 func readBoundedProducer(ctx context.Context, input io.Reader) ([]byte, error) {
+	return readBoundedProducerLimit(ctx, input, 16384)
+}
+
+func readBoundedProducerLimit(ctx context.Context, input io.Reader, limit int) ([]byte, error) {
 	type result struct {
 		raw []byte
 		err error
 	}
 	done := make(chan result, 1)
 	go func() {
-		raw, err := io.ReadAll(io.LimitReader(input, 16385))
-		if len(raw) > 16384 {
+		raw, err := io.ReadAll(io.LimitReader(input, int64(limit)+1))
+		if len(raw) > limit {
 			err = transferclient.ErrInvalid
 		}
 		done <- result{raw, err}

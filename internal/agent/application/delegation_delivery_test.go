@@ -43,7 +43,7 @@ func awaitDeliveryIdle(t *testing.T, manager *sessionruntime.Manager) {
 }
 
 func deliveryCommand() turn.StartTurnCommand {
-	return turn.StartTurnCommand{TeamID: "team", BotID: "bot", ThreadID: "session", UserID: "user", Mode: turn.ModeChat, Query: "specialist result", DelegationResultID: "delegation", Attachments: []turn.Attachment{{Type: "image", ContentHash: "original", Metadata: map[string]any{"delegation_url": "/scoped/original"}}}}
+	return turn.StartTurnCommand{TeamID: "team", BotID: "bot", ThreadID: "session", UserID: "user", Mode: turn.ModeChat, Query: "specialist result", DelegationResultID: "delegation", CurrentChannel: "telegram", ChatID: "bot", RouteID: "synthetic-route", ReplyTarget: "synthetic-recipient", Attachments: []turn.Attachment{{Type: "image", ContentHash: "original", Metadata: map[string]any{"delegation_url": "/scoped/original"}}}}
 }
 
 func TestAuthorizedDeliveryWakesIdleSupervisorAndSurvivesQueueRestart(t *testing.T) {
@@ -78,7 +78,7 @@ func TestAuthorizedDeliveryWakesIdleSupervisorAndSurvivesQueueRestart(t *testing
 	}
 	cancel() // Delivery request finishing must not cancel the supervisor turn.
 	got := <-received
-	if got.DelegationResultID != cmd.DelegationResultID || got.Query != cmd.Query || !reflect.DeepEqual(got.Attachments, cmd.Attachments) {
+	if got.DelegationResultID != cmd.DelegationResultID || got.Query != cmd.Query || !reflect.DeepEqual(got.Attachments, cmd.Attachments) || got.CurrentChannel != cmd.CurrentChannel || got.RouteID != cmd.RouteID || got.ReplyTarget != cmd.ReplyTarget {
 		t.Fatalf("lost result/attachments: %+v", got)
 	}
 	awaitDeliveryIdle(t, manager)
@@ -172,7 +172,7 @@ func TestAuthorizedDeliveryBusyQueueRechecksRevocation(t *testing.T) {
 			if !revoke {
 				select {
 				case got := <-received:
-					if !reflect.DeepEqual(got.Attachments, cmd.Attachments) {
+					if !reflect.DeepEqual(got.Attachments, cmd.Attachments) || got.CurrentChannel != cmd.CurrentChannel || got.RouteID != cmd.RouteID || got.ReplyTarget != cmd.ReplyTarget {
 						t.Fatal("lost queued attachment")
 					}
 				case <-time.After(3 * time.Second):
@@ -258,7 +258,7 @@ func TestAuthorizedDeliveryIdleToBusyRaceQueuesSameInvocation(t *testing.T) {
 	}
 	select {
 	case got := <-received:
-		if !reflect.DeepEqual(got.Attachments, cmd.Attachments) {
+		if !reflect.DeepEqual(got.Attachments, cmd.Attachments) || got.CurrentChannel != cmd.CurrentChannel || got.RouteID != cmd.RouteID || got.ReplyTarget != cmd.ReplyTarget {
 			t.Fatal("race lost attachment")
 		}
 	case <-time.After(3 * time.Second):

@@ -1,0 +1,7 @@
+{
+  "state": "failed",
+  "delivery_state": "accepted",
+  "route_channel": "web",
+  "route_version": 1,
+  "forged_recipient_rejected": true
+}

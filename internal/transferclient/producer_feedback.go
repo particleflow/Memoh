@@ -141,54 +141,29 @@ func queueFeedback(r QueueStatus, binding string, now time.Time) deliverymeta.Fi
 func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan deliverymeta.Plan, now time.Time) (deliverymeta.Feedback, error) {
 	report := deliverymeta.Feedback{Version: 1, Task: plan.Task, PlanHash: deliverymeta.PlanHash(plan)}
 	// Caller holds the admission lock through projection and file synchronization.
-	if _, err := cfg.producerManifests(); err != nil {
+	if err := cfg.openSources(); err != nil {
 		return report, ErrProducerFeedback
 	}
-	heads, err := q.admissions()
-	if err != nil {
-		return report, ErrProducerFeedback
-	}
-	statuses := make(map[string]QueueStatus, len(heads))
-	readErrors := make(map[string]string)
-	runnable := false
-	for _, head := range heads {
+	// Only the declared page is projected. Do not materialize the entire queue
+	// to report a handful of files; global queue health belongs to lifecycle.
+	for _, file := range plan.FilePlans() {
 		if err := ctx.Err(); err != nil {
 			return report, err
 		}
-		r := head
-		if r.PayloadState != PayloadReleased {
-			r, err = q.Inspect(head.Job.DeliveryID)
-			if err != nil && !errors.Is(err, ErrAdmissionPending) {
-				runnable = true
-				readErrors[head.Job.DeliveryID] = "queue_unavailable"
-				if errors.Is(err, ErrBusy) {
-					readErrors[head.Job.DeliveryID] = "queue_busy"
-				}
-				continue
-			}
-		}
-		statuses[r.Job.DeliveryID] = r
-		local := queueFeedback(r, cfg.Binding, now)
-		runnable = runnable || local.Retryable || r.Associated && r.PayloadState != PayloadReleased
-	}
-	for _, file := range plan.FilePlans() {
-		if code := readErrors[file.DeliveryID()]; code != "" {
-			report.Files = append(report.Files, deliverymeta.FileFeedback{DeliveryID: file.DeliveryID(), State: "pending", Code: code, Retryable: true, RetryAt: now.Add(30 * time.Second), Change: feedbackChange(code)})
-			continue
-		}
-		if _, ok := statuses[file.DeliveryID()]; !ok {
-			r, err := q.Inspect(file.DeliveryID())
-			if err == nil {
-				statuses[file.DeliveryID()] = r
-			} else if !errors.Is(err, os.ErrNotExist) {
-				return report, err
-			}
-		}
-		if r, ok := statuses[file.DeliveryID()]; ok {
+		r, err := q.Inspect(file.DeliveryID())
+		if err == nil || errors.Is(err, ErrAdmissionPending) {
 			if !feedbackTaskMatches(plan.Task, r.Job) || r.Job.Spec.Mime != file.Artifact.Mime {
 				return report, ErrProducerFeedback
 			}
 			report.Files = append(report.Files, queueFeedback(r, cfg.Binding, now))
+			continue
+		}
+		if !errors.Is(err, os.ErrNotExist) {
+			code := "queue_unavailable"
+			if errors.Is(err, ErrBusy) {
+				code = "queue_busy"
+			}
+			report.Files = append(report.Files, deliverymeta.FileFeedback{DeliveryID: file.DeliveryID(), State: "pending", Code: code, Retryable: true, RetryAt: now.Add(30 * time.Second), Change: feedbackChange(code)})
 			continue
 		}
 		local := deliverymeta.FileFeedback{DeliveryID: file.DeliveryID(), State: "unknown", Code: "closure_or_admission_unknown", Change: feedbackChange(file)}
@@ -203,21 +178,13 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 		if err == nil {
 			raw, readErr := io.ReadAll(io.LimitReader(source, 16385))
 			_ = source.Close()
-			action, closed, parseErr := ProducerAdmission(bytes.NewReader(raw), q.revision)
+			_, closed, parseErr := ProducerAdmission(bytes.NewReader(raw), q.revision)
 			if readErr != nil || parseErr != nil || closed.Task != plan.Task || closed.Artifact != file.Artifact {
 				local.State, local.Code = "blocked", "manifest_invalid"
 			} else {
 				local.State, local.Code, local.Retryable = "pending", "queued", true
 				local.Change = feedbackChange(closed)
-				if err := q.capacity(action.Job.Spec.SizeBytes); err != nil {
-					if !errors.Is(err, ErrCapacity) {
-						return report, err
-					}
-					local.State, local.Code, local.Retryable = "blocked", "capacity_blocked", false
-					if runnable {
-						local.State, local.Code, local.Retryable, local.RetryAt = "pending", "capacity_wait", true, now.Add(30*time.Second)
-					}
-				}
+
 			}
 		}
 		report.Files = append(report.Files, local)

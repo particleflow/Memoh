@@ -1,0 +1,81 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/device-registry
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-chat
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_read
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_write
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_exec
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/caller-inactive
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/membership-inactive
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/owner-inactive
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/runtime-revoked
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/session-reassigned
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages
+    computer_delivery_integration_test.go:226: ledger metadata=257 pages=17 operation_json_bytes=512 elapsed=571.010732ms; restart/CAS/repeated page/late insert/original IDs preserved; one small underlying asset, not bulk network transfer
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/https-queue-handoff
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/task-principal-http
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/lost-response
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= lost-response
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/client-killed-before-checkpoint
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= client-killed-before-checkpoint
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/no-proof-gap
+    computer_ready_proof_postgres_integration_test.go:50: actual CLI + full-migration PG + TLS: original operation/attempt/delivery/receipt retained; creates=1, completes=1; mode= no-proof-gap
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/receipt-turnover
+    computer_delivery_integration_test.go:230: batch 1 completed
+    computer_delivery_integration_test.go:230: batch 2 completed
+    computer_delivery_integration_test.go:230: 24 files, 2 operation batches/reopenings; committed staging retired, canceled evidence retained, exact replay and original bytes verified
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/producer-multiple-files
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/real-route-roundtrip
+    computer_delivery_integration_test.go:232: real HTTPS Server/PG/filesystem: CLI upload 9800163 bytes, lost PATCH response -> same receipt, Create/Complete/Commit=1; library download Range resumed at 8394902, full content/hash match; CLI Linux publication unavailable; byte/job budgets and attempt/revoke checks enforced
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery
+    computer_delivery_integration_test.go:233: file=0 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:233: file=1 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:233: file=2 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:233: CLI killed after durable offset=16777216, local checkpoint=8388608; reopened NAS modules; transient rejections=2; two independent files committed before recovery; original receipt and ledger replay preserved
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query/head-query
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query/range-query
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query/token-query-rejected
+=== NAME  TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query
+    computer_api_base_integration_test.go:109: real prefixed media GET/Range/HEAD and full hash passed; RawQuery bytes preserved; unknown query ignored, token query rejected; original bytes retained; no local publication
+=== NAME  TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix
+    computer_delivery_integration_test.go:234: configured /api preserved for limits/create/status/append/complete/commit/resolve; real device verifier, PG and file store; same upload receipt and committed reference
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (46.93s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/device-registry (0.12s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-chat (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_read (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_write (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/revoke-workspace_exec (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/caller-inactive (0.00s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/membership-inactive (0.00s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/owner-inactive (0.04s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/runtime-revoked (0.02s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/session-reassigned (0.01s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/entry-pages (0.57s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/https-queue-handoff (0.20s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/task-principal-http (0.70s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli (9.97s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/lost-response (3.99s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/client-killed-before-checkpoint (2.70s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/ready-proof-cli/no-proof-gap (2.22s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/receipt-turnover (14.16s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/producer-multiple-files (1.25s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/real-route-roundtrip (7.15s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery (9.53s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix (0.73s)
+        --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query (0.21s)
+            --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query/head-query (0.05s)
+            --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query/range-query (0.04s)
+            --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/api-base-prefix/download-range-head-query/token-query-rejected (0.00s)
+=== RUN   TestComputerDeliveryPostgresCanceledContext
+--- PASS: TestComputerDeliveryPostgresCanceledContext (0.00s)
+=== RUN   TestComputerDeliveryPostgresUpgradeFrom170
+    computer_delivery_upgrade_integration_test.go:139: 170 -> 174, repeat-up, down/up: old receipt/unknown payloads and operation revision retained; old writer and lossy rollback rejected
+--- PASS: TestComputerDeliveryPostgresUpgradeFrom170 (2.39s)
+=== RUN   TestComputerDeliveryPostgresCanonicalTransferSchema
+--- PASS: TestComputerDeliveryPostgresCanonicalTransferSchema (0.65s)
+=== RUN   TestComputerDeliveryPostgresTransferCredentialMigration
+--- PASS: TestComputerDeliveryPostgresTransferCredentialMigration (2.10s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	53.156s

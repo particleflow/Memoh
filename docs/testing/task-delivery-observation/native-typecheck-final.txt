@@ -1,0 +1,13 @@
+
+> @memohai/web@0.22.0 typecheck <worktree>/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/components/session-task-results.test.ts(76,7): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Type '{ task_type: "computer_operation"; task_id: string; status: "unknown"; content_available: false; attachments_available: false; }' is missing the following properties from type 'SessiontaskTask': created_at, parent_session_id, session_id, summary, updated_at
+src/pages/home/components/session-task-results.test.ts(108,7): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Type '{ task_type: "computer_operation"; task_id: string; status: "unknown"; content_available: false; attachments_available: false; }' is missing the following properties from type 'SessiontaskTask': created_at, parent_session_id, session_id, summary, updated_at
+<worktree>/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

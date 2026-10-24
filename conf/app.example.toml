@@ -17,6 +17,12 @@ max_upload_bytes = 209715200
 # Optional independent originals storage, outside disposable workspaces.
 originals_root = ""
 
+[bot_delegation]
+# Specialist execution deadline; omitted/empty preserves 30m.
+# Set a longer duration (e.g. "2h") or "0s" to disable this outer deadline.
+# Shutdown and Agent/provider cancellation still apply. Restart Server after edits.
+execution_timeout = "30m"
+
 [log]
 level = "info"
 format = "text"

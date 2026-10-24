@@ -266,9 +266,7 @@ func (p *BackgroundProvider) execGetBackgroundStatus(_ context.Context, session 
 	if task == nil {
 		return nil, fmt.Errorf("task %s not found", taskID)
 	}
-	snapshot := task.Snapshot()
-	result := backgroundStatusMap(session, snapshot)
-	return result, nil
+	return backgroundStatusMap(session, task.Snapshot()), nil
 }
 
 func (p *BackgroundProvider) execKillBackground(_ context.Context, session SessionContext, args taskArgs) (any, error) {

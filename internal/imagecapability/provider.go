@@ -100,23 +100,23 @@ func (p *Provider) Tools(ctx context.Context, session tools.SessionContext) ([]t
 			if err := decode(input, &args, "prompt", "size"); err != nil {
 				return sdk.ToolOutput{}, err
 			}
-			return toolexec.OutputPair(p.execute(exec, session, args, nil, ""))
+			return toolexec.OutputPair(p.execute(exec, session, args, nil))
 		},
 	}}
 	if selected.config.Edits {
 		list = append(list, toolexec.Tool{
 			Name:        "edit_image",
-			Description: "Edit existing images through the explicitly enabled Images API. Input images and mask are content_hash references owned by this Bot; raw paths and URLs are not accepted. Returns the persisted original output. Do not automatically repeat an unknown outcome or regenerate to retry file delivery.",
+			Description: "Edit existing images through the explicitly enabled Images API. Input images are content_hash references owned by this Bot; raw paths and URLs are not accepted. Returns the persisted original output. Do not automatically repeat an unknown outcome or regenerate to retry file delivery.",
 			Parameters:  toolexec.SchemaFor[editArgs](toolexec.Strict()),
 			Execute: func(exec *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
 				var args editArgs
-				if err := decode(input, &args, "prompt", "size", "images", "mask"); err != nil {
+				if err := decode(input, &args, "prompt", "size", "images"); err != nil {
 					return sdk.ToolOutput{}, err
 				}
 				if len(args.Images) < 1 || len(args.Images) > 4 {
 					return sdk.ToolOutput{}, errors.New("edit_image requires one to four image content hashes")
 				}
-				return toolexec.OutputPair(p.execute(exec, session, request{Prompt: args.Prompt, Size: args.Size}, args.Images, args.Mask))
+				return toolexec.OutputPair(p.execute(exec, session, request{Prompt: args.Prompt, Size: args.Size}, args.Images))
 			},
 		})
 	}
@@ -157,7 +157,6 @@ type editArgs struct {
 	Prompt string   `json:"prompt" jsonschema:"Description of the requested edit"`
 	Size   string   `json:"size,omitempty"`
 	Images []string `json:"images" jsonschema:"One to four existing image content_hash values owned by this Bot"`
-	Mask   string   `json:"mask,omitempty" jsonschema:"Optional existing mask content_hash owned by this Bot"`
 }
 
 func decode(input sdk.ToolArguments, target any, allowed ...string) error {
@@ -180,7 +179,7 @@ func decode(input sdk.ToolArguments, target any, allowed ...string) error {
 	return nil
 }
 
-func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.SessionContext, args request, refs []string, maskRef string) (any, error) {
+func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.SessionContext, args request, refs []string) (any, error) {
 	if err := p.checkAccess(exec.Context, session); err != nil {
 		return nil, err
 	}
@@ -197,7 +196,6 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 		return nil, errors.New("configured image capability is unavailable")
 	}
 	var images []imageBytes
-	var mask *imageBytes
 	var total int64
 	for _, ref := range refs {
 		image, err := p.openImage(exec.Context, session, ref)
@@ -210,16 +208,6 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 		}
 		images = append(images, image)
 	}
-	if maskRef != "" {
-		image, err := p.openImage(exec.Context, session, maskRef)
-		if err != nil {
-			return nil, err
-		}
-		if total+int64(len(image.data)) > maxImageBytes {
-			return nil, errors.New("combined edit inputs exceed the limit")
-		}
-		mask = &image
-	}
 	apiKey, err := selected.credentials(exec.Context)
 	if err != nil {
 		return nil, errors.New("image provider authorization is unavailable")
@@ -230,7 +218,7 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 	if err := p.checkAccess(exec.Context, session); err != nil {
 		return nil, err
 	}
-	image, err := invoke(exec.Context, p.http, selected, apiKey, args, images, mask)
+	image, err := invoke(exec.Context, p.http, selected, apiKey, args, images)
 	if err != nil {
 		// No private provider response, URL, credential, or transport error is
 		// returned to the model. A normal structured result avoids retry guards.

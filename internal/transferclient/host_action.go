@@ -31,7 +31,7 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		return QueueStatus{}, err
 	}
 	defer func() { _ = q.Close() }()
-	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" || action.Kind == "advance-next" {
+	if action.Kind == "enqueue-download" || action.Kind == "advance-next" {
 		if err := q.ReclaimConfirmed(ctx); err != nil {
 			return QueueStatus{}, err
 		}
@@ -62,37 +62,9 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		return QueueStatus{}, err
 	}
 	defer func() { _ = cfg.Close() }()
+	q.openSource = cfg.OpenSource
 	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" {
-		if local.Job.HostBinding != "" && local.Job.HostBinding != cfg.Binding {
-			return QueueStatus{}, ErrVersion
-		}
-		local.Job.HostBinding = cfg.Binding
-		// Validate selectors without obtaining or transmitting any credential.
-		direction := "upload"
-		if action.Kind == "enqueue-download" {
-			direction = "download"
-		}
-		c, err := NewDeviceTask(cfg.Origin, local.Job, direction, local.Job.Task, transport, cfg.Authorization)
-		if err != nil {
-			return QueueStatus{}, err
-		}
-		c.CloseIdleConnections()
-		if existing, err := q.Inspect(action.DeliveryID); err == nil && existing.Admitted {
-			// Admit rechecks immutable metadata under the job lock. A sealed
-			// snapshot no longer depends on the producer file or directory.
-			return q.invokeHerdr(ctx, local, nil, nil, nil, now)
-		}
-		var source *os.File
-		if direction == "upload" {
-			source, err = cfg.OpenSource(action.SourceRef)
-			if err != nil {
-				return QueueStatus{}, err
-			}
-			defer func() { _ = source.Close() }()
-		} else if action.SourceRef != "" {
-			return QueueStatus{}, ErrInvalid
-		}
-		return q.invokeHerdr(ctx, local, source, nil, nil, now)
+		return q.enqueueConfigured(ctx, cfg, action, transport, now)
 	}
 	status, err := q.Inspect(action.DeliveryID)
 	if err != nil {
@@ -114,6 +86,53 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 	return q.invokeHerdr(ctx, local, nil, c, binding, now)
 }
 
+// One opened configuration/queue can admit a bounded producer page. The same
+// validation and legacy recovery path are used by single-file callers.
+func (q *DiskQueue) enqueueConfigured(ctx context.Context, cfg *HostConfig, action ConfiguredAction, transport *http.Client, now time.Time) (QueueStatus, error) {
+	local := HerdrAction{Kind: action.Kind, DeliveryID: action.DeliveryID, Job: action.Job}
+	var err error
+	if local.Job.HostBinding != "" && local.Job.HostBinding != cfg.Binding {
+		return QueueStatus{}, ErrVersion
+	}
+	local.Job.HostBinding = cfg.Binding
+	// Validate selectors without obtaining or transmitting any credential.
+	direction := "upload"
+	if action.Kind == "enqueue-download" {
+		direction = "download"
+	}
+	c, err := NewDeviceTask(cfg.Origin, local.Job, direction, local.Job.Task, transport, cfg.Authorization)
+	if err != nil {
+		return QueueStatus{}, err
+	}
+	c.CloseIdleConnections()
+	if direction == "upload" {
+		if action.DeliveryID != local.Job.DeliveryID {
+			return QueueStatus{}, ErrInvalid
+		}
+		registered, err := q.RegisterUpload(ctx, local.Job, action.SourceRef, cfg.OpenSource)
+		if err != nil || registered.Registered || registered.Admitted {
+			return registered, err
+		}
+		// An old partially sealed admission keeps its existing recovery protocol.
+	}
+	if existing, err := q.Inspect(action.DeliveryID); err == nil && existing.Admitted {
+		// Admit rechecks immutable metadata under the job lock. A sealed
+		// snapshot no longer depends on the producer file or directory.
+		return q.invokeHerdr(ctx, local, nil, nil, nil, now)
+	}
+	var source *os.File
+	if direction == "upload" {
+		source, err = cfg.OpenSource(action.SourceRef)
+		if err != nil {
+			return QueueStatus{}, err
+		}
+		defer func() { _ = source.Close() }()
+	} else if action.SourceRef != "" {
+		return QueueStatus{}, ErrInvalid
+	}
+	return q.invokeHerdr(ctx, local, source, nil, nil, now)
+}
+
 // A single bounded selection, not a worker loop. Locks remain owned by RunOne;
 // a race with another invocation returns busy and never runs duplicate work.
 func (q *DiskQueue) nextDue(now time.Time) (string, error) {
@@ -126,32 +145,33 @@ func (q *DiskQueue) nextDueForBinding(now time.Time, binding string) (string, er
 		return "", err
 	}
 	defer unlockClose(global)
-	records, err := q.admissions()
-	if err != nil {
-		return "", err
-	}
 	var selected QueueStatus
 	var selectedAt time.Time
-	for _, admission := range records {
+	err = q.visitAdmissions(func(admission QueueStatus) error {
 		r, err := q.Inspect(admission.Job.DeliveryID)
 		if errors.Is(err, ErrBusy) || errors.Is(err, ErrAdmissionPending) {
-			continue
+			return nil
 		}
 		if err != nil {
-			return "", err
+			return err
 		}
 		if !recordEligible(r) || recordDue(r).After(now) || binding != "" && (r.Job.HostBinding != binding || !r.Job.Task.valid()) {
-			continue
+			return nil
 		}
-		// A persisted backoff wins once due. Continuously runnable jobs rotate
-		// by the last finite attempt, with an ID tie-breaker for untouched jobs.
 		at := recordDue(r)
 		if r.LastRun.After(at) {
 			at = r.LastRun
 		}
-		if selected.Job.DeliveryID == "" || at.Before(selectedAt) || at.Equal(selectedAt) && r.Job.DeliveryID < selected.Job.DeliveryID {
+		// Finish already activated files before opening another temporary index.
+		active := r.Admitted || r.Activated
+		selectedActive := selected.Admitted || selected.Activated
+		if selected.Job.DeliveryID == "" || active && !selectedActive || active == selectedActive && (at.Before(selectedAt) || at.Equal(selectedAt) && r.Job.DeliveryID < selected.Job.DeliveryID) {
 			selected, selectedAt = r, at
 		}
+		return nil
+	})
+	if err != nil {
+		return "", err
 	}
 	if selected.Job.DeliveryID != "" {
 		return selected.Job.DeliveryID, nil

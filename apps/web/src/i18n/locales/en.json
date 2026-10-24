@@ -1070,7 +1070,7 @@
       "result": "Final assistant summary",
       "unavailable": "No final summary is available.",
       "truncated": "This summary is truncated.",
-      "businessUnknown": "Business completion remains unverified. Attachments are unavailable.",
+      "businessUnknown": "Business completion remains unverified.",
       "cancelIntent": "Cancellation was requested; this does not confirm termination.",
       "filteredPage": "No accessible tasks on this page. Continue to the next page.",
       "empty": "No recorded tasks.",
@@ -1105,7 +1105,23 @@
         "output_limit": "Pi result exceeded the observation limit"
       },
       "visibleOutput": "Latest visible assistant output",
-      "pollingOutput": "Updated by polling while this view is open. Shows persisted visible assistant text from this run, not reasoning or full logs."
+      "pollingOutput": "Updated by polling while this view is open. Shows persisted visible assistant text from this run, not reasoning or full logs.",
+      "files": {
+        "title": "Task files",
+        "empty": "No file deliveries have been recorded.",
+        "unsupported": "This server does not support task file observation yet.",
+        "loadFailed": "Unable to load task files.",
+        "upload": "Stored on NAS",
+        "download": "Received by PC",
+        "states": {
+          "pending": "Delivery pending",
+          "reserved": "Delivery in progress",
+          "committed": "Delivery recorded",
+          "canceled": "Delivery canceled",
+          "failed": "Delivery failed",
+          "unknown": "Delivery status unknown"
+        }
+      }
     },
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",
@@ -2073,6 +2089,12 @@
     "iconPlaceholder": "Icon URL or identifier (optional)",
     "enable": "Enable",
     "enableHint": "Only models from enabled providers appear in the available model list",
+    "imagesProtocol": {
+      "label": "Image generation protocol",
+      "description": "Uses the Bot's configured image model. Other saved image options are preserved.",
+      "preserve": "Keep existing behavior",
+      "openaiImages": "OpenAI Images"
+    },
     "promptCache": {
       "label": "Prompt Cache",
       "option5m": "5 minutes (default)",

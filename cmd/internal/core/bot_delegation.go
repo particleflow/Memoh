@@ -21,8 +21,10 @@ import (
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/channel"
+	"github.com/felinics/memoh/internal/channel/route"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/config"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
@@ -43,17 +45,22 @@ type delegationHost struct {
 	service     *botdelegation.Service
 	messages    *messagepkg.DBService
 	media       *media.Service
+	routes      delegationRouteReader
 }
 
-func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, media *media.Service, messages *messagepkg.DBService, runtime *boot.RuntimeConfig) *botdelegation.Service {
-	h := &delegationHost{store: store, accounts: accounts, permissions: &applicationBotPermissionChecker{bots: bots, accounts: accounts}, sessions: sessions, media: media, messages: messages}
+func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, media *media.Service, messages *messagepkg.DBService, runtime *boot.RuntimeConfig, routes *route.DBService, cfg config.Config) (*botdelegation.Service, error) {
+	timeout, err := cfg.BotDelegation.ExecutionTimeoutDuration()
+	if err != nil {
+		return nil, err
+	}
+	h := &delegationHost{store: store, accounts: accounts, permissions: &applicationBotPermissionChecker{bots: bots, accounts: accounts}, sessions: sessions, media: media, messages: messages, routes: routes}
 	a := &botdelegation.Authority{Permissions: h, Sessions: sessions, Workdirs: delegationWorkdirs{store}, Mounts: store, Assets: h}
-	s := botdelegation.NewService(a, botdelegation.NewPostgresLedger(store.SQLC()), media, log)
+	s := botdelegation.NewService(a, botdelegation.NewPostgresLedger(store.SQLC()), media, log, timeout)
 	s.SetCursorSecret(runtime.JwtSecret)
 	h.service = s
 	s.Host = h
 	lc.Append(fx.Hook{OnStop: func(context.Context) error { s.Close(); return nil }})
-	return s
+	return s, nil
 }
 
 // The authority reads persisted selection metadata, not a workspace capability.
@@ -298,6 +305,10 @@ func (h *delegationHost) Run(ctx context.Context, r botdelegation.Record, starte
 }
 
 func (h *delegationHost) Deliver(ctx context.Context, r botdelegation.Record) error {
+	routing, err := h.deliveryRoute(ctx, r)
+	if err != nil {
+		return err
+	}
 	attachments, err := h.inputAttachments(ctx, r, true)
 	if err != nil {
 		return err
@@ -306,7 +317,7 @@ func (h *delegationHost) Deliver(ctx context.Context, r botdelegation.Record) er
 	if r.Result.Summary != nil {
 		text += "\n\n" + r.Result.Summary.Text
 	}
-	return h.agent.EnqueueAuthorizedFollowUp(ctx, "bot-delegation-result:"+r.ID, turn.StartTurnCommand{DelegationResultID: r.ID, SchemaVersion: 1, TeamID: r.Identity.TeamID, Mode: turn.ModeChat, BotID: r.Identity.SourceBotID, ChatID: r.Identity.SourceBotID, ThreadID: r.Identity.SourceSessionID, UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, Query: text, UserVisibleText: text, Attachments: attachments, CurrentChannel: "web", ReplyTarget: r.Identity.SourceBotID})
+	return h.agent.EnqueueAuthorizedFollowUp(ctx, "bot-delegation-result:"+r.ID, delegationDeliveryCommand(r, routing, text, attachments))
 }
 
 type (
@@ -378,6 +389,11 @@ func (h *delegationHost) prepare(ctx context.Context, req application.ChatReques
 	if req.DelegationResultID != "" {
 		r, err := h.service.ReadRecord(ctx, req.BotID, req.UserID, req.ThreadID, req.DelegationResultID)
 		if err != nil || (r.State != "completed" && r.State != "failed") {
+			return ctx, req, botdelegation.ErrDenied
+		}
+		// Revalidate again at queued-turn admission, including after restart.
+		routing, err := h.deliveryRoute(ctx, r)
+		if err != nil || !delegationRequestMatchesRoute(req, routing) {
 			return ctx, req, botdelegation.ErrDenied
 		}
 		attachments, err := h.inputAttachments(ctx, r, true)

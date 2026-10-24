@@ -1137,8 +1137,6 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 	fedGateway.SetOAuthService(oauthService)
 	imageProvider := imagecapability.New(agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService), settingsService, modelsService, queries, mediaService,
 		imageCapabilityAuthorizer(&applicationBotPermissionChecker{bots: botService, accounts: accountService}, sessionService.Get))
-	spawnProvider := agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager)
-	backgroundProvider := agenttools.NewBackgroundProvider(log, bgManager)
 	return []agenttools.ToolProvider{
 		agenttools.NewBotDelegationProvider(delegations, botService),
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
@@ -1180,10 +1178,10 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewMemoryProvider(log, memoryRegistry, settingsService, historySessions, hookService),
 		agenttools.NewWebProvider(log, settingsService, searchProviderService),
 		agenttools.NewContainerProvider(log, manager, bgManager, config.DefaultDataMount, hookService),
-		backgroundProvider,
+		agenttools.NewBackgroundProvider(log, bgManager),
 		agenttools.NewBrowserProvider(log, settingsService, nativeWorkspaceBridgeProvider{manager: manager}, displayService, config.DefaultDataMount),
 		agenttools.NewWebFetchProvider(log, settingsService, fetchProviderService),
-		spawnProvider,
+		agenttools.NewSpawnProvider(log, settingsService, modelsService, queries, sessionService, bgManager),
 		agenttools.NewSkillProvider(log, func(ctx context.Context, botID string) (map[string]agenttools.SkillDetail, error) {
 			items, err := containerdHandler.LoadSkills(ctx, botID)
 			if err != nil {

@@ -76,6 +76,9 @@ func (q *DiskQueue) MigrateNativePublication(ctx context.Context) (bool, error) 
 	if ctx == nil || q == nil || q.root == nil || q.readOnly {
 		return false, ErrInvalid
 	}
+	if q.budgetBase != 0 {
+		return false, ErrVersion // Publication v1->v2 precedes the budget gate.
+	}
 	if err := ctx.Err(); err != nil {
 		return false, err
 	}
@@ -129,7 +132,7 @@ func (p *NativePublication) migratePublication(ctx context.Context) (bool, error
 	if json.Unmarshal(raw, &locator) != nil {
 		return false, ErrStore
 	}
-	if locator.Version == 2 {
+	if locator.Version == 2 || locator.Version == 3 {
 		err := p.metadata.validate(ctx)
 		return err == nil, err
 	}

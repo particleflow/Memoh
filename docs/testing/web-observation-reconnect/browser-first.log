@@ -1,0 +1,20 @@
+PASS existing real PG delegation -> child task detail; no business dispatch
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+1 !== 0
+
+    at missing (file:///tmp/web-observation-reconnect/browser-reconnect.mjs:33:37)
+    at file:///tmp/web-observation-reconnect/browser-reconnect.mjs:49:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v25.9.0

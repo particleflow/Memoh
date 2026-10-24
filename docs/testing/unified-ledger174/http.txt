@@ -1,0 +1,6 @@
+# github.com/felinics/memoh/internal/handlers
+package github.com/felinics/memoh/internal/handlers
+	imports github.com/felinics/memoh/internal/computertask from computer_deliveries.go
+	imports github.com/felinics/memoh/internal/sessiontask from delivery_postgres.go
+	imports github.com/felinics/memoh/internal/computertask from deliveries.go: import cycle not allowed
+FAIL	github.com/felinics/memoh/internal/handlers [setup failed]

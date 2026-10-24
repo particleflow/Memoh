@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.waitFor: Timeout 15000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('dialog').getByText(/Execution\s*·\s*Failed/).first() to be visible[22m
+
+    at /tmp/delegation-route-config/browser.mjs:21:59 {
+  log: [
+    "  - waiting for getByRole('dialog').getByText(/Execution\\s*·\\s*Failed/).first() to be visible"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v24.19.0

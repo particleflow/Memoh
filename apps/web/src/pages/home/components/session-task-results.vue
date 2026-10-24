@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, inject, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
+import type { ComputerTaskDeliveryView } from '../composables/useComputerTaskDeliveries'
+import AttachmentBlock from './attachment-block.vue'
+import MediaGalleryLightbox, { type MediaGalleryItem } from './media-gallery-lightbox.vue'
+import { resolveUrl, isMediaType } from '../composables/useMediaGallery'
+import { openAssetPreviewKey } from '../composables/useFileManagerProvider'
+import type { AttachmentItem } from '@/store/chat-list'
+import { formatFileSize } from '@/components/file-manager/utils'
 import type { SessiontaskTask } from '@memohai/sdk'
 import { apiErrorStatus, isApiErrorCode, parseMemohError, resolveApiErrorMessage } from '@/utils/api-error'
 
@@ -14,21 +21,57 @@ const props = defineProps<{
   nextCursor?: string
   loading: boolean
   error?: unknown
+  deliveries?: ComputerTaskDeliveryView
 }>()
 const emit = defineEmits<{
   openTask: [task: SessiontaskTask]
   page: [cursor?: string]
   refresh: []
+  assetOpened: []
 }>()
 const { t } = useI18n()
-const errorMessage = computed(() => {
-  const code = parseMemohError(props.error)?.code
+// Use the same attachment resolver, preview host and browser download as chat.
+// No task credential or per-file preflight: native media rechecks Bot access.
+const preview = inject(openAssetPreviewKey, undefined)
+if (preview) provide(openAssetPreviewKey, args => { preview(args); emit('assetOpened') })
+const attachments = computed(() => {
+  const result = new Map<string, AttachmentItem>()
+  if (!props.deliveries?.botId || props.deliveries.error) return result
+  for (const file of props.deliveries.files) {
+    if (file.state !== 'committed' || !file.reference) continue
+    result.set(file.delivery_id!, {
+      type: 'file', name: file.delivery_id, bot_id: props.deliveries.botId,
+      content_hash: file.reference.content_hash, mime: file.reference.mime, size: file.reference.size_bytes,
+    })
+  }
+  return result
+})
+const mediaItems = computed<MediaGalleryItem[]>(() => [...attachments.value.values()]
+  .filter(isMediaType).map(att => ({ src: resolveUrl(att), type: att.mime?.startsWith('video/') ? 'video' : 'image', name: att.name })))
+const mediaHost = ref<HTMLElement>()
+// Keep the existing lightbox in the host's top layer, outside its scroll body.
+const mediaTarget = computed(() => mediaHost.value?.closest<HTMLElement>('dialog, [role="dialog"]') ?? mediaHost.value)
+const mediaIndex = ref<number | null>(null)
+function openMedia(src: string) {
+  const index = mediaItems.value.findIndex(item => item.src === src)
+  mediaIndex.value = index < 0 ? null : index
+}
+watch([() => props.deliveries?.botId, () => props.detail?.task_id, () => props.deliveries?.error], () => { mediaIndex.value = null })
+watch(mediaItems, (items, previous) => {
+  const index = mediaIndex.value
+  if (index !== null && items[index]?.src !== previous[index]?.src) mediaIndex.value = null
+})
+
+const errorMessage = computed(() => readError(props.error, 'chat.tasks.unsupported', 'chat.tasks.loadFailed'))
+const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.unsupported', 'chat.tasks.files.loadFailed'))
+function readError(error: unknown, unsupported: string, fallback: string) {
+  const code = parseMemohError(error)?.code
   // Legacy servers may return an untyped route 404. A current scoped denial
   // uses session.not_found and must not be reported as a missing feature.
-  if (code === 'http.not_found' || (!code && apiErrorStatus(props.error) === 404)) return t('chat.tasks.unsupported')
-  if (isApiErrorCode(props.error, 'session.not_found')) return t('chat.tasks.inaccessible')
-  return resolveApiErrorMessage(props.error, t('chat.tasks.loadFailed'))
-})
+  if (code === 'http.not_found' || (!code && apiErrorStatus(error) === 404)) return t(unsupported)
+  if (isApiErrorCode(error, 'session.not_found')) return t('chat.tasks.inaccessible')
+  return resolveApiErrorMessage(error, t(fallback))
+}
 function stateLabel(task: SessiontaskTask) {
   const outcome = task.pi_result
   const known = ['succeeded', 'failed', 'aborted', 'incomplete', 'not_started', 'invalid_protocol', 'output_limit']
@@ -108,6 +151,72 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.truncated') }}
         </p>
       </div>
+      <section
+        v-if="detail.task_type === 'computer_operation' && deliveries"
+        class="space-y-2"
+        :aria-label="t('chat.tasks.files.title')"
+      >
+        <h3 class="text-label font-medium">
+          {{ t('chat.tasks.files.title') }}
+        </h3>
+        <Empty v-if="deliveries.error">
+          <EmptyDescription>{{ deliveriesError }}</EmptyDescription>
+          <Button
+            variant="outline"
+            :disabled="deliveries.loading"
+            @click="deliveries.refresh()"
+          >
+            {{ t('chat.tasks.reload') }}
+          </Button>
+        </Empty>
+        <template v-else>
+          <InlineLoadingRow v-if="deliveries.loading">
+            {{ t('common.loading') }}
+          </InlineLoadingRow>
+          <p
+            v-else-if="deliveries.loaded && !deliveries.files.length"
+            class="text-body text-muted-foreground"
+          >
+            {{ t('chat.tasks.files.empty') }}
+          </p>
+          <Item
+            v-for="file in deliveries.files"
+            :key="file.delivery_id"
+            size="sm"
+          >
+            <ItemContent>
+              <ItemTitle class="break-all">
+                {{ file.delivery_id }}
+              </ItemTitle>
+              <ItemDescription>
+                {{ t(`chat.tasks.files.states.${['pending', 'reserved', 'committed', 'canceled', 'failed'].includes(file.state ?? '') ? file.state : 'unknown'}`) }}
+              </ItemDescription>
+              <template v-if="file.state === 'committed' && file.reference">
+                <ItemDescription>{{ t(`chat.tasks.files.${file.reference.direction}`) }} · {{ file.reference.mime }} · {{ formatFileSize(file.reference.size_bytes ?? 0) }}</ItemDescription>
+                <ItemDescription class="break-all">
+                  {{ file.reference.content_hash }}
+                </ItemDescription>
+                <template v-if="attachments.has(file.delivery_id!)">
+                  <AttachmentBlock
+                    :block="{ id: 0, type: 'attachments', attachments: [attachments.get(file.delivery_id!)!] }"
+                    :on-open-media="openMedia"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    as-child
+                  >
+                    <a
+                      :href="resolveUrl(attachments.get(file.delivery_id!)!)"
+                      :download="file.delivery_id"
+                    >{{ t('bots.files.download') }}</a>
+                  </Button>
+                </template>
+              </template>
+            </ItemContent>
+          </Item>
+        </template>
+      </section>
       <p class="text-body text-muted-foreground">
         {{ t('chat.tasks.businessUnknown') }}
       </p>
@@ -153,4 +262,12 @@ function taskLabel(task: SessiontaskTask) {
       </Button>
     </div>
   </template>
+  <div ref="mediaHost" />
+  <MediaGalleryLightbox
+    v-if="mediaTarget"
+    :teleport-to="mediaTarget"
+    :items="mediaItems"
+    :open-index="mediaIndex"
+    @update:open-index="mediaIndex = $event"
+  />
 </template>

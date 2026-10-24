@@ -1,0 +1,6 @@
+Observed command results (summary, not raw stdout):
+Go 1.25.7; existing task caches; combined product ee0394f1.
+go build -p=2 -o <task-scratch>/server-combined ./cmd/agent
+exit=0; raw stdout/stderr log is empty
+go vet -p=2 ./internal/imagecapability ./internal/botdelegation ./internal/config ./cmd/internal/core ./internal/transferclient ./internal/deliverymeta ./cmd/transferqueue
+exit=0; raw stdout/stderr log is empty

@@ -1067,7 +1067,7 @@
       "result": "最終応答の要約",
       "unavailable": "最終応答の要約はありません。",
       "truncated": "要約は一部省略されています。",
-      "businessUnknown": "業務目標の達成は未検証です。添付成果物は利用できません。",
+      "businessUnknown": "業務の完了はまだ確認されていません。",
       "cancelIntent": "キャンセル要求は記録されていますが、終了の確認ではありません。",
       "filteredPage": "このページに閲覧可能なタスクはありません。次のページに進めます。",
       "empty": "タスク記録はありません。",
@@ -1102,7 +1102,23 @@
         "output_limit": "Pi の結果が確認上限を超過"
       },
       "visibleOutput": "最新の表示可能な応答",
-      "pollingOutput": "この画面を開いている間は定期的に更新します。この実行で保存された応答のみを表示し、推論や完全なログは含みません。"
+      "pollingOutput": "この画面を開いている間は定期的に更新します。この実行で保存された応答のみを表示し、推論や完全なログは含みません。",
+      "files": {
+        "title": "タスクのファイル",
+        "empty": "ファイルの受け渡しはまだ記録されていません。",
+        "unsupported": "このサーバーはタスクのファイル表示に未対応です。",
+        "loadFailed": "タスクのファイルを読み込めません。",
+        "upload": "NAS に保存済み",
+        "download": "PC が受信済み",
+        "states": {
+          "pending": "受け渡し待ち",
+          "reserved": "受け渡し中",
+          "committed": "受け渡しを記録済み",
+          "canceled": "受け渡しをキャンセル",
+          "failed": "受け渡し失敗",
+          "unknown": "受け渡し状態不明"
+        }
+      }
     },
     "uploadingAttachments": "添付ファイルをアップロード中…",
     "attachmentUploadTooLarge": "「{name}」はこのサーバーの上限（{limit} バイト）を超えています。小さいファイルを選んでください。",
@@ -2042,6 +2058,12 @@
     "iconPlaceholder": "アイコンURLまたは識別子 (オプション)",
     "enable": "有効にする",
     "enableHint": "利用可能なモデル一覧には、有効なプロバイダーのモデルのみが表示されます。",
+    "imagesProtocol": {
+      "label": "画像生成プロトコル",
+      "description": "Bot に設定された画像モデルを使用します。保存済みの他の画像設定は維持されます。",
+      "preserve": "現在の動作を維持",
+      "openaiImages": "OpenAI Images"
+    },
     "promptCache": {
       "label": "プロンプトキャッシュ",
       "option5m": "5分(デフォルト)",

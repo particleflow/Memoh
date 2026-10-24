@@ -193,7 +193,7 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 		return status
 	}
 	raw, _ := json.Marshal(closed)
-	if out := invoke("enqueue-result", raw); string(out["admitted"]) != "true" {
+	if out := invoke("enqueue-result", raw); string(out["registered"]) != "true" {
 		t.Fatal("admission failed", out)
 	}
 	if mode == "client-killed-before-checkpoint" {
@@ -241,22 +241,17 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 		if err != nil {
 			t.Fatal(err)
 		}
-		var d struct {
-			Ledger struct {
-				Version int `json:"version"`
-				Entries map[string]struct {
-					Outcome  string `json:"outcome"`
-					Transfer struct {
-						ID    string        `json:"upload_id"`
-						Ready *media.Upload `json:"ready"`
-					} `json:"transfer"`
-				} `json:"entries"`
-			} `json:"delivery_ledger"`
+		stored, err := store.ReadComputerDeliveryEntry(ctx, r, closed.DeliveryID())
+		var e struct {
+			Outcome  string `json:"outcome"`
+			Transfer struct {
+				ID    string        `json:"upload_id"`
+				Ready *media.Upload `json:"ready"`
+			} `json:"transfer"`
 		}
-		if json.Unmarshal(r.Details, &d) != nil || d.Ledger.Version != 4 {
-			t.Fatal("proof ledger version")
+		if err != nil || stored.Version != 4 || json.Unmarshal(stored.Data, &e) != nil {
+			t.Fatal("proof entry version", err)
 		}
-		e := d.Ledger.Entries[closed.DeliveryID()]
 		if e.Transfer.Ready == nil {
 			return media.Upload{}, e.Transfer.ID, e.Outcome, false
 		}
@@ -324,9 +319,12 @@ func exerciseReadyProofCLIRecovery(ctx context.Context, t *testing.T, store *pos
 		if string(final["associated"]) != "false" || string(final["state"]) != `"unknown"` || string(final["error_code"]) != `"receipt_unavailable"` {
 			t.Fatal("unknown publication fabricated success", final)
 		}
-		snapshot, err := os.ReadFile(filepath.Join(state, "deliveries-v1", closed.DeliveryID()+".snapshot")) //nolint:gosec // Isolated owned snapshot.
+		snapshot, err := os.ReadFile(filepath.Join(source, closed.Artifact.SourceRef)) //nolint:gosec // Isolated original source; the indexed path never duplicates its payload.
 		if err != nil || string(snapshot) != "synthetic delivery content" {
 			t.Fatal("unknown evidence released", err)
+		}
+		if info, err := os.Stat(filepath.Join(state, "deliveries-v1", closed.DeliveryID()+".tree")); err != nil || info.Size() == 0 {
+			t.Fatal("unknown block index removed", err)
 		}
 		feedbackRaw, err := os.ReadFile(filepath.Join(attemptPath, deliverymeta.ProducerFeedbackName)) //nolint:gosec // Isolated producer receipt.
 		if err != nil {

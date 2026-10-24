@@ -1,9 +1,10 @@
-import { onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
+import { computed, onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
 import {
   getBotsByBotIdSessionsBySessionIdTasks,
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId,
   type SessiontaskTask,
 } from '@memohai/sdk'
+import { useComputerTaskDeliveries } from './useComputerTaskDeliveries'
 import { apiErrorStatus } from '@/utils/api-error'
 
 export interface TaskScope {
@@ -15,7 +16,7 @@ export interface TaskScope {
 
 // Authorization-scoped content stays in this mounted view only. In particular,
 // a query-cache success must never reappear after a denial or a scope change.
-export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boolean>) {
+export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boolean>, paused: Ref<boolean> = ref(false)) {
   const items = shallowRef<SessiontaskTask[]>([])
   const detail = shallowRef<SessiontaskTask>()
   const selected = shallowRef<Pick<SessiontaskTask, 'task_type' | 'task_id'>>()
@@ -38,7 +39,7 @@ export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boole
   }
 
   async function refresh() {
-    if (!scope.value || !visible.value || loading.value) return
+    if (!scope.value || !visible.value || paused.value || loading.value) return
     const current = scope.value
     const target = selected.value
     const epoch = generation
@@ -102,11 +103,21 @@ export function useSessionTasks(scope: Ref<TaskScope | null>, visible: Ref<boole
     cursor.value = undefined
     void refresh()
   }, { immediate: true, flush: 'sync' })
+  // A temporarily unavailable parent relation clears content and aborts reads,
+  // but can retain navigation within this same visible identity/scope. Resuming
+  // requires the host to revalidate that relation, then reads the task afresh.
+  watch(paused, () => {
+    invalidate()
+    void refresh()
+  }, { flush: 'sync' })
   // A denial/missing route needs explicit Reload or a changed scope, not a
   // five-second retry loop. Transient failures can still recover by polling.
   const timer = setInterval(() => {
     if (![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh()
   }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
-  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh }
+  const deliveries = useComputerTaskDeliveries(scope, selected, computed(() => visible.value && !paused.value
+    && !error.value && !!detail.value && detail.value.task_type === 'computer_operation'
+    && detail.value.task_id === selected.value?.task_id))
+  return { items, detail, selected, cursor, nextCursor, loading, error, openTask, back, page, refresh, deliveries }
 }

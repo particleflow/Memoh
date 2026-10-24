@@ -1,0 +1,15 @@
+{
+  "page_errors": [],
+  "execution_failed_visible": true,
+  "no_completed_label": true,
+  "delegation_reads": [
+    {
+      "status": 200,
+      "method": "GET"
+    },
+    {
+      "status": 200,
+      "method": "GET"
+    }
+  ]
+}

@@ -64,8 +64,8 @@ func TestProductionResolverPreservesLegacyDefault(t *testing.T) {
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 				t.Error(err)
 			}
-			if _, ok := body["model"]; ok {
-				t.Error("explicit default-model policy did not omit model")
+			if body["model"] != "synthetic-image" {
+				t.Error("Bot image model was not used")
 			}
 			respondImage(w, output)
 			return
@@ -80,7 +80,7 @@ func TestProductionResolverPreservesLegacyDefault(t *testing.T) {
 	setConfig := func(explicit bool) {
 		cfg := map[string]any{"base_url": server.URL + "/v1", "api_key": "synthetic-test-key"}
 		if explicit {
-			cfg[ConfigKey] = Config{Protocol: "openai-images", ModelMode: "omit"}
+			cfg[ConfigKey] = Config{Protocol: "openai-images"}
 		}
 		q.provider.Config, _ = json.Marshal(cfg)
 	}
@@ -237,9 +237,6 @@ func TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution(t *testing.T) {
 				if _, err := list[0].Execute(&toolexec.ToolExecContext{Context: t.Context()}, sdk.ParseToolArguments(`{"prompt":"synthetic"}`)); err == nil || calls.Load() != 0 {
 					t.Fatal("stale legacy tool dispatched after explicit protocol selection")
 				}
-				if raw == `{"protocol":"openai-images","model_mode":"omit"}` {
-					return
-				}
 				if list, err := wrapped.Tools(t.Context(), session); err == nil || len(list) != 0 {
 					t.Fatal("known invalid explicit configuration fell back to legacy")
 				}
@@ -343,58 +340,12 @@ func TestModelArgumentsCannotChooseProvider(t *testing.T) {
 	}
 }
 
-func TestEditMultipartConfiguredModelAndMask(t *testing.T) {
-	data, mask := pngBytes(t, 21), pngBytes(t, 22)
-	p, _ := fixture(t, func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path != "/v1/images/edits" || r.Method != http.MethodPost {
-			t.Error("wrong edit protocol")
-		}
-		if err := r.ParseMultipartForm(1 << 20); err != nil {
-			t.Error(err)
-			return
-		}
-		defer func() {
-			if cleanupErr := r.MultipartForm.RemoveAll(); cleanupErr != nil {
-				t.Error(cleanupErr)
-			}
-		}()
-		if r.FormValue("model") != "synthetic-selected-image-model" || len(r.MultipartForm.File["image[]"]) != 2 {
-			t.Error("configured multipart fields lost")
-		}
-		for field, expected := range map[string][]byte{"image[]": data, "mask": mask} {
-			for _, header := range r.MultipartForm.File[field] {
-				f, err := header.Open()
-				if err != nil {
-					t.Error(err)
-					continue
-				}
-				got, _ := io.ReadAll(f)
-				_ = f.Close()
-				if !bytes.Equal(got, expected) {
-					t.Error("edit input bytes changed")
-				}
-			}
-		}
-		if len(r.MultipartForm.File["mask"]) != 1 {
-			t.Error("mask absent")
-		}
-		respondImage(w, data)
-	})
-	resolve := p.resolve
-	p.resolve = func(ctx context.Context, bot string) (selection, bool, error) {
-		s, b, e := resolve(ctx, bot)
-		s.config.ModelMode = "configured"
-		return s, b, e
-	}
-	for _, b := range [][]byte{data, mask} {
-		if _, err := p.media.Ingest(t.Context(), media.IngestInput{BotID: "synthetic-bot", Mime: "image/png", Reader: bytes.NewReader(b)}); err != nil {
-			t.Fatal(err)
-		}
-	}
-	args, _ := json.Marshal(map[string]any{"prompt": "synthetic edit", "images": []string{digest(data), digest(data)}, "mask": digest(mask)})
-	result := call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "edit_image", string(args))
-	if result.IsError || !strings.Contains(result.Result.String(), digest(data)) {
-		t.Fatal(result.Result.String())
+func TestEditMaskRejectedBeforeHTTP(t *testing.T) {
+	var calls atomic.Int32
+	p, _ := fixture(t, func(http.ResponseWriter, *http.Request) { calls.Add(1) })
+	result := call(t, p, tools.SessionContext{BotID: "synthetic-bot"}, "edit_image", `{"prompt":"synthetic edit","images":["missing"],"mask":"missing"}`)
+	if !result.IsError || calls.Load() != 0 {
+		t.Fatal("removed mask dispatched")
 	}
 }
 

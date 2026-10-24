@@ -1,0 +1,16 @@
+=== RUN   TestRegisteredProcessExitBeforeAcknowledgement
+--- PASS: TestRegisteredProcessExitBeforeAcknowledgement (0.02s)
+=== RUN   TestRegisteredSourceRestartAndMissingChanges
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/changed
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/deleted
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/canceled
+=== RUN   TestRegisteredSourceRestartAndMissingChanges/busy
+--- PASS: TestRegisteredSourceRestartAndMissingChanges (0.02s)
+    --- PASS: TestRegisteredSourceRestartAndMissingChanges/changed (0.01s)
+    --- PASS: TestRegisteredSourceRestartAndMissingChanges/deleted (0.01s)
+    --- PASS: TestRegisteredSourceRestartAndMissingChanges/canceled (0.01s)
+    --- PASS: TestRegisteredSourceRestartAndMissingChanges/busy (0.00s)
+=== RUN   TestRegisteredSourceResumesReceiptWithoutSnapshot
+--- PASS: TestRegisteredSourceResumesReceiptWithoutSnapshot (0.05s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	1.118s

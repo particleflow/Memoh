@@ -34,6 +34,7 @@ var (
 	deliveryAttempt     = regexp.MustCompile(`^[a-f0-9]{32}$`)
 )
 
+// Legacy JSON readers remain bounded. Row storage has no cumulative entry cap.
 const maxDeliveries = 128
 
 // DeliveryIdentity is supplied by an authenticated host, never by JSON, URL
@@ -217,82 +218,87 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 			return DeliveryOutcome{}, ErrDeliveryBinding
 		}
 	}
-	if tx.Store == nil || tx.Authorize == nil {
-		return DeliveryOutcome{}, ErrDeliveryBinding
-	}
-	target, err := tx.Authorize(ctx, id)
+	r, details, err := authorizeDeliveryRecord(ctx, tx, id)
 	if err != nil {
 		return DeliveryOutcome{}, err
 	}
-	if p, ok := VerifiedTransferFromContext(ctx); ok && p.Device != (VerifiedTransferDevice{}) {
-		// Request selectors are not authority. Bind this authenticated device to
-		// the freshly authorized target in the same transaction as the ledger CAS.
-		if p.Device.ConnectionID != target.ConnectionID || p.Device.DeviceID != target.DeviceID || p.Device.InstanceID != target.InstanceID {
-			return DeliveryOutcome{}, ErrDenied
-		}
-	}
-	b := id.Binding
-	r, err := tx.Store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID})
-	if err != nil {
-		return DeliveryOutcome{}, err
-	}
-	if r.ID != id.OperationID || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID || r.TargetID != b.TargetID || r.RunID != b.RunID ||
-		target.DeviceID != id.DeviceID || target.InstanceID != id.InstanceID || r.TargetFingerprint != agenvo.TargetFingerprint(target) || target.Agent.ExecutionMode != "pi-json-v1" {
-		return DeliveryOutcome{}, ErrDeliveryBinding
-	}
-	var details struct {
-		Kind   string          `json:"kind"`
-		Batch  *BatchDetails   `json:"batch"`
-		Ledger json.RawMessage `json:"delivery_ledger"`
-	}
-	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &details) != nil || details.Kind != "herdr_pi_task" || details.Batch == nil ||
-		details.Batch.Progress.Attempt != id.Attempt || details.Batch.Progress.Generation != id.Generation {
-		return DeliveryOutcome{}, ErrDeliveryBinding
-	}
+	rows, rowStore := tx.Store.(dbstore.ComputerDeliveryEntryStore)
 	ledger := &deliveryLedger{}
-	if len(details.Ledger) > 0 {
-		if string(details.Ledger) == "null" || json.Unmarshal(details.Ledger, ledger) != nil {
-			return DeliveryOutcome{}, ErrDeliveryConflict
+	var entry deliveryEntry
+	var exists bool
+	entryVersion := version
+	if rowStore {
+		// The production adapter requires migration 174; a missing table is an
+		// explicit error, never a fallback to the bounded legacy JSON writer.
+		if len(details.Ledger) > 0 {
+			var marker struct {
+				Version int    `json:"version"`
+				Storage string `json:"storage"`
+			}
+			if json.Unmarshal(details.Ledger, &marker) != nil || marker.Version != 5 || marker.Storage != "rows" {
+				return DeliveryOutcome{}, ErrDeliveryVersion
+			}
+		}
+		stored, readErr := rows.ReadComputerDeliveryEntry(ctx, r, delivery)
+		if readErr != nil && !errors.Is(readErr, db.ErrNotFound) {
+			return DeliveryOutcome{}, readErr
+		}
+		exists = readErr == nil
+		if exists {
+			entryVersion = stored.Version
+			if json.Unmarshal(stored.Data, &entry) != nil || !validStoredDeliveryEntry(delivery, entry, entryVersion) {
+				return DeliveryOutcome{}, ErrDeliveryConflict
+			}
+			if entryVersion > version || entryVersion < 1 {
+				return DeliveryOutcome{}, ErrDeliveryVersion
+			}
 		}
 	} else {
-		ledger.Version, ledger.Entries = version, map[string]deliveryEntry{}
-	}
-	if ledger.Version != version && (version < 2 || ledger.Version < 1 || ledger.Version >= version) {
-		return DeliveryOutcome{}, ErrDeliveryVersion
-	}
-	if ledger.Entries == nil || len(ledger.Entries) > maxDeliveries {
-		return DeliveryOutcome{}, ErrDeliveryConflict
-	}
-	for key, entry := range ledger.Entries {
-		if version >= 2 && ledger.Version == 1 && entry.Reference.Direction == "download" {
+		if len(details.Ledger) > 0 {
+			if string(details.Ledger) == "null" || json.Unmarshal(details.Ledger, ledger) != nil {
+				return DeliveryOutcome{}, ErrDeliveryConflict
+			}
+		} else {
+			ledger.Version, ledger.Entries = version, map[string]deliveryEntry{}
+		}
+		if ledger.Version != version && (version < 2 || ledger.Version < 1 || ledger.Version >= version) {
 			return DeliveryOutcome{}, ErrDeliveryVersion
 		}
-		if !deliveryIDPattern.MatchString(key) || !entry.Reference.valid() || !deliveryHash.MatchString(entry.Scope) || entry.At.IsZero() || !validDeliveryEntry(entry, ledger.Version) {
+		if ledger.Entries == nil || len(ledger.Entries) > maxDeliveries {
 			return DeliveryOutcome{}, ErrDeliveryConflict
 		}
+		for key, entry := range ledger.Entries {
+			if version >= 2 && ledger.Version == 1 && entry.Reference.Direction == "download" {
+				return DeliveryOutcome{}, ErrDeliveryVersion
+			}
+			if !deliveryIDPattern.MatchString(key) || !entry.Reference.valid() || !deliveryHash.MatchString(entry.Scope) || entry.At.IsZero() || !validDeliveryEntry(entry, ledger.Version) {
+				return DeliveryOutcome{}, ErrDeliveryConflict
+			}
+		}
+		entry, exists = ledger.Entries[delivery]
+		entryVersion = ledger.Version
 	}
 	rawScope, _ := json.Marshal(id)
 	hash := sha256.Sum256(rawScope)
 	scope := hex.EncodeToString(hash[:])
 	out := DeliveryOutcome{Version: min(version, 3), Outcome: "absent", Revision: strconv.FormatInt(r.Revision, 10)}
-	entry, exists := ledger.Entries[delivery]
 	if exists {
 		if entry.Reference != ref || entry.Scope != scope {
 			return DeliveryOutcome{}, ErrDeliveryConflict
 		}
 		// A v1 download cancellation never attested a local publication fence.
-		if version >= 2 && ledger.Version == 1 && ref.Direction == "download" {
+		if version >= 2 && entryVersion == 1 && ref.Direction == "download" {
 			return DeliveryOutcome{}, ErrDeliveryVersion
 		}
 		out.Outcome = entry.Outcome
 	} else {
 		entry = deliveryEntry{Reference: ref, Scope: scope}
 	}
-	// The durable operation is the cancellation fence for its declared uploads.
+	// The durable operation is the cancellation fence for all its upload pages.
 	// Read it in the SAME transaction/revision CAS as reservation and final scan
 	// commit. A delayed exit hook or live old validator cannot publish after the
 	// fence. A committed winner remains queryable; cancellation is not retraction.
-	if r.CancelRequested && details.Batch.Progress.Producer != nil && ref.Direction == "upload" && (!exists || entry.Outcome != "committed") {
+	if r.CancelRequested && ref.Direction == "upload" && (!exists || entry.Outcome != "committed") {
 		return DeliveryOutcome{}, ErrDenied
 	}
 	changed, err := mutate(&entry, exists)
@@ -305,26 +311,32 @@ func mutateDeliveryTransaction(ctx context.Context, tx DeliveryTransaction, id D
 		}
 		return out, nil
 	}
-	if !exists && len(ledger.Entries) == maxDeliveries {
+	if !rowStore && !exists && len(ledger.Entries) == maxDeliveries {
 		return DeliveryOutcome{}, ErrDeliveryLimit
 	}
 	entry.At = time.Now().UTC()
-	ledger.Version = version
-	ledger.Entries[delivery] = entry
 	out.Outcome = entry.Outcome
 	if out.Outcome == "reserved" {
 		out.Outcome = "absent"
 	}
-	data, err := json.Marshal(ledger)
-	if err != nil {
-		return DeliveryOutcome{}, err
+	if rowStore {
+		data, marshalErr := json.Marshal(entry)
+		if marshalErr != nil {
+			return DeliveryOutcome{}, marshalErr
+		}
+		r, err = rows.SaveComputerDeliveryEntry(ctx, r, dbstore.ComputerDeliveryEntry{DeliveryID: delivery, Version: version, Data: data})
+	} else {
+		ledger.Version = version
+		ledger.Entries[delivery] = entry
+		data, marshalErr := json.Marshal(ledger)
+		if marshalErr != nil {
+			return DeliveryOutcome{}, marshalErr
+		}
+		if len(r.Details)-len(details.Ledger)+len(data)+64 > 2*1024*1024 {
+			return DeliveryOutcome{}, ErrDeliveryLimit
+		}
+		r, err = tx.Store.SaveComputerDelivery(ctx, r, data)
 	}
-	// Keep the entire existing operation readable by its bounded projections.
-	// Conservative JSON overhead allowance avoids creating an unreadable row.
-	if len(r.Details)-len(details.Ledger)+len(data)+64 > 2*1024*1024 {
-		return DeliveryOutcome{}, ErrDeliveryLimit
-	}
-	r, err = tx.Store.SaveComputerDelivery(ctx, r, data)
 	if errors.Is(err, db.ErrNotFound) {
 		return DeliveryOutcome{}, ErrDeliveryRetry
 	}
@@ -386,4 +398,46 @@ func validDeliveryEntry(e deliveryEntry, version int) bool {
 		return e.Lease != "" && !e.Until.IsZero() && e.Attempts > 0
 	}
 	return e.Outcome == "committed" || e.Outcome == "canceled" || e.Outcome == "failed"
+}
+
+func validStoredDeliveryEntry(id string, entry deliveryEntry, version int) bool {
+	return version >= 1 && version <= transferLedgerVersion && deliveryIDPattern.MatchString(id) && entry.Reference.valid() && deliveryHash.MatchString(entry.Scope) && !entry.At.IsZero() && validDeliveryEntry(entry, version)
+}
+
+type deliveryOperationDetails struct {
+	Kind   string          `json:"kind"`
+	Batch  *BatchDetails   `json:"batch"`
+	Ledger json.RawMessage `json:"delivery_ledger"`
+}
+
+func authorizeDeliveryRecord(ctx context.Context, tx DeliveryTransaction, id DeliveryIdentity) (dbstore.ComputerOperationRecord, deliveryOperationDetails, error) {
+	if tx.Store == nil || tx.Authorize == nil {
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
+	}
+	target, err := tx.Authorize(ctx, id)
+	if err != nil {
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, err
+	}
+	if p, ok := VerifiedTransferFromContext(ctx); ok && p.Device != (VerifiedTransferDevice{}) {
+		// Request selectors are not authority. Bind this authenticated device to
+		// the freshly authorized target in the same transaction as the ledger CAS.
+		if p.Device.ConnectionID != target.ConnectionID || p.Device.DeviceID != target.DeviceID || p.Device.InstanceID != target.InstanceID {
+			return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDenied
+		}
+	}
+	b := id.Binding
+	r, err := tx.Store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id.OperationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID})
+	if err != nil {
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, err
+	}
+	if r.ID != id.OperationID || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID || r.TargetID != b.TargetID || r.RunID != b.RunID ||
+		target.DeviceID != id.DeviceID || target.InstanceID != id.InstanceID || r.TargetFingerprint != agenvo.TargetFingerprint(target) || target.Agent.ExecutionMode != "pi-json-v1" {
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
+	}
+	var details deliveryOperationDetails
+	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &details) != nil || details.Kind != "herdr_pi_task" || details.Batch == nil ||
+		details.Batch.Progress.Attempt != id.Attempt || details.Batch.Progress.Generation != id.Generation {
+		return dbstore.ComputerOperationRecord{}, deliveryOperationDetails{}, ErrDeliveryBinding
+	}
+	return r, details, nil
 }

@@ -1,0 +1,9 @@
+# github.com/felinics/memoh/internal/db_test [github.com/felinics/memoh/internal/db.test]
+internal/db/session_task_deliveries_integration_test.go:34:37: cannot use store (variable of type *postgresstore.Store) as store.Queries value in argument to bots.NewService: *postgresstore.Store does not implement store.Queries (wrong type for method BindHistoryTurnAssistantByRequest)
+		have BindHistoryTurnAssistantByRequest("context".Context, sqlc.BindHistoryTurnAssistantByRequestParams) (sqlc.BindHistoryTurnAssistantByRequestRow, error)
+		want BindHistoryTurnAssistantByRequest("context".Context, sqlc.BindHistoryTurnAssistantByRequestParams) (store.HistoryTurn, error)
+internal/db/session_task_deliveries_integration_test.go:36:38: cannot use botService (variable of type *bots.Service) as agenvo.PermissionChecker value in argument to agenvo.NewService: *bots.Service does not implement agenvo.PermissionChecker (missing method HasBotPermission)
+internal/db/session_task_deliveries_integration_test.go:40:64: cannot use store (variable of type *postgresstore.Store) as thread.Queries value in argument to thread.NewService: *postgresstore.Store does not implement thread.Queries (wrong type for method GetVisibleHistoryTurnByMessage)
+		have GetVisibleHistoryTurnByMessage("context".Context, sqlc.GetVisibleHistoryTurnByMessageParams) (sqlc.GetVisibleHistoryTurnByMessageRow, error)
+		want GetVisibleHistoryTurnByMessage("context".Context, sqlc.GetVisibleHistoryTurnByMessageParams) (store.HistoryTurn, error)
+FAIL	github.com/felinics/memoh/internal/db [build failed]

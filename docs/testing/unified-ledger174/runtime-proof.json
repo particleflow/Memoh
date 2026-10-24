@@ -1,0 +1,10 @@
+{
+  "old_active_session_runs": 0,
+  "old_active_delegations": 0,
+  "before_schema": "173|f",
+  "after_schema": "174|f",
+  "backup_bytes": 1682754,
+  "old_writer_stopped": true,
+  "new_pid": 205489,
+  "scope": "existing isolated synthetic application database only; no production; no dispatch"
+}

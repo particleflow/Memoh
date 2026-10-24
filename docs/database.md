@@ -56,6 +56,10 @@ The canonical source of truth for the full PostgreSQL schema is `db/postgres/mig
 - `bot_history_message_assets` — Message → content_hash asset links (with name and metadata)
 - `bot_history_message_compacts` — Compacted message summaries
 
+**Computer execution and delivery**
+- `computer_operations` — Existing execution identity, authorization scope, cancellation fence and revision CAS; row-layout delivery marker since migration 0174
+- `computer_delivery_entries` — Per-delivery rows of that same operation ledger, preserving original receipt/proof JSON and bounded append-cursor reads; forced team RLS and operation CAS writes
+
 **User Input**
 - `user_input_requests` — In-conversation questions posed by the `ask_user` tool, keyed by session and tool_call_id
 

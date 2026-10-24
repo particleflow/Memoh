@@ -1,0 +1,23 @@
+PASS actual Web + JWT server + PG: all 18 seeded records automatically read; pending/failed distinct; no unauthorized download link
+PASS real browser offline -> same selected detail and file records automatically recover, no task dispatch
+PASS synthetic old-route 404 is unavailable, does not poll; explicit reload recovers against real backend
+locator.click: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '任务', exact: true })
+
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+  - waiting for getByRole('button', { name: '任务', exact: true })
+
+    at <evidence>/browser.mjs:48:56 {
+  log: [
+    "  - waiting for getByRole('button', { name: '任务', exact: true })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0

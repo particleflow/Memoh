@@ -1,15 +1,14 @@
 package imagecapability
 
 import (
-	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
-	"io"
-	"mime/multipart"
 	"net/http"
-	"net/textproto"
+	"strings"
+
+	openaiimages "github.com/felinics/twilight/provider/openai/images"
+	sdk "github.com/felinics/twilight/sdk"
 )
 
 const maxImageBytes int64 = 50 << 20
@@ -24,95 +23,44 @@ type request struct {
 	Size   string `json:"size,omitempty"`
 }
 
-// invoke performs exactly one POST, with no redirect, retry or chat fallback.
-// Any post-dispatch error is uncertain: the upstream may already have billed it.
-func invoke(ctx context.Context, client *http.Client, selected selection, apiKey string, args request, images []imageBytes, mask *imageBytes) (imageBytes, error) {
-	var body bytes.Buffer
-	contentType, operation := "application/json", "generations"
+// The pinned SDK owns Images request encoding and response parsing. Input URLs
+// are host-built data URIs from authorized Media bytes, never model-supplied URLs.
+func invoke(ctx context.Context, client *http.Client, selected selection, apiKey string, args request, images []imageBytes) (imageBytes, error) {
+	if strings.TrimSpace(selected.model) == "" {
+		return imageBytes{}, errors.New("configured image model is required")
+	}
+	provider := openaiimages.New(
+		openaiimages.WithBaseURL(strings.TrimRight(selected.baseURL, "/")),
+		openaiimages.WithAPIKey(apiKey),
+		openaiimages.WithHTTPClient(imageHTTPClient(client)),
+	)
+	var result *sdk.ImageResult
+	var err error
 	if len(images) == 0 {
-		wire := map[string]any{"prompt": args.Prompt, "n": 1, "response_format": "b64_json"}
-		if selected.config.ModelMode == "configured" {
-			wire["model"] = selected.model
-		}
-		if args.Size != "" {
-			wire["size"] = args.Size
-		}
-		if err := json.NewEncoder(&body).Encode(wire); err != nil {
-			return imageBytes{}, err
-		}
+		result, err = sdk.GenerateImage(ctx,
+			sdk.WithImageGenerationModel(provider.GenerationModel(selected.model)),
+			sdk.WithImagePrompt(args.Prompt), sdk.WithImageSize(args.Size),
+			sdk.WithImageN(1), sdk.WithImageResponseFormat("b64_json"),
+		)
 	} else {
-		operation = "edits"
-		writer := multipart.NewWriter(&body)
-		fields := map[string]string{"prompt": args.Prompt, "n": "1", "response_format": "b64_json"}
-		if selected.config.ModelMode == "configured" {
-			fields["model"] = selected.model
-		}
-		if args.Size != "" {
-			fields["size"] = args.Size
-		}
-		for name, value := range fields {
-			if err := writer.WriteField(name, value); err != nil {
-				return imageBytes{}, err
-			}
-		}
+		inputs := make([]sdk.ImageInput, 0, len(images))
 		for _, image := range images {
-			name := "image"
-			if len(images) > 1 {
-				name = "image[]"
-			}
-			if err := writeImage(writer, name, image); err != nil {
-				return imageBytes{}, err
-			}
+			inputs = append(inputs, sdk.ImageInput{URL: "data:" + image.mime + ";base64," + base64.StdEncoding.EncodeToString(image.data)})
 		}
-		if mask != nil {
-			if err := writeImage(writer, "mask", *mask); err != nil {
-				return imageBytes{}, err
-			}
-		}
-		contentType = writer.FormDataContentType()
-		if err := writer.Close(); err != nil {
-			return imageBytes{}, err
-		}
+		result, err = sdk.EditImage(ctx,
+			sdk.WithImageEditModel(provider.EditModel(selected.model)),
+			sdk.WithEditPrompt(args.Prompt), sdk.WithEditSize(args.Size),
+			sdk.WithEditImages(inputs...), sdk.WithEditN(1), sdk.WithEditResponseFormat("b64_json"),
+		)
 	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint(selected.baseURL, operation), &body)
 	if err != nil {
 		return imageBytes{}, err
 	}
-	// Do not provide replay semantics or an upstream idempotency claim.
-	req.GetBody = nil
-	req.Header.Set("Content-Type", contentType)
-	if apiKey != "" {
-		req.Header.Set("Authorization", "Bearer "+apiKey)
-	}
-	oneShot := *client
-	oneShot.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	// gosec v2.23.0 misclassifies locally constructed *http.Request values as
-	// external sources. Evidence and the removal condition are recorded in
-	// docs/testing/g704-source-tracking/DECISION.md.
-	resp, err := oneShot.Do(req) // #nosec G704 -- Selected provider config supplies the destination; tool arguments cannot select it and redirects are disabled.
-	if err != nil {
-		return imageBytes{}, err
-	}
-	defer func() { _ = resp.Body.Close() }()
-	if resp.StatusCode != http.StatusOK {
-		return imageBytes{}, errors.New("images request did not return a confirmed result")
-	}
-	// Bound the encoded response before allocation/decoding. The API contract
-	// requests bytes, so response URLs are never fetched as an implicit fallback.
-	limit := maxImageBytes*4/3 + (1 << 20)
-	data, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
-	if err != nil || int64(len(data)) > limit {
-		return imageBytes{}, errors.New("images response is incomplete or exceeds the limit")
-	}
-	var result struct {
-		Data []struct {
-			Base64 string `json:"b64_json"`
-		} `json:"data"`
-	}
-	if err := json.Unmarshal(data, &result); err != nil || len(result.Data) != 1 || result.Data[0].Base64 == "" {
+	// Never fetch a URL-only result or treat multiple/absent outputs as confirmed.
+	if result == nil || len(result.Data) != 1 || result.Data[0].B64JSON == "" {
 		return imageBytes{}, errors.New("images response has no single confirmed byte result")
 	}
-	decoded, err := base64.StdEncoding.DecodeString(result.Data[0].Base64)
+	decoded, err := base64.StdEncoding.DecodeString(result.Data[0].B64JSON)
 	if err != nil {
 		return imageBytes{}, errors.New("images response bytes are invalid")
 	}
@@ -130,16 +78,4 @@ func validateImage(data []byte) (imageBytes, error) {
 	default:
 		return imageBytes{}, errors.New("image bytes have an unsupported content type")
 	}
-}
-
-func writeImage(writer *multipart.Writer, name string, image imageBytes) error {
-	header := make(textproto.MIMEHeader)
-	header.Set("Content-Disposition", `form-data; name="`+name+`"; filename="image"`)
-	header.Set("Content-Type", image.mime)
-	part, err := writer.CreatePart(header)
-	if err != nil {
-		return err
-	}
-	_, err = part.Write(image.data)
-	return err
 }

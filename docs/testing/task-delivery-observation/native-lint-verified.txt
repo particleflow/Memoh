@@ -1,0 +1,12 @@
+
+<worktree>/apps/web/src/pages/home/components/session-task-results.test.ts
+   36:21  warning  There is more than one component in this file  vue/one-component-per-file
+   75:21  warning  There is more than one component in this file  vue/one-component-per-file
+  110:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+<worktree>/apps/web/src/pages/home/components/session-tasks.test.ts
+   52:33  warning  There is more than one component in this file  vue/one-component-per-file
+  213:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 5 problems (0 errors, 5 warnings)
+

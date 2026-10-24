@@ -104,7 +104,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	}
 	limits := transferclient.QueueLimits{Jobs: 1, Bytes: 1 << 20, JournalBytes: 1 << 20, Workers: 1}
 	status, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(raw), https.Client(), time.Now())
-	if err != nil || !status.Admitted {
+	if err != nil || !status.Registered {
 		t.Fatal("stdin admission", err)
 	}
 	for range 15 {
@@ -124,24 +124,28 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	if err != nil {
 		t.Fatal(err)
 	}
-	var persisted struct {
-		Ledger struct {
-			Entries map[string]struct {
-				Outcome   string
-				Reference computertask.DeliveryRequest
-			} `json:"entries"`
-		} `json:"delivery_ledger"`
+	readReference := func(id string) computertask.DeliveryRequest {
+		t.Helper()
+		stored, err := store.ReadComputerDeliveryEntry(ctx, op, id)
+		var entry struct {
+			Outcome   string
+			Reference computertask.DeliveryRequest
+		}
+		if err != nil || json.Unmarshal(stored.Data, &entry) != nil || entry.Outcome != "committed" {
+			t.Fatal("NAS ledger reference absent", err)
+		}
+		return entry.Reference
 	}
-	if json.Unmarshal(op.Details, &persisted) != nil || persisted.Ledger.Entries[closed.DeliveryID()].Outcome != "committed" || persisted.Ledger.Entries[closed.DeliveryID()].Reference != ref {
-		t.Fatal("NAS ledger reference absent")
+	if readReference(closed.DeliveryID()) != ref {
+		t.Fatal("NAS reference changed")
 	}
+
 	// Replaying the closed handoff after restart uses the existing sealed job.
 	replay, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(raw), https.Client(), time.Now())
 	if err != nil || !replay.Associated || replay.Job.ReceiptID != status.Job.ReceiptID || creates.Load() != 1 {
 		t.Fatal("replayed producer created new work", err)
 	}
-	// Same installed device credential and original operation, second file. With
-	// Jobs=1 this also requires the first durable association to release capacity.
+	// Same installed device credential and original operation, second file. Jobs=1 limits active processing, not metadata registration.
 	second := closed
 	second.Artifact.SourceRef = "result-two"
 	if err := os.WriteFile(filepath.Join(source, second.Artifact.SourceRef), []byte("synthetic delivery content"), 0o600); err != nil {
@@ -149,7 +153,7 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	}
 	nextRaw, _ := json.Marshal(second)
 	next, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(nextRaw), https.Client(), time.Now())
-	if err != nil || !next.Admitted {
+	if err != nil || !next.Registered {
 		t.Fatal("second admission", err)
 	}
 	for range 15 {
@@ -165,13 +169,10 @@ func exerciseProducerHandoff(ctx context.Context, t *testing.T, store *postgress
 	if !next.Associated || next.PayloadState != transferclient.PayloadReleased || creates.Load() != 2 || next.Job.ReceiptID == status.Job.ReceiptID {
 		t.Fatal("distinct original per-file receipts lost", err)
 	}
-	operation, err = store.ReadComputerOperation(ctx, scope)
-	if err != nil || json.Unmarshal(operation.Details, &persisted) != nil {
-		t.Fatal("read multiple ledger", err)
-	}
-	if persisted.Ledger.Entries[closed.DeliveryID()].Outcome != "committed" || persisted.Ledger.Entries[second.DeliveryID()].Outcome != "committed" {
+	if readReference(closed.DeliveryID()) != ref || readReference(second.DeliveryID()) != ref {
 		t.Fatal("partial ledger overwritten")
 	}
+
 	for _, metadata := range [][]byte{raw, nextRaw} {
 		replay, err := transferclient.EnqueueProducer(ctx, getenv, "fixture", limits, bytes.NewReader(metadata), https.Client(), time.Now())
 		if err != nil || !replay.Associated || creates.Load() != 2 {
