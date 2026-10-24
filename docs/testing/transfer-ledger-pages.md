@@ -68,12 +68,46 @@ in-flight IDs with existing Resolve, or rescan pages for current status.
 checks run again for every read. A file-scoped HTTP principal does not gain
 operation-wide enumeration. No new public HTTP route is introduced.
 
-The old single-file action and Pi's one bounded `artifact`/`artifacts` declaration
-remain compatible. Their aggregate describes only that declared page. A unified
-endpoint can use the new page interface; its automatic page production/consumption
-and arbitrary-length Pi output enumeration are still separate integration work.
-Herdr's existing native action API does not forward arbitrary stdin; this change
-does not invent that capability or modify official Agent code.
+The original `producer-context.json` remains immutable. `enqueue-results` now
+validates its Task against that context before registering a page. Missing or
+foreign context is an explicit error; a supplied operation ID is not sufficient.
+Existing single-file declarations and v1 feedback remain readable.
+
+For native producers, the envelope exports `MEMOH_DELIVERY_CONTEXT_FILE` and
+`MEMOH_DELIVERY_PAGE_PREFIX`. An output producer may close additional bounded
+`ClosedPage` files under the same configured source root: write a temporary
+metadata file after closing the explicitly selected outputs, then publish it as
+the prefix plus SHA256 of the exact written JSON bytes (no Go-specific
+serialization requirement; `ProducerPageName(raw)` implements it).
+The original finite `collect-result` recognizes these pages, validates the
+original context, and uses the same registration path. It consumes only a fully
+registered metadata page; partial/unknown pages remain. It does not scan arbitrary
+output content or append unbounded names to the launch command. The unified
+endpoint can instead stream the same objects to `enqueue-results`; users do not
+perform either handoff manually. Herdr's native action API still does not forward
+stdin, and no such capability or Agent modification is assumed.
+
+Additional declarations survive in existing per-file queue metadata (original
+Task, source reference, expected hash/size). No separate page index or ledger is
+created. When a delivery is outside the initial page, feedback is reconstructed
+only from its matching durable record, never from caller-supplied Job metadata.
+The fixed `delivery-feedback.json` becomes a v2 bounded advisory containing `page`
+(the current Plan); `plan_hash` continues to bind the original context. Task,
+attempt, generation, root and file identity are checked. A v2 advisory cannot
+claim delivery or supply a NAS reference. The Server supports both v1 and v2,
+continues reading after the first page completes, and projects the current page
+as `delivery.scope=page`. This is not a whole-producer aggregate. Authoritative
+history remains the paged NAS ledger and exact Commit/Resolve. Update Server and
+helper together for v2 advisory consumption; old strict readers reject it rather
+than treating it as success. The queue/root/HTTP protocol and migration 174 are
+unchanged by this follow-up.
+
+The one fixed feedback file is a current bounded observation, not a retained
+history of every local advisory. The queue retains each file's state and the NAS
+ledger retains committed references. Unified endpoint lifecycle wakeups drain
+registered work independently of conversation polling; this change does not
+install that endpoint or manufacture automatic result selection for arbitrary
+programs. The producer still explicitly closes the files it wants to deliver.
 
 ## Executed checks and limits
 
@@ -116,3 +150,46 @@ assertions; the final focused PG and race logs cover those additions.
 - [ledger-pages-full-pg.txt](evidence/ledger-pages-full-pg.txt), SHA256 `0782b0ab53c8b5ac9b3d9f2aab64f0012ab2c7acb54863f6eb76f3074abd37f1`.
 - [ledger-pages-final-pg.txt](evidence/ledger-pages-final-pg.txt), SHA256 `e256b8f741248e80b0d1a36cfee2d0b1e0e9db163950e1ce32592892099549da`.
 - [ledger-pages-final-race.txt](evidence/ledger-pages-final-race.txt), SHA256 `d35a65d259a0cf18ad9c37792df12769f858ae8938915527e9454919fd1b2e13`.
+
+## Second-page closure regression and recovery
+
+The 0f4 checkpoint admitted later pages but rejected their feedback against the
+initial 16-file declaration. A regression reproduced `producer feedback
+unavailable` for a durable second-page record before the fix. The fix preserves
+that original context, validates appended closed pages, and consumes their
+existing queue metadata for bound v2 advisory feedback.
+
+- Real HTTPS Server/PG/filesystem and production CLI test now sends **18 files**
+  (three 17 MiB + 123 byte files and fifteen 1027–1041 byte files). The original
+  context contains only the first 16. Every invocation rejects unavailable
+  feedback. Client process kill, NAS handler/store reopen, duplicate pages,
+  source/context retention and original-ID replay pass. Every file has exactly
+  one Create/Complete/Commit and matches full source/download SHA256. Local run:
+  30.451s, including 26.28s in the batch scenario. This is Linux cloud evidence.
+- Existing host collector processes 18 files from two closed pages, including
+  first-source absence, independent progress and restoration. Latest targeted
+  race run: 7.436s. NAS in this host-storage test is an explicit HTTPS protocol
+  fixture; Windows execution must be read from the exact-head Native CI.
+- The actual Bash producer envelope was exercised with synthetic Pi/Herdr tools
+  writing 18 outputs and two closed pages. Original Task/context, fixed collector
+  invocation and exclusive attempt guard remain; repeated launch does not rerun
+  the synthetic Pi. This is not real installed Herdr acceptance.
+- All affected packages passed race before the final collector-selection check:
+  transferclient 55.569s, deliverymeta 1.138s, CLI 19.877s, computertask 27.854s,
+  agenvo 23.291s. Later collector changes have the targeted race result above.
+- Observer tests retain a committed first page while accepting a later pending
+  page, recheck revocation/CAS, and wake transfer without replaying business. The
+  store fixture now models the existing production SQL preservation of ledger
+  data; no production database code or migration changed in this follow-up.
+
+- [producer-second-page-red.txt](evidence/producer-second-page-red.txt), unmodified SHA256 `fb6dfe23b6efccc783fee46ab09a85d55101b99df70b06772c9c77f4975d9c77`.
+- [producer-second-page-green.txt](evidence/producer-second-page-green.txt), unmodified SHA256 `cdebc1dd3c7dba67d954a22d7e0b37d94afffd0b61ef424552b9b4a752e13c11`.
+- [producer-pages-18-pg.txt](evidence/producer-pages-18-pg.txt), unmodified SHA256 `0d961eede3fb64664bf0c8fd2770fade2d341fb286baf4d0f2b351e6022919b5`.
+- [producer-pages-final-race.txt](evidence/producer-pages-final-race.txt), unmodified SHA256 `24cd52fb12d25e5e2e8be3339f5be1f22c77cacc0d05368d40ee68ad240d9405`.
+- [producer-pages-collector-race.txt](evidence/producer-pages-collector-race.txt), unmodified SHA256 `f5b956c668f9e9a90880c8e2906d86e5c275ca80490ae1cca48226a87309ccc1`.
+
+Final collector race after raw-JSON filename interoperability and partial-page
+scheduling checks: **12.989s**, PASS. No final production code changed after this
+check; incremental golangci-lint also exited 0.
+
+- [producer-pages-collector-final.txt](evidence/producer-pages-collector-final.txt), SHA256 `f3cd9fc2f792f746362a0ae732cb5e0644f7b8b3edd4d2830a78919c388bc9fb`.

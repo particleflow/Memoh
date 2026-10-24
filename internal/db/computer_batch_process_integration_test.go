@@ -60,13 +60,20 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 	plan := deliverymeta.Plan{Version: 2, Task: deliverymeta.Task{OperationID: id.OperationID, BotID: id.Binding.BotID, UserID: id.Binding.UserID, SessionID: id.Binding.SessionID, TargetID: id.Binding.TargetID, RunID: id.Binding.RunID, Attempt: id.Attempt, Generation: id.Generation, RootHash: deliverymeta.RootHash(source)}}
 	var files []deliverymeta.Closed
 	var sourceInfos []os.FileInfo
-	// 51 MiB + 369 bytes of sources; each file spans at least three chunks.
+	// First three files span three chunks; another fifteen small files cross the
+	// original 16-entry context boundary without increasing large-data footprint.
 	// At most one content buffer lives here, and all fixture files use t.TempDir.
-	for i := range 3 {
-		content := bytes.Repeat([]byte{byte(i + 17)}, (17<<20)+123)
+	for i := range 18 {
+		size := (17 << 20) + 123
+		if i >= 3 {
+			size = 1024 + i
+		}
+		content := bytes.Repeat([]byte{byte(i + 17)}, size)
 		sum := sha256.Sum256(content)
 		artifact := deliverymeta.Artifact{SourceRef: fmt.Sprintf("batch-result-%d", i), Mime: "application/octet-stream"}
-		plan.Artifacts = append(plan.Artifacts, artifact)
+		if i < deliverymeta.MaxArtifacts {
+			plan.Artifacts = append(plan.Artifacts, artifact)
+		}
 		files = append(files, deliverymeta.Closed{Plan: deliverymeta.Plan{Version: 1, Task: plan.Task, Artifact: artifact}, Closed: true, SHA256: hex.EncodeToString(sum[:]), SizeBytes: int64(len(content))})
 		path := filepath.Join(source, artifact.SourceRef)
 		write(path, content)
@@ -243,6 +250,9 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 		if json.Unmarshal(output.Bytes(), &out) != nil {
 			t.Fatal("invalid CLI JSON")
 		}
+		if string(out["feedback_status"]) == `"unavailable"` {
+			t.Fatalf("CLI %s advanced without durable producer feedback", action)
+		}
 		return out
 	}
 	admit := func(file deliverymeta.Closed) map[string]json.RawMessage {
@@ -320,9 +330,13 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 	if out := invoke("advance-results", "", nil); string(out["state"]) != `"waiting"` || rejected.Load() != 1 {
 		t.Fatal("temporary failure did not retain a retryable original delivery")
 	}
-	admitPage(files[1:])
+	for start := 1; start < len(files); start += deliverymeta.MaxArtifacts {
+		admitPage(files[start:min(start+deliverymeta.MaxArtifacts, len(files))])
+	}
 	admitPage(files[:1]) // Lost page output/restart uses the original receipt.
-	admitPage(files[1:])
+	for start := 1; start < len(files); start += deliverymeta.MaxArtifacts {
+		admitPage(files[start:min(start+deliverymeta.MaxArtifacts, len(files))])
+	}
 	waitDue := func() {
 		t.Helper()
 		summary := invoke("lifecycle-summary", "", nil)
@@ -344,7 +358,7 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 	associated := func(file deliverymeta.Closed) bool {
 		return string(invoke("inspect", file.DeliveryID(), nil)["associated"]) == "true"
 	}
-	for n := 0; n < 12 && (!associated(files[1]) || !associated(files[2])); n++ {
+	for n := 0; n < len(files)*4 && (!associated(files[1]) || !associated(files[2])); n++ {
 		waitDue()
 		invoke("advance-results", "", nil)
 	}
@@ -358,6 +372,21 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 	}
 	if !associated(files[0]) {
 		t.Fatal("original interrupted delivery did not resume")
+	}
+	for _, file := range files {
+		for range len(files) * 4 {
+			if associated(file) {
+				break
+			}
+			waitDue()
+			invoke("advance-results", "", nil)
+		}
+		if !associated(file) {
+			t.Fatal("additional producer page did not finish")
+		}
+	}
+	if raw, err := os.ReadFile(filepath.Join(attemptPath, deliverymeta.ProducerContextName)); err != nil || !bytes.Equal(raw, rawPlan) {
+		t.Fatal("additional page replaced original producer context", err)
 	}
 	assertLedger := func() map[string]json.RawMessage {
 		t.Helper()
@@ -444,7 +473,7 @@ func exerciseBatchProcessRecovery(ctx context.Context, t *testing.T, store *post
 	defer factsMu.Unlock()
 	for i, file := range files {
 		fact := facts[file.DeliveryID()]
-		if fact.creates != 1 || fact.completes != 1 || fact.commits != 1 || len(fact.accepted) < 3 || fact.upload.Offset != file.SizeBytes {
+		if fact.creates != 1 || fact.completes != 1 || fact.commits != 1 || len(fact.accepted) == 0 || i < 3 && len(fact.accepted) < 3 || fact.upload.Offset != file.SizeBytes {
 			t.Fatalf("file %d duplicated or incomplete: Create=%d Complete=%d Commit=%d accepted=%v", i, fact.creates, fact.completes, fact.commits, fact.accepted)
 		}
 		for j, offset := range fact.accepted {

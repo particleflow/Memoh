@@ -68,6 +68,15 @@ func (s *fixtureStore) SaveComputerOperation(_ context.Context, r dbstore.Comput
 	if s.records[r.ID].Revision != r.Revision {
 		return r, errors.New("concurrent update")
 	}
+	// Match UpdateComputerOperation: execution/advisory writes preserve the
+	// independent delivery ledger, including after a completed first page.
+	var old, next map[string]json.RawMessage
+	_ = json.Unmarshal(s.records[r.ID].Details, &old)
+	_ = json.Unmarshal(r.Details, &next)
+	if ledger, exists := old["delivery_ledger"]; exists {
+		next["delivery_ledger"] = ledger
+		r.Details, _ = json.Marshal(next)
+	}
 	r.Revision++
 	s.records[r.ID] = r
 	return r, nil

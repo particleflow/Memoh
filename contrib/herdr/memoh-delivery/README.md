@@ -217,14 +217,24 @@ The unified endpoint consumes this internal interface; it is not a manual user
 workflow. Herdr's existing action API still cannot forward arbitrary stdin, and
 this change does not claim that a native plugin RPC can do so.
 
-The original Pi `artifact`/`artifacts` declaration and its bounded aggregate
-remain compatible and cover that declared page only. Automatic generation and
-submission of arbitrarily many Pi result pages is not added here. The authorized
-`computer_task_get` query accepts `delivery_after` (empty string for page 1,
-then `next_after`) to read the same NAS ledger, at most 16 entries per response.
-Use existing exact Commit/Resolve for individual in-flight status. `has_more`
-means more currently stored rows, not that all producer output has arrived.
-See [the page contract and migration evidence](../../../docs/testing/transfer-ledger-pages.md).
+The original context remains immutable and anchors every later page. Version
+0.11.0 validates `enqueue-results` against that existing context before any
+registration; missing/foreign context fails explicitly. Native producers may
+publish additional `ClosedPage` manifests using the envelope's exported
+`MEMOH_DELIVERY_PAGE_PREFIX` and original Task. The same `collect-result` action
+enumerates and consumes those bounded pages; it does not expand the command line
+or rerun Pi. Registered per-file queue metadata supplies additional declarations,
+so no second ledger or page-index file is introduced.
+
+Feedback for an additional page uses v2 with a `page` Plan and the **original**
+`plan_hash`. Old v1 feedback remains supported. The Server continues reading
+advisories after the first page commits; `delivery.scope=page` describes only the
+current observation. NAS committed references remain authoritative, available
+through `computer_task_get` with `delivery_after` and exact Resolve. Update the
+helper and Server together for v2 advisory consumption. Pages and unknown work
+are retained until registration is durable; context and user sources are never
+removed. The host's lifecycle loop remains responsible for draining the queue.
+See [the page contract and evidence](../../../docs/testing/transfer-ledger-pages.md).
 
 Each file retains one stable delivery/closed manifest. New upload metadata does
 not consume the legacy eight-job/256 MiB snapshot reservation. Finite host actions

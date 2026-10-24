@@ -30,6 +30,9 @@ type Feedback struct {
 	Task     Task           `json:"task"`
 	PlanHash string         `json:"plan_hash"`
 	Files    []FileFeedback `json:"files"`
+	// Page is an additional declaration reconstructed from the durable queue.
+	// PlanHash still binds the immutable original producer context.
+	Page *Plan `json:"page,omitempty"`
 }
 
 // This receipt cannot report delivered or contain content/credentials/logs.
@@ -89,7 +92,20 @@ func (f FileFeedback) Valid() bool {
 }
 
 func (f Feedback) ValidFor(p Plan) bool {
-	if f.Version != 1 || !p.Valid() || f.Task != p.Task || f.PlanHash != PlanHash(p) {
+	if !p.Valid() || f.Task != p.Task || f.PlanHash != PlanHash(p) {
+		return false
+	}
+	switch f.Version {
+	case 1:
+		if f.Page != nil {
+			return false
+		}
+	case 2:
+		if f.Page == nil || !f.Page.Valid() || f.Page.Task != p.Task {
+			return false
+		}
+		p = *f.Page
+	default:
 		return false
 	}
 	plans := p.FilePlans()

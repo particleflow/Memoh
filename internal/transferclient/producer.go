@@ -99,6 +99,15 @@ func CollectProducer(ctx context.Context, getenv func(string) string, revision s
 		if err := ctx.Err(); err != nil {
 			return QueueStatus{}, errors.Join(collectionErr, err)
 		}
+		if strings.HasPrefix(name, deliverymeta.ProducerPagePrefix) {
+			raw, readErr := cfg.readProducerPage(name)
+			if readErr != nil {
+				collectionErr = errors.Join(ErrProducerSource, ErrProducerManifest)
+				continue
+			}
+			status, err := collectProducerPage(ctx, cfg, getenv, revision, limits, name, raw, transport, now)
+			return status, errors.Join(collectionErr, err)
+		}
 		raw, err := cfg.readProducerManifest(name, revision)
 		if err != nil {
 			// Do not guess identity from malformed bytes or a mismatched filename.
@@ -178,7 +187,7 @@ func (h *HostConfig) producerManifests() ([]string, error) {
 		}
 		for _, entry := range entries {
 			name := entry.Name()
-			if strings.HasPrefix(name, deliverymeta.ManifestPrefix) && len(name) == len(deliverymeta.ManifestPrefix)+64 && validID(name) {
+			if validID(name) && (strings.HasPrefix(name, deliverymeta.ManifestPrefix) && len(name) == len(deliverymeta.ManifestPrefix)+64 || strings.HasPrefix(name, deliverymeta.ProducerPagePrefix) && len(name) == len(deliverymeta.ProducerPagePrefix)+64) {
 				names = append(names, name)
 			}
 		}

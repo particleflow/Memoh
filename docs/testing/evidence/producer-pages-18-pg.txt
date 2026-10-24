@@ -1,0 +1,25 @@
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation
+=== RUN   TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery
+    computer_delivery_integration_test.go:236: file=0 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=1 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=2 bytes=17825915 accepted PATCH offsets=[0 8388608 16777216] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=3 bytes=1027 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=4 bytes=1028 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=5 bytes=1029 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=6 bytes=1030 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=7 bytes=1031 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=8 bytes=1032 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=9 bytes=1033 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=10 bytes=1034 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=11 bytes=1035 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=12 bytes=1036 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=13 bytes=1037 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=14 bytes=1038 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=15 bytes=1039 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=16 bytes=1040 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: file=17 bytes=1041 accepted PATCH offsets=[0] Create/Complete/Commit=1 source+download SHA256=match
+    computer_delivery_integration_test.go:236: CLI killed after durable offset=16777216, local checkpoint=8388608; reopened NAS modules; transient rejections=4; two independent files committed before recovery; original receipt and ledger replay preserved
+--- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation (29.35s)
+    --- PASS: TestComputerDeliveryPostgresAuthorizationCASAndPreservation/batch-process-recovery (26.28s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	30.451s

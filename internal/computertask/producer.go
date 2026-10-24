@@ -12,6 +12,7 @@ import (
 // original committed ledger supplies references; PC ready/acceptance cannot.
 // Version 1 declarations retain the existing single-file response shape.
 type ProducerResult struct {
+	Scope       string               `json:"scope,omitempty"`
 	Stage       string               `json:"stage,omitempty"`
 	Retryable   bool                 `json:"retryable"`
 	NeedsAction bool                 `json:"needs_action"`
@@ -71,6 +72,10 @@ func producerResult(r dbstore.ComputerOperationRecord, d Details) *ProducerResul
 	}
 	p := d.Batch.Progress.Producer
 	out := &ProducerResult{State: "unavailable"}
+	if feedback := d.Batch.Feedback; feedback != nil && feedback.Version == 2 && feedback.ValidFor(*p) {
+		p = feedback.Page
+		out.Scope = "page"
+	}
 	if p.Version == 1 {
 		out.DeliveryID, out.SourceRef = p.DeliveryID(), p.Artifact.SourceRef
 	}
@@ -106,7 +111,7 @@ func producerResult(r dbstore.ComputerOperationRecord, d Details) *ProducerResul
 			}
 		}
 		file := producerFile(r, plan, selected)
-		if file.State == "pending" && d.Batch.Feedback != nil && d.Batch.Feedback.ValidFor(*p) {
+		if file.State == "pending" && d.Batch.Feedback != nil && d.Batch.Feedback.ValidFor(*d.Batch.Progress.Producer) {
 			local := d.Batch.Feedback.Files[i]
 			file.State, file.Stage, file.Retryable, file.RetryAt = local.State, local.Code, local.Retryable, local.RetryAt
 			file.NeedsAction = !local.Retryable
