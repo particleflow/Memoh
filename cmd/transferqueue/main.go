@@ -28,7 +28,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-history, migrate-publications, probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, collect-result, advance-results, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -38,7 +38,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "collect-result", "advance-results", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -46,12 +46,23 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 	// Resolve the official host locations once. No cwd or legacy fallback.
 	locations := map[string]string{"HERDR_PLUGIN_CONFIG_DIR": env("HERDR_PLUGIN_CONFIG_DIR"), "HERDR_PLUGIN_STATE_DIR": env("HERDR_PLUGIN_STATE_DIR")}
 	getenv := func(key string) string { return locations[key] }
-	limits := transferclient.QueueLimits{Jobs: 8, Bytes: 256 << 20, JournalBytes: 8 << 20, Workers: 1}
+	limits, err := transferclient.LoadHostQueueLimits(getenv)
+	if err != nil {
+		_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+		return 1
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	// Reserve a bounded tail of the same invocation for advisory persistence.
 	workCtx, stopWork := context.WithTimeout(ctx, 115*time.Second)
 	defer stopWork()
+	if *kind == "migrate-budget" {
+		if err := transferclient.MigrateHerdrBudget(workCtx, getenv, "native-profile-v1", limits); err != nil {
+			_ = json.NewEncoder(output).Encode(transferclient.LifecycleFailure(err))
+			return 1
+		}
+		return writeFixed(output, `{"budget_migration":"complete"}`)
+	}
 	publish := func(status transferclient.QueueStatus) string {
 		if status.Job.Task.Attempt == "" {
 			return ""
@@ -148,6 +159,13 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		}
 		if errors.Is(err, transferclient.ErrNoWork) {
 			return writeFixed(output, `{"state":"idle"}`)
+		}
+		if errors.Is(err, transferclient.ErrAdmissionPending) {
+			// The immutable admission has a durable checkpoint. Continue the
+			// same enqueue/collect input; this is not an unknown remote outcome
+			// or a runnable upload for advance-results yet.
+			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending", "feedback_status": feedback, "error_class": "transient"})
+			return 1
 		}
 		if err != nil {
 			_ = json.NewEncoder(output).Encode(map[string]string{"state": "pending_or_unavailable", "feedback_status": feedback, "error_class": transferclient.LifecycleFailure(err).ErrorClass})

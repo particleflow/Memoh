@@ -7,7 +7,6 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"errors"
 	"io"
 	"os"
@@ -69,13 +68,11 @@ func (q *DiskQueue) openNativePublication(ctx context.Context, authorize Publica
 	if err != nil {
 		return nil, err
 	}
-	want, _ := json.Marshal(struct {
-		Version  int    `json:"version"`
-		Identity string `json:"identity"`
-		Revision string `json:"revision"`
-		Bytes    int64  `json:"bytes"`
-		Receipts int    `json:"receipts"`
-	}{2, identity, q.revision, q.limits.Bytes, publicationReceipts})
+	version, budget := 2, q.limits.Bytes
+	if q.budgetBase != 0 {
+		version, budget = 3, q.budgetBase
+	}
+	want := publicationLocator(identity, q.revision, version, budget)
 	flags := os.O_RDWR
 	if _, err := root.Lstat("locator"); errors.Is(err, os.ErrNotExist) {
 		dir, err := root.Open(".")

@@ -57,8 +57,9 @@ bounded failure messages; never send originals, full production logs or secrets.
 The manifest uses Herdr v0.9.5's existing argv action mechanism. No startup worker
 or timer is registered. `verify-storage` invokes `transferqueue.exe -action probe`:
 it validates/initializes its queue only under `HERDR_PLUGIN_STATE_DIR`, requiring
-an existing private local NTFS parent. Its fixed `native-profile-v1` quota profile
-is immutable in the locator. It never repairs ACLs, changes roots or falls back.
+an existing private local NTFS parent. Its `native-profile-v1` locator binds the
+resolved root and quota profile. Byte-budget changes require the explicit action
+below. It never repairs ACLs, changes roots or falls back.
 
 The executable exposes finite `enqueue-upload`, `enqueue-download`, `advance`,
 `advance-next`, `reconcile`, `inspect`, `cancel`, and `retire` actions. Explicit
@@ -107,9 +108,70 @@ completion receipt.
 existing queue journal. Changing the endpoint or source root (even formatting)
 requires explicit drain/migration; old jobs fail `configuration_changed`, never
 silently switch directories or send their credential to a different endpoint.
-The queue's `native-profile-v1` limits remain 8 jobs, 256 MiB reserved bytes,
+The queue's `native-profile-v1` defaults remain 8 jobs, 256 MiB reserved bytes,
 8 MiB per journal and one worker. This finite profile is not a claimed maximum
 protocol file size; changing quotas requires a reviewed locator migration.
+
+## Configurable byte budget (plugin 0.8)
+
+The endpoint owns an optional private `queue-budget.json` under the **existing**
+`HERDR_PLUGIN_CONFIG_DIR`. It has no separate root, credential or task registry.
+Leave `transfer.json` byte-for-byte unchanged so its existing endpoint/source
+binding and all original task/attempt IDs continue to match. Example policy:
+
+```json
+{"version":1,"bytes":8589934592}
+```
+
+`bytes` is an integer from 1 through 1099511627776 (1 TiB). This example expresses
+8 GiB, without allocating it. The setting bounds total active queue reservations,
+including snapshot-tree/admission metadata; independently it bounds retained
+native publication objects. It is not a per-file promise or a RAM buffer size.
+Jobs (8), journal bytes (8 MiB), workers (1), and per-call work/time budgets stay
+unchanged. Each admission also checks available storage. Missing policy uses the
+historical 256 MiB default; invalid, oversized, unsafe or unreadable policy fails
+explicitly, with no fallback. There is no per-invocation quota flag or override.
+
+A fresh queue binds the configured budget at creation. For an **existing** queue:
+
+1. Stop all CLI/plugin writers, including idle old-version processes, and retain
+   a complete raw backup of the existing state. Preserve originals and config.
+2. With the old budget, finish any required `migrate-history` (queue v2 to v3) and
+   `migrate-publications` (publication v1 to v2) using their existing procedures.
+3. Set the larger byte budget in the same config directory and invoke
+   `transferqueue.exe -action migrate-budget` (also a finite plugin action).
+   Ordinary open refuses a policy/locator mismatch and never reinitializes it.
+4. Resume only with the upgraded binary and matching policy. Lost responses or
+   process exits are reconciled by repeating that same migration action.
+
+The migration preserves the original locator fields, sets queue locator v4 and
+existing publication locator v3, and records monotonic byte increases in one
+64 KiB bounded, checksummed/fsynced journal beside the original locator. It reuses
+the queue framing and admission/worker/publication locks. The single-byte gates
+exclude old binaries; locks do not revoke idle old handles, hence the stop rule.
+Only incomplete final frames can be repaired; complete corruption fails closed.
+No job, payload, published file, receipt, unknown record or cancellation tombstone
+is removed. The original layout backup is still required; the migration journal
+is not a backup of the user's data. Repeated increases use the same action; a
+decrease, identity mismatch or full migration journal fails explicitly. A normal
+config rollback is not supported after migration; do not restore an old writer
+over newer state. History/publication layout migrations precede this budget gate.
+
+The NAS Server limit is independent: `[files].max_upload_bytes` in the existing
+Server `config.toml` defaults to 200 MiB (`0` means default, not unlimited).
+Changing that field and restarting Server needs no source change, but does not
+raise the PC queue budget. Both limits and actual free space must fit the file
+and its concurrent copies. The source, snapshot, upload staging and pending NAS
+original can coexist. Snapshot admission uses 1 MiB blocks, at most 64 MiB copied
+per finite invocation, and transfer chunks remain at most 8 MiB; a larger quota
+does not introduce a whole-file memory allocation. Continue the same admission
+input after `pending`; this change adds no background worker or automatic wake.
+
+Tests express 8/16 GiB policies with small synthetic files and cover original-ID
+recovery, insufficient quota, rejected configuration changes, interrupted budget
+migration and native publication/tombstone preservation. They are not multi-GiB
+throughput, physical power-loss, or real PC-to-NAS acceptance. Actual large-file
+validation still requires sufficient isolated storage and the coordinated host.
 
 ## Producer and finite-command handoff
 
@@ -124,7 +186,12 @@ selectors, not authorization; the Server verifies them against its current
 operation, Bot permissions and authenticated device.
 
 Reinvoke the same enqueue/ID/metadata after admission timeout to resume sealing;
-do not invent a new ID. Completed admission uses its immutable snapshot even if
+do not invent a new ID. When the 64 MiB copy budget leaves a durable admission
+checkpoint, `enqueue-result` and `collect-result` exit 1 with `state: pending`
+and `error_class: transient`. Continue the same enqueue/collect input; this
+does not mean that `advance-results` can upload the unsealed snapshot. The
+collector retains the closed manifest until admission completes. Completed
+admission uses its immutable snapshot even if
 the producer file or export directory has since been removed. New or incomplete
 upload admission still requires the original authorized source. Once admitted,
 invoke `advance` or the fixed manifest
