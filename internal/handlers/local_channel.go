@@ -71,6 +71,7 @@ type LocalChannelHandler struct {
 	botService          *bots.Service
 	accountService      *accounts.Service
 	sessionService      *sessionpkg.Service
+	abortObservations   sessionAbortObservationStore
 	workdirs            sessionWorkdirService
 	agentService        *application.Service
 	sessionRuntime      wsTurnAdmitter
@@ -886,6 +887,7 @@ type wsClientMessage struct {
 	Decision          string                     `json:"decision,omitempty"`
 	OptionID          string                     `json:"option_id,omitempty"`
 	Reason            string                     `json:"reason,omitempty"`
+	AbortReason       string                     `json:"abort_reason,omitempty"`
 	Answers           []userinput.QuestionAnswer `json:"answers,omitempty"`
 	Canceled          bool                       `json:"canceled,omitempty"`
 	// WorkdirID is the workdir a first message binds to the session it
@@ -1702,6 +1704,7 @@ func (h *LocalChannelHandler) abortWSRun(ctx context.Context, writer *wsWriter, 
 		applied bool
 		err     error
 	)
+	h.observeAbortControl(ctx, botID, sessionID, runID, controlID, msg.AbortReason)
 	if h.agentService != nil {
 		applied, err = h.agentService.AbortRuntimeRun(ctx, botID, sessionID, runID, controlID)
 	} else {
@@ -1937,6 +1940,14 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 			runID := strings.TrimSpace(msg.RunID)
 			if runID == "" {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, wsTurn("", msg.SessionID), "ws.runtime_command", apperror.FieldRequired("run_id"))
+				continue
+			}
+			if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, strings.TrimSpace(msg.SessionID)); err != nil {
+				failWSControl(streamBaseCtx, h.logger, writer, botID, wsTurn(msg.InvocationID, msg.SessionID).withRun(runID), "ws.control.abort", msg.Type, msg.ControlID, string(wsSessionAuthAckCode(err, apperror.CodeSessionNotFound, apperror.CodeInternal)), err)
+				continue
+			}
+			if err := h.authorizeAbortRun(c.Request().Context(), botID, strings.TrimSpace(msg.SessionID), runID); err != nil {
+				failWSControl(streamBaseCtx, h.logger, writer, botID, wsTurn(msg.InvocationID, msg.SessionID).withRun(runID), "ws.control.abort", msg.Type, msg.ControlID, string(apperror.CodeOf(err)), err)
 				continue
 			}
 			h.abortWSRun(streamBaseCtx, writer, botID, msg, runID)

@@ -1,0 +1,2 @@
+time=2026-10-25T21:09:45.657Z level=INFO msg="migration log" detail="177/u session_abort_observation (13.348961ms)\n"
+time=2026-10-25T21:09:45.658Z level=INFO msg="migration complete" version=177 dirty=false

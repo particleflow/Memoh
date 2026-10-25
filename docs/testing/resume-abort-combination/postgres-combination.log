@@ -1,0 +1,4 @@
+# github.com/felinics/memoh/internal/handlers.test
+/workspace/.memoh-cloud/go/pkg/tool/linux_amd64/link: mapping output file failed: no space left on device
+FAIL	github.com/felinics/memoh/internal/handlers [build failed]
+FAIL

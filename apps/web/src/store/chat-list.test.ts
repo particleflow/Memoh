@@ -13,6 +13,7 @@ import type {
   UIStreamEventHandler,
   UITurn,
   UIUserTurn,
+  WSAbortReason,
 } from '@/composables/api/useChat'
 import { REASONING_EFFORT_DISABLE } from '@/pages/bots/components/reasoning-effort'
 import { AUTH_SESSION_CLEARED_EVENT } from '@/lib/auth-session'
@@ -131,6 +132,12 @@ const h = {
   runtimeUnsubscribes: [] as string[],
   wsRunIds: [] as string[],
   abortedWSRuns: [] as string[],
+  abortedWSControls: [] as Array<{
+    runId: string
+    sessionId: string
+    controlId: string
+    reason?: WSAbortReason
+  }>,
   lastRunId: '',
   lastSessionId: '',
   // Mirrors the server: a message without session_id creates a session and
@@ -270,6 +277,11 @@ function wsRunId(index = 0): string {
   return (index < 0 ? h.wsRunIds.at(index) : h.wsRunIds[index]) ?? ''
 }
 
+function recordAbort(runId: string, sessionId: string, controlId: string, reason?: WSAbortReason) {
+  h.abortedWSRuns.push(runId)
+  h.abortedWSControls.push({ runId, sessionId, controlId, reason })
+}
+
 beforeEach(() => {
     pinia = createPinia()
     setActivePinia(pinia)
@@ -291,6 +303,7 @@ beforeEach(() => {
     h.runtimeUnsubscribes = []
     h.wsRunIds = []
     h.abortedWSRuns = []
+    h.abortedWSControls = []
     h.sendUpdates = [runtime.started, runtime.failed('runtime_run_failed')]
     h.acceptRuns = true
     vi.clearAllMocks()
@@ -594,9 +607,7 @@ beforeEach(() => {
             publishRuntimeUpdate(onStreamEvent, h.lastSessionId, h.lastRunId, update)
           }
         }),
-        abort: vi.fn((runId: string) => {
-          h.abortedWSRuns.push(runId)
-        }),
+        abort: vi.fn(recordAbort),
         close: vi.fn(),
         forget: vi.fn(),
         bindSession: vi.fn(),
@@ -3841,6 +3852,9 @@ describe('chat-list store', () => {
         session_id: 'session-created',
       })
       expect(h.abortedWSRuns).toContain(runId)
+      expect(h.abortedWSControls).toEqual([{
+        runId, sessionId: 'session-created', controlId: expect.any(String), reason: 'user_stop',
+      }])
       expect(store.streaming).toBe(false)
     })
 
@@ -3862,6 +3876,9 @@ describe('chat-list store', () => {
       store.abort()
       await expect(sending).resolves.toMatchObject({ ok: false })
       expect(h.abortedWSRuns).toEqual([wsRunId(0)])
+      expect(h.abortedWSControls).toEqual([{
+        runId: wsRunId(0), sessionId: 'session-1', controlId: expect.any(String), reason: 'user_stop',
+      }])
     })
 
   it('replays a stop pressed before the run was accepted', async () => {
@@ -3880,9 +3897,7 @@ describe('chat-list store', () => {
             ) return
             h.sentWSMessages.push(message)
           }),
-          abort: vi.fn((runId: string) => {
-            h.abortedWSRuns.push(runId)
-          }),
+          abort: vi.fn(recordAbort),
           close: vi.fn(),
           onOpen: null,
           onClose: null,
@@ -3912,7 +3927,39 @@ describe('chat-list store', () => {
 
       await expect(sending).resolves.toMatchObject({ ok: false })
       expect(h.abortedWSRuns).toEqual(['run-late'])
+      expect(h.abortedWSControls).toEqual([{
+        runId: 'run-late', sessionId: 'session-1', controlId: expect.any(String), reason: 'user_stop',
+      }])
     })
+
+  it.each(['bot_switch', 'auth_reset'] as const)('labels an active run abort with %s', async (reason) => {
+    const windowTarget = new EventTarget()
+    vi.stubGlobal('window', windowTarget)
+    api.fetchBots.mockResolvedValue([
+      { id: 'bot-1', status: 'active', name: 'Bot 1' },
+      { id: 'bot-2', status: 'active', name: 'Bot 2' },
+    ])
+    h.sendUpdates = []
+    const store = useChatStore()
+    await store.selectBot('bot-1')
+    const sending = store.sendMessage('hello')
+    await flushPromises()
+    const runId = wsRunId(0)
+
+    if (reason === 'bot_switch') {
+      await store.selectBot('bot-2')
+    }
+    else {
+      windowTarget.dispatchEvent(new CustomEvent(AUTH_SESSION_CLEARED_EVENT, {
+        detail: { reason: 'logout' },
+      }))
+    }
+
+    await expect(sending).resolves.toMatchObject({ ok: false })
+    expect(h.abortedWSControls).toEqual([{
+      runId, sessionId: 'session-1', controlId: expect.any(String), reason,
+    }])
+  })
 
   it('fails a rejected submission with the code the server refused it by', async () => {
       h.sendUpdates = []
@@ -4151,10 +4198,12 @@ describe('chat-list store', () => {
       expect(api.deleteSession).not.toHaveBeenCalled()
     })
 
-  it('keeps the session of a held first send whose confirmation timed out', async () => {
+  it.each([true, false])('keeps a timed-out first send and does not abort its late acceptance (session named before timeout: %s)', async (namedBeforeTimeout) => {
       h.manualSessionCreation = true
       h.sendUpdates = []
       h.acceptRuns = false
+      const network = vi.fn(() => Promise.reject(new Error('Unexpected network request')))
+      vi.stubGlobal('fetch', network)
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
       // flushPromises waits on a timer, which is fake here.
       const flush = () => vi.advanceTimersByTimeAsync(0)
@@ -4165,8 +4214,11 @@ describe('chat-list store', () => {
         const sending = store.sendMessage('hello', [], { composerScope: 'bot-1:draft-a' })
         await flush()
         const invocationId = wsInvocationId(0)
-        h.streamHandler?.({ type: 'session_created', invocation_id: invocationId, session_id: 'created-session' })
-        await flush()
+        const created = { type: 'session_created' as const, invocation_id: invocationId, session_id: 'created-session' }
+        if (namedBeforeTimeout) {
+          h.streamHandler?.(created)
+          await flush()
+        }
 
         await vi.advanceTimersByTimeAsync(30_000)
         const result = await sending
@@ -4176,9 +4228,11 @@ describe('chat-list store', () => {
         expect(result).toMatchObject({ ok: false, stage: 'startup', restoreInput: 'hello' })
         expect(result.error).toBe(enMessages.chat.sendOutcomeUnknown)
         expect(api.deleteSession).not.toHaveBeenCalled()
+        expect(h.abortedWSRuns).toEqual([])
 
-        // A confirmation that still arrives stops the run the user was told
-        // did not go through.
+        // The timeout is an unknown outcome, not a user stop. Its late
+        // confirmation must not cancel work the server already accepted.
+        if (!namedBeforeTimeout) h.streamHandler?.(created)
         h.streamHandler?.({
           type: 'run_accepted',
           run_id: 'run-late',
@@ -4189,7 +4243,12 @@ describe('chat-list store', () => {
           seq: 1,
         })
         await flush()
-        expect(h.abortedWSRuns).toEqual(['run-late'])
+        expect(h.abortedWSRuns).toEqual([])
+        expect(api.deleteSession).not.toHaveBeenCalled()
+        expect(h.sentWSMessages.filter(message =>
+          message.type === 'message' || message.type === 'retry_message' || message.type === 'edit_message',
+        )).toEqual([expect.objectContaining({ type: 'message', invocation_id: invocationId })])
+        expect(network).not.toHaveBeenCalled()
       } finally {
         vi.useRealTimers()
       }

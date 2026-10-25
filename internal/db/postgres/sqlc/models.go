@@ -893,6 +893,16 @@ type SessionRun struct {
 	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
 }
 
+type SessionRunAbortControl struct {
+	TeamID       pgtype.UUID        `json:"team_id"`
+	RunID        pgtype.UUID        `json:"run_id"`
+	SessionID    pgtype.UUID        `json:"session_id"`
+	RequestHash  string             `json:"request_hash"`
+	ReceivedAt   pgtype.Timestamptz `json:"received_at"`
+	Source       string             `json:"source"`
+	ClientReason string             `json:"client_reason"`
+}
+
 type Snapshot struct {
 	ID                        pgtype.UUID        `json:"id"`
 	ContainerID               string             `json:"container_id"`

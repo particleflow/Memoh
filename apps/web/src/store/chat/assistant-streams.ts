@@ -1,4 +1,5 @@
 import { reactive, toRaw } from 'vue'
+import type { WSAbortReason } from '@/composables/api/useChat.ws'
 import type { ChatAssistantTurn } from './types'
 
 export interface AssistantStream {
@@ -22,6 +23,7 @@ export interface AcceptedRun {
   readonly botId: string
   readonly sessionId: string
   readonly abortRequested: boolean
+  readonly abortReason?: WSAbortReason
 }
 
 interface PendingAssistantStream extends AssistantStream {
@@ -72,6 +74,7 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
   const runIdsByInvocation = new Map<string, string>()
   // Stops pressed before the server named the run, replayed by bindRunId.
   const abortRequestedInvocations = new Map<string, {
+    reason?: WSAbortReason
     botId: string
     sessionId: string
   }>()
@@ -180,6 +183,7 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
       botId: stream?.botId ?? deferredAbort?.botId ?? '',
       sessionId: stream?.sessionId ?? deferredAbort?.sessionId ?? '',
       abortRequested,
+      ...(deferredAbort?.reason ? { abortReason: deferredAbort.reason } : {}),
     }
   }
 
@@ -195,13 +199,14 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
   // requestAbort resolves a stop to the run the server can address. Before
   // run_accepted no such name exists, so the intent is recorded and bindRunId
   // replays it. Silent turns without a visible stream are addressable too.
-  function requestAbort(invocationId: string): string {
+  function requestAbort(invocationId: string, reason?: WSAbortReason): string {
     const invocation = invocationId.trim()
     if (!invocation) return ''
     const runId = runIdsByInvocation.get(invocation) ?? ''
     if (runId) return runId
     const stream = streams.get(invocation)
     abortRequestedInvocations.set(invocation, {
+      reason,
       botId: stream?.botId ?? '',
       sessionId: stream?.sessionId ?? '',
     })

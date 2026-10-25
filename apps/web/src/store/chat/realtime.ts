@@ -8,6 +8,7 @@ import {
   type UIRuntimeEvent,
   type UIStreamEvent,
   type WSClientMessage,
+  type WSAbortReason,
 } from '@/composables/api/useChat'
 import {
   createRuntimeClient,
@@ -178,6 +179,7 @@ export function createChatRealtimeController(
     botId?: string,
     sessionId?: string,
     controlId?: string,
+    reason?: WSAbortReason,
   ): boolean {
     const id = runId.trim()
     const bid = botId?.trim()
@@ -185,7 +187,7 @@ export function createChatRealtimeController(
     const cid = controlId?.trim() ?? ''
     if (!id || !sid || !cid || !activeWebSocket?.connected) return false
     if (bid && bid !== activeWebSocketBotId) return false
-    activeWebSocket.abort(id, sid, cid)
+    activeWebSocket.abort(id, sid, cid, reason)
     return true
   }
 

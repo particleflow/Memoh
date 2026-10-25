@@ -1,0 +1,48 @@
+{
+  "reason": "only inactive pre-turn task-owned regenerable Go cache archives; no source/data/logs/Git touched",
+  "reclaimed_bytes": 933896860,
+  "removed": [
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/a5/a50b674c1b142b5ca66860351367bb25e2b4c2e765a6f0efe7e2eae5f9a7fbff-d",
+      "bytes": 71957008,
+      "mtime_utc": "2026-10-25T08:56:41.840099+00:00",
+      "sha256": "a50b674c1b142b5ca66860351367bb25e2b4c2e765a6f0efe7e2eae5f9a7fbff"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/2d/2d232479b47fff895978cd3c1dae8642ad12de492d398a0085976687639380e0-d",
+      "bytes": 126856616,
+      "mtime_utc": "2026-10-25T09:51:48.190047+00:00",
+      "sha256": "2d232479b47fff895978cd3c1dae8642ad12de492d398a0085976687639380e0"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/e4/e4d789a9a4203e8f4f154f77227622644aec068eb5bdb315cdb66512efab577f-d",
+      "bytes": 126960492,
+      "mtime_utc": "2026-10-25T10:38:08.697780+00:00",
+      "sha256": "e4d789a9a4203e8f4f154f77227622644aec068eb5bdb315cdb66512efab577f"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/c9/c928ae22a52c131c3adfc1d97f5219c10ac826b6363e572be6583ba5d931b9fc-d",
+      "bytes": 177100510,
+      "mtime_utc": "2026-10-25T12:09:46.125502+00:00",
+      "sha256": "c928ae22a52c131c3adfc1d97f5219c10ac826b6363e572be6583ba5d931b9fc"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/eb/ebabf98bcfcd02a176b23bece0779a23f1bab6b8ca5d8bb60c325ea761eb43c7-d",
+      "bytes": 126960926,
+      "mtime_utc": "2026-10-25T12:13:12.388957+00:00",
+      "sha256": "ebabf98bcfcd02a176b23bece0779a23f1bab6b8ca5d8bb60c325ea761eb43c7"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/ca/cafc3ded27cf146eafdb8d7aa772e2549540718fa9401cdda05bb3bd0a59dd72-d",
+      "bytes": 126960926,
+      "mtime_utc": "2026-10-25T12:15:07.491747+00:00",
+      "sha256": "cafc3ded27cf146eafdb8d7aa772e2549540718fa9401cdda05bb3bd0a59dd72"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/71/7168cd970b1975ab1ffdd311a0d10f7b08a54531762e1935791efb7f97b43f89-d",
+      "bytes": 177100382,
+      "mtime_utc": "2026-10-25T12:21:51.756397+00:00",
+      "sha256": "7168cd970b1975ab1ffdd311a0d10f7b08a54531762e1935791efb7f97b43f89"
+    }
+  ]
+}

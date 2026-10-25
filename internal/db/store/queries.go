@@ -26,6 +26,9 @@ type HistoryTurn struct {
 // Queries is the transitional database interface implemented by sqlc-backed stores.
 // Domain-specific stores should replace this broad interface module by module.
 type Queries interface {
+	SessionRunMatchesAbortScope(context.Context, dbsqlc.SessionRunMatchesAbortScopeParams) (bool, error)
+	RecordSessionRunAbortControl(context.Context, dbsqlc.RecordSessionRunAbortControlParams) (int64, error)
+	GetSessionRunAbortControl(context.Context, dbsqlc.GetSessionRunAbortControlParams) (dbsqlc.GetSessionRunAbortControlRow, error)
 	SaveSessionRunResumeContext(context.Context, dbsqlc.SaveSessionRunResumeContextParams) (int64, error)
 	AcceptSessionRunDecisionContinuation(context.Context, dbsqlc.AcceptSessionRunDecisionContinuationParams) (dbsqlc.SessionRun, error)
 	MarkSessionRunDecisionExecuting(context.Context, dbsqlc.MarkSessionRunDecisionExecutingParams) (int64, error)

@@ -1,0 +1,16 @@
+{
+  "integration_base": "6a7a98412c5787ee72d7ba52307be6fbe80fd19c",
+  "source": "97fde22c1e86b90967177fac1b909eb62138749f",
+  "handoff_head": "9d7dd55fdf0820da573fd0a5e48c923789d01f08",
+  "handoff_tree": "a503ec51fc05fb9cfe2b2665f717b80077cbf02b",
+  "all_existing_paths_unchanged": true,
+  "existing_operation_count": 371,
+  "changed_existing_definitions": [
+    "handlers.sessionInvocationResponse"
+  ],
+  "new_definitions": [
+    "handlers.sessionAbortControlResponse"
+  ],
+  "source_files_byte_identical_except_generated_union_and_test_fixture": 27,
+  "official_core_and_workflows_unchanged": true
+}
