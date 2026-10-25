@@ -1264,7 +1264,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_task_attachments.vitest.ts",
-      "sha256": "0f73830d5c9e65836802b27b6564a6885756f81890ace13ba65956f80113fc52",
+      "sha256": "5efe3b3f87a7a98a9b0f7957de61a4f83a2055d9ec793fa12a35010d5c38b7d9",
       "origin": "New phone attachment regression test fixture; not a recovered historical source.",
       "licenseReview": "Project test contribution under the existing repository terms; no third-party implementation copied.",
       "preparationChanges": [
