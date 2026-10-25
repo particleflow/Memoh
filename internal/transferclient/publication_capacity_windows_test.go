@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 	"testing"
 	"time"
 )
@@ -76,7 +75,7 @@ func TestWindowsNativePublicationBucketBudget(t *testing.T) {
 	}
 }
 
-func TestWindowsNativePublicationByteBoundarySurvivesQueueRetire(t *testing.T) {
+func TestWindowsNativePublicationRetainedBytesDoNotUseQueueBudget(t *testing.T) {
 	limits := nativeLimits()
 	limits.Bytes = 2 << 20
 	root := nativeFixtureRoot(t, false)
@@ -111,20 +110,8 @@ func TestWindowsNativePublicationByteBoundarySurvivesQueueRetire(t *testing.T) {
 			t.Fatal("download not verified", err)
 		}
 		ref := *status.Job.Ready
-		if i == 2 {
-			if status.Associated || !status.AssociationBlocked || status.AssociationState != AssociationUnknown {
-				t.Fatalf("one byte beyond retained budget acknowledged: %+v", status)
-			}
-			if out, err := p.Resolve(t.Context(), ref, false); err != nil || out != OutcomeAbsent {
-				t.Fatal("rejected byte created publication", out, err)
-			}
-			if _, err := p.root.Lstat(publicationKey(ref) + ".object"); !errors.Is(err, os.ErrNotExist) {
-				t.Fatal("over-budget object exists", err)
-			}
-			continue
-		}
 		if !status.Associated {
-			t.Fatalf("publication at or below exact budget rejected: %+v", status)
+			t.Fatalf("publication rejected by unrelated legacy snapshot budget: %+v", status)
 		}
 		if err := q.Retire(j.DeliveryID); err != nil {
 			t.Fatal(err)
@@ -140,7 +127,7 @@ func TestWindowsNativePublicationByteBoundarySurvivesQueueRetire(t *testing.T) {
 	}
 	for _, ref := range retained {
 		if out, err := p.Resolve(t.Context(), ref, true); err != nil || out != OutcomeCommitted {
-			t.Fatal("retire/capacity failure removed acknowledged bytes", out, err)
+			t.Fatal("retire removed acknowledged bytes", out, err)
 		}
 	}
 }

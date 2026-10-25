@@ -61,9 +61,17 @@ func (q *DiskQueue) waitAssociation(f *os.File, r QueueStatus, err error, now ti
 	// Blocked pauses automatic attempts; unknown/retry_commit is retained.
 	// It is never evidence that the server did not commit.
 	r.AssociationError = lifecycleErrorClass(err)
+	if errors.Is(err, errDiskSpace) {
+		// Local space pressure is not a failed network attempt. Keep unknown
+		// until Resolve confirms the existing publication, with bounded wakes.
+		r.AssociationAttempts = max(0, r.AssociationAttempts-1)
+		r.AssociationBlocked = false
+		r.AssociationDue = now.Add(maxRetryDelay)
+		return q.save(f, r)
+	}
 	r.AssociationBlocked = !transientAssociation(err) || r.AssociationAttempts >= 12
 	if !r.AssociationBlocked {
-		r.AssociationDue = now.Add(min(time.Second*time.Duration(1<<r.AssociationAttempts), 5*time.Minute))
+		r.AssociationDue = now.Add(min(time.Second*time.Duration(1<<r.AssociationAttempts), maxRetryDelay))
 	}
 	return q.save(f, r)
 }

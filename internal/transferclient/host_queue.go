@@ -29,12 +29,13 @@ type Associate func(context.Context, string, Reference, io.Reader) error
 // a closed-output hash/size and an already authorized regular file handle.
 // A bounded copy verified against that hash becomes the private snapshot;
 // subsequent source mutation cannot change it. Paths never enter the journal.
-// Download admission reserves the entire declared final size as well.
+// Downloads register metadata and an empty part only. Their bytes are streamed
+// under worker locks and checked against actual free space as they are written.
 func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source *os.File) error {
 	if !job.valid() || job.Phase != "queued" || job.Offset != 0 || job.ReceiptID != "" || job.CancelRequested || job.Attempts != 0 || job.SnapshotID != job.DeliveryID || job.LocatorRevision != q.revision || job.DeliveryID == "admission" || direction != "upload" && direction != "download" {
 		return ErrInvalid
 	}
-	if job.Spec.SizeBytes > q.limits.Bytes {
+	if direction == "upload" && job.Spec.SizeBytes > q.limits.Bytes {
 		return ErrCapacity
 	}
 
@@ -87,7 +88,11 @@ func (q *DiskQueue) Admit(ctx context.Context, direction string, job Job, source
 	case !errors.Is(recordErr, os.ErrNotExist):
 		return ErrStore
 	default:
-		if err := q.capacity(job.Spec.SizeBytes); err != nil {
+		if direction == "download" {
+			if err := queueFreeSpace(q.root, admissionFileBytes); err != nil {
+				return err
+			}
+		} else if err := q.capacity(job.Spec.SizeBytes); err != nil {
 			return err
 		}
 		journal, err = q.file(job.DeliveryID+".journal", os.O_CREATE|os.O_EXCL|os.O_RDWR, 0o600)
@@ -259,28 +264,30 @@ func (q *DiskQueue) admissionHead(name string) (QueueStatus, error) {
 }
 
 func (q *DiskQueue) capacity(add int64) error {
-	records, err := q.admissions()
-	if err != nil {
-		return err
-	}
-	total := int64(0)
-	active := 0
-	for _, r := range records {
+	total, records, active := int64(0), 0, 0
+	// Legacy upload snapshots retain their existing policy. Download backlog is
+	// metadata, not a reservation of every future byte or a whole-memory catalog.
+	err := q.visitAdmissions(func(r QueueStatus) error {
+		if r.Direction == "download" || r.Registered && !r.Associated {
+			return nil
+		}
+		records++
 		if r.Registered || r.PayloadState == PayloadReleased {
-			continue
+			return nil
 		}
 		active++
-		reserved := snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes
-		if !r.Registered {
-			reserved += r.Job.Spec.SizeBytes
-		}
+		reserved := snapshotTreeBytes(r.Job.Spec.SizeBytes) + admissionFileBytes + r.Job.Spec.SizeBytes
 		if reserved > q.limits.Bytes-total {
 			return ErrCapacity
 		}
 		total += reserved
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	add += snapshotTreeBytes(add) + admissionFileBytes
-	if len(records) >= maxQueueRecords || active >= q.limits.Jobs || add > q.limits.Bytes-total {
+	if records >= maxQueueRecords || active >= q.limits.Jobs || add > q.limits.Bytes-total {
 		return ErrCapacity
 	}
 	return queueFreeSpace(q.root, add+total)
@@ -456,7 +463,19 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 			return err
 		}
 		defer func() { _ = f.Close() }()
-		err = client.Download(ctx, r.Job.BotID, r.Job.Spec.SHA256, r.Job.Spec.SizeBytes, r.Job.Offset, f, func(offset int64) error { next := r.Job; next.Offset = offset; return save(next) })
+		staging, err := q.downloadStaging(f, r.Job.Spec.SizeBytes-r.Job.Offset)
+		if err == nil {
+			err = client.Download(ctx, r.Job.BotID, r.Job.Spec.SHA256, r.Job.Spec.SizeBytes, r.Job.Offset, staging, func(offset int64) error {
+				next := r.Job
+				next.Offset, next.ErrorCode, next.NextAttempt = offset, "", time.Time{}
+				return save(next)
+			})
+		}
+		if errors.Is(err, errDiskSpace) {
+			next := r.Job
+			next.ErrorCode, next.NextAttempt = "capacity_wait", now.Add(maxRetryDelay)
+			return save(next)
+		}
 		if err != nil {
 			if r.Job.Ready != nil {
 				r.AssociationAttempts++

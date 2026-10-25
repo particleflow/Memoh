@@ -1,0 +1,177 @@
+✔ PR template can be completed and enforces unique identity/type choices (3.241566ms)
+✔ CLI issue bodies obey all three templates; agents explain missing screenshots (0.343447ms)
+✔ fenced examples and comments cannot forge headings or identity (0.261074ms)
+✔ fenced reproduction text is allowed and duplicate headings are rejected (0.254864ms)
+✔ single QA checkbox accepts checked and unchecked states without a record (0.309427ms)
+✔ all size boundaries use the larger total, never the sum (0.206862ms)
+✔ generated outputs are excluded but hand-authored icons and migrations count (0.676961ms)
+✔ renames, deletions and submodule gitlinks classify both affected areas (0.2318ms)
+✔ body fingerprint changes with the head, body and target branch (0.708508ms)
+✖ issue forms produce valid GitHub-rendered markdown after required fields are completed (2.071753ms)
+✖ automatic PR producers supply valid bodies (0.834337ms)
+✔ label sync is idempotent and does not remove unrelated labels (9.144033ms)
+✖ ordinary PR CI has no format job or dependency (1.167369ms)
+✖ both the read-only gate and privileged controller check out default-branch rules (0.868308ms)
+✔ English template structure accepts free-form responses in any language (0.437108ms)
+✔ subheadings remain part of their template section, including repeated subsection names (0.384229ms)
+✔ QA checkbox is visible, unique and allows follow-up notes (0.398861ms)
+✔ bare completion placeholders are reported without a minimum word count (0.416568ms)
+✔ legacy QA labels accept checking without a record and remain unique (0.277288ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 15
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 98.107616
+
+✖ failing tests:
+
+test at .github/scripts/contribution-policy.test.mjs:92:1
+✖ issue forms produce valid GitHub-rendered markdown after required fields are completed (2.071753ms)
+  Error: spawnSync ruby ENOENT
+      at Object.spawnSync (node:internal/child_process:1127:20)
+      at spawnSync (node:child_process:911:24)
+      at execFileSync (node:child_process:954:15)
+      at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:94:29)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'spawnSync ruby',
+    path: 'ruby',
+    spawnargs: [ '-ryaml', '-rjson', '-e', 'puts YAML.load_file(ARGV[0]).to_json', '<repo>/.github/ISSUE_TEMPLATE/bug_report.yml' ],
+    error: Error: spawnSync ruby ENOENT
+        at Object.spawnSync (node:internal/child_process:1127:20)
+        at spawnSync (node:child_process:911:24)
+        at execFileSync (node:child_process:954:15)
+        at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:94:29)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+        at Test.postRun (node:internal/test_runner/test:1330:19)
+        at Test.run (node:internal/test_runner/test:1258:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    status: null,
+    signal: null,
+    output: null,
+    pid: 0,
+    stdout: undefined,
+    stderr: undefined
+  }
+
+test at .github/scripts/contribution-policy.test.mjs:99:1
+✖ automatic PR producers supply valid bodies (0.834337ms)
+  Error: spawnSync ruby ENOENT
+      at Object.spawnSync (node:internal/child_process:1127:20)
+      at spawnSync (node:child_process:911:24)
+      at execFileSync (node:child_process:954:15)
+      at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:101:33)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'spawnSync ruby',
+    path: 'ruby',
+    spawnargs: [ '-ryaml', '-rjson', '-e', 'puts YAML.load_file(ARGV[0]).to_json', '<repo>/.github/workflows/sync-model-capabilities.yml' ],
+    error: Error: spawnSync ruby ENOENT
+        at Object.spawnSync (node:internal/child_process:1127:20)
+        at spawnSync (node:child_process:911:24)
+        at execFileSync (node:child_process:954:15)
+        at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:101:33)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+        at Test.postRun (node:internal/test_runner/test:1330:19)
+        at Test.run (node:internal/test_runner/test:1258:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    status: null,
+    signal: null,
+    output: null,
+    pid: 0,
+    stdout: undefined,
+    stderr: undefined
+  }
+
+test at .github/scripts/contribution-policy.test.mjs:114:1
+✖ ordinary PR CI has no format job or dependency (1.167369ms)
+  Error: spawnSync ruby ENOENT
+      at Object.spawnSync (node:internal/child_process:1127:20)
+      at spawnSync (node:child_process:911:24)
+      at execFileSync (node:child_process:954:15)
+      at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:118:31)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:831:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'spawnSync ruby',
+    path: 'ruby',
+    spawnargs: [ '-ryaml', '-rjson', '-e', 'puts YAML.load_file(ARGV[0]).to_json', '<repo>/.github/workflows/agents-md-updater.yml' ],
+    error: Error: spawnSync ruby ENOENT
+        at Object.spawnSync (node:internal/child_process:1127:20)
+        at spawnSync (node:child_process:911:24)
+        at execFileSync (node:child_process:954:15)
+        at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:118:31)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+        at Test.postRun (node:internal/test_runner/test:1330:19)
+        at Test.run (node:internal/test_runner/test:1258:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:831:7),
+    status: null,
+    signal: null,
+    output: null,
+    pid: 0,
+    stdout: undefined,
+    stderr: undefined
+  }
+
+test at .github/scripts/contribution-policy.test.mjs:133:1
+✖ both the read-only gate and privileged controller check out default-branch rules (0.868308ms)
+  Error: spawnSync ruby ENOENT
+      at Object.spawnSync (node:internal/child_process:1127:20)
+      at spawnSync (node:child_process:911:24)
+      at execFileSync (node:child_process:954:15)
+      at load (file://<repo>/.github/scripts/contribution-policy.test.mjs:134:31)
+      at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:135:14)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1201:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+      at Test.postRun (node:internal/test_runner/test:1330:19)
+      at Test.run (node:internal/test_runner/test:1258:12) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'spawnSync ruby',
+    path: 'ruby',
+    spawnargs: [ '-ryaml', '-rjson', '-e', 'puts YAML.load_file(ARGV[0]).to_json', '<repo>/.github/workflows/contribution-format.yml' ],
+    error: Error: spawnSync ruby ENOENT
+        at Object.spawnSync (node:internal/child_process:1127:20)
+        at spawnSync (node:child_process:911:24)
+        at execFileSync (node:child_process:954:15)
+        at load (file://<repo>/.github/scripts/contribution-policy.test.mjs:134:31)
+        at TestContext.<anonymous> (file://<repo>/.github/scripts/contribution-policy.test.mjs:135:14)
+        at Test.runInAsyncScope (node:async_hooks:226:14)
+        at Test.run (node:internal/test_runner/test:1201:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:831:18)
+        at Test.postRun (node:internal/test_runner/test:1330:19)
+        at Test.run (node:internal/test_runner/test:1258:12),
+    status: null,
+    signal: null,
+    output: null,
+    pid: 0,
+    stdout: undefined,
+    stderr: undefined
+  }

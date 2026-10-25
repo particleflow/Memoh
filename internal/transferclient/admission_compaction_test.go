@@ -132,8 +132,8 @@ func TestAdmissionReadDuringActiveCompaction(t *testing.T) {
 	if err != nil || len(records) != 1 || records[0].Job.DeliveryID != before.Job.DeliveryID || records[0].Job.Spec != before.Job.Spec || records[0].Job.Offset != 321 {
 		t.Fatal("compaction completion mistaken for missing/corrupt admission", records, err)
 	}
-	if err := reader.capacity(1); !errors.Is(err, ErrCapacity) {
-		t.Fatal("active reservation was lost", err)
+	if err := reader.capacity(1); err != nil {
+		t.Fatal("download metadata incorrectly consumes legacy snapshot quota", err)
 	}
 	if _, err := reader.root.Lstat(queueName(before.Job.DeliveryID + ".checkpoint")); !errors.Is(err, os.ErrNotExist) {
 		t.Fatal("test did not reach removed-witness window", err)
