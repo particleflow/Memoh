@@ -29,7 +29,7 @@ def main():
     test_file = 'apps/web/src/pages/home/components/session-task-results.test.ts'
     assert test_file in patches, 'Phone attachment assertions missing'
     existing = {name: values for name, values in patches.items() if name != test_file}
-    assert len(existing) == 43 and existing == baseline['existingPhonePatches'], 'Existing phone adaptation drift'
+    assert len(existing) == 43 and existing == baseline['existingPhonePatches'], 'Reviewed phone adaptation drift'
     checkout = BASE / 'checkout'
     checkout.mkdir(exist_ok=True)
     with tarfile.open(context) as source:
@@ -39,7 +39,7 @@ def main():
     report = {
         'sharedCommit': lock['commit'],
         'sourceSHA256': hashlib.sha256(archive.read_bytes()).hexdigest(),
-        'existingPhoneAdaptationsUnchanged': len(existing),
+        'reviewedPhoneAdaptations': len(existing),
         'testAdaptations': 1,
         'publicConfigurationEmpty': True,
         'fullTypecheckCommand': 'pnpm --filter @memohai/web typecheck',

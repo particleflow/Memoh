@@ -8,21 +8,24 @@ import { MEMOH_ORIGIN } from './MemohClientConfig';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { NativePhotoSelection } from './NativePhotoSelection';
 
-export interface UploadScope { operation: string; botId: string; scope: string; authorization: string; handle?: string; photos?: boolean; }
-export interface UploadLocal { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; }
+export interface UploadScope { operation: string; botId: string; scope: string; authorization: string; handle?: string; photos?: boolean; recoverDrafts?: boolean; }
+export interface UploadLocal { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; scope: string; }
 interface Limits { max_upload_bytes: number; resumable_enabled?: boolean; chunk_max_bytes?: number; }
 interface Identity { id: string; }
 interface Receipt { id: string; state: string; offset: number; size_bytes: number; expires_at: string; mime: string; content_hash?: string; }
 interface MediaReply { content_hash: string; size_bytes: number; mime: string; }
 interface Reply { status: number; body: string; headers: rcp.ResponseHeaders; }
 export interface UploadPreview { fd: number; mime: string; }
+interface UploadStagingHandle { handle: string; }
+interface UploadStagingOffset { offset: number; }
 class Journal {
   version: number = 1; handle: string = ''; owner: string = ''; bot: string = ''; scope: string = '';
   name: string = ''; type: string = ''; size: number = 0; hash: string = ''; uploadId: string = '';
-  offset: number = 0; expires: string = ''; state: string = 'staged'; resumable: boolean = false;
+  offset: number = 0; expires: string = ''; state: string = 'staged'; resumable: boolean = false; completePending: boolean = false;
 }
 class Running {
   apiOrigin: string = MEMOH_ORIGIN; epoch: number = 0; cancelled: boolean = false; staged: Journal[] = []; input: UploadScope; session: rcp.Session; journal?: Journal;
+  copying: boolean = false; copyBusy: boolean = false; copyCommitted: boolean = false; copyOffset: number = 0; copyFile?: fs.File; ended: boolean = false;
   constructor(input: UploadScope, epoch: number) { this.input = input; this.epoch = epoch; this.session = rcp.createSession(); }
 }
 
@@ -34,7 +37,7 @@ export class NativeResumableUpload {
   private epoch: number = 0;
   private running?: Running;
   private root: string;
-  private visible: Map<string, string> = new Map();
+  private visible: Map<string, Journal> = new Map();
   private previews: Map<string, fs.File> = new Map();
   constructor(context: common.UIAbilityContext, authorized: () => boolean) {
     this.context = context; this.authorized = authorized; this.root = context.filesDir + '/memoh-upload-journal-v1';
@@ -56,8 +59,12 @@ export class NativeResumableUpload {
     const run = new Running(input, this.epoch); this.running = run; return run;
   }
   private end(run: Running): void {
+    if (run.ended) { return; }
+    run.ended = true;
+    if (run.copyFile) { fs.closeSync(run.copyFile); run.copyFile = undefined; }
+    if (run.copying && !run.copyCommitted && run.journal) { this.remove(run.journal); }
     run.session.close();
-    if (run.cancelled || run.epoch !== this.epoch) { for (const staged of run.staged) { this.remove(staged); } }
+    if (run.cancelled) { for (const staged of run.staged) { this.remove(staged); } }
     if (run.cancelled && run.journal?.hash) { const path = this.path(run.journal.handle, '.original'); if (fs.accessSync(path)) { fs.unlinkSync(path); } }
     if (this.running === run) { this.running = undefined; }
   }
@@ -89,7 +96,7 @@ export class NativeResumableUpload {
       (j.uploadId !== '' && !/^[a-f0-9-]{36}$/.test(j.uploadId))) { throw new Error('UPLOAD_JOURNAL_INVALID'); }
     return j;
   }
-  private info(j: Journal): UploadLocal { return { handle: j.handle, name: j.name, type: j.type, size: j.size, hash: j.hash, resumable: j.resumable }; }
+  private info(j: Journal): UploadLocal { return { handle: j.handle, name: j.name, type: j.type, size: j.size, hash: j.hash, resumable: j.resumable, scope: j.scope }; }
   private async hash(bytes: Uint8Array): Promise<string> {
     const md = cryptoFramework.createMd('SHA256'); await md.update({ data: bytes });
     return Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join('');
@@ -144,6 +151,7 @@ export class NativeResumableUpload {
     j.name = name.replace(/[\\/\x00-\x1f]/g, '_').slice(0, 160) || 'file'; j.type = mime;
     j.resumable = limits.resumable_enabled === true; run.journal = j;
     let output: fs.File | undefined;
+    let committed: boolean = false;
     try {
       j.size = fs.statSync(input.fd).size;
       if (!Number.isSafeInteger(j.size) || j.size <= 0 || j.size > limits.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
@@ -160,8 +168,10 @@ export class NativeResumableUpload {
       j.hash = Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join('');
       // Re-read the granted source; mutation during snapshot copy cannot silently
       // substitute a mixed original even when its size did not change.
-      await verifyMediaFd(input.fd, j.size, j.hash, () => this.check(run)); this.check(run); this.save(j); run.staged.push(j); this.visible.set(j.handle, j.type); return this.info(j);
-    } catch (error) { this.remove(j); throw error as Error; }
+      await verifyMediaFd(input.fd, j.size, j.hash, () => this.check(run)); this.check(run);
+      this.save(j); committed = true; run.staged.push(j); this.check(run);
+      this.visible.set(j.handle, j); return this.info(j);
+    } catch (error) { if (!committed || run.cancelled) { this.remove(j); } throw error as Error; }
     finally { fs.closeSync(input); if (output) { fs.closeSync(output); } }
   }
   private remove(j: Journal): void {
@@ -171,15 +181,76 @@ export class NativeResumableUpload {
       const path = this.path(j.handle, suffix); if (fs.accessSync(path)) { fs.unlinkSync(path); }
     }
   }
+  async stageBegin(input: UploadScope, name: string, mime: string, size: number): Promise<UploadStagingHandle> {
+    const run = this.start(input); run.copying = true; run.copyBusy = true;
+    try {
+      const owner = await this.owner(run), limits = await this.limits(run); this.check(run);
+      if (!Number.isSafeInteger(size) || size <= 0 || size > limits.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
+      if (name.length > 1024 || mime.length > 256 || /[\x00-\x1f\x7f]/.test(mime)) { throw new Error('UPLOAD_REQUEST'); }
+      const j = new Journal(); j.handle = util.generateRandomUUID(true); j.owner = owner; j.bot = input.botId; j.scope = input.scope;
+      j.name = name.replace(/[\\/\x00-\x1f]/g, '_').slice(0, 160) || 'file'; j.type = mime || 'application/octet-stream';
+      j.size = size; j.resumable = limits.resumable_enabled === true; run.journal = j;
+      if (fs.accessSync(this.path(j.handle, '.original'))) { throw new Error('UPLOAD_IDENTITY'); }
+      run.copyFile = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE | fs.OpenMode.NOFOLLOW);
+      return { handle: j.handle };
+    } catch (error) { this.end(run); throw error as Error; }
+    finally { run.copyBusy = false; }
+  }
+  private copying(operation: string, authorization: string): Running {
+    const run = this.running;
+    if (!run || !run.copying || !run.copyFile || !run.journal) { throw new Error('UPLOAD_IDENTITY'); }
+    // Another command cannot replace an in-flight read/write or close its FD.
+    if (run.copyBusy) { throw new Error('UPLOAD_BUSY'); }
+    if (run.input.operation !== operation || run.input.authorization !== authorization) {
+      this.end(run); throw new Error('UPLOAD_IDENTITY');
+    }
+    try { this.check(run); } catch (error) { this.end(run); throw error as Error; }
+    run.copyBusy = true; return run;
+  }
+  async stageAppend(operation: string, authorization: string, offset: number, data: string): Promise<UploadStagingOffset> {
+    const run = this.copying(operation, authorization);
+    try {
+      if (!Number.isSafeInteger(offset) || offset !== run.copyOffset || !data || data.length > 87384 ||
+        !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(data)) { throw new Error('UPLOAD_REQUEST'); }
+      const bytes = new util.Base64Helper().decodeSync(data), j = run.journal as Journal, file = run.copyFile as fs.File;
+      if (!bytes.byteLength || bytes.byteLength > 65536 || offset + bytes.byteLength > j.size) { throw new Error('UPLOAD_REQUEST'); }
+      let written = 0;
+      while (written < bytes.byteLength) {
+        this.check(run);
+        const n = await fs.write(file.fd, bytes.buffer.slice(bytes.byteOffset + written, bytes.byteOffset + bytes.byteLength), { offset: offset + written });
+        this.check(run);
+        if (n <= 0 || n > bytes.byteLength - written) { throw new Error('UPLOAD_SHORT_WRITE'); }
+        written += n;
+      }
+      run.copyOffset += written; return { offset: run.copyOffset };
+    } catch (error) { this.end(run); throw error as Error; }
+    finally { run.copyBusy = false; }
+  }
+  async stageFinish(operation: string, authorization: string): Promise<UploadLocal> {
+    const run = this.copying(operation, authorization);
+    try {
+      const j = run.journal as Journal, file = run.copyFile as fs.File;
+      if (run.copyOffset !== j.size || fs.statSync(file.fd).size !== j.size) { throw new Error('UPLOAD_SHORT_READ'); }
+      fs.fsyncSync(file.fd);
+      const md = cryptoFramework.createMd('SHA256'), buffer = new ArrayBuffer(262144); let at = 0;
+      while (at < j.size) {
+        this.check(run); fs.lseek(file.fd, at, fs.WhenceType.SEEK_SET);
+        const n = await fs.read(file.fd, buffer, { length: Math.min(buffer.byteLength, j.size - at) }); this.check(run);
+        if (n <= 0 || n > Math.min(buffer.byteLength, j.size - at)) { throw new Error('UPLOAD_SHORT_READ'); }
+        await md.update({ data: new Uint8Array(buffer, 0, n) }); at += n;
+      }
+      j.hash = Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join(''); this.check(run);
+      this.save(j); run.copyCommitted = true; run.staged.push(j); this.check(run);
+      this.visible.set(j.handle, j); return this.info(j);
+    } finally { run.copyBusy = false; this.end(run); }
+  }
   async select(input: UploadScope, recordingPath?: string): Promise<UploadLocal[]> {
     const run = this.start(input);
     try {
       const owner = await this.owner(run), limits = await this.limits(run); this.check(run);
-      const existing = fs.listFileSync(this.root).filter((name: string) => /^[a-f0-9]{32}\.json$/.test(name) && this.read(name.slice(0, -5)).state !== 'canceled');
-      if (existing.length >= 16 || existing.filter((name: string) => this.read(name.slice(0, -5)).owner === owner).length >= 4) { throw new Error('UPLOAD_LOCAL_QUOTA'); }
       if (recordingPath) { return [await this.stagePath(run, owner, limits, recordingPath, '录音-' + input.handle + '.wav', 'audio/wav')]; }
-      const available = Math.min(16 - existing.length, 4 - existing.filter((name: string) => this.read(name.slice(0, -5)).owner === owner).length);
-      const uris = await new NativePhotoSelection(this.context).select(available, input.photos === true); this.check(run);
+      // Bound each picker invocation, not the user's total retained backlog.
+      const uris = await new NativePhotoSelection(this.context).select(4, input.photos === true); this.check(run);
       const results: UploadLocal[] = [];
       for (const uri of uris) {
       const name = new fileUri.FileUri(uri).name || 'file';
@@ -195,10 +266,17 @@ export class NativeResumableUpload {
     const run = this.start(input);
     try {
       const owner = await this.owner(run); await this.limits(run); const result: UploadLocal[] = [];
-      for (const name of fs.listFileSync(this.root)) {
+      const names = input.handle ? [input.handle + '.json'] : fs.listFileSync(this.root);
+      for (const name of names) {
         if (!/^[a-f0-9]{32}\.json$/.test(name)) { continue; }
         const j = this.read(name.slice(0, -5));
-        if (j.owner === owner && j.bot === input.botId && j.scope === input.scope && j.state !== 'canceled') { this.visible.set(j.handle, j.type); result.push(this.info(j)); }
+        const sameScope = j.scope === input.scope || (input.recoverDrafts === true && input.scope.startsWith('draft:') && j.scope.startsWith('draft:'));
+        if (j.owner === owner && j.bot === input.botId && sameScope && j.state !== 'canceled') {
+          await this.verify(run, j); this.check(run); this.visible.set(j.handle, j); result.push(this.info(j));
+          // An explicit restore opens one bounded window. Sent/removed snapshots
+          // leave the journal, so another restore can reveal the next window.
+          if (result.length === 16) { break; }
+        }
       }
       this.check(run); return result;
     } finally { this.end(run); }
@@ -209,7 +287,9 @@ export class NativeResumableUpload {
       !Number.isSafeInteger(r.offset) || r.offset < 0 || r.offset > j.size || !Number.isFinite(Date.parse(r.expires_at)) ||
       typeof r.mime !== 'string' || !r.mime || !['uploading', 'ready', 'canceled'].includes(r.state) ||
       (r.state === 'ready' ? r.content_hash !== j.hash || r.offset !== j.size : !!r.content_hash)) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
-    this.check(run); j.uploadId = r.id; j.offset = r.offset; j.expires = r.expires_at; j.state = r.state; j.type = r.mime; this.save(j); return r;
+    this.check(run); j.uploadId = r.id; j.offset = r.offset; j.expires = r.expires_at; j.state = r.state; j.type = r.mime;
+    if (r.state === 'ready') { j.completePending = false; }
+    this.save(j); return r;
   }
   private async retryCall(run: Running, path: string, method: rcp.HttpMethod = 'GET', body?: rcp.RequestContent,
     headers: rcp.RequestHeaders = {}): Promise<Reply> {
@@ -225,6 +305,7 @@ export class NativeResumableUpload {
       const owner = await this.owner(run), j = await this.owned(run, owner), limit = await this.limits(run);
       await this.verify(run, j); this.check(run);
       const base = this.base(run);
+      if (!j.uploadId && j.state === 'create-unknown') { throw new Error('UPLOAD_CREATE_UNCERTAIN'); }
       if (j.state === 'ready' || j.state === 'legacy-unknown') {
         const reply = await this.call(run, base + '/' + j.hash, 'HEAD');
         if (reply.status === 200) {
@@ -236,6 +317,9 @@ export class NativeResumableUpload {
         }
         if (reply.status !== 404) { this.status(reply); }
         if (j.state === 'legacy-unknown') { throw new Error('UPLOAD_LEGACY_UNCERTAIN'); }
+        // A ready receipt cannot override current evidence that its original
+        // is unavailable. Keep the local source and do not return a stale ref.
+        throw new Error('UPLOAD_ORIGINAL_UNAVAILABLE');
       }
       if (!j.uploadId && j.size > limit.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
       if (!limit.resumable_enabled) {
@@ -252,17 +336,23 @@ export class NativeResumableUpload {
       if (j.uploadId) {
         const status = await this.retryCall(run, base + '/uploads/' + j.uploadId);
         if (status.status === 404) {
-          // Owner and source already revalidated. Receipt may have expired or
-          // been collected; at most one new admission per explicit foreground run.
-          j.uploadId = ''; j.offset = 0; j.state = 'staged'; this.save(j);
+          // A missing/expired receipt is not permission to create another one.
+          // Keep the original ID, offset, expiry and immutable local snapshot.
+          throw new Error('UPLOAD_RECEIPT_UNAVAILABLE');
         } else { this.receipt(run, j, status); }
       }
       if (!j.uploadId) {
         if (j.size > limit.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
-        const reply = await this.retryCall(run, base + '/uploads', 'POST', JSON.stringify({ size_bytes: j.size, sha256: j.hash, mime: j.type }), { 'content-type': 'application/json' });
+        // Create has no idempotency key or lookup API. Persist uncertainty
+        // BEFORE sending; a lost reply must not become a second POST on restart.
+        j.state = 'create-unknown'; this.save(j);
+        let reply: Reply;
+        try { reply = await this.call(run, base + '/uploads', 'POST', JSON.stringify({ size_bytes: j.size, sha256: j.hash, mime: j.type }), { 'content-type': 'application/json' }); }
+        catch { this.check(run); throw new Error('UPLOAD_CREATE_UNCERTAIN'); }
         this.receipt(run, j, reply, 201);
         if (j.offset !== 0 || j.state !== 'uploading') { throw new Error('UPLOAD_RECEIPT_INVALID'); }
       }
+      if (j.completePending && j.state !== 'ready') { throw new Error('UPLOAD_COMPLETE_UNCERTAIN'); }
       if (j.state === 'canceled') { throw new Error('UPLOAD_CANCELLED'); }
       const file = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.READ_ONLY | fs.OpenMode.NOFOLLOW);
       const buffer = new ArrayBuffer(Math.min(262144, limit.chunk_max_bytes ?? 262144)); let recoveries = 0;
@@ -292,14 +382,12 @@ export class NativeResumableUpload {
       } finally { fs.closeSync(file); }
       await this.verify(run, j);
       if (j.state !== 'ready') {
+        j.completePending = true; this.save(j);
         let reply: Reply;
-        try { reply = await this.retryCall(run, base + '/uploads/' + j.uploadId + '/complete', 'POST'); }
+        try { reply = await this.call(run, base + '/uploads/' + j.uploadId + '/complete', 'POST'); }
         catch { this.check(run); reply = await this.retryCall(run, base + '/uploads/' + j.uploadId); }
-        let receipt = this.receipt(run, j, reply);
-        if (receipt.state === 'uploading' && receipt.offset === j.size) {
-          receipt = this.receipt(run, j, await this.retryCall(run, base + '/uploads/' + j.uploadId + '/complete', 'POST'));
-        }
-        if (receipt.state !== 'ready') { throw new Error('UPLOAD_NOT_READY'); }
+        const receipt = this.receipt(run, j, reply);
+        if (receipt.state !== 'ready') { throw new Error('UPLOAD_COMPLETE_UNCERTAIN'); }
       }
       this.check(run); return { content_hash: j.hash, size_bytes: j.size, mime: j.type };
     } finally { this.end(run); }
@@ -315,6 +403,14 @@ export class NativeResumableUpload {
       this.check(run); this.remove(j);
     } finally { this.end(run); }
   }
+  async consume(input: UploadScope): Promise<void> {
+    const run = this.start(input);
+    try {
+      const owner = await this.owner(run), j = await this.owned(run, owner);
+      if (j.state !== 'ready') { throw new Error('UPLOAD_NOT_READY'); }
+      this.check(run); this.remove(j);
+    } finally { this.end(run); }
+  }
   abort(operation: string): void {
     const run = this.running;
     if (!run || run.input.operation !== operation) { return; }
@@ -324,6 +420,11 @@ export class NativeResumableUpload {
     const preview = run.journal ? this.previews.get(run.journal.handle) : undefined;
     if (preview && run.journal) { fs.closeSync(preview); this.previews.delete(run.journal.handle); this.visible.delete(run.journal.handle); }
     if (run.journal?.uploadId && run.epoch === this.epoch && this.authorized()) { void this.cancelRemote(run); }
+  }
+  pause(operation: string): void {
+    // Navigation and a cancelled send stop I/O but retain a resumable original.
+    // Only explicit discard/abort tombstones the original or cancels staging.
+    if (this.running?.input.operation === operation) { this.close(); }
   }
   private async cancelRemote(run: Running): Promise<void> {
     const j = run.journal; if (!j?.uploadId) { return; }
@@ -339,14 +440,19 @@ export class NativeResumableUpload {
     finally { session.close(); }
   }
   preview(handle: string): UploadPreview {
-    const mime = this.visible.get(handle);
-    if (!this.authorized() || !mime || !/^(image|audio|video)\//.test(mime)) { throw new Error('UPLOAD_IDENTITY'); }
+    const journal = this.visible.get(handle);
+    if (!this.authorized() || !journal || !/^(image|audio|video)\//.test(journal.type)) { throw new Error('UPLOAD_IDENTITY'); }
     let file = this.previews.get(handle);
     if (!file) { file = fs.openSync(this.path(handle, '.original'), fs.OpenMode.READ_ONLY | fs.OpenMode.NOFOLLOW); this.previews.set(handle, file); }
-    return { fd: file.fd, mime };
+    if (fs.statSync(file.fd).size !== journal.size) { throw new Error('UPLOAD_IDENTITY'); }
+    return { fd: file.fd, mime: journal.type };
   }
   close(): void {
-    this.epoch++; this.running?.session.cancel(); this.visible.clear();
+    this.epoch++; const run = this.running; run?.session.cancel();
+    // Between bridge chunks there is no pending await to run a finally block.
+    // During I/O, its owner keeps the FD until the epoch check unwinds it.
+    if (run?.copying && !run.copyBusy) { this.end(run); }
+    this.visible.clear();
     this.previews.forEach((file: fs.File) => fs.closeSync(file)); this.previews.clear();
   }
 }

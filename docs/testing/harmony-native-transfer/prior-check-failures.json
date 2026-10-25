@@ -1,0 +1,29 @@
+{
+  "scope": "Prior failed checks retained; no pass substituted for these runs",
+  "failures": {
+    "ui-all-entries-final.log": {
+      "sha256": "09b90233d2cfcd0d26b2f635a963a8c64a8d91c55ac8cff72a516efc26176bf9",
+      "retainedPrivately": true
+    },
+    "ui-all-entries-qualified.log": {
+      "sha256": "45761ce42cc81907bf85fa83c43f2d3bf29c8af3ddbb3441f5b09114131b9f3b",
+      "retainedPrivately": true
+    },
+    "ui-recording-diagnostic.log": {
+      "sha256": "e4c0e65a2018c37a7f3e8bb2bd738c83dfcb785bab4edbedf4cef025e9d2edbe",
+      "retainedPrivately": true
+    },
+    "ui-all-entries-verified.log": {
+      "sha256": "e47a84cf7a2d4e4b910837f5938663a5b1a77760fc32984102a89e98c0d633f0",
+      "retainedPrivately": true
+    },
+    "typecheck-current.log": {
+      "sha256": "5533352154339e9d5f85b70727f4cb26f87fba54044d384100b4d67ffe54df34",
+      "retainedPrivately": true
+    }
+  },
+  "resolution": {
+    "ui": "Wait for session title; complete controlled empty history; use actual send gesture; permit only existing runtime subscribe/unsubscribe read-only frames. Product voice UI unchanged.",
+    "typecheck": "Default pnpm selected a fallback version and tried an implicit install; used already installed vue-tsc with identical tsconfig instead. No dependency download."
+  }
+}

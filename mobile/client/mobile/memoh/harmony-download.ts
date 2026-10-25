@@ -30,11 +30,12 @@ export async function saveNativeOriginal(botId: string, hash: string, size: numb
   const controller = new AbortController(), operation = crypto.randomUUID().replaceAll('-', '')
   const fields = { operation, botId }, generation = authSessionGeneration(), token = sdkAuthQuery().token
   const abort = () => { controller.abort(); void command('download.abort', fields).catch(() => {}) }
-  const offAuth = onAuthSessionCleared(abort)
+  const pause = () => { controller.abort(); void command('download.release', fields).catch(() => {}) }
+  const offAuth = onAuthSessionCleared(pause)
   const check = () => {
     controller.signal.throwIfAborted(); signal?.throwIfAborted()
     if (!token || generation !== authSessionGeneration() || token !== sdkAuthQuery().token) {
-      abort(); throw new DOMException('账号已变化，原件未保存', 'AbortError')
+      pause(); throw new DOMException('账号已变化，原件未保存', 'AbortError')
     }
   }
   signal?.addEventListener('abort', abort, { once: true })
@@ -75,7 +76,8 @@ export async function saveNativeOriginal(botId: string, hash: string, size: numb
     check()
   } finally {
     offAuth(); signal?.removeEventListener('abort', abort); toast.dismiss(notice)
-    // Covers failures after native readiness, late replies, picker dismissal.
-    await command('download.abort', fields).catch(() => {})
+    // Release the foreground lease; interrupted bytes remain privately resumable.
+    // Explicit user cancellation above still discards this operation.
+    await command('download.release', fields).catch(() => {})
   }
 }

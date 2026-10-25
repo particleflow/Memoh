@@ -246,6 +246,19 @@ struct SharedChat {
   }
   private intercept(request: WebResourceRequest): WebResourceResponse | null {
     const url = request.getRequestUrl();
+    const upload = /^begonia-client:\/\/app\/upload\/([a-f0-9]{32})$/.exec(url);
+    if (upload && request.getRequestMethod() === 'GET' && !request.isMainFrame()) {
+      try {
+        if (!this.nativeClient || !this.active || !this.chatReady) { throw new Error('UPLOAD_IDENTITY'); }
+        const original = this.nativeClient.uploadPreview(upload[1]);
+        const response = new WebResourceResponse();
+        response.setResponseCode(200); response.setReasonMessage('OK');
+        response.setResponseMimeType(original.mime); response.setResponseEncoding('');
+        response.setResponseHeader([{ headerKey: 'Cache-Control', headerValue: 'no-store' },
+          { headerKey: 'X-Content-Type-Options', headerValue: 'nosniff' }]);
+        response.setResponseData(original.fd); response.setResponseIsReady(true); return response;
+      } catch { return this.response(403, 'text/plain', new ArrayBuffer(0)); }
+    }
     const path = packagedPath(url);
     if (path && request.getRequestMethod() === 'GET') {
       if (path === 'index.html' && !request.isMainFrame()) { return this.response(403, 'text/plain', new ArrayBuffer(0)); }

@@ -57,7 +57,7 @@
       "upstreamSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122"
     },
     "apps/web/src/pages/home/components/chat-pane.vue": {
-      "adaptedSHA256": "4a703e6dce7b09dc87571e247ddd5c68b69a925ff0d678357c8078074ddecf93",
+      "adaptedSHA256": "e6cc02ac093944fa1bbd2125fdcdb6e1da987489e111d5859c8685e3719160b6",
       "upstreamSHA256": "3b3f89ab3ff1df338a604bb08126aa81c05b3e4deee1d561e3b5abf7f590f3e1"
     },
     "apps/web/src/pages/home/components/display-pane.vue": {
@@ -172,6 +172,14 @@
       "adaptedSHA256": "fc36d74d13468ae651a6fa3db3671133645c14862aa18327e6b75992437ab5c7",
       "upstreamSHA256": "c75f648f279b2303fa4690bb1a813d176d584ef0f969170ef86790aa7e61c421"
     }
+  },
+  "nativeTransferReview": {
+    "baseCommit": "b1a025dc79879d9cb986bc5b6d637caee60a4cde",
+    "changedAdaptations": [
+      "apps/web/src/pages/home/components/chat-pane.vue"
+    ],
+    "reason": "Wire the retained native picker and resumable uploader into the existing composer/send gate; preserve the other platform adaptations.",
+    "unchangedAdaptations": 42
   },
   "referenceHostCommit": "9fdff87bd8f65d048537ca4cfda77bcdaeae3674",
   "sharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f"

@@ -17,6 +17,9 @@ function executable(source, names, scope) {
 const hash = async bytes => Buffer.from(await crypto.subtle.digest('SHA-256', bytes)).toString('hex')
 const originals = new Map(), calls = []
 const scopedCalls = [], nativeSaves = [], host = {}
+const nativeCalls = [], nativeFileStages = new Map(), forgottenNativeFiles = []
+let nativeFailure = false
+const nativeFixture = {handle:'a'.repeat(32),name:'native.bin',type:'application/octet-stream',size:8,hash:'b'.repeat(64),resumable:true,scope:'session-a'}
 let scopedStatus = 200
 let limit = 209715200, holdUpload = false, activeXHR, readStatus, corrupt = false, badReceipt = false
 class XHR {
@@ -48,6 +51,23 @@ class XHR {
   abort() { this.onabort() }
 }
 const scope = {
+  stageNativeFile: async (bot,scope,file,signal) => {
+    signal?.throwIfAborted();const sha=await hash(await file.slice().arrayBuffer());
+    const item={handle:sha.slice(0,32),hash:sha,size:file.size,name:file.name,type:file.type,scope,resumable:true};
+    nativeFileStages.set(item.handle,item);return item;
+  },
+  forgetNativeFile: async (bot,scope,file,handle) => { forgottenNativeFiles.push({bot,scope,file,handle}) },
+  nativeAttachmentCommand: async (command, bot, scope, fields, signal) => {
+    signal?.throwIfAborted(); nativeCalls.push({command,bot,scope,handle:fields.handle})
+    if (nativeFailure) throw new Error('controlled native failure')
+    const real = process.env.HARMONY_RESUMABLE_E2E && JSON.parse(process.env.HARMONY_RESUMABLE_E2E)
+    if (real) {
+      const response = await fetch(real.origin.replace(/\/api$/, '')+'/test/native', {method:'POST',body:JSON.stringify({action:command==='upload.run'?'run':'consume',handle:fields.handle})})
+      const reply = await response.json(); if (reply.error) throw new Error(reply.error); return reply.result
+    }
+    const selected=nativeFileStages.get(fields.handle)||nativeFixture
+    return command==='upload.run' ? {content_hash:selected.hash,size_bytes:selected.size,mime:selected.type} : undefined
+  },
   createApiFetch: value => value ?? (async (url, options) => {
     scopedCalls.push({ url, options })
     return new Response(scopedStatus === 200 ? file : null, { status: scopedStatus })
@@ -204,4 +224,38 @@ const result={targetCommit:JSON.parse(fs.readFileSync('config/memoh_web.lock.jso
  limitsFailClosed:true,singleMultipartFile:true,hashReceiptAndReadback:true,botIsolation:true,
  unknownWriteReconciliation:true,cancelledModelMessages:0,duplicateReadyMessages:0,explicitReferencesGated:true,
  independentText:true,videoType:true,delegatedReadAndSaveScope:true,scopedDenialNoFallback:true,networkRequests:0,nativeDevice:false}
+const real = process.env.HARMONY_RESUMABLE_E2E && JSON.parse(process.env.HARMONY_RESUMABLE_E2E)
+if (real) Object.assign(nativeFixture,{handle:real.handle,hash:real.hash,size:real.size})
+const webReadsBefore=calls.length, postsBefore=sent.length
+const nativeBatch=prepareSubmission('bot-a',[],undefined,{scope:'session-a',files:[nativeFixture]})
+await nativeBatch.consumeNative();assert.equal(nativeCalls.length,0,'not ready is never consumed')
+nativeFailure=true
+const nativeFailed=await sender.sendMessage('retain original',nativeBatch.attachments,{target:targetA,prepareAttachments:nativeBatch.prepareAttachments})
+assert.equal(nativeFailed.stage,'startup');assert.equal(sent.length,postsBefore);assert.equal(nativeBatch.nativeFiles[0].handle,nativeFixture.handle)
+await nativeBatch.consumeNative();assert.equal(nativeCalls.filter(x=>x.command==='upload.consume').length,0)
+nativeFailure=false
+const retryBatch=prepareSubmission('bot-a',[],undefined,{scope:'session-a',files:[nativeFixture]})
+const nativeSent=await sender.sendMessage('native original',retryBatch.attachments,{target:targetA,prepareAttachments:retryBatch.prepareAttachments})
+assert.equal(nativeSent.messageSent,true);assert.equal(sent.length,postsBefore+1)
+assert.equal(calls.length,webReadsBefore,'native originals never enter Web byte reads, multipart or limits fallback')
+assert.equal(nativeCalls.filter(x=>x.command==='upload.consume').length,0,'upload ready alone does not consume')
+assert.deepEqual(Object.keys(sent.at(-1).message.attachments[0]).sort(),['content_hash','mime','name','size','type'])
+assert.equal(sent.at(-1).message.attachments[0].content_hash,nativeFixture.hash)
+await retryBatch.consumeNative();assert.equal(nativeCalls.filter(x=>x.command==='upload.consume').length,1)
+result.nativeHandlePreparation=true;result.nativeFailedSendKeepsOriginal=true;result.nativeConsumeAfterConfirmedSend=true
+if(real){result.durableNativeDiskHTTPToChat=true;result.networkRequests='controlled loopback native adapter'}
+else {
+  const pasted=new File(['pasted text'], 'pasted-text.txt', {type:'text/plain'})
+  const audio=new File(['synthetic recorded wave'], '录音-voice-test.wav', {type:'audio/wav'})
+  const dropped=new File(['dropped bytes'], 'dropped.bin',{type:'application/octet-stream'})
+  host.begoniaNative={};const webBeforeMixed=calls.length
+  for(const f of [pasted,dropped,audio])f.arrayBuffer=()=>{throw Error('native uploads must not read whole File')}
+  const mixed=prepareSubmission('bot-a',[pasted,dropped],{capture:{handle:'voice-test',durationMs:0,peaks:[],state:'complete',text:'',speechError:''},recording:Promise.resolve({file:audio,durationMs:123,peaks:[0.2]})},{scope:'session-a',files:[nativeFixture]})
+  const readyMixed=await mixed.prepareAttachments(new AbortController().signal)
+  assert.equal(readyMixed.length,4);assert.deepEqual(readyMixed.map(x=>x.type),['file','file','audio','file'])
+  assert.equal(readyMixed[2].metadata.voice_duration_ms,123);assert.equal(mixed.files[0],pasted);assert.equal(mixed.files[1],dropped);assert.equal(mixed.files[2],audio)
+  assert.equal(calls.length,webBeforeMixed,'paste/drop/recorded Files must not use Web multipart or byte reads')
+  await mixed.consumeNative();assert.equal(forgottenNativeFiles.length,3);delete host.begoniaNative
+  result.pasteDropAndVoiceUseSameNativeReceipt=true;result.nativeFileUploadForbidsWholeFileRead=true
+}
 console.log(JSON.stringify(result))

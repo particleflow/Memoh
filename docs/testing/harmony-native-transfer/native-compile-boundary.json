@@ -1,0 +1,10 @@
+{
+  "task": "CompileArkTS",
+  "result": "failed before compilation: 00306054 Task not found",
+  "rawLogSHA256": "be5c12fd3564e6259c6b0a1496b2817b2653c8565276b09a7ceee8f79f782344",
+  "rawLogRetainedPrivately": true,
+  "reasonRawLogNotPublished": "Includes a vendor tool source dump; no SDK implementation redistributed.",
+  "arkTSCompiled": false,
+  "hapAssembled": false,
+  "same109ArtifactPreserved": true
+}

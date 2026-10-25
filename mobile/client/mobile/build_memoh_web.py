@@ -44,6 +44,7 @@ def inputs():
         'mobile/build_memoh_web.py', 'mobile/memoh/harmony.ts', 'mobile/memoh/harmony-files.ts',
         'mobile/memoh/harmony-voice.ts', 'mobile/memoh/harmony-voice-geometry.ts',
         'mobile/memoh/HarmonyVoiceInput.vue', 'mobile/memoh/HarmonyVoiceFan.vue', 'mobile/memoh/HarmonyVoicePlayer.vue',
+        'mobile/memoh/HarmonyAttachments.vue', 'mobile/memoh/harmony-resumable.ts',
         'mobile/memoh/voiceFan.svg', 'mobile/memoh/voiceFan.css', 'contracts/ui_theme.json',
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
@@ -727,6 +728,48 @@ function close() {''', 1),
     ])
     # The unified upstream already owns its SDK and Web type fixes.
     changes['apps/web/src/pages/home/components/chat-pane.vue'].extend([('let preparingView: ReturnType<typeof chatStore.chatView> | undefined', 'let preparingView: ReturnType<typeof chatStore.chatView> | undefined\nlet attachmentPreparationCancelled = false', 1), ('function cancelAttachmentUpload() { preparingView?.attachmentPreparation.value?.abort() }', 'function cancelAttachmentUpload() {\n  const controller = preparingView?.attachmentPreparation.value\n  if (controller) { attachmentPreparationCancelled = true; controller.abort() }\n}', 1), ('  preparingView = paneView.value', '  attachmentPreparationCancelled = false\n  preparingView = paneView.value', 1), ('  if (!holdsInput) clearSentInput()\n', '', 1), ('      if (holdsInput) {\n        clearSentInput(onSentPane)', '      clearSentInput(onSentPane)\n      if (holdsInput) {', 1), ('  if (restore) {\n    if (!matchesChatPaneSendContext(', '  if (restore) {\n    // Selection/lifecycle cancellation leaves the live composer untouched.\n    if (attachmentPreparationCancelled) return\n    if (!matchesChatPaneSendContext(', 1)])
+    # One composer and one send: native handles join the existing preparation
+    # callback, while clipboard/voice Files keep their established path.
+    changes['apps/web/src/pages/home/components/chat-pane.vue'].extend([
+        ("import { prepareSubmission } from '@/lib/harmony-files'",
+         "import { prepareSubmission } from '@/lib/harmony-files'\nimport HarmonyAttachments from '@/lib/HarmonyAttachments.vue'\nimport { nativeAttachmentsAvailable, type NativeAttachment } from '@/lib/harmony-resumable'", 1),
+        ('const harmonyPhotoInput = ref<HTMLInputElement>()', '''const harmonyPhotoInput = ref<HTMLInputElement>()
+const harmonyAttachmentPicker = ref<InstanceType<typeof HarmonyAttachments>>()
+const pendingNativeAttachments = ref<NativeAttachment[]>([])
+const nativeAttachmentScope = computed(() => paneTarget.value.sessionId
+  ? 'session:' + paneTarget.value.sessionId : 'draft:' + paneTarget.value.viewId)
+const nativeAttachmentBusy = computed(() => !!harmonyAttachmentPicker.value?.busy)''', 1),
+        ('            <input ref="harmonyPhotoInput"', '''            <HarmonyAttachments
+              ref="harmonyAttachmentPicker"
+              v-model="pendingNativeAttachments"
+              :bot-id="currentBotId || ''"
+              :scope="nativeAttachmentScope"
+              :active="isActive && isVisible"
+              :disabled="!isActive || !isVisible || !currentBotId || activeChatReadOnly || streaming || loadingMessages || attachmentPreparing"
+            />
+            <input ref="harmonyPhotoInput"''', 1),
+        ('@select="harmonyPhotoInput?.click()"', '@select="nativeAttachmentsAvailable ? harmonyAttachmentPicker?.select(true) : harmonyPhotoInput?.click()"', 1),
+        ('@select="fileInput?.click()"', '@select="nativeAttachmentsAvailable ? harmonyAttachmentPicker?.select(false) : fileInput?.click()"', 1),
+        ('|| pendingFiles.value.length > 0 || requestedSkills.value.length', '|| pendingFiles.value.length > 0 || pendingNativeAttachments.value.length > 0 || requestedSkills.value.length', 1),
+        ('watch(() => pendingFiles.value.slice(), cancelAttachmentUpload, { flush: \'sync\' })',
+         "watch(() => pendingFiles.value.slice(), cancelAttachmentUpload, { flush: 'sync' })\nwatch(() => pendingNativeAttachments.value.slice(), cancelAttachmentUpload, { flush: 'sync' })", 1),
+        ('  if (!isActive.value || attachmentUploading.value || firstSendAwaiting.value) return',
+         '  if (!isActive.value || attachmentUploading.value || nativeAttachmentBusy.value || firstSendAwaiting.value) return', 1),
+        ('  const files = [...pendingFiles.value]', '  const files = [...pendingFiles.value]\n  const nativeFiles = [...pendingNativeAttachments.value]\n  const attachmentScope = nativeAttachmentScope.value', 1),
+        ('if (files.length || skills.length)', 'if (files.length || nativeFiles.length || skills.length)', 1),
+        ('composerError.value = files.length\n', 'composerError.value = files.length || nativeFiles.length\n', 1),
+        ('if (!text || files.length || skills.length ||', 'if (!text || files.length || nativeFiles.length || skills.length ||', 1),
+        ('(!text && !files.length && !skills.length && !voice)', '(!text && !files.length && !nativeFiles.length && !skills.length && !voice)', 1),
+        ("(goalSend || /^\\/goal(?:\\s|$)/.test(text)) && (files.length || skills.length)",
+         "(goalSend || /^\\/goal(?:\\s|$)/.test(text)) && (files.length || nativeFiles.length || skills.length)", 1),
+        ('    pendingFiles.value = []\n    requestedSkills.value = []', '    pendingFiles.value = []\n    pendingNativeAttachments.value = []\n    requestedSkills.value = []', 1),
+        ("  pendingFiles.value = []\n  composerError.value = ''", "  pendingFiles.value = []\n  pendingNativeAttachments.value = []\n  composerError.value = ''", 1),
+        ('prepareSubmission(sentContext.target.botId, files, voice)',
+         'prepareSubmission(sentContext.target.botId, files, voice, { scope: attachmentScope, files: nativeFiles })', 1),
+        ('    pendingFiles.value = nativeSubmission.files', '    pendingFiles.value = nativeSubmission.files\n    pendingNativeAttachments.value = nativeSubmission.nativeFiles', 1),
+        ("  rollbackPin = null\n  pairSend.finish(result.messageSent === true || result.stage === 'stream')",
+         "  rollbackPin = null\n  if (result.messageSent === true) await nativeSubmission.consumeNative()\n  pairSend.finish(result.messageSent === true || result.stage === 'stream')", 1),
+    ])
     changes['apps/web/src/lib/api-client.ts'] = [
         ('function createApiFetch(', 'export function createApiFetch(', 1),
     ]
@@ -839,6 +882,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         host_sources = {name: ROOT / 'mobile/memoh' / name for name in (
             'harmony.ts', 'harmony-files.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
+            'HarmonyAttachments.vue', 'harmony-resumable.ts',
             'harmony-download.ts', 'harmony-service-url.ts')}
         if platform == 'harmony':
             for name in ('harmony-entry.ts', 'harmony-service-config.ts', 'harmony-service.css'):

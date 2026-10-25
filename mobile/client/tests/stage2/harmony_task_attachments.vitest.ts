@@ -60,7 +60,7 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
         if (nativeDenied) return JSON.stringify({ ok: false, error: 'MEDIA_DOWNLOAD_HTTP_403' })
         return JSON.stringify({ ok: true, data: { operation: q.operation, hash, size: bytes.byteLength } })
       }
-      expect(['download.save', 'download.abort']).toContain(q.command)
+      expect(['download.save', 'download.release']).toContain(q.command)
       const first = commands[0]
       if (!first) throw new Error('Native command history is empty')
       expect(q.operation).toBe(first.operation)
@@ -110,7 +110,7 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
       expect(commands).toHaveLength(0)
       firstDownload().click()
     }
-    await vi.waitFor(() => expect(commands.map(q => q.command)).toEqual(['download.fetch', 'download.save', 'download.abort']))
+    await vi.waitFor(() => expect(commands.map(q => q.command)).toEqual(['download.fetch', 'download.save', 'download.release']))
     expect(http).not.toHaveBeenCalled() // Original bytes stay in the native cache on save.
     deliveries.value = { ...deliveries.value, error: { status: 403 } }
     await nextTick()
@@ -170,7 +170,7 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
     nativeDenied = true
     mountFiles('application/octet-stream')
     await nextTick(); firstDownload().click()
-    await vi.waitFor(() => expect(commands.map(q => q.command)).toEqual(['download.fetch', 'download.abort']))
+    await vi.waitFor(() => expect(commands.map(q => q.command)).toEqual(['download.fetch', 'download.release']))
     expect(http).not.toHaveBeenCalled()
     expect(root.querySelectorAll('a')).toHaveLength(0)
   })
