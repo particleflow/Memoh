@@ -16,6 +16,43 @@ plus the original non-secret task binding. They cannot contain a successful
 reference, source path, credential, raw diagnostic or file bytes. Output says
 `feedback_status: unavailable` when the projection cannot be persisted.
 
+## CLI feedback applicability
+
+Component 0.10.1 adds one value to the existing `feedback_status` field:
+
+| Value | Meaning |
+| --- | --- |
+| `recorded` | Outbound producer feedback was validated against its original task/attempt/declaration and persisted. |
+| `not_applicable` | The returned durable queue record is a **download**. The outbound producer projection does not apply. No producer context is read or created. |
+| `unavailable` | Applicable feedback could not be validated or written, including missing/foreign upload context and actual storage failure. |
+| absent/empty | No applicable task result was returned, preserving existing idle/error and legacy behavior. This is not proof of an inbound download. |
+
+The producer is `cmd/transferqueue`; the consumer is the unified Windows endpoint
+invoking the existing finite actions. In particular `advance-results` may select
+an inbound download from the same queue. Applicability comes from that validated
+durable record's direction, never a missing file, CLI action name or untrusted
+stdin hint. It remains `not_applicable` while the download is queued or blocked;
+it does **not** acknowledge delivery, authorization or local publication.
+
+Consumers may bypass only the outbound feedback guard for the explicit
+`not_applicable` value. They must still check command exit, lifecycle/backoff,
+phase, association and original delivery/reference. Keep `unavailable` handling
+unchanged. Do not translate old binaries' `unavailable` to `not_applicable`:
+upgrade/pin the producer and consumer contract together. Older consumers may
+continue to refuse inbound automation safely until they accept the new value.
+The v1 producer context/feedback JSON, task IDs, queue format, HostBinding and
+NAS protocol are unchanged; no data migration or new configuration is needed.
+
+`TestCLIPathFeedbackApplicability` covers no/foreign inbound context, valid v1
+outbound feedback, missing/foreign outbound context, an actual feedback-file
+open failure, repeat registration/inspect and an unknown delivery. The existing
+outbound TLS restart fixture still requires `recorded`. The Windows-only
+`TestCLIPathInboundFeedbackRestart` uses fresh CLI-dispatch processes, real TLS
+and NTFS publication, checks complete bytes/hash/reference and verifies two
+completed reopen/re-enqueue rounds issue no network requests. Its NAS is an
+explicit protocol fixture; it does not claim real Server/PG or installed EXE
+system-trust acceptance.
+
 The Server reads only the fixed filename through the original registered control
 pane, its checked pane/terminal/workspace identity and a fresh nonce. It requires
 the complete original task, declaration digest and exact ordered delivery IDs.
