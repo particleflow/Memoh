@@ -20,7 +20,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "fe857b2b5a5af60012e72a4785dcb2f0452b3ab428450cd39a89d70bf652a46d",
+      "sha256": "6931f117c3156a570cb312f8eea3a31fdc6930c8443bddde91f7e8dc999ab96a",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -36,7 +36,8 @@
         "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API.",
         "Source-only pin to unified fa77a073: reuse persisted computer checkpoints, direct parent references and explicit/auth-paused observation; all 43 phone adapters retained. New Windows native-to-Herdr contract and next HAP remain pending; no new protocol or private configuration.",
         "Pin complete unified 8a242293 source and generated SDK; Web pages and 43 phone adaptations are unchanged from verified fa77. No alternate SDK overlay or native configuration framework.",
-        "Pin unified cbcee15 parent Bot run/tool observation and terminal image recovery, retaining all 43 phone adapters and current native transfer recovery matrix. SDK/UI dependency unchanged. Source-only sync; no HAP build."
+        "Pin unified cbcee15 parent Bot run/tool observation and terminal image recovery, retaining all 43 phone adapters and current native transfer recovery matrix. SDK/UI dependency unchanged. Source-only sync; no HAP build.",
+        "Pin released shared 52609f7 original-operation resume UI/SDK, ACK-unknown no-cancel and explicit abort observation. Preserve all 43 phone adapters, 1.0.11 HTTPS migration, four intake routes and original scoped transfer recovery. Source-only; no HAP build."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",

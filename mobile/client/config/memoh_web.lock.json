@@ -1,9 +1,9 @@
 {
-  "version": "unified-cbcee15",
-  "commit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
-  "archive": "tests/.isolated/memoh-cbcee15-complete.tar.gz",
-  "archiveSHA256": "f796693f1e8229173fbe3aed6fe55bce48370623fe8b23d43ab293f94a133664",
-  "archivePrefix": "Memoh-cbcee15/",
+  "version": "unified-52609f7",
+  "commit": "52609f7db4e59d7e528c2c5f8aa0330aa3ebbbe3",
+  "archive": "tests/.isolated/memoh-52609f7-complete.tar.gz",
+  "archiveSHA256": "7df52e5d910767ac1958803b097eb977459c7a29d92e3b3092adfa03cffd811c",
+  "archivePrefix": "Memoh-52609f7/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
-      "archiveSHA256": "9cb44d4ab2fbf46308b6e6c5f8eed344b1868ddd81f950f7c4d9c588edff0a57",
-      "archivePrefix": "Memoh-cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45/",
+      "commit": "52609f7db4e59d7e528c2c5f8aa0330aa3ebbbe3",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/52609f7db4e59d7e528c2c5f8aa0330aa3ebbbe3",
+      "archiveSHA256": "41d03457485137eb3b17d3bd0ca33bda61aa4c9b756323a2a1b486e30ece37b1",
+      "archivePrefix": "Memoh-52609f7db4e59d7e528c2c5f8aa0330aa3ebbbe3/",
       "destination": ""
     },
     {

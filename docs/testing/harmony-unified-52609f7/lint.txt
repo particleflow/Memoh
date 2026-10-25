@@ -1,0 +1,12 @@
+
+/workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout/apps/web/src/pages/home/components/session-task-results.test.ts
+   38:21  warning  There is more than one component in this file  vue/one-component-per-file
+  145:21  warning  There is more than one component in this file  vue/one-component-per-file
+  253:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+/workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout/apps/web/src/pages/home/components/session-tasks.test.ts
+   58:33  warning  There is more than one component in this file  vue/one-component-per-file
+  315:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 5 problems (0 errors, 5 warnings)
+
