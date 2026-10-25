@@ -51,9 +51,9 @@
   "logHashes": {
     "upload-current-matrix.json": "145f04d47beaa260961bd00e44e142e8884b834401a56c255e1b29cd3afdb80c",
     "download-byte-check.json": "1d3c88e462cda1dd1eb90073accc06d37c85ce1c9b26b7a305a92947fb381fbd",
-    "typecheck-current-local.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "attachment-tests-current.log": "58134731059ea04f8c5d5221f6360ac3e5004e7d43b1138c292deecd9c709b44",
-    "lint-current.log": "24b61c6ab6b9ee076107c3ec1fc829b00176bf9620cdf9073ea0a1b0c3bb647d",
+    "typecheck-current-local.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "attachment-tests-current.txt": "58134731059ea04f8c5d5221f6360ac3e5004e7d43b1138c292deecd9c709b44",
+    "lint-current.txt": "24b61c6ab6b9ee076107c3ec1fc829b00176bf9620cdf9073ea0a1b0c3bb647d",
     "resumable-ui.json": "e6f4032385777f22086875479f3dcaa5f30ce12035c8ded098a7be0655601dec"
   }
 }
