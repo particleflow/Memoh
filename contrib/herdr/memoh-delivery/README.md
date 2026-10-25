@@ -143,11 +143,11 @@ old finite writers, not run both versions. Rollback must retain the state and
 use a reader supporting v5; it cannot reinterpret indexed sources as snapshots.
 
 The historical 8-job/256 MiB reservation profile and optional
-`queue-budget.json` are retained only for legacy snapshot/download/publication
-compatibility. They no longer limit new upload registration or source size.
-This increment does **not** remove the separate download/publication constraints,
-Server `[files].max_upload_bytes` default of 200 MiB, or task manifest/ledger
-limits. Consequently metadata registration is not a claim that 10,000 GiB files
+`queue-budget.json` are retained for legacy snapshot policy and unchanged
+locator compatibility. They do not limit new upload registration/source size,
+download size/backlog, or the cumulative bytes of retained download objects.
+Server `[files].max_upload_bytes` defaults to 200 MiB independently; metadata
+capacity and task-specific contracts remain separate. Consequently metadata registration is not a claim that 10,000 GiB files
 have been transferred or that every three-end product constraint is solved.
 
 The Server still requires the complete hash before Create. Closed producer
@@ -293,8 +293,9 @@ receipt and seal), supports original-ID inspect/admission without producer
 bytes, and never deletes unknown evidence. It has 256 deterministic buckets,
 each capped at 1 MiB framed metadata and 1024 files (filesystem overhead extra).
 Bucket exhaustion fails with capacity and preserves the source journal. There
-is no automatic history deletion. Native publication keeps its separate retained-byte budget; plugin 0.7 adds
-explicit publication metadata migration described below. Downloads remain bounded.
+is no automatic history deletion. Plugin 0.7 added explicit publication metadata
+migration described below. Current downloads retain the same metadata layout,
+with actual filesystem space governing payload writes.
 
 ## Publication metadata maintenance (0.7.0)
 
@@ -313,8 +314,28 @@ successful download from the maintenance result.
 
 Locator v2's explicit defaults are 64 buckets of at most 128 records, each journal
 at most 64 KiB (512 MiB maximum journal metadata plus filesystem/cache overhead).
-A full bucket returns capacity and never evicts a proof. Objects retain the
-separate existing byte limit, default CLI 256 MiB; Queue Retire does not free them.
-See `docs/delivery-publication-metadata.md` for accounting, crash and rollback
-boundaries. Larger sustainable object storage and ownership-based cleanup remain
-unimplemented. This component does not perform endpoint installation or upgrades.
+A full bucket returns capacity and never evicts a proof. Queue Retire does not
+delete retained objects. Current writers count their bytes for integrity but do
+not impose the old cumulative 256 MiB payload quota. See
+`docs/delivery-publication-metadata.md` for historical layout/crash boundaries
+and `docs/testing/transfer-native-large-byte-recovery.md` for the default-download
+correction. Ownership-based cleanup remains unimplemented. This component does
+not perform endpoint installation or upgrades.
+
+## Default download space handling
+
+Download enqueue writes metadata and an empty private part; it neither reserves
+the whole file nor allocates a second full copy. Existing workers stream with
+64 KiB buffers, checking actual free space in the existing checkpoint window.
+Insufficient payload space retains the synced offset and reports the existing
+summary fields `state: waiting`, `error_class: capacity`, and `next_due_at`. The
+finite host action can retry when due without exhausting network attempts. It
+does not delete source, unfinished data, unknown evidence, or published objects.
+Actual metadata exhaustion still fails explicitly; physical disk is not unlimited.
+
+No budget change or migration is required for this correction. Default locator
+bytes, origin/HostBinding, task identity and publication layout stay unchanged.
+Update all component writers before downloading beyond an old byte allowance;
+older binaries still reject such records/retained objects. Do not mix old/new
+writers or delete state to force a downgrade. Component replacement belongs to
+the unified endpoint, not an extra per-file user action.
