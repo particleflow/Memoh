@@ -77,6 +77,45 @@ func TestNativeTargetSeparatesAuthenticationAndPinsLocalReferences(t *testing.T)
 	}
 }
 
+func TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound(t *testing.T) {
+	p := syntheticNativeProfile()
+	before, err := p.target(syntheticNativeID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	p.Producer = ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
+	target, err := p.target(syntheticNativeID)
+	if err != nil || target.Producer != p.Producer || TargetFingerprint(target) == TargetFingerprint(before) {
+		t.Fatal("producer locator is not task-bound", err)
+	}
+	for _, field := range []string{"program", "config", "state"} {
+		changed := target
+		switch field {
+		case "program":
+			changed.Producer.ProgramPath = `C:\Other\producer.exe`
+		case "config":
+			changed.Producer.ConfigDir = `C:\Other\config`
+		case "state":
+			changed.Producer.StateDir = `C:\Other\state`
+		}
+		if TargetFingerprint(changed) == TargetFingerprint(target) {
+			t.Fatalf("%s locator is not pinned", field)
+		}
+	}
+	for _, bad := range []ProducerLocator{
+		{ProgramPath: p.Producer.ProgramPath},
+		{ProgramPath: `C:\Synthetic\producer.cmd`, ConfigDir: p.Producer.ConfigDir, StateDir: p.Producer.StateDir},
+		{ProgramPath: p.Producer.ProgramPath, ConfigDir: `C:/Synthetic/config`, StateDir: p.Producer.StateDir},
+		{ProgramPath: p.Producer.ProgramPath, ConfigDir: `C:\Synthetic\config\`, StateDir: p.Producer.StateDir},
+		{ProgramPath: p.Producer.ProgramPath, ConfigDir: p.Producer.ConfigDir, StateDir: `C:\Synthetic\\state`},
+	} {
+		p.Producer = bad
+		if _, err := p.target(syntheticNativeID); !errors.Is(err, ErrInvalidTarget) {
+			t.Fatalf("accepted incomplete or noncanonical locator: %+v", bad)
+		}
+	}
+}
+
 func TestNativeServiceChecksEveryCallWithoutMCPAndDoesNotReplay(t *testing.T) {
 	s, store, f := serviceFixture(t)
 	store.sourceAllowed = false // native identity must not depend on MCP authorization

@@ -20,13 +20,57 @@ var ErrNativeProfileConflict = errors.New("native Herdr profile changed; read cu
 // The Runtime identity is derived from its existing registry row, never supplied
 // by a model or copied from an MCP connection. No credentials belong here.
 type NativeHerdrProfile struct {
-	InstanceID      string       `json:"instance_id" validate:"required"`
-	Session         string       `json:"session" validate:"required"`
-	WorkDir         string       `json:"work_dir" validate:"required"`
-	BashPath        string       `json:"bash_path" validate:"required"`
-	HerdrCLI        string       `json:"herdr_cli" validate:"required"`
-	HerdrConfigRoot string       `json:"herdr_config_root" validate:"required"`
-	Agent           AgentProfile `json:"agent,omitempty,omitzero"`
+	InstanceID      string          `json:"instance_id" validate:"required"`
+	Session         string          `json:"session" validate:"required"`
+	WorkDir         string          `json:"work_dir" validate:"required"`
+	BashPath        string          `json:"bash_path" validate:"required"`
+	HerdrCLI        string          `json:"herdr_cli" validate:"required"`
+	HerdrConfigRoot string          `json:"herdr_config_root" validate:"required"`
+	Agent           AgentProfile    `json:"agent,omitempty,omitzero"`
+	Producer        ProducerLocator `json:"producer,omitempty,omitzero"`
+}
+
+// ProducerLocator references the existing finite producer CLI and its official
+// configuration/state directory pair. It contains neither credentials nor a
+// new queue identity; the existing target fingerprint pins it to each task.
+type ProducerLocator struct {
+	ProgramPath string `json:"program_path" validate:"required"`
+	ConfigDir   string `json:"config_dir" validate:"required"`
+	StateDir    string `json:"state_dir" validate:"required"`
+}
+
+func (p ProducerLocator) validate() error {
+	for _, path := range []string{p.ProgramPath, p.ConfigDir, p.StateDir} {
+		if validateNativeLocalPath(path) != nil {
+			return ErrInvalidTarget
+		}
+		// The existing producer rejects paths that Windows filepath.Clean
+		// would rewrite. Reject these before accepting owner configuration.
+		if strings.Contains(path, "/") || strings.Contains(path[3:], `\\`) || len(path) > 3 && strings.HasSuffix(path, `\`) {
+			return ErrInvalidTarget
+		}
+	}
+	if !strings.HasSuffix(strings.ToLower(p.ProgramPath), ".exe") {
+		return ErrInvalidTarget
+	}
+	return nil
+}
+
+func validateNativeLocalPath(path string) error {
+	if len(path) < 3 || len(path) > 4096 || !utf8.ValidString(path) || ((path[0] < 'A' || path[0] > 'Z') && (path[0] < 'a' || path[0] > 'z')) || path[1] != ':' || (path[2] != '\\' && path[2] != '/') || strings.TrimSpace(path) != path {
+		return ErrInvalidTarget
+	}
+	for _, ch := range path[2:] {
+		if ch < 32 || strings.ContainsRune(`<>:"|?*`, ch) {
+			return ErrInvalidTarget
+		}
+	}
+	for _, part := range strings.Split(strings.ReplaceAll(path, "/", `\`), `\`) {
+		if part == "." || part == ".." {
+			return ErrInvalidTarget
+		}
+	}
+	return nil
 }
 
 type nativeProfileStore interface {
@@ -42,7 +86,7 @@ func (p NativeHerdrProfile) target(runtime string) (Target, error) {
 	t := Target{
 		ConnectionID: runtime, DeviceID: runtime, NativeRuntimeID: runtime,
 		InstanceID: p.InstanceID, Session: p.Session, WorkDir: p.WorkDir, BashPath: p.BashPath,
-		HerdrCLI: p.HerdrCLI, HerdrConfigRoot: p.HerdrConfigRoot, Agent: p.Agent,
+		HerdrCLI: p.HerdrCLI, HerdrConfigRoot: p.HerdrConfigRoot, Agent: p.Agent, Producer: p.Producer,
 	}
 	if err = validateTarget(t); err != nil {
 		return Target{}, err
@@ -55,19 +99,12 @@ func (p NativeHerdrProfile) target(runtime string) (Target, error) {
 	for _, path := range []string{p.HerdrCLI, p.HerdrConfigRoot} {
 		// Match the Exec adapter's local Win32 executable/path contract before
 		// a task can claim its durable slot. UNC and shell wrappers are not used.
-		if len(path) < 3 || len(path) > 4096 || !utf8.ValidString(path) || ((path[0] < 'A' || path[0] > 'Z') && (path[0] < 'a' || path[0] > 'z')) || path[1] != ':' || (path[2] != '\\' && path[2] != '/') || strings.TrimSpace(path) != path {
+		if validateNativeLocalPath(path) != nil {
 			return Target{}, ErrInvalidTarget
 		}
-		for _, ch := range path[2:] {
-			if ch < 32 || strings.ContainsRune(`<>:"|?*`, ch) {
-				return Target{}, ErrInvalidTarget
-			}
-		}
-		for _, part := range strings.Split(strings.ReplaceAll(path, "/", `\`), `\`) {
-			if part == "." || part == ".." {
-				return Target{}, ErrInvalidTarget
-			}
-		}
+	}
+	if p.Producer != (ProducerLocator{}) && p.Producer.validate() != nil {
+		return Target{}, ErrInvalidTarget
 	}
 	if !strings.HasSuffix(strings.ToLower(p.HerdrCLI), ".exe") {
 		return Target{}, ErrInvalidTarget

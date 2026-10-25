@@ -22,16 +22,17 @@ var (
 // Target refers to an existing authorized MCP connection. Credentials belong
 // to the MCP/OAuth service and must never be copied into an execution target.
 type Target struct {
-	ConnectionID    string       `json:"connection_id"`
-	DeviceID        string       `json:"device_id"`
-	InstanceID      string       `json:"instance_id"`
-	Session         string       `json:"session"`
-	WorkDir         string       `json:"work_dir"`
-	BashPath        string       `json:"bash_path"`
-	Agent           AgentProfile `json:"agent,omitempty,omitzero"`
-	NativeRuntimeID string       `json:"native_runtime_id,omitempty"`
-	HerdrCLI        string       `json:"herdr_cli,omitempty"`
-	HerdrConfigRoot string       `json:"herdr_config_root,omitempty"`
+	ConnectionID    string          `json:"connection_id"`
+	DeviceID        string          `json:"device_id"`
+	InstanceID      string          `json:"instance_id"`
+	Session         string          `json:"session"`
+	WorkDir         string          `json:"work_dir"`
+	BashPath        string          `json:"bash_path"`
+	Agent           AgentProfile    `json:"agent,omitempty,omitzero"`
+	NativeRuntimeID string          `json:"native_runtime_id,omitempty"`
+	HerdrCLI        string          `json:"herdr_cli,omitempty"`
+	HerdrConfigRoot string          `json:"herdr_config_root,omitempty"`
+	Producer        ProducerLocator `json:"producer,omitempty,omitzero"`
 }
 
 // AgentProfile is private deployment configuration, never model-supplied.

@@ -21091,10 +21091,32 @@ const docTemplate = `{
                 "instance_id": {
                     "type": "string"
                 },
+                "producer": {
+                    "$ref": "#/definitions/agenvo.ProducerLocator"
+                },
                 "session": {
                     "type": "string"
                 },
                 "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.ProducerLocator": {
+            "type": "object",
+            "required": [
+                "config_dir",
+                "program_path",
+                "state_dir"
+            ],
+            "properties": {
+                "config_dir": {
+                    "type": "string"
+                },
+                "program_path": {
+                    "type": "string"
+                },
+                "state_dir": {
                     "type": "string"
                 }
             }
@@ -21151,6 +21173,9 @@ const docTemplate = `{
                 },
                 "native_runtime_id": {
                     "type": "string"
+                },
+                "producer": {
+                    "$ref": "#/definitions/agenvo.ProducerLocator"
                 },
                 "session": {
                     "type": "string"

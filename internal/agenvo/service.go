@@ -108,7 +108,7 @@ func DecodeTarget(raw []byte) (Target, error) {
 	}
 	// Only the provider-specific decoder may select a native Runtime. An MCP
 	// registration cannot inject a Runtime ID to switch authentication paths.
-	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" {
+	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" || target.Producer != (ProducerLocator{}) {
 		return Target{}, ErrInvalidTarget
 	}
 	return target, validateTarget(target)
@@ -205,7 +205,7 @@ func (s *Service) Register(ctx context.Context, ownerID, name string, target Tar
 	if err := validateTarget(target); err != nil {
 		return dbstore.UserRuntimeRecord{}, err
 	}
-	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" {
+	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" || target.Producer != (ProducerLocator{}) {
 		return dbstore.UserRuntimeRecord{}, ErrInvalidTarget
 	}
 	// Verify ownership before contacting the relay. Existing Bot membership or
