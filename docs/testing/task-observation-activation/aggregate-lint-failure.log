@@ -1,0 +1,44 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (e09d5fcb)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 7 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 3.93s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/handlers ./internal/mcp
+[hooks] Go package selection: 0.20s
+[hooks] Go lint: golangci-lint run --concurrency=2 <repo>/internal/handlers <repo>/internal/mcp
+internal/handlers/mcp_oauth_diagnostics_test.go:82:32: Error return value of `gateway.connectionHTTPClient` is not checked (errcheck)
+			gateway.connectionHTTPClient(t.Context(), mcp.Connection{ID: "11111111-1111-4111-8111-111111111111", AuthType: "oauth", Config: map[string]any{
+			                            ^
+internal/handlers/mcp_oauth_boundary_test.go:34:1: File is not properly formatted (gofumpt)
+}
+^
+internal/mcp/oauth_diagnostics_test.go:164:1: File is not properly formatted (gofumpt)
+		{"access_token_missing", "", true}, {"refresh_token_missing", "", true},
+^
+internal/handlers/mcp_oauth_boundary_test.go:55:21: "400" can be replaced by http.StatusBadRequest (usestdlibvars)
+						w.WriteHeader(400)
+						              ^
+internal/handlers/mcp_oauth_boundary_test.go:58:21: "503" can be replaced by http.StatusServiceUnavailable (usestdlibvars)
+						w.WriteHeader(503)
+						              ^
+internal/handlers/mcp_oauth_boundary_test.go:67:129: "400" can be replaced by http.StatusBadRequest (usestdlibvars)
+				remote := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { mcpCalls.Add(1); w.WriteHeader(400) }))
+				                                                                                                                            ^
+internal/handlers/mcp_oauth_boundary_test.go:126:20: "400" can be replaced by http.StatusBadRequest (usestdlibvars)
+					w.WriteHeader(400)
+					              ^
+internal/handlers/mcp_oauth_boundary_test.go:142:20: "401" can be replaced by http.StatusUnauthorized (usestdlibvars)
+					w.WriteHeader(401)
+					              ^
+[hooks] Go lint: 135.21s
+[hooks] Go lint failed (1)

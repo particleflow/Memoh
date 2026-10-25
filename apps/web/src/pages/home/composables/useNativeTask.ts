@@ -5,6 +5,7 @@ import type { TaskScope } from './useSessionTasks'
 
 export interface NativeTaskView {
   opened: boolean
+  pollingPaused?: boolean
   data?: ComputertaskNativeContent
   loading: boolean
   sending: boolean
@@ -20,6 +21,7 @@ export interface NativeTaskView {
 // task's evidence ledger. Storage retains one request UUID before any POST;
 // it contains no token or prompt, and unknown outcomes cannot mint another ID.
 export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<SessiontaskTask, 'task_type' | 'task_id'> | undefined>, enabled: Ref<boolean>, paused: Ref<boolean> = ref(false)) {
+  const pollingPaused = ref(false)
   const opened = ref(false), loading = ref(false), sending = ref(false)
   const data = shallowRef<ComputertaskNativeContent>(), error = shallowRef<unknown>()
   const actionError = shallowRef<unknown>()
@@ -30,7 +32,7 @@ export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<S
   const path = () => ({ bot_id: scope.value!.bot, session_id: scope.value!.session, task_type: 'computer_operation' as const, task_id: selected.value!.task_id })
   function invalidate() {
     generation++; reader?.abort(); sender?.abort()
-    opened.value = loading.value = sending.value = false
+    opened.value = loading.value = sending.value = pollingPaused.value = false
     data.value = error.value = actionError.value = response.value = undefined
     requestId.value = storageKey = undefined
   }
@@ -46,6 +48,7 @@ export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<S
   }
   async function refresh() {
     if (!usable() || !opened.value || loading.value) return
+    pollingPaused.value = false
     const epoch = generation, target = selected.value!.task_id
     reader = new AbortController(); const control = reader
     const timeout = setTimeout(() => control.abort(), 15000)
@@ -59,6 +62,7 @@ export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<S
       if (epoch !== generation) return
       if (result.data.operation_id !== target) throw new Error('Invalid native task response')
       data.value = result.data; error.value = undefined
+      pollingPaused.value = result.data.availability === 'authentication_unavailable'
       const receipt = result.data.followups?.find(item => item.request_id === requestId.value)
       if (receipt) {
         response.value = { operation_id: target, state: receipt.state, followup: receipt }; actionError.value = undefined
@@ -67,7 +71,7 @@ export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<S
         }
       }
     } catch (cause) {
-      if (epoch === generation) { data.value = undefined; error.value = cause }
+      if (epoch === generation) { data.value = undefined; error.value = cause; pollingPaused.value = [401, 403, 404].includes(apiErrorStatus(cause) ?? 0) }
     } finally { clearTimeout(timeout); if (epoch === generation) loading.value = false }
   }
   async function open() { if (!usable()) return; opened.value = true; await refresh() }
@@ -100,12 +104,12 @@ export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<S
   // requests, but does not undo the user's choice to watch this same task.
   // A refreshed parent must validate access before any content read resumes.
   watch(paused, () => {
-    const wasOpened = opened.value
+    const wasOpened = opened.value, wasPollingPaused = pollingPaused.value
     invalidate()
-    opened.value = wasOpened
-    if (!paused.value) void refresh()
+    opened.value = wasOpened; pollingPaused.value = wasPollingPaused
+    if (!paused.value && !pollingPaused.value) void refresh()
   }, { flush: 'sync' })
-  const timer = setInterval(() => { if (data.value?.supported !== false && ![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh() }, 5000)
+  const timer = setInterval(() => { if (!pollingPaused.value && data.value?.supported !== false) void refresh() }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
-  return computed<NativeTaskView>(() => ({ opened: opened.value, data: data.value, loading: loading.value, sending: sending.value, requestId: requestId.value, response: response.value, error: actionError.value ?? error.value, open, refresh, send }))
+  return computed<NativeTaskView>(() => ({ opened: opened.value, pollingPaused: pollingPaused.value, data: data.value, loading: loading.value, sending: sending.value, requestId: requestId.value, response: response.value, error: actionError.value ?? error.value, open, refresh, send }))
 }

@@ -41,12 +41,13 @@ func (g *MCPFederationGateway) SetOAuthService(svc *mcpgw.OAuthService) {
 	g.oauthService = svc
 }
 
-// errMCPUnauthorized reports that the MCP server answered a request of the
-// session with 401 Unauthorized.
+// errMCPUnauthorized marks an observed MCP 401 or known missing/rejected
+// OAuth credentials. Transport failures do not carry this marker.
 var errMCPUnauthorized = errors.New("mcp server requires authorization")
 
-// IsMCPAuthenticationUnavailable exposes only an observed HTTP 401 marker.
-// No transport error text or OAuth response body participates in this decision.
+// IsMCPAuthenticationUnavailable reports an observed MCP 401 or a typed OAuth
+// credential absence/rejection. Network failures are not authorization failures.
+// No raw error text or response body participates in this decision.
 func IsMCPAuthenticationUnavailable(err error) bool { return errors.Is(err, errMCPUnauthorized) }
 
 func (g *MCPFederationGateway) ListHTTPConnectionTools(ctx context.Context, connection mcpgw.Connection) ([]mcpgw.ToolDescriptor, error) {
@@ -116,7 +117,10 @@ func (g *MCPFederationGateway) connectStreamableSession(ctx context.Context, con
 		Name:    "memoh-federation-client",
 		Version: "v1",
 	}, nil)
-	httpClient, status := g.connectionHTTPClient(ctx, connection)
+	httpClient, status, authErr := g.connectionHTTPClient(ctx, connection)
+	if authErr != nil {
+		return nil, nil, authErr
+	}
 	transport := &sdkmcp.StreamableClientTransport{
 		Endpoint:   url,
 		HTTPClient: httpClient,
@@ -140,7 +144,10 @@ func (g *MCPFederationGateway) connectSSESession(ctx context.Context, connection
 			Name:    "memoh-federation-client",
 			Version: "v1",
 		}, nil)
-		httpClient, status := g.connectionHTTPClient(ctx, connection)
+		httpClient, status, authErr := g.connectionHTTPClient(ctx, connection)
+		if authErr != nil {
+			return nil, nil, authErr
+		}
 		transport := &sdkmcp.SSEClientTransport{
 			Endpoint:   endpoint,
 			HTTPClient: httpClient,
@@ -211,24 +218,47 @@ func resolveSSEEndpointCandidates(config map[string]any) []string {
 // connectionHTTPClient returns the client for one MCP session and the
 // recorder of the statuses its responses carried. The go-sdk transports report
 // a failed response only as its status text, so the status is taken here.
-func (g *MCPFederationGateway) connectionHTTPClient(ctx context.Context, connection mcpgw.Connection) (*http.Client, *responseStatusRecorder) {
+func (g *MCPFederationGateway) connectionHTTPClient(ctx context.Context, connection mcpgw.Connection) (*http.Client, *responseStatusRecorder, error) {
 	base := g.client
 	if base == nil {
 		base = &http.Client{Timeout: 30 * time.Second}
 	}
 	headers := normalizeHeaderMap(connection.Config["headers"])
 
-	if strings.TrimSpace(connection.AuthType) == "oauth" && g.oauthService != nil {
+	if strings.TrimSpace(connection.AuthType) == "oauth" {
+		if g.oauthService == nil {
+			return nil, nil, errMCPUnauthorized
+		}
 		token, err := g.oauthService.GetValidToken(ctx, connection.ID)
 		if err != nil {
 			attrs := append([]slog.Attr{slog.String("connection_id", connection.ID)}, mcpgw.OAuthTokenFailureAttrs(err)...)
 			g.logger.LogAttrs(ctx, slog.LevelWarn, "failed to get OAuth token for connection", attrs...)
-		} else if token != "" {
-			if headers == nil {
-				headers = map[string]string{}
+			// Fail before MCP initialization. Do not fall back to a static, stale
+			// or empty header, nor expose a URL-bearing/token-bearing cause.
+			if mcpgw.IsOAuthAuthenticationUnavailable(err) {
+				return nil, nil, errMCPUnauthorized
 			}
-			headers["Authorization"] = "Bearer " + token
+			if errors.Is(err, context.Canceled) {
+				return nil, nil, context.Canceled
+			}
+			if errors.Is(err, context.DeadlineExceeded) {
+				return nil, nil, context.DeadlineExceeded
+			}
+			return nil, nil, errors.New("mcp OAuth token unavailable")
 		}
+		if strings.TrimSpace(token) == "" {
+			return nil, nil, errMCPUnauthorized
+		}
+		// OAuth owns this request's Authorization header. Keep other headers,
+		// without mutating the connection configuration or retaining aliases.
+		authenticated := make(map[string]string, len(headers)+1)
+		for key, value := range headers {
+			if !strings.EqualFold(strings.TrimSpace(key), "Authorization") {
+				authenticated[key] = value
+			}
+		}
+		authenticated["Authorization"] = "Bearer " + token
+		headers = authenticated
 	}
 
 	transport := base.Transport
@@ -247,7 +277,7 @@ func (g *MCPFederationGateway) connectionHTTPClient(ctx context.Context, connect
 		CheckRedirect: base.CheckRedirect,
 		Jar:           base.Jar,
 		Transport:     status,
-	}, status
+	}, status, nil
 }
 
 type checkedEndpointTransport struct {

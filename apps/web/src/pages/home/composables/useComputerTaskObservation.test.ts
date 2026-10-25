@@ -10,17 +10,34 @@ let owner: ReturnType<typeof effectScope>
 const reply = (id = 'op-a', availability = 'online') => ({ data: { operation_id: id, state: 'unknown', business_outcome: 'unknown', native: { availability, agent_status: 'working', reference_match: 'observed' } } })
 async function settle() { await nextTick(); await vi.advanceTimersByTimeAsync(0); await nextTick() }
 function deferred() { let resolve!: (value: ReturnType<typeof reply>) => void; let reject!: (cause: unknown) => void; const promise = new Promise<ReturnType<typeof reply>>((yes, no) => { resolve = yes; reject = no }); return { promise, resolve, reject } }
-function setup() {
+function setup(open = true) {
   const scope = ref<TaskScope | null>({ bot: 'bot-a', session: 'root-a', selection: 'native', identity: 'synthetic' })
   const selected = ref<Pick<SessiontaskTask, 'task_type' | 'task_id'> | undefined>({ task_type: 'computer_operation', task_id: 'op-a' })
   const enabled = ref(true)
   owner = effectScope()
   const view = owner.run(() => useComputerTaskObservation(scope, selected, enabled))!
+  if (open) void view.value.refresh()
   return { scope, selected, enabled, view }
 }
 beforeEach(() => { vi.useFakeTimers(); api.mockReset().mockResolvedValue(reply()) })
 afterEach(() => { owner?.stop(); vi.useRealTimers() })
 describe('read-only current computer observation', () => {
+  it('does not contact a device until the existing refresh action is used', async () => {
+    const { view } = setup(false); await vi.advanceTimersByTimeAsync(15000)
+    expect(api).not.toHaveBeenCalled()
+    await view.value.refresh(); expect(api).toHaveBeenCalledTimes(1)
+  })
+  it('treats the HTTP 200 authentication status as an automatic polling stop', async () => {
+    api.mockResolvedValue(reply('op-a', 'authentication_unavailable'))
+    const { view, enabled } = setup(); await settle()
+    expect(view.value.pollingPaused).toBe(true)
+    await vi.advanceTimersByTimeAsync(15000); expect(api).toHaveBeenCalledTimes(1)
+    enabled.value = false; await settle(); enabled.value = true; await settle()
+    await vi.advanceTimersByTimeAsync(10000); expect(api).toHaveBeenCalledTimes(1)
+    api.mockResolvedValue(reply()); await view.value.refresh()
+    expect(view.value.pollingPaused).toBe(false)
+    await vi.advanceTimersByTimeAsync(5000); expect(api).toHaveBeenCalledTimes(3)
+  })
   it('uses the authenticated session route, single flight and visible polling only', async () => {
     const pending = deferred(); api.mockReturnValueOnce(pending.promise)
     const { view, enabled } = setup(); await settle()
@@ -54,6 +71,8 @@ describe('read-only current computer observation', () => {
     const signal = api.mock.calls[0]![0].signal as AbortSignal
     scope.value = { bot: 'bot-b', session: 'root-b', selection: 'native', identity: 'other' }; await settle()
     scope.value = { bot: 'bot-a', session: 'root-a', selection: 'native', identity: 'new-login' }; await settle()
+    expect(view.value.data).toBeUndefined()
+    await view.value.refresh()
     expect(signal.aborted).toBe(true)
     if (finish === 'resolve') old.resolve(reply('op-a', 'offline'))
     else old.reject({ status: 403 })

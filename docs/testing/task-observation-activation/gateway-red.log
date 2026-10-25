@@ -1,0 +1,6 @@
+--- FAIL: TestFederationOAuthFailureNeverConnectsMCP (0.00s)
+    --- FAIL: TestFederationOAuthFailureNeverConnectsMCP/http/invalid_grant (0.00s)
+        mcp_oauth_boundary_test.go:92: OAuth failure reached MCP: calls=2 err=calling "initialize": sending "initialize": Bad Request
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.017s
+FAIL

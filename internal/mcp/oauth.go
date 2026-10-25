@@ -412,7 +412,7 @@ func (s *OAuthService) GetValidToken(ctx context.Context, connectionID string) (
 			ExpiresAt:    expiresAt,
 			Scope:        refreshed.Scope,
 		}); err != nil {
-			s.logger.WarnContext(ctx, "failed to save refreshed tokens", slog.String("oauth_failure_category", "token_persist_failed"))
+			return "", oauthFailure("token_persist_failed", 0, "")
 		}
 		return refreshed.AccessToken, nil
 	}

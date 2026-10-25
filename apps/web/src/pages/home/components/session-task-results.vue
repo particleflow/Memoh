@@ -176,6 +176,12 @@ function taskLabel(task: SessiontaskTask) {
           :data="observation.data"
           :received-at="observation.receivedAt"
         />
+        <p
+          v-if="observation.pollingPaused"
+          class="text-body text-muted-foreground"
+        >
+          {{ t('chat.tasks.observation.paused') }}
+        </p>
         <Button
           variant="outline"
           :disabled="observation.loading"

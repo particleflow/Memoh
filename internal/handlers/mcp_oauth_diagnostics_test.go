@@ -79,9 +79,12 @@ func TestFederationOAuthRefreshLogHasSafeCategoryAndStatus(t *testing.T) {
 			logger := slog.New(slog.NewJSONHandler(&logs, nil))
 			gateway := NewMCPFederationGateway(logger, nil)
 			gateway.SetOAuthService(mcp.NewOAuthService(logger, queries, ""))
-			gateway.connectionHTTPClient(t.Context(), mcp.Connection{ID: "11111111-1111-4111-8111-111111111111", AuthType: "oauth", Config: map[string]any{
+			_, _, err := gateway.connectionHTTPClient(t.Context(), mcp.Connection{ID: "11111111-1111-4111-8111-111111111111", AuthType: "oauth", Config: map[string]any{
 				"url": "https://SECRET-resource.invalid", "headers": map[string]any{"Authorization": "SECRET-static-header"},
 			}})
+			if err == nil {
+				t.Fatal("OAuth failure did not stop connection preparation")
+			}
 			if int(calls.Load()) != tc.wantCalls || queries.updates != tc.wantUpdates {
 				t.Fatal("refresh retried or stored credentials after failure")
 			}

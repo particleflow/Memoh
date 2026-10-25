@@ -1138,7 +1138,8 @@
       },
       "observation": {
         "title": "Current computer observation",
-        "description": "Polls native metadata while this task is visible. These observations do not confirm task completion, restored history, or live output.",
+        "description": "Refresh computer starts live checks while this task is visible. Viewing the saved summary or attachments does not contact the computer. Observations do not confirm completion or restored history.",
+        "paused": "Automatic checks are paused. After restoring access or server support, use Refresh to check this same task again.",
         "unsupported": "This server does not support computer observation yet.",
         "loadFailed": "Computer observation could not be loaded.",
         "agentState": "Native Agent: {state}",

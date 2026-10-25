@@ -75,6 +75,12 @@ const receiptState = computed(() => {
       >
         {{ t('chat.tasks.native.unavailable') }}
       </p>
+      <p
+        v-if="view.pollingPaused"
+        class="text-body text-muted-foreground"
+      >
+        {{ t('chat.tasks.observation.paused') }}
+      </p>
       <Button
         variant="outline"
         :disabled="view.loading"

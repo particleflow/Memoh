@@ -1,0 +1,66 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (4cc349d6)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 7 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 4.42s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/handlers ./internal/mcp
+[hooks] Go package selection: 0.24s
+[hooks] Go lint: golangci-lint run --concurrency=2 <repo>/internal/handlers <repo>/internal/mcp
+[hooks] Go lint: 130.66s
+[hooks] Go test: go test -p=2 -timeout=180s <repo>/internal/handlers <repo>/internal/mcp
+# github.com/felinics/memoh/internal/mcp [github.com/felinics/memoh/internal/mcp.test]
+compile: writing output: write $WORK/b1046/_pkg_.a: no space left on device
+2026/10/25 08:51:36 INFO ws request operation=ws.queue_command bot_id=bot invocation_id=invocation fault=client reason=queue_request_invalid error=queue_request_invalid
+2026/10/25 08:51:36 INFO ws request operation=ws.queue_command bot_id=bot invocation_id=invocation fault=client reason=queue_request_invalid error=queue_request_invalid
+2026/10/25 08:51:36 INFO ws request operation=ws.queue_command bot_id=bot session_id=session invocation_id=invocation fault=client reason=queue_request_invalid error=queue_request_invalid
+2026/10/25 08:51:36 INFO ws request operation=ws.queue_command bot_id=bot session_id=session invocation_id=invocation fault=client reason=queue_request_invalid error=queue_request_invalid
+2026/10/25 08:51:36 ERROR ws request operation=ws.queue_command bot_id=bot session_id=session invocation_id=invocation fault=server reason=queue_admission_unavailable error=queue_admission_unavailable
+2026/10/25 08:51:36 ERROR ws request operation=ws.queue_command bot_id=bot session_id=session invocation_id=invocation fault=server reason=queue_admission_unavailable error=queue_admission_unavailable
+--- FAIL: TestMediaHTTPUploadConfiguredAbove200MiB (0.28s)
+    media_upload_test.go:108: upload: 500 {"type":"urn:memoh:error:internal","status":500,"detail":"Something went wrong on the server. Please try again.","code":"internal","args":{},"fault":"server"}
+--- FAIL: TestMediaHTTPStreamingLimitAndAdmission (0.28s)
+    --- FAIL: TestMediaHTTPStreamingLimitAndAdmission/over_default_200MiB (0.27s)
+        media_upload_test.go:164: status=500: {"type":"urn:memoh:error:internal","status":500,"detail":"Something went wrong on the server. Please try again.","code":"internal","args":{},"fault":"server"}
+2026/10/25 08:51:37 INFO background spawn task started service=background task_id=bg_bot1_0100723a bot_id=bot1 description="spawn 2 task(s): alpha | beta"
+2026/10/25 08:51:37 INFO runtime connection ready component=runtime_hub runtime_id=11111111-1111-4111-8111-111111111111 connection_id=41cb6f16-afcf-4feb-a976-bee028d303d6
+2026/10/25 08:51:37 WARN runtime gRPC transport lost handler=runtime_connect runtime_id=11111111-1111-4111-8111-111111111111 state=IDLE
+2026/10/25 08:51:37 INFO runtime connection disconnected component=runtime_hub runtime_id=11111111-1111-4111-8111-111111111111 connection_id=41cb6f16-afcf-4feb-a976-bee028d303d6 reason="gRPC transport lost"
+2026/10/25 08:51:37 WARN failed to bind ACP runtime to new session; first prompt will cold start handler=session session_id=22222222-2222-2222-2222-222222222222 runtime_id=rt_gone error="runtime gone"
+2026/10/25 08:51:37 INFO ws attachment_delta: ingested attachments bot_id=bot-1 count=1
+2026/10/25 08:51:37 INFO ws request operation=ws.command bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=client reason=slash.skill_activation_unsupported error=slash.skill_activation_unsupported
+2026/10/25 08:51:37 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:37 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:37 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 invocation_id=invocation-1 fault=client reason=http.forbidden error="http.forbidden: code=403, message=bot access denied"
+2026/10/25 08:51:37 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:37 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=client reason=session.not_found error=session.not_found
+2026/10/25 08:51:37 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=client reason=session.not_found error=session.not_found
+2026/10/25 08:51:37 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=client reason=session.not_found error=session.not_found
+2026/10/25 08:51:37 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:37 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:38 ERROR ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=server reason=internal error="session runtime is not configured" error_source.function=github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).admitWSTurn error_source.file=<repo>/internal/handlers/local_channel.go error_source.line=1560 error_stack="[map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).admitWSTurn line:1560] map[file:<repo>/internal/handlers/local_channel_admission_test.go function:github.com/felinics/memoh/internal/handlers.admitWSTestTurn line:162] map[file:<repo>/internal/handlers/local_channel_admission_test.go function:github.com/felinics/memoh/internal/handlers.TestAdmitWSTurnRequiresConfiguredRuntime line:488] map[file:<toolchain>/go/src/testing/testing.go function:testing.tRunner line:1934] map[file:<toolchain>/go/src/runtime/asm_amd64.s function:runtime.goexit line:1693]]"
+2026/10/25 08:51:38 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=client reason=session_runtime.session_busy error="session_runtime.session_busy: ledger: session already has an active run"
+2026/10/25 08:51:38 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=client reason=session_runtime.invocation_conflict error="session_runtime.invocation_conflict: runtime invocation conflicts with an earlier submission"
+2026/10/25 08:51:38 ERROR ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=server reason=internal error="session runtime is not configured" error_source.function=github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).admitWSTurn error_source.file=<repo>/internal/handlers/local_channel.go error_source.line=1560 error_stack="[map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).admitWSTurn line:1560] map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).startWSStream line:1740] map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).HandleWebSocket line:2412] map[file:<repo>/internal/handlers/local_channel_test.go function:github.com/felinics/memoh/internal/handlers.openLocalChannelTestWS.func1 line:607] map[file:<toolchain>/cache/go-mod/github.com/labstack/echo/v4@v4.15.0/echo.go function:github.com/labstack/echo/v4.(*Echo).add.func1 line:589] map[file:<toolchain>/cache/go-mod/github.com/labstack/echo/v4@v4.15.0/echo.go function:github.com/labstack/echo/v4.(*Echo).ServeHTTP line:676] map[file:<toolchain>/go/src/net/http/server.go function:net/http.serverHandler.ServeHTTP line:3340] map[file:<toolchain>/go/src/net/http/server.go function:net/http.(*conn).serve line:2109] map[file:<toolchain>/go/src/runtime/asm_amd64.s function:runtime.goexit line:1693]]"
+2026/10/25 08:51:38 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:38 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 invocation_id=invocation-1 fault=client reason=http.conflict error="http.conflict: code=409, message=Conflict, internal=workdir is archived"
+2026/10/25 08:51:38 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:38 INFO ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 invocation_id=invocation-1 fault=client reason=workdir.not_found error="workdir.not_found: workdir not found"
+2026/10/25 08:51:38 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+2026/10/25 08:51:38 ERROR ws request operation=ws.message bot_id=11111111-1111-1111-1111-111111111111 session_id=22222222-2222-2222-2222-222222222222 invocation_id=invocation-1 fault=server reason=internal error="session runtime is not configured" error_source.function=github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).admitWSTurn error_source.file=<repo>/internal/handlers/local_channel.go error_source.line=1560 error_stack="[map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).admitWSTurn line:1560] map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).startWSStream line:1740] map[file:<repo>/internal/handlers/local_channel.go function:github.com/felinics/memoh/internal/handlers.(*LocalChannelHandler).HandleWebSocket line:2412] map[file:<repo>/internal/handlers/local_channel_test.go function:github.com/felinics/memoh/internal/handlers.openLocalChannelTestWS.func1 line:607] map[file:<toolchain>/cache/go-mod/github.com/labstack/echo/v4@v4.15.0/echo.go function:github.com/labstack/echo/v4.(*Echo).add.func1 line:589] map[file:<toolchain>/cache/go-mod/github.com/labstack/echo/v4@v4.15.0/echo.go function:github.com/labstack/echo/v4.(*Echo).ServeHTTP line:676] map[file:<toolchain>/go/src/net/http/server.go function:net/http.serverHandler.ServeHTTP line:3340] map[file:<toolchain>/go/src/net/http/server.go function:net/http.(*conn).serve line:2109] map[file:<toolchain>/go/src/runtime/asm_amd64.s function:runtime.goexit line:1693]]"
+2026/10/25 08:51:38 INFO ws disconnected; active stream can finish in background bot_id=11111111-1111-1111-1111-111111111111 reason=closed close_code=1006
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	2.988s
+FAIL	github.com/felinics/memoh/internal/mcp [build failed]
+FAIL
+[hooks] Go test: 5.89s
+[hooks] Go test failed (1)

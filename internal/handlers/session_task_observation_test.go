@@ -38,6 +38,7 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 	calls := 0
 	revoke := false
 	revokeChat := false
+	availability := "online"
 	observer := observationReaderFunc(func(ctx context.Context, b toolcontext.ComputerBinding, id string) (computertask.Recovery, error) {
 		calls++
 		if b.BotID != taskBot || b.UserID != taskUser || b.SessionID != taskChild || b.TargetID != taskTarget || id != taskOp {
@@ -52,7 +53,7 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 		if revokeChat {
 			f.chat = false
 		}
-		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: agenvo.ReferenceObservation{Availability: "online", AgentStatus: "done", Match: "observed"}, Reconciliation: &computertask.OperationReconciliation{Revision: "9007199254740993", TargetFingerprint: f.op.TargetFingerprint, ReceiptState: "missing", Files: []computertask.RecoveryFile{}}}, nil
+		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: agenvo.ReferenceObservation{Availability: availability, AgentStatus: "done", Match: "observed"}, Reconciliation: &computertask.OperationReconciliation{Revision: "9007199254740993", TargetFingerprint: f.op.TargetFingerprint, ReceiptState: "missing", Files: []computertask.RecoveryFile{}}}, nil
 	})
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), observer)
 	e := echo.New()
@@ -94,6 +95,16 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 	if string(before) != string(after) {
 		t.Fatal("observation changed receipt")
 	}
+	availability = "authentication_unavailable"
+	body = call(taskUser, 200)
+	if !strings.Contains(body, `"availability":"authentication_unavailable"`) || !strings.Contains(body, `"state":"unknown"`) || !strings.Contains(body, `"business_outcome":"unknown"`) {
+		t.Fatal("HTTP 200 misrepresented native authentication or task outcome")
+	}
+	after, _ = json.Marshal(f.op)
+	if string(before) != string(after) {
+		t.Fatal("unavailable observation changed receipt")
+	}
+	availability = "online"
 	revokeChat = true
 	body = call(taskUser, 403)
 	if strings.Contains(body, "w-synthetic") {

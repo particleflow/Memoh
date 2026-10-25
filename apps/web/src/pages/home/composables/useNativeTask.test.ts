@@ -13,9 +13,9 @@ async function settle() { await nextTick(); await vi.advanceTimersByTimeAsync(0)
 function setup() {
  const scope = ref<TaskScope | null>({ bot: 'bot-a', session: 'root-a', selection: 'native', identity: 'synthetic-login' })
  const selected = ref<Pick<SessiontaskTask, 'task_type' | 'task_id'> | undefined>({ task_type: 'computer_operation', task_id: 'op-a' })
- const enabled = ref(true)
+ const enabled = ref(true), paused = ref(false)
  owner = effectScope()
- return { scope, enabled, view: owner.run(() => useNativeTask(scope, selected, enabled))! }
+ return { scope, enabled, paused, view: owner.run(() => useNativeTask(scope, selected, enabled, paused))! }
 }
 beforeEach(() => {
  vi.useFakeTimers(); sessionStorage.clear(); nextID = 0
@@ -24,6 +24,18 @@ beforeEach(() => {
 })
 afterEach(() => { owner?.stop(); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })
 describe('native terminal sample and retained follow-up request', () => {
+ it.each(['authentication_unavailable', 401, 403, 404] as const)('keeps %s paused through parent revalidation until explicit refresh', async failure => {
+  const { view, paused } = setup(); await view.value.open()
+  if (typeof failure === 'string') api.read.mockResolvedValue({ data: { operation_id: 'op-a', supported: true, availability: failure, followup_available: false } })
+  else api.read.mockRejectedValue({ status: failure })
+  await vi.advanceTimersByTimeAsync(5000); expect(view.value.pollingPaused).toBe(true)
+  paused.value = true; await settle(); paused.value = false; await settle()
+  await vi.advanceTimersByTimeAsync(15000); expect(api.read).toHaveBeenCalledTimes(2)
+  api.read.mockResolvedValue(reply()); await view.value.refresh()
+  expect(view.value.pollingPaused).toBe(false)
+  await vi.advanceTimersByTimeAsync(5000); expect(api.read).toHaveBeenCalledTimes(4)
+  expect(api.send).not.toHaveBeenCalled()
+ })
  it('reads only when explicitly opened and visible, without claiming terminal success', async () => {
   const { view, enabled } = setup(); await vi.advanceTimersByTimeAsync(10000)
   expect(api.read).not.toHaveBeenCalled()

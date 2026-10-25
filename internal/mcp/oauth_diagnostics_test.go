@@ -155,3 +155,35 @@ func TestOAuthUnknownFailureLogProjectionDoesNotStringifyCause(t *testing.T) {
 		t.Fatal("unknown cause escaped safe projection")
 	}
 }
+
+func TestOAuthAuthenticationUnavailableUsesOnlyExplicitEvidence(t *testing.T) {
+	for _, tc := range []struct {
+		category, code string
+		want           bool
+	}{
+		{"access_token_missing", "", true},
+		{"refresh_token_missing", "", true},
+		{"oauth_rejected", "invalid_grant", true},
+		{"oauth_rejected", "invalid_client", true},
+		{"oauth_rejected", "access_denied", true},
+		{"oauth_rejected", "server_error", false},
+		{"oauth_rejected", "temporarily_unavailable", false},
+		{"oauth_rejected", "invalid_request", false},
+		{"dns", "", false},
+		{"tls", "", false},
+		{"timeout", "", false},
+		{"connection", "", false},
+		{"response_invalid", "", false},
+		{"token_persist_failed", "", false},
+	} {
+		t.Run(tc.category+"/"+tc.code, func(t *testing.T) {
+			err := oauthFailure(tc.category, 400, tc.code)
+			if IsOAuthAuthenticationUnavailable(err) != tc.want {
+				t.Fatal("authorization classification did not match typed evidence")
+			}
+		})
+	}
+	if IsOAuthAuthenticationUnavailable(errors.New("invalid_grant SECRET")) {
+		t.Fatal("raw error text inferred revoked authorization")
+	}
+}
