@@ -143,19 +143,50 @@ node mobile/client/tests/stage2/harmony_download_frontend.cjs
 The existing 1.0.9 unsigned artifact remains unchanged at distribution commit
 `1bd851eca27bfb86adad690d01907b56f4b3f82f`, SHA-256
 `ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4`.
-These changes are not in that HAP. No SDK was downloaded, no public configuration
-filled, no signing material handled, and no Windows/NAS operation performed.
-A later candidate build waits for source integration and the file owner's fixed
-cross-end contract. A successful source check will not be described as a new
-installed client or end-to-end transfer acceptance.
+These changes are not in that distributed HAP. No SDK was downloaded, no public
+configuration filled, no signing material handled, and no Windows/NAS operation
+performed. A later release candidate waits for source integration and the file
+owner's fixed cross-end contract. Compilation verification below does not imply
+a new installed client or end-to-end transfer acceptance.
 
 An attempt to invoke the existing official tool's intermediate `CompileArkTS`
 task returned `00306054 Task not found` before compilation. The original HAP
 hash stayed unchanged. `native-compile-boundary.json` records this and the raw
-log digest; the vendor source dump in the error log remains private. This is
-not an ArkTS compile pass. The next integrated candidate still requires normal
-official native compilation, real platform file-picker/FD checks, installation
-and phone-to-NAS byte-transfer acceptance.
+log digest; the vendor source dump in the error log remains private. This was an
+incorrect intermediate task invocation, not an SDK or authorization blocker.
+
+The continuation used the **same successful official full entry as 1.0.9**:
+
+```sh
+python3 mobile/build_memoh_web.py --platform harmony --builder native --pnpm /path/to/retained/pnpm-10.27.0
+python3 mobile/package_memoh_web.py
+python3 mobile/harmony/tools/materials.py --output docs/evidence/development-runs/transfer-273415-source
+python3 -B mobile/harmony/tools/build_api26.py docs/evidence/development-runs/transfer-273415-native-attempt1 --toolchain-root /path/to/retained/toolchains --entry hvigor
+```
+
+The existing wrapper invokes official `hvigorw assembleHap --mode module -p
+product=default -p module=entry@default -p buildMode=debug --no-daemon` using the
+retained Linux CLT and cache. Source `273415c900b39693e2060c991fa2696ebae8a607`
+passed actual `:entry:default@CompileArkTS`, HAP assembly and all existing
+post-build integrity checks: 33 tasks, 19 executed / 14 up-to-date; 801 Web
+resources, 104 native inputs, compiled ABC and arm64/x86_64 ELF outputs verified.
+Official build and qualification exit codes are both zero; SDK metadata is
+unchanged. No product-source, SDK, compiler or assertion fix was needed.
+[Build evidence](native-build-verification.json) and
+[official output](native-official-build.txt) retain the warnings without
+suppression. The earlier source-only `validation.json` is a historical check,
+superseded only for compilation status by this new report.
+
+The resulting **private compilation-only output** is 37,182,314 bytes, SHA-256
+`b544eeccf83d5a8e279b733649bf24bdca327d98e0acf2ebdeedda68c5e459df`.
+It deliberately retains development version 1.0.9 / 1000009 and is **not an
+upgrade/release candidate**. It has empty deployment config, matching module
+identity/permissions and verified ZIP CRC; native upload/journal code and Web
+staging/release commands are present. It was kept separately, not uploaded or
+substituted for the original distributed 1.0.9. Final source integration will
+receive the appropriate next version and one final candidate build.
+Real ArkWeb file-picker/FD behavior, installation, phone lifecycle and
+phone-to-NAS byte-transfer acceptance remain unverified.
 
 The source manifest now has 127 entries / 136 files because this work adds a
 router regression test. That count does not prove recovery of the historical
