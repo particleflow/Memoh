@@ -1,0 +1,8 @@
+ok  	github.com/felinics/memoh/internal/nativeherdr	0.116s
+ok  	github.com/felinics/memoh/internal/agenvo	10.233s
+ok  	github.com/felinics/memoh/internal/computertask	10.236s
+ok  	github.com/felinics/memoh/internal/userruntime	0.032s
+ok  	github.com/felinics/memoh/internal/workspace/bridge	0.371s
+ok  	github.com/felinics/memoh/internal/workspace	0.038s
+ok  	github.com/felinics/memoh/internal/storage/providers/containerfs	0.012s
+ok  	github.com/felinics/memoh/internal/schedule	0.021s

@@ -1,0 +1,22 @@
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession/account
+    user_runtime_native_account_test.go:87: status=200 account_validations=1 configuration_writes=1
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession/revoked_account
+    user_runtime_native_account_test.go:87: status=401 account_validations=1 configuration_writes=0
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession/chat_route
+    user_runtime_native_account_test.go:87: status=403 account_validations=0 configuration_writes=0
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession/revoked_chat_account
+    user_runtime_native_account_test.go:87: status=403 account_validations=0 configuration_writes=0
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession/chat_query
+    user_runtime_native_account_test.go:87: status=403 account_validations=0 configuration_writes=0
+=== RUN   TestNativeHerdrConfigurationRequiresAccountSession/anonymous
+    user_runtime_native_account_test.go:87: status=401 account_validations=0 configuration_writes=0
+--- PASS: TestNativeHerdrConfigurationRequiresAccountSession (0.00s)
+    --- PASS: TestNativeHerdrConfigurationRequiresAccountSession/account (0.00s)
+    --- PASS: TestNativeHerdrConfigurationRequiresAccountSession/revoked_account (0.00s)
+    --- PASS: TestNativeHerdrConfigurationRequiresAccountSession/chat_route (0.00s)
+    --- PASS: TestNativeHerdrConfigurationRequiresAccountSession/revoked_chat_account (0.00s)
+    --- PASS: TestNativeHerdrConfigurationRequiresAccountSession/chat_query (0.00s)
+    --- PASS: TestNativeHerdrConfigurationRequiresAccountSession/anonymous (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.020s
