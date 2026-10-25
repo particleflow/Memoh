@@ -63,6 +63,57 @@ or operation: the Runtime/Server owners must define their authorized mapping.
 Do not silently rebind old jobs, substitute a Runtime token, or issue credentials
 from this component. This patch cannot establish native Runtime authentication.
 
+### Agreed native identity projection; implementation dependency
+
+The coordinated native adapter contract uses `kind=remote`, `provider=memoh`.
+`target_id` is still the Bot mount, while `runtime_id` is the registered runtime
+UUID. For a **new native target**, the file verifier projects
+`connection_id=runtime_id`, `device_id=runtime_id`, and
+`instance_id=herdr.instance_id`. This is a trusted registry lookup after owner,
+team, active/activated and revocation checks, not a client assertion. The native
+control token (`mrk`) is never a file token; the existing owner-only
+`transfer-credential` GET/POST/DELETE surface keeps separate `mft` credentials.
+This is the agreed source contract, not evidence that its implementation has
+landed in this producer tree. No third selector or client protocol is added here.
+
+The existing integration points are:
+
+| Existing location | Requirement for the native adapter / retained boundary |
+| --- | --- |
+| `internal/userruntime/transfer.go`; `db/postgres/queries/runtime_transfer_credentials.sql`; `internal/db/store/runtime_transfer.go` | Today decoding and all credential queries assume Agenvo, including the active owned HTTP MCP connection join. The source owner must add native registry authorization without dropping the legacy join, owner/team/revocation checks or config/credential CAS. `RuntimeTransferRecord` currently contains config but no provider discriminator; do not infer a provider from a UUID or accept arbitrary config. |
+| `internal/handlers/computer_transfers_device.go` | Reuse `DeviceTransferVerifier`; its verified tuple replaces untrusted request device/instance fields. Request operation/task selectors remain lookup inputs, never authorization. Keep transient verifier failure retryable and actual revocation denied. |
+| `internal/computertask/delivery_postgres.go`; `delivery.go:authorizeDeliveryRecord` | Resolve the mounted target through the same transaction's owner/Bot/session permissions and compare the verified tuple and persisted execution fingerprint before the ledger CAS. The current concrete resolver is Agenvo; the native source must supply its authoritative projection. |
+| Existing producer metadata and `internal/transferclient/producer_feedback.go` | Preserve operation/Bot/user/session/target/run/attempt/generation and `root_hash`. The root hash remains a source/producer binding, not a new HTTP authentication field. |
+
+Keep these existing hashes distinct: the file credential target digest hashes
+the connection/device/instance tuple; `TargetFingerprint` hashes the entire
+execution target; ledger scope hashes `DeliveryIdentity`; local HostBinding
+comes from the original local configuration. Replacing one with another, or
+recomputing old stored values under the native projection, would mix identities.
+The native source's foreground command mode is also not automatically eligible
+for file-result delivery: the current transaction requires `herdr_pi_task`,
+`pi-json-v1` and its persisted attempt/generation. Supporting another execution
+kind would need a separately aligned producer contract, not a bypass here.
+
+Old Agenvo operations, credentials, selectors, HostBinding, payloads and receipts
+remain unchanged. A native mount cannot inherit that queue's jobs merely because
+it reaches the same PC. Retain old jobs and report their original unavailable or
+unauthorized identity when applicable; do not rewrite, delete, re-enqueue or
+re-execute them. An already authorized credential replacement for the **same**
+target tuple is different: credential ID is not the ledger namespace, and the
+original task/reference/receipt must still resolve after fresh authorization.
+No credential replacement or queue migration is performed by this patch.
+
+`TestTransferCredentialPurposeAndStableTuple` uses a synthetic store to verify
+rejection of non-file tokens before lookup, verifier reconstruction and rejection
+of tuple rebinding. `TestTransferPrincipalReplacementPreservesReceiptAndScope`
+exercises both legacy and the agreed native tuple projection at the existing
+verified-principal boundary: fresh service/principal, original receipt and
+committed reference, no ledger/revision changes or second media verification, and
+rejection of another tuple or execution fingerprint. Its transaction/media are
+synthetic; the concrete native provider registration, SQL authorization and
+Runtime connection are **not** exercised or claimed complete.
+
 ## Incremental isolated regression
 
 `TestCLIPathRuntimeReconnectUpload` reuses the existing small TLS CLI fixture and
