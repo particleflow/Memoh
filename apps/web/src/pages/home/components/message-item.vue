@@ -434,6 +434,7 @@ import type {
 } from '@/store/chat-list'
 import { structuredToolResult } from '@/store/chat-list.normalize'
 import { runtimeGoalObjective } from '@/utils/runtime-slash-commands'
+import { provideNativeTaskResumeScope } from '../composables/native-task-resume-scope'
 import { withLiteralSingleDollars } from '@/utils/markdown-dollar'
 
 import { resolveUrl } from '../composables/useMediaGallery'
@@ -479,6 +480,8 @@ const props = defineProps<{
   isScrolling: boolean
   isLastMessage?: boolean
 }>()
+
+provideNativeTaskResumeScope(props)
 
 // Compare the whole reply, including tools separated by assistant text.
 const showExecutionLocation = computed(() => {

@@ -23,7 +23,7 @@ Use the existing logged-in **account** API client and API base (including its no
 - Read the same task ID after the response or a lost response. `outcome` is `submitted`, `unchanged`, `unknown`, `unavailable` or `blocked`; `automatic_retry` is always false and `business_outcome` remains `unknown`. `submitted` means input acknowledgement, not task completion or collected results. A failure/unknown response is not permission to create another operation or automatically repeat.
 - HTTP 401/403/404 preserve existing authentication and visibility boundaries; invalid/changed input is 400/409. All responses retain `no-store`. No raw native output or diagnostic cause is returned.
 
-The shared task page still has **no resume button**. This delivery provides the formal generated HTTP/SDK entry for an existing authenticated client; it does not add a manual JSON editor or pretend that the UI already performs recovery. A client must have the exact original arguments before offering this operation. Neither this code nor its tests execute a production recovery.
+At the API-only checkpoint `fb904ee3`, the shared task page had **no resume button**. The subsequent [shared UI increment](../native-resume-ui/README.md) adds an action only from an exact original tool call/receipt. The API checkpoint provides the formal generated HTTP/SDK entry for an existing authenticated client; it does not add a manual JSON editor or pretend that the UI already performs recovery. A client must have the exact original arguments before offering this operation. Neither this code nor its tests execute a production recovery.
 
 ## Implementation boundary
 

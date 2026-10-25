@@ -1,0 +1,35 @@
+{
+  "currentServer": true,
+  "realPG": true,
+  "syntheticHistory": true,
+  "realNativeExecution": false,
+  "scenarios": [
+    {
+      "mode": "actual-rejection",
+      "language": "en",
+      "posts": 1,
+      "unexpectedMutations": 0,
+      "deviceReads": 0,
+      "pageErrors": [],
+      "response": 400
+    },
+    {
+      "mode": "submitted",
+      "language": "en",
+      "posts": 1,
+      "unexpectedMutations": 0,
+      "deviceReads": 0,
+      "pageErrors": [],
+      "response": "synthetic acknowledged receipt"
+    },
+    {
+      "mode": "unknown",
+      "language": "zh",
+      "posts": 0,
+      "unexpectedMutations": 0,
+      "deviceReads": 0,
+      "pageErrors": [],
+      "response": null
+    }
+  ]
+}

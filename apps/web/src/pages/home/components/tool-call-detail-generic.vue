@@ -23,6 +23,10 @@
     <EmptyRow v-if="!inputEntries.length && !resultText && !errorText">
       {{ t('chat.tools.detail.noData') }}
     </EmptyRow>
+    <NativeTaskResume
+      v-if="block.toolName === 'computer_task_submit'"
+      :block="block"
+    />
   </div>
 </template>
 
@@ -30,6 +34,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { ToolCallBlock } from '@/store/chat-list'
+import NativeTaskResume from './native-task-resume.vue'
 import EmptyRow from './tool-detail/empty-row.vue'
 import { hasToolResultError, toolResultErrorText } from './tool-result-error'
 

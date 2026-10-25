@@ -6,11 +6,13 @@ import { useChatStore } from '@/store/chat-list'
 import { formatDateTimeSeconds } from '@/utils/date-time'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { sessionBotRunContent, sessionBotRunStatus } from '../composables/session-bot-run'
+import { provideNativeTaskResumeScope } from '../composables/native-task-resume-scope'
 import ToolCallDetailGeneric from './tool-call-detail-generic.vue'
 
 // Shared content, with no DialogRoot dependency. The chat host already owns the
 // authorized runtime subscription and transcript; opening this view sends nothing.
 const props = defineProps<{ botId: string, sessionId: string, visible: boolean }>()
+provideNativeTaskResumeScope(props)
 const { t } = useI18n()
 const chat = useChatStore()
 const expanded = ref(false)

@@ -1074,6 +1074,20 @@
       "downloadFailed": "Could not prepare the download. Reload the view and check access."
     },
     "tasks": {
+      "resume": {
+        "action": "Continue original native batch",
+        "ready": "Continue the original native batch with its original instruction. The server will check whether continuation is available.",
+        "sending": "Requesting continuation of the original batch…",
+        "submitted": "The original instruction was acknowledged. Task success is still unknown. Check this task’s current status and native terminal.",
+        "unchanged": "The original operation was left unchanged. Check this task’s current status and native terminal; task success is still unknown.",
+        "unknown": "The continuation outcome is unknown. This request will not be repeated. Check this task’s current status and native terminal.",
+        "unavailable": "Continuation is unavailable. The complete original arguments and an eligible native operation receipt are required; a disconnected Runtime must reconnect before continuation.",
+        "blocked": "Continuation was blocked. Review access, target and task status before explicitly checking again.",
+        "unsupported": "This server or task does not support native batch continuation.",
+        "unauthorized": "Sign in again before requesting continuation.",
+        "forbidden": "Your account does not have permission to continue this task.",
+        "storageUnavailable": "Continuation is unavailable because this browser cannot retain request tracking."
+      },
       "unsupported": "This server does not support task observation yet.",
       "inaccessible": "This conversation or task is no longer accessible.",
       "title": "Tasks",
