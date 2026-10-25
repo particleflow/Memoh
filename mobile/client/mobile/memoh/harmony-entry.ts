@@ -1,4 +1,4 @@
-import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, readServiceConfig, inspectServiceSetup, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
+import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, readServiceConfig, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
 import './harmony-service.css'
 
 type Bridge = { request: (raw: string) => Promise<string> }
@@ -52,7 +52,7 @@ function form(current: ServiceConfig | null, message = '') {
   try { unbound = inspectServiceSetup().kind === 'unbound' } catch { unbound = true }
   document.getElementById('service-migration')!.textContent = current
     ? '保持 API 地址不变会保留登录；切换服务将退出当前账号。'
-    : unbound ? '检测到旧登录或本地数据，尚未确认它们所属的服务。原数据未更改；迁移确认前不会覆盖配置、退出登录或连接新地址。' : '保存后使用已有账号登录。'
+    : unbound ? '检测到旧登录或本地数据。请使用已在 Windows 配置并签名的安装包完成迁移；原数据未更改，不会发送到其他地址。' : '本安装包尚未提供服务配置；Windows 配置并签名后的版本会自动读取。也可在此设置新服务。'
   const submit = root.querySelector('button[type=submit]') as HTMLButtonElement
   submit.disabled = unbound
   const cancel = document.getElementById('service-cancel') as HTMLButtonElement
@@ -66,9 +66,11 @@ function form(current: ServiceConfig | null, message = '') {
       sessionStorage.removeItem(EDIT_SERVICE_KEY)
       location.hash = '#/login'
       location.reload()
-    } catch {
-      error.textContent = '无法保存。请使用无账号、查询或片段的服务地址；内网地址须使用 HTTPS，API 路径须以 /api 结尾，并检查本地存储是否可用。'
-      submit.disabled = false
+    } catch (failure) {
+      error.textContent = failure instanceof Error && failure.message === 'SERVICE_BINDING_REQUIRED'
+        ? '地址未能与旧服务核对，原登录和本地数据未更改。请使用原服务的 API 地址。'
+        : '无法保存。请使用无账号、查询或片段的服务地址；内网地址须使用 HTTPS，API 路径须以 /api 结尾，并检查本地存储是否可用。'
+      submit.disabled = unbound
     }
   }
 }
@@ -76,10 +78,11 @@ function form(current: ServiceConfig | null, message = '') {
 async function start() {
   try {
     await nativeCommand('client.configuration') // Close transfers before any config UI or app imports.
-    const value = readServiceConfig()
+    let value = readServiceConfig()
+    if (!value) value = await applyDeploymentConfig(await readDeploymentConfig())
     if (!value || sessionStorage.getItem(EDIT_SERVICE_KEY) === '1') form(value)
     else await boot(value)
-  } catch { form(null, '本地配置不可用，已停止连接。请检查存储或配置版本；不会回退到旧地址。') }
+  } catch { form(null, '安装包配置或本地存储未能通过核对，已停止连接。请检查 Windows 配置与签名步骤；原登录和本地数据未更改。') }
 }
 
 // A second document changing shared configuration invalidates this app, too.

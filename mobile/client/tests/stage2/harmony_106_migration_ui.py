@@ -9,7 +9,7 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 import harmony_auth_persistence as f
 old=f.legacy_source('HARMONY_LEGACY_106_ROOT')
-# Read only to fill the migration form in a disposable local browser profile.
+# Read only for private-value redaction in this disposable local browser test.
 # Never emit, screenshot or persist this infrastructure value in test evidence.
 legacy_api=json.loads((old/'config/memoh_client.json').read_text())['apiOrigin']
 f.auto_configure=False
@@ -30,17 +30,12 @@ try:
   c,p=f.start(pw,Path(profile));f.login(p);old_token=f.fingerprint(p)
   assert p.evaluate('(key)=>localStorage.getItem(key)',config_key) is None
   p.evaluate("localStorage.setItem('chat-input-drafts',JSON.stringify({'synthetic-draft':'keep locally'}));localStorage.setItem('pinned-bot-ids',JSON.stringify(['synthetic-bot']))")
-  c.close();phase='unconfigured';f.current_dist=f.new_dist
+  c.close();phase='same-origin-migration';f.current_dist=f.new_dist
   c,p=f.start(pw,Path(profile))
-  p.get_by_role('heading',name='连接服务').wait_for()
-  assert f.fingerprint(p)==old_token,'old token changed before configuration'
-  count=len(observed);p.wait_for_timeout(200);assert len(observed)==count,'new API request while configuration is absent'
-  assert not any(x['phase']=='unconfigured' for x in observed),'API observed in unconfigured phase'
-  # The candidate's independently verified binding, not the typed URL alone,
-  # must authorize retaining the original session at the original API base.
-  phase='same-origin-migration';p.locator('#service-api').fill(legacy_api)
-  assert p.get_by_role('button',name='保存并继续').is_enabled(),'candidate has no verified legacy binding; migration remains incomplete'
-  p.get_by_role('button',name='保存并继续').click();f.wait_chat(p)
+  # The candidate must already contain the Windows-injected local config and
+  # verified binding. Requiring manual entry here would hide the delivery bug.
+  f.wait_chat(p)
+  assert p.locator('#service-api').count()==0,'migration must not require manual address entry'
   valid=f.fingerprint(p);assert valid==old_token and f.counts['login']==1
   assert p.evaluate("JSON.parse(localStorage.getItem('chat-input-drafts')||'{}')['synthetic-draft']")=='keep locally'
   assert 'synthetic-bot' in p.evaluate("JSON.parse(localStorage.getItem('pinned-bot-ids')||'[]')")
@@ -51,7 +46,7 @@ try:
   f.logout(p);c.close();c,p=f.start(pw,Path(profile));p.wait_for_selector('#username')
   assert not p.evaluate("localStorage.getItem('token')");c.close()
   assert not f.page_errors
-  report={'from':'1.0.6-rc.resume-tasks276c0b54','to':f.candidate_label(),'actualOldCompiledResources':True,'persistentBrowserProfile':True,'oldRuntimeEndpointKeyAbsent':True,'noAPIWhileUnconfigured':True,'verifiedSameOriginPreservesLoginDraftsAndPins':True,'noAccountRegistration':True,'validLoginAndConfigRetainedAfterRestart':True,'explicitLogoutPersists':True,'loginCalls':f.counts['login'],'infrastructureAddressInEvidence':False,'externalAPIContact':False,'actualHAPOverwriteInstall':False,'nativeDevice':False,'pageErrors':f.page_errors}
+  report={'from':'1.0.6-rc.resume-tasks276c0b54','to':f.candidate_label(),'actualOldCompiledResources':True,'persistentBrowserProfile':True,'oldRuntimeEndpointKeyAbsent':True,'noManualAddressEntry':True,'verifiedSameOriginPreservesLoginDraftsAndPins':True,'noAccountRegistration':True,'validLoginAndConfigRetainedAfterRestart':True,'explicitLogoutPersists':True,'loginCalls':f.counts['login'],'infrastructureAddressInEvidence':False,'externalAPIContact':False,'actualHAPOverwriteInstall':False,'nativeDevice':False,'pageErrors':f.page_errors}
   (f.OUT/'106-migration-ui.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report))
 except Exception as error:
  # Browser errors may echo a form value; never print the private legacy address.

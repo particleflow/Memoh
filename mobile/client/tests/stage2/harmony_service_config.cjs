@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict')
 const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
-function load(file,imports={}){const m={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>{assert.ok(n in imports,n);return imports[n]},URL,Error,JSON,Number,String,Array,Map,Set,Promise,console});return m.exports}
+function load(file,imports={}){const m={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>{assert.ok(n in imports,n);return imports[n]},URL,Error,JSON,Number,String,Array,Map,Set,Promise,console,TextEncoder,Uint8Array,crypto:require('node:crypto').webcrypto});return m.exports}
 const validator=load('mobile/memoh/harmony-service-url.ts'),{normalizeServiceUrl:normal}=validator
 let checks=0;function check(f){f();checks++}
 for(const value of ['','/api','http://localhost/api','http://127.0.0.1/api','http://10.0.0.2/api','http://[::1]/api','http://[fd00::1]/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/api#x','https://alpha.example/foo/../api','https://alpha.example/%61pi','https://alpha.example//api','https://alpha.example/','ftp://alpha.example/api','https://0x7f000001/api','https://alpha.example./api'])check(()=>assert.throws(()=>normal(value)))
@@ -105,6 +105,26 @@ let frame='begonia-client://app/index.html';const controller={getLastJavascriptP
 const bridge=new NativeClient(controller,s=>events.push(s),async()=>{},{});bridge.register()
 async function call(command,rest={}){return JSON.parse(await bridge.request(JSON.stringify({version:1,command,...rest})))}
 ;(async()=>{
+ const boundStorage=new Storage();boundStorage.setItem('token','synthetic-bound-old');boundStorage.setItem('chat-input-drafts','preserved-draft')
+ const expected=require('node:crypto').createHash('sha256').update(a).digest('hex')
+ const deployment={apiOrigin:a,hapDownloadUrl:'',productName:'Garnet-Assistant',legacyBinding:{schemaVersion:1,bundleName:'cloud.begonia.workassistant',versionCode:1000006,sourceHapSHA256:'a'.repeat(64),apiBaseSHA256:expected}}
+ const unchanged=JSON.stringify([...boundStorage.values])
+ assert.equal(await cfg.applyDeploymentConfig({apiOrigin:'',hapDownloadUrl:'',productName:'Garnet-Assistant'},boundStorage),null);checks++
+ for(const bad of [{...deployment,legacyBinding:null},{...deployment,apiOrigin:b},{...deployment,token:'unwanted'},{...deployment,legacyBinding:{...deployment.legacyBinding,bundleName:'wrong.app'}}]) {
+  await assert.rejects(()=>cfg.applyDeploymentConfig(bad,boundStorage));checks++
+  check(()=>assert.equal(JSON.stringify([...boundStorage.values]),unchanged))
+ }
+ const migrated=await cfg.applyDeploymentConfig(deployment,boundStorage)
+ check(()=>assert.equal(migrated.resetPending,false))
+ check(()=>assert.equal(boundStorage.getItem('token'),'synthetic-bound-old'))
+ check(()=>assert.equal(boundStorage.getItem('chat-input-drafts'),'preserved-draft'))
+ const retained=await cfg.applyDeploymentConfig({...deployment,apiOrigin:b},boundStorage)
+ check(()=>assert.equal(retained.apiOrigin,a));check(()=>assert.equal(boundStorage.getItem('token'),'synthetic-bound-old'))
+ const first=await cfg.applyDeploymentConfig({...deployment,legacyBinding:null},new Storage())
+ check(()=>assert.equal(first.resetPending,false));check(()=>assert.equal(first.apiOrigin,a))
+ const failed=new Storage();failed.setItem('token','synthetic-keep');failed.setItem=()=>{throw Error('QuotaExceededError')}
+ await assert.rejects(()=>cfg.applyDeploymentConfig(deployment,failed));checks++
+ check(()=>assert.equal(failed.getItem('token'),'synthetic-keep'));check(()=>assert.equal(failed.getItem(cfg.SERVICE_CONFIG_KEY),null))
  check(()=>assert.equal(nativeConfig.MEMOH_ORIGIN,''))
  assert.equal((await call('client.state',{state:'ready'})).ok,false);checks++
  assert.equal((await call('client.configure',{apiOrigin:a})).ok,true);checks++

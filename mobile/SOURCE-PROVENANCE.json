@@ -45,15 +45,17 @@
     },
     {
       "path": "mobile/client/mobile/client_config.py",
-      "sha256": "f2f5df416982d5aebd6051392e64fb5ecba51bb5fff85c00d9c023f1a2391868",
+      "sha256": "7b29495f70ae65aca4f3003e8b828e81b26fe4d489470b3588c1b9ad06a7eeb7",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
-        "Follow-up after 14bb9b8: align Python URL path/normalization validation and enforce shared nonempty port range in Python/TS; no private-source reconstruction or route migration."
+        "Follow-up after 14bb9b8: align Python URL path/normalization validation and enforce shared nonempty port range in Python/TS; no private-source reconstruction or route migration.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
       ],
       "endpointScopeBaseSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab",
-      "urlParityBaseSHA256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc"
+      "urlParityBaseSHA256": "8f8e8a8582f0be30c3df3df4fb6e940fcdf485c772cb059239fc8f5497f7fedc",
+      "windowsInjectionBaseSHA256": "f2f5df416982d5aebd6051392e64fb5ecba51bb5fff85c00d9c023f1a2391868"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
@@ -122,14 +124,16 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "1a2b1dac9e08769dcd833c73c84712753604e9137cf92c47a7ed6212f9e8ca75",
+      "sha256": "438543c562a5a181d5812bd7bf04475f60af5f1c4bbce943c0be452026b3575a",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
-        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
       ],
-      "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5"
+      "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5",
+      "windowsInjectionBaseSHA256": "1a2b1dac9e08769dcd833c73c84712753604e9137cf92c47a7ed6212f9e8ca75"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
@@ -140,12 +144,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-config.ts",
-      "sha256": "8b204ff2322d51140e01f2d0ab3e3743b82332db148be3c17d70e1ba5f1f76df",
+      "sha256": "7ccf116dc6372c9a93560754ea91cd7741165f9b6d710a7b756efa36bc2a59a7",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
-      ]
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
+      ],
+      "windowsInjectionBaseSHA256": "8b204ff2322d51140e01f2d0ab3e3743b82332db148be3c17d70e1ba5f1f76df"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
@@ -208,15 +214,17 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_106_migration_ui.py",
-      "sha256": "1128fde08fafc2a0239de9907cf8d9cb34973ff802106f722c6bdfb69c93a820",
+      "sha256": "1c033b6c1fb2a5d5096ae30bc422284071ea504bf1da6c8d4e12ced54b7cdf29",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
         "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
-        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
       ],
-      "checkpointSHA256": "3a8270c7378b8bc3d0466e35fd9374514737eb08b6a43736759a7f5385d598d2"
+      "checkpointSHA256": "3a8270c7378b8bc3d0466e35fd9374514737eb08b6a43736759a7f5385d598d2",
+      "windowsInjectionBaseSHA256": "1128fde08fafc2a0239de9907cf8d9cb34973ff802106f722c6bdfb69c93a820"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_auth_persistence.py",
@@ -343,26 +351,30 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
-      "sha256": "1a15dfe792b45c191e86154eaa0fc3574daba264b1bc2f9e5cd51b6129206a02",
+      "sha256": "d54b35999156764bf31082c299d0d641d58a17705fd9216bb376da6e2be30d6f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
         "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
-        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
       ],
       "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
-      "nativeIntegrationBaseSHA256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c"
+      "nativeIntegrationBaseSHA256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c",
+      "windowsInjectionBaseSHA256": "1a15dfe792b45c191e86154eaa0fc3574daba264b1bc2f9e5cd51b6129206a02"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config_ui.py",
-      "sha256": "8847d57fc4bf57c41ec116a7210daa22622a1323a7db79c7864f7b3b296a915d",
+      "sha256": "d7a4ea562c0fa340616f147ef1e92b331eefe82fdadc7038030c29393231f7a9",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
-        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
-      ]
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
+      ],
+      "windowsInjectionBaseSHA256": "8847d57fc4bf57c41ec116a7210daa22622a1323a7db79c7864f7b3b296a915d"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_task_lifecycle_ui.py",
@@ -461,7 +473,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "09bc0777b915be4ef7f2c1527c3386effe774158e2c84580067c5eff2333b408",
+      "sha256": "fe788bbbe62933991d9e410989a6bac2e0c011f520645ed4b13fe8a69a5062e3",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -477,7 +489,8 @@
         "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build. Browser-confirmed rapid reload drops the masked Key from the disk display snapshot; refresh the existing providers query on mount, without persisting or rewriting Key.",
         "Historical-source audit: restore the existing API request session-generation/token snapshot guard after reproducing anonymous and same-token prior-session late-401 logout. Test accepts an explicit current checkout; no token storage or server/auth protocol change. Not identified as one of the historical 19 unnamed edits.",
         "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations.",
-        "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams."
+        "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -485,20 +498,23 @@
       "releaseNoticeBaseSHA256": "f36f44e2c5ade6c86b6ad68dfe55dcddc33432d0e75f20127055baeb402969d6",
       "unifiedNative9e6BaseSHA256": "8d81ee8055eee24defc3eee0208a5489345f9a99165927bf08b6144f2ff0866c",
       "unifiedImages51bBaseSHA256": "71382eb1ff2e2b6215ab85a00119ae68c3549a73d5048e0b2fba15c635d0d6b7",
-      "historicalAuditBaseSHA256": "3e228fd23af37fe3244c06dd9c225b183efe7868af0bd29bb80a1265984493ad"
+      "historicalAuditBaseSHA256": "3e228fd23af37fe3244c06dd9c225b183efe7868af0bd29bb80a1265984493ad",
+      "windowsInjectionBaseSHA256": "09bc0777b915be4ef7f2c1527c3386effe774158e2c84580067c5eff2333b408"
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c",
+      "sha256": "7093832b3a18f53e491a7125c4aa90ef69fb3192e6b20fdbdf75b75b88d7d35b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
       "archiveCheckpointSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
       "preparationChanges": [
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
-        "Upgrade preflight: increase restored native application version from 1.0.2 / 1000002 to 1.0.7 / 1000007, above the user-reported installed 1.0.6 / 1000006. Bundle, permissions and persistence code are unchanged."
+        "Upgrade preflight: increase restored native application version from 1.0.2 / 1000002 to 1.0.7 / 1000007, above the user-reported installed 1.0.6 / 1000006. Bundle, permissions and persistence code are unchanged.",
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
       ],
-      "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4"
+      "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
+      "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json",

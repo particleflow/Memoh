@@ -16,7 +16,7 @@ import os
 import sys
 import tarfile
 import uuid
-from client_config import read_config
+from client_config import read_config, public_deployment_bytes
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -831,6 +831,12 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         for name, path in host_sources.items():
             data = path.read_bytes()
             entry = tarfile.TarInfo('apps/web/src/lib/' + name)
+            entry.size = len(data)
+            entry.mode = 0o644
+            target.addfile(entry, io.BytesIO(data))
+        if platform == 'harmony':
+            data = public_deployment_bytes()
+            entry = tarfile.TarInfo('apps/web/public/memoh_client.json')
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))

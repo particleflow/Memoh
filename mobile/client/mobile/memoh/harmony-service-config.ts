@@ -9,13 +9,62 @@ export interface ServiceConfig { version: 1; apiOrigin: string; hapDownloadUrl: 
 
 // Only an independently established binding of the existing installation may
 // supply this value. Form input is not evidence. v1.0.6 used a compiled origin,
-// not a stored key; deployment verification is not wired into this checkpoint.
+// not a stored key; the locally injected deployment config establishes a match.
 export interface LegacyServiceBinding { apiOrigin: string }
 export type ServiceSetup =
   | { kind: 'configured'; config: ServiceConfig }
   | { kind: 'legacy-bound'; config: ServiceConfig }
   | { kind: 'initial' }
   | { kind: 'unbound' }
+
+interface DeploymentConfig {
+  apiOrigin: string
+  hapDownloadUrl: string
+  productName: string
+  legacyBinding?: { schemaVersion: 1; bundleName: string; versionCode: number; sourceHapSHA256: string; apiBaseSHA256: string } | null
+}
+
+// Read only from the signed application's packaged resource. Never fetch a
+// deployment config from an entered endpoint, download URL or external service.
+export async function readDeploymentConfig(): Promise<unknown> {
+  const resource = new URL('./memoh_client.json', window.location.href)
+  const response = await fetch(resource, { credentials: 'omit', cache: 'no-store' })
+  if (!response.ok) throw new Error('DEPLOYMENT_CONFIG_UNAVAILABLE')
+  return response.json()
+}
+
+export async function applyDeploymentConfig(raw: unknown, storage: Storage = localStorage): Promise<ServiceConfig | null> {
+  const current = readServiceConfig(storage)
+  if (current) return current // A later package must never replace user configuration.
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw) ||
+    Object.keys(raw).some(key => !['apiOrigin', 'hapDownloadUrl', 'productName', 'legacyBinding'].includes(key))) throw new Error('DEPLOYMENT_CONFIG_INVALID')
+  const value = raw as DeploymentConfig
+  if (typeof value.apiOrigin !== 'string' || typeof value.hapDownloadUrl !== 'string' || typeof value.productName !== 'string' ||
+    !value.productName || value.productName.length > 128) throw new Error('DEPLOYMENT_CONFIG_INVALID')
+  if (!value.apiOrigin) {
+    if (value.hapDownloadUrl || value.legacyBinding) throw new Error('DEPLOYMENT_CONFIG_INVALID')
+    return null // Public unsigned template; Windows must fill it before signing.
+  }
+  const apiOrigin = normalizeServiceUrl(value.apiOrigin)
+  const download = value.hapDownloadUrl ? normalizeServiceUrl(value.hapDownloadUrl, false) : ''
+  let legacy: LegacyServiceBinding | undefined
+  if (value.legacyBinding != null) {
+    const binding = value.legacyBinding
+    const keys = ['schemaVersion', 'bundleName', 'versionCode', 'sourceHapSHA256', 'apiBaseSHA256']
+    if (typeof binding !== 'object' || Array.isArray(binding) || Object.keys(binding).length !== keys.length ||
+      Object.keys(binding).some(key => !keys.includes(key)) || binding.schemaVersion !== 1 ||
+      binding.bundleName !== 'cloud.begonia.workassistant' || binding.versionCode !== 1000006 ||
+      typeof binding.sourceHapSHA256 !== 'string' || !/^[a-f0-9]{64}$/.test(binding.sourceHapSHA256) ||
+      typeof binding.apiBaseSHA256 !== 'string' || !/^[a-f0-9]{64}$/.test(binding.apiBaseSHA256)) throw new Error('DEPLOYMENT_LEGACY_INVALID')
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(apiOrigin)))
+    const actual = Array.from(digest, byte => byte.toString(16).padStart(2, '0')).join('')
+    if (actual !== binding.apiBaseSHA256) throw new Error('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
+    legacy = { apiOrigin }
+  }
+  // A concurrent configuration write also wins over the package seed.
+  const latest = readServiceConfig(storage)
+  return latest ?? saveServiceConfig(apiOrigin, download, storage, legacy)
+}
 
 export function readServiceConfig(storage: Storage = localStorage): ServiceConfig | null {
   const raw = storage.getItem(SERVICE_CONFIG_KEY)

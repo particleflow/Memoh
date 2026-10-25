@@ -1,0 +1,17 @@
+{
+  "runtime": "real Harmony Vite entry/UI; synthetic local deployment config and old state",
+  "blankPublicTemplatePreservesUnboundState": true,
+  "differentBasePreservesOriginalStorageAndSendsNoAPIRequest": true,
+  "writeFailurePreservesOriginalStorageAndSendsNoAPIRequest": true,
+  "matchingBaseAutomaticallyPreservesTokenDraftsAndPins": true,
+  "noManualAddressEntry": true,
+  "persistedConfigOverridesLaterPackage": true,
+  "processRestartRetainsLogin": true,
+  "freshInstallAutomaticallyReachesLogin": true,
+  "loginHTTPCalls": 0,
+  "pageErrors": [],
+  "actual106Package": false,
+  "actualHAPUpgrade": false,
+  "nativeDevice": false,
+  "liveAPI": false
+}

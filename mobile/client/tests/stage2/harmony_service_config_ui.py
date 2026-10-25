@@ -54,7 +54,7 @@ try:
     # replace old data or turn a typed URL into credential-binding evidence.
     page.evaluate("localStorage.setItem('token','synthetic-unbound-old');localStorage.setItem('chat-input-drafts','synthetic-local-draft')")
     before=page.evaluate('JSON.stringify({...localStorage})')
-    page.reload();page.get_by_text('尚未确认它们所属的服务。',exact=False).wait_for()
+    page.reload();page.get_by_text('请使用已在 Windows 配置并签名的安装包完成迁移',exact=False).wait_for()
     assert page.get_by_role('button',name='保存并继续').is_disabled()
     assert page.evaluate('JSON.stringify({...localStorage})')==before
     assert not requests
