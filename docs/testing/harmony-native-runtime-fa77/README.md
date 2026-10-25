@@ -254,3 +254,11 @@ fixture: [source check](ci-local-source-check.json), [full types](ci-full-typech
 [12 attachment checks](ci-attachment-tests.txt), and [lint](ci-attachment-eslint.txt)
 passed (lint: zero errors, three fixture warnings). This is local evidence,
 not the status of the remote check.
+
+The first remote head `f3d91b05259d3fbcb6a3e2b61eb96842efdc6f46` passed
+[Generated Harmony Web](https://github.com/particleflow/Memoh/actions/runs/40186259058),
+but its contribution-policy test failed. Adding the new workflow increases the
+ordinary PR workflow inventory from 9 to 10; the exact count assertion has been
+updated while retaining every read-only permission and dependency assertion.
+The local environment lacks Ruby, so the complete policy suite must be verified
+by its existing remote runner; no local policy-suite pass is claimed.
