@@ -1,0 +1,47 @@
+[
+  {
+    "file": "after.log",
+    "bytes": 3291,
+    "sha256": "864916e7001c7c19fc283401a83de6cd712c9d122612588304e9874d14869809"
+  },
+  {
+    "file": "aggregate.log",
+    "bytes": 1251,
+    "sha256": "1bfa82d48884d2e06b5aac5c39f2427058edbf8fbf5ed91f36cd4cfbdfa5cca9"
+  },
+  {
+    "file": "before.log",
+    "bytes": 2422,
+    "sha256": "773510f353a7ec93016cb74d2dd4a63644edcd497f1ee28fcb1c66768738afd4"
+  },
+  {
+    "file": "build.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "catalog-success.png",
+    "bytes": 96812,
+    "sha256": "95618578966f8002299ca31aa0ef23e382c841e916340f23b6fb231b5675f087"
+  },
+  {
+    "file": "jwt-existing.log",
+    "bytes": 371,
+    "sha256": "8da8718883d6bab31a9683c1c13cf7f39f906c9e3cea0b336d82776035315f04"
+  },
+  {
+    "file": "runtime.log",
+    "bytes": 591,
+    "sha256": "3cd8fd94c3420efdd76258f7ff4cf6e18e6334cfb3a5ff9352be4630ba76770c"
+  },
+  {
+    "file": "sdk-types.log",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+  },
+  {
+    "file": "web-types.log",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+  }
+]

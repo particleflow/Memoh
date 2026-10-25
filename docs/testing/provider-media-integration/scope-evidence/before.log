@@ -1,0 +1,31 @@
+=== RUN   TestProviderMediaCatalogAccountScope
+=== RUN   TestProviderMediaCatalogAccountScope/active_account
+    provider_media_catalog_scope_test.go:92: status=200 account_validations=1 provider_reads=1 upstream_GETs=1
+=== RUN   TestProviderMediaCatalogAccountScope/revoked_account
+    provider_media_catalog_scope_test.go:92: status=401 account_validations=1 provider_reads=0 upstream_GETs=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_with_active_account
+    provider_media_catalog_scope_test.go:92: status=200 account_validations=0 provider_reads=1 upstream_GETs=1
+    provider_media_catalog_scope_test.go:94: status=200, want=403
+    provider_media_catalog_scope_test.go:104: wanted validations=0 and provider/upstream calls=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_with_revoked_account
+    provider_media_catalog_scope_test.go:92: status=200 account_validations=0 provider_reads=1 upstream_GETs=1
+    provider_media_catalog_scope_test.go:94: status=200, want=403
+    provider_media_catalog_scope_test.go:104: wanted validations=0 and provider/upstream calls=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_channel_identity
+    provider_media_catalog_scope_test.go:92: status=200 account_validations=0 provider_reads=1 upstream_GETs=1
+    provider_media_catalog_scope_test.go:94: status=200, want=403
+    provider_media_catalog_scope_test.go:104: wanted validations=0 and provider/upstream calls=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_query_credential
+    provider_media_catalog_scope_test.go:92: status=200 account_validations=0 provider_reads=1 upstream_GETs=1
+    provider_media_catalog_scope_test.go:94: status=200, want=403
+    provider_media_catalog_scope_test.go:104: wanted validations=0 and provider/upstream calls=0
+--- FAIL: TestProviderMediaCatalogAccountScope (0.01s)
+    --- PASS: TestProviderMediaCatalogAccountScope/active_account (0.00s)
+    --- PASS: TestProviderMediaCatalogAccountScope/revoked_account (0.00s)
+    --- FAIL: TestProviderMediaCatalogAccountScope/chat_route_with_active_account (0.00s)
+    --- FAIL: TestProviderMediaCatalogAccountScope/chat_route_with_revoked_account (0.00s)
+    --- FAIL: TestProviderMediaCatalogAccountScope/chat_route_channel_identity (0.00s)
+    --- FAIL: TestProviderMediaCatalogAccountScope/chat_route_query_credential (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.022s
+FAIL

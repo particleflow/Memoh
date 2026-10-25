@@ -17608,6 +17608,10 @@ export type GetProvidersByIdMediaCatalogErrors = {
      */
     401: ServerProblem;
     /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;

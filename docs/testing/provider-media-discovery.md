@@ -36,6 +36,9 @@ model execution or attachment delivery.
   OAuth provider types are rejected before credential resolution.
 - Existing authentication and provider team scope apply. Anonymous/revoked
   sessions return 401; foreign providers return 404 before any upstream request.
+- Discovery requires an account token. Chat-route reply tokens are rejected with
+  403 before provider lookup or remote access, even when they identify an active
+  account. See the [scope regression and original failure](provider-media-integration/chat-route-scope.md).
 - Only the saved destination is used. Redirects are refused and cookies are not
   shared. The existing probe timeout and catalog response-size limit apply.
 - Misconfiguration, upstream 401/403, transport errors and malformed/oversized

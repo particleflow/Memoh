@@ -4649,7 +4649,7 @@ export const getProvidersByIdMediaCatalogQueryKey = (options: Options<GetProvide
 /**
  * Read provider media catalog
  *
- * Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.
+ * Requires an active account token; chat-route reply tokens are not accepted. Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.
  */
 export const getProvidersByIdMediaCatalogQuery = defineQueryOptions<Options<GetProvidersByIdMediaCatalogData>, GetProvidersByIdMediaCatalogResponse, GetProvidersByIdMediaCatalogError>((options: Options<GetProvidersByIdMediaCatalogData>) => ({
     key: getProvidersByIdMediaCatalogQueryKey(options),

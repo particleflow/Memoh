@@ -16202,7 +16202,7 @@ const docTemplate = `{
         },
         "/providers/{id}/media-catalog": {
             "get": {
-                "description": "Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.",
+                "description": "Requires an active account token; chat-route reply tokens are not accepted. Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.",
                 "produces": [
                     "application/json"
                 ],
@@ -16244,6 +16244,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }

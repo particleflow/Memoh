@@ -1,0 +1,48 @@
+=== RUN   TestProviderMediaCatalogAccountScope
+=== RUN   TestProviderMediaCatalogAccountScope/active_account
+    provider_media_catalog_scope_test.go:92: status=200 account_validations=1 provider_reads=1 upstream_GETs=1
+=== RUN   TestProviderMediaCatalogAccountScope/revoked_account
+    provider_media_catalog_scope_test.go:92: status=401 account_validations=1 provider_reads=0 upstream_GETs=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_with_active_account
+    provider_media_catalog_scope_test.go:92: status=403 account_validations=0 provider_reads=0 upstream_GETs=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_with_revoked_account
+    provider_media_catalog_scope_test.go:92: status=403 account_validations=0 provider_reads=0 upstream_GETs=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_channel_identity
+    provider_media_catalog_scope_test.go:92: status=403 account_validations=0 provider_reads=0 upstream_GETs=0
+=== RUN   TestProviderMediaCatalogAccountScope/chat_route_query_credential
+    provider_media_catalog_scope_test.go:92: status=403 account_validations=0 provider_reads=0 upstream_GETs=0
+--- PASS: TestProviderMediaCatalogAccountScope (0.01s)
+    --- PASS: TestProviderMediaCatalogAccountScope/active_account (0.00s)
+    --- PASS: TestProviderMediaCatalogAccountScope/revoked_account (0.00s)
+    --- PASS: TestProviderMediaCatalogAccountScope/chat_route_with_active_account (0.00s)
+    --- PASS: TestProviderMediaCatalogAccountScope/chat_route_with_revoked_account (0.00s)
+    --- PASS: TestProviderMediaCatalogAccountScope/chat_route_channel_identity (0.00s)
+    --- PASS: TestProviderMediaCatalogAccountScope/chat_route_query_credential (0.00s)
+=== RUN   TestProviderMediaCatalogBoundary
+=== RUN   TestProviderMediaCatalogBoundary/success
+=== RUN   TestProviderMediaCatalogBoundary/empty
+=== RUN   TestProviderMediaCatalogBoundary/forbidden
+=== RUN   TestProviderMediaCatalogBoundary/unauthorized_upstream
+=== RUN   TestProviderMediaCatalogBoundary/redirect
+=== RUN   TestProviderMediaCatalogBoundary/invalid
+=== RUN   TestProviderMediaCatalogBoundary/anonymous
+=== RUN   TestProviderMediaCatalogBoundary/revoked
+=== RUN   TestProviderMediaCatalogBoundary/foreign_team
+=== RUN   TestProviderMediaCatalogBoundary/wrong_protocol
+=== RUN   TestProviderMediaCatalogBoundary/bad_id
+=== RUN   TestProviderMediaCatalogBoundary/not_enabled
+--- PASS: TestProviderMediaCatalogBoundary (0.01s)
+    --- PASS: TestProviderMediaCatalogBoundary/success (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/empty (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/forbidden (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/unauthorized_upstream (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/redirect (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/invalid (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/anonymous (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/revoked (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/foreign_team (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/wrong_protocol (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/bad_id (0.00s)
+    --- PASS: TestProviderMediaCatalogBoundary/not_enabled (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.094s

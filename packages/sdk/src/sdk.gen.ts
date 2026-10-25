@@ -2704,7 +2704,7 @@ export const postProvidersByIdImportModels = <ThrowOnError extends boolean = fal
 /**
  * Read provider media catalog
  *
- * Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.
+ * Requires an active account token; chat-route reply tokens are not accepted. Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.
  */
 export const getProvidersByIdMediaCatalog = <ThrowOnError extends boolean = false>(options: Options<GetProvidersByIdMediaCatalogData, ThrowOnError>): RequestResult<GetProvidersByIdMediaCatalogResponses, GetProvidersByIdMediaCatalogErrors, ThrowOnError> => (options.client ?? client).get<GetProvidersByIdMediaCatalogResponses, GetProvidersByIdMediaCatalogErrors, ThrowOnError>({ url: '/providers/{id}/media-catalog', ...options });
 
