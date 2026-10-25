@@ -1,0 +1,9 @@
+ipv6_disabled=0
+global_ipv6_address_count=0
+ipv6_default_route_count=0
+actual_ipv6_loopback_tcp=PASS
+documentation_prefix_route_exit=2
+documentation_prefix_route_result=RTNETLINK answers: Network is unreachable
+documentation_prefix_connect_errno=101
+documentation_prefix_connect_result=Network is unreachable
+main_ipv6_routes_all_link_local=true

@@ -1,0 +1,19 @@
+=== RUN   TestDualStackSameOriginRecovery
+    network_recovery_test.go:205: both_available tcp_families=[6] http_ipv4=0 http_ipv6=1 unchanged_authority_and_scope=true
+    network_recovery_test.go:220: preferred_connection_closed tcp_families=[6 4] http_ipv4=1 http_ipv6=5 unchanged_authority_and_scope=true
+    network_recovery_test.go:237: both_connections_closed tcp_families=[6 4] http_ipv4=3 http_ipv6=5 unchanged_authority_and_scope=true
+    network_recovery_test.go:244: original_family_restored tcp_families=[6] http_ipv4=3 http_ipv6=6 unchanged_authority_and_scope=true
+    network_recovery_test.go:258: ready bytes=16 create=1 complete=1 successful_patch=4 same_receipt=true hash_match=true retry_attempts_during_outage=1
+--- PASS: TestDualStackSameOriginRecovery (0.08s)
+=== RUN   TestDualStackDoesNotRerouteTLSOrAuthorizationFailure
+=== RUN   TestDualStackDoesNotRerouteTLSOrAuthorizationFailure/trusted_wrong_hostname
+    network_recovery_test.go:304: trusted_wrong_hostname tcp_families=[6 6] http_ipv4=0 http_ipv6=1 unchanged_authority_and_scope=true
+    network_recovery_test.go:305: healthy alternate remained unused after post-connect failure; no TLS or authorization downgrade
+=== RUN   TestDualStackDoesNotRerouteTLSOrAuthorizationFailure/authorization_403
+    network_recovery_test.go:304: authorization_403 tcp_families=[6 6] http_ipv4=0 http_ipv6=2 unchanged_authority_and_scope=true
+    network_recovery_test.go:305: healthy alternate remained unused after post-connect failure; no TLS or authorization downgrade
+--- PASS: TestDualStackDoesNotRerouteTLSOrAuthorizationFailure (0.06s)
+    --- PASS: TestDualStackDoesNotRerouteTLSOrAuthorizationFailure/trusted_wrong_hostname (0.04s)
+    --- PASS: TestDualStackDoesNotRerouteTLSOrAuthorizationFailure/authorization_403 (0.02s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	1.186s
