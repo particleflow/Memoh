@@ -1,0 +1,28 @@
+{
+  "resourceCount": 797,
+  "sourceMaps": [],
+  "highConfidenceSecretFindings": [],
+  "publicConfigAPIBaseEmpty": true,
+  "upstream": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "sourceCommit": "f2488597aba37ef8c3557cc3f156b78d870c82c9",
+  "thirdPartyNotices": [
+    "instrument-sans.txt",
+    "inter.txt",
+    "katex.txt",
+    "llvm-libcxx.txt",
+    "llvm-libcxxabi.txt",
+    "lucide-voice.txt",
+    "memoh.txt",
+    "misans-original-license.txt",
+    "misans-package.txt",
+    "noble-hashes.txt",
+    "seti.txt",
+    "sources.txt",
+    "wavesurfer.txt"
+  ],
+  "newURLHostsReviewed": true,
+  "nativeSourceMap": "Existing official ArkTS debug map retained, 19 relative-source entries; no sourcesContent or absolute workspace paths",
+  "signingMaterialsFound": false,
+  "privateConfigurationBakedIn": false,
+  "reviewLimit": "Static input/resource inspection; not an exhaustive transitive component audit or public redistribution permission"
+}

@@ -1,0 +1,5 @@
+> hvigor Finished :entry:default@CompileArkTS... after 4 s 71 ms
+> hvigor Finished :entry:default@PackageHap... after 846 ms
+> hvigor Finished :entry:default@SignHap... after 2 ms
+> hvigor BUILD SUCCESSFUL in 9 s 73 ms
+> hvigor WARN: No signingConfig found for product default

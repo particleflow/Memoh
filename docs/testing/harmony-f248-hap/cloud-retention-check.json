@@ -1,0 +1,10 @@
+{
+  "fileName": "memoh-harmony-1.0.7-1000007-f2488597-api26-unsigned.hap",
+  "bytes": 37013036,
+  "sha256": "b7eee63f9751ae5d7772299fd22e410ef129c39571269eb5f7bbf9a43d842f0d",
+  "readbackBytesEqual": true,
+  "readbackZIPCRC": true,
+  "identityMetadataVerified": true,
+  "consumer": "same Linux cloud environment",
+  "windowsReceivingVerified": false
+}

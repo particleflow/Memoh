@@ -1,28 +1,27 @@
 # Reproduction inputs and verified build sequence
 
-The current source-only alignment pins shared Web/SDK commit
-`5e55c45c85659f04b339b4df42aeff72966542a8`. It reuses the shared image-tool
-reference display and native `images_api.edits` control, retaining the phone's
-attachment, task and authentication adaptations. The Provider cache fix is now
-byte-identical upstream, so its duplicate phone patch has been removed. A
-browser-confirmed follow-up that refreshes the providers query on mount is also
-now upstream, so that duplicate patch is removed as well. The delayed-401
-session guard remains in the existing phone adapter. See
-[the complete production-pin comparison](../docs/testing/harmony-source-audit/production-5e55.md)
-and [the original image checks](../docs/testing/harmony-unified-images/README.md).
-This source has not been compiled into a new HAP; the previously compiled
-package below keeps its original source/hash.
+The current verified unsigned HAP is built from
+`f2488597aba37ef8c3557cc3f156b78d870c82c9`, pinned to shared Web/SDK commit
+`5e55c45c85659f04b339b4df42aeff72966542a8`. The existing source sequence and
+retained official API26 SDK compiled and qualified the updated client with exit
+codes zero. It contains 797 Web resources and the 104-file native source
+snapshot. [Current package identity, checks and delivery boundary](../docs/testing/harmony-f248-hap/README.md).
 
-The latest unified source/HAP checkpoint is
+This package includes the reviewed notices, shared native task and Images
+controls, saved Provider state, original/scoped attachment adapters and phone
+late-401 login guard. The Provider cache and mount-refresh fixes are now upstream,
+so both duplicate phone patches are removed. No later shared candidate is claimed.
+[Full production-source comparison](../docs/testing/harmony-source-audit/production-5e55.md).
+
+The prior unified source/HAP checkpoint is
 `f6403deaded6e76c0788aa66cffcaac5fef0badd`, pinned to shared source
 `91af53f43566cb827d1fc58d18102e8ad29383bc`. Its completed unsigned build and
 resource checks are in [the task-delivery evidence](../docs/testing/harmony-task-delivery/README.md).
-The subsequent notice-only preparation adds verbatim component notices to the
-existing `client-web/licenses/` resources on the next build. It does not alter
-the already built HAP or claim a new package has been compiled. See
+The subsequent notice supplement is included in the new f2488597 package under
+`client-web/licenses/`. It does not change the preserved older HAP. See
 [notice sources and remaining UI licensing evidence](../docs/testing/harmony-release-notices/README.md).
 
-The latest [observation-fix HAP](../docs/harmony-observation-hap.md) was built
+The earlier [observation-fix HAP](../docs/harmony-observation-hap.md) was built
 from `7ceca0e3eecbc83f0f8edd11be73e711e377d125` using the same sequence, existing
 SDK and dependency cache. Web resources were rebuilt to include the source fix;
 the official native build and all integrity checks passed. Its version remains
@@ -37,8 +36,7 @@ The same native sequence was repeated after the version-only update at
 `8f8dc99761a467d5dafa9dd6e46ab1438d406ab5`, producing `1.0.7 / 1000007` with
 compile and integrity exit codes zero. Existing verified Web/dependency inputs
 were reused and native intermediates were preserved separately before a fresh
-compile. Use [the current unsigned output](../docs/harmony-upgrade-107.md)
-for signing preparation; the earlier 1.0.2 HAP is not an upgrade candidate for
+compile. That [earlier unsigned output](../docs/harmony-upgrade-107.md) is retained; the earlier 1.0.2 HAP is not an upgrade candidate for
 the reported installed 1.0.6.
 
 ## Inputs

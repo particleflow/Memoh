@@ -1,0 +1,43 @@
+{
+  "sourceCommit": "f2488597aba37ef8c3557cc3f156b78d870c82c9",
+  "sharedCommit": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "sdkVersion": "26.0.0.105",
+  "sdkDownloaded": false,
+  "webChecks": [
+    {
+      "name": "submodule-check",
+      "exitCode": 0
+    },
+    {
+      "name": "dependencies",
+      "exitCode": 0
+    },
+    {
+      "name": "patched-dependencies",
+      "exitCode": 0
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "vue-build",
+      "exitCode": 0
+    }
+  ],
+  "webExitCode": 0,
+  "hostPatches": 44,
+  "webResourceCount": 797,
+  "nativeCompileExitCode": 0,
+  "nativeQualificationExitCode": 0,
+  "hapResourceDigestsVerified": true,
+  "sourceFingerprint": "738c6fbb4fcd85c177ac93b124d7d8906410406188a6a2e1b7a0681532e6f49a",
+  "nativeSourceFiles": 104,
+  "nativeReportSHA256": "c402b1259fdb9cfa793cc95050cb6f02b7ab95765394938a6196fb9f6a40b2b7",
+  "nativeLogSHA256": "ee535bdaced7325ed4a39c96cb4bc9fa604b481a7e2479077a1635f840491ca2",
+  "toolchainMetadataUnchanged": true,
+  "arktsWarningCount": 86,
+  "warningLocationsEqualPreviousF640Build": true,
+  "signed": false,
+  "nativeRuntime": false
+}

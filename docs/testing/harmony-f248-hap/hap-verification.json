@@ -1,0 +1,61 @@
+{
+  "fileName": "memoh-harmony-1.0.7-1000007-f2488597-api26-unsigned.hap",
+  "sourceCommit": "f2488597aba37ef8c3557cc3f156b78d870c82c9",
+  "sharedCommit": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "sourceFingerprint": "738c6fbb4fcd85c177ac93b124d7d8906410406188a6a2e1b7a0681532e6f49a",
+  "sourceFiles": 104,
+  "webResources": 797,
+  "sizeBytes": 37013036,
+  "sha256": "b7eee63f9751ae5d7772299fd22e410ef129c39571269eb5f7bbf9a43d842f0d",
+  "bundleName": "cloud.begonia.workassistant",
+  "versionName": "1.0.7",
+  "versionCode": 1000007,
+  "moduleMetadataIdenticalToPrevious107": true,
+  "permissions": [
+    "ohos.permission.INTERNET",
+    "ohos.permission.GET_NETWORK_INFO",
+    "ohos.permission.MICROPHONE",
+    "ohos.permission.DETECT_GESTURE",
+    "ohos.permission.FILE_ACCESS_PERSIST",
+    "ohos.permission.READ_IMAGEVIDEO"
+  ],
+  "sdkVersion": "26.0.0.105",
+  "compileExitCode": 0,
+  "qualificationExitCode": 0,
+  "zipCRC": true,
+  "hapResourceDigestsVerified": true,
+  "signed": false,
+  "forbiddenFiles": [],
+  "webSourceMaps": false,
+  "nativeMap": {
+    "entries": 19,
+    "sha256": "5fefbce65f831b336e52464fded7085c0365ae7129f716bfe500812e9fe729eb",
+    "embeddedSourceContent": false,
+    "absoluteSourcePaths": false,
+    "retainedOfficialDebugOutput": true
+  },
+  "newURLHostCount": 4,
+  "unreviewedNewURLHostCount": 0,
+  "humanQA": false,
+  "deviceRuntime": false,
+  "nativeLibraries": {
+    "libs/arm64-v8a/libbegoniaraw.so": {
+      "bytes": 1970000,
+      "sha256": "f147b7806b8efaa1a39d82a14db9a501a3d783d70ed3b02fea066c8cc81006a7",
+      "elfMachine": 183
+    },
+    "libs/x86_64/libbegoniaraw.so": {
+      "bytes": 1884120,
+      "sha256": "d1fd80180d4789bda90bd7ceaa5ff7acdb5d0671d0a4335c4de1649676e5a2e6",
+      "elfMachine": 62
+    }
+  },
+  "arkts": {
+    "ets/modules.abc": {
+      "bytes": 266948,
+      "sha256": "18d6697a98e00db845b650df18fd301ef10449f39e327bba85915206565bd88e"
+    }
+  },
+  "priorPackageUnchanged": true,
+  "packInfoIdentityMatchesModule": true
+}
