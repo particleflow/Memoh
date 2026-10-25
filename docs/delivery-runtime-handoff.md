@@ -72,10 +72,11 @@ deadline unchanged, issue no HTTP requests, and preserve the final original
 receipt/task/reference without another Create/Complete/Commit.
 
 `TestCLIPathRuntimeReconnectDownload` uses Windows CLI subprocesses and NTFS. It
-disconnects one response after an 8 MiB synced checkpoint, preserves that offset
-and backoff through three fresh summary invocations, then requests only the tail.
+disconnects one response after sending 8 MiB, then checks that the client persisted
+an 8 MiB checkpoint. Three fresh summary invocations preserve that offset and
+backoff before the next request fetches only the tail.
 It verifies complete bytes/hash, one association, original task/reference and
-two completed-process reopen rounds without additional HTTP. It uses 8,482,816
+two completed-process reopen rounds without additional HTTP. It uses 8,486,912
 bytes, not another 1 GiB or throughput qualification. The source and endpoint are
 synthetic; the NAS is the existing protocol fixture. Only the existing test
 helper receives RootCAs; production EXE/system trust is unchanged.
