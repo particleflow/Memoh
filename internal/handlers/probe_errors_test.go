@@ -108,7 +108,9 @@ func serveProbe(t *testing.T, register func(*echo.Echo), target string) (int, st
 	e := echo.New()
 	register(e)
 	rec := httptest.NewRecorder()
-	e.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, target, nil))
+	req := httptest.NewRequest(http.MethodPost, target, nil)
+	authorizeProviderTestRequest(t, e, req)
+	e.ServeHTTP(rec, req)
 	return rec.Code, rec.Body.String()
 }
 
