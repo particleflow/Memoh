@@ -19,14 +19,14 @@ export interface NativeTaskView {
 // Only an explicitly opened terminal sample polls. It is never appended to the
 // task's evidence ledger. Storage retains one request UUID before any POST;
 // it contains no token or prompt, and unknown outcomes cannot mint another ID.
-export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<SessiontaskTask, 'task_type' | 'task_id'> | undefined>, enabled: Ref<boolean>) {
+export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<SessiontaskTask, 'task_type' | 'task_id'> | undefined>, enabled: Ref<boolean>, paused: Ref<boolean> = ref(false)) {
   const opened = ref(false), loading = ref(false), sending = ref(false)
   const data = shallowRef<ComputertaskNativeContent>(), error = shallowRef<unknown>()
   const actionError = shallowRef<unknown>()
   const response = shallowRef<HandlersNativeTaskFollowupResponse>(), requestId = ref<string>()
   let generation = 0, storageKey: string | undefined
   let reader: AbortController | undefined, sender: AbortController | undefined
-  const usable = () => enabled.value && scope.value && selected.value?.task_type === 'computer_operation'
+  const usable = () => enabled.value && !paused.value && scope.value && selected.value?.task_type === 'computer_operation'
   const path = () => ({ bot_id: scope.value!.bot, session_id: scope.value!.session, task_type: 'computer_operation' as const, task_id: selected.value!.task_id })
   function invalidate() {
     generation++; reader?.abort(); sender?.abort()
@@ -96,6 +96,15 @@ export function useNativeTask(scope: Ref<TaskScope | null>, selected: Ref<Pick<S
     finally { if (epoch === generation) { sending.value = false; await refresh() } }
   }
   watch([scope, selected, enabled], invalidate, { flush: 'sync' })
+  // Parent authorization temporarily disappearing clears output and aborts
+  // requests, but does not undo the user's choice to watch this same task.
+  // A refreshed parent must validate access before any content read resumes.
+  watch(paused, () => {
+    const wasOpened = opened.value
+    invalidate()
+    opened.value = wasOpened
+    if (!paused.value) void refresh()
+  }, { flush: 'sync' })
   const timer = setInterval(() => { if (data.value?.supported !== false && ![401, 403, 404].includes(apiErrorStatus(error.value) ?? 0)) void refresh() }, 5000)
   onScopeDispose(() => { clearInterval(timer); invalidate() })
   return computed<NativeTaskView>(() => ({ opened: opened.value, data: data.value, loading: loading.value, sending: sending.value, requestId: requestId.value, response: response.value, error: actionError.value ?? error.value, open, refresh, send }))
