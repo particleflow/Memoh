@@ -245,6 +245,15 @@ ownership, HTTPS trust and the real PC/NAS route still require acceptance.
 Windows producer tests use a protocol fixture; Linux upload Server/PG and
 Windows download publication/PG tests are separate combinations.
 
+Starting with component 0.10.1, a durable inbound download returns
+`feedback_status: not_applicable`: it has no outbound producer projection.
+`recorded` and `unavailable` retain their outgoing feedback meanings, including
+strict original attempt/declaration checks and actual write failures. The unified
+endpoint must explicitly accept the new value without treating it as transfer
+success or weakening exit/lifecycle/association checks. Do not reinterpret an old
+component's `unavailable` as success. No queue/config migration is required; see
+[the exact consumer contract](../../../docs/delivery-producer-feedback.md#cli-feedback-applicability).
+
 Do not install/link or configure this package against production as part of
 fixture acceptance. The API fault model and limitations are documented in
 `docs/design/windows-native-binding.md` and `docs/design/device-delivery-binding.md`.

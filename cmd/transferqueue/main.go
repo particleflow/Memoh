@@ -83,6 +83,12 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return writeFixed(output, `{"budget_migration":"complete"}`)
 	}
 	publish := func(status transferclient.QueueStatus) string {
+		// Only a validated durable download is outside the outbound producer
+		// projection. Missing/foreign upload context remains a feedback failure.
+		// This says nothing about transfer/association success or retryability.
+		if status.Direction == "download" {
+			return "not_applicable"
+		}
 		if status.Job.Task.Attempt == "" {
 			return ""
 		}
