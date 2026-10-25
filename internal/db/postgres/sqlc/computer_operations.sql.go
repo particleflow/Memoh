@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const assertComputerOperationAdmission = `-- name: AssertComputerOperationAdmission :exec
+SELECT public.memoh_assert_computer_admission($1::uuid, $2::uuid)
+`
+
+type AssertComputerOperationAdmissionParams struct {
+	BotID    pgtype.UUID `json:"bot_id"`
+	TargetID pgtype.UUID `json:"target_id"`
+}
+
+// Hold the existing owner admission lock until the caller's revision CAS commits.
+func (q *Queries) AssertComputerOperationAdmission(ctx context.Context, arg AssertComputerOperationAdmissionParams) error {
+	_, err := q.db.Exec(ctx, assertComputerOperationAdmission, arg.BotID, arg.TargetID)
+	return err
+}
+
 const createComputerOperation = `-- name: CreateComputerOperation :one
 INSERT INTO computer_operations(id,bot_id,session_id,user_id,target_id,run_id,fingerprint,target_fingerprint,details)
 VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)

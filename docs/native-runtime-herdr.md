@@ -78,7 +78,7 @@ No new task HTTP API, scheduler, queue, task ID, or tool name is introduced. Reu
 | Operation | Contract |
 | --- | --- |
 | `computer_targets` | `target_id`, name, capabilities, `availability=not_probed`, optional `agent_protocol` |
-| `computer_task_submit` | Existing `kind`, task, target/work directory and bounded artifact declarations; returns the durable `operation_id` |
+| `computer_task_submit` | Existing `kind`, task, target/work directory and bounded artifact declarations; returns the durable `operation_id`. Optional `resume_operation_id` explicitly continues the same native batch after a lost workspace acknowledgement, as described below. |
 | `computer_task_get` | Read persisted operation, delivery and result facts; no CLI call |
 | `computer_task_result` | Collect receipt-bound evidence for the same operation; never submit the business task again |
 | `computer_task_recover` | Read current native metadata for stored references; cannot prove restored conversation history |
@@ -94,9 +94,70 @@ General bridge consumers, including Hooks and metadata-derived clients, receive 
 
 The existing state fields remain authoritative and separate: `state` / `phase`, `process_stopped`, `cancel_requested`, `pi_result`, `continuity` and `delivery`. A CLI exit 0 is only a transport acknowledgement. A verified invocation receipt can establish process exit; the correlated official Pi JSON completion establishes `pi_result`. Only a committed NAS delivery reference proves file delivery. Neither establishes independent acceptance of the user's objective.
 
+### Continue the same pre-prompt batch
+
+`computer_task_recover` remains read-only. An ordinary repeated submit still
+returns its saved operation without dispatch. The narrowly supported continuation
+is an explicit `computer_task_submit` using `resume_operation_id` and the complete,
+unchanged original submit arguments. Obtain those arguments from the original
+tool call; task text and work directory cannot be reconstructed from the hash.
+An omitted work directory normalizes to `.` and the chosen target is resolved as
+in the original submit. Excluding `resume_operation_id`, the request must match
+both saved request hashes. No workspace, pane, terminal, device or new task ID
+is accepted from the caller.
+
+This applies only to the original owned native operation in `unknown` at
+`batch_creating_workspace`, before any execution references or Pi request ID
+were saved, and to this flow's two confirmed continuation checkpoints. It checks
+the current grant, target fingerprint, cancellation and existing execution policy.
+Read-only official workspace/pane queries must find exactly one workspace labeled
+`memoh-batch-<original attempt>`, with its original single-tab/single-pane topology
+and matching configured work directory. The dedicated Herdr session must contain
+no registered Agent. The returned workspace, control pane and terminal IDs are
+verified again before adoption. A changed or ambiguous identity stops the call.
+Herdr labels are not immutable service-generation proofs; they are used only
+within the original pinned target and the explicit original request.
+
+The existing operation revision CAS saves `batch_workspace_adopted`. A transaction
+using the existing admission gate reserves `batch_creating_tab` before one
+`tab.create`. Its verified receipt is saved as `batch_tab_adopted`, then another
+admission/CAS transaction reserves `batch_submitting` before the first `pane.run`.
+Only a confirmed CAS winner can dispatch. This flow never calls `workspace.create`
+and retains operation/run/attempt/generation/Pi-session/producer identity and
+unrelated historical JSON fields. No migration or manual database write is needed.
+
+If a write acknowledgement is uncertain, re-read the original operation before
+doing anything else. `batch_creating_tab` and `batch_submitting` are fences, not
+retry points: an incomplete receipt there cannot issue another mutation. The
+adopted checkpoints may continue only after revalidating the saved references.
+`batch_submitted` means CLI acknowledgement, not Pi or business success; use the
+existing correlated receipt/result/producer ledger. The legacy Agent-only
+`prompt_submitted` field is not evidence of a finite batch's execution state.
+
 ## Windows host interface
 
 The host lane owns the existing Windows bundle and independently supervised Herdr service. Runtime owns and terminates its short-lived Exec child tree on disconnect or timeout; therefore CLI execution must not start the service. No new listener or service is introduced by Memoh.
+
+The PowerShell wrapper must discard the values returned by both stream-copy
+awaiters. PowerShell can expose the internal `VoidTaskResult` values on stdout,
+after an otherwise successful Herdr JSON response. That output is not part of
+Herdr's receipt and correctly fails the strict parser as `unknown`. The wrapper
+now uses `[void]` for both waits; it still drains both pipes, propagates failures
+and retains the child exit code. JSON parsing names
+`Microsoft.PowerShell.Utility\ConvertFrom-Json` explicitly so a fresh Windows
+PowerShell session loads the owning module without broad command discovery.
+The Windows delivery job exercises the actual
+Windows PowerShell 5.1 wrapper with an isolated child executable. On Linux the
+same byte-preservation regression can be run with an explicitly selected local
+PowerShell using `MEMOH_TEST_PWSH=/absolute/path/to/pwsh go test ./internal/nativeherdr`.
+
+This transport correction does not replay or repair an existing unknown task.
+A task stopped at `batch_creating_workspace` can already have created a native
+workspace. Preserve its operation, attempt and references; do not reset the
+phase, create another workspace, or infer Pi execution from the CLI exit. The
+current `computer_task_recover` remains read-only; only the explicit bounded
+continuation above can adopt that existing workspace and submit Pi for the first
+time after its native references and dispatch reservations have been persisted.
 
 The tested official baseline is Herdr v0.9.5, source [`2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01`](https://github.com/herdrdev/herdr/tree/2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01). The official [Windows release ZIP](https://github.com/herdrdev/herdr/releases/download/v0.9.5/herdr-windows-x86_64.zip), SHA256 `d2c6c9c971c43a0bfdde8c692a9a1a7a45c3e4807cd01ae45662b4734fac1cbf`, includes `herdr.exe`, ConPTY dependencies and license files. Do not distribute only the executable as if it were the complete release.
 

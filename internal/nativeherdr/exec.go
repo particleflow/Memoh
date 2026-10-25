@@ -242,7 +242,7 @@ func encodedPowerShell() string {
 const cliPowerShell = `$ErrorActionPreference='Stop'
 try {
   [Console]::InputEncoding=[Text.UTF8Encoding]::new($false)
-  $p=[Console]::In.ReadToEnd() | ConvertFrom-Json
+  $p=[Console]::In.ReadToEnd() | Microsoft.PowerShell.Utility\ConvertFrom-Json
   $s=[Diagnostics.ProcessStartInfo]::new()
   $s.FileName=[string]$p.executable
   $s.Arguments=[string]$p.arguments
@@ -267,8 +267,8 @@ try {
   $o=$c.StandardOutput.BaseStream.CopyToAsync([Console]::OpenStandardOutput())
   $e=$c.StandardError.BaseStream.CopyToAsync([Console]::OpenStandardError())
   $c.WaitForExit()
-  $o.GetAwaiter().GetResult()
-  $e.GetAwaiter().GetResult()
+  [void]$o.GetAwaiter().GetResult()
+  [void]$e.GetAwaiter().GetResult()
   exit $c.ExitCode
 } catch {
   [Console]::Error.WriteLine('Herdr CLI transport failed')

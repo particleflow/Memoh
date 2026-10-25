@@ -26,6 +26,10 @@ WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id)
 AND bot_id=sqlc.arg(bot_id) AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND revision=sqlc.arg(revision) RETURNING *;
 
+-- name: AssertComputerOperationAdmission :exec
+-- Hold the existing owner admission lock until the caller's revision CAS commits.
+SELECT public.memoh_assert_computer_admission(sqlc.arg(bot_id)::uuid, sqlc.arg(target_id)::uuid);
+
 -- name: UpdateComputerDelivery :one
 UPDATE computer_operations
 SET details=jsonb_set(details, '{delivery_ledger}', sqlc.arg(delivery_ledger)::jsonb),
