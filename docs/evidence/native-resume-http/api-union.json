@@ -1,0 +1,12 @@
+{
+  "previous_operations": 370,
+  "current_operations": 371,
+  "removed": [],
+  "added": [
+    [
+      "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume",
+      "post"
+    ]
+  ],
+  "changed_existing_paths": []
+}

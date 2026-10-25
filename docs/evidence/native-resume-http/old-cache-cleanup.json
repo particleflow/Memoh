@@ -1,0 +1,19 @@
+{
+  "before_available": 222343168,
+  "after_available": 591736832,
+  "removed": [
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/ee/eebb11e0fd3e7847b2aebbe14696ed3b84f66f991bfcecf6ccf9cb2e748d037a-d",
+      "bytes": 192378640,
+      "sha256": "eebb11e0fd3e7847b2aebbe14696ed3b84f66f991bfcecf6ccf9cb2e748d037a",
+      "classification": "old task-owned compiled Go cache archive, regenerable"
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/35/3533b958d2260f05dd5c2a8305c4ad5b68fe1cd2bbb63a497969a9f55cc671a0-d",
+      "bytes": 177011182,
+      "sha256": "3533b958d2260f05dd5c2a8305c4ad5b68fe1cd2bbb63a497969a9f55cc671a0",
+      "classification": "old task-owned compiled Go cache archive, regenerable"
+    }
+  ],
+  "preserved": "all sources, Git objects, evidence, databases, original files, current and base Server binaries"
+}

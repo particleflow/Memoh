@@ -1,0 +1,10 @@
+=== RUN   TestSessionTaskNativeHTTPAuthorityAndStrictInput
+--- PASS: TestSessionTaskNativeHTTPAuthorityAndStrictInput (0.00s)
+=== RUN   TestSessionTaskObservationHTTPHostBindingAndLateRevocation
+--- PASS: TestSessionTaskObservationHTTPHostBindingAndLateRevocation (0.00s)
+=== RUN   TestSessionTaskResumeHTTPAuthorityAndNoModelRun
+--- PASS: TestSessionTaskResumeHTTPAuthorityAndNoModelRun (0.00s)
+=== RUN   TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch
+--- PASS: TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.024s

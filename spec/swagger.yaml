@@ -3300,6 +3300,13 @@ definitions:
       user_input_id:
         type: string
     type: object
+  deliverymeta.Artifact:
+    properties:
+      mime:
+        type: string
+      source_ref:
+        type: string
+    type: object
   display.SessionInfo:
     properties:
       codec:
@@ -4666,6 +4673,51 @@ definitions:
         type: string
       request_conflict:
         type: boolean
+      state:
+        type: string
+    type: object
+  handlers.NativeTaskResumeInput:
+    properties:
+      artifact:
+        $ref: '#/definitions/deliverymeta.Artifact'
+      artifacts:
+        items:
+          $ref: '#/definitions/deliverymeta.Artifact'
+        type: array
+      kind:
+        enum:
+        - herdr_pi_task
+        type: string
+      target_id:
+        type: string
+      task:
+        type: string
+      work_dir:
+        type: string
+    required:
+    - kind
+    - task
+    type: object
+  handlers.NativeTaskResumeResponse:
+    properties:
+      automatic_retry:
+        type: boolean
+      business_outcome:
+        enum:
+        - unknown
+        type: string
+      operation_id:
+        type: string
+      outcome:
+        enum:
+        - submitted
+        - unchanged
+        - unknown
+        - unavailable
+        - blocked
+        type: string
+      phase:
+        type: string
       state:
         type: string
     type: object
@@ -16506,6 +16558,81 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Observe a computer task's original native references
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume:
+    post:
+      consumes:
+      - application/json
+      description: Requires the complete unchanged original computer_task_submit arguments.
+        Resolves host authority from the authenticated user, conversation ancestry,
+        operation ownership and target grant; reuses the persisted original run even
+        when terminal. No model call, new run, new operation or workspace. Existing
+        admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement,
+        not business success; never automatically retry unknown outcomes. Disconnected
+        Runtime remains unavailable. Read the same task afterward. No raw native output
+        is returned.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned parent session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Task discriminator
+        enum:
+        - computer_operation
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Original computer operation ID
+        in: path
+        name: task_id
+        required: true
+        type: string
+      - description: Complete original tool arguments
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.NativeTaskResumeInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.NativeTaskResumeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Explicitly continue one original native batch before prompt submission
       tags:
       - sessions
   /bots/{bot_id}/sessions/events:

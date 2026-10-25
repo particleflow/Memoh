@@ -1819,6 +1819,11 @@ export type ConversationUiUserInput = {
     user_input_id?: string;
 };
 
+export type DeliverymetaArtifact = {
+    mime?: string;
+    source_ref?: string;
+};
+
 export type DisplaySessionInfo = {
     codec?: string;
     created_at?: string;
@@ -2633,6 +2638,24 @@ export type HandlersNativeTaskFollowupResponse = {
     followup?: ComputertaskFollowupResult;
     operation_id?: string;
     request_conflict?: boolean;
+    state?: string;
+};
+
+export type HandlersNativeTaskResumeInput = {
+    artifact?: DeliverymetaArtifact;
+    artifacts?: Array<DeliverymetaArtifact>;
+    kind: 'herdr_pi_task';
+    target_id?: string;
+    task: string;
+    work_dir?: string;
+};
+
+export type HandlersNativeTaskResumeResponse = {
+    automatic_retry?: boolean;
+    business_outcome?: 'unknown';
+    operation_id?: string;
+    outcome?: 'submitted' | 'unchanged' | 'unknown' | 'unavailable' | 'blocked';
+    phase?: string;
     state?: string;
 };
 
@@ -14419,6 +14442,71 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationR
 };
 
 export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponse = GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses[keyof GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeData = {
+    /**
+     * Complete original tool arguments
+     */
+    body: HandlersNativeTaskResumeInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned parent session ID
+         */
+        session_id: string;
+        /**
+         * Task discriminator
+         */
+        task_type: 'computer_operation';
+        /**
+         * Original computer operation ID
+         */
+        task_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeError = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeErrors[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponses = {
+    /**
+     * OK
+     */
+    200: HandlersNativeTaskResumeResponse;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponse = PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponses[keyof PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResumeResponses];
 
 export type DeleteBotsByBotIdSettingsData = {
     body?: never;

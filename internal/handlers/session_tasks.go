@@ -53,6 +53,7 @@ func (h *SessionTaskHandler) Register(e *echo.Echo) {
 	g.GET("/:task_type/:task_id/observation", h.Observe)
 	g.GET("/:task_type/:task_id/content", h.Content)
 	g.POST("/:task_type/:task_id/followup", h.Followup)
+	g.POST("/:task_type/:task_id/resume", h.Resume)
 }
 
 func (h *SessionTaskHandler) authorize(c echo.Context) (string, error) {

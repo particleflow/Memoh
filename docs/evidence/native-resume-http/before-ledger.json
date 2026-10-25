@@ -1,0 +1,18 @@
+{
+  "computer_operations": {
+    "count": 9,
+    "sha256": "c94c3081188fdfd2ca9047144e858bf95a7bc527f810a5ef1fb8c467e73b9712"
+  },
+  "bot_sessions": {
+    "count": 18,
+    "sha256": "45b54eb224b7ca8917b352a40f86c63cbc9aabf58b258986e46ab85fc693cad9"
+  },
+  "bot_history_messages": {
+    "count": 29,
+    "sha256": "cea1ddf138def64b627a9941d22596f2ecf0f076ddf2e9b553837715629cce68"
+  },
+  "session_runs": {
+    "count": 14,
+    "sha256": "00ca27d42b3b40d0f490eeeb3007f2fc6363b5860b158cf8bea87786d69066f4"
+  }
+}

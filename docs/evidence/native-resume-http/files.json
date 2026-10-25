@@ -1,0 +1,117 @@
+[
+  {
+    "path": "after-ledger.json",
+    "bytes": 509,
+    "sha256": "bd457039e8b592eda3133fa0feb767edadc6cda5392cddaeb1975a6e6d8666d4"
+  },
+  {
+    "path": "aggregate-first-flag-error.log",
+    "bytes": 902,
+    "sha256": "4ddbb8a4c435679b6d63871df1f63092b34dd321fec389b4d16288ba6937fd59"
+  },
+  {
+    "path": "aggregate-media-recheck.log",
+    "bytes": 699,
+    "sha256": "5c5381d31665e005a9b03285ebc8bff3c1eaf3abd1ce10f256b643f24aa9e6e5"
+  },
+  {
+    "path": "aggregate.log",
+    "bytes": 12642,
+    "sha256": "07aedc41e823c86448bae17e5ddf5dbd095015ccb8d9da7a40fa81005270c62c"
+  },
+  {
+    "path": "api-union.json",
+    "bytes": 235,
+    "sha256": "80f461e8ce37fcebf05ce764d90a4de57fdaab5984288b6ca65a6e14ff6448e2"
+  },
+  {
+    "path": "baseline-route.json",
+    "bytes": 372,
+    "sha256": "89cb1965a550fbcdc48c435d7e97323216b2c1d2e1e18e7e8c9db7e1a10d5b93"
+  },
+  {
+    "path": "before-ledger.json",
+    "bytes": 509,
+    "sha256": "bd457039e8b592eda3133fa0feb767edadc6cda5392cddaeb1975a6e6d8666d4"
+  },
+  {
+    "path": "browser-proof.json",
+    "bytes": 159,
+    "sha256": "66d1cf4a447a276c67f83169d84458f7007de47121543993401999561b8e37b5"
+  },
+  {
+    "path": "browser.log",
+    "bytes": 158,
+    "sha256": "89513b8b0a3f40aa40e22cbc1f80427e5f49923785e9702e840e65931040f6cf"
+  },
+  {
+    "path": "combined-unknown-task.png",
+    "bytes": 109337,
+    "sha256": "e63b8e5f4833cf79b120022ee1db8ad9bb9796c59c2e90c14fecf44e252484ed"
+  },
+  {
+    "path": "core-boundary.log",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
+  },
+  {
+    "path": "errors-server.log",
+    "bytes": 110,
+    "sha256": "9e42337a44e04e9d4dfdd40ba7b049795679ce34d4c3686429221b110bfb0383"
+  },
+  {
+    "path": "handler-http-final.log",
+    "bytes": 226,
+    "sha256": "00f80b933ec732b5aba3eda879ff4f7e4a120841a28349b66a8d4641fc380a75"
+  },
+  {
+    "path": "handler-http-verified.log",
+    "bytes": 597,
+    "sha256": "5f4d05800777ff385a98490c6f99431c32400410f00575d2a057ac2fa7480f2f"
+  },
+  {
+    "path": "http-check.log",
+    "bytes": 647,
+    "sha256": "e4e4f7e5f05f3293dc5880090045e2117c371e5389e1460179dcac4248825753"
+  },
+  {
+    "path": "http-proof.json",
+    "bytes": 515,
+    "sha256": "6465d54f10a302bb3f0e270157aa9e0da68f4c3853b3efeaa10ed11a3062d2b2"
+  },
+  {
+    "path": "lint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "old-cache-cleanup.json",
+    "bytes": 861,
+    "sha256": "8ea48de7280f05f1a26b618039ae27cf7c7323bde10e73ff66595cd581074b17"
+  },
+  {
+    "path": "sdk-generate.log",
+    "bytes": 323,
+    "sha256": "afbe7dc163510fc5e39f4d8e657336e4ac9942450577a7e22508e1ba4660c9f9"
+  },
+  {
+    "path": "sdk-types.log",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+  },
+  {
+    "path": "targeted-go-first.log",
+    "bytes": 2111,
+    "sha256": "9e1f23bd023f2c033d881a6f9803e6455ebc8f9294562153c43dc9b487b750c6"
+  },
+  {
+    "path": "targeted-go.log",
+    "bytes": 2403,
+    "sha256": "7e6e75943755e1c40a606b8b3ddc0badf33f3bbf2173380cf0d3d883d04a828b"
+  },
+  {
+    "path": "web-types.log",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+  }
+]

@@ -12146,6 +12146,107 @@
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume": {
+            "post": {
+                "description": "Requires the complete unchanged original computer_task_submit arguments. Resolves host authority from the authenticated user, conversation ancestry, operation ownership and target grant; reuses the persisted original run even when terminal. No model call, new run, new operation or workspace. Existing admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement, not business success; never automatically retry unknown outcomes. Disconnected Runtime remains unavailable. Read the same task afterward. No raw native output is returned.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Explicitly continue one original native batch before prompt submission",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned parent session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "computer_operation"
+                        ],
+                        "type": "string",
+                        "description": "Task discriminator",
+                        "name": "task_type",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Original computer operation ID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Complete original tool arguments",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskResumeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.NativeTaskResumeResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/settings": {
             "get": {
                 "description": "Get agent settings for current user",
@@ -24626,6 +24727,17 @@
                 }
             }
         },
+        "deliverymeta.Artifact": {
+            "type": "object",
+            "properties": {
+                "mime": {
+                    "type": "string"
+                },
+                "source_ref": {
+                    "type": "string"
+                }
+            }
+        },
         "display.SessionInfo": {
             "type": "object",
             "properties": {
@@ -26632,6 +26744,72 @@
                 },
                 "request_conflict": {
                     "type": "boolean"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskResumeInput": {
+            "type": "object",
+            "required": [
+                "kind",
+                "task"
+            ],
+            "properties": {
+                "artifact": {
+                    "$ref": "#/definitions/deliverymeta.Artifact"
+                },
+                "artifacts": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/deliverymeta.Artifact"
+                    }
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "herdr_pi_task"
+                    ]
+                },
+                "target_id": {
+                    "type": "string"
+                },
+                "task": {
+                    "type": "string"
+                },
+                "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.NativeTaskResumeResponse": {
+            "type": "object",
+            "properties": {
+                "automatic_retry": {
+                    "type": "boolean"
+                },
+                "business_outcome": {
+                    "type": "string",
+                    "enum": [
+                        "unknown"
+                    ]
+                },
+                "operation_id": {
+                    "type": "string"
+                },
+                "outcome": {
+                    "type": "string",
+                    "enum": [
+                        "submitted",
+                        "unchanged",
+                        "unknown",
+                        "unavailable",
+                        "blocked"
+                    ]
+                },
+                "phase": {
+                    "type": "string"
                 },
                 "state": {
                     "type": "string"
