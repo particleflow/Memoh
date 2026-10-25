@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 <current-phone-checkout>
+
+··············
+
+ Test Files  1 passed (1)
+      Tests  14 passed (14)
+   Start at  03:27:00
+   Duration  1.68s (transform 250ms, setup 0ms, import 155ms, tests 591ms, environment 747ms)

@@ -1,0 +1,11 @@
+{
+  "anonymousLate401KeepsNewLogin": true,
+  "sameTokenPriorSession401Ignored": true,
+  "reloadKeepsLogin": true,
+  "loginHTTPCalls": 1,
+  "currentSession401StillClearsLogin": true,
+  "pageErrors": [],
+  "runtime": "existing Vite + real UI/store + intercepted synthetic HTTP",
+  "nativeDevice": false,
+  "liveAPI": false
+}

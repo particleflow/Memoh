@@ -106,9 +106,11 @@ remain unperformed.
 1. **Historical 19 edits:** file identities and original later content are still
    unavailable. They cannot be individually declared recovered/equivalent/not
    needed. The confirmed auth repair does not reduce that historical count.
-2. **Label `5e55`:** not a resolvable commit in the supplied checkout; the GitHub
-   commit lookup returned 422. No complete SHA was supplied. This audit compares
-   the actual 51b pin and prior 9e6 context, not an invented 5e55 tree.
+2. **Label `5e55`:** the abbreviated lookup failed during this earlier audit.
+   The subsequently supplied full SHA has now been fetched and verified through
+   normal Git. The current source pin and full comparison are recorded in
+   [the production alignment follow-up](production-5e55.md); this older audit
+   still describes its actual 51b input.
 3. **Known retained limits:** no automatic LAN/IPv6 identity migration, no
    cross-process file resume, no batch-Pi interactive continuation; native save
    still expects positive known file size. These are existing explicit limits,

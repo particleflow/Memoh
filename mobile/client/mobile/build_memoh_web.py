@@ -103,9 +103,6 @@ def context_archive(lock, base=BASE, platform='harmony'):
     warm_css = '\n:root.warm {\n  color-scheme: light;\n' + ''.join(
         '  --' + name + ': ' + value + ';\n' for name, value in warm_tokens.items()) + '}\n'
     changes = {
-        'apps/web/src/pages/providers/models-panel.vue': [
-            ("  key: () => ['providers'],\n  query: async () => {", "  key: () => ['providers'],\n  // Disk display snapshots omit secrets; refresh even a recent snapshot before\n  // the form treats an absent masked Key as a missing server credential.\n  refetchOnMount: 'always',\n  query: async () => {", 1),
-        ],
         'apps/web/src/pages/home/components/thinking-block.vue': [
             ('''// Persisted, user-driven toggle (survives the post-turn refetch/remount).
 const collapseKey = computed(() => reasoningCollapseKey(props.messageId, props.block))

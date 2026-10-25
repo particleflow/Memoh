@@ -1,0 +1,65 @@
+{
+  "oldBase": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+  "newBase": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "phoneAuthFix": "e26d56b8b544231bb9e9d7990656307274b41337",
+  "oldContextSHA256": "bf39567fca0e33c998c517ccd6427fc1b691683854e14b5d1ee06c7bdc6f99f6",
+  "newContextSHA256": "b14f335578920e0dc27b8810910afd55e2a6f324d53223d53521e1feceec378b",
+  "oldFiles": 6296,
+  "newFiles": 6304,
+  "unchangedFiles": 6295,
+  "changes": [
+    {
+      "path": "apps/web/src/pages/providers/models-panel.test.ts",
+      "beforeSHA256": "395a13c177a5a77bea5057e46ea3aa57450a9e8c69459fe24f1bbae746a47108",
+      "afterSHA256": "2bd3300dadb841084c57f40efd0a6e52c51c3c76494c2496f7c75c4bf0b6d1e6"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/README.md",
+      "beforeSHA256": null,
+      "afterSHA256": "a751a7b70dd11f60662fe1f13ed9d012b2b29e6761e1e16753df0930beb996e9"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/browser.txt",
+      "beforeSHA256": null,
+      "afterSHA256": "0b060682e5d13b5869a40626ab5403d5c5ce7a553be3e685e57b1fd452598790"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/build.txt",
+      "beforeSHA256": null,
+      "afterSHA256": "9c956cccca8ca45a1c4127bfab97bfe0d4fa0b0f815a86ef489f3dbecc30c687"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/evidence.json",
+      "beforeSHA256": null,
+      "afterSHA256": "6aa16835a31c7bd5ba1d390da4e0476c9dcfcbb86fcef0180146c8e74e75970f"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/lint.txt",
+      "beforeSHA256": null,
+      "afterSHA256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/quick-refresh-saved.png",
+      "beforeSHA256": null,
+      "afterSHA256": "ef98e49f552a0b1560f1f096ec8b9dc109d815dfea73849c316b5bce91468fd4"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/types.txt",
+      "beforeSHA256": null,
+      "afterSHA256": "1d2837098ea0f9a4d8ee73d52e7cc1dba8e59720f8adc921c7d9d097f45fea5e"
+    },
+    {
+      "path": "docs/testing/provider-refresh-integration/ui.txt",
+      "beforeSHA256": null,
+      "afterSHA256": "27b15ed18aec7e643519c604576470cc00850fb393da61635f87da5beae2782f"
+    }
+  ],
+  "webSDKNonTestFilesCompared": 1454,
+  "existingValidationCheckoutMatches": true,
+  "changedWebSDKProductFiles": [],
+  "nonTestScope": "Files under apps/web or packages excluding *.test.ts; includes source, configuration and documentation.",
+  "archivePrefixNormalization": {
+    "files": 19,
+    "reason": "Existing long-path PAX entries retain the source archive prefix. Strip that prefix for comparison; bytes are unchanged and all are outside Web/SDK product code."
+  }
+}

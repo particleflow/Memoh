@@ -20,7 +20,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "edff9b495d4b9775dcc3452f9e43679a7a731ae45ccc6cc647437204ea1b9a17",
+      "sha256": "443b09be0985f48887a27918cf64c443a2ff5b7f90b4011c362257af00343e61",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -30,7 +30,8 @@
         "Bind the two existing shared observation modules byte-for-byte to PR79 0a324013f9fe1beec77ac948d0af8f210194ba52; retain selected downstream detail across transient parent read failure with fresh authorization. No legacy HarmonyTasks activation or API/provider/auth changes.",
         "Pin complete shared PR79 source 91af53f43566cb827d1fc58d18102e8ad29383bc; reuse task delivery UI, route phone image originals and saves through existing verified adapters, preserve image Blob during same-identity polling. Native shell, identity, auth persistence and dependencies unchanged.",
         "Pin complete shared 9e6c470 source for native task content, retained interactive follow-up, identity observation and Provider Images controls; preserve existing phone adapters, licenses, native identity and auth persistence. Source-only alignment; no new HAP.",
-        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build."
+        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build.",
+        "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -451,7 +452,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "e6f87d75ceebee508f072b00236efc8b8e5d7197b9bd4b1946074754ad2b4731",
+      "sha256": "13a676753101aff8bfe6b25efc493b06b74ce00d6b0228bc152c99344cb02901",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -465,7 +466,8 @@
         "Bind all allowlisted notices as source inputs and copy them verbatim to the existing licenses resource directory in both native and Docker Web build paths. No product or native API change.",
         "After a confirmed quick-reload regression, flush the existing secret-stripped Provider display cache after its existing query refresh. Preserve the PUT outcome if that refresh fails. No new cache/auth/config layer or page.",
         "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build. Browser-confirmed rapid reload drops the masked Key from the disk display snapshot; refresh the existing providers query on mount, without persisting or rewriting Key.",
-        "Historical-source audit: restore the existing API request session-generation/token snapshot guard after reproducing anonymous and same-token prior-session late-401 logout. Test accepts an explicit current checkout; no token storage or server/auth protocol change. Not identified as one of the historical 19 unnamed edits."
+        "Historical-source audit: restore the existing API request session-generation/token snapshot guard after reproducing anonymous and same-token prior-session late-401 logout. Test accepts an explicit current checkout; no token storage or server/auth protocol change. Not identified as one of the historical 19 unnamed edits.",
+        "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -1214,13 +1216,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/licenses/sources.txt",
-      "sha256": "19971098891a7727ad21e0dd6d67b4bd12547fb5b6108a9446f1e590b9ad4ffa",
+      "sha256": "b772f582b4e9481b79efdce5a6280482f306b8c9311c3c92ef1ac986a04e9d3d",
       "origin": "Project-authored component source references; no license grant is invented.",
       "licenseReview": "Verbatim original notice text or explicitly labeled source-reference commentary; origin/hash recorded in docs/testing/harmony-release-notices/notice-origins.json.",
       "preparationChanges": [
         "Release notice preparation only; new provenance entry, not a recovered historical source file.",
         "Pin complete shared 9e6c470 source for native task content, retained interactive follow-up, identity observation and Provider Images controls; preserve existing phone adapters, licenses, native identity and auth persistence. Source-only alignment; no new HAP.",
-        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build."
+        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build.",
+        "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations."
       ],
       "unifiedNative9e6BaseSHA256": "38984466caef896519c25ac7e24a8e6e3f45dd73f2a25d0daa46cc4b4efbbcad",
       "unifiedImages51bBaseSHA256": "1aae0eee8c3c03becbd8b9ee7b8a4eca0e54ae7c8d3acc1292dd51b522403a87"
@@ -1705,6 +1708,17 @@
     "confirmedFunctionalGap": "Missing API response session guard, reproduced by existing PR67 auth-race test",
     "newRepairIsProvenMemberOfHistorical19": false,
     "evidence": "docs/testing/harmony-source-audit/README.md",
+    "nativeBuild": false
+  },
+  "production5e55Alignment": {
+    "baseCommit": "787780fbe3c1a91262d99a5a3b8820d531406c20",
+    "sharedCommit": "5e55c45c85659f04b339b4df42aeff72966542a8",
+    "sharedTree": "4ebeb57041ba5bb58b7400f372cb4c8ac1f28a61",
+    "removedDuplicatePatch": "Provider models-panel.vue refetchOnMount from 6c3de5e9ea1b2fcba07cc82fcf8879045a764f67",
+    "unchangedGeneratedWebSDKRuntime": true,
+    "hostPatchCount": 44,
+    "historicalLaterEditsUnverified": 19,
+    "evidence": "docs/testing/harmony-source-audit/production-5e55.md",
     "nativeBuild": false
   }
 }

@@ -1,9 +1,9 @@
 {
-  "version": "unified-51b19cb",
-  "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
-  "archive": "tests/.isolated/memoh-51b19cb-complete.tar.gz",
-  "archiveSHA256": "860c9535bcb0058bc659bd97dc35ac31116a49cbd2b67b639f027e681bc3ef64",
-  "archivePrefix": "Memoh-51b19cb/",
+  "version": "unified-5e55c45",
+  "commit": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "archive": "tests/.isolated/memoh-5e55c45-complete.tar.gz",
+  "archiveSHA256": "ee40a029d15bf30623e7fc7029d82f917e8d4b2a33584dab6df07f240c4444a4",
+  "archivePrefix": "Memoh-5e55c45/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
-      "archiveSHA256": "10d028682d79d165c9310c945f79c8c0331acb5c06746a1f1a65a526ef3d22c9",
-      "archivePrefix": "Memoh-51b19cbeb76e9803eb8d4b614cfabb03ef18cc73/",
+      "commit": "5e55c45c85659f04b339b4df42aeff72966542a8",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/5e55c45c85659f04b339b4df42aeff72966542a8",
+      "archiveSHA256": "c6d96fc8d19e9085b52e4d501726661d347566555df52179fc06db375f2eaddf",
+      "archivePrefix": "Memoh-5e55c45c85659f04b339b4df42aeff72966542a8/",
       "destination": ""
     },
     {
@@ -137,7 +137,7 @@
     }
   },
   "downstreamObservation": {
-    "commit": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73",
+    "commit": "5e55c45c85659f04b339b4df42aeff72966542a8",
     "scope": "Shared native task observation/continuation, truthful image-tool reference display and native Provider Images/reference controls are present directly in the pinned source. The equivalent upstream Provider cache fix replaces the former phone adaptation.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {

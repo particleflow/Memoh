@@ -1,0 +1,103 @@
+{
+  "scope": "Older 5900 checkpoint change records, not the missing historical 19 edits",
+  "manifest": {
+    "localHead": "37b0eb469423f158344203faad6fdb1eab763841",
+    "targetCommit": "5900e4c1fd5b2bf43c470eb2b29ad090a67e7dfa",
+    "selectedSourceFiles": 77
+  },
+  "changesRecordSHA256": "498a4bef4c4d2e183e64d498255a26e7d8e0af29f4bcd90cb56d099714dbdcd4",
+  "changes": [
+    {
+      "path": "config/memoh_client.json",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "42c7f2f34367c3d12b3c7fa90bb30f6fd619aae9ceb650ad4b06cd05e10989b2",
+      "afterSHA256": "f9090b005c17e85640e47299e4d983afe7d731bf13bb8b45a0933b30ccc3cf57"
+    },
+    {
+      "path": "config/memoh_runtime.lock.json",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "0c7732e2ecc9b6e3a7be9975bc76abdc99700980762156edec77e86ac880c6cc",
+      "afterSHA256": "78fb77eed303915cc17ede4cdf7a259ec414d20aef32a347f0f664f00aa2754b"
+    },
+    {
+      "path": "config/memoh_web.lock.json",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "679c6d600b1cb56fd78cd8ce4d89e11e65149da58dc008c208ad782956ce9c5f",
+      "afterSHA256": "e55fbd22152bc03b962eab2bebb828afb84392060c9598c7ccb7f90aec0dccda"
+    },
+    {
+      "path": "mobile/build_memoh_web.py",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
+      "afterSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c"
+    },
+    {
+      "path": "mobile/harmony/tests/voice_text.cjs",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "b07f2e59374345187dd2aaa489cbf089be47a6dda95d75ee05c52c299e7e03f7",
+      "afterSHA256": "18e40a3352a8bdcb5cc72e5545152479d11f443afe89b97c8378c560bccd9973"
+    },
+    {
+      "path": "mobile/harmony/tools/build_api26.py",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "3e22d0d1d5bc1f14f45de14c7cd091a9ca432d1759833847fe9541adbe8652d5",
+      "afterSHA256": "0aef9a86997979d1a63fa8c3a7ae5e683f6936908b68dfb2509b205d076462ed"
+    },
+    {
+      "path": "mobile/memoh/harmony-files.ts",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
+      "afterSHA256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63"
+    },
+    {
+      "path": "mobile/package_memoh_web.py",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "071ddf8f753f9dbe5069768f04dcaaa6cc963ccedc1285196b46a695bfd35639",
+      "afterSHA256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc"
+    },
+    {
+      "path": "tests/stage2/memoh_upload_preparation_checks.mjs",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "d5fdb140d9318a8f6e9bd6dfbb927a56cf7f75902a96410af3f86c32047bfd6f",
+      "afterSHA256": "7e35feba88723056c30eb642f2ab05aec79172d7f0bfe50b10a0fea49500590d"
+    },
+    {
+      "path": "tests/stage2/native_voice_result_checks.cjs",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "f345735107335e15628363573306c535f8a8fe4e174dde4bc326f8ccaf9c0f04",
+      "afterSHA256": "ece007ad979abb5df49c6e654330e3dadb973578d77827d7af7a8a28b9adb39f"
+    },
+    {
+      "path": "validation/harmony/tools/toolchain.py",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": "2fcede971a66ce782cafd8fd94b2f9273ee0bd7390f8c0d0d7df06852fc1c0d0",
+      "afterSHA256": "f2098cf16e1f7f548c2de35cb089ceed4efd4836e908f438a4d974dd0e7578ca"
+    },
+    {
+      "path": "mobile/client_config.py",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": null,
+      "afterSHA256": "b13009400fa64078d980c847775322d4ac8bb96fde5f2f1492ad70b7c5334aab"
+    },
+    {
+      "path": "mobile/prepare_memoh_source.py",
+      "beforeRecordMatchesOriginal": true,
+      "afterRecordMatchesCheckpoint": true,
+      "beforeSHA256": null,
+      "afterSHA256": "103fc2500d92ccc233bf6581ba53cd3dfecd1e16113547c1085da9993457a567"
+    }
+  ],
+  "historical19MappingRecovered": false
+}
