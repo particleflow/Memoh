@@ -1,0 +1,255 @@
+{
+  "sourceCommit": "760ed76e82da7b66c62e5d8a9ce01cc490a7b89d",
+  "sharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+  "serverSourceCommit": "58e39866057bf798b0789053d3215ddf4600c612",
+  "serverIdentityEvidence": "Normal fetch of the existing integration branch; NAS live deployment is reported by the parent task, not probed here.",
+  "equalGitObjects": {
+    "apps/web": {
+      "sharedObject": "14d697dab1134f4a249a467132ce03ce92338fb7",
+      "serverObject": "14d697dab1134f4a249a467132ce03ce92338fb7"
+    },
+    "packages/sdk": {
+      "sharedObject": "845957bd81cac478b441e53b246df42f01f1ca6e",
+      "serverObject": "845957bd81cac478b441e53b246df42f01f1ca6e"
+    },
+    "spec": {
+      "sharedObject": "9579ed419cc42e059a00429c0735740e6a03cbcb",
+      "serverObject": "9579ed419cc42e059a00429c0735740e6a03cbcb"
+    },
+    "internal/handlers": {
+      "sharedObject": "952bc954d1fb7d92d71145fae8654688fc32d0c9",
+      "serverObject": "952bc954d1fb7d92d71145fae8654688fc32d0c9"
+    },
+    "internal/media": {
+      "sharedObject": "419f42fd2143194125735f36e8a31e34e56c67e4",
+      "serverObject": "419f42fd2143194125735f36e8a31e34e56c67e4"
+    },
+    "internal/transferclient": {
+      "sharedObject": "2826aa1a9fbb0f735a74e713a2869d39358e9ba1",
+      "serverObject": "2826aa1a9fbb0f735a74e713a2869d39358e9ba1"
+    },
+    "internal/userruntime": {
+      "sharedObject": "941037b301189b0f294d87c7e776d1146e224045",
+      "serverObject": "941037b301189b0f294d87c7e776d1146e224045"
+    },
+    "internal/computertask/producer.go": {
+      "sharedObject": "2a08e33ed39ea302bcd23cfeaa987ebf0290c9b9",
+      "serverObject": "2a08e33ed39ea302bcd23cfeaa987ebf0290c9b9"
+    },
+    "internal/agenvo/pi_batch_producer.go": {
+      "sharedObject": "60ecf81fcec2b8c9f5af509a7462d9fcd91db876",
+      "serverObject": "60ecf81fcec2b8c9f5af509a7462d9fcd91db876"
+    },
+    "internal/deliverymeta/producer.go": {
+      "sharedObject": "c88cb33009aaadc338e340028aa2461c1a954160",
+      "serverObject": "c88cb33009aaadc338e340028aa2461c1a954160"
+    }
+  },
+  "compiledSourceCommit": "273415c900b39693e2060c991fa2696ebae8a607",
+  "compiledOwnedPathScopes": [
+    "mobile/client/mobile/harmony/app",
+    "mobile/client/mobile/client_config.py",
+    "mobile/client/mobile/memoh/harmony-service-config.ts",
+    "mobile/client/mobile/memoh/harmony-service-url.ts",
+    "mobile/client/mobile/memoh/harmony-entry.ts",
+    "mobile/client/mobile/memoh/harmony-resumable.ts",
+    "mobile/client/mobile/memoh/harmony-download.ts"
+  ],
+  "compiledOwnedDiff": [],
+  "sourceSHA256": {
+    "mobile/client/config/memoh_web.lock.json": "fe857b2b5a5af60012e72a4785dcb2f0452b3ab428450cd39a89d70bf652a46d",
+    "mobile/client/mobile/client_config.py": "7b29495f70ae65aca4f3003e8b828e81b26fe4d489470b3588c1b9ad06a7eeb7",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "a521be1dfe25ae788d8034fc3157f1032657e8014335de4877ef188a8d307eb2",
+    "mobile/client/mobile/harmony/app/build-profile.json5": "6cef8672b7ddb77c42f1841dd96a9836a48bf6167113560fc836bdb29e6ca8f9",
+    "mobile/client/mobile/harmony/app/entry/src/main/module.json5": "693bbe2692009c271abfdf403530a33c6b608da8e27741624a132b7aca9ac563",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets": "6925389444239471b91bee890c52747ea48cc61635f827054dbd47c67ae26729",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets": "b1d037faf3d4e46b75149bd6d21ea05dc551f3aea143979ef5fa80ad502ea354",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "bfa865b3af7566b626fd021cd5de573dc2d8b3b979d3cfa6e3e265a99fb3a329",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets": "d66e30cae2fe0b80c69f2faa71cfd82c9576878b45457ace81d470ca6022463e",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets": "fb615f4f637c118e858249a70ee78316648ac09c6e061473310be566dcb34ee6",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "7ccf116dc6372c9a93560754ea91cd7741165f9b6d710a7b756efa36bc2a59a7",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "d1db670652625e4299f712b88b98e4ac2b164834c955d40e5fadd68aeb5d8bd3",
+    "mobile/client/mobile/memoh/harmony-entry.ts": "0a362e0724c81a2b1d78e9b2453434620aece0eccf8496d2532f33afb6ecb53a"
+  },
+  "app": {
+    "bundleName": "cloud.begonia.workassistant",
+    "vendor": "Begonia",
+    "versionCode": 1000009,
+    "versionName": "1.0.9",
+    "icon": "$media:app_icon",
+    "label": "$string:app_name"
+  },
+  "cloudSigningConfigs": [],
+  "publicSourceConfigEmpty": true,
+  "artifacts": [
+    {
+      "file": "memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap",
+      "scope": "generic-1.0.9-handoff",
+      "sourceCommit": "c9c00580052d09d5dce273e958ec384bef2ebed3",
+      "bytes": 37053849,
+      "sha256": "ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4",
+      "zipCRCVerifiedNow": true,
+      "entries": 817,
+      "bundleName": "cloud.begonia.workassistant",
+      "versionName": "1.0.9",
+      "versionCode": 1000009,
+      "emptyStoredConfigurationBytes": 8192,
+      "permissions": [
+        {
+          "name": "ohos.permission.INTERNET"
+        },
+        {
+          "name": "ohos.permission.GET_NETWORK_INFO"
+        },
+        {
+          "reason": "$string:microphone_reason",
+          "reasonId": 16777220,
+          "usedScene": {
+            "abilities": [
+              "EntryAbility"
+            ],
+            "when": "inuse"
+          },
+          "name": "ohos.permission.MICROPHONE"
+        },
+        {
+          "name": "ohos.permission.DETECT_GESTURE"
+        },
+        {
+          "name": "ohos.permission.FILE_ACCESS_PERSIST"
+        },
+        {
+          "reason": "$string:album_backup_reason",
+          "reasonId": 16777218,
+          "usedScene": {
+            "abilities": [
+              "EntryAbility"
+            ],
+            "when": "always"
+          },
+          "name": "ohos.permission.READ_IMAGEVIDEO"
+        }
+      ],
+      "currentSourceArtifact": false
+    },
+    {
+      "file": "memoh-transfer-273415c9-api26-compile-only-unsigned.hap",
+      "scope": "private-compile-validation-only",
+      "sourceCommit": "273415c900b39693e2060c991fa2696ebae8a607",
+      "bytes": 37182314,
+      "sha256": "b544eeccf83d5a8e279b733649bf24bdca327d98e0acf2ebdeedda68c5e459df",
+      "zipCRCVerifiedNow": true,
+      "entries": 817,
+      "bundleName": "cloud.begonia.workassistant",
+      "versionName": "1.0.9",
+      "versionCode": 1000009,
+      "emptyStoredConfigurationBytes": 8192,
+      "permissions": [
+        {
+          "name": "ohos.permission.INTERNET"
+        },
+        {
+          "name": "ohos.permission.GET_NETWORK_INFO"
+        },
+        {
+          "reason": "$string:microphone_reason",
+          "reasonId": 16777220,
+          "usedScene": {
+            "abilities": [
+              "EntryAbility"
+            ],
+            "when": "inuse"
+          },
+          "name": "ohos.permission.MICROPHONE"
+        },
+        {
+          "name": "ohos.permission.DETECT_GESTURE"
+        },
+        {
+          "name": "ohos.permission.FILE_ACCESS_PERSIST"
+        },
+        {
+          "reason": "$string:album_backup_reason",
+          "reasonId": 16777218,
+          "usedScene": {
+            "abilities": [
+              "EntryAbility"
+            ],
+            "when": "always"
+          },
+          "name": "ohos.permission.READ_IMAGEVIDEO"
+        }
+      ],
+      "currentSourceArtifact": false
+    }
+  ],
+  "sdk": {
+    "apiVersion": "26",
+    "displayName": "HarmonyOS 26.0.0",
+    "path": "HarmonyOS-26.0.0",
+    "platformVersion": "26.0.0",
+    "releaseType": "Release",
+    "version": "26.0.0.105",
+    "stage": "Release"
+  },
+  "toolFiles": {
+    "bin/hvigorw": {
+      "bytes": 737,
+      "sha256": "31fc01ad4b0bace37a97f25e1b242bb6d2179b777fb0c3a5ea9d1e5081dafb78"
+    },
+    "bin/ohpm": {
+      "bytes": 516,
+      "sha256": "06d3192310619e12ba6ed36c39f6d0354e0761884df6f42ea76e50cd352d47fe"
+    },
+    "tool/node/bin/node": {
+      "bytes": 122502392,
+      "sha256": "bf9112eb83a827dc9f9c8d19bb7bddcbf00f7b2fedae18fdcaee05406981f20a"
+    },
+    "sdk/default/sdk-pkg.json": {
+      "bytes": 322,
+      "sha256": "285eded3340dc45d56395792eea52cbc60cfb62cfcb7abed923a0505fac05724"
+    },
+    "sdk/default/openharmony/toolchains/lib/hap-sign-tool.jar": {
+      "bytes": 12660750,
+      "sha256": "a434b6747e6c5d0b14e73837a46b39f4816ab25b42d1833d6f767bf867cf616d"
+    }
+  },
+  "retainedCLTArchive": {
+    "bytes": 2348063309,
+    "sha256FromCompletedDownloadRecord": "ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082",
+    "archiveRehashedThisAudit": false,
+    "downloadedAgain": false
+  },
+  "capacity": {
+    "totalBytes": 33770192896,
+    "freeBytes": 15518199808,
+    "cleanupPerformed": false
+  },
+  "candidate": {
+    "productBase": "760ed76e82da7b66c62e5d8a9ce01cc490a7b89d",
+    "sharedLock": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+    "serverAPIReference": "58e39866057bf798b0789053d3215ddf4600c612",
+    "plannedVersionName": "1.0.10",
+    "plannedVersionCode": 1000010,
+    "versionBumpApplied": false,
+    "built": false,
+    "published": false,
+    "awaitsWebFileOwnerForNativeOnlyCandidate": false,
+    "awaitsWebFileOwnerForFinalCrossEndFileAcceptance": true
+  },
+  "executedThisAudit": [
+    "Git tree/blob equality",
+    "owned source equality",
+    "artifact size/SHA256/ZIP CRC/configuration slot inspection",
+    "retained SDK metadata/tool presence/hash checks",
+    "existing endpoint/TLS/configuration source inspection"
+  ],
+  "notExecutedThisAudit": [
+    "HAP build",
+    "repeated shared tests",
+    "Windows injection/signing",
+    "private NAS TLS probe",
+    "phone installation or file transfer",
+    "automatic LAN/IPv6 selection"
+  ]
+}
