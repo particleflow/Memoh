@@ -1,0 +1,18 @@
+PASS actual combined Web: four groups, exact string revision, offline separated from persisted success, zero/recorded bytes without download URLs
+PASS 403 clears checkpoints and stops polling; explicit read and browser reconnection restore the same operation without mutations
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: '任务', exact: true })[22m
+
+    at /tmp/task-checkpoint-integration/browser.mjs:91:63 {
+  log: [
+    "  - waiting for getByRole('button', { name: '任务', exact: true })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0

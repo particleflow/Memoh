@@ -1,0 +1,12 @@
+PASS actual combined Web: four groups, exact string revision, offline separated from persisted success, zero/recorded bytes without download URLs
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 20000ms exceeded.
+    at /tmp/task-checkpoint-integration/browser.mjs:74:14 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0
