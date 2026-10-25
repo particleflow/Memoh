@@ -1228,7 +1228,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/licenses/misans-package.txt",
-      "sha256": "542ec8466c3e0b459f0ef2555c8049f790c942ac90f050b5ca7f9f81abd55a54",
+      "sha256": "946abdea6fc8a61f2a2beedc6fd3101c27c9ab0d932a2f176f9a9619543ab49c",
       "origin": "npm:misans-vf@1.0.0/LICENSE",
       "licenseReview": "Verbatim original notice text or explicitly labeled source-reference commentary; origin/hash recorded in docs/testing/harmony-release-notices/notice-origins.json.",
       "preparationChanges": [
@@ -1262,7 +1262,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_task_attachments.vitest.ts",
-      "sha256": "4fedc96c045e743f35eff411d397a54a816a3e2c22f9b1deed72497c2b412749",
+      "sha256": "5efe3b3f87a7a98a9b0f7957de61a4f83a2055d9ec793fa12a35010d5c38b7d9",
       "origin": "New phone attachment regression test fixture; not a recovered historical source.",
       "licenseReview": "Project test contribution under the existing repository terms; no third-party implementation copied.",
       "preparationChanges": []

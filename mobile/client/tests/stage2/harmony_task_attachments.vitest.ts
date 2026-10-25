@@ -12,7 +12,7 @@ const hash = createHash('sha256').update(bytes).digest('hex')
 
 describe.each(['web', 'native'])('phone committed attachment access in %s host', host => {
   let commands: Record<string, unknown>[]
-  let http: ReturnType<typeof vi.fn>
+  let http: ReturnType<typeof vi.fn<typeof fetch>>
   let created: Map<string, Blob>
   let revoked: ReturnType<typeof vi.fn>
   let httpStatus: number
@@ -38,7 +38,11 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
       expect(request.method).toBe('GET')
       expect(request.headers.get('authorization')).toBe('Bearer synthetic-token')
       const body = bytes.slice()
-      if (corrupt) body[0] ^= 1
+      if (corrupt) {
+        const first = body[0]
+        if (first === undefined) throw new Error('Synthetic image is empty')
+        body[0] = first ^ 1
+      }
       return new Response(body, { status: httpStatus })
     })
     client.setConfig({ baseUrl: apiBase, headers: { authorization: 'Bearer synthetic-token' }, fetch: http })
@@ -57,7 +61,9 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
         return JSON.stringify({ ok: true, data: { operation: q.operation, hash, size: bytes.byteLength } })
       }
       expect(['download.save', 'download.abort']).toContain(q.command)
-      expect(q.operation).toBe(commands[0].operation)
+      const first = commands[0]
+      if (!first) throw new Error('Native command history is empty')
+      expect(q.operation).toBe(first.operation)
       return JSON.stringify({ ok: true, data: true })
     }) })
   })
@@ -83,6 +89,12 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
     return [...root.querySelectorAll('button')].filter(button => button.textContent?.trim() === en.bots.files.download)
   }
 
+  function firstDownload() {
+    const button = downloads()[0]
+    if (!button) throw new Error('Expected a download button')
+    return button
+  }
+
   it('uses the reader Bot and verified native save, hides pending refs and clears on denial', async () => {
     const { deliveries, preview, opened } = mountFiles('application/octet-stream')
     await nextTick()
@@ -96,7 +108,7 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
       expect(preview).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ botId: owner, contentHash: hash, src: undefined }))
       expect(opened).toHaveBeenCalledOnce()
       expect(commands).toHaveLength(0)
-      downloads()[0].click()
+      firstDownload().click()
     }
     await vi.waitFor(() => expect(commands.map(q => q.command)).toEqual(['download.fetch', 'download.save', 'download.abort']))
     expect(http).not.toHaveBeenCalled() // Original bytes stay in the native cache on save.
@@ -157,7 +169,7 @@ describe.each(['web', 'native'])('phone committed attachment access in %s host',
   it('never opens the picker or browser fallback after native access is denied', async () => {
     nativeDenied = true
     mountFiles('application/octet-stream')
-    await nextTick(); downloads()[0].click()
+    await nextTick(); firstDownload().click()
     await vi.waitFor(() => expect(commands.map(q => q.command)).toEqual(['download.fetch', 'download.abort']))
     expect(http).not.toHaveBeenCalled()
     expect(root.querySelectorAll('a')).toHaveLength(0)
