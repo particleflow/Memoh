@@ -48,7 +48,8 @@ def inputs():
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
         'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts',
-        'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css')]
+        'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
+        'tests/stage2/harmony_task_attachments.vitest.ts')]
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -804,6 +805,20 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                                  'adaptedSHA256': hashlib.sha256(data).hexdigest()}
             if data is not None:
                 entry.size = len(data)
+            if name == 'apps/web/src/pages/home/components/session-task-results.test.ts':
+                # The locked shared tests assert browser anchors and synchronous
+                # media URLs. Exercise the phone's real bridge/verified Blob path
+                # instead, preserving the other shared task/observation tests.
+                original = data.decode('utf-8')
+                start = "const hash = 'a'.repeat(64)\n"
+                end = "describe.each(['web', 'native'])('computer observation in %s host'"
+                assert original.count(start) == original.count(end) == 1
+                block = original[original.index(start):original.index(end)]
+                assert hashlib.sha256(block.encode()).hexdigest() == '143633a6813ce27d15c61261600809af6e2b96c637930de18d3cba163d0959f4', 'Shared attachment assertions changed; review the phone test adapter'
+                changes[name] = [
+                    ("vi.mock('@memohai/sdk', () => ({", "vi.mock('@memohai/sdk', async () => ({\n  getBotsByBotIdMediaByContentHash: (await vi.importActual<typeof import('@memohai/sdk')>('@memohai/sdk')).getBotsByBotIdMediaByContentHash,", 1),
+                    (block, (ROOT / 'tests/stage2/harmony_task_attachments.vitest.ts').read_text(), 1),
+                ]
             if name in changes:
                 original = data.decode('utf-8')
                 adapted = original
@@ -820,6 +835,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                 assert hashlib.sha256(data).hexdigest() == expected['sha256'], 'Observation candidate drift'
             target.addfile(entry, io.BytesIO(data) if data is not None else None)
         assert patches.keys() == changes.keys() | {'apps/web/package.json', 'pnpm-lock.yaml'}, 'Upstream host seam missing'
+        assert 'apps/web/src/pages/home/components/session-task-results.test.ts' in patches, 'Phone attachment test seam missing'
         host_sources = {name: ROOT / 'mobile/memoh' / name for name in (
             'harmony.ts', 'harmony-files.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',

@@ -475,7 +475,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "fe788bbbe62933991d9e410989a6bac2e0c011f520645ed4b13fe8a69a5062e3",
+      "sha256": "0d526639ef7e1d67e94795bdc39d7cc4c9981d3ff9464c34d352dbd819dc5b85",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -492,7 +492,8 @@
         "Historical-source audit: restore the existing API request session-generation/token snapshot guard after reproducing anonymous and same-token prior-session late-401 logout. Test accepts an explicit current checkout; no token storage or server/auth protocol change. Not identified as one of the historical 19 unnamed edits.",
         "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations.",
         "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
-        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
+        "Generate phone-specific attachment assertions alongside the existing shared task tests. Preserve all 43 product adaptations and their output bytes; exercise the actual SDK/verified originals/native save path against synthetic HTTP and OS boundaries. No HAP rebuild."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -501,7 +502,8 @@
       "unifiedNative9e6BaseSHA256": "8d81ee8055eee24defc3eee0208a5489345f9a99165927bf08b6144f2ff0866c",
       "unifiedImages51bBaseSHA256": "71382eb1ff2e2b6215ab85a00119ae68c3549a73d5048e0b2fba15c635d0d6b7",
       "historicalAuditBaseSHA256": "3e228fd23af37fe3244c06dd9c225b183efe7868af0bd29bb80a1265984493ad",
-      "windowsInjectionBaseSHA256": "09bc0777b915be4ef7f2c1527c3386effe774158e2c84580067c5eff2333b408"
+      "windowsInjectionBaseSHA256": "09bc0777b915be4ef7f2c1527c3386effe774158e2c84580067c5eff2333b408",
+      "attachmentTestBaseSHA256": "fe788bbbe62933991d9e410989a6bac2e0c011f520645ed4b13fe8a69a5062e3"
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
@@ -1257,6 +1259,13 @@
       ],
       "unifiedNative9e6BaseSHA256": "38984466caef896519c25ac7e24a8e6e3f45dd73f2a25d0daa46cc4b4efbbcad",
       "unifiedImages51bBaseSHA256": "1aae0eee8c3c03becbd8b9ee7b8a4eca0e54ae7c8d3acc1292dd51b522403a87"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_task_attachments.vitest.ts",
+      "sha256": "4fedc96c045e743f35eff411d397a54a816a3e2c22f9b1deed72497c2b412749",
+      "origin": "New phone attachment regression test fixture; not a recovered historical source.",
+      "licenseReview": "Project test contribution under the existing repository terms; no third-party implementation copied.",
+      "preparationChanges": []
     }
   ],
   "excludedSourcePaths": [],

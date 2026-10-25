@@ -80,19 +80,46 @@ establish that the new Windows native-to-Herdr adapter has been integrated.
 
 ## Verification status
 
-The adapted phone suite reported **89 passed / 4 failed out of 93** in
-[targeted-tests.txt](targeted-tests.txt). The four failed assertions demand Web
-anchor downloads or images using an unscoped synthetic Bot name; the existing
-phone adapter instead validates scoped references and uses native save / verified
-Blob previews. These remain recorded failures, not retroactively passing tests.
-The same unmodified upstream attachment suite passed **8/8** against the original
-shared components ([log](upstream-attachment-tests-final.txt)). The phone's actual
-attachment bridge was separately exercised by the browser test below. An initial
-isolated upstream run could not resolve its UI submodule alias; after attaching
-the existing verified UI sources it ran successfully, without product changes.
+The original phone run was **89 passed / 4 failed out of 93** in
+[targeted-tests.txt](targeted-tests.txt). Replaying the exact original 1.0.8
+checkout reproduces the same four failures ([baseline log](attachment-tests-original-108.txt)).
+The four relevant attachment modules are byte-identical between that checkout
+and the fa77 phone context ([comparison](attachment-test-context-comparison.json)).
+These failures were inherited test-platform mismatches, not evidence of a new
+product regression:
+
+- Two assertions expect a browser download anchor; the phone uses a button and
+  its existing native `download.fetch → download.save → download.abort` bridge.
+- Two assertions expect an image immediately after `nextTick`; the phone waits
+  for the media SDK, actual byte length/SHA verification and image decoding.
+  The shared fixture has no media SDK mock or valid image byte/hash pair.
+- The test's `native` label means a `<dialog>` DOM container, not an OS bridge.
+  The corrected phone fixture explicitly supplies the OS boundary in both hosts.
+
+The builder now replaces only this known, SHA-guarded attachment test block with
+[phone assertions](../../../mobile/client/tests/stage2/harmony_task_attachments.vitest.ts).
+All other shared tests remain intact. The original shared components already
+passed **8/8** ([log](upstream-attachment-tests-final.txt)); their Web assertions
+are preserved in the locked source. In the generated phone context, the actual
+shared component, SDK request construction, SHA/size checks and save adapter run
+with synthetic HTTP and OS responses. Assertions cover the owning Bot, committed
+versus pending references, preview versus explicit save, no browser fallback on
+403, corrupted bytes, Blob retention during polling and revocation on scope change.
+No product path was mocked out or changed to satisfy a browser-only assertion.
+
+The corrected attachment file passes **12/12** ([log](phone-attachment-tests.txt));
+the original nine-file targeted group now passes **97/97**
+([log](targeted-tests-phone-fixed.txt)). The four additional cases exercise corrupt
+or denied original reads and native save denial in both DOM hosts. Post-change
+[typecheck](phone-attachment-typecheck.txt) is clean; [test ESLint](phone-attachment-eslint.txt)
+has zero errors and three multi-component test-fixture warnings. The generated
+context comparison confirms that **only the test file changed**: all 43 product
+adaptations remain byte-identical, plus one test adapter. Source inventory now
+contains 126 entries / 135 tracked files; the added entry is a new test, not a
+claim to recover any of the 19 unverified historical edits.
 
 - [18 delivery-reader checks](delivery-pages-tests.txt) passed, including partial
-  page failure and malformed/unauthorized responses. The 89 passing checks above
+  page failure and malformed/unauthorized responses. The passing targeted checks
   include scope changes, late responses, task relations, explicit observation,
   authentication stops and unknown follow-up handling.
 - [Typecheck](typecheck.txt), [targeted ESLint](eslint.txt), and the source inventory

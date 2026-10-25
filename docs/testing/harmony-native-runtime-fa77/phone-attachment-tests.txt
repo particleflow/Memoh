@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/unified-9e6c470-validation
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  10:15:34
+   Duration  11.17s (transform 7.10s, setup 0ms, import 9.14s, tests 1.09s, environment 723ms)

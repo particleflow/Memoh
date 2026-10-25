@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/unified-9e6c470-validation
+
+
+ Test Files  9 passed (9)
+      Tests  97 passed (97)
+   Start at  10:16:20
+   Duration  11.70s (transform 16.43s, setup 0ms, import 26.15s, tests 2.19s, environment 4.04s)
