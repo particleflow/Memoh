@@ -35,6 +35,7 @@ func serveProblem(t *testing.T, register func(*echo.Echo), method, target, body 
 	req := httptest.NewRequest(method, target, strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
+	authorizeProviderTestRequest(t, e, req)
 	e.ServeHTTP(rec, req)
 	var problem server.Problem
 	if rec.Code >= http.StatusBadRequest {

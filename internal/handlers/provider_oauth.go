@@ -26,10 +26,10 @@ func NewProviderOAuthHandler(service *providers.Service) *ProviderOAuthHandler {
 }
 
 func (h *ProviderOAuthHandler) Register(e *echo.Echo) {
-	e.GET("/providers/:id/oauth/authorize", h.Authorize)
-	e.POST("/providers/:id/oauth/poll", h.Poll)
-	e.GET("/providers/:id/oauth/status", h.Status)
-	e.DELETE("/providers/:id/oauth/token", h.Revoke)
+	e.GET("/providers/:id/oauth/authorize", h.Authorize, requireProviderAccount)
+	e.POST("/providers/:id/oauth/poll", h.Poll, requireProviderAccount)
+	e.GET("/providers/:id/oauth/status", h.Status, requireProviderAccount)
+	e.DELETE("/providers/:id/oauth/token", h.Revoke, requireProviderAccount)
 	e.GET("/auth/callback", h.Callback)
 	e.GET("/providers/oauth/callback", h.Callback)
 }
@@ -41,6 +41,8 @@ func (h *ProviderOAuthHandler) Register(e *echo.Echo) {
 // @Success 200 {object} providers.OAuthAuthorizeResponse
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/oauth/authorize [get].
 func (h *ProviderOAuthHandler) Authorize(c echo.Context) error {
 	providerID, err := httpx.RequiredParam(c, "id")
@@ -65,6 +67,8 @@ func (h *ProviderOAuthHandler) Authorize(c echo.Context) error {
 // @Success 200 {object} providers.OAuthStatus
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/oauth/poll [post].
 func (h *ProviderOAuthHandler) Poll(c echo.Context) error {
 	providerID, err := httpx.RequiredParam(c, "id")
@@ -89,6 +93,8 @@ func (h *ProviderOAuthHandler) Poll(c echo.Context) error {
 // @Success 200 {object} providers.OAuthStatus
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/oauth/status [get].
 func (h *ProviderOAuthHandler) Status(c echo.Context) error {
 	providerID, err := httpx.RequiredParam(c, "id")
@@ -113,6 +119,8 @@ func (h *ProviderOAuthHandler) Status(c echo.Context) error {
 // @Success 204 "No Content"
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/oauth/token [delete].
 func (h *ProviderOAuthHandler) Revoke(c echo.Context) error {
 	providerID, err := httpx.RequiredParam(c, "id")

@@ -39,7 +39,7 @@ func NewProvidersHandler(log *slog.Logger, service *providers.Service, modelsSer
 }
 
 func (h *ProvidersHandler) Register(e *echo.Echo) {
-	group := e.Group("/providers")
+	group := e.Group("/providers", requireProviderAccount)
 	group.POST("", h.Create)
 	group.POST("/from-template", h.CreateFromTemplate)
 	group.GET("", h.List)
@@ -66,6 +66,8 @@ func (h *ProvidersHandler) Register(e *echo.Echo) {
 // @Failure 404 {object} server.Problem
 // @Failure 409 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/from-template [post].
 func (h *ProvidersHandler) CreateFromTemplate(c echo.Context) error {
 	var req providers.CreateFromTemplateRequest
@@ -89,6 +91,8 @@ func (h *ProvidersHandler) CreateFromTemplate(c echo.Context) error {
 // @Success 201 {object} providers.GetResponse
 // @Failure 400 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers [post].
 func (h *ProvidersHandler) Create(c echo.Context) error {
 	var req providers.CreateRequest
@@ -120,6 +124,8 @@ func (h *ProvidersHandler) Create(c echo.Context) error {
 // @Produce json
 // @Success 200 {array} providers.GetResponse
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers [get].
 func (h *ProvidersHandler) List(c echo.Context) error {
 	resp, err := h.service.List(c.Request().Context())
@@ -141,6 +147,8 @@ func (h *ProvidersHandler) List(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id} [get].
 func (h *ProvidersHandler) Get(c echo.Context) error {
 	id, err := httpx.RequiredParam(c, "id")
@@ -166,6 +174,8 @@ func (h *ProvidersHandler) Get(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/models [get].
 func (h *ProvidersHandler) ListModelsByProvider(c echo.Context) error {
 	if h.modelsService == nil {
@@ -209,6 +219,8 @@ func (h *ProvidersHandler) ListModelsByProvider(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/name/{name} [get].
 func (h *ProvidersHandler) GetByName(c echo.Context) error {
 	name, err := httpx.RequiredParam(c, "name")
@@ -239,6 +251,8 @@ func (h *ProvidersHandler) GetByName(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id} [put].
 func (h *ProvidersHandler) Update(c echo.Context) error {
 	id, err := httpx.RequiredParam(c, "id")
@@ -273,6 +287,8 @@ func (h *ProvidersHandler) Update(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id} [delete].
 func (h *ProvidersHandler) Delete(c echo.Context) error {
 	id, err := httpx.RequiredParam(c, "id")
@@ -295,6 +311,8 @@ func (h *ProvidersHandler) Delete(c echo.Context) error {
 // @Produce json
 // @Success 200 {object} providers.CountResponse
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/count [get].
 func (h *ProvidersHandler) Count(c echo.Context) error {
 	count, err := h.service.Count(c.Request().Context())
@@ -316,6 +334,8 @@ func (h *ProvidersHandler) Count(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/test [post].
 func (h *ProvidersHandler) Test(c echo.Context) error {
 	id, err := httpx.RequiredParam(c, "id")
@@ -358,6 +378,8 @@ func (h *ProvidersHandler) Test(c echo.Context) error {
 // @Failure 400 {object} server.Problem
 // @Failure 404 {object} server.Problem
 // @Failure 500 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
 // @Router /providers/{id}/import-models [post].
 func (h *ProvidersHandler) ImportModels(c echo.Context) error {
 	id, err := httpx.RequiredParam(c, "id")
