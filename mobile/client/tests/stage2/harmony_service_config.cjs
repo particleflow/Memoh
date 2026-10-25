@@ -19,24 +19,55 @@ for(const value of ['https://127.0.0.1/api','https://[::1]/api','https://[fe80::
 const cfg=load('mobile/memoh/harmony-service-config.ts',{'./harmony-service-url':validator})
 class Storage{constructor(){this.values=new Map()}get length(){return this.values.size}key(i){return [...this.values.keys()][i]??null}getItem(k){return this.values.get(k)??null}setItem(k,v){this.values.set(k,String(v))}removeItem(k){this.values.delete(k)}}
 const s=new Storage(),tab=new Storage(),a='https://alpha.example/api',b='https://beta.example/api'
+// The binding here is synthetic evidence, not a claim that a real v1.0.6
+// storage key has been identified. A user-entered URL is never such evidence.
+const binding={apiOrigin:a}
+const unknown=new Storage();unknown.setItem('token','synthetic-unbound');unknown.setItem('chat-input-drafts','local-only')
+const originalUnknown=JSON.stringify([...unknown.values])
+check(()=>assert.equal(cfg.inspectServiceSetup(unknown).kind,'unbound'))
+check(()=>assert.equal(JSON.stringify([...unknown.values]),originalUnknown))
+for(const destination of [a,b]) {
+ check(()=>assert.throws(()=>cfg.saveServiceConfig(destination,'',unknown),/SERVICE_BINDING_REQUIRED/))
+ check(()=>assert.equal(JSON.stringify([...unknown.values]),originalUnknown))
+}
+check(()=>assert.equal(unknown.getItem(cfg.LEGACY_STATE_KEY),null))
+check(()=>assert.equal(cfg.inspectServiceSetup(new Storage()).kind,'initial'))
+check(()=>assert.equal(cfg.saveServiceConfig(a,'',new Storage()).resetPending,false))
+const appearance=new Storage();appearance.setItem('language','zh');appearance.setItem('theme','dark')
+check(()=>assert.equal(cfg.inspectServiceSetup(appearance).kind,'initial'))
+appearance.setItem('unknown-legacy-record','keep')
+check(()=>assert.equal(cfg.inspectServiceSetup(appearance).kind,'unbound'))
+check(()=>assert.equal(cfg.inspectServiceSetup(unknown,binding).kind,'legacy-bound'))
+check(()=>assert.equal(JSON.stringify([...unknown.values]),originalUnknown))
 const quota=new Storage();quota.setItem('token','synthetic-unbound');quota.setItem('chat-input-drafts','local-only');const originalSet=quota.setItem.bind(quota)
-quota.setItem=(k,v)=>{if(k===cfg.LEGACY_STATE_KEY)throw Error('QuotaExceededError');originalSet(k,v)}
-check(()=>assert.throws(()=>cfg.saveServiceConfig(a,'',quota)))
+quota.setItem=(k,v)=>{if(k===cfg.SERVICE_CONFIG_KEY)throw Error('QuotaExceededError');originalSet(k,v)}
+check(()=>assert.throws(()=>cfg.saveServiceConfig(a,'',quota,binding)))
 check(()=>assert.equal(quota.getItem('token'),'synthetic-unbound'))
+check(()=>assert.equal(quota.getItem('chat-input-drafts'),'local-only'))
 check(()=>assert.equal(quota.getItem(cfg.SERVICE_CONFIG_KEY),null))
 check(()=>assert.equal(cfg.readServiceConfig(s),null))
 s.setItem('token','synthetic-legacy');s.setItem('chat-input-drafts','synthetic-draft')
-let c=cfg.saveServiceConfig(a,'',s)
-check(()=>assert.equal(c.resetPending,true))
-check(()=>assert.equal(JSON.parse(s.getItem(cfg.LEGACY_STATE_KEY)).entries.token,undefined))
+const originalLegacy=JSON.stringify([...s.values])
+check(()=>assert.throws(()=>cfg.saveServiceConfig(b,'',s,binding),/SERVICE_LEGACY_ORIGIN_CHANGED/))
+check(()=>assert.equal(JSON.stringify([...s.values]),originalLegacy))
+let c=cfg.saveServiceConfig(a,'',s,binding)
+check(()=>assert.equal(c.resetPending,false))
+check(()=>assert.equal(s.getItem('token'),'synthetic-legacy'))
 check(()=>assert.equal(s.getItem('chat-input-drafts'),'synthetic-draft'))
+check(()=>assert.equal(cfg.inspectServiceSetup(s).kind,'configured'))
+// Restart after same-origin migration must not turn it into a reset.
+c=cfg.readServiceConfig(s);cfg.finishServiceTransition(c,s,tab)
+check(()=>assert.equal(s.getItem('token'),'synthetic-legacy'))
+// Existing configured installations may deliberately switch services.
+c=cfg.saveServiceConfig(b,'',s)
+check(()=>assert.equal(c.resetPending,true))
 // Simulated process death after pending write: a fresh read cannot become active
 // until auth cleanup has run. Transition is idempotent.
 c=cfg.readServiceConfig(s);cfg.finishServiceTransition(c,s,tab);cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
 check(()=>assert.equal(s.getItem('token'),null))
-s.setItem('token','synthetic-A');c=cfg.saveServiceConfig(a,'https://download.example/releases',s)
+s.setItem('token','synthetic-A');c=cfg.saveServiceConfig(b,'https://download.example/releases',s)
 check(()=>assert.equal(c.resetPending,false));check(()=>assert.equal(s.getItem('token'),'synthetic-A'))
-c=cfg.saveServiceConfig(b,'',s);check(()=>assert.equal(c.resetPending,true));cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
+c=cfg.saveServiceConfig(a,'',s);check(()=>assert.equal(c.resetPending,true));cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
 check(()=>assert.equal(s.getItem('token'),null))
 // A LAN/IPv6 address change cannot silently carry credentials to another origin.
 s.setItem('token','synthetic-current')
@@ -52,7 +83,8 @@ check(()=>assert.equal(c.resetPending,true))
 cfg.finishServiceTransition(c,s,tab);cfg.commitServiceTransition(c,s)
 check(()=>assert.equal(s.getItem('token'),null))
 s.setItem(cfg.SERVICE_CONFIG_KEY,'{"version":99}');check(()=>assert.throws(()=>cfg.readServiceConfig(s)))
-check(()=>assert.equal(cfg.saveServiceConfig(a,'',s).resetPending,true))
+check(()=>assert.throws(()=>cfg.saveServiceConfig(a,'',s)))
+check(()=>assert.equal(s.getItem(cfg.SERVICE_CONFIG_KEY),'{"version":99}'))
 // Same validator in the real native module, and real bridge guard. No OS Kit
 // execution is claimed; only IO edges are stubbed.
 const nativeValidator=load('mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets',{'@kit.ArkTS':{url:{URL:{parseURL:v=>new URL(v)}}}})

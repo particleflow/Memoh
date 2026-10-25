@@ -142,17 +142,22 @@ def intercept(route):
             data = {'path': '/data', 'entries': []}
     route.fulfill(status=status, content_type='application/json', headers=headers, body=json.dumps(data))
 
-def start(playwright, profile):
+def start(playwright, profile, expected_entry=None):
     context = playwright.chromium.launch_persistent_context(str(profile), executable_path=os.environ.get('HARMONY_CHROMIUM') or shutil.which('chromium') or shutil.which('chromium-browser'),
         headless=True, viewport={'width': 390, 'height': 844}, locale='zh-CN', service_workers='block',
         args=['--proxy-server=http://127.0.0.1:9', '--proxy-bypass-list=127.0.0.1;localhost'])
     restored_pages = list(context.pages)
-    page = context.new_page()
-    for restored in restored_pages:
-        restored.close()
+    if expected_entry is not None and restored_pages:
+        # Vite's restored HMR document can hang Page.close before interception
+        # is installed. Navigate it away after installing routes instead.
+        page = restored_pages[0]
+    else:
+        page = context.new_page()
+        for restored in restored_pages:
+            restored.close()
     context.route('**/*', intercept)
     context.route_web_socket('**/*', lambda socket: socket.on_message(lambda message: None))
-    context.add_init_script("localStorage.setItem('locale','zh')")
+    context.add_init_script("if(location.protocol !== 'about:') localStorage.setItem('locale','zh')")
     if auto_configure and current_dist == new_dist:
         context.add_init_script("if (!localStorage.getItem('memoh:harmony:service-config:v1')) localStorage.setItem('memoh:harmony:service-config:v1', JSON.stringify({version:1,apiOrigin:'https://alpha.example/api',hapDownloadUrl:'',resetPending:false}))")
     # A persistent profile may restore the last document before routing attaches.
@@ -161,8 +166,11 @@ def start(playwright, profile):
     page.on('pageerror', lambda error: page_errors.append({
         'message': re.sub(r'https?://\S+|eyJ[A-Za-z0-9._-]+', '[redacted]', str(error))[:400],
         'offlineProbe': network_offline}))
+    if expected_entry is not None:
+        page.goto('about:blank', wait_until='domcontentloaded')
     page.goto(base + '/#/', wait_until='domcontentloaded')
-    expected_entry = re.search(r'<script[^>]+src="([^"]+)"', (current_dist / 'index.html').read_text()).group(1)
+    if expected_entry is None:
+        expected_entry = re.search(r'<script[^>]+src="([^"]+)"', (current_dist / 'index.html').read_text()).group(1)
     actual_entry = page.locator('script[src]').first.get_attribute('src')
     assert actual_entry == expected_entry, 'Wrong compiled entry loaded during resource migration'
     return context, page

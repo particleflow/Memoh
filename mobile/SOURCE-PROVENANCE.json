@@ -122,11 +122,12 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "898549de7cb385eb07315a71b64e1ffe13fbf7392824703fbf5268713e21fd8f",
+      "sha256": "1a2b1dac9e08769dcd833c73c84712753604e9137cf92c47a7ed6212f9e8ca75",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction."
+        "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
       ],
       "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5"
     },
@@ -139,10 +140,12 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-config.ts",
-      "sha256": "caa18e21b183038c2c300f19c48fc098a5dbe7790f6d500a3563b3cd05238f99",
+      "sha256": "8b204ff2322d51140e01f2d0ab3e3743b82332db148be3c17d70e1ba5f1f76df",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
+      ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
@@ -205,23 +208,25 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_106_migration_ui.py",
-      "sha256": "920e561326bd0bcc170ba24d0237e50b9309e7c1abdd3070ba15492dc3e494fa",
+      "sha256": "1128fde08fafc2a0239de9907cf8d9cb34973ff802106f722c6bdfb69c93a820",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
-        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
       ],
       "checkpointSHA256": "3a8270c7378b8bc3d0466e35fd9374514737eb08b6a43736759a7f5385d598d2"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_auth_persistence.py",
-      "sha256": "e98c9eb1aff86e9ec429b5aba5dbaedff01e6840ee776bef42d9d94489daa43b",
+      "sha256": "479e30d679b079339ae9d7afabd69c967c23b4cdc491bd2aa8e8a79ff9d5875d",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
-        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
+        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label",
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
       ],
       "checkpointSHA256": "e7ab24ea3e5cca52004fdab72f6c87fb426cd56888b3d5bb751fdb4abd234b98"
     },
@@ -338,23 +343,25 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
-      "sha256": "a59b50b405fdb38c2db6125fe0f6aebf9aef3b45e605779deca1c7f4fe82314f",
+      "sha256": "1a15dfe792b45c191e86154eaa0fc3574daba264b1bc2f9e5cd51b6129206a02",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
-        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
       ],
       "endpointScopeBaseSHA256": "503ca97a3ada94db30984d3fc1436121d87806183271dcebfc3bd8fd80629cbe",
       "nativeIntegrationBaseSHA256": "dec91464877c64685ca1fa65e5b0a2505b83859083930658d464c3b3f587af1c"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config_ui.py",
-      "sha256": "281bdd11058344f7ad4a77467c071744558322adbdc2549b16ffaf5358455161",
+      "sha256": "8847d57fc4bf57c41ec116a7210daa22622a1323a7db79c7864f7b3b296a915d",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
-        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths"
+        "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
+        "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade."
       ]
     },
     {
