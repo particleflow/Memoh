@@ -1,0 +1,57 @@
+2026-10-25T21:28:06.1496006Z [31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+2026-10-25T21:28:06.1496475Z 
+2026-10-25T21:28:06.1503260Z [41m[1m FAIL [22m[49m [30m[46m web [49m[39m src/store/chat/realtime.test.ts[2m > [22mchat realtime controller[2m > [22maborts only a connected websocket for the matching bot
+2026-10-25T21:28:06.1533350Z [31m[1mAssertionError[22m: expected "vi.fn()" to be called with arguments: [ 'run-1', 'session-1', 'control-1' ][90m
+2026-10-25T21:28:06.1534245Z 
+2026-10-25T21:28:06.1534422Z Received:
+2026-10-25T21:28:06.1534641Z 
+2026-10-25T21:28:06.1534948Z [1m  1st vi.fn() call:
+2026-10-25T21:28:06.1535227Z 
+2026-10-25T21:28:06.1535481Z [22m[2m  [[22m
+2026-10-25T21:28:06.1535985Z [2m    "run-1",[22m
+2026-10-25T21:28:06.1536527Z [2m    "session-1",[22m
+2026-10-25T21:28:06.1537082Z [2m    "control-1",[22m
+2026-10-25T21:28:06.1537606Z [31m+   undefined,[90m
+2026-10-25T21:28:06.1538073Z [2m  ][22m
+2026-10-25T21:28:06.1538495Z [31m[90m
+2026-10-25T21:28:06.1538697Z 
+2026-10-25T21:28:06.1538987Z Number of calls: [1m1[22m
+2026-10-25T21:28:06.1539432Z [31m[39m
+2026-10-25T21:28:06.1540177Z [36m [2m❯[22m src/store/chat/realtime.test.ts:[2m203:38[22m[39m
+2026-10-25T21:28:06.1580490Z     [90m201|[39m       [32m'control-1'[39m[33m,[39m
+2026-10-25T21:28:06.1582091Z     [90m202|[39m     ))[33m.[39m[34mtoBe[39m([35mtrue[39m)
+2026-10-25T21:28:06.1584092Z     [90m203|[39m     [34mexpect[39m(sockets[[34m0[39m][33m![39m[33m.[39msocket[33m.[39mabort)[33m.[39m[34mtoHaveBeenCalledWith[39m(
+2026-10-25T21:28:06.1585730Z     [90m   |[39m                                      [31m^[39m
+2026-10-25T21:28:06.1587848Z     [90m204|[39m       [32m'run-1'[39m[33m,[39m
+2026-10-25T21:28:06.1588680Z     [90m205|[39m       [32m'session-1'[39m[33m,[39m
+2026-10-25T21:28:06.1589100Z 
+2026-10-25T21:28:06.1589576Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+2026-10-25T21:28:06.1589953Z 
+2026-10-25T21:28:06.1589991Z 
+2026-10-25T21:28:06.1603073Z [2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m17 passed[39m[22m[90m (18)[39m
+2026-10-25T21:28:06.1604842Z [2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m294 passed[39m[22m[90m (295)[39m
+2026-10-25T21:28:06.1606219Z [2m   Start at [22m 21:27:41
+2026-10-25T21:28:06.1607704Z [2m   Duration [22m 24.40s[2m (transform 24.98s, setup 0ms, import 42.77s, tests 10.45s, environment 6.29s)[22m
+2026-10-25T21:28:06.1609168Z 
+2026-10-25T21:28:06.1622297Z 
+2026-10-25T21:28:06.1657936Z ##[error]AssertionError: expected "vi.fn()" to be called with arguments: [ 'run-1', 'session-1', 'control-1' ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "run-1",
+    "session-1",
+    "control-1",
++   undefined,
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/store/chat/realtime.test.ts:203:38
+
+
+2026-10-25T21:28:06.3176270Z  ELIFECYCLE  Test failed. See above for more details.
+2026-10-25T21:28:06.3559147Z ##[error]Process completed with exit code 1.

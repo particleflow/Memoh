@@ -60,3 +60,11 @@ bash scripts/check-agent-core-boundary.sh
 The first combined Go command above has the documented partial-pass/link-failure boundary; it is not presented as a full PASS. The DSN is supplied privately from the existing loopback test configuration and never logged. Selected raw outputs are adjacent; `files.json` records their exact hashes/bytes. The eventual new commit's CI is assessed independently of the passed6a7 checkpoint.
 
 ![Same task and original recovery action after combined Server restart](after-restart.png)
+
+## Precise-head CI follow-up
+
+The first combined head `7499b9c705bca462001e504eea5bc567fb6ceb17` failed the ESLint workflow's task-observation Test job (run40235542035/job121296201641); Lint itself passed. The remote step ran295 tests:294 passed and one failed. `chat/realtime.test.ts` still expected a three-argument socket abort call, while the newly optional reason is forwarded as the fourth argument (`undefined` for old callers). This was locally reproduced before correction.
+
+Only the test fixture changed: its mock now uses `ChatWebSocket['abort']`; the existing matching-Bot assertion covers both an absent reason and explicit `user_stop`, and verifies a wrong Bot causes zero downstream calls. Product behavior, rules and existing assertions were preserved. The complete affected realtime file then passed16 tests and targeted ESLint exited0. No model, browser, Go build or previously passed standalone suite was rerun for this test-only correction. The previous remote failure remains visible; the final follow-up commit's CI must pass independently.
+
+The public CI excerpt retains the exact decoded lines containing the failure and summary. The full decoded log is retained privately; its SHA256/byte count and excerpt line interval are recorded separately. It is not represented as the raw HTTP archive or complete public job log.

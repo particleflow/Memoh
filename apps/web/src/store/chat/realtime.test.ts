@@ -37,7 +37,7 @@ function createSocket(connected = true): ChatWebSocket & {
   return {
     connected,
     send: vi.fn<(message: WSClientMessage) => void>(),
-    abort: vi.fn<(runId: string, sessionId: string, controlId: string) => void>(),
+    abort: vi.fn<ChatWebSocket['abort']>(),
     close: vi.fn<() => void>(),
     onOpen: null,
     onClose: null,
@@ -184,7 +184,7 @@ describe('chat realtime controller', () => {
     expect(sockets[0]!.socket.send).toHaveBeenCalledWith(message)
   })
 
-  it('aborts only a connected websocket for the matching bot', () => {
+  it.each([undefined, 'user_stop'] as const)('aborts only a connected websocket for the matching bot (reason: %s)', (reason) => {
     const { controller, sockets } = makeController()
     controller.startWebSocket('bot-1')
 
@@ -193,17 +193,21 @@ describe('chat realtime controller', () => {
       'bot-2',
       'session-1',
       'control-1',
+      reason,
     )).toBe(false)
+    expect(sockets[0]!.socket.abort).not.toHaveBeenCalled()
     expect(controller.abortWebSocketRun(
       'run-1',
       'bot-1',
       'session-1',
       'control-1',
+      reason,
     )).toBe(true)
     expect(sockets[0]!.socket.abort).toHaveBeenCalledWith(
       'run-1',
       'session-1',
       'control-1',
+      reason,
     )
   })
 

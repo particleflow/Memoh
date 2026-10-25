@@ -1,8 +1,8 @@
 [
   {
     "path": "README.md",
-    "bytes": 10133,
-    "sha256": "960c017096b60af476954c0baf666e1d22603dd1fb7b4177f35448f3b473e0e1"
+    "bytes": 11479,
+    "sha256": "0e96725141bfc90576d057951df3973b0b687dbe0eb2c02828365e50eeba1159"
   },
   {
     "path": "after-ledger.json",
@@ -60,6 +60,16 @@
     "sha256": "bb7f3069dabd14b2619fd1a69a1951c7378f424d3513d32d00897a3f29254cf1"
   },
   {
+    "path": "ci-realtime-failure-excerpt.log",
+    "bytes": 3129,
+    "sha256": "962b3344ce44d195ac21b2d12213c0c338428863aa7115fb88e5d3c988d4ff40"
+  },
+  {
+    "path": "ci-realtime-failure-provenance.json",
+    "bytes": 565,
+    "sha256": "78d817c9daa23730055af513caa02c205d79ae0ee248fa04ca6843a59e940605"
+  },
+  {
     "path": "core-boundary.log",
     "bytes": 95,
     "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
@@ -113,6 +123,21 @@
     "path": "postgres-upgrade-layout.log",
     "bytes": 394,
     "sha256": "b5e5cab4892a24ff1e2f17ccb996a71f88f5c4626e20629ff414626219427943"
+  },
+  {
+    "path": "realtime-eslint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "realtime-green.log",
+    "bytes": 317,
+    "sha256": "f4444adccc41b148f511b8aecd753dbfcae0c2f3913388fa7cfb6943b2ecb427"
+  },
+  {
+    "path": "realtime-red.log",
+    "bytes": 1249,
+    "sha256": "cf5f76715c3020eafe9e630576e570e4f8e4bb078b14c926005767544c2fc27a"
   },
   {
     "path": "sdk-types.log",
