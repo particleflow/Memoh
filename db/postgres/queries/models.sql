@@ -280,6 +280,8 @@ ORDER BY created_at DESC;
 -- name: ListTranscriptionProviders :many
 SELECT * FROM providers
 WHERE team_id = public.memoh_current_team_id() AND client_type IN (
+  'openai-completions',
+  'openai-responses',
   'openai-transcription',
   'openrouter-transcription',
   'elevenlabs-transcription',

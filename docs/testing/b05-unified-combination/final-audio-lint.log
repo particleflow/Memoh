@@ -1,0 +1,3 @@
+internal/audio/service.go:507:15: error-format: fmt.Errorf can be replaced with errors.New (perfsprint)
+		return nil, fmt.Errorf("transcription provider is disabled")
+		            ^
