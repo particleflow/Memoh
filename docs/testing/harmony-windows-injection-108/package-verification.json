@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "ee00ff76a07ac27e08f4b4f58fd1354f0ecbeef3",
+  "sharedCommit": "68be06092a1ea85d961115aac404082982bdecf4",
+  "bundleName": "cloud.begonia.workassistant",
+  "versionName": "1.0.8",
+  "versionCode": 1000008,
+  "bytes": 37029849,
+  "sha256": "83109c5c889e6f314dc0916b9ea4027ca35fa79055c4cff48c66669f7c5a44cd",
+  "members": 814,
+  "unsigned": true,
+  "allCRCsValid": true,
+  "permissionsUnchangedFrom775b": true,
+  "emptyConfigurationSlotBytes": 8192,
+  "configurationStored": true,
+  "credentialPatternMatches": {
+    "privateKey": 0,
+    "githubCredential": 0,
+    "awsKey": 0,
+    "jwtValue": 0
+  },
+  "newReadableURLCandidatesComparedWith775b": 0,
+  "scanScope": "all decompressed members, readable URL deltas and selected credential patterns; not exhaustive secret detection",
+  "actualDeviceAcceptance": false
+}

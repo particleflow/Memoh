@@ -1,0 +1,13 @@
+{
+  "configured": true,
+  "signed": false,
+  "modifiedPayloadMembers": 1,
+  "bytes": 37029849,
+  "sha256": "b565dae23dae64cac2b0e8505b2e9d2a4413cf659bfdef4bc84dc170f3da36a1",
+  "legacyPackageChecked": false,
+  "realCompiledHAP": true,
+  "syntheticConfigOnly": true,
+  "allOffsetsPreserved": true,
+  "WindowsExecuted": false,
+  "officialSigningExecuted": false
+}

@@ -1,6 +1,13 @@
 # Reproduction inputs and verified build sequence
 
-The current verified unsigned HAP is built from phone source
+The new generic unsigned 1.0.8 / 1000008 package is built from
+`ee00ff76a07ac27e08f4b4f58fd1354f0ecbeef3` with the same retained official SDK.
+It adds the empty local configuration slot and verified legacy migration, for
+Windows-only private configuration injection before signing.
+[Build and injection evidence](../docs/testing/harmony-windows-injection-108/README.md).
+The packages below remain preserved historical outputs.
+
+The preserved 1.0.7 unsigned HAP is built from phone source
 `775b494db1b888f63140afba5030a9177eb2400f`, pinned to shared Web/SDK
 `68be06092a1ea85d961115aac404082982bdecf4`. It includes expert root RunID,
 persisted state and authorized history navigation, while retaining native login,
