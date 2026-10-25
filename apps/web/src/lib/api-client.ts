@@ -1,5 +1,5 @@
 import { client } from '@memohai/sdk/client'
-import { notifyAuthSessionCleared } from './auth-session'
+import { authSessionGeneration, notifyAuthSessionCleared } from './auth-session'
 
 export interface SetupApiClientOptions {
   baseUrl?: string
@@ -70,6 +70,8 @@ interface ApiFetchContext {
   input: Parameters<typeof fetch>[0]
   init?: Parameters<typeof fetch>[1]
   requestToken: string
+  sessionToken: string
+  sessionGeneration: number
 }
 
 type ApiFetchResponseHandler = (
@@ -102,6 +104,8 @@ function createApiFetch(
       input,
       init,
       requestToken: requestBearerToken(input, init),
+      sessionToken: authToken(),
+      sessionGeneration: authSessionGeneration(),
     }
     const response = await baseFetch(input, init)
     for (const handler of responseHandlers) {
@@ -113,6 +117,8 @@ function createApiFetch(
 
 function handleAuthResponse(response: Response, context: ApiFetchContext) {
   if (response.status === 401) {
+    // A late response belongs to the identity that started the request.
+    if (context.sessionGeneration !== authSessionGeneration() || context.sessionToken !== authToken()) return
     handleUnauthorized(context.requestToken)
   }
 }

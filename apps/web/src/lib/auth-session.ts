@@ -35,7 +35,11 @@ export function clearPersistedUserScopedState() {
   }
 }
 
+let authGeneration = 0
+export function authSessionGeneration() { return authGeneration }
+
 export function notifyAuthSessionCleared(reason: AuthSessionClearReason) {
+  authGeneration++
   clearPersistedUserScopedState()
 
   if (typeof window === 'undefined') return

@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('./auth-session', () => ({
-  notifyAuthSessionCleared: vi.fn(),
-}))
+vi.mock('./auth-session', async (importOriginal) => {
+  const original = await importOriginal<typeof import('./auth-session')>()
+  return { ...original, notifyAuthSessionCleared: vi.fn(original.notifyAuthSessionCleared) }
+})
 
 let client: typeof import('@memohai/sdk/client')['client']
 let setupApiClient: typeof import('./api-client')['setupApiClient']
@@ -199,6 +200,41 @@ describe('setupApiClient auth handling', () => {
     expect(onUnauthorized).not.toHaveBeenCalled()
     expect(mockedNotifyAuthSessionCleared).not.toHaveBeenCalled()
     expect(localStorage.getItem('token')).toBe('new-token')
+  })
+
+  describe.each(['REST', 'SSE'] as const)('%s response ownership', (transport) => {
+    it.each(['anonymous', 'same-token'] as const)('ignores a delayed %s request after a new login', async (prior) => {
+      if (prior === 'same-token') localStorage.setItem('token', 'synthetic-token')
+      let started!: () => void
+      const ready = new Promise<void>(resolve => { started = resolve })
+      let finish!: (response: Response) => void
+      const pending = new Promise<Response>(resolve => { finish = resolve })
+      const fetchMock = vi.fn<typeof fetch>(() => { started(); return pending })
+      const onUnauthorized = vi.fn()
+      setupApiClient({ baseUrl: 'http://example.test', fetch: fetchMock, onUnauthorized })
+
+      const request = transport === 'REST'
+        ? client.get({ url: '/users/me' })
+        : client.sse.get({ url: '/events', sseMaxRetryAttempts: 1 }).then(result => drain(result.stream))
+      await ready
+      const sent = fetchMock.mock.calls[0]?.[0] as Request
+      expect(sent.headers.get('Authorization')).toBe(prior === 'same-token' ? 'Bearer synthetic-token' : null)
+      // The real user store notifies this boundary on every login, even if the
+      // backend issues the same token bytes. Do not replace it with a mock epoch.
+      const authSession = await import('./auth-session')
+      authSession.notifyAuthSessionCleared('login')
+      localStorage.setItem('token', 'synthetic-token')
+      localStorage.setItem('chat-bot-id', 'new-login-bot')
+      mockedNotifyAuthSessionCleared.mockClear()
+      finish(new Response('', { status: 401, statusText: 'Unauthorized' }))
+      await request
+
+      expect(localStorage.getItem('token')).toBe('synthetic-token')
+      expect(localStorage.getItem('chat-bot-id')).toBe('new-login-bot')
+      expect(mockedNotifyAuthSessionCleared).not.toHaveBeenCalled()
+      expect(onUnauthorized).not.toHaveBeenCalled()
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
   })
 
   it('handles a 401 when the current session has a token but the request has no bearer token', async () => {
