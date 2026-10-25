@@ -3,9 +3,13 @@ package nativeherdr
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	_ "embed"
+	"encoding/base64"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -13,6 +17,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"unicode/utf16"
 
 	"github.com/felinics/memoh/internal/agenvo"
 )
@@ -59,17 +64,96 @@ func TestPowerShellChildFixture(t *testing.T) {
 	if os.Getenv("MEMOH_POWERSHELL_TEST_CHILD") != "1" {
 		return
 	}
+	powerShellChildTrace("child-enter")
 	stdout, stderr, code := powerShellChildOutput(t, os.Getenv("MEMOH_POWERSHELL_TEST_MODE"))
+	powerShellChildTrace("child-output-ready")
 	drained := make(chan error, 1)
 	go func() {
 		_, err := os.Stderr.Write(stderr)
+		powerShellChildTrace(fmt.Sprintf("child-stderr-written error=%t", err != nil))
 		drained <- err
 	}()
 	_, outErr := os.Stdout.Write(stdout)
+	powerShellChildTrace(fmt.Sprintf("child-stdout-written error=%t", outErr != nil))
 	if err := <-drained; err != nil || outErr != nil {
+		powerShellChildTrace("child-exit=97")
 		os.Exit(97)
 	}
+	powerShellChildTrace(fmt.Sprintf("child-exit=%d", code))
 	os.Exit(code)
+}
+
+// Only the isolated fixture supplies this path. Trace markers stay out of the
+// child's byte streams and contain no deployment paths, arguments or secrets.
+func powerShellChildTrace(stage string) {
+	path := os.Getenv("MEMOH_POWERSHELL_CHILD_TRACE")
+	if path == "" {
+		return
+	}
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o600) //nolint:gosec // Explicit synthetic fixture trace, never used by production.
+	if err != nil {
+		return
+	}
+	_, _ = fmt.Fprintln(f, stage) //nolint:gosec // Fixed synthetic stage markers in a private test file, not HTML.
+	_ = f.Close()
+}
+
+func powerShellOutputDiagnostic(raw []byte) string {
+	return fmt.Sprintf("bytes=%d sha256=%x prefix=%q", len(raw), sha256.Sum256(raw), raw[:min(len(raw), 256)])
+}
+
+func logPowerShellFixtureTrace(t *testing.T, name, path string) {
+	t.Helper()
+	raw, err := os.ReadFile(path) //nolint:gosec // Test-owned temporary trace path.
+	if err != nil {
+		t.Logf("%s: trace unavailable (%T)", name, err)
+		return
+	}
+	t.Logf("%s: %s", name, raw[:min(len(raw), 8192)])
+}
+
+// A failed production run gets one diagnostic replay of the SYNTHETIC child.
+// The passing assertion always uses the untouched production script. Markers
+// distinguish stdin, launch and individual pipe waits on Windows .NET Framework;
+// a passing diagnostic replay cannot turn the original failure into a pass.
+func diagnosePowerShellFixture(t *testing.T, shell string, env []string, payload []byte, root string) {
+	t.Helper()
+	trace := filepath.Join(root, "powershell-stages.txt")
+	childTrace := filepath.Join(root, "diagnostic-child-stages.txt")
+	script := "function Write-FixtureStage([string]$stage) { [IO.File]::AppendAllText($env:MEMOH_POWERSHELL_TRACE, $stage+[Environment]::NewLine) }\nWrite-FixtureStage 'script-enter'\n" + cliPowerShell
+	for _, marker := range []struct{ line, stage string }{
+		{"[Console]::InputEncoding=[Text.UTF8Encoding]::new($false)", "input-encoding-set"},
+		{"$p=[Console]::In.ReadToEnd() | ConvertFrom-Json", "input-parsed"},
+		{"$c.StartInfo=$s", "child-configured"},
+		{"[void]$c.Start()", "child-started"},
+		{"$c.StandardInput.Close()", "child-stdin-closed"},
+		{"$o=$c.StandardOutput.BaseStream.CopyToAsync([Console]::OpenStandardOutput())", "stdout-copy-returned"},
+		{"$e=$c.StandardError.BaseStream.CopyToAsync([Console]::OpenStandardError())", "stderr-copy-returned"},
+		{"$c.WaitForExit()", "child-wait-returned"},
+		{"[void]$o.GetAwaiter().GetResult()", "stdout-copy-completed"},
+		{"[void]$e.GetAwaiter().GetResult()", "stderr-copy-completed"},
+	} {
+		if strings.Count(script, marker.line) != 1 {
+			t.Fatalf("diagnostic anchor changed: %s", marker.stage)
+		}
+		script = strings.Replace(script, marker.line, marker.line+"\n  Write-FixtureStage '"+marker.stage+"'", 1)
+	}
+	units := utf16.Encode([]rune(script))
+	raw := make([]byte, len(units)*2)
+	for i, unit := range units {
+		binary.LittleEndian.PutUint16(raw[i*2:], unit)
+	}
+	ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, shell, "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand", base64.StdEncoding.EncodeToString(raw)) //nolint:gosec // Fixed production script with synthetic phase markers; no live Herdr command.
+	cmd.Env = append(append([]string(nil), env...), "MEMOH_POWERSHELL_TRACE="+trace, "MEMOH_POWERSHELL_CHILD_TRACE="+childTrace)
+	cmd.Stdin = bytes.NewReader(payload)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+	err := cmd.Run()
+	t.Logf("diagnostic replay: process_error=%v context_error=%v stdout={%s} stderr={%s}", err, ctx.Err(), powerShellOutputDiagnostic(stdout.Bytes()), powerShellOutputDiagnostic(stderr.Bytes()))
+	logPowerShellFixtureTrace(t, "PowerShell phases", trace)
+	logPowerShellFixtureTrace(t, "diagnostic child phases", childTrace)
 }
 
 // Runs the production encoded cliPowerShell in an actual PowerShell process.
@@ -136,17 +220,41 @@ func TestPowerShellCLITransportPreservesChildBytesAndExit(t *testing.T) {
 	}
 	bootstrap := encodedPowerShell()
 	encoded := bootstrap[strings.LastIndex(bootstrap, " ")+1:]
+	diagnosed := false
 	for _, mode := range []string{"pinned-json", "large-stderr", "nonzero-exit"} {
 		t.Run(mode, func(t *testing.T) {
+			wantOut, wantErr, wantExit := powerShellChildOutput(t, mode)
+			modeEnv := append(append([]string(nil), env...), "MEMOH_POWERSHELL_TEST_MODE="+mode)
+			// Establish that the same Go fixture works under the isolated Windows
+			// environment before attributing a timeout to PowerShell pipe handling.
+			directCtx, directCancel := context.WithTimeout(t.Context(), 20*time.Second)
+			direct := exec.CommandContext(directCtx, child, "-test.run=^TestPowerShellChildFixture$") //nolint:gosec // This test executable only, fixed child selector.
+			direct.Env = modeEnv
+			var directOut, directErr bytes.Buffer
+			direct.Stdout, direct.Stderr = &directOut, &directErr
+			directRunErr := direct.Run()
+			directContextErr := directCtx.Err()
+			directCancel()
+			if directContextErr != nil || direct.ProcessState == nil || direct.ProcessState.ExitCode() != wantExit || !bytes.Equal(directOut.Bytes(), wantOut) || !bytes.Equal(directErr.Bytes(), wantErr) {
+				t.Fatalf("direct synthetic child baseline failed: process_error=%v context_error=%v stdout={%s} stderr={%s}", directRunErr, directContextErr, powerShellOutputDiagnostic(directOut.Bytes()), powerShellOutputDiagnostic(directErr.Bytes()))
+			}
+			t.Logf("direct synthetic child baseline passed: stdout=%d stderr=%d exit=%d", directOut.Len(), directErr.Len(), wantExit)
 			ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
 			defer cancel()
 			cmd := exec.CommandContext(ctx, shell, "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded) //nolint:gosec // Explicit local shell; encoded script is a production constant.
-			cmd.Env = append(append([]string(nil), env...), "MEMOH_POWERSHELL_TEST_MODE="+mode)
+			childTrace := filepath.Join(t.TempDir(), "production-child-stages.txt")
+			cmd.Env = append(append([]string(nil), modeEnv...), "MEMOH_POWERSHELL_CHILD_TRACE="+childTrace)
 			cmd.Stdin = bytes.NewReader(payload)
 			var stdout, stderr bytes.Buffer
 			cmd.Stdout, cmd.Stderr = &stdout, &stderr
 			err := cmd.Run()
 			if ctx.Err() != nil {
+				t.Logf("production timeout: process_error=%v stdout={%s} stderr={%s}", err, powerShellOutputDiagnostic(stdout.Bytes()), powerShellOutputDiagnostic(stderr.Bytes()))
+				logPowerShellFixtureTrace(t, "production child phases", childTrace)
+				if !diagnosed {
+					diagnosed = true
+					diagnosePowerShellFixture(t, shell, modeEnv, payload, t.TempDir())
+				}
 				t.Fatal("PowerShell did not drain concurrent child output before timeout", ctx.Err())
 			}
 			gotExit := 0
@@ -157,7 +265,6 @@ func TestPowerShellCLITransportPreservesChildBytesAndExit(t *testing.T) {
 				}
 				gotExit = exited.ExitCode()
 			}
-			wantOut, wantErr, wantExit := powerShellChildOutput(t, mode)
 			if !bytes.Equal(stdout.Bytes(), wantOut) {
 				t.Errorf("stdout changed: got %q, want exact child JSON %q", stdout.Bytes(), wantOut)
 			}
