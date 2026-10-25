@@ -236,6 +236,11 @@
            on a clean form: testing while edits are pending would probe
            parameters the user is no longer looking at. -->
       <template #footer>
+        <ProviderMediaCatalog
+          v-if="props.provider?.id && supportsImagesProtocol(props.provider.client_type)"
+          :provider-id="props.provider.id"
+          :disabled="hasChanges || editLoading || props.provider.enable === false"
+        />
         <HoverCard :open-delay="120">
           <HoverCardTrigger as-child>
             <Button
@@ -475,6 +480,7 @@ import { ConfirmPopover, DeviceCodePanel, SettingsRow, SettingsSection, toast } 
 import { useProviderModelCatalog } from '@/composables/useProviderModelCatalog'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { providerPresets } from '@/constants/provider-presets'
+import ProviderMediaCatalog from './provider-media-catalog.vue'
 
 const { t, te } = useI18n()
 const { syncProviderModelCatalog } = useProviderModelCatalog()

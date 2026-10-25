@@ -2136,6 +2136,28 @@
     "showingCount": "显示 {count} / {total}"
   },
   "provider": {
+    "mediaCatalog": {
+      "close": "关闭",
+      "errorTitle": "目录读取失败",
+      "title": "媒体模型目录",
+      "protocol": "Magpie 目录协议",
+      "read": "读取目录",
+      "readOnly": "读取已保存服务商的目录",
+      "hint": "使用此服务商已保存的连接，不导入、删除或测试模型。目录声明不代表模型执行或附件交付已通过。",
+      "failed": "无法读取目录，请检查已保存的连接及目录访问权限。",
+      "checkedAt": "读取时间",
+      "transcription": "转录支持",
+      "unverified": "未验证。音频元数据或模型名称不能证明支持转录接口。",
+      "empty": "服务商返回了空目录。",
+      "unspecified": "未声明",
+      "modelFacts": "类别：{kind} · 输入：{input} · 输出：{output} · 来源：{source}",
+      "sources": {
+        "unspecified": "无能力元数据",
+        "catalog_kind": "目录类别字段",
+        "catalog_modalities": "目录模态字段",
+        "catalog_kind_and_modalities": "目录类别及模态字段"
+      }
+    },
     "add": "添加服务商",
     "addBtn": "添加",
     "searchPlaceholder": "搜索服务商…",

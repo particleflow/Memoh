@@ -25,6 +25,8 @@ async function flushPromises() {
   await nextTick()
 }
 
+vi.mock('./provider-media-catalog.vue', () => ({ default: { template: '<span />' } }))
+
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: translate }),
 }))

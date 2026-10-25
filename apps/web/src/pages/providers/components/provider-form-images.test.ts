@@ -5,6 +5,8 @@ import type { App, Slots } from 'vue'
 import type { ProvidersGetResponse } from '@memohai/sdk'
 
 const feedback = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+vi.mock('./provider-media-catalog.vue', () => ({ default: { template: '<span />' } }))
+
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key, te: () => false }) }))
 vi.mock('@memohai/sdk', () => ({
   deleteProvidersByIdOauthToken: vi.fn(),
