@@ -43,6 +43,7 @@ func (h *AudioHandler) Register(e *echo.Echo) {
 	pg.POST("/:id/import-models", h.ImportModels)
 
 	tpg := e.Group("/transcription-providers")
+	tpg.Use(requireProviderAccount)
 	tpg.GET("", h.ListTranscriptionProviders)
 	tpg.GET("/meta", h.ListTranscriptionMeta)
 	tpg.GET("/:id", h.GetProvider)
@@ -57,6 +58,7 @@ func (h *AudioHandler) Register(e *echo.Echo) {
 	mg.POST("/:id/test", h.TestModel)
 
 	tg := e.Group("/transcription-models")
+	tg.Use(requireProviderAccount)
 	tg.GET("", h.ListTranscriptionModels)
 	tg.GET("/:id", h.GetTranscriptionModel)
 	tg.PUT("/:id", h.UpdateTranscriptionModel)

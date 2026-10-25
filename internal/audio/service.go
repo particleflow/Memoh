@@ -147,7 +147,7 @@ func (s *Service) ListTranscriptionModelsByProvider(ctx context.Context, provide
 	if err != nil {
 		return nil, fmt.Errorf("get speech provider: %w", err)
 	}
-	def, err := s.registry.Get(models.ClientType(providerRow.ClientType))
+	def, err := s.registry.GetTranscription(models.ClientType(providerRow.ClientType))
 	if err != nil {
 		return nil, err
 	}
@@ -329,7 +329,7 @@ func (s *Service) GetTranscriptionModelCapabilities(ctx context.Context, modelID
 	if err != nil {
 		return nil, fmt.Errorf("get transcription model: %w", err)
 	}
-	def, err := s.registry.Get(models.ClientType(modelRow.ProviderType))
+	def, err := s.registry.GetTranscription(models.ClientType(modelRow.ProviderType))
 	if err != nil {
 		return nil, err
 	}
@@ -394,7 +394,7 @@ func (s *Service) FetchRemoteTranscriptionModels(ctx context.Context, providerID
 		return nil, fmt.Errorf("get speech provider: %w", err)
 	}
 
-	def, err := s.registry.Get(models.ClientType(providerRow.ClientType))
+	def, err := s.registry.GetTranscription(models.ClientType(providerRow.ClientType))
 	if err != nil {
 		return nil, err
 	}
@@ -504,7 +504,7 @@ func (s *Service) resolveTranscriptionParams(ctx context.Context, modelID string
 		return nil, fmt.Errorf("get speech provider: %w", err)
 	}
 
-	def, err := s.registry.Get(models.ClientType(providerRow.ClientType))
+	def, err := s.registry.GetTranscription(models.ClientType(providerRow.ClientType))
 	if err != nil {
 		return nil, err
 	}
