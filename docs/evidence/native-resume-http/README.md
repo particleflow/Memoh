@@ -10,13 +10,14 @@ The underlying bounded continuation already supports reuse of the original persi
 
 ## Call contract and field handoff
 
-Use the existing logged-in API client and API base (including its normal `/api` proxy prefix where configured):
+Use the existing logged-in **account** API client and API base (including its normal `/api` proxy prefix where configured):
 
 `POST /bots/{bot_id}/sessions/{session_id}/tasks/computer_operation/{task_id}/resume`
 
 - Path IDs identify the original Bot, an owned conversation with the original operation in its authorized ancestry, and the original operation. The server resolves the actual owning session and original RunID. A terminal original run does **not** require a replacement active run.
 - Body: the original `kind: "herdr_pi_task"`, complete original `task`, and original `target_id`, `work_dir`, `artifact` / `artifacts` when present. Normal defaults are unchanged. The original normalized request hash and target fingerprint must still match. Do not infer the task text from a summary or hash.
 - Do **not** put `resume_operation_id`, `operation_id`, `run_id`, user/session identity, workspace/pane references or a new request ID in the body. No `X-Memoh-*` headers establish identity. Strict decoding rejects unknown body fields.
+- A `chat_route` reply token is refused with403 before binding or continuation. The normal account JWT still goes through the server session validator (inactive account401). This is the existing account/session boundary, not another approval flow.
 - The current user must still have Bot chat access, own the operation's conversation path, and retain the selected target's execute grant. Existing admission, policy, CAS, original receipt/phase and uncertain-dispatch fences remain authoritative. There is no new-work claim path.
 - Runtime disconnected is an execution blocker. Restore the existing Runtime through its normal connection mechanism first, without changing the original registration/task identity. This endpoint does not reconnect Runtime or restore credentials. Then explicitly submit the unchanged request once. It can reuse the saved workspace and safely continue the allowed pre-prompt phases; it cannot replay an uncertain prompt submission.
 - Read the same task ID after the response or a lost response. `outcome` is `submitted`, `unchanged`, `unknown`, `unavailable` or `blocked`; `automatic_retry` is always false and `business_outcome` remains `unknown`. `submitted` means input acknowledgement, not task completion or collected results. A failure/unknown response is not permission to create another operation or automatically repeat.
@@ -36,9 +37,9 @@ New adapter: `internal/computertask/resume_view.go`. New HTTP handler: `internal
 | Changed owner/run/task/work_dir, injected resume ID, lost authority | PASS: refused, original record unchanged, no new native call. |
 | Disconnected preflight | PASS in service fixture: unknown original operation, unchanged record, zero new native calls. |
 | Lost prompt receipt and repeated explicit continuation after restart | PASS in service fixture: one prompt only; uncertain phase cannot replay. Existing bounded recovery owns CAS. |
-| Actual Echo JWT chain and task binding | PASS: anonymous, wrong owner/Bot/session, forged body identity, malformed/oversized JSON, late revocation, conflict and safe error/outcome responses. |
+| Actual Echo JWT chain and task binding | PASS: current account accepted, inactive account401, chat-route reply token403/zero continuation; anonymous, wrong owner/Bot/session, forged body identity, malformed/oversized JSON, late revocation, conflict and safe error/outcome responses. |
 | SDK/Web typecheck, affected Go lint, errors/server packages, core boundary | PASS, exit 0. |
-| Current compiled Server + existing synthetic PostgreSQL | PASS: new route rejects anonymous401, forged identity400, wrong kind400 and an old Agenvo operation400, all no-store. These are actual HTTP requests, not stubbed responses. |
+| Current compiled Server + existing synthetic PostgreSQL | PASS: same-owner synthetic chat-route token403/zero record mutation; new route rejects anonymous401, forged identity400, wrong kind400 and an old Agenvo operation400, all no-store. These are actual HTTP requests, not stubbed responses. |
 | Current Web + same Server/PG | PASS: open original synthetic conversation → Tasks → unknown operation detail → reload → same ID/status/parent. No writes or device-observation/content calls; no page error. |
 | Durable-data preservation | All-row hashes unchanged for 9 operations, 18 sessions, 14 runs and 29 messages, before/after the HTTP/UI checks. |
 
@@ -57,9 +58,15 @@ bash scripts/check-agent-core-boundary.sh
 go build -p=1 -ldflags='-s -w' -o <isolated-binary> ./cmd/agent
 ```
 
-The first combined command passed computertask and toolcontext but **failed to link handlers due to disk capacity**. Its FAIL is retained. A second handler link attempt while the Server build was competing also failed. The final stripped-debug handler test passed; no assertion or test scope was removed. Only verified unused task-generated binaries and two old task-owned compiled Go cache archives were removed; sources, databases, logs, originals and the base binary remain. The isolated Server initially failed to start because the operator used `MEMOH_CONFIG` instead of the repository's `CONFIG_PATH`; corrected using the same existing private configuration, then `/ping` returned200. The private startup log is retained locally and excluded here.
+The first combined command passed computertask and toolcontext but **failed to link handlers due to disk capacity**. Its FAIL is retained. A second handler link attempt while the Server build was competing also failed. The final stripped-debug handler test passed; no assertion or test scope was removed. Only verified unused task-generated binaries and old task-owned compiled Go cache archives were removed; sources, databases, logs, originals and the base binary remain. The isolated Server initially failed to start because the operator used `MEMOH_CONFIG` instead of the repository's `CONFIG_PATH`; corrected using the same existing private configuration, then `/ping` returned200. The private startup log is retained locally and excluded here.
 
 UI was served on loopback port18402, current Server on18400, existing synthetic PG on15432. The unrelated workspace-target sidebar response was replaced with an empty list to avoid device probes; task list/detail and new POST responses came from the actual Server/PG. Full unrelated business tests and real Windows/TLS/Herdr execution were not rerun. The staged aggregate passed Web lint, Go lint and the complete computertask package, but its complete handlers run failed two unchanged large-upload tests (201 MiB and over-limit streaming) with HTTP500 while the temporary filesystem had only about214 MiB available. After reclaiming369,393,664 bytes from two old compiled Go archives, those exact tests passed (1.919s); no file-module code changed. The failed aggregate is retained and is **not** described as an entire successful rerun. An earlier aggregate invocation stopped at package selection due to incorrectly quoted local GOFLAGS; the corrected invocation used `GOFLAGS=-ldflags=-s`. Remote CI belongs to the eventual exact commit and is not inferred from base58e.
+
+## New-entry token-scope correction
+
+The first unpublished API commit `eb819dfb` inherited the task handlers' generic JWT handling. A targeted red test demonstrated that a same-owner `chat_route` reply token could reach the new action (HTTP200). The follow-up correction limits **only this new POST** to an account token, preserving the middleware's live account validation. No existing task, chat, provider or global auth route was changed. The green test proves403 with zero continuation, inactive account401, and unchanged normal-account behavior. The current compiled Server also rejects a freshly generated in-memory synthetic chat-route token with403/no-store; its token was never persisted. See `account-scope-red.log`, `account-scope-green.log` and `account-http-proof.json`.
+
+The first corrected-handler link ran out of temporary disk space; this failure is retained. After removing three more pre-turn task-owned cache archives (531,337,216 bytes), the exact middleware suite passed. The corrected handler lint and generated-SDK ESLint both exited0. The Server was rebuilt and the HTTP/UI/data-preservation checks above were repeated against it. Successful native execution is still a service fixture result, not a connected-device claim.
 
 ![Current synthetic unknown task after Server replacement](combined-unknown-task.png)
 

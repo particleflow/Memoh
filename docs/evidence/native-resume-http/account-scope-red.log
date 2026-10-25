@@ -1,0 +1,6 @@
+=== RUN   TestSessionTaskResumeHTTPAuthorityAndNoModelRun
+    session_task_resume_test.go:100: status=200 want=403 cache=no-store body={"operation_id":"10000000-0000-4000-8000-000000000005","state":"submitted","phase":"batch_submitted","outcome":"submitted","automatic_retry":false,"business_outcome":"unknown"}
+--- FAIL: TestSessionTaskResumeHTTPAuthorityAndNoModelRun (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.020s
+FAIL

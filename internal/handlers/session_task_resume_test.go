@@ -61,9 +61,16 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), native)
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
-	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
+	activeAccount := true
+	e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }, func(context.Context, string) error {
+		if !activeAccount {
+			return errors.New("inactive synthetic account")
+		}
+		return nil
+	}))
 	h.Register(e)
 	path := "/bots/" + taskBot + "/sessions/" + taskRoot + "/tasks/computer_operation/" + taskOp + "/resume"
+	chatRouteToken := false
 	call := func(path, user, body string, want int) string {
 		t.Helper()
 		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(body))
@@ -72,6 +79,9 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 		req.Header.Set("X-Memoh-Session-Id", "forged-session")
 		if user != "" {
 			token, _, err := auth.GenerateToken(user, "test-secret", time.Minute)
+			if chatRouteToken {
+				token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: taskBot, UserID: user, ChatID: "synthetic-chat", RouteID: "synthetic-route"}, "test-secret", time.Minute)
+			}
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -86,6 +96,12 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 	}
 	in := `{"kind":"herdr_pi_task","task":"original synthetic instruction","work_dir":"."}`
 	call(path, "", in, 401)
+	chatRouteToken = true
+	call(path, taskUser, in, 403)
+	chatRouteToken = false
+	activeAccount = false
+	call(path, taskUser, in, 401)
+	activeAccount = true
 	call(path, taskOwner, in, 404)
 	call(strings.Replace(path, taskRoot, taskOwner, 1), taskUser, in, 404)
 	call(strings.Replace(path, taskBot, taskOwner, 1), taskUser, in, 404)

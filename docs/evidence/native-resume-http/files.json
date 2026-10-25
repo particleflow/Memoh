@@ -1,5 +1,50 @@
 [
   {
+    "path": "account-check-cache-cleanup.json",
+    "bytes": 983,
+    "sha256": "2f0b62704cd1546647f7fa3c79df4a3de28ccd61db27cafc1d861129053b8e37"
+  },
+  {
+    "path": "account-http-proof.json",
+    "bytes": 152,
+    "sha256": "e718b0f577b2c2fd65c15cbd325926a2685633513d82cec4bb6aeedc696d4187"
+  },
+  {
+    "path": "account-http.log",
+    "bytes": 140,
+    "sha256": "78b5bd03b82c5270c7c696b251f02df37b750b5b5696aff623f8ac90df4aea88"
+  },
+  {
+    "path": "account-lint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "account-scope-green.log",
+    "bytes": 597,
+    "sha256": "964a9e5358fcab964af24277376ec7e9c17fb8f034a4cd464ac52003479ae1c8"
+  },
+  {
+    "path": "account-scope-link-failure.log",
+    "bytes": 226,
+    "sha256": "00f80b933ec732b5aba3eda879ff4f7e4a120841a28349b66a8d4641fc380a75"
+  },
+  {
+    "path": "account-scope-red.log",
+    "bytes": 444,
+    "sha256": "6a8b3ebe159d851dfd7df7494b2c745f67f199335eea87af05240464eea07867"
+  },
+  {
+    "path": "account-sdk-eslint.log",
+    "bytes": 512,
+    "sha256": "8005b66392b9663a2e3adfd9d8b61ee61e7df94ba5dab75b2a474a1c484de62d"
+  },
+  {
+    "path": "account-sdk-generate.log",
+    "bytes": 323,
+    "sha256": "afbe7dc163510fc5e39f4d8e657336e4ac9942450577a7e22508e1ba4660c9f9"
+  },
+  {
     "path": "after-ledger.json",
     "bytes": 509,
     "sha256": "bd457039e8b592eda3133fa0feb767edadc6cda5392cddaeb1975a6e6d8666d4"

@@ -12157,7 +12157,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume": {
             "post": {
-                "description": "Requires the complete unchanged original computer_task_submit arguments. Resolves host authority from the authenticated user, conversation ancestry, operation ownership and target grant; reuses the persisted original run even when terminal. No model call, new run, new operation or workspace. Existing admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement, not business success; never automatically retry unknown outcomes. Disconnected Runtime remains unavailable. Read the same task afterward. No raw native output is returned.",
+                "description": "Requires a current account JWT and the complete unchanged original computer_task_submit arguments. Chat-route reply credentials cannot resume execution. Resolves host authority from the authenticated user, conversation ancestry, operation ownership and target grant; reuses the persisted original run even when terminal. No model call, new run, new operation or workspace. Existing admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement, not business success; never automatically retry unknown outcomes. Disconnected Runtime remains unavailable. Read the same task afterward. No raw native output is returned.",
                 "consumes": [
                     "application/json"
                 ],

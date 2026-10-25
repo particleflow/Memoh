@@ -11,6 +11,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
+	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -43,7 +44,7 @@ type NativeTaskResumeResponse struct {
 
 // Resume godoc
 // @Summary Explicitly continue one original native batch before prompt submission
-// @Description Requires the complete unchanged original computer_task_submit arguments. Resolves host authority from the authenticated user, conversation ancestry, operation ownership and target grant; reuses the persisted original run even when terminal. No model call, new run, new operation or workspace. Existing admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement, not business success; never automatically retry unknown outcomes. Disconnected Runtime remains unavailable. Read the same task afterward. No raw native output is returned.
+// @Description Requires a current account JWT and the complete unchanged original computer_task_submit arguments. Chat-route reply credentials cannot resume execution. Resolves host authority from the authenticated user, conversation ancestry, operation ownership and target grant; reuses the persisted original run even when terminal. No model call, new run, new operation or workspace. Existing admission/CAS and uncertain-dispatch fences apply. submitted is input acknowledgement, not business success; never automatically retry unknown outcomes. Disconnected Runtime remains unavailable. Read the same task afterward. No raw native output is returned.
 // @Tags sessions
 // @Accept json
 // @Produce json
@@ -56,6 +57,11 @@ type NativeTaskResumeResponse struct {
 // @Failure 400,401,403,404,409,500 {object} server.Problem
 // @Router /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/resume [post].
 func (h *SessionTaskHandler) Resume(c echo.Context) error {
+	// This is an explicit logged-in management action. Chat-route reply
+	// credentials skip account-session validation and cannot authorize it.
+	if _, err := auth.ChatTokenFromContext(c); err == nil {
+		return apperror.New(apperror.CodeHTTPForbidden, nil)
+	}
 	ctx, b, err := h.nativeBinding(c)
 	if err != nil {
 		return err
