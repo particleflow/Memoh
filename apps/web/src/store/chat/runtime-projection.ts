@@ -216,7 +216,16 @@ function transcriptForRun(run: RuntimeCurrentRunView | null): RuntimeTranscriptS
   // Runtime activity belongs to the current run, even when a steer splits its
   // transcript. Keep it out of the historical segments defined by message IDs.
   const runtimeStatus = active ? run.messages.find(message => message.type === 'status') : undefined
-  const assistantMessages = run.messages.filter(message => message.type !== 'status')
+  const assistantMessages = run.messages.filter(message => message.type !== 'status').map((message) => {
+    // An aborted/lost run can retain the last tool-start frame without a
+    // tool-end frame. End its foreground image indicator, not its outcome:
+    // an absent receipt stays absent and must not trigger another generation.
+    if (!active && message.type === 'tool' && !message.background_task
+      && (message.name === 'generate_image' || message.name === 'edit_image')) {
+      return { ...message, running: false }
+    }
+    return message
+  })
   const projectsAssistantContent = active
     || assistantMessages.length > 0
     || Boolean(run.error_code)

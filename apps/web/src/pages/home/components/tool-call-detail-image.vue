@@ -43,7 +43,8 @@ const prompt = computed(() => {
 const result = computed(() => structuredToolResult(props.block.result))
 const state = computed(() => pickString(result.value, 'state'))
 const finished = computed(() => props.block.done && !props.block.running)
-const confirmed = computed(() => finished.value && (!state.value || state.value === 'completed'))
+const confirmed = computed(() => finished.value && props.block.result != null
+  && (!state.value || state.value === 'completed'))
 
 const contentHash = computed(() => {
   if (!confirmed.value) return ''
@@ -54,10 +55,11 @@ const contentHash = computed(() => {
 // The result has no Bot/session authorization scope. Keep previews in the
 // existing attachment flow; do not invent an asset URL from the current Bot.
 const statusText = computed(() => {
-  if (!finished.value) return t('chat.tools.detail.waitingOutput')
   if (state.value === 'generated' && result.value.storage_state === 'unconfirmed') {
     return t('chat.tools.detail.imageStorageUnconfirmed')
   }
+  if (state.value && state.value !== 'completed') return t('chat.tools.detail.imageUnconfirmed')
+  if (!finished.value) return t('chat.tools.detail.waitingOutput')
   if (!confirmed.value) return t('chat.tools.detail.imageUnconfirmed')
   if (contentHash.value) {
     return t(result.value.delivered === 'current_conversation'
