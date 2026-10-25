@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -121,9 +122,26 @@ func diagnosePowerShellFixture(t *testing.T, shell string, env []string, payload
 	trace := filepath.Join(root, "powershell-stages.txt")
 	childTrace := filepath.Join(root, "diagnostic-child-stages.txt")
 	script := "function Write-FixtureStage([string]$stage) { [IO.File]::AppendAllText($env:MEMOH_POWERSHELL_TRACE, $stage+[Environment]::NewLine) }\nWrite-FixtureStage 'script-enter'\n" + cliPowerShell
+	const inputLine = "$p=[Console]::In.ReadToEnd() | ConvertFrom-Json"
+	if strings.Count(script, inputLine) != 1 {
+		t.Fatal("diagnostic input anchor changed")
+	}
+	// Split reading from cmdlet invocation without changing production. In
+	// Windows PowerShell, cmdlet discovery/autoload is a separate possible wait.
+	// These markers record only metadata about the synthetic input, never JSON.
+	script = strings.Replace(script, inputLine, `Write-FixtureStage ('input-redirected='+[Console]::IsInputRedirected)
+  Write-FixtureStage ('module-path-present='+(-not [string]::IsNullOrEmpty($env:PSModulePath)))
+  $raw=[Console]::In.ReadToEnd()
+  Write-FixtureStage ('input-read-completed chars='+$raw.Length)
+  $rawBytes=[Text.Encoding]::UTF8.GetBytes($raw)
+  $hasher=[Security.Cryptography.SHA256]::Create()
+  $rawHash=[BitConverter]::ToString($hasher.ComputeHash($rawBytes)).Replace('-','').ToLowerInvariant()
+  $hasher.Dispose()
+  Write-FixtureStage ('input-read-metadata bytes='+$rawBytes.Length+' sha256='+$rawHash)
+  $p=ConvertFrom-Json -InputObject $raw
+  Write-FixtureStage 'input-parsed'`, 1)
 	for _, marker := range []struct{ line, stage string }{
 		{"[Console]::InputEncoding=[Text.UTF8Encoding]::new($false)", "input-encoding-set"},
-		{"$p=[Console]::In.ReadToEnd() | ConvertFrom-Json", "input-parsed"},
 		{"$c.StartInfo=$s", "child-configured"},
 		{"[void]$c.Start()", "child-started"},
 		{"$c.StandardInput.Close()", "child-stdin-closed"},
@@ -147,10 +165,28 @@ func diagnosePowerShellFixture(t *testing.T, shell string, env []string, payload
 	defer cancel()
 	cmd := exec.CommandContext(ctx, shell, "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand", base64.StdEncoding.EncodeToString(raw)) //nolint:gosec // Fixed production script with synthetic phase markers; no live Herdr command.
 	cmd.Env = append(append([]string(nil), env...), "MEMOH_POWERSHELL_TRACE="+trace, "MEMOH_POWERSHELL_CHILD_TRACE="+childTrace)
-	cmd.Stdin = bytes.NewReader(payload)
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		t.Fatalf("diagnostic stdin pipe: %v", err)
+	}
+	defer func() { _ = stdin.Close() }()
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr
-	err := cmd.Run()
+	err = cmd.Start()
+	if err == nil {
+		type inputResult struct {
+			written            int64
+			writeErr, closeErr error
+		}
+		inputDone := make(chan inputResult, 1)
+		go func() {
+			n, writeErr := io.Copy(stdin, bytes.NewReader(payload))
+			inputDone <- inputResult{written: n, writeErr: writeErr, closeErr: stdin.Close()}
+		}()
+		err = cmd.Wait()
+		input := <-inputDone
+		t.Logf("diagnostic stdin producer: written=%d expected=%d sha256=%x write_error=%v close_error=%v", input.written, len(payload), sha256.Sum256(payload), input.writeErr, input.closeErr)
+	}
 	t.Logf("diagnostic replay: process_error=%v context_error=%v stdout={%s} stderr={%s}", err, ctx.Err(), powerShellOutputDiagnostic(stdout.Bytes()), powerShellOutputDiagnostic(stderr.Bytes()))
 	logPowerShellFixtureTrace(t, "PowerShell phases", trace)
 	logPowerShellFixtureTrace(t, "diagnostic child phases", childTrace)
