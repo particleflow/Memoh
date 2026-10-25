@@ -1,0 +1,2 @@
+READY real isolated PG/HTTP; synthetic official-shaped peer; exact bounded local workload only
+PASS configuration restored; all pre-existing operation rows unchanged; new synthetic receipts retained

@@ -1,0 +1,2 @@
+PASS post-restart real HTTP/PG readback: original parent/target/workspace/pane + accepted/unknown receipts; sampled process exit does not complete task
+PASS anonymous401 + wrong parent/bot404/no-store; zero peer calls on all denied reads; workload count remains two

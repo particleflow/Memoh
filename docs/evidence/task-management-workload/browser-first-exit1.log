@@ -1,0 +1,19 @@
+PASS real authenticated follow-up + PG CAS + two browser clicks: one local process; accepted remains input-only; actual output sample visible
+PASS deliberately lost peer confirmation follows real second process start: PG/browser retain unknown and original request UUID
+PASS restarted only the owned loopback Server, same executable/configuration/PG schema; no migration or workload restart
+PASS actual Server process restart with same PG: same operation/request/pane output, original local PID still alive, no third prompt
+PASS real workload exit and sampled output do not promote unknown receipt or task to completed
+Changed only the owned synthetic Runtime revocation fixture: revoke
+PASS actual Runtime revocation: content cleared; unauthorized follow-up 404/no-store; automatic content reads stop; zero peer calls or new workload
+Changed only the owned synthetic Runtime revocation fixture: restore
+PASS permission restored, same task/request read only; narrow shared Web layout; no business replay
+node:internal/process/promises:394
+    triggerUncaughtException(err, true /* fromPromise */);
+    ^
+
+response.json: Target page, context or browser has been closed
+    at _Page.<anonymous> (/tmp/task-management-workload/browser.mjs:18:132) {
+  log: []
+}
+
+Node.js v24.19.0

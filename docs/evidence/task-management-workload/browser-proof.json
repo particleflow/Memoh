@@ -1,0 +1,25 @@
+{
+  "realServerPG": true,
+  "transport": "synthetic MCP official method shapes, NOT native Runtime Exec or real Herdr/Pi",
+  "actualLocalWorkloads": [
+    "accepted",
+    "unknown"
+  ],
+  "posts": [
+    {
+      "http": 200,
+      "state": "accepted"
+    },
+    {
+      "http": 200,
+      "state": "unknown"
+    }
+  ],
+  "errors": [],
+  "restartedServer": true,
+  "revocation": {
+    "status": 404,
+    "cache": "no-store"
+  },
+  "passed": true
+}

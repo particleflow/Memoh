@@ -1,0 +1,17 @@
+{
+  "task_state": "submitted",
+  "business_state": "unknown",
+  "request_states": [
+    "accepted",
+    "unknown"
+  ],
+  "direct_parent_preserved": true,
+  "selected_target_preserved": true,
+  "native_reference_match": "observed",
+  "process_state": "unknown",
+  "anonymous": 401,
+  "wrong_parent": 404,
+  "wrong_bot": 404,
+  "unauthorized_peer_calls": 0,
+  "actual_workload_starts": 2
+}

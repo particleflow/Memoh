@@ -1,0 +1,193 @@
+{
+  "product_head": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+  "server_build_source": "384414933c8734b5e5bca663b99d9d7e292b4389",
+  "checks": [
+    {
+      "command": "python3 fixture.py",
+      "exit": 1,
+      "note": "All browser assertions completed, but final cleanup lacked required synthetic team context. Transaction rolled back; explicit cleanup with same existing team context succeeded. Initial peer stderr was not captured to a file; no full raw stderr claim."
+    },
+    {
+      "command": "node browser.mjs",
+      "exit": 1,
+      "note": "All scenario assertions passed; asynchronous response.json raced browser close. Original log retained. Harness fixed, workload not repeated."
+    },
+    {
+      "command": "python3 readback.py && node readback.mjs (first read-only closure)",
+      "exit": 0,
+      "note": "Native metadata remained unavailable because peer did not accept agent.get with pane ID. Did not establish native online state."
+    },
+    {
+      "command": "python3 fixture.py --read-only",
+      "exit": 0,
+      "note": "Only readback; zero new processes. Accepts existing legitimate pane-ID metadata form and returns standard unsupported-method responses. Temporary synthetic config fully restored."
+    },
+    {
+      "command": "python3 readback.py && node readback.mjs (final read-only closure)",
+      "exit": 0,
+      "note": "Real HTTP/PG permissions + visible native references, online and original reference match; same two original workloads."
+    },
+    {
+      "command": "Python AST parse + node --check for all included scripts",
+      "exit": 0
+    }
+  ],
+  "files": [
+    {
+      "file": "fixture-first.py",
+      "bytes": 10237,
+      "sha256": "85c1c0d10aa7d127987150ca58070006e3d85852ea41a0076bf54cc2c8041737",
+      "transformation": "none"
+    },
+    {
+      "file": "fixture.py",
+      "bytes": 11147,
+      "sha256": "4772d4334c40fb5ef22acaaa812af1cd6ee864a82b46a7f4ef625223328686c9",
+      "transformation": "none"
+    },
+    {
+      "file": "workload.py",
+      "bytes": 762,
+      "sha256": "d7973be39b72b9d45a44db09f0a4c5bb373e69a259dd4dac174c89eef106ed76",
+      "transformation": "none"
+    },
+    {
+      "file": "restart.py",
+      "bytes": 1853,
+      "sha256": "b2b5b02514d8d7f3173c9cae89dc2a9c0a09a2b8945275fc693a9ec6eb9fb3e3",
+      "transformation": "none"
+    },
+    {
+      "file": "permission.py",
+      "bytes": 616,
+      "sha256": "97bf8222b8666a8c28515e9fae55b140c11591bdb92fea8da96bd30fc0c3b803",
+      "transformation": "none"
+    },
+    {
+      "file": "browser.mjs",
+      "bytes": 9037,
+      "sha256": "486cb0a31e209da75e9c747f7966554251683ff0b1da12414fb5e709b5b30bb4",
+      "transformation": "none"
+    },
+    {
+      "file": "readback.py",
+      "bytes": 3314,
+      "sha256": "0618c87cc1d37c5a925e488266aabd12758564fa056a964229797aa263f906f2",
+      "transformation": "none"
+    },
+    {
+      "file": "readback.mjs",
+      "bytes": 3461,
+      "sha256": "f7158ba274b2f2731a7bd8c778f05237e96b0480e7c34dd8845a4cb59bc31e9e",
+      "transformation": "none"
+    },
+    {
+      "file": "browser-first-exit1.log",
+      "bytes": 1276,
+      "sha256": "8dc125f1f47f0c8f2209ed51c85e02572235760db0dbe344d53ee5f8688d710d",
+      "transformation": "none"
+    },
+    {
+      "file": "browser-proof.json",
+      "bytes": 446,
+      "sha256": "0774b633d14ef383c09cbbabac02fb435afc1aed14df2f8e897b85d5eac0409c",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-first-api.log",
+      "bytes": 266,
+      "sha256": "5b6929054d96bf786d08e239e3cbdec5f14c023d7741e0c51c42e1aeff9d0113",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-first-ui.log",
+      "bytes": 149,
+      "sha256": "8e0511bb7f63b6cb092df1ac83fd613282cfd64164acdc52f53373edd1035e23",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-first-proof.json",
+      "bytes": 387,
+      "sha256": "717d4c344aed83bca68c2fbc2b199418d9d00bbf4820de95d561e3b63542349b",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-api.log",
+      "bytes": 266,
+      "sha256": "5b6929054d96bf786d08e239e3cbdec5f14c023d7741e0c51c42e1aeff9d0113",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-ui.log",
+      "bytes": 149,
+      "sha256": "8e0511bb7f63b6cb092df1ac83fd613282cfd64164acdc52f53373edd1035e23",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-proof.json",
+      "bytes": 422,
+      "sha256": "d0ae3c9ff3857d5caa41717cb3c93cfb7f02bca014ae4b858883faaf6a8b35d5",
+      "transformation": "none"
+    },
+    {
+      "file": "pg-proof.json",
+      "bytes": 514,
+      "sha256": "37e75d2e95d1d8bf664cff267a9d0c6cc6ae6a48781cc4bf076718eb8179e52c",
+      "transformation": "none"
+    },
+    {
+      "file": "readonly-peer.log",
+      "bytes": 199,
+      "sha256": "90adef632d37abb145d1ad7473e297b8dd8ac07ed6fed6766be13b09112c9b15",
+      "transformation": "none"
+    },
+    {
+      "file": "readonly-cleanup.json",
+      "bytes": 1214,
+      "sha256": "00054235b9adbbdbe418b9f990948a8e7bc74bbc2fab8765e982e75ad2c86c20",
+      "transformation": "none"
+    },
+    {
+      "file": "accepted.stdout",
+      "bytes": 139,
+      "sha256": "d9ddc15459547b61232f00ec7c6e8432926cb3ca56af0d19de3620f267b59a70",
+      "transformation": "none"
+    },
+    {
+      "file": "unknown.stdout",
+      "bytes": 136,
+      "sha256": "eb7738a1e70697ad5543707ae3075d09de5bf638e6c49df295f8a9280170757e",
+      "transformation": "none"
+    },
+    {
+      "file": "batch-readback.json",
+      "bytes": 130,
+      "sha256": "4c6a10ee6925ca255c2bdc999b3a03cb76d30e2e7b8f26ac7b6d78f4101c47d0",
+      "transformation": "none"
+    },
+    {
+      "file": "foreground-readback.json",
+      "bytes": 167,
+      "sha256": "297f1ba7be79f10174b8c0cd8f1301e76dcc65f1d4baadf49202ed64b725da77",
+      "transformation": "none"
+    },
+    {
+      "file": "same-task-after-server-restart.png",
+      "bytes": 135776,
+      "sha256": "88816dab8d531433f905f588d2ae84b9bbf7047cd402156cb8326651eb90e6d1",
+      "transformation": "none"
+    },
+    {
+      "file": "unknown-narrow.png",
+      "bytes": 71708,
+      "sha256": "563e75a83c30264a7bbcd3e35c4ae0336060cd9e07dc888a626b5c0cb22f77a7",
+      "transformation": "none"
+    },
+    {
+      "file": "readback-with-native-references.png",
+      "bytes": 116681,
+      "sha256": "1c8b7ee29cf0ada9353a2153aa2733933238f88812469701922e4e7be7363f7e",
+      "transformation": "none"
+    }
+  ]
+}

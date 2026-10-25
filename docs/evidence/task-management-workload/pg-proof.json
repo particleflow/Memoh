@@ -1,0 +1,17 @@
+{
+  "original_operation_rows_unchanged": true,
+  "temporary_config_values_restored": true,
+  "temporary_revocation_restored": true,
+  "state": "submitted",
+  "revision": 6,
+  "receipts": [
+    "accepted",
+    "unknown"
+  ],
+  "process_logs": 2,
+  "peer_prompts": 2,
+  "cleanup_initial_exit": 1,
+  "cleanup_failure": "memoh.team_id not set; transaction rolled back",
+  "cleanup_retry_with_existing_team_context_exit": 0,
+  "old_operation_digest": "b6ed66d5ceb7432fa15eacd3a43493546530913224134efd8f6a730108e11cbf"
+}

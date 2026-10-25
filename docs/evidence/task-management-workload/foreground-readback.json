@@ -1,0 +1,8 @@
+{
+  "http": 200,
+  "supported": false,
+  "followup_available": false,
+  "availability": "unsupported",
+  "persisted_batch": false,
+  "actual_kind": "foreground_bash"
+}
