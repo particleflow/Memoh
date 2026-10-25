@@ -1,0 +1,11 @@
+{
+  "distributionCommit": "1bd851eca27bfb86adad690d01907b56f4b3f82f",
+  "url": "https://raw.githubusercontent.com/particleflow/Memoh/1bd851eca27bfb86adad690d01907b56f4b3f82f/artifacts/harmony/1.0.9-c9c005800/memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap",
+  "bytes": 37053849,
+  "sha256": "ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4",
+  "crcVerified": true,
+  "versionName": "1.0.9",
+  "versionCode": 1000009,
+  "emptyPublicConfiguration": true,
+  "windowsSigned": false
+}
