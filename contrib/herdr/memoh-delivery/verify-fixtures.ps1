@@ -22,7 +22,7 @@ foreach ($entry in $manifest.files) {
 # durability assertion, without sharing its timeout with publication/catalog I/O.
 & (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNativeActiveJournal$' '-test.v' '-test.timeout=5m'
 if ($LASTEXITCODE -ne 0) { throw "Native journal fixture validation failed: $LASTEXITCODE" }
-& (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNative' '-test.skip=^TestWindowsNativeActiveJournal$' '-test.v' '-test.timeout=5m'
+& (Join-Path $bundle 'transferqueue.test.exe') '-test.run=^TestWindowsNative' '-test.skip=^TestWindowsNativeActiveJournal$' '-test.v' '-test.timeout=10m'
 if ($LASTEXITCODE -ne 0) { throw "Remaining native fixture validation failed: $LASTEXITCODE" }
 
 # The CLI test binary invokes its real command dispatcher in fresh processes,

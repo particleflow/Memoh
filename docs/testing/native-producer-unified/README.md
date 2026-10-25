@@ -40,3 +40,20 @@ All three producer references must be canonical local Windows absolute paths. Se
 Actual Runtime enrollment, credential authorization, positive TLS acceptance, host directory/queue binding, real Pi results and phone/PC end-to-end recovery still require the coordinated field acceptance. No production mount was deleted, no credential was created and no deployment or image publication was performed by this integration step. Keep old connection/mount records; never use the generic migration CLI `down` as a single-step rollback of 0176. Live native pauses still block its down script.
 
 After exact final-head CI succeeds, the existing candidate image workflow is `.github/workflows/docker.yml` on the unified branch with `validated_sha` equal to that full final SHA. Its `validate-ref` requires equality with `GITHUB_SHA`. Docker PR validation does not publish images; candidate publication does not authorize NAS deployment or main/latest promotion.
+
+## Bounded Windows verification budget correction
+
+The final integration's first Native attempt failed in the unchanged aggregate Windows source-test process, before CLI/PG/package stages could run. The [retained step output](native-attempt1-step.log) ends with the package-wide five-minute alarm, not a preceding assertion failure. This is a CI execution limit, not evidence of a field device fault or authorization failure.
+
+| Evidence | Observed result |
+| --- | --- |
+| Source `2030c2d`, run 40190700957 attempt 1, job 121160882054 | Aggregate timeout at 300.06 seconds. Earlier passing tests included PublishCancelRace 77.04s, BucketBudget 74.83s and MigrationProcessCrash 47.85s; the current test had run two seconds. Existing source evidence is retained in `docs/evidence/native-herdr/windows-ci-2030c2d.json`. |
+| Integration `3a3cd00e`, run 40199820161 attempt 1, job 121188411058 | Aggregate timeout at 300.030 seconds. BucketBudget passed in 109.72s, ExplicitMigration in 54.16s and PublishCancelRace in 28.98s. MigrationProcessCrash had run 44s; its last started subcase was at zero seconds, in a Windows FlushFileBuffers stack. |
+| Passing e753 run 40193260634 | Whole job 1,161s (19m21s); source Windows aggregate 239s; packaged verification 308s across its existing groups. |
+| Passing source 03e4 run 40199092938 | Whole job 512s (8m32s); source Windows aggregate 119s; packaged verification 154s. |
+
+The two source deadline failures and the measured runner variability justify ten minutes for the **unchanged** remaining Windows aggregate. The packaged verifier repeats those same native publication/catalog cases, so only its corresponding aggregate receives the same ten-minute deadline. All other per-process deadlines remain unchanged. The whole-job limit increases from 25 to 35 minutes: two aggregate limits each gain five minutes, preserving the original overall headroom. Both process and job limits remain finite.
+
+No test is moved, removed, skipped or weakened. No production timeout, TLS behavior, filesystem flush, persistence code, credential or permission changes. `budget-check.json` records a command/selector comparison after removing only the changed budget literals and YAML comments; all executable lines otherwise match. `windows-budget-timings.json` contains the read-only GitHub step timestamps reduced to durations.
+
+One job-specific retry of the unchanged 3a3 head was accepted before the budget correction was requested. It is not the correction and must not be used as the new candidate's acceptance. The subsequent branch update uses the existing concurrency cancellation policy; it does not repeatedly retry the five-minute limit. The original five successful workflows are retained as historical evidence, while publication must use the corrected exact head's checks. No unrelated local business suite or UI check is rerun for this verification-only change.

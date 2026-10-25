@@ -31,9 +31,10 @@ jobs:
     name: Windows NTFS isolated fixtures
     runs-on: windows-2025
     # Source contracts and the packaged native replay both perform real NTFS
-    # flushes. A slow runner used 168s for the unchanged progress case alone;
-    # retain bounded five-minute processes and allow both complete passes.
-    timeout-minutes: 25
+    # flushes. Publication/catalog aggregates exhausted 5m on two runners.
+    # Allow 10m for each source/package aggregate and retain the existing
+    # overall headroom; other groups keep their original process deadlines.
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,7 +53,7 @@ jobs:
       - name: Execute Windows active journal contracts
         run: go test -count=1 -v -timeout=5m -run '^TestWindowsNativeActiveJournal$' ./internal/transferclient
       - name: Execute remaining Windows-prefixed transfer contracts
-        run: go test -count=1 -v -timeout=5m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient
+        run: go test -count=1 -v -timeout=10m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient
       - name: Execute complete CLI contracts
         run: go test -count=1 -v -timeout=5m ./cmd/transferqueue
       - name: Execute native publication with PostgreSQL
