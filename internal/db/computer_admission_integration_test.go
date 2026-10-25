@@ -168,9 +168,13 @@ func TestComputerAdmissionPreservesAlreadyReservedFollowup(t *testing.T) {
 }
 
 func TestComputerAdmissionPauseSerializesWithClaims(t *testing.T) {
+	exerciseAdmissionPauseSerializesWithClaims(t, newAdmissionFixture)
+}
+
+func exerciseAdmissionPauseSerializesWithClaims(t *testing.T, fixture func(*testing.T) admissionFixture) {
 	for _, first := range []string{"pause", "claim", "pause_followup", "followup"} {
 		t.Run(first, func(t *testing.T) {
-			f := newAdmissionFixture(t)
+			f := fixture(t)
 			ctx, cancel := context.WithTimeout(t.Context(), 15*time.Second)
 			defer cancel()
 			input := f.operation(f.mount)

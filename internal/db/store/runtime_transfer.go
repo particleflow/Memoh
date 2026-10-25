@@ -7,7 +7,7 @@ import (
 
 // RuntimeTransferRecord extends the existing computer registry, never an API DTO.
 type RuntimeTransferRecord struct {
-	RuntimeID, UserID                  string
+	RuntimeID, UserID, Provider        string
 	Config                             JSON
 	CredentialID, Digest, TargetDigest string
 	ExpiresAt                          time.Time

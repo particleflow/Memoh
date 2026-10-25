@@ -38,7 +38,10 @@ type Service struct {
 	store       dbstore.AgenvoRuntimeStore
 	permissions PermissionChecker
 	call        SourceCaller
+	callNative  NativeCaller
 }
+
+func (s *Service) SetNativeCaller(call NativeCaller) { s.callNative = call }
 
 // DiscoveredInstance contains only the fields needed to choose a target. It
 // deliberately excludes instance context, provider credentials and scope data.
@@ -101,6 +104,11 @@ func NewService(store dbstore.AgenvoRuntimeStore, permissions PermissionChecker,
 func DecodeTarget(raw []byte) (Target, error) {
 	var target Target
 	if json.Unmarshal(raw, &target) != nil {
+		return Target{}, ErrInvalidTarget
+	}
+	// Only the provider-specific decoder may select a native Runtime. An MCP
+	// registration cannot inject a Runtime ID to switch authentication paths.
+	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" {
 		return Target{}, ErrInvalidTarget
 	}
 	return target, validateTarget(target)
@@ -181,8 +189,12 @@ func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, err
 		}
 		return t, err
 	}, func(ctx context.Context, id, name string, args map[string]any) (json.RawMessage, error) {
+		if s.call == nil {
+			return nil, ErrUnavailable
+		}
 		return s.call(ctx, owner, id, name, args)
 	})
+	c.callNative = s.callNative
 	return c, target, nil
 }
 
@@ -192,6 +204,9 @@ func (s *Service) Register(ctx context.Context, ownerID, name string, target Tar
 	}
 	if err := validateTarget(target); err != nil {
 		return dbstore.UserRuntimeRecord{}, err
+	}
+	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" {
+		return dbstore.UserRuntimeRecord{}, ErrInvalidTarget
 	}
 	// Verify ownership before contacting the relay. Existing Bot membership or
 	// administrator status alone does not authorize sharing somebody else's MCP.
@@ -244,15 +259,17 @@ func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, err
 		return Target{}, "", ErrForbidden
 	}
 	record, err := s.store.GetMount(ctx, scope.BotID, scope.TargetID)
-	if err != nil || record.BotID != scope.BotID || record.ID != scope.TargetID || record.RuntimeRevoked || record.RuntimeUserID != record.BotOwnerUserID || record.RuntimeProvider != Provider {
+	if err != nil || record.BotID != scope.BotID || record.ID != scope.TargetID || record.RuntimeRevoked || record.RuntimeUserID != record.BotOwnerUserID {
 		return Target{}, "", ErrForbidden
 	}
-	target, err := DecodeTarget(record.RuntimeProviderConfig)
+	target, err := DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
 	if err != nil {
 		return Target{}, "", err
 	}
-	if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, record.RuntimeUserID, target.ConnectionID); err != nil {
-		return Target{}, "", ErrForbidden
+	if target.NativeRuntimeID == "" {
+		if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, record.RuntimeUserID, target.ConnectionID); err != nil {
+			return Target{}, "", ErrForbidden
+		}
 	}
 	if pin, ok := ctx.Value(registrationPinKey{}).(registrationPin); ok && (pin.Scope != scope || pin.Fingerprint == "" || pin.Fingerprint != TargetFingerprint(target)) {
 		return Target{}, "", ErrTargetChanged
@@ -261,18 +278,9 @@ func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, err
 }
 
 func (s *Service) Execute(ctx context.Context, req Request) (Result, error) {
-	_, ownerID, err := s.resolve(ctx, req.Scope)
+	client, _, err := s.Client(ctx, req.Scope)
 	if err != nil {
 		return Result{State: "not_started"}, err
 	}
-	client := NewClient(func(ctx context.Context, scope Scope) (Target, error) {
-		target, owner, err := s.resolve(ctx, scope)
-		if err == nil && owner != ownerID {
-			return Target{}, ErrTargetChanged
-		}
-		return target, err
-	}, func(ctx context.Context, id, name string, args map[string]any) (json.RawMessage, error) {
-		return s.call(ctx, ownerID, id, name, args)
-	})
 	return NewExecutor(client).Execute(ctx, req)
 }

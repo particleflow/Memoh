@@ -495,6 +495,16 @@ export type AgenvoEndpointLocator = {
     program_path?: string;
 };
 
+export type AgenvoNativeHerdrProfile = {
+    agent?: AgenvoAgentProfile;
+    bash_path: string;
+    herdr_cli: string;
+    herdr_config_root: string;
+    instance_id: string;
+    session: string;
+    work_dir: string;
+};
+
 export type AgenvoReferenceObservation = {
     agent_status?: string;
     availability?: string;
@@ -510,7 +520,10 @@ export type AgenvoTarget = {
     bash_path?: string;
     connection_id?: string;
     device_id?: string;
+    herdr_cli?: string;
+    herdr_config_root?: string;
     instance_id?: string;
+    native_runtime_id?: string;
     session?: string;
     work_dir?: string;
 };
@@ -4702,6 +4715,14 @@ export type UserruntimeCreateRuntimeRequest = {
     provider?: string;
 };
 
+export type UserruntimeNativeHerdrIdentity = {
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    session?: string;
+    target_fingerprint?: string;
+};
+
 export type UserruntimeRuntime = {
     arch?: string;
     availability?: string;
@@ -4712,6 +4733,7 @@ export type UserruntimeRuntime = {
     id?: string;
     key?: string;
     name?: string;
+    native_herdr?: UserruntimeNativeHerdrIdentity;
     online?: boolean;
     os?: string;
     provider?: string;
@@ -19899,6 +19921,47 @@ export type PutUsersMeRuntimesByIdAgenvoEndpointResponses = {
 };
 
 export type PutUsersMeRuntimesByIdAgenvoEndpointResponse = PutUsersMeRuntimesByIdAgenvoEndpointResponses[keyof PutUsersMeRuntimesByIdAgenvoEndpointResponses];
+
+export type PutUsersMeRuntimesByIdNativeHerdrData = {
+    /**
+     * Private deployment profile
+     */
+    body: AgenvoNativeHerdrProfile;
+    path: {
+        /**
+         * Existing native Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/native-herdr';
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrError = PutUsersMeRuntimesByIdNativeHerdrErrors[keyof PutUsersMeRuntimesByIdNativeHerdrErrors];
+
+export type PutUsersMeRuntimesByIdNativeHerdrResponses = {
+    /**
+     * OK
+     */
+    200: UserruntimeRuntime;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrResponse = PutUsersMeRuntimesByIdNativeHerdrResponses[keyof PutUsersMeRuntimesByIdNativeHerdrResponses];
 
 export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;

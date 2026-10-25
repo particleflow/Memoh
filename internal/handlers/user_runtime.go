@@ -48,10 +48,40 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.DELETE("/:id", h.Delete)
 	g.POST("/agenvo/discover", h.DiscoverAgenvo)
 	g.PUT("/:id/agenvo-agent", h.ConfigureAgenvoAgent)
+	g.PUT("/:id/native-herdr", h.ConfigureNativeHerdr)
 	g.GET("/:id/agenvo-endpoint", h.ReadAgenvoEndpoint)
 	g.PUT("/:id/agenvo-endpoint", h.ConfigureAgenvoEndpoint)
 	g.GET("/:id/admission", h.ReadAdmission)
 	g.PUT("/:id/admission", h.SetAdmission)
+}
+
+// ConfigureNativeHerdr godoc
+// @Summary Configure Herdr on an existing owned native Runtime
+// @Description Stores non-secret local references on an activated Runtime. Does not enroll a device, grant Bots, start Herdr, or change credentials. Native Pi tasks require pi-json-v1.
+// @Tags user-runtimes
+// @Accept json
+// @Produce json
+// @Param id path string true "Existing native Runtime ID"
+// @Param request body agenvo.NativeHerdrProfile true "Private deployment profile"
+// @Success 200 {object} userruntime.Runtime
+// @Failure 400 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 409 {object} server.Problem
+// @Router /users/me/runtimes/{id}/native-herdr [put].
+func (h *UserRuntimeHandler) ConfigureNativeHerdr(c echo.Context) error {
+	owner, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	var profile agenvo.NativeHerdrProfile
+	if err = c.Bind(&profile); err != nil {
+		return err
+	}
+	runtime, err := h.service.ConfigureNativeHerdr(c.Request().Context(), owner, strings.TrimSpace(c.Param("id")), profile)
+	if err != nil {
+		return runtimeHTTPError(err)
+	}
+	return c.JSON(http.StatusOK, runtime)
 }
 
 // ConfigureAgenvoAgent godoc
@@ -191,7 +221,7 @@ func (h *UserRuntimeHandler) Delete(c echo.Context) error {
 
 func runtimeHTTPError(err error) error {
 	switch {
-	case errors.Is(err, agenvo.ErrEndpointConfigConflict):
+	case errors.Is(err, agenvo.ErrEndpointConfigConflict), errors.Is(err, agenvo.ErrNativeProfileConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
 		return apperror.Wrap(apperror.CodeComputerAdmissionPaused, err, nil)

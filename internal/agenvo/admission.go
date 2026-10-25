@@ -47,15 +47,27 @@ func (s *Service) admissionTarget(ctx context.Context, owner, runtime string) (a
 		return nil, dbstore.UserRuntimeRecord{}, Target{}, ErrUnavailable
 	}
 	row, err := store.OwnedAgenvoRuntime(ctx, owner, runtime)
+	if errors.Is(err, db.ErrNotFound) {
+		if native, ok := s.store.(nativeProfileStore); ok {
+			row, err = native.OwnedNativeHerdrRuntime(ctx, owner, runtime)
+		}
+	}
 	if err != nil {
 		return nil, row, Target{}, ErrForbidden
 	}
-	target, err := DecodeTarget(row.ProviderConfig)
+	var target Target
+	if row.Provider == "memoh" {
+		target, err = DecodeNativeTarget(row.ID, row.ProviderConfig)
+	} else {
+		target, err = DecodeTarget(row.ProviderConfig)
+	}
 	if err != nil {
 		return nil, row, target, db.ErrComputerAdmissionScope
 	}
-	if _, err = s.store.OwnedHTTPMCPConnectionBot(ctx, owner, target.ConnectionID); err != nil {
-		return nil, row, target, ErrForbidden
+	if target.NativeRuntimeID == "" {
+		if _, err = s.store.OwnedHTTPMCPConnectionBot(ctx, owner, target.ConnectionID); err != nil {
+			return nil, row, target, ErrForbidden
+		}
 	}
 	return store, row, target, nil
 }
@@ -87,8 +99,12 @@ func (s *Service) SetAdmission(ctx context.Context, owner, runtime string, in Ch
 	if err != nil {
 		return Admission{}, err
 	}
-	if err = s.Probe(ctx, owner, record.ProviderConfig); err != nil {
-		return Admission{}, err
+	// Native admission is an owner control-plane change and remains available
+	// while the PC is disconnected. It does not grant execution or resume work.
+	if record.Provider != "memoh" {
+		if err = s.Probe(ctx, owner, record.ProviderConfig); err != nil {
+			return Admission{}, err
+		}
 	}
 	row, err := store.ChangeComputerAdmission(ctx, owner, runtime, record.ProviderConfig, in.RequestID, revision, *in.Paused)
 	return admissionResponse(row), err
