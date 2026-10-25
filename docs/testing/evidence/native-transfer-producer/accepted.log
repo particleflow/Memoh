@@ -1,0 +1,7 @@
+=== RUN   TestNativeTransferPinnedProducerCombination
+    native_transfer_producer_integration_test.go:142: real Server verifier/PG: native and legacy own identities accepted; both cross-provider directions denied=403; Runtime mrk rejected=401
+    native_transfer_producer_integration_test.go:112: real HTTPS Server/PG/filesystem: CLI upload 9800163 bytes, lost PATCH response -> same receipt, Create/Complete/Commit=1; library download Range resumed at 8394902, full content/hash match; CLI Linux publication unavailable; large/backlog metadata accepted without payload GET; attempt/revoke checks enforced
+    native_transfer_producer_integration_test.go:144: server=2030c2d5 producer=0.10.1 separately pinned; task/attempt/receipt/reference retained across fresh CLI processes; Linux download transport only, no Windows publication claim
+--- PASS: TestNativeTransferPinnedProducerCombination (9.29s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	10.364s

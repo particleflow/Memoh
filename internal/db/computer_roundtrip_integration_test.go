@@ -52,6 +52,13 @@ func (w interruptedRouteResponse) Unwrap() http.ResponseWriter { return w.networ
 // has no LocalPublication implementation and must not claim local publication.
 func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgresstore.Store, id computertask.DeliveryIdentity) {
 	t.Helper()
+	exerciseRealRouteRoundTripWithProducer(ctx, t, store, id, "", nil)
+}
+
+// The optional source checkout and probe allow an independently pinned producer
+// to exercise a newly integrated server without changing either product tree.
+func exerciseRealRouteRoundTripWithProducer(ctx context.Context, t *testing.T, store *postgresstore.Store, id computertask.DeliveryIdentity, producerSource string, probe func(string, *http.Client, *registeredTransferVerifier, transferclient.Job)) {
+	t.Helper()
 	if runtime.GOOS != "linux" {
 		t.Skip("Linux cloud route acceptance; Windows NTFS publication has separate native coverage")
 	}
@@ -103,13 +110,14 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 	}
 	defer active.Close()
 	endpoint := server.NewServer(log, ":0", "isolated-roundtrip", active) //nolint:contextcheck // Real HTTP requests supply their own contexts.
-	var creates, completes, commits, gets atomic.Int64
+	var creates, completes, commits, gets, requests atomic.Int64
 	var dropPatch, dropDownload atomic.Bool
 	dropPatch.Store(true)
 	dropDownload.Store(true)
 	patchResult := make(chan media.Upload, 1)
 	ranges := make(chan string, 4)
 	https := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests.Add(1)
 		if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, "/media/uploads") {
 			creates.Add(1)
 		}
@@ -180,6 +188,10 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 	write(cert, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: https.Certificate().Raw}))
 	binary := filepath.Join(root, "transferqueue")
 	build := exec.CommandContext(ctx, "go", "build", "-buildvcs=false", "-o", binary, "../../cmd/transferqueue") //nolint:gosec // Fixed repository build, never a downloaded artifact.
+	if producerSource != "" {
+		build = exec.CommandContext(ctx, "go", "build", "-buildvcs=false", "-o", binary, "./cmd/transferqueue") //nolint:gosec // Explicit local fixture checkout, never remote input.
+		build.Dir = producerSource
+	}
 	if output, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("build actual CLI: %v %s", err, output)
 	}
@@ -267,6 +279,16 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 		return entry
 	}
 	proof := readProof()
+	// Reopened finite commands must expose the original committed reference and
+	// producer feedback without network work or changing the durable proof.
+	for range 2 {
+		before := requests.Load()
+		status := invoke("inspect", closed.DeliveryID(), nil, 0)
+		var restored transferclient.Reference
+		if string(status["associated"]) != "true" || string(status["feedback_status"]) != `"recorded"` || json.Unmarshal(status["reference"], &restored) != nil || restored != ref || !bytes.Equal(readProof(), proof) || before != requests.Load() {
+			t.Fatal("reopened producer lost original reference/feedback or replayed mutation")
+		}
+	}
 	if out := invoke("enqueue-result", "", raw, 0); string(out["associated"]) != "true" {
 		t.Fatal("duplicate producer did not replay confirmed receipt")
 	}
@@ -281,6 +303,12 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 		t.Fatal("upload retried as new business", creates.Load(), completes.Load(), commits.Load())
 	}
 	job := transferclient.Job{Version: 1, DeliveryID: "roundtrip-download", OperationID: id.OperationID, BotID: id.Binding.BotID, SnapshotID: "roundtrip-download", LocatorRevision: "native-profile-v1", Phase: "queued", Task: pgDeviceTask(id), Spec: spec}
+	if probe != nil {
+		probe(https.URL, https.Client(), verifier, job)
+		if !bytes.Equal(readProof(), proof) {
+			t.Fatal("cross-provider denial changed original committed proof")
+		}
+	}
 	newClient := func(job transferclient.Job) *transferclient.Client {
 		t.Helper()
 		client, err := transferclient.NewDeviceTask(https.URL, job, "download", job.Task, https.Client(), func(context.Context) (string, error) { return "Memoh-Transfer " + verifier.token, nil })

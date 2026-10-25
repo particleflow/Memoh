@@ -1,0 +1,6 @@
+=== RUN   TestNativeCompletionRegistersWithoutLegacyPlugin
+    native_completion_hook_test.go:57: new result closed and business receipt returned, but only disabled legacy plugin invoked; producer collector not called
+--- FAIL: TestNativeCompletionRegistersWithoutLegacyPlugin (0.07s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/agenvo	0.079s
+FAIL

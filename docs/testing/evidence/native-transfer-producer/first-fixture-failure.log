@@ -1,0 +1,6 @@
+=== RUN   TestNativeTransferPinnedProducerCombination
+    native_transfer_producer_integration_test.go:101: device credential rejected
+--- FAIL: TestNativeTransferPinnedProducerCombination (3.78s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/db	3.851s
+FAIL

@@ -1,0 +1,59 @@
+package agenvo
+
+import (
+	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/google/uuid"
+
+	"github.com/felinics/memoh/internal/deliverymeta"
+)
+
+// Red reproduction on 2030c2d5. Execute the real generated completion wrapper
+// with a disabled legacy plugin. Synthetic Pi/Herdr utilities are explicit;
+// this is neither a Windows run nor proof of a later direct-CLI implementation.
+func TestNativeCompletionRegistersWithoutLegacyPlugin(t *testing.T) {
+	dir := t.TempDir()
+	bin := filepath.Join(dir, "bin")
+	if err := os.Mkdir(bin, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	for name, script := range map[string]string{
+		"uname":         "#!/bin/sh\nprintf MINGW64_NT-SYNTHETIC\n",
+		"cygpath":       "#!/bin/sh\ncase \"$2\" in 'C:\\Synthetic') printf '%s' \"$SYNTH_ROOT\";; *) printf '%s' \"$2\";; esac\n",
+		"pi":            "#!/bin/sh\ncat >/dev/null\ntest -f \"$MEMOH_DELIVERY_CONTEXT_FILE\" || exit 1\nprintf 'synthetic-result' > result_one\nprintf run >> \"$SYNTH_ROOT/pi-count\"\n",
+		"herdr":         "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/hook-args\"\nprintf 'synthetic legacy plugin disabled' >&2\nexit 17\n",
+		"transferqueue": "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/collector-called\"\n",
+	} {
+		if err := os.WriteFile(filepath.Join(bin, name), []byte(script), 0o700); err != nil { //nolint:gosec // Test-owned synthetic binaries only.
+			t.Fatal(err)
+		}
+	}
+	p := batchFixtureProgress()
+	p.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: uuid.NewString(), BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "synthetic-run", Attempt: p.Attempt, Generation: p.Generation, RootHash: deliverymeta.RootHash(`C:\Synthetic`)}, Artifact: deliverymeta.Artifact{SourceRef: "result_one", Mime: "text/plain"}}
+	target := Target{NativeRuntimeID: syntheticNativeID, ConnectionID: syntheticNativeID, DeviceID: syntheticNativeID, InstanceID: "synthetic-herdr", WorkDir: `C:\Synthetic`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
+	script := batchFixtureScript(t, p, target, target.WorkDir, "create the declared result")
+	command := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script) //nolint:gosec // Real generated wrapper, synthetic local tools only.
+	command.Dir = dir
+	command.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir}
+	out, err := command.CombinedOutput()
+	if err != nil {
+		t.Fatal("generated wrapper failed", err)
+	}
+	receipt, err := parseBatchReceipt(string(out), p)
+	if err != nil || receipt == nil || !receipt.Started || string(readBatchFixture(t, filepath.Join(dir, "pi-count"))) != "run" {
+		t.Fatal("business receipt or single execution lost", err)
+	}
+	var closed deliverymeta.Closed
+	if json.Unmarshal(readBatchFixture(t, filepath.Join(dir, p.Producer.ManifestName())), &closed) != nil || !closed.Valid() {
+		t.Fatal("new result was not actually closed")
+	}
+	args := string(readBatchFixture(t, filepath.Join(dir, "hook-args")))
+	if _, err := os.Stat(filepath.Join(dir, "collector-called")); os.IsNotExist(err) && strings.Contains(args, "plugin\naction\ninvoke\ncollect-result") {
+		t.Fatal("new result closed and business receipt returned, but only disabled legacy plugin invoked; producer collector not called")
+	}
+}
