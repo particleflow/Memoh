@@ -132,7 +132,7 @@ describe.each(['web', 'native'])('computer observation in %s host', host => {
     const detail = { task_type: 'computer_operation' as const, task_id: 'operation', session_id: 'session', parent_session_id: 'root', created_at: '', updated_at: '', status: 'submitted' as const, summary: '', content_available: false, attachments_available: false }
     const observation = ref<import('../composables/useComputerTaskObservation').ComputerTaskObservationView>({
       loading: false, refresh: vi.fn().mockResolvedValue(undefined), receivedAt: '12:00:00',
-      data: { operation_id: 'operation', target_id: 'synthetic-pc', workspace_id: 'w-observed', pane_id: 'p-observed', state: 'submitted', business_outcome: 'unknown', native: { availability: 'online', agent_status: 'working', reference_match: 'observed' } },
+      data: { operation_id: 'operation', target_id: 'synthetic-pc', workspace_id: 'w-observed', pane_id: 'p-observed', state: 'submitted', reconciliation: { revision: '9007199254740993123', receipt_state: 'validated' }, business_outcome: 'unknown', native: { availability: 'online', agent_status: 'working', reference_match: 'observed' } },
     })
     app = createApp({ setup() {
       const body = () => h(SessionTaskResults, { items: [], detail, selected: detail, loading: false, observation: observation.value })
@@ -146,11 +146,16 @@ describe.each(['web', 'native'])('computer observation in %s host', host => {
     const dialog = document.querySelector(host === 'web' ? '[role=dialog]' : 'dialog')!
     expect(dialog.textContent).toContain('Native Agent: Working')
     expect(dialog.textContent).toContain('w-observed')
+    expect(dialog.textContent).toContain('9007199254740993123')
     observation.value = { ...observation.value, data: { ...observation.value.data, native: { availability: 'online', agent_status: 'done', reference_match: 'observed' } } }
     await nextTick()
     expect(dialog.textContent).toContain(en.chat.tasks.observation.states.done)
     expect(dialog.textContent).toContain(en.chat.tasks.statuses.submitted)
     expect(dialog.textContent).toContain(en.chat.tasks.businessUnknown)
+    observation.value = { ...observation.value, error: { status: 403 } } // Even stale data must be hidden on access loss.
+    await nextTick()
+    expect(dialog.textContent).not.toContain('9007199254740993123')
+    expect(dialog.textContent).not.toContain('w-observed')
     observation.value = { ...observation.value, data: undefined, error: { status: 404, code: 'http.not_found' } }
     await nextTick()
     expect(dialog.textContent).toContain(en.chat.tasks.observation.unsupported)
