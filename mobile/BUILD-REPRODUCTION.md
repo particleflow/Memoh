@@ -1,5 +1,14 @@
 # Reproduction inputs and verified build sequence
 
+The latest generic unsigned candidate is **1.0.9 / 1000009**, source
+`c9c00580052d09d5dce273e958ec384bef2ebed3`, locking complete shared Web/SDK to
+`8a2422935916f56b5bacfac2f991824d1cb9bd9f`. It reuses the existing toolchain and
+Windows private-injection flow. [Qualified build and handoff](../docs/testing/harmony-unified-8a24229/README.md).
+The initial sandbox denied the official synchronous VM-version probe with
+`EPERM`; formal execution approval restored correct metadata. Do not manually
+patch SDK or HAP metadata to conceal such a failure. Earlier packages below are
+retained historical outputs.
+
 The new generic unsigned 1.0.8 / 1000008 package is built from
 `ee00ff76a07ac27e08f4b4f58fd1354f0ecbeef3` with the same retained official SDK.
 It adds the empty local configuration slot and verified legacy migration, for
@@ -63,10 +72,10 @@ the reported installed 1.0.6.
 - Python 3.12 and pnpm 10.27.0. The verified Web run used Node 24.19.0;
   native compilation used the official CLT's bundled Linux Node.
 - `client/config/memoh_web.lock.json` pins complete public Memoh source at
-  `68be06092a1ea85d961115aac404082982bdecf4` and UI at
+  `8a2422935916f56b5bacfac2f991824d1cb9bd9f` and UI at
   `f69402a55dd87a59c10722fe11507ad8fd7048f5`, including component archive hashes.
   The deterministic combined archive SHA256 is
-  `9b083128e78e0827462ba12c913433fd3ee2161cd450338adda6d0a560c31f25`.
+  `a46cd6ac84b36b417a578a4f7a95c802ba864998edd481ec7e23290a225a4a92`.
 - Official `commandline-tools-linux-x64-26.0.0.851.zip`, 2,348,063,309 bytes,
   SHA256 `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`,
   containing SDK API26 / 26.0.0.105. Acquire through the official supported

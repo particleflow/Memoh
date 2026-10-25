@@ -1,0 +1,75 @@
+{
+  "sourceCommit": "c9c00580052d09d5dce273e958ec384bef2ebed3",
+  "sharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "bundleName": "cloud.begonia.workassistant",
+  "versionName": "1.0.9",
+  "versionCode": 1000009,
+  "bytes": 37053849,
+  "sha256": "ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4",
+  "members": 817,
+  "unsigned": true,
+  "allCRCsValid": true,
+  "moduleIdentityPermissionsUnchangedExceptVersion": true,
+  "permissions": [
+    {
+      "name": "ohos.permission.INTERNET"
+    },
+    {
+      "name": "ohos.permission.GET_NETWORK_INFO"
+    },
+    {
+      "reason": "$string:microphone_reason",
+      "reasonId": 16777220,
+      "usedScene": {
+        "abilities": [
+          "EntryAbility"
+        ],
+        "when": "inuse"
+      },
+      "name": "ohos.permission.MICROPHONE"
+    },
+    {
+      "name": "ohos.permission.DETECT_GESTURE"
+    },
+    {
+      "name": "ohos.permission.FILE_ACCESS_PERSIST"
+    },
+    {
+      "reason": "$string:album_backup_reason",
+      "reasonId": 16777218,
+      "usedScene": {
+        "abilities": [
+          "EntryAbility"
+        ],
+        "when": "always"
+      },
+      "name": "ohos.permission.READ_IMAGEVIDEO"
+    }
+  ],
+  "emptyConfigurationSlotBytes": 8192,
+  "configurationStored": true,
+  "legacyBinding": null,
+  "credentialPatternMatches": {
+    "privateKey": 0,
+    "githubCredential": 0,
+    "awsKey": 0,
+    "jwtValue": 0,
+    "runtimeOrTransferCredential": 0
+  },
+  "sourceMaps": [
+    "ets/sourceMaps.map"
+  ],
+  "sourceMapKeysAndSourcesUnchanged": true,
+  "abcVersion": [
+    24,
+    0,
+    0,
+    0
+  ],
+  "virtualMachine": "ark24.0.0.0",
+  "newReadableURLCandidatesComparedWith108": 0,
+  "sourceIdentitySha256": "ca1d7d410a676881c7285b02fd8ffe16a10baeb2cc755552781c3cdd6e952d26",
+  "webResources": 801,
+  "scanScope": "Every decompressed ZIP member; UTF-8/UTF-16 readable URL deltas; selected credential patterns; reserved empty config and signing-material extensions. Not exhaustive arbitrary secret/encoding detection.",
+  "actualDeviceAcceptance": false
+}

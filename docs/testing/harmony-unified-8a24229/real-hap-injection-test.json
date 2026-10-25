@@ -1,0 +1,13 @@
+{
+  "sourceCommit": "c9c00580052d09d5dce273e958ec384bef2ebed3",
+  "publicHAPSHA256": "ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4",
+  "syntheticConfigurationOnly": true,
+  "changedMembers": [
+    "resources/rawfile/client-web/memoh_client.json"
+  ],
+  "allCRCsValid": true,
+  "allEntryOffsetsPreserved": true,
+  "publicHAPUnchanged": true,
+  "realWindowsInjection": false,
+  "signed": false
+}
