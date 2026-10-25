@@ -1,0 +1,40 @@
+=== RUN   TestProducerFeedbackScopeAndUnchangedBlock
+--- PASS: TestProducerFeedbackScopeAndUnchangedBlock (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	1.020s
+=== RUN   TestFeedbackStrictOriginalBindingAndBound
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/root
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/unknown-backoff
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/bot
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/target
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/run
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/delivered
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/retry-unknown
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/session
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/plan
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/duplicate
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/missing
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/operation
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/user
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/generation
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/raw-error
+=== RUN   TestFeedbackStrictOriginalBindingAndBound/attempt
+--- PASS: TestFeedbackStrictOriginalBindingAndBound (0.03s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/root (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/unknown-backoff (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/bot (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/target (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/run (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/delivered (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/retry-unknown (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/session (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/plan (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/duplicate (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/missing (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/operation (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/user (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/generation (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/raw-error (0.00s)
+    --- PASS: TestFeedbackStrictOriginalBindingAndBound/attempt (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/deliverymeta	1.041s

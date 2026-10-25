@@ -1,0 +1,46 @@
+=== RUN   TestCLIBudgetConfigurationAndOldQueueRecovery
+--- PASS: TestCLIBudgetConfigurationAndOldQueueRecovery (0.02s)
+=== RUN   TestCLIPathFeedbackApplicability
+=== RUN   TestCLIPathFeedbackApplicability/download-no-context
+=== RUN   TestCLIPathFeedbackApplicability/download-foreign-context
+=== RUN   TestCLIPathFeedbackApplicability/upload-v1
+=== RUN   TestCLIPathFeedbackApplicability/upload-missing-context
+=== RUN   TestCLIPathFeedbackApplicability/upload-foreign-context
+=== RUN   TestCLIPathFeedbackApplicability/upload-write-failure
+--- PASS: TestCLIPathFeedbackApplicability (0.05s)
+    --- PASS: TestCLIPathFeedbackApplicability/download-no-context (0.01s)
+    --- PASS: TestCLIPathFeedbackApplicability/download-foreign-context (0.01s)
+    --- PASS: TestCLIPathFeedbackApplicability/upload-v1 (0.01s)
+    --- PASS: TestCLIPathFeedbackApplicability/upload-missing-context (0.01s)
+    --- PASS: TestCLIPathFeedbackApplicability/upload-foreign-context (0.01s)
+    --- PASS: TestCLIPathFeedbackApplicability/upload-write-failure (0.01s)
+=== RUN   TestCLIPathChild
+--- PASS: TestCLIPathChild (0.00s)
+=== RUN   TestCLIPathTLSRestartAndLostResponses
+--- PASS: TestCLIPathTLSRestartAndLostResponses (6.22s)
+=== RUN   TestCLIPathSummaryMissingConfigurationDoesNotCreateState
+--- PASS: TestCLIPathSummaryMissingConfigurationDoesNotCreateState (0.00s)
+=== RUN   TestCLIPathCorruptQueueCannotAdvertiseIndependentDue
+--- PASS: TestCLIPathCorruptQueueCannotAdvertiseIndependentDue (0.01s)
+=== RUN   TestCLIPathHistoryMigration
+--- PASS: TestCLIPathHistoryMigration (0.00s)
+=== RUN   TestCLIDefaultDownloadDoesNotCapSourceSize
+--- PASS: TestCLIDefaultDownloadDoesNotCapSourceSize (0.00s)
+=== RUN   TestAdmissionMetadataDeadlineAndBounds
+--- PASS: TestAdmissionMetadataDeadlineAndBounds (0.02s)
+=== RUN   TestProducerAdmissionPendingCanResumeSameDelivery
+=== RUN   TestProducerAdmissionPendingCanResumeSameDelivery/enqueue-result
+=== RUN   TestProducerAdmissionPendingCanResumeSameDelivery/collect-result
+--- PASS: TestProducerAdmissionPendingCanResumeSameDelivery (0.51s)
+    --- PASS: TestProducerAdmissionPendingCanResumeSameDelivery/enqueue-result (0.25s)
+    --- PASS: TestProducerAdmissionPendingCanResumeSameDelivery/collect-result (0.26s)
+=== RUN   TestCLIProducerPageChild
+--- PASS: TestCLIProducerPageChild (0.00s)
+=== RUN   TestCLIPathProducerPagesRestartAndPartialFailure
+=== RUN   TestCLIPathProducerPagesRestartAndPartialFailure/0
+=== RUN   TestCLIPathProducerPagesRestartAndPartialFailure/7
+--- PASS: TestCLIPathProducerPagesRestartAndPartialFailure (8.28s)
+    --- PASS: TestCLIPathProducerPagesRestartAndPartialFailure/0 (4.15s)
+    --- PASS: TestCLIPathProducerPagesRestartAndPartialFailure/7 (4.13s)
+PASS
+ok  	github.com/felinics/memoh/cmd/transferqueue	16.125s
