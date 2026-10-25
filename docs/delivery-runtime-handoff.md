@@ -121,27 +121,20 @@ pair `HERDR_PLUGIN_CONFIG_DIR` / `HERDR_PLUGIN_STATE_DIR` at invocation start.
 Use that existing interface; no new CLI flag, active-profile registry, queue
 implementation or service is needed to address separate profile directories.
 
-The unified host's existing locator owns the base pair `C`, `S`. Legacy/default
-selection passes exactly `C`, `S`, retaining the current paths and file bytes.
-For a new verified principal, the file component's path convention is:
+The unified host's existing locator supplies two explicit config/state pairs.
+Legacy/default selection passes exactly the original pair, retaining its paths
+and file bytes. A new native principal uses a distinct pair under the same
+managed host root. The directory names are configuration, not another identity
+selector: **no mandatory principal hash, profile ID format, new selection file
+or registry is required**. A hash used to name a synthetic test directory is
+fixture data only, not a product contract.
 
-```text
-key = lowercase hex SHA256(UTF8(provider + NUL + connection_id + NUL
-                             + device_id + NUL + instance_id))
-HERDR_PLUGIN_CONFIG_DIR = resolve(C, "profiles", key)
-HERDR_PLUGIN_STATE_DIR  = resolve(S, "profiles", key)
-```
-
-The four values come from the existing verified registration, not model input or
-a second identity registry. Provider and UUID values use the registration's
-canonical representation; instance bytes are exact UTF-8, without trimming or
-case/Unicode normalization. Empty fields or embedded NUL are invalid. For the
-agreed native projection both IDs are the registered runtime UUID. Credential
-ID/secret, token rotation, connection epoch, Bot mount, attempt and generation
-do not enter the storage key. This is a local directory key, not a NAS selector
-or authority. The host must derive both paths together in its one locator,
-resolve relative layout components there, and pass canonical absolute paths;
-the CLI does not resolve relative paths against cwd or fall back to another root.
+The host derives/resolves both paths together in its existing locator and passes
+canonical absolute paths. Relative configuration belongs to that locator; the
+CLI does not resolve it against cwd or fall back to another root. The configured
+pair must be tied to the already verified registration and original task, never
+to model input, the Runtime token, a connection epoch or the currently visible
+pane. The NAS verifier and transaction still establish actual authority.
 
 The existing private local directory/NTFS, owner, no-link and root-identity
 checks apply unchanged. Profile directories must exist before invocation; this
@@ -169,10 +162,12 @@ There is one remaining caller integration gap: the legacy envelope in
 [action invocation](https://github.com/herdrdev/herdr/blob/5bd900d88c80d95f5b145397e45bbeea398b8165/src/app/api/plugins/mod.rs#L177)
 uses its [derived plugin path environment](https://github.com/herdrdev/herdr/blob/5bd900d88c80d95f5b145397e45bbeea398b8165/src/app/api/plugins/env.rs#L15);
 that pinned action has no arbitrary environment override. The native host/source owner
-must route its completion through the existing finite CLI with the pinned pair
-and gate the inactive legacy hook (using the existing host/plugin lifecycle).
-Changing a global pointer or assuming that action inherits new profile paths
-is not a supported solution. No such host/hook change is claimed by this patch.
+should first use its existing completion event, finite CLI and pinned locator
+pair, with inactive legacy hooks gated by the existing plugin enable/disable
+configuration and host lifecycle. Verify those native configuration mechanisms
+before proposing any caller code change. No new file-layer entrypoint is proven
+necessary here. A global pointer cannot be assumed to redirect an old action
+safely. No actual host/hook activation or gating is claimed by this patch.
 
 `TestCLIPathSelectedProfileIsolation` uses fresh real CLI processes, synthetic
 credentials and a TLS endpoint returning 503. Two profiles deliberately share
