@@ -1,0 +1,16 @@
+{
+  "base": "b7f478bc1b79209207b0061bdf5af874406d6399",
+  "http_operations_preserved": 369,
+  "new_operations": 0,
+  "changed_existing_task_fields": 0,
+  "new_optional_field": "direct_parent_session_id",
+  "required_fields_unchanged": true,
+  "sql_authority_provider_and_core_zero_diff": [
+    "internal/agent/runtime",
+    "internal/contextview",
+    "packages/runtime",
+    "db/postgres/queries/session_tasks.sql",
+    "internal/handlers/providers.go",
+    "internal/auth"
+  ]
+}

@@ -129,6 +129,23 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.cancelIntent') }}
         </p>
       </div>
+      <dl
+        class="space-y-1 text-body"
+        :aria-label="t('chat.tasks.relationship.title')"
+      >
+        <div
+          v-for="field in ['session_id', 'direct_parent_session_id', 'parent_session_id'] as const"
+          :key="field"
+          class="grid gap-x-4 sm:grid-cols-2"
+        >
+          <dt class="text-muted-foreground">
+            {{ t(`chat.tasks.relationship.${field}`) }}
+          </dt>
+          <dd class="min-w-0 break-all">
+            {{ detail[field] || t('chat.tasks.relationship.unavailable') }}
+          </dd>
+        </div>
+      </dl>
       <NativeTaskContent
         v-if="detail.task_type === 'computer_operation' && nativeTask"
         :view="nativeTask"
@@ -284,6 +301,12 @@ function taskLabel(task: SessiontaskTask) {
       <ItemContent>
         <ItemTitle>{{ taskLabel(item) }}</ItemTitle>
         <ItemDescription>{{ stateLabel(item) }}</ItemDescription>
+        <ItemDescription class="break-all">
+          {{ t('chat.tasks.relationship.session_id') }}: {{ item.session_id || t('chat.tasks.relationship.unavailable') }}
+        </ItemDescription>
+        <ItemDescription class="break-all">
+          {{ t('chat.tasks.relationship.direct_parent_session_id') }}: {{ item.direct_parent_session_id || t('chat.tasks.relationship.unavailable') }}
+        </ItemDescription>
       </ItemContent>
     </Item>
     <div

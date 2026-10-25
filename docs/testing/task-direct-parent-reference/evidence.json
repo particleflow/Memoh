@@ -1,0 +1,135 @@
+{
+  "logs": "Unmodified selected stdout/stderr logs; no private server log/config/token or DB snapshot included. Browser runner parameterized for portability; screenshots contain only synthetic data.",
+  "files": [
+    {
+      "file": "service.log",
+      "sha256": "46df533db81156cc6fdb1baa4a6595fda1e06577343c702bf6e3059114c7e2d1",
+      "bytes": 7944
+    },
+    {
+      "file": "postgres.log",
+      "sha256": "66468ac98148af2bed52a4c5eefaac2e48cf8a42f360fbe97df6a95183d40588",
+      "bytes": 361
+    },
+    {
+      "file": "http.log",
+      "sha256": "3db938405b9894f56b163675cbc181313a6fbde37e834395835b5cf5b5dad83c",
+      "bytes": 56
+    },
+    {
+      "file": "ui.log",
+      "sha256": "57559bc6e57ae6d16d3f9f3c82fc7c83335da5a34de456a4692ae4a4756527ca",
+      "bytes": 339
+    },
+    {
+      "file": "ui-final-fixture.log",
+      "sha256": "721bc7a1ab9ad9225853e616bb23b10c2ce706963f2063c6b08513fda5bdf7da",
+      "bytes": 317
+    },
+    {
+      "file": "web-types.log",
+      "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "bytes": 116
+    },
+    {
+      "file": "sdk-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "file": "web-build.log",
+      "sha256": "bb9383c8bb841946e202eeae11d556b9542635c3ba18ac34be1c58bc0a699532",
+      "bytes": 76364
+    },
+    {
+      "file": "runtime.log",
+      "sha256": "b9f806ffc001bbb0cfa5e3c97d76b5adbfee0866e011764dfe3a412340ca5f1d",
+      "bytes": 373
+    },
+    {
+      "file": "browser.log",
+      "sha256": "60cd888b8dadb9277f81f2ac6a6a40f42906601f242f33ad233cc32c4c7c1f28",
+      "bytes": 295
+    },
+    {
+      "file": "postgres-initial.log",
+      "sha256": "028a2c9207b60e1d6c37d1648f6ea7a9896d57566f100c2054f235db360ca30f",
+      "bytes": 712
+    },
+    {
+      "file": "ui-initial.log",
+      "sha256": "b1c521dcca1f6363655be4d67af50ad9b49fafdc886fad96902d3c7f338b0df9",
+      "bytes": 1968
+    },
+    {
+      "file": "web-types-initial.log",
+      "sha256": "760472b70e2046ba47009657ccf839a53ab090d457f5e9b189e9f01714a930b3",
+      "bytes": 728
+    },
+    {
+      "file": "browser-initial.log",
+      "sha256": "27348dba9335c50d430c82f831fb4bc000fb1a793c6c715f675625bb84110054",
+      "bytes": 1644
+    },
+    {
+      "file": "browser-state-label-initial.log",
+      "sha256": "cf32327758ed5894f79408d3d78b8238cff54b26d24f6f76c5df18f7ce20a6ef",
+      "bytes": 426
+    },
+    {
+      "file": "aggregate-initial-space-failure.log",
+      "sha256": "1b308319335bf3249c951942d9fbcb3ee7f82848f5ada3702444eb6e30491c4d",
+      "bytes": 1326
+    },
+    {
+      "file": "contract.json",
+      "sha256": "6803be28ced89dad361af58ccae89e7ff1bb8195df96c10604017c45ca28008a",
+      "bytes": 481
+    },
+    {
+      "file": "cache-recovery.json",
+      "sha256": "29c852eb1b091cf028d457ed892e1a107879518d425f9dc122b9f7837741f8c9",
+      "bytes": 657
+    },
+    {
+      "file": "browser-proof.json",
+      "sha256": "5be02138679b4a6d4abb9c266d345506bcd6713d331eedc064339c2369f86e42",
+      "bytes": 710
+    },
+    {
+      "file": "list.png",
+      "sha256": "dddde513555f52dc7de6717a9fa9a01a4b71a354ec4b0a085282a0afb1570686",
+      "bytes": 82091
+    },
+    {
+      "file": "detail.png",
+      "sha256": "f553014ebefcee3cf5d5cbfa92a0a0b017067ab2187363b2b60904a6a38a805f",
+      "bytes": 84402
+    },
+    {
+      "file": "narrow-zh.png",
+      "sha256": "f58e53546b8282f3a8a67a47dd5b5c079798a1d6de266c8fbb43f0a489d8d33f",
+      "bytes": 44418
+    },
+    {
+      "file": "aggregate.log",
+      "sha256": "1a84d0c2d46d2176b19a6f6c284d8c221d07824d8dc0bd14eee68225265b4b99",
+      "bytes": 1597
+    },
+    {
+      "file": "ui-contract.log",
+      "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+      "bytes": 1169
+    },
+    {
+      "file": "checks.json",
+      "sha256": "1ebb51b30e33c20933e121d0cbef47e4872b23d46289e71469d4fd9cac931a1b",
+      "bytes": 677
+    },
+    {
+      "file": "evidence-runner-lint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ]
+}

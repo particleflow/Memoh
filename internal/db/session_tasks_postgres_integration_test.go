@@ -5,18 +5,21 @@ package db_test
 import (
 	"context"
 	"errors"
-	"github.com/felinics/memoh/internal/db"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"log/slog"
 	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 
+	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/sessiontask"
 	"github.com/felinics/memoh/internal/team"
 )
 
@@ -130,6 +133,25 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 	}
 	filter.Type = ""
 	filter.ID = ""
+	// Exercise the projection with the real persisted session service too.
+	// Direct ownership must not be rewritten to the requested aggregation root.
+	service := sessiontask.NewService(s, thread.NewService(slog.Default(), postgresstore.NewQueries(dbsqlc.New(conn)), nil), nil, nil, "synthetic-parent-cursor")
+	t.Run("direct-parent-projection", func(t *testing.T) {
+		for _, item := range []struct{ query, id, parent string }{
+			{root, child, root}, {root, grand, child}, {child, grand, child},
+		} {
+			got, err := service.Get(ctx, bot, user, item.query, sessiontask.Subagent, item.id)
+			if err != nil || got.ParentSessionID != item.query || got.DirectParentSessionID != item.parent || got.SessionID != item.id || got.TaskID != item.id {
+				t.Fatalf("persisted relation: %+v %v", got, err)
+			}
+		}
+		exec("SELECT set_config('memoh.team_id',$1,false)", uuid.NewString())
+		got, err := service.Get(ctx, bot, user, root, sessiontask.Subagent, grand)
+		if !errors.Is(err, sessiontask.ErrUnavailable) || got.DirectParentSessionID != "" || got.SessionID != "" {
+			t.Fatalf("cross-team projection leaked: %+v %v", got, err)
+		}
+		exec("SELECT set_config('memoh.team_id',$1,false)", team.DefaultTeamID)
+	})
 	exec("UPDATE bot_sessions SET deleted_at=now() WHERE id=$1", child)
 	rows, err := s.ListSessionTaskCandidates(ctx, filter)
 	if err != nil {
@@ -137,6 +159,9 @@ func TestSessionTasksPostgresOwnedTreeAndStableCursor(t *testing.T) {
 	}
 	if len(rows) != 1 || rows[0].SessionID != root {
 		t.Fatalf("deleted ancestor exposed subtree: %v", rows)
+	}
+	if got, err := service.Get(ctx, bot, user, root, sessiontask.Subagent, grand); !errors.Is(err, sessiontask.ErrUnavailable) || got.DirectParentSessionID != "" {
+		t.Fatalf("deleted ancestor exposed relation: %+v %v", got, err)
 	}
 	var version int
 	var dirty bool

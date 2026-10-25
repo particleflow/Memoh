@@ -1893,14 +1893,14 @@ export const patchBotsByBotIdSessionsBySessionIdSteerQueueByItemId = <ThrowOnErr
 /**
  * List safe task summaries under an owned conversation
  *
- * Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.
+ * Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. session_id is the owning session; parent_session_id remains the requested aggregation root. Optional direct_parent_session_id is the owning session's persisted direct parent, authorized through the ancestor path; omission supplies no parent reference. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.
  */
 export const getBotsByBotIdSessionsBySessionIdTasks = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdSessionsBySessionIdTasksData, ThrowOnError>): RequestResult<GetBotsByBotIdSessionsBySessionIdTasksResponses, GetBotsByBotIdSessionsBySessionIdTasksErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdSessionsBySessionIdTasksResponses, GetBotsByBotIdSessionsBySessionIdTasksErrors, ThrowOnError>({ url: '/bots/{bot_id}/sessions/{session_id}/tasks', ...options });
 
 /**
  * Read a safe task summary within an owned conversation
  *
- * Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
+ * Same projection as a list item, with fresh authorization. session_id and optional direct_parent_session_id describe the owning session and its direct parent; parent_session_id remains the requested aggregation root. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
  */
 export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdData, ThrowOnError>): RequestResult<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdResponses, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdErrors, ThrowOnError>({ url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}', ...options });
 

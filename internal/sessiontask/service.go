@@ -73,22 +73,26 @@ type Task struct {
 	TaskID    string `json:"task_id" validate:"required" format:"uuid"`
 	SessionID string `json:"session_id" validate:"required" format:"uuid"`
 	// ParentSessionID is the requested aggregation root, not a rewritten owner.
-	ParentSessionID      string         `json:"parent_session_id" validate:"required" format:"uuid"`
-	CreatedAt            time.Time      `json:"created_at" validate:"required"`
-	UpdatedAt            time.Time      `json:"updated_at" validate:"required"`
-	Status               string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected,accepted,running,waiting_decision,finishing,completed,failed,aborted,lost"`
-	Summary              string         `json:"summary" validate:"required"`
-	ContentAvailable     bool           `json:"content_available" validate:"required"`
-	AttachmentsAvailable bool           `json:"attachments_available" validate:"required"`
-	RunID                string         `json:"run_id,omitempty" format:"uuid"`
-	TargetID             string         `json:"target_id,omitempty" format:"uuid"`
-	OperationKind        string         `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
-	Revision             string         `json:"revision,omitempty"`
-	CancelRequested      *bool          `json:"cancel_requested,omitempty"`
-	ProcessState         string         `json:"process_state,omitempty" enums:"unknown,exited,not_started"`
-	PiResult             string         `json:"pi_result,omitempty" enums:"unknown,not_applicable,succeeded,failed,aborted,incomplete,not_started,invalid_protocol,output_limit"`
-	BusinessState        string         `json:"business_state,omitempty" enums:"unknown"`
-	ResultSummary        *ResultSummary `json:"result_summary,omitempty"`
+	ParentSessionID string `json:"parent_session_id" validate:"required" format:"uuid"`
+	// DirectParentSessionID is the owning session's persisted direct parent,
+	// exposed only after the complete ancestor path is authorized. Omitted when
+	// that session has no parent; older servers also omit this optional field.
+	DirectParentSessionID string         `json:"direct_parent_session_id,omitempty" format:"uuid"`
+	CreatedAt             time.Time      `json:"created_at" validate:"required"`
+	UpdatedAt             time.Time      `json:"updated_at" validate:"required"`
+	Status                string         `json:"status" validate:"required" enums:"unknown,submitted,process_exited,not_started,rejected,accepted,running,waiting_decision,finishing,completed,failed,aborted,lost"`
+	Summary               string         `json:"summary" validate:"required"`
+	ContentAvailable      bool           `json:"content_available" validate:"required"`
+	AttachmentsAvailable  bool           `json:"attachments_available" validate:"required"`
+	RunID                 string         `json:"run_id,omitempty" format:"uuid"`
+	TargetID              string         `json:"target_id,omitempty" format:"uuid"`
+	OperationKind         string         `json:"operation_kind,omitempty" enums:"foreground_bash,herdr_pi_task,unknown"`
+	Revision              string         `json:"revision,omitempty"`
+	CancelRequested       *bool          `json:"cancel_requested,omitempty"`
+	ProcessState          string         `json:"process_state,omitempty" enums:"unknown,exited,not_started"`
+	PiResult              string         `json:"pi_result,omitempty" enums:"unknown,not_applicable,succeeded,failed,aborted,incomplete,not_started,invalid_protocol,output_limit"`
+	BusinessState         string         `json:"business_state,omitempty" enums:"unknown"`
+	ResultSummary         *ResultSummary `json:"result_summary,omitempty"`
 }
 
 // ResultSummary is allowlisted visible assistant text, not logs or general
@@ -278,7 +282,7 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 	if err != nil {
 		return Task{}, err
 	}
-	t := Task{TaskType: c.Type, TaskID: c.ID, SessionID: c.SessionID, ParentSessionID: parent, CreatedAt: c.CreatedAt, UpdatedAt: p[0].UpdatedAt, Status: "unknown", Summary: "Subagent session recorded; live execution status and content are unavailable."}
+	t := Task{TaskType: c.Type, TaskID: c.ID, SessionID: c.SessionID, ParentSessionID: parent, DirectParentSessionID: p[0].ParentThreadID, CreatedAt: c.CreatedAt, UpdatedAt: p[0].UpdatedAt, Status: "unknown", Summary: "Subagent session recorded; live execution status and content are unavailable."}
 	if c.Type == Subagent {
 		if c.ID != c.SessionID || c.ID == parent || p[0].Type != Subagent {
 			return Task{}, ErrUnavailable

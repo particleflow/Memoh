@@ -1,0 +1,3 @@
+PASS seeded only three unique synthetic sessions in the existing isolated PG; original operations unchanged
+PASS actual Server + PG HTTP: limit=1 unique three-level references, nested query-root compatibility, anonymous401/no-store, original operation rows unchanged; zero dispatch
+PASS removed only the three newly seeded synthetic sessions; original operations unchanged

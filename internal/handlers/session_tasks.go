@@ -83,7 +83,7 @@ func taskHTTPError(err error) error {
 
 // List godoc
 // @Summary List safe task summaries under an owned conversation
-// @Description Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.
+// @Description Read-only persisted facts. Includes owned subagent descendants and computer receipts; rechecks current target grants. session_id is the owning session; parent_session_id remains the requested aggregation root. Optional direct_parent_session_id is the owning session's persisted direct parent, authorized through the ancestor path; omission supplies no parent reference. No dispatch, device polling, reasoning, raw output or attachments. Continue while next_cursor is nonempty, even for an empty page. States are live; creation order is stable.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"
@@ -118,7 +118,7 @@ func (h *SessionTaskHandler) List(c echo.Context) error {
 
 // Get godoc
 // @Summary Read a safe task summary within an owned conversation
-// @Description Same projection as a list item, with fresh authorization. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
+// @Description Same projection as a list item, with fresh authorization. session_id and optional direct_parent_session_id describe the owning session and its direct parent; parent_session_id remains the requested aggregation root. Unknown execution and cancel intent never assert termination or business completion. Subagents expose their own latest persisted run and bounded visible assistant text; computer tasks expose verified result summaries. No raw logs or attachment bytes.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"

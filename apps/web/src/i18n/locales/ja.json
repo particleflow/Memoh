@@ -1273,6 +1273,13 @@
           "conflict": "この ID は別の指示で使用されています。",
           "unknown": "入力の到達は不明です。同じリクエストを確認し、新しい ID で再送しないでください。"
         }
+      },
+      "relationship": {
+        "title": "セッションの関係",
+        "session_id": "所属セッション",
+        "direct_parent_session_id": "セッションの直接の親",
+        "parent_session_id": "今回の照会元セッション",
+        "unavailable": "参照情報なし"
       }
     },
     "uploadingAttachments": "添付ファイルをアップロード中…",

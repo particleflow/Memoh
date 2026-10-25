@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.innerText: Error: strict mode violation: getByRole('button').filter({ hasText: '499f8fbb' }) resolved to 2 elements:
+    1) <button type="button" data-slot="item" class="group/item flex items-center border border-transparent text-body rounded-lg transition-colors duration-100 [a]:cursor-pointer [button]:cursor-pointer [a]:hover:bg-[color:var(--ui-hover)] [button]:hover:bg-[color:var(--ui-hover)] [a]:active:bg-[color:var(--ui-pressed)] [button]:active:bg-[color:var(--ui-pressed)] flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] shadow-none py-3 px-4 gap-2.5 w-full text-lef…>…</button> aka getByRole('button', { name: 'Subagent · f44ded5e Execution' })
+    2) <button type="button" data-slot="item" class="group/item flex items-center border border-transparent text-body rounded-lg transition-colors duration-100 [a]:cursor-pointer [button]:cursor-pointer [a]:hover:bg-[color:var(--ui-hover)] [button]:hover:bg-[color:var(--ui-hover)] [a]:active:bg-[color:var(--ui-pressed)] [button]:active:bg-[color:var(--ui-pressed)] flex-wrap outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] shadow-none py-3 px-4 gap-2.5 w-full text-lef…>…</button> aka getByRole('button', { name: 'Subagent · 499f8fbb Execution' })
+
+Call log:
+[2m  - waiting for getByRole('button').filter({ hasText: '499f8fbb' })[22m
+
+    at /tmp/task-parent-integration/browser.mjs:28:22 {
+  log: [
+    "  - waiting for getByRole('button').filter({ hasText: '499f8fbb' })"
+  ]
+}
+
+Node.js v25.9.0

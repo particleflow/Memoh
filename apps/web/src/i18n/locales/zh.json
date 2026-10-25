@@ -1276,6 +1276,13 @@
           "conflict": "此请求 ID 已用于其他指令。",
           "unknown": "输入是否送达未知。请核对同一请求，不要换新 ID 重发。"
         }
+      },
+      "relationship": {
+        "title": "会话归属关系",
+        "session_id": "归属会话",
+        "direct_parent_session_id": "该会话的直接父会话",
+        "parent_session_id": "本次查询的会话根",
+        "unavailable": "未提供引用"
       }
     },
     "uploadingAttachments": "正在上传附件…",

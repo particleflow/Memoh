@@ -1,0 +1,6 @@
+=== RUN   TestSessionTasksPostgresOwnedTreeAndStableCursor
+=== RUN   TestSessionTasksPostgresOwnedTreeAndStableCursor/direct-parent-projection
+--- PASS: TestSessionTasksPostgresOwnedTreeAndStableCursor (2.38s)
+    --- PASS: TestSessionTasksPostgresOwnedTreeAndStableCursor/direct-parent-projection (0.02s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	3.451s

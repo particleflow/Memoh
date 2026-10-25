@@ -1276,6 +1276,13 @@
           "conflict": "This request ID belongs to a different instruction.",
           "unknown": "Input delivery is unknown. Check the same request; do not resend with a new ID."
         }
+      },
+      "relationship": {
+        "title": "Session relationship",
+        "session_id": "Owning session",
+        "direct_parent_session_id": "Session’s direct parent",
+        "parent_session_id": "Requested conversation root",
+        "unavailable": "No reference provided"
       }
     },
     "uploadingAttachments": "Uploading attachments…",

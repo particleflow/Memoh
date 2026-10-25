@@ -4456,6 +4456,12 @@ export type SessiontaskTask = {
     cancel_requested?: boolean;
     content_available: boolean;
     created_at: string;
+    /**
+     * DirectParentSessionID is the owning session's persisted direct parent,
+     * exposed only after the complete ancestor path is authorized. Omitted when
+     * that session has no parent; older servers also omit this optional field.
+     */
+    direct_parent_session_id?: string;
     operation_kind?: 'foreground_bash' | 'herdr_pi_task' | 'unknown';
     /**
      * ParentSessionID is the requested aggregation root, not a rewritten owner.
