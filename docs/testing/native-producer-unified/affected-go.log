@@ -1,0 +1,7 @@
+ok  	github.com/felinics/memoh/internal/agenvo	10.599s
+ok  	github.com/felinics/memoh/internal/computertask	10.313s
+ok  	github.com/felinics/memoh/internal/userruntime	0.030s
+
+real	0m31.558s
+user	0m24.485s
+sys	0m6.079s

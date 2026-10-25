@@ -1,0 +1,22 @@
+{
+  "source": "03e4fb6220a4b9f13f2b642e8dd3acaca7545a48",
+  "base": "e75341d8a943ff350f516b148e71073650576b71",
+  "merge_head": "384414933c8734b5e5bca663b99d9d7e292b4389",
+  "merge_tree": "9e0a6666165f19a4c7ceb521e68a00ff5c5af825",
+  "routes_before": 370,
+  "routes_after": 370,
+  "removed_routes": [],
+  "generated_diff": [],
+  "preserved_paths": [
+    "internal/agent/runtime",
+    "internal/contextview",
+    "packages/runtime",
+    "cmd/transferqueue",
+    "internal/transferqueue",
+    "contrib/herdr",
+    "db/postgres",
+    "internal/handlers/user_runtime.go",
+    "internal/handlers/user_runtime_native_account_test.go"
+  ],
+  "schema": 176
+}

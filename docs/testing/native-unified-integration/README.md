@@ -2,6 +2,8 @@
 
 This is an isolated integration checkpoint, not a deployment or completed Windows cutover.
 
+The later [native producer integration checkpoint](../native-producer-unified/README.md) records the source-owned CLI collection fix and its combined verification. The hook limitation below describes this earlier checkpoint. Source Native run 40190700957 subsequently passed on attempt 2 at the same `2030c2d` SHA; attempt 1's timeout remains historical evidence and did not require a workflow change.
+
 ## Fixed inputs and preserved boundaries
 
 | Component | Fixed source | Integration treatment |
