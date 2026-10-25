@@ -1,6 +1,6 @@
 # Owner reconciliation before Windows upgrade
 
-Base: `68be06092a1ea85d961115aac404082982bdecf4`. This independent local branch does not move the candidate publishing branch. No production, Windows endpoint, Herdr/Pi binary, credential, schema or admission policy is changed.
+Base: `68be06092a1ea85d961115aac404082982bdecf4`. Validation ran on an independent local branch while that candidate's publishing branch was frozen. After the freeze was lifted, these same source/evidence commits were prepared for normal fast-forward integration into the existing draft branch. No production, Windows endpoint, Herdr/Pi binary, credential, schema or admission policy is changed.
 
 ## Implemented boundary
 
@@ -60,4 +60,4 @@ No timestamp timeout, local queue idle, process exit alone or manual override is
 
 Screenshot inspected: original workspace/pane remain visible, native state is unknown, connection unavailable and business completion unverified. The additive owner metadata is verified in the real API response, not invented as new UI controls. Human QA is not claimed. Published source/evidence must not include private configuration, token files, fixture details or server logs.
 
-Evidence is indexed in [evidence.json](evidence.json). SDK/Web type logs only have trailing blank lines removed; their original hashes are retained. The package failure excerpt and cache summary explicitly identify their selection rules. Other copied outputs are byte-preserved. The product checkpoint is `5b6d69cf63e208e4955bb690a8c5ec364ce891bb`; the subsequent evidence-only commit changes no product files. No branch was pushed, workflow dispatched, PR created, image published or environment deployed in this iteration.
+Evidence is indexed in [evidence.json](evidence.json). SDK/Web type logs only have trailing blank lines removed; their original hashes are retained. The package failure excerpt and cache summary explicitly identify their selection rules. Other copied outputs are byte-preserved. The product checkpoint is `5b6d69cf63e208e4955bb690a8c5ec364ce891bb`; subsequent evidence-only commits change no product files. At the initial local validation checkpoint no branch had been pushed. Later source integration does not constitute a successful remote check, image publication, deployment or Windows handoff acceptance; those outcomes must be reported separately.
