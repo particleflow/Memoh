@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/components/computer/native-herdr-sdk.compatibility.test.ts apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout
+
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  14:32:52
+   Duration  11.14s (transform 6.94s, setup 0ms, import 9.25s, tests 1.08s, environment 977ms)

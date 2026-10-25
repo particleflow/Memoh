@@ -1,0 +1,12 @@
+{
+  "commit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "rawBytes": 35495991,
+  "rawSHA256": "91aaa2c43be304dccdc2f3426a88bbf20be3838aceb5dd0334c691000390c841",
+  "gitBlobsVerified": 6278,
+  "uiCommit": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "uiArchiveSHA256": "55199ba9ad385c32f574906bda4fd43f21c106b6acb58f9e977d0da27222a4a9",
+  "combinedSHA256": "a46cd6ac84b36b417a578a4f7a95c802ba864998edd481ec7e23290a225a4a92",
+  "combinedBytes": 36048920,
+  "method": "Existing prepare_memoh_source deterministic archive procedure; every upstream Git blob matched; cached UI reused"
+}

@@ -20,7 +20,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "e235b4be7381c1b160ce0da23d50916b7b3910d25a24252e265756ed97852e18",
+      "sha256": "535df60861cdc2b69a6634ecc840ecd869bfb8ce69b9413d6ddf7086370eeaf8",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -34,7 +34,8 @@
         "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations.",
         "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
         "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API.",
-        "Source-only pin to unified fa77a073: reuse persisted computer checkpoints, direct parent references and explicit/auth-paused observation; all 43 phone adapters retained. New Windows native-to-Herdr contract and next HAP remain pending; no new protocol or private configuration."
+        "Source-only pin to unified fa77a073: reuse persisted computer checkpoints, direct parent references and explicit/auth-paused observation; all 43 phone adapters retained. New Windows native-to-Herdr contract and next HAP remain pending; no new protocol or private configuration.",
+        "Pin complete unified 8a242293 source and generated SDK; Web pages and 43 phone adaptations are unchanged from verified fa77. No alternate SDK overlay or native configuration framework."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -507,7 +508,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "7093832b3a18f53e491a7125c4aa90ef69fb3192e6b20fdbdf75b75b88d7d35b",
+      "sha256": "a521be1dfe25ae788d8034fc3157f1032657e8014335de4877ef188a8d307eb2",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -515,7 +516,8 @@
       "preparationChanges": [
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
         "Upgrade preflight: increase restored native application version from 1.0.2 / 1000002 to 1.0.7 / 1000007, above the user-reported installed 1.0.6 / 1000006. Bundle, permissions and persistence code are unchanged.",
-        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
+        "Increment generic candidate to 1.0.9 / 1000009 for the newly aligned shared source; preserve bundle, permissions, persistence and Windows-only private injection."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
