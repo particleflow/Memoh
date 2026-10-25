@@ -109,6 +109,10 @@ func (s *Service) TriggerSchedule(ctx context.Context, botID string, payload sch
 	if err := s.recordRunResumeContext(ctx, req); err != nil {
 		return schedule.TriggerResult{}, err
 	}
+	ctx, req, err = s.prepareWorkspaceRequest(ctx, req)
+	if err != nil {
+		return schedule.TriggerResult{}, err
+	}
 	rc, req, err := s.resolve(ctx, req)
 	if err != nil {
 		return schedule.TriggerResult{}, err
