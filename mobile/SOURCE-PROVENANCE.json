@@ -533,7 +533,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "a521be1dfe25ae788d8034fc3157f1032657e8014335de4877ef188a8d307eb2",
+      "sha256": "5274da0f413b6a44910ee66dfd4622b1664a6d51945725f88d1a4a4278aa29e7",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -542,7 +542,8 @@
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
         "Upgrade preflight: increase restored native application version from 1.0.2 / 1000002 to 1.0.7 / 1000007, above the user-reported installed 1.0.6 / 1000006. Bundle, permissions and persistence code are unchanged.",
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
-        "Increment generic candidate to 1.0.9 / 1000009 for the newly aligned shared source; preserve bundle, permissions, persistence and Windows-only private injection."
+        "Increment generic candidate to 1.0.9 / 1000009 for the newly aligned shared source; preserve bundle, permissions, persistence and Windows-only private injection.",
+        "Increment private native-transfer test candidate to 1.0.10 / 1000010 on the fixed cbcee shared source and 58e398-compatible API; preserve the 760ed product implementation, bundle, permissions, persistence and empty Windows injection slot. No artifact publication authorized in this build step."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
