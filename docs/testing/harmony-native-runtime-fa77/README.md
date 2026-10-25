@@ -1,5 +1,11 @@
 # Harmony shared Runtime UI alignment
 
+The later [fixed PR84 compatibility review](../harmony-native-runtime-pr84/README.md)
+checks the now-published native server/SDK against this phone checkpoint. The
+earlier missing-server statements below describe fa77, not PR84. No new phone
+component or split SDK pin was needed; the shared lock still awaits the unified
+combination.
+
 This source-only checkpoint prepares the existing phone UI against unified
 commit `fa77a073fe6380d297474a6053a1445201bcab83` on the independent branch
 `feat/harmony-native-runtime-ui-20261025`. Source preparation verified 6,198 Git

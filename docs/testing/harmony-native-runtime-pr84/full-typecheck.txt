@@ -1,0 +1,3 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
