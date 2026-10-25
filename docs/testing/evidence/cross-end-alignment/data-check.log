@@ -1,0 +1,15 @@
+create: exit=0
+{"created_files": 36, "written_bytes": 19997326}
+verify all: exit=0
+{"verified_files": 36, "verified_bytes": 19997326}
+same-content reference: exit=0
+{"verified_files": 1, "verified_bytes": 65537}
+corrupt downloaded copy rejected: exit=1
+test data check failed: size/hash mismatch: collision-a/result.bin
+same-name wrong content rejected: exit=1
+test data check failed: size/hash mismatch: collision-a/result.bin
+existing destination refused: exit=1; original manifest unchanged
+originals still intact: exit=0
+{"verified_files": 36, "verified_bytes": 19997326}
+source_files=36 allocated_bytes=20144128
+No network, transfer, app UI or device operation was run.
