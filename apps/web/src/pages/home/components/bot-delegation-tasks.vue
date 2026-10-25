@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import BotDelegationRun from './bot-delegation-run.vue'
+import type { BotDelegationHistoryAction } from '../composables/useBotDelegationHistory'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, CalloutBanner, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
@@ -17,6 +19,7 @@ const props = defineProps<{
   loading: boolean
   error?: unknown
   deliveryAction?: BotDelegationDeliveryAction
+  historyAction?: BotDelegationHistoryAction
   tasksAction?: () => void
   downloadAction?: BotDelegationDownloadAction
 }>()
@@ -79,6 +82,11 @@ function taskLabel(task: BotdelegationView) {
         {{ t('chat.delegations.deliveryAccepted') }}
       </p>
     </div>
+    <BotDelegationRun
+      :task="detail"
+      :loading="loading"
+      :history-action="historyAction"
+    />
     <Button
       v-if="tasksAction && detail.target_session_id"
       variant="outline"

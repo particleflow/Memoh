@@ -17,8 +17,18 @@ import (
 )
 
 type memoryLedger struct {
-	mu      sync.Mutex
-	records map[string]Record
+	mu       sync.Mutex
+	records  map[string]Record
+	run      *RunObservation
+	runErr   error
+	runReads int
+}
+
+func (m *memoryLedger) TargetRun(_ context.Context, _ Record) (*RunObservation, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.runReads++
+	return m.run, m.runErr
 }
 
 func (m *memoryLedger) Claim(_ context.Context, r Record) (Record, bool, error) {
@@ -372,5 +382,41 @@ func TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget(t *testing.T) {
 			}
 		}
 		c = p.NextCursor
+	}
+}
+
+func TestRunObservationSurvivesReaderRestartWithoutRedispatch(t *testing.T) {
+	a, _, identity, _ := fixture()
+	now := time.Now().UTC()
+	r := Record{Identity: identity, ID: uuid.NewString(), RunID: uuid.NewString(), State: "running", DeliveryState: "pending"}
+	ledger := &memoryLedger{records: map[string]Record{r.ID: r}, run: &RunObservation{ID: r.RunID, State: "completed", CreatedAt: now, UpdatedAt: now}}
+	for range 2 {
+		s := NewService(a, ledger, nil, nil, time.Minute)
+		got, err := s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID)
+		s.Close()
+		if err != nil || got.TargetRunID != r.RunID || got.TargetRunState != "completed" || got.State != "unknown" || got.TargetRunUpdatedAt == nil || !got.TargetRunUpdatedAt.Equal(now) {
+			t.Fatalf("durable observation must not promote unknown delegation or require live host: %+v %v", got, err)
+		}
+	}
+}
+
+func TestRunProjectionOmitsPlaceholderAndChecksAuthorityFirst(t *testing.T) {
+	a, f, identity, _ := fixture()
+	r := Record{Identity: identity, ID: uuid.NewString(), RunID: uuid.NewString(), State: "failed"}
+	ledger := &memoryLedger{records: map[string]Record{r.ID: r}}
+	s := NewService(a, ledger, nil, nil, time.Minute)
+	defer s.Close()
+	got, err := s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID)
+	if err != nil || got.TargetRunID != "" || got.TargetRunState != "" || got.TargetRunCreatedAt != nil {
+		t.Fatalf("placeholder leaked: %+v %v", got, err)
+	}
+	ledger.runErr = errors.New("synthetic read unavailable")
+	if _, err = s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID); err == nil {
+		t.Fatal("read failure must not look like no run")
+	}
+	reads := ledger.runReads
+	f.active = false
+	if _, err = s.Get(t.Context(), identity.SourceBotID, identity.UserID, identity.SourceSessionID, r.ID); err == nil || ledger.runReads != reads {
+		t.Fatal("revoked session read native run")
 	}
 }

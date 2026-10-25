@@ -3,6 +3,10 @@ import { dirname, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const frontendExtensions = new Set(['.vue', '.js', '.jsx', '.mjs', '.cjs', '.ts', '.tsx'])
+// Exact outputs of internal/handlers/swagger.go's go:generate command. The
+// accumulated API contract already exceeds the ordinary single-file limit;
+// exempt only these artifacts from size checks, never their lint/test checks.
+const generatedSwaggerFiles = new Set(['spec/docs.go', 'spec/swagger.json', 'spec/swagger.yaml'])
 // These files are read by internal/handlers display and contract tests.
 const handlerInputs = new Set([
   'docker/Dockerfile.workspace', 'spec/swagger.json',
@@ -74,7 +78,7 @@ function checkSizes(changed, entries) {
   if (result.status !== 0) throw new Error(result.stderr || 'Cannot inspect staged blob sizes')
   const sizes = result.stdout.trim().split('\n').map(Number)
   if (sizes.length !== blobs.length || sizes.some(size => !Number.isFinite(size))) throw new Error('Invalid staged blob sizes')
-  const large = blobs.filter((entry, index) => sizes[index] > 1048576)
+  const large = blobs.filter((entry, index) => sizes[index] > 1048576 && !generatedSwaggerFiles.has(entry.path))
   if (large.length) throw new Error(`Staged files exceed 1 MiB: ${large.map(entry => entry.path).join(', ')}`)
 }
 

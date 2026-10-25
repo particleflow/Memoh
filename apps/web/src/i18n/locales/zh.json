@@ -1022,6 +1022,15 @@
   },
   "chat": {
     "delegations": {
+      "nativeRun": "专家会话运行",
+      "runId": "运行 ID",
+      "runCreated": "接纳时间",
+      "runUpdated": "最近记录时间",
+      "runRecorded": "原生运行的持久化状态，不代表实时连接。会话记录可能包含其他轮次。",
+      "runUnavailable": "此委派暂无可核实的原生运行记录。",
+      "openHistory": "打开专家会话记录",
+      "historyUnavailable": "无法打开专家会话，请刷新并检查访问权限。",
+      "childTasks": "子 Agent 与电脑任务",
       "openTasks": "查看下游任务",
       "downstreamTitle": "专业 Bot 的任务",
       "downstreamDescription": "此专业 Bot 会话记录的执行任务。访问权限由服务端校验；此视图不提供实时日志或可调度队列。",

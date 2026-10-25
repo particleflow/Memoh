@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { computed, onScopeDispose, ref, shallowRef, watch } from 'vue'
-import { useDocumentVisibility, useLocalStorage } from '@vueuse/core'
+import { until, useDocumentVisibility, useLocalStorage } from '@vueuse/core'
+import { useRouter } from 'vue-router'
+import { useChatStore } from '@/store/chat-list'
+import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
+import { useBotDelegationHistory } from '../composables/useBotDelegationHistory'
+import BotDelegationRun from './bot-delegation-run.vue'
 import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
 import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
@@ -27,6 +32,18 @@ const { items, detail, selected, cursor, nextCursor, loading, error, openTask, b
 const delegationVisible = computed(() => visible.value && group.value === 'delegations')
 const delegationReader = useBotDelegations(scope, delegationVisible)
 const deliveryAction = useBotDelegationDelivery(scope, delegationVisible, delegationReader)
+const chatStore = useChatStore()
+const workspaceTabs = useWorkspaceTabsStore()
+const router = useRouter()
+const historyAction = useBotDelegationHistory(scope, delegationVisible, delegationReader, async target => {
+  await chatStore.selectBot(target.bot)
+  if (token.value !== target.identity || chatStore.currentBotId !== target.bot) return
+  await router.push({ name: 'bot', params: { botName: target.bot } })
+  await until(() => workspaceTabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
+  if (token.value !== target.identity || chatStore.currentBotId !== target.bot) return
+  workspaceTabs.openSessionChat({ sessionId: target.session, title: target.title })
+  open.value = false
+})
 const downloadAction = useBotDelegationDownload(scope, delegationVisible, delegationReader)
 const { items: delegations, detail: delegationDetail, selected: delegationSelected, cursor: delegationCursor, nextCursor: delegationNext, loading: delegationLoading, error: delegationError, openTask: openDelegation, back: backDelegation, page: delegationPage, refresh: refreshDelegations } = delegationReader
 const specialist = shallowRef<{ bot: string, session: string, delegation: string }>()
@@ -103,6 +120,18 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
       <DialogBody class="space-y-4">
         <template v-if="specialist">
           <DialogDescription>{{ t('chat.delegations.downstreamDescription') }}</DialogDescription>
+          <BotDelegationRun
+            v-if="!specialistSelected && !specialistPaused && delegationDetail"
+            :task="delegationDetail"
+            :loading="delegationLoading"
+            :history-action="historyAction"
+          />
+          <h3
+            v-if="!specialistSelected && !specialistPaused"
+            class="text-label font-medium"
+          >
+            {{ t('chat.delegations.childTasks') }}
+          </h3>
           <SessionTaskResults
             :items="specialistItems"
             :detail="specialistDetail"
@@ -142,6 +171,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
               :next-cursor="delegationNext"
               :loading="delegationLoading"
               :error="delegationError"
+              :history-action="historyAction"
               :delivery-action="deliveryAction"
               :download-action="downloadAction"
               :tasks-action="delegationDetail?.target_session_id ? openSpecialistTasks : undefined"

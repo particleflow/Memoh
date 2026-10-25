@@ -21316,6 +21316,29 @@ const docTemplate = `{
                     "type": "string",
                     "format": "uuid"
                 },
+                "target_run_created_at": {
+                    "type": "string"
+                },
+                "target_run_id": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "target_run_state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "running",
+                        "waiting_decision",
+                        "finishing",
+                        "completed",
+                        "aborted",
+                        "failed",
+                        "lost"
+                    ]
+                },
+                "target_run_updated_at": {
+                    "type": "string"
+                },
                 "target_session_id": {
                     "type": "string",
                     "format": "uuid"

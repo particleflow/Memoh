@@ -5,6 +5,12 @@ It does not commit or push. `lint-staged` keeps its backup and partial-staging
 behavior. Go tools still read the working tree, as they did before this hook;
 keep unstaged Go edits in mind when interpreting results.
 
+- The staged-file limit is 1 MiB. Only `spec/docs.go`, `spec/swagger.json` and
+  `spec/swagger.yaml`, the exact outputs of `internal/handlers/swagger.go`'s
+  `go:generate` command, are exempt from this size limit: the accumulated API
+  contract exceeds it. They still select the normal lint/test checks. Other
+  files, including other files under `spec/` and files named `*.gen.*`, retain
+  the same limit. Regenerate the contract through `mise run swagger-generate`.
 - JavaScript, TypeScript and Vue changes: ESLint through `lint-staged`.
   ESLint does not validate Markdown, JSON or SCSS in this repository.
 - Frontend dependency, UI submodule, ESLint or TypeScript configuration changes: full ESLint.

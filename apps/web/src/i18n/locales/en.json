@@ -1022,6 +1022,15 @@
   },
   "chat": {
     "delegations": {
+      "nativeRun": "Specialist session run",
+      "runId": "Run ID",
+      "runCreated": "Admitted",
+      "runUpdated": "Last recorded update",
+      "runRecorded": "Persisted native run state; this does not confirm a live connection. The session history may include other turns.",
+      "runUnavailable": "No verified native run is available for this handoff.",
+      "openHistory": "Open specialist session history",
+      "historyUnavailable": "Could not open the specialist session. Reload and check access.",
+      "childTasks": "Subagents and computer tasks",
       "openTasks": "View downstream tasks",
       "downstreamTitle": "Specialist Bot tasks",
       "downstreamDescription": "Execution tasks recorded under this specialist session. Access is checked by the server; this view does not provide live logs or a runnable queue.",
