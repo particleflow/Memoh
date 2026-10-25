@@ -57,10 +57,25 @@ WHERE binding.team_id = public.memoh_current_team_id()
   AND binding.runtime_id = expired.id;
 
 -- name: ListUserRuntimes :many
-SELECT * FROM user_runtimes
-WHERE team_id = public.memoh_current_team_id()
-  AND user_id = sqlc.arg(user_id) AND revoked_at IS NULL
-ORDER BY created_at ASC, id ASC;
+-- An explicitly disabled Agenvo connection retires its selectable computer,
+-- without revoking the runtime or deleting mounts and their historical workdirs.
+SELECT runtime.* FROM user_runtimes runtime
+WHERE runtime.team_id = public.memoh_current_team_id()
+  AND runtime.user_id = sqlc.arg(user_id) AND runtime.revoked_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM mcp_connections connection
+    WHERE runtime.provider = 'agenvo'
+      AND connection.team_id = runtime.team_id
+      AND CASE octet_length(runtime.provider_config->>'connection_id')
+        WHEN 32 THEN lower(runtime.provider_config->>'connection_id') = replace(connection.id::text, '-', '')
+        WHEN 36 THEN lower(runtime.provider_config->>'connection_id') = connection.id::text
+        WHEN 38 THEN lower(substring(runtime.provider_config->>'connection_id' FROM 2 FOR 36)) = connection.id::text
+        WHEN 45 THEN lower(runtime.provider_config->>'connection_id') = 'urn:uuid:' || connection.id::text
+        ELSE FALSE
+      END
+      AND NOT connection.is_active
+  )
+ORDER BY runtime.created_at ASC, runtime.id ASC;
 
 -- name: RevokeUserRuntime :one
 UPDATE user_runtimes
@@ -134,6 +149,19 @@ JOIN users owner ON owner.id = owner_membership.user_id
 WHERE binding.team_id = public.memoh_current_team_id()
   AND binding.bot_id = sqlc.arg(bot_id)
   AND runtime.revoked_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM mcp_connections connection
+    WHERE runtime.provider = 'agenvo'
+      AND connection.team_id = runtime.team_id
+      AND CASE octet_length(runtime.provider_config->>'connection_id')
+        WHEN 32 THEN lower(runtime.provider_config->>'connection_id') = replace(connection.id::text, '-', '')
+        WHEN 36 THEN lower(runtime.provider_config->>'connection_id') = connection.id::text
+        WHEN 38 THEN lower(substring(runtime.provider_config->>'connection_id' FROM 2 FOR 36)) = connection.id::text
+        WHEN 45 THEN lower(runtime.provider_config->>'connection_id') = 'urn:uuid:' || connection.id::text
+        ELSE FALSE
+      END
+      AND NOT connection.is_active
+  )
 ORDER BY binding.created_at ASC, binding.id ASC;
 
 -- name: GetBotRemoteRuntimeMount :one
@@ -235,6 +263,19 @@ JOIN user_runtimes runtime ON runtime.id = binding.runtime_id AND runtime.team_i
 WHERE binding.team_id = public.memoh_current_team_id()
   AND bot.owner_user_id = sqlc.arg(owner_user_id)
   AND runtime.revoked_at IS NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM mcp_connections connection
+    WHERE runtime.provider = 'agenvo'
+      AND connection.team_id = runtime.team_id
+      AND CASE octet_length(runtime.provider_config->>'connection_id')
+        WHEN 32 THEN lower(runtime.provider_config->>'connection_id') = replace(connection.id::text, '-', '')
+        WHEN 36 THEN lower(runtime.provider_config->>'connection_id') = connection.id::text
+        WHEN 38 THEN lower(substring(runtime.provider_config->>'connection_id' FROM 2 FOR 36)) = connection.id::text
+        WHEN 45 THEN lower(runtime.provider_config->>'connection_id') = 'urn:uuid:' || connection.id::text
+        ELSE FALSE
+      END
+      AND NOT connection.is_active
+  )
 ORDER BY binding.created_at ASC, binding.id ASC;
 
 -- name: OwnedHTTPMCPConnectionBot :one
