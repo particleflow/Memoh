@@ -21,13 +21,19 @@
   },
   {
     "file": "sdk-types.txt",
-    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
-    "bytes": 112
+    "sha256": "7e15b1e8626b11308ed8c51337a9fb829398f56a9012cd6051d14c1519cf3888",
+    "bytes": 111,
+    "raw_sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "raw_bytes": 112,
+    "normalization": "Removed trailing blank lines only; original retained in local test log."
   },
   {
     "file": "web-types.txt",
-    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
-    "bytes": 116
+    "sha256": "d7bb68855b8c6825aa409b3a76954d32f634fc10ef28762827a3c7fe9707dfb2",
+    "bytes": 115,
+    "raw_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "raw_bytes": 116,
+    "normalization": "Removed trailing blank lines only; original retained in local test log."
   },
   {
     "file": "build-server.txt",
@@ -88,5 +94,36 @@
     "file": "core.txt",
     "bytes": 95,
     "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
+  },
+  {
+    "file": "handlers-after-space.txt",
+    "sha256": "089b73284cd67189250282e99b5d3f354aec7ddf68d3db964e39b5e6b9bf781f",
+    "bytes": 56,
+    "raw_sha256": "089b73284cd67189250282e99b5d3f354aec7ddf68d3db964e39b5e6b9bf781f",
+    "raw_bytes": 56,
+    "normalization": "Removed trailing blank lines only; original local output retained."
+  },
+  {
+    "file": "sdk-lint.txt",
+    "sha256": "04773ff240e24656b3cc6d6be595c265ddc18b66e4aaf0533be64270bd043c44",
+    "bytes": 973,
+    "raw_sha256": "881cd700346a508cef35bdffed898ee626575a999530282e0d51eced27886c2e",
+    "raw_bytes": 974,
+    "normalization": "Removed trailing blank lines only; original local output retained."
+  },
+  {
+    "file": "packages-outcomes.txt",
+    "sha256": "268465d65ff1850b162ab73af80bb36a40d9b605ee4c0526b60b26bef79f0136",
+    "bytes": 890,
+    "raw_sha256": "b4663c4f0fb9086ab746c592ba52415de0d1546ec9474552e7a57d03f88e05ee",
+    "raw_bytes": 11362,
+    "normalization": "Selected package outcomes, named failures and media_upload_test.go assertions; unrelated diagnostics omitted."
+  },
+  {
+    "file": "cache-recovery-upload-summary.json",
+    "sha256": "08bf9a07bedc16c7bcb97980a60059500cea4fa63396f62da93d759ab105d8a4",
+    "bytes": 258,
+    "raw_sha256": "38cb7235b230b3f134f1b80a5d9bd40fa4ec20fd0095c5235ab74ce72d0a9688",
+    "normalization": "Counts and scope only; per-cache-entry local manifest retained."
   }
 ]
