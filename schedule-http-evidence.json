@@ -1,0 +1,116 @@
+[
+  {
+    "stage": "ui-schedule-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-form-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-crud-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-crud-events.json",
+    "method": "POST",
+    "status": 201,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-crud-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-crud-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-crud-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/schedule-qa"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "PUT",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-edit-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-final-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  },
+  {
+    "stage": "ui-schedule-final-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-final-events.json",
+    "method": "DELETE",
+    "status": 204,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule/e62e106a-a609-470f-a08d-e11e9e5e7a50"
+  },
+  {
+    "stage": "ui-schedule-final-events.json",
+    "method": "GET",
+    "status": 200,
+    "path": "/api/bots/11111111-1111-4111-8111-111111111111/schedule"
+  }
+]

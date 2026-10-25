@@ -1,0 +1,8 @@
+{
+  "head": "0ee7a42c22a5965e9d69ea9471729e6da0574d1f",
+  "base": "9601ac062a3b65477db8db76bcaa521265ba7ee2",
+  "aggregate_exit": 0,
+  "server_binary_sha256": "2b7f6f87e9aaaf1b0cb7aa4e7edbfd7f79527360d7b7cb1123742a9fb669b36a",
+  "real_models_or_PC_calls": 0,
+  "production_configuration_changes": false
+}

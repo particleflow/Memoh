@@ -1,0 +1,10 @@
+[hooks] Web: no relevant staged changes
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/agent/application ./internal/schedule
+[hooks] Go package selection: 0.18s
+[hooks] Go lint: golangci-lint run --concurrency=2 $REPO/internal/agent/application $REPO/internal/schedule
+[hooks] Go lint: 181.47s
+[hooks] Go test: go test -p=2 -timeout=600s $REPO/internal/agent/application $REPO/internal/schedule
+ok  	github.com/felinics/memoh/internal/agent/application	11.802s
+ok  	github.com/felinics/memoh/internal/schedule	0.013s
+[hooks] Go test: 22.70s
+[hooks] Total: 204.35s
