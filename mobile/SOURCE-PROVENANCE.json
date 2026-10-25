@@ -20,7 +20,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "619f6ad287cfd85b68178aa696346e733ac7b26ad4448df004af9460bb9679ee",
+      "sha256": "e235b4be7381c1b160ce0da23d50916b7b3910d25a24252e265756ed97852e18",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -33,7 +33,8 @@
         "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build.",
         "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations.",
         "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
-        "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API."
+        "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API.",
+        "Source-only pin to unified fa77a073: reuse persisted computer checkpoints, direct parent references and explicit/auth-paused observation; all 43 phone adapters retained. New Windows native-to-Herdr contract and next HAP remain pending; no new protocol or private configuration."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -41,7 +42,8 @@
       "observationAuditBaseSHA256": "5f22d9990691eb3dc913c5011d2e823afcfecde70b812f8b1feb1abef4101aa6",
       "taskDeliveryBaseSHA256": "fe95b261675c36bdbd855727231d167feb1a38599b337a9736dc99fe26a804ef",
       "unifiedNative9e6BaseSHA256": "42e5bc67d9d61fb439163a213b5d2e87d2169a38727fbe27bfee2ed4b5b016ff",
-      "unifiedImages51bBaseSHA256": "ce095c26dcce82a163fa966c7f5bd79c9314486c6846e3fba03243ea9aa765d7"
+      "unifiedImages51bBaseSHA256": "ce095c26dcce82a163fa966c7f5bd79c9314486c6846e3fba03243ea9aa765d7",
+      "preNativeRuntimeUIBaseSHA256": "619f6ad287cfd85b68178aa696346e733ac7b26ad4448df004af9460bb9679ee"
     },
     {
       "path": "mobile/client/mobile/client_config.py",

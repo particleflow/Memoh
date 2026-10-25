@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/native-runtime-ui
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  09:56:23
+   Duration  9.18s (transform 5.82s, setup 0ms, import 7.75s, tests 537ms, environment 697ms)
+

@@ -1,0 +1,19 @@
+
+⚠ UI contract — 3 warning(s):
+  packages/ui/src/components/sidebar/Sidebar.vue:66  raw shadow utility (use an elevation token or shadow-none) → group-data-[variant=floating]:shadow-sm
+  packages/ui/src/components/sidebar/SidebarInset.vue:15  raw shadow utility (use an elevation token or shadow-none) → md:peer-data-[variant=inset]:shadow-sm
+  apps/web/src/pages/bots/components/mcp-server-detail.vue:275  possible hand-rolled SettingsRow (min-h-[3.75rem]/min-h-15 outside the owner) — compose <SettingsRow>, or mark ui-allow-shape if it is a genuinely different row → min-h-[3.75rem]
+
+ℹ px baseline: 112 grandfathered px violation(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ app-injection baseline: 134 grandfathered injection(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ hand-spun-loader baseline: 10 grandfathered loader(s) remaining — adopt a loading-ladder rung per cluster, then re-run with --write-baseline
+ℹ alpha baseline: 145 grandfathered hand-written alpha value(s) remaining — burn down per cluster, then re-run with --write-baseline
+
+✗ UI contract — 4 violation(s):
+  apps/web/src/lib/HarmonyVoiceInput.vue:166  hand-spun loader (pick a rung: Spinner atom / Button :loading / InlineLoadingRow / PanePlaceholder) → animate-spin
+  apps/web/src/lib/HarmonyVoiceInput.vue  ✗ hand-spun-loader count 1 exceeds baseline 0 — no NEW hand-spun-loader (fix it, or mark the line with ui-allow-spin)
+  apps/web/src/lib/HarmonyVoicePlayer.vue:99  hand-written alpha (use a -soft/-border/-muted token, or add one — see packages/ui/AGENTS.md § Alpha policy) → bg-muted/30
+  apps/web/src/lib/HarmonyVoicePlayer.vue  ✗ alpha count 1 exceeds baseline 0 — no NEW alpha (fix it, or mark the line with ui-allow-alpha)
+
+See packages/ui/src/style.css for the single sources.
+
