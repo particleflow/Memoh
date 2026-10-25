@@ -10,6 +10,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
+	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/userruntime"
@@ -69,6 +70,11 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 // @Failure 409 {object} server.Problem
 // @Router /users/me/runtimes/{id}/native-herdr [put].
 func (h *UserRuntimeHandler) ConfigureNativeHerdr(c echo.Context) error {
+	// Chat-route credentials may send replies but deliberately bypass account
+	// session revalidation. They cannot configure the owner's executable paths.
+	if _, err := auth.ChatTokenFromContext(c); err == nil {
+		return apperror.New(apperror.CodeHTTPForbidden, nil)
+	}
 	owner, err := RequireChannelIdentityID(c)
 	if err != nil {
 		return err
