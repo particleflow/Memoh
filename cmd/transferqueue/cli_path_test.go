@@ -63,11 +63,15 @@ func TestCLIPathChild(_ *testing.T) {
 // The NAS side is an explicit small protocol fixture, not production Server/PG.
 // Client dispatch, stdin decoding, queue/NTFS, HTTP/TLS, hashes and outbox are real.
 func TestCLIPathTLSRestartAndLostResponses(t *testing.T) {
-	t.Run("trusted-matching-host", func(t *testing.T) { exerciseCLIPathTLS(t, false) })
-	t.Run("trusted-wrong-host", func(t *testing.T) { exerciseCLIPathTLS(t, true) })
+	t.Run("trusted-matching-host", func(t *testing.T) { exerciseCLIPathTLS(t, false, false) })
+	t.Run("trusted-wrong-host", func(t *testing.T) { exerciseCLIPathTLS(t, true, false) })
 }
 
-func exerciseCLIPathTLS(t *testing.T, wrongHost bool) {
+func TestCLIPathRuntimeReconnectUpload(t *testing.T) {
+	exerciseCLIPathTLS(t, false, true)
+}
+
+func exerciseCLIPathTLS(t *testing.T, wrongHost, reconnect bool) {
 	t.Helper()
 	root := cliPrivateRoot(t)
 	config, state, source := filepath.Join(root, "config"), filepath.Join(root, "state"), filepath.Join(root, "source")
@@ -282,6 +286,26 @@ func exerciseCLIPathTLS(t *testing.T, wrongHost bool) {
 		var deadline time.Time
 		if json.Unmarshal(waiting["next_due_at"], &deadline) != nil || !deadline.After(now) {
 			t.Fatal("missing persisted deadline")
+		}
+		if reconnect {
+			mu.Lock()
+			beforeRequests := requests
+			mu.Unlock()
+			beforeFiles := runtimeWakeFiles(t, root)
+			// These labels are host events, not a new producer wire protocol.
+			// Reconnect permits a summary read, never an early advance or enqueue.
+			for _, event := range []string{"startup", "network", "network"} {
+				got := invoke("lifecycle-summary", "", nil)
+				if string(got["state"]) != `"waiting"` || !bytes.Equal(got["next_due_at"], waiting["next_due_at"]) || string(got["error_class"]) != `"transient"` {
+					t.Fatal("reconnect changed producer backoff", event, got)
+				}
+			}
+			mu.Lock()
+			gotRequests := requests
+			mu.Unlock()
+			if gotRequests != beforeRequests || !reflect.DeepEqual(beforeFiles, runtimeWakeFiles(t, root)) {
+				t.Fatal("reconnect changed queue/config/context or replayed network work")
+			}
 		}
 		now = deadline.Add(time.Millisecond)
 	}

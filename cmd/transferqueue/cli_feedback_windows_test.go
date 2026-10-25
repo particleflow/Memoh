@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync"
@@ -27,6 +28,15 @@ import (
 // NAS is an explicit protocol fixture, not production Server/PostgreSQL. Roots
 // are injected only into the existing test helper; system trust is untouched.
 func TestCLIPathInboundFeedbackRestart(t *testing.T) {
+	exerciseCLIInboundFeedback(t, false)
+}
+
+func TestCLIPathRuntimeReconnectDownload(t *testing.T) {
+	exerciseCLIInboundFeedback(t, true)
+}
+
+func exerciseCLIInboundFeedback(t *testing.T, reconnect bool) {
+	t.Helper()
 	root := cliPrivateRoot(t)
 	config, state := filepath.Join(root, "config"), filepath.Join(root, "state")
 	for _, path := range []string{config, state} {
@@ -35,11 +45,16 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 		}
 	}
 	data := bytes.Repeat([]byte("inbound-feedback-fixture"), 4096)
+	if reconnect {
+		// One existing 8 MiB checkpoint plus a small tail, not another 1 GiB
+		// acceptance run. The first body is disconnected after that checkpoint.
+		data = append(bytes.Repeat([]byte{0x5a}, int(transferclient.MaxChunkBytes)), data...)
+	}
 	sum := sha256.Sum256(data)
 	job := transferclient.Job{Version: 1, DeliveryID: "inbound-feedback", SnapshotID: "inbound-feedback", BotID: "bot-1", OperationID: "op-1", LocatorRevision: "native-profile-v1", Phase: "queued", Task: transferclient.DeviceTask{UserID: "user-1", SessionID: "session-1", TargetID: "target-1", RunID: "run-1", Attempt: strings.Repeat("a", 32), Generation: strings.Repeat("b", 32)}, Spec: transferclient.Spec{SizeBytes: int64(len(data)), SHA256: hex.EncodeToString(sum[:]), Mime: "application/octet-stream"}}
 	ref := transferclient.Reference{DeliveryID: job.DeliveryID, OperationID: job.OperationID, BotID: job.BotID, ContentHash: job.Spec.SHA256, SizeBytes: job.Spec.SizeBytes, Mime: job.Spec.Mime}
 	var mu sync.Mutex
-	requests, gets, commits, ledgerEntries := 0, 0, 0, 0
+	requests, gets, commits, ledgerEntries, sent := 0, 0, 0, 0, 0
 	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mu.Lock()
 		defer mu.Unlock()
@@ -53,15 +68,38 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 		case strings.HasSuffix(r.URL.Path, "/limits"):
 			_ = json.NewEncoder(w).Encode(transferclient.Limits{MaxUploadBytes: 1 << 20, ChunkMaxBytes: 8 << 20, ResumableEnabled: true})
 		case strings.HasSuffix(r.URL.Path, "/media/"+job.Spec.SHA256):
-			if r.Method != http.MethodGet && r.Method != http.MethodHead || r.Header.Get("Range") != "" {
+			offset := 0
+			if reconnect && gets == 1 && r.Method == http.MethodGet {
+				offset = int(transferclient.MaxChunkBytes)
+			}
+			wantRange := ""
+			if offset > 0 {
+				wantRange = "bytes=" + strconv.Itoa(offset) + "-"
+			}
+			if r.Method != http.MethodGet && r.Method != http.MethodHead || r.Header.Get("Range") != wantRange || offset > 0 && r.Header.Get("If-Range") != `"`+job.Spec.SHA256+`"` {
 				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			w.Header().Set("ETag", `"`+job.Spec.SHA256+`"`)
-			w.Header().Set("Content-Length", strconv.Itoa(len(data)))
+			w.Header().Set("Content-Length", strconv.Itoa(len(data)-offset))
+			if offset > 0 {
+				w.Header().Set("Content-Range", "bytes "+strconv.Itoa(offset)+"-"+strconv.Itoa(len(data)-1)+"/"+strconv.Itoa(len(data)))
+				w.WriteHeader(http.StatusPartialContent)
+			}
 			if r.Method == http.MethodGet {
 				gets++
-				_, _ = w.Write(data)
+				if reconnect && gets == 1 {
+					n, _ := w.Write(data[:transferclient.MaxChunkBytes])
+					sent += n
+					w.(http.Flusher).Flush()
+					connection, _, err := w.(http.Hijacker).Hijack()
+					if err == nil {
+						_ = connection.Close()
+					}
+					return
+				}
+				n, _ := w.Write(data[offset:])
+				sent += n
 			}
 		case strings.Contains(r.URL.Path, "/internal/computer-deliveries/"+job.OperationID+"/"+job.DeliveryID+"/"):
 			var body struct {
@@ -108,7 +146,7 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 		t.Helper()
 		cmd := exec.CommandContext(t.Context(), executable, "-test.run=^TestCLIPathChild$") //nolint:gosec // Existing test executable, fixed arguments, no shell.
 		id := job.DeliveryID
-		if kind == "advance-results" {
+		if kind == "advance-results" || kind == "lifecycle-summary" {
 			id = ""
 		}
 		cmd.Env = append(os.Environ(), "MEMOH_CLI_TEST_CHILD=1", "MEMOH_CLI_TEST_CERT="+certPath, "MEMOH_CLI_TEST_NOW="+now.Format(time.RFC3339Nano), "MEMOH_CLI_TEST_ACTION="+kind, "MEMOH_CLI_TEST_DELIVERY="+id, "HERDR_PLUGIN_CONFIG_DIR="+config, "HERDR_PLUGIN_STATE_DIR="+state)
@@ -119,7 +157,10 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 			t.Fatalf("finite %s failed: %v output=%s stderr=%s", kind, err, out.String(), stderr.String())
 		}
 		var result map[string]json.RawMessage
-		if json.Unmarshal(out.Bytes(), &result) != nil || string(result["feedback_status"]) != `"not_applicable"` || string(result["delivery_id"]) != `"`+job.DeliveryID+`"` {
+		if json.Unmarshal(out.Bytes(), &result) != nil {
+			t.Fatal("invalid CLI JSON", out.String())
+		}
+		if kind != "lifecycle-summary" && (string(result["feedback_status"]) != `"not_applicable"` || string(result["delivery_id"]) != `"`+job.DeliveryID+`"`) {
 			t.Fatal("inbound command lost its feedback applicability/identity", out.String())
 		}
 		for _, private := range []string{"synthetic-inbound-device", config, state, server.URL} {
@@ -132,6 +173,30 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 	if enqueued := invoke("enqueue-download"); string(enqueued["associated"]) != "false" {
 		t.Fatal("not_applicable is not completion")
 	}
+	if reconnect {
+		waiting := invoke("advance-results")
+		var deadline time.Time
+		if string(waiting["state"]) != `"waiting"` || string(waiting["error_class"]) != `"transient"` || string(waiting["offset"]) != strconv.FormatInt(transferclient.MaxChunkBytes, 10) || string(waiting["associated"]) != "false" || json.Unmarshal(waiting["next_due_at"], &deadline) != nil || !deadline.After(now) {
+			t.Fatal("disconnection did not preserve its checkpoint/backoff", waiting)
+		}
+		beforeFiles := runtimeWakeFiles(t, root)
+		mu.Lock()
+		beforeRequests := requests
+		mu.Unlock()
+		for _, event := range []string{"startup", "network", "network"} {
+			got := invoke("lifecycle-summary")
+			if len(got) != 4 || string(got["state"]) != `"waiting"` || !bytes.Equal(got["next_due_at"], waiting["next_due_at"]) {
+				t.Fatal("reconnect changed producer deadline", event, got)
+			}
+		}
+		mu.Lock()
+		gotRequests := requests
+		mu.Unlock()
+		if gotRequests != beforeRequests || !reflect.DeepEqual(beforeFiles, runtimeWakeFiles(t, root)) {
+			t.Fatal("reconnect changed queue/config or replayed bytes")
+		}
+		now = deadline.Add(time.Millisecond)
+	}
 	completed := invoke("advance-results")
 	var gotRef transferclient.Reference
 	if string(completed["associated"]) != "true" || string(completed["phase"]) != `"ready"` || json.Unmarshal(completed["reference"], &gotRef) != nil || gotRef != ref {
@@ -139,11 +204,21 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 	}
 	mu.Lock()
 	before := requests
-	if gets != 1 || commits != 1 || ledgerEntries != 1 {
+	wantGets := 1
+	if reconnect {
+		wantGets = 2
+	}
+	if gets != wantGets || sent != len(data) || commits != 1 || ledgerEntries != 1 {
 		t.Fatal("duplicate or missing transfer/association", gets, commits, ledgerEntries)
 	}
 	mu.Unlock()
 	for range 2 {
+		if reconnect {
+			idle := invoke("lifecycle-summary")
+			if string(idle["state"]) != `"idle"` {
+				t.Fatal("completed reconnect scheduled more work", idle)
+			}
+		}
 		for _, kind := range []string{"enqueue-download", "inspect"} {
 			got := invoke(kind)
 			if string(got["associated"]) != "true" || !bytes.Equal(got["reference"], completed["reference"]) || !bytes.Equal(got["offset"], completed["offset"]) {
@@ -183,5 +258,8 @@ func TestCLIPathInboundFeedbackRestart(t *testing.T) {
 	got, err := io.ReadAll(io.LimitReader(file, int64(len(data))+1))
 	if err != nil || !bytes.Equal(got, data) || sha256.Sum256(got) != sum {
 		t.Fatal("published bytes/hash changed", err)
+	}
+	if reconnect {
+		t.Logf("bytes=%d checkpoint=%d GET=%d Commit=%d ledger_entries=%d confirmed_prefix_retransmitted=0 wake_mutations=0 completed_reopen=2; real NTFS/CLI, synthetic reconnect hints and NAS protocol", len(data), transferclient.MaxChunkBytes, gets, commits, ledgerEntries)
 	}
 }
