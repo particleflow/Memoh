@@ -9,13 +9,14 @@ test_log=$(mktemp)
 trap 'rm -f "$test_log"' EXIT
 
 go test -json -race -tags=integration -count=1 -timeout 90s \
-  -run '^TestComputer(OperationsMigrationAndDurableIsolation|Admission.*)$' ./internal/db | tee "$test_log"
+  -run '^Test(Computer(OperationsMigrationAndDurableIsolation|Admission.*)|NativeHerdr.*|NativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths)$' ./internal/db | tee "$test_log"
 
 python3 - "$test_log" <<'PY'
 import json
 import sys
 
 names = ["TestComputerOperationsMigrationAndDurableIsolation", "TestComputerAdmissionDurabilityCoverageAndReservations", "TestComputerAdmissionPreservesAlreadyReservedFollowup", "TestComputerAdmissionPauseSerializesWithClaims", "TestComputerAdmissionRollbackRefusesLivePause", "TestComputerAdmissionRLSAndUnknownMapping"]
+names += ["TestNativeHerdrAdmissionPersistsAndFencesNewWork", "TestNativeHerdrConfigAndTransferOwnership", "TestNativeHerdrAdmissionRLSAndRollback", "TestNativeHerdrPauseSerializesWithClaims", "TestNativeHerdrCanonicalAdmissionDefinition", "TestNativeHerdrDeliveryUsesTransactionalRegistry", "TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths"]
 with open(sys.argv[1], encoding="utf-8") as stream:
     events = [json.loads(line) for line in stream if line.strip()]
 for name in names:
