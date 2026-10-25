@@ -30,13 +30,27 @@ func New(clients bridge.Provider) *Provider {
 	return &Provider{clients: clients}
 }
 
+func (p *Provider) mediaClient(ctx context.Context, botID string) (*bridge.Client, error) {
+	client, err := p.clients.MCPClient(ctx, botID)
+	if err != nil {
+		return nil, err
+	}
+	// FilesOnly is deliberately still usable by workspace read/write tools.
+	// Generic media storage is a different authority: managed computer files
+	// enter or leave NAS storage only through the producer delivery ledger.
+	if !client.DirectTransfersAllowed() {
+		return nil, bridge.ErrForbidden
+	}
+	return client, nil
+}
+
 // Put writes data to the bot container via gRPC streaming.
 func (p *Provider) Put(ctx context.Context, key string, reader io.Reader) error {
 	botID, sub, err := parseRoutingKey(key)
 	if err != nil {
 		return err
 	}
-	client, err := p.clients.MCPClient(ctx, botID)
+	client, err := p.mediaClient(ctx, botID)
 	if err != nil {
 		return fmt.Errorf("get client: %w", err)
 	}
@@ -53,7 +67,7 @@ func (p *Provider) Open(ctx context.Context, key string) (io.ReadCloser, error) 
 	if err != nil {
 		return nil, err
 	}
-	client, err := p.clients.MCPClient(ctx, botID)
+	client, err := p.mediaClient(ctx, botID)
 	if err != nil {
 		return nil, fmt.Errorf("get client: %w", err)
 	}
@@ -71,7 +85,7 @@ func (p *Provider) Delete(ctx context.Context, key string) error {
 	if err != nil {
 		return err
 	}
-	client, err := p.clients.MCPClient(ctx, botID)
+	client, err := p.mediaClient(ctx, botID)
 	if err != nil {
 		return fmt.Errorf("get client: %w", err)
 	}
@@ -94,7 +108,7 @@ func (p *Provider) AccessPath(ctx context.Context, key string) string {
 	if p == nil || p.clients == nil {
 		return attachmentpkg.DataMountPath(paths[0])
 	}
-	client, err := p.clients.MCPClient(ctx, botID)
+	client, err := p.mediaClient(ctx, botID)
 	if err != nil {
 		return ""
 	}
@@ -115,7 +129,7 @@ func (p *Provider) OpenContainerFile(ctx context.Context, botID, containerPath s
 		if !filepath.IsAbs(strings.TrimSpace(containerPath)) {
 			return nil, fmt.Errorf("path must start with %s/ or be an absolute workspace path", attachmentpkg.DataMountPath(""))
 		}
-		client, err := p.clients.MCPClient(ctx, botID)
+		client, err := p.mediaClient(ctx, botID)
 		if err != nil {
 			return nil, fmt.Errorf("get client: %w", err)
 		}
@@ -124,7 +138,7 @@ func (p *Provider) OpenContainerFile(ctx context.Context, botID, containerPath s
 	if subPath == "" || strings.Contains(subPath, "..") {
 		return nil, errors.New("invalid workspace path")
 	}
-	client, err := p.clients.MCPClient(ctx, botID)
+	client, err := p.mediaClient(ctx, botID)
 	if err != nil {
 		return nil, fmt.Errorf("get client: %w", err)
 	}
@@ -142,7 +156,7 @@ func (p *Provider) ListPrefix(ctx context.Context, prefix string) ([]string, err
 	if botID == "" || sub == "" {
 		return nil, nil
 	}
-	client, err := p.clients.MCPClient(ctx, botID)
+	client, err := p.mediaClient(ctx, botID)
 	if err != nil {
 		return nil, nil
 	}

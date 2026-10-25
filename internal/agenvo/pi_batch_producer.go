@@ -10,7 +10,7 @@ import (
 	"github.com/felinics/memoh/internal/deliverymeta"
 )
 
-// AdvanceBatchDelivery only wakes the existing finite plugin command. Neither
+// AdvanceBatchDelivery only wakes the existing finite producer command. Neither
 // pane.run acceptance nor its output is delivery evidence. The dedicated control
 // pane is checked again; this never sends input to the Pi pane or resubmits Pi.
 func (s *Service) AdvanceBatchDelivery(ctx context.Context, scope Scope, p BatchProgress) error {
@@ -24,6 +24,14 @@ func (s *Service) AdvanceBatchDelivery(ctx context.Context, scope Scope, p Batch
 	if p.Producer.Task.RootHash != deliverymeta.RootHash(target.WorkDir) {
 		return ErrTargetChanged
 	}
+	command := `& { herdr plugin action invoke collect-result --plugin memoh.delivery *> $null }`
+	if target.NativeRuntimeID != "" {
+		collect, err := nativeProducerCollectCommand(target.Producer)
+		if err != nil {
+			return err
+		}
+		command = launchBashScript(collect+" >/dev/null 2>&1", target.BashPath)
+	}
 	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
 	if err != nil {
 		return err
@@ -35,7 +43,7 @@ func (s *Service) AdvanceBatchDelivery(ctx context.Context, scope Scope, p Batch
 	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != p.ControlPane || info.Pane.Terminal != p.ControlTerminal || info.Pane.Workspace != p.WorkspaceID {
 		return ErrTargetChanged
 	}
-	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": `& { herdr plugin action invoke collect-result --plugin memoh.delivery *> $null }`})
+	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": command})
 	return err
 }
 
@@ -88,6 +96,13 @@ if [ "$memoh_started" = true ] && command -v herdr >/dev/null; then
   herdr plugin action invoke collect-result --plugin memoh.delivery > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true
 fi
 `
+	if target.NativeRuntimeID != "" {
+		collect, err := nativeProducerCollectCommand(target.Producer)
+		if err != nil {
+			return "", err
+		}
+		hook = "\nif [ \"$memoh_started\" = true ]; then\n  " + collect + ` > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true` + "\nfi\n"
+	}
 	result := script + closures.String() + hook
 	// Leave headroom below Windows CreateProcessW's 32767-character bound.
 	// The connector's existing larger command cap alone is insufficient here.
@@ -95,6 +110,17 @@ fi
 		return "", ErrUnsupported
 	}
 	return result, nil
+}
+
+// The native host's existing collector is a finite CLI, not an enabled Herdr
+// plugin hook. Explicit directory references prevent inheritance from a retired
+// Agenvo profile. Durable producer admission retains its existing idempotency.
+func nativeProducerCollectCommand(p ProducerLocator) (string, error) {
+	if p.validate() != nil {
+		return "", ErrUnsupported
+	}
+	quote := func(value string) string { return "'" + strings.ReplaceAll(value, "'", "'\"'\"'") + "'" }
+	return fmt.Sprintf(`HERDR_PLUGIN_CONFIG_DIR=%s HERDR_PLUGIN_STATE_DIR=%s "$(cygpath -u %s)" -action collect-result </dev/null`, quote(p.ConfigDir), quote(p.StateDir), quote(p.ProgramPath)), nil
 }
 
 func producerClosureFunction(task deliverymeta.Task) string {

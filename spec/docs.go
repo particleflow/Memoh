@@ -18869,7 +18869,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Uses the existing owner connection and a read-only native probe, then atomically fences new operation claims and follow-up reservations across matching mounts. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.",
+                "description": "Atomically fences new operation claims and follow-up reservations across matching mounts. Agenvo uses the existing owner connection and a read-only probe; configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.",
                 "consumes": [
                     "application/json"
                 ],
@@ -19082,6 +19082,65 @@ const docTemplate = `{
                     },
                     "503": {
                         "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/native-herdr": {
+            "put": {
+                "description": "Stores non-secret local references on an activated Runtime. Does not enroll a device, grant Bots, start Herdr, or change credentials. Native Pi tasks require pi-json-v1.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Configure Herdr on an existing owned native Runtime",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing native Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Private deployment profile",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.NativeHerdrProfile"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.Runtime"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -21006,6 +21065,62 @@ const docTemplate = `{
                 }
             }
         },
+        "agenvo.NativeHerdrProfile": {
+            "type": "object",
+            "required": [
+                "bash_path",
+                "herdr_cli",
+                "herdr_config_root",
+                "instance_id",
+                "session",
+                "work_dir"
+            ],
+            "properties": {
+                "agent": {
+                    "$ref": "#/definitions/agenvo.AgentProfile"
+                },
+                "bash_path": {
+                    "type": "string"
+                },
+                "herdr_cli": {
+                    "type": "string"
+                },
+                "herdr_config_root": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "producer": {
+                    "$ref": "#/definitions/agenvo.ProducerLocator"
+                },
+                "session": {
+                    "type": "string"
+                },
+                "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.ProducerLocator": {
+            "type": "object",
+            "required": [
+                "config_dir",
+                "program_path",
+                "state_dir"
+            ],
+            "properties": {
+                "config_dir": {
+                    "type": "string"
+                },
+                "program_path": {
+                    "type": "string"
+                },
+                "state_dir": {
+                    "type": "string"
+                }
+            }
+        },
         "agenvo.ReferenceObservation": {
             "type": "object",
             "properties": {
@@ -21047,8 +21162,20 @@ const docTemplate = `{
                 "device_id": {
                     "type": "string"
                 },
+                "herdr_cli": {
+                    "type": "string"
+                },
+                "herdr_config_root": {
+                    "type": "string"
+                },
                 "instance_id": {
                     "type": "string"
+                },
+                "native_runtime_id": {
+                    "type": "string"
+                },
+                "producer": {
+                    "$ref": "#/definitions/agenvo.ProducerLocator"
                 },
                 "session": {
                     "type": "string"
@@ -31322,6 +31449,26 @@ const docTemplate = `{
                 }
             }
         },
+        "userruntime.NativeHerdrIdentity": {
+            "type": "object",
+            "properties": {
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "session": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
+                    "type": "string"
+                }
+            }
+        },
         "userruntime.Runtime": {
             "type": "object",
             "properties": {
@@ -31354,6 +31501,9 @@ const docTemplate = `{
                 },
                 "name": {
                     "type": "string"
+                },
+                "native_herdr": {
+                    "$ref": "#/definitions/userruntime.NativeHerdrIdentity"
                 },
                 "online": {
                     "type": "boolean"

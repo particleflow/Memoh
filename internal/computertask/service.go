@@ -65,12 +65,13 @@ type Target struct {
 	AgentProtocol string   `json:"agent_protocol,omitempty"`
 }
 type Submit struct {
-	Artifact  *deliverymeta.Artifact  `json:"artifact,omitempty"`
-	Artifacts []deliverymeta.Artifact `json:"artifacts,omitempty"`
-	TargetID  string                  `json:"target_id,omitempty"`
-	Kind      string                  `json:"kind"`
-	Task      string                  `json:"task"`
-	WorkDir   string                  `json:"work_dir,omitempty"`
+	ResumeOperationID string                  `json:"resume_operation_id,omitempty"`
+	Artifact          *deliverymeta.Artifact  `json:"artifact,omitempty"`
+	Artifacts         []deliverymeta.Artifact `json:"artifacts,omitempty"`
+	TargetID          string                  `json:"target_id,omitempty"`
+	Kind              string                  `json:"kind"`
+	Task              string                  `json:"task"`
+	WorkDir           string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
 	NativeEvidence *NativeEvidenceLedger    `json:"native_evidence,omitempty"`
@@ -269,6 +270,11 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	if err := agenvo.ValidateWorkDir(target.WorkDir, in.WorkDir); err != nil {
 		return Result{}, err
+	}
+	if in.ResumeOperationID != "" {
+		operationID := in.ResumeOperationID
+		in.ResumeOperationID = ""
+		return s.resumeBatchWorkspace(ctx, b, operationID, in, target)
 	}
 	if s.authorize == nil {
 		return Result{}, ErrDenied

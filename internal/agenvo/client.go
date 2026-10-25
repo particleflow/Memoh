@@ -22,13 +22,17 @@ var (
 // Target refers to an existing authorized MCP connection. Credentials belong
 // to the MCP/OAuth service and must never be copied into an execution target.
 type Target struct {
-	ConnectionID string       `json:"connection_id"`
-	DeviceID     string       `json:"device_id"`
-	InstanceID   string       `json:"instance_id"`
-	Session      string       `json:"session"`
-	WorkDir      string       `json:"work_dir"`
-	BashPath     string       `json:"bash_path"`
-	Agent        AgentProfile `json:"agent,omitempty,omitzero"`
+	ConnectionID    string          `json:"connection_id"`
+	DeviceID        string          `json:"device_id"`
+	InstanceID      string          `json:"instance_id"`
+	Session         string          `json:"session"`
+	WorkDir         string          `json:"work_dir"`
+	BashPath        string          `json:"bash_path"`
+	Agent           AgentProfile    `json:"agent,omitempty,omitzero"`
+	NativeRuntimeID string          `json:"native_runtime_id,omitempty"`
+	HerdrCLI        string          `json:"herdr_cli,omitempty"`
+	HerdrConfigRoot string          `json:"herdr_config_root,omitempty"`
+	Producer        ProducerLocator `json:"producer,omitempty,omitzero"`
 }
 
 // AgentProfile is private deployment configuration, never model-supplied.
@@ -73,9 +77,14 @@ type Resolve func(context.Context, Scope) (Target, error)
 // the standard MCP CallToolResult, without a JSON-RPC transport envelope.
 type CallTool func(context.Context, string, string, map[string]any) (json.RawMessage, error)
 
+// NativeCaller uses the selected, grant-checked Runtime's Exec transport. It
+// returns a native receipt, never business completion or a retry instruction.
+type NativeCaller func(context.Context, Scope, Target, string, map[string]any) (Receipt, error)
+
 type Client struct {
-	resolve  Resolve
-	callTool CallTool
+	resolve    Resolve
+	callTool   CallTool
+	callNative NativeCaller
 }
 
 func NewClient(resolve Resolve, call CallTool) *Client {
@@ -93,7 +102,7 @@ type Receipt struct {
 }
 
 func (c *Client) resolveTarget(ctx context.Context, scope Scope) (Target, error) {
-	if c == nil || c.resolve == nil || c.callTool == nil || scope.BotID == "" || scope.TargetID == "" {
+	if c == nil || c.resolve == nil || (c.callTool == nil && c.callNative == nil) || scope.BotID == "" || scope.TargetID == "" {
 		return Target{}, ErrInvalidTarget
 	}
 	t, err := c.resolve(ctx, scope)
@@ -132,6 +141,15 @@ func (c *Client) relay(ctx context.Context, scope Scope, expected Target, method
 	}
 	if current != expected {
 		return Receipt{}, ErrTargetChanged
+	}
+	if current.NativeRuntimeID != "" {
+		if c.callNative == nil {
+			return Receipt{}, ErrUnavailable
+		}
+		return c.callNative(ctx, scope, current, method, params)
+	}
+	if c.callTool == nil {
+		return Receipt{}, ErrUnavailable
 	}
 	target, _ := json.Marshal(map[string]string{"deviceId": current.DeviceID, "instanceId": current.InstanceID})
 	name, _ := json.Marshal(method)

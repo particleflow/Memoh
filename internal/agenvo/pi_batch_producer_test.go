@@ -20,7 +20,14 @@ import (
 // Synthetic Bash utilities, not a Herdr installation or Windows acceptance.
 func TestBatchProducerClosesOnlyDeclaredResult(t *testing.T)          { exerciseBatchProducer(t, false) }
 func TestBatchProducerClosesMultipleResultsWithoutRerun(t *testing.T) { exerciseBatchProducer(t, true) }
-func exerciseBatchProducer(t *testing.T, multiple bool) {
+
+// Regression for the disabled-plugin completion reproduction supplied by the
+// file integration lane (ddb7872e). The actual generated envelope must collect.
+func TestNativeCompletionRegistersWithoutLegacyPlugin(t *testing.T) {
+	exerciseBatchProducer(t, true, true)
+}
+
+func exerciseBatchProducer(t *testing.T, multiple bool, native ...bool) {
 	t.Helper()
 	dir := t.TempDir()
 	bin := filepath.Join(dir, "bin")
@@ -28,10 +35,11 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 		t.Fatal(err)
 	}
 	for name, script := range map[string]string{
-		"uname":   "#!/bin/sh\nprintf MINGW64_NT-SYNTHETIC\n",
-		"cygpath": "#!/bin/sh\ncase \"$2\" in 'C:\\Synthetic') printf '%s' \"$SYNTH_ROOT\";; *) printf '%s' \"$2\";; esac\n",
-		"pi":      "#!/bin/sh\ncat > /dev/null\ntest -f \"$MEMOH_DELIVERY_CONTEXT_FILE\" || exit 1\nprintf 'PRIVATE-OUTPUT-CONTENT' > result_one\nprintf 'SECOND-OUTPUT' > result_two\nprintf 'run' >> \"$SYNTH_ROOT/pi-count\"\nprintf 'unrelated' > unrelated\n",
-		"herdr":   "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/hook-args\"\nprintf 'fixture-accepted'\n",
+		"uname":        "#!/bin/sh\nprintf MINGW64_NT-SYNTHETIC\n",
+		"cygpath":      "#!/bin/sh\nif [ \"$2\" = \"$SYNTH_PRODUCER_WINDOWS\" ]; then printf '%s' \"$SYNTH_ROOT/bin/producer.exe\"; else case \"$2\" in 'C:\\Synthetic') printf '%s' \"$SYNTH_ROOT\";; *) printf '%s' \"$2\";; esac; fi\n",
+		"pi":           "#!/bin/sh\ncat > /dev/null\ntest -f \"$MEMOH_DELIVERY_CONTEXT_FILE\" || exit 1\nprintf 'PRIVATE-OUTPUT-CONTENT' > result_one\nprintf 'SECOND-OUTPUT' > result_two\nprintf 'run' >> \"$SYNTH_ROOT/pi-count\"\nprintf 'unrelated' > unrelated\n",
+		"herdr":        "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/hook-args\"\nif [ -n \"$SYNTH_PRODUCER_WINDOWS\" ]; then printf 'synthetic legacy plugin disabled' >&2; exit 17; fi\nprintf 'fixture-accepted'\n",
+		"producer.exe": "#!/bin/sh\nprintf '%s\\n' \"$@\" > \"$SYNTH_ROOT/producer-args\"\nprintf '%s' \"$HERDR_PLUGIN_CONFIG_DIR\" > \"$SYNTH_ROOT/producer-config\"\nprintf '%s' \"$HERDR_PLUGIN_STATE_DIR\" > \"$SYNTH_ROOT/producer-state\"\nprintf 'collect' >> \"$SYNTH_ROOT/producer-count\"\nprintf 'fixture-accepted'\n",
 	} {
 		//nolint:gosec // Fixed synthetic executable confined to t.TempDir.
 		if err := os.WriteFile(filepath.Join(bin, name), []byte(script), 0o700); err != nil {
@@ -46,11 +54,15 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 		p.Producer.Artifact = deliverymeta.Artifact{}
 	}
 	target := Target{WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
+	if len(native) != 0 && native[0] {
+		target.NativeRuntimeID = uuid.NewString()
+		target.Producer = ProducerLocator{ProgramPath: `C:\Synthetic Owner's Bin\producer.exe`, ConfigDir: `C:\Native Owner's Config\$(touch MUST_NOT_EXIST)`, StateDir: `C:\Native State\queue`}
+	}
 	script := batchFixtureScript(t, p, target, target.WorkDir, "create the declared result")
 	//nolint:gosec // Fixed wrapper and isolated synthetic binaries only.
 	command := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script)
 	command.Dir = dir
-	command.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir}
+	command.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir, "SYNTH_PRODUCER_WINDOWS=" + target.Producer.ProgramPath, "HERDR_PLUGIN_CONFIG_DIR=retired-config", "HERDR_PLUGIN_STATE_DIR=retired-state"}
 	out, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("wrapper: %v %s", err, out)
@@ -89,6 +101,21 @@ func exerciseBatchProducer(t *testing.T, multiple bool) {
 	}
 	if string(readBatchFixture(t, filepath.Join(dir, "pi-count"))) != "run" {
 		t.Fatal("Pi ran again")
+	}
+	if target.NativeRuntimeID != "" {
+		if _, err := os.Stat(filepath.Join(dir, "hook-args")); !os.IsNotExist(err) {
+			t.Fatal("native route invoked the retired plugin hook")
+		}
+		if string(readBatchFixture(t, filepath.Join(dir, "producer-args"))) != "-action\ncollect-result\n" || string(readBatchFixture(t, filepath.Join(dir, "producer-count"))) != "collect" {
+			t.Fatal("wrong or repeated producer invocation")
+		}
+		if string(readBatchFixture(t, filepath.Join(dir, "producer-config"))) != target.Producer.ConfigDir || string(readBatchFixture(t, filepath.Join(dir, "producer-state"))) != target.Producer.StateDir {
+			t.Fatal("producer inherited the retired directory pair")
+		}
+		if _, err := os.Stat(filepath.Join(dir, "MUST_NOT_EXIST")); !os.IsNotExist(err) {
+			t.Fatal("locator became shell source")
+		}
+		return
 	}
 	args := string(readBatchFixture(t, filepath.Join(dir, "hook-args")))
 	if args != "plugin\naction\ninvoke\ncollect-result\n--plugin\nmemoh.delivery\n" {

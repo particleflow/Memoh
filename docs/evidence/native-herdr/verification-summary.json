@@ -1,0 +1,67 @@
+{
+  "verified_at_utc": "2026-10-25T12:26:40.817517+00:00",
+  "base_sha": "2030c2d522695f52a227f12421800fe075760813",
+  "source_sha256": "8072a745e7181b88ea5f16cf128923e420eaf7f1270bdd138a514efa4b886898",
+  "binary_sha256": "901dbcc14cb62770567adb40fa78a8a69253aa7d465d0077b71ea60f3573da03",
+  "server": "http://127.0.0.1:58080",
+  "ui": {
+    "url": "http://127.0.0.1:58083/settings/runtimes",
+    "grant_persisted_after_process_restart": true,
+    "grant_before_toggle": "false",
+    "grant_after_toggle": "true",
+    "revoke_http_status": 204,
+    "grant_http_status": 200,
+    "uncaught_page_errors": [],
+    "oauth_navigation": false
+  },
+  "health_head_status": 200,
+  "migration": 176,
+  "api_checks": 39,
+  "api_checks_passed": 39,
+  "data_invariants": {
+    "profile_preserves_unrelated_data": true,
+    "native_credential_unchanged": true,
+    "runtime_owner_retained": true,
+    "no_mcp_connection_created": true,
+    "no_business_operation_dispatched": true
+  },
+  "screenshots": {
+    "native-computers.png": "3bcaafd5d778fb800ef3a95797f6472e3093a298fa2e304bcba974ffd005f0a2",
+    "native-access-granted.png": "ea927ce3abf7aa0f00f98058ba92b91f1dad2739683560e33e37a2a5f5a682f8"
+  },
+  "limitations": [
+    "No real Windows Runtime enrollment or credentials; all users and registry rows are synthetic.",
+    "No Windows Herdr/Pi execution in this UI verification; short-lived CLI transport is verified in separate contract tests.",
+    "No synthetic Cloud workspace was provisioned; first UI run logged expected background workspace-unreachable errors.",
+    "mise was not installed; equivalent Go/Vite dev commands used current worktree with independent local PostgreSQL and pgvector.",
+    "Google Fonts request failed certificate validation; bundled/system fallback rendered UI."
+  ],
+  "source_stable_during_build_and_ui": true,
+  "native_identity": {
+    "readback": {
+      "connection_id": "10000000-0000-4000-8000-000000000001",
+      "device_id": "10000000-0000-4000-8000-000000000001",
+      "instance_id": "herdr-main",
+      "session": "default",
+      "target_fingerprint": "205c633d7fc58efde39d971dbe555ed7d75234463dd01993ce3ebf9d03f8380c"
+    },
+    "put_matches_get": true,
+    "connection_and_device_id_equal_runtime_id": true,
+    "fingerprint_nonempty": true,
+    "full_identity_survives_process_restart_before_any_profile_write": true
+  },
+  "producer_locator": {
+    "readback_from_isolated_pg_before_restart": {
+      "state_dir": "C:\\Memoh\\producer-state",
+      "config_dir": "C:\\Memoh\\producer-config",
+      "program_path": "C:\\Memoh\\producer\\memoh-producer.exe"
+    },
+    "all_three_fields_persist_across_server_restart_before_profile_writes": true,
+    "without_producer_profile_remains_legal": true,
+    "fingerprint_without_producer": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396",
+    "fingerprint_with_producer": "205c633d7fc58efde39d971dbe555ed7d75234463dd01993ce3ebf9d03f8380c",
+    "partial_field_inputs_rejected_400": 3,
+    "noncanonical_path_inputs_rejected_400": 3,
+    "all_rejected_inputs_preserve_profile_row_and_updated_at": true
+  }
+}

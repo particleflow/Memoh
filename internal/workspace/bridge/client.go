@@ -33,6 +33,7 @@ type Client struct {
 	target    string
 	createdAt time.Time
 	ownsConn  bool
+	filesOnly bool
 }
 
 // NewClientFromConn wraps an existing gRPC connection into a Client.
@@ -114,13 +115,17 @@ func (c *Client) WithOutgoingMetadata(values map[string]string) *Client {
 		return nil
 	}
 	conn := &outgoingMetadataConn{ClientConnInterface: c.conn, values: cloneStringMap(values)}
-	return &Client{
+	view := &Client{
 		conn:      c.conn,
 		svc:       pb.NewContainerServiceClient(conn),
 		target:    c.target,
 		createdAt: c.createdAt,
 		ownsConn:  false,
 	}
+	if c.filesOnly {
+		return view.FilesOnly()
+	}
+	return view
 }
 
 type outgoingMetadataConn struct {

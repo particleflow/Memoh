@@ -1,0 +1,116 @@
+{
+  "verified_at_utc": "2026-10-25T17:25:35.056243+00:00",
+  "build_base_head": "d07b773a81d02f08d4699504f7858f43723c172b",
+  "verified_head": "d07b773a81d02f08d4699504f7858f43723c172b",
+  "production_source_sha256": "c41f82dfe705fb18ecfe4929834ecd7b0fc1c1d8e418c425d0717250630e397d",
+  "production_source_unchanged_from_build": true,
+  "binary_sha256": "2ea6b62ee89decbb5b5fb0eb71bfd5671030c2152525f024079eee29e6167c36",
+  "environment": {
+    "ui": "http://127.0.0.1:58083",
+    "api": "http://127.0.0.1:58080",
+    "health_head_status": 200,
+    "postgres": "isolated memoh-herdr-ui-pg loopback 58432",
+    "startup": "Current modified Go binary + existing real Vite UI; mise unavailable."
+  },
+  "synthetic_fixture": {
+    "provenance": "Explicit isolated PostgreSQL seed for receipt reading, not evidence of real workspace creation or resume execution. Existing two historical operations were preserved.",
+    "operation_id": "70000000-0000-4000-8000-000000000006",
+    "run_id": "80000000-0000-4000-8000-000000000006",
+    "normalized_submit": {
+      "target_id": "e76bd2c0-260b-4a1d-b05e-ea7ac0cea597",
+      "kind": "herdr_pi_task",
+      "task": "Synthetic isolated original task; receipt reading only.",
+      "work_dir": "."
+    },
+    "encoded_submit": "{\"target_id\":\"e76bd2c0-260b-4a1d-b05e-ea7ac0cea597\",\"kind\":\"herdr_pi_task\",\"task\":\"Synthetic isolated original task; receipt reading only.\",\"work_dir\":\".\"}",
+    "full_submit_hash": "b00fbbb65caa8197d57b7a6e625d3d59a8788cfeeab1554ff02e4a2a158ce427",
+    "target_fingerprint": "205c633d7fc58efde39d971dbe555ed7d75234463dd01993ce3ebf9d03f8380c",
+    "progress": {
+      "phase": "batch_creating_workspace",
+      "attempt": "e4b4876fe645f81b403d35d116716316",
+      "history": {
+        "mode": "first",
+        "version": 1
+      },
+      "pane_id": "",
+      "generation": "53fdcb7667a593a63a223605bf2245aa",
+      "terminal_id": "",
+      "control_pane": "",
+      "request_hash": "b00fbbb65caa8197d57b7a6e625d3d59a8788cfeeab1554ff02e4a2a158ce427",
+      "workspace_id": "",
+      "pi_session_id": "d37a06ff786e2a157d2576401a64fc39098697cab2e4b71a696b2313737ec86d",
+      "layout_version": 1,
+      "control_terminal": "",
+      "completion_version": 1
+    }
+  },
+  "read_result": {
+    "task_type": "computer_operation",
+    "task_id": "70000000-0000-4000-8000-000000000006",
+    "session_id": "60000000-0000-4000-8000-000000000006",
+    "parent_session_id": "60000000-0000-4000-8000-000000000006",
+    "created_at": "2026-10-25T17:05:10.146721Z",
+    "updated_at": "2026-10-25T17:05:10.146721Z",
+    "status": "unknown",
+    "summary": "Pi receipt recorded; current history continuity and business completion are unverified.",
+    "content_available": false,
+    "attachments_available": false,
+    "target_id": "e76bd2c0-260b-4a1d-b05e-ea7ac0cea597",
+    "operation_kind": "herdr_pi_task",
+    "revision": "2",
+    "cancel_requested": false,
+    "process_state": "unknown",
+    "pi_result": "unknown",
+    "business_state": "unknown"
+  },
+  "checks": {
+    "same_operation_id": true,
+    "same_request_hash": true,
+    "same_attempt_generation_runid": true,
+    "phase_unchanged": true,
+    "all_references_remain_empty": true,
+    "all_operation_and_session_rows_unchanged": true,
+    "operation_count_before": 3,
+    "operation_count_after": 3,
+    "oauth_token_rows": 0,
+    "execution_unknown": true,
+    "business_unknown": true,
+    "task_write_requests": [],
+    "browser_page_errors": [],
+    "historical_message_rows_unchanged": true,
+    "historical_message_count": 0,
+    "new_fixture_rows_this_run": 0
+  },
+  "tools_discovery": {
+    "reads": [
+      {
+        "method": "initialize",
+        "status": 200,
+        "error": null
+      },
+      {
+        "method": "tools/list",
+        "status": 200,
+        "error": null
+      }
+    ],
+    "tool_name": "computer_task_submit",
+    "resume_operation_id": {
+      "description": "Explicit original operation ID for the bounded native workspace-acknowledgement recovery only. Retain the exact original task, work_dir, target and artifact declarations. Omit for a new operation.",
+      "type": "string"
+    },
+    "parameter_required": false,
+    "tools_call_count": 0
+  },
+  "snapshot_sha256": "1dec6cb6e2e3dce12695c9c6ebd32d7f97928dafad7e597710114bf3323d2030",
+  "limitations": [
+    "UI verification covers receipt reading, same-ID refresh and unknown/no-replay presentation only. No submit, resume, duplicate-submit, or execution tool was called.",
+    "The native PC is deliberately offline. The visible workspace-unavailable toast and computer connection unavailable state are expected.",
+    "No real credential, OAuth authorization/refresh, Runtime enrollment, Windows CLI execution or production deployment occurred.",
+    "Resume execution, admission, concurrency and real PostgreSQL behavior are verified separately by the assigned test agent; this hand-seeded fixture does not prove resume success.",
+    "Agent browser verification is not human QA."
+  ],
+  "local_raw_evidence_directory": "/workspace/native-herdr-verification/resume",
+  "exec_go_sha256": "d3b5aafdaf7400fd26f2933e0c519be1e8a1d6156bdcae3e2228e8551e093e7f",
+  "verified_product_change": "PowerShell envelope resolves Microsoft.PowerShell.Utility\\ConvertFrom-Json explicitly; existing [void] stdout drains remain."
+}

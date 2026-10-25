@@ -177,6 +177,13 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 		}
 		raw, _ := base64.StdEncoding.DecodeString(match[1])
 		script := string(raw)
+		if strings.HasPrefix(script, "HERDR_PLUGIN_CONFIG_DIR=") && strings.Contains(script, " -action collect-result </dev/null") {
+			if params["paneId"] != "control" || !strings.Contains(script, "HERDR_PLUGIN_STATE_DIR=") || strings.Contains(script, "plugin action invoke") {
+				f.t.Fatal("native producer wake lost its fixed control route")
+			}
+			f.producerWakes++
+			return envelope(map[string]any{"session": "synthetic", "result": map[string]string{"type": "accepted"}}), nil
+		}
 		switch params["paneId"] {
 		case "job":
 			f.runs++

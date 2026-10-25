@@ -38,6 +38,20 @@ type Service struct {
 
 func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
 
+func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, profile agenvo.NativeHerdrProfile) (Runtime, error) {
+	if s.agenvo == nil {
+		return Runtime{}, agenvo.ErrUnavailable
+	}
+	row, err := s.agenvo.ConfigureNativeHerdr(ctx, owner, id, profile)
+	if err != nil {
+		return Runtime{}, err
+	}
+	runtime := runtimeFromRecord(row, s.connection(row.ID))
+	// Configuring a program reference must not reissue the Runtime credential.
+	runtime.Key = ""
+	return runtime, nil
+}
+
 func (s *Service) ReadAgenvoEndpoint(ctx context.Context, owner, runtime string) (agenvo.EndpointConfiguration, error) {
 	if s.agenvo == nil {
 		return agenvo.EndpointConfiguration{}, agenvo.ErrUnavailable
@@ -368,6 +382,14 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 		}
 		return runtime
 	}
+	target, targetErr := agenvo.DecodeRuntimeTarget(row.Provider, row.ID, row.ProviderConfig)
+	if targetErr == nil && target.NativeRuntimeID != "" {
+		runtime.NativeHerdr = &NativeHerdrIdentity{
+			ConnectionID: target.ConnectionID, DeviceID: target.DeviceID,
+			InstanceID: target.InstanceID, Session: target.Session,
+			TargetFingerprint: agenvo.TargetFingerprint(target),
+		}
+	}
 	if connection == nil {
 		return runtime
 	}
@@ -378,5 +400,11 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 	runtime.Arch = connection.Info.Arch
 	runtime.ClientVersion = connection.Info.ClientVersion
 	runtime.Capabilities = append([]string(nil), connection.Info.Capabilities...)
+	if runtime.NativeHerdr != nil {
+		runtime.Capabilities = append(runtime.Capabilities, agenvo.CapabilityForegroundExec)
+		if target.Agent != (agenvo.AgentProfile{}) {
+			runtime.Capabilities = append(runtime.Capabilities, "herdr_pi_task")
+		}
+	}
 	return runtime
 }

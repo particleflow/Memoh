@@ -11,11 +11,21 @@ trap 'rm -f "$test_log"' EXIT
 go test -json -race -tags=integration -count=1 -timeout 90s \
   -run '^TestComputer(OperationsMigrationAndDurableIsolation|Admission.*)$' ./internal/db | tee "$test_log"
 
+# Keep the same-operation dispatch transaction checks in a separate bounded
+# process; preserve the existing contracts and their original time budget.
+go test -json -race -tags=integration -count=1 -timeout 90s \
+  -run '^TestComputerOperationAdmission' ./internal/db | tee -a "$test_log"
+
 python3 - "$test_log" <<'PY'
 import json
 import sys
 
 names = ["TestComputerOperationsMigrationAndDurableIsolation", "TestComputerAdmissionDurabilityCoverageAndReservations", "TestComputerAdmissionPreservesAlreadyReservedFollowup", "TestComputerAdmissionPauseSerializesWithClaims", "TestComputerAdmissionRollbackRefusesLivePause", "TestComputerAdmissionRLSAndUnknownMapping"]
+names.extend([
+    "TestComputerOperationAdmissionCASPreservesScopeAndDelivery",
+    "TestComputerOperationAdmissionConcurrentReservationsAndRLS",
+    "TestComputerOperationAdmissionSerializesPauseAndCancellation",
+])
 with open(sys.argv[1], encoding="utf-8") as stream:
     events = [json.loads(line) for line in stream if line.strip()]
 for name in names:

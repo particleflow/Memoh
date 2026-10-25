@@ -309,6 +309,19 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 	if err != nil {
 		return ResolvedWorkspaceTarget{}, err
 	}
+	var execute func(context.Context, agenvo.Request) (agenvo.Result, error)
+	var providerConfig map[string]json.RawMessage
+	if json.Unmarshal(record.RuntimeProviderConfig, &providerConfig) == nil && len(providerConfig["herdr"]) > 0 {
+		// Once configured for durable computer tasks, raw exec cannot bypass
+		// unknown operations or paused admission. Reads/writes retain their
+		// existing permissions; artifact delivery still uses the producer ledger.
+		execute = func(context.Context, agenvo.Request) (agenvo.Result, error) {
+			return agenvo.Result{State: "not_started"}, agenvo.ErrComputerTaskRequired
+		}
+		// Hook commands and other bridge consumers do not use Execute. Keep
+		// their file access, but withhold Exec and network tunnels at the client.
+		client = client.FilesOnly()
+	}
 	return ResolvedWorkspaceTarget{
 		TargetID: record.ID,
 		Kind:     WorkspaceTargetRemote,
@@ -321,6 +334,7 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 			DefaultWorkDir: connection.Info.WorkspaceBase,
 		},
 		Approval: toolApprovalConfig(record.ToolApproval),
+		Execute:  execute,
 	}, nil
 }
 
