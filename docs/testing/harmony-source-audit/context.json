@@ -1,0 +1,5 @@
+{
+  "sha256": "bf39567fca0e33c998c517ccd6427fc1b691683854e14b5d1ee06c7bdc6f99f6",
+  "hostPatches": 45,
+  "changedProductionFile": "apps/web/src/lib/api-client.ts"
+}

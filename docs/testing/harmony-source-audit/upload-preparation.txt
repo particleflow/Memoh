@@ -1,0 +1,3 @@
+(node:237170) ExperimentalWarning: stripTypeScriptTypes is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"targetCommit":"51b19cbeb76e9803eb8d4b614cfabb03ef18cc73","productionAdapter":true,"productionStore":true,"limitsFailClosed":true,"singleMultipartFile":true,"hashReceiptAndReadback":true,"botIsolation":true,"unknownWriteReconciliation":true,"cancelledModelMessages":0,"duplicateReadyMessages":0,"explicitReferencesGated":true,"independentText":true,"videoType":true,"delegatedReadAndSaveScope":true,"scopedDenialNoFallback":true,"networkRequests":0,"nativeDevice":false}

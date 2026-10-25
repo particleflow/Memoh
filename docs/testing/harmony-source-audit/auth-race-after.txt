@@ -1,0 +1,2 @@
+{"scope":"Actual api-client.ts under Node; deferred synthetic 401 and auth-session boundary","anonymous401CannotClearNewLogin":true,"priorSession401CannotClearSameTokenLogin":true,"oldBearerCannotClearNewLogin":true}
+{"current401StillClears":true,"networkFailureRetainsToken":true}

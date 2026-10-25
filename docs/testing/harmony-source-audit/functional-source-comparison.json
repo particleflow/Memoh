@@ -1,0 +1,170 @@
+[
+  {
+    "area": "bot_management",
+    "path": "apps/web/src/pages/bots/new.vue",
+    "currentSHA256": "ce9ab6e8c3330ecf29b8d76339a3c893907503d2a2a2883e5c02126b54ad703d",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "bot_management",
+    "path": "apps/web/src/pages/bots/index.vue",
+    "currentSHA256": "56b80c45c673499897b3fbd064062d9565b8c4ce101e23b0eab5181013da4ca6",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "bot_management",
+    "path": "apps/web/src/pages/bots/components/bot-settings.vue",
+    "currentSHA256": "f0f902be5cb8e3239830e2453ecc9078946b300077ea89391275beacaabc407a",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "bot_management",
+    "path": "apps/web/src/composables/useAgentModelCatalog.ts",
+    "currentSHA256": "04005b1121cefd412baadb4d9ac725332305d6f9518e282eacd97f9e5aff555e",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/composables/useSessionTasks.ts",
+    "currentSHA256": "9a47a427fd3fbaba77f4fece7935ad13d2072b58c0bb9eacfe690effe59a0251",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/composables/useBotDelegations.ts",
+    "currentSHA256": "523cb081ecf13e449d74a9811e5c82193731d89951632d27889edb9ad1d34e17",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/composables/useComputerTaskObservation.ts",
+    "currentSHA256": "ae3a6cd1d71fc66609c63e2cea913c82bee366fcc03e35d3f55b0f43150d7e78",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/composables/useComputerTaskDeliveries.ts",
+    "currentSHA256": "8841e795251a96c9d9590ca6bd483cf9b864ce509b75ebff0146a375c7657e5c",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/composables/useNativeTask.ts",
+    "currentSHA256": "ce988f36e212fe9e7d63942c355d42b1299a95feed9edf6d3b2cb8e48e17687a",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/components/session-tasks.vue",
+    "currentSHA256": "ee5b611e3cae2c8d1133722de9a40c7a1d87be6a42ae58a851d488b269e44413",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/components/session-task-results.vue",
+    "currentSHA256": "15895925be4a9181c16bd5b9de31ce874b387b169f8f943a6cf9177a799fc01a",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "downstream_observation",
+    "path": "apps/web/src/pages/home/components/native-task-content.vue",
+    "currentSHA256": "7c1c2d188cd6d0ac3ecc54f87461b8fbd2a0b902474752cce3e4fffb3fc2d15f",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "login",
+    "path": "apps/web/src/lib/api-client.ts",
+    "currentSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": false,
+    "status": "current auth race repair"
+  },
+  {
+    "area": "login",
+    "path": "apps/web/src/lib/auth-session.ts",
+    "currentSHA256": "c403a64338f1fd231d3fce44dd42b629363dfc9bec9630e52b85beea90d808e7",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "login",
+    "path": "apps/web/src/pages/login/login-submit.ts",
+    "currentSHA256": "153d029dcadda69046fa029b4ea50a7607323217f6361814c42d0cf8c544c12c",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "login",
+    "path": "apps/web/src/store/user.ts",
+    "currentSHA256": "611d5021304242fdf02e7f9d44d0511688c84dec987b72489a49060e52b97cba",
+    "equalsPinnedSharedSource": true,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "attachments",
+    "path": "apps/web/src/pages/home/components/attachment-block.vue",
+    "currentSHA256": "acfac9d2e6b839ccd9012909354e58b2db1eb24aac4a5fc2bea9cee648b201b5",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "attachments",
+    "path": "apps/web/src/pages/home/composables/useMediaGallery.ts",
+    "currentSHA256": "25ab15e56ec5ea6fd47381f9cd63ab74cbac9cb784a1b06e4faac77795cdab50",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "attachments",
+    "path": "apps/web/src/store/chat/send.ts",
+    "currentSHA256": "02d48c06ddedf4635d590ea20499b6099503bbf931d33c1cc2d0498afa45faa9",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "attachments",
+    "path": "apps/web/src/lib/harmony-files.ts",
+    "currentSHA256": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  },
+  {
+    "area": "attachments",
+    "path": "apps/web/src/lib/harmony-download.ts",
+    "currentSHA256": "e381a6b00b6a3e7e1923e219e75eb07addb863676300314d58db42799d6f1b15",
+    "equalsPinnedSharedSource": false,
+    "equalsPreviouslyVerified9e6PhoneContext": true,
+    "status": "retained shared module or existing platform adapter"
+  }
+]

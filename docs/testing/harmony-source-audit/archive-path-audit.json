@@ -1,0 +1,934 @@
+{
+  "summary": {
+    "auditedCommit": "bf44bdd907ce8a67c77de937d69a2e8db62ba7b6",
+    "historicalExcludedPaths": 72,
+    "missingCurrentPaths": 0,
+    "archiveStates": {
+      "archive_exact": 29,
+      "archive_text_equivalent": 37,
+      "restored_then_modified_with_recorded_recovery_changes": 6
+    },
+    "betweenArchiveDifferences": [
+      "mobile/client/mobile/build_memoh_web.py",
+      "mobile/client/mobile/harmony/tests/voice_text.cjs",
+      "mobile/client/mobile/harmony/tools/build_api26.py",
+      "mobile/client/mobile/memoh/harmony-files.ts",
+      "mobile/client/mobile/package_memoh_web.py",
+      "mobile/client/validation/harmony/tools/toolchain.py"
+    ],
+    "publicPR67Files": 51,
+    "publicPR67PathsPresent": 51,
+    "historicalUnverifiedLaterChanges": 19,
+    "historical19PathMappingAvailable": false,
+    "personalContextResult": "unavailable_for_this_conversation",
+    "unresolvedSharedLabel": "5e55 (GitHub commit lookup returned 422; no exact SHA supplied)",
+    "actualSharedPin": "51b19cbeb76e9803eb8d4b614cfabb03ef18cc73"
+  },
+  "paths": [
+    {
+      "path": "mobile/client/contracts/album_sync.json",
+      "originalSHA256": "997f4ccf16ae8db0f75a84828c79c25c55cbb790b9a0f787ed1479501ff4bbe5",
+      "checkpointSHA256": "997f4ccf16ae8db0f75a84828c79c25c55cbb790b9a0f787ed1479501ff4bbe5",
+      "currentSHA256": "997f4ccf16ae8db0f75a84828c79c25c55cbb790b9a0f787ed1479501ff4bbe5",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/contracts/client_capabilities.json",
+      "originalSHA256": "fb1c9dc3ec6d6063751b15d9d9aadb7a8795a32c306178787b996afcfbda428d",
+      "checkpointSHA256": "fb1c9dc3ec6d6063751b15d9d9aadb7a8795a32c306178787b996afcfbda428d",
+      "currentSHA256": "920cb09c442549981aafcac219f8e8dffdeaacd43ce8117276fb74cf76e1deb0",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/contracts/folder_source_access.json",
+      "originalSHA256": "565f4577472e10748d14c26c910deedcde89bfdda439446bcf705b07ab614107",
+      "checkpointSHA256": "565f4577472e10748d14c26c910deedcde89bfdda439446bcf705b07ab614107",
+      "currentSHA256": "565f4577472e10748d14c26c910deedcde89bfdda439446bcf705b07ab614107",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/contracts/harmony_native_assets.json",
+      "originalSHA256": "10b89005ad31932512e5a7435cb44400c74ffac4d826aee30196f983245dadf5",
+      "checkpointSHA256": "10b89005ad31932512e5a7435cb44400c74ffac4d826aee30196f983245dadf5",
+      "currentSHA256": "959e1961f2c54edfb9637a41b171ac85f3a59b9f7ee1493409b079b57d89123a",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/contracts/matrix_assets.json",
+      "originalSHA256": "0bfa86c6d98dd9e83ec4f57d40434734013ba7eb823d060fdca6612e18f5583d",
+      "checkpointSHA256": "0bfa86c6d98dd9e83ec4f57d40434734013ba7eb823d060fdca6612e18f5583d",
+      "currentSHA256": "0bfa86c6d98dd9e83ec4f57d40434734013ba7eb823d060fdca6612e18f5583d",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/contracts/ui_theme.json",
+      "originalSHA256": "44d24c4ab2a088ab55f24cd3e513164dc49e042187557d5ca1a1c653db5b159a",
+      "checkpointSHA256": "44d24c4ab2a088ab55f24cd3e513164dc49e042187557d5ca1a1c653db5b159a",
+      "currentSHA256": "2b23b0926c700be2535bb0bb6b55370e769e1a4c00fc814d0f298f5921063720",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/build_memoh_web.py",
+      "originalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
+      "checkpointSHA256": "3de996938ab545c8bbebe9c83dd434df3d7104e673cc72f44ab2460d38562c0c",
+      "currentSHA256": "3e228fd23af37fe3244c06dd9c225b183efe7868af0bd29bb80a1265984493ad",
+      "archiveDiffers": true,
+      "currentState": "restored_then_modified_with_recorded_recovery_changes",
+      "subsequentRecoveryCommits": [
+        "bf44bdd907ce8a67c77de937d69a2e8db62ba7b6",
+        "b1d0915277f205e888d095c4b2194140dc840860",
+        "5a5adecf26688b5c0209e792d46ca1f3edfdff7d",
+        "f6403deaded6e76c0788aa66cffcaac5fef0badd",
+        "7ceca0e3eecbc83f0f8edd11be73e711e377d125",
+        "59126ace1e408baff5fb790aa41732c6414f2617",
+        "732f09d8f25893b63f5b2d5ba6d35c5f3d28fd15"
+      ],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content.",
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
+        "Bind the two existing shared observation modules byte-for-byte to PR79 0a324013f9fe1beec77ac948d0af8f210194ba52; retain selected downstream detail across transient parent read failure with fresh authorization. No legacy HarmonyTasks activation or API/provider/auth changes.",
+        "Pin complete shared PR79 source 91af53f43566cb827d1fc58d18102e8ad29383bc; reuse task delivery UI, route phone image originals and saves through existing verified adapters, preserve image Blob during same-identity polling. Native shell, identity, auth persistence and dependencies unchanged.",
+        "Bind all allowlisted notices as source inputs and copy them verbatim to the existing licenses resource directory in both native and Docker Web build paths. No product or native API change.",
+        "After a confirmed quick-reload regression, flush the existing secret-stripped Provider display cache after its existing query refresh. Preserve the PUT outcome if that refresh fails. No new cache/auth/config layer or page.",
+        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build. Browser-confirmed rapid reload drops the masked Key from the disk display snapshot; refresh the existing providers query on mount, without persisting or rewriting Key."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
+      "originalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
+      "checkpointSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
+      "currentSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c",
+      "archiveDiffers": false,
+      "currentState": "restored_then_modified_with_recorded_recovery_changes",
+      "subsequentRecoveryCommits": [
+        "8f8dc99761a467d5dafa9dd6e46ab1438d406ab5"
+      ],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "Upgrade preflight: increase restored native application version from 1.0.2 / 1000002 to 1.0.7 / 1000007, above the user-reported installed 1.0.6 / 1000006. Bundle, permissions and persistence code are unchanged."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json",
+      "originalSHA256": "eff4cbb47121bb254a16dee4017ba66dcb044f18fd0e8e7667cc48ffac99b734",
+      "checkpointSHA256": "eff4cbb47121bb254a16dee4017ba66dcb044f18fd0e8e7667cc48ffac99b734",
+      "currentSHA256": "64967dedf8c123af0d7f80aa5b560123f77112208c1c77f826d336d7bfddbe2c",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.svg",
+      "originalSHA256": "804100c2c460662789f7a697f3b9adfceb4680f39f605f57aec23dee30503d0c",
+      "checkpointSHA256": "804100c2c460662789f7a697f3b9adfceb4680f39f605f57aec23dee30503d0c",
+      "currentSHA256": "ea0a3474d61fd09ebdef42dd38dc40b962611f8ad495c747579eb9bb2e311d89",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/build-profile.json5",
+      "originalSHA256": "2e45295fa009610f73ed73b2023d75459c40771056a40a9a325e3a42df32582d",
+      "checkpointSHA256": "2e45295fa009610f73ed73b2023d75459c40771056a40a9a325e3a42df32582d",
+      "currentSHA256": "6cef8672b7ddb77c42f1841dd96a9836a48bf6167113560fc836bdb29e6ca8f9",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/code-linter.json5",
+      "originalSHA256": "f557c3bcdb40c64c986bffed9628310cc7a79fb7d2642c1c8b8d265fd92e25ad",
+      "checkpointSHA256": "f557c3bcdb40c64c986bffed9628310cc7a79fb7d2642c1c8b8d265fd92e25ad",
+      "currentSHA256": "f557c3bcdb40c64c986bffed9628310cc7a79fb7d2642c1c8b8d265fd92e25ad",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/build-profile.json5",
+      "originalSHA256": "fce5c19fd1889a7b98301df12b012448e0b5a5c785fec38ab8c20ebb925f29e3",
+      "checkpointSHA256": "fce5c19fd1889a7b98301df12b012448e0b5a5c785fec38ab8c20ebb925f29e3",
+      "currentSHA256": "a1fac60e48146f2dd8ba8cf7fad24ad79e32cd87bfddfe8fef270421430f281d",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/hvigorfile.ts",
+      "originalSHA256": "f71679171099cb5c2260ab2a43e38164f169216c217ffdba7d0933e92ca8f733",
+      "checkpointSHA256": "f71679171099cb5c2260ab2a43e38164f169216c217ffdba7d0933e92ca8f733",
+      "currentSHA256": "f547983dcab9c8fff87cc3ddedb22bb98063663c5b8afe18bb32e131311ec289",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/oh-package-lock.json5",
+      "originalSHA256": "7581d6fa7e064d82b85c243e4917acc0c42c502e1023711233591003288239fe",
+      "checkpointSHA256": "7581d6fa7e064d82b85c243e4917acc0c42c502e1023711233591003288239fe",
+      "currentSHA256": "9b11d7aac8bc895dd68e2231756563ed3f7eb79ab16a4fe41eb95329fd0eed39",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/oh-package.json5",
+      "originalSHA256": "8d0967ec872c5895a8bdbf24de2f82c9e455dc89e132052b20f8f52091e9c829",
+      "checkpointSHA256": "8d0967ec872c5895a8bdbf24de2f82c9e455dc89e132052b20f8f52091e9c829",
+      "currentSHA256": "32ee2d24738498f1dc1b7ac66fe837b5d2e764bceac81ff9dd6bae29bf1bd277",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/CMakeLists.txt",
+      "originalSHA256": "f16dec85ecf9d610f742e08df5009c81b8dd72861df0421b275d6c4f14539485",
+      "checkpointSHA256": "f16dec85ecf9d610f742e08df5009c81b8dd72861df0421b275d6c4f14539485",
+      "currentSHA256": "f16dec85ecf9d610f742e08df5009c81b8dd72861df0421b275d6c4f14539485",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/authority_lock.h",
+      "originalSHA256": "c3d197ffbadd09ab3e93ce2f067aea4949091ef711e5d6f1578e2d22fbc0a048",
+      "checkpointSHA256": "c3d197ffbadd09ab3e93ce2f067aea4949091ef711e5d6f1578e2d22fbc0a048",
+      "currentSHA256": "c3d197ffbadd09ab3e93ce2f067aea4949091ef711e5d6f1578e2d22fbc0a048",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/file_uri.cpp",
+      "originalSHA256": "69a31adc93105e4c7001fab28ade6c9ff9fb26f3c5f964e347a427dcb118608a",
+      "checkpointSHA256": "69a31adc93105e4c7001fab28ade6c9ff9fb26f3c5f964e347a427dcb118608a",
+      "currentSHA256": "69a31adc93105e4c7001fab28ade6c9ff9fb26f3c5f964e347a427dcb118608a",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/folder_publish.h",
+      "originalSHA256": "34dfdbe1c031b8ef4fcd5cecdceda8c929af3aecede7974136408411d3a47911",
+      "checkpointSHA256": "34dfdbe1c031b8ef4fcd5cecdceda8c929af3aecede7974136408411d3a47911",
+      "currentSHA256": "34dfdbe1c031b8ef4fcd5cecdceda8c929af3aecede7974136408411d3a47911",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/media_lease.h",
+      "originalSHA256": "c1e9a6945e29f0d841c71f3e2dae0cd2157807daf47c0186cc52cbd8189d0b45",
+      "checkpointSHA256": "c1e9a6945e29f0d841c71f3e2dae0cd2157807daf47c0186cc52cbd8189d0b45",
+      "currentSHA256": "c1e9a6945e29f0d841c71f3e2dae0cd2157807daf47c0186cc52cbd8189d0b45",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/raw_image.cpp",
+      "originalSHA256": "afcf63f97f722baff12472ba6347ffb3884567bc5db8347e62f91f0519968c1e",
+      "checkpointSHA256": "afcf63f97f722baff12472ba6347ffb3884567bc5db8347e62f91f0519968c1e",
+      "currentSHA256": "8ee25c3837e026718db644cb6aa48964a9874a5d8ed306eb550990490416eb7a",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/types/libbegoniaraw/index.d.ts",
+      "originalSHA256": "adb80ab1e63c3fa0c38721691d0795429b751b7cba68c9e8a5d6c50476068e22",
+      "checkpointSHA256": "adb80ab1e63c3fa0c38721691d0795429b751b7cba68c9e8a5d6c50476068e22",
+      "currentSHA256": "7b7ec7cd6f6db97447856d354dbe8bc8cb1233e155fb65cfe27260c2cc0de2d3",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/cpp/types/libbegoniaraw/oh-package.json5",
+      "originalSHA256": "ada20de0dfcb610ebad91c21a5e5d4c2f2f3b24d789e948b4e2fc3416bc8cc7c",
+      "checkpointSHA256": "ada20de0dfcb610ebad91c21a5e5d4c2f2f3b24d789e948b4e2fc3416bc8cc7c",
+      "currentSHA256": "ada20de0dfcb610ebad91c21a5e5d4c2f2f3b24d789e948b4e2fc3416bc8cc7c",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/AssetBackgroundScope.ets",
+      "originalSHA256": "bc7d5981b41de0cc1918ea2f21dc02c39bd3a2c5988f76d18fa671c674f81834",
+      "checkpointSHA256": "bc7d5981b41de0cc1918ea2f21dc02c39bd3a2c5988f76d18fa671c674f81834",
+      "currentSHA256": "bc7d5981b41de0cc1918ea2f21dc02c39bd3a2c5988f76d18fa671c674f81834",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+      "originalSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
+      "checkpointSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
+      "currentSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "originalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
+      "checkpointSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
+      "currentSHA256": "39be155e6a864f9fe73f084bd7473388f2d8f251001cdf476b1ecf500de7b93e",
+      "archiveDiffers": false,
+      "currentState": "restored_then_modified_with_recorded_recovery_changes",
+      "subsequentRecoveryCommits": [
+        "59126ace1e408baff5fb790aa41732c6414f2617"
+      ],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeExchangeDirectory.ets",
+      "originalSHA256": "17039657b2d2b8eed8461f4781a4ddea44a9439f9768875d8df1f11423055ec4",
+      "checkpointSHA256": "17039657b2d2b8eed8461f4781a4ddea44a9439f9768875d8df1f11423055ec4",
+      "currentSHA256": "31a64277872ae9f71983eed9ed38e570ecabf5a8edfc7ec9d9a04fd2250d234f",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets",
+      "originalSHA256": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab",
+      "checkpointSHA256": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab",
+      "currentSHA256": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets",
+      "originalSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+      "checkpointSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+      "currentSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferPolicy.ets",
+      "originalSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
+      "checkpointSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
+      "currentSHA256": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets",
+      "originalSHA256": "2d69a43f09df6542e6b3379c203a52db14096bc512cb00c9cf04f1fbbed42428",
+      "checkpointSHA256": "2d69a43f09df6542e6b3379c203a52db14096bc512cb00c9cf04f1fbbed42428",
+      "currentSHA256": "89250720bd8a6ee088787725272f0f6d21daaf850679ecec613b196823544d94",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/RawImage.ets",
+      "originalSHA256": "ef4519796bf6858b11a0d687f9904d149dfd614320c311a2e884dd27f46df36e",
+      "checkpointSHA256": "ef4519796bf6858b11a0d687f9904d149dfd614320c311a2e884dd27f46df36e",
+      "currentSHA256": "838dcd78274d799234823068f9bd98446c74a43a53d5f3de1c1b8b132ed18e2e",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
+      "originalSHA256": "bb6266a6c5cd31a4bb0371e3004bc4ec22c89d3a831b991d366a50d9ec86ab3f",
+      "checkpointSHA256": "bb6266a6c5cd31a4bb0371e3004bc4ec22c89d3a831b991d366a50d9ec86ab3f",
+      "currentSHA256": "db7f752d2685741f23eda9cc99e24508997b18c095ac4dc25f488c9747baf945",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/UiTheme.ets",
+      "originalSHA256": "1672fc71246e94476c20cffcf2f86942a9130370b4a523e72e605e0810c12dc6",
+      "checkpointSHA256": "1672fc71246e94476c20cffcf2f86942a9130370b4a523e72e605e0810c12dc6",
+      "currentSHA256": "5737ccf5bd46cf4f2c81273835a6869ce2c3acceff31f844767d0567d588ad51",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceText.ets",
+      "originalSHA256": "ee960b4a0b1e453991edb1eebbdd993484d3754453d7095d0216a2bae7471d80",
+      "checkpointSHA256": "ee960b4a0b1e453991edb1eebbdd993484d3754453d7095d0216a2bae7471d80",
+      "currentSHA256": "2898f4059925e3a99147f323c556111e9a318cf6032c9cf2666cc75b5d35671d",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceTextProtocol.ets",
+      "originalSHA256": "84f8e2ebd45b0c55de846ee8b10c3dd96843c3e22ca5dbee9923c1dce5cd7b0e",
+      "checkpointSHA256": "84f8e2ebd45b0c55de846ee8b10c3dd96843c3e22ca5dbee9923c1dce5cd7b0e",
+      "currentSHA256": "ed1a940341437163bbb0678d98322048f230c12af6bb166fd1c1f3a83e363796",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/ClientAbilityStage.ets",
+      "originalSHA256": "52770e32fdd1262b2c7e562b0e1bc64200d53f82c353d279426b1daaf56f89fd",
+      "checkpointSHA256": "52770e32fdd1262b2c7e562b0e1bc64200d53f82c353d279426b1daaf56f89fd",
+      "currentSHA256": "d452dd925c9f99ed91b6ed1d1481bb175e0297f6382b85d8a777dac01f894f9f",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
+      "originalSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
+      "checkpointSHA256": "5b0fd7524d2ab3cee693bbeedee10bacda7e77bcb25425fa16f4e3fcca659f52",
+      "currentSHA256": "eff4b39dec5fa5d1fc9e2f6ac4cfbcb42506e68304b9058e88e4f39a212097c3",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
+      "originalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
+      "checkpointSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
+      "currentSHA256": "069bbf45ddb6fff7306f87d4c09979ed370df5b69c13b819022b1cc21b4c41b0",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets",
+      "originalSHA256": "a0e228dc16e55439ddae76d4d33ce21e53a6917f9c7fb9ba30fb156363a9154e",
+      "checkpointSHA256": "a0e228dc16e55439ddae76d4d33ce21e53a6917f9c7fb9ba30fb156363a9154e",
+      "currentSHA256": "f2dae9550bc6a5f4511d54c5e3c014ce06cc3c8400a3b6ae4639b35ec212f0a5",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/module.json5",
+      "originalSHA256": "88c4ed24330f93f9e3ab27b8f9c68134d8cbed84f18fe30db65c3bdbf50a1fbc",
+      "checkpointSHA256": "88c4ed24330f93f9e3ab27b8f9c68134d8cbed84f18fe30db65c3bdbf50a1fbc",
+      "currentSHA256": "693bbe2692009c271abfdf403530a33c6b608da8e27741624a132b7aca9ac563",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/color.json",
+      "originalSHA256": "cf74f8ef86f99823f72f96039938a14ea63fbc0f205125383c4f36d8490c8ab1",
+      "checkpointSHA256": "cf74f8ef86f99823f72f96039938a14ea63fbc0f205125383c4f36d8490c8ab1",
+      "currentSHA256": "b750c557fd0de5aa061bc7622687d8f7904b1fc3e77a9648fe1209878ad693a4",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/string.json",
+      "originalSHA256": "652706652754e493338016dbbe8b9af63b4e4c92b8aab7bd7393620117bc54fd",
+      "checkpointSHA256": "652706652754e493338016dbbe8b9af63b4e4c92b8aab7bd7393620117bc54fd",
+      "currentSHA256": "8a75f6b44331cd1cd0ed00da3244c817ad82ec51e0d90927bb1451115150a82f",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.svg",
+      "originalSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
+      "checkpointSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
+      "currentSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/main_pages.json",
+      "originalSHA256": "4a039edb97869f2b79ed574c929c7a5c95002434d1e4a1aa3e0924ff5fe3777d",
+      "checkpointSHA256": "4a039edb97869f2b79ed574c929c7a5c95002434d1e4a1aa3e0924ff5fe3777d",
+      "currentSHA256": "bc475e46a322b2e0aadb08e02011d2c0941e7905304f5e2cf348d8e6b265c3e8",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/share_files.json",
+      "originalSHA256": "2d77f506bc8581301725156faf4f8cc2c6152aaa8203b2c0dbbdb00a4d8df2f4",
+      "checkpointSHA256": "2d77f506bc8581301725156faf4f8cc2c6152aaa8203b2c0dbbdb00a4d8df2f4",
+      "currentSHA256": "2d77f506bc8581301725156faf4f8cc2c6152aaa8203b2c0dbbdb00a4d8df2f4",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/hvigor/hvigor-config.json5",
+      "originalSHA256": "ff2bed38cae4b48644ee5a30dc9e8b1d68876aaa7789ceecc7d8866ef24fb8df",
+      "checkpointSHA256": "ff2bed38cae4b48644ee5a30dc9e8b1d68876aaa7789ceecc7d8866ef24fb8df",
+      "currentSHA256": "986794866eca42f9e1b7ee8f0efe93ccb320d9fd2f9f6240955a87dd16191765",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/hvigorfile.ts",
+      "originalSHA256": "c08e821b017d4199cbc2f0d086bb329e27e469e4c7d575f4493dfc2f92c72143",
+      "checkpointSHA256": "c08e821b017d4199cbc2f0d086bb329e27e469e4c7d575f4493dfc2f92c72143",
+      "currentSHA256": "2378c5e0c5246005ada73a67e8c9834fa08adb9ffd6fb6c219051456753bed5a",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/oh-package.json5",
+      "originalSHA256": "0ae8bb6142a9d1883b5322ee393bf4fd389298ffa213aefbdb304a7e33be1236",
+      "checkpointSHA256": "0ae8bb6142a9d1883b5322ee393bf4fd389298ffa213aefbdb304a7e33be1236",
+      "currentSHA256": "68b73facb69fffe75f959bd6d8994ca6c92a2ecd1fb9be436f7f333541a88df7",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/raw-codec.lock.json",
+      "originalSHA256": "bb1de8ed9c9af90eeadab0c3a3bdc701ddbd2786ce10273e78d74573abb1e464",
+      "checkpointSHA256": "bb1de8ed9c9af90eeadab0c3a3bdc701ddbd2786ce10273e78d74573abb1e464",
+      "currentSHA256": "0148c26115f0b88b111ca86ba0339a020d51a702d198072c2bca61a0adcec129",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/authority_lock_runtime.cpp",
+      "originalSHA256": "68818c9120659acf44b6c52c955e864bc74f650855f6d3f3a2ed6db1078da508",
+      "checkpointSHA256": "68818c9120659acf44b6c52c955e864bc74f650855f6d3f3a2ed6db1078da508",
+      "currentSHA256": "68818c9120659acf44b6c52c955e864bc74f650855f6d3f3a2ed6db1078da508",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/folder_handoff_runtime.cpp",
+      "originalSHA256": "20e4c5346cdce4c1808e23c7043afe94e2f88c75b770a31523ca3ab6854ca619",
+      "checkpointSHA256": "20e4c5346cdce4c1808e23c7043afe94e2f88c75b770a31523ca3ab6854ca619",
+      "currentSHA256": "20e4c5346cdce4c1808e23c7043afe94e2f88c75b770a31523ca3ab6854ca619",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/folder_publish_runtime.cpp",
+      "originalSHA256": "0678d4f34face2c3ee30196431c02526f0673d7df776cb945430615c3ee50d5a",
+      "checkpointSHA256": "0678d4f34face2c3ee30196431c02526f0673d7df776cb945430615c3ee50d5a",
+      "currentSHA256": "0678d4f34face2c3ee30196431c02526f0673d7df776cb945430615c3ee50d5a",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tests/voice_text.cjs",
+      "originalSHA256": "b07f2e59374345187dd2aaa489cbf089be47a6dda95d75ee05c52c299e7e03f7",
+      "checkpointSHA256": "18e40a3352a8bdcb5cc72e5545152479d11f443afe89b97c8378c560bccd9973",
+      "currentSHA256": "18e40a3352a8bdcb5cc72e5545152479d11f443afe89b97c8378c560bccd9973",
+      "archiveDiffers": true,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/build_api26.py",
+      "originalSHA256": "3e22d0d1d5bc1f14f45de14c7cd091a9ca432d1759833847fe9541adbe8652d5",
+      "checkpointSHA256": "0aef9a86997979d1a63fa8c3a7ae5e683f6936908b68dfb2509b205d076462ed",
+      "currentSHA256": "ddfddc9eb1ebf9b996d35c7ed6cc20a75d599bca8b2237ddd80d9e11fb68c305",
+      "archiveDiffers": true,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/materials.py",
+      "originalSHA256": "3c2ac248b2e475caa362a6266a323e73d6cf16dca994244c6807bdfcb443c888",
+      "checkpointSHA256": "3c2ac248b2e475caa362a6266a323e73d6cf16dca994244c6807bdfcb443c888",
+      "currentSHA256": "22d66cbe794092342ce38429bc01fcf80a7f9d613983b17bb749001a6c05bad6",
+      "archiveDiffers": false,
+      "currentState": "restored_then_modified_with_recorded_recovery_changes",
+      "subsequentRecoveryCommits": [
+        "ef3678a86584bf197719d2cd1bcde881fec43d6d"
+      ],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "Generate LibRaw notices from verified locked files before source binding, then verify both generated metadata copies and complete rawfile integrity. New bootstrap repair, not recovered 5a7 identity."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/tools/prepare_raw_codec.py",
+      "originalSHA256": "c3604956cbfda21b04f1742565e7fb5483818a80379279c03686e994c97e515c",
+      "checkpointSHA256": "c3604956cbfda21b04f1742565e7fb5483818a80379279c03686e994c97e515c",
+      "currentSHA256": "c3604956cbfda21b04f1742565e7fb5483818a80379279c03686e994c97e515c",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoiceFan.vue",
+      "originalSHA256": "3e7a3d2f962dd757e52b31d13a5e7e9677f3e7a02f0919e095c833f845c11016",
+      "checkpointSHA256": "3e7a3d2f962dd757e52b31d13a5e7e9677f3e7a02f0919e095c833f845c11016",
+      "currentSHA256": "89c6e53702d3bdd11f2a46436d135b034052efc5b42c551bb94ff7c6e98f1d07",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoiceInput.vue",
+      "originalSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
+      "checkpointSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
+      "currentSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue",
+      "originalSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "checkpointSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "currentSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-files.ts",
+      "originalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
+      "checkpointSHA256": "dc451384f15bdf9567d38cc5cf5541e5ae7f265afa08eb8784dfca2f6f81fd63",
+      "currentSHA256": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
+      "archiveDiffers": true,
+      "currentState": "restored_then_modified_with_recorded_recovery_changes",
+      "subsequentRecoveryCommits": [
+        "732f09d8f25893b63f5b2d5ba6d35c5f3d28fd15"
+      ],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "New alignment work against fixed unified 40f0a69; obsolete upstream repair patches removed, delegated references retained. Not recovered historical 5a7 content."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-voice-geometry.ts",
+      "originalSHA256": "c9f3fcde22cc99c7d7ceb55a6b36bef76158ea34a92299fa3a7f87dd75a8bc42",
+      "checkpointSHA256": "c9f3fcde22cc99c7d7ceb55a6b36bef76158ea34a92299fa3a7f87dd75a8bc42",
+      "currentSHA256": "51909fdf32de1ee8aa55398eff55bb980fe85506fb530abdbceb80f43ffc35be",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-voice.ts",
+      "originalSHA256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+      "checkpointSHA256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+      "currentSHA256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony.ts",
+      "originalSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
+      "checkpointSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
+      "currentSHA256": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/lucide.txt",
+      "originalSHA256": "3c57143f22dac950efebf84002e360bba5458c7b90fe583b0667aaaef1a7256e",
+      "checkpointSHA256": "3c57143f22dac950efebf84002e360bba5458c7b90fe583b0667aaaef1a7256e",
+      "currentSHA256": "3c57143f22dac950efebf84002e360bba5458c7b90fe583b0667aaaef1a7256e",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/licenses/wavesurfer.txt",
+      "originalSHA256": "0fc992dc27cc34dde78bfeb024b4cadff6320f0dcbee2f1228efaeb533ca1364",
+      "checkpointSHA256": "0fc992dc27cc34dde78bfeb024b4cadff6320f0dcbee2f1228efaeb533ca1364",
+      "currentSHA256": "0fc992dc27cc34dde78bfeb024b4cadff6320f0dcbee2f1228efaeb533ca1364",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/voiceFan.css",
+      "originalSHA256": "3d1ecd4d8d62589d70c3d07ee7d9e3e429c11dc4e715f7af9f72adec2977cae0",
+      "checkpointSHA256": "3d1ecd4d8d62589d70c3d07ee7d9e3e429c11dc4e715f7af9f72adec2977cae0",
+      "currentSHA256": "3d1ecd4d8d62589d70c3d07ee7d9e3e429c11dc4e715f7af9f72adec2977cae0",
+      "archiveDiffers": false,
+      "currentState": "archive_exact",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/voiceFan.svg",
+      "originalSHA256": "9f7e5abba5e2337f47a7f8b49041e9fdb570019c0bce89b24d7b003122601e18",
+      "checkpointSHA256": "9f7e5abba5e2337f47a7f8b49041e9fdb570019c0bce89b24d7b003122601e18",
+      "currentSHA256": "7ceca0d37bef9f6259a202ea5d59cc078d2a8e0e474f810bac7f3f505e83d5ae",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/package_memoh_web.py",
+      "originalSHA256": "071ddf8f753f9dbe5069768f04dcaaa6cc963ccedc1285196b46a695bfd35639",
+      "checkpointSHA256": "cc330f23aa647028d0a205fcc915fd0fb85dd295e387eb3d79289126b7585cdc",
+      "currentSHA256": "4456876c563d010b4808f3692741f3d77b5d70f2347c73792b93a300c63d4f37",
+      "archiveDiffers": true,
+      "currentState": "restored_then_modified_with_recorded_recovery_changes",
+      "subsequentRecoveryCommits": [
+        "59126ace1e408baff5fb790aa41732c6414f2617"
+      ],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes."
+      ]
+    },
+    {
+      "path": "mobile/client/tools/artifact_paths.py",
+      "originalSHA256": "e12864f5ad271bb2199b596ee3afd42248e44a55bd23cb3232e3ae26c3103637",
+      "checkpointSHA256": "e12864f5ad271bb2199b596ee3afd42248e44a55bd23cb3232e3ae26c3103637",
+      "currentSHA256": "1a59aa331ecb394e508cee857998d378b75cdafd13ff9b6d0b1d1abfa07c2424",
+      "archiveDiffers": false,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    },
+    {
+      "path": "mobile/client/validation/harmony/tools/toolchain.py",
+      "originalSHA256": "2fcede971a66ce782cafd8fd94b2f9273ee0bd7390f8c0d0d7df06852fc1c0d0",
+      "checkpointSHA256": "f2098cf16e1f7f548c2de35cb089ceed4efd4836e908f438a4d974dd0e7578ca",
+      "currentSHA256": "d74091f36ad273923be81150e7b7202622c0770034323e57901f35f110aeb3bd",
+      "archiveDiffers": true,
+      "currentState": "archive_text_equivalent",
+      "subsequentRecoveryCommits": [],
+      "historical19Membership": "unknown_no_path_map_or_later_blob",
+      "documentedChanges": [
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+      ]
+    }
+  ]
+}

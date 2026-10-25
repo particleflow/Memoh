@@ -1,0 +1,14 @@
+--- a/apps/web/src/lib/api-client.ts
++++ b/apps/web/src/lib/api-client.ts
+@@ -2 +2 @@
+-import { notifyAuthSessionCleared } from './auth-session'
++import { authSessionGeneration, notifyAuthSessionCleared } from './auth-session'
+@@ -72,0 +73,2 @@
++  sessionToken: string
++  sessionGeneration: number
+@@ -104,0 +107,2 @@
++      sessionToken: authToken(),
++      sessionGeneration: authSessionGeneration(),
+@@ -115,0 +120,2 @@
++    // A late response belongs to the identity that started the request.
++    if (context.sessionGeneration !== authSessionGeneration() || context.sessionToken !== authToken()) return

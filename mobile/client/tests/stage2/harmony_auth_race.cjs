@@ -1,8 +1,9 @@
 // Execute the real API wrapper with a controlled SDK boundary. No credential is logged.
 const fs = require('node:fs'), path = require('node:path'), vm = require('node:vm'), assert = require('node:assert/strict')
 const root = path.resolve(__dirname, '../..')
-const ts = require(path.join(root, 'mobile/.build/memoh-web/checkout/node_modules/typescript'))
-const file = path.join(root, 'mobile/.build/memoh-web/checkout/apps/web/src/lib/api-client.ts')
+const checkout = process.env.HARMONY_TEST_CHECKOUT || path.join(root, 'mobile/.build/memoh-web/checkout')
+const ts = require(path.join(checkout, 'node_modules/typescript'))
+const file = path.join(checkout, 'apps/web/src/lib/api-client.ts')
 let source = fs.readFileSync(file, 'utf8').replaceAll('import.meta.env', '({})')
 let generation = 0, notifications = 0, redirects = 0
 const values = new Map(), storage = { getItem:k=>values.get(k)??null, setItem:(k,v)=>values.set(k,v), removeItem:k=>values.delete(k) }

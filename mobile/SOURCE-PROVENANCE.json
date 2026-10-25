@@ -224,10 +224,13 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_auth_race.cjs",
-      "sha256": "7cd5dc0c16e9964ccdbf722e8d4393fb2494f073fee16866954b86eb120cc00d",
+      "sha256": "6cc0ccf51c937df87be2835b59c87b26ef7533d97980baf6efe961d8475a3a4f",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Historical-source audit: restore the existing API request session-generation/token snapshot guard after reproducing anonymous and same-token prior-session late-401 logout. Test accepts an explicit current checkout; no token storage or server/auth protocol change. Not identified as one of the historical 19 unnamed edits."
+      ],
+      "historicalAuditBaseSHA256": "7cd5dc0c16e9964ccdbf722e8d4393fb2494f073fee16866954b86eb120cc00d"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_bot_navigation.py",
@@ -448,7 +451,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "3e228fd23af37fe3244c06dd9c225b183efe7868af0bd29bb80a1265984493ad",
+      "sha256": "e6f87d75ceebee508f072b00236efc8b8e5d7197b9bd4b1946074754ad2b4731",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -461,14 +464,16 @@
         "Pin complete shared PR79 source 91af53f43566cb827d1fc58d18102e8ad29383bc; reuse task delivery UI, route phone image originals and saves through existing verified adapters, preserve image Blob during same-identity polling. Native shell, identity, auth persistence and dependencies unchanged.",
         "Bind all allowlisted notices as source inputs and copy them verbatim to the existing licenses resource directory in both native and Docker Web build paths. No product or native API change.",
         "After a confirmed quick-reload regression, flush the existing secret-stripped Provider display cache after its existing query refresh. Preserve the PUT outcome if that refresh fails. No new cache/auth/config layer or page.",
-        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build. Browser-confirmed rapid reload drops the masked Key from the disk display snapshot; refresh the existing providers query on mount, without persisting or rewriting Key."
+        "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build. Browser-confirmed rapid reload drops the masked Key from the disk display snapshot; refresh the existing providers query on mount, without persisting or rewriting Key.",
+        "Historical-source audit: restore the existing API request session-generation/token snapshot guard after reproducing anonymous and same-token prior-session late-401 logout. Test accepts an explicit current checkout; no token storage or server/auth protocol change. Not identified as one of the historical 19 unnamed edits."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
       "taskDeliveryBaseSHA256": "0345448acf47251e5d0ff9847189e4d3dd2b8d95516fab9a11bea55dff6793e3",
       "releaseNoticeBaseSHA256": "f36f44e2c5ade6c86b6ad68dfe55dcddc33432d0e75f20127055baeb402969d6",
       "unifiedNative9e6BaseSHA256": "8d81ee8055eee24defc3eee0208a5489345f9a99165927bf08b6144f2ff0866c",
-      "unifiedImages51bBaseSHA256": "71382eb1ff2e2b6215ab85a00119ae68c3549a73d5048e0b2fba15c635d0d6b7"
+      "unifiedImages51bBaseSHA256": "71382eb1ff2e2b6215ab85a00119ae68c3549a73d5048e0b2fba15c635d0d6b7",
+      "historicalAuditBaseSHA256": "3e228fd23af37fe3244c06dd9c225b183efe7868af0bd29bb80a1265984493ad"
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
@@ -1689,5 +1694,17 @@
       "mobile/client/mobile/memoh/licenses/sources.txt"
     ],
     "scope": "Existing shared pages/configuration only; no duplicate cache patch, native/API/auth/Agent changes or new HAP. One guarded existing providers-query refetch fixes rapid reload with sanitized cached credentials; no new API or key storage."
+  },
+  "historicalSourceAudit": {
+    "baseCommit": "bf44bdd907ce8a67c77de937d69a2e8db62ba7b6",
+    "archivedPathsPresent": 72,
+    "archiveExact": 29,
+    "archiveTextEquivalent": 37,
+    "restoredThenModifiedBeforeAudit": 6,
+    "unmappedHistoricalLaterEdits": 19,
+    "confirmedFunctionalGap": "Missing API response session guard, reproduced by existing PR67 auth-race test",
+    "newRepairIsProvenMemberOfHistorical19": false,
+    "evidence": "docs/testing/harmony-source-audit/README.md",
+    "nativeBuild": false
   }
 }
