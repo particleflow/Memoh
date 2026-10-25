@@ -728,16 +728,6 @@ function close() {''', 1),
     changes['apps/web/src/pages/home/components/chat-pane.vue'].extend([('let preparingView: ReturnType<typeof chatStore.chatView> | undefined', 'let preparingView: ReturnType<typeof chatStore.chatView> | undefined\nlet attachmentPreparationCancelled = false', 1), ('function cancelAttachmentUpload() { preparingView?.attachmentPreparation.value?.abort() }', 'function cancelAttachmentUpload() {\n  const controller = preparingView?.attachmentPreparation.value\n  if (controller) { attachmentPreparationCancelled = true; controller.abort() }\n}', 1), ('  preparingView = paneView.value', '  attachmentPreparationCancelled = false\n  preparingView = paneView.value', 1), ('  if (!holdsInput) clearSentInput()\n', '', 1), ('      if (holdsInput) {\n        clearSentInput(onSentPane)', '      clearSentInput(onSentPane)\n      if (holdsInput) {', 1), ('  if (restore) {\n    if (!matchesChatPaneSendContext(', '  if (restore) {\n    // Selection/lifecycle cancellation leaves the live composer untouched.\n    if (attachmentPreparationCancelled) return\n    if (!matchesChatPaneSendContext(', 1)])
     changes['apps/web/src/lib/api-client.ts'] = [
         ('function createApiFetch(', 'export function createApiFetch(', 1),
-        ("import { notifyAuthSessionCleared }", "import { authSessionGeneration, notifyAuthSessionCleared }", 1),
-        ('  requestToken: string\n', '  requestToken: string\n  sessionToken: string\n  sessionGeneration: number\n', 1),
-        ('      requestToken: requestBearerToken(input, init),',
-         '      requestToken: requestBearerToken(input, init),\n      sessionToken: authToken(),\n      sessionGeneration: authSessionGeneration(),', 1),
-        ('  if (response.status === 401) {\n    handleUnauthorized(context.requestToken)',
-         '  if (response.status === 401) {\n    // A late response belongs to the identity that started the request.\n    if (context.sessionGeneration !== authSessionGeneration() || context.sessionToken !== authToken()) return\n    handleUnauthorized(context.requestToken)', 1),
-    ]
-    changes['apps/web/src/lib/auth-session.ts'] = [
-        ('export function notifyAuthSessionCleared(reason: AuthSessionClearReason) {',
-         'let harmonyAuthGeneration = 0\nexport function authSessionGeneration() { return harmonyAuthGeneration }\n\nexport function notifyAuthSessionCleared(reason: AuthSessionClearReason) {\n  harmonyAuthGeneration++', 1),
     ]
     # A task body can mount without the dock provider. Reuse the same native
     # save path as the asset preview instead of the Web-only anchor fallback.

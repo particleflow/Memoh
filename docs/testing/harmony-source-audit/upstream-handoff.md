@@ -27,7 +27,7 @@ this is not a production or hardware acceptance claim.
 
 The patch was applied to the exact upstream files in a local isolated scratch
 folder and compared with the verified phone source. They are identical apart
-from the phone's existing exported `createApiFetch` test seam and the local
+from the phone's existing exported `createApiFetch` native file-I/O/test seam and the local
 counter name. This patch does not include that export or phone adapters.
 It is a transfer of the verified fix, not a second implementation. Shared Web
 integration should retain its own regression coverage and adapt any existing

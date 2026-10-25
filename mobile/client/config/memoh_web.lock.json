@@ -1,9 +1,9 @@
 {
-  "version": "unified-5e55c45",
-  "commit": "5e55c45c85659f04b339b4df42aeff72966542a8",
-  "archive": "tests/.isolated/memoh-5e55c45-complete.tar.gz",
-  "archiveSHA256": "ee40a029d15bf30623e7fc7029d82f917e8d4b2a33584dab6df07f240c4444a4",
-  "archivePrefix": "Memoh-5e55c45/",
+  "version": "unified-1502199",
+  "commit": "150219908c316d75272b77c65148436fac3b7074",
+  "archive": "tests/.isolated/memoh-1502199-complete.tar.gz",
+  "archiveSHA256": "fa932c7c9acf637e54149aacda9b5aeb1af13d717dd55ae58e0b328f7fff1275",
+  "archivePrefix": "Memoh-1502199/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "5e55c45c85659f04b339b4df42aeff72966542a8",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/5e55c45c85659f04b339b4df42aeff72966542a8",
-      "archiveSHA256": "c6d96fc8d19e9085b52e4d501726661d347566555df52179fc06db375f2eaddf",
-      "archivePrefix": "Memoh-5e55c45c85659f04b339b4df42aeff72966542a8/",
+      "commit": "150219908c316d75272b77c65148436fac3b7074",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/150219908c316d75272b77c65148436fac3b7074",
+      "archiveSHA256": "48faf4f6f869d76bc69067dcdac149a3785684f19762cfe2c4fd465a19c3ad53",
+      "archivePrefix": "Memoh-150219908c316d75272b77c65148436fac3b7074/",
       "destination": ""
     },
     {
@@ -137,12 +137,12 @@
     }
   },
   "downstreamObservation": {
-    "commit": "5e55c45c85659f04b339b4df42aeff72966542a8",
+    "commit": "150219908c316d75272b77c65148436fac3b7074",
     "scope": "Shared native task observation/continuation, truthful image-tool reference display and native Provider Images/reference controls are present directly in the pinned source. The equivalent upstream Provider cache fix replaces the former phone adaptation.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {
-        "baseSHA256": "9a47a427fd3fbaba77f4fece7935ad13d2072b58c0bb9eacfe690effe59a0251",
-        "sha256": "9a47a427fd3fbaba77f4fece7935ad13d2072b58c0bb9eacfe690effe59a0251"
+        "baseSHA256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d",
+        "sha256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d"
       },
       "apps/web/src/pages/home/components/session-tasks.vue": {
         "baseSHA256": "ee5b611e3cae2c8d1133722de9a40c7a1d87be6a42ae58a851d488b269e44413",

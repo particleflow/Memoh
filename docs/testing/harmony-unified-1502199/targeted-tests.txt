@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ RUN  v4.1.10 <current-phone-checkout>
+
+·······································································································
+
+ Test Files  6 passed (6)
+      Tests  103 passed (103)
+   Start at  04:28:42
+   Duration  14.23s (transform 9.50s, setup 0ms, import 13.80s, tests 3.29s, environment 3.43s)

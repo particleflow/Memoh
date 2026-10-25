@@ -1,0 +1,26 @@
+[
+  {
+    "path": "apps/web/src/lib/auth-session.ts",
+    "generatedSHA256": "ce918d79ee32502a63ae3c3a08a2a80d95c9f82f84c416b8d707d96e1badf564",
+    "upstreamSHA256": "ce918d79ee32502a63ae3c3a08a2a80d95c9f82f84c416b8d707d96e1badf564",
+    "onlyException": null
+  },
+  {
+    "path": "apps/web/src/lib/api-client.ts",
+    "generatedSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
+    "upstreamSHA256": "b4e9bba92e6c71cf38b3136878a1b1b12f06f39543e1220e59ce165590902376",
+    "onlyException": "existing createApiFetch export"
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useNativeTask.ts",
+    "generatedSHA256": "1ed6d8ae146c8a0d423c7e76f5203ff92ec31177d3a0702a028bacf108cde750",
+    "upstreamSHA256": "1ed6d8ae146c8a0d423c7e76f5203ff92ec31177d3a0702a028bacf108cde750",
+    "onlyException": null
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useSessionTasks.ts",
+    "generatedSHA256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d",
+    "upstreamSHA256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d",
+    "onlyException": null
+  }
+]

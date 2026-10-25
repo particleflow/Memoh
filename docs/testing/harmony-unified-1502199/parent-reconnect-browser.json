@@ -1,0 +1,17 @@
+{
+  "sharedCommit": "150219908c316d75272b77c65148436fac3b7074",
+  "url": "http://127.0.0.1:4181",
+  "parent503ClearsVisibleContent": true,
+  "contentReadsPauseUntilParentRecovers": true,
+  "openedSampleResumesWithoutSecondClick": true,
+  "unknownUUIDRetained": true,
+  "followupPOSTCount": 1,
+  "unknownRemainsDisabledAfterReconnect": true,
+  "loginRetained": true,
+  "taskSuccessNotClaimed": true,
+  "pageErrors": [],
+  "viewport": "390x844",
+  "nativeDevice": false,
+  "liveAPI": false,
+  "scope": "Existing Vite/real shared components and phone adapters; intercepted synthetic API"
+}

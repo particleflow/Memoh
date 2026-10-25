@@ -1,0 +1,28 @@
+{
+  "previousShared": "5e55c45c85659f04b339b4df42aeff72966542a8",
+  "currentShared": "150219908c316d75272b77c65148436fac3b7074",
+  "upstreamChangedWebSDKFiles": [
+    "apps/web/src/lib/api-client.test.ts",
+    "apps/web/src/lib/api-client.ts",
+    "apps/web/src/lib/auth-session.ts",
+    "apps/web/src/pages/home/composables/useNativeTask.ts",
+    "apps/web/src/pages/home/composables/useSessionTasks.native-reconnect.test.ts",
+    "apps/web/src/pages/home/composables/useSessionTasks.ts"
+  ],
+  "sourceOnly": true,
+  "nativeBuild": false,
+  "retainedHAPSource": "f2488597aba37ef8c3557cc3f156b78d870c82c9",
+  "retainedHAPSHA256": "b7eee63f9751ae5d7772299fd22e410ef129c39571269eb5f7bbf9a43d842f0d",
+  "existingAPIFetchExportUsedBy": [
+    "harmony-files.ts",
+    "harmony-download.ts",
+    "harmony_auth_race.cjs"
+  ],
+  "currentUITestFixtureFiles": 4,
+  "realUpstreamAuthGenerationInTests": true,
+  "targetedTests": 103,
+  "testFiles": 6,
+  "typecheckExitCode": 0,
+  "lintExitCode": 0,
+  "historicalUnidentifiedLaterEdits": 19
+}

@@ -1,0 +1,16 @@
+{
+  "attempts": [
+    {
+      "logSHA256": "a4b1aaa2472887b7a06772f8f9b419d6e945790f60aebab924ee74bed3c63740",
+      "result": "assertion timeout",
+      "reason": "The old response text was cleared on parent invalidation; verify the retained pending UUID instead."
+    },
+    {
+      "logSHA256": "9f089095c29e3863ce80e2a60ca5ec4329dbef0b672f377cd8649c1f1337f6dd",
+      "result": "assertion timeout",
+      "reason": "The test attempted to type into the intentionally disabled unknown-request input; assert both input and submit remain disabled."
+    }
+  ],
+  "productChangesForTheseFailures": false,
+  "rawLogsRetainedLocally": true
+}
