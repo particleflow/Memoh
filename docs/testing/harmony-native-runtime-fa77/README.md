@@ -156,9 +156,18 @@ No product path was mocked out or changed to satisfy a browser-only assertion.
 The corrected attachment file passes **12/12** ([log](phone-attachment-tests.txt));
 the original nine-file targeted group now passes **97/97**
 ([log](targeted-tests-phone-fixed.txt)). The four additional cases exercise corrupt
-or denied original reads and native save denial in both DOM hosts. Post-change
-[typecheck](phone-attachment-typecheck.txt) is clean; [test ESLint](phone-attachment-eslint.txt)
-has zero errors and three multi-component test-fixture warnings. The generated
+or denied original reads and native save denial in both DOM hosts. The earlier
+[no-project typecheck log](phone-attachment-typecheck.txt) did **not** check the
+application: its default tsconfig has an empty files list and project references.
+That passing claim is withdrawn. Recreating the entire generated context and
+running the existing `pnpm --filter @memohai/web typecheck` command
+(`vue-tsc --noEmit -p tsconfig.app.json`) reproduces
+[five test-fixture errors](full-typecheck-before.txt). Typing the fetch mock and
+explicitly narrowing the known fixture indexes fixes all five without changing
+compiler options or removing assertions. The [full application check now passes](full-typecheck-after.txt),
+as do [all 12 attachment checks](attachment-tests-type-fixed.txt).
+[Test ESLint](attachment-eslint-type-fixed.txt) has zero errors and three
+multi-component test-fixture warnings. The generated
 context comparison confirms that **only the test file changed**: all 43 product
 adaptations remain byte-identical, plus one test adapter. Source inventory now
 contains 126 entries / 135 tracked files; the added entry is a new test, not a
@@ -198,3 +207,13 @@ No fixed new native-to-Herdr integration contract, actual Windows execution,
 phone overwrite-install, live NAS round trip, or human acceptance is claimed.
 Build the next generic HAP only after the interface and validated source are
 fixed; do not rebuild or relabel the already verified 1.0.8 package.
+
+## Clean-checkout license hash correction
+
+[Byte comparison](license-byte-review-before.json) found one inherited manifest
+mismatch: `misans-package.txt` had 201 CRLF line endings in the retained working
+copy, while Git already stored LF. Normalizing those line endings proves the
+license wording identical. The manifest now hashes the Git LF bytes and retains
+the original CRLF hash separately. No license term, source SDK, product adapter
+or HAP changed. The previous local source check passed against its CRLF working
+copy; that was not evidence that a fresh Git checkout would pass.
