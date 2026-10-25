@@ -7,11 +7,9 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/hex"
 	"encoding/json"
-	"encoding/pem"
+	"errors"
 	"io"
 	"io/fs"
 	"log/slog"
@@ -38,52 +36,11 @@ import (
 	"github.com/felinics/memoh/internal/transferclient"
 )
 
-const nativeLargeRevision = "native-large-fixture-v1"
+const nativeLargeRevision = "native-profile-v1"
 
-// This is a fixture working-set allowance, not a product backlog limit or a
-// change to the installed CLI configuration. Only one 1 GiB download is admitted.
-var nativeLargeLimits = transferclient.QueueLimits{Jobs: 2, Bytes: 2 << 30, JournalBytes: 1 << 20, Workers: 1}
-
-type nativeLargeInvocation struct {
-	Action transferclient.ConfiguredAction
-	Now    time.Time
-}
-
-type nativeLargeReply struct {
-	Status transferclient.QueueStatus
-	Error  string
-}
-
-// A fresh test process invokes the existing finite plugin boundary. RootCAs are
-// injected only into this process's HTTP client: this is NOT formal EXE/system
-// trust validation, and no certificate is installed on the runner.
-func TestWindowsNativeLargeByteChild(t *testing.T) {
-	if os.Getenv("MEMOH_NATIVE_LARGE_CHILD") != "1" {
-		return
-	}
-	raw, err := os.ReadFile(os.Getenv("MEMOH_NATIVE_LARGE_CA")) //nolint:gosec // Only the parent test supplies this private synthetic CA path.
-	if err != nil {
-		t.Fatal(err)
-	}
-	roots := x509.NewCertPool()
-	if !roots.AppendCertsFromPEM(raw) {
-		t.Fatal("fixture CA")
-	}
-	transport := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}}
-	defer transport.CloseIdleConnections()
-	var in nativeLargeInvocation
-	if err := json.NewDecoder(io.LimitReader(os.Stdin, 16384)).Decode(&in); err != nil {
-		t.Fatal(err)
-	}
-	status, err := transferclient.InvokeConfiguredHerdr(t.Context(), os.Getenv, nativeLargeRevision, nativeLargeLimits, in.Action, &http.Client{Transport: transport}, in.Now)
-	reply := nativeLargeReply{Status: status}
-	if err != nil {
-		reply.Error = err.Error()
-	}
-	if err := json.NewEncoder(os.Stdout).Encode(reply); err != nil {
-		t.Fatal(err)
-	}
-}
+// Exactly the installed command defaults: no queue-budget.json or test-only
+// byte allowance. The child below is built by the existing official bundle script.
+var nativeLargeLimits = transferclient.DefaultHostQueueLimits()
 
 // The wrapper pauses a real Media response after a measured prefix. It neither
 // synthesizes headers/bodies nor buffers a file, and releases on client death.
@@ -257,12 +214,32 @@ func TestWindowsNativeLargeByteRecovery(t *testing.T) {
 	configJSON, _ := json.Marshal(map[string]any{"version": 1, "origin": https.URL, "source_root": ""})
 	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "transfer.json"), configJSON)
 	nativeDeliveryPrivateFile(t, filepath.Join(configRoot, "device.credential"), []byte(verifier.token))
-	caPath := filepath.Join(configRoot, "fixture-ca.pem")
-	nativeDeliveryPrivateFile(t, caPath, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: https.Certificate().Raw}))
+	caPath := filepath.Join(configRoot, "fixture-ca.der")
+	nativeDeliveryPrivateFile(t, caPath, https.Certificate().Raw)
 	job := transferclient.Job{Version: 1, DeliveryID: "native-large-download", SnapshotID: "native-large-download", BotID: id.Binding.BotID, OperationID: id.OperationID, LocatorRevision: nativeLargeRevision, Phase: "queued", Task: pgDeviceTask(id), Spec: transferclient.Spec{SizeBytes: size, SHA256: contentHash, Mime: "application/octet-stream"}}
-	executable, err := os.Executable()
-	if err != nil {
-		t.Fatal(err)
+	executable := os.Getenv("MEMOH_NATIVE_LARGE_CLI_TEST")
+	if executable == "" {
+		t.Fatal("official CLI test binary is required; no helper/override fallback")
+	}
+	if _, err := os.Stat(filepath.Join(configRoot, "queue-budget.json")); !errors.Is(err, os.ErrNotExist) {
+		t.Fatal("unexpected budget override", err)
+	}
+	inspect := func() transferclient.QueueStatus {
+		q, err := transferclient.OpenHerdrQueue(func(key string) string {
+			if key == "HERDR_PLUGIN_STATE_DIR" {
+				return stateRoot
+			}
+			return configRoot
+		}, nativeLargeRevision, nativeLargeLimits)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() { _ = q.Close() }()
+		status, err := q.Inspect(job.DeliveryID)
+		if err != nil {
+			t.Fatal(err)
+		}
+		return status
 	}
 	command := func(kind string, status transferclient.QueueStatus) *exec.Cmd {
 		now := time.Now()
@@ -272,9 +249,9 @@ func TestWindowsNativeLargeByteRecovery(t *testing.T) {
 		if status.AssociationDue.After(now) {
 			now = status.AssociationDue
 		}
-		input, _ := json.Marshal(nativeLargeInvocation{Action: transferclient.ConfiguredAction{Kind: kind, DeliveryID: job.DeliveryID, Job: job}, Now: now})
-		cmd := exec.CommandContext(ctx, executable, "-test.run=^TestWindowsNativeLargeByteChild$", "-test.timeout=150s")
-		cmd.Env = append(os.Environ(), "MEMOH_NATIVE_LARGE_CHILD=1", "MEMOH_NATIVE_LARGE_CA="+caPath, "HERDR_PLUGIN_CONFIG_DIR="+configRoot, "HERDR_PLUGIN_STATE_DIR="+stateRoot)
+		input, _ := json.Marshal(map[string]any{"job": job})
+		cmd := exec.CommandContext(ctx, executable, "-test.run=^TestCLIPathChild$", "-test.timeout=150s") //nolint:gosec // Existing official bundle test executable, supplied by this isolated workflow; no shell.
+		cmd.Env = append(os.Environ(), "MEMOH_CLI_TEST_CHILD=1", "MEMOH_CLI_TEST_CERT="+caPath, "MEMOH_CLI_TEST_NOW="+now.Format(time.RFC3339Nano), "MEMOH_CLI_TEST_ACTION="+kind, "MEMOH_CLI_TEST_DELIVERY="+job.DeliveryID, "HERDR_PLUGIN_CONFIG_DIR="+configRoot, "HERDR_PLUGIN_STATE_DIR="+stateRoot)
 		cmd.Stdin = bytes.NewReader(input)
 		return cmd
 	}
@@ -284,11 +261,20 @@ func TestWindowsNativeLargeByteRecovery(t *testing.T) {
 		if err != nil {
 			t.Fatalf("finite child %s: %v %s", kind, err, output)
 		}
-		var reply nativeLargeReply
-		if err := json.NewDecoder(bytes.NewReader(output)).Decode(&reply); err != nil || reply.Error != "" {
-			t.Fatalf("finite child %s: decode=%v error=%s output=%s", kind, err, reply.Error, output)
+		var reply struct {
+			DeliveryID string `json:"delivery_id"`
+			Phase      string `json:"phase"`
+			Offset     int64  `json:"offset"`
+			Associated bool   `json:"associated"`
 		}
-		return reply.Status
+		if err := json.Unmarshal(output, &reply); err != nil {
+			t.Fatalf("CLI JSON %s: %v %s", kind, err, output)
+		}
+		persisted := inspect()
+		if reply.DeliveryID != persisted.Job.DeliveryID || reply.Offset != persisted.Job.Offset || reply.Phase != persisted.Job.Phase || reply.Associated != persisted.Associated {
+			t.Fatal("CLI projection differs from durable identity", reply)
+		}
+		return persisted
 	}
 	status := invoke("enqueue-download", transferclient.QueueStatus{})
 	initial := status.Job
@@ -455,5 +441,5 @@ func TestWindowsNativeLargeByteRecovery(t *testing.T) {
 		t.Fatal("restart repeated transfer or registration", err)
 	}
 	t.Logf("verified bytes=%d source_allocated=%d published_allocated=%d free_after=%d GET=%d HEAD=%d Commit_requests=%d confirmed_prefix_retransmitted=0 unconfirmed_tail_replayed=%d ledger=committed stable_reopen=2 sha256=%s elapsed=%s", size, allocated, publishedAllocated, nativeLargeFree(t, stateRoot), gets.Load(), heads.Load(), commits.Load(), sent.Load()-size, contentHash, time.Since(started).Round(time.Millisecond))
-	t.Log("scope=Windows-test-process/HTTPS/real-Server/PG/NTFS direction=download fixture_CA_only=true physical_power_loss=false upload_receipt=not-applicable")
+	t.Log("scope=Windows-official-CLI-test-binary/default-config/HTTPS/real-Server/PG/NTFS direction=download fixture_CA_only=true physical_power_loss=false upload_receipt=not-applicable")
 }

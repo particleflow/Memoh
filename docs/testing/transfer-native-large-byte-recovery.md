@@ -1,7 +1,8 @@
 # Windows large-byte recovery fixture
 
-This increment builds on `a51ddcb1cab8e246ee32fe50762e633f221ef271` without
-changing production code, storage layout, protocol, configuration or limits.
+The original test-only increment built on
+`a51ddcb1cab8e246ee32fe50762e633f221ef271`. Its later default-CLI regression
+fix is described below; the original results and failure remain historical evidence.
 The prior Windows Server/PostgreSQL/NTFS test used a short string; the 65 MiB
 admission test did not exercise this combined transfer route. The Linux 1 GiB
 and 512-file evidence remains separate and is not rerun by this fixture.
@@ -15,8 +16,10 @@ store, installed PostgreSQL service, production device, Agent, or NAS is changed
 The fixture writes 1 GiB of random non-sparse source bytes in 64 KiB buffers,
 Syncs them, verifies NTFS and reports allocation using `FILE_STANDARD_INFO`.
 It requires 4 GiB free before starting and retains a 1 GiB free-space reserve
-between finite invocations. Its explicit 2 GiB working-set allowance is test
-setup for one download, not a product backlog limit or a new user step.
+between finite invocations. The current test uses the existing official bundle
+CLI test executable and actual command dispatcher with installed defaults,
+without `queue-budget.json` or a test-only byte allowance. Only its test process
+receives the synthetic CA; the shipped EXE does not receive a new trust path.
 
 A streaming wrapper pauses the first **real Media** response after 256 MiB;
 the test kills its client subprocess and inspects the durable queue offset.
@@ -33,6 +36,8 @@ queue/publication state and PostgreSQL reference, not an invented upload ID.
 Run using the existing disposable PostgreSQL bootstrap:
 
 ```powershell
+python scripts/build-transferqueue-bundle.py --output "$env:RUNNER_TEMP/default-delivery-windows-amd64"
+$env:MEMOH_NATIVE_LARGE_CLI_TEST = "$env:RUNNER_TEMP/default-delivery-windows-amd64/transferqueue-cli.test.exe"
 ./scripts/test-native-delivery-postgres.ps1 -TestPattern '^TestWindowsNativeLargeByteRecovery$' -TestTimeout '12m'
 ```
 
@@ -67,3 +72,51 @@ Contribution CI 40172148231 independently failed its expected workflow count
 (10 vs actual 11). The catalog assertion is updated by one, retaining all
 read-only permissions and no-format-dependency checks. Local full Node tests
 could not complete because Ruby is absent; the actual GitHub check must pass.
+
+## Default download limit regression
+
+The earlier successful [Windows run 40172549407](https://github.com/particleflow/Memoh/actions/runs/40172549407/job/121106271229)
+at `de05d0532a6d9a46bd9923dce172f739fde82e17` used a fixture-only 2 GiB
+allowance. It proved NTFS recovery but did not prove the installed defaults.
+`TestCLIDefaultDownloadDoesNotCapSourceSize` reproduced the default command's
+1 GiB metadata admission failure before the fix:
+
+```text
+exit=1 output={"feedback_status":"","state":"capacity"}
+--- FAIL: TestCLIDefaultDownloadDoesNotCapSourceSize (0.00s)
+```
+
+Three gates were involved: download admission/replay compared size to the
+historical 256 MiB profile, pending downloads reserved cumulative bytes/slots,
+and native publication compared all retained objects to the same byte value.
+The correction registers metadata and an empty part, then streams bytes under
+existing worker locks. Downloads no longer use any of these cumulative gates.
+The 64 KiB copy buffer and existing 8 MiB checkpoint chunk are unchanged.
+Free space is checked per chunk, including the existing metadata reserve; actual
+ENOSPC/EDQUOT remains possible if another process consumes space after a check.
+It preserves the synced prefix and records a `waiting` / `capacity` summary with
+`next_due_at`, reusing the existing maximum retry delay without consuming the
+network retry budget. Insufficient metadata space can still prevent admission
+or checkpoint persistence; that error does not invent a successful checkpoint.
+
+No locator, root, credential, transfer identity, HTTP contract or stored record
+shape changes. Existing default locators reopen unchanged; no budget migration
+or user configuration is needed. The legacy byte field remains bound for older
+snapshot/config compatibility, but is not a download size or retained-object
+allowance. Published objects and records are preserved and still counted for
+integrity and overflow checks. Existing metadata bucket limits remain distinct
+from payload space. This is not an unlimited physical disk claim.
+
+All writers must use the corrected component before processing downloads above
+an old byte allowance: an older component still rejects those states; rolling
+back the binary does not make a large retained object fit its old policy. Do not
+run old and new writers together or delete data to make a rollback fit. There is
+no on-disk migration or reset step in this change.
+
+Focused regressions cover default 1 GiB registration with no allocated payload,
+more pending downloads than worker/admission slots, unchanged locator bytes and
+identities after reopen, 13 disk-pressure retries preserving the offset and
+retry budget, worker exclusion, full-hash resume, and unknown association
+reconciliation. The Windows retained-object case also crosses a legacy byte
+allowance without deleting the earlier objects. These small-data tests are
+separate from the real 1 GiB Windows job; a pending job is not a pass.

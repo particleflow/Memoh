@@ -48,7 +48,7 @@ func (q *DiskQueue) openNativePublication(ctx context.Context, authorize Publica
 		return nil, ErrStore
 	}
 	p := &NativePublication{queue: q, root: root, authorize: authorize, hook: hook}
-	p.metadata = &publicationMetadata{root: root, objectBytes: q.limits.Bytes, hook: p.mark}
+	p.metadata = &publicationMetadata{root: root, objectBytes: 0, hook: p.mark}
 	good := false
 	defer func() {
 		if !good {

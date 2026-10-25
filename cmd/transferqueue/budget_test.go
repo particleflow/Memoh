@@ -86,11 +86,11 @@ func TestCLIBudgetConfigurationAndOldQueueRecovery(t *testing.T) {
 	if code, _ := invoke("enqueue-download", raw); code != 0 {
 		t.Fatal("original ID replay", code)
 	}
-	// This deliberately exceeds the configured aggregate quota, before any I/O.
+	// Download metadata is no longer limited by the legacy snapshot byte policy.
 	job.DeliveryID, job.SnapshotID, job.Spec.SizeBytes = "too-large", "too-large", (8<<30)+1
 	raw, _ = json.Marshal(admissionInput{Job: job})
-	if code, status := invoke("enqueue-download", raw); code != 1 || string(status["state"]) != `"capacity"` {
-		t.Fatal("capacity classification", code, status)
+	if code, status := invoke("enqueue-download", raw); code != 0 || string(status["offset"]) != "0" {
+		t.Fatal("legacy byte policy blocked download metadata", code, status)
 	}
 	f, err := os.OpenFile(filepath.Join(config, "queue-budget.json"), os.O_WRONLY|os.O_TRUNC, 0) //nolint:gosec // Existing private fixture only; preserve its owner/DACL.
 	if err != nil {

@@ -53,22 +53,23 @@ func (q *DiskQueue) ReclaimConfirmed(ctx context.Context) error {
 		return err
 	}
 	defer unlockClose(global)
-	records, err := q.admissions()
-	if err != nil {
-		return err
-	}
 	archived := 0
-	for _, head := range records {
+	finished := errors.New("reclaim batch complete")
+	err = q.visitAdmissions(func(head QueueStatus) error {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		id := head.Job.DeliveryID
 		if archived >= historyReclaimBatch {
-			break
+			return finished
 		}
+		// Registered upload completion already compacts its head before release.
+		if head.Registered && !head.Associated {
+			return nil
+		}
+		id := head.Job.DeliveryID
 		lock, err := q.lock(id)
 		if errors.Is(err, ErrBusy) {
-			continue
+			return nil
 		}
 		if err != nil {
 			return err
@@ -84,11 +85,12 @@ func (q *DiskQueue) ReclaimConfirmed(ctx context.Context) error {
 			}
 		}
 		unlockClose(lock)
-		if err != nil {
-			return err
-		}
+		return err
+	})
+	if errors.Is(err, finished) {
+		return nil
 	}
-	return nil
+	return err
 }
 
 func (q *DiskQueue) releaseConfirmedLocked(ctx context.Context, id string) error {
