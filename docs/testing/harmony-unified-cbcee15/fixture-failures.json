@@ -1,0 +1,15 @@
+{
+  "rawLogsRetainedPrivately": true,
+  "sha256": {
+    "phone-task-list-tests.txt": "5fd7b7df04258883e235ae3e6bae5a618852c0d68d16e76639f4fb883863419a",
+    "parent-ui.log": "a19d2f3b3106108d0490b68a78512bb5b7f320f4f538796ca96141ddd5fd2193",
+    "parent-ui-final.log": "6ad862620492bc24eda37a4a3defaaee07269f7b5f8eeab73db49f0e83256cde",
+    "parent-ui-verified.log": "8b51fe09ab3772c17a7547c1d8aa57e841f1c2eb4ffaf59da672842c309d3857"
+  },
+  "causes": [
+    "Task-list adapter initially retained a blanket SDK mock which omitted the real media method; corrected by importing the actual SDK method.",
+    "Runtime fixture initially rejected protocol ping; now handles ping/pong, still rejects execution frames.",
+    "Browser locators initially used old task-button and unrendered summary labels; now use actual shared labels and distinct task/run IDs."
+  ],
+  "productCodeChanged": false
+}

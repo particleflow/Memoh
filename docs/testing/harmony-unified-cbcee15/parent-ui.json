@@ -1,0 +1,14 @@
+{
+  "sharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+  "environment": "actual generated Vite phone UI; synthetic API/native/runtime boundaries",
+  "viewport": "390x844",
+  "parentRunSeparateFromChild": true,
+  "toolIdentityVisible": true,
+  "terminalDoesNotClaimToolSuccess": true,
+  "runtimeDroppedClearsStaleRun": true,
+  "resynchronizationRestoresSameRun": true,
+  "reloadKeepsLogin": true,
+  "executionWrites": 0,
+  "pageErrors": [],
+  "nativeDevice": false
+}

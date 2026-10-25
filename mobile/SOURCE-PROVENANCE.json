@@ -20,7 +20,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "535df60861cdc2b69a6634ecc840ecd869bfb8ce69b9413d6ddf7086370eeaf8",
+      "sha256": "fe857b2b5a5af60012e72a4785dcb2f0452b3ab428450cd39a89d70bf652a46d",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -35,7 +35,8 @@
         "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
         "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API.",
         "Source-only pin to unified fa77a073: reuse persisted computer checkpoints, direct parent references and explicit/auth-paused observation; all 43 phone adapters retained. New Windows native-to-Herdr contract and next HAP remain pending; no new protocol or private configuration.",
-        "Pin complete unified 8a242293 source and generated SDK; Web pages and 43 phone adaptations are unchanged from verified fa77. No alternate SDK overlay or native configuration framework."
+        "Pin complete unified 8a242293 source and generated SDK; Web pages and 43 phone adaptations are unchanged from verified fa77. No alternate SDK overlay or native configuration framework.",
+        "Pin unified cbcee15 parent Bot run/tool observation and terminal image recovery, retaining all 43 phone adapters and current native transfer recovery matrix. SDK/UI dependency unchanged. Source-only sync; no HAP build."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -498,7 +499,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "58f23e9fe803e7fc77bec07c04babddc21feaa452f8cdf3a9ec90d19f753d4dc",
+      "sha256": "efb36dfdef62d244093872fb880d83533e5609acbe6573d6b3958f5dfbf67d7d",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -517,7 +518,8 @@
         "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Generate phone-specific attachment assertions alongside the existing shared task tests. Preserve all 43 product adaptations and their output bytes; exercise the actual SDK/verified originals/native save path against synthetic HTTP and OS boundaries. No HAP rebuild.",
-        "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance."
+        "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
+        "Source-only cbcee15 integration: add the scoped task-list attachment test adapter; no native/product component or SDK changes."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -1312,6 +1314,15 @@
       "preparationChanges": [
         "Exercise the actual native upload command router and SharedChat file-descriptor preview scope.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration."
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_task_list_attachment.vitest.ts",
+      "sha256": "fc660a739aab53ad7f5aa2f9d3ca90e655b620dd2ac17a697e3dc11f611860cb",
+      "origin": "new recovery follow-up phone test adapter; not historical recovered source",
+      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
+      "preparationChanges": [
+        "Replace the upstream task-list Web anchor expectation with actual native save-button/owner/hash/auth/same-operation assertions; preserve all pagination and pending/failed-state checks."
       ]
     }
   ],

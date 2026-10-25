@@ -1,0 +1,22 @@
+{
+  "sharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+  "previousHostCommit": "159c1dc7a9fbde43a964b888b7bbd59f413b7c05",
+  "fullGeneratedWebTypecheckExitCode": 0,
+  "selectedSharedTests": 160,
+  "initialPassed": 159,
+  "initialFailed": 1,
+  "correctedTaskListTestsPassed": 42,
+  "testAdapterScope": "Only old Web anchor expectation; real phone save-button and SDK envelope assertions preserve pagination/status checks",
+  "lintErrors": 0,
+  "taskListLintWarnings": 2,
+  "sourceEntries": 128,
+  "sourceFiles": 137,
+  "phoneProductionAdapters": 43,
+  "phoneProductionAdapterImplementationsChanged": false,
+  "testAdapters": 2,
+  "nativeTransferOwnedFilesChanged": false,
+  "sharedFileOwnerModulesChanged": false,
+  "publicConfigEmpty": true,
+  "newHapBuilt": false,
+  "nativeDevice": false
+}

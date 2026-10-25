@@ -1,0 +1,34 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout
+
+ ❯ |web| src/pages/home/components/session-tasks.test.ts (42 tests | 1 failed) 4737ms
+     × shows all recorded files automatically, with pending and failed separate from task completion 101ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > shows all recorded files automatically, with pending and failed separate from task completion
+AssertionError: expected  to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/pages/home/components/session-tasks.test.ts:177:19
+    175|     expect(document.body.textContent).not.toContain(en.chat.tasks.stat…
+    176|     const links = document.querySelector('[role=dialog]')!.querySelect…
+    177|     expect(links).toHaveLength(1)
+       |                   ^
+    178|     expect(links[0]!.getAttribute('href')).toBe(`/api/bots/bot/media/$…
+    179|     expect(links[0]!.getAttribute('download')).toBe('ready-result')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 7 passed (8)
+      Tests  1 failed | 159 passed (160)
+   Start at  16:56:45
+   Duration  22.05s (transform 31.90s, setup 0ms, import 47.33s, tests 7.04s, environment 4.54s)
+

@@ -50,7 +50,7 @@ def inputs():
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
         'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts',
         'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
-        'tests/stage2/harmony_task_attachments.vitest.ts')]
+        'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts')]
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -861,6 +861,19 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                 changes[name] = [
                     ("vi.mock('@memohai/sdk', () => ({", "vi.mock('@memohai/sdk', async () => ({\n  getBotsByBotIdMediaByContentHash: (await vi.importActual<typeof import('@memohai/sdk')>('@memohai/sdk')).getBotsByBotIdMediaByContentHash,", 1),
                     (block, (ROOT / 'tests/stage2/harmony_task_attachments.vitest.ts').read_text(), 1),
+                ]
+            if name == 'apps/web/src/pages/home/components/session-tasks.test.ts':
+                # The existing phone save is a button/OS bridge, not a browser anchor.
+                # Preserve the shared pagination, identity and failure assertions.
+                original = data.decode('utf-8')
+                start = "    const links = document.querySelector('[role=dialog]')!.querySelectorAll('a')\n"
+                end = "    expect(api.deliveries.mock.lastCall![0].query.after).toBe('16')\n"
+                assert original.count(start) == original.count(end) == 1
+                block = original[original.index(start):original.index(end)]
+                assert hashlib.sha256(block.encode()).hexdigest() == '451eb71811487e88bf49fb6a10178d69b43cdac8e268da7c62a46be54ca05384', 'Shared list attachment assertions changed'
+                changes[name] = [
+                    ("vi.mock('@memohai/sdk', () => ({", "vi.mock('@memohai/sdk', async () => ({\n  getBotsByBotIdMediaByContentHash: (await vi.importActual<typeof import('@memohai/sdk')>('@memohai/sdk')).getBotsByBotIdMediaByContentHash,", 1),
+                    (block, (ROOT / 'tests/stage2/harmony_task_list_attachment.vitest.ts').read_text(), 1),
                 ]
             if name in changes:
                 original = data.decode('utf-8')

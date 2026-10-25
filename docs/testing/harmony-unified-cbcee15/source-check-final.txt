@@ -1,0 +1,2 @@
+{"sourceFiles": 128, "heldSources": 0, "unverifiedHistoricalLaterChanges": 19, "files": 137, "pythonSyntax": 23, "cjsSyntax": 12, "passed": true, "fullClientBuild": false}
+{"sharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45", "sourceSHA256": "f796693f1e8229173fbe3aed6fe55bce48370623fe8b23d43ab293f94a133664", "reviewedPhoneAdaptations": 43, "testAdaptations": 2, "publicConfigurationEmpty": true, "fullTypecheckCommand": "pnpm --filter @memohai/web typecheck", "hapCompiled": false}

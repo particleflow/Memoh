@@ -50,7 +50,7 @@ jobs:
         run: pnpm --filter @memohai/web typecheck
       - name: Verify phone task attachments
         working-directory: mobile/client/tests/.isolated/ci-web/checkout
-        run: pnpm test --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts
+        run: pnpm test --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts
       - name: Lint the generated attachment tests
         working-directory: mobile/client/tests/.isolated/ci-web/checkout
-        run: pnpm exec eslint apps/web/src/pages/home/components/session-task-results.test.ts
+        run: pnpm exec eslint apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts

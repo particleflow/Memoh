@@ -1,0 +1,32 @@
+{
+  "scope": "Actual generated client UI with synthetic native/API boundaries; not phone acceptance.",
+  "candidate": "cbcee15-source",
+  "environment": "generated Vite client",
+  "actualComposerFileMenuUsesNative": true,
+  "restoreAndRemove": true,
+  "restorePreservesOriginalDraftScope": true,
+  "restoreDidNotUploadOrDispatch": true,
+  "actualFileEntries": [
+    {
+      "entry": "paste",
+      "staged": true,
+      "unknownNotConsumed": true
+    },
+    {
+      "entry": "drop",
+      "staged": true,
+      "unknownNotConsumed": true
+    },
+    {
+      "entry": "recording",
+      "staged": true,
+      "unknownNotConsumed": true
+    }
+  ],
+  "unknownNeverConsumed": true,
+  "unknownNeverDispatched": true,
+  "logoutClosesNative": true,
+  "viewport": "390x844",
+  "pageErrors": [],
+  "nativeDevice": false
+}

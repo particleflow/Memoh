@@ -1,0 +1,60 @@
+{
+  "baseSharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "sharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+  "changedWebFiles": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/home/components/session-bot-run.test.ts",
+    "apps/web/src/pages/home/components/session-bot-run.vue",
+    "apps/web/src/pages/home/components/session-tasks.test.ts",
+    "apps/web/src/pages/home/components/session-tasks.vue",
+    "apps/web/src/pages/home/components/tool-call-detail-image.vue",
+    "apps/web/src/pages/home/components/tool-call-inline.test.ts",
+    "apps/web/src/pages/home/composables/session-bot-run.test.ts",
+    "apps/web/src/pages/home/composables/session-bot-run.ts",
+    "apps/web/src/store/chat-list.ts",
+    "apps/web/src/store/chat/image-runtime-recovery.test.ts",
+    "apps/web/src/store/chat/realtime.test.ts",
+    "apps/web/src/store/chat/realtime.ts",
+    "apps/web/src/store/chat/runtime-client.test.ts",
+    "apps/web/src/store/chat/runtime-client.ts",
+    "apps/web/src/store/chat/runtime-projection.ts",
+    "apps/web/src/store/chat/runtime-transcript-merge.ts"
+  ],
+  "changedWebFileCount": 19,
+  "sdkChanged": false,
+  "uiSubmoduleChanged": false,
+  "phoneProductionInputsUnchangedFrom273415": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets": "d66e30cae2fe0b80c69f2faa71cfd82c9576878b45457ace81d470ca6022463e",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets": "fb615f4f637c118e858249a70ee78316648ac09c6e061473310be566dcb34ee6",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "bfa865b3af7566b626fd021cd5de573dc2d8b3b979d3cfa6e3e265a99fb3a329",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "4333909b73792a7c7603b4f09e091fbfab4ac03b1cf58e88595e5e94d8982f84",
+    "mobile/client/mobile/memoh/harmony-files.ts": "646002d64b63f26019f9e2ceb5cc8160c4d29c9ac0698a2627764807ea87edf9",
+    "mobile/client/mobile/memoh/harmony-resumable.ts": "e55acc09fd3925cf6f7480acae6474ecfcc7e32909cdefc23f71af8312621ae5",
+    "mobile/client/mobile/memoh/harmony-download.ts": "6990c567e495a20c5a089f37b656bde8ec93cd9a723bc5a4ab4597fc7cccbdb0",
+    "mobile/client/mobile/memoh/HarmonyAttachments.vue": "43788d4c894b454d360044aeef321e0c7fbb5c6342e230a820c550f8d69eb40f",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "7ccf116dc6372c9a93560754ea91cd7741165f9b6d710a7b756efa36bc2a59a7",
+    "mobile/client/mobile/client_config.py": "7b29495f70ae65aca4f3003e8b828e81b26fe4d489470b3588c1b9ad06a7eeb7",
+    "mobile/client/config/memoh_client.json": "99137240f5107a63328e1f83793b48a2a2cb05b1db84126659f04709b3a2df60"
+  },
+  "unchangedSharedAttachmentFiles": [
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/composables/useMediaGallery.ts",
+    "apps/web/src/pages/home/components/attachment-block.vue",
+    "apps/web/src/pages/home/components/session-task-results.vue",
+    "packages/sdk/src/sdk.gen.ts",
+    "packages/sdk/src/types.gen.ts"
+  ],
+  "patchTargets": 43,
+  "patchImplementationChanged": false,
+  "upstreamChangedPatchTargets": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json"
+  ],
+  "testAdapters": 2,
+  "fileOwnerFutureHeadIncluded": false,
+  "conflictsObserved": [],
+  "hapBuilt": false
+}

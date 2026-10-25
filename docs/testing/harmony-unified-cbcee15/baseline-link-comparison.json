@@ -1,0 +1,13 @@
+{
+  "baseSharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "currentSharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+  "oldFilesExecuted": [
+    "apps/web/src/pages/home/components/session-tasks.vue",
+    "apps/web/src/pages/home/components/session-tasks.test.ts"
+  ],
+  "scope": "Old test and containing component, unchanged phone attachment implementation in current generated context; not a full old-tree test run",
+  "sameFailure": "Expected one Web anchor, found zero because phone uses native save button",
+  "baseExitCode": 1,
+  "currentExitCode": 1,
+  "productAttachmentModuleChanged": false
+}

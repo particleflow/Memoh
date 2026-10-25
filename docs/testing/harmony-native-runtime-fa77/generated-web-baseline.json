@@ -25,16 +25,16 @@
       "upstreamSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df"
     },
     "apps/web/src/i18n/locales/en.json": {
-      "adaptedSHA256": "ec73bd7746eba7d60fee080f51fe3ecf9029f7fddc6b246fcbe906ebf4b28afb",
-      "upstreamSHA256": "526a8f7264b6aea73e79d68a13c58b0e088c0dd50e3632b37249dd7b4b0fe44d"
+      "adaptedSHA256": "aa77c601d0c5e356452204b8ae187427fedaabda221b44adcde47ac55a86df71",
+      "upstreamSHA256": "7ae1650c2fa6e1bb1e53359fbaa4ef85b2e85e47a6d621b88abbfc4a4d1d91f4"
     },
     "apps/web/src/i18n/locales/ja.json": {
-      "adaptedSHA256": "dae2088312026e8392b36e300f8fab8f0fba4dc959af1590ae862d388a2e8435",
-      "upstreamSHA256": "ecec2d14463c87ef44bfa8d9cbb18d956807d295c6c443dc3680ac481c6f8437"
+      "adaptedSHA256": "396fdaf993fad8d600982132cae7372be9df0a26b1cd902ff387185bb60f1093",
+      "upstreamSHA256": "248c9afa715b3199744d14e3195a409c0260cad539fc74ce93ae06495804f153"
     },
     "apps/web/src/i18n/locales/zh.json": {
-      "adaptedSHA256": "3e77c71460cf8bd291af148193f5d4f0cecd12da1bf8bfa0129663891dd95fe7",
-      "upstreamSHA256": "73b2a2a47df14a8ac3280d7a23471fa18cf2012707cc2b57bad3223616cc3b59"
+      "adaptedSHA256": "c02d9a634ac0b4d0e27198b9dd5aad9cc377a6a99757e3d0282ba86ab48890c1",
+      "upstreamSHA256": "6f18f2b603670747c4554b8521bec86bcc5deac48b25c453c7ad2ff6e089a29d"
     },
     "apps/web/src/lib/api-client.ts": {
       "adaptedSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
@@ -182,5 +182,16 @@
     "unchangedAdaptations": 42
   },
   "referenceHostCommit": "9fdff87bd8f65d048537ca4cfda77bcdaeae3674",
-  "sharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f"
+  "sharedCbceeReview": {
+    "baseHostCommit": "159c1dc7a9fbde43a964b888b7bbd59f413b7c05",
+    "baseSharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+    "phonePatchImplementationChanged": false,
+    "unchangedAdaptationTargets": 40,
+    "upstreamChangedAdaptationTargets": [
+      "apps/web/src/i18n/locales/en.json",
+      "apps/web/src/i18n/locales/ja.json",
+      "apps/web/src/i18n/locales/zh.json"
+    ]
+  },
+  "sharedCommit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45"
 }

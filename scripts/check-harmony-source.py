@@ -26,9 +26,10 @@ def main():
     builder.verify_modules({lock['archive']: lock['archiveSHA256']})
     BASE.mkdir(parents=True, exist_ok=True)
     context, patches = builder.context_archive(lock, BASE, 'harmony')
-    test_file = 'apps/web/src/pages/home/components/session-task-results.test.ts'
-    assert test_file in patches, 'Phone attachment assertions missing'
-    existing = {name: values for name, values in patches.items() if name != test_file}
+    test_files = {'apps/web/src/pages/home/components/session-task-results.test.ts',
+                  'apps/web/src/pages/home/components/session-tasks.test.ts'}
+    assert test_files.issubset(patches), 'Phone attachment assertions missing'
+    existing = {name: values for name, values in patches.items() if name not in test_files}
     assert len(existing) == 43 and existing == baseline['existingPhonePatches'], 'Reviewed phone adaptation drift'
     checkout = BASE / 'checkout'
     checkout.mkdir(exist_ok=True)
@@ -40,7 +41,7 @@ def main():
         'sharedCommit': lock['commit'],
         'sourceSHA256': hashlib.sha256(archive.read_bytes()).hexdigest(),
         'reviewedPhoneAdaptations': len(existing),
-        'testAdaptations': 1,
+        'testAdaptations': len(test_files),
         'publicConfigurationEmpty': True,
         'fullTypecheckCommand': 'pnpm --filter @memohai/web typecheck',
         'hapCompiled': False,
