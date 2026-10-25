@@ -267,8 +267,8 @@ try {
   $o=$c.StandardOutput.BaseStream.CopyToAsync([Console]::OpenStandardOutput())
   $e=$c.StandardError.BaseStream.CopyToAsync([Console]::OpenStandardError())
   $c.WaitForExit()
-  $o.GetAwaiter().GetResult()
-  $e.GetAwaiter().GetResult()
+  [void]$o.GetAwaiter().GetResult()
+  [void]$e.GetAwaiter().GetResult()
   exit $c.ExitCode
 } catch {
   [Console]::Error.WriteLine('Herdr CLI transport failed')

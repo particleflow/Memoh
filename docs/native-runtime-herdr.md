@@ -98,6 +98,23 @@ The existing state fields remain authoritative and separate: `state` / `phase`, 
 
 The host lane owns the existing Windows bundle and independently supervised Herdr service. Runtime owns and terminates its short-lived Exec child tree on disconnect or timeout; therefore CLI execution must not start the service. No new listener or service is introduced by Memoh.
 
+The PowerShell wrapper must discard the values returned by both stream-copy
+awaiters. PowerShell can expose the internal `VoidTaskResult` values on stdout,
+after an otherwise successful Herdr JSON response. That output is not part of
+Herdr's receipt and correctly fails the strict parser as `unknown`. The wrapper
+now uses `[void]` for both waits; it still drains both pipes, propagates failures
+and retains the child exit code. The Windows delivery job exercises the actual
+Windows PowerShell 5.1 wrapper with an isolated child executable. On Linux the
+same byte-preservation regression can be run with an explicitly selected local
+PowerShell using `MEMOH_TEST_PWSH=/absolute/path/to/pwsh go test ./internal/nativeherdr`.
+
+This transport correction does not replay or repair an existing unknown task.
+A task stopped at `batch_creating_workspace` can already have created a native
+workspace. Preserve its operation, attempt and references; do not reset the
+phase, create another workspace, or infer Pi execution from the CLI exit. The
+current `computer_task_recover` remains read-only and cannot continue a task
+whose creation acknowledgement was lost before its native IDs were persisted.
+
 The tested official baseline is Herdr v0.9.5, source [`2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01`](https://github.com/herdrdev/herdr/tree/2ecf19a92fc3a7fff75b6ce3655ef04f4625ec01). The official [Windows release ZIP](https://github.com/herdrdev/herdr/releases/download/v0.9.5/herdr-windows-x86_64.zip), SHA256 `d2c6c9c971c43a0bfdde8c692a9a1a7a45c3e4807cd01ae45662b4734fac1cbf`, includes `herdr.exe`, ConPTY dependencies and license files. Do not distribute only the executable as if it were the complete release.
 
 The host service and CLI must use the same profile:
