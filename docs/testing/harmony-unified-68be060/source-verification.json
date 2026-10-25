@@ -1,0 +1,11 @@
+{
+  "commit": "68be06092a1ea85d961115aac404082982bdecf4",
+  "tree": "9697857688118f86bce672cc40977686e483b536",
+  "gitBlobCount": 5926,
+  "archiveBytes": 33325791,
+  "archiveSHA256": "039f47d222ed0e1c10325b449cc7cc93e914ef07430cd5768f3733d2ce6bd01f",
+  "combinedArchiveSHA256": "9b083128e78e0827462ba12c913433fd3ee2161cd450338adda6d0a560c31f25",
+  "unchangedUICommit": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "frozenDependenciesUnchanged": true,
+  "originalGeneratorReproduced": true
+}

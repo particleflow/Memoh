@@ -1,12 +1,12 @@
 # Reproduction inputs and verified build sequence
 
-The current source-only pin is deployed shared commit
-`150219908c316d75272b77c65148436fac3b7074`, including parent-detail reconnect
-recovery and the upstream login response-ownership fix. Equivalent phone login
-patches are removed; native adapters are retained.
-[Alignment checks](../docs/testing/harmony-unified-1502199/README.md).
-This update has not been rebuilt into a HAP; the verified f248 package below
-remains bound to 5e55 and is preserved unchanged.
+The current source pin is shared commit
+`68be06092a1ea85d961115aac404082982bdecf4`, including expert native RunID,
+persisted state and authorized history navigation. Existing phone login,
+attachment adapters and application identity remain unchanged.
+[Alignment checks](../docs/testing/harmony-unified-68be060/README.md).
+The source checkpoint precedes its new build; the f248 package below remains
+bound to 5e55 and is preserved unchanged.
 
 The current verified unsigned HAP is built from
 `f2488597aba37ef8c3557cc3f156b78d870c82c9`, pinned to shared Web/SDK commit
@@ -52,10 +52,10 @@ the reported installed 1.0.6.
 - Python 3.12 and pnpm 10.27.0. The verified Web run used Node 24.19.0;
   native compilation used the official CLT's bundled Linux Node.
 - `client/config/memoh_web.lock.json` pins complete public Memoh source at
-  `150219908c316d75272b77c65148436fac3b7074` and UI at
+  `68be06092a1ea85d961115aac404082982bdecf4` and UI at
   `f69402a55dd87a59c10722fe11507ad8fd7048f5`, including component archive hashes.
   The deterministic combined archive SHA256 is
-  `fa932c7c9acf637e54149aacda9b5aeb1af13d717dd55ae58e0b328f7fff1275`.
+  `9b083128e78e0827462ba12c913433fd3ee2161cd450338adda6d0a560c31f25`.
 - Official `commandline-tools-linux-x64-26.0.0.851.zip`, 2,348,063,309 bytes,
   SHA256 `ab604bd92721d5cbcafd154e6461d46b9f1b105e7b89eab04a9d046681198082`,
   containing SDK API26 / 26.0.0.105. Acquire through the official supported

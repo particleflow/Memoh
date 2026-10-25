@@ -1,0 +1,21 @@
+{
+  "sharedCommit": "68be06092a1ea85d961115aac404082982bdecf4",
+  "hostPatchCount": 43,
+  "changedWebSDKFiles": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/home/components/bot-delegation-run.vue",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.test.ts",
+    "apps/web/src/pages/home/components/bot-delegation-tasks.vue",
+    "apps/web/src/pages/home/components/session-tasks.test.ts",
+    "apps/web/src/pages/home/components/session-tasks.vue",
+    "apps/web/src/pages/home/composables/useBotDelegationHistory.ts",
+    "packages/sdk/src/types.gen.ts"
+  ],
+  "nativeAdaptersUnchanged": true,
+  "dependencyLockUnchanged": true,
+  "loginClientUnchanged": true,
+  "authSessionUnchanged": true,
+  "contextSHA256": "28b486b7a62d36fb98105124f77bec0126a2d3d4a1e6e4b17e1d954fea52f501"
+}

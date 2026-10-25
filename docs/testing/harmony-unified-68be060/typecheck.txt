@@ -1,0 +1,4 @@
+
+> @memohai/web@0.22.0 typecheck <validation-checkout>/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+

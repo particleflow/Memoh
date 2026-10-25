@@ -20,7 +20,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "cf8a79b504664b877877744248e073b6f0a12cb4b51abf8d66c3407c10b29cc2",
+      "sha256": "619f6ad287cfd85b68178aa696346e733ac7b26ad4448df004af9460bb9679ee",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -32,7 +32,8 @@
         "Pin complete shared 9e6c470 source for native task content, retained interactive follow-up, identity observation and Provider Images controls; preserve existing phone adapters, licenses, native identity and auth persistence. Source-only alignment; no new HAP.",
         "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build.",
         "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations.",
-        "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams."
+        "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
+        "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -1218,7 +1219,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/licenses/sources.txt",
-      "sha256": "7bd09a6dadf0f256e278b937f2de1e508326d8f58cb436cb5f207afc5fe0e385",
+      "sha256": "4bf1253a19c0461e9464996d1a912bae316d55d9872a8c331b9c4bbaac0dd08d",
       "origin": "Project-authored component source references; no license grant is invented.",
       "licenseReview": "Verbatim original notice text or explicitly labeled source-reference commentary; origin/hash recorded in docs/testing/harmony-release-notices/notice-origins.json.",
       "preparationChanges": [
@@ -1226,7 +1227,8 @@
         "Pin complete shared 9e6c470 source for native task content, retained interactive follow-up, identity observation and Provider Images controls; preserve existing phone adapters, licenses, native identity and auth persistence. Source-only alignment; no new HAP.",
         "Pin shared 51b19cb image-tool reference display and native images_api.edits controls. Remove the equivalent Provider cache patch now present byte-for-byte upstream. Existing phone identity, auth, attachments and task adapters retained; no HAP build.",
         "Align the exact shared 5e55 production source; remove the now-upstream Provider mount-refresh patch; preserve verified phone adaptations.",
-        "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams."
+        "Pin deployed shared 1502199 and remove its equivalent auth-generation/response-guard adapter; keep native platform seams.",
+        "Pin exact shared 68be060 expert native RunID/state/history navigation and matching SDK optional fields. Preserve 43 phone adaptations, existing login and attachment bridges; no alternate component or API."
       ],
       "unifiedNative9e6BaseSHA256": "38984466caef896519c25ac7e24a8e6e3f45dd73f2a25d0daa46cc4b4efbbcad",
       "unifiedImages51bBaseSHA256": "1aae0eee8c3c03becbd8b9ee7b8a4eca0e54ae7c8d3acc1292dd51b522403a87"
@@ -1734,6 +1736,16 @@
     "scope": "Exact deployed shared source, parent-detail reconnect recovery and real upstream login generation. No later expert-run projection or new native build.",
     "evidence": "docs/testing/harmony-unified-1502199/README.md",
     "retainedHAPSource": "f2488597aba37ef8c3557cc3f156b78d870c82c9",
+    "historicalLaterEditsUnverified": 19
+  },
+  "specialistRun68beAlignment": {
+    "baseCommit": "eea13736690b31c84e2e29c8e757ae52c039dfdd",
+    "sharedCommit": "68be06092a1ea85d961115aac404082982bdecf4",
+    "sharedTree": "9697857688118f86bce672cc40977686e483b536",
+    "hostPatchCount": 43,
+    "nativeLoginAttachmentAdaptersUnchanged": true,
+    "sharedWebSDKChangedFiles": 10,
+    "evidence": "docs/testing/harmony-unified-68be060/README.md",
     "historicalLaterEditsUnverified": 19
   }
 }

@@ -1,9 +1,9 @@
 {
-  "version": "unified-1502199",
-  "commit": "150219908c316d75272b77c65148436fac3b7074",
-  "archive": "tests/.isolated/memoh-1502199-complete.tar.gz",
-  "archiveSHA256": "fa932c7c9acf637e54149aacda9b5aeb1af13d717dd55ae58e0b328f7fff1275",
-  "archivePrefix": "Memoh-1502199/",
+  "version": "unified-68be060",
+  "commit": "68be06092a1ea85d961115aac404082982bdecf4",
+  "archive": "tests/.isolated/memoh-68be060-complete.tar.gz",
+  "archiveSHA256": "9b083128e78e0827462ba12c913433fd3ee2161cd450338adda6d0a560c31f25",
+  "archivePrefix": "Memoh-68be060/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "150219908c316d75272b77c65148436fac3b7074",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/150219908c316d75272b77c65148436fac3b7074",
-      "archiveSHA256": "48faf4f6f869d76bc69067dcdac149a3785684f19762cfe2c4fd465a19c3ad53",
-      "archivePrefix": "Memoh-150219908c316d75272b77c65148436fac3b7074/",
+      "commit": "68be06092a1ea85d961115aac404082982bdecf4",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/68be06092a1ea85d961115aac404082982bdecf4",
+      "archiveSHA256": "039f47d222ed0e1c10325b449cc7cc93e914ef07430cd5768f3733d2ce6bd01f",
+      "archivePrefix": "Memoh-68be06092a1ea85d961115aac404082982bdecf4/",
       "destination": ""
     },
     {
@@ -137,21 +137,21 @@
     }
   },
   "downstreamObservation": {
-    "commit": "150219908c316d75272b77c65148436fac3b7074",
-    "scope": "Shared native task observation/continuation, truthful image-tool reference display and native Provider Images/reference controls are present directly in the pinned source. The equivalent upstream Provider cache fix replaces the former phone adaptation.",
+    "commit": "68be06092a1ea85d961115aac404082982bdecf4",
+    "scope": "Shared native task observation/continuation, expert root RunID/persisted state/authorized history navigation, image references and native Provider Images controls come directly from this exact source. Existing phone login and attachment bridges remain separate platform adaptations.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {
         "baseSHA256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d",
         "sha256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d"
       },
       "apps/web/src/pages/home/components/session-tasks.vue": {
-        "baseSHA256": "ee5b611e3cae2c8d1133722de9a40c7a1d87be6a42ae58a851d488b269e44413",
-        "sha256": "ee5b611e3cae2c8d1133722de9a40c7a1d87be6a42ae58a851d488b269e44413"
+        "baseSHA256": "11a84a6d882cc9760c451207c96143beb3f4665ea692821396055d89e856f72d",
+        "sha256": "11a84a6d882cc9760c451207c96143beb3f4665ea692821396055d89e856f72d"
       }
     },
     "regressionTest": {
       "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
-      "sha256": "ceb00e2b12a74a67a13e4ed4e7ae513fe366b998f77e9b52027436919373e487"
+      "sha256": "64cc937e32ab66faffb69f7ca7466fb962a61a94a7550c046000aa0194fd859c"
     }
   }
 }

@@ -1,0 +1,49 @@
+{
+  "productCodeChangedForHarness": false,
+  "correctedAssumptions": [
+    "Run ID is label-prefixed; child details show task ID and state, not the full child run UUID.",
+    "Existing bot switch may briefly read the previous session under the target bot; fixture now returns session.not_found rather than a malformed empty success.",
+    "Bot URLs canonicalize to the Bot name; the actual store identity is asserted.",
+    "Historical transcript commit waits for the existing initial runtime_snapshot; the isolated fixture now supplies an empty snapshot without executing a run."
+  ],
+  "initialLogs": [
+    {
+      "name": "specialist-browser-attempt1.txt",
+      "sha256": "ab8ac56b84653a1f5209a8887002ab472daa72073ffedb3eca12de1d8d0c726f"
+    },
+    {
+      "name": "specialist-browser-attempt2.txt",
+      "sha256": "359e4655f6d8cff67a4d8cd96ba1c2cd2db067bcc73300342ec87cbdb0b547a8"
+    },
+    {
+      "name": "specialist-browser-attempt3.txt",
+      "sha256": "3140dd698641a95802ff413d6a7106dc8fe996987df1a3ff3e31c61ba1f7a375"
+    },
+    {
+      "name": "specialist-browser-attempt4.txt",
+      "sha256": "f15acb5cd785559e0d6b32a4651b6b5266b4a643acbb063fd8db3f7ec2e755cc"
+    },
+    {
+      "name": "specialist-browser-attempt5.txt",
+      "sha256": "968c327fc8c82e37fa3d74eb94bce9b291bf9cbfaf51fcbef27b38b523ab87ac"
+    },
+    {
+      "name": "specialist-browser-attempt6.txt",
+      "sha256": "3d83f12fbd1a80a60a40a798d66d0ac7149303e85ea9a1b0670f47edb6dd001f"
+    },
+    {
+      "name": "specialist-browser-attempt7.txt",
+      "sha256": "253a281b82730d2cb44ea95a8616aeee54796bf4e3ef9bd41ba8b0df92e79108"
+    },
+    {
+      "name": "specialist-browser-attempt8.txt",
+      "sha256": "b6c47981deefe16e9f09cf4a2efd3edea34bbbb5f7b24f3b6ef1bf5f599d098d"
+    },
+    {
+      "name": "specialist-browser-attempt9.txt",
+      "sha256": "ae50e106954f7299229408c5ce960b08674f294e87f895ffa59c5eeae3711980"
+    }
+  ],
+  "successLogSHA256": "4e07bcc2c57d120885b0ae217ee3b881e9186a88ba215ceec5d0685db6345354",
+  "cleanupWarnings": "Playwright reported canceled pending route tasks when the isolated context closed; successful assertions and zero application page errors are recorded separately."
+}

@@ -1,0 +1,7 @@
+
+<validation-checkout>/apps/web/src/pages/home/components/session-tasks.test.ts
+   59:33  warning  There is more than one component in this file  vue/one-component-per-file
+  294:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 2 problems (0 errors, 2 warnings)
+
