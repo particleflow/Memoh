@@ -80,6 +80,52 @@ establish that the new Windows native-to-Herdr adapter has been integrated.
 
 ## Verification status
 
+### Native Runtime contract received after the source checkpoint
+
+The native owner supplied the following contract on 2026-10-25, but has not yet
+provided a pushed, verified implementation revision. PR79 still points to
+`fa77a073fe6380d297474a6053a1445201bcab83` at this review. This section records
+consumer compatibility and concrete dependencies; it does not claim deployment.
+
+| Contract | Current shared/phone consumer | Required integration |
+| --- | --- | --- |
+| Windows `provider=memoh`, `kind=remote`; `runtime_id` is registration, `target_id` is a Bot mount | `use-computer-access.ts` grants by runtime ID and revokes by target ID; `chat-pane.vue` preserves the selected target and session snapshot, without matching by host name/provider | Keep new native IDs distinct from old Agenvo IDs. Do not rewrite historical selections, queues or HostBinding. |
+| `task_type=computer_operation`, `task_id=operation_id`; operation kinds `foreground_bash` / `herdr_pi_task` | Existing SDK and scoped task readers already use these fields; observation/content/deliveries reject a mismatched operation ID | No alternate phone mapping is needed. Operation kind is not a substitute for a reported runtime capability. |
+| Separate status, process state, Pi result, business state and summary | Existing task DTO has `business_state: unknown`; observation DTO uses `business_outcome`. `session-task-results.vue` displays cancel intent separately, and `computer-task-checkpoints.vue` never infers business success from Pi completion | Preserve the two DTO field locations; do not rename one into the other. `revision`, attempt and generation remain strings. |
+| Only NAS-committed references count as delivered | `useComputerTaskDeliveries.ts` validates version/direction/hash/size/MIME and exposes only committed references; native saving uses the owning Bot | Runtime/transfer credentials and producer principal remain server/host responsibilities, not phone attachment credentials. |
+| Unknown follow-up outcome must not resubmit | `useNativeTask.ts` persists the request UUID before POST and blocks another send until an authoritative receipt resolves it | Keep the existing server capability gate; a new native provider does not enable batch Pi follow-up. |
+| Native Herdr owner configuration | No `native-herdr` endpoint, generated SDK method or configuration page exists at fa77 | Await the fixed endpoint/SDK and owner-readable response. Reuse the runtime page; do not manually edit generated SDK or reuse the Agenvo registration form. |
+| Admission GET/PUT with request ID, expected revision, paused; offline management without OAuth probe | SDK methods exist, but the page does not consume them. The current service delegates both methods to Agenvo; admission target lookup uses `OwnedAgenvoRuntime`, and PUT calls `Probe` before CAS | The native server branch must land before exposing this write for Memoh runtimes. Reusing the current PUT would not meet the supplied native contract. |
+| Native transfer-credential GET/POST/DELETE | SDK methods exist, but the current transfer SQL restricts reads and changes to `provider='agenvo'`; no phone page enrolls transfer credentials | Await native owner/team/activation/revocation enforcement and native identity projection. Do not pass a Runtime `mrk` credential as an `mft` transfer credential. |
+
+The supplied native configuration body requires `instance_id`, `session`,
+`work_dir`, `bash_path`, `herdr_cli`, and `herdr_config_root`. Optional `agent`
+contains `execution_mode=pi-json-v1`, `provider`, `model`, `config_dir`, and
+optional `path`. These belong to the forthcoming existing-runtime configuration
+endpoint, not a second phone settings schema. Its precise response/error DTO and
+the native capability/availability projection still need the owner's fixed SDK.
+
+For native transfer identity, the supplied contract sets both `connection_id`
+and `device_id` to the registered runtime UUID, with the configured Herdr
+`instance_id`. It must not be inferred from the old Agenvo selector. The phone
+continues to consume task IDs and committed NAS references; it does not mint,
+translate or persist that producer principal or device credential.
+
+The task DTO retains `revision` as a string but the task header does not display
+it; the observation checkpoint displays its string revision directly. The
+delivery reader currently does not consume the page's revision field and does
+not infer task completion or implement CAS from it. No cross-page snapshot or
+freeze rule is introduced without a server contract requiring one.
+
+Source evidence: [admission dispatch](https://github.com/particleflow/Memoh/blob/fa77a073fe6380d297474a6053a1445201bcab83/internal/userruntime/service.go#L55),
+[current admission lookup/probe](https://github.com/particleflow/Memoh/blob/fa77a073fe6380d297474a6053a1445201bcab83/internal/agenvo/admission.go#L40),
+[current transfer SQL](https://github.com/particleflow/Memoh/blob/fa77a073fe6380d297474a6053a1445201bcab83/internal/db/postgres/sqlc/runtime_transfer_credentials.sql.go#L19),
+and [task DTO](https://github.com/particleflow/Memoh/blob/fa77a073fe6380d297474a6053a1445201bcab83/packages/sdk/src/types.gen.ts#L4453).
+This review changed documentation only. It did not repeat the passing tests,
+create credentials, change shared product files, or build another HAP.
+
+### Completed checks
+
 The original phone run was **89 passed / 4 failed out of 93** in
 [targeted-tests.txt](targeted-tests.txt). Replaying the exact original 1.0.8
 checkout reproduces the same four failures ([baseline log](attachment-tests-original-108.txt)).
