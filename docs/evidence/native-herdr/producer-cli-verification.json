@@ -1,0 +1,43 @@
+{
+  "base_sha": "2030c2d522695f52a227f12421800fe075760813",
+  "source_sha256": "8072a745e7181b88ea5f16cf128923e420eaf7f1270bdd138a514efa4b886898",
+  "regression_source": "https://github.com/particleflow/Memoh/blob/ddb7872e71789cfb303429b7f6f5aa96240f37cf/docs/testing/native-transfer-producer-combination.md",
+  "generated_completion": {
+    "command": "go test -race ./internal/agenvo -run '^(TestNativeGeneratedCompletionInvokesProductionCollector|TestNativeCompletionRegistersWithoutLegacyPlugin|TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound)$' -count=1 -v",
+    "output": "=== RUN   TestNativeGeneratedCompletionInvokesProductionCollector\n--- PASS: TestNativeGeneratedCompletionInvokesProductionCollector (0.59s)\n=== RUN   TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound\n--- PASS: TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound (0.00s)\n=== RUN   TestNativeCompletionRegistersWithoutLegacyPlugin\n--- PASS: TestNativeCompletionRegistersWithoutLegacyPlugin (0.06s)\nPASS\nok  \tgithub.com/felinics/memoh/internal/agenvo\t1.675s\n",
+    "path": "generated batchScript -> synthetic Pi writes fresh file -> production closure -> built production CLI collect-result",
+    "manual_new_manifest_or_enqueue": false,
+    "legacy_hook_calls": 0,
+    "old_directory_bytes_unchanged": true,
+    "unknown_creates": 1,
+    "unknown_queue_entries": 1,
+    "pi_executions": 1,
+    "unknown_associated": false
+  },
+  "postgres_cli": {
+    "command": "TEST_POSTGRES_DSN=<isolated-loopback-database> go test -race -tags=integration ./internal/db -run '^TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit$' -count=1 -v",
+    "result": "PASS",
+    "test_seconds": 3.54,
+    "package_seconds": 4.593,
+    "fault": "NAS PG committed, then CLI killed before acknowledgement",
+    "repeat_collection_processes": 3,
+    "creates": 1,
+    "commits": 1,
+    "resolves": 1,
+    "operation_count": 1,
+    "old_directory_bytes_unchanged": true,
+    "nas_content_matches_committed_reference": true
+  },
+  "unchanged_product_components": [
+    "cmd/transferqueue",
+    "internal/transferclient",
+    "internal/deliverymeta",
+    ".github/workflows"
+  ],
+  "limits": [
+    "Only synthetic accounts, credentials, TLS, directories and database.",
+    "Generated-completion test uses explicit Linux path shims for Windows references; no Windows installation or live cutover is claimed.",
+    "CLI is built from this repository source; independently pinned producer 0.10.1 combination remains the file integration lane acceptance.",
+    "A finite collector can be invoked again after unknown; its journal prevents duplicate Pi/business identity/upload Create."
+  ]
+}

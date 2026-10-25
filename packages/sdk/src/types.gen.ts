@@ -501,8 +501,15 @@ export type AgenvoNativeHerdrProfile = {
     herdr_cli: string;
     herdr_config_root: string;
     instance_id: string;
+    producer?: AgenvoProducerLocator;
     session: string;
     work_dir: string;
+};
+
+export type AgenvoProducerLocator = {
+    config_dir: string;
+    program_path: string;
+    state_dir: string;
 };
 
 export type AgenvoReferenceObservation = {
@@ -524,6 +531,7 @@ export type AgenvoTarget = {
     herdr_config_root?: string;
     instance_id?: string;
     native_runtime_id?: string;
+    producer?: AgenvoProducerLocator;
     session?: string;
     work_dir?: string;
 };

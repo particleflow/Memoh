@@ -1,5 +1,5 @@
 {
-  "base": "d74da26338ffc166e905211417c4be1649fd5903",
+  "base": "2030c2d522695f52a227f12421800fe075760813",
   "source_files": {
     "cmd/agent/http_providers.go": "eddce3e49cefff54baccf64f8c358bbd0c5dabd7a49c69336ada6af01b2866db",
     "cmd/agent/main.go": "bc6e3142e6a601d80a810532cc6c33e9746f071b5d61acece0f2bdb7eaf67d57",
@@ -858,21 +858,21 @@
     "internal/agenvo/agent.go": "d65c96b0acbcc49aef6c68ceda3ba3b2e50e82cd95a22b2093037a403c8566ae",
     "internal/agenvo/agent_followup.go": "37d65f426f9cd95203b9d2b8128ce4921a439b11558067baf2636b59d05e4dc8",
     "internal/agenvo/bash.go": "8b237fdda1855836fabea4bf79ded2a3ca1f8269009eee84942919d79ac6b428",
-    "internal/agenvo/client.go": "7872ecb5326326a5433c2b47746f7478c64b12b1f835f30fe402440845cf3f1b",
+    "internal/agenvo/client.go": "f6814ed174a1452e7a19eb51b2dbe2d189af8834f8e71f6d5d0205f0c6b57738",
     "internal/agenvo/endpoint.go": "44a8f6951ddfb17f42c45ec7efec886d0c4135bf0e471436f0eaa72c0945cb04",
     "internal/agenvo/exec.go": "f0274d400178c2fe378c7139a973895f3ce944f9deea8124ff9a6f21e5ce60f2",
-    "internal/agenvo/native_profile.go": "83a7d507728915808ac559c60ee32d9845096afa925dadde89ca8cfdfcfc615a",
+    "internal/agenvo/native_profile.go": "1657f7d7653704d87702724ba825febb02fd6593be55769be1b294ade8da4e51",
     "internal/agenvo/observation.go": "15aeec79f925da2cc4a6b017969a6d746d752bdaa08a69835c1ff244a04f4381",
     "internal/agenvo/pi_batch.go": "86cffe6c4bdac223d4cf96a6117ed9aeddac55a30701c6cf9522d66e8b486b46",
     "internal/agenvo/pi_batch_history.go": "ccaa501eb53fb24a21ba40bcd580f1a5163669afb81c9099fb0938196ada6c9b",
     "internal/agenvo/pi_batch_paths.go": "5a024f198f8582da4ff633b3ecba9501fcb7bf7bee057f16290bcb39ffab2158",
-    "internal/agenvo/pi_batch_producer.go": "a712744801ceec07778910e6209d55c8159f403002ab0119bfff9ffb68121091",
+    "internal/agenvo/pi_batch_producer.go": "4aee2c1c84d52aa65c9ba27cd2e66c724c09977b7bf619fb09a7f7da1e958e5a",
     "internal/agenvo/pi_batch_reader.go": "982436550ac23ca8a3cc353bdaa90def945a81d0f9718290258f95fb9ffb2737",
     "internal/agenvo/pi_batch_service.go": "3921259b888ea8319471b6388c25c953dbcebe692cc8403ffad271d9771fe8a5",
     "internal/agenvo/pi_completion.go": "253f1b137b28b40987b8c6d55b12b776affbf4693e022c8cd9715852b5b78ae6",
     "internal/agenvo/pi_json.go": "af79af0f43e3762bac26f5626f83989df3d1d0137409a050aeef14f218926842",
     "internal/agenvo/profile.go": "1b0b5f16e816ddf30a274eda61b7d870a1ae94b08a3d7abec1e465014fd887c5",
-    "internal/agenvo/service.go": "693ab9e524ba8821494b81119a036e9bc0bbffc54115e0eb9cebd2cd433b4575",
+    "internal/agenvo/service.go": "9e30d7b5c683223b8facc3908f92b81e9ea8bb756565de8b3a4f4750e0f298de",
     "internal/agenvo/workdir.go": "ca8067f719b36a1a3c7b614e5fe9c28d4692ab47ea1e2acdf04611fe425df362",
     "internal/apperror/error.go": "94ac7bd39b926353e1e07fcb66f7e31cbe2f661d7537f640d440cc1a85114e6e",
     "internal/apps/events.go": "c88d7e5d8e4d2040650bd504c10413138d1f07c0f690a0ab4137824e92fe9773",
@@ -1776,8 +1776,8 @@
     "internal/workspacedeps/store_pg.go": "8364a5c667667d66767a30ee048b74527f94377b1f883621bd80b9d5f8761a32",
     "internal/workspacedeps/updates.go": "eb2019cc59bdd57eed2e9ac754d5fbb07a90628464fb795fae0061a2f73a56b9",
     "internal/workspacedeps/workspace_access.go": "0f1552ed0c86794885b504a32268cfe4a8d43b4de061d5b121f45195d5b77db3",
-    "spec/docs.go": "c1b475dc2461ab35f10d04dcd09babe3fd715b8b4fcde4772c60ad3520d785b7",
+    "spec/docs.go": "f65d1d2c26e37ea32d1a2e20c4640a273646a1b9233ceebc29649047c79c6cab",
     "templates/workspace.go": "88de6dc7e5a2f81d30258d1f1ba328af89746bb46055859e8a4c0f5981a66be9"
   },
-  "source_sha256": "206aeeea1f2e23b650abf2560226c83f9bac91866a66676338815a263d7f0a17"
+  "source_sha256": "8072a745e7181b88ea5f16cf128923e420eaf7f1270bdd138a514efa4b886898"
 }
