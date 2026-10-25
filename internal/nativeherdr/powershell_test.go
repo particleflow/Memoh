@@ -101,7 +101,7 @@ func powerShellChildTrace(stage string) {
 }
 
 func powerShellOutputDiagnostic(raw []byte) string {
-	return fmt.Sprintf("bytes=%d sha256=%x prefix=%q", len(raw), sha256.Sum256(raw), raw[:min(len(raw), 256)])
+	return fmt.Sprintf("bytes=%d sha256=%x prefix=%q", len(raw), sha256.Sum256(raw), raw[:min(len(raw), 512)])
 }
 
 func logPowerShellFixtureTrace(t *testing.T, name, path string) {
@@ -204,7 +204,7 @@ func diagnosePowerShellFixture(t *testing.T, shell string, env []string, payload
 	trace := filepath.Join(root, "powershell-stages.txt")
 	childTrace := filepath.Join(root, "diagnostic-child-stages.txt")
 	script := "function Write-FixtureStage([string]$stage) { [IO.File]::AppendAllText($env:MEMOH_POWERSHELL_TRACE, $stage+[Environment]::NewLine) }\nWrite-FixtureStage 'script-enter'\n" + cliPowerShell
-	const inputLine = "$p=[Console]::In.ReadToEnd() | ConvertFrom-Json"
+	const inputLine = "$p=[Console]::In.ReadToEnd() | Microsoft.PowerShell.Utility\\ConvertFrom-Json"
 	if strings.Count(script, inputLine) != 1 {
 		t.Fatal("diagnostic input anchor changed")
 	}
@@ -220,7 +220,7 @@ func diagnosePowerShellFixture(t *testing.T, shell string, env []string, payload
   $rawHash=[BitConverter]::ToString($hasher.ComputeHash($rawBytes)).Replace('-','').ToLowerInvariant()
   $hasher.Dispose()
   Write-FixtureStage ('input-read-metadata bytes='+$rawBytes.Length+' sha256='+$rawHash)
-  $p=ConvertFrom-Json -InputObject $raw
+  $p=Microsoft.PowerShell.Utility\ConvertFrom-Json -InputObject $raw
   Write-FixtureStage 'input-parsed'`, 1)
 	for _, marker := range []struct{ line, stage string }{
 		{"[Console]::InputEncoding=[Text.UTF8Encoding]::new($false)", "input-encoding-set"},
@@ -374,7 +374,7 @@ func TestPowerShellCLITransportPreservesChildBytesAndExit(t *testing.T) {
 					diagnosePowerShellFixture(t, shell, modeEnv, payload, t.TempDir())
 					diagnosePowerShellJSON(t, shell, modeEnv)
 				}
-				t.Fatal("PowerShell did not drain concurrent child output before timeout", ctx.Err())
+				t.Fatal("PowerShell CLI transport exceeded timeout; inspect phase markers to locate the wait", ctx.Err())
 			}
 			gotExit := 0
 			if err != nil {
@@ -388,7 +388,7 @@ func TestPowerShellCLITransportPreservesChildBytesAndExit(t *testing.T) {
 				t.Errorf("stdout changed: got %q, want exact child JSON %q", stdout.Bytes(), wantOut)
 			}
 			if !bytes.Equal(stderr.Bytes(), wantErr) {
-				t.Errorf("stderr changed: got %d bytes, want %d exact child bytes", stderr.Len(), len(wantErr))
+				t.Errorf("stderr changed: got {%s}, want %d exact child bytes", powerShellOutputDiagnostic(stderr.Bytes()), len(wantErr))
 			}
 			if gotExit != wantExit {
 				t.Errorf("child exit lost: got %d, want %d", gotExit, wantExit)

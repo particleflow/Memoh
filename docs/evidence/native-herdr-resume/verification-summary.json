@@ -1,10 +1,10 @@
 {
-  "verified_at_utc": "2026-10-25T17:07:07.796456+00:00",
-  "build_base_head": "3aced23061d8965ccb1daf328ed1d871623b4019",
-  "verified_head": "9d09e1c652439e833e7e6799849d4b429706a646",
-  "production_source_sha256": "e6832cfa56d766a05abed5297f1018636f7665c779e2f8d2437476d9e2563084",
+  "verified_at_utc": "2026-10-25T17:25:35.056243+00:00",
+  "build_base_head": "d07b773a81d02f08d4699504f7858f43723c172b",
+  "verified_head": "d07b773a81d02f08d4699504f7858f43723c172b",
+  "production_source_sha256": "c41f82dfe705fb18ecfe4929834ecd7b0fc1c1d8e418c425d0717250630e397d",
   "production_source_unchanged_from_build": true,
-  "binary_sha256": "68ba13a66e17df84297622150517b00d6644a1a86e21b208414c0fe404ce05f9",
+  "binary_sha256": "2ea6b62ee89decbb5b5fb0eb71bfd5671030c2152525f024079eee29e6167c36",
   "environment": {
     "ui": "http://127.0.0.1:58083",
     "api": "http://127.0.0.1:58080",
@@ -76,7 +76,10 @@
     "execution_unknown": true,
     "business_unknown": true,
     "task_write_requests": [],
-    "browser_page_errors": []
+    "browser_page_errors": [],
+    "historical_message_rows_unchanged": true,
+    "historical_message_count": 0,
+    "new_fixture_rows_this_run": 0
   },
   "tools_discovery": {
     "reads": [
@@ -107,5 +110,7 @@
     "Resume execution, admission, concurrency and real PostgreSQL behavior are verified separately by the assigned test agent; this hand-seeded fixture does not prove resume success.",
     "Agent browser verification is not human QA."
   ],
-  "local_raw_evidence_directory": "/workspace/native-herdr-verification/resume"
+  "local_raw_evidence_directory": "/workspace/native-herdr-verification/resume",
+  "exec_go_sha256": "d3b5aafdaf7400fd26f2933e0c519be1e8a1d6156bdcae3e2228e8551e093e7f",
+  "verified_product_change": "PowerShell envelope resolves Microsoft.PowerShell.Utility\\ConvertFrom-Json explicitly; existing [void] stdout drains remain."
 }

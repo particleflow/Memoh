@@ -143,7 +143,10 @@ awaiters. PowerShell can expose the internal `VoidTaskResult` values on stdout,
 after an otherwise successful Herdr JSON response. That output is not part of
 Herdr's receipt and correctly fails the strict parser as `unknown`. The wrapper
 now uses `[void]` for both waits; it still drains both pipes, propagates failures
-and retains the child exit code. The Windows delivery job exercises the actual
+and retains the child exit code. JSON parsing names
+`Microsoft.PowerShell.Utility\ConvertFrom-Json` explicitly so a fresh Windows
+PowerShell session loads the owning module without broad command discovery.
+The Windows delivery job exercises the actual
 Windows PowerShell 5.1 wrapper with an isolated child executable. On Linux the
 same byte-preservation regression can be run with an explicitly selected local
 PowerShell using `MEMOH_TEST_PWSH=/absolute/path/to/pwsh go test ./internal/nativeherdr`.

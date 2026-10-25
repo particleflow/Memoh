@@ -1,0 +1,61 @@
+{
+  "baseline": "d07b773a81d02f08d4699504f7858f43723c172b",
+  "workflow_run": 40215779290,
+  "job": 121236586288,
+  "platform": "GitHub Windows runner, Windows PowerShell 5.1, system Utility manifest 3.1.0.0",
+  "scope": "Synthetic JSON and test child only. No live Runtime, Herdr workspace, Pi or credentials.",
+  "input": {
+    "copied_bytes": 722,
+    "read_bytes": 722,
+    "sha256": "479b2ac9c7c19787e2692ba399d79167550dd5ebfc215ca3ca17b10fbd235b53",
+    "write_close_errors": false
+  },
+  "probes": [
+    {
+      "name": "isolated-autoload",
+      "progress": "SilentlyContinue",
+      "stdin": null,
+      "limit_seconds": 20,
+      "result": "timeout before constant-parsed",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "runtime-roots-autoload",
+      "progress": "SilentlyContinue",
+      "stdin": null,
+      "limit_seconds": 20,
+      "result": "timeout before constant-parsed",
+      "stderr_bytes": 0
+    },
+    {
+      "name": "isolated-system-module",
+      "progress": "SilentlyContinue",
+      "stdin": null,
+      "limit_seconds": 20,
+      "method": "absolute PSHOME Utility Import-Module plus module-qualified ConvertFrom-Json",
+      "result": "PASS constant JSON Unicode/newline assertions",
+      "elapsed_seconds_approx": 1.26,
+      "stderr_bytes": 0
+    }
+  ],
+  "conclusion": "ReadToEnd and writer close completed with matching bytes/hash. Explicit owning-module import avoids the observed broad command-discovery delay. Silencing progress alone did not avoid the delay. The probe combines explicit import and qualification; module qualification alone still requires the production-wrapper Windows regression.",
+  "prior_stderr_evidence": {
+    "baseline": "5ea0e60eb3c79a8777c61a6d1fcf25fb1a17d637",
+    "workflow_run": 40214863499,
+    "job": 121233688872,
+    "large_stderr_timeout_prefix": "#< CLIXML\r\n",
+    "nonzero_exit": {
+      "elapsed_seconds": 19.53,
+      "stdout_matches": true,
+      "exit_matches_23": true,
+      "stderr_bytes": 425,
+      "expected_child_stderr_bytes": 33
+    },
+    "limitation": "The prior test did not retain the full extra stderr payload; host progress is a supported hypothesis, not a captured message attribution."
+  },
+  "live_limitations": [
+    "The original live workspace.create stdout/stderr/exit were not saved.",
+    "CI discovery delay is not asserted to be the sole live unknown cause.",
+    "Same-operation recovery and final Pi/producer business acceptance remain separate."
+  ]
+}
