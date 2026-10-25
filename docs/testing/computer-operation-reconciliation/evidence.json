@@ -1,0 +1,92 @@
+[
+  {
+    "file": "targeted.txt",
+    "sha256": "8fa58cb170fa4861004bc3d5c5c86c1e785cfd19ab7de916f69024cb2cee8f38",
+    "bytes": 6603
+  },
+  {
+    "file": "race.txt",
+    "sha256": "c313d5a169f2ee727e97ce9836a5e5324e61d7c1d36ed9e9e3823aeab17ae07f",
+    "bytes": 2396
+  },
+  {
+    "file": "race-after-cleanup.txt",
+    "sha256": "c1d757db3bdef1725061b2732f7a43cc7a436aacce9ced68780aa3e78c232a51",
+    "bytes": 7369
+  },
+  {
+    "file": "http-tests-final.txt",
+    "sha256": "e0bc623dd3c118906f14b81b7681e6069c751af1fe37563bc6f0eb410a0bf19e",
+    "bytes": 207
+  },
+  {
+    "file": "sdk-types.txt",
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "bytes": 112
+  },
+  {
+    "file": "web-types.txt",
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "bytes": 116
+  },
+  {
+    "file": "build-server.txt",
+    "sha256": "ff3a0e73517ba802ee6dcdc71cbc9763e42c574627146847d332062309dcd644",
+    "bytes": 70
+  },
+  {
+    "file": "build-agent.txt",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "bytes": 0
+  },
+  {
+    "file": "start-current.txt",
+    "sha256": "118975bba4cd75b8fc2c4f8c4a2968705c0f3ca42f8cecf4a8564c6fca1e06e1",
+    "bytes": 135
+  },
+  {
+    "file": "browser.txt",
+    "sha256": "bc0af44055d0127b8d46c8419e77660c5d1bb9af9de572a5d3b2684dd79daeac",
+    "bytes": 340
+  },
+  {
+    "file": "browser-proof.json",
+    "sha256": "5ad5b04ad1390854b227daed8cc32b9c5798c8e5b99e621d69cb4b5e03d62df8",
+    "bytes": 620
+  },
+  {
+    "file": "persistence-proof.txt",
+    "sha256": "796132f3e77aaba282951f7437e69b7dc405ce0a6cda3d0b1ea0fe4bd96a0485",
+    "bytes": 127
+  },
+  {
+    "file": "cache-cleanup.json",
+    "sha256": "3f2eb31be05f212d2ad897ed533dc523acc0a8a1d6a233296bcec25007f5f1bd",
+    "bytes": 222
+  },
+  {
+    "file": "task-reconciliation.png",
+    "sha256": "62c0b9b4e85a6a21d4a85704728fab5317c2fb9afd4c50ffab8d89570d453c04",
+    "bytes": 105164
+  },
+  {
+    "file": "lint.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "lint-version.txt",
+    "bytes": 91,
+    "sha256": "a895dd6979fa80d8f10a8769871d3fdb0b3493fad48a713c9319ea2bf331ebc5"
+  },
+  {
+    "file": "schema-proof.json",
+    "bytes": 240,
+    "sha256": "2f9db1be3b9b1f78b5bac52b1330ed9b0670ceeb4c78f5f7dde7c995cb14cbb2"
+  },
+  {
+    "file": "core.txt",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
+  }
+]

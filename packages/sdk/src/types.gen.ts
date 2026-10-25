@@ -413,6 +413,12 @@ export type AgenvoAgentProfile = {
     provider?: string;
 };
 
+export type AgenvoBatchFile = {
+    name?: string;
+    sha256?: string;
+    size?: number;
+};
+
 export type AgenvoBatchHistoryEvidence = {
     file?: string;
     sha256?: string;
@@ -423,6 +429,24 @@ export type AgenvoBatchHistoryReport = {
     after?: string;
     before?: string;
     evidence?: AgenvoBatchHistoryEvidence;
+};
+
+export type AgenvoBatchReceipt = {
+    attempt?: string;
+    completion?: AgenvoBatchFile;
+    exit_code?: number;
+    exited?: boolean;
+    generation?: string;
+    history?: AgenvoBatchHistoryReport;
+    pane_id?: string;
+    pi_session_id?: string;
+    request_hash?: string;
+    started?: boolean;
+    stderr?: AgenvoBatchFile;
+    stdout?: AgenvoBatchFile;
+    terminal_id?: string;
+    version?: number;
+    workspace_id?: string;
 };
 
 export type AgenvoDiscoveredInstance = {
@@ -1249,6 +1273,19 @@ export type ComputertaskNativeContent = {
     supported?: boolean;
 };
 
+export type ComputertaskOperationReconciliation = {
+    control_pane_id?: string;
+    control_terminal_id?: string;
+    files?: Array<ComputertaskRecoveryFile>;
+    generation?: string;
+    receipt?: AgenvoBatchReceipt;
+    receipt_state?: string;
+    request_hash?: string;
+    revision?: string;
+    target_fingerprint?: string;
+    terminal_id?: string;
+};
+
 export type ComputertaskPiContinuity = {
     last_invocation?: AgenvoBatchHistoryReport;
     reason?: string;
@@ -1266,11 +1303,20 @@ export type ComputertaskRecovery = {
     pi_result?: string;
     pi_session_id?: string;
     process_state?: string;
+    reconciliation?: ComputertaskOperationReconciliation;
     result_reason?: string;
     result_summary?: ComputertaskRecoverySummary;
     state?: string;
     target_id?: string;
     workspace_id?: string;
+};
+
+export type ComputertaskRecoveryFile = {
+    confirmed_offset?: number;
+    current_availability?: string;
+    meta?: AgenvoBatchFile;
+    recorded_content_hash?: string;
+    state?: string;
 };
 
 export type ComputertaskRecoverySummary = {

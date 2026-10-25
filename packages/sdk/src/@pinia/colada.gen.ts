@@ -3283,7 +3283,7 @@ export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservation
 /**
  * Observe a computer task's original native references
  *
- * Read-only, bounded Herdr metadata via the existing task recovery service. Rechecks parent/descendant ownership and current device grants before and after observation. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history.
+ * Read-only, bounded Herdr metadata and an operation-revision-bound persisted reconciliation snapshot. Rechecks parent/descendant ownership and current device grants before and after observation. A concurrent operation revision change fails closed. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history. Reconciliation neither pauses target admission nor authorizes host stop/upgrade; recorded file references are not live media checks.
  */
 export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationQuery = defineQueryOptions<Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationData>, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationResponse, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationError>((options: Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationData>) => ({
     key: getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservationQueryKey(options),

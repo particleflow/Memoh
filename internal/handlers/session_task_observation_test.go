@@ -52,7 +52,7 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 		if revokeChat {
 			f.chat = false
 		}
-		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: agenvo.ReferenceObservation{Availability: "online", AgentStatus: "done", Match: "observed"}}, nil
+		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: agenvo.ReferenceObservation{Availability: "online", AgentStatus: "done", Match: "observed"}, Reconciliation: &computertask.OperationReconciliation{Revision: "9007199254740993", TargetFingerprint: f.op.TargetFingerprint, ReceiptState: "missing", Files: []computertask.RecoveryFile{}}}, nil
 	})
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), observer)
 	e := echo.New()
@@ -86,6 +86,9 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 	body := call(taskUser, 200)
 	if !strings.Contains(body, `"agent_status":"done"`) || !strings.Contains(body, `"business_outcome":"unknown"`) {
 		t.Fatal(body)
+	}
+	if !strings.Contains(body, `"revision":"9007199254740993"`) || !strings.Contains(body, `"receipt_state":"missing"`) || strings.Contains(body, `"stop_authorized"`) {
+		t.Fatal("HTTP adapter lost exact revision or invented stop authorization")
 	}
 	after, _ := json.Marshal(f.op)
 	if string(before) != string(after) {

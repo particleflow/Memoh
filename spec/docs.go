@@ -12074,7 +12074,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation": {
             "get": {
-                "description": "Read-only, bounded Herdr metadata via the existing task recovery service. Rechecks parent/descendant ownership and current device grants before and after observation. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history.",
+                "description": "Read-only, bounded Herdr metadata and an operation-revision-bound persisted reconciliation snapshot. Rechecks parent/descendant ownership and current device grants before and after observation. A concurrent operation revision change fails closed. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history. Reconciliation neither pauses target admission nor authorizes host stop/upgrade; recorded file references are not live media checks.",
                 "produces": [
                     "application/json"
                 ],
@@ -20337,6 +20337,20 @@ const docTemplate = `{
                 }
             }
         },
+        "agenvo.BatchFile": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "sha256": {
+                    "type": "string"
+                },
+                "size": {
+                    "type": "integer"
+                }
+            }
+        },
         "agenvo.BatchHistoryEvidence": {
             "type": "object",
             "properties": {
@@ -20362,6 +20376,56 @@ const docTemplate = `{
                 },
                 "evidence": {
                     "$ref": "#/definitions/agenvo.BatchHistoryEvidence"
+                }
+            }
+        },
+        "agenvo.BatchReceipt": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "string"
+                },
+                "completion": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "exit_code": {
+                    "type": "integer"
+                },
+                "exited": {
+                    "type": "boolean"
+                },
+                "generation": {
+                    "type": "string"
+                },
+                "history": {
+                    "$ref": "#/definitions/agenvo.BatchHistoryReport"
+                },
+                "pane_id": {
+                    "type": "string"
+                },
+                "pi_session_id": {
+                    "type": "string"
+                },
+                "request_hash": {
+                    "type": "string"
+                },
+                "started": {
+                    "type": "boolean"
+                },
+                "stderr": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "stdout": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "terminal_id": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "integer"
+                },
+                "workspace_id": {
+                    "type": "string"
                 }
             }
         },
@@ -22505,6 +22569,44 @@ const docTemplate = `{
                 }
             }
         },
+        "computertask.OperationReconciliation": {
+            "type": "object",
+            "properties": {
+                "control_pane_id": {
+                    "type": "string"
+                },
+                "control_terminal_id": {
+                    "type": "string"
+                },
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/computertask.RecoveryFile"
+                    }
+                },
+                "generation": {
+                    "type": "string"
+                },
+                "receipt": {
+                    "$ref": "#/definitions/agenvo.BatchReceipt"
+                },
+                "receipt_state": {
+                    "type": "string"
+                },
+                "request_hash": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
+                    "type": "string"
+                },
+                "terminal_id": {
+                    "type": "string"
+                }
+            }
+        },
         "computertask.PiContinuity": {
             "type": "object",
             "properties": {
@@ -22552,6 +22654,9 @@ const docTemplate = `{
                 "process_state": {
                     "type": "string"
                 },
+                "reconciliation": {
+                    "$ref": "#/definitions/computertask.OperationReconciliation"
+                },
                 "result_reason": {
                     "type": "string"
                 },
@@ -22565,6 +22670,26 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "computertask.RecoveryFile": {
+            "type": "object",
+            "properties": {
+                "confirmed_offset": {
+                    "type": "integer"
+                },
+                "current_availability": {
+                    "type": "string"
+                },
+                "meta": {
+                    "$ref": "#/definitions/agenvo.BatchFile"
+                },
+                "recorded_content_hash": {
+                    "type": "string"
+                },
+                "state": {
                     "type": "string"
                 }
             }

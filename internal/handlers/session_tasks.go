@@ -188,7 +188,7 @@ func (h *SessionTaskHandler) Deliveries(c echo.Context) error {
 
 // Observe godoc
 // @Summary Observe a computer task's original native references
-// @Description Read-only, bounded Herdr metadata via the existing task recovery service. Rechecks parent/descendant ownership and current device grants before and after observation. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history.
+// @Description Read-only, bounded Herdr metadata and an operation-revision-bound persisted reconciliation snapshot. Rechecks parent/descendant ownership and current device grants before and after observation. A concurrent operation revision change fails closed. No dispatch, terminal input, logs, cancellation, result collection or receipt writes. Native idle/done and matching references never prove business success or restored conversation history. Reconciliation neither pauses target admission nor authorizes host stop/upgrade; recorded file references are not live media checks.
 // @Tags sessions
 // @Produce json
 // @Param bot_id path string true "Bot ID"

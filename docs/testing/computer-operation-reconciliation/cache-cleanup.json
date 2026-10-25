@@ -1,0 +1,5 @@
+{
+  "path": "/tmp/delegation-run-integration/build-tmp/go-build1324632201",
+  "bytes": 490103950,
+  "reason": "only interrupted reconciliation race command temporary compiler output; no source/database/evidence removed"
+}
