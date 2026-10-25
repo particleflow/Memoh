@@ -1,0 +1,20 @@
+WARN: ArkTS:WARN File: <client>/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:177:12
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <client>/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:178:21
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <client>/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:180:28
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <client>/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:225:21
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <client>/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:9:117
+ Function may throw exceptions. Special handling is required.
+
+WARN: ArkTS:WARN File: <client>/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:68:39
+ Function may throw exceptions. Special handling is required.
+
+
+> hvigor WARN: No signingConfig found for product default

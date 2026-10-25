@@ -67,12 +67,12 @@ Initial harness failures and final cleanup warnings are retained with hashes
 and explanations in [the correction record](browser-harness-corrections.json).
 No product implementation was changed to make those fixture assumptions pass.
 
-## Build boundary
+## Completed package and boundary
 
-This source checkpoint is prepared for a new build using the retained official
-API26 SDK and existing dependency cache. It does not relabel the previous
-`f2488597` / shared 5e55 HAP. The completed package's exact source, content checks
-and private retention are recorded separately after the build succeeds.
+The new unsigned package was subsequently built from source
+`775b494db1b888f63140afba5030a9177eb2400f` using the retained official SDK.
+[Completed compile, integrity checks, compiled UI and private readback](../harmony-775b494d-hap/README.md).
+The old `f2488597` / shared 5e55 HAP is preserved unchanged.
 No public binary upload, signing, production change, real model execution or
 Windows operation is authorized or performed by this source update.
 Device runtime, phone/NAS transfers and human acceptance remain unverified.

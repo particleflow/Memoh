@@ -1,19 +1,23 @@
 # Reproduction inputs and verified build sequence
 
-The current source pin is shared commit
-`68be06092a1ea85d961115aac404082982bdecf4`, including expert native RunID,
-persisted state and authorized history navigation. Existing phone login,
-attachment adapters and application identity remain unchanged.
-[Alignment checks](../docs/testing/harmony-unified-68be060/README.md).
-The source checkpoint precedes its new build; the f248 package below remains
-bound to 5e55 and is preserved unchanged.
+The current verified unsigned HAP is built from phone source
+`775b494db1b888f63140afba5030a9177eb2400f`, pinned to shared Web/SDK
+`68be06092a1ea85d961115aac404082982bdecf4`. It includes expert root RunID,
+persisted state and authorized history navigation, while retaining native login,
+attachment adapters, identity and permissions. The existing official API26
+compiler and integrity qualification both exited zero. The package is 1.0.7 /
+1000007, 37,019,091 bytes, SHA-256
+`aa509e7d561ee7a9e07076b0d735b8f71b66dfa4ccf3d868230dbf91d3050d6c`.
+It was saved privately and read back with matching bytes and identity.
+[Source alignment](../docs/testing/harmony-unified-68be060/README.md),
+[package evidence and remaining delivery](../docs/testing/harmony-775b494d-hap/README.md).
 
-The current verified unsigned HAP is built from
+The preserved previous unsigned HAP is built from
 `f2488597aba37ef8c3557cc3f156b78d870c82c9`, pinned to shared Web/SDK commit
 `5e55c45c85659f04b339b4df42aeff72966542a8`. The existing source sequence and
 retained official API26 SDK compiled and qualified the updated client with exit
 codes zero. It contains 797 Web resources and the 104-file native source
-snapshot. [Current package identity, checks and delivery boundary](../docs/testing/harmony-f248-hap/README.md).
+snapshot. [Previous package identity, checks and delivery boundary](../docs/testing/harmony-f248-hap/README.md).
 
 This package includes the reviewed notices, shared native task and Images
 controls, saved Provider state, original/scoped attachment adapters and phone
