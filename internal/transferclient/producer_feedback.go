@@ -184,7 +184,6 @@ func (q *DiskQueue) producerFeedback(ctx context.Context, cfg *HostConfig, plan 
 			} else {
 				local.State, local.Code, local.Retryable = "pending", "queued", true
 				local.Change = feedbackChange(closed)
-
 			}
 		}
 		report.Files = append(report.Files, local)
