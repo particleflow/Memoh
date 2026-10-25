@@ -9,9 +9,16 @@ There are no Web page differences from the already reviewed fa77 baseline.
 The generated SDK includes the fixed native Herdr API and optional producer
 locator; no existing phone consumer requires a new configuration component.
 All 43 phone adaptations and the test-only attachment adapter still apply.
-The only build-input changes are the complete-source lock and app version.
-Login, Bot/Agent observation, owning-Bot attachment saves and Windows-only private
-injection are unchanged. Public configuration remains empty.
+The initial alignment changed only the complete-source lock and app version.
+Its compiled-page regression then reproduced an inherited login-only service
+button remaining over the chat task action: Vue Router's programmatic navigation
+does not dispatch the `hashchange` event used by that button. The minimal repair
+uses the existing router's `afterEach` and current route to update its visibility;
+the configuration regression now checks login and logout visibility. This is a
+confirmed UI defect, not a native configuration problem. No new component,
+configuration schema or route is added. Login storage, Bot/Agent observation,
+owning-Bot attachment saves and Windows-only private injection are unchanged.
+Public configuration remains empty.
 
 ## Source and compatibility evidence
 

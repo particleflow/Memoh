@@ -73,6 +73,8 @@ try:
     assert all(not r['authorized'] for r in requests)
     checks['initialSetupDoesNotScheduleSessionReset']=True
     f.login(page);initial=f.fingerprint(page)
+    assert page.locator('#harmony-service-settings').is_hidden()
+    checks['routerTransitionsHideSettingsOverChatAndRestoreOnLogout']=True
     assert f.counts['login']==1
     assert all(r['host']=='alpha.example' for r in requests)
     checks['distributionAddressDoesNotDriveAPI']=True
@@ -97,7 +99,7 @@ try:
     f.login(page)
     assert any(r['host']=='beta.example' and r['authorized'] for r in requests[boundary:])
     checks['serviceSwitchDoesNotSendPreviousCredential']=True
-    f.logout(page);context.close();context,page=start(pw,Path(profile));page.wait_for_selector('#username')
+    f.logout(page);page.get_by_role('button',name='服务地址',exact=True).wait_for();context.close();context,page=start(pw,Path(profile));page.wait_for_selector('#username')
     assert page.evaluate("!localStorage.getItem('token')")
     checks['logoutSurvivesRestart']=True
     f.login(page);f.revoked=True;page.reload();page.wait_for_selector('#username');assert page.evaluate("!localStorage.getItem('token')")

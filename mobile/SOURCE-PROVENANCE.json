@@ -127,13 +127,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "438543c562a5a181d5812bd7bf04475f60af5f1c4bbce943c0be452026b3575a",
+      "sha256": "0a362e0724c81a2b1d78e9b2453434620aece0eccf8496d2532f33afb6ecb53a",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Follow-up after 84ca0e5: explicit HTTPS LAN validation and/or scoped native download contract and corresponding test imports; no automatic route switching or private source reconstruction.",
         "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
-        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
+        "Use the existing Vue Router afterEach/currentRoute to update the login-only service button; hashchange missed programmatic login and obscured the task action. No routing/configuration framework or storage change."
       ],
       "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5",
       "windowsInjectionBaseSHA256": "1a2b1dac9e08769dcd833c73c84712753604e9137cf92c47a7ed6212f9e8ca75"
@@ -369,13 +370,14 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_service_config_ui.py",
-      "sha256": "d7a4ea562c0fa340616f147ef1e92b331eefe82fdadc7038030c29393231f7a9",
+      "sha256": "189f2018b74db36c0e5d4c9e4b596afdc43122e7205a554b147d94dded5fdbb1",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "test-only explicit legacy fixture/browser parameters and ignored in-tree output paths",
         "Preserve unbound legacy state during setup, distinguish first configuration from service changes, and verify migration invariants without claiming an unperformed 1.0.6 upgrade.",
-        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded."
+        "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
+        "Assert the service address control is hidden after login and visible again after the existing logout flow; preserve existing migration and credential-isolation checks."
       ],
       "windowsInjectionBaseSHA256": "8847d57fc4bf57c41ec116a7210daa22622a1323a7db79c7864f7b3b296a915d"
     },

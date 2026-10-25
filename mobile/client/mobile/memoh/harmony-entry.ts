@@ -28,13 +28,14 @@ async function boot(config: ServiceConfig) {
     }
     await nativeCommand('client.configure', config.apiOrigin)
     await import('../main')
+    const { default: router } = await import('../router')
     // Login must also offer a way to correct an unavailable endpoint.
     const button = document.createElement('button')
     button.id = 'harmony-service-settings'; button.textContent = '服务地址'; button.type = 'button'
     button.onclick = editServiceConfig
     document.body.append(button)
-    const update = () => { button.hidden = !location.hash.includes('/login') }
-    window.addEventListener('hashchange', update); update()
+    const update = () => { button.hidden = router.currentRoute.value.name !== 'Login' }
+    router.afterEach(update); update()
   } catch {
     started = false
     form(config, '启动或本地配置读取失败。未连接服务，请检查配置后重试。')
