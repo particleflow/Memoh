@@ -48,6 +48,8 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.DELETE("/:id", h.Delete)
 	g.POST("/agenvo/discover", h.DiscoverAgenvo)
 	g.PUT("/:id/agenvo-agent", h.ConfigureAgenvoAgent)
+	g.GET("/:id/agenvo-endpoint", h.ReadAgenvoEndpoint)
+	g.PUT("/:id/agenvo-endpoint", h.ConfigureAgenvoEndpoint)
 	g.GET("/:id/admission", h.ReadAdmission)
 	g.PUT("/:id/admission", h.SetAdmission)
 }
@@ -189,6 +191,8 @@ func (h *UserRuntimeHandler) Delete(c echo.Context) error {
 
 func runtimeHTTPError(err error) error {
 	switch {
+	case errors.Is(err, agenvo.ErrEndpointConfigConflict):
+		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
 		return apperror.Wrap(apperror.CodeComputerAdmissionPaused, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionConflict):

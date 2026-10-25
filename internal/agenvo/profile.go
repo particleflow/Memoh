@@ -2,7 +2,6 @@ package agenvo
 
 import (
 	"context"
-	"encoding/json"
 
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
@@ -33,7 +32,13 @@ func (s *Service) ConfigureAgent(ctx context.Context, owner, id string, profile 
 	if _, err = s.store.OwnedHTTPMCPConnectionBot(ctx, owner, target.ConnectionID); err != nil {
 		return dbstore.UserRuntimeRecord{}, ErrForbidden
 	}
-	target.Agent = profile
-	raw, _ := json.Marshal(target)
+	var value any
+	if profile != (AgentProfile{}) {
+		value = profile
+	}
+	raw, err := replaceRegistrationField(row.ProviderConfig, "agent", value)
+	if err != nil {
+		return row, err
+	}
 	return store.ConfigureAgenvoRuntime(ctx, owner, id, row.ProviderConfig, raw)
 }

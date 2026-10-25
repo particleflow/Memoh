@@ -18721,6 +18721,110 @@
                 }
             }
         },
+        "/users/me/runtimes/{id}/agenvo-endpoint": {
+            "get": {
+                "description": "No native call. Configuration is not filesystem verification, host identity proof or stop authorization. An absent locator means unconfigured.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Read the owned endpoint location configuration",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing owned runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.EndpointConfiguration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Compare-and-swap the existing registration's owner-only program_path and host_root. Explicit empty locator clears configuration; null/omitted locator is invalid. Only an existing native read-only probe is issued. No program runs, process stops, workspace changes or credentials are created. Live admission pause blocks changes. Unknown responses require GET reconciliation, not host/task replay.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Configure an existing owned endpoint location",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing owned runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Expected configuration fingerprint and locator",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.ChangeEndpointConfiguration"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.EndpointConfiguration"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/users/me/runtimes/{id}/transfer-credential": {
             "get": {
                 "produces": [
@@ -20564,6 +20668,26 @@
                 }
             }
         },
+        "agenvo.ChangeEndpointConfiguration": {
+            "type": "object",
+            "required": [
+                "expected_configuration_fingerprint",
+                "locator"
+            ],
+            "properties": {
+                "expected_configuration_fingerprint": {
+                    "type": "string"
+                },
+                "locator": {
+                    "description": "A required object sets the locator. An explicit empty object clears it.",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/agenvo.EndpointLocator"
+                        }
+                    ]
+                }
+            }
+        },
         "agenvo.DiscoveredInstance": {
             "type": "object",
             "properties": {
@@ -20581,6 +20705,40 @@
                 },
                 "online": {
                     "type": "boolean"
+                }
+            }
+        },
+        "agenvo.EndpointConfiguration": {
+            "type": "object",
+            "properties": {
+                "configuration_fingerprint": {
+                    "type": "string"
+                },
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "locator": {
+                    "$ref": "#/definitions/agenvo.EndpointLocator"
+                },
+                "target_fingerprint": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.EndpointLocator": {
+            "type": "object",
+            "properties": {
+                "host_root": {
+                    "type": "string"
+                },
+                "program_path": {
+                    "type": "string"
                 }
             }
         },

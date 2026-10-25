@@ -465,12 +465,34 @@ export type AgenvoChangeAdmission = {
     request_id?: string;
 };
 
+export type AgenvoChangeEndpointConfiguration = {
+    expected_configuration_fingerprint: string;
+    /**
+     * A required object sets the locator. An explicit empty object clears it.
+     */
+    locator: AgenvoEndpointLocator;
+};
+
 export type AgenvoDiscoveredInstance = {
     device_id?: string;
     device_name?: string;
     instance_id?: string;
     name?: string;
     online?: boolean;
+};
+
+export type AgenvoEndpointConfiguration = {
+    configuration_fingerprint?: string;
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    locator?: AgenvoEndpointLocator;
+    target_fingerprint?: string;
+};
+
+export type AgenvoEndpointLocator = {
+    host_root?: string;
+    program_path?: string;
 };
 
 export type AgenvoReferenceObservation = {
@@ -19598,6 +19620,85 @@ export type PutUsersMeRuntimesByIdAgenvoAgentResponses = {
 };
 
 export type PutUsersMeRuntimesByIdAgenvoAgentResponse = PutUsersMeRuntimesByIdAgenvoAgentResponses[keyof PutUsersMeRuntimesByIdAgenvoAgentResponses];
+
+export type GetUsersMeRuntimesByIdAgenvoEndpointData = {
+    body?: never;
+    path: {
+        /**
+         * Existing owned runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/agenvo-endpoint';
+};
+
+export type GetUsersMeRuntimesByIdAgenvoEndpointErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdAgenvoEndpointError = GetUsersMeRuntimesByIdAgenvoEndpointErrors[keyof GetUsersMeRuntimesByIdAgenvoEndpointErrors];
+
+export type GetUsersMeRuntimesByIdAgenvoEndpointResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoEndpointConfiguration;
+};
+
+export type GetUsersMeRuntimesByIdAgenvoEndpointResponse = GetUsersMeRuntimesByIdAgenvoEndpointResponses[keyof GetUsersMeRuntimesByIdAgenvoEndpointResponses];
+
+export type PutUsersMeRuntimesByIdAgenvoEndpointData = {
+    /**
+     * Expected configuration fingerprint and locator
+     */
+    body: AgenvoChangeEndpointConfiguration;
+    path: {
+        /**
+         * Existing owned runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/agenvo-endpoint';
+};
+
+export type PutUsersMeRuntimesByIdAgenvoEndpointErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdAgenvoEndpointError = PutUsersMeRuntimesByIdAgenvoEndpointErrors[keyof PutUsersMeRuntimesByIdAgenvoEndpointErrors];
+
+export type PutUsersMeRuntimesByIdAgenvoEndpointResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoEndpointConfiguration;
+};
+
+export type PutUsersMeRuntimesByIdAgenvoEndpointResponse = PutUsersMeRuntimesByIdAgenvoEndpointResponses[keyof PutUsersMeRuntimesByIdAgenvoEndpointResponses];
 
 export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;

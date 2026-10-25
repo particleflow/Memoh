@@ -767,6 +767,19 @@ definitions:
       request_id:
         type: string
     type: object
+  agenvo.ChangeEndpointConfiguration:
+    properties:
+      expected_configuration_fingerprint:
+        type: string
+      locator:
+        allOf:
+        - $ref: '#/definitions/agenvo.EndpointLocator'
+        description: A required object sets the locator. An explicit empty object
+          clears it.
+    required:
+    - expected_configuration_fingerprint
+    - locator
+    type: object
   agenvo.DiscoveredInstance:
     properties:
       device_id:
@@ -779,6 +792,28 @@ definitions:
         type: string
       online:
         type: boolean
+    type: object
+  agenvo.EndpointConfiguration:
+    properties:
+      configuration_fingerprint:
+        type: string
+      connection_id:
+        type: string
+      device_id:
+        type: string
+      instance_id:
+        type: string
+      locator:
+        $ref: '#/definitions/agenvo.EndpointLocator'
+      target_fingerprint:
+        type: string
+    type: object
+  agenvo.EndpointLocator:
+    properties:
+      host_root:
+        type: string
+      program_path:
+        type: string
     type: object
   agenvo.ReferenceObservation:
     properties:
@@ -21039,6 +21074,81 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Configure Pi on an existing owned Agenvo computer
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/agenvo-endpoint:
+    get:
+      description: No native call. Configuration is not filesystem verification, host
+        identity proof or stop authorization. An absent locator means unconfigured.
+      parameters:
+      - description: Existing owned runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.EndpointConfiguration'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read the owned endpoint location configuration
+      tags:
+      - user-runtimes
+    put:
+      consumes:
+      - application/json
+      description: Compare-and-swap the existing registration's owner-only program_path
+        and host_root. Explicit empty locator clears configuration; null/omitted locator
+        is invalid. Only an existing native read-only probe is issued. No program
+        runs, process stops, workspace changes or credentials are created. Live admission
+        pause blocks changes. Unknown responses require GET reconciliation, not host/task
+        replay.
+      parameters:
+      - description: Existing owned runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Expected configuration fingerprint and locator
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.ChangeEndpointConfiguration'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.EndpointConfiguration'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Configure an existing owned endpoint location
       tags:
       - user-runtimes
   /users/me/runtimes/{id}/transfer-credential:
