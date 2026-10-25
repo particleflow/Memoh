@@ -737,17 +737,21 @@ func (s *Service) generateTriggerToken(userID string, durations ...time.Duration
 	return "Bearer " + signed, nil
 }
 
-func (s *Service) scheduleJob(ctx context.Context, schedule sqlc.Schedule) error {
+func (s *Service) scheduleJob(ctx context.Context, schedule sqlc.Schedule) error { //nolint:contextcheck // Each persisted fire starts from the service lifecycle, not its creator's run.
 	id := schedule.ID.String()
 	if id == "" {
 		return errors.New("schedule id missing")
 	}
+	// A fire is a new run, not a child of the request that registered it.
+	// Reuse the service lifetime, never the creator's tool identity or scope;
+	// runSchedule reloads the persisted owner/session before workspace admission.
+	fireCtx := s.lifecycleCtx
+	if fireCtx == nil {
+		fireCtx = context.Background()
+	}
 	fire := func() {
-		// Every context reachable here descends from the one that registered
-		// the schedule, on the Create path an HTTP request that finished long
-		// ago. A firing belongs to no request, so the unit gets its own request
-		// id and its own unlinked trace.
-		_ = job.Run(ctx, s.logger, "schedule.fire", job.Options{OwnRequestID: true}, func(runCtx context.Context) error {
+		// A firing gets its own request id and unlinked trace.
+		_ = job.Run(fireCtx, s.logger, "schedule.fire", job.Options{OwnRequestID: true}, func(runCtx context.Context) error {
 			runCtx, runCancel := context.WithCancel(runCtx)
 			defer runCancel()
 			return fireResult(runCtx, s.runSchedule(runCtx, toSchedule(schedule)))
@@ -761,10 +765,14 @@ func (s *Service) scheduleJob(ctx context.Context, schedule sqlc.Schedule) error
 	if err != nil {
 		return err
 	}
-	entryID := s.cron.Schedule(newLocationSchedule(sched, loc), cron.FuncJob(fire))
 	s.mu.Lock()
+	defer s.mu.Unlock()
+	// Re-registering the same schedule replaces its tracked cron entry.
+	if previous, exists := s.jobs[id]; exists {
+		s.cron.Remove(previous)
+	}
+	entryID := s.cron.Schedule(newLocationSchedule(sched, loc), cron.FuncJob(fire))
 	s.jobs[id] = entryID
-	s.mu.Unlock()
 	return nil
 }
 
