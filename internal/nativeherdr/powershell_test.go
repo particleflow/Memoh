@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 	"unicode/utf16"
@@ -111,6 +112,87 @@ func logPowerShellFixtureTrace(t *testing.T, name, path string) {
 		return
 	}
 	t.Logf("%s: %s", name, raw[:min(len(raw), 8192)])
+}
+
+// Each probe has its own synthetic profile/cache and no stdin or child process.
+// They distinguish cmdlet discovery, explicit system-module import and the OS
+// roots that Runtime preserves but the original fixture environment omitted.
+func diagnosePowerShellJSON(t *testing.T, shell string, env []string) {
+	t.Helper()
+	const parse = "$p=ConvertFrom-Json -InputObject '{\"fixture\":\"synthetic \\u4e2d\\u6587\",\"lines\":\"first\\nsecond\"}'"
+	var probes sync.WaitGroup
+	for _, mode := range []string{"isolated-autoload", "isolated-system-module", "runtime-roots-autoload"} {
+		root := t.TempDir()
+		probeEnv := append([]string(nil), env...)
+		for i, assignment := range probeEnv {
+			key, _, _ := strings.Cut(assignment, "=")
+			switch strings.ToUpper(key) {
+			case "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "XDG_CONFIG_HOME", "XDG_CACHE_HOME":
+				probeEnv[i] = key + "=" + root
+			}
+		}
+		if mode == "runtime-roots-autoload" {
+			// Match additional inheritedExactNames in packages/runtime/src/core/guards.ts.
+			// PSModulePath is intentionally absent in both Runtime and this fixture.
+			for _, key := range []string{"SYSTEMDRIVE", "COMSPEC", "PROGRAMDATA", "HOMEDRIVE", "HOMEPATH"} {
+				if value, ok := os.LookupEnv(key); ok {
+					probeEnv = append(probeEnv, key+"="+value)
+				}
+			}
+		}
+		script := strings.Join([]string{
+			"function Write-FixtureStage([string]$stage) { [IO.File]::AppendAllText($env:MEMOH_POWERSHELL_TRACE, $stage+[Environment]::NewLine) }",
+			"$ErrorActionPreference='Stop'",
+			"$ProgressPreference='SilentlyContinue'",
+			"try {",
+			"  Write-FixtureStage 'probe-enter'",
+			"  Write-FixtureStage ('system-roots pshome='+$PSHOME+' systemroot='+$env:SystemRoot)",
+			"  $manifest=[IO.Path]::Combine($PSHOME,'Modules','Microsoft.PowerShell.Utility','Microsoft.PowerShell.Utility.psd1')",
+			"  Write-FixtureStage ('system-utility-manifest-exists='+[IO.File]::Exists($manifest))",
+			"  if ([IO.File]::Exists($manifest)) {",
+			"    $version=[regex]::Match([IO.File]::ReadAllText($manifest),'(?im)^\\s*ModuleVersion\\s*=\\D*(\\d+(?:\\.\\d+)*)').Groups[1].Value",
+			"    Write-FixtureStage ('system-utility-manifest-version='+$version)",
+			"  }",
+			"  Write-FixtureStage 'before-parse'",
+			"  " + parse,
+			"  Write-FixtureStage 'constant-parsed'",
+			"  if ($p.fixture -ne 'synthetic 中文' -or $p.lines -ne ('first'+[char]10+'second')) { throw 'synthetic JSON mismatch' }",
+			"  Write-FixtureStage 'constant-asserted'",
+			"  exit 0",
+			"} catch {",
+			"  Write-FixtureStage ('probe-error-type='+$_.Exception.GetType().FullName)",
+			"  exit 125",
+			"}",
+		}, "\n")
+		if mode == "isolated-system-module" {
+			script = strings.Replace(script, parse, strings.Join([]string{
+				"Write-FixtureStage 'before-import'",
+				"  Microsoft.PowerShell.Core\\Import-Module -Name $manifest -ErrorAction Stop",
+				"  Write-FixtureStage 'system-module-imported'",
+				"  " + strings.Replace(parse, "ConvertFrom-Json", "Microsoft.PowerShell.Utility\\ConvertFrom-Json", 1),
+			}, "\n"), 1)
+		}
+		probes.Add(1)
+		go func() {
+			defer probes.Done()
+			units := utf16.Encode([]rune(script))
+			raw := make([]byte, len(units)*2)
+			for i, unit := range units {
+				binary.LittleEndian.PutUint16(raw[i*2:], unit)
+			}
+			ctx, cancel := context.WithTimeout(t.Context(), 20*time.Second)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, shell, "-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand", base64.StdEncoding.EncodeToString(raw)) //nolint:gosec // Constant JSON/system module probe only; no stdin, child or real Herdr command.
+			trace := filepath.Join(root, "json-probe-stages.txt")
+			cmd.Env = append(append([]string(nil), probeEnv...), "MEMOH_POWERSHELL_TRACE="+trace)
+			var stdout, stderr bytes.Buffer
+			cmd.Stdout, cmd.Stderr = &stdout, &stderr
+			err := cmd.Run()
+			t.Logf("JSON probe %s: process_error=%v context_error=%v stdout={%s} stderr={%s}", mode, err, ctx.Err(), powerShellOutputDiagnostic(stdout.Bytes()), powerShellOutputDiagnostic(stderr.Bytes()))
+			logPowerShellFixtureTrace(t, "JSON probe "+mode, trace)
+		}()
+	}
+	probes.Wait()
 }
 
 // A failed production run gets one diagnostic replay of the SYNTHETIC child.
@@ -290,6 +372,7 @@ func TestPowerShellCLITransportPreservesChildBytesAndExit(t *testing.T) {
 				if !diagnosed {
 					diagnosed = true
 					diagnosePowerShellFixture(t, shell, modeEnv, payload, t.TempDir())
+					diagnosePowerShellJSON(t, shell, modeEnv)
 				}
 				t.Fatal("PowerShell did not drain concurrent child output before timeout", ctx.Err())
 			}
