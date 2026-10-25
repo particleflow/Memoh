@@ -30,7 +30,10 @@ jobs:
   windows:
     name: Windows NTFS isolated fixtures
     runs-on: windows-2025
-    timeout-minutes: 15
+    # Source contracts and the packaged native replay both perform real NTFS
+    # flushes. A slow runner used 168s for the unchanged progress case alone;
+    # retain bounded five-minute processes and allow both complete passes.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,12 +43,16 @@ jobs:
         with:
           go-version-file: go.mod
       # Filesystem durability/catalog tests can exceed one package's aggregate
-      # five-minute budget. These complementary selectors retain every test;
-      # the per-process timeout and the overall job budget remain unchanged.
-      - name: Execute transfer contracts except Windows-prefixed cases
-        run: go test -count=1 -v -timeout=5m -skip '^TestWindows' ./internal/transferclient
-      - name: Execute Windows-prefixed transfer contracts
-        run: go test -count=1 -v -timeout=5m -run '^TestWindows' ./internal/transferclient
+      # five-minute budget. These disjoint selectors retain every test once,
+      # including both the shared progress test and its native wrapper.
+      - name: Execute transfer contracts except Windows and journal progress
+        run: go test -count=1 -v -timeout=5m -skip '^Test(Windows|ActiveJournalBoundedAcrossProgress$)' ./internal/transferclient
+      - name: Execute active journal progress contract
+        run: go test -count=1 -v -timeout=5m -run '^TestActiveJournalBoundedAcrossProgress$' ./internal/transferclient
+      - name: Execute Windows active journal contracts
+        run: go test -count=1 -v -timeout=5m -run '^TestWindowsNativeActiveJournal$' ./internal/transferclient
+      - name: Execute remaining Windows-prefixed transfer contracts
+        run: go test -count=1 -v -timeout=5m -run '^TestWindows' -skip '^TestWindowsNativeActiveJournal$' ./internal/transferclient
       - name: Execute complete CLI contracts
         run: go test -count=1 -v -timeout=5m ./cmd/transferqueue
       - name: Execute native publication with PostgreSQL
