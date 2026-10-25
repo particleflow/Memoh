@@ -37,7 +37,7 @@ The staged aggregate passed (exit 0): selected Web ESLint, Go lint and the four 
 
 ## Reviewable evidence and initial failures
 
-Selected logs are included verbatim with hashes/byte sizes in `evidence.json`; no private credentials/configuration, raw server logs or DB snapshots are included. `browser.mjs` is the exercised runner with filesystem/URL inputs parameterized; seed synthetic sessions with real parent relationships and provide a fixture JSON containing `bot`, `root`, `child`, `grandchild`, `title`. Reusable database fixtures are also committed in the Go integration test.
+Selected logs are included with hashes/byte sizes in `evidence.json`. Five logs have only trailing horizontal whitespace and excess blank EOF lines normalized; per-file original hashes and exact rules are recorded (raw bytes remain in product commit `73a71323` and the private scratch evidence). Other logs are verbatim; no private credentials/configuration, raw server logs or DB snapshots are included. `browser.mjs` is the exercised runner with filesystem/URL inputs parameterized; seed synthetic sessions with real parent relationships and provide a fixture JSON containing `bot`, `root`, `child`, `grandchild`, `title`. Reusable database fixtures are also committed in the Go integration test.
 
 Initial failures are retained: the new PG test first used the wrong queries adapter; the new UI test's substring assertion matched `grandchild-session`; typecheck caught optional array accesses; browser selectors matched a child ID in both title and parent reference, then expected the wrong capitalization of the existing unknown-state label. These test/harness defects were corrected without changing product semantics.
 

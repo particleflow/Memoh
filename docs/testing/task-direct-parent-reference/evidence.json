@@ -1,5 +1,5 @@
 {
-  "logs": "Unmodified selected stdout/stderr logs; no private server log/config/token or DB snapshot included. Browser runner parameterized for portability; screenshots contain only synthetic data.",
+  "logs": "Selected stdout/stderr logs; records with processing specify whitespace-only publication normalization and retain original hashes. All other logs are verbatim. No private server log/config/token or DB snapshot included. Browser runner parameterized; screenshots synthetic.",
   "files": [
     {
       "file": "service.log",
@@ -18,18 +18,27 @@
     },
     {
       "file": "ui.log",
-      "sha256": "57559bc6e57ae6d16d3f9f3c82fc7c83335da5a34de456a4692ae4a4756527ca",
-      "bytes": 339
+      "sha256": "78ee32986aa1cdfb2d73e9c3b987c779de40ada3a180189496d7a14b5fee5694",
+      "bytes": 338,
+      "original_sha256": "57559bc6e57ae6d16d3f9f3c82fc7c83335da5a34de456a4692ae4a4756527ca",
+      "original_bytes": 339,
+      "processing": "Strip trailing horizontal whitespace and excess blank EOF lines only. Original bytes retained locally and in product commit 73a71323."
     },
     {
       "file": "ui-final-fixture.log",
-      "sha256": "721bc7a1ab9ad9225853e616bb23b10c2ce706963f2063c6b08513fda5bdf7da",
-      "bytes": 317
+      "sha256": "d7f5535a81c88e88858e265e5664126c07fccdaf5dbe00bdc5a7604517f4d252",
+      "bytes": 316,
+      "original_sha256": "721bc7a1ab9ad9225853e616bb23b10c2ce706963f2063c6b08513fda5bdf7da",
+      "original_bytes": 317,
+      "processing": "Strip trailing horizontal whitespace and excess blank EOF lines only. Original bytes retained locally and in product commit 73a71323."
     },
     {
       "file": "web-types.log",
-      "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
-      "bytes": 116
+      "sha256": "d7bb68855b8c6825aa409b3a76954d32f634fc10ef28762827a3c7fe9707dfb2",
+      "bytes": 115,
+      "original_sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+      "original_bytes": 116,
+      "processing": "Strip trailing horizontal whitespace and excess blank EOF lines only. Original bytes retained locally and in product commit 73a71323."
     },
     {
       "file": "sdk-types.log",
@@ -38,8 +47,11 @@
     },
     {
       "file": "web-build.log",
-      "sha256": "bb9383c8bb841946e202eeae11d556b9542635c3ba18ac34be1c58bc0a699532",
-      "bytes": 76364
+      "sha256": "b3586a2bc299ede88fae28e6c4dd1b03369cc074e11b7d06352a191c0c9dc670",
+      "bytes": 76363,
+      "original_sha256": "bb9383c8bb841946e202eeae11d556b9542635c3ba18ac34be1c58bc0a699532",
+      "original_bytes": 76364,
+      "processing": "Strip trailing horizontal whitespace and excess blank EOF lines only. Original bytes retained locally and in product commit 73a71323."
     },
     {
       "file": "runtime.log",
@@ -58,8 +70,11 @@
     },
     {
       "file": "ui-initial.log",
-      "sha256": "b1c521dcca1f6363655be4d67af50ad9b49fafdc886fad96902d3c7f338b0df9",
-      "bytes": 1968
+      "sha256": "e42dd2978948acf76c9b3d4396b8123dac411f6e03216dc75fed2c088c88b548",
+      "bytes": 1967,
+      "original_sha256": "b1c521dcca1f6363655be4d67af50ad9b49fafdc886fad96902d3c7f338b0df9",
+      "original_bytes": 1968,
+      "processing": "Strip trailing horizontal whitespace and excess blank EOF lines only. Original bytes retained locally and in product commit 73a71323."
     },
     {
       "file": "web-types-initial.log",
