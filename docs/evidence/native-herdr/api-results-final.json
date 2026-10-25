@@ -15,14 +15,31 @@
       "provider": "synthetic",
       "model": "test",
       "config_dir": "C:\\Memoh\\pi"
+    },
+    "producer": {
+      "program_path": "C:\\Memoh\\producer\\memoh-producer.exe",
+      "config_dir": "C:\\Memoh\\producer-config",
+      "state_dir": "C:\\Memoh\\producer-state"
     }
+  },
+  "identity_without_producer": {
+    "connection_id": "10000000-0000-4000-8000-000000000001",
+    "device_id": "10000000-0000-4000-8000-000000000001",
+    "instance_id": "herdr-main",
+    "session": "default",
+    "target_fingerprint": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396"
   },
   "identity_before_restart": {
     "connection_id": "10000000-0000-4000-8000-000000000001",
     "device_id": "10000000-0000-4000-8000-000000000001",
     "instance_id": "herdr-main",
     "session": "default",
-    "target_fingerprint": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396"
+    "target_fingerprint": "205c633d7fc58efde39d971dbe555ed7d75234463dd01993ce3ebf9d03f8380c"
+  },
+  "producer_before_restart": {
+    "state_dir": "C:\\Memoh\\producer-state",
+    "config_dir": "C:\\Memoh\\producer-config",
+    "program_path": "C:\\Memoh\\producer\\memoh-producer.exe"
   },
   "checks": [
     {
@@ -48,6 +65,10 @@
     },
     {
       "check": "native identity survives process restart unchanged",
+      "pass": true
+    },
+    {
+      "check": "all three producer locator fields survive process restart before profile writes",
       "pass": true
     },
     {
@@ -93,7 +114,7 @@
       "code": "http.forbidden"
     },
     {
-      "check": "owner native profile configured",
+      "check": "owner profile without optional producer remains legal",
       "status": 200,
       "expected": 200,
       "pass": true,
@@ -101,6 +122,87 @@
     },
     {
       "check": "profile response omits credential",
+      "pass": true
+    },
+    {
+      "check": "complete producer locator configured",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "producer locator changes target fingerprint",
+      "pass": true
+    },
+    {
+      "check": "all three producer locator fields stored together",
+      "pass": true
+    },
+    {
+      "check": "partial producer missing program rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "partial producer missing program leaves entire selected profile row unchanged",
+      "pass": true
+    },
+    {
+      "check": "partial producer missing config rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "partial producer missing config leaves entire selected profile row unchanged",
+      "pass": true
+    },
+    {
+      "check": "partial producer missing state rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "partial producer missing state leaves entire selected profile row unchanged",
+      "pass": true
+    },
+    {
+      "check": "producer forward slash path rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "producer forward slash path leaves entire selected profile row unchanged",
+      "pass": true
+    },
+    {
+      "check": "producer trailing separator path rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "producer trailing separator path leaves entire selected profile row unchanged",
+      "pass": true
+    },
+    {
+      "check": "producer repeated separator path rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "producer repeated separator path leaves entire selected profile row unchanged",
       "pass": true
     },
     {
@@ -164,7 +266,7 @@
           "device_id": "10000000-0000-4000-8000-000000000001",
           "instance_id": "herdr-main",
           "session": "default",
-          "target_fingerprint": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396"
+          "target_fingerprint": "205c633d7fc58efde39d971dbe555ed7d75234463dd01993ce3ebf9d03f8380c"
         }
       }
     },

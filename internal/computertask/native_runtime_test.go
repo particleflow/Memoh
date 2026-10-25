@@ -48,6 +48,7 @@ func newNativeTaskFixture(t *testing.T) (*nativeTaskFixture, *Service, context.C
 		binding: toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "native-first-run"},
 		profile: agenvo.NativeHerdrProfile{InstanceID: "herdr-native", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}},
 	}
+	f.profile.Producer = agenvo.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
 	raw, err := json.Marshal(map[string]any{"herdr": f.profile})
 	if err != nil {
 		t.Fatal(err)
@@ -252,6 +253,18 @@ func TestNativeRuntimeTaskRechecksSelectedPCPermissionAndFingerprint(t *testing.
 				t.Fatal("denial reached native Runtime")
 			}
 		})
+	}
+}
+
+func TestNativeRuntimeArtifactRequiresProducerLocatorBeforeClaim(t *testing.T) {
+	f, service, ctx := newNativeTaskFixture(t)
+	f.profile.Producer = agenvo.ProducerLocator{}
+	mount := f.store.mounts[f.binding.TargetID]
+	mount.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": f.profile})
+	f.store.mounts[f.binding.TargetID] = mount
+	_, err := service.submit(ctx, f.binding, Submit{Kind: "herdr_pi_task", Task: "write result", Artifact: &deliverymeta.Artifact{SourceRef: "result", Mime: "text/plain"}})
+	if !errors.Is(err, agenvo.ErrUnsupported) || len(f.store.records) != 0 || len(f.batch.calls) != 0 {
+		t.Fatal("missing producer location claimed or dispatched work", err)
 	}
 }
 

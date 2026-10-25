@@ -1,0 +1,6 @@
+=== RUN   TestNativeGeneratedCompletionRealServerAndPinnedProducer
+    native_producer_cli_integration_test.go:51: restarted collector did not recover original delivery map[state:[34 105 100 108 101 34]]
+--- FAIL: TestNativeGeneratedCompletionRealServerAndPinnedProducer (12.44s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/db	12.726s
+FAIL

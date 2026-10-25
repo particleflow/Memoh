@@ -22,6 +22,11 @@ Do not infer Windows routing from the word “native.” The selected Bot mount 
   "bash_path": "C:\\Program Files\\Git\\bin\\bash.exe",
   "herdr_cli": "C:\\Memoh\\herdr\\herdr.exe",
   "herdr_config_root": "C:\\Memoh\\config\\herdr",
+  "producer": {
+    "program_path": "C:\\Memoh\\bin\\transferqueue.exe",
+    "config_dir": "C:\\Memoh\\producer\\native-config",
+    "state_dir": "C:\\Memoh\\producer\\native-state"
+  },
   "agent": {
     "execution_mode": "pi-json-v1",
     "provider": "deployment-provider",
@@ -32,6 +37,10 @@ Do not infer Windows routing from the word “native.” The selected Bot mount 
 ```
 
 These example paths and names are not discovered production settings. `agent` is optional; without it only `foreground_bash` is advertised. Native Agent tasks require the existing `pi-json-v1` protocol. `.cmd` wrappers, relative program/config paths and legacy TUI startup are not supported. `herdr_config_root` must end in `herdr`, matching the official CLI's XDG directory convention. The existing Agent `path` override is optional. Credentials must remain in the existing host-owned protected configuration, never in this profile, headers or model arguments.
+
+`producer` is optional for tasks without file declarations, and required before a native task with declared files can be claimed. It references the existing finite producer EXE and existing `HERDR_PLUGIN_CONFIG_DIR` / `HERDR_PLUGIN_STATE_DIR` pair. All three values are required together, use canonical local Windows paths with backslashes and no redundant/trailing separator, and are pinned by the existing target fingerprint. The existing producer configuration's `source_root` must match the task work directory. No new directory, profile manager, queue or credential is created by this configuration. Updating these references cannot silently redirect an old task.
+
+On native task completion, and on a permitted bounded delivery wakeup, Memoh invokes that exact EXE with `-action collect-result` and explicitly sets both directory variables for that process. It does not invoke the retired `herdr plugin action` hook, inherit its directory pair, or substitute `advance-results` for first registration. Agenvo tasks retain their existing plugin hook.
 
 The returned Runtime DTO and owner Runtime list expose optional `native_herdr = {connection_id, device_id, instance_id, session, target_fingerprint}` for a valid configured profile, including while offline. The first two fields both equal the DTO's `id`; the fingerprint identifies the current full profile. This is a read-only binding for host/transfer consistency checks, not a third selector or a credential. Bot task requests continue to use their existing mount `target_id`. Invalid or unconfigured profiles and Agenvo records omit this native binding.
 
@@ -55,6 +64,8 @@ Runtime authentication (`mrk_...`) and file authentication (`mft_...`) remain se
 File authentication revalidates the current owner, team, activated/non-revoked Runtime, credential and instance. The delivery transaction then verifies the same operation, original run/attempt/generation, current grant, target fingerprint and authenticated device triple before committing a NAS reference. An owner configuration change does not rewrite old task evidence.
 
 Old Agenvo registrations, operation identities, file credentials and HostBinding values are not converted or accepted as the new native identity. HostBinding is still the local transfer configuration binding, not Runtime authentication. The host/transfer integration must explicitly select the approved native credential reference and retain or isolate old queue entries under their original identity. Unknown old work is queried in place and is never re-enqueued under a new selector. Host-side transfer 0.10.1 configuration and queue-isolation acceptance remain separate from the server mapping implemented here.
+
+An unknown producer acknowledgement is not permission to replay Pi or create a new upload identity. The existing collector can be invoked again with the same pinned directory pair: its durable journal, original delivery ID and unknown-create fence govern recovery. This can repeat a finite collector process; it does not imply a second business invocation or upload Create. Matching non-retryable feedback suppresses further automatic wakeups. CLI output and process exit remain advisory until the NAS ledger contains a committed reference.
 
 ## Task and result contract
 

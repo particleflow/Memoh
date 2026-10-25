@@ -1,0 +1,5 @@
+=== RUN   TestNativeGeneratedCompletionRealServerAndPinnedProducer
+    native_producer_cli_integration_test.go:51: generated completion -> real pinned producer -> Server/PG committed: bytes=45 Pi=1 Create=1 Commit=1 Resolve=1; collector killed after durable NAS commit; three generated wakes preserved original identity/receipt/reference; source and config intact; old directory pair byte-identical; legacy plugin calls=0
+--- PASS: TestNativeGeneratedCompletionRealServerAndPinnedProducer (8.27s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	9.346s

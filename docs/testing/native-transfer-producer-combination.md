@@ -4,7 +4,9 @@ This is an isolated Linux protocol integration test, not a production deployment
 or Windows native host acceptance. No product, Agent, credential purpose, queue,
 protocol, configuration root or Windows endpoint code changes are included.
 
-## Fixed sources
+## Original verification on 2030c2d5
+
+### Fixed sources
 
 - Server: `2030c2d522695f52a227f12421800fe075760813` (PR84, native migration 0176).
 - CLI source checkout: `c50342868f99cfb5f78f1f7724d0272bf43906c7` (PR77).
@@ -85,8 +87,8 @@ the source to `internal/agenvo/native_completion_hook_test.go` on `2030c2d5` and
 running `go test -v -count=1 -timeout=1m -run
 '^TestNativeCompletionRegistersWithoutLegacyPlugin$' ./internal/agenvo`.
 
-The native source owner must fix the two existing collection hooks and provide
-the fixed executable/config/state binding. Only then can a combined test start
+On the original 2030c2d5 source, the native source owner still needed to fix the two existing collection hooks and provide
+the fixed executable/config/state binding. The follow-up below now verifies the fixed generator. A combined test must start
 from a newly produced result through that actual entry point. A pre-enqueued job
 plus `advance-results` is insufficient to close this requirement.
 
@@ -115,3 +117,73 @@ was performed. No CI run is claimed for this standalone evidence branch.
 - `completion-hook-red.log`: SHA-256 `03449c4350d295851a05b8e92c74cbf5d8bd73a4cc168266c538b1ff4e9c3ba8`
 - `first-fixture-failure.log`: SHA-256 `e94ec65f7a5c9f18ba3d036ee24f28cde050d5439b9a787bb2eec2ba9082103d`
 - `native_completion_hook_test.go.txt`: SHA-256 `ee542f9798f0b8292471e1a14c72739018570cf80e96c398f2f582ee712fd3db`
+
+## Follow-up: generated native completion and real NAS commit
+
+Server/generator source is now
+`03e4fb6220a4b9f13f2b642e8dd3acaca7545a48`; the CLI remains separately pinned to
+`c50342868f99cfb5f78f1f7724d0272bf43906c7` / unchanged 0.10.1 product blobs.
+No producer or server product code was changed by this verification delta.
+The native source's fixed collector call is exercised directly.
+
+`TestNativeGeneratedCompletionRealServerAndPinnedProducer` reuses the existing
+real Server/PG fixture. A test-binary entry point calls the actual private
+`batchScript` and `nativeProducerCollectCommand` functions, so the integration
+test does not recreate their command-generation logic. The real generated Bash
+script runs a synthetic Pi that writes 45 source bytes. The production completion
+closure writes the context and closed manifest; its native hook invokes the
+existing production `collect-result`. The test neither writes that new manifest
+nor manually admits/enqueues the new result. The unrelated retained legacy queue
+is deliberately seeded before execution solely to check isolation.
+
+The Linux shim checks the exact registered Windows program/config/state strings,
+fixed `-action collect-result` arguments and then maps only those locations to
+test-owned Linux paths. Ambient config/state point to the retired legacy pair;
+the generated command must override them. To keep local path hashing coherent,
+the generator fixture uses its Linux source path for WorkDir/RootHash, as the
+native source's existing Linux test does. This does not claim Windows path
+resolution, NTFS validation, or a real Runtime transport invocation.
+
+The real HTTP wrapper waits until PostgreSQL says committed, then holds the
+acknowledgement. The test kills only the actual producer child process; it does
+not kill Pi, the NAS server or a user process. The queue is explicitly checked as
+`associated:false`, `association_state:in_flight`. Three subsequent freshly
+spawned generated wakes resolve that original job. Consumed manifests are not
+recreated. A later idle wake is followed by a durable inspect; idle alone is
+never treated as proof of delivery.
+
+Verified final assertions:
+
+- Pi executes once; duplicate original launch is rejected by the existing attempt.
+- Create=1, Commit=1, Resolve=1; original operation/run/target fingerprint stays
+  completed, and the synthetic Bot still has exactly one business operation.
+- All original PG entry bytes, including receipt/reference proof, stay identical
+  after recovery. NAS bytes/full hash match the generated source.
+- Original source and selected config remain intact; every old configuration,
+  queue and source byte stays unchanged; legacy Herdr hook calls=0.
+- The first generated collector plus three generated recovery wakes are counted;
+  no second queue, admission implementation, HostFS delivery or task ID is added.
+
+[Final raw output](evidence/native-transfer-producer/generated-completion-accepted.log)
+has one PASS, zero FAIL/SKIP, 9.346s including race instrumentation (body 8.27s).
+The [first test expectation failure](evidence/native-transfer-producer/generated-completion-first-expectation.log)
+is retained: it expected each no-manifest wake to return associated status instead
+of allowing idle and proving the original association through inspect. Only the
+test assertion was corrected; no product change or manifest replay was used.
+
+```sh
+# Same isolated PostgreSQL and fixed producer source as above.
+go test -v -race -tags=integration -count=1 -timeout=3m \
+  -run '^TestNativeGeneratedCompletionRealServerAndPinnedProducer$' ./internal/db
+```
+
+The earlier red completion-hook seam is closed in this Linux combined sample.
+The prior download protocol and 1 GiB Windows byte evidence are reused, not rerun
+or relabeled. Real Windows native-host/Runtime/NTFS combination, system-trusted
+EXE TLS and actual PC/NAS acceptance remain outside this run. This branch records
+local integration/lint evidence; it has no independent CI or deployment claim.
+
+- `generated-completion-accepted.log` SHA-256: `fd920278627b95499801fe65dadc6ad8bf72a33a125cc2a30946b444966ebeb5`
+- `generated-completion-first-expectation.log` SHA-256: `adb875266a655d12608aa6ffd4f354568ab74f12ed2939cedb4a0c634819c4a1`
+
+The unchanged-mode branch of the reused fixture also passed its targeted race regression: [raw output](evidence/native-transfer-producer/original-helper-regression.log), one PASS, zero FAIL/SKIP, 6.793s. SHA-256 `bc8dee7462a198d3c21c480a0de14f8a66b07ed0affb23af1129b3c43d3c3013`. Incremental integration-tag lint for `internal/db` and `internal/agenvo`, and `git diff --check`, passed. No broad byte/stress suite was rerun.

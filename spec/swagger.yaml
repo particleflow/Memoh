@@ -827,6 +827,8 @@ definitions:
         type: string
       instance_id:
         type: string
+      producer:
+        $ref: '#/definitions/agenvo.ProducerLocator'
       session:
         type: string
       work_dir:
@@ -838,6 +840,19 @@ definitions:
     - instance_id
     - session
     - work_dir
+    type: object
+  agenvo.ProducerLocator:
+    properties:
+      config_dir:
+        type: string
+      program_path:
+        type: string
+      state_dir:
+        type: string
+    required:
+    - config_dir
+    - program_path
+    - state_dir
     type: object
   agenvo.ReferenceObservation:
     properties:
@@ -874,6 +889,8 @@ definitions:
         type: string
       native_runtime_id:
         type: string
+      producer:
+        $ref: '#/definitions/agenvo.ProducerLocator'
       session:
         type: string
       work_dir:

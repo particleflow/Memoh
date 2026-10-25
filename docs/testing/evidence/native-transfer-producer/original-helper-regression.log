@@ -1,0 +1,4 @@
+=== RUN   TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit
+--- PASS: TestNativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit (5.72s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	6.793s
