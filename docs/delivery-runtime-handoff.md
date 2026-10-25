@@ -114,6 +114,76 @@ rejection of another tuple or execution fingerprint. Its transaction/media are
 synthetic; the concrete native provider registration, SQL authorization and
 Runtime connection are **not** exercised or claimed complete.
 
+### Local profile locator contract (existing CLI interface)
+
+The CLI has no `--config`/`--state` flags. It already accepts and freezes the
+pair `HERDR_PLUGIN_CONFIG_DIR` / `HERDR_PLUGIN_STATE_DIR` at invocation start.
+Use that existing interface; no new CLI flag, active-profile registry, queue
+implementation or service is needed to address separate profile directories.
+
+The unified host's existing locator owns the base pair `C`, `S`. Legacy/default
+selection passes exactly `C`, `S`, retaining the current paths and file bytes.
+For a new verified principal, the file component's path convention is:
+
+```text
+key = lowercase hex SHA256(UTF8(provider + NUL + connection_id + NUL
+                             + device_id + NUL + instance_id))
+HERDR_PLUGIN_CONFIG_DIR = resolve(C, "profiles", key)
+HERDR_PLUGIN_STATE_DIR  = resolve(S, "profiles", key)
+```
+
+The four values come from the existing verified registration, not model input or
+a second identity registry. Provider and UUID values use the registration's
+canonical representation; instance bytes are exact UTF-8, without trimming or
+case/Unicode normalization. Empty fields or embedded NUL are invalid. For the
+agreed native projection both IDs are the registered runtime UUID. Credential
+ID/secret, token rotation, connection epoch, Bot mount, attempt and generation
+do not enter the storage key. This is a local directory key, not a NAS selector
+or authority. The host must derive both paths together in its one locator,
+resolve relative layout components there, and pass canonical absolute paths;
+the CLI does not resolve relative paths against cwd or fall back to another root.
+
+The existing private local directory/NTFS, owner, no-link and root-identity
+checks apply unchanged. Profile directories must exist before invocation; this
+component does not change ACLs or provision credentials. Each config directory
+owns its own `transfer.json`, `device.credential`, optional network policy and
+legacy settings. Each state directory owns its own unchanged `deliveries-v1`
+locator, journals, history, locks and publication objects. Identical NAS origin
+or HostBinding does not permit exchanging those state directories. A common
+`source_root` may reference the same approved originals; this does not copy,
+delete or grant either principal another task's metadata or receipts.
+
+**Single selected profile is a host lifecycle obligation, not an existing CLI
+global lock.** The host's existing single-instance owner must stop accepting
+old-profile wake/admission events, finish/classify its in-flight finite command,
+then change the selected pair. Queue worker/job locks protect a queue, not two
+different profiles. Keep the old pair untouched and do not schedule it until
+explicitly selected again. Startup/network events only summarize/advance the
+selected queue; they never re-enqueue or collect old work. Result admissions
+must retain the original task's pinned profile and bounded closed metadata;
+do not indiscriminately collect all old manifests from a shared source root.
+
+There is one remaining caller integration gap: the legacy envelope in
+`internal/agenvo/pi_batch_producer.go` calls unprofiled
+`herdr plugin action invoke collect-result --plugin memoh.delivery`. Herdr's
+[action invocation](https://github.com/herdrdev/herdr/blob/5bd900d88c80d95f5b145397e45bbeea398b8165/src/app/api/plugins/mod.rs#L177)
+uses its [derived plugin path environment](https://github.com/herdrdev/herdr/blob/5bd900d88c80d95f5b145397e45bbeea398b8165/src/app/api/plugins/env.rs#L15);
+that pinned action has no arbitrary environment override. The native host/source owner
+must route its completion through the existing finite CLI with the pinned pair
+and gate the inactive legacy hook (using the existing host/plugin lifecycle).
+Changing a global pointer or assuming that action inherits new profile paths
+is not a supported solution. No such host/hook change is claimed by this patch.
+
+`TestCLIPathSelectedProfileIsolation` uses fresh real CLI processes, synthetic
+credentials and a TLS endpoint returning 503. Two profiles deliberately share
+the same transfer.json bytes, logical delivery ID and source original, but have
+different tasks and credentials. Advancing only the native profile persists its
+retry without changing the old journal/config/original or sending an old-profile
+request; two new-process summaries and a read-only switch back do not replay.
+These are direct upload queue admissions: absent producer context correctly
+remains `feedback_status:unavailable`, not a successful producer handoff. It does
+not test actual host selection/locking or the still-unprofiled Herdr hook.
+
 ## Incremental isolated regression
 
 `TestCLIPathRuntimeReconnectUpload` reuses the existing small TLS CLI fixture and
