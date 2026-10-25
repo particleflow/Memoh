@@ -1,0 +1,32 @@
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe/owner
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe/missing_runtime
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe/credential
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe/request
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe/revision
+=== RUN   TestAdmissionOwnerBindingAndReadOnlyProbe/missing_state
+--- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe (0.00s)
+    --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/owner (0.00s)
+    --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/missing_runtime (0.00s)
+    --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/credential (0.00s)
+    --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/request (0.00s)
+    --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/revision (0.00s)
+    --- PASS: TestAdmissionOwnerBindingAndReadOnlyProbe/missing_state (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	0.006s
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused/computer_task_submit
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused/computer_task_followup
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_scope_is_unverified
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_scope_is_unverified/computer_task_submit
+=== RUN   TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_scope_is_unverified/computer_task_followup
+--- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation (0.02s)
+    --- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused (0.01s)
+        --- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused/computer_task_submit (0.00s)
+        --- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_is_paused/computer_task_followup (0.00s)
+    --- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_scope_is_unverified (0.01s)
+        --- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_scope_is_unverified/computer_task_submit (0.00s)
+        --- PASS: TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation/computer_admission_scope_is_unverified/computer_task_followup (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	0.030s

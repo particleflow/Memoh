@@ -1,0 +1,4 @@
+
+> @memohai/desktop@0.22.0 typecheck:web /tmp/memoh-candidate-7bcb-review/apps/desktop
+> vue-tsc --noEmit -p tsconfig.web.json --composite false
+

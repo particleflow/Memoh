@@ -133,5 +133,35 @@
     "file": "task-while-paused.png",
     "bytes": 105398,
     "sha256": "386eee937bf76ce2fd88a8d26a6dba8105d8e023785a92b5d52cb8f93da252bd"
+  },
+  {
+    "file": "lan-combined-race.log",
+    "bytes": 4072,
+    "sha256": "c946db0de98fba4ff9c2829d84c5baf5c7ca6108a2fd2f1f402b51c7ee1214c7"
+  },
+  {
+    "file": "lan-combined-lint.log",
+    "bytes": 104,
+    "sha256": "4b147885bde10e8d4b54e2426179420745e0584e87c281623aafd2d2f64ba7ff"
+  },
+  {
+    "file": "lan-combined-lint-final.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "lan-combined-cli.log",
+    "bytes": 56,
+    "sha256": "16a9be74bfafc72b5733f7f3b892a5e3f82e282a5360018c1884c3f3f009c6cb"
+  },
+  {
+    "file": "lan-combined-build.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "combined-core.log",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c"
   }
 ]

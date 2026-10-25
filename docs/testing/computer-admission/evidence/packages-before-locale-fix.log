@@ -1,0 +1,28 @@
+ok  	github.com/felinics/memoh/internal/agenvo	10.129s
+ok  	github.com/felinics/memoh/internal/computertask	10.425s
+ok  	github.com/felinics/memoh/internal/handlers	4.149s
+ok  	github.com/felinics/memoh/internal/userruntime	0.029s
+--- FAIL: TestLocaleCatalogAlignment (0.00s)
+    --- FAIL: TestLocaleCatalogAlignment/en.json (0.00s)
+        catalog_guard_test.go:159: en.json: keys under errors are not sorted at errors.computer.admission_conflict; sort them so codes added on parallel branches land on different lines
+    --- FAIL: TestLocaleCatalogAlignment/zh.json#01 (0.00s)
+        catalog_guard_test.go:165: zh.json: missing errors.computer.admission_scope_unverified
+        catalog_guard_test.go:165: zh.json: missing errors.computer.admission_conflict
+        catalog_guard_test.go:165: zh.json: missing errors.computer.admission_paused
+    --- FAIL: TestLocaleCatalogAlignment/ja.json#01 (0.00s)
+        catalog_guard_test.go:165: ja.json: missing errors.computer.admission_paused
+        catalog_guard_test.go:165: ja.json: missing errors.computer.admission_scope_unverified
+        catalog_guard_test.go:165: ja.json: missing errors.computer.admission_conflict
+    --- FAIL: TestLocaleCatalogAlignment/en.json#01 (0.00s)
+        catalog_guard_test.go:165: en.json: missing errors.computer.admission_paused
+        catalog_guard_test.go:165: en.json: missing errors.computer.admission_scope_unverified
+        catalog_guard_test.go:165: en.json: missing errors.computer.admission_conflict
+    --- FAIL: TestLocaleCatalogAlignment/ja.json (0.00s)
+        catalog_guard_test.go:159: ja.json: keys under errors are not sorted at errors.computer.admission_conflict; sort them so codes added on parallel branches land on different lines
+    --- FAIL: TestLocaleCatalogAlignment/zh.json (0.00s)
+        catalog_guard_test.go:159: zh.json: keys under errors are not sorted at errors.computer.admission_conflict; sort them so codes added on parallel branches land on different lines
+FAIL
+FAIL	github.com/felinics/memoh/internal/apperror	0.976s
+ok  	github.com/felinics/memoh/internal/db/postgres/store	0.004s
+?   	github.com/felinics/memoh/internal/db/store	[no test files]
+FAIL

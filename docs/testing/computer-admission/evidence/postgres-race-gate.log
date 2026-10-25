@@ -1,0 +1,47 @@
+Verified existing isolated loopback database; test creates/cleans only its own unique temporary database.
+COMMAND: bash scripts/test-computer-operations-postgres.sh
+{"Time":"2026-10-25T05:35:31.188602735Z","Action":"start","Package":"github.com/felinics/memoh/internal/db"}
+{"Time":"2026-10-25T05:35:31.236965529Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionDurabilityCoverageAndReservations"}
+{"Time":"2026-10-25T05:35:31.236994312Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionDurabilityCoverageAndReservations","Output":"=== RUN   TestComputerAdmissionDurabilityCoverageAndReservations\n"}
+{"Time":"2026-10-25T05:35:33.109989286Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionDurabilityCoverageAndReservations","Output":"--- PASS: TestComputerAdmissionDurabilityCoverageAndReservations (1.87s)\n"}
+{"Time":"2026-10-25T05:35:33.111332904Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionDurabilityCoverageAndReservations","Elapsed":1.87}
+{"Time":"2026-10-25T05:35:33.111364481Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPreservesAlreadyReservedFollowup"}
+{"Time":"2026-10-25T05:35:33.111373695Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPreservesAlreadyReservedFollowup","Output":"=== RUN   TestComputerAdmissionPreservesAlreadyReservedFollowup\n"}
+{"Time":"2026-10-25T05:35:35.0607208Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPreservesAlreadyReservedFollowup","Output":"--- PASS: TestComputerAdmissionPreservesAlreadyReservedFollowup (1.95s)\n"}
+{"Time":"2026-10-25T05:35:35.060785307Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPreservesAlreadyReservedFollowup","Elapsed":1.95}
+{"Time":"2026-10-25T05:35:35.060802703Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims"}
+{"Time":"2026-10-25T05:35:35.060829424Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims","Output":"=== RUN   TestComputerAdmissionPauseSerializesWithClaims\n"}
+{"Time":"2026-10-25T05:35:35.060838157Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause"}
+{"Time":"2026-10-25T05:35:35.060844506Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause","Output":"=== RUN   TestComputerAdmissionPauseSerializesWithClaims/pause\n"}
+{"Time":"2026-10-25T05:35:37.025945658Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause","Output":"--- PASS: TestComputerAdmissionPauseSerializesWithClaims/pause (1.97s)\n"}
+{"Time":"2026-10-25T05:35:37.025975624Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause","Elapsed":1.97}
+{"Time":"2026-10-25T05:35:37.025989635Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/claim"}
+{"Time":"2026-10-25T05:35:37.025996145Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/claim","Output":"=== RUN   TestComputerAdmissionPauseSerializesWithClaims/claim\n"}
+{"Time":"2026-10-25T05:35:38.8898954Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/claim","Output":"--- PASS: TestComputerAdmissionPauseSerializesWithClaims/claim (1.86s)\n"}
+{"Time":"2026-10-25T05:35:38.889950282Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/claim","Elapsed":1.86}
+{"Time":"2026-10-25T05:35:38.889970022Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause_followup"}
+{"Time":"2026-10-25T05:35:38.889977303Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause_followup","Output":"=== RUN   TestComputerAdmissionPauseSerializesWithClaims/pause_followup\n"}
+{"Time":"2026-10-25T05:35:40.855164578Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause_followup","Output":"--- PASS: TestComputerAdmissionPauseSerializesWithClaims/pause_followup (1.97s)\n"}
+{"Time":"2026-10-25T05:35:40.855217077Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/pause_followup","Elapsed":1.97}
+{"Time":"2026-10-25T05:35:40.855226492Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/followup"}
+{"Time":"2026-10-25T05:35:40.855229697Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/followup","Output":"=== RUN   TestComputerAdmissionPauseSerializesWithClaims/followup\n"}
+{"Time":"2026-10-25T05:35:42.77891273Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/followup","Output":"--- PASS: TestComputerAdmissionPauseSerializesWithClaims/followup (1.92s)\n"}
+{"Time":"2026-10-25T05:35:42.778966311Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims/followup","Elapsed":1.92}
+{"Time":"2026-10-25T05:35:42.778975555Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims","Output":"--- PASS: TestComputerAdmissionPauseSerializesWithClaims (7.72s)\n"}
+{"Time":"2026-10-25T05:35:42.77897857Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionPauseSerializesWithClaims","Elapsed":7.72}
+{"Time":"2026-10-25T05:35:42.778980793Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRollbackRefusesLivePause"}
+{"Time":"2026-10-25T05:35:42.778983427Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRollbackRefusesLivePause","Output":"=== RUN   TestComputerAdmissionRollbackRefusesLivePause\n"}
+{"Time":"2026-10-25T05:35:44.822020613Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRollbackRefusesLivePause","Output":"--- PASS: TestComputerAdmissionRollbackRefusesLivePause (2.04s)\n"}
+{"Time":"2026-10-25T05:35:44.822075105Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRollbackRefusesLivePause","Elapsed":2.04}
+{"Time":"2026-10-25T05:35:44.822087003Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRLSAndUnknownMapping"}
+{"Time":"2026-10-25T05:35:44.822092722Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRLSAndUnknownMapping","Output":"=== RUN   TestComputerAdmissionRLSAndUnknownMapping\n"}
+{"Time":"2026-10-25T05:35:46.833894496Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRLSAndUnknownMapping","Output":"--- PASS: TestComputerAdmissionRLSAndUnknownMapping (2.01s)\n"}
+{"Time":"2026-10-25T05:35:46.83395055Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerAdmissionRLSAndUnknownMapping","Elapsed":2.01}
+{"Time":"2026-10-25T05:35:46.833959203Z","Action":"run","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation"}
+{"Time":"2026-10-25T05:35:46.833961186Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"=== RUN   TestComputerOperationsMigrationAndDurableIsolation\n"}
+{"Time":"2026-10-25T05:35:49.024392806Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Output":"--- PASS: TestComputerOperationsMigrationAndDurableIsolation (2.19s)\n"}
+{"Time":"2026-10-25T05:35:49.024430033Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Test":"TestComputerOperationsMigrationAndDurableIsolation","Elapsed":2.19}
+{"Time":"2026-10-25T05:35:49.02461189Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"PASS\n"}
+{"Time":"2026-10-25T05:35:50.029575412Z","Action":"output","Package":"github.com/felinics/memoh/internal/db","Output":"ok  \tgithub.com/felinics/memoh/internal/db\t18.841s\n"}
+{"Time":"2026-10-25T05:35:50.029629794Z","Action":"pass","Package":"github.com/felinics/memoh/internal/db","Elapsed":18.841}
+Required computer operation PostgreSQL CAS/ownership/RLS test passed without skips

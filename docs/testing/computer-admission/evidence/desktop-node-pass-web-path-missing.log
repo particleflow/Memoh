@@ -1,0 +1,25 @@
+
+> @memohai/desktop@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/desktop
+> pnpm run typecheck:node && pnpm run typecheck:web
+
+
+> @memohai/desktop@0.22.0 typecheck:node /tmp/memoh-candidate-7bcb-review/apps/desktop
+> pnpm run prepare:runtime && tsc --noEmit -p tsconfig.node.json --composite false
+
+
+> @memohai/desktop@0.22.0 prepare:runtime /tmp/memoh-candidate-7bcb-review/apps/desktop
+> pnpm --filter @memohai/runtime build
+
+
+> @memohai/runtime@0.22.0 build /tmp/memoh-candidate-7bcb-review/packages/runtime
+> node scripts/build.mjs && tsc -p tsconfig.build.json && node scripts/copy-proto.mjs
+
+
+> @memohai/desktop@0.22.0 typecheck:web /tmp/memoh-candidate-7bcb-review/apps/desktop
+> vue-tsc --noEmit -p tsconfig.web.json --composite false
+
+sh: 1: vue-tsc: not found
+ ELIFECYCLE  Command failed.
+/tmp/memoh-candidate-7bcb-review/apps/desktop:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/desktop@0.22.0 typecheck: `pnpm run typecheck:node && pnpm run typecheck:web`
+Exit status 1

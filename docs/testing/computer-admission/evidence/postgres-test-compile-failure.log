@@ -1,0 +1,6 @@
+Verified existing isolated loopback database; test creates/cleans only its own unique temporary database.
+COMMAND: go test -p=2 -tags=integration -count=1 -v ./internal/db -run ^TestComputerAdmission -timeout=180s
+# github.com/felinics/memoh/internal/db_test [github.com/felinics/memoh/internal/db.test]
+internal/db/computer_admission_integration_test.go:319:15: assignment mismatch: 2 variables but store.ClaimComputerOperation returns 3 values
+FAIL	github.com/felinics/memoh/internal/db [build failed]
+FAIL
