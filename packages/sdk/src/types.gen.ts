@@ -3944,6 +3944,25 @@ export type ProvidersImportModelsResponse = {
     updated?: number;
 };
 
+export type ProvidersMediaCatalogModel = {
+    capability_source?: string;
+    id?: string;
+    input?: Array<string>;
+    kind?: string;
+    output?: Array<string>;
+};
+
+export type ProvidersMediaCatalogResponse = {
+    checked_at?: string;
+    models?: Array<ProvidersMediaCatalogModel>;
+    protocol?: string;
+    provider_id?: string;
+    /**
+     * Audio input metadata does not prove a model implements the transcription API.
+     */
+    transcription_status?: string;
+};
+
 export type ProvidersOAuthAccount = {
     avatar_url?: string;
     email?: string;
@@ -17561,6 +17580,57 @@ export type PostProvidersByIdImportModelsResponses = {
 };
 
 export type PostProvidersByIdImportModelsResponse = PostProvidersByIdImportModelsResponses[keyof PostProvidersByIdImportModelsResponses];
+
+export type GetProvidersByIdMediaCatalogData = {
+    body?: never;
+    path: {
+        /**
+         * Provider ID
+         */
+        id: string;
+    };
+    query: {
+        /**
+         * Catalog protocol
+         */
+        protocol: 'magpie';
+    };
+    url: '/providers/{id}/media-catalog';
+};
+
+export type GetProvidersByIdMediaCatalogErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Bad Gateway
+     */
+    502: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetProvidersByIdMediaCatalogError = GetProvidersByIdMediaCatalogErrors[keyof GetProvidersByIdMediaCatalogErrors];
+
+export type GetProvidersByIdMediaCatalogResponses = {
+    /**
+     * OK
+     */
+    200: ProvidersMediaCatalogResponse;
+};
+
+export type GetProvidersByIdMediaCatalogResponse = GetProvidersByIdMediaCatalogResponses[keyof GetProvidersByIdMediaCatalogResponses];
 
 export type GetProvidersByIdModelsData = {
     body?: never;

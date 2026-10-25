@@ -1,0 +1,128 @@
+[
+  {
+    "file": "aggregate-first-failure.log",
+    "bytes": 1725,
+    "sha256": "5db472c0b48ab9858174ce91c882a95a7f923d1eda1a1a9b267759f7b5fc9cd3",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "aggregate.log",
+    "bytes": 1247,
+    "sha256": "db41a19b27ece8c5b4b449f74befb2eacff980ae3e96e03edcacfa40e2687be3",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "browser-first-failure.json",
+    "bytes": 118,
+    "sha256": "887db100f6b294ab8130a673ad2665c13632b29a0ef0890d6a57ab161b196905",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "browser-proof.json",
+    "bytes": 136,
+    "sha256": "d1dcbceba97f71b75a5f47ac587c6bcfd50c41008e8168c07db58c3f229d4b43",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "catalog-narrow.png",
+    "bytes": 50501,
+    "sha256": "31e342c7c9c0b37869bb263021334381bdaacc91b17edd343ecc3a195fd511cb",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "catalog-success.png",
+    "bytes": 96838,
+    "sha256": "ddac3a1a4bb50329a71ea74b983c435e633041b6dd5451e3900fb0d5fc13beda",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "core.log",
+    "bytes": 95,
+    "sha256": "02d586bbfed1eb8e3b1fc4c49104616f34dcce10428edbbf2eb1155a61d03b9c",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "go-lint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "go-media.log",
+    "bytes": 5775,
+    "sha256": "570b57111c02082d67f3a20cde3f7ad35d3f055100aa1ca6b925b6ea84b83c99",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "go-packages.log",
+    "bytes": 11416,
+    "sha256": "7658db286336560bd96543858022e3450192ed29e036c2a6ea49ece0377ac51d",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "large-upload-recheck.log",
+    "bytes": 699,
+    "sha256": "c5822e76794a0e78bb4249784ca359ac5a9c389067a955039156265a455d9d98",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "runtime-first-failure.log",
+    "bytes": 2020,
+    "sha256": "a923c2a18519b181417d9d5a12024421a03a92350901290443ae25bd45743313",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "runtime.log",
+    "bytes": 591,
+    "sha256": "3cd8fd94c3420efdd76258f7ff4cf6e18e6334cfb3a5ff9352be4630ba76770c",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "sdk-type.log",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "server-build-corrected.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "server-build.log",
+    "bytes": 69,
+    "sha256": "b359a8f653f153808571e98ba22658a5b11f3a9d432e0657c1ae1992cd28b0d4",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "ui-contract.log",
+    "bytes": 1169,
+    "sha256": "b67eaed4c93cc5b1cf72d7f6b56f2e7339497b65ddc95c1b17ac213a0219d0ec",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "web-build.log",
+    "bytes": 76364,
+    "sha256": "10aa42bda3dc470494c151e535a93483bf8bde226c6b49edcf02a905d4e4fdbd",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "web-lint.log",
+    "bytes": 1701,
+    "sha256": "7f5b710c68b54224dbffc78f5ade901827f0779f758784bc3fe91abe2f6a1f1e",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "web-type.log",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868",
+    "handling": "byte-preserved synthetic test output"
+  },
+  {
+    "file": "web.log",
+    "bytes": 342,
+    "sha256": "3f490c82e02dfee432c1791ba7f5675a0b0847795157188460b9ce02d6cec37c",
+    "handling": "byte-preserved synthetic test output"
+  }
+]

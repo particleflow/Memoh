@@ -6879,6 +6879,40 @@ definitions:
       updated:
         type: integer
     type: object
+  providers.MediaCatalogModel:
+    properties:
+      capability_source:
+        type: string
+      id:
+        type: string
+      input:
+        items:
+          type: string
+        type: array
+      kind:
+        type: string
+      output:
+        items:
+          type: string
+        type: array
+    type: object
+  providers.MediaCatalogResponse:
+    properties:
+      checked_at:
+        type: string
+      models:
+        items:
+          $ref: '#/definitions/providers.MediaCatalogModel'
+        type: array
+      protocol:
+        type: string
+      provider_id:
+        type: string
+      transcription_status:
+        description: Audio input metadata does not prove a model implements the transcription
+          API.
+        type: string
+    type: object
   providers.OAuthAccount:
     properties:
       avatar_url:
@@ -19201,6 +19235,53 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Import models from provider
+      tags:
+      - providers
+  /providers/{id}/media-catalog:
+    get:
+      description: Read the saved provider's Magpie catalog. Does not import models
+        or call a model; transcription support remains unverified.
+      parameters:
+      - description: Provider ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Catalog protocol
+        enum:
+        - magpie
+        in: query
+        name: protocol
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/providers.MediaCatalogResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "502":
+          description: Bad Gateway
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read provider media catalog
       tags:
       - providers
   /providers/{id}/models:

@@ -16200,6 +16200,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/providers/{id}/media-catalog": {
+            "get": {
+                "description": "Read the saved provider's Magpie catalog. Does not import models or call a model; transcription support remains unverified.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "providers"
+                ],
+                "summary": "Read provider media catalog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Provider ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "magpie"
+                        ],
+                        "type": "string",
+                        "description": "Catalog protocol",
+                        "name": "protocol",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/providers.MediaCatalogResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/providers/{id}/models": {
             "get": {
                 "description": "Get models for a provider by id, optionally filtered by type",
@@ -29447,6 +29516,56 @@ const docTemplate = `{
                 },
                 "updated": {
                     "type": "integer"
+                }
+            }
+        },
+        "providers.MediaCatalogModel": {
+            "type": "object",
+            "properties": {
+                "capability_source": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "input": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "output": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "providers.MediaCatalogResponse": {
+            "type": "object",
+            "properties": {
+                "checked_at": {
+                    "type": "string"
+                },
+                "models": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/providers.MediaCatalogModel"
+                    }
+                },
+                "protocol": {
+                    "type": "string"
+                },
+                "provider_id": {
+                    "type": "string"
+                },
+                "transcription_status": {
+                    "description": "Audio input metadata does not prove a model implements the transcription API.",
+                    "type": "string"
                 }
             }
         },
