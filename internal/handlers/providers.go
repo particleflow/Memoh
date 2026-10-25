@@ -45,6 +45,7 @@ func (h *ProvidersHandler) Register(e *echo.Echo) {
 	group.GET("", h.List)
 	group.GET("/:id", h.Get)
 	group.GET("/:id/models", h.ListModelsByProvider)
+	group.GET("/:id/media-catalog", h.DiscoverMediaCatalog)
 	group.GET("/name/:name", h.GetByName)
 	group.PUT("/:id", h.Update)
 	group.DELETE("/:id", h.Delete)

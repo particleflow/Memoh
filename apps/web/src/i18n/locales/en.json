@@ -2131,6 +2131,28 @@
     "showingCount": "Showing {count} of {total}"
   },
   "provider": {
+    "mediaCatalog": {
+      "close": "Close",
+      "errorTitle": "Catalog unavailable",
+      "title": "Media catalog",
+      "protocol": "Magpie directory protocol",
+      "read": "Read catalog",
+      "readOnly": "Read saved provider catalog",
+      "hint": "Uses this provider’s saved connection. Does not import, delete or test models. Listed capabilities do not prove model execution or attachment delivery.",
+      "failed": "Could not read the catalog. Check the saved connection and catalog permission.",
+      "checkedAt": "Observed at",
+      "transcription": "Transcription support",
+      "unverified": "Unverified. Audio metadata or a model name does not confirm a transcription endpoint.",
+      "empty": "The provider returned an empty catalog.",
+      "unspecified": "Not advertised",
+      "modelFacts": "Kind: {kind} · Input: {input} · Output: {output} · Source: {source}",
+      "sources": {
+        "unspecified": "No capability metadata",
+        "catalog_kind": "Catalog kind",
+        "catalog_modalities": "Catalog modalities",
+        "catalog_kind_and_modalities": "Catalog kind and modalities"
+      }
+    },
     "add": "Add Provider",
     "addBtn": "Add",
     "searchPlaceholder": "Search providers...",

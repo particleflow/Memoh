@@ -2100,6 +2100,28 @@
     "showingCount": "{total} の {count} を表示中"
   },
   "provider": {
+    "mediaCatalog": {
+      "close": "閉じる",
+      "errorTitle": "カタログを取得できません",
+      "title": "メディアモデル一覧",
+      "protocol": "Magpie ディレクトリプロトコル",
+      "read": "一覧を取得",
+      "readOnly": "保存済みプロバイダーの一覧を取得",
+      "hint": "保存済みの接続を使用します。モデルのインポート、削除、テストは行いません。一覧の能力表示は実行や添付配信の成功を保証しません。",
+      "failed": "一覧を取得できません。保存済みの接続とアクセス権限を確認してください。",
+      "checkedAt": "取得日時",
+      "transcription": "文字起こしへの対応",
+      "unverified": "未検証。音声メタデータやモデル名だけでは文字起こしAPIへの対応を確認できません。",
+      "empty": "プロバイダーが空の一覧を返しました。",
+      "unspecified": "記載なし",
+      "modelFacts": "種類: {kind} · 入力: {input} · 出力: {output} · 出典: {source}",
+      "sources": {
+        "unspecified": "能力メタデータなし",
+        "catalog_kind": "一覧の種類フィールド",
+        "catalog_modalities": "一覧のモダリティフィールド",
+        "catalog_kind_and_modalities": "一覧の種類とモダリティフィールド"
+      }
+    },
     "add": "プロバイダーを追加",
     "addBtn": "追加",
     "searchPlaceholder": "プロバイダーを検索...",
