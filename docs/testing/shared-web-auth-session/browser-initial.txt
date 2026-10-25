@@ -1,0 +1,16 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+locator.click: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for getByRole('button', { name: 'Continue', exact: true })[22m
+
+    at /tmp/shared-auth-session-guard/browser.mjs:65:69 {
+  log: [
+    "  - waiting for getByRole('button', { name: 'Continue', exact: true })"
+  ],
+  name: 'TimeoutError'
+}
+
+Node.js v25.9.0
