@@ -49,3 +49,21 @@ physical power-loss test, Internet/LAN throughput benchmark, Windows 512-file
 batch, phone acceptance, or formal `transferqueue.exe`/Herdr trust acceptance.
 No certificate import is attempted. Source/binary provenance remains the fixed
 commit tested by Actions; no blocked artifact is downloaded through another route.
+
+## Initial execution retained
+
+[Run 40172148458 / job 121105065246](https://github.com/particleflow/Memoh/actions/runs/40172148458/job/121105065246)
+at `e844456f6076283ee508ec6327e50a7e1637c514` failed after actual transfer:
+free space 31,507,292,160 bytes; prefix sent and durable offset both 268,435,456.
+The fixture then incorrectly asserted that the published reader was an
+`*os.File`. The production interface intentionally returns a private wrapper.
+Its failed assertion also prevented explicit handle closure and caused a
+TempDir cleanup error. The follow-up retains the public reader for hash checks,
+closes it on every path, and measures allocation by a read-only census of the
+test-owned object directory. No production API is changed or exposed. This
+first run is a failure, not full recovery acceptance.
+
+Contribution CI 40172148231 independently failed its expected workflow count
+(10 vs actual 11). The catalog assertion is updated by one, retaining all
+read-only permissions and no-format-dependency checks. Local full Node tests
+could not complete because Ruby is absent; the actual GitHub check must pass.

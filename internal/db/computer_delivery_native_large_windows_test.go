@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"io"
+	"io/fs"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -177,6 +178,7 @@ func TestWindowsNativeLargeByteRecovery(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer func() { _ = source.Close() }()
 	hash := sha256.New()
 	buffer := make([]byte, 64<<10)
 	for written := int64(0); written < size; written += int64(len(buffer)) {
@@ -372,22 +374,42 @@ func TestWindowsNativeLargeByteRecovery(t *testing.T) {
 		t.Fatalf("Range/replay mismatch gets=%d range_errors=%d sent=%d checkpoint=%d", gets.Load(), rangeMismatch.Load(), sent.Load(), checkpoint)
 	}
 	q, p = openPublication()
+	defer func() { _ = p.Close(); _ = q.Close() }()
 	reader, err := p.OpenPublished(ctx, ref)
 	if err != nil {
 		t.Fatal(err)
 	}
+	// The public reader deliberately hides its native handle. Verify through
+	// that interface, close it even on failure, then measure only this fixture's
+	// retained object files without changing the production abstraction.
+	defer func() { _ = reader.Close() }()
 	hash.Reset()
 	n, err := io.CopyBuffer(hash, reader, buffer)
-	object, ok := reader.(*os.File)
-	if !ok {
-		t.Fatal("native object handle unavailable")
-	}
-	publishedAllocated := nativeLargeAllocation(t, object)
 	_ = reader.Close()
 	_ = p.Close()
 	_ = q.Close()
 	if err != nil || n != size || hex.EncodeToString(hash.Sum(nil)) != contentHash {
 		t.Fatal("full published hash/length mismatch", n, err)
+	}
+	var publishedAllocated int64
+	objects := 0
+	if err := filepath.WalkDir(stateRoot, func(name string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() || filepath.Ext(name) != ".object" {
+			return nil
+		}
+		object, err := os.Open(name) //nolint:gosec // Read-only allocation census of this test-owned state root.
+		if err != nil {
+			return err
+		}
+		defer func() { _ = object.Close() }()
+		publishedAllocated += nativeLargeAllocation(t, object)
+		objects++
+		return nil
+	}); err != nil || objects != 1 || publishedAllocated < size {
+		t.Fatal("retained object allocation", objects, publishedAllocated, err)
 	}
 	original, err := os.Open(originalNameFinal) //nolint:gosec // Read back only the generated fixture object, never a user-provided path.
 	if err != nil {
