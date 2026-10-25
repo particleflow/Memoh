@@ -53,13 +53,13 @@ func (q *DiskQueue) ReclaimConfirmed(ctx context.Context) error {
 		return err
 	}
 	defer unlockClose(global)
-	archived := 0
+	var candidates []string
 	finished := errors.New("reclaim batch complete")
 	err = q.visitAdmissions(func(head QueueStatus) error {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		if archived >= historyReclaimBatch {
+		if len(candidates) >= historyReclaimBatch {
 			return finished
 		}
 		// Registered upload completion already compacts its head before release.
@@ -78,19 +78,34 @@ func (q *DiskQueue) ReclaimConfirmed(ctx context.Context) error {
 		if err == nil {
 			_ = f.Close()
 			if confirmedDelivery(r) {
-				err = q.releaseConfirmedLocked(ctx, id)
-				if err == nil {
-					archived++
-				}
+				candidates = append(candidates, id)
 			}
 		}
 		unlockClose(lock)
 		return err
 	})
-	if errors.Is(err, finished) {
-		return nil
+	if err != nil && !errors.Is(err, finished) {
+		return err
 	}
-	return err
+	// Finish bounded directory enumeration before removing any entry. A page
+	// may contain both a journal and its release witness after process death;
+	// removing the witness mid-page would make its later visit look corrupt.
+	// Recheck confirmation under the same admission -> job lock order.
+	for _, id := range candidates {
+		lock, err := q.lock(id)
+		if errors.Is(err, ErrBusy) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		err = q.releaseConfirmedLocked(ctx, id)
+		unlockClose(lock)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (q *DiskQueue) releaseConfirmedLocked(ctx context.Context, id string) error {

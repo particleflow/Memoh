@@ -120,3 +120,22 @@ retry budget, worker exclusion, full-hash resume, and unknown association
 reconciliation. The Windows retained-object case also crosses a legacy byte
 allowance without deleting the earlier objects. These small-data tests are
 separate from the real 1 GiB Windows job; a pending job is not a pass.
+
+## Default-path regression execution
+
+The first default-path fixed head `5c3b983707611195dc29cf7920c5a2033ac67888`
+passed the real [1 GiB case](https://github.com/particleflow/Memoh/actions/runs/40175212658/job/121114334437)
+(PASS 40.03s, GET 2 / HEAD 1 / Commit requests 3, durable offset 268435456,
+confirmed-prefix replay 0, stable completed reopens 2). This is not an all-green
+candidate: the ordinary [Windows regression job](https://github.com/particleflow/Memoh/actions/runs/40175212657/job/121114479380)
+failed `TestQueueReleaseProcessCrash/after_receipt`, `/after_truncate` and
+`/after_compact`. Subsequent native/CLI/PG/bundle steps were skipped, not passed.
+
+The new bounded reclaim traversal removed a journal and its release witness
+while that directory page was still being visited. Windows then visited the
+now-missing witness and returned ErrStore. The follow-up collects at most the
+existing reclaim batch of confirmed IDs, finishes traversal, and only then
+rechecks/releases each under admission -> job locking. It neither swallows
+missing/corrupt evidence nor loads the entire backlog. The original process-exit
+regressions and their fsync assertions are kept unchanged and must pass on the
+new exact head before it is considered integrated.
