@@ -30,18 +30,20 @@ import (
 // production client and the existing checkpoint fixture are exercised here;
 // these tests are not a second Server/PG/NAS acceptance or a LAN/WAN topology.
 type dualStackFixture struct {
-	t       *testing.T
-	file    *fixture
-	port    string
-	base    string
-	cert    tls.Certificate
-	roots   *x509.CertPool
-	servers map[string]*httptest.Server
-	calls   map[string]*atomic.Int64
-	status  map[string]*atomic.Int32
-	last    atomic.Value
-	mu      sync.Mutex
-	dials   []string
+	t         *testing.T
+	file      *fixture
+	port      string
+	base      string
+	auth      string
+	selection string
+	cert      tls.Certificate
+	roots     *x509.CertPool
+	servers   map[string]*httptest.Server
+	calls     map[string]*atomic.Int64
+	status    map[string]*atomic.Int32
+	last      atomic.Value
+	mu        sync.Mutex
+	dials     []string
 }
 
 func networkCertificate(t *testing.T, hostname string) (tls.Certificate, *x509.Certificate) {
@@ -94,7 +96,7 @@ func newDualStackFixture(t *testing.T) *dualStackFixture {
 		t.Fatal(err)
 	}
 	cert, leaf := networkCertificate(t, "localhost")
-	d := &dualStackFixture{t: t, file: &fixture{calls: map[string]int{}}, port: port, base: "https://localhost:" + port + "/api", cert: cert, roots: x509.NewCertPool(), servers: map[string]*httptest.Server{}, calls: map[string]*atomic.Int64{"4": {}, "6": {}}, status: map[string]*atomic.Int32{"4": {}, "6": {}}}
+	d := &dualStackFixture{t: t, file: &fixture{calls: map[string]int{}}, port: port, base: "https://localhost:" + port + "/api", auth: syntheticAuth, cert: cert, roots: x509.NewCertPool(), servers: map[string]*httptest.Server{}, calls: map[string]*atomic.Int64{"4": {}, "6": {}}, status: map[string]*atomic.Int32{"4": {}, "6": {}}}
 	d.roots.AddCert(leaf)
 	t.Cleanup(func() { d.stop("4"); d.stop("6") })
 	d.startListener("6", l, cert)
@@ -118,7 +120,7 @@ func (d *dualStackFixture) start(family string, cert tls.Certificate) {
 func (d *dualStackFixture) startListener(family string, l net.Listener, cert tls.Certificate) {
 	d.t.Helper()
 	s := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Host != "localhost:"+d.port || !strings.HasPrefix(r.URL.Path, "/api/internal/computer-transfers/operation-1/delivery-1/bots/bot-1/media") || r.Header.Get("Authorization") != syntheticAuth {
+		if r.Host != "localhost:"+d.port || !strings.HasPrefix(r.URL.Path, "/api/internal/computer-transfers/operation-1/delivery-1/bots/bot-1/media") || r.Header.Get("Authorization") != d.auth || d.selection != "" && r.Header.Get("Memoh-Transfer-Context") != d.selection {
 			d.t.Error("authority, API prefix, task/delivery or credential changed across routes")
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -129,6 +131,9 @@ func (d *dualStackFixture) startListener(family string, l net.Listener, cert tls
 			w.WriteHeader(int(code))
 			return
 		}
+		// The configured-device fixture above verifies the real header first;
+		// adapt only the existing in-memory protocol fixture's synthetic auth.
+		r.Header.Set("Authorization", syntheticAuth)
 		d.file.serve(w, r)
 	}))
 	_ = s.Listener.Close()
