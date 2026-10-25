@@ -1,3 +1,7 @@
+param(
+    [string]$TestPattern = '^TestWindowsNativePostgresDelivery$',
+    [string]$TestTimeout = '90s'
+)
 $ErrorActionPreference = 'Stop'
 # Use only the runner's installed binaries and a new disposable cluster. Never
 # start/reconfigure its installed service, change a firewall, or contact a NAS.
@@ -31,7 +35,7 @@ try {
     # Database transport is confined to this disposable loopback cluster. File
     # transfer itself uses httptest TLS with its verified fixture CA, not -k.
     $env:TEST_POSTGRES_DSN = "postgres://fixture_admin:isolated-native-postgres-fixture@127.0.0.1:$fixturePort/postgres?sslmode=disable"
-    go test -v -tags=integration -count=1 -timeout=90s '-run=^TestWindowsNativePostgresDelivery$' ./internal/db
+    go test -v -tags=integration -count=1 "-timeout=$TestTimeout" "-run=$TestPattern" ./internal/db
     if ($LASTEXITCODE -ne 0) { throw 'Native PostgreSQL combination failed' }
 } finally {
     $env:TEST_POSTGRES_DSN = $oldDSN

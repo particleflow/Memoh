@@ -1,0 +1,6 @@
+=== RUN   TestProducerFeedbackRegisteredPageOutsideInitialDeclaration
+    producer_feedback_test.go:39: registered second page has unavailable feedback producer feedback unavailable
+--- FAIL: TestProducerFeedbackRegisteredPageOutsideInitialDeclaration (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/transferclient	0.006s
+FAIL

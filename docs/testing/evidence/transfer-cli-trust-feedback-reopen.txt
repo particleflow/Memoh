@@ -1,0 +1,11 @@
+=== RUN   TestCLIPathTLSRestartAndLostResponses
+=== RUN   TestCLIPathTLSRestartAndLostResponses/trusted-matching-host
+    cli_path_test.go:66: Complete/Commit response loss recovered; original attempt v1 feedback recorded; two completed-process reopens retained task/receipt/reference with zero additional HTTP requests
+=== RUN   TestCLIPathTLSRestartAndLostResponses/trusted-wrong-host
+2026/10/24 16:19:42 http: TLS handshake error from 127.0.0.1:54542: remote error: tls: bad certificate
+    cli_path_test.go:67: trusted CA + wrong hostname rejected before HTTP; original attempt feedback recorded
+--- PASS: TestCLIPathTLSRestartAndLostResponses (15.87s)
+    --- PASS: TestCLIPathTLSRestartAndLostResponses/trusted-matching-host (12.77s)
+    --- PASS: TestCLIPathTLSRestartAndLostResponses/trusted-wrong-host (3.10s)
+PASS
+ok  	github.com/felinics/memoh/cmd/transferqueue	16.885s

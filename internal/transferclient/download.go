@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -90,13 +91,22 @@ func (c *Client) Download(ctx context.Context, bot, hash string, size, offset in
 			n, readErr := resp.Body.Read(buffer[:min(int64(len(buffer)), size-offset)])
 			if n > 0 {
 				written, err := file.Write(buffer[:n])
+				if errors.Is(err, errDiskSpace) {
+					return err
+				}
 				if err != nil || written != n {
 					return ErrCheckpoint
 				}
 				offset += int64(n)
 			}
 			if offset-durable >= MaxChunkBytes || offset == size {
-				if file.Sync() != nil || checkpoint(offset) != nil {
+				if err := file.Sync(); err != nil {
+					if errors.Is(err, errDiskSpace) {
+						return err
+					}
+					return ErrCheckpoint
+				}
+				if checkpoint(offset) != nil {
 					return ErrCheckpoint
 				}
 				durable = offset

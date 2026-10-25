@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -36,8 +37,17 @@ func putLegacyPublication(t *testing.T, m *publicationMetadata, id, state string
 }
 
 func TestPublicationMetadataMigrationPreservesCompleteHistory(t *testing.T) {
+	for _, objectBytes := range []int64{4096, 0} {
+		t.Run(strconv.FormatInt(objectBytes, 10), func(t *testing.T) {
+			exercisePublicationHistoryMigration(t, objectBytes)
+		})
+	}
+}
+
+func exercisePublicationHistoryMigration(t *testing.T, objectBytes int64) {
+	t.Helper()
 	m := metadataBareFixture(t)
-	m.objectBytes = 4096
+	m.objectBytes = objectBytes
 	records := make([]publicationRecord, 20)
 	original := map[string][]byte{}
 	backup, err := os.OpenRoot(configFixtureRoot(t))

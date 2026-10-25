@@ -22,9 +22,11 @@ var (
 	ErrPermission = errors.New("delivery private storage permission denied")
 )
 
-// QueueLimits bound active jobs (including incomplete admissions), reserved
-// bytes and each active journal. Confirmed deliveries keep bounded compact
-// receipts; their separate maxQueueRecords bound never evicts idempotency proof.
+// QueueLimits retain the legacy snapshot admission policy and locator binding.
+// Download metadata has no cumulative byte/job quota; Workers bounds concurrent
+// streaming and actual filesystem space bounds retained download bytes.
+// Confirmed deliveries keep compact receipts in the existing history layout;
+// metadata capacity never evicts idempotency proof.
 type QueueLimits struct {
 	Jobs         int
 	Bytes        int64
@@ -37,16 +39,17 @@ type QueueLimits struct {
 // The host must grant this directory only to its trusted user. Config, logs,
 // execution receipts and NAS originals remain owned by their existing services.
 type DiskQueue struct {
-	readOnly    bool
-	root        *os.Root
-	guard       *os.File
-	revision    string
-	limits      QueueLimits
-	releaseHook func(string)
-	journalHook func(string)
-	historyHook func(string)
-	budgetBase  int64 // Nonzero only for explicitly upgraded locator v4.
-	openSource  func(string) (*os.File, error)
+	downloadSpaceCheck func(int64) error // Test-only fault injection; nil uses actual filesystem space.
+	readOnly           bool
+	root               *os.Root
+	guard              *os.File
+	revision           string
+	limits             QueueLimits
+	releaseHook        func(string)
+	journalHook        func(string)
+	historyHook        func(string)
+	budgetBase         int64 // Nonzero only for explicitly upgraded locator v4.
+	openSource         func(string) (*os.File, error)
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
@@ -425,7 +428,7 @@ func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
 		}
 	}
 
-	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || !r.Registered && r.Job.Spec.SizeBytes > q.limits.Bytes {
+	if r.AdmissionVersion < 0 || r.AdmissionVersion > 1 || !r.Registered && r.Direction == "upload" && r.Job.Spec.SizeBytes > q.limits.Bytes {
 		return false
 	}
 	if r.Registered && (r.Source == nil || !r.Source.valid() || r.Direction != "upload" || r.Admitted && !r.Activated) {

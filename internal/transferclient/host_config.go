@@ -24,6 +24,7 @@ type HostConfig struct {
 	sources     *os.Root
 	sourceGuard *os.File
 	sourcePath  string
+	network     *hostNetworkPolicy
 }
 
 type hostConfigWire struct {
@@ -90,6 +91,10 @@ func OpenHostConfig(getenv func(string) string) (*HostConfig, error) {
 	h.Origin = cfg.Origin
 	sum := sha256.Sum256(raw)
 	h.Binding = hex.EncodeToString(sum[:])
+	h.network, err = h.readNetworkPolicy()
+	if err != nil {
+		return nil, err
+	}
 	if cfg.SourceRoot != "" {
 		if !filepath.IsAbs(cfg.SourceRoot) || filepath.Clean(cfg.SourceRoot) != cfg.SourceRoot {
 			return nil, ErrBinding

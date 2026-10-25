@@ -1,5 +1,43 @@
 # Per-file operation ledger and bounded producer pages
 
+## Scope correction: withdrawn additional-declaration experiment
+
+The additional producer-declaration experiment at
+`bb582ec1680c4e23552857af7fd1d698cb555dcf` is withdrawn by a normal successor
+commit, without rewriting history. Executable code, existing tests and the
+plugin contract are restored byte-for-byte to
+`0f4a4ae8b615098f8a4f34cf187160c37c689996` (component version 0.10.0).
+Metadata registration and the per-delivery ledger described below remain.
+
+The old feedback rejection was reproduced only after a fixture explicitly
+registered an ID outside the initial declaration. The original producer closes
+only declared files; a failure in its normal workflow was not reproduced.
+The 18-file experiment constructed extra declarations itself. Its successful
+local run therefore does not establish that a new producer protocol is needed.
+Task declarations, task-result feedback, generic file-byte transfer and UI
+lists are different boundaries. A declaration or ledger count alone does not
+prove a generic transfer limit or a loss of accessible committed files.
+
+Removed: the additional closed-page filename/prefix and environment variable,
+collector entry point, feedback v2/page projection, context requirement added
+to the existing stdin registration action, and their experimental tests.
+Existing v1 feedback, original producer flow, stdin registration and the
+three-file process-recovery scenario are restored. No Windows or Harmony
+consumer change, new migration, deployment or release accompanies this revert.
+
+The six `producer-pages-*` / `producer-second-page-*` logs added at bb582ec
+remain as historical experiment evidence, not validation of the restored head.
+Their code and explanatory document are still available at that immutable
+commit. [The CI failure excerpt](evidence/producer-pages-withdrawn-ci-failure.txt)
+also remains explicit: Go run 40100974269 failed in the 18-file scenario with
+`original interrupted delivery did not resume`; subsequent PostgreSQL checks
+were skipped. Native run 40100974370, Docker run 40100974322 and contribution
+run 40100974332 passed. That mixed outcome is not rewritten as all-green.
+The failure was not diagnosed as a production defect, and the withdrawn
+scenario is not being adjusted or rerun to obtain a passing result.
+
+## Retained increment
+
 This increment continues PR77's metadata-only registration. It removes the
 production operation ledger's 128-entry / 2 MiB aggregate limit by normalizing
 that same ledger into PostgreSQL rows. It does not create another task service,

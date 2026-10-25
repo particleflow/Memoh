@@ -1,0 +1,4 @@
+=== RUN   TestProducerFeedbackRegisteredPageOutsideInitialDeclaration
+--- PASS: TestProducerFeedbackRegisteredPageOutsideInitialDeclaration (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	0.008s

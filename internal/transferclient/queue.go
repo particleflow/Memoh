@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const maxRetryDelay = 5 * time.Minute
+
 var (
 	ErrCheckpoint = errors.New("delivery checkpoint failed")
 	ErrSnapshot   = errors.New("frozen delivery snapshot unavailable")
@@ -140,11 +142,11 @@ func fail(j *Job, err error, now time.Time, save Save) error {
 	if next.Attempts >= 12 {
 		return stop(j, "blocked", "retry_budget", save)
 	}
-	ceiling := min(time.Second*time.Duration(1<<min(next.Attempts, 9)), 5*time.Minute)
+	ceiling := min(time.Second*time.Duration(1<<min(next.Attempts, 9)), maxRetryDelay)
 	// Bounded jitter, persisted by the host; Advance never sleeps or schedules.
 	delay := ceiling/2 + time.Duration(rand.Int64N(int64(ceiling/2))) //nolint:gosec // Retry jitter has no security/identity role.
 	if h != nil && h.RetryAfter > delay {
-		delay = min(h.RetryAfter, 5*time.Minute)
+		delay = min(h.RetryAfter, maxRetryDelay)
 	}
 	next.NextAttempt, next.ErrorCode = now.Add(delay), code
 	return persist(j, next, save)

@@ -73,7 +73,7 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 	if status.Job.HostBinding == "" || status.Job.HostBinding != cfg.Binding {
 		return QueueStatus{}, ErrVersion
 	}
-	c, err := NewDeviceTask(cfg.Origin, status.Job, status.Direction, status.Job.Task, transport, cfg.Authorization)
+	c, err := cfg.newDeviceTask(status.Job, status.Direction, transport)
 	if err != nil {
 		return QueueStatus{}, err
 	}
@@ -100,7 +100,7 @@ func (q *DiskQueue) enqueueConfigured(ctx context.Context, cfg *HostConfig, acti
 	if action.Kind == "enqueue-download" {
 		direction = "download"
 	}
-	c, err := NewDeviceTask(cfg.Origin, local.Job, direction, local.Job.Task, transport, cfg.Authorization)
+	c, err := cfg.newDeviceTask(local.Job, direction, transport)
 	if err != nil {
 		return QueueStatus{}, err
 	}

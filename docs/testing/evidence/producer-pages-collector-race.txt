@@ -1,0 +1,8 @@
+=== RUN   TestProducerFeedbackRegisteredPageOutsideInitialDeclaration
+--- PASS: TestProducerFeedbackRegisteredPageOutsideInitialDeclaration (0.01s)
+=== RUN   TestProducerClosedPagesBeyondInitialDeclaration
+--- PASS: TestProducerClosedPagesBeyondInitialDeclaration (2.94s)
+=== RUN   TestProducerClosedPagePartialAdmissionDoesNotStarve
+--- PASS: TestProducerClosedPagePartialAdmissionDoesNotStarve (3.46s)
+PASS
+ok  	github.com/felinics/memoh/internal/transferclient	7.436s

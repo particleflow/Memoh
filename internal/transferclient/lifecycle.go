@@ -156,6 +156,9 @@ func recordLifecycle(r QueueStatus, binding string, now time.Time) Lifecycle {
 	}
 	due := recordDue(r)
 	if due.After(now) {
+		if r.Job.ErrorCode == "capacity_wait" || r.AssociationError == "capacity" {
+			return lifecycle("waiting", "capacity", due)
+		}
 		return lifecycle("waiting", "transient", due)
 	}
 	return lifecycle("due", "none", time.Time{})

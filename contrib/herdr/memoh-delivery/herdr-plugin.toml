@@ -1,6 +1,6 @@
 id = "memoh.delivery"
 name = "Memoh delivery storage"
-version = "0.10.0"
+version = "0.10.1"
 min_herdr_version = "0.9.5"
 description = "Finite native delivery queue using a configured reusable device identity"
 platforms = ["windows"]
