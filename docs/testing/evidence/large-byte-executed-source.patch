@@ -1,0 +1,54 @@
+--- a/internal/db/computer_large_byte_integration_test.go
++++ b/internal/db/computer_large_byte_integration_test.go
+@@ -28,3 +27,0 @@
+-	"github.com/google/uuid"
+-	"github.com/jackc/pgx/v5/pgxpool"
+-
+@@ -42,0 +40,2 @@
++	"github.com/google/uuid"
++	"github.com/jackc/pgx/v5/pgxpool"
+@@ -55 +54 @@
+-	initialFree := int64(initialSpace.Bavail) * initialSpace.Bsize //nolint:gosec // Local fixture filesystem size is below MaxInt64.
++	initialFree := int64(initialSpace.Bavail) * initialSpace.Bsize
+@@ -63 +62 @@
+-		if err := os.Mkdir(p, 0o700); err != nil {
++		if err := os.Mkdir(p, 0700); err != nil {
+@@ -69 +68 @@
+-		if err := os.WriteFile(p, b, 0o600); err != nil {
++		if err := os.WriteFile(p, b, 0600); err != nil {
+@@ -79 +78 @@
+-		_ = filepath.WalkDir(root, func(_ string, e fs.DirEntry, err error) error {
++		_ = filepath.WalkDir(root, func(p string, e fs.DirEntry, err error) error {
+@@ -96 +95 @@
+-		free := int64(space.Bavail) * space.Bsize //nolint:gosec // Local fixture filesystem size is below MaxInt64.
++		free := int64(space.Bavail) * space.Bsize
+@@ -104 +103 @@
+-			sampleErr = fmt.Errorf("fixture space reserve violated: free=%d stat=%w", free, err)
++			sampleErr = fmt.Errorf("fixture space reserve violated: free=%d stat=%v", free, err)
+@@ -143 +142 @@
+-	if err := assets.EnableUploads(originals); err != nil { //nolint:contextcheck // Startup initializer; HTTP requests carry their own contexts.
++	if err := assets.EnableUploads(originals); err != nil {
+@@ -154 +153 @@
+-	endpoint := server.NewServer(log, ":0", "isolated-scale", active) //nolint:contextcheck // Actual HTTP requests supply their own contexts.
++	endpoint := server.NewServer(log, ":0", "isolated-scale", active)
+@@ -210 +209 @@
+-			w.WriteHeader(http.StatusServiceUnavailable)
++			w.WriteHeader(503)
+@@ -249 +248 @@
+-	build := exec.CommandContext(ctx, "go", "build", "-buildvcs=false", "-o", binary, "../../cmd/transferqueue") //nolint:gosec // Fixed local source, isolated output; no downloaded artifacts.
++	build := exec.CommandContext(ctx, "go", "build", "-buildvcs=false", "-o", binary, "../../cmd/transferqueue")
+@@ -254 +253 @@
+-		cmd := exec.CommandContext(ctx, binary, "-action", action, "-delivery", id) //nolint:gosec // Fixed fixture actions/IDs; no shell or secrets in argv.
++		cmd := exec.CommandContext(ctx, binary, "-action", action, "-delivery", id)
+@@ -334 +333 @@
+-			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600) //nolint:gosec // Synthetic fixed fixture path below private temporary root.
++			f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+@@ -388 +387 @@
+-		if err := os.MkdirAll(attemptPath, 0o700); err != nil {
++		if err := os.MkdirAll(attemptPath, 0700); err != nil {
+@@ -507 +506 @@
+-			dst, err := os.OpenFile(filepath.Join(root, "download.part"), os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0o600) //nolint:gosec // Reusable synthetic download staging, not a user destination.
++			dst, err := os.OpenFile(filepath.Join(root, "download.part"), os.O_CREATE|os.O_TRUNC|os.O_RDWR, 0600)
+@@ -524 +523 @@
+-			src, err := os.Open(filepath.Join(source, file.Artifact.SourceRef)) //nolint:gosec // SourceRef is created in this fixture, never untrusted input.
++			src, err := os.Open(filepath.Join(source, file.Artifact.SourceRef))

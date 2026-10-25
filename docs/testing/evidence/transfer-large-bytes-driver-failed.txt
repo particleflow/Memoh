@@ -1,0 +1,7 @@
+=== RUN   TestComputerLargeByteResourceAcceptance
+    computer_large_byte_integration_test.go:59: PREFLIGHT free_bytes=4525187072 large_file_bytes=1073741824 small_files=512 small_file_bytes=65536 reserve_bytes=1073741824 filesystem_type=1021994
+    computer_large_byte_integration_test.go:411: large upload did not reach kill barrier
+--- FAIL: TestComputerLargeByteResourceAcceptance (97.20s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/db	97.221s
+FAIL
