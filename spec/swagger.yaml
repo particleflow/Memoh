@@ -6258,8 +6258,33 @@ definitions:
       state:
         type: string
     type: object
+  handlers.sessionAbortControlResponse:
+    properties:
+      client_reason:
+        description: ClientReason is a client-reported enum, not proof of a human
+          action.
+        type: string
+      received_at:
+        type: string
+      source:
+        description: Source is assigned by the receiving server, not inferred from
+          a user agent.
+        type: string
+    type: object
   handlers.sessionInvocationResponse:
     properties:
+      abort_control:
+        allOf:
+        - $ref: '#/definitions/handlers.sessionAbortControlResponse'
+        description: |-
+          AbortControl is the earliest observed incoming request, not necessarily
+          the request that caused runtime intent. Delivery to storage is best effort.
+          Its client_reason is client-reported, never an authenticated actor.
+      abort_requested_at:
+        description: |-
+          AbortRequestedAt is durable runtime intent. Missing means unknown, not
+          proof that no cancellation occurred. Old records are never backfilled.
+        type: string
       found:
         description: |-
           Found is false when the session has no run for this invocation, which

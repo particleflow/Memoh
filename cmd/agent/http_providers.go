@@ -91,7 +91,7 @@ func provideMessageHandler(log *slog.Logger, msgService *message.DBService, sess
 	return h
 }
 
-func provideSessionHandler(log *slog.Logger, sessionService *sessionpkg.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, workdirService *workdir.Service, botAgentsService *botagents.Service, agentService *application.Service, pipeline *timeline.Pipeline, runs ledger.Store) *handlers.SessionHandler {
+func provideSessionHandler(log *slog.Logger, sessionService *sessionpkg.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, workdirService *workdir.Service, botAgentsService *botagents.Service, agentService *application.Service, pipeline *timeline.Pipeline, runs ledger.Store, queries dbstore.Queries) *handlers.SessionHandler {
 	handler := handlers.NewSessionHandler(log, sessionService, acpPool, botService, accountService)
 	handler.SetThreadEnricher(routeService)
 	handler.SetWorkdirService(workdirService)
@@ -100,6 +100,7 @@ func provideSessionHandler(log *slog.Logger, sessionService *sessionpkg.Service,
 	handler.SetModelPreferenceService(agentService)
 	handler.SetProjectionCache(pipeline)
 	handler.SetInvocationLookup(runs)
+	handler.SetAbortObservationStore(queries)
 	return handler
 }
 
@@ -151,10 +152,11 @@ func provideProviderOAuthHandler(providersService *providers.Service) *handlers.
 	return handlers.NewProviderOAuthHandler(providersService)
 }
 
-func provideWebHandler(channelManager *channel.Manager, channelStore *channel.Store, hub *local.RouteHub, botService *bots.Service, accountService *accounts.Service, sessionService *sessionpkg.Service, resolver *application.Service, sessionRuntime *sessionruntime.Manager, mediaService *media.Service, audioService *audiopkg.Service, settingsService *settings.Service, rc *boot.RuntimeConfig, commandHandler *command.Handler, containerdHandler *handlers.ContainerdHandler, workdirService *workdir.Service) *handlers.LocalChannelHandler {
+func provideWebHandler(channelManager *channel.Manager, channelStore *channel.Store, hub *local.RouteHub, botService *bots.Service, accountService *accounts.Service, sessionService *sessionpkg.Service, resolver *application.Service, sessionRuntime *sessionruntime.Manager, mediaService *media.Service, audioService *audiopkg.Service, settingsService *settings.Service, rc *boot.RuntimeConfig, commandHandler *command.Handler, containerdHandler *handlers.ContainerdHandler, workdirService *workdir.Service, queries dbstore.Queries) *handlers.LocalChannelHandler {
 	h := handlers.NewLocalChannelHandler(local.WebType, channelManager, channelStore, hub, botService, accountService, sessionService)
 	h.SetAgentService(resolver)
 	h.SetSessionRuntime(sessionRuntime)
+	h.SetAbortObservationStore(queries)
 	h.SetWorkdirService(workdirService)
 	h.SetCommandHandler(commandHandler)
 	h.SetRuntimeSkillResolver(containerdHandler)

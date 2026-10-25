@@ -116,6 +116,31 @@ describe('assistant stream registry', () => {
     await local.completion
   })
 
+  it.each(['user_stop', 'bot_switch', 'auth_reset', 'workdir_mismatch', 'client_cleanup'] as const)(
+    'retains a deferred %s reason after the local stream settles', async (reason) => {
+      const { registry } = makeRegistry()
+      const entry = track(registry, 'invocation-1')
+
+      expect(registry.requestAbort('invocation-1', reason)).toBe('')
+      registry.discardAssistantStream('invocation-1')
+      await entry.completion
+
+      expect(registry.bindRunId('invocation-1', 'run-1', 'turn-1')).toMatchObject({
+        runId: 'run-1',
+        botId: 'bot-1',
+        sessionId: 'session-a',
+        abortRequested: true,
+        abortReason: reason,
+      })
+      expect(registry.bindRunId('invocation-other', 'run-other', 'turn-other')).toMatchObject({
+        abortRequested: false,
+      })
+      expect(registry.bindRunId('invocation-1', 'run-1', 'turn-1')).toMatchObject({
+        abortRequested: false,
+      })
+    },
+  )
+
   it('binds a deferred draft stream to exactly one created session', async () => {
     const { registry } = makeRegistry()
     const deferred = track(registry, 'invocation-1', '')

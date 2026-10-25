@@ -98,6 +98,34 @@ describe('useChat.ws', () => {
     })
   })
 
+  it.each(['user_stop', 'bot_switch', 'auth_reset', 'workdir_mismatch', 'client_cleanup', 'unspecified'] as const)(
+    'preserves %s on an abort frame and its unacknowledged replay', (reason) => {
+      vi.useFakeTimers()
+      const ws = connectWebSocket('bot-1', vi.fn())
+      const first = MockWebSocket.instances[0]!
+      first.open()
+
+      ws.abort('run-1', 'session-1', 'control-1', reason)
+      const expected = {
+        type: 'abort',
+        run_id: 'run-1',
+        session_id: 'session-1',
+        control_id: 'control-1',
+        abort_reason: reason,
+      }
+      expect(JSON.parse(first.sent[0]!)).toEqual(expected)
+
+      first.close()
+      vi.advanceTimersByTime(1000)
+      const second = MockWebSocket.instances[1]!
+      second.open()
+
+      expect(second.sent).toHaveLength(1)
+      expect(JSON.parse(second.sent[0]!)).toEqual(expected)
+      ws.close()
+    },
+  )
+
   it('sends a large pre-uploaded attachment as a small hash-only frame', () => {
     const ws = connectWebSocket('bot-1', vi.fn())
     const socket = MockWebSocket.instances[0]!

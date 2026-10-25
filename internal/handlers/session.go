@@ -30,20 +30,21 @@ import (
 
 // SessionHandler handles bot session CRUD endpoints.
 type SessionHandler struct {
-	sessionService  *session.Service
-	threadEnricher  threadEnricher
-	acpRuntimes     acpSessionRuntimeService
-	runtimeResets   sessionResetService
-	workdirs        sessionWorkdirService
-	agentRuntimes   sessionAgentRuntimeService
-	runtimeControls turn.RuntimeControlService
-	botAgents       *botagents.Service
-	botService      *bots.Service
-	accountService  *accounts.Service
-	modelPrefs      modelPreferenceService
-	projectionCache sessionProjectionCache
-	invocations     sessionInvocationLookup
-	logger          *slog.Logger
+	sessionService    *session.Service
+	threadEnricher    threadEnricher
+	acpRuntimes       acpSessionRuntimeService
+	runtimeResets     sessionResetService
+	workdirs          sessionWorkdirService
+	agentRuntimes     sessionAgentRuntimeService
+	runtimeControls   turn.RuntimeControlService
+	botAgents         *botagents.Service
+	botService        *bots.Service
+	accountService    *accounts.Service
+	modelPrefs        modelPreferenceService
+	projectionCache   sessionProjectionCache
+	invocations       sessionInvocationLookup
+	abortObservations sessionAbortObservationStore
+	logger            *slog.Logger
 }
 
 type sessionProjectionCache interface {

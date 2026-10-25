@@ -1,6 +1,7 @@
 import { ref, type Ref } from 'vue'
 import { fetchSessions, type SessionSummary } from '@/composables/api/useChat'
-import type { ExternalAgentSessionInput } from './types'
+import type { WSAbortReason } from '@/composables/api/useChat.ws'
+import type { ChatViewTarget, ExternalAgentSessionInput } from './types'
 
 export interface ChatBootstrapDeps {
   currentBotId: Ref<string | null>
@@ -34,8 +35,8 @@ export interface ChatBootstrapDeps {
   startBotSessionsActivityStream: (botId: string) => void
   startSessionRuntime: (botId: string, sessionId: string) => void
   releasePreviousSession: (botId: string, sessionId: string) => void
-  abort: () => void
-  abortAllAssistantStreams: () => void
+  abort: (target?: ChatViewTarget, reason?: WSAbortReason) => void
+  abortAllAssistantStreams: (reason?: WSAbortReason) => void
   clearFsForBotSwitch: () => void
   clearRememberedSessions: () => void
   resetToEmptyComposer: (options: {
@@ -210,8 +211,8 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   async function selectBot(targetBotId: string) {
     if (deps.currentBotId.value === targetBotId) return
     deps.bumpSelectSessionRequest()
-    deps.abort()
-    deps.abortAllAssistantStreams()
+    deps.abort(undefined, 'bot_switch')
+    deps.abortAllAssistantStreams('bot_switch')
     deps.clearPendingExternalAgentSession()
     deps.clearFsForBotSwitch()
     deps.resetSessionActivity()

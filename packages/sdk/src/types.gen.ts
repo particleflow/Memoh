@@ -3552,7 +3552,30 @@ export type HandlersOauthExchangeRequest = {
     state?: string;
 };
 
+export type HandlersSessionAbortControlResponse = {
+    /**
+     * ClientReason is a client-reported enum, not proof of a human action.
+     */
+    client_reason?: string;
+    received_at?: string;
+    /**
+     * Source is assigned by the receiving server, not inferred from a user agent.
+     */
+    source?: string;
+};
+
 export type HandlersSessionInvocationResponse = {
+    /**
+     * AbortControl is the earliest observed incoming request, not necessarily
+     * the request that caused runtime intent. Delivery to storage is best effort.
+     * Its client_reason is client-reported, never an authenticated actor.
+     */
+    abort_control?: HandlersSessionAbortControlResponse;
+    /**
+     * AbortRequestedAt is durable runtime intent. Missing means unknown, not
+     * proof that no cancellation occurred. Old records are never backfilled.
+     */
+    abort_requested_at?: string;
     /**
      * Found is false when the session has no run for this invocation, which
      * is an ordinary answer (never admitted, or not yet) rather than an error.

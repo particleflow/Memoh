@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 
@@ -41,6 +43,13 @@ type sessionInvocationResponse struct {
 	// accepted, running, waiting_decision, finishing, completed, aborted,
 	// failed or lost.
 	State string `json:"state,omitempty"`
+	// AbortRequestedAt is durable runtime intent. Missing means unknown, not
+	// proof that no cancellation occurred. Old records are never backfilled.
+	AbortRequestedAt *time.Time `json:"abort_requested_at,omitempty"`
+	// AbortControl is the earliest observed incoming request, not necessarily
+	// the request that caused runtime intent. Delivery to storage is best effort.
+	// Its client_reason is client-reported, never an authenticated actor.
+	AbortControl *sessionAbortControlResponse `json:"abort_control,omitempty"`
 }
 
 // GetSessionInvocation godoc
@@ -101,5 +110,15 @@ func (h *SessionHandler) GetSessionInvocation(c echo.Context) error {
 	resp.TurnID = run.TurnID
 	resp.TurnPosition = run.TurnPosition
 	resp.State = string(run.State)
+	if !run.AbortRequestedAt.IsZero() {
+		resp.AbortRequestedAt = &run.AbortRequestedAt
+	}
+	resp.AbortControl, err = h.readAbortControl(c.Request().Context(), botID, sess.ID, run.RunID)
+	if err != nil {
+		// Optional diagnostics cannot hide the authoritative invocation result.
+		if h.logger != nil {
+			h.logger.WarnContext(c.Request().Context(), "read abort control observation failed", slog.String("run_id", run.RunID))
+		}
+	}
 	return c.JSON(http.StatusOK, resp)
 }

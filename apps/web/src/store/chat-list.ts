@@ -376,7 +376,7 @@ export const useChatStore = defineStore('chat', () => {
   function resetUserScopedState(options: { clearSelection?: boolean } = {}) {
     userScopeGeneration += 1
     stopStreams()
-    abortAllAssistantStreams()
+    abortAllAssistantStreams('auth_reset')
     stopWebSocket()
 
     resetRefreshCoordinator()
