@@ -14,6 +14,8 @@ import (
 func requireProviderAccount(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		if _, err := auth.ChatTokenFromContext(c); err == nil {
+			// Preserve the catalog denial policy when the group rejects before its handler.
+			c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
 			return apperror.New(apperror.CodeHTTPForbidden, nil)
 		}
 		if _, err := auth.UserIDFromContext(c); err != nil {

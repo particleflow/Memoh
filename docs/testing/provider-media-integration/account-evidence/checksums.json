@@ -1,0 +1,62 @@
+[
+  {
+    "file": "scope-first.log",
+    "bytes": 2106,
+    "sha256": "1f44128a79990c680eda348645ed40e758f3047796d6186bd5a3b974fb65adf4"
+  },
+  {
+    "file": "scope-combined.log",
+    "bytes": 36162,
+    "sha256": "73c35c3f412caa641d7ff9284694cab4e2215b7ce9e37c579866de383277119c"
+  },
+  {
+    "file": "aggregate.log",
+    "bytes": 1250,
+    "sha256": "62d75fdcb5c2ed7fb20b7c49ab53c39173c6e23b1fac8c627a18a2b32f3bf77f"
+  },
+  {
+    "file": "go-packages.log",
+    "bytes": 275,
+    "sha256": "bc98f8946726f118975bd66b551146f5bb425ed6665a1012a452c3fc54189504"
+  },
+  {
+    "file": "sdk-types.log",
+    "bytes": 112,
+    "sha256": "1df241a54a69af3361b94e4ab7be2f8471dd2c1f1ee5a3b4329baef8f9e51f6d"
+  },
+  {
+    "file": "web-types.log",
+    "bytes": 116,
+    "sha256": "d82f6b5761a3d2aa5544f755491726d77cef292c06a578a214c1ee0e54756868"
+  },
+  {
+    "file": "web-errors.log",
+    "bytes": 328,
+    "sha256": "1708a3475f952fd1718a1b43df10af65cc0910cf539e0b2dcb10c729425fb30a"
+  },
+  {
+    "file": "build.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "runtime.log",
+    "bytes": 619,
+    "sha256": "be0a6a53b454aeb17b68ffd12050323f00eb0f04f33199b397e09635354553e6"
+  },
+  {
+    "file": "browser-proof.json",
+    "bytes": 147,
+    "sha256": "f2321c35e400d0fd104c81a73d2d15aefc81c775de31494b3130fdcf65c20792"
+  },
+  {
+    "file": "contract-union.json",
+    "bytes": 2861,
+    "sha256": "16a970651e93f6d2a1d9c87585d6164215de1098337b4532f51271f2f5b3871e"
+  },
+  {
+    "file": "account-catalog.png",
+    "bytes": 97381,
+    "sha256": "4ae13578d6a4bdd8380ef8978f94dd978646611c4d97b620f1aa1965b159b574"
+  }
+]

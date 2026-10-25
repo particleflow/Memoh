@@ -1,0 +1,9 @@
+{
+  "realServerPG": true,
+  "syntheticProvider": true,
+  "puts": 2,
+  "probePosts": 1,
+  "catalogReads": 1,
+  "pageErrors": [],
+  "passed": true
+}

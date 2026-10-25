@@ -220,6 +220,7 @@ func TestProviderAccountEveryManagementRoute(t *testing.T) {
 					if strings.HasPrefix(kind, "chat") {
 						want = http.StatusForbidden
 						require.Zero(t, *validated)
+						require.Equal(t, "no-store", rec.Header().Get(echo.HeaderCacheControl))
 					}
 					require.Equal(t, want, rec.Code)
 					require.Contains(t, rec.Header().Get("Content-Type"), "application/problem+json")

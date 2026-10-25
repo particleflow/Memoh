@@ -17240,6 +17240,14 @@ export type GetProvidersData = {
 
 export type GetProvidersErrors = {
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Internal Server Error
      */
     500: ServerProblem;
@@ -17272,6 +17280,14 @@ export type PostProvidersErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Internal Server Error
      */
     500: ServerProblem;
@@ -17296,6 +17312,14 @@ export type GetProvidersCountData = {
 };
 
 export type GetProvidersCountErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Internal Server Error
      */
@@ -17328,6 +17352,14 @@ export type PostProvidersFromTemplateErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17370,6 +17402,14 @@ export type GetProvidersNameByNameErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17443,6 +17483,14 @@ export type DeleteProvidersByIdErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17478,6 +17526,14 @@ export type GetProvidersByIdErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17520,6 +17576,14 @@ export type PutProvidersByIdErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17560,6 +17624,14 @@ export type PostProvidersByIdImportModelsErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17659,6 +17731,14 @@ export type GetProvidersByIdModelsErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17697,6 +17777,14 @@ export type GetProvidersByIdOauthAuthorizeErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17730,6 +17818,14 @@ export type PostProvidersByIdOauthPollErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */
@@ -17765,6 +17861,14 @@ export type GetProvidersByIdOauthStatusErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17799,6 +17903,14 @@ export type DeleteProvidersByIdOauthTokenErrors = {
      */
     400: ServerProblem;
     /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
      * Not Found
      */
     404: ServerProblem;
@@ -17830,6 +17942,14 @@ export type PostProvidersByIdTestErrors = {
      * Bad Request
      */
     400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
     /**
      * Not Found
      */

@@ -19062,6 +19062,14 @@ paths:
             items:
               $ref: '#/definitions/providers.GetResponse'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "500":
           description: Internal Server Error
           schema:
@@ -19091,6 +19099,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "500":
           description: Internal Server Error
           schema:
@@ -19116,6 +19132,14 @@ paths:
           description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -19148,6 +19172,14 @@ paths:
             $ref: '#/definitions/providers.GetResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -19188,6 +19220,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -19224,6 +19264,14 @@ paths:
             $ref: '#/definitions/providers.ImportModelsResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -19313,6 +19361,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -19341,6 +19397,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -19363,6 +19427,14 @@ paths:
             $ref: '#/definitions/providers.OAuthStatus'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -19389,6 +19461,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -19409,6 +19489,14 @@ paths:
           description: No Content
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -19441,6 +19529,14 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "404":
           description: Not Found
           schema:
@@ -19464,6 +19560,14 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/providers.CountResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
         "500":
           description: Internal Server Error
           schema:
@@ -19493,6 +19597,14 @@ paths:
             $ref: '#/definitions/providers.GetResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
@@ -19530,6 +19642,14 @@ paths:
             $ref: '#/definitions/providers.GetResponse'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
           schema:
             $ref: '#/definitions/server.Problem'
         "404":
