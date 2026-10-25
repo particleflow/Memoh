@@ -139,3 +139,22 @@ rechecks/releases each under admission -> job locking. It neither swallows
 missing/corrupt evidence nor loads the entire backlog. The original process-exit
 regressions and their fsync assertions are kept unchanged and must pass on the
 new exact head before it is considered integrated.
+
+The subsequent PostgreSQL job [121116022429](https://github.com/particleflow/Memoh/actions/runs/40175732264/job/121116022429)
+exposed a separate outdated assertion in the existing real-route roundtrip:
+it still required download metadata above 256 MiB or the eighth extra pending
+job to fail. The corrected command accepted the metadata (no payload GET), so
+the old assertion failed. That fixture now expects metadata acceptance and zero
+offset across those boundaries. Its byte transfer, hash, original receipt,
+wrong-attempt denial and revocation assertions remain unchanged. This is a test
+contract correction for the deliberately removed download gate, not evidence
+that the metadata-only extra jobs transferred any content.
+
+The same head's [Native job121115880712](https://github.com/particleflow/Memoh/actions/runs/40175732295/job/121115880712)
+confirmed all release-process crash cases had recovered, then exposed one
+missed legacy-publication migration check. It interpreted the internal zero
+(no cumulative payload quota) as zero capacity. Migration now reuses the same
+overflow-safe retained-byte check as normal reads; its old/new copies, version
+gate, locking, fsync and nine process-exit assertions are unchanged. The shared
+complete-history migration test is exercised with both its legacy nonzero
+allowance and current zero mode; zero mode failed before this one-line fix.

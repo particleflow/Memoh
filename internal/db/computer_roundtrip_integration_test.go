@@ -371,19 +371,20 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 		t.Fatal("unsupported publication changed queue", out)
 	}
 	large := job
-	large.DeliveryID, large.SnapshotID, large.Spec.SizeBytes = "byte-budget", "byte-budget", (256<<20)+1
-	if out := invoke("enqueue-download", "", admission(large), 1); string(out["state"]) != `"capacity"` {
-		t.Fatal("CLI byte budget not enforced before allocation", out)
+	large.DeliveryID, large.SnapshotID, large.Spec.SizeBytes = "large-metadata", "large-metadata", 1<<30
+	if out := invoke("enqueue-download", "", admission(large), 0); string(out["admitted"]) != "true" || string(out["offset"]) != "0" {
+		t.Fatal("CLI download metadata rejected by old byte allowance", out)
 	}
 	for i := 1; i < 9; i++ {
 		pending := job
 		pending.DeliveryID = fmt.Sprintf("pending-%d", i)
 		pending.SnapshotID = pending.DeliveryID
-		if i < 8 {
-			invoke("enqueue-download", "", admission(pending), 0)
-		} else if out := invoke("enqueue-download", "", admission(pending), 1); string(out["state"]) != `"capacity"` {
-			t.Fatal("CLI job budget not enforced", out)
+		if out := invoke("enqueue-download", "", admission(pending), 0); string(out["admitted"]) != "true" || string(out["offset"]) != "0" {
+			t.Fatal("CLI download backlog rejected by old active-slot allowance", out)
 		}
+	}
+	if gets.Load() != beforeGets {
+		t.Fatal("metadata registration started payload transfer")
 	}
 	// Same device identity must still fail a wrong attempt and a later revoke.
 	wrong := job
@@ -401,5 +402,5 @@ func exerciseRealRouteRoundTrip(ctx context.Context, t *testing.T, store *postgr
 	assertDenied(newClient(job))
 	assertContent(staging)
 	assertContent(filepath.Join(source, closed.Artifact.SourceRef))
-	t.Logf("real HTTPS Server/PG/filesystem: CLI upload %d bytes, lost PATCH response -> same receipt, Create/Complete/Commit=1; library download Range resumed at %d, full content/hash match; CLI Linux publication unavailable; byte/job budgets and attempt/revoke checks enforced", spec.SizeBytes, offset)
+	t.Logf("real HTTPS Server/PG/filesystem: CLI upload %d bytes, lost PATCH response -> same receipt, Create/Complete/Commit=1; library download Range resumed at %d, full content/hash match; CLI Linux publication unavailable; large/backlog metadata accepted without payload GET; attempt/revoke checks enforced", spec.SizeBytes, offset)
 }
