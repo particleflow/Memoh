@@ -1,0 +1,53 @@
+{
+  "verified_at_utc": "2026-10-25T10:40:10.983228+00:00",
+  "base_sha": "d74da26338ffc166e905211417c4be1649fd5903",
+  "source_sha256": "206aeeea1f2e23b650abf2560226c83f9bac91866a66676338815a263d7f0a17",
+  "binary_sha256": "422e4198b8bfef66e4ee8b3c90ecbf94ab35a3b9082df80ab1e64dc4c378a920",
+  "server": "http://127.0.0.1:58080",
+  "ui": {
+    "url": "http://127.0.0.1:58083/settings/runtimes",
+    "grant_persisted_after_process_restart": true,
+    "grant_before_toggle": "false",
+    "grant_after_toggle": "true",
+    "uncaught_page_errors": [],
+    "oauth_navigation": false,
+    "revoke_http_status": 204,
+    "grant_http_status": 200
+  },
+  "health_head_status": 200,
+  "migration": 176,
+  "api_checks": 23,
+  "api_checks_passed": 23,
+  "data_invariants": {
+    "profile_preserves_unrelated_data": true,
+    "native_credential_unchanged": true,
+    "runtime_owner_retained": true,
+    "no_mcp_connection_created": true,
+    "no_business_operation_dispatched": true
+  },
+  "screenshots": {
+    "native-computers.png": "bdd30ab1db77f5072e45f8299402d75c5c5a32f5d163d37d1dfd5cd1a7f61704",
+    "native-access-granted.png": "84701465c8cf39804dd296fcccaf888ccbd69fd16cde4126daae05ec098a8ef3"
+  },
+  "limitations": [
+    "No real Windows Runtime enrollment or credentials; all users and registry rows are synthetic.",
+    "No Windows Herdr/Pi execution in this UI verification; short-lived CLI transport is verified in separate contract tests.",
+    "No synthetic Cloud workspace was provisioned; first UI run logged expected background workspace-unreachable errors.",
+    "mise was not installed; equivalent Go/Vite dev commands used current worktree with independent local PostgreSQL and pgvector.",
+    "Google Fonts request failed certificate validation; bundled/system fallback rendered UI."
+  ],
+  "source_stable_during_build_and_ui": true,
+  "native_identity": {
+    "readback": {
+      "connection_id": "10000000-0000-4000-8000-000000000001",
+      "device_id": "10000000-0000-4000-8000-000000000001",
+      "instance_id": "herdr-main",
+      "session": "default",
+      "target_fingerprint": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396"
+    },
+    "put_matches_get": true,
+    "connection_and_device_id_equal_runtime_id": true,
+    "fingerprint_nonempty": true,
+    "full_identity_survives_process_restart_before_any_profile_write": true
+  }
+}

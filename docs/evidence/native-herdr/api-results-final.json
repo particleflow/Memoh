@@ -1,0 +1,184 @@
+{
+  "base": "http://127.0.0.1:58080",
+  "owner": "f27c21ad-cb0f-49c9-a99c-14d5c372f559",
+  "runtime_id": "10000000-0000-4000-8000-000000000001",
+  "bot_id": "20000000-0000-4000-8000-000000000001",
+  "profile": {
+    "instance_id": "herdr-main",
+    "session": "default",
+    "work_dir": "C:\\Memoh\\work",
+    "bash_path": "C:\\Program Files\\Git\\bin\\bash.exe",
+    "herdr_cli": "C:\\Memoh\\herdr\\herdr.exe",
+    "herdr_config_root": "C:\\Memoh\\config\\herdr",
+    "agent": {
+      "execution_mode": "pi-json-v1",
+      "provider": "synthetic",
+      "model": "test",
+      "config_dir": "C:\\Memoh\\pi"
+    }
+  },
+  "identity_before_restart": {
+    "connection_id": "10000000-0000-4000-8000-000000000001",
+    "device_id": "10000000-0000-4000-8000-000000000001",
+    "instance_id": "herdr-main",
+    "session": "default",
+    "target_fingerprint": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396"
+  },
+  "checks": [
+    {
+      "check": "synthetic admin login",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "foreign principal login",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "identity read before profile write after process restart",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "native identity survives process restart unchanged",
+      "pass": true
+    },
+    {
+      "check": "invalid cli path rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "UNC cli rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "invalid Win32 characters rejected",
+      "status": 400,
+      "expected": 400,
+      "pass": true,
+      "code": "request.field_invalid"
+    },
+    {
+      "check": "foreign owner rejected",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "code": "http.forbidden"
+    },
+    {
+      "check": "pending runtime rejected",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "code": "http.forbidden"
+    },
+    {
+      "check": "revoked runtime rejected",
+      "status": 403,
+      "expected": 403,
+      "pass": true,
+      "code": "http.forbidden"
+    },
+    {
+      "check": "owner native profile configured",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "profile response omits credential",
+      "pass": true
+    },
+    {
+      "check": "admission survives process restart",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "pause native admission",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "paused native profile protected",
+      "status": 409,
+      "expected": 409,
+      "pass": true,
+      "code": "computer.admission_paused"
+    },
+    {
+      "check": "read persisted native admission",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "native identity in admission",
+      "pass": true
+    },
+    {
+      "check": "resume same native admission request",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "runtime list",
+      "status": 200,
+      "expected": 200,
+      "pass": true,
+      "code": null
+    },
+    {
+      "check": "native runtime kept offline without real enrollment",
+      "pass": true,
+      "runtime": {
+        "provider": "memoh",
+        "id": "10000000-0000-4000-8000-000000000001",
+        "team_id": "00000000-0000-0000-0000-000000000001",
+        "name": "Synthetic Windows Herdr",
+        "created_at": "2026-10-25T09:55:37.721242Z",
+        "online": false,
+        "native_herdr": {
+          "connection_id": "10000000-0000-4000-8000-000000000001",
+          "device_id": "10000000-0000-4000-8000-000000000001",
+          "instance_id": "herdr-main",
+          "session": "default",
+          "target_fingerprint": "217c14a52197f6a3bc987baa912b9a826c00285458b7e4c3e7e0c36f37b0c396"
+        }
+      }
+    },
+    {
+      "check": "PUT and GET return identical native identity while offline",
+      "pass": true
+    },
+    {
+      "check": "native connection and device identity derive from Runtime ID",
+      "pass": true
+    },
+    {
+      "check": "native identity exposes only five non-secret fields and a fingerprint",
+      "pass": true
+    }
+  ]
+}

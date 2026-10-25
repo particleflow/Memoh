@@ -3314,6 +3314,17 @@ RETURNS VOID LANGUAGE SQL VOLATILE AS $$
         'computer-admission:' || public.memoh_current_team_id()::text || ':' || p_owner::text, 0));
 $$;
 
+CREATE OR REPLACE FUNCTION public.memoh_computer_admission_identity(p_provider TEXT, p_runtime UUID, p_config JSONB)
+RETURNS JSONB LANGUAGE SQL IMMUTABLE AS $$
+    SELECT CASE
+        WHEN p_provider='agenvo' THEN p_config
+        WHEN p_provider='memoh' AND jsonb_typeof(p_config->'herdr')='object' THEN
+            jsonb_build_object('connection_id',p_runtime::text,'device_id',p_runtime::text,
+                'instance_id',p_config->'herdr'->>'instance_id')
+        ELSE NULL
+    END;
+$$;
+
 CREATE OR REPLACE FUNCTION public.memoh_change_computer_admission(
     p_owner UUID, p_runtime UUID, p_config JSONB,
     p_request UUID, p_revision BIGINT, p_paused BOOLEAN)
@@ -3326,9 +3337,10 @@ DECLARE
     gate public.computer_admission_gates%ROWTYPE;
 BEGIN
     PERFORM public.memoh_computer_admission_lock(p_owner);
-    SELECT provider_config INTO registered FROM public.user_runtimes
+    SELECT public.memoh_computer_admission_identity(provider,id,provider_config) INTO registered FROM public.user_runtimes
     WHERE team_id=public.memoh_current_team_id() AND id=p_runtime AND user_id=p_owner
-      AND provider='agenvo' AND revoked_at IS NULL AND provider_config=p_config;
+      AND provider IN ('agenvo','memoh') AND revoked_at IS NULL AND activated_at IS NOT NULL
+      AND provider_config=p_config;
     IF NOT FOUND THEN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
     END IF;
@@ -3339,15 +3351,14 @@ BEGIN
        OR coalesce(length(instance),0) NOT BETWEEN 1 AND 128 THEN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
     END IF;
-    -- A different MCP connection is a different trust domain unless a future
-    -- native contract proves otherwise. Names, URLs and credentials are not
-    -- used to guess native ownership. Refuse an ambiguous coverage claim.
+    -- Each native runtime is its own trust domain. Preserve fail-closed alias
+    -- coverage for Agenvo without guessing equivalence from names or URLs.
     IF EXISTS (SELECT 1 FROM public.user_runtimes r
         WHERE r.team_id=public.memoh_current_team_id() AND r.user_id=p_owner
-          AND r.provider='agenvo' AND r.revoked_at IS NULL
-          AND r.provider_config->>'device_id'=device
-          AND r.provider_config->>'instance_id'=instance
-          AND lower(r.provider_config->>'connection_id') IS DISTINCT FROM conn::text) THEN
+          AND r.provider IN ('agenvo','memoh') AND r.revoked_at IS NULL
+          AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'device_id'=device
+          AND public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'instance_id'=instance
+          AND lower(public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'connection_id') IS DISTINCT FROM conn::text) THEN
         RAISE EXCEPTION USING ERRCODE='MC003', MESSAGE='computer admission scope unverified';
     END IF;
     SELECT * INTO gate FROM public.computer_admission_gates
@@ -3393,11 +3404,11 @@ BEGIN
     END IF;
     PERFORM public.memoh_computer_admission_lock(owner);
     -- Re-read mapping after acquiring the same lock as the pause transition.
-    SELECT r.provider_config INTO registered
+    SELECT public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config) INTO registered
     FROM public.bot_remote_runtime_bindings b JOIN public.user_runtimes r
       ON r.team_id=b.team_id AND r.id=b.runtime_id
     WHERE b.team_id=public.memoh_current_team_id() AND b.bot_id=p_bot AND b.id=p_target
-      AND r.user_id=owner AND r.provider='agenvo';
+      AND r.user_id=owner AND r.provider IN ('agenvo','memoh');
     IF registered IS NULL OR nullif(registered->>'connection_id','') IS NULL
        OR nullif(registered->>'device_id','') IS NULL OR nullif(registered->>'instance_id','') IS NULL THEN
         -- Preserve legacy no-gate store behaviour. When the owner has a pause,
@@ -3446,12 +3457,13 @@ CREATE TRIGGER computer_admission_followup BEFORE UPDATE OF details ON public.co
 CREATE OR REPLACE FUNCTION public.memoh_guard_paused_registration()
 RETURNS TRIGGER LANGUAGE plpgsql VOLATILE AS $$
 BEGIN
-    IF OLD.provider='agenvo' AND
+    IF OLD.provider IN ('agenvo','memoh') AND
        (NEW.provider IS DISTINCT FROM OLD.provider OR NEW.provider_config IS DISTINCT FROM OLD.provider_config) THEN
         PERFORM public.memoh_computer_admission_lock(OLD.user_id);
         IF EXISTS (SELECT 1 FROM public.computer_admission_gates
             WHERE team_id=OLD.team_id AND owner_id=OLD.user_id AND paused
-              AND device_id=OLD.provider_config->>'device_id' AND instance_id=OLD.provider_config->>'instance_id') THEN
+              AND device_id=public.memoh_computer_admission_identity(OLD.provider,OLD.id,OLD.provider_config)->>'device_id'
+              AND instance_id=public.memoh_computer_admission_identity(OLD.provider,OLD.id,OLD.provider_config)->>'instance_id') THEN
             RAISE EXCEPTION USING ERRCODE='MC001', MESSAGE='computer admission paused';
         END IF;
     END IF;

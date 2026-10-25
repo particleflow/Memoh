@@ -1,0 +1,47 @@
+[
+  {
+    "log": "memoh-native-herdr-db-tests.log",
+    "passed_tests": [
+      "TestComputerAdmissionDurabilityCoverageAndReservations (5.15s)",
+      "TestComputerAdmissionPreservesAlreadyReservedFollowup (4.87s)",
+      "TestComputerAdmissionPauseSerializesWithClaims (18.11s)",
+      "TestComputerAdmissionRollbackRefusesLivePause (4.99s)",
+      "TestComputerAdmissionRLSAndUnknownMapping (5.74s)",
+      "TestComputerDeliveryPostgresAuthorizationCASAndPreservation (59.05s)",
+      "TestComputerAdmissionEndpointConfigurationPreservesUnknownOperation (4.16s)",
+      "TestComputerOperationsMigrationAndDurableIsolation (2.82s)",
+      "TestNativeHerdrAdmissionPersistsAndFencesNewWork (2.19s)",
+      "TestNativeHerdrConfigAndTransferOwnership (2.27s)",
+      "TestNativeHerdrAdmissionRLSAndRollback (2.23s)",
+      "TestNativeHerdrPauseSerializesWithClaims (9.37s)",
+      "TestNativeHerdrCanonicalAdmissionDefinition (0.80s)"
+    ],
+    "result": [
+      "ok  \tgithub.com/felinics/memoh/internal/db\t121.776s"
+    ]
+  },
+  {
+    "log": "memoh-native-herdr-delivery-test.log",
+    "passed_tests": [
+      "TestNativeHerdrDeliveryUsesTransactionalRegistry (2.86s)"
+    ],
+    "result": [
+      "ok  \tgithub.com/felinics/memoh/internal/db\t2.883s"
+    ]
+  },
+  {
+    "log": "memoh-native-cutover-test.log",
+    "passed_tests": [
+      "TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths (2.43s)"
+    ],
+    "result": [
+      "ok  \\tgithub.com/felinics/memoh/internal/db\\t2.449s"
+    ],
+    "assertions": [
+      "zero retired transport/OAuth calls",
+      "native metadata route worked",
+      "unknown operation and history bindings preserved",
+      "synthetic credential records unchanged"
+    ]
+  }
+]

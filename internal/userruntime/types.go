@@ -9,20 +9,31 @@ import (
 // Runtime is one registered client. Machine details only exist while its
 // reverse-RPC connection is online; they are not persisted.
 type Runtime struct {
-	Provider      string    `json:"provider,omitempty"`
-	ID            string    `json:"id"`
-	TeamID        string    `json:"team_id"`
-	Name          string    `json:"name"`
-	Key           string    `json:"key"`
-	CreatedAt     time.Time `json:"created_at"`
-	Online        bool      `json:"online"`
-	Availability  string    `json:"availability,omitempty"`
-	WorkspaceBase string    `json:"workspace_base,omitempty"`
-	Hostname      string    `json:"hostname,omitempty"`
-	OS            string    `json:"os,omitempty"`
-	Arch          string    `json:"arch,omitempty"`
-	ClientVersion string    `json:"client_version,omitempty"`
-	Capabilities  []string  `json:"capabilities,omitempty"`
+	Provider      string               `json:"provider,omitempty"`
+	ID            string               `json:"id"`
+	TeamID        string               `json:"team_id"`
+	Name          string               `json:"name"`
+	Key           string               `json:"key"`
+	CreatedAt     time.Time            `json:"created_at"`
+	Online        bool                 `json:"online"`
+	Availability  string               `json:"availability,omitempty"`
+	WorkspaceBase string               `json:"workspace_base,omitempty"`
+	Hostname      string               `json:"hostname,omitempty"`
+	OS            string               `json:"os,omitempty"`
+	Arch          string               `json:"arch,omitempty"`
+	ClientVersion string               `json:"client_version,omitempty"`
+	Capabilities  []string             `json:"capabilities,omitempty"`
+	NativeHerdr   *NativeHerdrIdentity `json:"native_herdr,omitempty"`
+}
+
+// NativeHerdrIdentity is the current server-resolved binding, not a selectable
+// target or a credential. Bot requests still use their existing mount target_id.
+type NativeHerdrIdentity struct {
+	ConnectionID      string `json:"connection_id"`
+	DeviceID          string `json:"device_id"`
+	InstanceID        string `json:"instance_id"`
+	Session           string `json:"session"`
+	TargetFingerprint string `json:"target_fingerprint"`
 }
 
 type CreateRuntimeRequest struct {

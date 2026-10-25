@@ -29,7 +29,7 @@ func (s *Store) ReadRuntimeTransfer(ctx context.Context, credentialID string) (d
 }
 
 func runtimeTransferRecord(r dbsqlc.ReadTransferCredentialRow) dbstore.RuntimeTransferRecord {
-	return dbstore.RuntimeTransferRecord{RuntimeID: r.ID.String(), UserID: r.UserID.String(), Config: r.ProviderConfig, CredentialID: r.TransferCredentialID, Digest: r.TransferCredentialDigest, TargetDigest: r.TransferTargetDigest, ExpiresAt: db.TimeFromPg(r.TransferExpiresAt)}
+	return dbstore.RuntimeTransferRecord{RuntimeID: r.ID.String(), UserID: r.UserID.String(), Provider: r.Provider, Config: r.ProviderConfig, CredentialID: r.TransferCredentialID, Digest: r.TransferCredentialDigest, TargetDigest: r.TransferTargetDigest, ExpiresAt: db.TimeFromPg(r.TransferExpiresAt)}
 }
 
 func (s *Store) ChangeRuntimeTransfer(ctx context.Context, old, next dbstore.RuntimeTransferRecord) (bool, error) {

@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "recorded_at_utc": "2026-10-25T10:44:04.054424+00:00",
+  "scope": "Synthetic local WebSocket tests only; no production access or repository implementation/test modifications.",
+  "baseline_commit": "9601ac062a3b65477db8db76bcaa521265ba7ee2",
+  "candidate_head_at_investigation_start": "d74da26338ffc166e905211417c4be1649fd5903",
+  "candidate_source_scope": "Candidate working tree. Parent-owned unrelated identity/docs/SDK edits proceeded during investigation; this does not certify those later changes. The listed WebSocket implementation, tests and Go module files remained byte-identical to the baseline.",
+  "toolchain": "go1.26.1 linux/amd64",
+  "cpu_environment": {
+    "cpu_affinity": "0-4",
+    "cgroup_cpu_max": "400000 100000",
+    "explicit_GOMAXPROCS": false
+  },
+  "unchanged_source_hashes": {
+    "internal/handlers/containerd_terminal.go": {
+      "candidate_sha256": "7b851dbf42fd4de0f7cd3e3344796c6cd03b454204d488ffe16d1987a811cd77",
+      "baseline_sha256": "7b851dbf42fd4de0f7cd3e3344796c6cd03b454204d488ffe16d1987a811cd77",
+      "identical": true
+    },
+    "internal/handlers/containerd_terminal_test.go": {
+      "candidate_sha256": "8c9d195c96d03d0d9c3d367958d23b69665a1a9d8b12364a08ad376a1b81c797",
+      "baseline_sha256": "8c9d195c96d03d0d9c3d367958d23b69665a1a9d8b12364a08ad376a1b81c797",
+      "identical": true
+    },
+    "internal/handlers/websocket.go": {
+      "candidate_sha256": "1a3dd2e52759a0dd4eac78e50c2da9efc0b74a9e3581de64bfe493a3842d70fe",
+      "baseline_sha256": "1a3dd2e52759a0dd4eac78e50c2da9efc0b74a9e3581de64bfe493a3842d70fe",
+      "identical": true
+    },
+    "internal/handlers/websocket_test.go": {
+      "candidate_sha256": "c3efdf46282b180f837162c1c8cf9082231ccfbc314103cc56837fff2ea20aaa",
+      "baseline_sha256": "c3efdf46282b180f837162c1c8cf9082231ccfbc314103cc56837fff2ea20aaa",
+      "identical": true
+    },
+    "go.mod": {
+      "candidate_sha256": "3e5edc9f4092cf5368fa6eab5abbfefc568bda2c4cdbb5c2f162703896049969",
+      "baseline_sha256": "3e5edc9f4092cf5368fa6eab5abbfefc568bda2c4cdbb5c2f162703896049969",
+      "identical": true
+    },
+    "go.sum": {
+      "candidate_sha256": "21bceb5b93f08750637d76d7eac44544e22a63c3d5e949d328cee214655e3609",
+      "baseline_sha256": "21bceb5b93f08750637d76d7eac44544e22a63c3d5e949d328cee214655e3609",
+      "identical": true
+    }
+  },
+  "full_package_verification": [
+    {
+      "cwd": "/workspace/memoh-herdr-baseline",
+      "command": "GOPATH=/workspace/cache/go GOCACHE=/workspace/cache/go-build /workspace/toolchains/go/bin/go test -race ./internal/handlers -count=3",
+      "result": "PASS",
+      "elapsed_seconds": 35.712,
+      "log": "ok  \tgithub.com/felinics/memoh/internal/handlers\t35.712s"
+    },
+    {
+      "cwd": "/workspace/memoh-herdr",
+      "command": "GOPATH=/workspace/cache/go GOCACHE=/workspace/cache/go-build /workspace/toolchains/go/bin/go test -race ./internal/handlers -count=3",
+      "result": "PASS",
+      "elapsed_seconds": 37.59,
+      "log": "ok  \tgithub.com/felinics/memoh/internal/handlers\t37.590s"
+    }
+  ],
+  "manual_test_skips": false,
+  "data_race_reports_observed": false,
+  "finding": {
+    "confirmed": "Both versions have the same short-budget sensitivity. After four pongs, a controlled 200 ms process scheduling pause caused a server read timeout at about 301 ms, before the 600 ms idle timer. This ends the fake PTY and closes TCP without the idle timer going-away frame; the client receives abnormal EOF or reset.",
+    "not_proven": "The exact cause of the earlier three reported natural full-suite failures is not uniquely established. Controlled SIGSTOP and diagnostic instrumentation demonstrate the mechanism but do not identify the original scheduler, CPU, GC, ping-write or OS timing cause. Passing comparisons do not prove absence of every possible regression.",
+    "production_budgets": {
+      "ping_seconds": 20,
+      "read_seconds": 60,
+      "write_seconds": 10,
+      "terminal_idle_minutes": 30
+    },
+    "unchanged_test_budgets_ms": {
+      "ping": 20,
+      "read": 150,
+      "write": 100,
+      "terminal_idle": 600
+    }
+  },
+  "diagnostic_method": {
+    "instrumentation": "Go -overlay copied terminal and heartbeat sources into /tmp, adding diagnostic timestamps, pong counts and error prints only. Both compared implementations and original test assertions stayed unchanged. Instrumentation can affect timing.",
+    "pause": "Only each newly launched synthetic handlers.test child was SIGSTOPped 100 ms after DIAG_ARMED, then SIGCONTed after 200 ms. Two independent child processes per mode.",
+    "commands": [
+      "python /tmp/native-herdr-ws-diagnose.py baseline",
+      "python /tmp/native-herdr-ws-diagnose.py candidate",
+      "python /tmp/native-herdr-ws-diagnose.py fixed-budget"
+    ],
+    "build_argv": [
+      "/workspace/toolchains/go/bin/go",
+      "test",
+      "-race",
+      "-overlay=/tmp/native-herdr-ws-diagnose/<mode>/overlay.json",
+      "-c",
+      "-o",
+      "/tmp/native-herdr-ws-diagnose/<mode>/handlers.test",
+      "./internal/handlers"
+    ],
+    "test_argv": [
+      "/tmp/native-herdr-ws-diagnose/<mode>/handlers.test",
+      "-test.run=^TestTerminalWSPongsDoNotCountAsActivity$",
+      "-test.count=1",
+      "-test.v"
+    ]
+  },
+  "controlled_observations": [
+    {
+      "mode": "baseline",
+      "repository": "/workspace/memoh-herdr-baseline",
+      "overlay_only": true,
+      "pause_after_armed_ms": 100,
+      "pause_duration_ms": 200,
+      "results": [
+        {
+          "attempt": 1,
+          "exit_code": 1,
+          "controlled_stall": true,
+          "log": "=== RUN   TestTerminalWSPongsDoNotCountAsActivity\n=== PAUSE TestTerminalWSPongsDoNotCountAsActivity\n=== CONT  TestTerminalWSPongsDoNotCountAsActivity\nDIAG_ARMED read=150ms idle=600ms\nDIAG_READ_END elapsed=300.690455ms since_extend=220.405944ms pongs=4 error=*net.OpError:read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: i/o timeout\n    containerd_terminal_test.go:159: read ended with read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: read: connection reset by peer, want the idle timeout's going-away close\n--- FAIL: TestTerminalWSPongsDoNotCountAsActivity (0.30s)\nFAIL\n"
+        },
+        {
+          "attempt": 2,
+          "exit_code": 1,
+          "controlled_stall": true,
+          "log": "=== RUN   TestTerminalWSPongsDoNotCountAsActivity\n=== PAUSE TestTerminalWSPongsDoNotCountAsActivity\n=== CONT  TestTerminalWSPongsDoNotCountAsActivity\nDIAG_ARMED read=150ms idle=600ms\nDIAG_READ_END elapsed=300.688778ms since_extend=220.002372ms pongs=4 error=*net.OpError:read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: i/o timeout\n    containerd_terminal_test.go:159: read ended with websocket: close 1006 (abnormal closure): unexpected EOF, want the idle timeout's going-away close\n--- FAIL: TestTerminalWSPongsDoNotCountAsActivity (0.30s)\nFAIL\n"
+        }
+      ]
+    },
+    {
+      "mode": "candidate",
+      "repository": "/workspace/memoh-herdr",
+      "overlay_only": true,
+      "pause_after_armed_ms": 100,
+      "pause_duration_ms": 200,
+      "results": [
+        {
+          "attempt": 1,
+          "exit_code": 1,
+          "controlled_stall": true,
+          "log": "=== RUN   TestTerminalWSPongsDoNotCountAsActivity\n=== PAUSE TestTerminalWSPongsDoNotCountAsActivity\n=== CONT  TestTerminalWSPongsDoNotCountAsActivity\nDIAG_ARMED read=150ms idle=600ms\nDIAG_READ_END elapsed=300.695346ms since_extend=220.420055ms pongs=4 error=*net.OpError:read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: i/o timeout\n    containerd_terminal_test.go:159: read ended with read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: read: connection reset by peer, want the idle timeout's going-away close\n--- FAIL: TestTerminalWSPongsDoNotCountAsActivity (0.30s)\nFAIL\n"
+        },
+        {
+          "attempt": 2,
+          "exit_code": 1,
+          "controlled_stall": true,
+          "log": "=== RUN   TestTerminalWSPongsDoNotCountAsActivity\n=== PAUSE TestTerminalWSPongsDoNotCountAsActivity\n=== CONT  TestTerminalWSPongsDoNotCountAsActivity\nDIAG_ARMED read=150ms idle=600ms\nDIAG_READ_END elapsed=300.833119ms since_extend=220.13397ms pongs=4 error=*net.OpError:read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: i/o timeout\n    containerd_terminal_test.go:159: read ended with read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: read: connection reset by peer, want the idle timeout's going-away close\n--- FAIL: TestTerminalWSPongsDoNotCountAsActivity (0.30s)\nFAIL\n"
+        }
+      ]
+    },
+    {
+      "mode": "fixed-budget",
+      "repository": "/workspace/memoh-herdr-baseline",
+      "overlay_only": true,
+      "pause_after_armed_ms": 100,
+      "pause_duration_ms": 200,
+      "results": [
+        {
+          "attempt": 1,
+          "exit_code": 0,
+          "controlled_stall": true,
+          "log": "=== RUN   TestTerminalWSPongsDoNotCountAsActivity\n=== PAUSE TestTerminalWSPongsDoNotCountAsActivity\n=== CONT  TestTerminalWSPongsDoNotCountAsActivity\nDIAG_ARMED read=6s idle=600ms\nDIAG_IDLE elapsed=601.212742ms pongs=19\nDIAG_READ_END elapsed=601.372307ms since_extend=20.422048ms pongs=19 error=*net.OpError:read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: use of closed network connection\n--- PASS: TestTerminalWSPongsDoNotCountAsActivity (0.60s)\nPASS\n"
+        },
+        {
+          "attempt": 2,
+          "exit_code": 0,
+          "controlled_stall": true,
+          "log": "=== RUN   TestTerminalWSPongsDoNotCountAsActivity\n=== PAUSE TestTerminalWSPongsDoNotCountAsActivity\n=== CONT  TestTerminalWSPongsDoNotCountAsActivity\nDIAG_ARMED read=6s idle=600ms\nDIAG_IDLE elapsed=600.785252ms pongs=19\nDIAG_READ_END elapsed=601.207908ms since_extend=306.591µs pongs=20 error=*websocket.CloseError:websocket: close 1001 (going away)\n--- PASS: TestTerminalWSPongsDoNotCountAsActivity (0.60s)\nPASS\n"
+        }
+      ]
+    }
+  ],
+  "proposed_test_only_change": {
+    "applied_to_repository": false,
+    "overlay_only": "In TestTerminalWSPongsDoNotCountAsActivity only, retain 600 ms idle / 20 ms ping and give its local handler readTimeout=10*idle (6 s), writeTimeout=idle (600 ms). This lets the test assert pong-versus-activity semantics without requiring heartbeat survival within 150 ms. No production budget changes.",
+    "result": "PASS 2/2 under the same controlled pause; 19-20 pongs observed, idle close at about 601 ms.",
+    "heartbeat_controls_command": "/tmp/native-herdr-ws-diagnose/fixed-budget/handlers.test -test.run='^(TestTerminalWSDisconnectsASilentClient|TestChatWSDisconnectsASilentClient|TestHeartbeatStopsPingingABrokenConnection|TestTerminalWSPingsAnIdleClient)$' -test.count=1 -test.v",
+    "heartbeat_controls_result": "PASS; independent tests retain the original 150 ms heartbeat read budget.",
+    "heartbeat_controls_log": "=== RUN   TestTerminalWSPingsAnIdleClient\n=== PAUSE TestTerminalWSPingsAnIdleClient\n=== RUN   TestTerminalWSDisconnectsASilentClient\n=== PAUSE TestTerminalWSDisconnectsASilentClient\n=== RUN   TestChatWSDisconnectsASilentClient\n=== PAUSE TestChatWSDisconnectsASilentClient\n=== RUN   TestHeartbeatStopsPingingABrokenConnection\n=== PAUSE TestHeartbeatStopsPingingABrokenConnection\n=== CONT  TestTerminalWSPingsAnIdleClient\n=== CONT  TestHeartbeatStopsPingingABrokenConnection\n=== CONT  TestTerminalWSDisconnectsASilentClient\n=== CONT  TestChatWSDisconnectsASilentClient\nDIAG_ARMED read=150ms idle=1h0m0s\nDIAG_ARMED read=150ms idle=1h0m0s\nDIAG_PING_ERROR error=*net.OpError:set tcp 127.0.0.1:<ephemeral-port>: use of closed network connection\n--- PASS: TestHeartbeatStopsPingingABrokenConnection (0.02s)\nDIAG_READ_END elapsed=21.987733ms since_extend=109.2µs pongs=1 error=*websocket.CloseError:websocket: close 1006 (abnormal closure): unexpected EOF\n--- PASS: TestTerminalWSPingsAnIdleClient (0.03s)\nDIAG_READ_END elapsed=151.795249ms since_extend=150.65705ms pongs=0 error=*net.OpError:read tcp 127.0.0.1:<ephemeral-port>->127.0.0.1:<ephemeral-port>: i/o timeout\n--- PASS: TestTerminalWSDisconnectsASilentClient (0.16s)\n--- PASS: TestChatWSDisconnectsASilentClient (0.16s)\nPASS\n"
+  },
+  "reproduction_harness": {
+    "instruction": "For reproduction in equivalent existing worktrees, write source below to /tmp/native-herdr-ws-diagnose.py and run the three diagnostic commands. It creates temporary overlays/binaries only, never edits repository implementation or tests. No test result is cached by the explicit count settings.",
+    "sha256": "f857679b27393f6187074307ce1c9797f41bd8ac248689198aadaa0b6615479e",
+    "source": "import json\nimport os\nimport pathlib\nimport signal\nimport subprocess\nimport sys\nimport time\n\nmode = sys.argv[1]\nrepo = pathlib.Path('/workspace/memoh-herdr-baseline' if mode != 'candidate' else '/workspace/memoh-herdr')\nout = pathlib.Path('/tmp/native-herdr-ws-diagnose') / mode\nout.mkdir(parents=True, exist_ok=True)\nterminal = (repo / 'internal/handlers/containerd_terminal.go').read_text()\nterminal = terminal.replace('\"encoding/json\"', '\"encoding/json\"\\n \"fmt\"')\nterminal = terminal.replace('heartbeat := h.wsHeartbeat.orDefault()', 'diagStart := time.Now()\\n heartbeat := h.wsHeartbeat.orDefault()')\nterminal = terminal.replace('keepalive := heartbeat.start(conn)', 'keepalive := heartbeat.start(conn)\\n fmt.Printf(\"DIAG_ARMED read=%v idle=%v\\\\n\", heartbeat.readTimeout, idleTimeout)')\nterminal = terminal.replace('h.logger.InfoContext(ctx, \"terminal idle timeout reached, closing\",', 'fmt.Printf(\"DIAG_IDLE elapsed=%v pongs=%d\\\\n\", time.Since(diagStart), keepalive.diagPongs.Load())\\n h.logger.InfoContext(ctx, \"terminal idle timeout reached, closing\",')\nterminal = terminal.replace('if readErr != nil {\\n\\t\\t\\t\\t_ = execStream.Close()', 'if readErr != nil {\\n fmt.Printf(\"DIAG_READ_END elapsed=%v since_extend=%v pongs=%d error=%T:%v\\\\n\", time.Since(diagStart), time.Since(time.Unix(0,keepalive.diagExtended.Load())), keepalive.diagPongs.Load(), readErr, readErr)\\n\\t\\t\\t\\t_ = execStream.Close()')\nheartbeat = (repo / 'internal/handlers/websocket.go').read_text()\nheartbeat = heartbeat.replace('\"errors\"', '\"errors\"\\n \"fmt\"\\n \"sync/atomic\"')\nheartbeat = heartbeat.replace('type wsKeepalive struct {', 'type wsKeepalive struct {\\n diagExtended atomic.Int64\\n diagPongs atomic.Int64')\nheartbeat = heartbeat.replace('conn.SetPongHandler(func(string) error {', 'conn.SetPongHandler(func(string) error {\\n k.diagPongs.Add(1)')\nheartbeat = heartbeat.replace('func (k *wsKeepalive) extend() {', 'func (k *wsKeepalive) extend() {\\n k.diagExtended.Store(time.Now().UnixNano())')\nheartbeat = heartbeat.replace('if err := k.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(writeTimeout)); err != nil {\\n\\t\\t\\t\\treturn', 'if err := k.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(writeTimeout)); err != nil {\\n fmt.Printf(\"DIAG_PING_ERROR error=%T:%v\\\\n\", err, err)\\n\\t\\t\\t\\treturn')\nreplacements = {}\nfor name, content in [('containerd_terminal.go', terminal), ('websocket.go', heartbeat)]:\n    dest = out / name\n    dest.write_text(content)\n    replacements[str(repo / 'internal/handlers' / name)] = str(dest)\nif mode == 'fixed-budget':\n    tests = (repo / 'internal/handlers/containerd_terminal_test.go').read_text()\n    old = 'client, _ := openTestTerminal(t, terminalTestHandler(idle), newFakeTerminalStream(false))'\n    new = 'testHandler := terminalTestHandler(idle)\\n testHandler.wsHeartbeat.readTimeout = 10 * idle\\n testHandler.wsHeartbeat.writeTimeout = idle\\n client, _ := openTestTerminal(t, testHandler, newFakeTerminalStream(false))'\n    assert tests.count(old) == 1\n    dest = out / 'containerd_terminal_test.go'\n    dest.write_text(tests.replace(old, new))\n    replacements[str(repo / 'internal/handlers/containerd_terminal_test.go')] = str(dest)\noverlay = out / 'overlay.json'\noverlay.write_text(json.dumps({'Replace': replacements}, indent=2))\nenv = os.environ.copy()\nenv.update(GOPATH='/workspace/cache/go', GOCACHE='/workspace/cache/go-build')\nbinary = out / 'handlers.test'\nbuild = subprocess.run(['/workspace/toolchains/go/bin/go', 'test', '-race', '-overlay=' + str(overlay), '-c', '-o', str(binary), './internal/handlers'], cwd=repo, env=env, capture_output=True, text=True)\n(out / 'build.log').write_text(build.stdout + build.stderr)\nif build.returncode:\n    print(build.stdout + build.stderr)\n    sys.exit(build.returncode)\nresults = []\nfor attempt in range(2):\n    proc = subprocess.Popen([str(binary), '-test.run=^TestTerminalWSPongsDoNotCountAsActivity$', '-test.count=1', '-test.v'], cwd=repo, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)\n    lines = []\n    stalled = False\n    try:\n        for line in proc.stdout:\n            lines.append(line)\n            if 'DIAG_ARMED' in line and not stalled:\n                time.sleep(0.100)\n                os.kill(proc.pid, signal.SIGSTOP)\n                try:\n                    time.sleep(0.200)\n                finally:\n                    os.kill(proc.pid, signal.SIGCONT)\n                stalled = True\n        code = proc.wait(timeout=10)\n    finally:\n        if proc.poll() is None:\n            os.kill(proc.pid, signal.SIGCONT)\n            proc.terminate()\n            proc.wait(timeout=5)\n    log = ''.join(lines)\n    (out / f'controlled-stall-{attempt + 1}.log').write_text(log)\n    results.append({'attempt': attempt + 1, 'exit_code': code, 'controlled_stall': stalled, 'log': log})\nresult = {'mode': mode, 'repository': str(repo), 'overlay_only': True, 'pause_after_armed_ms': 100, 'pause_duration_ms': 200, 'results': results}\n(out / 'result.json').write_text(json.dumps(result, indent=2))\nprint(json.dumps(result, indent=2))\n"
+  }
+}

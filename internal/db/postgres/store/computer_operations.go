@@ -218,3 +218,34 @@ func (s *Store) PreviousComputerPiOperation(ctx context.Context, r dbstore.Compu
 	row, err := s.queries.PreviousComputerPiOperation(ctx, dbsqlc.PreviousComputerPiOperationParams{ID: ids[0], BotID: ids[1], SessionID: ids[2], UserID: ids[3], TargetID: ids[4], PiSessionID: session})
 	return operationRecord(row), mapQueryErr(err)
 }
+
+// OwnedNativeHerdrRuntime returns only an activated native runtime owned by this
+// account. Herdr profile validation belongs to the computer service.
+func (s *Store) OwnedNativeHerdrRuntime(ctx context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
+	user, err := db.ParseUUID(owner)
+	if err != nil {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	runtime, err := db.ParseUUID(id)
+	if err != nil {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	row, err := s.queries.GetOwnedNativeHerdrRuntime(ctx, dbsqlc.GetOwnedNativeHerdrRuntimeParams{ID: runtime, UserID: user})
+	return userRuntimeRecord(row), mapQueryErr(err)
+}
+
+// ConfigureNativeHerdrRuntime compares the complete provider config so a stale
+// owner request cannot overwrite a newer instance mapping. Admission triggers
+// protect an already paused mapping inside this same transaction.
+func (s *Store) ConfigureNativeHerdrRuntime(ctx context.Context, owner, id string, previous, next dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
+	user, err := db.ParseUUID(owner)
+	if err != nil {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	runtime, err := db.ParseUUID(id)
+	if err != nil {
+		return dbstore.UserRuntimeRecord{}, err
+	}
+	row, err := s.queries.UpdateNativeHerdrRuntimeConfig(ctx, dbsqlc.UpdateNativeHerdrRuntimeConfigParams{ID: runtime, UserID: user, ExpectedConfig: previous, ProviderConfig: next})
+	return userRuntimeRecord(row), mapQueryErr(err)
+}

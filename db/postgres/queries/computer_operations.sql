@@ -63,3 +63,15 @@ AND session_id=sqlc.arg(session_id) AND user_id=sqlc.arg(user_id)
 AND target_id=sqlc.arg(target_id) AND id<>sqlc.arg(id)
 AND details->'batch'->'progress'->>'pi_session_id'=sqlc.arg(pi_session_id)::text
 ORDER BY created_at DESC, id DESC LIMIT 1;
+
+-- name: GetOwnedNativeHerdrRuntime :one
+SELECT * FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
+AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id) AND provider='memoh' AND revoked_at IS NULL
+AND activated_at IS NOT NULL;
+
+-- name: UpdateNativeHerdrRuntimeConfig :one
+UPDATE user_runtimes SET provider_config=sqlc.arg(provider_config),updated_at=now()
+WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id)
+AND provider='memoh' AND revoked_at IS NULL AND activated_at IS NOT NULL
+AND provider_config=sqlc.arg(expected_config)
+RETURNING *;
