@@ -21,7 +21,7 @@ interface DeploymentConfig {
   apiOrigin: string
   hapDownloadUrl: string
   productName: string
-  legacyBinding?: { schemaVersion: 1; bundleName: string; versionCode: number; sourceHapSHA256: string; apiBaseSHA256: string } | null
+  legacyBinding?: { schemaVersion: 1; bundleName: string; versionCode: number; sourceHapSHA256: string; apiBaseSHA256: string; apiOrigin?: string } | null
 }
 
 // Read only from the signed application's packaged resource. Never fetch a
@@ -35,7 +35,11 @@ export async function readDeploymentConfig(): Promise<unknown> {
 
 export async function applyDeploymentConfig(raw: unknown, storage: Storage = localStorage): Promise<ServiceConfig | null> {
   const current = readServiceConfig(storage)
-  if (current) return current // A later package must never replace user configuration.
+  // Only a locally signed, explicit old-origin binding may upgrade persisted
+  // HTTP. Ordinary seeds must never replace user configuration.
+  const upgradeRequested = !!raw && typeof raw === 'object' && 'legacyBinding' in raw &&
+    !!raw.legacyBinding && typeof raw.legacyBinding === 'object' && 'apiOrigin' in raw.legacyBinding
+  if (current && !upgradeRequested) return current
   if (!raw || typeof raw !== 'object' || Array.isArray(raw) ||
     Object.keys(raw).some(key => !['apiOrigin', 'hapDownloadUrl', 'productName', 'legacyBinding'].includes(key))) throw new Error('DEPLOYMENT_CONFIG_INVALID')
   const value = raw as DeploymentConfig
@@ -51,18 +55,33 @@ export async function applyDeploymentConfig(raw: unknown, storage: Storage = loc
   if (value.legacyBinding != null) {
     const binding = value.legacyBinding
     const keys = ['schemaVersion', 'bundleName', 'versionCode', 'sourceHapSHA256', 'apiBaseSHA256']
-    if (typeof binding !== 'object' || Array.isArray(binding) || Object.keys(binding).length !== keys.length ||
-      Object.keys(binding).some(key => !keys.includes(key)) || binding.schemaVersion !== 1 ||
+    if (typeof binding !== 'object' || Array.isArray(binding) || Object.keys(binding).length !== keys.length + (upgradeRequested ? 1 : 0) ||
+      Object.keys(binding).some(key => !keys.includes(key) && !(upgradeRequested && key === 'apiOrigin')) || binding.schemaVersion !== 1 ||
       binding.bundleName !== 'cloud.begonia.workassistant' || binding.versionCode !== 1000006 ||
       typeof binding.sourceHapSHA256 !== 'string' || !/^[a-f0-9]{64}$/.test(binding.sourceHapSHA256) ||
       typeof binding.apiBaseSHA256 !== 'string' || !/^[a-f0-9]{64}$/.test(binding.apiBaseSHA256)) throw new Error('DEPLOYMENT_LEGACY_INVALID')
-    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(apiOrigin)))
+    const boundOrigin = upgradeRequested ? normalizeServiceUrl(binding.apiOrigin as string) : apiOrigin
+    if (upgradeRequested) {
+      const old = new URL(boundOrigin), next = new URL(apiOrigin)
+      if (boundOrigin !== binding.apiOrigin || old.protocol !== 'http:' || next.protocol !== 'https:' ||
+        old.hostname !== next.hostname || old.pathname !== next.pathname) throw new Error('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
+    }
+    const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(boundOrigin)))
     const actual = Array.from(digest, byte => byte.toString(16).padStart(2, '0')).join('')
     if (actual !== binding.apiBaseSHA256) throw new Error('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
-    legacy = { apiOrigin }
+    legacy = { apiOrigin: boundOrigin }
   }
   // A concurrent configuration write also wins over the package seed.
   const latest = readServiceConfig(storage)
+  if (upgradeRequested) {
+    if (JSON.stringify(latest) !== JSON.stringify(current)) throw new Error('SERVICE_CONFIG_CHANGED')
+    if (!legacy) throw new Error('DEPLOYMENT_LEGACY_INVALID')
+    if (latest?.apiOrigin === apiOrigin && !latest.resetPending) return latest
+    if (latest && (latest.apiOrigin !== legacy.apiOrigin || latest.resetPending)) throw new Error('SERVICE_LEGACY_ORIGIN_CHANGED')
+    const upgraded: ServiceConfig = { version: 1, apiOrigin, hapDownloadUrl: latest?.hapDownloadUrl || download, resetPending: false }
+    writeConfig(upgraded, storage)
+    return upgraded
+  }
   return latest ?? saveServiceConfig(apiOrigin, download, storage, legacy)
 }
 

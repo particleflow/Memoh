@@ -1,4 +1,4 @@
-import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, readServiceConfig, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
+import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
 import './harmony-service.css'
 
 type Bridge = { request: (raw: string) => Promise<string> }
@@ -79,8 +79,7 @@ function form(current: ServiceConfig | null, message = '') {
 async function start() {
   try {
     await nativeCommand('client.configuration') // Close transfers before any config UI or app imports.
-    let value = readServiceConfig()
-    if (!value) value = await applyDeploymentConfig(await readDeploymentConfig())
+    const value = await applyDeploymentConfig(await readDeploymentConfig())
     if (!value || sessionStorage.getItem(EDIT_SERVICE_KEY) === '1') form(value)
     else await boot(value)
   } catch { form(null, '安装包配置或本地存储未能通过核对，已停止连接。请检查 Windows 配置与签名步骤；原登录和本地数据未更改。') }

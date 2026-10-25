@@ -84,11 +84,17 @@ def deployment_config(value, allow_empty=False):
     binding = value.get('legacyBinding')
     if binding is not None:
         fields = {'schemaVersion', 'bundleName', 'versionCode', 'sourceHapSHA256', 'apiBaseSHA256'}
-        if not isinstance(binding, dict) or set(binding) != fields or binding['schemaVersion'] != 1 or binding['bundleName'] != DEPLOYMENT_BUNDLE or binding['versionCode'] != 1000006:
+        if not isinstance(binding, dict) or set(binding) not in (fields, fields | {'apiOrigin'}) or binding['schemaVersion'] != 1 or binding['bundleName'] != DEPLOYMENT_BUNDLE or binding['versionCode'] != 1000006:
             raise ValueError('DEPLOYMENT_LEGACY_IDENTITY')
         if any(not isinstance(binding[k], str) or not re.fullmatch('[a-f0-9]{64}', binding[k]) for k in ('sourceHapSHA256', 'apiBaseSHA256')):
             raise ValueError('DEPLOYMENT_LEGACY_DIGEST')
-        if not api or hashlib.sha256(api.encode()).hexdigest() != binding['apiBaseSHA256']:
+        bound_api = api
+        if 'apiOrigin' in binding:
+            bound_api = public_url(binding['apiOrigin'], 'apiOrigin')
+            old, new = urlsplit(bound_api), urlsplit(api)
+            if bound_api != binding['apiOrigin'] or old.scheme != 'http' or new.scheme != 'https' or old.hostname != new.hostname or old.path != new.path:
+                raise ValueError('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
+        if not api or hashlib.sha256(bound_api.encode()).hexdigest() != binding['apiBaseSHA256']:
             raise ValueError('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
     return {'apiOrigin': api, 'hapDownloadUrl': download, 'productName': name, 'legacyBinding': binding}
 
