@@ -1,0 +1,78 @@
+[hooks] Hook regression tests: /workspace/.memoh-cloud/tooling/node_modules/node/bin/node --test scripts/hook-checks.test.mjs
+✔ frontend (2.555783ms)
+✔ hook test script (0.286943ms)
+✔ docs (0.138038ms)
+✔ Go package (0.227022ms)
+✔ deduplicate (0.279681ms)
+✔ embedded prompt (0.167012ms)
+✔ template (0.155304ms)
+✔ mixed (0.185109ms)
+✔ workspace Dockerfile (0.300853ms)
+✔ OpenAPI contract (1.511188ms)
+✔ display assets (0.171308ms)
+✔ runtime configuration (0.121342ms)
+✔ dependency (0.122434ms)
+✔ SQL inputs (0.070476ms)
+✔ deleted package (0.037216ms)
+✔ rename old and new paths (0.03324ms)
+✔ UI submodule (0.029024ms)
+✔ toolchain (0.028203ms)
+✔ frontend configuration (0.029204ms)
+✔ root Go package (0.027391ms)
+✔ explicit full checks (0.075154ms)
+✔ only staged files select checks; spaces are preserved (77.430789ms)
+✔ file size uses the index, not a smaller working copy (79.359802ms)
+✔ large generated Swagger artifacts retain their package checks (278.019563ms)
+✔ ordinary oversized file remains rejected: spec/notes.json (63.316873ms)
+✔ ordinary oversized file remains rejected: spec/nested/swagger.json (61.932381ms)
+✔ ordinary oversized file remains rejected: docs/swagger.json (64.754441ms)
+✔ ordinary oversized file remains rejected: packages/sdk/src/other.gen.ts (55.052654ms)
+✔ ordinary oversized file remains rejected: uploads/large.bin (71.974965ms)
+✔ ordinary file at the unchanged 1 MiB boundary is accepted (65.396692ms)
+✔ frontend calls lint-staged without Go (94.985151ms)
+✔ Go package checks run sequentially and failures stop the chain (295.937164ms)
+✔ timeout fails rather than silently skipping checks (1188.424159ms)
+✔ full mode runs all three checks even without staged changes (135.561294ms)
+✔ deleted resource still selects its package through the index (53.525803ms)
+✔ build-excluded packages do not invoke lint or test (80.760412ms)
+✔ packages that remain after build selection still run checks (135.222953ms)
+✔ ordinary package failures are not hidden by selection (139.65904ms)
+✔ real Go build constraints skip tag-only packages and honor GOFLAGS (647.744227ms)
+✔ manual checks from a subdirectory select and run packages at the root (123.47948ms)
+✔ dependency-only commits explicitly require CI without invoking Go (50.432341ms)
+✔ lint rejects import paths even when Go accepts them (103.513965ms)
+ℹ tests 42
+ℹ suites 0
+ℹ pass 42
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3953.410877
+[hooks] Hook regression tests: 4.00s
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (debf648a)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 9 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 4.86s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/botdelegation ./internal/db ./internal/handlers ./spec
+[hooks] Go package selection: 0.17s
+[hooks] Go lint: golangci-lint run --concurrency=2 /tmp/memoh-candidate-7bcb-review/internal/botdelegation /tmp/memoh-candidate-7bcb-review/internal/db /tmp/memoh-candidate-7bcb-review/internal/handlers /tmp/memoh-candidate-7bcb-review/spec
+[hooks] Go lint: 121.06s
+[hooks] Go test: go test -p=2 -timeout=180s /tmp/memoh-candidate-7bcb-review/internal/botdelegation /tmp/memoh-candidate-7bcb-review/internal/db /tmp/memoh-candidate-7bcb-review/internal/handlers /tmp/memoh-candidate-7bcb-review/spec
+ok  	github.com/felinics/memoh/internal/botdelegation	0.079s
+ok  	github.com/felinics/memoh/internal/db	0.011s
+ok  	github.com/felinics/memoh/internal/handlers	4.237s
+?   	github.com/felinics/memoh/spec	[no test files]
+[hooks] Go test: 16.51s
+[hooks] Total: 146.60s

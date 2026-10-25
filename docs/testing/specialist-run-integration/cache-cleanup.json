@@ -1,0 +1,42 @@
+{
+  "scope": "Seven task-owned regenerable Go build-cache data entries only",
+  "files": [
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/fe/fe8e2c4d0d69db45825c12f9eb096ef541a31d152f6cfb3972825810b5483904-d",
+      "bytes": 166756238,
+      "mtime": 1792861919.492655
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/b9/b96af860d1b033bf0b91918c0e51aee126dbfdb1c9b496fd0715038d80f0e26a-d",
+      "bytes": 166895074,
+      "mtime": 1792864069.9543965
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/76/76c2e0f5ee26781e1cd5b558ab779301fc4f7ccae3bb1d65e1787bf105549db6-d",
+      "bytes": 166677228,
+      "mtime": 1792857136.0441523
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/48/486bf1eb42b6ca7ab17761b805fc8a11df3d43e5530e1c1bfaf29e40e55e7e6d-d",
+      "bytes": 55647286,
+      "mtime": 1792861396.563193
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/43/43dae391f0351b3ac1d73039880fa605d241f5637579e6015069e3ca4a9e709e-d",
+      "bytes": 166754298,
+      "mtime": 1792861411.8523011
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/27/278b1e4ce410ca415ec906da60d22c68f987a8183075cdd9e71d9f9aa77808f0-d",
+      "bytes": 62718504,
+      "mtime": 1792849030.5043383
+    },
+    {
+      "path": "/tmp/web-observation-reconnect/go-cache/0e/0e7491343e760caef70be4430d01ee05f68adb12df0e2229b9fda52c4588c512-d",
+      "bytes": 166894974,
+      "mtime": 1792863945.0240605
+    }
+  ],
+  "removed": true,
+  "removed_bytes": 952343602
+}
