@@ -584,7 +584,7 @@ export const useChatStore = defineStore('chat', () => {
 
   return {
     messages, chatView, bindChatView, setChatViewVisible, unbindChatView,
-    focusChatView, promoteDraftChatView, chatTargetFor,
+    runtimeObservationFor: realtime.runtimeObservation, focusChatView, promoteDraftChatView, chatTargetFor,
     workspaceTargetSelectionFor, setWorkspaceTargetSelection,
     initializeWorkspaceTargetSelection, resetWorkspaceTargetSelection,
     chatReadOnlyFor, chatCanForkFor, isChatViewStreaming,

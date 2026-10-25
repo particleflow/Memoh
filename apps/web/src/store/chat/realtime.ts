@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import { useRetryingStream } from '@/composables/useRetryingStream'
 import {
   connectWebSocket,
@@ -75,10 +76,12 @@ export function createChatRealtimeController(
   let botSessionsActivityGeneration = 0
   let activityStreamBotId = ''
   const sessionRuntimeConnections = new Map<string, SessionRuntimeConnection>()
+  const observationVersion = ref(0)
   const botSessionsActivityStream = transport.createRetryingStream()
   const runtimeClient = createRuntimeClient({
     send: message => activeWebSocket?.send(message),
     onProjection: (sessionId, change) => {
+      observationVersion.value++
       const botId = activeWebSocketBotId
       const connection = botId
         ? sessionRuntimeConnections.get(sessionRuntimeKey(botId, sessionId))
@@ -102,6 +105,7 @@ export function createChatRealtimeController(
     activeWebSocket = null
     activeWebSocketBotId = ''
     runtimeClient.onDisconnected()
+    observationVersion.value++
     socket?.close()
   }
 
@@ -117,6 +121,7 @@ export function createChatRealtimeController(
         if (generation !== webSocketGeneration || activeWebSocketBotId !== bid) return
         if (isRuntimeEvent(event)) {
           runtimeClient.handleEvent(event)
+          observationVersion.value++
           return
         }
         callbacks.onWebSocketEvent(bid, event)
@@ -124,10 +129,12 @@ export function createChatRealtimeController(
       socket.onOpen = () => {
         if (generation !== webSocketGeneration || activeWebSocketBotId !== bid) return
         runtimeClient.onConnected()
+        observationVersion.value++
       }
       socket.onClose = () => {
         if (generation !== webSocketGeneration || activeWebSocketBotId !== bid) return
         runtimeClient.onDisconnected()
+        observationVersion.value++
         callbacks.onWebSocketClosed?.(bid)
       }
       activeWebSocket = socket
@@ -194,6 +201,7 @@ export function createChatRealtimeController(
         runtimeClient.unsubscribe(sid)
       }
       sessionRuntimeConnections.clear()
+      observationVersion.value += 1
       return
     }
 
@@ -206,6 +214,7 @@ export function createChatRealtimeController(
     sessionRuntimeConnections.delete(key)
     connection.resolveInitialSnapshot?.()
     runtimeClient.unsubscribe(sid)
+    observationVersion.value += 1
   }
 
   function startSessionRuntime(botId: string, sessionId: string) {
@@ -296,6 +305,15 @@ export function createChatRealtimeController(
     stopBotSessionsActivityStream()
   }
 
+  function runtimeObservation(botId: string, sessionId: string) {
+    void observationVersion.value
+    const state = runtimeClient.projection(sessionId)
+    const synchronized = activeWebSocketBotId === botId
+      && runtimeClient.synchronized(sessionId)
+      && state?.botId === botId && state.sessionId === sessionId
+    return { synchronized, run: synchronized ? state.currentRunView : null }
+  }
+
   return {
     startWebSocket,
     stopWebSocket,
@@ -309,5 +327,6 @@ export function createChatRealtimeController(
     startBotSessionsActivityStream,
     stopStreams,
     runtimeProjection: runtimeClient.projection,
+    runtimeObservation,
   }
 }

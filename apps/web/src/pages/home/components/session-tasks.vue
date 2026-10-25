@@ -17,6 +17,7 @@ import { useBotDelegationDownload } from '../composables/useBotDelegationDownloa
 import { useBotDelegationDelivery } from '../composables/useBotDelegationDelivery'
 import BotDelegationTasks from './bot-delegation-tasks.vue'
 import SessionTaskResults from './session-task-results.vue'
+import SessionBotRun from './session-bot-run.vue'
 
 const props = defineProps<{ botId: string, sessionId: string, selection: string, visible: boolean }>()
 const { t } = useI18n()
@@ -182,6 +183,12 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
           </TabsContent>
           <TabsContent value="execution">
             <DialogDescription>{{ t('chat.tasks.description') }}</DialogDescription>
+            <SessionBotRun
+              v-if="!selected"
+              :bot-id="botId"
+              :session-id="sessionId"
+              :visible="visible && group === 'execution'"
+            />
             <SessionTaskResults
               :items="items"
               :detail="detail"

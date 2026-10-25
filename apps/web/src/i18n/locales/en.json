@@ -1087,7 +1087,7 @@
       "businessUnknown": "Business completion remains unverified.",
       "cancelIntent": "Cancellation was requested; this does not confirm termination.",
       "filteredPage": "No accessible tasks on this page. Continue to the next page.",
-      "empty": "No recorded tasks.",
+      "empty": "No subagent or computer tasks are recorded.",
       "newest": "Back to newest",
       "next": "Next page",
       "types": {
@@ -2126,6 +2126,23 @@
         "usageLimited": "Usage limit reached",
         "budgetLimited": "Token budget reached",
         "complete": "Goal completed"
+      }
+    },
+    "botRun": {
+      "title": "Latest Bot run in this conversation",
+      "unavailable": "Run state is not synchronized. It will update when the conversation reconnects.",
+      "empty": "No Bot run is recorded in the current snapshot.",
+      "configuration": "The latest activity is a configuration change, not a task run.",
+      "aborting": "Cancellation in progress",
+      "runError": "This run recorded an error.",
+      "boundary": "Run status and tool results are separate. A finished run does not confirm an unreturned tool result.",
+      "content": "View run content and tools",
+      "noContent": "No visible content is available in the received record.",
+      "tools": {
+        "failed": "Tool returned an error",
+        "received": "Tool result received",
+        "running": "Tool is running",
+        "unconfirmed": "Tool result unconfirmed"
       }
     }
   },

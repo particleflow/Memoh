@@ -8,7 +8,7 @@ import en from '@/i18n/locales/en.json'
 import SessionTasks from './session-tasks.vue'
 import { client } from '@memohai/sdk/client'
 const navigation = vi.hoisted(() => ({ bot: 'wrong-global-bot', select: vi.fn(), push: vi.fn(), open: vi.fn() }))
-vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ get currentBotId() { return navigation.bot }, selectBot: navigation.select }) }))
+vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ get currentBotId() { return navigation.bot }, selectBot: navigation.select, runtimeObservationFor: () => ({ synchronized: false, run: null }) }) }))
 vi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: {}, openSessionChat: navigation.open }) }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: navigation.push }) }))
 

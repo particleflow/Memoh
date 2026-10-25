@@ -46,6 +46,29 @@ function createHarness() {
 }
 
 describe('runtime client', () => {
+  it('exposes synchronized reads only for a subscribed session with a current snapshot', () => {
+    const { client } = createHarness()
+    client.subscribe('session-1')
+    expect(client.synchronized('session-1')).toBe(false)
+    client.onConnected()
+    expect(client.synchronized('session-1')).toBe(false)
+    client.handleEvent(snapshot())
+    expect(client.synchronized('session-1')).toBe(true)
+    expect(client.synchronized('session-2')).toBe(false)
+    client.onDisconnected()
+    expect(client.synchronized('session-1')).toBe(false)
+    client.onConnected()
+    expect(client.synchronized('session-1')).toBe(false)
+    client.handleEvent(snapshot())
+    expect(client.synchronized('session-1')).toBe(true)
+    client.handleEvent(delta(5))
+    expect(client.synchronized('session-1')).toBe(false)
+    client.handleEvent(snapshot(5))
+    expect(client.synchronized('session-1')).toBe(true)
+    client.unsubscribe('session-1')
+    expect(client.synchronized('session-1')).toBe(false)
+  })
+
   it('subscribes on connect and resumes from its last authoritative cursor', () => {
     const { client, sent } = createHarness()
     client.subscribe('session-1')

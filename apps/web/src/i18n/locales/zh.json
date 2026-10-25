@@ -1087,7 +1087,7 @@
       "businessUnknown": "业务是否完成仍需核实。",
       "cancelIntent": "已请求取消，但尚不能据此确认进程终止。",
       "filteredPage": "本页没有可查看的任务，可继续下一页。",
-      "empty": "暂无任务记录。",
+      "empty": "暂无子 Agent 或电脑任务记录。",
       "newest": "返回最新",
       "next": "下一页",
       "types": {
@@ -2126,6 +2126,23 @@
         "usageLimited": "已达到用量上限",
         "budgetLimited": "已达到 Token 预算",
         "complete": "目标已完成"
+      }
+    },
+    "botRun": {
+      "title": "本会话最近一次 Bot 运行",
+      "unavailable": "运行状态尚未同步，会话重新连接后会更新。",
+      "empty": "当前快照没有已记录的 Bot 运行。",
+      "configuration": "最近活动是配置变更，不是任务运行。",
+      "aborting": "正在取消",
+      "runError": "本次运行记录了错误。",
+      "boundary": "运行状态与工具结果分别记录；运行结束不代表尚未返回的工具结果已确认。",
+      "content": "查看运行内容与工具",
+      "noContent": "已收到的记录中暂无可见内容。",
+      "tools": {
+        "failed": "工具返回错误",
+        "received": "已收到工具结果",
+        "running": "工具正在运行",
+        "unconfirmed": "工具结果未确认"
       }
     }
   },

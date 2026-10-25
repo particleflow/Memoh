@@ -1,3 +1,4 @@
+import { computed } from 'vue'
 import { describe, expect, it, vi } from 'vitest'
 import type {
   BotSessionActivityEvent,
@@ -95,6 +96,35 @@ async function flushPromises() {
 }
 
 describe('chat realtime controller', () => {
+  it('reactively exposes the authorized native run without sending new work or leaking stale scope', async () => {
+    const { controller, sockets } = makeController()
+    controller.startWebSocket('bot-1')
+    controller.startSessionRuntime('bot-1', 'session-1')
+    await flushPromises()
+    const observation = computed(() => controller.runtimeObservation('bot-1', 'session-1'))
+    expect(observation.value.synchronized).toBe(false)
+    const frame = {
+      type: 'runtime_snapshot' as const, session_id: 'session-1', epoch: 'epoch-1', seq: 1,
+      snapshot: { bot_id: 'bot-1', session_id: 'session-1', epoch: 'epoch-1', seq: 1,
+        updated_at: '2026-10-25T00:00:01Z', current_run_view: {
+          run_id: 'run-a', turn_id: 'turn-a', generation: 'generation-a', status: 'aborted' as const,
+          started_at: '2026-10-25T00:00:00Z', updated_at: '2026-10-25T00:00:01Z', messages: [],
+        } },
+    }
+    sockets[0]!.handler(frame)
+    expect(observation.value.run?.run_id).toBe('run-a')
+    expect(controller.runtimeObservation('bot-2', 'session-1').run).toBeNull()
+    sockets[0]!.socket.onClose?.()
+    expect(observation.value.run).toBeNull()
+    sockets[0]!.socket.onOpen?.()
+    expect(observation.value.run).toBeNull()
+    sockets[0]!.handler(frame)
+    expect(observation.value.run?.run_id).toBe('run-a')
+    controller.stopSessionRuntime('bot-1', 'session-1')
+    expect(observation.value.run).toBeNull()
+    expect(sockets[0]!.socket.send.mock.calls.every(([message]) => ['runtime_subscribe', 'runtime_unsubscribe'].includes(message.type))).toBe(true)
+  })
+
   it('closes the previous websocket and rejects events from its generation', () => {
     const { controller, callbacks, sockets } = makeController()
     controller.startWebSocket('bot-1')
