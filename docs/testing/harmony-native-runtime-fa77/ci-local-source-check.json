@@ -1,0 +1,9 @@
+{
+  "sharedCommit": "fa77a073fe6380d297474a6053a1445201bcab83",
+  "sourceSHA256": "43759626ce3700e210c29f91f739e5373e08f8a625939f2ec145269e850bef32",
+  "existingPhoneAdaptationsUnchanged": 43,
+  "testAdaptations": 1,
+  "publicConfigurationEmpty": true,
+  "fullTypecheckCommand": "pnpm --filter @memohai/web typecheck",
+  "hapCompiled": false
+}

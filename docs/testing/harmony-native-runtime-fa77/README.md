@@ -217,3 +217,40 @@ license wording identical. The manifest now hashes the Git LF bytes and retains
 the original CRLF hash separately. No license term, source SDK, product adapter
 or HAP changed. The previous local source check passed against its CRLF working
 copy; that was not evidence that a fresh Git checkout would pass.
+
+## Generated-context CI gate
+
+The existing Go/ESLint/Docker PR workflows do not include this PR's recovery
+base branch. Their skipped governance jobs were never a remote validation pass.
+The [Harmony Source CI workflow](../../../.github/workflows/harmony-source-ci.yml)
+now targets pull requests into `recovery/harmony-source-20261023` and checks out
+the exact PR head, without stored checkout credentials or deployment permissions.
+
+It runs [the source/context check](../../../scripts/check-harmony-source.py),
+using the existing source preparer and builder. The 43 adaptation hashes in
+[the baseline](generated-web-baseline.json) were reproduced with the builder
+from `9fdff87bd8f65d048537ca4cfda77bcdaeae3674` and the fixed fa77 source. The
+additional attachment test adapter is checked separately. Only the existing
+public source archives and pinned pnpm Web dependencies are needed; no SDK,
+HAP build, signing, private configuration or production service is involved.
+
+The blocking commands run inside the complete generated checkout:
+
+```sh
+pnpm --filter @memohai/web typecheck
+pnpm test --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts
+pnpm exec eslint apps/web/src/pages/home/components/session-task-results.test.ts
+```
+
+There is no `continue-on-error`. Local logs and the GitHub check for a specific
+head are separate evidence; a pending or skipped remote job is not a pass.
+The review commit `51de6332ffaa255b98f000e0fb1a54961967e834` was cherry-picked as
+`1bbc67ed9ad60543ffc88ca60ada56b3aa838331` after the initial local fix. Its explicit
+fixture guards are retained verbatim, together with the later documentation
+and original-versus-Git license hash evidence.
+
+The local replay of this gate used the new isolated checkout and the reviewed
+fixture: [source check](ci-local-source-check.json), [full types](ci-full-typecheck.txt),
+[12 attachment checks](ci-attachment-tests.txt), and [lint](ci-attachment-eslint.txt)
+passed (lint: zero errors, three fixture warnings). This is local evidence,
+not the status of the remote check.
