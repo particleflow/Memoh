@@ -3,6 +3,7 @@ import { computed, inject, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button, Empty, EmptyDescription, InlineLoadingRow, Item, ItemContent, ItemTitle, ItemDescription } from '@felinic/ui'
 import NativeTaskContent from './native-task-content.vue'
+import ComputerTaskCheckpoints from './computer-task-checkpoints.vue'
 import type { NativeTaskView } from '../composables/useNativeTask'
 import type { ComputerTaskObservationView } from '../composables/useComputerTaskObservation'
 import type { ComputerTaskDeliveryView } from '../composables/useComputerTaskDeliveries'
@@ -34,7 +35,7 @@ const emit = defineEmits<{
   refresh: []
   assetOpened: []
 }>()
-const { t, te } = useI18n()
+const { t } = useI18n()
 // Use the same attachment resolver, preview host and browser download as chat.
 // No task credential or per-file preflight: native media rechecks Bot access.
 const preview = inject(openAssetPreviewKey, undefined)
@@ -69,10 +70,7 @@ watch(mediaItems, (items, previous) => {
 
 const errorMessage = computed(() => readError(props.error, 'chat.tasks.unsupported', 'chat.tasks.loadFailed'))
 const observationError = computed(() => readError(props.observation?.error, 'chat.tasks.observation.unsupported', 'chat.tasks.observation.loadFailed'))
-function nativeLabel(group: string, value?: string) {
-  const key = `chat.tasks.observation.${group}.${value ?? 'unknown'}`
-  return te(key) ? t(key) : t(`chat.tasks.observation.${group}.unknown`)
-}
+
 const deliveriesError = computed(() => readError(props.deliveries?.error, 'chat.tasks.files.unsupported', 'chat.tasks.files.loadFailed'))
 function readError(error: unknown, unsupported: string, fallback: string) {
   const code = parseMemohError(error)?.code
@@ -156,33 +154,11 @@ function taskLabel(task: SessiontaskTask) {
         <InlineLoadingRow v-else-if="observation.loading && !observation.data">
           {{ t('common.loading') }}
         </InlineLoadingRow>
-        <template v-else-if="observation.data">
-          <p class="text-body">
-            {{ nativeLabel('availability', observation.data.native?.availability) }}
-          </p>
-          <p class="text-body">
-            {{ t('chat.tasks.observation.agentState', { state: nativeLabel('states', observation.data.native?.agent_status) }) }}
-          </p>
-          <p class="text-body text-muted-foreground">
-            {{ nativeLabel('match', observation.data.native?.reference_match) }}
-          </p>
-          <dl class="space-y-1 text-body break-all">
-            <div
-              v-for="field in ['target_id', 'workspace_id', 'pane_id', 'pi_session_id'] as const"
-              :key="field"
-            >
-              <template v-if="observation.data[field]">
-                <dt class="text-muted-foreground">
-                  {{ t(`chat.tasks.observation.fields.${field}`) }}
-                </dt>
-                <dd>{{ observation.data[field] }}</dd>
-              </template>
-            </div>
-          </dl>
-          <p class="text-body text-muted-foreground">
-            {{ t('chat.tasks.observation.receivedAt', { time: observation.receivedAt }) }}
-          </p>
-        </template>
+        <ComputerTaskCheckpoints
+          v-else-if="observation.data"
+          :data="observation.data"
+          :received-at="observation.receivedAt"
+        />
         <Button
           variant="outline"
           :disabled="observation.loading"

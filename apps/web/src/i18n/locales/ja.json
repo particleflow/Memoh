@@ -1166,7 +1166,83 @@
           "pane_id": "実行ペイン",
           "pi_session_id": "記録された Pi セッション"
         },
-        "refresh": "コンピューター観測を更新"
+        "refresh": "コンピューター観測を更新",
+        "checkpoints": {
+          "connection": "現在の接続",
+          "receipt": "保存済み受領記録と Pi の結果",
+          "history": "履歴の連続性",
+          "collection": "収集チェックポイント",
+          "receiptNotice": "保存された実行証拠は、現在の接続や業務結果とは別の情報です。",
+          "historyNotice": "前回の呼び出しの証拠は、履歴が現在利用できることや復元済みであることを示しません。",
+          "collectionNotice": "記録済みチェックポイントは、現在のファイルの可用性やダウンロード可能な成果物を示しません。",
+          "bytes": "{offset} / {size} バイト",
+          "fields": {
+            "revision": "正確なリビジョン",
+            "attempt": "元の試行 ID",
+            "generation": "元の世代 ID",
+            "receipt_state": "受領記録の検証",
+            "process_state": "プロセス状態",
+            "pi_result": "Pi の結果",
+            "result_reason": "結果の証拠",
+            "business_outcome": "業務結果",
+            "continuity": "連続性の状態",
+            "continuity_reason": "連続性の証拠",
+            "before": "前回の呼び出し前",
+            "after": "前回の呼び出し後",
+            "confirmed_offset": "確認済みバイト / 報告サイズ",
+            "current_availability": "現在のファイルの可用性",
+            "recorded_content_hash": "記録済みコンテンツハッシュ"
+          },
+          "receiptStates": {
+            "not_applicable": "対象外",
+            "missing": "受領記録なし",
+            "invalid": "無効な受領記録",
+            "validated": "保存済み受領記録を検証済み"
+          },
+          "processStates": {
+            "exited": "プロセス終了",
+            "not_started": "未開始"
+          },
+          "resultReasons": {
+            "receipt_missing": "受領記録なし",
+            "legacy_result_protocol": "旧結果プロトコル",
+            "receipt_mismatch": "受領記録の不一致",
+            "verified_receipt": "検証済みの受領記録",
+            "verified_persisted_result": "検証済みの保存された Pi 結果",
+            "completion_result_unavailable": "完了結果を取得できません",
+            "legacy_observation_only": "旧観測記録のみ"
+          },
+          "continuityStates": {
+            "unconfirmed": "未確認"
+          },
+          "continuityReasons": {
+            "history_not_rechecked": "履歴は未再確認",
+            "legacy_evidence_missing": "旧履歴の証拠なし",
+            "prior_evidence_unconfirmed": "以前の履歴の証拠は未確認"
+          },
+          "historyStates": {
+            "new": "その呼び出しで新規履歴を使用",
+            "verified": "その呼び出し時に検証済み",
+            "created": "その呼び出し時に作成済み",
+            "missing": "見つかりません",
+            "corrupt": "破損",
+            "unreadable": "読み取り不可",
+            "changed": "変更あり",
+            "unconfirmed": "未確認",
+            "not_checked": "未確認",
+            "not_started": "未開始"
+          },
+          "collectionStates": {
+            "not_collected": "未収集",
+            "empty": "空ファイル・メディアオブジェクトなし",
+            "invalid": "無効なチェックポイント",
+            "recorded": "記録済みチェックポイント",
+            "collecting": "一部収集済み"
+          },
+          "fileAvailability": {
+            "not_rechecked": "現在の可用性は未確認"
+          }
+        }
       },
       "native": {
         "title": "ネイティブ Agent の内容と追加指示",

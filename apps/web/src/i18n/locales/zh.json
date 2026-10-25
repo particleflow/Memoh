@@ -1169,7 +1169,83 @@
           "pane_id": "执行窗格",
           "pi_session_id": "已记录 Pi 会话"
         },
-        "refresh": "刷新电脑观察"
+        "refresh": "刷新电脑观察",
+        "checkpoints": {
+          "connection": "当前连接",
+          "receipt": "持久回执与 Pi 结果",
+          "history": "历史连续性",
+          "collection": "收集检查点",
+          "receiptNotice": "持久执行证据与当前连接、业务结果分别记录。",
+          "historyNotice": "上次调用的证据不能确认历史当前可用或已经恢复。",
+          "collectionNotice": "已记录的检查点不代表当前文件可用，也不是可下载的成果交付。",
+          "bytes": "{offset} / {size} 字节",
+          "fields": {
+            "revision": "精确修订号",
+            "attempt": "原始尝试 ID",
+            "generation": "原始代次 ID",
+            "receipt_state": "回执校验",
+            "process_state": "进程状态",
+            "pi_result": "Pi 结果",
+            "result_reason": "结果证据",
+            "business_outcome": "业务结果",
+            "continuity": "连续性状态",
+            "continuity_reason": "连续性证据",
+            "before": "上次调用前",
+            "after": "上次调用后",
+            "confirmed_offset": "已确认字节 / 报告大小",
+            "current_availability": "当前文件可用性",
+            "recorded_content_hash": "已记录内容哈希"
+          },
+          "receiptStates": {
+            "not_applicable": "不适用",
+            "missing": "回执缺失",
+            "invalid": "回执无效",
+            "validated": "持久回执已校验"
+          },
+          "processStates": {
+            "exited": "进程已退出",
+            "not_started": "未启动"
+          },
+          "resultReasons": {
+            "receipt_missing": "回执缺失",
+            "legacy_result_protocol": "旧版结果协议",
+            "receipt_mismatch": "回执不匹配",
+            "verified_receipt": "已校验回执",
+            "verified_persisted_result": "已校验的持久 Pi 结果",
+            "completion_result_unavailable": "完成结果不可用",
+            "legacy_observation_only": "仅有旧版观察记录"
+          },
+          "continuityStates": {
+            "unconfirmed": "未确认"
+          },
+          "continuityReasons": {
+            "history_not_rechecked": "历史未重新检查",
+            "legacy_evidence_missing": "旧版历史证据缺失",
+            "prior_evidence_unconfirmed": "先前历史证据未确认"
+          },
+          "historyStates": {
+            "new": "该次调用使用新历史",
+            "verified": "该次调用时已校验",
+            "created": "该次调用时已创建",
+            "missing": "缺失",
+            "corrupt": "损坏",
+            "unreadable": "不可读取",
+            "changed": "已改变",
+            "unconfirmed": "未确认",
+            "not_checked": "未检查",
+            "not_started": "未启动"
+          },
+          "collectionStates": {
+            "not_collected": "未收集",
+            "empty": "空文件；无媒体对象",
+            "invalid": "检查点无效",
+            "recorded": "已记录检查点",
+            "collecting": "已部分收集"
+          },
+          "fileAvailability": {
+            "not_rechecked": "未检查当前可用性"
+          }
+        }
       },
       "native": {
         "title": "原生 Agent 内容与续接",

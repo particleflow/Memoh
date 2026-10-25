@@ -1169,7 +1169,83 @@
           "pane_id": "Execution pane",
           "pi_session_id": "Recorded Pi session"
         },
-        "refresh": "Refresh computer"
+        "refresh": "Refresh computer",
+        "checkpoints": {
+          "connection": "Current connection",
+          "receipt": "Persisted receipt and Pi result",
+          "history": "Historical continuity",
+          "collection": "Collection checkpoints",
+          "receiptNotice": "Persisted execution evidence is separate from the current connection and business outcome.",
+          "historyNotice": "Last-invocation evidence does not confirm that history is available now or has been restored.",
+          "collectionNotice": "Recorded checkpoints are not a current availability check or downloadable file deliveries.",
+          "bytes": "{offset} / {size} bytes",
+          "fields": {
+            "revision": "Exact revision",
+            "attempt": "Original attempt",
+            "generation": "Original generation",
+            "receipt_state": "Receipt validation",
+            "process_state": "Process state",
+            "pi_result": "Pi result",
+            "result_reason": "Result evidence",
+            "business_outcome": "Business outcome",
+            "continuity": "Continuity status",
+            "continuity_reason": "Continuity evidence",
+            "before": "Before the last invocation",
+            "after": "After the last invocation",
+            "confirmed_offset": "Confirmed bytes / reported size",
+            "current_availability": "Current file availability",
+            "recorded_content_hash": "Recorded content hash"
+          },
+          "receiptStates": {
+            "not_applicable": "Not applicable",
+            "missing": "Receipt missing",
+            "invalid": "Receipt invalid",
+            "validated": "Persisted receipt validated"
+          },
+          "processStates": {
+            "exited": "Process exited",
+            "not_started": "Not started"
+          },
+          "resultReasons": {
+            "receipt_missing": "Receipt missing",
+            "legacy_result_protocol": "Legacy result protocol",
+            "receipt_mismatch": "Receipt mismatch",
+            "verified_receipt": "Validated receipt",
+            "verified_persisted_result": "Validated persisted Pi result",
+            "completion_result_unavailable": "Completion result unavailable",
+            "legacy_observation_only": "Legacy observation only"
+          },
+          "continuityStates": {
+            "unconfirmed": "Unconfirmed"
+          },
+          "continuityReasons": {
+            "history_not_rechecked": "History not rechecked",
+            "legacy_evidence_missing": "Legacy history evidence missing",
+            "prior_evidence_unconfirmed": "Prior history evidence unconfirmed"
+          },
+          "historyStates": {
+            "new": "New history at that invocation",
+            "verified": "Verified at that invocation",
+            "created": "Created at that invocation",
+            "missing": "Missing",
+            "corrupt": "Corrupt",
+            "unreadable": "Unreadable",
+            "changed": "Changed",
+            "unconfirmed": "Unconfirmed",
+            "not_checked": "Not checked",
+            "not_started": "Not started"
+          },
+          "collectionStates": {
+            "not_collected": "Not collected",
+            "empty": "Empty; no media object",
+            "invalid": "Invalid checkpoint",
+            "recorded": "Recorded checkpoint",
+            "collecting": "Partially collected"
+          },
+          "fileAvailability": {
+            "not_rechecked": "Current availability not checked"
+          }
+        }
       },
       "native": {
         "title": "Native Agent content and follow-up",
