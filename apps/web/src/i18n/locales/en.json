@@ -243,6 +243,11 @@
     "compaction": {
       "model_unavailable": "The compaction model is unavailable. Pick an enabled chat model with a declared context window."
     },
+    "computer": {
+      "admission_conflict": "The computer admission revision changed. Read the current state before continuing.",
+      "admission_paused": "This computer is paused for new work. Existing task recovery remains available.",
+      "admission_scope_unverified": "The registered native identity cannot establish admission coverage."
+    },
     "connector": {
       "conflict": "This connector conflicts with an existing connection.",
       "not_configured": "Connectors are not configured on this server.",

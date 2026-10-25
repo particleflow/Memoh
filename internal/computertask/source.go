@@ -162,6 +162,20 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		value = receipt
 	}
 	if err != nil {
+		if (name == "computer_task_submit" || name == "computer_task_followup") && admissionBlocked(err) {
+			facts := map[string]any{"ok": false, "code": admissionErrorCode(err), "phase": "admission", "business_dispatched": false, "retry": map[string]any{"automatic": false, "requires": "verified_owner_admission_state"}}
+			if name == "computer_task_submit" {
+				facts["operation_created"] = false
+			} else {
+				facts["request_reserved"] = false
+			}
+			if receipt, ok := value.(Result); ok && receipt.ID != "" {
+				facts["computer"] = receipt
+			}
+			out := mcp.BuildToolSuccessResult(facts)
+			out["isError"] = true
+			return out, nil
+		}
 		if name == "computer_task_submit" && errors.Is(err, ErrPreflightUnavailable) {
 			// These facts describe this call, not the state of any older task.
 			// Do not use this envelope for uncertain claim/dispatch outcomes.

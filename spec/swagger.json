@@ -18564,6 +18564,110 @@
                 }
             }
         },
+        "/users/me/runtimes/{id}/admission": {
+            "get": {
+                "description": "Reads the existing durable admission gate without contacting or stopping the host. A pause is not proof that accepted work has drained.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Read owned computer admission state",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing owner runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Uses the existing owner connection and a read-only native probe, then atomically fences new operation claims and follow-up reservations across matching mounts. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Pause or resume new work for an owned native instance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing owner runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Compare-and-swap admission request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.ChangeAdmission"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/users/me/runtimes/{id}/agenvo-agent": {
             "put": {
                 "description": "Updates non-secret provider/model/config-directory references without creating credentials, changing the device mapping, or granting Bots. An empty profile disables Agent tasks.",
@@ -20271,6 +20375,32 @@
                 }
             }
         },
+        "agenvo.Admission": {
+            "type": "object",
+            "properties": {
+                "connection_id": {
+                    "type": "string"
+                },
+                "device_id": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "request_id": {
+                    "type": "string"
+                },
+                "revision": {
+                    "type": "string"
+                },
+                "scope": {
+                    "type": "string"
+                }
+            }
+        },
         "agenvo.AgentObservation": {
             "type": "object",
             "properties": {
@@ -20416,6 +20546,20 @@
                     "type": "integer"
                 },
                 "workspace_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.ChangeAdmission": {
+            "type": "object",
+            "properties": {
+                "expected_revision": {
+                    "type": "string"
+                },
+                "paused": {
+                    "type": "boolean"
+                },
+                "request_id": {
                     "type": "string"
                 }
             }

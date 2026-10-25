@@ -178,6 +178,16 @@ func mapQueryErr(err error) error {
 	if errors.As(err, &pgErr) && pgErr.ConstraintName == "team_members_last_active_admin" {
 		return db.ErrLastActiveAdmin
 	}
+	if pgErr != nil {
+		switch pgErr.Code {
+		case "MC001":
+			return db.ErrComputerAdmissionPaused
+		case "MC002":
+			return db.ErrComputerAdmissionConflict
+		case "MC003":
+			return db.ErrComputerAdmissionScope
+		}
+	}
 	return err
 }
 

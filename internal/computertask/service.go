@@ -300,6 +300,9 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	raw, _ := json.Marshal(d)
 	r, created, err := s.store.ClaimComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: operationID, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID, RunID: b.RunID, TargetID: id, Fingerprint: fingerprint(in), TargetFingerprint: agenvo.TargetFingerprint(target), Details: raw})
 	if err != nil {
+		if admissionBlocked(err) {
+			return Result{}, err
+		}
 		return Result{}, ErrDenied
 	}
 	if !created {

@@ -149,7 +149,7 @@ func (s *Store) ClaimComputerOperation(ctx context.Context, r dbstore.ComputerOp
 		return operationRecord(row), true, nil
 	}
 	if !errors.Is(mapQueryErr(err), db.ErrNotFound) {
-		return r, false, err
+		return r, false, mapQueryErr(err)
 	}
 	row, err = s.queries.FindComputerOperation(ctx, dbsqlc.FindComputerOperationParams{BotID: ids[1], SessionID: ids[2], UserID: ids[3], TargetID: ids[4], RunID: r.RunID, Fingerprint: r.Fingerprint})
 	return operationRecord(row), false, mapQueryErr(err)

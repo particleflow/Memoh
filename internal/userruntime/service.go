@@ -38,6 +38,20 @@ type Service struct {
 
 func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
 
+func (s *Service) ReadComputerAdmission(ctx context.Context, owner, runtime string) (agenvo.Admission, error) {
+	if s.agenvo == nil {
+		return agenvo.Admission{}, agenvo.ErrUnavailable
+	}
+	return s.agenvo.ReadAdmission(ctx, owner, runtime)
+}
+
+func (s *Service) SetComputerAdmission(ctx context.Context, owner, runtime string, in agenvo.ChangeAdmission) (agenvo.Admission, error) {
+	if s.agenvo == nil {
+		return agenvo.Admission{}, agenvo.ErrUnavailable
+	}
+	return s.agenvo.SetAdmission(ctx, owner, runtime, in)
+}
+
 func (s *Service) ConfigureAgenvoAgent(ctx context.Context, owner, id string, profile agenvo.AgentProfile) (Runtime, error) {
 	if s.agenvo == nil {
 		return Runtime{}, agenvo.ErrUnavailable

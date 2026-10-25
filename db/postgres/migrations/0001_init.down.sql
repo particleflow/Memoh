@@ -1,3 +1,9 @@
+DROP FUNCTION IF EXISTS public.memoh_guard_paused_registration() CASCADE;
+DROP FUNCTION IF EXISTS public.memoh_guard_computer_admission() CASCADE;
+DROP FUNCTION IF EXISTS public.memoh_assert_computer_admission(UUID,UUID);
+DROP FUNCTION IF EXISTS public.memoh_change_computer_admission(UUID,UUID,JSONB,UUID,BIGINT,BOOLEAN);
+DROP FUNCTION IF EXISTS public.memoh_computer_admission_lock(UUID);
+DROP TABLE IF EXISTS public.computer_admission_gates;
 DROP FUNCTION IF EXISTS public.memoh_guard_computer_delivery() CASCADE;
 DROP TABLE IF EXISTS public.workspace_dependency_catalogs;
 DROP TABLE IF EXISTS public.workspace_dependency_definitions;

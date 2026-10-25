@@ -147,6 +147,15 @@ func (s *Service) followup(ctx context.Context, b toolcontext.ComputerBinding, i
 	d.Followups = append(d.Followups, f)
 	claimed, err := s.saveFollowups(ctx, r, d.Followups)
 	if err != nil {
+		if admissionBlocked(err) {
+			// The database rejected this reservation before accepting input.
+			// Project the persisted receipt, never the unsaved appended record.
+			var previous Details
+			if json.Unmarshal(r.Details, &previous) != nil {
+				return Result{}, agenvo.ErrUnknown
+			}
+			return result(r, previous), err
+		}
 		// A conflicting/lost CAS response never authorizes a prompt. Reload
 		// the actual ledger; even our own committed reservation is not resumed.
 		current, details, readErr := s.load(ctx, b, r.ID)

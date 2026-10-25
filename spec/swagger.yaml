@@ -639,6 +639,23 @@ definitions:
       updated_at:
         type: string
     type: object
+  agenvo.Admission:
+    properties:
+      connection_id:
+        type: string
+      device_id:
+        type: string
+      instance_id:
+        type: string
+      paused:
+        type: boolean
+      request_id:
+        type: string
+      revision:
+        type: string
+      scope:
+        type: string
+    type: object
   agenvo.AgentObservation:
     properties:
       completion_changed:
@@ -739,6 +756,15 @@ definitions:
       version:
         type: integer
       workspace_id:
+        type: string
+    type: object
+  agenvo.ChangeAdmission:
+    properties:
+      expected_revision:
+        type: string
+      paused:
+        type: boolean
+      request_id:
         type: string
     type: object
   agenvo.DiscoveredInstance:
@@ -20902,6 +20928,80 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Revoke a Remote Runtime credential
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/admission:
+    get:
+      description: Reads the existing durable admission gate without contacting or
+        stopping the host. A pause is not proof that accepted work has drained.
+      parameters:
+      - description: Existing owner runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read owned computer admission state
+      tags:
+      - user-runtimes
+    put:
+      consumes:
+      - application/json
+      description: Uses the existing owner connection and a read-only native probe,
+        then atomically fences new operation claims and follow-up reservations across
+        matching mounts. Retain request_id after an uncertain response. Resume requires
+        the pause request ID and current revision. Does not stop processes, drain
+        accepted work or authorize a host restart.
+      parameters:
+      - description: Existing owner runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Compare-and-swap admission request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.ChangeAdmission'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Pause or resume new work for an owned native instance
       tags:
       - user-runtimes
   /users/me/runtimes/{id}/agenvo-agent:

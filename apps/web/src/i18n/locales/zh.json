@@ -243,6 +243,11 @@
     "compaction": {
       "model_unavailable": "压缩模型不可用。请选择一个已启用、且声明了上下文窗口的对话模型。"
     },
+    "computer": {
+      "admission_conflict": "电脑接纳状态版本已变化，请先读取当前状态。",
+      "admission_paused": "此电脑已暂停接收新任务，已有任务仍可回收结果。",
+      "admission_scope_unverified": "无法确认已注册原生实例的接纳覆盖范围。"
+    },
     "connector": {
       "conflict": "该连接器与现有连接冲突。",
       "not_configured": "此服务器尚未配置连接器，请联系管理员启用 Connect-It。",

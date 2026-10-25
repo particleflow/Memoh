@@ -550,6 +550,18 @@ type ChannelLinkCode struct {
 	TeamID                    pgtype.UUID        `json:"team_id"`
 }
 
+type ComputerAdmissionGate struct {
+	TeamID       pgtype.UUID        `json:"team_id"`
+	OwnerID      pgtype.UUID        `json:"owner_id"`
+	ConnectionID pgtype.UUID        `json:"connection_id"`
+	DeviceID     string             `json:"device_id"`
+	InstanceID   string             `json:"instance_id"`
+	RequestID    pgtype.UUID        `json:"request_id"`
+	Paused       bool               `json:"paused"`
+	Revision     int64              `json:"revision"`
+	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+}
+
 type ComputerDeliveryEntry struct {
 	TeamID      pgtype.UUID `json:"team_id"`
 	OperationID pgtype.UUID `json:"operation_id"`

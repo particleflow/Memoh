@@ -384,6 +384,16 @@ export type AgentcredentialPublicCredential = {
     updated_at?: string;
 };
 
+export type AgenvoAdmission = {
+    connection_id?: string;
+    device_id?: string;
+    instance_id?: string;
+    paused?: boolean;
+    request_id?: string;
+    revision?: string;
+    scope?: string;
+};
+
 export type AgenvoAgentObservation = {
     completion_changed?: boolean;
     completion_seq?: string;
@@ -447,6 +457,12 @@ export type AgenvoBatchReceipt = {
     terminal_id?: string;
     version?: number;
     workspace_id?: string;
+};
+
+export type AgenvoChangeAdmission = {
+    expected_revision?: string;
+    paused?: boolean;
+    request_id?: string;
 };
 
 export type AgenvoDiscoveredInstance = {
@@ -19466,6 +19482,85 @@ export type DeleteUsersMeRuntimesByIdResponses = {
      */
     204: unknown;
 };
+
+export type GetUsersMeRuntimesByIdAdmissionData = {
+    body?: never;
+    path: {
+        /**
+         * Existing owner runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/admission';
+};
+
+export type GetUsersMeRuntimesByIdAdmissionErrors = {
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdAdmissionError = GetUsersMeRuntimesByIdAdmissionErrors[keyof GetUsersMeRuntimesByIdAdmissionErrors];
+
+export type GetUsersMeRuntimesByIdAdmissionResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoAdmission;
+};
+
+export type GetUsersMeRuntimesByIdAdmissionResponse = GetUsersMeRuntimesByIdAdmissionResponses[keyof GetUsersMeRuntimesByIdAdmissionResponses];
+
+export type PutUsersMeRuntimesByIdAdmissionData = {
+    /**
+     * Compare-and-swap admission request
+     */
+    body: AgenvoChangeAdmission;
+    path: {
+        /**
+         * Existing owner runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/admission';
+};
+
+export type PutUsersMeRuntimesByIdAdmissionErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdAdmissionError = PutUsersMeRuntimesByIdAdmissionErrors[keyof PutUsersMeRuntimesByIdAdmissionErrors];
+
+export type PutUsersMeRuntimesByIdAdmissionResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoAdmission;
+};
+
+export type PutUsersMeRuntimesByIdAdmissionResponse = PutUsersMeRuntimesByIdAdmissionResponses[keyof PutUsersMeRuntimesByIdAdmissionResponses];
 
 export type PutUsersMeRuntimesByIdAgenvoAgentData = {
     /**

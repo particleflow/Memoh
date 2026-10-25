@@ -95,6 +95,9 @@ chat.message_empty	400
 codex_auth_token_missing	409
 codex_oauth_incomplete	409
 compaction.model_unavailable	400
+computer.admission_conflict	409
+computer.admission_paused	409
+computer.admission_scope_unverified	409
 connector.conflict	409
 connector.not_configured	503
 connector.not_found	404

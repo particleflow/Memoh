@@ -11,6 +11,9 @@ import (
 type Code string
 
 const (
+	CodeComputerAdmissionPaused                  Code = "computer.admission_paused"
+	CodeComputerAdmissionConflict                Code = "computer.admission_conflict"
+	CodeComputerAdmissionScope                   Code = "computer.admission_scope_unverified"
 	CodeCapabilityNotFound                       Code = "capability.not_found"
 	CodeCapabilityApprovalRequired               Code = "capability.approval_required"
 	CodeCapabilityOperationFailed                Code = "capability.operation_failed"
@@ -1291,6 +1294,9 @@ var catalog = map[Code]Definition{
 	CodeVideoProviderNotFound:         {HTTPStatus: http.StatusNotFound, Detail: "This video provider no longer exists. Refresh the list and choose another one."},
 	CodeVideoModelNotFound:            {HTTPStatus: http.StatusNotFound, Detail: "This video model no longer exists. Refresh the list and choose another one."},
 	CodeUserNotFound:                  {HTTPStatus: http.StatusNotFound, Detail: "This user no longer exists. Refresh the member list and try again."},
+	CodeComputerAdmissionPaused:       {HTTPStatus: http.StatusConflict, Detail: "This computer is paused for new work. Existing task recovery remains available."},
+	CodeComputerAdmissionConflict:     {HTTPStatus: http.StatusConflict, Detail: "The computer admission revision changed. Read the existing state before continuing."},
+	CodeComputerAdmissionScope:        {HTTPStatus: http.StatusConflict, Detail: "The registered native identity cannot establish admission coverage."},
 	CodeUserRuntimeNotFound:           {HTTPStatus: http.StatusNotFound, Detail: "This runtime is no longer registered to your account. Refresh the list and try again."},
 	CodeWorkdirNotFound:               {HTTPStatus: http.StatusNotFound, Detail: "This working directory no longer exists. Refresh the list and choose another one."},
 	CodeWorkspaceTargetNotFound:       {HTTPStatus: http.StatusNotFound, Detail: "This workspace target is no longer available. Refresh and choose another one."},

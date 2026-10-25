@@ -160,7 +160,8 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 		"expired":       sign(owner, secret, -time.Minute), "revoked": sign(revoked, secret, time.Minute),
 	} {
 		t.Run(name, func(t *testing.T) {
-			for _, path := range []string{base, base + "/", base + "/unknown", base + "/primary", base + "/remotes/private-device-id", account, account + "/", account + "/unknown", account + "/agenvo/discover", account + "/private-device-id/agenvo-agent"} {
+			request(t, http.MethodPut, account+"/private-device-id/admission", token, 401, "no-store")
+			for _, path := range []string{base, base + "/", base + "/unknown", base + "/primary", base + "/remotes/private-device-id", account, account + "/", account + "/unknown", account + "/agenvo/discover", account + "/private-device-id/agenvo-agent", account + "/private-device-id/admission"} {
 				request(t, http.MethodGet, path, token, 401, "no-store")
 			}
 		})
