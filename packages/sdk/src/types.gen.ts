@@ -781,6 +781,10 @@ export type BotdelegationView = {
     state: 'accepted' | 'running' | 'unknown' | 'completed' | 'failed';
     summary?: BotdelegationSummary;
     target_bot_id: string;
+    target_run_created_at?: string;
+    target_run_id?: string;
+    target_run_state?: 'accepted' | 'running' | 'waiting_decision' | 'finishing' | 'completed' | 'aborted' | 'failed' | 'lost';
+    target_run_updated_at?: string;
     target_session_id?: string;
     updated_at: string;
 };

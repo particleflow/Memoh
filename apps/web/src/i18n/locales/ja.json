@@ -1019,6 +1019,15 @@
   },
   "chat": {
     "delegations": {
+      "nativeRun": "専門 Bot のセッション実行",
+      "runId": "実行 ID",
+      "runCreated": "受け付け時刻",
+      "runUpdated": "最終記録時刻",
+      "runRecorded": "保存済みのネイティブ実行状態です。現在の接続を保証しません。セッション履歴には他のターンも含まれる場合があります。",
+      "runUnavailable": "この委任に対応するネイティブ実行を確認できません。",
+      "openHistory": "専門 Bot のセッション履歴を開く",
+      "historyUnavailable": "専門 Bot のセッションを開けません。再読み込みしてアクセス権を確認してください。",
+      "childTasks": "サブ Agent とコンピュータータスク",
       "openTasks": "後続タスクを見る",
       "downstreamTitle": "専門 Bot のタスク",
       "downstreamDescription": "この専門 Bot セッションに記録された実行タスクです。アクセス権限はサーバーで確認されます。ライブログや実行待ちキューではありません。",

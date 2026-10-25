@@ -43,6 +43,21 @@ afterEach(() => {
 })
 
 describe('specialist handoff content and states', () => {
+  it('keeps native run facts separate from unknown delegation and delivery', () => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, state: 'unknown', delivery_state: 'unknown', target_run_id: 'native-run-a', target_run_state: 'completed', target_run_updated_at: '2026-10-22T01:00:00Z' } })
+    expect(root.textContent).toContain('native-run-a')
+    expect(root.textContent).toContain('Run completed')
+    expect(root.textContent).toContain('Execution unknown')
+    expect(root.textContent).toContain('Delivery unknown')
+    expect(root.textContent).not.toContain(task.summary!.text)
+  })
+
+  it('does not infer an admitted run from a completed handoff or target session', () => {
+    const root = mount({ selected: task.delegation_id, detail: { ...task, target_session_id: 'specialist-session', target_run_state: 'completed' } })
+    expect(root.textContent).toContain(en.chat.delegations.runUnavailable)
+    expect(root.textContent).not.toContain('Run completed')
+  })
+
   it('offers delivery retry only to a capable host and respects its pending state', async () => {
     const retry = vi.fn()
     const action = ref<BotDelegationDeliveryAction>({ pending: false, disabled: false, retry })

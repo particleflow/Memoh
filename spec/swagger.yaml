@@ -1342,6 +1342,24 @@ definitions:
       target_bot_id:
         format: uuid
         type: string
+      target_run_created_at:
+        type: string
+      target_run_id:
+        format: uuid
+        type: string
+      target_run_state:
+        enum:
+        - accepted
+        - running
+        - waiting_decision
+        - finishing
+        - completed
+        - aborted
+        - failed
+        - lost
+        type: string
+      target_run_updated_at:
+        type: string
       target_session_id:
         format: uuid
         type: string

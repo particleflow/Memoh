@@ -64,11 +64,48 @@ type Ledger interface {
 	ForTarget(context.Context, string, string) (Record, error)
 	Save(context.Context, Record) (Record, error)
 	List(context.Context, Filter) ([]Record, error)
+	TargetRun(context.Context, Record) (*RunObservation, error)
+}
+
+// RunObservation contains durable native-run facts, not a live execution lease
+// or diagnostic logs. Admission placeholders are never observations.
+type RunObservation struct {
+	ID, State            string
+	CreatedAt, UpdatedAt time.Time
 }
 
 type PostgresLedger struct{ q *sqlc.Queries }
 
 func NewPostgresLedger(q *sqlc.Queries) *PostgresLedger { return &PostgresLedger{q: q} }
+
+func (s *PostgresLedger) TargetRun(ctx context.Context, r Record) (*RunObservation, error) {
+	if r.Identity.TargetSessionID == "" {
+		return nil, nil
+	}
+	row, err := s.q.GetSessionRun(ctx, pgID(r.RunID))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if row.TeamID != pgID(r.Identity.TeamID) || row.BotID != pgID(r.Identity.TargetBotID) || row.SessionID != pgID(r.Identity.TargetSessionID) || row.InvocationID != "bot-delegation:"+r.ID {
+		return nil, nil
+	}
+	session, err := s.q.GetSessionByID(ctx, row.SessionID)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	// Match the native latest-run visibility fence without substituting another
+	// turn for this delegation's exact run after a new turn or history reset.
+	if session.TeamID != row.TeamID || session.BotID != row.BotID || session.CreatedByUserID != pgID(r.Identity.UserID) || session.DeletedAt.Valid || row.ErrorCode.String == "history_reset" || (row.FencingToken > 0 && session.RuntimeFencingToken > row.FencingToken) {
+		return nil, nil
+	}
+	return &RunObservation{ID: row.RunID.String(), State: row.State, CreatedAt: row.CreatedAt.Time, UpdatedAt: row.UpdatedAt.Time}, nil
+}
 
 func pgID(id string) pgtype.UUID {
 	u, err := uuid.Parse(id)

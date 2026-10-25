@@ -32,17 +32,21 @@ type AttachmentInput struct {
 }
 
 type View struct {
-	ID              string       `json:"delegation_id" validate:"required" format:"uuid"`
-	RequestID       string       `json:"request_id" validate:"required" format:"uuid"`
-	SourceSessionID string       `json:"source_session_id" validate:"required" format:"uuid"`
-	TargetBotID     string       `json:"target_bot_id" validate:"required" format:"uuid"`
-	TargetSessionID string       `json:"target_session_id,omitempty" format:"uuid"`
-	State           string       `json:"state" validate:"required" enums:"accepted,running,unknown,completed,failed"`
-	DeliveryState   string       `json:"delivery_state" validate:"required" enums:"pending,accepted,unknown,unavailable"`
-	Summary         *Summary     `json:"summary,omitempty"`
-	Attachments     []Attachment `json:"attachments" validate:"required"`
-	CreatedAt       time.Time    `json:"created_at" validate:"required"`
-	UpdatedAt       time.Time    `json:"updated_at" validate:"required"`
+	ID                 string       `json:"delegation_id" validate:"required" format:"uuid"`
+	RequestID          string       `json:"request_id" validate:"required" format:"uuid"`
+	SourceSessionID    string       `json:"source_session_id" validate:"required" format:"uuid"`
+	TargetBotID        string       `json:"target_bot_id" validate:"required" format:"uuid"`
+	TargetSessionID    string       `json:"target_session_id,omitempty" format:"uuid"`
+	TargetRunID        string       `json:"target_run_id,omitempty" format:"uuid"`
+	TargetRunState     string       `json:"target_run_state,omitempty" enums:"accepted,running,waiting_decision,finishing,completed,aborted,failed,lost"`
+	TargetRunCreatedAt *time.Time   `json:"target_run_created_at,omitempty"`
+	TargetRunUpdatedAt *time.Time   `json:"target_run_updated_at,omitempty"`
+	State              string       `json:"state" validate:"required" enums:"accepted,running,unknown,completed,failed"`
+	DeliveryState      string       `json:"delivery_state" validate:"required" enums:"pending,accepted,unknown,unavailable"`
+	Summary            *Summary     `json:"summary,omitempty"`
+	Attachments        []Attachment `json:"attachments" validate:"required"`
+	CreatedAt          time.Time    `json:"created_at" validate:"required"`
+	UpdatedAt          time.Time    `json:"updated_at" validate:"required"`
 }
 
 // Host uses existing Bot chat, sessions, and follow-up delivery. There is no
@@ -311,6 +315,14 @@ func (s *Service) project(ctx context.Context, r Record) (View, error) {
 		state = "unknown"
 	}
 	v := View{ID: r.ID, RequestID: r.RequestID, SourceSessionID: r.Identity.SourceSessionID, TargetBotID: r.Identity.TargetBotID, TargetSessionID: r.Identity.TargetSessionID, State: state, DeliveryState: r.DeliveryState, CreatedAt: r.CreatedAt, UpdatedAt: r.UpdatedAt, Attachments: []Attachment{}}
+	run, err := s.Ledger.TargetRun(ctx, r)
+	if err != nil {
+		return View{}, err
+	}
+	if run != nil {
+		v.TargetRunID, v.TargetRunState = run.ID, run.State
+		v.TargetRunCreatedAt, v.TargetRunUpdatedAt = &run.CreatedAt, &run.UpdatedAt
+	}
 	if state == "completed" {
 		v.Summary = r.Result.Summary
 		for _, hash := range r.Result.Outputs {
