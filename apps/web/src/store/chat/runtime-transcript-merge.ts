@@ -117,6 +117,25 @@ function isErrorBlock(block: ContentBlock): block is ErrorBlock {
   return block.type === 'error'
 }
 
+// A terminal runtime snapshot may predate a persisted tool receipt. Preserve
+// that receipt only for the same image call; absence is not a new result and
+// must not erase a confirmed reference (or an explicit unknown outcome).
+function inheritImageReceipts(next: ChatAssistantTurn, current: ChatAssistantTurn): void {
+  if (next.streaming) return
+  for (const block of next.messages) {
+    if (block.type !== 'tool' || block.backgroundTask || block.result != null
+      || !block.toolCallId || (block.toolName !== 'generate_image' && block.toolName !== 'edit_image')) continue
+    const known = current.messages.find(other => other.type === 'tool'
+      && other.toolCallId === block.toolCallId && other.toolName === block.toolName
+      && other.done && !other.running && !other.backgroundTask && other.result != null)
+    if (known?.type !== 'tool') continue
+    block.result = known.result
+    block.output = known.output
+    block.running = false
+    block.done = true
+  }
+}
+
 // Reconciles one authoritative runtime frame without changing render
 // identities already owned by optimistic or settled turns.
 export function reconcileRuntimeTurns(
@@ -132,7 +151,10 @@ export function reconcileRuntimeTurns(
     )
     if (!current) return next
     used.add(current)
-    if (current.role === 'assistant' && next.role === 'assistant') inheritErrorDetails(next, current)
+    if (current.role === 'assistant' && next.role === 'assistant') {
+      inheritErrorDetails(next, current)
+      inheritImageReceipts(next, current)
+    }
     const renderId = current.id
     const settledPosition = current.turnPosition ?? next.turnPosition
     Object.assign(current, next, { id: renderId, turnPosition: settledPosition })

@@ -216,7 +216,19 @@ describe('generated image reference detail', () => {
     expect(root.textContent).not.toContain('Image saved')
   })
 
-  it.each([null, {}, { state: 'completed' }, { content_hash: 'invalid' }, { content: [{ type: 'text', text: 'Generated a 1536x1024 image successfully.' }] }])('does not infer an attachment from missing data or model prose: %j', async (result) => {
+  it.each([
+    ['en', 'Image result is unconfirmed. Do not automatically generate again.'],
+    ['zh', '图像结果尚未确认，请勿自动重新生成。'],
+    ['ja', '画像の結果は未確認です。自動で再生成しないでください。'],
+  ])('keeps a finished call without a receipt unconfirmed (%s)', async (locale, text) => {
+    const { root } = mountTool('generate_image', {}, null, false, locale)
+    await open(root)
+    expect(root.textContent).toContain(text)
+    expect(root.textContent).not.toContain('Image saved')
+    expect(root.querySelector('img')).toBeNull()
+  })
+
+  it.each([{}, { state: 'completed' }, { content_hash: 'invalid' }, { content: [{ type: 'text', text: 'Generated a 1536x1024 image successfully.' }] }])('does not infer an attachment from missing data or model prose: %j', async (result) => {
     const { root } = mountTool('generate_image', {}, result)
     await open(root)
     expect(root.textContent).toContain('No image preview or file reference was returned.')
