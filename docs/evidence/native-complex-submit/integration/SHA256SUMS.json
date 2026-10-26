@@ -4,7 +4,10 @@
   "local-windows-selector.txt": "8eaf169b352b0ea278a81d52993c3ca60ccecbb986c09ad0fbd3776d65f8c87a",
   "pc-combination-lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "pc-combination-tests.txt": "a4c0fb802092cf3d28ac3ae40ad9ef8d15e393a79faf45baa0477a9b9ac8e2b5",
+  "ps51-bom-failure-excerpt.txt": "4aaa39805c129c5d2b1f57e68fa921266231e95e2ed032d036c238562b4e8fc6",
+  "ps51-bom-lint.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "ps51-bom-local-final.txt": "c18d856b7f8c87426b228a2be796cf454bcc18dfbd862732a4291d46bf42c8a1",
   "ps51-compat-local.txt": "de11a3cee69d572c87eb2b056bc2d1080fd99d20d0b2b78c8599602538eb687c",
-  "ps51-compatibility.md": "1b19d6b8133f204eadafbef04c89eb574c4abab219335487ae1e00ccb7c598fc",
+  "ps51-compatibility.md": "981d568a322e313faef292ce78ed08ee2a7bb6faff7a5de3f020b90c2b2e477a",
   "ps51-original-failure-excerpt.txt": "acfe0a8800f6f5ab589b51e96dd2c8cbe77a8b2ff58170d519ca0eecb19baf53"
 }

@@ -32,6 +32,9 @@ func TestNativeBatchLauncherWindowsPowerShell(t *testing.T) {
 	want := "雪🙂 ' quoted $(literal) \" " + variedSyntheticTask(3435)
 	script := "# CRLF fixture\r\nprintf '%s' '" + strings.ReplaceAll(want, "'", "'\"'\"'") + "'\n" + strings.Repeat("# stdin fixture\n", 3000)
 	command := launchBatchScript(script, Target{NativeRuntimeID: "synthetic", BashPath: bash})
+	// The .NET Framework stdin writer inherits Console.InputEncoding at Start.
+	// Its temporary BOM-free UTF-8 setting must preserve the owning pane's state.
+	command = "$memohBeforeEncoding=[Console]::InputEncoding; $memohBeforePreamble=[Convert]::ToBase64String($memohBeforeEncoding.GetPreamble()); " + command + "; $memohAfterEncoding=[Console]::InputEncoding; if ($memohAfterEncoding.CodePage -ne $memohBeforeEncoding.CodePage -or [Convert]::ToBase64String($memohAfterEncoding.GetPreamble()) -ne $memohBeforePreamble) { throw 'console input encoding was not restored' }"
 	cmd := exec.CommandContext(t.Context(), shell, "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", command) //nolint:gosec // OS PowerShell and installed Git Bash, generated synthetic script only.
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &stdout, &stderr

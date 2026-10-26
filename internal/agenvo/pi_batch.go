@@ -226,7 +226,13 @@ const nativeBatchLaunch = `& {
     $p.StartInfo.UseShellExecute=$false;
     $p.StartInfo.RedirectStandardInput=$true;
     try {
-      [void]$p.Start();
+      $inputEncoding=[Console]::InputEncoding;
+      try {
+        if ($inputEncoding.CodePage -eq [Text.Encoding]::UTF8.CodePage) {
+          [Console]::InputEncoding=[Text.UTF8Encoding]::new($false)
+        };
+        [void]$p.Start()
+      } finally { [Console]::InputEncoding=$inputEncoding };
       try { $p.StandardInput.BaseStream.Write($b,0,$b.Length) }
       finally { $p.StandardInput.BaseStream.Close() };
       $p.WaitForExit()

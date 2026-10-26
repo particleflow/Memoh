@@ -21,3 +21,25 @@ preflight, exact packing and same-operation unknown reconstruction passed after
 the correction; Windows-only/optional local PowerShell tests still skip locally.
 This is not claimed as PS5.1 success before the new exact-head Windows CI result.
 No Windows host, production device, deployment or paid model is involved.
+
+## Second observed failure and minimal BOM correction
+
+Head14958cbef9224068cfcf89235ee66a74399e5832 actually executed the script and
+returned exactly3465 expected stdout bytes, but [Native40337021505](https://github.com/particleflow/Memoh/actions/runs/40337021505),
+job121621225185, correctly failed the unchanged stderr assertion at14:11:23UTC.
+The first Bash line had an injected UTF-8 BOM before its comment; no assertion
+was removed and this head is also not releaseable.
+
+[Microsoft's .NET Framework source](https://github.com/microsoft/referencesource/blob/main/System/services/monitoring/system/diagnosticts/Process.cs#L2009)
+initializes the redirected input writer from Console.InputEncoding and enables
+AutoFlush during Process.Start. That can emit a preamble before any raw write.
+The correction therefore uses the same UTF-8 codepage with a BOM-free encoder
+only around Start, and restores the original encoding in finally immediately
+afterward. Other codepages retain their existing behavior. It does not strip or
+alter script bytes, change the codepage, add another shell/helper/transport,
+disable validation, or persist console configuration.
+
+The Windows test retains exact stdout and empty-stderr assertions and now also
+checks that the original console codepage and preamble are restored. Windows
+PS5.1 remains the decisive required test; Linux source/preflight passes alone
+are not called Windows success. Both original Windows failures are preserved.
