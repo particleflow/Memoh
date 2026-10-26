@@ -1,0 +1,5 @@
+=== RUN   TestNativeBatchLauncherWindowsPowerShell
+    native_batch_launcher_test.go:21: Windows PowerShell 5.1 acceptance runs in the native Windows job
+--- SKIP: TestNativeBatchLauncherWindowsPowerShell (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	0.011s
