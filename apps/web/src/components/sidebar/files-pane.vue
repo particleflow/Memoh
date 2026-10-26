@@ -494,17 +494,20 @@ function downloadBlob(blob: Blob, filename: string) {
 // errors). Used by the tree per folder; failures surface as a toast and an empty
 // folder rather than breaking the whole tree.
 async function listDirectory(path: string): Promise<HandlersFsFileInfo[]> {
-  if (!props.botId) return []
+  const botId = props.botId
+  if (!botId || !props.active) return []
   let lastError: unknown
   for (let attempt = 0; attempt < 3; attempt++) {
+    if (!props.active || props.botId !== botId) return []
     try {
       const { data } = await getBotsByBotIdContainerFsList({
-        path: { bot_id: props.botId },
+        path: { bot_id: botId },
         query: { path },
         throwOnError: true,
       })
-      return data.entries ?? []
+      return props.active && props.botId === botId ? data.entries ?? [] : []
     } catch (error) {
+      if (!props.active || props.botId !== botId) return []
       lastError = error
       if (attempt < 2 && isTransientWorkspaceError(error)) {
         await wait(500 * (attempt + 1))

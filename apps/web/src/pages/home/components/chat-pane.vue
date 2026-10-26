@@ -1239,14 +1239,6 @@
                   <Lightbulb class="size-3.5 shrink-0" />
                   <span class="text-label">{{ $t('chatExamples.tryThese') }}</span>
                 </Button>
-                <SessionTasks
-                  v-if="currentBotId && activeSessionId && !isWelcome"
-                  :key="`${currentBotId}:${activeSessionId}`"
-                  :bot-id="currentBotId"
-                  :session-id="activeSessionId"
-                  :selection="selectedWorkspaceTargetId"
-                  :visible="isVisible"
-                />
                 <SessionInfoRing
                   v-if="showSessionInfoRing && voiceInputState === 'idle'"
                   class="ml-auto shrink-0"
@@ -1346,7 +1338,6 @@ import ChatScrollRail, { type ScrollRailSegment } from './chat-scroll-rail.vue'
 import { provideBgTaskBeacons } from '../composables/useBgTaskBeacons'
 import MediaGalleryLightbox from './media-gallery-lightbox.vue'
 import SessionInfoRing from './session-info-ring.vue'
-import SessionTasks from './session-tasks.vue'
 import { useSessionInfo } from '../composables/useSessionInfo'
 import ComposerModelMenu from './composer-model-menu.vue'
 import { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort, reconcileStoredEffort } from '@/pages/bots/components/reasoning-effort'

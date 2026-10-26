@@ -34,7 +34,7 @@ const history = useBotDelegationHistory(scope, visible, navigationReader, async 
   await until(() => tabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
   if (token.value !== target.identity || chat.currentBotId !== target.bot) return
   tabs.openSessionChat({ sessionId: target.session, title: target.title }); tabs.closeMobileNav()
-})
+}, false)
 interface Activity { key: string; title: string; state: string; session?: string; delegation?: BotdelegationView }
 const activeStates = new Set(['accepted', 'submitted', 'running', 'waiting_decision', 'finishing'])
 const rows = computed(() => {
@@ -45,7 +45,8 @@ const rows = computed(() => {
     const observation = chat.runtimeObservationFor(session.bot_id, session.id), run = observation?.synchronized ? observation.run : null
     if (!run || run.configuration_only || !isRuntimeRunActive(run.status)) continue
     runs.add(run.run_id)
-    const title = session.title || run.request_user_turn?.text?.split('\n')[0] || t('chat.tasks.title')
+    const bot = chat.bots.find(bot => bot.id === session.bot_id)
+    const title = session.title || bot?.display_name || bot?.name || t('chat.tasks.title')
     result.set('run:' + run.run_id, { key: 'run:' + run.run_id, title, state: sessionBotRunStatus(run.status), session: session.id })
   }
   for (const task of reader.tasks.value) {
@@ -91,7 +92,7 @@ async function open(row: Activity) {
     <SidebarNavButton
       v-for="row in rows"
       :key="row.key"
-      :disabled="!row.session || !!(row.delegation && !row.delegation.target_run_id) || history.pending"
+      :disabled="!row.session || history.pending"
       @click="open(row)"
     >
       <PauseCircle

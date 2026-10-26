@@ -21,7 +21,7 @@ const observations = reactive<Record<string, { synchronized: boolean, run: Runti
 const sidebar = reactive({ sidebarOpen: true, sidebarView: 'sessions', api: {} })
 vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({
   get currentBotId() { return bot.value }, get sessionId() { return session.value },
-  get knownSessions() { return known.value }, bots: [{ id: 'specialist', display_name: 'Image specialist' }],
+  get knownSessions() { return known.value }, bots: [{ id: 'bot', display_name: 'Supervisor' }, { id: 'specialist', display_name: 'Image specialist' }],
   knownSessionSummary: (id: string) => known.value.find(value => value.id === id),
   runtimeObservationFor: (_bot: string, id: string) => observations[id],
   workspaceTargetSelectionFor: () => ({ targetId: 'native' }), selectBot: api.select,
@@ -105,10 +105,55 @@ describe('compact activity outside the task dialog', () => {
     expect(api.open).toHaveBeenCalledWith({ sessionId: 'parent', title: 'Generate snow landscape' })
     expect(api.tasks).not.toHaveBeenCalled(); expect(api.delegations).not.toHaveBeenCalled()
   })
-  it('does not invent a link without the recorded specialist session/run relation', async () => {
-    api.delegations.mockResolvedValue({ data: { items: [{ ...delegation, target_run_id: undefined }] } }); await mount()
+  it('does not invent a link without the recorded specialist session', async () => {
+    api.delegations.mockResolvedValue({ data: { items: [{ ...delegation, target_session_id: undefined }] } }); await mount()
     expect(root.querySelector('button')!.disabled).toBe(true); root.querySelector('button')!.click()
     expect(api.open).not.toHaveBeenCalled(); expect(api.session).not.toHaveBeenCalled()
+  })
+  it('uses the Bot name without substituting a request body for a missing session name', async () => {
+    known.value[0]!.title = ''
+    observations.parent = { synchronized: true, run: { run_id: 'private-run', turn_id: 'turn', generation: 'g', status: 'running', started_at: 'private-time', updated_at: 'private-time', messages: [], request_user_turn: { turn_id: 'turn', role: 'user', timestamp: 'private-time', text: 'Do not turn this request into a management name' } } }
+    await mount()
+    expect(root.textContent).toContain('Supervisor')
+    expect(root.textContent).not.toMatch(/Do not turn|private-run|private-time/)
+  })
+  it('shows Bot, Agent and delegated Bot names/statuses together without details', async () => {
+    observations.parent = { synchronized: true, run: { run_id: 'private-run', turn_id: 'turn', generation: 'g', status: 'running', started_at: '', updated_at: '', messages: [] } }
+    api.tasks.mockResolvedValue({ data: { items: [task('private-task', 'waiting_decision')] } })
+    api.delegations.mockResolvedValue({ data: { items: [delegation] } })
+    await mount()
+    expect(root.querySelectorAll('button')).toHaveLength(3)
+    expect(root.textContent).toContain('Generate snow landscape')
+    expect(root.textContent).toContain('Review image reference')
+    expect(root.textContent).toContain('Image specialist')
+    expect(root.textContent).not.toMatch(/private-|diagnostic|Run ID/)
+    expect(root.querySelector('[role=dialog]')).toBeNull()
+  })
+  it('opens the authorized original specialist session before a RunID exists', async () => {
+    const admitted = { ...delegation, state: 'accepted' as const, target_run_id: undefined, target_run_state: undefined }
+    api.delegations.mockResolvedValue({ data: { items: [admitted] } })
+    api.delegation.mockResolvedValue({ data: admitted })
+    await mount(); expect(root.querySelector('button')!.disabled).toBe(false)
+    root.querySelector('button')!.click(); await settled()
+    expect(api.session).toHaveBeenCalledOnce()
+    expect(api.open).toHaveBeenCalledWith({ sessionId: 'expert-session', title: 'Specialist original session' })
+  })
+  it('does not block the original session when its run appears during navigation', async () => {
+    api.delegations.mockResolvedValue({ data: { items: [{ ...delegation, target_run_id: undefined, target_run_state: undefined }] } })
+    await mount(); root.querySelector('button')!.click(); await settled()
+    expect(api.open).toHaveBeenCalledWith({ sessionId: 'expert-session', title: 'Specialist original session' })
+  })
+  it.each([401, 403, 404, 503])('keeps target-session permission/error %s from becoming a navigation', async status => {
+    api.delegations.mockResolvedValue({ data: { items: [{ ...delegation, target_run_id: undefined }] } })
+    api.session.mockRejectedValue({ status })
+    await mount(); root.querySelector('button')!.click(); await settled()
+    expect(api.open).not.toHaveBeenCalled(); expect(api.select).not.toHaveBeenCalled()
+  })
+  it('rejects a changed target-session relation without opening either conversation', async () => {
+    api.delegations.mockResolvedValue({ data: { items: [delegation] } })
+    api.delegation.mockResolvedValue({ data: { ...delegation, target_session_id: 'different-session' } })
+    await mount(); root.querySelector('button')!.click(); await settled()
+    expect(api.session).not.toHaveBeenCalled(); expect(api.open).not.toHaveBeenCalled()
   })
   it('cancels an in-flight specialist navigation when the source list loses access', async () => {
     let finish!: (value: { data: BotdelegationView }) => void
