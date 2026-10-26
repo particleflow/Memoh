@@ -1,0 +1,79 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/image-timing-20261026/context/checkout
+> vitest --run --testTimeout=15000 apps/web/src/lib/harmony-image-timing.test.ts apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/attachment-block.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/image-timing-20261026/context/checkout
+
+ ❯ |web| src/pages/home/components/attachment-block.test.ts (8 tests | 2 failed) 414ms
+     × does not fetch a large history.txt and preserves size and explicit download 19ms
+     × does not fetch a large history.csv and preserves size and explicit download 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.txt and preserves size and explicit download
+ FAIL  |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.csv and preserves size and explicit download
+AssertionError: expected "click" to be called once, but got 0 times
+ ❯ src/pages/home/components/attachment-block.test.ts:72:22
+     70|     })
+     71|     host.querySelector('button')!.click()
+     72|     expect(download).toHaveBeenCalledOnce()
+       |                      ^
+     73|     expect(fetchMock).not.toHaveBeenCalled()
+     74|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: [vitest] No "toast" export is defined on the "@felinic/ui" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("@felinic/ui"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ VitestMocker.createError ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:62:17
+ ❯ Object.get ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:327:16
+ ❯ apps/web/src/pages/home/components/attachment-block.vue:362:40
+ ❯ processTicksAndRejections node:internal/process/task_queues:104:5
+
+This error originated in "apps/web/src/pages/home/components/attachment-block.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: [vitest] No "toast" export is defined on the "@felinic/ui" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("@felinic/ui"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ VitestMocker.createError ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:62:17
+ ❯ Object.get ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:327:16
+ ❯ apps/web/src/pages/home/components/attachment-block.vue:362:40
+ ❯ processTicksAndRejections node:internal/process/task_queues:104:5
+
+This error originated in "apps/web/src/pages/home/components/attachment-block.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  2 failed | 28 passed (30)
+     Errors  2 errors
+   Start at  18:45:56
+   Duration  26.71s (transform 22.85s, setup 0ms, import 32.19s, tests 2.25s, environment 4.80s)
+
+ ELIFECYCLE  Test failed. See above for more details.

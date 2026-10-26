@@ -1,0 +1,158 @@
+{
+  "base": "a2f3c9f6c597f71688c5677dccfcfc2ce659e95e",
+  "scope": "source-only opt-in temporary local image timing; no HAP rebuild",
+  "collectorAndActualComponentTests": {
+    "passed": 10
+  },
+  "existingScopedAttachmentTests": {
+    "passed": 12
+  },
+  "inheritedPhoneAnchorAssertions": {
+    "passed": 6,
+    "failed": 2,
+    "unhandledErrors": 2,
+    "sameFailureReproducedOnUnmodifiedBase": true,
+    "reason": "Upstream tests assume immediate browser anchor download; the existing phone adapter saves through its verified path and test UI mock lacks toast. No assertion or product change in this patch."
+  },
+  "nativeClassIsolation": {
+    "passed": 7,
+    "officialCompiler": false,
+    "realArkWeb": false
+  },
+  "desktopOutputFilter": {
+    "passed": 3
+  },
+  "generatedWebTypes": {
+    "exitCode": 0
+  },
+  "generatedWebBuild": {
+    "exitCode": 0
+  },
+  "eslint": {
+    "errors": 0,
+    "warnings": 11,
+    "suppressions": false
+  },
+  "sourceManifest": {
+    "reviewedSources": 146,
+    "sourceAndSupportFiles": 155,
+    "historicalUnverifiedChanges": 19,
+    "passed": true
+  },
+  "runtime": {
+    "snapshot": {
+      "version": 1,
+      "active": true,
+      "paintSupported": true,
+      "rows": [
+        {
+          "id": 1,
+          "card": 2266.0999999940395,
+          "request": 2310.300000011921,
+          "headers": 2331.800000011921,
+          "body": 2335.4000000059605,
+          "bytes": 69,
+          "hashStart": 2335.5999999940395,
+          "hashEnd": 2335.800000011921,
+          "blob": 2338.0999999940395,
+          "responseEnd": 2322.199999988079,
+          "load": 2367.0999999940395,
+          "decodeStart": 2367.0999999940395,
+          "decodeEnd": 2371.5999999940395,
+          "render": 2384
+        },
+        {
+          "id": 2,
+          "card": 2266.800000011921,
+          "request": 2311,
+          "headers": 2332.199999988079,
+          "body": 2341.699999988079,
+          "bytes": 69,
+          "hashStart": 2341.800000011921,
+          "hashEnd": 2341.9000000059605,
+          "blob": 2343.0999999940395,
+          "responseEnd": 2323.300000011921,
+          "load": 2371.0999999940395,
+          "decodeStart": 2371.0999999940395,
+          "decodeEnd": 2372.199999988079,
+          "render": 2384
+        },
+        {
+          "id": 3,
+          "card": 2267.0999999940395,
+          "request": 2311.199999988079,
+          "headers": 2332.4000000059605,
+          "body": 2345.800000011921,
+          "bytes": 69,
+          "hashStart": 2345.9000000059605,
+          "hashEnd": 2346,
+          "blob": 2348.0999999940395,
+          "responseEnd": 2327.699999988079,
+          "load": 2371.300000011921,
+          "decodeStart": 2371.300000011921,
+          "decodeEnd": 2372.199999988079,
+          "render": 2384
+        },
+        {
+          "id": 4,
+          "card": 2267.4000000059605,
+          "request": 2311.5,
+          "headers": 2332.5999999940395,
+          "body": 2352,
+          "bytes": 69,
+          "hashStart": 2352.0999999940395,
+          "hashEnd": 2352.199999988079,
+          "blob": 2354.300000011921,
+          "responseEnd": 2328.0999999940395,
+          "load": 2371.4000000059605,
+          "decodeStart": 2371.4000000059605,
+          "decodeEnd": 2372.199999988079,
+          "render": 2384
+        },
+        {
+          "id": 5,
+          "card": 2267.4000000059605,
+          "request": 2311.5999999940395,
+          "headers": 2332.800000011921,
+          "body": 2358.800000011921,
+          "bytes": 69,
+          "hashStart": 2358.800000011921,
+          "hashEnd": 2358.9000000059605,
+          "blob": 2360.9000000059605,
+          "responseEnd": 2328.9000000059605,
+          "load": 2371.5,
+          "decodeStart": 2371.5,
+          "decodeEnd": 2372.199999988079,
+          "render": 2384
+        }
+      ]
+    },
+    "syntheticExistingImageGETs": 5,
+    "extraModelTasks": 0,
+    "extraMeasurementGETs": 0,
+    "sameAuthenticatedSDKPath": true,
+    "loginRetained": true,
+    "pageErrors": [],
+    "browser": "Chromium,390x844, compiled current phone Web source",
+    "officialArkWeb": false,
+    "device": false,
+    "runtimeHandshake": "synthetic explicit history commit callback, not real WS admission",
+    "actualFiveUserImagesMeasured": false,
+    "byteThroughputAcceptance": false
+  },
+  "noNewPermissions": true,
+  "webDebuggingEnabled": false,
+  "persistentAppTimingLogs": false,
+  "defaultCollectionEnabled": false,
+  "nativeAndWebTTLms": 120000,
+  "maximumImageRows": 5,
+  "privateDataInReadback": false,
+  "actualUserImageMeasurement": false,
+  "officialArkTSCompile": false,
+  "newHAPBuilt": false,
+  "directoryAttachmentOwnerContract": "pending exact fixed source; originalBlob/SDK/delegation/hash seams preserved; no independent schema added",
+  "artifactHashes": {
+    "synthetic-image-card-runtime-390.png": "bedbe89d8231a561cf820531579699eaff013f35047f6d935203bea5578d8021",
+    "browser-image-flow.json": "b296a6b8b710758e7b4461a6212a8aa59b80de8a0a5f7c36e1c8f2ff72f41517"
+  }
+}

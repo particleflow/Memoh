@@ -1,0 +1,18 @@
+
+/workspace/harmony-recovery-20261023/evidence/image-timing-20261026/context/checkout/apps/web/src/pages/home/components/attachment-block.vue
+   53:11  warning  Attribute ":name" should go before "@error.capture"        vue/attributes-order
+   54:11  warning  Attribute "interactive" should go before "@error.capture"  vue/attributes-order
+  110:1   warning  Expected indentation of 8 spaces but found 10 spaces       vue/html-indent
+  111:9   warning  Attribute "v-else" should go before "v-bind"               vue/attributes-order
+
+/workspace/harmony-recovery-20261023/evidence/image-timing-20261026/context/checkout/apps/web/src/pages/home/components/chat-attachment-card.vue
+  121:11  warning  Expected a linebreak before this attribute                              vue/first-attribute-linebreak
+  121:27  warning  'class' should be on a new line                                         vue/max-attributes-per-line
+  122:1   warning  Expected indentation of 10 spaces but found 6 spaces                    vue/html-indent
+  122:30  warning  ':aria-label' should be on a new line                                   vue/max-attributes-per-line
+  122:57  warning  Expected 1 line break before closing bracket, but no line breaks found  vue/html-closing-bracket-newline
+  123:42  warning  'class' should be on a new line                                         vue/max-attributes-per-line
+  125:20  warning  'class' should be on a new line                                         vue/max-attributes-per-line
+
+✖ 11 problems (0 errors, 11 warnings)
+  0 errors and 11 warnings potentially fixable with the `--fix` option.

@@ -1,4 +1,5 @@
 import { NativeClient } from '../common/NativeClient';
+import { ImageTimingDump } from '../common/ImageTimingDump';
 import { NativePhotoSelection } from '../common/NativePhotoSelection';
 import { common } from '@kit.AbilityKit';
 import { webview } from '@kit.ArkWeb';
@@ -139,6 +140,7 @@ struct SharedChat {
   }
 
   aboutToDisappear(): void {
+    ImageTimingDump.detach();
     this.clearClientWait();
     this.cancelWebDownloads();
     this.active = false;
@@ -163,6 +165,7 @@ struct SharedChat {
       this.nativeClient = new NativeClient(this.controller, (state: string) => this.clientState(state),
         (theme: string) => this.setClientTheme(theme), this.context);
       this.nativeReady = this.nativeClient.register();
+      ImageTimingDump.bind(this.controller, (): boolean => this.active && this.chatReady && this.nativeReady);
       if (!this.nativeReady) { this.status = '附件功能暂时不可用，请重新打开聊天'; }
     } catch { this.nativeReady = false; this.status = '附件功能暂时不可用，请重新打开聊天'; }
   }

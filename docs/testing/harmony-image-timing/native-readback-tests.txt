@@ -1,0 +1,8 @@
+PASS only literal commands on the app-owned origin
+PASS foreign page and inactive chat cannot arm or read
+PASS whitelist strips secrets and rejects invalid numeric values
+PASS accepts one ArkWeb string wrapper and expires local output
+PASS rejects oversized and malformed payloads without logging them
+PASS late native completion cannot restore a cleared snapshot
+PASS missing controller and failed WebView do not throw
+{"passed":7,"officialArkTSCompiler":false,"actualArkWeb":false,"device":false}

@@ -8,6 +8,8 @@ import {
 import type { ChatAttachment, UIAttachment } from '@/composables/api/useChat'
 import type { VoiceSubmission } from './harmony-voice'
 import { shallowReactive, toRaw } from 'vue'
+import { client } from '@memohai/sdk/client'
+import { imageTimingHandle, imageTimingFetch, imageTimingMark, imageTimingResource, imageTimingBlob } from './harmony-image-timing'
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { normalizeDelegationPath } from './harmony-service-url'
 import { saveNativeOriginal } from './harmony-download'
@@ -108,6 +110,7 @@ function uploadFetch(progress: ((value: UploadProgress) => void) | undefined, at
 
 export async function originalBlob(attachment: UIAttachment, signal?: AbortSignal): Promise<Blob> {
   signal?.throwIfAborted()
+  const timing = imageTimingHandle(attachment)
   const hash = String(attachment.content_hash ?? '')
   const botId = String(attachment.bot_id ?? attachment.metadata?.bot_id ?? '')
   if (!/^[a-f0-9]{64}$/.test(hash) || referenceBot(attachment) !== botId) {
@@ -120,22 +123,30 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
     const path = normalizeDelegationPath(scope as string, hash)
     const token = sdkAuthQuery().token
     if (!token) throw new Error('原件授权不可用')
-    response = await createApiFetch()(sdkApiUrl({ url: path }), {
+    response = await imageTimingFetch(timing, createApiFetch())(sdkApiUrl({ url: path }), {
       method: 'GET', signal, redirect: 'error', headers: { authorization: 'Bearer ' + token },
     })
     if (response.status !== 200) throw new Error('委派原件访问失败')
     bytes = await response.arrayBuffer()
   } else {
     const result = await getBotsByBotIdMediaByContentHash({
-      path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: true })
+      path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: true,
+      ...(timing ? { fetch: imageTimingFetch(timing, client.getConfig().fetch ?? globalThis.fetch) } : {}) })
     bytes = result.data
     response = result.response
   }
   if (response.status !== 200) throw new Error('原件响应不完整')
-  if (!(bytes instanceof ArrayBuffer) || (typeof attachment.size === 'number' && bytes.byteLength !== attachment.size)
-    || await digest(bytes) !== hash) throw new Error('原件校验未通过')
+  imageTimingMark(timing, 'body', bytes instanceof ArrayBuffer ? bytes.byteLength : undefined)
+  imageTimingResource(timing, response.url)
+  if (!(bytes instanceof ArrayBuffer) || (typeof attachment.size === 'number' && bytes.byteLength !== attachment.size)) throw new Error('原件校验未通过')
+  imageTimingMark(timing, 'hashStart')
+  const verifiedHash = await digest(bytes)
+  imageTimingMark(timing, 'hashEnd')
+  if (verifiedHash !== hash) throw new Error('原件校验未通过')
   signal?.throwIfAborted()
-  return new Blob([bytes], { type: attachment.mime || 'application/octet-stream' })
+  const blob = new Blob([bytes], { type: attachment.mime || 'application/octet-stream' })
+  imageTimingBlob(timing, blob)
+  return blob
 }
 
 function saveBlob(blob: Blob, name: string): void {

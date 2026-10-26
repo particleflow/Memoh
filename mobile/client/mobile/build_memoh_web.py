@@ -42,6 +42,7 @@ def sha(path):
 def inputs():
     files = [ROOT / name for name in (
         'mobile/build_memoh_web.py', 'mobile/memoh/harmony.ts', 'mobile/memoh/harmony-files.ts',
+        'mobile/memoh/harmony-image-timing.ts', 'mobile/memoh/harmony-image-timing.test.ts',
         'mobile/memoh/harmony-voice.ts', 'mobile/memoh/harmony-voice-geometry.ts',
         'mobile/memoh/HarmonyVoiceInput.vue', 'mobile/memoh/HarmonyVoiceFan.vue', 'mobile/memoh/HarmonyVoicePlayer.vue',
         'mobile/memoh/HarmonyAttachments.vue', 'mobile/memoh/harmony-resumable.ts',
@@ -724,6 +725,23 @@ function close() {''', 1),
 
 
     }
+    # Temporary opt-in image timing adds no display, request, or authorization path.
+    changes['apps/web/src/pages/home/components/attachment-block.vue'].extend([
+        ("import { originalBlob, saveOriginal } from '@/lib/harmony-files'",
+         "import { originalBlob, saveOriginal } from '@/lib/harmony-files'\nimport { imageTimingCard, imageTimingURL, imageTimingElement, imageTimingLoaded, imageTimingFailed } from '@/lib/harmony-image-timing'", 1),
+        ('      seen.add(key)\n      void originalBlob',
+         '      seen.add(key)\n      imageTimingCard(att)\n      void originalBlob', 1),
+        ('        const url = URL.createObjectURL(blob)\n        urls.push(url)',
+         '        const url = URL.createObjectURL(blob)\n        imageTimingURL(blob, url)\n        urls.push(url)', 1),
+        ('          loading="eager"\n          decoding="async"',
+         '          loading="eager"\n          decoding="async"\n          :elementtiming="imageTimingElement(getUrl(att))"\n          @load="imageTimingLoaded"\n          @error="imageTimingFailed"', 1),
+        ('          :src="getUrl(att)"\n          :video="isVideo(att)"',
+         '          :src="getUrl(att)"\n          :video="isVideo(att)"\n          :element-timing="imageTimingElement(getUrl(att))"\n          @load.capture="imageTimingLoaded"\n          @error.capture="imageTimingFailed"', 1),
+    ])
+    changes['apps/web/src/pages/home/components/chat-attachment-card.vue'].extend([
+        ('  src?: string', '  src?: string\n  elementTiming?: string', 1),
+        ('          v-else-if="src"\n          :src="src"', '          v-else-if="src"\n          :src="src"\n          :elementtiming="elementTiming"', 1),
+    ])
     changes['apps/web/src/pages/home/composables/useComposerAttachments.ts'].extend([
         ("import { computed,", "import { selectedAttachmentFile } from '@/lib/harmony-files'\nimport { computed,", 1),
         ('const uploaded = uploadedAttachmentFile(attachment)',
@@ -917,7 +935,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         assert patches.keys() == changes.keys() | {'apps/web/package.json', 'pnpm-lock.yaml'}, 'Upstream host seam missing'
         assert 'apps/web/src/pages/home/components/session-task-results.test.ts' in patches, 'Phone attachment test seam missing'
         host_sources = {name: ROOT / 'mobile/memoh' / name for name in (
-            'harmony.ts', 'harmony-files.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
+            'harmony.ts', 'harmony-files.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
             'HarmonyAttachments.vue', 'harmony-resumable.ts',
             'harmony-download.ts', 'harmony-service-url.ts')}
