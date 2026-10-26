@@ -30,10 +30,11 @@ type ConnectionCommitGuard func() error
 // in-memory reverse-RPC connections. Bot/session routing belongs outside this
 // package.
 type Service struct {
-	agenvo         *agenvo.Service
-	store          dbstore.UserRuntimeStore
-	hub            *Hub
-	lifecycleLocks *runtimeLifecycleLocks
+	agenvo           *agenvo.Service
+	store            dbstore.UserRuntimeStore
+	hub              *Hub
+	lifecycleLocks   *runtimeLifecycleLocks
+	workspaceStorage *workspaceStorage
 }
 
 func (s *Service) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }

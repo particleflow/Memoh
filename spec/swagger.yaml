@@ -8308,6 +8308,31 @@ definitions:
       expires_at:
         type: string
     type: object
+  userruntime.WorkspaceDirectory:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    type: object
+  userruntime.WorkspaceStorage:
+    properties:
+      directories:
+        items:
+          $ref: '#/definitions/userruntime.WorkspaceDirectory'
+        type: array
+      path:
+        type: string
+      selected_path:
+        type: string
+      windows_path:
+        type: string
+    type: object
+  userruntime.WorkspaceStorageRequest:
+    properties:
+      path:
+        type: string
+    type: object
   video.ConfigSchema:
     properties:
       fields:
@@ -21709,6 +21734,136 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Enroll or explicitly rotate an owned computer file credential
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/workspace-storage:
+    get:
+      description: Account session required. Uses an existing configured private LAN
+        share and existing Runtime identity. No directory creation, execution or credential
+        changes.
+      parameters:
+      - description: Owned Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Relative directory within this computer's NAS storage
+        in: query
+        name: path
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/userruntime.WorkspaceStorage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Browse this owned computer's NAS workspace directories
+      tags:
+      - user-runtimes
+    put:
+      consumes:
+      - application/json
+      description: Persists only workspace_storage in the existing Runtime configuration
+        with compare-and-swap. Creates the default folder if missing after LAN/share
+        access validation. Does not rewrite Herdr WorkDir, existing tasks, sessions,
+        local sourceRoot or credentials.
+      parameters:
+      - description: Owned Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Relative selected directory
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userruntime.WorkspaceStorageRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Save this owned computer's default NAS storage directory
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/workspace-storage/directories:
+    post:
+      consumes:
+      - application/json
+      description: Requires the existing private LAN share to be readable before any
+        NAS write. Does not change selection, local defaults, tasks or sessions.
+      parameters:
+      - description: Owned Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Relative path
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/userruntime.WorkspaceStorageRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Create a directory in this owned computer's NAS storage
       tags:
       - user-runtimes
   /video-models:

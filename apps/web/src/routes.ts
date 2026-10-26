@@ -13,6 +13,7 @@ const pageBotCreateProgress = () => import('@/pages/bots/new-progress.vue')
 const pageBotDetail = () => import('@/pages/bots/detail.vue')
 const pageProviders = () => import('@/pages/providers/index.vue')
 const pageRuntimes = () => import('@/pages/runtimes/index.vue')
+const pageWorkspaceStorage = () => import('@/pages/workspace-storage/index.vue')
 const pageUsage = () => import('@/pages/usage/index.vue')
 const pagePeople = () => import('@/pages/people/index.vue')
 const pageAppearance = () => import('@/pages/appearance/index.vue')
@@ -32,7 +33,7 @@ const pageAbout = () => import('@/pages/about/index.vue')
  */
 export const settingsPageLoaders = [
   pageSettings,
-  pageBots, pageProviders, pageRuntimes,
+  pageBots, pageProviders, pageRuntimes, pageWorkspaceStorage,
   pageUsage, pagePeople, pageAppearance, pageKeyboard,
   pageProfile, pageSupermarket, pageAbout,
   pageBotNew, pageBotCreateProgress, pageBotDetail,
@@ -187,6 +188,12 @@ export function createAppRoutes(platform: 'web' | 'desktop'): RouteRecordRaw[] {
           meta: {
             breadcrumb: i18nRef('sidebar.runtimes'),
           },
+        },
+        {
+          name: 'workspace-storage',
+          path: 'workspace-storage',
+          component: pageWorkspaceStorage,
+          meta: { breadcrumb: i18nRef('workspaceStorage.title') },
         },
         {
           name: 'web-search',

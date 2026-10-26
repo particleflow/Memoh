@@ -1,0 +1,40 @@
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/account
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/chat
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/revoked
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/anonymous
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/other_owner
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/invalid_id
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/account
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/chat
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/revoked
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/anonymous
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/other_owner
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/invalid_id
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/account
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/chat
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/revoked
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/anonymous
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/other_owner
+=== RUN   TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/invalid_id
+--- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite (0.01s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/account (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/chat (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/revoked (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/anonymous (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/other_owner (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/GET/invalid_id (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/account (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/chat (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/revoked (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/anonymous (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/other_owner (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/POST/invalid_id (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/account (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/chat (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/revoked (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/anonymous (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/other_owner (0.00s)
+    --- PASS: TestWorkspaceStorageAccountBoundaryAndOfflineNoWrite/PUT/invalid_id (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.021s

@@ -28,7 +28,6 @@ import (
 	"github.com/felinics/memoh/internal/schedule"
 	"github.com/felinics/memoh/internal/searchproviders"
 	"github.com/felinics/memoh/internal/supermarket"
-	"github.com/felinics/memoh/internal/userruntime"
 	videopkg "github.com/felinics/memoh/internal/video"
 	"github.com/felinics/memoh/internal/workdir"
 	"github.com/felinics/memoh/internal/workspace"
@@ -80,7 +79,7 @@ func ServerModule() fx.Option {
 			provideBotRemoteRuntimeBindingStore,
 			provideBotWorkdirStore,
 			provideUserRuntimeHub,
-			userruntime.NewService,
+			provideUserRuntimeService,
 			provideAgenvoService,
 			workspace.NewRemoteWorkspaceService,
 			provideUserRuntimePipe,

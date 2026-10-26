@@ -4811,6 +4811,22 @@ export type UserruntimeTransferCredentialStatus = {
     expires_at?: string;
 };
 
+export type UserruntimeWorkspaceDirectory = {
+    name?: string;
+    path?: string;
+};
+
+export type UserruntimeWorkspaceStorage = {
+    directories?: Array<UserruntimeWorkspaceDirectory>;
+    path?: string;
+    selected_path?: string;
+    windows_path?: string;
+};
+
+export type UserruntimeWorkspaceStorageRequest = {
+    path?: string;
+};
+
 export type VideoConfigSchema = {
     fields?: Array<VideoFieldSchema>;
 };
@@ -20109,6 +20125,147 @@ export type PostUsersMeRuntimesByIdTransferCredentialResponses = {
 };
 
 export type PostUsersMeRuntimesByIdTransferCredentialResponse = PostUsersMeRuntimesByIdTransferCredentialResponses[keyof PostUsersMeRuntimesByIdTransferCredentialResponses];
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageData = {
+    body?: never;
+    path: {
+        /**
+         * Owned Runtime ID
+         */
+        id: string;
+    };
+    query?: {
+        /**
+         * Relative directory within this computer's NAS storage
+         */
+        path?: string;
+    };
+    url: '/users/me/runtimes/{id}/workspace-storage';
+};
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageError = GetUsersMeRuntimesByIdWorkspaceStorageErrors[keyof GetUsersMeRuntimesByIdWorkspaceStorageErrors];
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageResponses = {
+    /**
+     * OK
+     */
+    200: UserruntimeWorkspaceStorage;
+};
+
+export type GetUsersMeRuntimesByIdWorkspaceStorageResponse = GetUsersMeRuntimesByIdWorkspaceStorageResponses[keyof GetUsersMeRuntimesByIdWorkspaceStorageResponses];
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageData = {
+    /**
+     * Relative selected directory
+     */
+    body: UserruntimeWorkspaceStorageRequest;
+    path: {
+        /**
+         * Owned Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/workspace-storage';
+};
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageError = PutUsersMeRuntimesByIdWorkspaceStorageErrors[keyof PutUsersMeRuntimesByIdWorkspaceStorageErrors];
+
+export type PutUsersMeRuntimesByIdWorkspaceStorageResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesData = {
+    /**
+     * Relative path
+     */
+    body: UserruntimeWorkspaceStorageRequest;
+    path: {
+        /**
+         * Owned Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/workspace-storage/directories';
+};
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesError = PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors[keyof PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors];
+
+export type PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
 
 export type DeleteUsersByIdData = {
     body?: never;

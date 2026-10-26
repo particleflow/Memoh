@@ -645,18 +645,26 @@ type AppleConfig struct {
 }
 
 type WorkspaceConfig struct {
-	Registry        string `toml:"registry"`
-	DefaultImage    string `toml:"default_image"`
-	ImagePullPolicy string `toml:"image_pull_policy"`
-	Snapshotter     string `toml:"snapshotter"`
-	DataRoot        string `toml:"data_root"`
-	CNIBinaryDir    string `toml:"cni_bin_dir"`
-	CNIConfigDir    string `toml:"cni_conf_dir"`
-	BridgePath      string `toml:"bridge_path"`
+	Storage         WorkspaceStorageConfig `toml:"storage"`
+	Registry        string                 `toml:"registry"`
+	DefaultImage    string                 `toml:"default_image"`
+	ImagePullPolicy string                 `toml:"image_pull_policy"`
+	Snapshotter     string                 `toml:"snapshotter"`
+	DataRoot        string                 `toml:"data_root"`
+	CNIBinaryDir    string                 `toml:"cni_bin_dir"`
+	CNIConfigDir    string                 `toml:"cni_conf_dir"`
+	BridgePath      string                 `toml:"bridge_path"`
 	// RuntimeDir is accepted for one compatibility release. New deployments
 	// should configure bridge_path because the Server no longer owns a toolkit
 	// or workspace templates directory.
 	RuntimeDir string `toml:"runtime_dir"`
+}
+
+// WorkspaceStorageConfig maps one existing NAS directory to its existing LAN
+// share. Empty values disable computer storage; this does not mount a share.
+type WorkspaceStorageConfig struct {
+	Root      string `toml:"root"`
+	ShareRoot string `toml:"share_root"`
 }
 
 // ImageRef returns the fully qualified image reference for the base image,
@@ -1131,6 +1139,9 @@ func (cfg *Config) resolvePaths() {
 	cfg.Container.DataRoot = cfg.Container.DataRootPath()
 	cfg.Container.RuntimeDir = cfg.Container.RuntimePath()
 	cfg.Container.BridgePath = cfg.Container.BridgeBinaryPath()
+	if strings.TrimSpace(cfg.Container.Storage.Root) != "" {
+		cfg.Container.Storage.Root = absPath(cfg.Container.Storage.Root)
+	}
 	cfg.Workspace = cfg.Container.WorkspaceConfig
 	if strings.TrimSpace(cfg.Registry.ProvidersDir) != "" {
 		cfg.Registry.ProvidersDir = cfg.Registry.ProvidersPath()
@@ -1151,6 +1162,7 @@ func containerHasWorkspaceFields(values map[string]any) bool {
 		"cni_conf_dir",
 		"bridge_path",
 		"runtime_dir",
+		"storage",
 	} {
 		if _, ok := values[key]; ok {
 			return true

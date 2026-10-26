@@ -19258,6 +19258,193 @@ const docTemplate = `{
                 }
             }
         },
+        "/users/me/runtimes/{id}/workspace-storage": {
+            "get": {
+                "description": "Account session required. Uses an existing configured private LAN share and existing Runtime identity. No directory creation, execution or credential changes.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Browse this owned computer's NAS workspace directories",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owned Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Relative directory within this computer's NAS storage",
+                        "name": "path",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.WorkspaceStorage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Persists only workspace_storage in the existing Runtime configuration with compare-and-swap. Creates the default folder if missing after LAN/share access validation. Does not rewrite Herdr WorkDir, existing tasks, sessions, local sourceRoot or credentials.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Save this owned computer's default NAS storage directory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owned Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Relative selected directory",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.WorkspaceStorageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/workspace-storage/directories": {
+            "post": {
+                "description": "Requires the existing private LAN share to be readable before any NAS write. Does not change selection, local defaults, tasks or sessions.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Create a directory in this owned computer's NAS storage",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Owned Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Relative path",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/userruntime.WorkspaceStorageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/users/{id}": {
             "get": {
                 "description": "Get user details (self or admin only)",
@@ -31666,6 +31853,45 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "expires_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.WorkspaceDirectory": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.WorkspaceStorage": {
+            "type": "object",
+            "properties": {
+                "directories": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/userruntime.WorkspaceDirectory"
+                    }
+                },
+                "path": {
+                    "type": "string"
+                },
+                "selected_path": {
+                    "type": "string"
+                },
+                "windows_path": {
+                    "type": "string"
+                }
+            }
+        },
+        "userruntime.WorkspaceStorageRequest": {
+            "type": "object",
+            "properties": {
+                "path": {
                     "type": "string"
                 }
             }

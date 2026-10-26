@@ -18,7 +18,7 @@ import { UserFacingError } from '@/utils/api-error'
 // listing from the previous one can land in it.
 
 const props = withDefaults(defineProps<{
-  botId: string
+  botId?: string
   /** Workspace target to browse. */
   targetId?: string
   /**
@@ -30,7 +30,10 @@ const props = withDefaults(defineProps<{
   rootLabel: string
   /** Absolute path of the row drawn as selected. */
   selectedPath: string
+  /** Owned non-Bot settings may supply their existing authorized directory read. */
+  directoryLoader?: (path: string) => Promise<DirectoryListing>
 }>(), {
+  botId: '',
   targetId: 'native',
   rootPath: '',
 })
@@ -44,6 +47,8 @@ defineEmits<{ select: [path: string] }>()
 const { t } = useI18n()
 
 async function listDirectory(path: string): Promise<DirectoryListing> {
+  if (props.directoryLoader) return props.directoryLoader(path)
+  if (!props.botId) throw new UserFacingError(t('bots.folders.form.browseFailed'))
   let result: Awaited<ReturnType<typeof getBotsByBotIdWorkdirsDirectories>>
   try {
     result = await getBotsByBotIdWorkdirsDirectories({

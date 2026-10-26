@@ -158,6 +158,13 @@ bridge_path = "/opt/memoh/runtime/bridge"
 cni_bin_dir = "/opt/cni/bin"
 cni_conf_dir = "/etc/cni/net.d"
 
+# Optional: the same existing NAS directory as seen by Server and by Windows.
+# Configure only after confirming the existing LAN share and bind mount.
+# Empty values keep NAS computer-storage actions unavailable; no share is mounted.
+[container.storage]
+root = ""
+share_root = ""
+
 [containerd]
 # Used when [container].backend = "containerd". The Docker Compose deployment
 # starts an embedded containerd inside the server container at this socket.

@@ -533,6 +533,7 @@
       "image_not_found": "The workspace image does not exist, needs registry credentials, or its name is invalid. Check the image name and try again.",
       "image_registry_unavailable": "The image registry could not be reached. Please try again later.",
       "operation_unsupported": "This target supports foreground commands only. Choose another computer for file or terminal operations.",
+      "storage_unavailable": "NAS workspace storage is unavailable.",
       "teardown_failed": "Workspace removal failed. Retry deleting the bot.",
       "template_bootstrap_failed": "The workspace files could not be initialized. Please try rebuilding the workspace.",
       "unreachable": "The workspace could not be reached."
@@ -4855,5 +4856,16 @@
     "uncertain": "Command outcome is unknown or rejected. Stopping the wait does not stop Windows execution. Inspect it before retrying.",
     "retained": "Workspace {id} is retained for manual inspection; it was not closed automatically.",
     "truncated": "Output was truncated."
+  },
+  "workspaceStorage": {
+    "title": "Workspace storage",
+    "choose": "Choose NAS directory",
+    "newDirectory": "New directory",
+    "create": "Create",
+    "saved": "NAS directory saved",
+    "loadFailed": "Unable to read computers",
+    "unavailable": "NAS storage is not configured or its existing LAN share is unavailable",
+    "loading": "Loading computers",
+    "empty": "No registered computers"
   }
 }

@@ -270,6 +270,7 @@ const navGroups = computed<NavGroup[]>(() => [
       { title: t('sidebar.bots'), name: 'bots', icon: MousePointer2, flipX: true },
       { title: t('sidebar.providers'), name: 'providers', icon: Box },
       { title: t('sidebar.runtimes'), name: 'runtimes', icon: ComputerIcon },
+      { title: t('workspaceStorage.title'), name: 'workspace-storage', icon: ComputerIcon },
       { title: t('sidebar.supermarket'), name: 'supermarket', icon: Blocks },
     ],
   },

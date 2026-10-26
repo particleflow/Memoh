@@ -50,6 +50,9 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.PUT("/:id/native-herdr", h.ConfigureNativeHerdr)
 	g.GET("/:id/admission", h.ReadAdmission)
 	g.PUT("/:id/admission", h.SetAdmission)
+	g.GET("/:id/workspace-storage", h.WorkspaceDirectories)
+	g.POST("/:id/workspace-storage/directories", h.CreateWorkspaceDirectory)
+	g.PUT("/:id/workspace-storage", h.SelectWorkspaceDirectory)
 }
 
 // ConfigureNativeHerdr godoc
@@ -161,6 +164,12 @@ func (h *UserRuntimeHandler) Delete(c echo.Context) error {
 
 func runtimeHTTPError(err error) error {
 	switch {
+	case errors.Is(err, userruntime.ErrWorkspaceStorageDisabled), errors.Is(err, userruntime.ErrWorkspaceShareUnavailable), errors.Is(err, userruntime.ErrRuntimeConnectionNotReady):
+		return apperror.Wrap(apperror.CodeWorkspaceStorageUnavailable, err, nil)
+	case errors.Is(err, userruntime.ErrWorkspaceStoragePath):
+		return apperror.FieldInvalid("path", err)
+	case errors.Is(err, userruntime.ErrWorkspaceStorageConflict):
+		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, agenvo.ErrEndpointConfigConflict), errors.Is(err, agenvo.ErrNativeProfileConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
