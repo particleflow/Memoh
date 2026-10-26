@@ -20,6 +20,7 @@ export interface OpenAssetPreviewArgs {
   botId?: string
   // Preferred, re-resolvable source for a persisted asset.
   contentHash?: string
+  size?: number
   // Conversation-scoped API path, without credentials. Re-authenticate after
   // restoring a tab; never substitute a wider owner+hash route.
   delegationUrl?: string

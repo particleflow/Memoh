@@ -1,0 +1,16 @@
+{
+  "schema": "177|f",
+  "fixture_business_rows": {
+    "bot_sessions": 0,
+    "bot_history_messages": 0,
+    "bot_delegations": 0,
+    "computer_operations": 0
+  },
+  "original_files": [
+    {
+      "bytes": 3145747,
+      "sha256": "d65ebdd932478b7c2d98e272b786a89ad80b4d36ce3fc0d72e2676a020bbf3af"
+    }
+  ],
+  "after_synthetic_message_confirmation": true
+}

@@ -5,11 +5,13 @@ import type { AttachmentItem } from '@/store/chat-list'
 import AttachmentBlock from './attachment-block.vue'
 import { openAssetPreviewKey, type OpenAssetPreview } from '../composables/useFileManagerProvider'
 
+const transfer = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/media-transfer', () => ({ saveMediaDownload: transfer.save, MediaRecoveryError: class extends Error {} }))
 vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'bot-a' }) }))
 vi.mock('../composables/useMediaGallery', () => ({
   resolveUrl: (att: AttachmentItem) => att.url || '',
 }))
-vi.mock('@felinic/ui', () => ({ Skeleton: 'span' }))
+vi.mock('@felinic/ui', () => ({ Skeleton: 'span', toast: { error: vi.fn() } }))
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: (key: string, args?: { count: number }) => `${key}:${args?.count ?? ''}` }),
 }))
@@ -48,6 +50,14 @@ async function renderAttachment(size: number | undefined, name = 'history.txt', 
 }
 
 describe('history attachment automatic line counts', () => {
+  it('uses durable scope-bound download outside a dock for stored originals', async () => {
+    const hash = 'b'.repeat(64)
+    await renderAttachment(3145747, 'original.bin', { content_hash: hash })
+    host.querySelector('button')!.click()
+    await nextTick()
+    expect(transfer.save).toHaveBeenCalledWith('bot-a', hash, 3145747, undefined, 'original.bin', expect.any(AbortSignal))
+  })
+
   it('passes a credential-free delegation scope into the asset dock', async () => {
     const hash = 'a'.repeat(64)
     const id = '10000000-0000-4000-8000-000000000001'

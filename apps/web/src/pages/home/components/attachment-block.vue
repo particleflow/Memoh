@@ -108,7 +108,11 @@
 </template>
 
 <script setup lang="ts">
-import { inject, reactive, watch } from 'vue'
+import { inject, onScopeDispose, reactive, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { toast } from '@felinic/ui'
+import { MediaRecoveryError, saveMediaDownload } from '@/lib/media-transfer'
+import { resolveApiErrorMessage } from '@/utils/api-error'
 import type { AttachmentBlock, AttachmentItem } from '@/store/chat-list'
 import { useChatStore } from '@/store/chat-list'
 import { isTextFile } from '@/components/file-manager/utils'
@@ -136,6 +140,9 @@ const props = withDefaults(defineProps<{
 const chatStore = useChatStore()
 const openInFileManager = inject(openInFileManagerKey, undefined)
 const openAssetPreview = inject(openAssetPreviewKey, undefined)
+const { t } = useI18n()
+let downloadController: AbortController | undefined
+onScopeDispose(() => downloadController?.abort())
 
 // A sent text file should read exactly like its composer preview did — same line
 // count, same "load then appear" shimmer. The composer had the File object to
@@ -280,7 +287,7 @@ function stableKey(input: string): string {
   return hash.toString(36)
 }
 
-function handleOpenFile(att: AttachmentItem) {
+async function handleOpenFile(att: AttachmentItem) {
   const url = getUrl(att)
   if (!url) return
   const name = getDisplayName(att)
@@ -293,9 +300,23 @@ function handleOpenFile(att: AttachmentItem) {
       name,
       botId: contentHash ? resolveAttBotId(att) : undefined,
       contentHash: contentHash || undefined,
+      size: attachmentSize(att),
       delegationUrl,
       src: contentHash ? undefined : url,
     })
+    return
+  }
+  if (contentHash) {
+    if (downloadController) return
+    const controller = new AbortController()
+    downloadController = controller
+    try {
+      await saveMediaDownload(resolveAttBotId(att), contentHash, attachmentSize(att), delegationUrl, name, controller.signal)
+    } catch (error) {
+      if (!controller.signal.aborted) toast.error(error instanceof MediaRecoveryError
+        ? t(`chat.mediaRecovery.${error.reason}`)
+        : resolveApiErrorMessage(error, t('bots.files.readFailed')))
+    } finally { if (downloadController === controller) downloadController = undefined }
     return
   }
   // Rendered outside a dock (no preview host): download rather than hand a

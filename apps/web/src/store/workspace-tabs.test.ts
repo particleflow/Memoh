@@ -10,6 +10,9 @@ import { handleBrowserKeyboardShortcut } from '@/lib/browser-keyboard-shortcuts'
 import { selectWebBindings } from '@/lib/keyboard-bindings'
 import { useKeyboardShortcutsStore } from '@/store/keyboard-shortcuts'
 
+const mediaRecovery = vi.hoisted(() => ({ scopes: vi.fn() }))
+vi.mock('@/lib/media-transfer', () => ({ restoreMediaUploadScopes: mediaRecovery.scopes }))
+
 vi.hoisted(() => {
   class MemoryStorage implements Storage {
     private readonly values = new Map<string, string>()
@@ -654,6 +657,7 @@ describe('workspace layout store', () => {
   })
 
   beforeEach(() => {
+    mediaRecovery.scopes.mockReset().mockResolvedValue({ scopes: [], check: () => {} })
     localStorage.clear()
     window.localStorage.clear()
     sessionStorage.clear()
@@ -730,6 +734,31 @@ describe('workspace layout store', () => {
       seq: prevSeq + 1,
     }
   }
+
+  it('restores the exact journal draft tab after an ephemeral preview replaced it, without sending', async () => {
+    mediaRecovery.scopes.mockResolvedValue({ scopes: [{ tab: 'chat:original', session: null }], check: () => {} })
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    await vi.waitFor(() => expect(dock.getPanel('chat:original')).toBeDefined())
+    store.activateChatPanel()
+    expect(dock.activePanel?.id).toBe('chat:original')
+    store.openAsset({ key: 'fixture', name: 'fixture.bin', botId: 'bot-1', contentHash: 'a'.repeat(64) })
+    expect(dock.getPanel('chat:original')).toBeDefined()
+    expect(chatStoreMock.createNewSession).not.toHaveBeenCalled()
+  })
+
+  it('does not repoint a different live conversation to an old upload scope', async () => {
+    mediaRecovery.scopes.mockResolvedValue({ scopes: [{ tab: 'chat:1', session: 'original-session' }], check: () => {} })
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    dock.addPanel({ id: 'chat:1', component: 'chat', title: 'Current', params: { sessionId: 'different-session' } })
+    await vi.waitFor(() => expect(mediaRecovery.scopes).toHaveBeenCalled())
+    await nextTick()
+    expect(dock.getPanel('chat:1')!.params.sessionId).toBe('different-session')
+    expect(chatStoreMock.createNewSession).not.toHaveBeenCalled()
+  })
 
   it('keeps a non-chat tab active when the session list changes during a running turn', async () => {
     // Background session-list refreshes and initialize() re-runs must not pull

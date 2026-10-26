@@ -556,7 +556,7 @@
                       >
                         <InlineLoadingRow>{{ $t('chat.uploadingAttachments') }}</InlineLoadingRow>
                         <TextButton @click="cancelAttachmentUpload">
-                          {{ $t('common.cancel') }}
+                          {{ $t('chat.mediaRecovery.pause') }}
                         </TextButton>
                       </div>
                     </div>
@@ -1352,7 +1352,8 @@ import ComposerModelMenu from './composer-model-menu.vue'
 import { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort, reconcileStoredEffort } from '@/pages/bots/components/reasoning-effort'
 import { useMediaGallery } from '../composables/useMediaGallery'
 import { ATTACHMENT_ANIM_MS, attachmentToFile, useComposerAttachments } from '../composables/useComposerAttachments'
-import { AttachmentUploadLimitError, useComposerUpload } from '../composables/useComposerUpload'
+import { acknowledgeComposerAttachments, AttachmentUploadLimitError, useComposerUpload } from '../composables/useComposerUpload'
+import { forgetMediaFile, mediaFileJournalKey, MediaRecoveryError, restoreMediaUploads } from '@/lib/media-transfer'
 import { useComposerDrafts } from '../composables/useComposerDrafts'
 import ChatExampleSuggestions from './chat-example-suggestions.vue'
 import { useChatExamplesUi } from '@/components/chat-examples/use-chat-examples-ui'
@@ -1434,6 +1435,8 @@ function removeAttachment(index: number) {
   // The last card's visual collapse delays removal from pendingFiles.
   // Abort immediately, before that animation can race upload completion.
   cancelAttachmentUpload()
+  const file = pendingFiles.value[index]
+  if (file) void forgetMediaFile(file).catch(() => { composerError.value = t('chat.mediaRecovery.storage') })
   removePendingAttachment(index)
 }
 
@@ -3736,7 +3739,28 @@ watch(
   cancelAttachmentUpload,
   { flush: 'sync' },
 )
-watch(() => pendingFiles.value.slice(), cancelAttachmentUpload, { flush: 'sync' })
+watch(() => pendingFiles.value.slice(), (files) => {
+  cancelAttachmentUpload()
+  if (files.length) workspaceTabs.pinPanel(props.tabId)
+}, { flush: 'sync' })
+const mediaDraftScope = computed(() => JSON.stringify([inputDraftKey.value, paneTarget.value.sessionId ?? '']))
+watch(() => [paneTarget.value.botId, mediaDraftScope.value] as const, async ([bot, draft], _, onCleanup) => {
+  if (!bot || !draft) return
+  const controller = new AbortController()
+  onCleanup(() => controller.abort())
+  try {
+    const restored = await restoreMediaUploads(bot, draft, controller.signal)
+    controller.signal.throwIfAborted()
+    for (const file of restored.files) {
+      if (!pendingFiles.value.some(f => mediaFileJournalKey(f) === mediaFileJournalKey(file))) pendingFiles.value.push(file)
+    }
+    if (restored.unknown) composerError.value = t('chat.mediaRecovery.unknown')
+    else if (restored.missing.length) composerError.value = t('chat.mediaRecovery.reselect', { names: restored.missing.join(', ') })
+  } catch (error) {
+    if (controller.signal.aborted) return
+    if (error instanceof MediaRecoveryError) composerError.value = t(`chat.mediaRecovery.${error.reason}`)
+  }
+}, { immediate: true })
 // Registered after useComposerDrafts so its draft restore runs first and
 // cannot overwrite a prefilled prompt (usage examples, App "Try it").
 const replaceDraftConfirm = useAsyncConfirm()
@@ -4281,7 +4305,7 @@ async function handleSend() {
   let attachments: ChatAttachment[] | undefined
   try {
     if (files.length) {
-      attachments = await uploadAttachments(sentContext.target.botId, files)
+      attachments = await uploadAttachments(sentContext.target.botId, files, JSON.stringify([sentDraftKey, sentContext.target.sessionId ?? '']))
     }
   } catch (error) {
     pairSend.releaseReads()
@@ -4296,7 +4320,9 @@ async function handleSend() {
     if (error instanceof DOMException && error.name === 'AbortError') return
     composerError.value = error instanceof AttachmentUploadLimitError
       ? t('chat.attachmentUploadTooLarge', { name: error.fileName, limit: error.maxBytes.toLocaleString() })
-      : resolveApiErrorMessage(error, t('chat.sendFailed'))
+      : error instanceof MediaRecoveryError
+        ? t(`chat.mediaRecovery.${error.reason}`)
+        : resolveApiErrorMessage(error, t('chat.sendFailed'))
     return
   }
   if (!holdsInput) clearSentInput()
@@ -4344,6 +4370,11 @@ async function handleSend() {
     pairSend.finish(false)
     pairSend.releaseReads()
   })
+  if (result.messageSent === true && attachments) {
+    void acknowledgeComposerAttachments(attachments).catch(() => {
+      composerError.value = t('chat.mediaRecovery.storage')
+    })
+  }
   rollbackPin = null
   pairSend.finish(result.messageSent === true || result.stage === 'stream')
   await refreshACPComposerConfigAfterSelectionError(result)

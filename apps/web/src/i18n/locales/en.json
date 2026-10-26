@@ -1300,6 +1300,16 @@
         "unavailable": "No reference provided"
       }
     },
+    "mediaRecovery": {
+      "pause": "Pause",
+      "unknown": "The upload outcome is unknown. The original record is kept; it will not be submitted again.",
+      "receiptMissing": "The original upload is unavailable or expired. Its ID and progress are kept; no replacement upload was created.",
+      "sourceMissing": "The local file is unavailable. Select the original file again to resume.",
+      "integrity": "File size or checksum verification failed. No attachment was accepted.",
+      "storage": "Local recovery storage is unavailable. Keep this tab open and try again.",
+      "unsupported": "Resumable attachments are unavailable on this server.",
+      "reselect": "Select the original files again to resume: {names}"
+    },
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",
     "workspaceLinkUnavailable": "This workspace link is unavailable here. Open the conversation in Memoh with workspace access.",

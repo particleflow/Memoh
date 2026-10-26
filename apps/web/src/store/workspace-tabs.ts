@@ -8,6 +8,7 @@ import { useChatStore } from '@/store/chat-list'
 import { routeConversationLabel } from '@/store/chat-list.utils'
 import { useChatSelectionStore } from '@/store/chat-selection'
 import { onAuthSessionCleared } from '@/lib/auth-session'
+import { restoreMediaUploadScopes } from '@/lib/media-transfer'
 import { hasBotPermission, type BotPermission } from '@/utils/bot-permissions'
 import { parseBrowserAddress } from '@/utils/browser-address'
 import {
@@ -94,6 +95,7 @@ function panelComponentOf(id: string): WorkspacePanelComponent | null {
 }
 
 export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
+  const mediaRecoveryPanels = new Set<string>()
   const selection = useChatSelectionStore()
   const { currentBotId } = storeToRefs(selection)
   const chatStore = useChatStore()
@@ -1220,7 +1222,8 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         return
       }
     }
-    const anyChat = dock.panels.find(p => panelComponentOf(p.id) === 'chat')
+    const anyChat = dock.panels.find(p => mediaRecoveryPanels.has(p.id))
+      ?? dock.panels.find(p => panelComponentOf(p.id) === 'chat')
     if (anyChat) {
       focusPanel(anyChat)
       return
@@ -1390,6 +1393,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         name: args.name,
         botId: args.botId,
         contentHash: args.contentHash,
+        size: args.size,
         delegationUrl: args.delegationUrl,
         src: args.src,
       },
@@ -1952,6 +1956,34 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       restoreLayout(next)
       reconcileDeletedChatPanels()
     }
+  }, { immediate: true })
+
+  // Mobile cold start and ephemeral previews may not retain a chat tab. Restore
+  // its exact validated journal scope, without creating a session or sending.
+  watch([currentBotId, api], async ([bot, dock], _, onCleanup) => {
+    mediaRecoveryPanels.clear()
+    if (!bot || !dock) return
+    const controller = new AbortController()
+    onCleanup(() => controller.abort())
+    try {
+      const recovery = await restoreMediaUploadScopes(bot, controller.signal)
+      recovery.check()
+      if (api.value !== dock || currentBotId.value !== bot || loadedBotId !== bot) return
+      for (const scope of recovery.scopes) {
+        recovery.check()
+        if (scope.session && isDeletedSessionForCurrentBot(scope.session)) continue
+        const existing = dock.getPanel(scope.tab)
+        // Never repoint another live conversation to adopt an old upload.
+        if (existing && panelSessionId(existing) !== scope.session) continue
+        if (!existing) dock.addPanel({
+          id: scope.tab, component: 'chat', title: defaultChatTitle(),
+          params: { sessionId: scope.session, explicitSelection: false },
+          renderer: 'always', inactive: true,
+        })
+        pinPanel(scope.tab)
+        mediaRecoveryPanels.add(scope.tab)
+      }
+    } catch { /* Preserve unavailable journals; the composer exposes read errors. */ }
   }, { immediate: true })
 
   // Crossing the breakpoint either way re-shapes the dock. Entering mobile
