@@ -104,15 +104,23 @@ func (s *Service) storageOwner(ctx context.Context, owner, id string) (dbstore.U
 // storageConnection checks the current owner's existing reverse RPC only.
 // Online alone is insufficient: the existing private share must be readable.
 func (s *Service) storageConnection(ctx context.Context, id string) (*Connection, error) {
+	c, err := s.storageRuntimeConnection(id)
+	if err != nil {
+		return nil, err
+	}
+	entry, err := c.Client.Stat(ctx, s.workspaceStorage.share)
+	if err != nil || entry == nil || !entry.GetIsDir() {
+		return nil, ErrWorkspaceShareUnavailable
+	}
+	return c, nil
+}
+
+func (s *Service) storageRuntimeConnection(id string) (*Connection, error) {
 	if s.workspaceStorage == nil {
 		return nil, ErrWorkspaceStorageDisabled
 	}
 	c, ok := s.Connection(id)
 	if !ok || c.Client == nil || c.Info.OS != "win32" {
-		return nil, ErrWorkspaceShareUnavailable
-	}
-	entry, err := c.Client.Stat(ctx, s.workspaceStorage.share)
-	if err != nil || entry == nil || !entry.GetIsDir() {
 		return nil, ErrWorkspaceShareUnavailable
 	}
 	return c, nil
@@ -176,6 +184,55 @@ func storageSelection(raw dbstore.JSON) (string, error) {
 		return "", ErrWorkspaceStoragePath
 	}
 	return storageRelative(value.WorkspaceStorage.Path)
+}
+
+// ConfiguredWorkspaceDirectory reads an explicitly saved owned NAS default.
+// It changes no task/profile root and performs no duplicate connection probe.
+// An absent selection preserves existing local defaults.
+func (s *Service) ConfiguredWorkspaceDirectory(ctx context.Context, owner, id string) (string, error) {
+	row, _, err := s.storageOwner(ctx, owner, id)
+	if err != nil {
+		return "", err
+	}
+	if len(row.ProviderConfig) == 0 || string(row.ProviderConfig) == "null" {
+		return "", nil
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(row.ProviderConfig, &fields) != nil {
+		return "", ErrWorkspaceStoragePath
+	}
+	if _, selected := fields["workspace_storage"]; !selected {
+		return "", nil
+	}
+	relative, err := storageSelection(row.ProviderConfig)
+	if err != nil {
+		return "", err
+	}
+	if err = s.validateStoragePath(id, relative); err != nil {
+		return "", err
+	}
+	return s.storageWindowsPath(id, relative), nil
+}
+
+// SelectedWorkspaceDirectory verifies the existing share at workspace resolution,
+// not again for each byte transfer or once more in the task-default resolver.
+func (s *Service) SelectedWorkspaceDirectory(ctx context.Context, owner, id string) (string, error) {
+	selected, err := s.ConfiguredWorkspaceDirectory(ctx, owner, id)
+	if err != nil || selected == "" {
+		return selected, err
+	}
+	c, err := s.storageRuntimeConnection(id)
+	if err != nil {
+		return "", err
+	}
+	entry, err := c.Client.Stat(ctx, selected)
+	if err != nil || entry == nil || !entry.GetIsDir() {
+		return "", ErrWorkspaceShareUnavailable
+	}
+	if current, ok := s.Connection(id); !ok || current != c {
+		return "", ErrRuntimeConnectionNotReady
+	}
+	return selected, nil
 }
 
 // WorkspaceDirectories is read-only. A missing default directory is returned

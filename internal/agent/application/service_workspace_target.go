@@ -44,6 +44,7 @@ func (s *Service) prepareWorkspaceRequest(ctx context.Context, req ChatRequest) 
 	}
 	enforceSelection := requestedTargetID != ""
 	if hasWorkdir {
+		ctx = toolcontext.WithExplicitWorkdir(ctx, bound.WorkDir)
 		// The workdir pins the target for the session's whole life. An
 		// explicit different target is rejected loudly — silently ignoring
 		// it would let the user believe the switch took effect.
