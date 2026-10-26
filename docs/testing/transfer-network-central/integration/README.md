@@ -53,8 +53,12 @@ image update; their original owner must package/adopt the consumer separately.
   original files, binaries and raw logs were preserved. Recovery results are
   recorded separately, without rewriting the initial failure.
 - After cache recovery, the full scoped lint found four test-only issues above;
-  its failure is retained. The original commit hook then validates the correction
-  without changing any rule, assertion, timeout or workflow.
+  its failure is retained. After correction, the same scoped `golangci-lint run
+  --concurrency=2` over all seven selected packages exited0; the focused Go
+  regressions across four packages also exited0. This checkout has no configured
+  `core.hooksPath`, so these were explicitly executed checks, not an automatically
+  executed Git hook. No rule, assertion, timeout or workflow was changed. Complete
+  repository/Windows/PostgreSQL gates belong to the final-head remote CI.
 
 ## Still open
 
