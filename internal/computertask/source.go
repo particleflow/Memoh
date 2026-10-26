@@ -31,6 +31,7 @@ func (s *Source) logResultReadFailure(ctx context.Context, session mcp.ToolSessi
 	s.logger.WarnContext(ctx, "computer task result read failed",
 		slog.String("operation_id", id), slog.String("operation_run_id", trace.OperationRunID), slog.String("run_id", session.RunID), slog.String("tool_call_id", session.ToolCallID),
 		slog.String("stage", trace.Stage), slog.String("read_stage", trace.ReadStage), slog.String("reason", trace.Reason),
+		slog.Int("snapshot_attempts", trace.SnapshotAttempts), slog.Int("snapshot_lines", trace.SnapshotLines), slog.Int64("snapshot_last_elapsed_ms", trace.SnapshotLastElapsedMS),
 		slog.Int64("elapsed_ms", time.Since(started).Milliseconds()), slog.Int64("read_elapsed_ms", trace.ReadElapsedMS),
 		slog.Int64("feedback_elapsed_ms", trace.FeedbackElapsedMS), slog.Int64("delivery_wake_elapsed_ms", trace.DeliveryWakeElapsedMS),
 		slog.Bool("feedback_failed", trace.FeedbackFailed), slog.Bool("delivery_wake_failed", trace.DeliveryWakeFailed),

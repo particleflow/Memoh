@@ -75,6 +75,14 @@ func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcom
 			}
 		}
 		value, err := f.invoke(callCtx, scope, target, method, params)
+		if mode == "ansi_success" && method == "pane.read" && err == nil {
+			var snapshot map[string]any
+			if json.Unmarshal(value.Result, &snapshot) != nil {
+				t.Fatal("invalid synthetic snapshot")
+			}
+			snapshot["output"] = "\x1b[32m" + snapshot["output"].(string) + "\x1b[0m"
+			value.Result, _ = json.Marshal(snapshot)
+		}
 		if method == "pane.run" && params["paneId"] == "control" {
 			if mode == "short_second" && controlRuns == 2 {
 				f.batch.pending = regexp.MustCompile(`(MEMOH_FILE_[a-f0-9]{32}:)[^:\r\n]+(:END_FILE_[a-f0-9]{32})`).ReplaceAllString(f.batch.pending, "${1}eA==${2}")
@@ -112,7 +120,7 @@ func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcom
 		t.Fatalf("retained computer response missing: %s", raw)
 	}
 	out := readTraceOutcome{Error: response["isError"] == true, State: envelope.Computer.State, Phase: envelope.Computer.Phase, ErrorText: envelope.Error, HasPiResult: envelope.Computer.PiResult != nil, ControlRuns: controlRuns, PiRuns: f.batch.runs}
-	if mode == "success" {
+	if mode == "success" || mode == "ansi_success" {
 		if out.Error || !out.HasPiResult || out.Phase != "pi_succeeded" || controlRuns != 2 {
 			t.Fatalf("two-page result failed: %+v", out)
 		}
@@ -126,7 +134,7 @@ func runResultReadTrace(t *testing.T, mode string, logged bool) (readTraceOutcom
 		t.Fatal("internal diagnostic entered response")
 	}
 	var fields map[string]any
-	if logged && mode != "success" {
+	if logged && mode != "success" && mode != "ansi_success" {
 		if json.Unmarshal(log.Bytes(), &fields) != nil {
 			t.Fatalf("expected one structured failure log: %s", log.Bytes())
 		}
@@ -155,6 +163,7 @@ func TestResultReadTracePreservesErrorsAndDispatch(t *testing.T) {
 		offset, count, actual, pages float64
 	}{
 		{"success", "", "", 0, 0, 0, 0},
+		{"ansi_success", "", "", 0, 0, 0, 0},
 		{"native_first", "completion_page", "native_error", 0, 2048, -1, 0},
 		{"native_second", "completion_page", "native_error", 2048, 221, -1, 1},
 		{"short_second", "completion_page", "short_page", 2048, 221, 1, 1},
@@ -170,7 +179,7 @@ func TestResultReadTracePreservesErrorsAndDispatch(t *testing.T) {
 			if !reflect.DeepEqual(plain, traced) {
 				t.Fatalf("instrumentation changed behavior: plain=%+v traced=%+v", plain, traced)
 			}
-			if tc.mode == "success" {
+			if tc.mode == "success" || tc.mode == "ansi_success" {
 				return
 			}
 			if fields["stage"] != tc.stage || fields["reason"] != tc.reason || fields["offset"] != tc.offset || fields["count"] != tc.count || fields["actual_bytes"] != tc.actual || fields["completed_pages"] != tc.pages {

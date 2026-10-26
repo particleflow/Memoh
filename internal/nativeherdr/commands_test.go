@@ -147,3 +147,26 @@ func TestOfficialV095ProbeReceipts(t *testing.T) {
 		}
 	}
 }
+
+func TestBatchReadExplicitANSIIsOfficialAndOrdinaryDefaultUnchanged(t *testing.T) {
+	target := agenvo.Target{Session: "synthetic"}
+	params := map[string]any{"session": "synthetic", "paneId": "w1:p1", "source": "recent-unwrapped", "lines": 64, "format": "ansi"}
+	argv, err := buildCommand("pane.read", params, target)
+	expected := []string{"pane", "read", "w1:p1", "--lines", "64", "--source", "recent-unwrapped", "--format", "ansi"}
+	if err != nil || !reflect.DeepEqual(argv, expected) {
+		t.Fatalf("official format argv=%q err=%v", argv, err)
+	}
+	delete(params, "format")
+	argv, err = buildCommand("pane.read", params, target)
+	if err != nil || !reflect.DeepEqual(argv, expected[:7]) {
+		t.Fatalf("ordinary read changed: %q %v", argv, err)
+	}
+	params["format"] = "ansi"
+	if _, err = buildCommand("agent.read", map[string]any{"session": "synthetic", "name": "synthetic-agent", "format": "ansi"}, target); !errors.Is(err, agenvo.ErrUnsupported) {
+		t.Fatal("ordinary Agent read contract expanded")
+	}
+	params["format"] = "passive"
+	if _, err = buildCommand("pane.read", params, target); !errors.Is(err, agenvo.ErrUnsupported) {
+		t.Fatal("invented format accepted")
+	}
+}

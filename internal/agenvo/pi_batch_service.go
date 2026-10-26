@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,6 +14,10 @@ import (
 
 	"github.com/felinics/memoh/internal/deliverymeta"
 )
+
+// Only SGR presentation styling is removed from the direct ANSI snapshot.
+// Other terminal controls remain untrusted and cannot bypass frame/hash checks.
+var batchSnapshotSGR = regexp.MustCompile(`\x1b\[[0-9;:]*m`)
 
 type batchPane struct {
 	ID        string `json:"pane_id"`
@@ -119,7 +124,19 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 		return "", traceBatchReadFailure(ctx, "snapshot", "invalid_window", ErrUnknown)
 	}
 	traceBatchReadMethod(ctx, "pane.read")
-	r, err := c.native(ctx, scope, target, "pane.read", map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"})
+	params := map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"}
+	if target.NativeRuntimeID != "" {
+		// Official ANSI snapshots read the existing buffer without interactive
+		// alternate-screen scrolling. Ordinary Agent reads keep their own format.
+		params["format"] = "ansi"
+	}
+	if trace := BatchReadTraceFromContext(ctx); trace != nil {
+		trace.SnapshotAttempts++
+		trace.SnapshotLines = lines
+		started := time.Now()
+		defer func() { trace.SnapshotLastElapsedMS = time.Since(started).Milliseconds() }()
+	}
+	r, err := c.native(ctx, scope, target, "pane.read", params)
 	if err != nil {
 		if r.Error != nil && r.Error.Code == "result_too_large" {
 			return "", errBatchSnapshotTooLarge
@@ -141,7 +158,11 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 	if out.Session != target.Session {
 		return "", traceBatchReadFailure(ctx, "snapshot", "session_mismatch", ErrUnknown)
 	}
-	return *out.Output, nil
+	text := *out.Output
+	if target.NativeRuntimeID != "" {
+		text = batchSnapshotSGR.ReplaceAllString(text, "")
+	}
+	return text, nil
 }
 
 // ObserveBatch never types into Pi, including after timeout or cancellation.

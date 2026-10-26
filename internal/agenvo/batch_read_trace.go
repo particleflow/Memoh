@@ -7,6 +7,8 @@ import "context"
 // commands, paths, frames, file contents and native error messages stay out.
 type BatchReadTrace struct {
 	Stage, ReadStage, Reason, Method, FileKind string
+	SnapshotAttempts, SnapshotLines            int
+	SnapshotLastElapsedMS                      int64
 	OperationRunID                             string
 	Offset, Count, ActualBytes, CompletedPages int64
 	FeedbackElapsedMS, DeliveryWakeElapsedMS   int64
