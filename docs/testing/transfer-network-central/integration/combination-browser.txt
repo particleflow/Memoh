@@ -1,0 +1,1 @@
+PASS current shared Web, actual SDK identity GET, existing JWT/Server/PG with omitted network_policy; original origin/Bot preserved; zero business writes/page errors

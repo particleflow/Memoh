@@ -21,9 +21,10 @@ import (
 
 // MediaUploadLimitsResponse is the authoritative per-file Web upload policy.
 type MediaUploadLimitsResponse struct {
-	MaxUploadBytes   int64 `json:"max_upload_bytes" validate:"required"`
-	ResumableEnabled bool  `json:"resumable_enabled"`
-	ChunkMaxBytes    int64 `json:"chunk_max_bytes"`
+	NetworkPolicy    *media.TransferNetworkPolicy `json:"network_policy,omitempty"`
+	MaxUploadBytes   int64                        `json:"max_upload_bytes" validate:"required"`
+	ResumableEnabled bool                         `json:"resumable_enabled"`
+	ChunkMaxBytes    int64                        `json:"chunk_max_bytes"`
 }
 
 // MediaUploadResponse contains a Bot-scoped reference, never a workspace path.
@@ -46,7 +47,8 @@ func (h *MessageHandler) MediaUploadLimits(c echo.Context) error {
 	if _, err := h.mediaUploadBot(c); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, MediaUploadLimitsResponse{MaxUploadBytes: h.mediaService.MaxUploadBytes(), ResumableEnabled: h.mediaService.Uploads() != nil, ChunkMaxBytes: media.UploadChunkBytes})
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
+	return c.JSON(http.StatusOK, MediaUploadLimitsResponse{MaxUploadBytes: h.mediaService.MaxUploadBytes(), ResumableEnabled: h.mediaService.Uploads() != nil, ChunkMaxBytes: media.UploadChunkBytes, NetworkPolicy: h.mediaService.TransferNetworkPolicy()})
 }
 
 // UploadMedia persists an attachment without creating a session or model turn.

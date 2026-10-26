@@ -18,11 +18,12 @@ import (
 // Service provides content-addressed media asset persistence.
 // All metadata is derived from the filesystem — no database, no sidecar files.
 type Service struct {
-	provider           storage.Provider
-	logger             *slog.Logger
-	requirePersistence bool
-	maxUploadBytes     int64
-	uploads            *UploadStore
+	provider              storage.Provider
+	logger                *slog.Logger
+	requirePersistence    bool
+	maxUploadBytes        int64
+	uploads               *UploadStore
+	transferNetworkPolicy *TransferNetworkPolicy
 }
 
 // SetMaxUploadBytes configures HTTP attachment admission. Zero keeps the default.

@@ -13,6 +13,7 @@ import (
 	"github.com/BurntSushi/toml"
 
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
+	"github.com/felinics/memoh/internal/media"
 )
 
 const (
@@ -60,6 +61,8 @@ const (
 )
 
 type FilesConfig struct {
+	// NetworkPolicy is distributed only by existing authenticated metadata GETs.
+	NetworkPolicy *media.TransferNetworkPolicy `toml:"network_policy"`
 	// DeviceTransfersEnabled mounts device-authenticated transfers after explicit setup.
 	DeviceTransfersEnabled bool `toml:"device_transfers_enabled"`
 	// OriginalsRoot keeps attachment originals outside disposable workspaces.
@@ -991,6 +994,9 @@ func Load(path string) (Config, error) {
 }
 
 func (cfg Config) validate() error {
+	if _, err := cfg.Files.NetworkPolicy.Normalized(); err != nil {
+		return fmt.Errorf("files.network_policy: %w", err)
+	}
 	if _, err := cfg.BotDelegation.ExecutionTimeoutDuration(); err != nil {
 		return err
 	}

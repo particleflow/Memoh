@@ -8,10 +8,11 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"net/netip"
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/felinics/memoh/internal/media"
 )
 
 // This optional transport policy lives in the existing private CONFIG_DIR.
@@ -20,6 +21,26 @@ import (
 type hostNetworkPolicy struct {
 	Version      int      `json:"version"`
 	LANAddresses []string `json:"lan_addresses"`
+}
+
+func (p *hostNetworkPolicy) UnmarshalJSON(raw []byte) error {
+	type wire hostNetworkPolicy
+	var value wire
+	d := json.NewDecoder(bytes.NewReader(raw))
+	d.DisallowUnknownFields()
+	if d.Decode(&value) != nil || d.Decode(new(any)) != io.EOF {
+		return ErrInvalid
+	}
+	*p = hostNetworkPolicy(value)
+	return nil
+}
+
+func (p *hostNetworkPolicy) normalized() (*hostNetworkPolicy, error) {
+	value, err := (&media.TransferNetworkPolicy{Version: p.Version, LANAddresses: p.LANAddresses}).Normalized()
+	if err != nil {
+		return nil, ErrInvalid
+	}
+	return &hostNetworkPolicy{Version: value.Version, LANAddresses: value.LANAddresses}, nil
 }
 
 func (h *HostConfig) readNetworkPolicy() (*hostNetworkPolicy, error) {
@@ -38,20 +59,7 @@ func (h *HostConfig) readNetworkPolicy() (*hostNetworkPolicy, error) {
 	if d.Decode(&p) != nil || d.Decode(new(any)) != io.EOF || p.Version != 1 || len(p.LANAddresses) == 0 {
 		return nil, ErrInvalid
 	}
-	seen := make(map[netip.Addr]bool, len(p.LANAddresses))
-	for i, raw := range p.LANAddresses {
-		ip, err := netip.ParseAddr(raw)
-		if err != nil {
-			return nil, ErrInvalid
-		}
-		ip = ip.Unmap()
-		if ip.IsUnspecified() || ip.IsMulticast() || seen[ip] {
-			return nil, ErrInvalid
-		}
-		seen[ip] = true
-		p.LANAddresses[i] = ip.String()
-	}
-	return &p, nil
+	return p.normalized()
 }
 
 func (h *HostConfig) newDeviceTask(job Job, direction string, transport *http.Client) (*Client, error) {
@@ -63,7 +71,23 @@ func (h *HostConfig) newDeviceTask(job Job, direction string, transport *http.Cl
 		c.CloseIdleConnections()
 		return nil, err
 	}
+	c.policyBot = job.BotID
+	c.bootstrapPolicy = direction == "download"
 	return c, nil
+}
+
+func (c *Client) adoptNetworkPolicy(policy *hostNetworkPolicy) error {
+	if policy != nil {
+		p, err := policy.normalized()
+		if err != nil {
+			return ErrProtocol
+		}
+		if err = c.useNetworkPolicy(p); err != nil {
+			return err
+		}
+	}
+	c.policyLoaded = true
+	return nil
 }
 
 // TCP selection only: net/http still owns TLS (including the original ServerName)
@@ -73,7 +97,9 @@ func (c *Client) useNetworkPolicy(p *hostNetworkPolicy) error {
 	if p == nil {
 		return nil
 	}
-	t := c.http.Transport.(*http.Transport) // New already validated and cloned it.
+	// Rebuild from the validated original transport; never stack a NAS policy
+	// on the old local dialer or keep its bootstrap connection pooled.
+	t := c.transport.Clone()
 	u, err := url.Parse(c.base)
 	if err != nil {
 		return ErrInvalid
@@ -133,5 +159,7 @@ func (c *Client) useNetworkPolicy(p *hostNetworkPolicy) error {
 		// on-link address too; IP family is never used to classify LAN vs WAN.
 		return dial(ctx, "tcp6", address)
 	}
+	c.http.CloseIdleConnections()
+	c.http.Transport = t
 	return nil
 }

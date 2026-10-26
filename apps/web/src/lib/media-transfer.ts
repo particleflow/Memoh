@@ -9,6 +9,7 @@ import {
   getBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHash,
   headBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdAttachmentsByContentHash,
   type MediaUpload,
+  type MediaTransferNetworkPolicy,
 } from '@memohai/sdk'
 import { sdkApiBaseUrl, sdkAuthQuery } from './api-client'
 import { authSessionGeneration } from './auth-session'
@@ -34,6 +35,9 @@ export interface MediaIdentity {
   owner: string
   origin: string
   bot: string
+  // Same NAS policy snapshot as native consumers. Fetch leaves TCP resolution
+  // with the platform; these hints never rewrite an origin or replay a write.
+  networkPolicy?: Readonly<MediaTransferNetworkPolicy>
   // These are request-lifetime guards only and are never persisted.
   check: () => void
   fetch: typeof fetch
@@ -66,7 +70,8 @@ export async function mediaIdentity(bot: string, signal: AbortSignal): Promise<M
   const { data } = await getUsersMe({ signal, fetch: guardedFetch, cache: 'no-store', throwOnError: true })
   check()
   if (!data.id) throw new MediaRecoveryError('unknown')
-  return { owner: data.id, origin, bot, check, fetch: guardedFetch }
+  const networkPolicy = data.network_policy ? Object.freeze({ ...data.network_policy, lan_addresses: [...(data.network_policy.lan_addresses ?? [])] }) : undefined
+  return { owner: data.id, origin, bot, check, fetch: guardedFetch, networkPolicy }
 }
 
 function belongs(journal: MediaJournal, identity: MediaIdentity) {

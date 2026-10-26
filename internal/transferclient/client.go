@@ -42,6 +42,12 @@ type Client struct {
 	http      http.Client
 	auth      Authorization
 	selection string
+	// Configured uploads use their existing limits/receipt GET. Downloads read
+	// the same task-scoped limits once before their existing file stream.
+	policyBot       string
+	policyLoaded    bool
+	bootstrapPolicy bool
+	transport       *http.Transport
 }
 
 // New accepts HTTPS only. The supplied transport must validate the server's
@@ -76,7 +82,7 @@ func New(base string, client *http.Client, auth Authorization) (*Client, error) 
 	t.TLSClientConfig.ServerName = u.Hostname()
 	t.DisableCompression = true
 	h.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	return &Client{base: strings.TrimRight(base, "/"), http: h, auth: auth}, nil
+	return &Client{base: strings.TrimRight(base, "/"), http: h, auth: auth, transport: t}, nil
 }
 
 // NewTask uses the explicit task-authenticated adapter namespace. The original
@@ -111,20 +117,22 @@ func (s Spec) valid() bool {
 }
 
 type Limits struct {
-	MaxUploadBytes   int64 `json:"max_upload_bytes"`
-	ResumableEnabled bool  `json:"resumable_enabled"`
-	ChunkMaxBytes    int64 `json:"chunk_max_bytes"`
+	NetworkPolicy    *hostNetworkPolicy `json:"network_policy,omitempty"`
+	MaxUploadBytes   int64              `json:"max_upload_bytes"`
+	ResumableEnabled bool               `json:"resumable_enabled"`
+	ChunkMaxBytes    int64              `json:"chunk_max_bytes"`
 }
 
 // Receipt mirrors PR #8's wire shape, without importing the server or runtime.
 type Receipt struct {
-	ID          string    `json:"id"`
-	State       string    `json:"state"`
-	Offset      int64     `json:"offset"`
-	SizeBytes   int64     `json:"size_bytes"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	ContentHash string    `json:"content_hash,omitempty"`
-	Mime        string    `json:"mime"`
+	NetworkPolicy *hostNetworkPolicy `json:"network_policy,omitempty"`
+	ID            string             `json:"id"`
+	State         string             `json:"state"`
+	Offset        int64              `json:"offset"`
+	SizeBytes     int64              `json:"size_bytes"`
+	ExpiresAt     time.Time          `json:"expires_at"`
+	ContentHash   string             `json:"content_hash,omitempty"`
+	Mime          string             `json:"mime"`
 }
 
 type HTTPError struct {
@@ -168,6 +176,11 @@ func mediaPath(bot string) (string, error) {
 }
 
 func (c *Client) request(ctx context.Context, method, path string, body []byte, headers http.Header) (*http.Response, error) {
+	if c.bootstrapPolicy && !c.policyLoaded && path != "/bots/"+c.policyBot+"/media/limits" {
+		if _, err := c.Limits(ctx, c.policyBot); err != nil {
+			return nil, err
+		}
+	}
 	auth, err := c.auth(ctx)
 	if err != nil || auth == "" || strings.ContainsAny(auth, "\r\n") {
 		return nil, ErrAuthorization
@@ -239,6 +252,9 @@ func (c *Client) Limits(ctx context.Context, bot string) (Limits, error) {
 	if err == nil && (result.MaxUploadBytes <= 0 || result.ResumableEnabled && (result.ChunkMaxBytes <= 0 || result.ChunkMaxBytes > MaxChunkBytes)) {
 		err = ErrProtocol
 	}
+	if err == nil && c.policyBot == bot && !c.policyLoaded {
+		err = c.adoptNetworkPolicy(result.NetworkPolicy)
+	}
 	return result, err
 }
 
@@ -260,6 +276,9 @@ func (c *Client) receipt(ctx context.Context, method, bot, id, suffix string, bo
 		return result, ErrInvalid
 	}
 	err = c.json(ctx, method, path+"/uploads/"+id+suffix, body, headers, 200, &result)
+	if err == nil && method == http.MethodGet && c.policyBot == bot && !c.policyLoaded {
+		err = c.adoptNetworkPolicy(result.NetworkPolicy)
+	}
 	return result, err
 }
 

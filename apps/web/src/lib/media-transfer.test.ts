@@ -47,7 +47,7 @@ async function server(input: RequestInfo | URL) {
   const req = input as Request
   const path = new URL(req.url).pathname.replace(/^\/api/, '')
   requests.push({ method: req.method, path, range: req.headers.get('Range'), offset: req.headers.get('Upload-Offset') })
-  if (path === '/users/me') return json({ id: owner })
+  if (path === '/users/me') return json({ id: owner, ...(fault === 'network-policy' ? { network_policy: { version: 1, lan_addresses: ['192.0.2.1', '2001:db8::1'] } } : {}) })
   if (path.endsWith('/media/limits')) return json({ max_upload_bytes: 200 * 1024 * 1024, resumable_enabled: true, chunk_max_bytes: 8 * 1024 * 1024 })
   if (path.endsWith('/uploads') && req.method === 'POST') {
     expect(journal().phase).toBe('create-unknown')
@@ -102,6 +102,17 @@ beforeEach(() => {
 })
 
 describe('persistent browser media safety (SDK HTTP seam, synthetic storage)', () => {
+  it('reads the central policy with the original identity GET and leaves browser routing with the platform', async () => {
+    fault = 'network-policy'
+    const identity = await mediaIdentity(bot, signal())
+    expect(identity.networkPolicy).toEqual({ version: 1, lan_addresses: ['192.0.2.1', '2001:db8::1'] })
+    expect(identity.origin).toBe('https://nas.example.invalid/api')
+    expect(requests).toHaveLength(1)
+    expect(requests[0]).toMatchObject({ method: 'GET', path: '/users/me' })
+    await upload()
+    expect(count('POST', '/uploads')).toBe(1)
+    expect(journal().origin).toBe(identity.origin)
+  })
   it('checks real chunk bytes and complete original hash before returning a reference; ACK cleans local only', async () => {
     const result = await upload()
     expect(result).toMatchObject({ hash, size: 3 * 1024 * 1024 + 19 })

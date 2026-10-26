@@ -4286,6 +4286,46 @@ definitions:
       version:
         type: integer
     type: object
+  handlers.CurrentUserResponse:
+    properties:
+      avatar_url:
+        type: string
+      created_at:
+        type: string
+      display_name:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      is_active:
+        type: boolean
+      joined_at:
+        type: string
+      last_login_at:
+        type: string
+      membership_is_active:
+        type: boolean
+      membership_updated_at:
+        type: string
+      metadata:
+        additionalProperties: {}
+        type: object
+      network_policy:
+        $ref: '#/definitions/media.TransferNetworkPolicy'
+      principal_is_active:
+        type: boolean
+      role:
+        type: string
+      timezone:
+        type: string
+      title_model_id:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
   handlers.DailyTokenUsage:
     properties:
       cache_read_tokens:
@@ -4613,6 +4653,8 @@ definitions:
         type: integer
       max_upload_bytes:
         type: integer
+      network_policy:
+        $ref: '#/definitions/media.TransferNetworkPolicy'
       resumable_enabled:
         type: boolean
     required:
@@ -4630,6 +4672,36 @@ definitions:
     - content_hash
     - mime
     - size_bytes
+    type: object
+  handlers.MediaUploadStatusResponse:
+    properties:
+      content_hash:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      mime:
+        type: string
+      network_policy:
+        $ref: '#/definitions/media.TransferNetworkPolicy'
+      offset:
+        type: integer
+      size_bytes:
+        type: integer
+      state:
+        enum:
+        - uploading
+        - ready
+        - canceled
+        type: string
+    required:
+    - expires_at
+    - id
+    - mime
+    - offset
+    - size_bytes
+    - state
     type: object
   handlers.ModelTokenUsage:
     properties:
@@ -6709,6 +6781,15 @@ definitions:
         type: string
       url:
         type: string
+    type: object
+  media.TransferNetworkPolicy:
+    properties:
+      lan_addresses:
+        items:
+          type: string
+        type: array
+      version:
+        type: integer
     type: object
   media.Upload:
     properties:
@@ -13457,7 +13538,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/media.Upload'
+            $ref: '#/definitions/handlers.MediaUploadStatusResponse'
         "401":
           description: Unauthorized
           schema:
@@ -21110,7 +21191,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/accounts.Account'
+            $ref: '#/definitions/handlers.CurrentUserResponse'
         "400":
           description: Bad Request
           schema:

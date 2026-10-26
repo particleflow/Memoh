@@ -2407,6 +2407,29 @@ export type HandlersCreateSnapshotResponse = {
     version?: number;
 };
 
+export type HandlersCurrentUserResponse = {
+    avatar_url?: string;
+    created_at?: string;
+    display_name?: string;
+    email?: string;
+    id?: string;
+    is_active?: boolean;
+    joined_at?: string;
+    last_login_at?: string;
+    membership_is_active?: boolean;
+    membership_updated_at?: string;
+    metadata?: {
+        [key: string]: unknown;
+    };
+    network_policy?: MediaTransferNetworkPolicy;
+    principal_is_active?: boolean;
+    role?: string;
+    timezone?: string;
+    title_model_id?: string;
+    updated_at?: string;
+    username?: string;
+};
+
 export type HandlersDailyTokenUsage = {
     cache_read_tokens?: number;
     day?: string;
@@ -2609,6 +2632,7 @@ export type HandlersMcpStdioResponse = {
 export type HandlersMediaUploadLimitsResponse = {
     chunk_max_bytes?: number;
     max_upload_bytes: number;
+    network_policy?: MediaTransferNetworkPolicy;
     resumable_enabled?: boolean;
 };
 
@@ -2616,6 +2640,17 @@ export type HandlersMediaUploadResponse = {
     content_hash: string;
     mime: string;
     size_bytes: number;
+};
+
+export type HandlersMediaUploadStatusResponse = {
+    content_hash?: string;
+    expires_at: string;
+    id: string;
+    mime: string;
+    network_policy?: MediaTransferNetworkPolicy;
+    offset: number;
+    size_bytes: number;
+    state: 'uploading' | 'ready' | 'canceled';
 };
 
 export type HandlersModelTokenUsage = {
@@ -3830,6 +3865,11 @@ export type McpUpsertRequest = {
     name?: string;
     transport?: string;
     url?: string;
+};
+
+export type MediaTransferNetworkPolicy = {
+    lan_addresses?: Array<string>;
+    version?: number;
 };
 
 export type MediaUpload = {
@@ -10805,7 +10845,7 @@ export type GetBotsByBotIdMediaUploadsByUploadIdResponses = {
     /**
      * OK
      */
-    200: MediaUpload;
+    200: HandlersMediaUploadStatusResponse;
 };
 
 export type GetBotsByBotIdMediaUploadsByUploadIdResponse = GetBotsByBotIdMediaUploadsByUploadIdResponses[keyof GetBotsByBotIdMediaUploadsByUploadIdResponses];
@@ -19453,7 +19493,7 @@ export type GetUsersMeResponses = {
     /**
      * OK
      */
-    200: AccountsAccount;
+    200: HandlersCurrentUserResponse;
 };
 
 export type GetUsersMeResponse = GetUsersMeResponses[keyof GetUsersMeResponses];

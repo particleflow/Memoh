@@ -7260,7 +7260,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/media.Upload"
+                            "$ref": "#/definitions/handlers.MediaUploadStatusResponse"
                         }
                     },
                     "401": {
@@ -18440,7 +18440,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/accounts.Account"
+                            "$ref": "#/definitions/handlers.CurrentUserResponse"
                         }
                     },
                     "400": {
@@ -26166,6 +26166,66 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CurrentUserResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "display_name": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "joined_at": {
+                    "type": "string"
+                },
+                "last_login_at": {
+                    "type": "string"
+                },
+                "membership_is_active": {
+                    "type": "boolean"
+                },
+                "membership_updated_at": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "network_policy": {
+                    "$ref": "#/definitions/media.TransferNetworkPolicy"
+                },
+                "principal_is_active": {
+                    "type": "boolean"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title_model_id": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.DailyTokenUsage": {
             "type": "object",
             "properties": {
@@ -26668,6 +26728,9 @@ const docTemplate = `{
                 "max_upload_bytes": {
                     "type": "integer"
                 },
+                "network_policy": {
+                    "$ref": "#/definitions/media.TransferNetworkPolicy"
+                },
                 "resumable_enabled": {
                     "type": "boolean"
                 }
@@ -26689,6 +26752,48 @@ const docTemplate = `{
                 },
                 "size_bytes": {
                     "type": "integer"
+                }
+            }
+        },
+        "handlers.MediaUploadStatusResponse": {
+            "type": "object",
+            "required": [
+                "expires_at",
+                "id",
+                "mime",
+                "offset",
+                "size_bytes",
+                "state"
+            ],
+            "properties": {
+                "content_hash": {
+                    "type": "string"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "mime": {
+                    "type": "string"
+                },
+                "network_policy": {
+                    "$ref": "#/definitions/media.TransferNetworkPolicy"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "uploading",
+                        "ready",
+                        "canceled"
+                    ]
                 }
             }
         },
@@ -29646,6 +29751,20 @@ const docTemplate = `{
                 },
                 "url": {
                     "type": "string"
+                }
+            }
+        },
+        "media.TransferNetworkPolicy": {
+            "type": "object",
+            "properties": {
+                "lan_addresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "version": {
+                    "type": "integer"
                 }
             }
         },

@@ -12,6 +12,13 @@ import (
 	"github.com/felinics/memoh/internal/media"
 )
 
+// MediaUploadStatusResponse adds only the current file routing snapshot to the
+// existing authenticated receipt GET. It never enters the upload journal.
+type MediaUploadStatusResponse struct {
+	media.Upload
+	NetworkPolicy *media.TransferNetworkPolicy `json:"network_policy,omitempty"`
+}
+
 func (h *MessageHandler) uploadScope(c echo.Context) (*media.UploadStore, string, string, error) {
 	c.Response().Header().Set("Cache-Control", "no-store")
 	bot, err := h.mediaUploadBot(c)
@@ -115,7 +122,7 @@ func (h *MessageHandler) CreateMediaUpload(c echo.Context) error {
 // @Produce json
 // @Param bot_id path string true "Bot ID"
 // @Param upload_id path string true "Upload ID"
-// @Success 200 {object} media.Upload
+// @Success 200 {object} MediaUploadStatusResponse
 // @Failure 401,403,404,429,500,503 {object} server.Problem
 // @Router /bots/{bot_id}/media/uploads/{upload_id} [get].
 func (h *MessageHandler) GetMediaUpload(c echo.Context) error {
@@ -130,7 +137,7 @@ func (h *MessageHandler) GetMediaUpload(c echo.Context) error {
 	if err := checkTaskTransferResponse(c); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, result)
+	return c.JSON(http.StatusOK, MediaUploadStatusResponse{Upload: result, NetworkPolicy: h.mediaService.TransferNetworkPolicy()})
 }
 
 // AppendMediaUpload streams an exact bounded chunk. Retry after querying status.

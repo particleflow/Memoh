@@ -1261,6 +1261,9 @@ func provideMediaService(lc fx.Lifecycle, log *slog.Logger, provider storagepkg.
 	service := media.NewService(log, provider)
 	service.SetRequirePersistence(strings.TrimSpace(cfg.Files.OriginalsRoot) != "")
 	service.SetMaxUploadBytes(cfg.Files.MaxUploadBytes)
+	if err := service.SetTransferNetworkPolicy(cfg.Files.NetworkPolicy); err != nil {
+		return nil, err
+	}
 	if root := strings.TrimSpace(cfg.Files.OriginalsRoot); root != "" {
 		if err := service.EnableUploads(root); err != nil {
 			return nil, err
