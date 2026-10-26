@@ -1,0 +1,144 @@
+{
+  "errors": [],
+  "console": [
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+      "location": {
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: net::ERR_CERT_AUTHORITY_INVALID",
+      "location": {
+        "url": "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/@fs/workspace/Memoh/node_modules/.pnpm/@fontsource-variable+inter@5.2.8/node_modules/@fontsource-variable/inter/files/inter-latin-wght-normal.woff2",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/@fs/workspace/Memoh/node_modules/.pnpm/misans-vf@1.0.0/node_modules/misans-vf/lib/MiSans.97.woff2",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/@fs/workspace/Memoh/node_modules/.pnpm/misans-vf@1.0.0/node_modules/misans-vf/lib/MiSans.95.woff2",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/container",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/workdirs",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/@fs/workspace/Memoh/node_modules/.pnpm/misans-vf@1.0.0/node_modules/misans-vf/lib/MiSans.92.woff2",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+      "location": {
+        "url": "http://127.0.0.1:18583/@fs/workspace/Memoh/node_modules/.pnpm/@fontsource-variable+instrument-sans@5.3.0/node_modules/@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2",
+        "lineNumber": 0,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "WebSocket connection to 'ws://127.0.0.1:18583/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/web/ws?token=<redacted-fixture-token>' failed: Error during WebSocket handshake: Unexpected response code: 403",
+      "location": {
+        "url": "http://127.0.0.1:18583/src/composables/api/useChat.ws.ts",
+        "lineNumber": 107,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "WebSocket connection to 'ws://127.0.0.1:18583/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/web/ws?token=<redacted-fixture-token>' failed: Error during WebSocket handshake: Unexpected response code: 403",
+      "location": {
+        "url": "http://127.0.0.1:18583/src/composables/api/useChat.ws.ts",
+        "lineNumber": 107,
+        "columnNumber": 0
+      }
+    },
+    {
+      "type": "error",
+      "text": "WebSocket connection to 'ws://127.0.0.1:18583/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/web/ws?token=<redacted-fixture-token>' failed: Error during WebSocket handshake: Unexpected response code: 403",
+      "location": {
+        "url": "http://127.0.0.1:18583/src/composables/api/useChat.ws.ts",
+        "lineNumber": 107,
+        "columnNumber": 0
+      }
+    }
+  ],
+  "responses": [
+    {
+      "method": "GET",
+      "path": "/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/container",
+      "status": 403,
+      "body": "{\"type\":\"urn:memoh:error:http.forbidden\",\"status\":403,\"detail\":\"You do not have permission to perform this action.\",\"code\":\"http.forbidden\",\"args\":{},\"fault\":\"client\",\"request_id\":\"bd810959-8f53-4b49-934e-b673027f8c5b\"}\n"
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/workdirs",
+      "status": 403,
+      "body": "{\"type\":\"urn:memoh:error:http.forbidden\",\"status\":403,\"detail\":\"You do not have permission to perform this action.\",\"code\":\"http.forbidden\",\"args\":{},\"fault\":\"client\",\"request_id\":\"7eae2523-0aad-4834-91ef-4a042e0f6c3c\"}\n"
+    }
+  ],
+  "runtime": {
+    "rejections": [],
+    "fetches": [
+      {
+        "path": "/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/container",
+        "status": 403,
+        "stack": "Error: fetch caller\n    at window.fetch (<anonymous>:2:493)\n    at http://127.0.0.1:18583/src/lib/api-client.ts:70:26\n    at request (http://127.0.0.1:18583/@fs/workspace/Memoh-files-next/packages/sdk/src/client/client.gen.ts:62:21)\n    at async Promise.allSettled (index 1)\n    at async Object.query (http://127.0.0.1:18583/src/composables/api/useChatExamples.ts:28:34)"
+      },
+      {
+        "path": "/api/bots/e07d9006-b094-49aa-926e-3fbc6798b44b/workdirs",
+        "status": 403,
+        "stack": "Error: fetch caller\n    at window.fetch (<anonymous>:2:493)\n    at http://127.0.0.1:18583/src/lib/api-client.ts:70:26\n    at request (http://127.0.0.1:18583/@fs/workspace/Memoh-files-next/packages/sdk/src/client/client.gen.ts:62:21)\n    at async fetchWorkdirs (http://127.0.0.1:18583/src/composables/api/useWorkdirs.ts:3:19)"
+      }
+    ],
+    "errors": []
+  },
+  "body": "Task details\n\nAuthorized Bot handoffs from this conversation. Execution and return delivery have separate states.\n\nTarget Bot 22b2cf77 \u00b7 71dd5930\n\nExecution \u00b7 Execution completed\n\nReturn delivery \u00b7 Accepted\n\nDelivery was accepted; this does not confirm that the supervisor has processed the result.\n\nSpecialist session run\n\nNo verified native run is available for this handoff.\n\nView downstream tasks\nFinal visible reply\n\nSynthetic recorded reference for recovery verification; no expert execution\n\nDownload result f1bd6ec269b2"
+}

@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { fetchWorkdirs, type BotWorkdir } from '@/composables/api/useWorkdirs'
+import { isApiErrorCode } from '@/utils/api-error'
 
 // Client state around bot workdirs: the per-bot workdir list (shared by the
 // sidebar grouping, the composer chip, and session creation) plus the per-bot
@@ -41,6 +42,13 @@ export const useWorkdirsStore = defineStore('workdirs', () => {
       .then((workdirs) => {
         workdirsByBot.value = { ...workdirsByBot.value, [bid]: workdirs }
         loadedBots.add(bid)
+      })
+      .catch((cause: unknown) => {
+        // Chat-only readers can open conversations without workspace_read.
+        // Do not retain earlier paths or mark a denied list as loaded; a later
+        // grant must allow the same Bot to load its original folders again.
+        if (!isApiErrorCode(cause, 'http.forbidden')) throw cause
+        workdirsByBot.value = { ...workdirsByBot.value, [bid]: [] }
       })
       .finally(() => {
         pendingLoads.delete(bid)
