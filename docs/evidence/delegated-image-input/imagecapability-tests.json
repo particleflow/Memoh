@@ -1,0 +1,414 @@
+[
+  {
+    "test": "TestProductionResolverPreservesLegacyDefault",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDefersLookupFailuresUntilExecution/settings_failure",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_model",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDefersLookupFailuresUntilExecution/model_query_failure",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDefersLookupFailuresUntilExecution/missing_provider",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDefersLookupFailuresUntilExecution/provider_query_failure",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDefersLookupFailuresUntilExecution",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/null",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{\"protocol\":\"unsupported\",\"model_mode\":\"omit\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_false/{\"protocol\":\"openai-images\",\"model_mode\":\"omit\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/null",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{\"protocol\":\"unsupported\",\"model_mode\":\"omit\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution/unavailable_true/{\"protocol\":\"openai-images\",\"model_mode\":\"omit\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyDiscoveryDoesNotBypassExplicitProtocolAtExecution",
+    "result": "pass"
+  },
+  {
+    "test": "TestAttachmentShortcutKeepsExistingSessionRules/no_reply_target",
+    "result": "pass"
+  },
+  {
+    "test": "TestAttachmentShortcutKeepsExistingSessionRules/subagent",
+    "result": "pass"
+  },
+  {
+    "test": "TestAttachmentShortcutKeepsExistingSessionRules",
+    "result": "pass"
+  },
+  {
+    "test": "TestEditDisabledBeforeHTTP",
+    "result": "pass"
+  },
+  {
+    "test": "TestDeniedConversationDoesNotOpenExistingHash",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/base_url",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/endpoint",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/api_key",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/protocol",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/model",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/model_mode",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/bot_id",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider/session_id",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelArgumentsCannotChooseProvider",
+    "result": "pass"
+  },
+  {
+    "test": "TestEditMaskRejectedBeforeHTTP",
+    "result": "pass"
+  },
+  {
+    "test": "TestTimeoutIsUnknownWithoutRetry",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKHTTPBoundary/known_oversize",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKHTTPBoundary/chunked_oversize",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKHTTPBoundary/non_200",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKHTTPBoundary",
+    "result": "pass"
+  },
+  {
+    "test": "TestResponseReadLimit",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKPreservesHTTPTimeout",
+    "result": "pass"
+  },
+  {
+    "test": "TestLegacyPoliciesNeverDispatch",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKImageWireContract/inputs_0",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKImageWireContract/inputs_1",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKImageWireContract/inputs_2",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKImageWireContract",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown/mask",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown/foreign",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown/revoked",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown/tool_encoding_override",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown/tool_default_override",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown/unknown",
+    "result": "pass"
+  },
+  {
+    "test": "TestJSONEditAdmissionAndUnknown",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/http504",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/cancel",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/cancel_with504",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/deadline",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/client_timeout",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/body_timeout",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/invalid200",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/completed",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts/before_dispatch",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageRequestObservationSeparatesCancellationAndTimeoutFacts",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageObservationDoesNotInventMissingRunIdentity",
+    "result": "pass"
+  },
+  {
+    "test": "TestCancellationBeforeAndAfterDispatch/before_dispatch",
+    "result": "pass"
+  },
+  {
+    "test": "TestCancellationBeforeAndAfterDispatch/after_dispatch",
+    "result": "pass"
+  },
+  {
+    "test": "TestCancellationBeforeAndAfterDispatch",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/absent",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/omit",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/configured",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/null",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/unknown_protocol",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/native_model",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig/unknown_field",
+    "result": "pass"
+  },
+  {
+    "test": "TestExplicitConfig",
+    "result": "pass"
+  },
+  {
+    "test": "TestGenerateBytesAndAttachment/synthetic-selected-image-model",
+    "result": "pass"
+  },
+  {
+    "test": "TestGenerateBytesAndAttachment/synthetic-other-image-model",
+    "result": "pass"
+  },
+  {
+    "test": "TestGenerateBytesAndAttachment",
+    "result": "pass"
+  },
+  {
+    "test": "TestNativeSupervisorAndSubagentImageChain/subagent_false",
+    "result": "pass"
+  },
+  {
+    "test": "TestNativeSupervisorAndSubagentImageChain/subagent_true",
+    "result": "pass"
+  },
+  {
+    "test": "TestNativeSupervisorAndSubagentImageChain",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/201",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/429",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/500",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/redirect",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/disconnect",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/invalid_base64",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries/url_only",
+    "result": "pass"
+  },
+  {
+    "test": "TestUnknownNeverAutomaticallyRetries",
+    "result": "pass"
+  },
+  {
+    "test": "TestInvalidInputsNeverDispatch/null",
+    "result": "pass"
+  },
+  {
+    "test": "TestInvalidInputsNeverDispatch/{\"prompt\":\"synthetic\",\"model\":\"override\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestInvalidInputsNeverDispatch/{\"prompt\":\"\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestInvalidInputsNeverDispatch/{\"prompt\":\"synthetic\",\"mode\":\"edit\"}",
+    "result": "pass"
+  },
+  {
+    "test": "TestInvalidInputsNeverDispatch",
+    "result": "pass"
+  },
+  {
+    "test": "TestStorageFailureDoesNotRegenerate",
+    "result": "pass"
+  },
+  {
+    "test": "TestModelContentDoesNotSelectDestination",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/native_model",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/references",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/legacy_configured_generation",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/legacy_configured_json",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/legacy_omit",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/legacy_implicit_multipart",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/legacy_multipart",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/unknown_mode",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/unknown_encoding",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/null_mode",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility/null_encoding",
+    "result": "pass"
+  },
+  {
+    "test": "TestSDKConfigCompatibility",
+    "result": "pass"
+  }
+]

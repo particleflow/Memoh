@@ -36,12 +36,19 @@ type selection struct {
 // It replaces only the explicitly configured image capability. No config means
 // delegation to the original provider, not guessed protocol selection.
 type Provider struct {
-	logger    *slog.Logger
-	fallback  tools.ToolProvider
-	media     *media.Service
-	http      *http.Client
-	resolve   func(context.Context, string) (selection, bool, error)
-	authorize func(context.Context, tools.SessionContext) error
+	logger        *slog.Logger
+	fallback      tools.ToolProvider
+	media         *media.Service
+	http          *http.Client
+	resolve       func(context.Context, string) (selection, bool, error)
+	authorize     func(context.Context, tools.SessionContext) error
+	openReference func(context.Context, string, string) (io.ReadCloser, string, error)
+}
+
+// SetReferenceOpener uses the host's existing conversation-scoped media reader.
+// It does not grant an alias or fall back to Bot ownership after a scoped denial.
+func (p *Provider) SetReferenceOpener(open func(context.Context, string, string) (io.ReadCloser, string, error)) {
+	p.openReference = open
 }
 
 func New(fallback tools.ToolProvider, settingsSvc *settings.Service, modelsSvc *models.Service, queries dbstore.Queries, mediaSvc *media.Service, authorize func(context.Context, tools.SessionContext) error) *Provider {
@@ -110,7 +117,7 @@ func (p *Provider) Tools(ctx context.Context, session tools.SessionContext) ([]t
 	if selected.config.Edits {
 		list = append(list, toolexec.Tool{
 			Name:        "edit_image",
-			Description: "Edit existing images through the explicitly enabled Images API. Input images are content_hash references owned by this Bot; raw paths and URLs are not accepted. Returns the persisted original output. Do not automatically repeat an unknown outcome or regenerate to retry file delivery.",
+			Description: "Transform reference images through the explicitly enabled Images API. Input images are authorized conversation content_hash references; raw paths and URLs are not accepted. Returns the persisted original output. Do not automatically repeat an unknown outcome or regenerate to retry file delivery.",
 			Parameters:  toolexec.SchemaFor[editArgs](toolexec.Strict()),
 			Execute: func(exec *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
 				var args editArgs
@@ -160,7 +167,7 @@ func (p *Provider) legacyTools(ctx context.Context, session tools.SessionContext
 type editArgs struct {
 	Prompt string   `json:"prompt" jsonschema:"Description of the requested edit"`
 	Size   string   `json:"size,omitempty"`
-	Images []string `json:"images" jsonschema:"One to four existing image content_hash values owned by this Bot"`
+	Images []string `json:"images" jsonschema:"One to four existing image content_hash values authorized in this conversation"`
 }
 
 func decode(input sdk.ToolArguments, target any, allowed ...string) error {
@@ -263,8 +270,14 @@ func (p *Provider) openImage(ctx context.Context, session tools.SessionContext, 
 	if err := p.checkAccess(ctx, session); err != nil {
 		return imageBytes{}, err
 	}
-	reader, _, err := p.media.Open(ctx, session.BotID, hash)
-	if err != nil {
+	var reader io.ReadCloser
+	var err error
+	if p.openReference != nil {
+		reader, _, err = p.openReference(ctx, session.BotID, hash)
+	} else {
+		reader, _, err = p.media.Open(ctx, session.BotID, hash)
+	}
+	if err != nil || reader == nil {
 		return imageBytes{}, errors.New("input image reference is unavailable for this Bot")
 	}
 	defer func() { _ = reader.Close() }()

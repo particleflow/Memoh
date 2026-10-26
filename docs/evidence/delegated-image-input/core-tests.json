@@ -1,0 +1,70 @@
+[
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/success",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/unknown",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/undeclared",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/revoked",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/missing-scope",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/source-unlinked",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/revoked-on-open",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal/subagent-scope",
+    "result": "pass"
+  },
+  {
+    "test": "TestDelegatedImageReferenceUsesScopedOriginal",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend/success",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend/reference_success",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend/revoked",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend/foreign_reference",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend/missing_reference",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend/unknown",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityActualSpawnAndParentSend",
+    "result": "pass"
+  },
+  {
+    "test": "TestImageCapabilityUsesCurrentBotAndSessionAuthority",
+    "result": "pass"
+  }
+]
