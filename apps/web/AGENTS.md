@@ -18,6 +18,8 @@ Do not skip this for "small" UI edits. The routed guidance covers
 `@felinic/ui` composition, copy discipline, empty/loading states, layout
 patterns, and the verification checklist for every surface in this package.
 
+For this NAS Assistant fork, the root `AGENTS.md` QA policy takes precedence over inherited UI skills: human rendered review is an acceptance status, not a commit/amend/push prerequisite. Preserve automated and actual application verification and leave Human QA unchecked until a human confirms it.
+
 ## Tech Stack
 
 | Category | Technology |

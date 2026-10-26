@@ -1,0 +1,374 @@
+> @memohai/monorepo@0.22.0 test /tmp/memoh-candidate-7bcb-review
+> vitest --run --testTimeout=15000 apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/pages/home/components/session-bot-run.test.ts apps/web/src/pages/home/composables/session-bot-run.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+ ❯ |web| src/pages/home/components/session-tasks.test.ts (42 tests | 42 failed) 432ms
+     × shows the specialist root run with no children and opens its native history without dispatch 80ms
+     × keeps native history closed after target session rejection 401 13ms
+     × keeps native history closed after target session rejection 403 13ms
+     × keeps native history closed after target session rejection 404 14ms
+     × keeps native history closed after target session rejection 503 13ms
+     × clears an unconfirmed root run on disconnect and restores the same delegation/run after refresh 11ms
+     × retires pending native history navigation on logout 10ms
+     × rejects a changed admitted run during native history revalidation 9ms
+     × shows all recorded files automatically, with pending and failed separate from task completion 10ms
+     × keeps task summary but distinguishes file observation failure: 'http.not_found' 11ms
+     × keeps task summary but distinguishes file observation failure: 'session.not_found' 8ms
+     × keeps task summary but distinguishes file observation failure: 'http.forbidden' 8ms
+     × opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch 9ms
+     × distinguishes downstream read failure from an empty task list: 'This server does not support task obs…' 8ms
+     × distinguishes downstream read failure from an empty task list: 'This conversation or task is no longe…' 8ms
+     × distinguishes downstream read failure from an empty task list: 'You do not have permission to perform…' 8ms
+     × distinguishes downstream read failure from an empty task list: 'Sign in to continue.' 8ms
+     × distinguishes downstream read failure from an empty task list: 'The workspace could not be reached.' 7ms
+     × distinguishes downstream read failure from an empty task list: 'Network connection failed. Check your…' 7ms
+     × does not invent a specialist session for an accepted handoff without one 7ms
+     × resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch 8ms
+     × resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch 7ms
+     × resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch 7ms
+     × resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch 7ms
+     × retires downstream content and ignores a late response after relation-denied 8ms
+     × retires downstream content and ignores a late response after relation-unauthorized 7ms
+     × retires downstream content and ignores a late response after relation-forbidden 8ms
+     × retires downstream content and ignores a late response after relation-changed 7ms
+     × retires downstream content and ignores a late response after logout 50ms
+     × retires downstream content and ignores a late response after scope-changed 5ms
+     × wires the shared retry action through the existing SDK and never reports supervisor completion 4ms
+     × opens the specialist group without polling the hidden execution group 4ms
+     × keeps delegation page two and execution task cursors separate across tab round trips 5ms
+     × keeps the Web shell description and restores trigger focus on Escape 5ms
+     × closes specialist detail and ignores its late reply after same-tab logout 5ms
+     × projects the child own completed run, then removes its output when the next run is pending 4ms
+     × renders HTML, Markdown and URLs literally without active elements 5ms
+     × invalidates pending detail when another tab replaces the identity token 5ms
+     × closes and aborts on login before any token update or parent unmount 4ms
+     × closes and aborts on logout before any token update or parent unmount 4ms
+     × closes and aborts on unauthorized before any token update or parent unmount 4ms
+     × closes and aborts on token-cleared before any token update or parent unmount 4ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 42 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > shows the specialist root run with no children and opens its native history without dispatch
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:99:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps native history closed after target session rejection 401
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps native history closed after target session rejection 403
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps native history closed after target session rejection 404
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps native history closed after target session rejection 503
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:115:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > clears an unconfirmed root run on disconnect and restores the same delegation/run after refresh
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:126:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires pending native history navigation on logout
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:144:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > rejects a changed admitted run during native history revalidation
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:155:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > shows all recorded files automatically, with pending and failed separate from task completion
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:168:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps task summary but distinguishes file observation failure: 'http.not_found'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps task summary but distinguishes file observation failure: 'session.not_found'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps task summary but distinguishes file observation failure: 'http.forbidden'
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:189:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > opens only the server-returned specialist session, retains detail across polls, and navigates back without dispatch
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:203:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'This server does not support task obs…'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'This conversation or task is no longe…'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'You do not have permission to perform…'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'Sign in to continue.'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'The workspace could not be reached.'
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > distinguishes downstream read failure from an empty task list: 'Network connection failed. Check your…'
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:233:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > does not invent a specialist session for an accepted handoff without one
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:243:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'reload' without redispatch
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > resumes the same downstream detail after a transient parent read failure via 'poll' without redispatch
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:256:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-denied
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-unauthorized
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-forbidden
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after relation-changed
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after logout
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > retires downstream content and ignores a late response after scope-changed
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ src/pages/home/components/session-tasks.test.ts:291:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > wires the shared retry action through the existing SDK and never reports supervisor completion
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:316:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > opens the specialist group without polling the hidden execution group
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:328:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps delegation page two and execution task cursors separate across tab round trips
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:350:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > keeps the Web shell description and restores trigger focus on Escape
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:376:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes specialist detail and ignores its late reply after same-tab logout
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:390:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > projects the child own completed run, then removes its output when the next run is pending
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:405:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > renders HTML, Markdown and URLs literally without active elements
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:417:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > invalidates pending detail when another tab replaces the identity token
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:427:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/42]⎯
+
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on login before any token update or parent unmount
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on logout before any token update or parent unmount
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on unauthorized before any token update or parent unmount
+ FAIL  |web| src/pages/home/components/session-tasks.test.ts > task detail identity and rendering boundary > closes and aborts on token-cleared before any token update or parent unmount
+AssertionError: expected undefined to be defined
+ ❯ button src/pages/home/components/session-tasks.test.ts:45:17
+     43|   const found = [...document.querySelectorAll('button')].find(b => typ…
+     44|     ? b.textContent?.trim() === label : label.test(b.textContent ?? ''…
+     45|   expect(found).toBeDefined()
+       |                 ^
+     46|   return found!
+     47| }
+ ❯ open src/pages/home/components/session-tasks.test.ts:61:3
+ ❯ src/pages/home/components/session-tasks.test.ts:445:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/42]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  42 failed | 13 passed (55)
+   Start at  06:57:17
+   Duration  8.14s (transform 10.34s, setup 0ms, import 14.39s, tests 816ms, environment 832ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

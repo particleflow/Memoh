@@ -58,7 +58,7 @@ async function open(group = 'execution', selectDetail = true) {
   app.use(createI18n({ legacy: false, locale: 'en', messages: { en } }))
   app.mount(root)
   await settled()
-  button('Tasks').click()
+  button(en.chat.tasks.records).click()
   await settled()
   if (group === 'delegations') {
     await selectGroup('Specialist Bot handoffs')
@@ -288,7 +288,7 @@ describe('task detail identity and rendering boundary', () => {
     root = document.createElement('div'); document.body.append(root)
     app = createApp({ setup: () => () => h(SessionTasks, props.value) })
     app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root)
-    await settled(); button('Tasks').click(); await settled()
+    await settled(); button(en.chat.tasks.records).click(); await settled()
     await selectGroup('Specialist Bot handoffs'); button(/Target Bot/).click(); await settled()
     let finish!: (value: { data: { items: SessiontaskTask[] } }) => void
     api.list.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
@@ -381,7 +381,7 @@ describe('task detail identity and rendering boundary', () => {
     document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     await settled(); await vi.advanceTimersByTimeAsync(300); await nextTick()
     expect(document.querySelector('[role=dialog]')).toBeNull()
-    expect(document.activeElement).toBe(button('Tasks'))
+    expect(document.activeElement).toBe(button(en.chat.tasks.records))
   })
 
   it('closes specialist detail and ignores its late reply after same-tab logout', async () => {

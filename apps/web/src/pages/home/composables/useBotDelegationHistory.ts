@@ -11,7 +11,7 @@ export interface BotDelegationHistoryAction {
 
 // Navigation rechecks the source relation and the target's ordinary session
 // permission. It never dispatches a turn or treats a UUID as an access grant.
-export function useBotDelegationHistory(scope: Ref<TaskScope | null>, visible: Ref<boolean>, reader: ReturnType<typeof useBotDelegations>, navigate: (target: { bot: string, session: string, title?: string, identity: string }) => Promise<void>) {
+export function useBotDelegationHistory(scope: Ref<TaskScope | null>, visible: Ref<boolean>, reader: Pick<ReturnType<typeof useBotDelegations>, 'detail' | 'selected' | 'error' | 'loading'>, navigate: (target: { bot: string, session: string, title?: string, identity: string }) => Promise<void>) {
   const pending = ref(false), error = shallowRef<unknown>()
   let epoch = 0, controller: AbortController | undefined
   function invalidate() { epoch++; controller?.abort(); pending.value = false; error.value = undefined }

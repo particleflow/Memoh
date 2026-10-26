@@ -8,7 +8,7 @@ import { useBotDelegationHistory } from '../composables/useBotDelegationHistory'
 import BotDelegationRun from './bot-delegation-run.vue'
 import { useI18n } from 'vue-i18n'
 import { ListTree } from 'lucide-vue-next'
-import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
+import { Button, Collapsible, CollapsibleTrigger, CollapsibleContent, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent } from '@felinic/ui'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { apiErrorStatus } from '@/utils/api-error'
 import { useSessionTasks } from '../composables/useSessionTasks'
@@ -106,7 +106,7 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
         size="sm"
       >
         <ListTree />
-        {{ t('chat.tasks.title') }}
+        {{ t('chat.tasks.records') }}
       </Button>
     </DialogTrigger>
     <DialogPanel view-swap>
@@ -163,7 +163,9 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             </TabsTrigger>
           </TabsList>
           <TabsContent value="delegations">
-            <DialogDescription>{{ t('chat.delegations.description') }}</DialogDescription>
+            <DialogDescription class="sr-only">
+              {{ t('chat.delegations.description') }}
+            </DialogDescription>
             <BotDelegationTasks
               :items="delegations"
               :detail="delegationDetail"
@@ -182,13 +184,26 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
             />
           </TabsContent>
           <TabsContent value="execution">
-            <DialogDescription>{{ t('chat.tasks.description') }}</DialogDescription>
-            <SessionBotRun
-              v-if="!selected"
-              :bot-id="botId"
-              :session-id="sessionId"
-              :visible="visible && group === 'execution'"
-            />
+            <DialogDescription class="sr-only">
+              {{ t('chat.tasks.description') }}
+            </DialogDescription>
+            <Collapsible v-if="!selected">
+              <CollapsibleTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                >
+                  {{ t('chat.botRun.title') }}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SessionBotRun
+                  :bot-id="botId"
+                  :session-id="sessionId"
+                  :visible="visible && group === 'execution'"
+                />
+              </CollapsibleContent>
+            </Collapsible>
             <SessionTaskResults
               :items="items"
               :detail="detail"

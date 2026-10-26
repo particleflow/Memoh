@@ -1074,6 +1074,7 @@
       "downloadFailed": "Could not prepare the download. Reload the view and check access."
     },
     "tasks": {
+      "records": "Task records",
       "resume": {
         "action": "Continue original native batch",
         "ready": "Continue the original native batch with its original instruction. The server will check whether continuation is available.",

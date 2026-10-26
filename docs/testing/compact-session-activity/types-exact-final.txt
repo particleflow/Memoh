@@ -1,0 +1,7 @@
+> @memohai/web@0.22.0 typecheck /tmp/memoh-candidate-7bcb-review/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/components/sidebar/session-activity.vue(61,109): error TS2367: This comparison appears to be unintentional because the types '"failed" | "accepted" | "running" | "completed" | "waiting_decision" | "finishing" | "aborted" | "lost" | undefined' and '"admitting"' have no overlap.
+/tmp/memoh-candidate-7bcb-review/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

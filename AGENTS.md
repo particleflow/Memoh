@@ -132,6 +132,8 @@ Memoh is a commercial project split across two repositories: this OSS repo and a
 
 ### Pull Request QA Status
 
+For the NAS Assistant fork, human review of the rendered UI is **not a prerequisite for commit, amend, push, or the already-authorized delivery workflow**. This project policy overrides any such prerequisite in inherited UI skills, including `packages/ui/skills/web/SKILL.md`. Keep the required automated checks, actual application verification, and truthful acceptance disclosures. Do not request another submission waiver when the user has already authorized the work. This does not change tool approvals, credentials, repository protections, or production acceptance requirements.
+
 The `Human QA` section contains only one status checkbox, `- [ ] Human QA passed`, without an additional warning line:
 
 - **Not yet verified by a human**: leave the checkbox unchecked.
