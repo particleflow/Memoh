@@ -1,7 +1,7 @@
 {
   "existingPhonePatches": {
     "apps/web/index.html": {
-      "adaptedSHA256": "1ca44e70d3699589ce85776d343ba4a78253bd99825d07a28188dc06dc22209b",
+      "adaptedSHA256": "280d87306ae34a1ab92a33e5bc03438143894c9c3e4798f82a51cd91772fdfff",
       "upstreamSHA256": "7e2085d382f8bad18eddb9c887c84e89a296a23d97bf3afb4084a5b689633414"
     },
     "apps/web/package.json": {
@@ -105,7 +105,7 @@
       "upstreamSHA256": "f58ec2bf7395ba50eab2c106873bf941df4909d8a2907bba6866bbf378cecd7e"
     },
     "apps/web/src/pages/home/index.vue": {
-      "adaptedSHA256": "793ec3716cb6acb5aacc00082a05a26b56077502c8b5aad5e5b576092ddbd3b3",
+      "adaptedSHA256": "9aeb142133ff8c4f0815e89855cc373525e810412c0518a35dcabb5e87ebdce9",
       "upstreamSHA256": "b91439b9d6285d3a2d3dd37d741818d07b1c1735fe6261ce2b323e1b38c06ead"
     },
     "apps/web/src/pages/login/index.vue": {

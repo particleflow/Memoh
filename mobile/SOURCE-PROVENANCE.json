@@ -6,10 +6,12 @@
   "entries": [
     {
       "path": "mobile/client/config/memoh_client.json",
-      "sha256": "99137240f5107a63328e1f83793b48a2a2cb05b1db84126659f04709b3a2df60",
+      "sha256": "92d2fc85d947461b414201a10ce543d3009572feec5d2dfebc642741308067e1",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
-      "preparationChanges": []
+      "preparationChanges": [
+        "Use the explicitly requested display name Garnet Assistant; keep bundle, paths and application identity unchanged."
+      ]
     },
     {
       "path": "mobile/client/config/memoh_runtime.lock.json",
@@ -576,13 +578,14 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json",
-      "sha256": "64967dedf8c123af0d7f80aa5b560123f77112208c1c77f826d336d7bfddbe2c",
+      "sha256": "7bfd9fc293c76439d8bb7bf28958ed08959e56d8e8b4464998daea585b9ec235",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "eff4cbb47121bb254a16dee4017ba66dcb044f18fd0e8e7667cc48ffac99b734",
       "archiveCheckpointSHA256": "eff4cbb47121bb254a16dee4017ba66dcb044f18fd0e8e7667cc48ffac99b734",
       "preparationChanges": [
-        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "Use the explicitly requested display name Garnet Assistant; keep bundle, paths and application identity unchanged."
       ]
     },
     {
@@ -932,13 +935,14 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/string.json",
-      "sha256": "8a75f6b44331cd1cd0ed00da3244c817ad82ec51e0d90927bb1451115150a82f",
+      "sha256": "670267a2ab514a103450936077460707f51a6e540584430c66d7cc5d29b6e8ec",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "652706652754e493338016dbbe8b9af63b4e4c92b8aab7bd7393620117bc54fd",
       "archiveCheckpointSHA256": "652706652754e493338016dbbe8b9af63b4e4c92b8aab7bd7393620117bc54fd",
       "preparationChanges": [
-        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "Use the explicitly requested display name Garnet Assistant; keep bundle, paths and application identity unchanged."
       ]
     },
     {

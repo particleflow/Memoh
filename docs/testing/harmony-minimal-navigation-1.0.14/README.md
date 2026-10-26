@@ -10,8 +10,9 @@ needs its earlier sidebar entry and read-only reader, absent from the phone's
 sidebar visibility/entry and ordinary authorized delegation session navigation.
 The duplicate composer task menu is removed. Web durable-transfer changes and
 file-tree error changes are excluded. No API, service, permission or framework is
-added. The existing 43 phone adaptations are preserved; only the expected
-composer input/output hashes change because its task menu was removed.
+added. The existing 43 phone adaptations are preserved; the expected
+composer input/output hashes change because its task menu was removed; the
+index/page title outputs change only for the explicitly requested display name.
 
 ## Verification
 
@@ -32,7 +33,10 @@ composer input/output hashes change because its task menu was removed.
   This focused page check does not claim a live runtime result or completed
   phone rendering/upgrade acceptance.
 - Existing official CLT26.0.0.851 / SDK26.0.0.105: release `assembleHap` passed
-  once, including real CompileArkTS. CRC, every rawfile digest, source binding,
+  for the product fix, including real CompileArkTS. A later explicit naming
+  requirement changed the three display-name inputs to `Garnet Assistant`;
+  its different source was compiled and qualified separately. The first HAP
+  remains preserved and is superseded, not relabeled or overwritten. CRC, every rawfile digest, source binding,
   both native ELF architectures, empty configuration slot and unchanged
   application identity/permissions passed. See [verification](verification.json)
   and [content scan scope](content-scan.json).
@@ -50,3 +54,5 @@ be returned to GitHub. Existing 1.0.13 is retained for recovery.
 The conversation skeleton is expected in this isolated fixture, which does not
 simulate its runtime synchronization. The screenshots demonstrate the changed
 controls and navigation, not successful task execution or real-phone acceptance.
+
+The final revision uses `Garnet Assistant` in the public configuration, native app/module resource labels and page title. Bundle identity and engineering paths are unchanged. The name check initially assumed the brand was a title suffix; the actual existing title format is brand-first, and the corrected fixture passed without a product change.
