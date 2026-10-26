@@ -1,0 +1,67 @@
+{
+  "base": "7c96d6d2ca753c3f3cb17d237a1920f7633bfdcc",
+  "incomingReviewTree": "37ecf303d139fc0615f7b5a3951150f22c228c2c",
+  "incomingPatchSHA256": "48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178",
+  "incomingFiles": 14,
+  "productFilesChangedAfterReview": false,
+  "sourceRegistrationAdditionalFiles": [
+    "mobile/SOURCE-PROVENANCE.json",
+    "mobile/check_source_subset.py"
+  ],
+  "sourceEntries": 131,
+  "sourceFiles": 140,
+  "sdkVersion": "26.0.0.105",
+  "buildExitCode": 0,
+  "qualificationExitCode": 0,
+  "sourceIdentitySHA256": "82c8630d4b8036f632c993aef271403e95d1b7bfe7a1e446d7d56c5582a5bbb6",
+  "nativeInputs": 105,
+  "sdkMetadataMismatches": [],
+  "compilerWarnings": 166,
+  "hapResourceDigestsVerified": true,
+  "compiledAbc": {
+    "ets/modules.abc": {
+      "bytes": 350040,
+      "sha256": "d3b993812961114162a4fef1087da42db2138da45285684680ca9412ad10b40e"
+    }
+  },
+  "nativeLibraries": {
+    "libs/arm64-v8a/libbegoniaraw.so": {
+      "bytes": 1970000,
+      "sha256": "f147b7806b8efaa1a39d82a14db9a501a3d783d70ed3b02fea066c8cc81006a7",
+      "elfMachine": 183
+    },
+    "libs/x86_64/libbegoniaraw.so": {
+      "bytes": 1884120,
+      "sha256": "d1fd80180d4789bda90bd7ceaa5ff7acdb5d0671d0a4335c4de1649676e5a2e6",
+      "elfMachine": 62
+    }
+  },
+  "package": {
+    "file": "memoh-network-consumer-37ecf303-api26-compile-only-unsigned.hap",
+    "scope": "Private compile validation only, NOT a new installable release; version intentionally unchanged",
+    "versionName": "1.0.12",
+    "versionCode": 1000012,
+    "bytes": 37229071,
+    "sha256": "6f32b038dbfb3691269a88a72a3fc6a5a678c3cfc2fa8b324b22a576ab8da080",
+    "zipCRC": true,
+    "entries": 817,
+    "emptyStoredConfigurationBytes": 8192,
+    "networkPolicyInPublicSeed": false
+  },
+  "old112Unchanged": true,
+  "reusedIncomingChecks": {
+    "productPolicy": 61,
+    "pythonPrivateSlot": 33,
+    "serviceConfiguration": 178,
+    "controlledUploadCases": 19,
+    "controlledUploadMiB": 2,
+    "independentProcessDownloadMiB": 18
+  },
+  "renderedEntryCheck": "actual compiled page; same-base policy forwarded, HTTP/HTTPS old login retained, unknown-origin no request",
+  "realNativeNetwork": false,
+  "deviceAccepted": false,
+  "signed": false,
+  "versionIncremented": false,
+  "moduleMetadataAndPermissionsEqualDistributed112": true,
+  "compiledNetworkConsumerPresent": true
+}

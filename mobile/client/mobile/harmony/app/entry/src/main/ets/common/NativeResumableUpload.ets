@@ -4,7 +4,8 @@ import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { uniformTypeDescriptor } from '@kit.ArkData';
 import { util } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
-import { MEMOH_ORIGIN } from './MemohClientConfig';
+import { MEMOH_ORIGIN, MEMOH_NETWORK_POLICY } from './MemohClientConfig';
+import { NativeTransferNetwork } from './NativeTransferNetwork';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { NativePhotoSelection } from './NativePhotoSelection';
 
@@ -26,7 +27,8 @@ class Journal {
 class Running {
   apiOrigin: string = MEMOH_ORIGIN; epoch: number = 0; cancelled: boolean = false; staged: Journal[] = []; input: UploadScope; session: rcp.Session; journal?: Journal;
   copying: boolean = false; copyBusy: boolean = false; copyCommitted: boolean = false; copyOffset: number = 0; copyFile?: fs.File; ended: boolean = false;
-  constructor(input: UploadScope, epoch: number) { this.input = input; this.epoch = epoch; this.session = rcp.createSession(); }
+  network: NativeTransferNetwork;
+  constructor(input: UploadScope, epoch: number) { this.input = input; this.epoch = epoch; this.network = new NativeTransferNetwork(this.apiOrigin, MEMOH_NETWORK_POLICY); this.session = rcp.createSession(); }
 }
 
 // Foreground only. An app-owned immutable snapshot and atomic bounded journal
@@ -106,15 +108,19 @@ export class NativeResumableUpload {
     this.check(run);
     const requestHeaders: rcp.RequestHeaders = { authorization: run.input.authorization, accept: 'application/json', 'cache-control': 'no-store' };
     for (const key of Object.keys(headers)) { requestHeaders[key] = headers[key]; }
-    const request = new rcp.Request(run.apiOrigin.replace(/\/+$/, '') + path, method, requestHeaders, body);
-    request.configuration = { transfer: { autoRedirect: false } };
+    const target = run.apiOrigin.replace(/\/+$/, '') + path;
     const buffer = new Uint8Array(65536); let count = 0;
-    request.destination = (data: ArrayBuffer): void => {
-      this.check(run);
-      if (count + data.byteLength > buffer.length) { run.session.cancel(request); throw new Error('UPLOAD_RECEIPT_SIZE'); }
-      buffer.set(new Uint8Array(data), count); count += data.byteLength;
-    };
-    const response = await run.session.fetch(request); this.check(run);
+    const response = await run.network.fetch(run.session, target, method, (): rcp.Request => {
+      this.check(run); count = 0;
+      const request = new rcp.Request(target, method, requestHeaders, body);
+      request.configuration = { transfer: { autoRedirect: false } };
+      request.destination = (data: ArrayBuffer): void => {
+        this.check(run);
+        if (count + data.byteLength > buffer.length) { run.session.cancel(request); throw new Error('UPLOAD_RECEIPT_SIZE'); }
+        buffer.set(new Uint8Array(data), count); count += data.byteLength;
+      };
+      return request;
+    }); this.check(run);
     return { status: response.statusCode, body: new util.TextDecoder().decodeToString(buffer.subarray(0, count)), headers: response.headers };
   }
   private status(reply: Reply, expected: number = 200): void {
@@ -435,7 +441,7 @@ export class NativeResumableUpload {
       request.configuration = { transfer: { autoRedirect: false } };
       let received = 0;
       request.destination = (data: ArrayBuffer): void => { received += data.byteLength; if (received > 65536) { session.cancel(request); } };
-      await session.fetch(request);
+      await run.network.fetch(session, run.apiOrigin.replace(/\/+$/, '') + this.base(run) + '/uploads/' + j.uploadId, 'DELETE', (): rcp.Request => request);
     } catch { /* Local tombstone is final. Without credentials on disk, an offline cancellation relies on server TTL. */ }
     finally { session.close(); }
   }

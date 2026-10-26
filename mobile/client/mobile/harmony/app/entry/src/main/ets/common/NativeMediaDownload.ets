@@ -3,7 +3,8 @@ import { fileIo as fs, picker } from '@kit.CoreFileKit';
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { util } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
-import { MEMOH_ORIGIN } from './MemohClientConfig';
+import { MEMOH_ORIGIN, MEMOH_NETWORK_POLICY } from './MemohClientConfig';
+import { NativeTransferNetwork } from './NativeTransferNetwork';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { normalizeDelegationPath } from './ServiceUrl';
 
@@ -46,18 +47,21 @@ export class NativeMediaDownload {
     await md.update({ data: new util.TextEncoder().encodeInto(text) });
     return Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join('');
   }
-  private async bind(state: DownloadState, input: MediaDownloadInput, origin: string, endpoint: string): Promise<void> {
+  private async bind(state: DownloadState, input: MediaDownloadInput, origin: string, endpoint: string, network: NativeTransferNetwork): Promise<void> {
     const session = rcp.createSession(); state.session = session;
     try {
-      const request = new rcp.Request(origin + '/users/me', 'GET', { authorization: input.authorization });
-      request.configuration = { transfer: { autoRedirect: false } };
       const bytes = new Uint8Array(65536); let count = 0;
-      request.destination = (data: ArrayBuffer): void => {
-        this.check(state);
-        if (count + data.byteLength > bytes.length) { session.cancel(request); throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
-        bytes.set(new Uint8Array(data), count); count += data.byteLength;
-      };
-      const response = await session.fetch(request); this.check(state);
+      const response = await network.fetch(session, origin + '/users/me', 'GET', (): rcp.Request => {
+        this.check(state); count = 0;
+        const request = new rcp.Request(origin + '/users/me', 'GET', { authorization: input.authorization });
+        request.configuration = { transfer: { autoRedirect: false } };
+        request.destination = (data: ArrayBuffer): void => {
+          this.check(state);
+          if (count + data.byteLength > bytes.length) { session.cancel(request); throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+          bytes.set(new Uint8Array(data), count); count += data.byteLength;
+        };
+        return request;
+      }); this.check(state);
       if (response.statusCode === 401 || response.statusCode === 403) { throw new Error('MEDIA_DOWNLOAD_HTTP_' + response.statusCode); }
       if (response.statusCode !== 200) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
       const owner = (JSON.parse(new util.TextDecoder().decodeToString(bytes.subarray(0, count))) as Record<string, string>).id;
@@ -135,7 +139,8 @@ export class NativeMediaDownload {
     this.states.set(input.operation, state);
     let file: fs.File | undefined;
     try {
-      await this.bind(state, input, origin, endpoint);
+      const network = new NativeTransferNetwork(origin, MEMOH_NETWORK_POLICY);
+      await this.bind(state, input, origin, endpoint, network);
       state.retain = true;
       file = this.reopen(state);
       state.retain = false;
@@ -147,7 +152,7 @@ export class NativeMediaDownload {
           const request = new rcp.Request(endpoint, 'HEAD', { authorization: input.authorization, 'accept-encoding': 'identity' });
           request.configuration = { transfer: { autoRedirect: false } };
           request.destination = (): void => {};
-          const response = await session.fetch(request); this.check(state);
+          const response = await network.fetch(session, endpoint, 'HEAD', (): rcp.Request => request); this.check(state);
           if (response.statusCode === 401 || response.statusCode === 403) {
             state.retain = true; throw new Error('MEDIA_DOWNLOAD_HTTP_' + response.statusCode);
           }
@@ -192,7 +197,7 @@ export class NativeMediaDownload {
           } catch (error) { fatal = true; session.cancel(request); throw error as Error; }
         };
         try {
-          const response = await session.fetch(request); this.check(state);
+          const response = await network.fetch(session, endpoint, 'GET', (): rcp.Request => request); this.check(state);
           if (!this.validHeaders(state, start, response.statusCode, response.headers) || state.received !== state.size) {
             fatal = true; throw new Error('MEDIA_DOWNLOAD_INCOMPLETE');
           }

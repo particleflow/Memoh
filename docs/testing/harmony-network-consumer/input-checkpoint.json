@@ -1,0 +1,25 @@
+{
+  "base": "7c96d6d2ca753c3f3cb17d237a1920f7633bfdcc",
+  "files": {
+    "mobile/client/mobile/client_config.py": "d258694874210f53f4247521a8ca16dca894579379abcb2280e4f6623b856658",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets": "985768e472b8d4be46b53ff539db1173e958bd4e481da20a988030053c7852e0",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "dbe4568cd9a686b81b5c9d463353e509ef774477dc0d4690b302e98cc3981566",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets": "53cc53a40c65ac8800c6c9cd682d2b0efbc4a591dced7065a1e2fdfc6964b843",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets": "ca2be644dc5a8ab212deb465757000f1051b1e45a03b51286d8d88323bbc7a68",
+    "mobile/client/mobile/memoh/harmony-entry.ts": "a37f952ce2a4c6ad1cf98f23cf40d3349f6132f9882fbcf2e4e78b82dd037902",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+    "mobile/client/mobile/package_memoh_web.py": "7a45020bd14104968172a6b7fa74ace1dd873d2e87e4b23267e91ca5aad0eba0",
+    "mobile/client/tests/stage2/harmony_native_download.cjs": "1db3997a6e20df738d05aa995f9b380ab4554441b27a925f9bb402ee9055eb32",
+    "mobile/client/tests/stage2/harmony_resumable.cjs": "aa871e418226a2ab81b0045ea7f752344c0c5ee8c0ae59ee064fbf141834e41d",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets": "61ce1f31d061e86bf853d6b51d879ff622cd221563e549e6f27482cd76b92a6d",
+    "mobile/client/tests/stage2/harmony_network_policy.cjs": "83c40e2fa6eb81f7c3138166d287d143b0ec4a45b8b312827cac9c49e149f226",
+    "mobile/client/tests/stage2/network_policy_config.py": "71f6032fd64fb477e93bcdb91c1798cd90ba24158576503fc8e0c9c17995f5bc"
+  },
+  "review_tree": "37ecf303d139fc0615f7b5a3951150f22c228c2c",
+  "patch_sha256": "48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178",
+  "uncommitted": true,
+  "pushed": false,
+  "HAP_built": false,
+  "official_SDK_compilation": "NOT_EXECUTED"
+}

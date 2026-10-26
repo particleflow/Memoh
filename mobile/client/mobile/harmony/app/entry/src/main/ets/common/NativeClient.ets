@@ -4,10 +4,11 @@ import { NativeVoice } from './NativeVoice';
 import { NativeMediaDownload } from './NativeMediaDownload';
 import { NativeResumableUpload, UploadPreview, UploadScope } from './NativeResumableUpload';
 import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
+import { TransferNetworkPolicy } from './ServiceUrl';
 
 interface ClientRequest {
   version: number; command: string; state?: string; themeId?: string; handle?: string; offset?: number;
-  apiOrigin?: string; operation?: string; botId?: string; hash?: string; size?: number;
+  apiOrigin?: string; networkPolicy?: TransferNetworkPolicy; operation?: string; botId?: string; hash?: string; size?: number;
   name?: string; type?: string; data?: string; url?: string; authorization?: string; scope?: string; photos?: boolean; recoverDrafts?: boolean;
 }
 const PERMISSION: string = '{"javascriptProxyPermission":{"urlPermissionList":[{"scheme":"begonia-client","host":"app","port":"","path":"/index.html"}]}}';
@@ -60,7 +61,7 @@ export class NativeClient {
         this.stopTransfers(); resetMemohOrigin(); this.stateChanged('login-page');
       } else if (value.command === 'client.configure' && typeof value.apiOrigin === 'string') {
         if (this.ready) { throw new Error('SERVICE_CONFIG_LOCKED'); }
-        configureMemohOrigin(value.apiOrigin);
+        configureMemohOrigin(value.apiOrigin, value.networkPolicy);
       } else if (value.command === 'client.state' && typeof value.state === 'string' &&
         ['login-page', 'ready', 'failed'].includes(value.state)) {
         if (value.state === 'ready' && !MEMOH_ORIGIN) { throw new Error('SERVICE_NOT_CONFIGURED'); }

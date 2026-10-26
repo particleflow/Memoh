@@ -1,18 +1,20 @@
-import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
+import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, deploymentNetworkPolicy, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
+import type { TransferNetworkPolicy } from './harmony-service-url'
 import './harmony-service.css'
 
 type Bridge = { request: (raw: string) => Promise<string> }
 const native = (window as Window & { begoniaNative?: Bridge }).begoniaNative
-async function nativeCommand(command: string, apiOrigin?: string) {
+async function nativeCommand(command: string, apiOrigin?: string, networkPolicy?: TransferNetworkPolicy) {
   if (!native) {
     if (location.protocol === 'begonia-client:') throw new Error('SERVICE_BRIDGE_UNAVAILABLE')
     return // Explicit browser fixture/preview, never a native fallback.
   }
-  const result = JSON.parse(await native.request(JSON.stringify({ version: 1, command, apiOrigin }))) as { ok?: boolean }
+  const result = JSON.parse(await native.request(JSON.stringify({ version: 1, command, apiOrigin, networkPolicy }))) as { ok?: boolean }
   if (!result.ok) throw new Error('SERVICE_BRIDGE_REJECTED')
 }
 
 let started = false
+let packagedConfig: unknown
 async function boot(config: ServiceConfig) {
   if (started) return
   started = true
@@ -26,7 +28,7 @@ async function boot(config: ServiceConfig) {
       finishServiceTransition(config)
       config = commitServiceTransition(config)
     }
-    await nativeCommand('client.configure', config.apiOrigin)
+    await nativeCommand('client.configure', config.apiOrigin, deploymentNetworkPolicy(packagedConfig, config.apiOrigin))
     await import('../main')
     const { default: router } = await import('../router')
     // Login must also offer a way to correct an unavailable endpoint.
@@ -79,7 +81,8 @@ function form(current: ServiceConfig | null, message = '') {
 async function start() {
   try {
     await nativeCommand('client.configuration') // Close transfers before any config UI or app imports.
-    const value = await applyDeploymentConfig(await readDeploymentConfig())
+    packagedConfig = await readDeploymentConfig()
+    const value = await applyDeploymentConfig(packagedConfig)
     if (!value || sessionStorage.getItem(EDIT_SERVICE_KEY) === '1') form(value)
     else await boot(value)
   } catch { form(null, '安装包配置或本地存储未能通过核对，已停止连接。请检查 Windows 配置与签名步骤；原登录和本地数据未更改。') }

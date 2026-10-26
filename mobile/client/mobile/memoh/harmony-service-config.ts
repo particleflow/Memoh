@@ -1,4 +1,4 @@
-import { normalizeServiceUrl } from './harmony-service-url'
+import { normalizeServiceUrl, normalizeTransferNetworkPolicy, type TransferNetworkPolicy } from './harmony-service-url'
 
 // Same Web Storage and stable WebView origin as existing login/drafts. Native
 // holds only an in-memory copy for its network allowlist, never a second store.
@@ -21,7 +21,20 @@ interface DeploymentConfig {
   apiOrigin: string
   hapDownloadUrl: string
   productName: string
+  networkPolicy?: TransferNetworkPolicy
   legacyBinding?: { schemaVersion: 1; bundleName: string; versionCode: number; sourceHapSHA256: string; apiBaseSHA256: string; apiOrigin?: string } | null
+}
+
+// Address hints come only from the existing packaged private resource. They
+// are not another persisted setting and never follow a user to a different NAS.
+export function deploymentNetworkPolicy(raw: unknown, apiOrigin: string): TransferNetworkPolicy | undefined {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !('networkPolicy' in raw)) return undefined
+  const seed = raw as DeploymentConfig
+  if (typeof seed.apiOrigin !== 'string') throw new Error('DEPLOYMENT_CONFIG_INVALID')
+  const bound = normalizeServiceUrl(seed.apiOrigin)
+  if (bound !== normalizeServiceUrl(apiOrigin)) return undefined
+  if (!bound.startsWith('https://')) throw new Error('NETWORK_POLICY_HTTPS')
+  return normalizeTransferNetworkPolicy(seed.networkPolicy as TransferNetworkPolicy)
 }
 
 // Read only from the signed application's packaged resource. Never fetch a
@@ -41,15 +54,16 @@ export async function applyDeploymentConfig(raw: unknown, storage: Storage = loc
     !!raw.legacyBinding && typeof raw.legacyBinding === 'object' && 'apiOrigin' in raw.legacyBinding
   if (current && !upgradeRequested) return current
   if (!raw || typeof raw !== 'object' || Array.isArray(raw) ||
-    Object.keys(raw).some(key => !['apiOrigin', 'hapDownloadUrl', 'productName', 'legacyBinding'].includes(key))) throw new Error('DEPLOYMENT_CONFIG_INVALID')
+    Object.keys(raw).some(key => !['apiOrigin', 'hapDownloadUrl', 'productName', 'legacyBinding', 'networkPolicy'].includes(key))) throw new Error('DEPLOYMENT_CONFIG_INVALID')
   const value = raw as DeploymentConfig
   if (typeof value.apiOrigin !== 'string' || typeof value.hapDownloadUrl !== 'string' || typeof value.productName !== 'string' ||
     !value.productName || value.productName.length > 128) throw new Error('DEPLOYMENT_CONFIG_INVALID')
   if (!value.apiOrigin) {
-    if (value.hapDownloadUrl || value.legacyBinding) throw new Error('DEPLOYMENT_CONFIG_INVALID')
+    if (value.hapDownloadUrl || value.legacyBinding || value.networkPolicy !== undefined) throw new Error('DEPLOYMENT_CONFIG_INVALID')
     return null // Public unsigned template; Windows must fill it before signing.
   }
   const apiOrigin = normalizeServiceUrl(value.apiOrigin)
+  deploymentNetworkPolicy(raw, apiOrigin)
   const download = value.hapDownloadUrl ? normalizeServiceUrl(value.hapDownloadUrl, false) : ''
   let legacy: LegacyServiceBinding | undefined
   if (value.legacyBinding != null) {

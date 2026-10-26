@@ -1,11 +1,13 @@
 // Execute the actual ArkTS implementation with API boundary adapters, real
 // filesystem and HTTP. Child termination is real process death; not ArkWeb/OS.
 const fs=require('node:fs'),path=require('node:path'),os=require('node:os'),http=require('node:http'),crypto=require('node:crypto'),vm=require('node:vm'),assert=require('node:assert/strict'),{spawn}=require('node:child_process')
-const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
+const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_TYPESCRIPT||path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
+const networkPolicyTest=process.env.HARMONY_NETWORK_POLICY_TEST==='1'
+const networkPolicy={version:1,lan_addresses:['192.0.2.10','2001:db8::10']}
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex')
 if(process.argv[2]==='worker') worker().catch(e=>{console.log(JSON.stringify({error:e.message}));process.exitCode=2});else main().catch(e=>{console.error(e);process.exitCode=1})
 async function worker(){
- const [dir,origin,action,handle='',token='alice',bot='bot-a',scope='session-a']=process.argv.slice(3),positions=new Map();let maxRead=0,maxWrite=0,maxBody=0,samples=0,onPatch,onJournalSave,onWrite,onRead
+ const [dir,origin,action,handle='',token='alice',bot='bot-a',scope='session-a']=process.argv.slice(3),positions=new Map();let maxRead=0,maxWrite=0,maxBody=0,samples=0,networkHints=[],onPatch,onJournalSave,onWrite,onRead
  const io={OpenMode:{READ_ONLY:fs.constants.O_RDONLY,WRITE_ONLY:fs.constants.O_WRONLY,READ_WRITE:fs.constants.O_RDWR,CREATE:fs.constants.O_CREAT,EXCL:fs.constants.O_EXCL,TRUNC:fs.constants.O_TRUNC,NOFOLLOW:fs.constants.O_NOFOLLOW},WhenceType:{SEEK_SET:0},
   accessSync:p=>fs.existsSync(p),mkdirSync:p=>fs.mkdirSync(p),openSync:(p,m)=>({fd:fs.openSync(p,m)}),closeSync:f=>{let fd=typeof f==='number'?f:f.fd;positions.delete(fd);fs.closeSync(fd)},
   statSync:p=>typeof p==='number'?fs.fstatSync(p):fs.statSync(p),lseek:(fd,at)=>positions.set(fd,at),readTextSync:p=>fs.readFileSync(p,'utf8'),listFileSync:p=>fs.readdirSync(p),renameSync:(a,b)=>{fs.renameSync(a,b);const hook=onJournalSave;onJournalSave=undefined;hook?.(b)},unlinkSync:p=>fs.unlinkSync(p),fsyncSync:fd=>fs.fsyncSync(fd),
@@ -18,14 +20,19 @@ async function worker(){
  const rcp={Request,MultipartForm,createSession:()=>{let active,stream;return{cancel:()=>active?.destroy(Error('cancel')),close:()=>{active?.destroy();stream?.destroy()},fetch:r=>new Promise((resolve,reject)=>{
   assert.equal(r.configuration.transfer.autoRedirect,false)
   let content=r.content,headers={...r.headers},tail
+  let wireURL=r.url;
+  if(networkPolicyTest){const u=new URL(r.url),ip=r.configuration.dns?.dnsRules[0]?.ipAddresses[0];assert.equal(u.protocol,'https:');assert.equal(u.hostname,'nas.example');assert.equal(r.configuration.security.remoteValidation,'system');assert.equal(r.configuration.dns.dnsRules[0].host,u.hostname);assert.equal(r.configuration.dns.dnsRules[0].port,Number(u.port));networkHints.push([r.method,ip]);if(r.method==='GET'&&u.pathname==='/api/users/me'&&ip!=='2001:db8::20'){if(ip==='192.0.2.10'){const stale=Buffer.from('stale partial metadata');r.destination(stale.buffer.slice(stale.byteOffset,stale.byteOffset+stale.length))}return reject(Object.assign(Error('synthetic metadata path loss'),{code:ip==='192.0.2.10'?1007900056:1007900007}))}assert.equal(ip,'2001:db8::20');wireURL='http://127.0.0.1:'+u.port+u.pathname;headers.host=u.host}
   if(content instanceof MultipartForm){let p=content.fields.file;headers['content-type']='multipart/form-data; boundary=bounded';content=Buffer.from('--bounded\r\nContent-Disposition: form-data; name="file"; filename="file.bin"\r\nContent-Type: '+p.contentType+'\r\n\r\n');tail=Buffer.from('\r\n--bounded--\r\n');headers['content-length']=content.length+fs.statSync(p.contentOrPath).size+tail.length;stream=fs.createReadStream(p.contentOrPath,{highWaterMark:262144})}
   else if(content!==undefined){content=typeof content==='string'?Buffer.from(content):Buffer.from(content);headers['content-length']=content.length;maxBody=Math.max(maxBody,content.length)}
   if(r.method==='PATCH'&&onPatch){const once=onPatch;onPatch=undefined;once()}
-  active=http.request(r.url,{method:r.method,headers},res=>{res.on('data',b=>{try{r.destination(b.buffer.slice(b.byteOffset,b.byteOffset+b.length))}catch(e){active.destroy(e)}});res.on('error',reject);res.on('end',()=>resolve({statusCode:res.statusCode,headers:res.headers}))});active.on('error',reject)
+  active=http.request(wireURL,{method:r.method,headers},res=>{res.on('data',b=>{try{r.destination(b.buffer.slice(b.byteOffset,b.byteOffset+b.length))}catch(e){active.destroy(e)}});res.on('error',reject);res.on('end',()=>resolve({statusCode:res.statusCode,headers:res.headers}))});active.on('error',reject)
   if(stream){active.write(content);stream.pipe(active,{end:false});stream.on('end',()=>active.end(tail));stream.on('error',reject)}else active.end(content)
  })}}}
- const modules={'@kit.CoreFileKit':{fileIo:io,fileUri:{FileUri:class{constructor(uri){this.name=path.basename(uri)}}}},'@kit.CryptoArchitectureKit':kitCrypto,'@kit.ArkTS':{util:{TextEncoder:class{encodeInto(s){return new TextEncoder().encode(s)}},TextDecoder:class{decodeToString(b){return new TextDecoder().decode(b)}},Base64Helper:class{decodeSync(s){return new Uint8Array(Buffer.from(s,'base64'))}},generateRandomUUID:()=>crypto.randomUUID().replaceAll('-','')}},'@kit.RemoteCommunicationKit':{rcp},'@kit.ArkData':{uniformTypeDescriptor:{}},'./MemohClientConfig':{MEMOH_ORIGIN:origin},'./NativePhotoSelection':{NativePhotoSelection:class{}}}
- function load(name){const module={exports:{}},code=fs.readFileSync(path.join(root,'mobile/harmony/app/entry/src/main/ets/common/'+name+'.ets'),'utf8');vm.runInNewContext(ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{module,exports:module.exports,require:n=>{assert.ok(n in modules,n);return modules[n]},ArrayBuffer,Uint8Array,Map,Set,Promise,Error,Date,JSON,Math,Number,String,setTimeout});return module.exports}
+ const modules={'@kit.CoreFileKit':{fileIo:io,fileUri:{FileUri:class{constructor(uri){this.name=path.basename(uri)}}}},'@kit.CryptoArchitectureKit':kitCrypto,'@kit.ArkTS':{url:{URL:{parseURL:value=>new URL(value)}},util:{TextEncoder:class{encodeInto(s){return new TextEncoder().encode(s)}},TextDecoder:class{decodeToString(b){return new TextDecoder().decode(b)}},Base64Helper:class{decodeSync(s){return new Uint8Array(Buffer.from(s,'base64'))}},generateRandomUUID:()=>crypto.randomUUID().replaceAll('-','')}},'@kit.RemoteCommunicationKit':{rcp},'@kit.ArkData':{uniformTypeDescriptor:{}},'./MemohClientConfig':{MEMOH_ORIGIN:origin,MEMOH_NETWORK_POLICY:networkPolicyTest?networkPolicy:undefined},'./NativePhotoSelection':{NativePhotoSelection:class{}}}
+ function load(name){const module={exports:{}},code=fs.readFileSync(path.join(root,'mobile/harmony/app/entry/src/main/ets/common/'+name+'.ets'),'utf8');vm.runInNewContext(ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{module,exports:module.exports,require:n=>{assert.ok(n in modules,n);return modules[n]},ArrayBuffer,Uint8Array,Map,Set,Promise,Error,Date,JSON,Math,Number,String,URL,setTimeout});return module.exports}
+ modules['@kit.NetworkKit']={connection:{getDefaultHttpProxy:async()=>{assert(networkPolicyTest);return{host:''}},getDefaultNet:async()=>{assert(networkPolicyTest);return{getAddressesByName:async host=>{assert.equal(host,'nas.example');return[{family:2,address:'2001:db8::20'}]}}}}};
+ const serviceModule={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,'mobile/memoh/harmony-service-url.ts'),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{exports:serviceModule.exports,require:()=>{throw Error('unexpected validator import')},URL,Error,JSON,Number,Array});modules['./ServiceUrl']=serviceModule.exports;
+ modules['./NativeTransferNetwork']=load('NativeTransferNetwork');
  modules['./NativeMediaFile']=load('NativeMediaFile');const {NativeResumableUpload}=load('NativeResumableUpload'),native=new NativeResumableUpload({filesDir:dir},()=>true)
  const input={operation:'a'.repeat(32),botId:bot,scope,authorization:'Bearer '+token,handle}
  global.gc?.();const baseline=process.memoryUsage(),peak={...baseline},timer=setInterval(()=>{samples++;let m=process.memoryUsage();for(let k in peak)peak[k]=Math.max(peak[k],m[k])},10)
@@ -76,7 +83,7 @@ async function worker(){
   else if(action==='pause'){onPatch=()=>setTimeout(()=>native.pause(input.operation),20);result=await native.upload(input)}
   else if(action==='close'){const promise=native.upload(input);setTimeout(()=>native.close(),80);result=await promise}
   else result=await native.upload(input)
-  console.log(JSON.stringify({result,metrics:{baseline,peak,samples,maxRead,maxWrite,maxBody,pid:process.pid}}))
+  console.log(JSON.stringify({result,metrics:{baseline,peak,samples,maxRead,maxWrite,maxBody,networkHints,pid:process.pid}}))
  }finally{clearInterval(timer);native.close()}
 }
 async function main(){
@@ -138,7 +145,7 @@ async function main(){
   }
   json(res,400,{})
  }catch(e){console.error(e);res.destroy(e)}})
- await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+server.address().port+'/api'
+ await new Promise(r=>server.listen(0,'127.0.0.1',r));const origin=(networkPolicyTest?'https://nas.example:':'http://127.0.0.1:')+server.address().port+'/api'
  async function child(action,handle='',token='alice',bot='bot-a',scope='session-a'){
   return await new Promise((resolve,reject)=>{let out='',err='';const p=spawn(process.execPath,['--expose-gc',__filename,'worker',dir,origin,action,handle,token,bot,scope],{stdio:['ignore','pipe','pipe']});activeChild=p;p.stdout.on('data',c=>out+=c);p.stderr.on('data',c=>err+=c);p.on('error',reject);p.on('close',(code,signal)=>{if(signal==='SIGKILL')return resolve({killed:true});if(!out.trim())return reject(Error(err||'empty worker '+code));try{resolve(JSON.parse(out.trim().split('\n').at(-1)))}catch(e){reject(Error(out+err))}})})
  }
