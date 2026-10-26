@@ -1,0 +1,3 @@
+ok  	github.com/felinics/memoh/internal/agenvo	20.433s
+ok  	github.com/felinics/memoh/internal/computertask	14.184s
+ok  	github.com/felinics/memoh/internal/nativeherdr	2.539s

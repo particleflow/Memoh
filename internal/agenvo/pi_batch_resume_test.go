@@ -104,7 +104,7 @@ func (f *batchResumeRelayFixture) call(_ context.Context, _ Scope, target Target
 		expected := f.progress
 		expected.WorkspaceID, expected.PaneID, expected.TerminalID = "w-synthetic", "job", "job-terminal"
 		script, err := batchScript(expected, target, target.WorkDir, "same synthetic task")
-		if err != nil || params["command"] != launchBashScript(script, target.BashPath) {
+		if err != nil || params["command"] != launchBatchScript(script, target) {
 			f.t.Fatal("resume changed the original batch script/identity")
 		}
 		body = map[string]any{"type": "ok"}

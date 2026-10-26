@@ -1,0 +1,14 @@
+=== RUN   TestNativeProducerComplexTaskPreflight
+=== RUN   TestNativeProducerComplexTaskPreflight/3046-bytes
+    native_complex_preflight_test.go:33: native complex task rejected before operation claim: task_bytes=3046: operation not supported by Agenvo target
+=== RUN   TestNativeProducerComplexTaskPreflight/3435-bytes
+    native_complex_preflight_test.go:33: native complex task rejected before operation claim: task_bytes=3435: operation not supported by Agenvo target
+=== RUN   TestNativeProducerComplexTaskPreflight/3435-utf8-bytes
+    native_complex_preflight_test.go:33: native complex task rejected before operation claim: task_bytes=3435: operation not supported by Agenvo target
+--- FAIL: TestNativeProducerComplexTaskPreflight (0.01s)
+    --- FAIL: TestNativeProducerComplexTaskPreflight/3046-bytes (0.01s)
+    --- FAIL: TestNativeProducerComplexTaskPreflight/3435-bytes (0.00s)
+    --- FAIL: TestNativeProducerComplexTaskPreflight/3435-utf8-bytes (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/agenvo	0.022s
+FAIL

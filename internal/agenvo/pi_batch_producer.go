@@ -106,7 +106,7 @@ fi
 	result := script + closures.String() + hook
 	// Leave headroom below Windows CreateProcessW's 32767-character bound.
 	// The connector's existing larger command cap alone is insufficient here.
-	if len(launchBashScript(result, target.BashPath)) > 30000 {
+	if len(launchBatchScript(result, target)) > 30000 {
 		return "", ErrUnsupported
 	}
 	return result, nil

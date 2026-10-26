@@ -27,6 +27,13 @@ func TestNativeCompletionRegistersWithoutLegacyPlugin(t *testing.T) {
 	exerciseBatchProducer(t, true, true)
 }
 
+func TestNativePackedLauncherPreservesProducerHandoff(t *testing.T) {
+	if os.Getenv("MEMOH_TEST_PWSH") == "" {
+		t.Skip("set MEMOH_TEST_PWSH to an isolated PowerShell executable")
+	}
+	exerciseBatchProducer(t, true, true, true)
+}
+
 func exerciseBatchProducer(t *testing.T, multiple bool, native ...bool) {
 	t.Helper()
 	dir := t.TempDir()
@@ -58,11 +65,21 @@ func exerciseBatchProducer(t *testing.T, multiple bool, native ...bool) {
 		target.NativeRuntimeID = uuid.NewString()
 		target.Producer = ProducerLocator{ProgramPath: `C:\Synthetic Owner's Bin\producer.exe`, ConfigDir: `C:\Native Owner's Config\$(touch MUST_NOT_EXIST)`, StateDir: `C:\Native State\queue`}
 	}
-	script := batchFixtureScript(t, p, target, target.WorkDir, "create the declared result")
+	task := "create the declared result"
+	if len(native) > 1 && native[1] {
+		task += strings.Repeat("雪", 1136) + "x" // 3,435 synthetic UTF-8 bytes in total.
+	}
+	script := batchFixtureScript(t, p, target, target.WorkDir, task)
 	//nolint:gosec // Fixed wrapper and isolated synthetic binaries only.
 	command := exec.CommandContext(t.Context(), "/bin/bash", "--noprofile", "--norc", "-p", "-c", script)
 	command.Dir = dir
 	command.Env = []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir, "SYNTH_PRODUCER_WINDOWS=" + target.Producer.ProgramPath, "HERDR_PLUGIN_CONFIG_DIR=retired-config", "HERDR_PLUGIN_STATE_DIR=retired-state"}
+	if len(native) > 1 && native[1] {
+		launcher := target
+		launcher.BashPath = "/bin/bash"                                                                                                                                       // Isolated Linux test peer, not a product profile.
+		command = exec.CommandContext(t.Context(), os.Getenv("MEMOH_TEST_PWSH"), "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", launchBatchScript(script, launcher)) //nolint:gosec // Explicit isolated PowerShell and generated script only.
+		command.Dir, command.Env = dir, []string{"PATH=" + bin + ":/usr/bin:/bin", "SYNTH_ROOT=" + dir, "SYNTH_PRODUCER_WINDOWS=" + target.Producer.ProgramPath, "XDG_CONFIG_HOME=" + dir, "XDG_CACHE_HOME=" + dir, "POWERSHELL_TELEMETRY_OPTOUT=1", "POWERSHELL_UPDATECHECK=Off"}
+	}
 	out, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("wrapper: %v %s", err, out)

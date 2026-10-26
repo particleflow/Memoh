@@ -178,7 +178,7 @@ func (s *Service) ContinueBatch(ctx context.Context, scope Scope, task, workDir 
 	if err != nil {
 		return p, err
 	}
-	command := launchBashScript(script, target.BashPath)
+	command := launchBatchScript(script, target)
 	if len(command) > 48000 {
 		return p, ErrUnsupported
 	}
