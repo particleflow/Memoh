@@ -1564,6 +1564,78 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/activity": {
+            "get": {
+                "description": "Read-only existing persisted states, independent of the open conversation. Ordinary session/ancestor permissions and current computer target grants are rechecked. Unknown and terminal entries are not active. Names and original session references only; no transcripts, dispatch or device calls. Continue while next_cursor is nonempty, including an empty filtered page. Account authentication required.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "List readable active Bot runs, Agent runs and computer tasks",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Page size (1-100)",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Opaque continuation scoped to caller and Bot",
+                        "name": "cursor",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/sessiontask.ActivityPage"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/agents": {
             "get": {
                 "description": "List active and disabled non-deleted Agents attached to a bot. Direct-runtime Agents carry the workspace dependency their runtime declares.",
@@ -30762,6 +30834,66 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "item_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "sessiontask.Activity": {
+            "type": "object",
+            "required": [
+                "bot_id",
+                "id",
+                "kind",
+                "name",
+                "session_id",
+                "state"
+            ],
+            "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string",
+                    "enum": [
+                        "bot",
+                        "agent",
+                        "task"
+                    ]
+                },
+                "name": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string",
+                    "enum": [
+                        "accepted",
+                        "submitted",
+                        "running",
+                        "waiting_decision",
+                        "finishing"
+                    ]
+                }
+            }
+        },
+        "sessiontask.ActivityPage": {
+            "type": "object",
+            "required": [
+                "items"
+            ],
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/sessiontask.Activity"
+                    }
+                },
+                "next_cursor": {
                     "type": "string"
                 }
             }

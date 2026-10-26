@@ -134,7 +134,7 @@ func (s *Service) decodeCursor(raw, bot, user, parent string) (cursor, error) {
 		return c, ErrCursor
 	}
 	data, err = s.cursorCipher.Open(nil, data[:s.cursorCipher.NonceSize()], data[s.cursorCipher.NonceSize():], nil)
-	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || (c.Before.Type != Subagent && c.Before.Type != ComputerOperation) {
+	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || (c.Before.Type != Subagent && c.Before.Type != ComputerOperation && (parent != activityCursorScope || c.Before.Type != sessionRun)) {
 		return c, ErrCursor
 	}
 	if _, err := uuid.Parse(c.Before.ID); err != nil {

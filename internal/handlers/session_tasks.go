@@ -35,12 +35,13 @@ func NewSessionTaskHandler(service *sessiontask.Service, bots *bots.Service, acc
 }
 
 func (h *SessionTaskHandler) Register(e *echo.Echo) {
+	e.GET("/bots/:bot_id/activity", h.Activity)
 	// Global JWT middleware can reject before a route handler runs. Apply the
 	// task response policy before routing/auth, including namespace 404/405s.
 	e.Pre(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			parts := strings.SplitN(echo.GetPath(c.Request()), "/", 7)
-			if len(parts) >= 6 && parts[0] == "" && parts[1] == "bots" && parts[2] != "" && parts[3] == "sessions" && parts[4] != "" && parts[5] == "tasks" {
+			if len(parts) >= 4 && parts[0] == "" && parts[1] == "bots" && parts[2] != "" && (parts[3] == "activity" || (len(parts) >= 6 && parts[3] == "sessions" && parts[4] != "" && parts[5] == "tasks")) {
 				c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
 			}
 			return next(c)

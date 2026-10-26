@@ -4498,6 +4498,20 @@ export type SessionruntimeSteerPendingRef = {
     item_id?: string;
 };
 
+export type SessiontaskActivity = {
+    bot_id: string;
+    id: string;
+    kind: 'bot' | 'agent' | 'task';
+    name: string;
+    session_id: string;
+    state: 'accepted' | 'submitted' | 'running' | 'waiting_decision' | 'finishing';
+};
+
+export type SessiontaskActivityPage = {
+    items: Array<SessiontaskActivity>;
+    next_cursor?: string;
+};
+
 export type SessiontaskPage = {
     items: Array<SessiontaskTask>;
     next_cursor?: string;
@@ -6211,6 +6225,61 @@ export type PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponses = {
 };
 
 export type PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponse = PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponses[keyof PatchBotsByBotIdAcpRuntimesByRuntimeIdReasoningResponses];
+
+export type GetBotsByBotIdActivityData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: {
+        /**
+         * Page size (1-100)
+         */
+        limit?: number;
+        /**
+         * Opaque continuation scoped to caller and Bot
+         */
+        cursor?: string;
+    };
+    url: '/bots/{bot_id}/activity';
+};
+
+export type GetBotsByBotIdActivityErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdActivityError = GetBotsByBotIdActivityErrors[keyof GetBotsByBotIdActivityErrors];
+
+export type GetBotsByBotIdActivityResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskActivityPage;
+};
+
+export type GetBotsByBotIdActivityResponse = GetBotsByBotIdActivityResponses[keyof GetBotsByBotIdActivityResponses];
 
 export type GetBotsByBotIdAgentsData = {
     body?: never;

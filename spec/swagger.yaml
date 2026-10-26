@@ -7711,6 +7711,49 @@ definitions:
       item_id:
         type: string
     type: object
+  sessiontask.Activity:
+    properties:
+      bot_id:
+        type: string
+      id:
+        type: string
+      kind:
+        enum:
+        - bot
+        - agent
+        - task
+        type: string
+      name:
+        type: string
+      session_id:
+        type: string
+      state:
+        enum:
+        - accepted
+        - submitted
+        - running
+        - waiting_decision
+        - finishing
+        type: string
+    required:
+    - bot_id
+    - id
+    - kind
+    - name
+    - session_id
+    - state
+    type: object
+  sessiontask.ActivityPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/sessiontask.Activity'
+        type: array
+      next_cursor:
+        type: string
+    required:
+    - items
+    type: object
   sessiontask.Page:
     properties:
       items:
@@ -9453,6 +9496,59 @@ paths:
       summary: Set an ACP runtime's reasoning effort
       tags:
       - acp
+  /bots/{bot_id}/activity:
+    get:
+      description: Read-only existing persisted states, independent of the open conversation.
+        Ordinary session/ancestor permissions and current computer target grants are
+        rechecked. Unknown and terminal entries are not active. Names and original
+        session references only; no transcripts, dispatch or device calls. Continue
+        while next_cursor is nonempty, including an empty filtered page. Account authentication
+        required.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - default: 100
+        description: Page size (1-100)
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque continuation scoped to caller and Bot
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.ActivityPage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List readable active Bot runs, Agent runs and computer tasks
+      tags:
+      - sessions
   /bots/{bot_id}/agents:
     get:
       description: List active and disabled non-deleted Agents attached to a bot.

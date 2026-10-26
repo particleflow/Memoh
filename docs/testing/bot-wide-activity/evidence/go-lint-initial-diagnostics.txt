@@ -1,0 +1,12 @@
+internal/handlers/bot_activity_test.go:27:7: unused-receiver: method receiver 'f' is not referenced in method's body, consider removing or renaming it as _ (revive)
+func (f activityHTTPFixture) ReadSubagentRun(context.Context, string, string) (dbstore.SubagentRun, error) {
+      ^
+internal/sessiontask/activity_test.go:84:12: QF1001: could apply De Morgan's law (staticcheck)
+				return !(scenario == "session" && s.ID == f.grandchild) && !(scenario == "ancestor" && s.ID == f.root)
+				       ^
+internal/sessiontask/service.go:137:290: QF1001: could apply De Morgan's law (staticcheck)
+	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || (c.Before.Type != Subagent && c.Before.Type != ComputerOperation && !(parent == activityCursorScope && c.Before.Type == sessionRun)) {
+	                                                                                                                                                                                                                                                                                                ^
+internal/handlers/bot_activity_test.go:48:30: "GET" can be replaced by http.MethodGet (usestdlibvars)
+		req := httptest.NewRequest("GET", path, nil)
+		                           ^

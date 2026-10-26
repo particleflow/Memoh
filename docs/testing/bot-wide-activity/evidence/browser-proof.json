@@ -1,0 +1,12 @@
+{
+  "fixtureActivityLists": true,
+  "realExistingServerPG": true,
+  "models": 0,
+  "writes": 0,
+  "fileTreeReads": 0,
+  "deviceReads": 0,
+  "pageErrors": [],
+  "originalSessionNavigation": true,
+  "pcAccountListFailure": 2,
+  "rowCount": 3
+}

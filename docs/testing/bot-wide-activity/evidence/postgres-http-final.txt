@@ -1,0 +1,4 @@
+=== RUN   TestBotActivityPostgresUnopenedRunsScopeAndReadOnly
+--- PASS: TestBotActivityPostgresUnopenedRunsScopeAndReadOnly (2.44s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	2.463s

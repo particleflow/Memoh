@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, shallowRef } from 'vue'
+import { computed, nextTick, onScopeDispose, ref, shallowRef, watch } from 'vue'
 import { useDocumentVisibility, useLocalStorage, until } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { Clock3, PauseCircle } from 'lucide-vue-next'
 import { Spinner, toast } from '@felinic/ui'
-import type { BotdelegationView } from '@memohai/sdk'
+import { getBotsByBotIdSessionsBySessionId, type BotdelegationView } from '@memohai/sdk'
 import { useChatStore } from '@/store/chat-list'
 import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 import { isRuntimeRunActive } from '@/store/chat/runtime-projection'
 import { sessionBotRunStatus } from '@/pages/home/composables/session-bot-run'
 import { useSessionActivity } from '@/pages/home/composables/useSessionActivity'
+import { useBotActivity } from '@/pages/home/composables/useBotActivity'
 import { useBotDelegationHistory } from '@/pages/home/composables/useBotDelegationHistory'
 import { apiErrorStatus, resolveApiErrorMessage } from '@/utils/api-error'
 import SidebarPanelHeader from './panel-header.vue'
@@ -24,7 +25,10 @@ const visible = computed(() => props.visible && documentVisibility.value === 'vi
 const scope = computed(() => chat.currentBotId && chat.sessionId && token.value ? {
   bot: chat.currentBotId, session: chat.sessionId, selection: chat.workspaceTargetSelectionFor().targetId, identity: token.value,
 } : null)
-const reader = useSessionActivity(scope, visible)
+const activity = useBotActivity(computed(() => chat.bots.flatMap(bot => bot.id ? [bot.id] : [])), token, visible)
+// Older servers do not have the aggregate read. Keep their existing scoped
+// projection; a denied aggregate must not be replaced by cached success.
+const reader = useSessionActivity(scope, computed(() => visible.value && activity.unsupported.value))
 const selectedDelegation = shallowRef<BotdelegationView>()
 const navigationReader = { detail: selectedDelegation, selected: computed(() => selectedDelegation.value?.delegation_id), error: reader.delegationError, loading: ref(false) }
 const history = useBotDelegationHistory(scope, visible, navigationReader, async target => {
@@ -35,11 +39,22 @@ const history = useBotDelegationHistory(scope, visible, navigationReader, async 
   if (token.value !== target.identity || chat.currentBotId !== target.bot) return
   tabs.openSessionChat({ sessionId: target.session, title: target.title }); tabs.closeMobileNav()
 }, false)
-interface Activity { key: string; title: string; state: string; session?: string; delegation?: BotdelegationView }
+interface Activity { key: string; title: string; state: string; session?: string; bot?: string; delegation?: BotdelegationView }
 const activeStates = new Set(['accepted', 'submitted', 'running', 'waiting_decision', 'finishing'])
 const rows = computed(() => {
   if (!visible.value || !token.value || [reader.taskError.value, reader.delegationError.value].some(error => [401, 403].includes(apiErrorStatus(error) ?? 0))) return []
   const result = new Map<string, Activity>(), runs = new Set<string>()
+  if (!activity.unsupported.value) {
+    for (const item of activity.items.value) {
+      if (!activeStates.has(item.state)) continue
+      const bot = chat.bots.find(bot => bot.id === item.bot_id)
+      const title = item.name || (item.kind === 'bot'
+        ? bot?.display_name || bot?.name || t('chat.tasks.title')
+        : t(`chat.tasks.types.${item.kind === 'agent' ? 'subagent' : 'computer_operation'}`))
+      result.set(item.kind + ':' + item.id, { key: item.kind + ':' + item.id, title, state: item.state, session: item.session_id, bot: item.bot_id })
+    }
+    return [...result.values()]
+  }
   for (const session of chat.knownSessions) {
     if (session.bot_id !== chat.currentBotId) continue
     const observation = chat.runtimeObservationFor(session.bot_id, session.id), run = observation?.synchronized ? observation.run : null
@@ -64,8 +79,34 @@ const rows = computed(() => {
   }
   return [...result.values()]
 })
+const navigating = ref(false)
+let navigationEpoch = 0, navigationController: AbortController | undefined
+function cancelNavigation() { navigationEpoch++; navigationController?.abort(); navigating.value = false }
+watch([token, visible, scope], cancelNavigation, { flush: 'sync' })
+watch(rows, value => { if (!value.some(row => row.key === pendingKey)) cancelNavigation() })
+let pendingKey = ''
+onScopeDispose(cancelNavigation)
 async function open(row: Activity) {
   if (!row.session) return
+  if (row.bot) {
+    if (navigating.value) return
+    const epoch = navigationEpoch, identity = token.value, control = new AbortController()
+    navigationController = control; navigating.value = true; pendingKey = row.key
+    const timeout = setTimeout(() => control.abort(), 15000)
+    try {
+      const { data: session } = await getBotsByBotIdSessionsBySessionId({ path: { bot_id: row.bot, session_id: row.session }, signal: control.signal, cache: 'no-store', throwOnError: true })
+      if (epoch !== navigationEpoch || !visible.value || token.value !== identity) return
+      if (session.id !== row.session || session.bot_id !== row.bot) throw new Error('Activity session changed')
+      await chat.selectBot(row.bot)
+      if (token.value !== identity || chat.currentBotId !== row.bot) return
+      await router.push({ name: 'bot', params: { botName: row.bot } })
+      await until(() => tabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
+      if (token.value !== identity || chat.currentBotId !== row.bot) return
+      tabs.openSessionChat({ sessionId: session.id, title: session.title }); tabs.closeMobileNav()
+    } catch (error) { if (epoch === navigationEpoch && !control.signal.aborted) toast.error(resolveApiErrorMessage(error, t('chat.delegations.historyUnavailable'))) }
+    finally { clearTimeout(timeout); if (epoch === navigationEpoch) navigating.value = false }
+    return
+  }
   if (row.delegation) {
     if (!scope.value) return
     selectedDelegation.value = row.delegation
@@ -92,7 +133,7 @@ async function open(row: Activity) {
     <SidebarNavButton
       v-for="row in rows"
       :key="row.key"
-      :disabled="!row.session || history.pending"
+      :disabled="!row.session || history.pending || navigating"
       @click="open(row)"
     >
       <PauseCircle
