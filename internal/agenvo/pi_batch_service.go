@@ -151,6 +151,7 @@ func (s *Service) ObserveBatchWithReader(ctx context.Context, scope Scope, p Bat
 	if !p.valid() || p.PaneID == "" || p.TerminalID == "" {
 		return nil, ErrUnknown
 	}
+	var snapshotErr error
 	if reader == nil {
 		c, target, err := s.Client(ctx, scope)
 		if err != nil {
@@ -161,15 +162,20 @@ func (s *Service) ObserveBatchWithReader(ctx context.Context, scope Scope, p Bat
 			return nil, err
 		}
 		receipt, err := parseBatchReceipt(text, p)
-		if err != nil || receipt != nil {
+		if receipt != nil || err != nil && !errors.Is(err, ErrUnknown) {
 			return receipt, err
 		}
+		snapshotErr = err
 	}
-	// A terminal snapshot may have lost the frame. Read the immutable receipt
+	// A terminal snapshot can lose or corrupt a frame. Only the original,
+	// fully correlated immutable receipt can resolve that uncertainty. Read it
 	// through the separate control pane; never type a status query into Pi.
 	raw, err := s.readBatchFileWithReader(ctx, scope, p, reader, "receipt.json", 0, batchReceiptBytes)
-	if err != nil || len(raw) == 0 {
+	if err != nil {
 		return nil, err
+	}
+	if len(raw) == 0 {
+		return nil, snapshotErr // An empty file cannot clear a corrupt frame.
 	}
 	var persisted BatchReceipt
 	if len(raw) >= batchReceiptBytes || json.Unmarshal(raw, &persisted) != nil || persisted.Validate(p) != nil {

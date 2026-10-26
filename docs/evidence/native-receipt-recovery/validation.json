@@ -1,0 +1,106 @@
+{
+  "base": "50d69c7b77be0dda884e2708db6167a1d561bba0",
+  "checks": [
+    {
+      "name": "receipt-tests",
+      "argv": [
+        "go",
+        "test",
+        "-json",
+        "./internal/agenvo",
+        "./internal/computertask",
+        "-run",
+        "^(TestNativeReceiptRecovery.*|TestStandardMCPPiBatch.*|TestReadOnlyRecovery.*|TestBatch.*|TestNativeRuntimeAcceptedCLIRequiresMatchingPiCompletion|TestNativeRuntimeTaskRechecksSelectedPCPermissionAndFingerprint|TestNativeRuntimeBusinessCompletionDoesNotBypassProducerDelivery)$",
+        "-count=1",
+        "-timeout=3m"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "vet",
+      "argv": [
+        "go",
+        "vet",
+        "./internal/agenvo",
+        "./internal/computertask"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "lint",
+      "argv": [
+        "golangci-lint",
+        "run",
+        "./internal/agenvo/...",
+        "./internal/computertask/..."
+      ],
+      "exit_code": 0
+    }
+  ],
+  "test_events": {
+    "pass": 151,
+    "fail": 0,
+    "skip": 1
+  },
+  "skipped": [
+    "TestBatchReaderPostgresPersistenceCAS"
+  ],
+  "new_receipt_recovery_tests": [
+    {
+      "test": "TestNativeReceiptRecoveryUsesOriginalFileAfterMalformedTerminalFrame",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/missing-file",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/corrupt-file",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-attempt",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-generation",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-request",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-session",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-workspace",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-pane",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-terminal",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/revoked",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/revoked-during-file-read",
+      "status": "pass"
+    },
+    {
+      "test": "TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile",
+      "status": "pass"
+    }
+  ],
+  "production_requests": 0,
+  "real_model_requests": 0,
+  "field_files_read": 0,
+  "agent_core_changed": false
+}

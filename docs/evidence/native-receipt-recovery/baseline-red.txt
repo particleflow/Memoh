@@ -1,0 +1,24 @@
+=== RUN   TestNativeReceiptRecoveryUsesOriginalFileAfterMalformedTerminalFrame
+    native_receipt_recovery_test.go:32: valid immutable receipt was not checked: state=submitted control_reads=0: agenvo operation outcome is unknown; do not repeat the operation
+--- FAIL: TestNativeReceiptRecoveryUsesOriginalFileAfterMalformedTerminalFrame (0.02s)
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/corrupt-file
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-attempt
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-generation
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-request
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-session
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-workspace
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-terminal
+=== RUN   TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/revoked
+--- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile (0.09s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/corrupt-file (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-attempt (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-generation (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-request (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-session (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-workspace (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/other-terminal (0.01s)
+    --- PASS: TestNativeReceiptRecoveryDoesNotTrustMalformedTerminalOrForeignFile/revoked (0.01s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/computertask	0.122s
+FAIL
