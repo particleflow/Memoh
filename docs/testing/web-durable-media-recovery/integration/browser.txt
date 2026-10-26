@@ -1,0 +1,1 @@
+PASS current Vite + existing isolated Server/PG: real composer file selection, narrow zh/dark, new media/storage modules and SHA256, zero media/business writes, zero page errors
