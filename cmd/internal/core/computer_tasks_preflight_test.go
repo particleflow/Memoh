@@ -88,7 +88,7 @@ func TestComputerTaskPreflightFailureIsNotConversationDenial(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			const bot = "11111111-1111-4111-8111-111111111111"
 			const owner = "33333333-3333-4333-8333-333333333333"
-			target := agenvo.Target{ConnectionID: "55555555-5555-4555-8555-555555555555", DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "test", ConfigDir: `C:\Synthetic\Config`}}
+			target := agenvo.Target{ConnectionID: "55555555-5555-4555-8555-555555555555", InstanceID: "synthetic-herdr", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "test", ConfigDir: `C:\Synthetic\Config`}}
 			raw, err := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent}})
 			if err != nil {
 				t.Fatal(err)
