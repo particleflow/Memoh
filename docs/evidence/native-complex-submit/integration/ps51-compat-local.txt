@@ -1,0 +1,28 @@
+=== RUN   TestNativeBatchLauncherWindowsPowerShell
+    native_batch_launcher_test.go:21: Windows PowerShell 5.1 acceptance runs in the native Windows job
+--- SKIP: TestNativeBatchLauncherWindowsPowerShell (0.00s)
+=== RUN   TestNativeBatchLauncherRoundTripAndLegacyCompatibility
+--- PASS: TestNativeBatchLauncherRoundTripAndLegacyCompatibility (0.00s)
+=== RUN   TestNativeBatchLauncherPowerShellPreservesBytesBeforeExecution
+    native_batch_launcher_test.go:73: set MEMOH_TEST_PWSH to an isolated PowerShell executable
+--- SKIP: TestNativeBatchLauncherPowerShellPreservesBytesBeforeExecution (0.00s)
+=== RUN   TestNativeProducerComplexTaskPreflight
+=== RUN   TestNativeProducerComplexTaskPreflight/3046-bytes
+    native_complex_preflight_test.go:42: task_bytes=3046 old_launch_bytes=31213 native_launch_bytes=15180
+=== RUN   TestNativeProducerComplexTaskPreflight/3435-bytes
+    native_complex_preflight_test.go:42: task_bytes=3435 old_launch_bytes=31901 native_launch_bytes=15180
+=== RUN   TestNativeProducerComplexTaskPreflight/3435-utf8-bytes
+    native_complex_preflight_test.go:42: task_bytes=3435 old_launch_bytes=31901 native_launch_bytes=15180
+=== RUN   TestNativeProducerComplexTaskPreflight/3435-varied-bytes
+    native_complex_preflight_test.go:42: task_bytes=3435 old_launch_bytes=31901 native_launch_bytes=19484
+--- PASS: TestNativeProducerComplexTaskPreflight (0.03s)
+    --- PASS: TestNativeProducerComplexTaskPreflight/3046-bytes (0.01s)
+    --- PASS: TestNativeProducerComplexTaskPreflight/3435-bytes (0.01s)
+    --- PASS: TestNativeProducerComplexTaskPreflight/3435-utf8-bytes (0.01s)
+    --- PASS: TestNativeProducerComplexTaskPreflight/3435-varied-bytes (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/agenvo	0.037s
+=== RUN   TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown
+--- PASS: TestNativeComplexProducerSubmitFitsCLIAndPreservesUnknown (0.02s)
+PASS
+ok  	github.com/felinics/memoh/internal/computertask	0.037s

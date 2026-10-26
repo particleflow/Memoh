@@ -225,11 +225,10 @@ const nativeBatchLaunch = `& {
     $p.StartInfo.Arguments='--noprofile --norc -p';
     $p.StartInfo.UseShellExecute=$false;
     $p.StartInfo.RedirectStandardInput=$true;
-    $p.StartInfo.StandardInputEncoding=[Text.UTF8Encoding]::new($false);
     try {
       [void]$p.Start();
       try { $p.StandardInput.BaseStream.Write($b,0,$b.Length) }
-      finally { $p.StandardInput.Close() };
+      finally { $p.StandardInput.BaseStream.Close() };
       $p.WaitForExit()
     } finally { $p.Dispose() }
   }
