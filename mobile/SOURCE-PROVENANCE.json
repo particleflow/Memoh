@@ -562,7 +562,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "a9d3b596a03a6a37ce5c1c7589f2d1b44141655e5cd0ad307ff766d3472fa950",
+      "sha256": "0a5be59c265472b5c0c365005f93b5fd62a6d09a432c13304984106ac81a68ca",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -577,7 +577,8 @@
         "Increment to 1.0.12 / 1000012 for the CI-passed 2b0c281 product tree and released shared 52609f7. Version-only preparation; preserve identity, permissions, HTTPS legacy binding, native transfer inputs and empty private configuration slot.",
         "Advance the existing app version to 1.0.13/1000013 for the exact Back+microphone bugfix candidate; bundle, permissions and deployment configuration unchanged.",
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
-        "Advance to 1.0.15 for the confirmed monitor/management entry regression; preserve application identity, permissions and stored configuration."
+        "Advance to 1.0.15 for the confirmed monitor/management entry regression; preserve application identity, permissions and stored configuration.",
+        "Advance to 1.0.16 for the approved minimal unified activity UI and hidden-panel mount change; no image probe, permissions, identity or private-config change."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
