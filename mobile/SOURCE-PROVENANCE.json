@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "dc57d610fa356913a42025e785211564e64a131923e8d8814d24e50a2e380b4e",
+      "sha256": "4d658e90ea5c98791183ae315323a8bbabf9f9ce321a143acd2cac4b00383198",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -41,7 +41,8 @@
         "Pin unified cbcee15 parent Bot run/tool observation and terminal image recovery, retaining all 43 phone adapters and current native transfer recovery matrix. SDK/UI dependency unchanged. Source-only sync; no HAP build.",
         "Pin released shared 52609f7 original-operation resume UI/SDK, ACK-unknown no-cancel and explicit abort observation. Preserve all 43 phone adapters, 1.0.11 HTTPS migration, four intake routes and original scoped transfer recovery. Source-only; no HAP build.",
         "Source-only pin to released 9bb6fc3: one upstream transcription-provider metadata mapping; SDK, all 43 phone adaptations, 1.0.12 identity/version, HTTPS migration and native attachment recovery unchanged. No HAP build or paid ASR call.",
-        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot."
+        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
+        "Clarify the corrected monitor/management entry boundary; do not remove the only permanent session monitor."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -520,7 +521,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "35a08e94e97b5a9a93aca98979e5be83539b586e5cd610db6d110db3ef39db04",
+      "sha256": "625bd785e9d4c74806b4d958d26887fde5b17f6c34e2958c71ffcc30a2bd4664",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -543,7 +544,8 @@
         "Source-only cbcee15 integration: add the scoped task-list attachment test adapter; no native/product component or SDK changes.",
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
         "Fix released voice feedback viewport positioning and capture-scoped target lifecycle on c530567d; retain original artwork, timing and native protocol.",
-        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot."
+        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
+        "Restore the existing current-session monitor instead of hiding its only permanent entry; expose the existing Bot management route directly in the mobile sidebar. No changes to the shared activity projection or native attachment recovery UI."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -557,7 +559,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "032272a7aecb4fe7f7f84bef3be71643657f8cbdf8303dbb8af5005e5b978f11",
+      "sha256": "a9d3b596a03a6a37ce5c1c7589f2d1b44141655e5cd0ad307ff766d3472fa950",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -571,7 +573,8 @@
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
         "Increment to 1.0.12 / 1000012 for the CI-passed 2b0c281 product tree and released shared 52609f7. Version-only preparation; preserve identity, permissions, HTTPS legacy binding, native transfer inputs and empty private configuration slot.",
         "Advance the existing app version to 1.0.13/1000013 for the exact Back+microphone bugfix candidate; bundle, permissions and deployment configuration unchanged.",
-        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot."
+        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
+        "Advance to 1.0.15 for the confirmed monitor/management entry regression; preserve application identity, permissions and stored configuration."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"

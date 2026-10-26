@@ -1,0 +1,23 @@
+{
+  "exitCode": 0,
+  "qualificationExitCode": 0,
+  "officialApi26Compile": true,
+  "buildMode": "release",
+  "sdkVersion": "26.0.0.105",
+  "sourceIdentitySha256": "c682c17468626b0c79a02bf2d496d6224c4c87e1a3b760fa4bb5e97890d3d5f2",
+  "crcVerified": true,
+  "sourceMatchesBuild": true,
+  "identityPermissionsUnchanged": true,
+  "publicConfigEmpty": true,
+  "publicConfigBytes": 8192,
+  "versionName": "1.0.15",
+  "versionCode": 1000015,
+  "productDisplayName": "Garnet Assistant",
+  "sourceBase": "ea9746a92c6d9ea773ff131ac877b94f277a0b17",
+  "hapBytes": 35663660,
+  "hapSHA256": "3ae778ffa38e2dc12cfe8ef974730d7014f70273984d4c71b1bd568394f80b58",
+  "phoneAcceptance": false,
+  "sharedActivityProjectionUnchanged": true,
+  "allHAPMembersScanned": 815,
+  "scanScope": "All members for explicit key/token and URL authority credential patterns, plus empty deployment and no signing file checks; not an exhaustive proof against arbitrary encodings."
+}

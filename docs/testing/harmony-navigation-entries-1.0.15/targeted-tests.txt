@@ -1,0 +1,14 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/components/sidebar/session-activity.test.ts apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/lib/harmony-back.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  4 passed (4)
+      Tests  95 passed (95)
+   Start at  16:27:18
+   Duration  29.29s (transform 42.43s, setup 0ms, import 57.04s, tests 8.42s, environment 6.60s)
+
