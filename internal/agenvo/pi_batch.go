@@ -1,8 +1,11 @@
 package agenvo
 
 import (
+	"bytes"
+	"compress/gzip"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"regexp"
@@ -180,6 +183,57 @@ func launchBashScript(script, bashPath string) string {
 	encoded := base64.StdEncoding.EncodeToString([]byte(script))
 	return fmt.Sprintf(`& { param([string]$memohBash) if ([IO.File]::Exists($memohBash)) { & $memohBash --noprofile --norc -p -c 'printf %%s %s | base64 --decode | /usr/bin/bash --noprofile --norc -p' } } '%s'`, encoded, strings.ReplaceAll(bashPath, "'", "''"))
 }
+
+// Native Herdr's CLI still receives one bounded command argument. Pack the
+// envelope before that boundary, then pass its exact bytes to Bash over stdin,
+// rather than putting the expanded script on a second Windows command line.
+// PowerShell/.NET are already required by this transport; no host tool or
+// alternate Agent runtime is introduced. Legacy relay launches stay unchanged.
+func launchBatchScript(script string, target Target) string {
+	if target.NativeRuntimeID == "" {
+		return launchBashScript(script, target.BashPath)
+	}
+	var packed bytes.Buffer
+	zipper := gzip.NewWriter(&packed)
+	_, _ = zipper.Write([]byte(script)) // bytes.Buffer cannot fail these writes.
+	_ = zipper.Close()
+	digest := sha256.Sum256([]byte(script))
+	// Fully decode before starting Bash. Raw bytes bypass PowerShell's text
+	// pipeline and StreamWriter newline/BOM conversion. Only fixed Bash flags
+	// enter ProcessStartInfo.Arguments; the configured absolute path is data.
+	return fmt.Sprintf(strings.ReplaceAll(nativeBatchLaunch, "\n", " "), base64.StdEncoding.EncodeToString(packed.Bytes()), hex.EncodeToString(digest[:]), strings.ReplaceAll(target.BashPath, "'", "''"))
+}
+
+// One command is entered into the existing PowerShell pane. Keeping the source
+// separate makes the fixed process/pipe boundary reviewable; only data fills
+// the format parameters, and line breaks are flattened before dispatch.
+const nativeBatchLaunch = `& {
+  param([string]$memohBash)
+  if ([IO.File]::Exists($memohBash)) {
+    $ErrorActionPreference='Stop';
+    $m=[IO.MemoryStream]::new([Convert]::FromBase64String('%s'));
+    $g=[IO.Compression.GZipStream]::new($m,[IO.Compression.CompressionMode]::Decompress);
+    $d=[IO.MemoryStream]::new();
+    try { $g.CopyTo($d); $b=$d.ToArray() }
+    finally { $g.Dispose(); $m.Dispose(); $d.Dispose() };
+    $sha=[Security.Cryptography.SHA256]::Create();
+    try { $hash=[BitConverter]::ToString($sha.ComputeHash($b)).Replace('-','').ToLowerInvariant() }
+    finally { $sha.Dispose() };
+    if ($hash -ne '%s') { throw 'batch payload verification failed' };
+    $p=[Diagnostics.Process]::new();
+    $p.StartInfo.FileName=$memohBash;
+    $p.StartInfo.Arguments='--noprofile --norc -p';
+    $p.StartInfo.UseShellExecute=$false;
+    $p.StartInfo.RedirectStandardInput=$true;
+    $p.StartInfo.StandardInputEncoding=[Text.UTF8Encoding]::new($false);
+    try {
+      [void]$p.Start();
+      try { $p.StandardInput.BaseStream.Write($b,0,$b.Length) }
+      finally { $p.StandardInput.Close() };
+      $p.WaitForExit()
+    } finally { $p.Dispose() }
+  }
+} '%s'`
 
 func parseBatchReceipt(snapshot string, p BatchProgress) (*BatchReceipt, error) {
 	start, end := "MEMOH_BATCH_"+p.Generation+":", ":END_BATCH_"+p.Generation

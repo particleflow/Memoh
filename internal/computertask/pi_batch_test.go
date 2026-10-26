@@ -2,6 +2,7 @@ package computertask
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
@@ -172,10 +173,26 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 			return envelope(map[string]any{"session": "synthetic", "result": map[string]string{"type": "accepted"}}), nil
 		}
 		match := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
+		packed := false
+		if len(match) != 2 {
+			match = regexp.MustCompile(`FromBase64String\('([A-Za-z0-9+/=]+)'\)`).FindStringSubmatch(command)
+			packed = true
+		}
 		if len(match) != 2 {
 			f.t.Fatal("missing fixed Bash launch")
 		}
 		raw, _ := base64.StdEncoding.DecodeString(match[1])
+		if packed {
+			reader, err := gzip.NewReader(bytes.NewReader(raw))
+			if err != nil {
+				f.t.Fatal(err)
+			}
+			raw, err = io.ReadAll(reader)
+			if err != nil {
+				f.t.Fatal(err)
+			}
+			_ = reader.Close()
+		}
 		script := string(raw)
 		if strings.HasPrefix(script, "HERDR_PLUGIN_CONFIG_DIR=") && strings.Contains(script, " -action collect-result </dev/null") {
 			if params["paneId"] != "control" || !strings.Contains(script, "HERDR_PLUGIN_STATE_DIR=") || strings.Contains(script, "plugin action invoke") {

@@ -4,6 +4,7 @@ on:
     paths:
       - 'internal/transferclient/**'
       - 'internal/nativeherdr/**'
+      - 'internal/agenvo/**'
       - 'cmd/transferqueue/**'
       - 'contrib/herdr/memoh-delivery/**'
       - 'scripts/build-transferqueue-bundle.py'
@@ -46,6 +47,8 @@ jobs:
           go-version-file: go.mod
       - name: Verify native Herdr CLI bytes through Windows PowerShell
         run: go test -count=1 -v -timeout=3m ./internal/nativeherdr
+      - name: Verify native batch stdin through Windows PowerShell
+        run: go test -count=1 -v -timeout=3m -run '^TestNativeBatchLauncherWindowsPowerShell$' ./internal/agenvo
       # Filesystem durability/catalog tests can exceed one package's aggregate
       # five-minute budget. These disjoint selectors retain every test once,
       # including both the shared progress test and its native wrapper.

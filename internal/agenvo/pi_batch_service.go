@@ -35,7 +35,7 @@ func ValidateBatchRequest(p BatchProgress, target Target, workDir, task string) 
 	if err != nil {
 		return err
 	}
-	if len(launchBashScript(script, target.BashPath)) > 48000 {
+	if len(launchBatchScript(script, target)) > 48000 {
 		return ErrUnsupported
 	}
 	return nil
@@ -99,7 +99,7 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 	if err != nil {
 		return p, err
 	}
-	command := launchBashScript(script, target.BashPath)
+	command := launchBatchScript(script, target)
 	// Agenvo's official pane.run contract has a 48,000-character limit.
 	if len(command) > 48000 {
 		return p, ErrUnsupported

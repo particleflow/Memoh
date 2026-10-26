@@ -1,0 +1,43 @@
+diff --git a/internal/agenvo/native_complex_preflight_test.go b/internal/agenvo/native_complex_preflight_test.go
+new file mode 100644
+index 00000000..858dc9db
+--- /dev/null
++++ b/internal/agenvo/native_complex_preflight_test.go
+@@ -0,0 +1,37 @@
++package agenvo
++
++import (
++	"strings"
++	"testing"
++
++	"github.com/google/uuid"
++
++	"github.com/felinics/memoh/internal/deliverymeta"
++)
++
++// Only the byte counts mirror the reported requests; no field prompt or host
++// configuration enters this fixture, and no Runtime or model is contacted.
++func TestNativeProducerComplexTaskPreflight(t *testing.T) {
++	for _, tc := range []struct {
++		name string
++		task string
++	}{
++		{"3046-bytes", strings.Repeat("x", 3046)},
++		{"3435-bytes", strings.Repeat("x", 3435)},
++		{"3435-utf8-bytes", strings.Repeat("雪", 1145)},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			p := batchFixtureProgress()
++			p.LayoutVersion, p.CompletionVersion = BatchLayoutVersion, BatchCompletionVersion
++			p.History = &BatchHistoryExpectation{Version: BatchHistoryVersion, Mode: "unconfirmed"}
++			target := Target{NativeRuntimeID: uuid.NewString(), WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}, Producer: ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}}
++			p.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: uuid.NewString(), BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: uuid.NewString(), Attempt: p.Attempt, Generation: p.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}, Artifact: deliverymeta.Artifact{SourceRef: strings.Repeat("r", 23), Mime: "text/plain"}}
++			if !p.valid() || !p.Producer.Valid() || target.Producer.validate() != nil {
++				t.Fatal("invalid synthetic identity or producer configuration")
++			}
++			if err := ValidateBatchRequest(p, target, ".", tc.task); err != nil {
++				t.Fatalf("native complex task rejected before operation claim: task_bytes=%d: %v", len(tc.task), err)
++			}
++		})
++	}
++}
