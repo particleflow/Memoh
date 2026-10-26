@@ -533,6 +533,7 @@
       "image_not_found": "工作区镜像不存在、需要镜像仓库凭据，或名称无效，请检查镜像名称后重试。",
       "image_registry_unavailable": "暂时无法连接镜像仓库，请稍后重试。",
       "operation_unsupported": "此执行目标仅支持前台命令。文件或交互终端操作请选择其他电脑。",
+      "storage_unavailable": "NAS 工作区存储暂不可用。",
       "teardown_failed": "移除工作区失败。请重试删除 bot。",
       "template_bootstrap_failed": "工作区文件初始化失败，请尝试重建工作区。",
       "unreachable": "暂时无法连接工作区，请稍后重试。"
@@ -4855,5 +4856,16 @@
     "uncertain": "命令结果未确定或被拒绝。停止等待不会终止 Windows 执行，请先检查再决定是否重试。",
     "retained": "工作区 {id} 已保留以供人工检查，未自动关闭。",
     "truncated": "输出已截断。"
+  },
+  "workspaceStorage": {
+    "title": "工作区存储",
+    "choose": "选择 NAS 目录",
+    "newDirectory": "新建目录",
+    "create": "创建",
+    "saved": "NAS 目录已保存",
+    "loadFailed": "暂时无法读取电脑",
+    "unavailable": "NAS 存储未配置或现有内网共享不可用",
+    "loading": "正在读取电脑",
+    "empty": "暂无已登记电脑"
   }
 }

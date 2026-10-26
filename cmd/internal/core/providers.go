@@ -268,6 +268,12 @@ func provideUserRuntimeHub(lc fx.Lifecycle, log *slog.Logger) *userruntime.Hub {
 	return hub
 }
 
+func provideUserRuntimeService(store dbstore.UserRuntimeStore, hub *userruntime.Hub, cfg config.Config) *userruntime.Service {
+	svc := userruntime.NewService(store, hub)
+	svc.SetWorkspaceStorage(cfg.Workspace.Storage.Root, cfg.Workspace.Storage.ShareRoot)
+	return svc
+}
+
 func provideUserRuntimePipe() userruntime.Pipe {
 	return userruntime.NewDirectPipe()
 }

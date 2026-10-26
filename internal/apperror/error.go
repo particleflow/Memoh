@@ -46,6 +46,7 @@ const (
 	CodeContextBudgetUnsatisfied                 Code = "context.budget_unsatisfied"
 	CodeContextProtectedOverflow                 Code = "context.protected_overflow"
 	CodeWorkspaceUnreachable                     Code = "workspace.unreachable"
+	CodeWorkspaceStorageUnavailable              Code = "workspace.storage_unavailable"
 	CodeWorkspaceTemplateBootstrapFailed         Code = "workspace.template_bootstrap_failed"
 	CodeWorkspaceDisplayClipboardFailed          Code = "workspace.display_clipboard_failed"
 	CodeWorkspaceDisplayClipboardTooLarge        Code = "workspace.display_clipboard_too_large"
@@ -590,6 +591,10 @@ var catalog = map[Code]Definition{
 	CodeWorkspaceUnreachable: {
 		HTTPStatus: http.StatusServiceUnavailable,
 		Detail:     "The workspace could not be reached.",
+	},
+	CodeWorkspaceStorageUnavailable: {
+		HTTPStatus: http.StatusServiceUnavailable,
+		Detail:     "NAS workspace storage is unavailable.",
 	},
 	CodeWorkspaceTemplateBootstrapFailed: {
 		HTTPStatus: http.StatusInternalServerError,

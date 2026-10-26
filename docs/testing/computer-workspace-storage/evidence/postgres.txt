@@ -1,0 +1,4 @@
+=== RUN   TestWorkspaceStoragePostgresHTTPPreservesRegistration
+--- PASS: TestWorkspaceStoragePostgresHTTPPreservesRegistration (2.39s)
+PASS
+ok  	github.com/felinics/memoh/internal/db	2.412s
