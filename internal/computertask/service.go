@@ -44,6 +44,8 @@ type Assets interface {
 }
 type Authorize func(context.Context, toolcontext.ComputerBinding, string, string, string) error
 
+type DefaultWorkDir func(context.Context, toolcontext.ComputerBinding, string, agenvo.Target) (string, error)
+
 type Service struct {
 	nativeObservationLimit int
 	store                  dbstore.ComputerOperationStore
@@ -51,6 +53,14 @@ type Service struct {
 	relay                  *agenvo.Service
 	assets                 Assets
 	authorize              Authorize
+	defaultWorkDir         DefaultWorkDir
+}
+
+// WithDefaultWorkDir injects the existing owned directory selection. It is
+// consulted only for new requests without an explicit working directory.
+func (s *Service) WithDefaultWorkDir(resolve DefaultWorkDir) *Service {
+	s.defaultWorkDir = resolve
+	return s
 }
 
 func NewService(store dbstore.ComputerOperationStore, registry Registry, relay *agenvo.Service, assets Assets, authorize Authorize) *Service {
@@ -74,6 +84,8 @@ type Submit struct {
 	WorkDir           string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
+	TargetSnapshot *agenvo.Target           `json:"target_snapshot,omitempty"`
+	DefaultWorkDir string                   `json:"default_work_dir,omitempty"`
 	NativeEvidence *NativeEvidenceLedger    `json:"native_evidence,omitempty"`
 	Followups      []FollowupRecord         `json:"followups,omitempty"`
 	Batch          *BatchDetails            `json:"batch,omitempty"`
@@ -257,14 +269,36 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if b.RunID == "" || (in.Kind != "foreground_bash" && in.Kind != "herdr_pi_task") || strings.TrimSpace(in.Task) == "" || len(in.Task) > 32000 || !utf8.ValidString(in.Task) || strings.ContainsRune(in.Task, 0) || (in.Kind == "foreground_bash" && len(in.Task) > 4096) {
 		return Result{}, ErrInvalid
 	}
-	if in.WorkDir == "" {
-		in.WorkDir = "."
+	if in.WorkDir != "" && in.WorkDir != "." {
+		ctx = toolcontext.WithExplicitWorkdir(ctx, in.WorkDir)
 	}
 	id, target, err := s.choose(ctx, b, in.TargetID, in.Kind)
 	if err != nil {
 		return Result{}, err
 	}
 	in.TargetID = id
+	usedDefault := false
+	if in.WorkDir == "" || in.WorkDir == "." {
+		if in.ResumeOperationID != "" {
+			_, original, err := s.load(ctx, b, in.ResumeOperationID)
+			if err != nil {
+				return Result{}, err
+			}
+			in.WorkDir = original.DefaultWorkDir
+		} else if explicit := toolcontext.ExplicitWorkdir(ctx); explicit != "" {
+			in.WorkDir = explicit
+			usedDefault = true
+		} else if s.defaultWorkDir != nil && target.NativeRuntimeID != "" {
+			in.WorkDir, err = s.defaultWorkDir(ctx, b, id, target)
+			if err != nil {
+				return Result{}, err
+			}
+			usedDefault = in.WorkDir != ""
+		}
+		if in.WorkDir == "" {
+			in.WorkDir = "."
+		}
+	}
 	if in.Kind == "herdr_pi_task" && target.Agent == (agenvo.AgentProfile{}) {
 		return Result{}, agenvo.ErrAgentNotConfigured
 	}
@@ -272,6 +306,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		return Result{}, err
 	}
 	if in.ResumeOperationID != "" {
+		ctx = toolcontext.WithExplicitWorkdir(ctx, in.WorkDir)
 		operationID := in.ResumeOperationID
 		in.ResumeOperationID = ""
 		return s.resumeBatchWorkspace(ctx, b, operationID, in, target)
@@ -287,6 +322,13 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	operationID := uuid.NewString()
 	d := Details{Kind: in.Kind}
+	if target.NativeRuntimeID != "" {
+		snapshot := target
+		d.TargetSnapshot = &snapshot
+	}
+	if usedDefault {
+		d.DefaultWorkDir = in.WorkDir
+	}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
 		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{History: &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "unconfirmed"}, LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
 
@@ -315,6 +357,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		if r.TargetFingerprint != agenvo.TargetFingerprint(target) {
 			return Result{}, agenvo.ErrTargetChanged
 		}
+		d = Details{} // absent legacy fields must not inherit a new request's defaults
 		if json.Unmarshal(r.Details, &d) != nil {
 			return Result{}, agenvo.ErrUnknown
 		}
@@ -437,6 +480,9 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 	}
 	var d Details
 	if json.Unmarshal(r.Details, &d) != nil {
+		return r, d, agenvo.ErrUnknown
+	}
+	if d.TargetSnapshot != nil && agenvo.TargetFingerprint(*d.TargetSnapshot) != r.TargetFingerprint {
 		return r, d, agenvo.ErrUnknown
 	}
 	if d.NativeEvidence != nil {

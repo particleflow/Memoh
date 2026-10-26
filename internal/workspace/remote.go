@@ -14,6 +14,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/settings"
+	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/userruntime"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
@@ -99,6 +100,10 @@ type RemoteWorkspaceService struct {
 
 type runtimeConnectionResolver interface {
 	Connection(runtimeID string) (*userruntime.Connection, bool)
+}
+
+type runtimeWorkspaceDirectoryResolver interface {
+	ConfiguredWorkspaceDirectory(context.Context, string, string) (string, error)
 }
 
 func NewRemoteWorkspaceService(store dbstore.BotRemoteRuntimeBindingStore, runtimes *userruntime.Service) *RemoteWorkspaceService {
@@ -287,6 +292,16 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 	if err != nil {
 		return ResolvedWorkspaceTarget{}, err
 	}
+	defaultWorkDir := connection.Info.WorkspaceBase
+	if defaults, ok := s.runtimes.(runtimeWorkspaceDirectoryResolver); ok && record.RuntimeProvider == "memoh" && !toolcontext.HasExplicitWorkdir(ctx) {
+		selected, err := defaults.ConfiguredWorkspaceDirectory(ctx, record.RuntimeUserID, record.RuntimeID)
+		if err != nil {
+			return ResolvedWorkspaceTarget{}, err
+		}
+		if selected != "" {
+			defaultWorkDir = selected
+		}
+	}
 	var execute func(context.Context, agenvo.Request) (agenvo.Result, error)
 	var providerConfig map[string]json.RawMessage
 	if json.Unmarshal(record.RuntimeProviderConfig, &providerConfig) == nil && len(providerConfig["herdr"]) > 0 {
@@ -309,7 +324,7 @@ func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbsto
 		Info: bridge.WorkspaceInfo{
 			Backend:        bridge.WorkspaceBackendRemote,
 			OS:             connection.Info.OS,
-			DefaultWorkDir: connection.Info.WorkspaceBase,
+			DefaultWorkDir: defaultWorkDir,
 		},
 		Approval: toolApprovalConfig(record.ToolApproval),
 		Execute:  execute,
@@ -412,7 +427,7 @@ func (s *RemoteWorkspaceService) clientForRecord(record dbstore.BotRemoteRuntime
 	return client, connection, nil
 }
 
-func (s *RemoteWorkspaceService) target(ctx context.Context, record dbstore.BotRemoteRuntimeBindingRecord) WorkspaceTarget {
+func (s *RemoteWorkspaceService) target(_ context.Context, record dbstore.BotRemoteRuntimeBindingRecord) WorkspaceTarget {
 	approval := toolApprovalConfig(record.ToolApproval)
 	target := WorkspaceTarget{
 		TargetID:           record.ID,

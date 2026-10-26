@@ -1048,6 +1048,7 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 	if bound, hasWorkdir, workdirErr := s.resolveSessionWorkdirBinding(ctx, p.BotID, p.SessionID); workdirErr != nil {
 		return native.RunConfig{}, models.GetResponse{}, sqlc.Provider{}, workdirErr
 	} else if hasWorkdir {
+		ctx = toolcontext.WithExplicitWorkdir(ctx, bound.WorkDir)
 		cfg.Identity.WorkdirPath = bound.WorkDir
 		// Pin the workdir's target so the resolution below runs against it —
 		// including its error path when the target is unreachable.

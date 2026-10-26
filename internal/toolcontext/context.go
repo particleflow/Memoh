@@ -89,7 +89,7 @@ func bindComputerScope(ctx context.Context, session Session) context.Context {
 	if session.PublicRequest {
 		return context.WithValue(ctx, untrustedComputerKey{}, true)
 	}
-	return WithComputerScope(ctx, session.WorkspaceTargetID)
+	return WithExplicitWorkdir(WithComputerScope(ctx, session.WorkspaceTargetID), session.WorkdirPath)
 }
 
 // ValidateRuntimeGuard performs the last ownership check immediately before a

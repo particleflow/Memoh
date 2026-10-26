@@ -17,13 +17,16 @@ import (
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/settings"
 	"github.com/felinics/memoh/internal/toolcontext"
+	"github.com/felinics/memoh/internal/userruntime"
 	"github.com/felinics/memoh/internal/workspace"
 )
 
-func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, cfg config.Config) *computertask.Source {
+func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, cfg config.Config) *computertask.Source {
 	permissions := &applicationBotPermissionChecker{bots: botService, accounts: accountService}
 	authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, approval.EvaluatePolicy)
-	source := computertask.NewSource(computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit))
+	service := computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit)
+	service.WithDefaultWorkDir(computerTaskWorkspaceDefault(store.GetMount, runtimes.SelectedWorkspaceDirectory))
+	source := computertask.NewSource(service)
 	source.SetLogger(log)
 	return source
 }
