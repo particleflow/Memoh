@@ -45,6 +45,7 @@ type failedActivitySessions struct{ err error }
 func (f failedActivitySessions) Get(context.Context, string) (thread.Thread, error) {
 	return thread.Thread{}, f.err
 }
+
 func TestActivityDoesNotTurnDatabaseReadFailureIntoEmptySuccess(t *testing.T) {
 	f := activityFixtureForTest()
 	f.run(f.root, "chat", "running")

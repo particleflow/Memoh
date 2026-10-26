@@ -15,7 +15,7 @@ type retiredRuntimeStore struct {
 	rows []dbstore.UserRuntimeRecord
 }
 
-func (s retiredRuntimeStore) ExpirePendingUserRuntimes(context.Context, string) error { return nil }
+func (retiredRuntimeStore) ExpirePendingUserRuntimes(context.Context, string) error { return nil }
 func (s retiredRuntimeStore) ListUserRuntimes(context.Context, string) ([]dbstore.UserRuntimeRecord, error) {
 	return s.rows, nil
 }

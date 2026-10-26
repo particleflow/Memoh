@@ -1,0 +1,4 @@
+2026-10-26T16:43:09.1845691Z ##[error]internal/sessiontask/activity_test.go:47:1: File is not properly formatted (gofumpt)
+2026-10-26T16:43:09.1855559Z ##[error]internal/userruntime/agenvo_retirement_test.go:18:7: unused-receiver: method receiver 's' is not referenced in method's body, consider removing or renaming it as _ (revive)
+2026-10-26T16:43:09.1867656Z Ran golangci-lint in 421890ms
+
