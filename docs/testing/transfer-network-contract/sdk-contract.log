@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /tmp/memoh-candidate-7bcb-review
+
+
+ Test Files  1 passed (1)
+      Tests  22 passed (22)
+   Start at  04:01:07
+   Duration  491ms (transform 185ms, setup 0ms, import 67ms, tests 294ms, environment 0ms)
+

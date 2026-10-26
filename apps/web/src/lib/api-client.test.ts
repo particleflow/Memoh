@@ -361,4 +361,55 @@ describe('setupApiClient auth handling', () => {
 
     expect(sdkApiBaseUrl()).toBe('http://127.0.0.1:18731')
   })
+
+  it.each(['create', 'complete'] as const)('does not replay %s or switch authority after a lost response', async (phase) => {
+    localStorage.setItem('token', 'synthetic-transfer-account')
+    const fetchMock = vi.fn<typeof fetch>(async () => { throw new TypeError('synthetic lost response') })
+    setupApiClient({ baseUrl: 'https://nas.example.invalid/api', fetch: fetchMock })
+    const sdk = await import('@memohai/sdk')
+    const original = { bot_id: 'synthetic-bot', upload_id: 'persisted-upload' }
+    const response = phase === 'create'
+      ? await sdk.postBotsByBotIdMediaUploads({ path: { bot_id: original.bot_id }, body: { sha256: 'a'.repeat(64), size_bytes: 16, mime: 'text/plain' } })
+      : await sdk.postBotsByBotIdMediaUploadsByUploadIdComplete({ path: original })
+
+    expect(response.error).toBeInstanceOf(TypeError)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const request = fetchMock.mock.calls[0]?.[0] as Request
+    expect(request.url).toBe(`https://nas.example.invalid/api/bots/synthetic-bot/media/uploads${phase === 'complete' ? '/persisted-upload/complete' : ''}`)
+    expect(request.method).toBe('POST')
+    expect(request.headers.get('Authorization')).toBe('Bearer synthetic-transfer-account')
+    expect(sdkApiBaseUrl()).toBe('https://nas.example.invalid/api')
+    expect(localStorage.getItem('token')).toBe('synthetic-transfer-account')
+  })
+
+  it.each([403, 503])('does not turn HTTP %i into another-origin transfer submission', async (status) => {
+    localStorage.setItem('token', 'synthetic-transfer-account')
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response('{"code":"synthetic.failure"}', { status, headers: { 'Content-Type': 'application/json' } }))
+    setupApiClient({ baseUrl: 'https://nas.example.invalid/api', fetch: fetchMock })
+    const sdk = await import('@memohai/sdk')
+    const response = await sdk.postBotsByBotIdMediaUploadsByUploadIdComplete({ path: { bot_id: 'synthetic-bot', upload_id: 'persisted-upload' } })
+
+    expect(response.error).toEqual({ code: 'synthetic.failure' })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const request = fetchMock.mock.calls[0]?.[0] as Request
+    expect(request.url).toBe('https://nas.example.invalid/api/bots/synthetic-bot/media/uploads/persisted-upload/complete')
+    expect(sdkApiBaseUrl()).toBe('https://nas.example.invalid/api')
+    expect(localStorage.getItem('token')).toBe('synthetic-transfer-account')
+  })
+
+  it('reconciles an already persisted upload with GET of its original identity', async () => {
+    localStorage.setItem('token', 'synthetic-transfer-account')
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response('{"id":"persisted-upload","offset":8,"state":"uploading"}', { headers: { 'Content-Type': 'application/json' } }))
+    setupApiClient({ baseUrl: 'https://nas.example.invalid/api', fetch: fetchMock })
+    const sdk = await import('@memohai/sdk')
+    const result = await sdk.getBotsByBotIdMediaUploadsByUploadId({ path: { bot_id: 'synthetic-bot', upload_id: 'persisted-upload' }, throwOnError: true })
+
+    expect(result.data.id).toBe('persisted-upload')
+    expect(result.data.offset).toBe(8)
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const request = fetchMock.mock.calls[0]?.[0] as Request
+    expect(request.method).toBe('GET')
+    expect(request.url).toBe('https://nas.example.invalid/api/bots/synthetic-bot/media/uploads/persisted-upload')
+    expect(request.headers.get('Authorization')).toBe('Bearer synthetic-transfer-account')
+  })
 })
