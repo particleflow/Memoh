@@ -6,7 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
+	"time"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/deliverymeta"
 	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -14,9 +17,28 @@ import (
 
 // Source exposes the same service to any standard MCP tools client. Authority
 // comes from the existing host-owned tool mount, never an MCP session header.
-type Source struct{ service *Service }
+type Source struct {
+	service *Service
+	logger  *slog.Logger
+}
 
 func NewSource(service *Service) *Source { return &Source{service: service} }
+
+// SetLogger injects the existing host logger; no global logger or new sink.
+func (s *Source) SetLogger(log *slog.Logger) { s.logger = log }
+
+func (s *Source) logResultReadFailure(ctx context.Context, session mcp.ToolSessionContext, id string, started time.Time, trace *agenvo.BatchReadTrace) {
+	s.logger.WarnContext(ctx, "computer task result read failed",
+		slog.String("operation_id", id), slog.String("operation_run_id", trace.OperationRunID), slog.String("run_id", session.RunID), slog.String("tool_call_id", session.ToolCallID),
+		slog.String("stage", trace.Stage), slog.String("read_stage", trace.ReadStage), slog.String("reason", trace.Reason),
+		slog.Int64("elapsed_ms", time.Since(started).Milliseconds()), slog.Int64("read_elapsed_ms", trace.ReadElapsedMS),
+		slog.Int64("feedback_elapsed_ms", trace.FeedbackElapsedMS), slog.Int64("delivery_wake_elapsed_ms", trace.DeliveryWakeElapsedMS),
+		slog.Bool("feedback_failed", trace.FeedbackFailed), slog.Bool("delivery_wake_failed", trace.DeliveryWakeFailed),
+		slog.Bool("deadline_exceeded", trace.DeadlineExceeded), slog.Bool("canceled", trace.Canceled),
+		slog.String("file_kind", trace.FileKind), slog.String("native_method", trace.Method),
+		slog.Int64("offset", trace.Offset), slog.Int64("count", trace.Count), slog.Int64("actual_bytes", trace.ActualBytes), slog.Int64("completed_pages", trace.CompletedPages),
+		slog.String("save_kind", trace.SaveKind), slog.Int64("expected_revision", trace.ExpectedRevision), slog.String("save_error_class", trace.SaveErrorClass))
+}
 
 func (*Source) ListTools(context.Context, mcp.ToolSessionContext) ([]mcp.ToolDescriptor, error) {
 	text := func(description string) map[string]any {
@@ -145,6 +167,16 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 		}
 		switch name {
 		case "computer_task_result":
+			if s.logger != nil {
+				trace := &agenvo.BatchReadTrace{ActualBytes: -1}
+				ctx = agenvo.WithBatchReadTrace(ctx, trace)
+				started := time.Now()
+				defer func() {
+					if receipt, ok := value.(Result); err != nil && ok && receipt.ID != "" {
+						s.logResultReadFailure(ctx, session, receipt.ID, started, trace)
+					}
+				}()
+			}
 			value, err = s.service.observe(ctx, b, input.ID, true)
 		case "computer_task_cancel":
 			value, err = s.service.cancel(ctx, b, input.ID)

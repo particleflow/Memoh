@@ -116,8 +116,9 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, pane string, lines int) (string, error) {
 	// Agenvo v0.2.0 herdr.ts uses z.number().int().min(1).max(500).
 	if lines < 1 || lines > batchReadMaxLines {
-		return "", ErrUnknown
+		return "", traceBatchReadFailure(ctx, "snapshot", "invalid_window", ErrUnknown)
 	}
+	traceBatchReadMethod(ctx, "pane.read")
 	r, err := c.native(ctx, scope, target, "pane.read", map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"})
 	if err != nil {
 		if r.Error != nil && r.Error.Code == "result_too_large" {
@@ -126,16 +127,19 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 		// Rejection applies to this observation, never to the already
 		// submitted Pi invocation. Only a correlated receipt proves no start.
 		if errors.Is(err, ErrRejected) {
-			return "", ErrUnknown
+			return "", traceBatchReadFailure(ctx, "snapshot", "native_error", ErrUnknown)
 		}
-		return "", err
+		return "", traceBatchReadFailure(ctx, "snapshot", "native_error", err)
 	}
 	var out struct {
 		Output  *string `json:"output"`
 		Session string  `json:"session"`
 	}
-	if json.Unmarshal(r.Result, &out) != nil || out.Output == nil || out.Session != target.Session {
-		return "", ErrUnknown
+	if json.Unmarshal(r.Result, &out) != nil || out.Output == nil {
+		return "", traceBatchReadFailure(ctx, "snapshot", "invalid_envelope", ErrUnknown)
+	}
+	if out.Session != target.Session {
+		return "", traceBatchReadFailure(ctx, "snapshot", "session_mismatch", ErrUnknown)
 	}
 	return *out.Output, nil
 }
@@ -208,7 +212,10 @@ func (s *Service) ReadBatchPageWithReader(ctx context.Context, scope Scope, p Ba
 		return nil, err
 	}
 	if int64(len(data)) != count {
-		return nil, ErrUnknown
+		return nil, traceBatchReadFailure(ctx, "page", "short_page", ErrUnknown)
+	}
+	if trace := BatchReadTraceFromContext(ctx); trace != nil {
+		trace.ReadStage = "page_complete"
 	}
 	return data, nil
 }
@@ -220,6 +227,23 @@ func (s *Service) readBatchFile(ctx context.Context, scope Scope, p BatchProgres
 }
 
 func (s *Service) readBatchFileWithReader(ctx context.Context, scope Scope, p BatchProgress, reader *BatchRecoveryReader, name string, offset, count int64) ([]byte, error) {
+	if trace := BatchReadTraceFromContext(ctx); trace != nil {
+		trace.Offset, trace.Count, trace.ActualBytes = offset, count, -1
+		trace.ReadStage, trace.Reason, trace.Method = "read_guard", "", ""
+		trace.FileKind = "unknown"
+		switch name {
+		case "result.json":
+			trace.FileKind = "result"
+		case deliverymeta.ProducerFeedbackName:
+			trace.FileKind = "feedback"
+		case "receipt.json":
+			trace.FileKind = "receipt"
+		case "stdout.jsonl":
+			trace.FileKind = "stdout"
+		case "stderr.txt":
+			trace.FileKind = "stderr"
+		}
+	}
 	limit := int64(BatchPageBytes)
 	if name == "receipt.json" {
 		limit = batchReceiptBytes
@@ -228,53 +252,55 @@ func (s *Service) readBatchFileWithReader(ctx context.Context, scope Scope, p Ba
 		limit = deliverymeta.FeedbackMaxBytes
 	}
 	if !p.valid() || p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID || offset < 0 || count <= 0 || count > limit || (name != "receipt.json" && name != "stdout.jsonl" && name != "stderr.txt" && name != "result.json" && name != deliverymeta.ProducerFeedbackName) {
-		return nil, ErrUnsupported
+		return nil, traceBatchReadFailure(ctx, "read_guard", "unsupported_input", ErrUnsupported)
 	}
 	workspace, pane, terminal := p.WorkspaceID, p.ControlPane, p.ControlTerminal
 	if reader != nil {
 		if !reader.valid(p) {
-			return nil, ErrUnknown
+			return nil, traceBatchReadFailure(ctx, "reader", "invalid_reader", ErrUnknown)
 		}
 		workspace, pane, terminal = reader.WorkspaceID, reader.PaneID, reader.TerminalID
 	}
 	c, target, err := s.Client(ctx, scope)
 	if err != nil {
-		return nil, err
+		return nil, traceBatchReadFailure(ctx, "target", "target_unavailable", err)
 	}
 	if name == deliverymeta.ProducerFeedbackName && (p.Producer == nil || p.Producer.Task.RootHash != deliverymeta.RootHash(target.WorkDir)) {
-		return nil, ErrTargetChanged
+		return nil, traceBatchReadFailure(ctx, "target", "root_changed", ErrTargetChanged)
 	}
 	nonce := strings.ReplaceAll(uuid.NewString(), "-", "")
 	script, err := batchReadScript(p, target, name, offset, count, nonce)
 	if err != nil {
-		return nil, err
+		return nil, traceBatchReadFailure(ctx, "read_guard", "invalid_script_input", err)
 	}
+	traceBatchReadMethod(ctx, "pane.get")
 	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": pane})
 	if err != nil {
 		if errors.Is(err, ErrRejected) {
-			return nil, ErrUnknown
+			return nil, traceBatchReadFailure(ctx, "control_lookup", "native_error", ErrUnknown)
 		}
-		return nil, err
+		return nil, traceBatchReadFailure(ctx, "control_lookup", "native_error", err)
 	}
 	var info struct {
 		Type string    `json:"type"`
 		Pane batchPane `json:"pane"`
 	}
 	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != pane || info.Pane.Workspace != workspace || !batchReaderID(info.Pane.Terminal) {
-		return nil, ErrTargetChanged
+		return nil, traceBatchReadFailure(ctx, "control_lookup", "reference_mismatch", ErrTargetChanged)
 	}
 	if info.Pane.Terminal != terminal {
 		if reader == nil {
-			return nil, ErrBatchControlChanged
+			return nil, traceBatchReadFailure(ctx, "control_lookup", "terminal_changed", ErrBatchControlChanged)
 		}
-		return nil, ErrTargetChanged // never replace a changed recovery reader
+		return nil, traceBatchReadFailure(ctx, "control_lookup", "reader_terminal_changed", ErrTargetChanged) // never replace a changed recovery reader
 	}
+	traceBatchReadMethod(ctx, "pane.run")
 	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": pane, "command": launchBashScript(script, target.BashPath)})
 	if err != nil {
 		if errors.Is(err, ErrRejected) {
-			return nil, ErrUnknown
+			return nil, traceBatchReadFailure(ctx, "command_dispatch", "native_error", ErrUnknown)
 		}
-		return nil, err
+		return nil, traceBatchReadFailure(ctx, "command_dispatch", "native_error", err)
 	} // never repeat an uncertain input call
 	lines := 8
 	for {
@@ -286,7 +312,7 @@ func (s *Service) readBatchFileWithReader(ctx context.Context, scope Scope, p Ba
 			// Old terminal history can exceed 64 KiB even for a legal row
 			// count. Narrow only the read; never retype the control command.
 			if lines == 1 {
-				return nil, ErrUnknown
+				return nil, traceBatchReadFailure(ctx, "snapshot", "snapshot_too_large", ErrUnknown)
 			}
 			lines = max(1, lines/2)
 		} else if err != nil {
@@ -301,13 +327,22 @@ func (s *Service) readBatchFileWithReader(ctx context.Context, scope Scope, p Ba
 			if !strings.HasPrefix(line, start) || !strings.HasSuffix(line, end) {
 				continue
 			}
-			if found || len(line) > base64.StdEncoding.EncodedLen(int(count))+len(start)+len(end) {
-				return nil, ErrUnknown
+			if found {
+				return nil, traceBatchReadFailure(ctx, "frame", "duplicate_frame", ErrUnknown)
+			}
+			if len(line) > base64.StdEncoding.EncodedLen(int(count))+len(start)+len(end) {
+				return nil, traceBatchReadFailure(ctx, "frame", "frame_oversize", ErrUnknown)
 			}
 			data, err = base64.StdEncoding.DecodeString(strings.TrimSuffix(strings.TrimPrefix(line, start), end))
 			found = true
-			if err != nil || int64(len(data)) > count {
-				return nil, ErrUnknown
+			if trace := BatchReadTraceFromContext(ctx); trace != nil {
+				trace.ActualBytes = int64(len(data))
+			}
+			if err != nil {
+				return nil, traceBatchReadFailure(ctx, "frame", "invalid_base64", ErrUnknown)
+			}
+			if int64(len(data)) > count {
+				return nil, traceBatchReadFailure(ctx, "frame", "decoded_oversize", ErrUnknown)
 			}
 		}
 		if found {
@@ -318,13 +353,13 @@ func (s *Service) readBatchFileWithReader(ctx context.Context, scope Scope, p Ba
 			continue
 		}
 		if ended {
-			return nil, ErrUnknown // complete frame does not fit the legal window
+			return nil, traceBatchReadFailure(ctx, "frame", "window_exhausted", ErrUnknown) // complete frame does not fit the legal window
 		}
 		timer := time.NewTimer(100 * time.Millisecond)
 		select {
 		case <-ctx.Done():
 			timer.Stop()
-			return nil, ErrUnknown
+			return nil, traceBatchReadFailure(ctx, "frame", "context_ended_waiting_frame", ErrUnknown)
 		case <-timer.C:
 		}
 	}
