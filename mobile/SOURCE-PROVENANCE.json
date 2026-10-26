@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "accf03b166c18673ff28ec72f3b8e8b72bdb79bd7452e99a708c29eb0920e09d",
+      "sha256": "ab6d43a4f7e88a6d3e1259bf8742db43b6add0a44b6519ee0339f4620fd8ef55",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -43,7 +43,8 @@
         "Source-only pin to released 9bb6fc3: one upstream transcription-provider metadata mapping; SDK, all 43 phone adaptations, 1.0.12 identity/version, HTTPS migration and native attachment recovery unchanged. No HAP build or paid ASR call.",
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
         "Clarify the corrected monitor/management entry boundary; do not remove the only permanent session monitor.",
-        "Source-only correction: task trigger reuses the unified minimal activity list, never SessionTasks detail; sync only activity GET/type contract and avoid inactive mobile panel mounts. No version bump or HAP build."
+        "Source-only correction: task trigger reuses the unified minimal activity list, never SessionTasks detail; sync only activity GET/type contract and avoid inactive mobile panel mounts. No version bump or HAP build.",
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -522,7 +523,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "44caf703fe62074604f9814f3c05b1c5135f1acea972fb8fb201d3dde569defb",
+      "sha256": "8158b0e5334fa3804518c696319d4e4cd63198429e8e14aa68baf8ad2d8243c9",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -549,7 +550,8 @@
         "Restore the existing current-session monitor instead of hiding its only permanent entry; expose the existing Bot management route directly in the mobile sidebar. No changes to the shared activity projection or native attachment recovery UI.",
         "Source-only correction: task trigger reuses the unified minimal activity list, never SessionTasks detail; sync only activity GET/type contract and avoid inactive mobile panel mounts. No version bump or HAP build.",
         "Mount inactive mobile file/schedule panels only on first explicit selection and retain them for the open drawer; do not destroy active file-operation UI on view switches.",
-        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP."
+        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -1530,6 +1532,69 @@
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-storage.vue",
+      "sha256": "e9311bbfd80ffa308e4ba3649b3377e518e8cd09f6ddf4433d30a7daadf7a8df",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-storage.test.ts",
+      "sha256": "fe48e3cd2bc85568f1a2d767bfee3751a3e03b78dd268ad0eefa61987e7fe735",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-directory-picker.vue",
+      "sha256": "5896a4c3f7dfd4f0a8e59f3ec573b322e440b1f6470b8246b44b2efc3fed4ba5",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-routes.ts",
+      "sha256": "eee23fc9b22a274b0bfd25c6649c46f2b55f3793cca61cd7e71035b83ce4680b",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-settings-sidebar.vue",
+      "sha256": "91d5252d631acf185875c95004f5c3fc207b4d95347dabeaa5637ce7a1051f5b",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-storage-sdk.json",
+      "sha256": "13aa94781291f2ee61edc4ef7642a6a7200206e74f6e0d7e5bd71706e1aa9030",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-workspace-storage-i18n.json",
+      "sha256": "32bfc1576084a5bf9af7ca4a364cd706a39362c51aef9f04bca2da1cad9fe126",
+      "origin": "Fixed shared Memoh source / verbatim generated declarations at 56b38d39fadda858963b36e597dcabd3a0fb0a1d; not restored historical source",
+      "licenseReview": "Existing Memoh project source/license; no third-party dependency introduced.",
+      "preparationChanges": [
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
       ]
     }
   ],

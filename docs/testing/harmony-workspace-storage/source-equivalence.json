@@ -1,0 +1,26 @@
+{
+  "commit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "tree": "596be2d3a5b2471c473af90fdfd6b1c1a91f08bc",
+  "files": {
+    "apps/web/src/pages/workspace-storage/index.vue": {
+      "verbatimShared": true
+    },
+    "apps/web/src/pages/workspace-storage/index.test.ts": {
+      "verbatimShared": true
+    },
+    "apps/web/src/components/file-manager/directory-picker.vue": {
+      "verbatimShared": true
+    },
+    "apps/web/src/routes.ts": {
+      "verbatimShared": true
+    },
+    "apps/web/src/components/settings-sidebar/index.vue": {
+      "verbatimShared": true
+    }
+  },
+  "phoneAdapterCount": 43,
+  "packageDependencyPatches": 2,
+  "contextHostPatchCount": 45,
+  "privateConfigChanged": false,
+  "generatedSDKCurrentWorkspace": true
+}

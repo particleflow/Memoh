@@ -1,0 +1,59 @@
+{
+  "fixedSharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "viewport": [
+    390,
+    844
+  ],
+  "api": "synthetic exact account contract; not real NAS/RPC/SMB",
+  "events": [
+    {
+      "method": "PUT",
+      "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage",
+      "body": {
+        "path": "existing-project"
+      },
+      "mode": "ok"
+    },
+    {
+      "method": "POST",
+      "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage/directories",
+      "body": {
+        "path": "existing-project/mobile-created"
+      },
+      "mode": "ok"
+    },
+    {
+      "method": "POST",
+      "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage/directories",
+      "body": {
+        "path": "existing-project/must-not-create"
+      },
+      "mode": "unavailable"
+    },
+    {
+      "method": "PUT",
+      "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage",
+      "body": {
+        "path": "archive"
+      },
+      "mode": "conflict"
+    }
+  ],
+  "selectedPath": "existing-project",
+  "cancelWithoutSave": true,
+  "nativeBackCancelsDialog": true,
+  "nativeBackReturnsSettings": true,
+  "offlineNotRead": true,
+  "permission403And404DisableSave": true,
+  "unavailable503DisablesWrites": true,
+  "conflict409NotAutoRetried": true,
+  "newDirectoryNotRemovedOnCancel": true,
+  "savedSelectionReadAfterRefresh": true,
+  "noUnexpectedBusinessWrites": true,
+  "loginRetained": true,
+  "pageErrors": [],
+  "actualPhone": false,
+  "realLAN": false,
+  "executionRootCutover": false,
+  "arbitraryNASRootAccess": false
+}

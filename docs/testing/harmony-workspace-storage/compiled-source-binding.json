@@ -1,0 +1,7 @@
+{
+  "reason": "Rename shared locale source file to i18n because existing private-config ignore glob also matches locales; source manifest now includes the reviewed public strings. Normal context regenerated, no product changes.",
+  "webSDKAndUISourceFiles": 1382,
+  "changedGeneratedSourcePaths": [],
+  "reusedTypesTestsAndWebBuild": true,
+  "noHAPRebuild": true
+}

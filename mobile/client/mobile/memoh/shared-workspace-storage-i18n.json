@@ -1,0 +1,44 @@
+{
+  "en": {
+    "workspaceStorage": {
+      "title": "Workspace storage",
+      "choose": "Choose NAS directory",
+      "newDirectory": "New directory",
+      "create": "Create",
+      "saved": "NAS directory saved",
+      "loadFailed": "Unable to read computers",
+      "unavailable": "NAS storage is not configured or its existing LAN share is unavailable",
+      "loading": "Loading computers",
+      "empty": "No registered computers"
+    },
+    "storageUnavailable": "NAS workspace storage is unavailable."
+  },
+  "zh": {
+    "workspaceStorage": {
+      "title": "工作区存储",
+      "choose": "选择 NAS 目录",
+      "newDirectory": "新建目录",
+      "create": "创建",
+      "saved": "NAS 目录已保存",
+      "loadFailed": "暂时无法读取电脑",
+      "unavailable": "NAS 存储未配置或现有内网共享不可用",
+      "loading": "正在读取电脑",
+      "empty": "暂无已登记电脑"
+    },
+    "storageUnavailable": "NAS 工作区存储暂不可用。"
+  },
+  "ja": {
+    "workspaceStorage": {
+      "title": "ワークスペースの保存先",
+      "choose": "NAS フォルダーを選択",
+      "newDirectory": "新しいフォルダー",
+      "create": "作成",
+      "saved": "NAS フォルダーを保存しました",
+      "loadFailed": "コンピューターを読み取れません",
+      "unavailable": "NAS の保存先が未設定、または既存の LAN 共有にアクセスできません",
+      "loading": "コンピューターを読み込み中",
+      "empty": "登録済みのコンピューターはありません"
+    },
+    "storageUnavailable": "NAS ワークスペースの保存先を利用できません。"
+  }
+}

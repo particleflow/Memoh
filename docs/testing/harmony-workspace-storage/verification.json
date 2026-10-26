@@ -1,0 +1,109 @@
+{
+  "base": "b0849bc832cbe82f6c5a5ce4d155857fb9d7ae35",
+  "fixedSharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "fixedSharedTree": "596be2d3a5b2471c473af90fdfd6b1c1a91f08bc",
+  "sharedFilesVerbatim": 5,
+  "generatedFunctions": 3,
+  "generatedTypes": 16,
+  "phoneAdaptersRetained": 43,
+  "types": {
+    "exitCode": 0
+  },
+  "tests": {
+    "passed": 27,
+    "sharedDirectoryPage": 5,
+    "imageTiming": 10,
+    "existingAttachments": 12
+  },
+  "webBuild": {
+    "exitCode": 0
+  },
+  "eslint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 0
+  },
+  "sourceManifest": {
+    "reviewedSources": 153,
+    "sourceAndSupportFiles": 162,
+    "unverifiedHistoricalChanges": 19,
+    "passed": true
+  },
+  "browser": {
+    "fixedSharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+    "viewport": [
+      390,
+      844
+    ],
+    "api": "synthetic exact account contract; not real NAS/RPC/SMB",
+    "events": [
+      {
+        "method": "PUT",
+        "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage",
+        "body": {
+          "path": "existing-project"
+        },
+        "mode": "ok"
+      },
+      {
+        "method": "POST",
+        "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage/directories",
+        "body": {
+          "path": "existing-project/mobile-created"
+        },
+        "mode": "ok"
+      },
+      {
+        "method": "POST",
+        "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage/directories",
+        "body": {
+          "path": "existing-project/must-not-create"
+        },
+        "mode": "unavailable"
+      },
+      {
+        "method": "PUT",
+        "path": "/users/me/runtimes/44444444-4444-4444-8444-444444444444/workspace-storage",
+        "body": {
+          "path": "archive"
+        },
+        "mode": "conflict"
+      }
+    ],
+    "selectedPath": "existing-project",
+    "cancelWithoutSave": true,
+    "nativeBackCancelsDialog": true,
+    "nativeBackReturnsSettings": true,
+    "offlineNotRead": true,
+    "permission403And404DisableSave": true,
+    "unavailable503DisablesWrites": true,
+    "conflict409NotAutoRetried": true,
+    "newDirectoryNotRemovedOnCancel": true,
+    "savedSelectionReadAfterRefresh": true,
+    "noUnexpectedBusinessWrites": true,
+    "loginRetained": true,
+    "pageErrors": [],
+    "actualPhone": false,
+    "realLAN": false,
+    "executionRootCutover": false,
+    "arbitraryNASRootAccess": false
+  },
+  "HAPRebuilt": false,
+  "nativeChangedInThisSlice": false,
+  "SDKRedownloaded": false,
+  "deployed": false,
+  "publicConfigurationEmpty": true,
+  "runtimeConfigOrCredentialsChanged": false,
+  "sourceFileHashes": {
+    "apps/web/src/pages/workspace-storage/index.vue": "e9311bbfd80ffa308e4ba3649b3377e518e8cd09f6ddf4433d30a7daadf7a8df",
+    "apps/web/src/pages/workspace-storage/index.test.ts": "fe48e3cd2bc85568f1a2d767bfee3751a3e03b78dd268ad0eefa61987e7fe735",
+    "apps/web/src/components/file-manager/directory-picker.vue": "5896a4c3f7dfd4f0a8e59f3ec573b322e440b1f6470b8246b44b2efc3fed4ba5",
+    "apps/web/src/routes.ts": "eee23fc9b22a274b0bfd25c6649c46f2b55f3793cca61cd7e71035b83ce4680b",
+    "apps/web/src/components/settings-sidebar/index.vue": "91d5252d631acf185875c95004f5c3fc207b4d95347dabeaa5637ce7a1051f5b"
+  },
+  "screenshotHashes": {
+    "storage-entry-390.png": "8c9ac3ffb6db59ce223797e5a6f8a960599e8677843fbf1e6cd7f5fb02e979e4",
+    "storage-error-390.png": "536b17e6f0be3cc778f3d10c69d5706b98a4c794c16970b1cf65fb93a848306e",
+    "storage-dialog-390.png": "219938841f0fc6f2ff77007a57e350a84af6a7149ca4f6f467718ffa3828ed47"
+  }
+}

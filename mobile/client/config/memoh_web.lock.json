@@ -167,5 +167,73 @@
       "apps/web/src/components/sidebar/session-activity-trigger.test.ts": "44067c1fc4c078c545a3fb77e23643983cf095228f83041e97bd37b07069f57a"
     },
     "sdkOverlaySHA256": "28838d768702181920719351e64d3a20ad0895d7ff8f677412ecbb01fe20e812"
+  },
+  "sharedWorkspaceStorage": {
+    "commit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+    "tree": "596be2d3a5b2471c473af90fdfd6b1c1a91f08bc",
+    "scope": "Shared owned-computer NAS directory configuration only; not execution-root cutover or arbitrary NAS access",
+    "files": {
+      "apps/web/src/pages/workspace-storage/index.vue": {
+        "local": "shared-workspace-storage.vue",
+        "sha256": "e9311bbfd80ffa308e4ba3649b3377e518e8cd09f6ddf4433d30a7daadf7a8df",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/workspace-storage/index.test.ts": {
+        "local": "shared-workspace-storage.test.ts",
+        "sha256": "fe48e3cd2bc85568f1a2d767bfee3751a3e03b78dd268ad0eefa61987e7fe735",
+        "baseSHA256": null
+      },
+      "apps/web/src/components/file-manager/directory-picker.vue": {
+        "local": "shared-workspace-directory-picker.vue",
+        "sha256": "5896a4c3f7dfd4f0a8e59f3ec573b322e440b1f6470b8246b44b2efc3fed4ba5",
+        "baseSHA256": "0078f952d1898b2d932a267ccee941f743f0e8d0088a2726574fb8e4aef50a6c"
+      },
+      "apps/web/src/routes.ts": {
+        "local": "shared-workspace-routes.ts",
+        "sha256": "eee23fc9b22a274b0bfd25c6649c46f2b55f3793cca61cd7e71035b83ce4680b",
+        "baseSHA256": "e5ef00523d78ae71815ea201d1478f4b89a23efcab252dd5d3248cb9b0c828f8"
+      },
+      "apps/web/src/components/settings-sidebar/index.vue": {
+        "local": "shared-workspace-settings-sidebar.vue",
+        "sha256": "91d5252d631acf185875c95004f5c3fc207b4d95347dabeaa5637ce7a1051f5b",
+        "baseSHA256": "06eef6f4688f5bfa36dc0b4169b9f0b7638bbe2ed505c95a70904f1515606857"
+      }
+    },
+    "sdkOverlay": {
+      "local": "shared-workspace-storage-sdk.json",
+      "sha256": "13aa94781291f2ee61edc4ef7642a6a7200206e74f6e0d7e5bd71706e1aa9030",
+      "typeNames": [
+        "GetUsersMeRuntimesByIdWorkspaceStorageData",
+        "GetUsersMeRuntimesByIdWorkspaceStorageError",
+        "GetUsersMeRuntimesByIdWorkspaceStorageErrors",
+        "GetUsersMeRuntimesByIdWorkspaceStorageResponse",
+        "GetUsersMeRuntimesByIdWorkspaceStorageResponses",
+        "PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesData",
+        "PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesError",
+        "PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesErrors",
+        "PostUsersMeRuntimesByIdWorkspaceStorageDirectoriesResponses",
+        "PutUsersMeRuntimesByIdWorkspaceStorageData",
+        "PutUsersMeRuntimesByIdWorkspaceStorageError",
+        "PutUsersMeRuntimesByIdWorkspaceStorageErrors",
+        "PutUsersMeRuntimesByIdWorkspaceStorageResponses",
+        "UserruntimeWorkspaceDirectory",
+        "UserruntimeWorkspaceStorage",
+        "UserruntimeWorkspaceStorageRequest"
+      ],
+      "functions": [
+        "getUsersMeRuntimesByIdWorkspaceStorage",
+        "putUsersMeRuntimesByIdWorkspaceStorage",
+        "postUsersMeRuntimesByIdWorkspaceStorageDirectories"
+      ],
+      "sourceFileSHA256": {
+        "packages/sdk/src/types.gen.ts": "a040d6c9f24a38406019384cf6938dd606b7d0a02a3c663df071443e7ec50afd",
+        "packages/sdk/src/sdk.gen.ts": "6b104ad4d934118fb64f3a98c03e09404b649eee90333a0dfb0826f39807fd13",
+        "packages/sdk/src/index.ts": "6317319a460aeb53e06fb324452b04d508f12a747079b989d63152f9dd01d522"
+      }
+    },
+    "locales": {
+      "local": "shared-workspace-storage-i18n.json",
+      "sha256": "32bfc1576084a5bf9af7ca4a364cd706a39362c51aef9f04bca2da1cad9fe126"
+    }
   }
 }

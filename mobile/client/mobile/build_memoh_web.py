@@ -55,6 +55,11 @@ def inputs():
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-session-activity.vue', 'shared-session-activity.test.ts', 'shared-useSessionActivity.ts'))
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-useBotActivity.ts', 'shared-useBotActivity.test.ts', 'shared-session-activity-trigger.vue', 'shared-activity-sdk.json'))
     files.append(ROOT / 'mobile/memoh/shared-session-activity-trigger.test.ts')
+    files.extend(ROOT / 'mobile/memoh' / name for name in (
+        'shared-workspace-storage.vue', 'shared-workspace-storage.test.ts',
+        'shared-workspace-directory-picker.vue', 'shared-workspace-routes.ts',
+        'shared-workspace-settings-sidebar.vue', 'shared-workspace-storage-sdk.json',
+        'shared-workspace-storage-i18n.json'))
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -836,6 +841,20 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     }
     assert sha(ROOT / 'mobile/memoh/shared-activity-sdk.json') == lock['sharedActivity']['sdkOverlaySHA256'], 'Activity SDK source drift'
     sdk_overlay = json.loads((ROOT / 'mobile/memoh/shared-activity-sdk.json').read_text())
+    workspace = lock['sharedWorkspaceStorage']
+    workspace_sources = {}
+    for destination, item in workspace['files'].items():
+        source_path = ROOT / 'mobile/memoh' / item['local']
+        assert sha(source_path) == item['sha256'], 'Workspace shared source drift'
+        workspace_sources[destination] = source_path.read_bytes()
+    for kind in ('sdkOverlay', 'locales'):
+        assert sha(ROOT / 'mobile/memoh' / workspace[kind]['local']) == workspace[kind]['sha256'], 'Workspace contract drift'
+    workspace_sdk = json.loads((ROOT / 'mobile/memoh' / workspace['sdkOverlay']['local']).read_text())
+    for name, addition in workspace_sdk.items():
+        assert name in sdk_overlay, 'Unexpected workspace SDK target'
+        sdk_overlay[name] += addition
+    workspace_locales = json.loads((ROOT / 'mobile/memoh' / workspace['locales']['local']).read_text())
+
     patches = {}
     context = base / 'official-context.tar'
     if platform == 'harmony':
@@ -856,6 +875,18 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             if entry.linkname.startswith(lock['archivePrefix']):
                 entry.linkname = entry.linkname[len(lock['archivePrefix']):]
             data = source.extractfile(member).read() if member.isfile() else None
+            if name in workspace_sources:
+                assert data is not None and hashlib.sha256(data).hexdigest() == workspace['files'][name]['baseSHA256'], 'Workspace baseline drift'
+                data = workspace_sources[name]
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in workspace_locales}:
+                language = Path(name).stem
+                value = json.loads(data)
+                assert 'workspaceStorage' not in value, 'Workspace locale already present'
+                value['workspaceStorage'] = workspace_locales[language]['workspaceStorage']
+                assert 'storage_unavailable' not in value['errors']['workspace'], 'Workspace error already present'
+                value['errors']['workspace']['storage_unavailable'] = workspace_locales[language]['storageUnavailable']
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
+
             if name in sdk_overlay:
                 data += sdk_overlay[name].encode('utf-8')
                 entry.size = len(data)
@@ -952,6 +983,14 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         for local, destination in {'shared-session-activity.vue': 'apps/web/src/components/sidebar/session-activity.vue', 'shared-session-activity.test.ts': 'apps/web/src/components/sidebar/session-activity.test.ts', 'shared-useSessionActivity.ts': 'apps/web/src/pages/home/composables/useSessionActivity.ts', 'shared-useBotActivity.ts': 'apps/web/src/pages/home/composables/useBotActivity.ts', 'shared-useBotActivity.test.ts': 'apps/web/src/pages/home/composables/useBotActivity.test.ts', 'shared-session-activity-trigger.vue': 'apps/web/src/components/sidebar/session-activity-trigger.vue', 'shared-session-activity-trigger.test.ts': 'apps/web/src/components/sidebar/session-activity-trigger.test.ts'}.items():
             data = (ROOT / 'mobile/memoh' / local).read_bytes()
             assert hashlib.sha256(data).hexdigest() == lock['sharedActivity']['files'][destination], 'Shared activity source drift'
+            entry = tarfile.TarInfo(destination)
+            entry.size = len(data)
+            entry.mode = 0o644
+            target.addfile(entry, io.BytesIO(data))
+        for destination, item in workspace['files'].items():
+            if item['baseSHA256'] is not None:
+                continue
+            data = workspace_sources[destination]
             entry = tarfile.TarInfo(destination)
             entry.size = len(data)
             entry.mode = 0o644

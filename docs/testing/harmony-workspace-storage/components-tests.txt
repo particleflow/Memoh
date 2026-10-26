@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/workspace-storage-20261026/context/checkout
+> vitest --run --testTimeout=15000 apps/web/src/pages/workspace-storage/index.test.ts apps/web/src/components/file-manager/directory-picker.test.ts apps/web/src/lib/harmony-image-timing.test.ts apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/workspace-storage-20261026/context/checkout
+
+
+ Test Files  3 passed (3)
+      Tests  27 passed (27)
+   Start at  19:19:25
+   Duration  24.57s (transform 19.65s, setup 0ms, import 29.04s, tests 2.30s, environment 4.95s)
