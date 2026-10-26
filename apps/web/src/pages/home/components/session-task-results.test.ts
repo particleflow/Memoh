@@ -11,6 +11,8 @@ import { openAssetPreviewKey } from '../composables/useFileManagerProvider'
 vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'wrong-global-bot' }) }))
 import { useSessionTasks, type TaskScope } from '../composables/useSessionTasks'
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), files: vi.fn() }))
+const transfer = vi.hoisted(() => ({ save: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/media-transfer', () => ({ saveMediaDownload: transfer.save, MediaRecoveryError: class extends Error {} }))
 vi.mock('@memohai/sdk', () => ({
   getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdObservation: vi.fn().mockResolvedValue({ data: { operation_id: 'task', native: { availability: 'connection_unavailable' } } }),
   getBotsByBotIdSessionsBySessionIdTasks: api.list,
@@ -21,6 +23,7 @@ let app: ReturnType<typeof createApp>
 let root: HTMLDivElement
 beforeEach(() => {
   vi.useFakeTimers()
+  transfer.save.mockClear()
   client.setConfig({ baseUrl: '/api' })
   localStorage.setItem('token', 'synthetic-token')
   vi.stubGlobal('requestAnimationFrame', (fn: FrameRequestCallback) => { fn(0); return 0 })
@@ -93,8 +96,14 @@ describe.each(['web', 'native'])('native committed attachment access in %s host'
     if (host === 'web') {
       expect(preview).toHaveBeenCalledWith(expect.objectContaining({ botId: 'specialist', contentHash: hash, src: undefined }))
       expect(opened).toHaveBeenCalledOnce()
-      expect(download).not.toHaveBeenCalled()
-    } else expect(download).toHaveBeenCalledOnce()
+      expect(transfer.save).not.toHaveBeenCalled()
+    } else {
+      // This dialog-only host has no preview injection or phone byte bridge.
+      // Its fallback must use the shared durable downloader with the reader
+      // identity, rather than a bare URL or the global Bot.
+      expect(transfer.save).toHaveBeenCalledExactlyOnceWith('specialist', hash, 42, undefined, 'output', expect.any(AbortSignal))
+    }
+    expect(download).not.toHaveBeenCalled()
     deliveries.value = { ...deliveries.value, error: { status: 403 } }
     await nextTick()
     expect(root.querySelectorAll('a')).toHaveLength(0)
