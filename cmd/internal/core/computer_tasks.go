@@ -41,7 +41,7 @@ func computerTaskAuthorizer(permissions agenvo.PermissionChecker, resolve func(c
 			}
 			resolved, err := resolve(ctx, b.BotID, target)
 			if errors.Is(err, workspace.ErrRemoteRuntimeOffline) {
-				// Resolving an Agenvo target probes the existing connection.
+				// Native resolution checks the selected Runtime connection.
 				// Availability/authentication failure is not a scope denial; all
 				// binding and permission checks above still apply unchanged.
 				return computertask.ErrPreflightUnavailable

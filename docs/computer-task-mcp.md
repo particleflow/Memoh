@@ -44,7 +44,7 @@ that brain on the PC or replacing the workspace runtime.
 
 | Tool | Effect |
 | --- | --- |
-| `computer_targets` | Bot-authorized Agenvo targets within conversation scope; no raw connector/device/instance identifiers. Availability is explicitly not probed. |
+| `computer_targets` | Bot-authorized native Memoh Runtime targets within conversation scope; no raw connector/device/instance identifiers. Availability is explicitly not probed. |
 | `computer_workspaces` | Bounded native workspace discovery on one authorized PC, with separate authentication/connection/device states. |
 | `computer_task_recover` | Read the original owned operation and observe saved workspace/pane/agent references; no terminal input, log ingestion, resubmission or receipt rewrite. |
 | `computer_task_submit` | Fixed `foreground_bash` or configured `herdr_pi_task`, optionally selecting a returned target. |
@@ -96,8 +96,7 @@ confinement of arbitrary programs or unknown third-party tools.
 ## Existing registration and Pi configuration
 
 Registration and per-Bot grants reuse the existing account runtime tables.
-`PUT /users/me/runtimes/{id}/agenvo-agent` updates an existing owner registration
-with `{provider, model, config_dir, path?}`. An empty profile disables Pi tasks.
+`PUT /users/me/runtimes/{id}/native-herdr` updates an existing owned native Runtime. Its `agent` field contains `{execution_mode: "pi-json-v1", provider, model, config_dir, path?}`. An empty Agent profile disables Pi tasks. Legacy Agenvo discovery/configuration routes are removed.
 Updates use owner checks and compare-and-swap; they do not create a duplicate
 connection, credentials, default target or grants. Actual paths and secrets
 belong only in private deployment configuration. The response advertises
@@ -113,7 +112,7 @@ its business tools; this service does not change a global shell or vendor code.
 
 Business workdirs use `.`/root-relative paths resolved against the current
 registered root. Existing in-root absolute compatibility is retained by the
-Agenvo adapter. Traversal, cross-drive and other invalid forms are rejected.
+shared computer task adapter. Traversal, cross-drive and other invalid forms are rejected.
 Lexical checks do not prevent symlink/junction escapes.
 
 ## Receipts, uncertainty and migration
@@ -126,7 +125,7 @@ reservation is reported as unknown, not proof a worker is running. A failed
 post-dispatch persistence attempt retains the receipt in the error response.
 A different task blocked by an unsettled slot returns an explicit conflict and
 `blocked_by_operation`, not a normal receipt for the new task. Ordinary `exec`
-cannot dispatch Agenvo commands, even from a NAS conversation; all foreground
+cannot dispatch managed PC commands, even from a NAS conversation; all foreground
 commands must use this durable service. Native NAS exec is unchanged. Foreground
 workspace/pane/request IDs and cleanup requirements are stored for investigation.
 The ledger target fingerprint is pinned through every subsequent authorization

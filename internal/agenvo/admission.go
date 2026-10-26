@@ -55,6 +55,9 @@ func (s *Service) admissionTarget(ctx context.Context, owner, runtime string) (a
 	if err != nil {
 		return nil, row, Target{}, ErrForbidden
 	}
+	if row.Provider != "memoh" && s.call == nil {
+		return nil, row, Target{}, ErrLegacyRetired
+	}
 	var target Target
 	if row.Provider == "memoh" {
 		target, err = DecodeNativeTarget(row.ID, row.ProviderConfig)

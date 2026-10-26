@@ -38,8 +38,8 @@ type NativeHerdrIdentity struct {
 
 type CreateRuntimeRequest struct {
 	Name     string         `json:"name"`
-	Provider string         `json:"provider,omitempty"`
-	Agenvo   *agenvo.Target `json:"agenvo,omitempty"`
+	Provider string         `json:"provider,omitempty" enums:"memoh"`
+	Agenvo   *agenvo.Target `json:"agenvo,omitempty" swaggerignore:"true"`
 }
 
 type HandshakeInfo struct {

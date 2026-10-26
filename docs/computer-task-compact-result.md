@@ -1,5 +1,7 @@
 # Compact Pi completion results
 
+> Current routing: legacy Agenvo enrollment and execution are retired. Use an owned native Memoh Runtime with `/users/me/runtimes/{id}/native-herdr`. Agenvo wire examples below are historical protocol references, not installation/OAuth instructions. The shared `internal/agenvo` ledger remains in use by native Herdr/Pi. See [retirement audit](agenvo-retirement-audit.md).
+
 This is a separate, unshipped follow-up to the merged versioned path resolver in PR #11.
 It does not change Pi, Memoh's Agent runtime/contextview, the configured provider,
 MCP/skills settings, task authorization, or production storage locations.

@@ -1,5 +1,5 @@
 // Package nativeherdr calls an existing Herdr server through its official CLI.
-// It owns transport receipts only; business completion remains in Agenvo's ledger.
+// It owns transport receipts only; business completion remains in the shared Memoh task ledger.
 package nativeherdr
 
 import (

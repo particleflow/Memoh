@@ -767,54 +767,6 @@ definitions:
       request_id:
         type: string
     type: object
-  agenvo.ChangeEndpointConfiguration:
-    properties:
-      expected_configuration_fingerprint:
-        type: string
-      locator:
-        allOf:
-        - $ref: '#/definitions/agenvo.EndpointLocator'
-        description: A required object sets the locator. An explicit empty object
-          clears it.
-    required:
-    - expected_configuration_fingerprint
-    - locator
-    type: object
-  agenvo.DiscoveredInstance:
-    properties:
-      device_id:
-        type: string
-      device_name:
-        type: string
-      instance_id:
-        type: string
-      name:
-        type: string
-      online:
-        type: boolean
-    type: object
-  agenvo.EndpointConfiguration:
-    properties:
-      configuration_fingerprint:
-        type: string
-      connection_id:
-        type: string
-      device_id:
-        type: string
-      instance_id:
-        type: string
-      locator:
-        $ref: '#/definitions/agenvo.EndpointLocator'
-      target_fingerprint:
-        type: string
-    type: object
-  agenvo.EndpointLocator:
-    properties:
-      host_root:
-        type: string
-      program_path:
-        type: string
-    type: object
   agenvo.NativeHerdrProfile:
     properties:
       agent:
@@ -869,31 +821,6 @@ definitions:
       reference_match:
         type: string
       workspace:
-        type: string
-    type: object
-  agenvo.Target:
-    properties:
-      agent:
-        $ref: '#/definitions/agenvo.AgentProfile'
-      bash_path:
-        type: string
-      connection_id:
-        type: string
-      device_id:
-        type: string
-      herdr_cli:
-        type: string
-      herdr_config_root:
-        type: string
-      instance_id:
-        type: string
-      native_runtime_id:
-        type: string
-      producer:
-        $ref: '#/definitions/agenvo.ProducerLocator'
-      session:
-        type: string
-      work_dir:
         type: string
     type: object
   apperror.Fault:
@@ -4338,13 +4265,6 @@ definitions:
         type: integer
       reasoning_tokens:
         type: integer
-    type: object
-  handlers.DiscoverAgenvoRequest:
-    properties:
-      connection_id:
-        type: string
-    required:
-    - connection_id
     type: object
   handlers.FSArchiveRequest:
     properties:
@@ -8274,11 +8194,11 @@ definitions:
     type: object
   userruntime.CreateRuntimeRequest:
     properties:
-      agenvo:
-        $ref: '#/definitions/agenvo.Target'
       name:
         type: string
       provider:
+        enum:
+        - memoh
         type: string
     type: object
   userruntime.NativeHerdrIdentity:
@@ -21422,9 +21342,8 @@ paths:
     post:
       consumes:
       - application/json
-      description: Register a native Remote Runtime credential or an Agenvo command
-        target backed by an existing account-owned MCP connection. Agenvo registrations
-        return no API token.
+      description: Register a native Memoh Remote Runtime credential. Legacy providers
+        are retired.
       parameters:
       - description: Runtime configuration
         in: body
@@ -21553,118 +21472,6 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Pause or resume new work for an owned native instance
-      tags:
-      - user-runtimes
-  /users/me/runtimes/{id}/agenvo-agent:
-    put:
-      consumes:
-      - application/json
-      description: Updates non-secret provider/model/config-directory references without
-        creating credentials, changing the device mapping, or granting Bots. An empty
-        profile disables Agent tasks.
-      parameters:
-      - description: Existing runtime ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Private deployment profile
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/agenvo.AgentProfile'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/userruntime.Runtime'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/server.Problem'
-      summary: Configure Pi on an existing owned Agenvo computer
-      tags:
-      - user-runtimes
-  /users/me/runtimes/{id}/agenvo-endpoint:
-    get:
-      description: No native call. Configuration is not filesystem verification, host
-        identity proof or stop authorization. An absent locator means unconfigured.
-      parameters:
-      - description: Existing owned runtime ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/agenvo.EndpointConfiguration'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/server.Problem'
-      summary: Read the owned endpoint location configuration
-      tags:
-      - user-runtimes
-    put:
-      consumes:
-      - application/json
-      description: Compare-and-swap the existing registration's owner-only program_path
-        and host_root. Explicit empty locator clears configuration; null/omitted locator
-        is invalid. Only an existing native read-only probe is issued. No program
-        runs, process stops, workspace changes or credentials are created. Live admission
-        pause blocks changes. Unknown responses require GET reconciliation, not host/task
-        replay.
-      parameters:
-      - description: Existing owned runtime ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Expected configuration fingerprint and locator
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/agenvo.ChangeEndpointConfiguration'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/agenvo.EndpointConfiguration'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "409":
-          description: Conflict
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/server.Problem'
-      summary: Configure an existing owned endpoint location
       tags:
       - user-runtimes
   /users/me/runtimes/{id}/native-herdr:
@@ -21806,41 +21613,6 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Enroll or explicitly rotate an owned computer file credential
-      tags:
-      - user-runtimes
-  /users/me/runtimes/agenvo/discover:
-    post:
-      consumes:
-      - application/json
-      parameters:
-      - description: Existing MCP connection
-        in: body
-        name: request
-        required: true
-        schema:
-          $ref: '#/definitions/handlers.DiscoverAgenvoRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/agenvo.DiscoveredInstance'
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/server.Problem'
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/server.Problem'
-      summary: List Herdr instances from an existing account-owned MCP connection
       tags:
       - user-runtimes
   /video-models:

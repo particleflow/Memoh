@@ -183,8 +183,8 @@ func TestPrivateDeviceNoStoreThroughServerMiddleware(t *testing.T) {
 		t.Fatal("cache policy changed authentication-unavailable device status")
 	}
 	var runtimes []userruntime.Runtime
-	if err := json.Unmarshal(request(t, http.MethodGet, account, valid, 200, "no-store"), &runtimes); err != nil || len(runtimes) != 1 {
-		t.Fatalf("account runtime projection failed: %v", err)
+	if err := json.Unmarshal(request(t, http.MethodGet, account, valid, 200, "no-store"), &runtimes); err != nil || len(runtimes) != 0 {
+		t.Fatalf("retired account runtime was exposed: %v", err)
 	}
 	for _, path := range []string{base, account} {
 		request(t, http.MethodPatch, path, valid, 405, "no-store")

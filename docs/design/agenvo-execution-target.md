@@ -1,5 +1,7 @@
 # Agenvo execution target
 
+> Archived design: Connect Agenvo, discovery and legacy configuration routes are removed. Do not follow the setup/OAuth steps below. Native Runtime reuses the task ledger without this transport. See [retirement audit](../agenvo-retirement-audit.md).
+
 This integration registers a command-only Windows target in the existing
 account computer registry. It reuses `user_runtimes`, Bot mounts and session
 `workspace_target_id`; it does not implement `memoh.runtime.v1`, a scheduler, or

@@ -1,5 +1,7 @@
 # Native Runtime adapter scope review
 
+> Historical scope review: the pre-change limitations in the table below describe the prior Agenvo-only baseline. Current routing uses native Memoh Runtime; legacy entry points are retired. See [retirement audit](agenvo-retirement-audit.md).
+
 The implementation is a provider adapter on base `9601ac062a3b65477db8db76bcaa521265ba7ee2`. Existing configuration is preferred wherever it supplies the required behavior. No production deployment, enrollment, credential creation, network change or old-connection disable is part of this source delivery.
 
 ## Existing configuration and interfaces retained

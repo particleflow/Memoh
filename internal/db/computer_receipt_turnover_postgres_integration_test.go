@@ -46,7 +46,7 @@ func exerciseReceiptTurnover(ctx context.Context, t *testing.T, store *postgress
 	if err != nil {
 		t.Fatal(err)
 	}
-	target, err := agenvo.DecodeTarget(mount.RuntimeProviderConfig)
+	target, err := agenvo.DecodeRuntimeTarget(mount.RuntimeProvider, mount.RuntimeID, mount.RuntimeProviderConfig)
 	if err != nil {
 		t.Fatal(err)
 	}

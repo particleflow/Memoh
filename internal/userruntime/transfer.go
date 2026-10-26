@@ -238,7 +238,7 @@ func transferRuntimeTarget(r dbstore.RuntimeTransferRecord) (agenvo.Target, erro
 	if r.Provider == "memoh" {
 		return agenvo.DecodeNativeTarget(r.RuntimeID, r.Config)
 	}
-	return agenvo.DecodeTarget(r.Config)
+	return agenvo.Target{}, ErrTransferCredential
 }
 
 func transferIdentityDigest(t agenvo.Target) (string, error) {
