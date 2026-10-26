@@ -1,0 +1,32 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/lib/harmony-image-timing.test.ts -t 'does not overwrite inline-card stages'
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/lib/harmony-image-timing.test.ts (11 tests | 1 failed | 10 skipped) 24ms
+     × does not overwrite inline-card stages when the same image is explicitly read again 22ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-image-timing.test.ts > temporary image timing at real phone component seams > does not overwrite inline-card stages when the same image is explicitly read again
+AssertionError: expected 11 to be less than or equal to 6
+ ❯ src/lib/harmony-image-timing.test.ts:116:25
+    114|     const row = control.take().rows[0]!
+    115|     expect(http).toHaveBeenCalledTimes(2) // Both existing explicit re…
+    116|     expect(row.hashEnd).toBeLessThanOrEqual(firstReadEnd)
+       |                         ^
+    117|     expect(row.request).toBeLessThanOrEqual(firstReadEnd)
+    118|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 10 skipped (11)
+   Start at  19:40:12
+   Duration  2.82s (transform 1.10s, setup 0ms, import 1.48s, tests 24ms, environment 1.06s)
+
+ ELIFECYCLE  Test failed. See above for more details.

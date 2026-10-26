@@ -234,6 +234,16 @@
     "locales": {
       "local": "shared-workspace-storage-i18n.json",
       "sha256": "32bfc1576084a5bf9af7ca4a364cd706a39362c51aef9f04bca2da1cad9fe126"
+    },
+    "compatibleUnified": {
+      "commit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
+      "tree": "4a8eb980b27d1f3e5a9a103734526ae0321cc54b",
+      "webSDKDiffFromPinnedShared": "empty; verified using git diff apps/web packages/sdk",
+      "serverOnlyChanges": [
+        "scoped delegated image input references",
+        "retained native result read diagnostics"
+      ],
+      "executionRootCutover": false
     }
   }
 }

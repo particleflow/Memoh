@@ -1,0 +1,15 @@
+{
+  "sourceBase": "194473f64cacbf622e62359ca576bd109571fc4f",
+  "unifiedCommit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
+  "unifiedTree": "4a8eb980b27d1f3e5a9a103734526ae0321cc54b",
+  "webSDKDeltaFrom56b": [],
+  "directorySharedFilesVerbatim": 5,
+  "readyHashAndScopedAuthorizationRetained": true,
+  "version": "1.0.17",
+  "versionCode": 1000017,
+  "SDKReused": true,
+  "capacityFreeBeforeGB": 13,
+  "executionRootCutover": false,
+  "physicalLAN": false,
+  "phonePerformance": false
+}

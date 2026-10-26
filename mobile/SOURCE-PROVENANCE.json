@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "ab6d43a4f7e88a6d3e1259bf8742db43b6add0a44b6519ee0339f4620fd8ef55",
+      "sha256": "f714d4c3a2d8b218d757bd786dc0f2660e4c10eae80d38a78a8978178399565a",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -44,7 +44,8 @@
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
         "Clarify the corrected monitor/management entry boundary; do not remove the only permanent session monitor.",
         "Source-only correction: task trigger reuses the unified minimal activity list, never SessionTasks detail; sync only activity GET/type contract and avoid inactive mobile panel mounts. No version bump or HAP build.",
-        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP."
+        "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP.",
+        "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -565,7 +566,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "0a5be59c265472b5c0c365005f93b5fd62a6d09a432c13304984106ac81a68ca",
+      "sha256": "5d7d677613e21ae3ac4e31e4f25222c14e3b46f61d557511cb635a3222e63e9b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -581,7 +582,8 @@
         "Advance the existing app version to 1.0.13/1000013 for the exact Back+microphone bugfix candidate; bundle, permissions and deployment configuration unchanged.",
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
         "Advance to 1.0.15 for the confirmed monitor/management entry regression; preserve application identity, permissions and stored configuration.",
-        "Advance to 1.0.16 for the approved minimal unified activity UI and hidden-panel mount change; no image probe, permissions, identity or private-config change."
+        "Advance to 1.0.16 for the approved minimal unified activity UI and hidden-panel mount change; no image probe, permissions, identity or private-config change.",
+        "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
@@ -1482,20 +1484,22 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-image-timing.ts",
-      "sha256": "1534b2be694a161f9fb71e8244ce2bf736e0e9588ab25b460afb9f597dbb3c21",
+      "sha256": "2563a322084e446aeece56c70c30efa7401cae66a39d81c88e45a792ce2f170c",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
-        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP."
+        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
+        "Regression-proven fix: claim each inline timing handle once so a later same-object lightbox/save read cannot overwrite first-display stages; actual reads/auth/hash checks unchanged."
       ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-image-timing.test.ts",
-      "sha256": "3ac534fbfe2309451d920b9b5f8660b4cf9c5aa0c9b4c0e18b92aac6231b2475",
+      "sha256": "601a1dd5b6e7d61572cb0dc3ae760bf65956cd35689abd5c1f7e0eac53794eb8",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
-        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP."
+        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
+        "Regression-proven fix: claim each inline timing handle once so a later same-object lightbox/save read cannot overwrite first-display stages; actual reads/auth/hash checks unchanged."
       ]
     },
     {

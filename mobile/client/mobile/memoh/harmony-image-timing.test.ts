@@ -104,6 +104,18 @@ describe('temporary image timing at real phone component seams', () => {
     const row = control.take().rows[0]!
     expect(row.headers).toBeUndefined(); expect(row.request).toBeUndefined()
   })
+  it('does not overwrite inline-card stages when the same image is explicitly read again', async () => {
+    let clock = 0
+    vi.spyOn(performance, 'now').mockImplementation(() => ++clock)
+    const att = attachment(); control.arm(); timing.imageTimingCard(att)
+    await originalBlob(att)
+    const firstReadEnd = clock
+    await originalBlob(att) // Existing lightbox/save reader may reuse this same object.
+    const row = control.take().rows[0]!
+    expect(http).toHaveBeenCalledTimes(2) // Both existing explicit reads still execute.
+    expect(row.hashEnd).toBeLessThanOrEqual(firstReadEnd)
+    expect(row.request).toBeLessThanOrEqual(firstReadEnd)
+  })
   it('copies only a matching recent fetch responseEnd, never a URL or masked bytes', async () => {
     vi.useFakeTimers()
     vi.spyOn(performance, 'now').mockReturnValue(50)

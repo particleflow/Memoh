@@ -1,0 +1,65 @@
+{
+  "versionName": "1.0.17",
+  "versionCode": 1000017,
+  "bundleName": "cloud.begonia.workassistant",
+  "hapName": "garnet-assistant-1.0.17-1000017-api26-release-unsigned.hap",
+  "hapBytes": 35638493,
+  "hapSHA256": "07c532d5516cb326f2c3c1cc28d3f26f276a3f06d78bed399fbf06260a95739b",
+  "sourceIdentitySHA256": "46c98813aaa8c38256488fc967bdc073adf58230ceab3d418af0c380de1ebe9f",
+  "formalInputs": 124,
+  "sdkVersion": "26.0.0.105",
+  "officialApi26Compile": true,
+  "crc": true,
+  "resourceDigests": true,
+  "identityPermissionsUnchanged": true,
+  "releaseMode": true,
+  "signed": false,
+  "publicConfigurationEmpty": true,
+  "publicConfigBytes": 8192,
+  "packageMemberCount": 818,
+  "featurePresence": {
+    "workspace-storage": [
+      "resources/rawfile/client-web/assets/router-Cmo2oB7V.js",
+      "resources/rawfile/client-web/assets/settings-section-D1KzgJ0e.js",
+      "resources/rawfile/client-web/assets/sdk.gen-Cm5FFMhJ.js",
+      "resources/rawfile/source-build.json",
+      "ets/modules.abc"
+    ],
+    "__garnetImageTiming": [
+      "resources/rawfile/client-web/assets/chat-list-BFpTPHBb.js",
+      "ets/modules.abc"
+    ],
+    "GarnetImageTiming:": [
+      "ets/modules.abc"
+    ]
+  },
+  "explicitCredentialAndPrivateAuthorityScan": {
+    "members": 818,
+    "findings": [],
+    "arbitraryEncodingExhaustiveness": false
+  },
+  "reusedFunctionalTests": {
+    "sharedDirectory": 5,
+    "existingScopedAttachments": 12
+  },
+  "affectedTimingTests": 11,
+  "timingRepeatedReadRegression": {
+    "baselineFailed": true,
+    "fixedPassed": true,
+    "actualExtraReadsStillAllowed": true
+  },
+  "initialCandidate": "compiled but rejected before publication for measurement-overwrite defect; private original/logs retained",
+  "unifiedCommit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
+  "unifiedTree": "4a8eb980b27d1f3e5a9a103734526ae0321cc54b",
+  "workspaceAPISharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "WebSDKDiffFrom56b": [],
+  "phoneAdaptersRetained": 43,
+  "privateConfigurationInjected": false,
+  "executionRootCutover": false,
+  "arbitraryNASDirectoryAccess": false,
+  "physicalLAN": false,
+  "crossBotFieldAcceptance": false,
+  "ArkWebImagePerformanceMeasured": false,
+  "phoneAcceptance": false,
+  "SDKDownloaded": false
+}

@@ -8,6 +8,7 @@ type Row = { id: number; card: number; request?: number; headers?: number; respo
 const lifetime = 120_000
 let generation = 0, armed = false, timer: ReturnType<typeof setTimeout> | undefined
 let rows: Row[] = [], cards = new WeakMap<object, Handle>(), blobs = new WeakMap<Blob, Handle>()
+let requested = new WeakSet<object>()
 const urls = new Map<string, Handle>() // Private transient Blob URLs; never serialized.
 let observer: PerformanceObserver | undefined, paintSupported = false
 const now = () => performance.now()
@@ -16,7 +17,7 @@ const row = (handle?: Handle) => handle?.generation === generation ? rows[handle
 function clear() {
   generation++; armed = false; clearTimeout(timer); timer = undefined
   observer?.disconnect(); observer = undefined; paintSupported = false
-  rows = []; cards = new WeakMap(); blobs = new WeakMap(); urls.clear()
+  rows = []; cards = new WeakMap(); requested = new WeakSet(); blobs = new WeakMap(); urls.clear()
 }
 function snapshot() {
   // Whitelist numeric fields again on native readback; never return entry/attachment objects.
@@ -51,7 +52,11 @@ export function imageTimingCard(attachment: object): void {
   cards.set(attachment, handle); rows.push({ id: handle.id, card: now() })
 }
 export function imageTimingHandle(attachment: object): Handle | undefined {
-  return armed ? cards.get(attachment) : undefined
+  // Claim only the inline card's first read; lightbox/save reuse must not overwrite it.
+  if (!armed || requested.has(attachment)) return undefined
+  const handle = cards.get(attachment)
+  if (handle) requested.add(attachment)
+  return handle
 }
 export function imageTimingMark(handle: Handle | undefined, phase: 'body' | 'hashStart' | 'hashEnd', bytes?: number): void {
   const value = row(handle); if (!value || !armed) return
