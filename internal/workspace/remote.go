@@ -93,12 +93,9 @@ type ResolvedWorkspaceTarget struct {
 // RemoteWorkspaceService owns persistent remote mounts. Live runtime
 // connections remain owned by userruntime.Service.
 type RemoteWorkspaceService struct {
-	agenvo   *agenvo.Service
 	store    dbstore.BotRemoteRuntimeBindingStore
 	runtimes runtimeConnectionResolver
 }
-
-func (s *RemoteWorkspaceService) SetAgenvoService(provider *agenvo.Service) { s.agenvo = provider }
 
 type runtimeConnectionResolver interface {
 	Connection(runtimeID string) (*userruntime.Connection, bool)
@@ -137,6 +134,9 @@ func (s *RemoteWorkspaceService) ListMounts(ctx context.Context, botID string) (
 	}
 	targets := make([]WorkspaceTarget, 0, len(records))
 	for _, record := range records {
+		if record.RuntimeProvider == agenvo.Provider {
+			continue
+		}
 		targets = append(targets, s.target(ctx, record))
 	}
 	return targets, nil
@@ -281,29 +281,7 @@ func (s *RemoteWorkspaceService) ResolveMount(ctx context.Context, botID, target
 
 func (s *RemoteWorkspaceService) resolveRecord(ctx context.Context, record dbstore.BotRemoteRuntimeBindingRecord) (ResolvedWorkspaceTarget, error) {
 	if record.RuntimeProvider == agenvo.Provider {
-		if record.RuntimeUserID != record.BotOwnerUserID {
-			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeOwnerMismatch
-		}
-		if record.RuntimeRevoked {
-			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeRevoked
-		}
-		if s.agenvo == nil {
-			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeOffline
-		}
-		if err := s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig); err != nil {
-			return ResolvedWorkspaceTarget{}, ErrRemoteRuntimeOffline
-		}
-		config, err := agenvo.DecodeTarget(record.RuntimeProviderConfig)
-		if err != nil {
-			return ResolvedWorkspaceTarget{}, err
-		}
-		return ResolvedWorkspaceTarget{
-			TargetID: record.ID, Kind: WorkspaceTargetRemote, Name: record.RuntimeName, Primary: record.IsPrimary,
-			Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: config.WorkDir},
-			Approval: toolApprovalConfig(record.ToolApproval), Execute: func(_ context.Context, _ agenvo.Request) (agenvo.Result, error) {
-				return agenvo.Result{State: "not_started"}, agenvo.ErrComputerTaskRequired
-			},
-		}, nil
+		return ResolvedWorkspaceTarget{}, agenvo.ErrLegacyRetired
 	}
 	client, connection, err := s.clientForRecord(record)
 	if err != nil {
@@ -355,9 +333,6 @@ func (s *RemoteWorkspaceService) EnsurePrimaryReady(ctx context.Context, botID s
 	if err != nil || !primary {
 		return primary, err
 	}
-	if target.Info.Backend == bridge.WorkspaceBackendAgenvo {
-		return true, nil
-	}
 	entry, err := target.Client.Stat(ctx, target.Info.DefaultWorkDir)
 	if err != nil {
 		return true, fmt.Errorf("check remote workspace: %w", err)
@@ -389,7 +364,7 @@ func (s *RemoteWorkspaceService) getRecord(ctx context.Context, botID, targetID 
 		return dbstore.BotRemoteRuntimeBindingRecord{}, ErrWorkspaceTargetNotFound
 	}
 	record, err := s.store.GetMount(ctx, botID, targetID)
-	if errors.Is(err, db.ErrNotFound) {
+	if errors.Is(err, db.ErrNotFound) || err == nil && record.RuntimeProvider == agenvo.Provider {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, ErrWorkspaceTargetNotFound
 	}
 	return record, err
@@ -406,6 +381,9 @@ func (s *RemoteWorkspaceService) getPrimaryRecord(ctx context.Context, botID str
 	record, err := s.store.GetPrimaryMount(ctx, botID)
 	if errors.Is(err, db.ErrNotFound) {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, ErrRemoteWorkspaceNotBound
+	}
+	if err == nil && record.RuntimeProvider == agenvo.Provider {
+		return record, agenvo.ErrLegacyRetired
 	}
 	return record, err
 }
@@ -454,15 +432,7 @@ func (s *RemoteWorkspaceService) target(ctx context.Context, record dbstore.BotR
 	case record.RuntimeRevoked:
 		target.Status = WorkspaceTargetStatusRevoked
 	case record.RuntimeProvider == agenvo.Provider:
-		target.Capabilities = []string{agenvo.CapabilityForegroundExec}
-		if config, err := agenvo.DecodeTarget(record.RuntimeProviderConfig); err == nil && config.Agent != (agenvo.AgentProfile{}) {
-			target.Capabilities = append(target.Capabilities, "herdr_pi_task")
-		}
-		target.Status = "connection_unavailable"
-		if s.agenvo != nil {
-			target.Status = agenvo.Availability(s.agenvo.Probe(ctx, record.RuntimeUserID, record.RuntimeProviderConfig))
-			target.Online = target.Status == WorkspaceTargetStatusOnline
-		}
+		target.Status = WorkspaceTargetStatusRevoked
 	case s.runtimes == nil:
 		target.Status = WorkspaceTargetStatusOffline
 	default:

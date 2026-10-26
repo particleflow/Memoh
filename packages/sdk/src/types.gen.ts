@@ -465,36 +465,6 @@ export type AgenvoChangeAdmission = {
     request_id?: string;
 };
 
-export type AgenvoChangeEndpointConfiguration = {
-    expected_configuration_fingerprint: string;
-    /**
-     * A required object sets the locator. An explicit empty object clears it.
-     */
-    locator: AgenvoEndpointLocator;
-};
-
-export type AgenvoDiscoveredInstance = {
-    device_id?: string;
-    device_name?: string;
-    instance_id?: string;
-    name?: string;
-    online?: boolean;
-};
-
-export type AgenvoEndpointConfiguration = {
-    configuration_fingerprint?: string;
-    connection_id?: string;
-    device_id?: string;
-    instance_id?: string;
-    locator?: AgenvoEndpointLocator;
-    target_fingerprint?: string;
-};
-
-export type AgenvoEndpointLocator = {
-    host_root?: string;
-    program_path?: string;
-};
-
 export type AgenvoNativeHerdrProfile = {
     agent?: AgenvoAgentProfile;
     bash_path: string;
@@ -520,20 +490,6 @@ export type AgenvoReferenceObservation = {
     reason?: string;
     reference_match?: string;
     workspace?: string;
-};
-
-export type AgenvoTarget = {
-    agent?: AgenvoAgentProfile;
-    bash_path?: string;
-    connection_id?: string;
-    device_id?: string;
-    herdr_cli?: string;
-    herdr_config_root?: string;
-    instance_id?: string;
-    native_runtime_id?: string;
-    producer?: AgenvoProducerLocator;
-    session?: string;
-    work_dir?: string;
 };
 
 export type ApperrorFault = 'client' | 'server' | 'dependency' | 'canceled';
@@ -2436,10 +2392,6 @@ export type HandlersDailyTokenUsage = {
     input_tokens?: number;
     output_tokens?: number;
     reasoning_tokens?: number;
-};
-
-export type HandlersDiscoverAgenvoRequest = {
-    connection_id: string;
 };
 
 export type HandlersFsArchiveRequest = {
@@ -4804,9 +4756,8 @@ export type UserruntimeChangeTransferCredentialRequest = {
 };
 
 export type UserruntimeCreateRuntimeRequest = {
-    agenvo?: AgenvoTarget;
     name?: string;
-    provider?: string;
+    provider?: 'memoh';
 };
 
 export type UserruntimeNativeHerdrIdentity = {
@@ -19814,42 +19765,6 @@ export type PostUsersMeRuntimesResponses = {
 
 export type PostUsersMeRuntimesResponse = PostUsersMeRuntimesResponses[keyof PostUsersMeRuntimesResponses];
 
-export type PostUsersMeRuntimesAgenvoDiscoverData = {
-    /**
-     * Existing MCP connection
-     */
-    body: HandlersDiscoverAgenvoRequest;
-    path?: never;
-    query?: never;
-    url: '/users/me/runtimes/agenvo/discover';
-};
-
-export type PostUsersMeRuntimesAgenvoDiscoverErrors = {
-    /**
-     * Bad Request
-     */
-    400: ServerProblem;
-    /**
-     * Forbidden
-     */
-    403: ServerProblem;
-    /**
-     * Service Unavailable
-     */
-    503: ServerProblem;
-};
-
-export type PostUsersMeRuntimesAgenvoDiscoverError = PostUsersMeRuntimesAgenvoDiscoverErrors[keyof PostUsersMeRuntimesAgenvoDiscoverErrors];
-
-export type PostUsersMeRuntimesAgenvoDiscoverResponses = {
-    /**
-     * OK
-     */
-    200: Array<AgenvoDiscoveredInstance>;
-};
-
-export type PostUsersMeRuntimesAgenvoDiscoverResponse = PostUsersMeRuntimesAgenvoDiscoverResponses[keyof PostUsersMeRuntimesAgenvoDiscoverResponses];
-
 export type DeleteUsersMeRuntimesByIdData = {
     body?: never;
     path: {
@@ -19964,122 +19879,6 @@ export type PutUsersMeRuntimesByIdAdmissionResponses = {
 };
 
 export type PutUsersMeRuntimesByIdAdmissionResponse = PutUsersMeRuntimesByIdAdmissionResponses[keyof PutUsersMeRuntimesByIdAdmissionResponses];
-
-export type PutUsersMeRuntimesByIdAgenvoAgentData = {
-    /**
-     * Private deployment profile
-     */
-    body: AgenvoAgentProfile;
-    path: {
-        /**
-         * Existing runtime ID
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/users/me/runtimes/{id}/agenvo-agent';
-};
-
-export type PutUsersMeRuntimesByIdAgenvoAgentErrors = {
-    /**
-     * Bad Request
-     */
-    400: ServerProblem;
-    /**
-     * Forbidden
-     */
-    403: ServerProblem;
-};
-
-export type PutUsersMeRuntimesByIdAgenvoAgentError = PutUsersMeRuntimesByIdAgenvoAgentErrors[keyof PutUsersMeRuntimesByIdAgenvoAgentErrors];
-
-export type PutUsersMeRuntimesByIdAgenvoAgentResponses = {
-    /**
-     * OK
-     */
-    200: UserruntimeRuntime;
-};
-
-export type PutUsersMeRuntimesByIdAgenvoAgentResponse = PutUsersMeRuntimesByIdAgenvoAgentResponses[keyof PutUsersMeRuntimesByIdAgenvoAgentResponses];
-
-export type GetUsersMeRuntimesByIdAgenvoEndpointData = {
-    body?: never;
-    path: {
-        /**
-         * Existing owned runtime ID
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/users/me/runtimes/{id}/agenvo-endpoint';
-};
-
-export type GetUsersMeRuntimesByIdAgenvoEndpointErrors = {
-    /**
-     * Bad Request
-     */
-    400: ServerProblem;
-    /**
-     * Forbidden
-     */
-    403: ServerProblem;
-};
-
-export type GetUsersMeRuntimesByIdAgenvoEndpointError = GetUsersMeRuntimesByIdAgenvoEndpointErrors[keyof GetUsersMeRuntimesByIdAgenvoEndpointErrors];
-
-export type GetUsersMeRuntimesByIdAgenvoEndpointResponses = {
-    /**
-     * OK
-     */
-    200: AgenvoEndpointConfiguration;
-};
-
-export type GetUsersMeRuntimesByIdAgenvoEndpointResponse = GetUsersMeRuntimesByIdAgenvoEndpointResponses[keyof GetUsersMeRuntimesByIdAgenvoEndpointResponses];
-
-export type PutUsersMeRuntimesByIdAgenvoEndpointData = {
-    /**
-     * Expected configuration fingerprint and locator
-     */
-    body: AgenvoChangeEndpointConfiguration;
-    path: {
-        /**
-         * Existing owned runtime ID
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/users/me/runtimes/{id}/agenvo-endpoint';
-};
-
-export type PutUsersMeRuntimesByIdAgenvoEndpointErrors = {
-    /**
-     * Bad Request
-     */
-    400: ServerProblem;
-    /**
-     * Forbidden
-     */
-    403: ServerProblem;
-    /**
-     * Conflict
-     */
-    409: ServerProblem;
-    /**
-     * Service Unavailable
-     */
-    503: ServerProblem;
-};
-
-export type PutUsersMeRuntimesByIdAgenvoEndpointError = PutUsersMeRuntimesByIdAgenvoEndpointErrors[keyof PutUsersMeRuntimesByIdAgenvoEndpointErrors];
-
-export type PutUsersMeRuntimesByIdAgenvoEndpointResponses = {
-    /**
-     * OK
-     */
-    200: AgenvoEndpointConfiguration;
-};
-
-export type PutUsersMeRuntimesByIdAgenvoEndpointResponse = PutUsersMeRuntimesByIdAgenvoEndpointResponses[keyof PutUsersMeRuntimesByIdAgenvoEndpointResponses];
 
 export type PutUsersMeRuntimesByIdNativeHerdrData = {
     /**

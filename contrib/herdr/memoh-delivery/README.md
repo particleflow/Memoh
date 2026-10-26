@@ -20,7 +20,7 @@ complete endpoint installer or require the user to assemble separate services.
 
 | Concern | Present in this component | Remaining endpoint integration |
 | --- | --- | --- |
-| Dependencies | The prebuilt transfer executable needs no Go/Python runtime. The plugin declares Herdr >= 0.9.5; action paths are relative to its package. Fixture acceptance uses PowerShell. | Herdr/Agenvo pairing, Pi, Node and the Git Bash tools used by the existing execution envelope are external to this bundle. It neither installs nor inventories them. |
+| Dependencies | The prebuilt transfer executable needs no Go/Python runtime. The plugin declares Herdr >= 0.9.5; action paths are relative to its package. Fixture acceptance uses PowerShell. | Memoh Runtime/Herdr configuration, Pi, Node and the Git Bash tools used by the existing execution envelope are external to this bundle. It neither installs nor inventories them. |
 | Configuration and data | Herdr supplies config/state locations. One `HostConfig` reads `transfer.json`; the separate private credential is read on requests. Queue/publications use the supplied state root; source files keep their existing owner. | No endpoint-wide setup currently provisions these locations and the registered task `WorkDir` together. `source_root` is a separately supplied value checked against the task root hash, not an automatically shared registration setting. |
 | Relative paths | Plugin executable paths are package-relative; source references are logical filenames. Config/state/source roots must be clean absolute private paths, never CWD-relative or silently inferred. | No endpoint root relocation tool exists. The queue binds the configuration digest and refuses changes pending drain/migration; this is detection, not automatic relocation. |
 | Startup checks | `verify-storage` checks/opens native queue storage. Task launch checks Pi, Node and required Bash utilities; the producer hook checks Herdr when collecting. | There is no combined startup health check for all dependencies, plugin installation, device authorization and real HTTPS trust. `probe` explicitly reports `device_configuration: required`; it does not prove connectivity. |
@@ -67,7 +67,7 @@ job actions select `-delivery <logical-id>`. The manifest's `advance-delivery`
 runs `advance-results`: at most 64 existing queue steps on one due job within
 two minutes, then exits. It does not poll, schedule,
 reset retry budgets, create a business attempt, or run a background service.
-Herdr/Agenvo can invoke the installed command through its existing command path;
+The configured native Memoh Runtime/Herdr path can invoke the installed command through its existing command path;
 no connector or Agent core change is needed. Input acceptance alone is not a
 completion receipt.
 
@@ -83,7 +83,7 @@ completion receipt.
    `/users/me/runtimes/:id/transfer-credential`; only its digest is stored on
    Server. Choose expiry/revoke/rotation policy and privately provision the
    one-time returned purpose-specific device credential. Do not use a PC account JWT, broad Bot
-   token or the Agenvo control/OAuth credential. No per-file token or pairing is
+   token or any legacy control/OAuth credential. No per-file token or pairing is
    required. Missing verifier means unavailable, never account-auth fallback.
 3. After installation approval, install this bundle through the existing Herdr
    plugin mechanism, without a service. Herdr supplies `HERDR_PLUGIN_CONFIG_DIR`

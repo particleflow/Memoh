@@ -21,9 +21,11 @@ const (
 	CapabilityForegroundExec = "exec_foreground"
 )
 
-var ErrForbidden = errors.New("agenvo target access denied")
+var ErrForbidden = errors.New("computer target access denied")
 
-var ErrComputerTaskRequired = errors.New("agenvo commands require computer_task_submit so unresolved operations cannot be bypassed with exec")
+var ErrLegacyRetired = errors.New("legacy Agenvo targets are retired; use a native Memoh Runtime")
+
+var ErrComputerTaskRequired = errors.New("computer commands require computer_task_submit so unresolved operations cannot be bypassed with exec")
 
 // SourceCaller resolves the existing MCP connection under ownerID and uses its
 // existing OAuth transport. A target never supplies an endpoint or a token.
@@ -97,6 +99,8 @@ func (s *Service) Discover(ctx context.Context, ownerID, connectionID string) ([
 	return items, nil
 }
 
+// NewService uses the native caller when call is nil, as in all production
+// wiring. A legacy SourceCaller is retained only for archived protocol fixtures.
 func NewService(store dbstore.AgenvoRuntimeStore, permissions PermissionChecker, call SourceCaller) *Service {
 	return &Service{store: store, permissions: permissions, call: call}
 }
@@ -261,6 +265,11 @@ func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, err
 	record, err := s.store.GetMount(ctx, scope.BotID, scope.TargetID)
 	if err != nil || record.BotID != scope.BotID || record.ID != scope.TargetID || record.RuntimeRevoked || record.RuntimeUserID != record.BotOwnerUserID {
 		return Target{}, "", ErrForbidden
+	}
+	// Production installs no legacy caller. Keep decoding old records for
+	// historical fixtures without allowing a native service to contact OAuth/MCP.
+	if record.RuntimeProvider == Provider && s.call == nil {
+		return Target{}, "", ErrLegacyRetired
 	}
 	target, err := DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
 	if err != nil {

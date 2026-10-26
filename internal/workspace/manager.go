@@ -15,6 +15,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/config"
 	ctr "github.com/felinics/memoh/internal/container"
 	"github.com/felinics/memoh/internal/db"
@@ -572,6 +573,11 @@ func (m *Manager) ListWorkspaceTargets(ctx context.Context, botID string) ([]Wor
 	remoteTargets, err := m.remote.ListMounts(ctx, botID)
 	if err != nil {
 		return nil, err
+	}
+	// Omitting a retired primary must not advertise Server Workspace as an
+	// automatic replacement. Resolution still fails on the saved old primary.
+	if _, err := m.remote.getPrimaryRecord(ctx, botID); errors.Is(err, agenvo.ErrLegacyRetired) {
+		targets[0].Primary = false
 	}
 	for _, target := range remoteTargets {
 		if target.Primary {

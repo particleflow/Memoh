@@ -99,7 +99,7 @@ changed locally in the phone but not yet persisted is not visible to this API.
 Malformed or contradictory selection metadata fails closed. Every computer
 read checks the current Bot mount, runtime owner,
 revocation, `workspace_exec` permission, owned MCP connection and registration
-fingerprint using the existing Agenvo resolver. Resolution does not contact
+fingerprint using the shared computer target resolver. Resolution does not contact
 the device. Grants are never created by reads.
 
 Order is `(created_at DESC, task_type DESC, task_id DESC)`. The page chain has

@@ -80,7 +80,6 @@ func exerciseDeviceRegistry(ctx context.Context, t *testing.T, store *postgresst
 	}{
 		{"UPDATE users SET is_active=false WHERE id=$1", "UPDATE users SET is_active=true WHERE id=$1", v.owner},
 		{"UPDATE team_members SET is_active=false WHERE user_id=$1", "UPDATE team_members SET is_active=true WHERE user_id=$1", v.owner},
-		{"UPDATE mcp_connections SET is_active=false WHERE id=$1", "UPDATE mcp_connections SET is_active=true WHERE id=$1", v.device.ConnectionID},
 		{"UPDATE user_runtimes SET revoked_at=now() WHERE id=$1", "UPDATE user_runtimes SET revoked_at=NULL WHERE id=$1", v.runtime},
 	} {
 		exec(toggle.off, toggle.arg)
@@ -88,7 +87,10 @@ func exerciseDeviceRegistry(ctx context.Context, t *testing.T, store *postgresst
 		exec(toggle.on, toggle.arg)
 		allowed()
 	}
-	exec(`UPDATE user_runtimes SET provider_config=jsonb_set(provider_config,'{device_id}','"other-device"') WHERE id=$1`, v.runtime)
+	exec("UPDATE mcp_connections SET is_active=false WHERE id=$1", v.device.ConnectionID)
+	allowed() // An unrelated MCP connection cannot revoke native Runtime authority.
+	exec("UPDATE mcp_connections SET is_active=true WHERE id=$1", v.device.ConnectionID)
+	exec(`UPDATE user_runtimes SET provider_config=jsonb_set(provider_config,'{herdr,instance_id}','"other-instance"') WHERE id=$1`, v.runtime)
 	denied()
 	exec("UPDATE user_runtimes SET provider_config=$2 WHERE id=$1", v.runtime, []byte(row.Config))
 	allowed()

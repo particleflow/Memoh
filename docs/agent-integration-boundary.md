@@ -40,7 +40,7 @@ The restoration itself did not implement computer task routing. The subsequent i
 
 The existing MCP ToolGatewayService supports additional ToolSource instances
 and Streamable HTTP tools. Computer submit/query/result/cancel operations
-belong in a separate source backed by the existing Agenvo service. A model
+belong in a separate source backed by the shared native computer-task service. A model
 selects a task and an allowed Memoh target reference; it does not supply raw
 JavaScript, arbitrary Herdr methods, credentials or device/instance IDs.
 The service resolves the registered connector/device/Herdr mapping and fixed

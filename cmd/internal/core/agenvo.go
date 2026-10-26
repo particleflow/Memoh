@@ -2,46 +2,26 @@ package core
 
 import (
 	"context"
-	"encoding/json"
 	"slices"
 
 	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/bots"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
-	"github.com/felinics/memoh/internal/handlers"
-	"github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/nativeherdr"
 	"github.com/felinics/memoh/internal/userruntime"
 	"github.com/felinics/memoh/internal/workspace"
 	"github.com/felinics/memoh/internal/workspace/bridge"
 )
 
-func provideAgenvoService(store *postgresstore.Store, connections *mcp.ConnectionService, gateway *handlers.MCPFederationGateway, oauth *mcp.OAuthService, botService *bots.Service, accounts *accounts.Service) *agenvo.Service {
-	gateway.SetOAuthService(oauth)
-	return agenvo.NewService(store, &applicationBotPermissionChecker{bots: botService, accounts: accounts}, func(ctx context.Context, ownerID, connectionID, tool string, args map[string]any) (json.RawMessage, error) {
-		botID, err := store.OwnedHTTPMCPConnectionBot(ctx, ownerID, connectionID)
-		if err != nil {
-			return nil, agenvo.ErrForbidden
-		}
-		connection, err := connections.Get(ctx, botID, connectionID)
-		if err != nil || !connection.Active || connection.Type != "http" {
-			return nil, agenvo.ErrUnavailable
-		}
-		result, err := gateway.CallHTTPConnectionTool(ctx, connection, tool, args)
-		if err != nil {
-			if handlers.IsMCPAuthenticationUnavailable(err) {
-				return nil, agenvo.ErrAuthenticationUnavailable
-			}
-			return nil, err
-		}
-		return json.Marshal(result["result"])
-	})
+// provideAgenvoService retains the shared task adapter for native Memoh Runtime.
+// No legacy MCP/OAuth caller is installed; old registrations cannot dispatch.
+func provideAgenvoService(store *postgresstore.Store, botService *bots.Service, accounts *accounts.Service) *agenvo.Service {
+	return agenvo.NewService(store, &applicationBotPermissionChecker{bots: botService, accounts: accounts}, nil)
 }
 
-func setupAgenvoService(provider *agenvo.Service, runtimes *userruntime.Service, targets *workspace.RemoteWorkspaceService, manager *workspace.Manager, store *postgresstore.Store) {
+func setupAgenvoService(provider *agenvo.Service, runtimes *userruntime.Service, manager *workspace.Manager, store *postgresstore.Store) {
 	runtimes.SetAgenvoService(provider)
-	targets.SetAgenvoService(provider)
 	executor := nativeherdr.NewExecutor(func(ctx context.Context, scope agenvo.Scope, expected agenvo.Target) (*bridge.Client, bridge.WorkspaceInfo, error) {
 		current, err := provider.ResolveTarget(ctx, scope)
 		if err != nil {

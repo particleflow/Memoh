@@ -1,5 +1,6 @@
-// Package agenvo adapts Agenvo's existing MCP tools. It does not run a relay,
-// mint credentials, or implement a second agent scheduler.
+// Package agenvo holds the shared Windows computer task ledger and Herdr/Pi
+// adapters used by native Memoh Runtime. The package name and legacy wire
+// decoders remain for historical compatibility; production has no MCP caller.
 package agenvo
 
 import (
@@ -11,12 +12,12 @@ import (
 )
 
 var (
-	ErrInvalidTarget = errors.New("invalid Agenvo target")
-	ErrUnavailable   = errors.New("agenvo target unavailable")
-	ErrUnsupported   = errors.New("operation not supported by Agenvo target")
-	ErrRejected      = errors.New("agenvo operation rejected")
-	ErrUnknown       = errors.New("agenvo operation outcome is unknown; do not repeat the operation")
-	ErrTargetChanged = errors.New("agenvo target authorization changed")
+	ErrInvalidTarget = errors.New("invalid computer target")
+	ErrUnavailable   = errors.New("computer target unavailable")
+	ErrUnsupported   = errors.New("operation not supported by computer target")
+	ErrRejected      = errors.New("computer operation rejected")
+	ErrUnknown       = errors.New("computer operation outcome is unknown; do not repeat the operation")
+	ErrTargetChanged = errors.New("computer target authorization changed")
 )
 
 // Target refers to an existing authorized MCP connection. Credentials belong

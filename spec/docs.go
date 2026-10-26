@@ -18785,7 +18785,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Register a native Remote Runtime credential or an Agenvo command target backed by an existing account-owned MCP connection. Agenvo registrations return no API token.",
+                "description": "Register a native Memoh Remote Runtime credential. Legacy providers are retired.",
                 "consumes": [
                     "application/json"
                 ],
@@ -18828,60 +18828,6 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/me/runtimes/agenvo/discover": {
-            "post": {
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-runtimes"
-                ],
-                "summary": "List Herdr instances from an existing account-owned MCP connection",
-                "parameters": [
-                    {
-                        "description": "Existing MCP connection",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/handlers.DiscoverAgenvoRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/agenvo.DiscoveredInstance"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -19004,163 +18950,6 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/agenvo.Admission"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "503": {
-                        "description": "Service Unavailable",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/me/runtimes/{id}/agenvo-agent": {
-            "put": {
-                "description": "Updates non-secret provider/model/config-directory references without creating credentials, changing the device mapping, or granting Bots. An empty profile disables Agent tasks.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-runtimes"
-                ],
-                "summary": "Configure Pi on an existing owned Agenvo computer",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Existing runtime ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Private deployment profile",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/agenvo.AgentProfile"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/userruntime.Runtime"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    }
-                }
-            }
-        },
-        "/users/me/runtimes/{id}/agenvo-endpoint": {
-            "get": {
-                "description": "No native call. Configuration is not filesystem verification, host identity proof or stop authorization. An absent locator means unconfigured.",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-runtimes"
-                ],
-                "summary": "Read the owned endpoint location configuration",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Existing owned runtime ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/agenvo.EndpointConfiguration"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/server.Problem"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Compare-and-swap the existing registration's owner-only program_path and host_root. Explicit empty locator clears configuration; null/omitted locator is invalid. Only an existing native read-only probe is issued. No program runs, process stops, workspace changes or credentials are created. Live admission pause blocks changes. Unknown responses require GET reconciliation, not host/task replay.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "user-runtimes"
-                ],
-                "summary": "Configure an existing owned endpoint location",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Existing owned runtime ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Expected configuration fingerprint and locator",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/agenvo.ChangeEndpointConfiguration"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/agenvo.EndpointConfiguration"
                         }
                     },
                     "400": {
@@ -21092,80 +20881,6 @@ const docTemplate = `{
                 }
             }
         },
-        "agenvo.ChangeEndpointConfiguration": {
-            "type": "object",
-            "required": [
-                "expected_configuration_fingerprint",
-                "locator"
-            ],
-            "properties": {
-                "expected_configuration_fingerprint": {
-                    "type": "string"
-                },
-                "locator": {
-                    "description": "A required object sets the locator. An explicit empty object clears it.",
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/agenvo.EndpointLocator"
-                        }
-                    ]
-                }
-            }
-        },
-        "agenvo.DiscoveredInstance": {
-            "type": "object",
-            "properties": {
-                "device_id": {
-                    "type": "string"
-                },
-                "device_name": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "online": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "agenvo.EndpointConfiguration": {
-            "type": "object",
-            "properties": {
-                "configuration_fingerprint": {
-                    "type": "string"
-                },
-                "connection_id": {
-                    "type": "string"
-                },
-                "device_id": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
-                "locator": {
-                    "$ref": "#/definitions/agenvo.EndpointLocator"
-                },
-                "target_fingerprint": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.EndpointLocator": {
-            "type": "object",
-            "properties": {
-                "host_root": {
-                    "type": "string"
-                },
-                "program_path": {
-                    "type": "string"
-                }
-            }
-        },
         "agenvo.NativeHerdrProfile": {
             "type": "object",
             "required": [
@@ -21244,44 +20959,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "workspace": {
-                    "type": "string"
-                }
-            }
-        },
-        "agenvo.Target": {
-            "type": "object",
-            "properties": {
-                "agent": {
-                    "$ref": "#/definitions/agenvo.AgentProfile"
-                },
-                "bash_path": {
-                    "type": "string"
-                },
-                "connection_id": {
-                    "type": "string"
-                },
-                "device_id": {
-                    "type": "string"
-                },
-                "herdr_cli": {
-                    "type": "string"
-                },
-                "herdr_config_root": {
-                    "type": "string"
-                },
-                "instance_id": {
-                    "type": "string"
-                },
-                "native_runtime_id": {
-                    "type": "string"
-                },
-                "producer": {
-                    "$ref": "#/definitions/agenvo.ProducerLocator"
-                },
-                "session": {
-                    "type": "string"
-                },
-                "work_dir": {
                     "type": "string"
                 }
             }
@@ -26243,17 +25920,6 @@ const docTemplate = `{
                 },
                 "reasoning_tokens": {
                     "type": "integer"
-                }
-            }
-        },
-        "handlers.DiscoverAgenvoRequest": {
-            "type": "object",
-            "required": [
-                "connection_id"
-            ],
-            "properties": {
-                "connection_id": {
-                    "type": "string"
                 }
             }
         },
@@ -31763,14 +31429,14 @@ const docTemplate = `{
         "userruntime.CreateRuntimeRequest": {
             "type": "object",
             "properties": {
-                "agenvo": {
-                    "$ref": "#/definitions/agenvo.Target"
-                },
                 "name": {
                     "type": "string"
                 },
                 "provider": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "memoh"
+                    ]
                 }
             }
         },

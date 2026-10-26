@@ -19,7 +19,7 @@ type nativeRuntimeHost interface {
 	NativeWorkspaceInfo(context.Context, string) (bridge.WorkspaceInfo, error)
 }
 
-// containerRuntimeBridge keeps the Agenvo integration boundary in the host.
+// containerRuntimeBridge keeps the computer task integration boundary in the host.
 // Upstream drivers remain unchanged: a command-only target cannot host their
 // container executable, filesystem, credentials or persistent process.
 type containerRuntimeBridge struct {

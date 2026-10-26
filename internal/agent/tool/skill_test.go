@@ -39,7 +39,7 @@ func TestWindowsComputerSkillIsOptInAndLoadsThroughNativeTool(t *testing.T) {
 	if value["success"] != true || value["content"] != parsed.Content {
 		t.Fatal("native activation did not preserve instructions")
 	}
-	for _, boundary := range []string{"foreground_bash", "computer_task_submit", "Ordinary `exec` cannot dispatch Agenvo commands", "agent.start", "agent.get", "agent.read", "Magpie", "Memoh subagent", "unknown", "not permissions"} {
+	for _, boundary := range []string{"foreground_bash", "computer_task_submit", "Ordinary `exec` cannot dispatch managed PC commands", "agent.start", "agent.get", "agent.read", "Magpie", "Memoh subagent", "unknown", "not permissions"} {
 		if !strings.Contains(parsed.Content, boundary) {
 			t.Errorf("missing workflow boundary %q", boundary)
 		}

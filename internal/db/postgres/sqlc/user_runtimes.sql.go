@@ -157,6 +157,7 @@ JOIN user_runtimes r
  AND r.user_id = b.owner_user_id
  AND r.revoked_at IS NULL
  AND r.activated_at IS NOT NULL
+ AND r.provider = 'memoh'
 JOIN team_members owner_membership
   ON owner_membership.team_id = public.memoh_current_team_id()
  AND owner_membership.user_id = b.owner_user_id
@@ -495,19 +496,7 @@ JOIN user_runtimes runtime ON runtime.id = binding.runtime_id AND runtime.team_i
 WHERE binding.team_id = public.memoh_current_team_id()
   AND bot.owner_user_id = $1
   AND runtime.revoked_at IS NULL
-  AND NOT EXISTS (
-    SELECT 1 FROM mcp_connections connection
-    WHERE runtime.provider = 'agenvo'
-      AND connection.team_id = runtime.team_id
-      AND CASE octet_length(runtime.provider_config->>'connection_id')
-        WHEN 32 THEN lower(runtime.provider_config->>'connection_id') = replace(connection.id::text, '-', '')
-        WHEN 36 THEN lower(runtime.provider_config->>'connection_id') = connection.id::text
-        WHEN 38 THEN lower(substring(runtime.provider_config->>'connection_id' FROM 2 FOR 36)) = connection.id::text
-        WHEN 45 THEN lower(runtime.provider_config->>'connection_id') = 'urn:uuid:' || connection.id::text
-        ELSE FALSE
-      END
-      AND NOT connection.is_active
-  )
+  AND runtime.provider = 'memoh'
 ORDER BY binding.created_at ASC, binding.id ASC
 `
 
@@ -572,19 +561,7 @@ JOIN users owner ON owner.id = owner_membership.user_id
 WHERE binding.team_id = public.memoh_current_team_id()
   AND binding.bot_id = $1
   AND runtime.revoked_at IS NULL
-  AND NOT EXISTS (
-    SELECT 1 FROM mcp_connections connection
-    WHERE runtime.provider = 'agenvo'
-      AND connection.team_id = runtime.team_id
-      AND CASE octet_length(runtime.provider_config->>'connection_id')
-        WHEN 32 THEN lower(runtime.provider_config->>'connection_id') = replace(connection.id::text, '-', '')
-        WHEN 36 THEN lower(runtime.provider_config->>'connection_id') = connection.id::text
-        WHEN 38 THEN lower(substring(runtime.provider_config->>'connection_id' FROM 2 FOR 36)) = connection.id::text
-        WHEN 45 THEN lower(runtime.provider_config->>'connection_id') = 'urn:uuid:' || connection.id::text
-        ELSE FALSE
-      END
-      AND NOT connection.is_active
-  )
+  AND runtime.provider = 'memoh'
 ORDER BY binding.created_at ASC, binding.id ASC
 `
 
@@ -642,24 +619,12 @@ const listUserRuntimes = `-- name: ListUserRuntimes :many
 SELECT runtime.transfer_credential_id, runtime.transfer_credential_digest, runtime.transfer_target_digest, runtime.transfer_expires_at, runtime.id, runtime.user_id, runtime.name, runtime.api_token, runtime.provider, runtime.provider_config, runtime.revoked_at, runtime.activated_at, runtime.pending_expires_at, runtime.created_at, runtime.updated_at, runtime.team_id FROM user_runtimes runtime
 WHERE runtime.team_id = public.memoh_current_team_id()
   AND runtime.user_id = $1 AND runtime.revoked_at IS NULL
-  AND NOT EXISTS (
-    SELECT 1 FROM mcp_connections connection
-    WHERE runtime.provider = 'agenvo'
-      AND connection.team_id = runtime.team_id
-      AND CASE octet_length(runtime.provider_config->>'connection_id')
-        WHEN 32 THEN lower(runtime.provider_config->>'connection_id') = replace(connection.id::text, '-', '')
-        WHEN 36 THEN lower(runtime.provider_config->>'connection_id') = connection.id::text
-        WHEN 38 THEN lower(substring(runtime.provider_config->>'connection_id' FROM 2 FOR 36)) = connection.id::text
-        WHEN 45 THEN lower(runtime.provider_config->>'connection_id') = 'urn:uuid:' || connection.id::text
-        ELSE FALSE
-      END
-      AND NOT connection.is_active
-  )
+  AND runtime.provider = 'memoh'
 ORDER BY runtime.created_at ASC, runtime.id ASC
 `
 
-// An explicitly disabled Agenvo connection retires its selectable computer,
-// without revoking the runtime or deleting mounts and their historical workdirs.
+// Only native Memoh Runtimes are selectable. Historical provider rows, mounts,
+// workdirs, credentials and task records remain unchanged.
 func (q *Queries) ListUserRuntimes(ctx context.Context, userID pgtype.UUID) ([]UserRuntime, error) {
 	rows, err := q.db.Query(ctx, listUserRuntimes, userID)
 	if err != nil {

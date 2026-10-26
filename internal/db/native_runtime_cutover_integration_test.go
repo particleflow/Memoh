@@ -124,18 +124,7 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	}
 	before := preservedRows()
 	legacyCalls, nativeCalls, otherCalls := 0, 0, 0
-	var otherConnection string
-	relay := agenvo.NewService(f.store, cutoverPermission{bot: f.bot, owner: f.owner}, func(_ context.Context, _ string, id string, _ string, _ map[string]any) (json.RawMessage, error) {
-		switch id {
-		case connection.ID:
-			legacyCalls++
-		case otherConnection:
-			otherCalls++
-		default:
-			t.Fatal("unexpected connection selected", id)
-		}
-		return nil, agenvo.ErrAuthenticationUnavailable
-	})
+	relay := agenvo.NewService(f.store, cutoverPermission{bot: f.bot, owner: f.owner}, nil)
 	relay.SetNativeCaller(func(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, _ map[string]any) (agenvo.Receipt, error) {
 		nativeCalls++
 		if scope.TargetID != f.mount || target.NativeRuntimeID != f.runtime || method != "workspace.list" {
@@ -147,7 +136,6 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	owners := userruntime.NewService(f.store, nil)
 	owners.SetAgenvoService(relay)
 	remotes := workspace.NewRemoteWorkspaceService(f.store, owners)
-	remotes.SetAgenvoService(relay)
 	gateway := &cutoverGateway{}
 	source := federation.NewSource(nil, gateway, connections)
 	session := mcpgw.ToolSessionContext{BotID: f.bot}
@@ -155,12 +143,11 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	if err != nil || len(discovered) != 1 || gateway.lists != 1 {
 		t.Fatal("active positive control", len(discovered), gateway.lists, err)
 	}
-	// A separate active Agenvo connection must remain visible and routable.
+	// Even a separate active Agenvo registration must be omitted from inventories.
 	other, err := connections.Create(t.Context(), f.bot, mcpgw.UpsertRequest{Name: "unrelated-active-agenvo", URL: oauthServer.URL + "/other-mcp"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	otherConnection = other.ID
 	otherTarget := legacy
 	otherTarget.ConnectionID, otherTarget.Session = other.ID, "other-active"
 	otherConfig, _ := json.Marshal(otherTarget)
@@ -170,13 +157,10 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	}
 	otherMount := uuid.NewString()
 	f.exec(t, `INSERT INTO bot_remote_runtime_bindings(id,bot_id,runtime_id) VALUES($1,$2,$3)`, otherMount, f.bot, otherRuntime.ID)
-	assertInventories := func(retiredVisible bool) {
+	assertInventories := func() {
 		t.Helper()
-		wantRuntimes := map[string]bool{f.runtime: true, otherRuntime.ID: true}
-		wantMounts := map[string]bool{f.mount: true, otherMount: true}
-		if retiredVisible {
-			wantRuntimes[legacyRuntime], wantMounts[legacyMount] = true, true
-		}
+		wantRuntimes := map[string]bool{f.runtime: true}
+		wantMounts := map[string]bool{f.mount: true}
 		listed, err := owners.ListRuntimes(t.Context(), f.owner)
 		if err != nil {
 			t.Fatal(err)
@@ -214,9 +198,9 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 			t.Error("account grant inventory does not match active connections and native runtime")
 		}
 	}
-	assertInventories(true)
-	if legacyCalls != 2 || otherCalls != 2 {
-		t.Fatal("active listing positive controls did not probe both Agenvo connections", legacyCalls, otherCalls)
+	assertInventories()
+	if legacyCalls != 0 || otherCalls != 0 {
+		t.Fatal("retired listings contacted a legacy connection", legacyCalls, otherCalls)
 	}
 	// Same endpoint and auth type: the existing update preserves all OAuth rows.
 	inactive := false
@@ -229,7 +213,7 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 		t.Fatal(err)
 	}
 	for range 3 {
-		assertInventories(false)
+		assertInventories()
 	}
 	manager := workspace.NewManager(slog.Default(), nil, nil, config.WorkspaceConfig{}, "", nil)
 	manager.SetRemoteWorkspaceService(remotes)
@@ -252,14 +236,14 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	if _, err = relay.Workspaces(selected, agenvo.Scope{BotID: f.bot, UserID: f.owner, TargetID: f.mount}); err != nil || nativeCalls != 1 {
 		t.Fatal("native provider route", nativeCalls, err)
 	}
-	if _, err = relay.ResolveTarget(t.Context(), agenvo.Scope{BotID: f.bot, UserID: f.owner, TargetID: legacyMount}); !errors.Is(err, agenvo.ErrForbidden) {
+	if _, err = relay.ResolveTarget(t.Context(), agenvo.Scope{BotID: f.bot, UserID: f.owner, TargetID: legacyMount}); !errors.Is(err, agenvo.ErrLegacyRetired) {
 		t.Fatal("retired execution target resolved", err)
 	}
-	if _, err = remotes.ResolveMount(t.Context(), f.bot, legacyMount); !errors.Is(err, workspace.ErrRemoteRuntimeOffline) {
+	if _, err = remotes.ResolveMount(t.Context(), f.bot, legacyMount); !errors.Is(err, workspace.ErrWorkspaceTargetNotFound) {
 		t.Fatal("retired mount resolved executable transport", err)
 	}
-	if target, err := relay.ResolveTarget(t.Context(), agenvo.Scope{BotID: f.bot, UserID: f.owner, TargetID: otherMount}); err != nil || target.ConnectionID != other.ID {
-		t.Fatal("unrelated active Agenvo target no longer resolves", err)
+	if _, err := remotes.ResolveMount(t.Context(), f.bot, otherMount); !errors.Is(err, workspace.ErrWorkspaceTargetNotFound) {
+		t.Fatal("active legacy mount remained callable", err)
 	}
 	again := original
 	again.ID = uuid.NewString()
@@ -276,13 +260,13 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 			t.Error("cutover changed retained record", name)
 		}
 	}
-	if legacyCalls != 0 || nativeCalls != 1 || oauthRequests.Load() != 0 || gateway.lists != 2 || gateway.calls != 0 || otherCalls < 8 {
+	if legacyCalls != 0 || nativeCalls != 1 || oauthRequests.Load() != 0 || gateway.lists != 2 || gateway.calls != 0 || otherCalls != 0 {
 		t.Fatal("retired route performed automatic work", legacyCalls, nativeCalls, oauthRequests.Load(), gateway.lists, gateway.calls)
 	}
 	if _, err = f.store.OwnedHTTPMCPConnectionBot(t.Context(), f.owner, connection.ID); !errors.Is(err, memohdb.ErrNotFound) {
 		t.Fatal("disabled connection still usable", err)
 	}
-	t.Log("MCP inactive + native primary: owner runtimes, bot mounts and account grants omit retired IDs while keeping native and unrelated active Agenvo IDs; zero old transport/OAuth; runtime, mount, workdir/session, unknown operation/transfer and synthetic credentials unchanged")
+	t.Log("MCP inactive + native primary: owner runtimes, bot mounts and account grants omit retired IDs while keeping native and omitting all active Agenvo IDs; zero old transport/OAuth; runtime, mount, workdir/session, unknown operation/transfer and synthetic credentials unchanged")
 }
 
 func TestNativeRuntimeCutoverListsRecognizeUUIDTextForms(t *testing.T) {
@@ -357,9 +341,41 @@ func TestNativeRuntimeCutoverListsRecognizeUUIDTextForms(t *testing.T) {
 			for _, item := range grants {
 				foundGrant = foundGrant || item.RuntimeID == runtime.ID || item.TargetID == mount
 			}
-			if foundRuntime == tc.hidden || foundMount == tc.hidden || foundGrant == tc.hidden {
+			if foundRuntime || foundMount || foundGrant {
 				t.Fatalf("hidden=%v, listed owner=%v mount=%v grant=%v", tc.hidden, foundRuntime, foundMount, foundGrant)
 			}
 		})
+	}
+}
+
+func TestProjectWideAgenvoRetirementPreservesRowsAndRejectsMountAndTransfer(t *testing.T) {
+	f := newAdmissionFixture(t)
+	// An active connection is insufficient: all legacy providers are retired.
+	f.exec(t, `INSERT INTO mcp_connections(id,bot_id,name,type,is_active) VALUES($1,$2,'legacy-active-retirement','http',true)`, f.connection, f.bot)
+	f.exec(t, `UPDATE user_runtimes SET transfer_credential_id='historical-credential',transfer_credential_digest='historical-digest',transfer_target_digest='historical-target' WHERE id=$1`, f.runtime)
+	var before, after string
+	snapshot := func(dest *string) {
+		t.Helper()
+		if err := f.conn.QueryRow(t.Context(), `SELECT to_jsonb(r)::text FROM user_runtimes r WHERE id=$1`, f.runtime).Scan(dest); err != nil {
+			t.Fatal(err)
+		}
+	}
+	snapshot(&before)
+	if _, err := f.store.CreateOrUpdateMount(t.Context(), f.bot, f.runtime); !errors.Is(err, memohdb.ErrNotFound) {
+		t.Fatal("retired runtime accepted a grant", err)
+	}
+	if _, err := f.store.ReadOwnedRuntimeTransfer(t.Context(), f.runtime, f.owner); !errors.Is(err, memohdb.ErrNotFound) {
+		t.Fatal("retired owner transfer remained available", err)
+	}
+	if _, err := f.store.ReadRuntimeTransfer(t.Context(), "historical-credential"); !errors.Is(err, memohdb.ErrNotFound) {
+		t.Fatal("retired credential remained usable", err)
+	}
+	snapshot(&after)
+	if before != after {
+		t.Fatal("retirement query changed historical runtime or credentials")
+	}
+	var mounts int
+	if err := f.conn.QueryRow(t.Context(), `SELECT count(*) FROM bot_remote_runtime_bindings WHERE runtime_id=$1`, f.runtime).Scan(&mounts); err != nil || mounts != 1 {
+		t.Fatal("historical mount changed", err)
 	}
 }

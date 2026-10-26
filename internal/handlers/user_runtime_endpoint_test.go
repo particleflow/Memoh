@@ -32,7 +32,7 @@ func (s *admissionHTTPStore) ConfigureAgenvoRuntime(_ context.Context, owner, id
 	return dbstore.UserRuntimeRecord{ID: id, UserID: owner, ProviderConfig: after}, nil
 }
 
-func TestOwnerEndpointHTTPAuthenticationConfigurationAndNoExecution(t *testing.T) {
+func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 	const secret = "synthetic-endpoint-http-signing-key" //nolint:gosec // G101: isolated test-only signing key.
 	owner, runtime := uuid.NewString(), uuid.NewString()
 	target := agenvo.Target{ConnectionID: uuid.NewString(), DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
@@ -78,31 +78,24 @@ func TestOwnerEndpointHTTPAuthenticationConfigurationAndNoExecution(t *testing.T
 	if store.reads != 0 {
 		t.Fatal("anonymous reached store")
 	}
-	request(http.MethodGet, sign(uuid.NewString()), "", 403)
+	request(http.MethodGet, sign(uuid.NewString()), "", 404)
 	token := sign(owner)
-	var initial agenvo.EndpointConfiguration
-	if err := json.Unmarshal(request(http.MethodGet, token, "", 200), &initial); err != nil || initial.Locator != nil || calls != 0 {
-		t.Fatal("GET inferred a location or contacted native", err)
+	request(http.MethodGet, token, "", 404)
+	request(http.MethodPut, token, `{}`, 404)
+	for _, retired := range []struct{ method, path string }{
+		{http.MethodPost, "/users/me/runtimes/agenvo/discover"},
+		{http.MethodPut, "/users/me/runtimes/" + runtime + "/agenvo-agent"},
+	} {
+		req := httptest.NewRequest(retired.method, retired.path, strings.NewReader(`{}`))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Authorization", "Bearer "+token)
+		rec := httptest.NewRecorder()
+		capture.echo.ServeHTTP(rec, req)
+		if rec.Code != 404 || rec.Header().Get("Cache-Control") != "no-store" {
+			t.Fatalf("retired route %s returned %d", retired.path, rec.Code)
+		}
 	}
-	for _, body := range []string{`null`, `{}`, `{"locator":{}}`, `{"locator":{},"owner_id":"forged"}`, `{"locator":{"program_path":"C:\\Host\\entry","host_root":"C:\\Host","command":"stop"}}`} {
-		request(http.MethodPut, token, body, 400)
-	}
-	if calls != 0 || store.writes != 0 {
-		t.Fatal("invalid request caused a side effect")
-	}
-	put, _ := json.Marshal(agenvo.ChangeEndpointConfiguration{ExpectedConfigurationFingerprint: initial.ConfigurationFingerprint, Locator: &agenvo.EndpointLocator{ProgramPath: `C:\Endpoint\endpoint.mjs`, HostRoot: `D:\Host data`}})
-	var configured agenvo.EndpointConfiguration
-	if err := json.Unmarshal(request(http.MethodPut, token, string(put), 200), &configured); err != nil || configured.TargetFingerprint != initial.TargetFingerprint || configured.Locator == nil {
-		t.Fatal("configuration lost original task identity", err)
-	}
-	request(http.MethodPut, token, string(put), 409)
-	if calls != 1 || store.writes != 1 {
-		t.Fatal("stale update caused side effect")
-	}
-	store.row.Paused = true
-	put, _ = json.Marshal(agenvo.ChangeEndpointConfiguration{ExpectedConfigurationFingerprint: configured.ConfigurationFingerprint, Locator: &agenvo.EndpointLocator{}})
-	result := request(http.MethodPut, token, string(put), 409)
-	if !strings.Contains(string(result), `"code":"computer.admission_paused"`) || store.writes != 1 {
-		t.Fatal("live pause allowed reconfiguration")
+	if store.reads != 0 || store.writes != 0 || calls != 0 {
+		t.Fatal("retired route touched stored configuration or native transport")
 	}
 }
