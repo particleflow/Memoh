@@ -37,6 +37,8 @@ def main():
         config = json.load(source.extractfile('apps/web/public/memoh_client.json'))
         assert config['apiOrigin'] == '' and config['hapDownloadUrl'] == ''
         source.extractall(checkout, filter='data')
+    (checkout / 'apps/web/src/lib/harmony-back.test.ts').write_bytes(
+        (REPO / 'docs/testing/harmony-system-back/harmony-back.test.ts').read_bytes())
     report = {
         'sharedCommit': lock['commit'],
         'sourceSHA256': hashlib.sha256(archive.read_bytes()).hexdigest(),

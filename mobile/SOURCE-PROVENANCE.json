@@ -143,7 +143,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "a37f952ce2a4c6ad1cf98f23cf40d3349f6132f9882fbcf2e4e78b82dd037902",
+      "sha256": "8a766c11f09069c42c366155d79ff648f58ad6238835bf53f4b3ca233a1d5e03",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -152,7 +152,8 @@
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Use the existing Vue Router afterEach/currentRoute to update the login-only service button; hashchange missed programmatic login and obscured the task action. No routing/configuration framework or storage change.",
         "Fix explicitly signed same-host/path HTTP-to-HTTPS legacy migration with original origin/hash and exact configured ports, persisted-config upgrade, retained login, refusal coverage and patch version 1.0.11. No private endpoint or TLS bypass.",
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes."
       ],
       "endpointScopeBaseSHA256": "dbcf84869826e79ba732e31c83b33af0d0efae3f58d6b1eac1a50afe7214a7a5",
       "windowsInjectionBaseSHA256": "1a2b1dac9e08769dcd833c73c84712753604e9137cf92c47a7ed6212f9e8ca75"
@@ -515,7 +516,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "efb36dfdef62d244093872fb880d83533e5609acbe6573d6b3958f5dfbf67d7d",
+      "sha256": "3f860a29fab5d0bc57a69c98aa88f57a718e3fffbcddfe4ae4d900a671d9f3ca",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -535,7 +536,8 @@
         "Windows-only local configuration injection and automatic verified same-base legacy migration; public empty seed, preserved user storage, next patch version and focused regression coverage. No private endpoint embedded.",
         "Generate phone-specific attachment assertions alongside the existing shared task tests. Preserve all 43 product adaptations and their output bytes; exercise the actual SDK/verified originals/native save path against synthetic HTTP and OS boundaries. No HAP rebuild.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "Source-only cbcee15 integration: add the scoped task-list attachment test adapter; no native/product component or SDK changes."
+        "Source-only cbcee15 integration: add the scoped task-list attachment test adapter; no native/product component or SDK changes.",
+        "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -878,14 +880,15 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "4333909b73792a7c7603b4f09e091fbfab4ac03b1cf58e88595e5e94d8982f84",
+      "sha256": "a124071e29cea6cd14347f06f4eb16d7c7d05e791347005e5c833f465a3611cc",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
       "archiveCheckpointSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
       "preparationChanges": [
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
-        "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance."
+        "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
+        "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes."
       ]
     },
     {
@@ -1371,6 +1374,15 @@
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-back.ts",
+      "sha256": "708f389a43d08b63c225bd05c2d65d1ce63653735ccbb8da188061987f2c7c14",
+      "origin": "project phone host adapter developed for verified system-back gap",
+      "licenseReview": "Project source; uses existing shared UI/router, no added dependency.",
+      "preparationChanges": [
+        "Dispatch native back to existing topmost Web dismissal/back action before root background; no shared component changes."
       ]
     }
   ],

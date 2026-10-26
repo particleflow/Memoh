@@ -1,0 +1,19 @@
+{
+  "cases": [
+    "login-root-unhandled",
+    "chat-root-unhandled",
+    "attachment-preview-dismissed",
+    "nested-menu-only-dismissed",
+    "drawer-dismissed-no-navigation",
+    "settings-content-to-list",
+    "settings-list-to-chat",
+    "draft-and-pending-attachment-retained",
+    "text-preview-dialog-dismissed",
+    "cold-settings-drill-back",
+    "task-detail-to-list-with-modal-retained",
+    "task-list-dismissed-on-second-back"
+  ],
+  "loginCalls": 1,
+  "pageErrors": [],
+  "scope": "Actual generated phone UI in Chromium390x844, synthetic API/native boundaries; system gesture/ArkWeb/device not verified"
+}

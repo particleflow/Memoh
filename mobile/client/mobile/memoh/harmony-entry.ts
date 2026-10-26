@@ -1,3 +1,4 @@
+import { installHarmonyBack } from './harmony-back'
 import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, deploymentNetworkPolicy, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
 import type { TransferNetworkPolicy } from './harmony-service-url'
 import './harmony-service.css'
@@ -12,6 +13,8 @@ async function nativeCommand(command: string, apiOrigin?: string, networkPolicy?
   const result = JSON.parse(await native.request(JSON.stringify({ version: 1, command, apiOrigin, networkPolicy }))) as { ok?: boolean }
   if (!result.ok) throw new Error('SERVICE_BRIDGE_REJECTED')
 }
+
+installHarmonyBack()
 
 let started = false
 let packagedConfig: unknown
@@ -31,6 +34,7 @@ async function boot(config: ServiceConfig) {
     await nativeCommand('client.configure', config.apiOrigin, deploymentNetworkPolicy(packagedConfig, config.apiOrigin))
     await import('../main')
     const { default: router } = await import('../router')
+    installHarmonyBack(router)
     // Login must also offer a way to correct an unavailable endpoint.
     const button = document.createElement('button')
     button.id = 'harmony-service-settings'; button.textContent = '服务地址'; button.type = 'button'

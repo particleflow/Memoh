@@ -6,6 +6,7 @@ on:
     paths:
       - "mobile/**"
       - "scripts/check-harmony-source.py"
+      - "docs/testing/harmony-system-back/**"
       - "docs/testing/harmony-native-runtime-fa77/generated-web-baseline.json"
       - ".github/workflows/harmony-source-ci.yml"
 
@@ -48,9 +49,11 @@ jobs:
       - name: Typecheck the complete generated Web application
         working-directory: mobile/client/tests/.isolated/ci-web/checkout
         run: pnpm --filter @memohai/web typecheck
-      - name: Verify phone task attachments
+      - name: Verify phone task attachments and system back
         working-directory: mobile/client/tests/.isolated/ci-web/checkout
-        run: pnpm test --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts
-      - name: Lint the generated attachment tests
+        run: pnpm test --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/lib/harmony-back.test.ts
+      - name: Lint the generated phone regressions
         working-directory: mobile/client/tests/.isolated/ci-web/checkout
-        run: pnpm exec eslint apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts
+        run: pnpm exec eslint apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/lib/harmony-back.test.ts
+      - name: Verify the actual native back method with SDK seams
+        run: node docs/testing/harmony-system-back/verify_native.cjs

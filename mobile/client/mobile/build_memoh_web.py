@@ -49,7 +49,7 @@ def inputs():
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
         'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts',
-        'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
+        'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-back.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
         'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts')]
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
@@ -898,7 +898,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             'HarmonyAttachments.vue', 'harmony-resumable.ts',
             'harmony-download.ts', 'harmony-service-url.ts')}
         if platform == 'harmony':
-            for name in ('harmony-entry.ts', 'harmony-service-config.ts', 'harmony-service.css'):
+            for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css'):
                 host_sources[name] = ROOT / 'mobile/memoh' / name
         host_sources['harmony-theme.json'] = ROOT / 'contracts/ui_theme.json'
         for name, path in host_sources.items():

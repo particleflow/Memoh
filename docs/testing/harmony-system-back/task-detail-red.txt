@@ -1,0 +1,27 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 <repo>/mobile/client/tests/.isolated/ci-web/checkout
+
+ ❯ |web| src/lib/harmony-back.test.ts (12 tests | 1 failed | 11 skipped) 156ms
+     × returns a task-detail dialog to its list before closing the modal 154ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-back.test.ts > system back to existing Web owners > returns a task-detail dialog to its list before closing the modal
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/lib/harmony-back.test.ts:50:19
+     48|     window.addEventListener('keydown', escape)
+     49|     expect(handleHarmonyBack(router())).toBe(true)
+     50|     expect(click).toHaveBeenCalledOnce();expect(escape).not.toHaveBeen…
+       |                   ^
+     51|     window.removeEventListener('keydown', escape)
+     52|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 11 skipped (12)
+   Start at  07:33:00
+   Duration  1.26s (transform 104ms, setup 0ms, import 137ms, tests 156ms, environment 732ms)
+

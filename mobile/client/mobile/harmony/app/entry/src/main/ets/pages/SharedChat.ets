@@ -118,6 +118,26 @@ struct SharedChat {
     }
   }
 
+  private backPending: boolean = false;
+
+  onBackPress(): boolean {
+    if (!this.active || this.loadFailed || this.renderWaiting || !sharedWebAvailable()) { return false; }
+    if (this.backPending) { return true; }
+    this.backPending = true;
+    const generation = this.probeGeneration;
+    // onBackPress is synchronous in SDK26. Resolve the Web layer first, then
+    // perform the normal root-page background action without destroying drafts
+    // or native transfers. Never navigate ArkWeb's document history here.
+    this.controller.runJavaScript('typeof window.__memohBack === "function" && window.__memohBack()')
+      .then(async (handled: string) => {
+        if (!this.active || generation !== this.probeGeneration) { return; }
+        if (handled !== 'true') { await this.context.moveAbilityToBackground(); }
+      }).catch(() => {
+        ClientDiagnostics.event('SYSTEM', 'shared-client', 'back-dispatch-failed', '');
+      }).finally(() => { this.backPending = false; });
+    return true;
+  }
+
   aboutToDisappear(): void {
     this.clearClientWait();
     this.cancelWebDownloads();
