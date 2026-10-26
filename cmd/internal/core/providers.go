@@ -1138,6 +1138,7 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 	imageProvider := imagecapability.New(agenttools.NewImageGenProvider(log, settingsService, modelsService, queries, mediaService), settingsService, modelsService, queries, mediaService,
 		imageCapabilityAuthorizer(&applicationBotPermissionChecker{bots: botService, accounts: accountService}, sessionService.Get))
 	imageProvider.SetLogger(log)
+	bindImageCapabilityReferences(imageProvider, mediaService, delegations)
 	return []agenttools.ToolProvider{
 		agenttools.NewBotDelegationProvider(delegations, botService),
 		agenttools.NewCapabilityProvider(log, agenttools.CapabilityOptions{
