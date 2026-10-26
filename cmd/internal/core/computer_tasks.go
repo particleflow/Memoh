@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log/slog"
 
 	"github.com/felinics/memoh/internal/accounts"
 	toolapproval "github.com/felinics/memoh/internal/agent/decision/approval"
@@ -19,10 +20,12 @@ import (
 	"github.com/felinics/memoh/internal/workspace"
 )
 
-func provideComputerTaskSource(store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, cfg config.Config) *computertask.Source {
+func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, cfg config.Config) *computertask.Source {
 	permissions := &applicationBotPermissionChecker{bots: botService, accounts: accountService}
 	authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, approval.EvaluatePolicy)
-	return computertask.NewSource(computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit))
+	source := computertask.NewSource(computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit))
+	source.SetLogger(log)
+	return source
 }
 
 func computerTaskAuthorizer(permissions agenvo.PermissionChecker, resolve func(context.Context, string, string) (workspace.ResolvedWorkspaceTarget, error), evaluate func(context.Context, toolapproval.CreatePendingInput) (toolapproval.Evaluation, error)) computertask.Authorize {
