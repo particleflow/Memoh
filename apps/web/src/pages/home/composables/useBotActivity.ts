@@ -1,7 +1,7 @@
 import { onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
 import { getBotsByBotIdActivity, type SessiontaskActivity } from '@memohai/sdk'
 import { onAuthSessionCleared } from '@/lib/auth-session'
-import { apiErrorStatus } from '@/utils/api-error'
+import { apiErrorStatus, isApiErrorCode, parseMemohError } from '@/utils/api-error'
 
 // One persisted read per accessible Bot/page, never one connection/transcript
 // per historical session. Selection and the current transcript are not inputs.
@@ -15,7 +15,12 @@ export function useBotActivity(botIds: Ref<string[]>, identity: Ref<string>, vis
   }
   function publish() {
     items.value = [...rows.values()].flat()
-    unsupported.value = botIds.value.length > 0 && botIds.value.every(bot => apiErrorStatus(errors.get(bot)) === 404)
+    unsupported.value = botIds.value.length > 0 && botIds.value.every(bot => {
+      const error = errors.get(bot)
+      // A hidden/deleted Bot's typed404 is a resource denial, not an old
+      // server. Only a missing route (or legacy untyped404) enables fallback.
+      return isApiErrorCode(error, 'http.not_found') || (apiErrorStatus(error) === 404 && !parseMemohError(error)?.code)
+    })
   }
   async function refresh() {
     if (!identity.value || !visible.value || loading) return

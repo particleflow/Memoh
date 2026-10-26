@@ -61,4 +61,8 @@ describe('accessible Bot activity discovery', () => {
     api.get.mockRejectedValue({ status: 404 }); const reader = start(); await settle(); expect(reader.unsupported.value).toBe(true)
     api.get.mockRejectedValue({ status: 403 }); bots.value = ['replacement']; await settle(); expect(reader.unsupported.value).toBe(false)
   })
+  it('does not treat a hidden or deleted Bot as an unsupported server', async () => {
+    api.get.mockRejectedValue({ status: 404, code: 'bot.not_found' }); const reader = start(); await settle()
+    expect(reader.unsupported.value).toBe(false); expect(reader.items.value).toEqual([])
+  })
 })

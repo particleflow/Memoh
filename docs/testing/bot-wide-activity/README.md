@@ -76,6 +76,8 @@ The deleted unsolicited attachment recovery button/explanation is not restored.
 - 40 affected Web tests passed, covering unopened Bot discovery, three row types,
   original links, missing names, denied/foreign rows, internal continuation,
   transient recovery, stale A→B→A success/rejection and old-server fallback.
+  A final9-test reader run also passed after distinguishing a missing route
+  from a typed hidden/deleted Bot404; the latter must not enable cached fallback.
 - Full Web and SDK typechecks, changed-file ESLint, Web build and UI guard
   passed. Existing chunk warning and three UI-contract warnings remain.
 - Handler/service targeted tests passed, including account/chat-token boundary,
