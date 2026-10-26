@@ -100,11 +100,33 @@ const downloads=[];class Download extends Media{
  async save(operation,botId){assert.equal(this.authorized(),true);downloads.push(['save',operation,botId]);return true}
  abort(operation,botId){downloads.push(['abort',operation,botId])}
 }
-const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':nativeConfig,'./NativeVoice':{NativeVoice:Media},'./NativeMediaDownload':{NativeMediaDownload:Download}})
+const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':nativeConfig,'./NativeVoice':{NativeVoice:Media},'./NativeResumableUpload':{NativeResumableUpload:Media},'./NativeMediaDownload':{NativeMediaDownload:Download}})
 let frame='begonia-client://app/index.html';const controller={getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=>frame,registerJavaScriptProxy(){},deleteJavaScriptRegister(){}}
 const bridge=new NativeClient(controller,s=>events.push(s),async()=>{},{});bridge.register()
 async function call(command,rest={}){return JSON.parse(await bridge.request(JSON.stringify({version:1,command,...rest})))}
 ;(async()=>{
+ const oldHTTP='http://alpha.example:18000/api', newHTTPS='https://alpha.example:18443/api'
+ const proof={schemaVersion:1,bundleName:'cloud.begonia.workassistant',versionCode:1000006,sourceHapSHA256:'a'.repeat(64),apiOrigin:oldHTTP,apiBaseSHA256:require('node:crypto').createHash('sha256').update(oldHTTP).digest('hex')}
+ const upgrade={apiOrigin:newHTTPS,hapDownloadUrl:'',productName:'Garnet-Assistant',legacyBinding:proof}
+ for(const persisted of [false,true]) {
+  const store=new Storage();store.setItem('token','synthetic-http-login');store.setItem('chat-input-drafts','keep')
+  if(persisted)store.setItem(cfg.SERVICE_CONFIG_KEY,JSON.stringify({version:1,apiOrigin:oldHTTP,hapDownloadUrl:'',resetPending:false}))
+  const migrated=await cfg.applyDeploymentConfig(upgrade,store)
+  check(()=>assert.equal(migrated.apiOrigin,newHTTPS));check(()=>assert.equal(migrated.resetPending,false))
+  check(()=>assert.equal(store.getItem('token'),'synthetic-http-login'));check(()=>assert.equal(store.getItem('chat-input-drafts'),'keep'))
+  check(()=>assert.equal(cfg.readServiceConfig(store).apiOrigin,newHTTPS))
+  check(()=>assert.equal(cfg.finishServiceTransition(migrated,store,new Storage()).apiOrigin,newHTTPS))
+ }
+ for(const mutation of [{apiOrigin:'https://beta.example:18443/api'},{apiOrigin:'http://alpha.example:18443/api'},{apiOrigin:'https://alpha.example:18443/other/api'},{legacyBinding:{...proof,apiBaseSHA256:'b'.repeat(64)}}]) {
+  const store=new Storage();store.setItem('token','keep');store.setItem(cfg.SERVICE_CONFIG_KEY,JSON.stringify({version:1,apiOrigin:oldHTTP,hapDownloadUrl:'',resetPending:false}))
+  const before=JSON.stringify([...store.values]);await assert.rejects(()=>cfg.applyDeploymentConfig({...upgrade,...mutation},store));checks++
+  check(()=>assert.equal(JSON.stringify([...store.values]),before))
+ }
+ const unknownHTTP=new Storage();unknownHTTP.setItem('token','keep');unknownHTTP.setItem(cfg.SERVICE_CONFIG_KEY,JSON.stringify({version:1,apiOrigin:'http://beta.example:18000/api',hapDownloadUrl:'',resetPending:false}))
+ const beforeUnknown=JSON.stringify([...unknownHTTP.values]);await assert.rejects(()=>cfg.applyDeploymentConfig(upgrade,unknownHTTP));checks++
+ check(()=>assert.equal(JSON.stringify([...unknownHTTP.values]),beforeUnknown))
+ const failingHTTP=new Storage();failingHTTP.setItem('token','keep');failingHTTP.setItem(cfg.SERVICE_CONFIG_KEY,JSON.stringify({version:1,apiOrigin:oldHTTP,hapDownloadUrl:'',resetPending:false}));const beforeFail=JSON.stringify([...failingHTTP.values]);failingHTTP.setItem=()=>{throw Error('QuotaExceededError')}
+ await assert.rejects(()=>cfg.applyDeploymentConfig(upgrade,failingHTTP));checks++;check(()=>assert.equal(JSON.stringify([...failingHTTP.values]),beforeFail))
  const boundStorage=new Storage();boundStorage.setItem('token','synthetic-bound-old');boundStorage.setItem('chat-input-drafts','preserved-draft')
  const expected=require('node:crypto').createHash('sha256').update(a).digest('hex')
  const deployment={apiOrigin:a,hapDownloadUrl:'',productName:'Garnet-Assistant',legacyBinding:{schemaVersion:1,bundleName:'cloud.begonia.workassistant',versionCode:1000006,sourceHapSHA256:'a'.repeat(64),apiBaseSHA256:expected}}
@@ -150,7 +172,7 @@ async function call(command,rest={}){return JSON.parse(await bridge.request(JSON
  check(()=>assert.equal(downloads.length,count))
  await call('client.state',{state:'ready'})
  assert.equal((await call('client.configure',{apiOrigin:b})).ok,false);checks++
- await call('client.configuration');check(()=>assert.equal(nativeConfig.MEMOH_ORIGIN,''));check(()=>assert.deepEqual(events.slice(-3),['close','close','login-page']))
+ await call('client.configuration');check(()=>assert.equal(nativeConfig.MEMOH_ORIGIN,''));check(()=>assert.deepEqual(events.slice(-4),['close','close','close','login-page']))
  assert.equal((await call('client.configure',{apiOrigin:b})).ok,true);checks++
  check(()=>assert.equal(policy.memohRequest(a+'/bots/b/media'),false))
  check(()=>assert.equal(policy.memohRequest(b+'/bots/b/media'),true))

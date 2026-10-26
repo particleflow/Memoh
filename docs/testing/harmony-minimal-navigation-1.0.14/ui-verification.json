@@ -1,0 +1,15 @@
+{
+  "compiledPage": true,
+  "productDisplayName": "Garnet Assistant",
+  "viewport": "390x844",
+  "removedRecoveryButtonAndHint": true,
+  "removedDuplicateTaskMenu": true,
+  "activityNameAndStateVisible": true,
+  "activityOpensOriginalSessionAndClosesDrawer": true,
+  "loginRetained": true,
+  "loginCalls": 1,
+  "pageErrors": [],
+  "noTaskOrTransferWrites": true,
+  "phoneAcceptance": false,
+  "environment": "Local compiled page with synthetic HTTP/native seams; not ArkWeb or device acceptance"
+}

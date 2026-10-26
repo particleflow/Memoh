@@ -1,0 +1,80 @@
+{
+  "cases": [
+    {
+      "clientType": "openai-completions",
+      "sameProviderId": "77777777-7777-4777-8777-777777777777",
+      "nativeSchemaFieldsVisible": true,
+      "maskedKey": true,
+      "reloadRetainsConfig": true
+    },
+    {
+      "clientType": "openai-responses",
+      "sameProviderId": "77777777-7777-4777-8777-777777777777",
+      "nativeSchemaFieldsVisible": true,
+      "maskedKey": true,
+      "reloadRetainsConfig": true
+    }
+  ],
+  "requests": [
+    {
+      "path": "/speech-providers",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers",
+      "method": "GET"
+    },
+    {
+      "path": "/provider-templates",
+      "method": "GET"
+    },
+    {
+      "path": "/provider-templates",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers/77777777-7777-4777-8777-777777777777",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers/meta",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers/77777777-7777-4777-8777-777777777777/models",
+      "method": "GET"
+    },
+    {
+      "path": "/speech-providers",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers",
+      "method": "GET"
+    },
+    {
+      "path": "/provider-templates",
+      "method": "GET"
+    },
+    {
+      "path": "/provider-templates",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers/77777777-7777-4777-8777-777777777777",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers/meta",
+      "method": "GET"
+    },
+    {
+      "path": "/transcription-providers/77777777-7777-4777-8777-777777777777/models",
+      "method": "GET"
+    }
+  ],
+  "managementMutations": 0,
+  "modelCalls": 0,
+  "pageErrors": [],
+  "scope": "Actual generated Harmony Vite UI, Chromium390x844 with synthetic authenticated API and native seams. No real ASR, provider configuration, phone or NAS."
+}

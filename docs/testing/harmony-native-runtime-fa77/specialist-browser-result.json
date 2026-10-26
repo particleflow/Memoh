@@ -1,0 +1,61 @@
+{
+  "sharedCommit": "fa77a073fe6380d297474a6053a1445201bcab83",
+  "viewport": [
+    390,
+    844
+  ],
+  "nativeMemohRuntimeListedAndSelectable": true,
+  "offlineNativeRuntimeDisabled": true,
+  "otherBotCannotReuseUnboundPC": true,
+  "noImplicitDeviceObservation": true,
+  "exactCheckpointRevisionAndPartialOffset": true,
+  "authenticationUnavailableStopsPolling": true,
+  "explicitObservationRestoresSameTask": true,
+  "rootRunDistinctFromChild": true,
+  "persistedStateNotDeliveryCompletion": true,
+  "historyAuthorizedBeforeNavigation": true,
+  "actualTargetBotSessionHistoryVisible": true,
+  "loginRetainedAfterNavigationAndReload": true,
+  "nativeBridgeCalls": [
+    {
+      "command": "download.fetch",
+      "botId": "55555555-5555-4555-8555-555555555555",
+      "hash": "2810c4473c54d9a79e0fa307b2c4e548e08cd6879d41063988008f97fbdb706c",
+      "size": 31
+    },
+    {
+      "command": "download.save"
+    },
+    {
+      "command": "download.abort"
+    }
+  ],
+  "attachmentPreviewAndReturn": true,
+  "observedMediaReads": [
+    "2810c4473c54d9a79e0fa307b2c4e548e08cd6879d41063988008f97fbdb706c",
+    "4c5d573cfb85b8ab0a5659062b830a058d1a449e51a6d79c13b483a77ea7ed28",
+    "4c5d573cfb85b8ab0a5659062b830a058d1a449e51a6d79c13b483a77ea7ed28"
+  ],
+  "runtimeSubscriptions": [
+    {
+      "bot": "11111111-1111-4111-8111-111111111111",
+      "session": "22222222-2222-4222-8222-222222222222"
+    },
+    {
+      "bot": "55555555-5555-4555-8555-555555555555",
+      "session": "66666666-6666-4666-8666-666666666666"
+    },
+    {
+      "bot": "55555555-5555-4555-8555-555555555555",
+      "session": "66666666-6666-4666-8666-666666666666"
+    }
+  ],
+  "unownedHistoryReadsDenied": [
+    [
+      "22222222-2222-4222-8222-222222222222"
+    ]
+  ],
+  "dispatchOrContinuationWrites": 0,
+  "pageErrors": [],
+  "boundary": "Actual phone-adapted Vue UI with synthetic HTTP and native OS bridge; not device/NAS/signing acceptance."
+}

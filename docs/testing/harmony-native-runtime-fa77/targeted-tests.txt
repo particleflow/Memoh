@@ -1,0 +1,51 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/unified-9e6c470-validation
+
+ ❯ |web| src/pages/home/components/session-task-results.test.ts (8 tests | 4 failed) 680ms
+     × uses the reader Bot and native preview/download, hides pending refs and clears on denial 47ms
+     × reuses the media lightbox inside the host, then retires it on a scope change 19ms
+     × uses the reader Bot and native preview/download, hides pending refs and clears on denial 22ms
+     × reuses the media lightbox inside the host, then retires it on a scope change 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > uses the reader Bot and native preview/download, hides pending refs and clears on denial
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > uses the reader Bot and native preview/download, hides pending refs and clears on denial
+AssertionError: expected  to have a length of 1 but got +0
+
+- Expected
++ Received
+
+- 1
++ 0
+
+ ❯ src/pages/home/components/session-task-results.test.ts:85:40
+     83|     await nextTick()
+     84|     const link = root.querySelector('a')!
+     85|     expect(root.querySelectorAll('a')).toHaveLength(1)
+       |                                        ^
+     86|     expect(link.getAttribute('href')).toBe(`/api/bots/specialist/media…
+     87|     expect(link.download).toBe('output')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in web host > reuses the media lightbox inside the host, then retires it on a scope change
+ FAIL  |web| src/pages/home/components/session-task-results.test.ts > native committed attachment access in native host > reuses the media lightbox inside the host, then retires it on a scope change
+TypeError: Cannot read properties of null (reading 'closest')
+ ❯ src/pages/home/components/session-task-results.test.ts:118:30
+    116|     app.use(createI18n({ legacy: false, locale: 'en', messages: { en }…
+    117|     await nextTick()
+    118|     root.querySelector('img')!.closest('button')!.click(); await nextT…
+       |                              ^
+    119|     expect(root.querySelector('[data-keyboard-scope="mediaLightbox"] i…
+    120|     deliveries.value = { ...deliveries.value, files: [...deliveries.va…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  4 failed | 89 passed (93)
+   Start at  09:54:05
+   Duration  18.11s (transform 26.83s, setup 0ms, import 39.16s, tests 1.81s, environment 8.37s)
+

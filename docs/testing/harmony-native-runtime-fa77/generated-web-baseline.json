@@ -1,0 +1,197 @@
+{
+  "existingPhonePatches": {
+    "apps/web/index.html": {
+      "adaptedSHA256": "280d87306ae34a1ab92a33e5bc03438143894c9c3e4798f82a51cd91772fdfff",
+      "upstreamSHA256": "7e2085d382f8bad18eddb9c887c84e89a296a23d97bf3afb4084a5b689633414"
+    },
+    "apps/web/package.json": {
+      "adaptedSHA256": "e35175cfa810c56f3dfd0efde4f5c02ed23cfa03603736dc0469f53af616efa9",
+      "upstreamSHA256": "c970514dca6a4e26554db04f3487815d24fe6fa799c1b9f23627d84b4789dcc7"
+    },
+    "apps/web/src/App.vue": {
+      "adaptedSHA256": "efc0ea296582c5f937998d737adc11c6aa58326c22d2c16a3a9929f067a9360e",
+      "upstreamSHA256": "c8b7cbe467fc1c771c818e45e8269ee2bf5c43bd4298c1f0433c74404ee2658a"
+    },
+    "apps/web/src/components/file-manager/file-viewer.vue": {
+      "adaptedSHA256": "f05fab15273e7da462870fd8e16395919b76f42e180304a664f92fa7cecf3e0e",
+      "upstreamSHA256": "0e706abd7a0b8e157d6a3afdf9fff7a2e2c70bafca42ef4d24601e186e1e349e"
+    },
+    "apps/web/src/components/sidebar/files-pane.vue": {
+      "adaptedSHA256": "c1bd58a8f1adef29b6e8cc07efde46b2c7c09e410e3cfd41f92d6a53f7dfaf4c",
+      "upstreamSHA256": "4a7829baa94faaed58e0802acb09ebe9fed2763b18dfdc27ec2fedc061cbefb6"
+    },
+    "apps/web/src/composables/useBotDisplayConnection.ts": {
+      "adaptedSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df",
+      "upstreamSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df"
+    },
+    "apps/web/src/i18n/locales/en.json": {
+      "adaptedSHA256": "d08b3d80f77385bbcccf858378bbbd8de6fcdffe4b83110d1319ce5ee18510b8",
+      "upstreamSHA256": "cb804efa75ab16f8a7a14d5cb458223c76d7b7dc5727c6dac768aff52caee07f"
+    },
+    "apps/web/src/i18n/locales/ja.json": {
+      "adaptedSHA256": "42125a4996bbf48e9176862700d0fcb01fef7e2a7098d37a3571027857a46c3b",
+      "upstreamSHA256": "a66835a064ef4a9bdcf4a1c49271d603e05cb6ec1377cd497fdf9fe8788728b7"
+    },
+    "apps/web/src/i18n/locales/zh.json": {
+      "adaptedSHA256": "d2df06f157024c13e6a8e03d6d4c02faa9ebd47f9ad260233fe78ff0ad1a56e0",
+      "upstreamSHA256": "fa628d9b40c50a7f12e922d6a211315d56615232c8f81b18eb207bbe9ae7c29d"
+    },
+    "apps/web/src/lib/api-client.ts": {
+      "adaptedSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
+      "upstreamSHA256": "b4e9bba92e6c71cf38b3136878a1b1b12f06f39543e1220e59ce165590902376"
+    },
+    "apps/web/src/main.ts": {
+      "adaptedSHA256": "28edb395679195238accdee6c058f455b20f6bc131246572d21b381979de968d",
+      "upstreamSHA256": "4e39e7f0f79fef7d70b38108a14e06bd211cff533015dfbfd77bbb6fe08cf29e"
+    },
+    "apps/web/src/pages/appearance/index.vue": {
+      "adaptedSHA256": "85ec3a11c9d6a2c80a2e2cc556cdcd71312d2804c421574c89a17cacb3a451eb",
+      "upstreamSHA256": "517b1e901fa6d2557e8972570808d879f617c4c3de9186e5d660f11a27d34020"
+    },
+    "apps/web/src/pages/home/components/attachment-block.vue": {
+      "adaptedSHA256": "acfac9d2e6b839ccd9012909354e58b2db1eb24aac4a5fc2bea9cee648b201b5",
+      "upstreamSHA256": "e18409ebd3b615e3578839871361756a2a093e378764cd12241499a9994eab77"
+    },
+    "apps/web/src/pages/home/components/chat-attachment-card.vue": {
+      "adaptedSHA256": "3b93998bc04565238f694468ce7d1390b6088dfeee1953e7d2888e02e2ece303",
+      "upstreamSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122"
+    },
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "adaptedSHA256": "f19601dfb71442de123c585e529a14f222cb016ad096546e38d45ea43db730f2",
+      "upstreamSHA256": "0af9d3318a01e5421cd2be19f4b51b90cafbffffb85e544f2e5868924f02937c"
+    },
+    "apps/web/src/pages/home/components/display-pane.vue": {
+      "adaptedSHA256": "404914e72d1bcfa7ae23e2f1fdd9545a6f9dec6bfc728f19b9e99e9f81f7f974",
+      "upstreamSHA256": "404914e72d1bcfa7ae23e2f1fdd9545a6f9dec6bfc728f19b9e99e9f81f7f974"
+    },
+    "apps/web/src/pages/home/components/dockview/panel-asset.vue": {
+      "adaptedSHA256": "3688c5562799ae82f1d399d6eb5aa62744c76dde8cdaa7feb27b99939241c404",
+      "upstreamSHA256": "c7019425035f5d51f3d6bc8bbdaa6f544ded973b66cb84df017d810ffb858fd3"
+    },
+    "apps/web/src/pages/home/components/media-gallery-lightbox.vue": {
+      "adaptedSHA256": "a1ce4017255992ad0899debe5114f2500afb5fab5ff0c090c560ff9190641a31",
+      "upstreamSHA256": "b5235f5a9222d7ef74955515bc3d92238b35dae521425913eb504d3cc49d2ec8"
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "adaptedSHA256": "36cba68f785a186b93e9de4fdb89c9d4c1f0f8c0da1d97f4772070c524956df9",
+      "upstreamSHA256": "4c097a7bdb32fdd5f134f68dceb1ffaf46432c2ee114542b483ae85a389014f6"
+    },
+    "apps/web/src/pages/home/components/process-collapse.ts": {
+      "adaptedSHA256": "e51f0e52622a7d1259336d3def4f2afecb6797d5ec387ff417010093b4ad31c9",
+      "upstreamSHA256": "4aca9c61ed6b3611a00f784b0bab37f3bf34d53eaaeb634fba3b04e3883c939a"
+    },
+    "apps/web/src/pages/home/components/session-task-results.vue": {
+      "adaptedSHA256": "d60bb940d64a0aec366e01fe4563ce0dd8e085acf31e2bc7f1dddd6d01d9029d",
+      "upstreamSHA256": "91930e25debd083ca01e5395eaeb1b3084e2c08dca38703dca1527a08600bb26"
+    },
+    "apps/web/src/pages/home/components/thinking-block.vue": {
+      "adaptedSHA256": "12530a4756fb84e951ed3dbbb37e0f18dd71b98647bb7fb954f4c220325b86ce",
+      "upstreamSHA256": "64bad771cd5bb990284e17329ad149347e50e6fb3bdd6002e859e4bbafa3b4ed"
+    },
+    "apps/web/src/pages/home/components/tool-call-group.vue": {
+      "adaptedSHA256": "05dbe9604922b568f5a6fe73e3794f120a7ce9b222ebe290fccabe1822efcf80",
+      "upstreamSHA256": "1b229ffe5defb53e1eefab1b5cc13ce06b27ac348cab0393345a572a73c6417e"
+    },
+    "apps/web/src/pages/home/composables/useComposerAttachments.ts": {
+      "adaptedSHA256": "4e049a37f3fac98876db3f3a43c81ab13aad422c8ee38b090f20d0aee3b91b0e",
+      "upstreamSHA256": "3e24bf6239afc64b7042ef4f2da27f6b97250fc320f61f375a3ecdff1c807cae"
+    },
+    "apps/web/src/pages/home/composables/useFileManagerProvider.ts": {
+      "adaptedSHA256": "1b0f309c3f499e6f60d87c8d7de9cdf9e38d7dbecfad478534b267e20b75c9c7",
+      "upstreamSHA256": "80dd7403a79d88ac976d8e4a9369048e9478a7f70915f4664bb06e052d7d456e"
+    },
+    "apps/web/src/pages/home/composables/useMediaGallery.ts": {
+      "adaptedSHA256": "25ab15e56ec5ea6fd47381f9cd63ab74cbac9cb784a1b06e4faac77795cdab50",
+      "upstreamSHA256": "f58ec2bf7395ba50eab2c106873bf941df4909d8a2907bba6866bbf378cecd7e"
+    },
+    "apps/web/src/pages/home/index.vue": {
+      "adaptedSHA256": "9aeb142133ff8c4f0815e89855cc373525e810412c0518a35dcabb5e87ebdce9",
+      "upstreamSHA256": "b91439b9d6285d3a2d3dd37d741818d07b1c1735fe6261ce2b323e1b38c06ead"
+    },
+    "apps/web/src/pages/login/index.vue": {
+      "adaptedSHA256": "81d0150579bd7481bf03bad2703c73fc24fe20488445b9e7e4992e5852c0d97d",
+      "upstreamSHA256": "4503b769ab1532c5dfcf85187b6c0be64cd3c85a7c172b4d05cc8cec48757aad"
+    },
+    "apps/web/src/pages/login/login-submit.test.ts": {
+      "adaptedSHA256": "a1b4ee945779a0227982463842d7a6dfb99a37a57a292033f7303925916720e6",
+      "upstreamSHA256": "bb27cf24d030e468744ddca1386f9ad7846e4ebb56c550e9bb50b44657e73ea0"
+    },
+    "apps/web/src/pages/login/login-submit.ts": {
+      "adaptedSHA256": "153d029dcadda69046fa029b4ea50a7607323217f6361814c42d0cf8c544c12c",
+      "upstreamSHA256": "2b2eb7f51962ffbe157a133787a5c6e565406c7fad4238dc77fb4134e5a72aa7"
+    },
+    "apps/web/src/pages/main-section/components/mobile-top-bar.vue": {
+      "adaptedSHA256": "59e37cdb2af16e2b0986db5404d83f6413cbc616d9a73acb9c9c81816cea82a5",
+      "upstreamSHA256": "ed0bc189ac1e6ea4423b36a3b0445d21d8f0d79484a7ed9adb00f00affcfccb1"
+    },
+    "apps/web/src/router.ts": {
+      "adaptedSHA256": "8170ce81502d42e0d27a718538b4bddfe01953d1d8d0547b860fd4ccdef1dfa9",
+      "upstreamSHA256": "475f6220617508045c79694f148348ad24c99edfb3cf63b48b950a831ff4b61b"
+    },
+    "apps/web/src/store/chat/send.ts": {
+      "adaptedSHA256": "02d48c06ddedf4635d590ea20499b6099503bbf931d33c1cc2d0498afa45faa9",
+      "upstreamSHA256": "a2a53773b59761fae9bdf82c44b07b7a3720a4d98d6c933757989db6fc1068b3"
+    },
+    "apps/web/src/store/chat/transcript.ts": {
+      "adaptedSHA256": "35785bccd8a698b6196b4308a85ecd7d00e77fe19af45422ea967a4748f2e3f6",
+      "upstreamSHA256": "ab05dc5fd5255b7bbddefbe6ccc173319f2744dc1b5f5efaf80d7fbd3f008afb"
+    },
+    "apps/web/src/store/chat/types.ts": {
+      "adaptedSHA256": "b0a687e408bb5e3813b63680f807618de8c2005056ea722eff5242b888ac6510",
+      "upstreamSHA256": "9aa896cbd750038a5bf55dd507684237c932173833c5331e15646d81096feeac"
+    },
+    "apps/web/src/store/chat/view-registry.ts": {
+      "adaptedSHA256": "828651577263151d15e5aa66ce0e3bc0f443d3338c16622db9c4c5ab1caa4a4a",
+      "upstreamSHA256": "3bbfb71dd6e8003830d5e9b0564cb0f683c88e0c790d095a9f57ba867a707f93"
+    },
+    "apps/web/src/store/chat/views.ts": {
+      "adaptedSHA256": "8b01ba36b92e2700dc37042da82e71ebe06b8fe7a40136298f0eced77801c78f",
+      "upstreamSHA256": "93871c3d6aadabcb9a673ddf60c1c4ee45bcf08d0dafc1ccef82db6829fc814a"
+    },
+    "apps/web/src/store/settings/index.ts": {
+      "adaptedSHA256": "fa58629f9904b6ab70cf4e8625ff7bea3a668e57e049a4914dc0eb6d2a41fac6",
+      "upstreamSHA256": "9799e94546de64b230e5ad031c109836c2c53fa54386e116171c39008148d78e"
+    },
+    "apps/web/src/store/workspace-tabs.ts": {
+      "adaptedSHA256": "c1e566ac48bf40b640960500c68028f90cf84c5a64e83cdc7cc0cfdab9108e85",
+      "upstreamSHA256": "d59e4a528b4308fac5c1fa04035754e81a354be291e98584d3028c3683b066ce"
+    },
+    "apps/web/src/style.css": {
+      "adaptedSHA256": "4fdb503dd60220f776c2720cd19326488b817eee57b632e34c63df2a3e748dd2",
+      "upstreamSHA256": "105df494bb43daf3d29a6d73781a353f9dc4755b01bb7eeed389c3a565f993e8"
+    },
+    "apps/web/vite.config.ts": {
+      "adaptedSHA256": "b8321e5a1a93d1937b628b536384f56524a2ac03728e6356cfd44a0db85ab923",
+      "upstreamSHA256": "91c12523eb080163fc2d0bc171c6c383c7d1c82e15bdc49456542a7df96cb683"
+    },
+    "packages/ui/src/components/label-swap/LabelSwap.vue": {
+      "adaptedSHA256": "945000e5c74c7249fafa4a431216d0ca257b63d7598bccd5f4e70923c54a7e93",
+      "upstreamSHA256": "8b7c32d98f1d860faa6b080b3a3752666b5f9038e7ee45a6887fe9583275486e"
+    },
+    "pnpm-lock.yaml": {
+      "adaptedSHA256": "fc36d74d13468ae651a6fa3db3671133645c14862aa18327e6b75992437ab5c7",
+      "upstreamSHA256": "c75f648f279b2303fa4690bb1a813d176d584ef0f969170ef86790aa7e61c421"
+    }
+  },
+  "nativeTransferReview": {
+    "baseCommit": "b1a025dc79879d9cb986bc5b6d637caee60a4cde",
+    "changedAdaptations": [
+      "apps/web/src/pages/home/components/chat-pane.vue"
+    ],
+    "reason": "Wire the retained native picker and resumable uploader into the existing composer/send gate; preserve the other platform adaptations.",
+    "unchangedAdaptations": 42
+  },
+  "referenceHostCommit": "9fdff87bd8f65d048537ca4cfda77bcdaeae3674",
+  "sharedCbceeReview": {
+    "baseHostCommit": "159c1dc7a9fbde43a964b888b7bbd59f413b7c05",
+    "baseSharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+    "phonePatchImplementationChanged": false,
+    "unchangedAdaptationTargets": 40,
+    "upstreamChangedAdaptationTargets": [
+      "apps/web/src/i18n/locales/en.json",
+      "apps/web/src/i18n/locales/ja.json",
+      "apps/web/src/i18n/locales/zh.json"
+    ]
+  },
+  "sharedCommit": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4"
+}

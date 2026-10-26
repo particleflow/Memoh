@@ -1,0 +1,29 @@
+{
+  "exitCode": 0,
+  "qualificationExitCode": 0,
+  "officialApi26Compile": true,
+  "buildMode": "release",
+  "sdkVersion": "26.0.0.105",
+  "sourceIdentitySha256": "6d56ee78cea559560eb6ea4838ab9315a81590dd1a4fb4daef0e67dd5ae5a18d",
+  "crcVerified": true,
+  "sourceMatchesBuild": true,
+  "identityPermissionsUnchanged": true,
+  "publicConfigEmpty": true,
+  "publicConfigBytes": 8192,
+  "versionName": "1.0.14",
+  "versionCode": 1000014,
+  "hapBytes": 35615952,
+  "hapSHA256": "cc065da0c516240b628ac53f9cb1898607b4e48dac501cbec4d88b253359a205",
+  "phoneAcceptance": false,
+  "sourceBase": "5d0f2df38d57588f313831459dac749d125918a9",
+  "sharedBase": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "sharedActivitySubset": "d2bade8b30e4b6df778bc2c0b402f3b1fe592eeb",
+  "nativeRemoval": "f76375468262237232f9342f922fdaa0e06d08ee",
+  "productDisplayName": "Garnet Assistant",
+  "nameOnlyRebuild": {
+    "reason": "A subsequent explicit display-name requirement changed three build inputs; original package retained.",
+    "previousSourceCommit": "5d04609cd53b3b4cf788f2d0da96459ff99c78eb",
+    "previousHAPSHA256": "a7472679a36ef2f714e3b2165bae7fab0eb4558b9add16d4cd012d9d3c11ffbe",
+    "sameProductVersionNotYetDistributed": true
+  }
+}

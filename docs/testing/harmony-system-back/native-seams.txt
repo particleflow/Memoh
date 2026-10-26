@@ -1,0 +1,1 @@
+{"scenarios":9,"passed":true,"coalescesPending":true,"staleDoesNotExit":true,"rootBackgroundOnly":true,"scope":"Production method with SDK seams; not device gesture acceptance"}

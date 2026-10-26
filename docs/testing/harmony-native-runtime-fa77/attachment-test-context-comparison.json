@@ -1,0 +1,31 @@
+{
+  "unchangedAttachmentModules": {
+    "apps/web/src/pages/home/components/attachment-block.vue": {
+      "phone108": "acfac9d2e6b839ccd9012909354e58b2db1eb24aac4a5fc2bea9cee648b201b5",
+      "phoneFa77": "acfac9d2e6b839ccd9012909354e58b2db1eb24aac4a5fc2bea9cee648b201b5",
+      "equal": true
+    },
+    "apps/web/src/pages/home/composables/useMediaGallery.ts": {
+      "phone108": "25ab15e56ec5ea6fd47381f9cd63ab74cbac9cb784a1b06e4faac77795cdab50",
+      "phoneFa77": "25ab15e56ec5ea6fd47381f9cd63ab74cbac9cb784a1b06e4faac77795cdab50",
+      "equal": true
+    },
+    "apps/web/src/lib/harmony-files.ts": {
+      "phone108": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
+      "phoneFa77": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
+      "equal": true
+    },
+    "apps/web/src/pages/home/components/media-gallery-lightbox.vue": {
+      "phone108": "a1ce4017255992ad0899debe5114f2500afb5fab5ff0c090c560ff9190641a31",
+      "phoneFa77": "a1ce4017255992ad0899debe5114f2500afb5fab5ff0c090c560ff9190641a31",
+      "equal": true
+    }
+  },
+  "generatedContextChangedFiles": [
+    "apps/web/src/pages/home/components/session-task-results.test.ts"
+  ],
+  "productFilesUnchanged": true,
+  "phoneAdapterCount": 43,
+  "additionalTestAdapterCount": 1,
+  "hapBuilt": false
+}

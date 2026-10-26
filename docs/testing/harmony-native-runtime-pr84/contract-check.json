@@ -1,0 +1,65 @@
+{
+  "phoneHead": "4e3c4d279f7f3c7770843d0714682f3297253fd7",
+  "sharedCommit": "fa77a073fe6380d297474a6053a1445201bcab83",
+  "candidateSDKCommit": "2030c2d522695f52a227f12421800fe075760813",
+  "sdkFiles": [
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "baseSHA256": "ca1980d84f68cc946ea0d8c8a47de6951071152bca09e23b921033511c5ec6c7",
+      "candidateSHA256": "3a9f25488958e4fca9079a1b5bf283d825f24ceb71dfef8e21af813ed1b3d7fd"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "baseSHA256": "de212b9bf423714af41bb4953e946539bf0773049fad993e64f75bff219c517d",
+      "candidateSHA256": "6d27bed9f925bdf93dd2896a48131ecd03790f00f1864f09a428d4f0ede72be0"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "baseSHA256": "605ac0e83742e7b757265db7289a2dc9bda3cee477848216dfa2a1695e09a972",
+      "candidateSHA256": "15bf557145534bc7834f3889694d52aa8e31ba40385749b1a7a7b5593f561580"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "baseSHA256": "6092a687e028a2f9d2c6d3bd467edfeb5cb51367856251a723c5539205a12383",
+      "candidateSHA256": "a8d08721ff7398880a2a364df880342ea7a76d8afd78863f04961a6b921fbf51"
+    }
+  ],
+  "webChangedFiles": [],
+  "existingTypeDefinitions": 2292,
+  "existingTypesRemoved": [],
+  "existingTypesChangedAdditivelyOnly": [
+    "AgenvoTarget",
+    "UserruntimeRuntime"
+  ],
+  "newTypes": [
+    "AgenvoNativeHerdrProfile",
+    "PutUsersMeRuntimesByIdNativeHerdrData",
+    "PutUsersMeRuntimesByIdNativeHerdrError",
+    "PutUsersMeRuntimesByIdNativeHerdrErrors",
+    "PutUsersMeRuntimesByIdNativeHerdrResponse",
+    "PutUsersMeRuntimesByIdNativeHerdrResponses",
+    "UserruntimeNativeHerdrIdentity"
+  ],
+  "existingPhoneAdaptationsUnchanged": 43,
+  "signed108PreservationHashesMatched": 7,
+  "publicConfigEmpty": true,
+  "productionLockChanged": false,
+  "hapBuilt": false,
+  "validation": {
+    "fullGeneratedWebTypecheck": {
+      "exitCode": 0,
+      "project": "apps/web/tsconfig.app.json"
+    },
+    "sdkCompatibilityTests": 7,
+    "phoneAttachmentTests": 12,
+    "totalTestsPassed": 19,
+    "fixtureESLint": {
+      "exitCode": 0,
+      "errors": 0,
+      "warnings": 0
+    }
+  },
+  "isolatedSDKRestoredToLockedFa77": true,
+  "syntheticHTTPOnly": true,
+  "realWindowsPhoneNASAcceptance": false
+}

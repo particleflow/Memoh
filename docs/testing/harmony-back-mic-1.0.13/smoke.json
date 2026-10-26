@@ -1,0 +1,12 @@
+{
+  "actualCompiledCombinedPage": true,
+  "flows": [
+    "boot-with-combined-voice-binding",
+    "drawer-back",
+    "settings-back-draft-retained"
+  ],
+  "loginCalls": 1,
+  "pageErrors": [],
+  "missingRequiredPropWarnings": [],
+  "scope": "Actual compiled combined page, Chromium390x844 and synthetic auth/native seams; microphone15 scenario result reused, no new recording or phone acceptance"
+}

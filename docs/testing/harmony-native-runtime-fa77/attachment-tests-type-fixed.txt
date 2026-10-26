@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/unified-9e6c470-validation
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  10:37:57
+   Duration  16.58s (transform 11.02s, setup 0ms, import 14.17s, tests 1.22s, environment 937ms)

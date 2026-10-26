@@ -1,0 +1,59 @@
+name: Harmony Source CI
+
+on:
+  pull_request:
+    branches: ["recovery/harmony-source-20261023"]
+    paths:
+      - "mobile/**"
+      - "scripts/check-harmony-source.py"
+      - "docs/testing/harmony-system-back/**"
+      - "docs/testing/harmony-native-runtime-fa77/generated-web-baseline.json"
+      - ".github/workflows/harmony-source-ci.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: harmony-source-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  generated-web:
+    name: Generated Harmony Web
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      HUSKY: "0"
+      CI: "true"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.27.0
+      - name: Verify source hashes and preserve existing phone adaptations
+        run: |
+          git rev-parse HEAD
+          python3 scripts/check-harmony-source.py
+      - name: Install the existing pinned Web dependencies
+        working-directory: mobile/client/tests/.isolated/ci-web/checkout
+        run: |
+          node scripts/ensure-submodules.mjs --check
+          pnpm --filter @memohai/web... install --frozen-lockfile --ignore-scripts --store-dir "$RUNNER_TEMP/harmony-pnpm-store"
+          node scripts/check-patched-deps.mjs
+      - name: Typecheck the complete generated Web application
+        working-directory: mobile/client/tests/.isolated/ci-web/checkout
+        run: pnpm --filter @memohai/web typecheck
+      - name: Verify phone task attachments and system back
+        working-directory: mobile/client/tests/.isolated/ci-web/checkout
+        run: pnpm test --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/lib/harmony-back.test.ts apps/web/src/components/sidebar/session-activity.test.ts apps/web/src/pages/home/composables/useBotActivity.test.ts apps/web/src/components/sidebar/session-activity-trigger.test.ts
+      - name: Lint the generated phone regressions
+        working-directory: mobile/client/tests/.isolated/ci-web/checkout
+        run: pnpm exec eslint apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/lib/harmony-back.test.ts apps/web/src/components/sidebar/session-activity.test.ts apps/web/src/pages/home/composables/useBotActivity.test.ts apps/web/src/components/sidebar/session-activity-trigger.test.ts
+      - name: Verify the actual native back method with SDK seams
+        run: node docs/testing/harmony-system-back/verify_native.cjs

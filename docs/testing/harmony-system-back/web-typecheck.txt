@@ -1,0 +1,4 @@
+
+> @memohai/web@0.22.0 typecheck <repo>/mobile/client/tests/.isolated/ci-web/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+

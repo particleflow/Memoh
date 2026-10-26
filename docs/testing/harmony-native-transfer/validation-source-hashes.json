@@ -1,0 +1,19 @@
+{
+  "mobile/client/mobile/build_memoh_web.py": "58f23e9fe803e7fc77bec07c04babddc21feaa452f8cdf3a9ec90d19f753d4dc",
+  "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "bfa865b3af7566b626fd021cd5de573dc2d8b3b979d3cfa6e3e265a99fb3a329",
+  "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets": "fb615f4f637c118e858249a70ee78316648ac09c6e061473310be566dcb34ee6",
+  "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets": "d66e30cae2fe0b80c69f2faa71cfd82c9576878b45457ace81d470ca6022463e",
+  "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "4333909b73792a7c7603b4f09e091fbfab4ac03b1cf58e88595e5e94d8982f84",
+  "mobile/client/mobile/memoh/HarmonyAttachments.vue": "43788d4c894b454d360044aeef321e0c7fbb5c6342e230a820c550f8d69eb40f",
+  "mobile/client/mobile/memoh/harmony-download.ts": "6990c567e495a20c5a089f37b656bde8ec93cd9a723bc5a4ab4597fc7cccbdb0",
+  "mobile/client/mobile/memoh/harmony-files.ts": "646002d64b63f26019f9e2ceb5cc8160c4d29c9ac0698a2627764807ea87edf9",
+  "mobile/client/mobile/memoh/harmony-resumable.ts": "e55acc09fd3925cf6f7480acae6474ecfcc7e32909cdefc23f71af8312621ae5",
+  "mobile/client/tests/stage2/harmony_download_frontend.cjs": "e58ea7ffea7e495007252f00d7145d1188da9b34eec5eb96a9a556948adf4dbf",
+  "mobile/client/tests/stage2/harmony_native_download.cjs": "521da721b0cea056bebb750b50ea73496d85cbfc621843c356eaad9c3c94e61f",
+  "mobile/client/tests/stage2/harmony_resumable.cjs": "e0e66cf81c9690f07f6cc3d03a45a359bc9828f645cda121cd2429e721034be1",
+  "mobile/client/tests/stage2/harmony_resumable_frontend.cjs": "4b1e6425d4a9b9156b6dcc3c29e6a977b1b4784517e5eb0c32a050f84ad42712",
+  "mobile/client/tests/stage2/harmony_resumable_ui.py": "4479011315b557f038204d84ca9439923045718300d86a0cf88fd15bc85fab5b",
+  "mobile/client/tests/stage2/harmony_task_attachments.vitest.ts": "d013625c0bc6ef0caa1add66fd06808675b42f53d40358b45c51aaa47023e0bf",
+  "mobile/client/tests/stage2/harmony_upload_router.cjs": "08aa36360af6ce79b91f9f04b50f03ec28864e09767b880393f014f97c58388c",
+  "mobile/client/tests/stage2/memoh_upload_preparation_checks.mjs": "4b04bd205337dc0b7ac216aa5f6d6b78bd2d522f478b0f33fe60b8b3ebb3a129"
+}

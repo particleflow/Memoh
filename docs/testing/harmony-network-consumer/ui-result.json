@@ -1,0 +1,20 @@
+{
+  "cases": [
+    {
+      "persistedHTTP": true,
+      "retainedLogin": true,
+      "httpsRequestsOnly": true
+    },
+    {
+      "persistedHTTP": false,
+      "retainedLogin": true,
+      "httpsRequestsOnly": true
+    }
+  ],
+  "unknownOriginNoRequests": true,
+  "unknownOriginDataPreserved": true,
+  "loginCalls": 1,
+  "pageErrors": [],
+  "networkPolicyForwardedThroughActualEntry": true,
+  "environment": "newly compiled shared page, Chromium 390x844; synthetic API/configuration boundaries; not real TLS or phone acceptance"
+}

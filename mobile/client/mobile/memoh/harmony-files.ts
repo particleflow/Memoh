@@ -11,6 +11,7 @@ import { shallowReactive, toRaw } from 'vue'
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { normalizeDelegationPath } from './harmony-service-url'
 import { saveNativeOriginal } from './harmony-download'
+import { nativeAttachmentCommand, stageNativeFile, forgetNativeFile, type NativeAttachment, type NativeUploadReceipt } from './harmony-resumable'
 
 const digest = async (bytes: ArrayBuffer) => Array.from(
   new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)),
@@ -200,14 +201,30 @@ async function uploadLimit(botId: string, files: File[], signal?: AbortSignal): 
 }
 
 export async function prepareAttachment(botId: string, file: File, signal?: AbortSignal,
-  progress?: (value: UploadProgress) => void): Promise<ChatAttachment & UIAttachment> {
-  await uploadLimit(botId, [file], signal)
-  return prepareOriginal(botId, file, signal, progress)
+  progress?: (value: UploadProgress) => void, scope?: string): Promise<ChatAttachment & UIAttachment> {
+  if (!(window as Window & { begoniaNative?: unknown }).begoniaNative) await uploadLimit(botId, [file], signal)
+  return prepareOriginal(botId, file, signal, progress, scope)
 }
 
 async function prepareOriginal(botId: string, file: File, signal?: AbortSignal,
-  progress?: (value: UploadProgress) => void): Promise<ChatAttachment & UIAttachment> {
+  progress?: (value: UploadProgress) => void, scope?: string,
+  onStaged?: (file: NativeAttachment) => void): Promise<ChatAttachment & UIAttachment> {
   signal?.throwIfAborted()
+  if ((window as Window & { begoniaNative?: unknown }).begoniaNative) {
+    if (!scope) throw new Error('原件会话范围不完整')
+    progress?.({ phase: 'checking' })
+    const staged = await stageNativeFile(botId, scope, file, signal)
+    onStaged?.(staged)
+    progress?.({ phase: 'uploading' })
+    const receipt = await nativeAttachmentCommand<NativeUploadReceipt>('upload.run', botId, staged.scope, { handle: staged.handle }, signal)
+    signal?.throwIfAborted()
+    if (!receipt || receipt.content_hash !== staged.hash || receipt.size_bytes !== staged.size
+      || typeof receipt.mime !== 'string' || !receipt.mime.trim()) throw new Error('服务端未确认完整附件')
+    const attachment: ChatAttachment & UIAttachment = { type: mediaType(receipt.mime), name: file.name,
+      mime: receipt.mime, size: receipt.size_bytes, content_hash: receipt.content_hash, bot_id: botId, metadata: { bot_id: botId } }
+    sourceFiles.set(attachment, file)
+    return attachment
+  }
   const hash = await digest(await file.arrayBuffer())
   signal?.throwIfAborted()
   const identity = JSON.stringify([botId, hash])
@@ -260,8 +277,12 @@ async function prepareOriginal(botId: string, file: File, signal?: AbortSignal,
 
 // The official transcript owns the local message. Its existing send path waits
 // here for the exact originals before its one native WebSocket submission.
-export function prepareSubmission(botId: string, selectedFiles: File[], voice?: VoiceSubmission) {
+export function prepareSubmission(botId: string, selectedFiles: File[], voice?: VoiceSubmission,
+  native?: { scope: string; files: NativeAttachment[] }) {
   const files = [...selectedFiles]
+  const nativeFiles = native?.files.map(file => ({ ...file })) ?? []
+  const consumableFiles = new Map(nativeFiles.map(file => [file.handle, file]))
+  const stagedOriginals = new Map<string, File>()
   let preparation: Promise<ChatAttachment[]> | undefined
   const attachments = files.map<ChatAttachment & UIAttachment>(file => ({
     type: mediaType(file.type),
@@ -275,8 +296,27 @@ export function prepareSubmission(botId: string, selectedFiles: File[], voice?: 
     metadata: shallowReactive<Record<string, unknown>>({ harmony_transfer: 'finalizing', voice_handle: voice.capture.handle,
       voice_duration_ms: voice.capture.durationMs, voice_peaks: voice.capture.peaks }),
   })
+  for (const file of nativeFiles) attachments.push({
+    type: mediaType(file.type), name: file.name, mime: file.type, size: file.size,
+    metadata: shallowReactive<Record<string, unknown>>({ harmony_transfer: 'uploading', bot_id: botId }),
+  })
+  let completed: ChatAttachment[] | undefined
   return {
     files,
+    nativeFiles,
+    // Called only after the existing chat store confirms its one send. A ready
+    // NAS receipt alone must never consume the recoverable composer original.
+    consumeNative: async () => {
+      if (!completed) return
+      for (const file of consumableFiles.values()) {
+        try {
+          await nativeAttachmentCommand('upload.consume', botId, file.scope, { handle: file.handle })
+          const original = stagedOriginals.get(file.handle)
+          if (original) await forgetNativeFile(botId, file.scope, original, file.handle)
+        }
+        catch { /* Keep the journal if cleanup/authentication fails. */ }
+      }
+    },
     attachments: attachments.length ? attachments : undefined,
     prepareAttachments: attachments.length ? (signal: AbortSignal) => preparation ??= (async () => {
       signal.throwIfAborted()
@@ -291,7 +331,7 @@ export function prepareSubmission(botId: string, selectedFiles: File[], voice?: 
           voice_duration_ms: recording.durationMs, voice_peaks: recording.peaks, harmony_transfer: 'uploading' })
         files.push(recording.file)
       }
-      await uploadLimit(botId, files, signal)
+      if (files.length && !(window as Window & { begoniaNative?: unknown }).begoniaNative) await uploadLimit(botId, files, signal)
       const ready: (ChatAttachment & UIAttachment)[] = []
       // One submission prepares in order; no global/background queue.
       for (const [index, file] of files.entries()) {
@@ -300,7 +340,17 @@ export function prepareSubmission(botId: string, selectedFiles: File[], voice?: 
           if (local?.metadata) Object.assign(local.metadata, { harmony_transfer: value.phase,
             ...(value.loaded == null ? {} : { harmony_upload_wire_loaded: value.loaded }),
             ...(value.total == null ? {} : { harmony_upload_wire_total: value.total }) })
-        }))
+        }, native?.scope, staged => { consumableFiles.set(staged.handle, staged); stagedOriginals.set(staged.handle, file) }))
+      }
+      for (const file of nativeFiles) {
+        if (!native?.scope || !(file.scope === native.scope
+          || (native.scope.startsWith('draft:') && file.scope.startsWith('draft:')))) throw new Error('原件会话范围不一致')
+        const receipt = await nativeAttachmentCommand<NativeUploadReceipt>('upload.run', botId, file.scope, { handle: file.handle }, signal)
+        signal.throwIfAborted()
+        if (!receipt || receipt.content_hash !== file.hash || receipt.size_bytes !== file.size
+          || typeof receipt.mime !== 'string' || !receipt.mime.trim()) throw new Error('服务端未确认完整附件')
+        ready.push({ type: mediaType(receipt.mime), name: file.name, mime: receipt.mime,
+          size: receipt.size_bytes, content_hash: receipt.content_hash, bot_id: botId, metadata: { bot_id: botId } })
       }
       for (const attachment of ready) {
         attachment.metadata = { ...attachment.metadata, harmony_transfer: 'ready' }
@@ -310,6 +360,7 @@ export function prepareSubmission(botId: string, selectedFiles: File[], voice?: 
         }
       }
       signal.throwIfAborted()
+      completed = ready
       return ready
     })().catch(error => {
       if (error instanceof UnknownWrite) throw error

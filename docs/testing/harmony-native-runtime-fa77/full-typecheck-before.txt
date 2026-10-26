@@ -1,0 +1,11 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/unified-9e6c470-validation/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/components/session-task-results.test.ts(108,20): error TS2532: Object is possibly 'undefined'.
+src/pages/home/components/session-task-results.test.ts(111,96): error TS2322: Type 'Mock<Procedure | Constructable>' is not assignable to type '{ (input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>; (input: string | URL | Request, init?: RequestInit | undefined): Promise<...>; } | undefined'.
+  Type 'MockInstance<Procedure | Constructable> & (new (...args: any[]) => any) & {}' is not assignable to type '{ (input: URL | RequestInfo, init?: RequestInit | undefined): Promise<Response>; (input: string | URL | Request, init?: RequestInit | undefined): Promise<...>; } | undefined'.
+src/pages/home/components/session-task-results.test.ts(127,32): error TS2532: Object is possibly 'undefined'.
+src/pages/home/components/session-task-results.test.ts(166,7): error TS2532: Object is possibly 'undefined'.
+src/pages/home/components/session-task-results.test.ts(227,23): error TS2532: Object is possibly 'undefined'.
+ ELIFECYCLE  Command failed with exit code 2.

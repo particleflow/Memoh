@@ -1,0 +1,57 @@
+{
+  "sdkVersion": "26.0.0.105",
+  "contractCommit": "2d03f6cbabad67b242d33180cc36bf02d423e6d5",
+  "productSharedCommit": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "files": {
+    "rcp": {
+      "pathRelativeToSDK": "hms/ets/api/@hms.collaboration.rcp.d.ts",
+      "sha256": "c233285101fb1b47c7d9c6eb8941acc79d7c395db9f72b083151e0ff62bae670",
+      "anchors": {
+        "export interface DnsConfiguration": 1573,
+        "dnsRules?:": 1591,
+        "happyEyeballOnDnsRule?:": 1625,
+        "export interface StaticDnsRule": 2540,
+        "remoteValidation?:": 1971,
+        "export interface Configuration": 2111,
+        "export interface ConnectionConfiguration": 2177,
+        "export interface HttpEventsHandler": 2337,
+        "1007900007 -": 3557,
+        "1007900035 -": 3567,
+        "1007900060 -": 3578,
+        "export interface SessionConfiguration": 4446
+      }
+    },
+    "webview": {
+      "pathRelativeToSDK": "openharmony/ets/api/@ohos.web.webview.d.ts",
+      "sha256": "50a9f20ed47de94e27dbb4d09603764cfdc543098f06955ff962acda4bc5825c",
+      "anchors": {
+        "static setHostIP": 4418,
+        "static clearHostIP": 4429,
+        "static setHttpDns": 2813
+      }
+    },
+    "http": {
+      "pathRelativeToSDK": "openharmony/ets/api/@ohos.net.http.d.ts",
+      "sha256": "0b0336e7ace65d785f56ab1a923255ba285f3c50290506c4c1a10fd5fc913310",
+      "anchors": {
+        "addressFamily?:": 376,
+        "dnsServers?:": 319
+      }
+    },
+    "connection": {
+      "pathRelativeToSDK": "openharmony/ets/api/@ohos.net.connection.d.ts",
+      "sha256": "8cc5c139dbf43b6b38100ceb692aa2577d602acefcae7124b86fce842c88b7c5",
+      "anchors": {
+        "function getDefaultHttpProxy():": 760,
+        "getAddressesByName(host: string):": 636,
+        "export interface NetAddress": 2249
+      }
+    }
+  },
+  "declarationsCopiedToRepo": false,
+  "productCodeChanged": false,
+  "deviceNetworkModified": false,
+  "probeTypecheckExitCode": 0,
+  "probeMode": "TypeScript against actual SDK declarations, strict own code / skipLibCheck for vendor dependencies; no ArkTS/HAP compile",
+  "mockProductWired": false
+}

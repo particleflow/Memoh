@@ -1,0 +1,15 @@
+{
+  "firstSourceCommit": "42e840f69fb64a84f66f7846157417b5118deed5",
+  "firstHAPSHA256": "6cff8fe42a9ed844d7cf2a91fefe799e749b91dde8457eac8006ea0f8bcc7e87",
+  "published": false,
+  "nativeCompileExitCode": 0,
+  "packageReviewAccepted": false,
+  "issues": [
+    "Login-only service button remains visible after Vue Router navigation and intercepts task action",
+    "Unexpected generated module virtualMachine ark instead of previous ark24.0.0.0; exact SDK query returns 24.0.0.0"
+  ],
+  "nextActions": [
+    "Use existing router hook with login/logout regression; do not alter storage/config",
+    "Retain first evidence and regenerate current app intermediates through official clean task; never edit HAP metadata manually"
+  ]
+}

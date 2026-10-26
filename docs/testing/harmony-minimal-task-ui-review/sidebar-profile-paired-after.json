@@ -1,0 +1,72 @@
+{
+  "label": "paired-after",
+  "viewport": "390x844",
+  "samples": [
+    {
+      "firstVisibleMs": 185,
+      "fullWidthMs": 325,
+      "rect": {
+        "left": -1.52587890625e-05,
+        "right": 287.99998474121094,
+        "width": 288,
+        "state": "open"
+      },
+      "longTasks": []
+    },
+    {
+      "firstVisibleMs": 69.60000002384186,
+      "fullWidthMs": 201.60000002384186,
+      "rect": {
+        "left": -0.0001678466796875,
+        "right": 287.9998321533203,
+        "width": 288,
+        "state": "open"
+      },
+      "longTasks": []
+    },
+    {
+      "firstVisibleMs": 61.400000005960464,
+      "fullWidthMs": 194.09999999403954,
+      "rect": {
+        "left": -3.0517578125e-05,
+        "right": 287.9999694824219,
+        "width": 288,
+        "state": "open"
+      },
+      "longTasks": []
+    }
+  ],
+  "requestsDuringThreeOpens": [
+    {
+      "kind": "activity",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    },
+    {
+      "kind": "activity",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    },
+    {
+      "kind": "activity",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    }
+  ],
+  "pageErrors": [],
+  "deviceMeasurement": false,
+  "scope": "Compiled app/local Chromium and synthetic 7 schedules. Programmatic DOM click to first visible frame; not physical phone input latency."
+}

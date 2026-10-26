@@ -70,9 +70,36 @@ def read_config(require_api=True):
     return config
 
 
+def network_policy(value):
+    if not isinstance(value, dict) or set(value) != {'version', 'lan_addresses'} or type(value['version']) is not int or value['version'] != 1 or not isinstance(value['lan_addresses'], list) or not value['lan_addresses']:
+        raise ValueError('NETWORK_POLICY_INVALID')
+    if len(json.dumps(value, ensure_ascii=False, separators=(',', ':')).encode()) > 8192:
+        raise ValueError('NETWORK_POLICY_SIZE')
+    addresses = []
+    for raw in value['lan_addresses']:
+        if not isinstance(raw, str) or not raw:
+            raise ValueError('NETWORK_POLICY_ADDRESS')
+        address, separator, zone = raw.partition('%')
+        try:
+            ip = ipaddress.ip_address(address)
+        except ValueError:
+            raise ValueError('NETWORK_POLICY_ADDRESS') from None
+        if separator and (ip.version != 6 or not zone):
+            raise ValueError('NETWORK_POLICY_ADDRESS')
+        if ip.version == 6 and ip.ipv4_mapped:
+            ip, separator, zone = ip.ipv4_mapped, '', ''
+        if ip.is_unspecified or ip.is_multicast:
+            raise ValueError('NETWORK_POLICY_ADDRESS')
+        normalized = ip.compressed + (('%' + zone) if separator else '')
+        if normalized in addresses:
+            raise ValueError('NETWORK_POLICY_DUPLICATE')
+        addresses.append(normalized)
+    return {'version': 1, 'lan_addresses': addresses}
+
+
 def deployment_config(value, allow_empty=False):
     """One existing config format; reject credentials and unknown extra fields."""
-    if not isinstance(value, dict) or set(value) - {'apiOrigin', 'hapDownloadUrl', 'productName', 'legacyBinding'}:
+    if not isinstance(value, dict) or set(value) - {'apiOrigin', 'hapDownloadUrl', 'productName', 'legacyBinding', 'networkPolicy'}:
         raise ValueError('DEPLOYMENT_CONFIG_FIELDS')
     api = value.get('apiOrigin')
     download = value.get('hapDownloadUrl', '')
@@ -84,13 +111,24 @@ def deployment_config(value, allow_empty=False):
     binding = value.get('legacyBinding')
     if binding is not None:
         fields = {'schemaVersion', 'bundleName', 'versionCode', 'sourceHapSHA256', 'apiBaseSHA256'}
-        if not isinstance(binding, dict) or set(binding) != fields or binding['schemaVersion'] != 1 or binding['bundleName'] != DEPLOYMENT_BUNDLE or binding['versionCode'] != 1000006:
+        if not isinstance(binding, dict) or set(binding) not in (fields, fields | {'apiOrigin'}) or binding['schemaVersion'] != 1 or binding['bundleName'] != DEPLOYMENT_BUNDLE or binding['versionCode'] != 1000006:
             raise ValueError('DEPLOYMENT_LEGACY_IDENTITY')
         if any(not isinstance(binding[k], str) or not re.fullmatch('[a-f0-9]{64}', binding[k]) for k in ('sourceHapSHA256', 'apiBaseSHA256')):
             raise ValueError('DEPLOYMENT_LEGACY_DIGEST')
-        if not api or hashlib.sha256(api.encode()).hexdigest() != binding['apiBaseSHA256']:
+        bound_api = api
+        if 'apiOrigin' in binding:
+            bound_api = public_url(binding['apiOrigin'], 'apiOrigin')
+            old, new = urlsplit(bound_api), urlsplit(api)
+            if bound_api != binding['apiOrigin'] or old.scheme != 'http' or new.scheme != 'https' or old.hostname != new.hostname or old.path != new.path:
+                raise ValueError('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
+        if not api or hashlib.sha256(bound_api.encode()).hexdigest() != binding['apiBaseSHA256']:
             raise ValueError('DEPLOYMENT_LEGACY_ORIGIN_MISMATCH')
-    return {'apiOrigin': api, 'hapDownloadUrl': download, 'productName': name, 'legacyBinding': binding}
+    result = {'apiOrigin': api, 'hapDownloadUrl': download, 'productName': name, 'legacyBinding': binding}
+    if 'networkPolicy' in value:
+        if not api or urlsplit(api).scheme != 'https':
+            raise ValueError('NETWORK_POLICY_HTTPS')
+        result['networkPolicy'] = network_policy(value['networkPolicy'])
+    return result
 
 
 def deployment_bytes(value, allow_empty=False):
@@ -102,7 +140,7 @@ def deployment_bytes(value, allow_empty=False):
 
 def public_deployment_bytes():
     value = read_config(require_api=False)
-    if value.get('apiOrigin') != '' or value.get('hapDownloadUrl', '') != '' or value.get('legacyBinding') is not None:
+    if value.get('apiOrigin') != '' or value.get('hapDownloadUrl', '') != '' or value.get('legacyBinding') is not None or 'networkPolicy' in value:
         raise ValueError('PUBLIC_BUILD_MUST_NOT_CONTAIN_PRIVATE_CONFIG')
     return deployment_bytes(value, allow_empty=True)
 

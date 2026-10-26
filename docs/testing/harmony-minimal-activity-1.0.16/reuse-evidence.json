@@ -1,0 +1,22 @@
+{
+  "reviewedSource": "591c05fca72626cfc25e4263a56ebc013a02e12a",
+  "deltaPaths": [
+    "mobile/SOURCE-PROVENANCE.json",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5"
+  ],
+  "runtimeUIChanged": false,
+  "reusedTests": 108,
+  "reusedTypesAndCI": true,
+  "webProducerRefreshedBecauseInputReceiptDrift": [
+    "config/memoh_web.lock.json",
+    "mobile/build_memoh_web.py",
+    "mobile/memoh/shared-session-activity-trigger.test.ts"
+  ],
+  "manual108TestRerun": false,
+  "SDKRedownloaded": false,
+  "imageProbeIncluded": false,
+  "newDirectoryFunctionality": false,
+  "productionNewGETVerified": false,
+  "productionDeploymentState": "waiting_decision",
+  "phoneStutterResolved": false
+}

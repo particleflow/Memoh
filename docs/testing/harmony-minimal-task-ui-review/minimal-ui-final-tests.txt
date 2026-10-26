@@ -1,0 +1,14 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/components/sidebar/session-activity.test.ts apps/web/src/pages/home/composables/useBotActivity.test.ts apps/web/src/components/sidebar/session-activity-trigger.test.ts apps/web/src/pages/home/components/session-task-results.test.ts apps/web/src/pages/home/components/session-tasks.test.ts apps/web/src/lib/harmony-back.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  6 passed (6)
+      Tests  108 passed (108)
+   Start at  17:22:05
+   Duration  30.38s (transform 45.78s, setup 0ms, import 64.18s, tests 8.80s, environment 7.54s)
+

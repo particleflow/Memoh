@@ -1,0 +1,25 @@
+{
+  "sharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "previousSharedCommit": "fa77a073fe6380d297474a6053a1445201bcab83",
+  "webSourceChangedFiles": [],
+  "generatedSDKChangedFiles": [
+    "packages/sdk/src/@pinia/colada.gen.ts",
+    "packages/sdk/src/index.ts",
+    "packages/sdk/src/sdk.gen.ts",
+    "packages/sdk/src/types.gen.ts"
+  ],
+  "phoneAdaptationsUnchanged": 43,
+  "testAdapters": 1,
+  "preservedSourceHashes": {
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "7ccf116dc6372c9a93560754ea91cd7741165f9b6d710a7b756efa36bc2a59a7",
+    "mobile/client/mobile/memoh/harmony-entry.ts": "438543c562a5a181d5812bd7bf04475f60af5f1c4bbce943c0be452026b3575a",
+    "mobile/client/mobile/memoh/harmony-files.ts": "c6fa7e17df5da42392a2ed0e8466cadfc85a5f1f3b5a4efcc05b1b7d3a48be29",
+    "mobile/client/mobile/memoh/harmony-download.ts": "e381a6b00b6a3e7e1923e219e75eb07addb863676300314d58db42799d6f1b15",
+    "mobile/client/mobile/client_config.py": "7b29495f70ae65aca4f3003e8b828e81b26fe4d489470b3588c1b9ad06a7eeb7",
+    "mobile/client/config/memoh_client.json": "99137240f5107a63328e1f83793b48a2a2cb05b1db84126659f04709b3a2df60"
+  },
+  "previous108HAPUnchanged": true,
+  "candidateVersionName": "1.0.9",
+  "candidateVersionCode": 1000009,
+  "publicConfigEmpty": true
+}

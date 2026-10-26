@@ -1,0 +1,9 @@
+{
+  "baseline": false,
+  "monitorButtons": 1,
+  "visibleManagementButtons": 1,
+  "scope": "Actual compiled Chromium390x844; synthetic auth/native/API; no current active task",
+  "loginCalls": 1,
+  "pageErrors": [],
+  "phoneAcceptance": false
+}

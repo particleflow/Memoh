@@ -1,0 +1,32 @@
+{
+  "baselineCommit": "c530567d2c8f35547e2f1cc550859f3da016b77f",
+  "sharedCommit": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "reviewedPhonePatches": 43,
+  "sourceIdentitySHA256": "a65777ac451d2bdda34bd94c77731297eb00fd10d21ac906f8a3510134a3d520",
+  "sourceInputs": 106,
+  "sourceMatchesBuild": true,
+  "sdkVersion": "26.0.0.105",
+  "officialApi26Compile": true,
+  "qualificationExitCode": 0,
+  "crcVerified": true,
+  "identityPermissionsModuleUnchanged": true,
+  "publicConfigEmpty": true,
+  "publicConfigBytes": 8192,
+  "unitCases": 12,
+  "nativeSeamCases": 9,
+  "actualGeneratedPageCases": 12,
+  "hap": {
+    "bytes": 37232788,
+    "sha256": "cef4f606c8b92716174ca945ecc2cd6ecc12cab67624f5ae274f422071bed82b",
+    "versionName": "1.0.12",
+    "versionCode": 1000012,
+    "scope": "compile-only; not a release/upgrade candidate"
+  },
+  "arktsWarnings": 166,
+  "signed": false,
+  "published": false,
+  "deviceGestureVerified": false,
+  "rollbackUnchanged": true,
+  "microphoneFilesChanged": false,
+  "sharedSidebarFilesChanged": false
+}

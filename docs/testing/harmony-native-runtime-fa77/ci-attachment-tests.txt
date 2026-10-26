@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  12 passed (12)
+   Start at  10:46:31
+   Duration  15.79s (transform 10.69s, setup 0ms, import 13.43s, tests 1.12s, environment 891ms)

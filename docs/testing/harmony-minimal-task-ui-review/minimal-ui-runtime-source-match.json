@@ -1,0 +1,8 @@
+{
+  "matchedGeneratedWebAndSDKFiles": 1014,
+  "onlyAddedAfterViteBuild": [
+    "apps/web/src/components/sidebar/session-activity-trigger.test.ts"
+  ],
+  "runtimeSourceBytesMatchLatestContext": true,
+  "newHAPBuilt": false
+}

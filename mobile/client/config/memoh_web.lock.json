@@ -1,9 +1,9 @@
 {
-  "version": "unified-68be060",
-  "commit": "68be06092a1ea85d961115aac404082982bdecf4",
-  "archive": "tests/.isolated/memoh-68be060-complete.tar.gz",
-  "archiveSHA256": "9b083128e78e0827462ba12c913433fd3ee2161cd450338adda6d0a560c31f25",
-  "archivePrefix": "Memoh-68be060/",
+  "version": "unified-9bb6fc3",
+  "commit": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "archive": "tests/.isolated/memoh-9bb6fc3-complete.tar.gz",
+  "archiveSHA256": "4f1d3403a3738b0d6080a200749b19ddabc404e6089704b630cdd10bd8f02757",
+  "archivePrefix": "Memoh-9bb6fc3/",
   "buildRecipe": "docker/Dockerfile.web",
   "buildTarget": "builder",
   "nativeDependencies": {
@@ -23,10 +23,10 @@
   "sourceArchives": [
     {
       "repository": "particleflow/Memoh",
-      "commit": "68be06092a1ea85d961115aac404082982bdecf4",
-      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/68be06092a1ea85d961115aac404082982bdecf4",
-      "archiveSHA256": "039f47d222ed0e1c10325b449cc7cc93e914ef07430cd5768f3733d2ce6bd01f",
-      "archivePrefix": "Memoh-68be06092a1ea85d961115aac404082982bdecf4/",
+      "commit": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+      "archiveURL": "https://codeload.github.com/particleflow/Memoh/tar.gz/9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+      "archiveSHA256": "d354b385d4451b8cbda2e55f22ec796a0bca3227e107acf0b9dbf8a920fd5b98",
+      "archivePrefix": "Memoh-9bb6fc3d84387012b4e2f5daffcc95d81ece5db4/",
       "destination": ""
     },
     {
@@ -137,21 +137,35 @@
     }
   },
   "downstreamObservation": {
-    "commit": "68be06092a1ea85d961115aac404082982bdecf4",
-    "scope": "Shared native task observation/continuation, expert root RunID/persisted state/authorized history navigation, image references and native Provider Images controls come directly from this exact source. Existing phone login and attachment bridges remain separate platform adaptations.",
+    "commit": "cbcee15a17dc87fd02eb4c198fba0aa45eb3fa45",
+    "scope": "Shared parent Bot runtime/tool outcomes and terminal image recovery from this exact source; preserve native phone transfer/auth/login adapters. No alternate runtime or transfer API.",
     "files": {
       "apps/web/src/pages/home/composables/useSessionTasks.ts": {
         "baseSHA256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d",
         "sha256": "f5ec5ea19123c2d175f31664b7848ed7089723e78be2cf8e1674f5a0f6293e8d"
       },
       "apps/web/src/pages/home/components/session-tasks.vue": {
-        "baseSHA256": "11a84a6d882cc9760c451207c96143beb3f4665ea692821396055d89e856f72d",
-        "sha256": "11a84a6d882cc9760c451207c96143beb3f4665ea692821396055d89e856f72d"
+        "baseSHA256": "35c980b0d46c97ed5da5a5af2130c60db85ed90662858e01351a051c93dcd91a",
+        "sha256": "35c980b0d46c97ed5da5a5af2130c60db85ed90662858e01351a051c93dcd91a"
       }
     },
     "regressionTest": {
       "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
-      "sha256": "64cc937e32ab66faffb69f7ca7466fb962a61a94a7550c046000aa0194fd859c"
+      "sha256": "d78b8cb124e38997d263f2e63873dc2d380ce54152c60d502d34a5049e3d38f5"
     }
+  },
+  "sharedActivity": {
+    "commit": "4d23244c683aca4c436efec4db375921fdf60472",
+    "scope": "Exact unified Bot-wide activity component/reader and generated activity GET/types only; existing phone task trigger opens the same existing sidebar, never the old task detail panel. Hidden file/schedule panels are not mounted while chat is selected. No HAP build.",
+    "files": {
+      "apps/web/src/components/sidebar/session-activity.vue": "8a4ef38a0e96143fb0dca570645a1d06fe15ed55c0132d3732d042ad4aafa5d1",
+      "apps/web/src/components/sidebar/session-activity.test.ts": "11f9d45caef012a54052d192a2c2e40ee24ae928111475cc03b13f967bb20d7f",
+      "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d",
+      "apps/web/src/pages/home/composables/useBotActivity.ts": "4be9eaa8edfea6f737f85b55828a163ec40af1c3a0723eca3c14be7550496039",
+      "apps/web/src/pages/home/composables/useBotActivity.test.ts": "2b6a660ae19628a0360bd50d407b4f72d4899178b62698999e16e485aeb4d017",
+      "apps/web/src/components/sidebar/session-activity-trigger.vue": "4e0e772a471c69d6ea2cd46e6e0bc225c5d7cdac6a1fba1d63ea40b5b65a88d5",
+      "apps/web/src/components/sidebar/session-activity-trigger.test.ts": "44067c1fc4c078c545a3fb77e23643983cf095228f83041e97bd37b07069f57a"
+    },
+    "sdkOverlaySHA256": "28838d768702181920719351e64d3a20ad0895d7ff8f677412ecbb01fe20e812"
   }
 }

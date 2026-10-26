@@ -1,0 +1,104 @@
+{
+  "inventories": [
+    {
+      "openedName": "红玉",
+      "rows": [
+        {
+          "name": "红玉",
+          "state": "执行中"
+        },
+        {
+          "name": "绘图 Agent",
+          "state": "等待决定"
+        },
+        {
+          "name": "参考图整理",
+          "state": "正在结束"
+        },
+        {
+          "name": "图像专家",
+          "state": "执行中"
+        }
+      ],
+      "correctOriginalSession": true
+    },
+    {
+      "openedName": "绘图 Agent",
+      "rows": [
+        {
+          "name": "红玉",
+          "state": "执行中"
+        },
+        {
+          "name": "绘图 Agent",
+          "state": "等待决定"
+        },
+        {
+          "name": "参考图整理",
+          "state": "正在结束"
+        },
+        {
+          "name": "图像专家",
+          "state": "执行中"
+        }
+      ],
+      "correctOriginalSession": true
+    },
+    {
+      "openedName": "参考图整理",
+      "rows": [
+        {
+          "name": "红玉",
+          "state": "执行中"
+        },
+        {
+          "name": "绘图 Agent",
+          "state": "等待决定"
+        },
+        {
+          "name": "参考图整理",
+          "state": "正在结束"
+        },
+        {
+          "name": "图像专家",
+          "state": "执行中"
+        }
+      ],
+      "correctOriginalSession": true
+    },
+    {
+      "openedName": "图像专家",
+      "rows": [
+        {
+          "name": "红玉",
+          "state": "执行中"
+        },
+        {
+          "name": "绘图 Agent",
+          "state": "等待决定"
+        },
+        {
+          "name": "参考图整理",
+          "state": "正在结束"
+        },
+        {
+          "name": "图像专家",
+          "state": "执行中"
+        }
+      ],
+      "correctOriginalSession": true
+    }
+  ],
+  "renderedTaskFieldsOnly": [
+    "name",
+    "state"
+  ],
+  "clickTarget": "authorized original conversation",
+  "newTaskDetailPanel": false,
+  "extraDetailDOM": false,
+  "loginCalls": 1,
+  "pageErrors": [],
+  "noBusinessWrites": true,
+  "backend": "Synthetic exact 4d23244 contract; actual NAS endpoint deployment/readback remains separate",
+  "deviceAcceptance": false
+}

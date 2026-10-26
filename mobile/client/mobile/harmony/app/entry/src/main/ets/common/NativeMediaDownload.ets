@@ -1,21 +1,26 @@
 import { common } from '@kit.AbilityKit';
 import { fileIo as fs, picker } from '@kit.CoreFileKit';
+import { cryptoFramework } from '@kit.CryptoArchitectureKit';
+import { util } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
-import { MEMOH_ORIGIN } from './MemohClientConfig';
+import { MEMOH_ORIGIN, MEMOH_NETWORK_POLICY } from './MemohClientConfig';
+import { NativeTransferNetwork } from './NativeTransferNetwork';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { normalizeDelegationPath } from './ServiceUrl';
 
 export interface MediaDownloadInput { operation: string; botId: string; hash: string; size: number; name: string; url: string; authorization: string; }
 export interface MediaDownloadReady { operation: string; hash: string; size: number; }
+interface DownloadJournal { version: number; key: string; hash: string; size: number; received: number; }
 class DownloadState {
-  operation: string = ''; bot: string = ''; hash: string = ''; name: string = ''; path: string = '';
+  key: string = ''; retain: boolean = false; operation: string = ''; bot: string = ''; hash: string = ''; name: string = ''; path: string = '';
   size: number = 0; epoch: number = 0; received: number = 0;
   cancelled: boolean = false; ready: boolean = false; saving: boolean = false; running: boolean = true;
   session?: rcp.Session;
 }
 
-// One foreground save action. Network bytes stay in the app sandbox until the
-// complete original is verified. Only DocumentViewPicker supplies a public URI.
+// Foreground transfer with an account/authority/scope-bound durable checkpoint.
+// No credential or endpoint is persisted; each reopen revalidates current access.
+// Only a fully hash-verified original reaches DocumentViewPicker.
 export class NativeMediaDownload {
   private epoch: number = 0;
   private states: Map<string, DownloadState> = new Map();
@@ -32,8 +37,72 @@ export class NativeMediaDownload {
     this.check(state); return state;
   }
   private remove(state: DownloadState): void {
-    if (state.path && fs.accessSync(state.path)) { fs.unlinkSync(state.path); }
+    for (const suffix of ['', '.json', '.json.tmp']) {
+      if (state.path && fs.accessSync(state.path + suffix)) { fs.unlinkSync(state.path + suffix); }
+    }
     this.states.delete(state.operation);
+  }
+  private async digest(text: string): Promise<string> {
+    const md = cryptoFramework.createMd('SHA256');
+    await md.update({ data: new util.TextEncoder().encodeInto(text) });
+    return Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join('');
+  }
+  private async bind(state: DownloadState, input: MediaDownloadInput, origin: string, endpoint: string, network: NativeTransferNetwork): Promise<void> {
+    const session = rcp.createSession(); state.session = session;
+    try {
+      const bytes = new Uint8Array(65536); let count = 0;
+      const response = await network.fetch(session, origin + '/users/me', 'GET', (): rcp.Request => {
+        this.check(state); count = 0;
+        const request = new rcp.Request(origin + '/users/me', 'GET', { authorization: input.authorization });
+        request.configuration = { transfer: { autoRedirect: false } };
+        request.destination = (data: ArrayBuffer): void => {
+          this.check(state);
+          if (count + data.byteLength > bytes.length) { session.cancel(request); throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+          bytes.set(new Uint8Array(data), count); count += data.byteLength;
+        };
+        return request;
+      }); this.check(state);
+      if (response.statusCode === 401 || response.statusCode === 403) { throw new Error('MEDIA_DOWNLOAD_HTTP_' + response.statusCode); }
+      if (response.statusCode !== 200) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+      const owner = (JSON.parse(new util.TextDecoder().decodeToString(bytes.subarray(0, count))) as Record<string, string>).id;
+      if (typeof owner !== 'string' || !owner || owner.length > 128) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+      state.key = await this.digest(JSON.stringify([origin, owner, input.botId, endpoint, input.hash, input.size]));
+      this.check(state);
+    } finally { state.session = undefined; session.close(); }
+  }
+  private checkpoint(state: DownloadState, fd: number): void {
+    fs.fsyncSync(fd);
+    const record: DownloadJournal = { version: 1, key: state.key, hash: state.hash, size: state.size, received: state.received };
+    const file = fs.openSync(state.path + '.json.tmp', fs.OpenMode.CREATE | fs.OpenMode.TRUNC | fs.OpenMode.WRITE_ONLY | fs.OpenMode.NOFOLLOW);
+    try {
+      const bytes = new util.TextEncoder().encodeInto(JSON.stringify(record));
+      if (fs.writeSync(file.fd, bytes.buffer) !== bytes.byteLength) { throw new Error('MEDIA_SHORT_WRITE'); }
+      fs.fsyncSync(file.fd);
+    } finally { fs.closeSync(file); }
+    fs.renameSync(state.path + '.json.tmp', state.path + '.json');
+    const dir = fs.openSync(this.context.filesDir + '/memoh-download-journal-v1', fs.OpenMode.READ_ONLY);
+    try { fs.fsyncSync(dir.fd); } finally { fs.closeSync(dir); }
+  }
+  private reopen(state: DownloadState): fs.File {
+    const directory = this.context.filesDir + '/memoh-download-journal-v1';
+    if (!fs.accessSync(directory)) { fs.mkdirSync(directory); }
+    state.path = directory + '/' + state.key + '.part';
+    const recorded = fs.accessSync(state.path + '.json');
+    state.retain = recorded;
+    if (recorded) {
+      if (fs.statSync(state.path + '.json').size > 4096) { throw new Error('MEDIA_DOWNLOAD_JOURNAL'); }
+      const j = JSON.parse(fs.readTextSync(state.path + '.json')) as DownloadJournal;
+      if (j.version !== 1 || j.key !== state.key || j.hash !== state.hash || j.size !== state.size ||
+        !Number.isSafeInteger(j.received) || j.received < 0 || j.received > state.size) { throw new Error('MEDIA_DOWNLOAD_JOURNAL'); }
+      state.received = j.received;
+    }
+    const file = fs.openSync(state.path, fs.OpenMode.CREATE | fs.OpenMode.NOFOLLOW | fs.OpenMode.READ_WRITE);
+    try {
+      if (fs.statSync(file.fd).size < state.received) { throw new Error('MEDIA_DOWNLOAD_JOURNAL'); }
+      // A crash may leave bytes written after the last durable journal rename.
+      fs.truncateSync(file.fd, state.received);
+      this.checkpoint(state, file.fd); return file;
+    } catch (error) { fs.closeSync(file); throw error as Error; }
   }
   private header(headers: rcp.ResponseHeaders, name: string): string {
     for (const key of Object.keys(headers)) {
@@ -67,18 +136,33 @@ export class NativeMediaDownload {
     state.operation = input.operation; state.bot = input.botId; state.hash = input.hash; state.size = input.size; state.epoch = this.epoch;
     state.name = (input.name || 'file').replace(/[\\/\x00-\x1f]/g, '_').slice(0, 160);
     if (state.name === '.' || state.name === '..') { state.name = 'file'; }
-    const directory = this.context.cacheDir + '/memoh-original-downloads';
-    if (!fs.accessSync(directory)) { fs.mkdirSync(directory); }
-    state.path = directory + '/' + input.operation + '.part';
-    if (fs.accessSync(state.path)) { throw new Error('MEDIA_DOWNLOAD_REQUEST'); }
     this.states.set(input.operation, state);
     let file: fs.File | undefined;
     try {
-      file = fs.openSync(state.path, fs.OpenMode.CREATE | fs.OpenMode.NOFOLLOW | fs.OpenMode.READ_WRITE);
+      const network = new NativeTransferNetwork(origin, MEMOH_NETWORK_POLICY);
+      await this.bind(state, input, origin, endpoint, network);
+      state.retain = true;
+      file = this.reopen(state);
+      state.retain = false;
+      // Even a fully cached original requires a new scoped permission check.
+      if (state.received === state.size) {
+        state.retain = true;
+        const session = rcp.createSession(); state.session = session;
+        try {
+          const request = new rcp.Request(endpoint, 'HEAD', { authorization: input.authorization, 'accept-encoding': 'identity' });
+          request.configuration = { transfer: { autoRedirect: false } };
+          request.destination = (): void => {};
+          const response = await network.fetch(session, endpoint, 'HEAD', (): rcp.Request => request); this.check(state);
+          if (response.statusCode === 401 || response.statusCode === 403) {
+            state.retain = true; throw new Error('MEDIA_DOWNLOAD_HTTP_' + response.statusCode);
+          }
+          if (!this.validHeaders(state, 0, response.statusCode, response.headers)) { throw new Error('MEDIA_DOWNLOAD_RESPONSE'); }
+        } finally { state.session = undefined; session.close(); }
+      }
       const buffer = new ArrayBuffer(262144), view = new Uint8Array(buffer);
       // One bounded foreground retry can resume an interrupted 206 response.
-      // No durable scheduler, no credential persistence, no blind retry on 4xx.
-      for (let attempt = 0; attempt < 2; attempt++) {
+      // No background scheduler, credential persistence or blind retry on 4xx.
+      for (let attempt = 0; state.received < state.size && attempt < 2; attempt++) {
         this.check(state);
         const start = state.received, session = rcp.createSession(); state.session = session;
         let status = 0, headers: rcp.ResponseHeaders = {}, fatal = false;
@@ -108,29 +192,34 @@ export class NativeMediaDownload {
                 if (left) { view.copyWithin(0, written, written + left); }
               }
               at += count;
+              this.checkpoint(state, fd);
             }
           } catch (error) { fatal = true; session.cancel(request); throw error as Error; }
         };
         try {
-          const response = await session.fetch(request); this.check(state);
+          const response = await network.fetch(session, endpoint, 'GET', (): rcp.Request => request); this.check(state);
           if (!this.validHeaders(state, start, response.statusCode, response.headers) || state.received !== state.size) {
             fatal = true; throw new Error('MEDIA_DOWNLOAD_INCOMPLETE');
           }
           break;
         } catch (error) {
           this.check(state);
-          if (status === 401 || status === 403) { throw new Error('MEDIA_DOWNLOAD_HTTP_' + status); }
+          if (status === 401 || status === 403) { state.retain = state.received > 0; throw new Error('MEDIA_DOWNLOAD_HTTP_' + status); }
+          state.retain = !fatal && (status === 0 || status >= 500 || status === 429 || this.validHeaders(state, start, status, headers));
           if (fatal || attempt > 0 || status !== 206 || !this.validHeaders(state, start, status, headers) ||
             state.received <= start || state.received >= state.size) { throw error as Error; }
         } finally { state.session = undefined; session.close(); }
       }
+      state.retain = false;
       fs.fsyncSync(file.fd);
       await verifyMediaFd(file.fd, state.size, state.hash, () => this.check(state));
       this.check(state); state.ready = true;
       return { operation: state.operation, hash: state.hash, size: state.size };
     } finally {
       if (file) { fs.closeSync(file); } state.running = false;
-      if (!state.ready || state.cancelled || state.epoch !== this.epoch) { this.remove(state); }
+      if (!state.ready || state.cancelled || state.epoch !== this.epoch) {
+        if (state.retain) { this.states.delete(state.operation); } else { this.remove(state); }
+      }
     }
   }
   async save(operation: string, bot: string): Promise<boolean> {
@@ -169,11 +258,19 @@ export class NativeMediaDownload {
     const state = this.states.get(operation);
     if (!state) { this.cancelled.set(operation, bot); return; }
     if (state.bot !== bot) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
-    state.cancelled = true; state.session?.cancel();
+    state.retain = false; state.cancelled = true; state.session?.cancel();
     if (!state.running) { this.remove(state); }
+  }
+  release(operation: string, bot: string): void {
+    const state = this.states.get(operation);
+    if (!state) { return; }
+    if (state.bot !== bot) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+    if (state.cancelled) { return; }
+    state.retain = true; state.cancelled = true; state.session?.cancel();
+    if (!state.running) { this.states.delete(operation); }
   }
   close(): void {
     this.epoch++;
-    this.states.forEach((state: DownloadState) => { this.abort(state.operation, state.bot); });
+    this.states.forEach((state: DownloadState) => { this.release(state.operation, state.bot); });
   }
 }

@@ -1,0 +1,16 @@
+{
+  "sourceCommit": "c9c00580052d09d5dce273e958ec384bef2ebed3",
+  "sharedCommit": "8a2422935916f56b5bacfac2f991824d1cb9bd9f",
+  "sharedLockSHA256": "535df60861cdc2b69a6634ecc840ecd869bfb8ce69b9413d6ddf7086370eeaf8",
+  "combinedSourceArchiveSHA256": "a46cd6ac84b36b417a578a4f7a95c802ba864998edd481ec7e23290a225a4a92",
+  "versionName": "1.0.9",
+  "versionCode": 1000009,
+  "bundleName": "cloud.begonia.workassistant",
+  "file": "memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap",
+  "bytes": 37053849,
+  "sha256": "ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4",
+  "configurationInjected": false,
+  "signed": false,
+  "injectorSourceCommit": "c9c00580052d09d5dce273e958ec384bef2ebed3",
+  "injectorSHA256": "7b29495f70ae65aca4f3003e8b828e81b26fe4d489470b3588c1b9ad06a7eeb7"
+}

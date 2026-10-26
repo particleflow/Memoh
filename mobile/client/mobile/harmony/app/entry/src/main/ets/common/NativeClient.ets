@@ -2,12 +2,14 @@ import { webview } from '@kit.ArkWeb';
 import { common } from '@kit.AbilityKit';
 import { NativeVoice } from './NativeVoice';
 import { NativeMediaDownload } from './NativeMediaDownload';
+import { NativeResumableUpload, UploadPreview, UploadScope } from './NativeResumableUpload';
 import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
+import { TransferNetworkPolicy } from './ServiceUrl';
 
 interface ClientRequest {
   version: number; command: string; state?: string; themeId?: string; handle?: string; offset?: number;
-  apiOrigin?: string; operation?: string; botId?: string; hash?: string; size?: number;
-  name?: string; url?: string; authorization?: string;
+  apiOrigin?: string; networkPolicy?: TransferNetworkPolicy; operation?: string; botId?: string; hash?: string; size?: number;
+  name?: string; type?: string; data?: string; url?: string; authorization?: string; scope?: string; photos?: boolean; recoverDrafts?: boolean;
 }
 const PERMISSION: string = '{"javascriptProxyPermission":{"urlPermissionList":[{"scheme":"begonia-client","host":"app","port":"","path":"/index.html"}]}}';
 
@@ -19,12 +21,14 @@ export class NativeClient {
   private themeChanged: (theme: string) => Promise<void>;
   private voice: NativeVoice;
   private downloads: NativeMediaDownload;
+  private uploads: NativeResumableUpload;
   private ready: boolean = false;
   constructor(controller: webview.WebviewController, stateChanged: (state: string) => void,
     themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext) {
     this.controller = controller; this.stateChanged = stateChanged; this.themeChanged = themeChanged;
     this.voice = new NativeVoice(context);
     this.downloads = new NativeMediaDownload(context, () => this.active && this.ready && MEMOH_ORIGIN !== '');
+    this.uploads = new NativeResumableUpload(context, () => this.active && this.ready && MEMOH_ORIGIN !== '');
   }
 
   register(): boolean {
@@ -42,8 +46,10 @@ export class NativeClient {
   }
 
   private stopTransfers(): void {
-    this.ready = false; this.voice.close(); this.downloads.close();
+    this.ready = false; this.voice.close(); this.downloads.close(); this.uploads.close();
   }
+
+  uploadPreview(handle: string): UploadPreview { return this.uploads.preview(handle); }
 
   async request(raw: string): Promise<string> {
     try {
@@ -55,7 +61,7 @@ export class NativeClient {
         this.stopTransfers(); resetMemohOrigin(); this.stateChanged('login-page');
       } else if (value.command === 'client.configure' && typeof value.apiOrigin === 'string') {
         if (this.ready) { throw new Error('SERVICE_CONFIG_LOCKED'); }
-        configureMemohOrigin(value.apiOrigin);
+        configureMemohOrigin(value.apiOrigin, value.networkPolicy);
       } else if (value.command === 'client.state' && typeof value.state === 'string' &&
         ['login-page', 'ready', 'failed'].includes(value.state)) {
         if (value.state === 'ready' && !MEMOH_ORIGIN) { throw new Error('SERVICE_NOT_CONFIGURED'); }
@@ -65,6 +71,37 @@ export class NativeClient {
       }
       else if (value.command === 'client.theme' && typeof value.themeId === 'string') {
         await this.themeChanged(value.themeId);
+      } else if (value.command === 'upload.close') {
+        this.uploads.close();
+      } else if (this.ready && value.command.startsWith('upload.')) {
+        if (typeof value.operation !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
+        if (value.command === 'upload.pause') { this.uploads.pause(value.operation); }
+        else if (value.command === 'upload.abort') { this.uploads.abort(value.operation); }
+        else if (value.command === 'upload.stage.append') {
+          if (typeof value.authorization !== 'string' || typeof value.offset !== 'number' || typeof value.data !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
+          return JSON.stringify({ ok: true, data: await this.uploads.stageAppend(value.operation, value.authorization, value.offset, value.data) });
+        } else if (value.command === 'upload.stage.finish') {
+          if (typeof value.authorization !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
+          return JSON.stringify({ ok: true, data: await this.uploads.stageFinish(value.operation, value.authorization) });
+        }
+        else {
+          if (typeof value.botId !== 'string' || typeof value.scope !== 'string' || typeof value.authorization !== 'string' ||
+            (value.handle !== undefined && typeof value.handle !== 'string') ||
+            (value.photos !== undefined && typeof value.photos !== 'boolean') ||
+            (value.recoverDrafts !== undefined && typeof value.recoverDrafts !== 'boolean')) { throw new Error('NATIVE_REQUEST_INVALID'); }
+          const scope: UploadScope = { operation: value.operation, botId: value.botId, scope: value.scope,
+            authorization: value.authorization, handle: value.handle, photos: value.photos, recoverDrafts: value.recoverDrafts };
+          if (value.command === 'upload.stage.begin') {
+            if (typeof value.name !== 'string' || typeof value.type !== 'string' || typeof value.size !== 'number') { throw new Error('NATIVE_REQUEST_INVALID'); }
+            return JSON.stringify({ ok: true, data: await this.uploads.stageBegin(scope, value.name, value.type, value.size) });
+          }
+          if (value.command === 'upload.select') { return JSON.stringify({ ok: true, data: await this.uploads.select(scope) }); }
+          if (value.command === 'upload.list') { return JSON.stringify({ ok: true, data: await this.uploads.list(scope) }); }
+          if (value.command === 'upload.run') { return JSON.stringify({ ok: true, data: await this.uploads.upload(scope) }); }
+          if (value.command === 'upload.consume') { await this.uploads.consume(scope); }
+          else if (value.command === 'upload.discard') { await this.uploads.discard(scope); }
+          else { throw new Error('NATIVE_COMMAND_UNAVAILABLE'); }
+        }
       } else if (this.ready && value.command.startsWith('download.')) {
         if (typeof value.operation !== 'string' || typeof value.botId !== 'string') { throw new Error('NATIVE_REQUEST_INVALID'); }
         if (value.command === 'download.fetch') {
@@ -75,7 +112,8 @@ export class NativeClient {
           return JSON.stringify({ version: 1, ok: true, data: result });
         } else if (value.command === 'download.save') {
           return JSON.stringify({ version: 1, ok: true, data: await this.downloads.save(value.operation, value.botId) });
-        } else if (value.command === 'download.abort') { this.downloads.abort(value.operation, value.botId); }
+        } else if (value.command === 'download.release') { this.downloads.release(value.operation, value.botId); }
+        else if (value.command === 'download.abort') { this.downloads.abort(value.operation, value.botId); }
         else { throw new Error('NATIVE_COMMAND_UNAVAILABLE'); }
       } else if (this.ready && value.command.startsWith('voice.')) {
         const handle = value.handle ?? '';

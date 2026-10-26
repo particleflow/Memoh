@@ -1,0 +1,15 @@
+{
+  "base": "4302b326c637585d3fccf510b4fa66180bb9aee1",
+  "patchSHA256": "9d4626c082061272decf7dccecc277b386aa4bbe89720b5d48c2ff7f24d2abab",
+  "verifiedApplicationTree": "fe46adf5409f20816ecb38f0d2c778cb6658d3bb",
+  "largerReviewTree": "43de7cf10e5415cfff0cbce529572bbee02367e9",
+  "paths": [
+    "docs/testing/harmony-native-runtime-fa77/generated-web-baseline.json",
+    "mobile/SOURCE-PROVENANCE.json",
+    "mobile/client/mobile/build_memoh_web.py",
+    "mobile/client/mobile/memoh/HarmonyVoiceFan.vue",
+    "mobile/client/mobile/memoh/HarmonyVoiceInput.vue"
+  ],
+  "applied": true,
+  "versionAdjustment": "1.0.13/1000013"
+}

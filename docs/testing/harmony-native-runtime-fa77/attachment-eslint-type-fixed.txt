@@ -1,0 +1,7 @@
+
+/workspace/harmony-recovery-20261023/unified-9e6c470-validation/apps/web/src/pages/home/components/session-task-results.test.ts
+   38:21  warning  There is more than one component in this file  vue/one-component-per-file
+  139:21  warning  There is more than one component in this file  vue/one-component-per-file
+  243:21  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 3 problems (0 errors, 3 warnings)

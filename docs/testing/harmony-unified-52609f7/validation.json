@@ -1,0 +1,19 @@
+{
+  "sharedCommit": "52609f7db4e59d7e528c2c5f8aa0330aa3ebbbe3",
+  "fullGeneratedTypesExitCode": 0,
+  "selectedSharedTests": 143,
+  "ackAbortTests": 10,
+  "ackAbortUnrelatedSkipped": 138,
+  "serviceConfigChecks": 178,
+  "sourceEntries": 128,
+  "sourceFiles": 137,
+  "phoneAdaptations": 43,
+  "extraPhoneComponent": false,
+  "nativeAndHTTPSInputsChanged": false,
+  "hapBuilt": false,
+  "versionChanged": false,
+  "nativeDevice": false,
+  "lintErrors": 0,
+  "lintWarnings": 5,
+  "actionWithinViewportAfterDialogScroll": true
+}

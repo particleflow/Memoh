@@ -47,9 +47,9 @@ def package_theme():
 
 def native_service_url():
     source = checked(SERVICE_SOURCE).read_text()
-    assert source.count('new URL(value)') == 1, 'Review the platform URL parser seam'
+    assert source.count('new URL(') == 2, 'Review the two platform URL parser seams'
     return ('// Generated from mobile/memoh/harmony-service-url.ts.\n'
-            "import { url } from '@kit.ArkTS';\n" + source.replace('new URL(value)', 'url.URL.parseURL(value)'))
+            "import { url } from '@kit.ArkTS';\n" + source.replace('new URL(', 'url.URL.parseURL('))
 
 
 def main():

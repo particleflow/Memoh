@@ -1,0 +1,27 @@
+{
+  "scope": "Existing Vite, real Harmony entry and UI; synthetic HTTP",
+  "checks": {
+    "emptyConfigurationSendsNoAPIRequest": true,
+    "invalidURLsFailWithoutRequestsOrDataLoss": true,
+    "unboundStatePreservedWithoutClaimingBackupOrConnecting": true,
+    "loginConfigurationEntryWorks": true,
+    "initialSetupDoesNotScheduleSessionReset": true,
+    "routerTransitionsHideSettingsOverChatAndRestoreOnLogout": true,
+    "distributionAddressDoesNotDriveAPI": true,
+    "processRestartPreservesConfiguredLogin": true,
+    "sameOriginResourceReloadPreservesConfiguredLogin": true,
+    "downloadOnlyChangePreservesLogin": true,
+    "cancelConfigEditPreservesLogin": true,
+    "serviceSwitchDoesNotSendPreviousCredential": true,
+    "logoutSurvivesRestart": true,
+    "revocationStillClearsLogin": true,
+    "realSyntheticExpiryStillClearsLogin": true,
+    "invalidStoredSchemaPreservedWithoutGuessingBinding": true
+  },
+  "passed": true,
+  "nativeDevice": false,
+  "actualHAPUpgrade": false,
+  "liveAPI": false,
+  "refreshCalls": 0,
+  "pageErrors": []
+}

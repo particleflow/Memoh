@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/repo/mobile/client/tests/.isolated/ci-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  42 passed (42)
+   Start at  17:02:51
+   Duration  18.43s (transform 9.76s, setup 0ms, import 12.89s, tests 4.78s, environment 602ms)
+

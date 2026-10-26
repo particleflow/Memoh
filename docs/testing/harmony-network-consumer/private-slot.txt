@@ -1,0 +1,1 @@
+{"passed": true, "checks": 33, "slot_bytes": 8192, "original_origin_and_legacy_binding_preserved": true, "public_seed_contains_no_policy": true, "hap_built_or_changed": false, "network_requests": 0}

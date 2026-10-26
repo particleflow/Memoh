@@ -1,0 +1,176 @@
+diff --git a/mobile/client/config/memoh_web.lock.json b/mobile/client/config/memoh_web.lock.json
+index d202e900f..6071a8bc5 100644
+--- a/mobile/client/config/memoh_web.lock.json
++++ b/mobile/client/config/memoh_web.lock.json
+@@ -155,12 +155,17 @@
+     }
+   },
+   "sharedActivity": {
+-    "commit": "d2bade8b30e4b6df778bc2c0b402f3b1fe592eeb",
+-    "scope": "Existing shared sidebar name/status/session navigation only. Restore the original current-session task monitor entry and expose the existing Bot management route. Excludes Web media recovery and file-tree changes.",
++    "commit": "4d23244c683aca4c436efec4db375921fdf60472",
++    "scope": "Exact unified Bot-wide activity component/reader and generated activity GET/types only; existing phone task trigger opens the same existing sidebar, never the old task detail panel. Hidden file/schedule panels are not mounted while chat is selected. No HAP build.",
+     "files": {
+-      "apps/web/src/components/sidebar/session-activity.vue": "a466123f5e0b9de3644edc0c795ef7886a20335e3ac68541375299c8736b6862",
+-      "apps/web/src/components/sidebar/session-activity.test.ts": "1ece68bfb687d543ad88d596b9acc7a790d304b50bd05d15f5bc97159e1bfffd",
+-      "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d"
+-    }
++      "apps/web/src/components/sidebar/session-activity.vue": "8a4ef38a0e96143fb0dca570645a1d06fe15ed55c0132d3732d042ad4aafa5d1",
++      "apps/web/src/components/sidebar/session-activity.test.ts": "11f9d45caef012a54052d192a2c2e40ee24ae928111475cc03b13f967bb20d7f",
++      "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d",
++      "apps/web/src/pages/home/composables/useBotActivity.ts": "4be9eaa8edfea6f737f85b55828a163ec40af1c3a0723eca3c14be7550496039",
++      "apps/web/src/pages/home/composables/useBotActivity.test.ts": "2b6a660ae19628a0360bd50d407b4f72d4899178b62698999e16e485aeb4d017",
++      "apps/web/src/components/sidebar/session-activity-trigger.vue": "4e0e772a471c69d6ea2cd46e6e0bc225c5d7cdac6a1fba1d63ea40b5b65a88d5",
++      "apps/web/src/components/sidebar/session-activity-trigger.test.ts": "44067c1fc4c078c545a3fb77e23643983cf095228f83041e97bd37b07069f57a"
++    },
++    "sdkOverlaySHA256": "28838d768702181920719351e64d3a20ad0895d7ff8f677412ecbb01fe20e812"
+   }
+ }
+diff --git a/mobile/client/mobile/build_memoh_web.py b/mobile/client/mobile/build_memoh_web.py
+index 60c94ef9c..2050c0658 100644
+--- a/mobile/client/mobile/build_memoh_web.py
++++ b/mobile/client/mobile/build_memoh_web.py
+@@ -52,6 +52,8 @@ def inputs():
+         'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-back.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
+         'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts')]
+     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-session-activity.vue', 'shared-session-activity.test.ts', 'shared-useSessionActivity.ts'))
++    files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-useBotActivity.ts', 'shared-useBotActivity.test.ts', 'shared-session-activity-trigger.vue', 'shared-activity-sdk.json'))
++    files.append(ROOT / 'mobile/memoh/shared-session-activity-trigger.test.ts')
+     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
+     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
+ 
+@@ -811,7 +813,11 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
+         'apps/web/src/components/sidebar/index.vue': [('    <div class="relative min-h-0 flex-1 overflow-hidden">\n      <PanelSessions\n        v-show="sidebarView === \'sessions\'"\n        class="h-full"\n      />\n      <PanelFiles\n', '    <div class="relative min-h-0 flex-1 overflow-hidden">\n      <PanelSessions\n        v-show="sidebarView === \'sessions\'"\n        :activity-visible="workbenchOpen && sidebarView === \'sessions\'"\n        class="h-full"\n      />\n      <PanelFiles\n', 1)],
+         'apps/web/src/components/sidebar/panel-sessions.vue': [('      class="sidebar-scroll min-h-0 flex-1"\n      :scroll-hide-delay="300"\n    >\n      <FoldersSection />\n\n      <Recents :scroll-el="listScrollEl" />\n', '      class="sidebar-scroll min-h-0 flex-1"\n      :scroll-hide-delay="300"\n    >\n      <SessionActivity :visible="activityVisible" />\n      <FoldersSection />\n\n      <Recents :scroll-el="listScrollEl" />\n', 1), ("import FoldersSection from './folders-section.vue'\nimport Recents from './recents.vue'\nimport SessionSelectionBar from './session-selection-bar.vue'\nimport { createSessionSelection, SessionSelectionKey } from './session-selection'\nimport '@/styles/sidebar-scroll.css'\n\nconst { t } = useI18n()\n\n// The one scrollport for Folders + Recents. Recents needs the scrolling\n// element itself for its load-more sentinel root, so it is passed down rather\n", "import FoldersSection from './folders-section.vue'\nimport Recents from './recents.vue'\nimport SessionSelectionBar from './session-selection-bar.vue'\nimport SessionActivity from './session-activity.vue'\nimport { createSessionSelection, SessionSelectionKey } from './session-selection'\nimport '@/styles/sidebar-scroll.css'\n\nconst { t } = useI18n()\nwithDefaults(defineProps<{ activityVisible?: boolean }>(), { activityVisible: true })\n\n// The one scrollport for Folders + Recents. Recents needs the scrolling\n// element itself for its load-more sentinel root, so it is passed down rather\n", 1), ("        {{ t('chat.botSettings') }}\n      </SidebarNavButton>\n    </div>", '        {{ t(\'chat.botSettings\') }}\n      </SidebarNavButton>\n      <SidebarNavButton @click="handleManageBots">\n        <Settings2 :stroke-width="1.75" class="size-[18px]" />\n        {{ t(\'sidebar.manageBots\') }}\n      </SidebarNavButton>\n    </div>', 1), ("// Navigate to the current bot's settings overview.", "// Reuse the existing management route and dismiss the mobile drawer.\nfunction handleManageBots() {\n  void router.push({ name: 'bots' })\n  workspaceTabs.closeMobileNav()\n}\n\n// Navigate to the current bot's settings overview.", 1)],
+         'apps/web/src/pages/home/composables/useBotDelegationHistory.ts': [("\n// Navigation rechecks the source relation and the target's ordinary session\n// permission. It never dispatches a turn or treats a UUID as an access grant.\nexport function useBotDelegationHistory(scope: Ref<TaskScope | null>, visible: Ref<boolean>, reader: ReturnType<typeof useBotDelegations>, navigate: (target: { bot: string, session: string, title?: string, identity: string }) => Promise<void>) {\n  const pending = ref(false), error = shallowRef<unknown>()\n  let epoch = 0, controller: AbortController | undefined\n  function invalidate() { epoch++; controller?.abort(); pending.value = false; error.value = undefined }\n  async function open() {\n    const current = scope.value, task = reader.detail.value\n    if (!current || !visible.value || pending.value || reader.error.value || reader.loading.value\n      || !task?.target_run_id || !task.target_session_id || task.source_session_id !== current.session\n      || task.delegation_id !== reader.selected.value) return\n    const generation = epoch, control = new AbortController()\n    controller = control; pending.value = true; error.value = undefined\n", "\n// Navigation rechecks the source relation and the target's ordinary session\n// permission. It never dispatches a turn or treats a UUID as an access grant.\n// Run-specific history keeps its guard; a compact session link may open an\n// admitted conversation before a run exists, using exactly the same permissions.\nexport function useBotDelegationHistory(scope: Ref<TaskScope | null>, visible: Ref<boolean>, reader: Pick<ReturnType<typeof useBotDelegations>, 'detail' | 'selected' | 'error' | 'loading'>, navigate: (target: { bot: string, session: string, title?: string, identity: string }) => Promise<void>, requireRun = true) {\n  const pending = ref(false), error = shallowRef<unknown>()\n  let epoch = 0, controller: AbortController | undefined\n  function invalidate() { epoch++; controller?.abort(); pending.value = false; error.value = undefined }\n  async function open() {\n    const current = scope.value, task = reader.detail.value\n    if (!current || !visible.value || pending.value || reader.error.value || reader.loading.value\n      || !task || (requireRun && !task.target_run_id) || !task.target_session_id || task.source_session_id !== current.session\n      || task.delegation_id !== reader.selected.value) return\n    const generation = epoch, control = new AbortController()\n    controller = control; pending.value = true; error.value = undefined\n", 1), ("      if (generation !== epoch) return\n      if (fresh.delegation_id !== task.delegation_id || fresh.source_session_id !== current.session\n        || fresh.target_bot_id !== task.target_bot_id || fresh.target_session_id !== task.target_session_id\n        || fresh.target_run_id !== task.target_run_id) throw new Error('Delegation run changed')\n      const { data: session } = await getBotsByBotIdSessionsBySessionId({\n        path: { bot_id: fresh.target_bot_id, session_id: fresh.target_session_id! },\n        signal: control.signal, cache: 'no-store', throwOnError: true,\n", "      if (generation !== epoch) return\n      if (fresh.delegation_id !== task.delegation_id || fresh.source_session_id !== current.session\n        || fresh.target_bot_id !== task.target_bot_id || fresh.target_session_id !== task.target_session_id\n        || (requireRun && fresh.target_run_id !== task.target_run_id)) throw new Error('Delegation run changed')\n      const { data: session } = await getBotsByBotIdSessionsBySessionId({\n        path: { bot_id: fresh.target_bot_id, session_id: fresh.target_session_id! },\n        signal: control.signal, cache: 'no-store', throwOnError: true,\n", 1), ("    finally { clearTimeout(timeout); if (generation === epoch) pending.value = false }\n  }\n  watch([scope, visible, reader.selected], invalidate, { flush: 'sync' })\n  watch(() => [reader.detail.value?.delegation_id, reader.detail.value?.target_bot_id, reader.detail.value?.target_session_id, reader.detail.value?.target_run_id].join(':'), invalidate, { flush: 'sync' })\n  watch(reader.error, cause => { if (cause) invalidate() }, { flush: 'sync' })\n  onScopeDispose(invalidate)\n  return computed<BotDelegationHistoryAction>(() => ({ pending: pending.value, error: error.value, open }))\n", "    finally { clearTimeout(timeout); if (generation === epoch) pending.value = false }\n  }\n  watch([scope, visible, reader.selected], invalidate, { flush: 'sync' })\n  watch(() => [reader.detail.value?.delegation_id, reader.detail.value?.target_bot_id, reader.detail.value?.target_session_id, requireRun ? reader.detail.value?.target_run_id : ''].join(':'), invalidate, { flush: 'sync' })\n  watch(reader.error, cause => { if (cause) invalidate() }, { flush: 'sync' })\n  onScopeDispose(invalidate)\n  return computed<BotDelegationHistoryAction>(() => ({ pending: pending.value, error: error.value, open }))\n", 1)],
++        'apps/web/src/pages/home/components/chat-pane.vue': [('                <SessionTasks\n                  v-if="currentBotId && activeSessionId && !isWelcome"\n                  :key="`${currentBotId}:${activeSessionId}`"\n                  :bot-id="currentBotId"\n                  :session-id="activeSessionId"\n                  :selection="selectedWorkspaceTargetId"\n                  :visible="isVisible"\n                />', '                <SessionActivityTrigger v-if="currentBotId" />', 1), ("import SessionTasks from './session-tasks.vue'", "import SessionActivityTrigger from '@/components/sidebar/session-activity-trigger.vue'", 1)],
++        'apps/web/src/pages/main-section/components/mobile-nav-sheet.vue': [('          <PanelSessions\n            v-show="sidebarView === \'sessions\'"\n            class="h-full"', '          <PanelSessions\n            v-show="sidebarView === \'sessions\'"\n            :activity-visible="mobileNavOpen && sidebarView === \'sessions\'"\n            class="h-full"', 1), ('            v-if="canWorkspaceRead"\n            v-show="sidebarView === \'files\'"', '            v-if="canWorkspaceRead && filesMounted"\n            v-show="sidebarView === \'files\'"', 1), ('          <PanelSchedule\n            v-show="sidebarView === \'schedule\'"', '          <PanelSchedule\n            v-if="scheduleMounted"\n            v-show="sidebarView === \'schedule\'"', 1), ("import { computed, watch, type Component } from 'vue'", "import { computed, ref, watch, type Component } from 'vue'", 1), ('const { mobileNavOpen, sidebarView, activeId } = storeToRefs(workspaceTabs)', "const { mobileNavOpen, sidebarView, activeId } = storeToRefs(workspaceTabs)\n// Mount a panel on first selection, then retain it while this drawer stays open.\nconst filesMounted = ref(false), scheduleMounted = ref(false)\nwatch(sidebarView, view => {\n  if (view === 'files') filesMounted.value = true\n  if (view === 'schedule') scheduleMounted.value = true\n}, { immediate: true })", 1)],
+     }
++    assert sha(ROOT / 'mobile/memoh/shared-activity-sdk.json') == lock['sharedActivity']['sdkOverlaySHA256'], 'Activity SDK source drift'
++    sdk_overlay = json.loads((ROOT / 'mobile/memoh/shared-activity-sdk.json').read_text())
+     patches = {}
+     context = base / 'official-context.tar'
+     if platform == 'harmony':
+@@ -832,6 +838,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
+             if entry.linkname.startswith(lock['archivePrefix']):
+                 entry.linkname = entry.linkname[len(lock['archivePrefix']):]
+             data = source.extractfile(member).read() if member.isfile() else None
++            if name in sdk_overlay:
++                data += sdk_overlay[name].encode('utf-8')
++                entry.size = len(data)
+             # Apply the fixed shared UI delta before the existing phone adapters.
+             if name in shared_changes:
+                 shared_text = data.decode('utf-8')
+@@ -922,7 +931,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
+             entry.size = len(data)
+             entry.mode = 0o644
+             target.addfile(entry, io.BytesIO(data))
+-        for local, destination in {'shared-session-activity.vue': 'apps/web/src/components/sidebar/session-activity.vue', 'shared-session-activity.test.ts': 'apps/web/src/components/sidebar/session-activity.test.ts', 'shared-useSessionActivity.ts': 'apps/web/src/pages/home/composables/useSessionActivity.ts'}.items():
++        for local, destination in {'shared-session-activity.vue': 'apps/web/src/components/sidebar/session-activity.vue', 'shared-session-activity.test.ts': 'apps/web/src/components/sidebar/session-activity.test.ts', 'shared-useSessionActivity.ts': 'apps/web/src/pages/home/composables/useSessionActivity.ts', 'shared-useBotActivity.ts': 'apps/web/src/pages/home/composables/useBotActivity.ts', 'shared-useBotActivity.test.ts': 'apps/web/src/pages/home/composables/useBotActivity.test.ts', 'shared-session-activity-trigger.vue': 'apps/web/src/components/sidebar/session-activity-trigger.vue', 'shared-session-activity-trigger.test.ts': 'apps/web/src/components/sidebar/session-activity-trigger.test.ts'}.items():
+             data = (ROOT / 'mobile/memoh' / local).read_bytes()
+             assert hashlib.sha256(data).hexdigest() == lock['sharedActivity']['files'][destination], 'Shared activity source drift'
+             entry = tarfile.TarInfo(destination)
+diff --git a/mobile/client/mobile/memoh/shared-session-activity.vue b/mobile/client/mobile/memoh/shared-session-activity.vue
+index 5a63b648f..8bbdd7295 100644
+--- a/mobile/client/mobile/memoh/shared-session-activity.vue
++++ b/mobile/client/mobile/memoh/shared-session-activity.vue
+@@ -1,16 +1,17 @@
+ <script setup lang="ts">
+-import { computed, nextTick, ref, shallowRef } from 'vue'
++import { computed, nextTick, onScopeDispose, ref, shallowRef, watch } from 'vue'
+ import { useDocumentVisibility, useLocalStorage, until } from '@vueuse/core'
+ import { useRouter } from 'vue-router'
+ import { useI18n } from 'vue-i18n'
+ import { Clock3, PauseCircle } from 'lucide-vue-next'
+ import { Spinner, toast } from '@felinic/ui'
+-import type { BotdelegationView } from '@memohai/sdk'
++import { getBotsByBotIdSessionsBySessionId, type BotdelegationView } from '@memohai/sdk'
+ import { useChatStore } from '@/store/chat-list'
+ import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
+ import { isRuntimeRunActive } from '@/store/chat/runtime-projection'
+ import { sessionBotRunStatus } from '@/pages/home/composables/session-bot-run'
+ import { useSessionActivity } from '@/pages/home/composables/useSessionActivity'
++import { useBotActivity } from '@/pages/home/composables/useBotActivity'
+ import { useBotDelegationHistory } from '@/pages/home/composables/useBotDelegationHistory'
+ import { apiErrorStatus, resolveApiErrorMessage } from '@/utils/api-error'
+ import SidebarPanelHeader from './panel-header.vue'
+@@ -24,7 +25,10 @@ const visible = computed(() => props.visible && documentVisibility.value === 'vi
+ const scope = computed(() => chat.currentBotId && chat.sessionId && token.value ? {
+   bot: chat.currentBotId, session: chat.sessionId, selection: chat.workspaceTargetSelectionFor().targetId, identity: token.value,
+ } : null)
+-const reader = useSessionActivity(scope, visible)
++const activity = useBotActivity(computed(() => chat.bots.flatMap(bot => bot.id ? [bot.id] : [])), token, visible)
++// Older servers do not have the aggregate read. Keep their existing scoped
++// projection; a denied aggregate must not be replaced by cached success.
++const reader = useSessionActivity(scope, computed(() => visible.value && activity.unsupported.value))
+ const selectedDelegation = shallowRef<BotdelegationView>()
+ const navigationReader = { detail: selectedDelegation, selected: computed(() => selectedDelegation.value?.delegation_id), error: reader.delegationError, loading: ref(false) }
+ const history = useBotDelegationHistory(scope, visible, navigationReader, async target => {
+@@ -35,11 +39,22 @@ const history = useBotDelegationHistory(scope, visible, navigationReader, async
+   if (token.value !== target.identity || chat.currentBotId !== target.bot) return
+   tabs.openSessionChat({ sessionId: target.session, title: target.title }); tabs.closeMobileNav()
+ }, false)
+-interface Activity { key: string; title: string; state: string; session?: string; delegation?: BotdelegationView }
++interface Activity { key: string; title: string; state: string; session?: string; bot?: string; delegation?: BotdelegationView }
+ const activeStates = new Set(['accepted', 'submitted', 'running', 'waiting_decision', 'finishing'])
+ const rows = computed(() => {
+   if (!visible.value || !token.value || [reader.taskError.value, reader.delegationError.value].some(error => [401, 403].includes(apiErrorStatus(error) ?? 0))) return []
+   const result = new Map<string, Activity>(), runs = new Set<string>()
++  if (!activity.unsupported.value) {
++    for (const item of activity.items.value) {
++      if (!activeStates.has(item.state)) continue
++      const bot = chat.bots.find(bot => bot.id === item.bot_id)
++      const title = item.name || (item.kind === 'bot'
++        ? bot?.display_name || bot?.name || t('chat.tasks.title')
++        : t(`chat.tasks.types.${item.kind === 'agent' ? 'subagent' : 'computer_operation'}`))
++      result.set(item.kind + ':' + item.id, { key: item.kind + ':' + item.id, title, state: item.state, session: item.session_id, bot: item.bot_id })
++    }
++    return [...result.values()]
++  }
+   for (const session of chat.knownSessions) {
+     if (session.bot_id !== chat.currentBotId) continue
+     const observation = chat.runtimeObservationFor(session.bot_id, session.id), run = observation?.synchronized ? observation.run : null
+@@ -64,8 +79,34 @@ const rows = computed(() => {
+   }
+   return [...result.values()]
+ })
++const navigating = ref(false)
++let navigationEpoch = 0, navigationController: AbortController | undefined
++function cancelNavigation() { navigationEpoch++; navigationController?.abort(); navigating.value = false }
++watch([token, visible, scope], cancelNavigation, { flush: 'sync' })
++watch(rows, value => { if (!value.some(row => row.key === pendingKey)) cancelNavigation() })
++let pendingKey = ''
++onScopeDispose(cancelNavigation)
+ async function open(row: Activity) {
+   if (!row.session) return
++  if (row.bot) {
++    if (navigating.value) return
++    const epoch = navigationEpoch, identity = token.value, control = new AbortController()
++    navigationController = control; navigating.value = true; pendingKey = row.key
++    const timeout = setTimeout(() => control.abort(), 15000)
++    try {
++      const { data: session } = await getBotsByBotIdSessionsBySessionId({ path: { bot_id: row.bot, session_id: row.session }, signal: control.signal, cache: 'no-store', throwOnError: true })
++      if (epoch !== navigationEpoch || !visible.value || token.value !== identity) return
++      if (session.id !== row.session || session.bot_id !== row.bot) throw new Error('Activity session changed')
++      await chat.selectBot(row.bot)
++      if (token.value !== identity || chat.currentBotId !== row.bot) return
++      await router.push({ name: 'bot', params: { botName: row.bot } })
++      await until(() => tabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
++      if (token.value !== identity || chat.currentBotId !== row.bot) return
++      tabs.openSessionChat({ sessionId: session.id, title: session.title }); tabs.closeMobileNav()
++    } catch (error) { if (epoch === navigationEpoch && !control.signal.aborted) toast.error(resolveApiErrorMessage(error, t('chat.delegations.historyUnavailable'))) }
++    finally { clearTimeout(timeout); if (epoch === navigationEpoch) navigating.value = false }
++    return
++  }
+   if (row.delegation) {
+     if (!scope.value) return
+     selectedDelegation.value = row.delegation
+@@ -92,7 +133,7 @@ async function open(row: Activity) {
+     <SidebarNavButton
+       v-for="row in rows"
+       :key="row.key"
+-      :disabled="!row.session || history.pending"
++      :disabled="!row.session || history.pending || navigating"
+       @click="open(row)"
+     >
+       <PauseCircle

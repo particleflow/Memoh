@@ -118,6 +118,26 @@ struct SharedChat {
     }
   }
 
+  private backPending: boolean = false;
+
+  onBackPress(): boolean {
+    if (!this.active || this.loadFailed || this.renderWaiting || !sharedWebAvailable()) { return false; }
+    if (this.backPending) { return true; }
+    this.backPending = true;
+    const generation = this.probeGeneration;
+    // onBackPress is synchronous in SDK26. Resolve the Web layer first, then
+    // perform the normal root-page background action without destroying drafts
+    // or native transfers. Never navigate ArkWeb's document history here.
+    this.controller.runJavaScript('typeof window.__memohBack === "function" && window.__memohBack()')
+      .then(async (handled: string) => {
+        if (!this.active || generation !== this.probeGeneration) { return; }
+        if (handled !== 'true') { await this.context.moveAbilityToBackground(); }
+      }).catch(() => {
+        ClientDiagnostics.event('SYSTEM', 'shared-client', 'back-dispatch-failed', '');
+      }).finally(() => { this.backPending = false; });
+    return true;
+  }
+
   aboutToDisappear(): void {
     this.clearClientWait();
     this.cancelWebDownloads();
@@ -246,6 +266,19 @@ struct SharedChat {
   }
   private intercept(request: WebResourceRequest): WebResourceResponse | null {
     const url = request.getRequestUrl();
+    const upload = /^begonia-client:\/\/app\/upload\/([a-f0-9]{32})$/.exec(url);
+    if (upload && request.getRequestMethod() === 'GET' && !request.isMainFrame()) {
+      try {
+        if (!this.nativeClient || !this.active || !this.chatReady) { throw new Error('UPLOAD_IDENTITY'); }
+        const original = this.nativeClient.uploadPreview(upload[1]);
+        const response = new WebResourceResponse();
+        response.setResponseCode(200); response.setReasonMessage('OK');
+        response.setResponseMimeType(original.mime); response.setResponseEncoding('');
+        response.setResponseHeader([{ headerKey: 'Cache-Control', headerValue: 'no-store' },
+          { headerKey: 'X-Content-Type-Options', headerValue: 'nosniff' }]);
+        response.setResponseData(original.fd); response.setResponseIsReady(true); return response;
+      } catch { return this.response(403, 'text/plain', new ArrayBuffer(0)); }
+    }
     const path = packagedPath(url);
     if (path && request.getRequestMethod() === 'GET') {
       if (path === 'index.html' && !request.isMainFrame()) { return this.response(403, 'text/plain', new ArrayBuffer(0)); }

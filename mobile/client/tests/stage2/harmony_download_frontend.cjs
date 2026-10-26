@@ -13,7 +13,7 @@ const host={begoniaNative:{request:async raw=>{
   return JSON.stringify({ok:true,data:{operation:q.operation,hash:nativeMode==='wrong'?'b'.repeat(64):hash,size}})
  }
  if(q.command==='download.save'){pickerSaves++;return JSON.stringify({ok:true,data:true})}
- assert.equal(q.command,'download.abort');return'{"ok":true}'
+ assert.ok(['download.abort','download.release'].includes(q.command));return'{"ok":true}'
 }}}
 const imports={
  './harmony-service-url':load('mobile/memoh/harmony-service-url.ts',{}, {URL}),
@@ -24,17 +24,17 @@ const imports={
 }
 const {saveNativeOriginal}=load('mobile/memoh/harmony-download.ts',imports,{window:host})
 ;(async()=>{
- await saveNativeOriginal(bot,hash,size,'original.bin');assert.deepEqual(commands.map(q=>q.command),['download.fetch','download.save','download.abort']);assert.equal(pickerSaves,1);assert.equal(listeners.size,0)
+ await saveNativeOriginal(bot,hash,size,'original.bin');assert.deepEqual(commands.map(q=>q.command),['download.fetch','download.save','download.release']);assert.equal(pickerSaves,1);assert.equal(listeners.size,0)
  const reset=()=>{commands=[];pickerSaves=0;nativeMode='normal';onFetch=undefined}
  reset();const pre=new AbortController();pre.abort();await assert.rejects(saveNativeOriginal(bot,hash,size,'x',pre.signal));assert.equal(commands.length,0)
- reset();nativeMode='wrong';await assert.rejects(saveNativeOriginal(bot,hash,size,'x'));assert.equal(pickerSaves,0);assert.equal(commands.at(-1).command,'download.abort')
+ reset();nativeMode='wrong';await assert.rejects(saveNativeOriginal(bot,hash,size,'x'));assert.equal(pickerSaves,0);assert.equal(commands.at(-1).command,'download.release')
  reset();nativeMode='unauthorized';await assert.rejects(saveNativeOriginal(bot,hash,size,'x'));assert.equal(authResponses.at(-1),401);assert.equal(pickerSaves,0)
- reset();nativeMode='hold';let started;const seen=new Promise(r=>started=r);onFetch=started;const cancelled=saveNativeOriginal(bot,hash,size,'x');await seen;action();releaseReady();await assert.rejects(cancelled);assert.equal(pickerSaves,0)
- reset();nativeMode='hold';const authSeen=new Promise(r=>onFetch=r),stale=saveNativeOriginal(bot,hash,size,'x');await authSeen;generation++;token='different-account';for(const f of listeners)f();releaseReady();await assert.rejects(stale);assert.equal(pickerSaves,0);assert.equal(listeners.size,0)
+ reset();nativeMode='hold';let started;const seen=new Promise(r=>started=r);onFetch=started;const cancelled=saveNativeOriginal(bot,hash,size,'x');await seen;action();releaseReady();await assert.rejects(cancelled);assert.equal(pickerSaves,0);assert.ok(commands.some(q=>q.command==='download.abort'))
+ reset();nativeMode='hold';const authSeen=new Promise(r=>onFetch=r),stale=saveNativeOriginal(bot,hash,size,'x');await authSeen;generation++;token='different-account';for(const f of listeners)f();releaseReady();await assert.rejects(stale);assert.equal(pickerSaves,0);assert.equal(listeners.size,0);assert.ok(commands.some(q=>q.command==='download.release'));assert.ok(!commands.some(q=>q.command==='download.abort'))
  token='synthetic-test-only';reset();nativeMode='hold';const changeSeen=new Promise(r=>onFetch=r),changed=saveNativeOriginal(bot,hash,size,'x');await changeSeen;token='silent-token-change';releaseReady();await assert.rejects(changed);assert.equal(pickerSaves,0)
  // Execute the actual native bridge dispatch, not just an isolated fetch mock.
  let fetched,aborted,closed=0;class Voice{prepare(){}close(){}}class VoiceTransfer{close(){}}
- class Downloads{constructor(_context,auth){this.auth=auth}async fetch(q){assert.ok(this.auth());fetched=q;return{operation:q.operation,hash:q.hash,size:q.size}}async save(op,owner){assert.equal(op,fetched.operation);assert.equal(owner,fetched.botId);return true}abort(op,owner){aborted={op,owner}}close(){closed++}}
+ class Downloads{constructor(_context,auth){this.auth=auth}async fetch(q){assert.ok(this.auth());fetched=q;return{operation:q.operation,hash:q.hash,size:q.size}}async save(op,owner){assert.equal(op,fetched.operation);assert.equal(owner,fetched.botId);return true}abort(op,owner){aborted={op,owner}}release(op,owner){aborted={op,owner}}close(){closed++}}
  const service=load('mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets',{'@kit.ArkTS':{url:{URL:{parseURL:value=>new URL(value)}}}})
  const config=load('mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets',{'./ServiceUrl':service})
  const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':config,'./NativeResumableUpload':{NativeResumableUpload:class{close(){}}},'./NativeVoice':{NativeVoice:Voice},'./NativeVoiceTransfer':{NativeVoiceTransfer:VoiceTransfer},'./NativeMediaDownload':{NativeMediaDownload:Downloads}})
