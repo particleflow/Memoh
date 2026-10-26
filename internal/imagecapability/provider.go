@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
@@ -24,6 +25,7 @@ import (
 )
 
 type selection struct {
+	providerID  string
 	config      Config
 	baseURL     string
 	model       string
@@ -34,6 +36,7 @@ type selection struct {
 // It replaces only the explicitly configured image capability. No config means
 // delegation to the original provider, not guessed protocol selection.
 type Provider struct {
+	logger    *slog.Logger
 	fallback  tools.ToolProvider
 	media     *media.Service
 	http      *http.Client
@@ -70,7 +73,8 @@ func New(fallback tools.ToolProvider, settingsSvc *settings.Service, modelsSvc *
 			return selection{}, true, errors.New("configured image capability is unavailable")
 		}
 		return selection{
-			config: cfg, baseURL: providers.ProviderConfigString(provider, "base_url"), model: model.ModelID,
+			providerID: provider.ID.String(),
+			config:     cfg, baseURL: providers.ProviderConfigString(provider, "base_url"), model: model.ModelID,
 			credentials: func(ctx context.Context) (string, error) {
 				credentials, err := providers.NewService(nil, queries, "").ResolveModelCredentials(ctx, provider)
 				return credentials.APIKey, err
@@ -179,7 +183,9 @@ func decode(input sdk.ToolArguments, target any, allowed ...string) error {
 	return nil
 }
 
-func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.SessionContext, args request, refs []string) (any, error) {
+func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.SessionContext, args request, refs []string) (output any, resultErr error) {
+	observation := p.newRequestObservation(exec, session)
+	defer func() { observation.finish(exec.Context, output, resultErr) }()
 	if err := p.checkAccess(exec.Context, session); err != nil {
 		return nil, err
 	}
@@ -192,6 +198,7 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 	}
 	// Resolve again at execution time to observe disable/reconfiguration.
 	selected, enabled, err := p.resolve(exec.Context, session.BotID)
+	observation.providerID = selected.providerID
 	if err != nil || !enabled || (len(refs) > 0 && !selected.config.Edits) {
 		return nil, errors.New("configured image capability is unavailable")
 	}
@@ -218,7 +225,7 @@ func (p *Provider) execute(exec *toolexec.ToolExecContext, session tools.Session
 	if err := p.checkAccess(exec.Context, session); err != nil {
 		return nil, err
 	}
-	image, err := invoke(exec.Context, p.http, selected, apiKey, args, images)
+	image, err := invoke(exec.Context, p.http, selected, apiKey, args, images, observation)
 	if err != nil {
 		// No private provider response, URL, credential, or transport error is
 		// returned to the model. A normal structured result avoids retry guards.

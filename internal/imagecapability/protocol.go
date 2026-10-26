@@ -25,14 +25,14 @@ type request struct {
 
 // The pinned SDK owns Images request encoding and response parsing. Input URLs
 // are host-built data URIs from authorized Media bytes, never model-supplied URLs.
-func invoke(ctx context.Context, client *http.Client, selected selection, apiKey string, args request, images []imageBytes) (imageBytes, error) {
+func invoke(ctx context.Context, client *http.Client, selected selection, apiKey string, args request, images []imageBytes, observation *requestObservation) (imageBytes, error) {
 	if strings.TrimSpace(selected.model) == "" {
 		return imageBytes{}, errors.New("configured image model is required")
 	}
 	provider := openaiimages.New(
 		openaiimages.WithBaseURL(strings.TrimRight(selected.baseURL, "/")),
 		openaiimages.WithAPIKey(apiKey),
-		openaiimages.WithHTTPClient(imageHTTPClient(client)),
+		openaiimages.WithHTTPClient(imageHTTPClient(client, observation)),
 	)
 	var result *sdk.ImageResult
 	var err error
