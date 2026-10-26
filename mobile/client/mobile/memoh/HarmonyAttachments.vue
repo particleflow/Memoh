@@ -1,7 +1,5 @@
 <template>
   <div v-if="nativeAttachmentsAvailable" class="space-y-1 px-2 text-body" aria-label="原件附件">
-    <Button variant="ghost" :disabled="disabled || busy" @click="restore">{{ scope.startsWith('draft:') ? '恢复未发送草稿附件' : '恢复本会话待传附件' }}</Button>
-    <p class="text-muted-foreground">每次恢复最多 16 项；发送或移除后可继续恢复。</p>
     <span v-if="busy" role="status"> 正在处理原件…</span>
     <Button v-if="busy" variant="ghost" @click="cancel">暂停处理</Button>
     <p v-if="error" role="alert">{{ error }}</p>
@@ -63,7 +61,6 @@ async function reopenPreviews() {
 }
 const preview = (file: NativeAttachment) => 'begonia-client://app/upload/' + file.handle
 const select = (photos = false) => action('upload.select', { photos })
-const restore = () => action('upload.list', { recoverDrafts: props.scope.startsWith('draft:') })
 const remove = (file: NativeAttachment) => action('upload.discard', { handle: file.handle }, file.scope)
 defineExpose({ select, busy })
 </script>

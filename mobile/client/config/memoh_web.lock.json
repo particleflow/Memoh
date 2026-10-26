@@ -153,5 +153,14 @@
       "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
       "sha256": "d78b8cb124e38997d263f2e63873dc2d380ce54152c60d502d34a5049e3d38f5"
     }
+  },
+  "sharedActivity": {
+    "commit": "d2bade8b30e4b6df778bc2c0b402f3b1fe592eeb",
+    "scope": "Only existing sidebar name/status/session navigation and removal of the duplicate composer task menu. Excludes Web media recovery and file-tree changes.",
+    "files": {
+      "apps/web/src/components/sidebar/session-activity.vue": "a466123f5e0b9de3644edc0c795ef7886a20335e3ac68541375299c8736b6862",
+      "apps/web/src/components/sidebar/session-activity.test.ts": "1ece68bfb687d543ad88d596b9acc7a790d304b50bd05d15f5bc97159e1bfffd",
+      "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d"
+    }
   }
 }

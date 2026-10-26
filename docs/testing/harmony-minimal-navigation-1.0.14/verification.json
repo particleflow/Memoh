@@ -1,0 +1,22 @@
+{
+  "exitCode": 0,
+  "qualificationExitCode": 0,
+  "officialApi26Compile": true,
+  "buildMode": "release",
+  "sdkVersion": "26.0.0.105",
+  "sourceIdentitySha256": "c029cf462de76978c30ffd72ececcbaf93123142cf05d2ed36a39504e7d4fea4",
+  "crcVerified": true,
+  "sourceMatchesBuild": true,
+  "identityPermissionsUnchanged": true,
+  "publicConfigEmpty": true,
+  "publicConfigBytes": 8192,
+  "versionName": "1.0.14",
+  "versionCode": 1000014,
+  "hapBytes": 35615952,
+  "hapSHA256": "a7472679a36ef2f714e3b2165bae7fab0eb4558b9add16d4cd012d9d3c11ffbe",
+  "phoneAcceptance": false,
+  "sourceBase": "5d0f2df38d57588f313831459dac749d125918a9",
+  "sharedBase": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "sharedActivitySubset": "d2bade8b30e4b6df778bc2c0b402f3b1fe592eeb",
+  "nativeRemoval": "f76375468262237232f9342f922fdaa0e06d08ee"
+}

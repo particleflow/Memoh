@@ -1,0 +1,9 @@
+{
+  "allHAPMembersScanned": 815,
+  "explicitCredentialPatterns": [],
+  "publicDeploymentSlotEmpty": true,
+  "legacyBindingEmpty": true,
+  "networkPolicyAbsent": true,
+  "signingMaterialAbsent": true,
+  "scope": "All members for explicit key/token and URL authority credentials; checked empty deployment fields. Not an exhaustive proof against arbitrary encodings."
+}
