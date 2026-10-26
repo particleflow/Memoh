@@ -6,6 +6,7 @@ import './voiceFan.css'
 const props = defineProps<{origin: VoiceOrigin; choice: VoiceChoice; finger: VoiceFinger; elapsed: number; peaks: number[]; closing: boolean; textTarget?: VoiceTarget; sentTarget?: VoiceTarget}>()
 const id = 'harmony-fan-' + crypto.randomUUID().replaceAll('-', '')
 const overlay = ref<HTMLDivElement>()
+const transferOverlay = ref<HTMLDivElement>()
 let entered = false
 function values() {
   const { origin, choice, finger, elapsed, peaks, closing, textTarget, sentTarget } = props
@@ -55,10 +56,10 @@ function feedbackFinished(): Promise<void> {
 defineExpose({ feedbackFinished })
 function animateTransfer() {
   transferFinished = undefined
-  const { origin, choice, closing, scale, lift, direction, transferTarget, transferAnchor, impact } = values()
+  const { origin, choice, closing, scale, lift, direction, transferTarget, transferAnchor } = values()
 
-    const root = overlay.value;
-    if (!root || !closing || !transferTarget || !impact) return undefined;
+    const root = transferOverlay.value
+    if (!root || !closing || !transferTarget) return undefined
     const motion = uiTheme.shared.voiceMotion;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const ball = root.querySelector<HTMLElement>('.voice-injection-ball');
@@ -68,11 +69,20 @@ function animateTransfer() {
     if (!ball || !splash || !wrap || !edges.length) return undefined;
     const sending = choice === 'send';
     const absorbMs = sending ? motion.sendSplash.absorbMs : motion.injectAbsorbMs;
-    const fromX = origin.x + direction * transferAnchor.x * scale;
-    const fromY = origin.y + (transferAnchor.y - lift) * scale;
+    // The fan remains in the composer's existing stacking context. Measure its
+    // displayed anchor before the flight enters the viewport-level layer.
+    const source = overlay.value?.querySelector(`[data-action="${choice}"]`)?.closest('.voice-anchor')?.getBoundingClientRect()
+    const fromX = source ? source.x + source.width / 2 : origin.x + direction * transferAnchor.x * scale
+    const fromY = source ? source.y + source.height / 2 : origin.y + (transferAnchor.y - lift) * scale
+    ball.style.left = `${fromX}px`
+    ball.style.top = `${fromY}px`
+    const flightOrigin = { ...origin, x: fromX - direction * transferAnchor.x * scale,
+      y: fromY - (transferAnchor.y - lift) * scale }
+    const impact = voiceSplashImpact(flightOrigin, sending ? 'send' : 'text', transferTarget)
     const ballFrames = (target: EditorBounds) => {
       const dx = target.x + target.width / 2 - fromX;
       const dy = target.y - fromY;
+      const { rise } = voiceSplashImpact(flightOrigin, sending ? 'send' : 'text', target)
       return [
         { transform: 'translate(0px, 0px) scale(0)', opacity: 0, easing: motion.entryEasing },
         {
@@ -82,7 +92,7 @@ function animateTransfer() {
           easing: motion.injectRiseEasing,
         },
         {
-          transform: `translate(0px, ${-impact.rise}px) scale(.85, 1.15)`,
+          transform: `translate(0px, ${-rise}px) scale(.85, 1.15)`,
           opacity: 1,
           offset: 0.4,
           easing: motion.injectFallEasing,
@@ -158,33 +168,31 @@ function animateTransfer() {
         )
       ),
     ];
-    const stopFollowing = sending
-      ? followVoiceTarget(
-          transferTarget,
-          (target) => {
-            // setKeyframes retains the animation clock; layout movement must not replay the effect.
-            (animations[0]?.effect as KeyframeEffect | null)?.setKeyframes(ballFrames(target));
-            if (splash) {
-              splash.style.left = `${target.x + target.width / 2}px`;
-              splash.style.top = `${target.y}px`;
-            }
-            if (wrap) {
-              wrap.style.left = `${target.x - 3}px`;
-              wrap.style.top = `${target.y - 3}px`;
-              wrap.style.width = `${target.width + 6}px`;
-              wrap.style.height = `${target.height + 6}px`;
-              wrapPaths(target).forEach((path, index) => edges[index]?.setAttribute('d', path));
-            }
-          },
-          () => {
-            animations.forEach((animation) => animation?.cancel());
-            [ball, splash, wrap].forEach((element) => {
-              const style = element?.style;
-              if (style) style.visibility = 'hidden';
-            });
-          }
-        )
-      : undefined;
+    const stopFollowing = followVoiceTarget(
+      transferTarget,
+      (target) => {
+        // setKeyframes retains the animation clock; layout movement must not replay the effect.
+        (animations[0]?.effect as KeyframeEffect | null)?.setKeyframes(ballFrames(target))
+        if (splash) {
+          splash.style.left = `${target.x + target.width / 2}px`
+          splash.style.top = `${target.y}px`
+        }
+        if (wrap) {
+          wrap.style.left = `${target.x - 3}px`
+          wrap.style.top = `${target.y - 3}px`
+          wrap.style.width = `${target.width + 6}px`
+          wrap.style.height = `${target.height + 6}px`
+          wrapPaths(target).forEach((path, index) => edges[index]?.setAttribute('d', path))
+        }
+      },
+      () => {
+        animations.forEach((animation) => animation?.cancel())
+        ;[ball, splash, wrap].forEach((element) => {
+          const style = element?.style
+          if (style) style.visibility = 'hidden'
+        })
+      }
+    )
     transferFinished = Promise.all(animations
       .filter((animation): animation is Animation => !!animation)
       .map(animation => animation.finished)).then(() => {});
@@ -366,12 +374,18 @@ onBeforeUnmount(() => { stopTransfer?.(); stopSurface?.(); overlay.value?.queryS
         <span>{{String(Math.floor(view.seconds/60)).padStart(2,'0')}}:{{String(view.seconds%60).padStart(2,'0')}}</span>
       </div></div>
     </div>
-    <template v-if="closing && view.transferTarget">
-      <div class="voice-injection-ball" :style="{left:px(origin.x+view.direction*view.transferAnchor.x*view.scale),top:px(origin.y+(view.transferAnchor.y-view.lift)*view.scale)}" />
-      <svg class="voice-injection-splash" :style="{left:px(view.transferTarget.x+view.transferTarget.width/2),top:px(view.transferTarget.y)}" viewBox="-48 -40 96 48" aria-hidden="true">
-        <g :transform="choice==='send'?`scale(${view.impact?.side??view.direction},1)`:undefined"><path :d="choice==='send'?view.impact?.path:'M-40 2 Q-25 0 -21 -12 Q-14 -25 -13 -8 Q-9 0 0 0 Q9 0 13 -8 Q14 -25 21 -12 Q25 0 40 2'" /><circle cx="-24" cy="-26" r="2" /><circle :cx="20+(choice==='send'?(view.impact?.lean??0)*.7:0)" cy="-32" r="2.5" /></g>
-      </svg>
-      <svg class="voice-injection-wrap" :style="{left:px(view.transferTarget.x-3),top:px(view.transferTarget.y-3),width:px(view.transferTarget.width+6),height:px(view.transferTarget.height+6)}" aria-hidden="true"><path pathLength="1" :d="wrapPaths(view.transferTarget)[0]" /><path pathLength="1" :d="wrapPaths(view.transferTarget)[1]" /></svg>
-    </template>
+    <!-- DOM measurements and pointer events are viewport CSS pixels. Keep the
+         flight outside the composer's first-send transform containing block. -->
+    <Teleport to="body">
+      <div ref="transferOverlay" class="voice-overlay" :style="styleVars">
+      <template v-if="closing && view.transferTarget">
+        <div class="voice-injection-ball" :style="{left:px(origin.x+view.direction*view.transferAnchor.x*view.scale),top:px(origin.y+(view.transferAnchor.y-view.lift)*view.scale)}" />
+        <svg class="voice-injection-splash" :style="{left:px(view.transferTarget.x+view.transferTarget.width/2),top:px(view.transferTarget.y)}" viewBox="-48 -40 96 48" aria-hidden="true">
+          <g :transform="choice==='send'?`scale(${view.impact?.side??view.direction},1)`:undefined"><path :d="choice==='send'?view.impact?.path:'M-40 2 Q-25 0 -21 -12 Q-14 -25 -13 -8 Q-9 0 0 0 Q9 0 13 -8 Q14 -25 21 -12 Q25 0 40 2'" /><circle cx="-24" cy="-26" r="2" /><circle :cx="20+(choice==='send'?(view.impact?.lean??0)*.7:0)" cy="-32" r="2.5" /></g>
+        </svg>
+        <svg class="voice-injection-wrap" :style="{left:px(view.transferTarget.x-3),top:px(view.transferTarget.y-3),width:px(view.transferTarget.width+6),height:px(view.transferTarget.height+6)}" aria-hidden="true"><path pathLength="1" :d="wrapPaths(view.transferTarget)[0]" /><path pathLength="1" :d="wrapPaths(view.transferTarget)[1]" /></svg>
+      </template>
+      </div>
+    </Teleport>
   </div>
 </template>

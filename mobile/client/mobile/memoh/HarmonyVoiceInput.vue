@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue'
 import { Button } from '@felinic/ui'
 import { Mic, LoaderCircle } from 'lucide-vue-next'
 import HarmonyVoiceFan from './HarmonyVoiceFan.vue'
@@ -7,8 +7,8 @@ import uiTheme from './harmony-theme.json'
 import { voiceFanChoice, voiceFanLayout, type VoiceChoice, type VoiceOrigin, type VoiceTarget } from './harmony-voice-geometry'
 import { finishRecording, nativeVoice, type Capture, type FinishedCapture, type VoiceSubmission } from './harmony-voice'
 
-const props = defineProps<{ disabled: boolean; editorTarget: () => VoiceTarget | undefined }>()
-const emit = defineEmits<{ send: [VoiceSubmission]; transcribe: [string]; error: [unknown] }>()
+const props = defineProps<{ disabled: boolean; editorTarget: () => VoiceTarget | undefined; send: (submission: VoiceSubmission) => Promise<unknown> }>()
+const emit = defineEmits<{ transcribe: [string]; error: [unknown] }>()
 const capture = ref<Capture>()
 const origin = ref<VoiceOrigin>({ x: 0, y: 0, radius: 44, hand: 'right' })
 const finger = ref({ x: 0, y: 0 })
@@ -25,6 +25,8 @@ let button: HTMLElement | undefined
 let active = true
 let pollTimer: ReturnType<typeof setTimeout> | undefined
 let exitTimer: ReturnType<typeof setTimeout> | undefined
+let targetFrame: number | undefined
+let targetObserver: MutationObserver | undefined
 const label = computed(() => converting.value ? '正在转字' : capture.value && !closing.value
   ? choice.value === 'text' ? '松开转字' : choice.value === 'cancel' ? '松开取消' : '松开发送' : '按住录音')
 
@@ -41,7 +43,13 @@ function afterFeedback<T>(work: () => Promise<T>): Promise<T> {
     requestAnimationFrame(() => { setTimeout(() => { void work().then(resolve, reject) }, 0) })
   })
 }
-function hide() { if (active) { capture.value = undefined; closing.value = false } }
+function hide() {
+  if (targetFrame !== undefined) cancelAnimationFrame(targetFrame)
+  targetFrame = undefined
+  targetObserver?.disconnect()
+  targetObserver = undefined
+  if (active) { capture.value = undefined; closing.value = false }
+}
 function abandon() {
   if (!held) return
   const handle = capture.value?.handle
@@ -57,7 +65,7 @@ async function poll(handle: string) {
     capture.value = next
     pollTimer = setTimeout(() => { void poll(handle) }, uiTheme.shared.voiceInput.meterPollMs)
   } catch (error) {
-    if (held) { abandon(); report(error) }
+    if (held && capture.value?.handle === handle) { abandon(); report(error) }
   }
 }
 function finish(cancelled = false) {
@@ -67,24 +75,52 @@ function finish(cancelled = false) {
   // A native permission dialog or an unfinished start cannot inherit a Send selection.
   releaseGuard()
   choice.value = action
+  if (action === 'text') textTarget.value = props.editorTarget()
   closing.value = true
-  if (action !== 'text') exitTimer = setTimeout(hide, action === 'send'
-    ? uiTheme.shared.voiceMotion.sendSplash.totalMs : uiTheme.shared.voiceMotion.exitMs)
+  if (action === 'cancel') exitTimer = setTimeout(hide, uiTheme.shared.voiceMotion.exitMs)
   if (action === 'cancel') { void afterFeedback(() => nativeVoice('voice.cancel', snapshot.handle)).catch(report); return }
   if (action === 'send') {
     const recording = afterFeedback(() => finishRecording(snapshot.handle))
     void recording.catch(report)
-    emit('send', { capture: snapshot, recording })
-    requestAnimationFrame(() => {
-      const resolve = () => {
-        const node = document.querySelector<HTMLElement>('[data-local-voice="' + snapshot.handle + '"]')
-        if (!node) return
-        const rect = node.getBoundingClientRect()
-        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, radius: 16 }
-      }
+    const selector = '[data-local-voice="' + snapshot.handle + '"]'
+    const resolve = () => {
+      const node = document.querySelector<HTMLElement>(selector)
+      if (!node?.isConnected) return
+      const rect = node.getBoundingClientRect()
+      if (!rect.width || !rect.height) return
+      const viewport = node.closest('[data-slot="scroll-area-viewport"]')?.getBoundingClientRect()
+      // A body-level effect must respect the actual message viewport's clip.
+      if (viewport && (rect.top < viewport.top || rect.bottom > viewport.bottom
+        || rect.left < viewport.left || rect.right > viewport.right)) return
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+        radius: Number.parseFloat(getComputedStyle(node).borderRadius) || 0 }
+    }
+    const locate = () => {
+      targetFrame = undefined
+      if (!active || !closing.value || capture.value?.handle !== snapshot.handle) return
       const bounds = resolve()
-      if (bounds && active) sentTarget.value = { ...bounds, resolve }
-    })
+      // Attachment preparation and send confirmation precede the actual row.
+      // Follow this capture's DOM lifecycle, never a timer or another message.
+      if (!bounds) {
+        if (document.querySelector(selector)) hide()
+        return
+      }
+      targetObserver?.disconnect()
+      targetObserver = undefined
+      sentTarget.value = { ...bounds, resolve }
+      void nextTick().then(() => feedback.value?.feedbackFinished()).then(hide, hide)
+    }
+    const scheduleTarget = () => {
+      if (targetFrame === undefined) targetFrame = requestAnimationFrame(locate)
+    }
+    targetObserver = new MutationObserver(scheduleTarget)
+    targetObserver.observe(document.body, { childList: true, subtree: true, attributes: true,
+      attributeFilter: ['style', 'class', 'data-local-voice'] })
+    scheduleTarget()
+    const settled = () => {
+      if (capture.value?.handle === snapshot.handle && !sentTarget.value) hide()
+    }
+    void props.send({ capture: snapshot, recording }).then(settled, error => { settled(); report(error) })
     return
   }
   converting.value = true
@@ -147,12 +183,15 @@ function up(event: PointerEvent) {
   finger.value = { x: event.clientX, y: event.clientY }
   finish()
 }
+onDeactivated(() => { abandon(); hide() })
 onMounted(() => { window.addEventListener('blur', abandon); document.addEventListener('visibilitychange', visibilityChanged) })
 onBeforeUnmount(() => {
   abandon()
   active = false
   clearTimeout(exitTimer)
   clearTimeout(pollTimer)
+  if (targetFrame !== undefined) cancelAnimationFrame(targetFrame)
+  targetObserver?.disconnect()
   window.removeEventListener('blur', abandon)
   document.removeEventListener('visibilitychange', visibilityChanged)
 })
