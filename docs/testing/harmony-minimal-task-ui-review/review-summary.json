@@ -1,0 +1,78 @@
+{
+  "sourceBase": "206b3190ff4313b9fa7a77f34ebf28d52c57b6a7",
+  "unifiedCommit": "4d23244c683aca4c436efec4db375921fdf60472",
+  "unifiedTree": "45f71558fbbf110761b12864dd892a97e1f5ddd2",
+  "sharedSources": [
+    {
+      "local": "mobile/client/mobile/memoh/shared-session-activity.vue",
+      "upstream": "apps/web/src/components/sidebar/session-activity.vue",
+      "sha256": "8a4ef38a0e96143fb0dca570645a1d06fe15ed55c0132d3732d042ad4aafa5d1",
+      "byteIdentical": true
+    },
+    {
+      "local": "mobile/client/mobile/memoh/shared-session-activity.test.ts",
+      "upstream": "apps/web/src/components/sidebar/session-activity.test.ts",
+      "sha256": "11f9d45caef012a54052d192a2c2e40ee24ae928111475cc03b13f967bb20d7f",
+      "byteIdentical": true
+    },
+    {
+      "local": "mobile/client/mobile/memoh/shared-useBotActivity.ts",
+      "upstream": "apps/web/src/pages/home/composables/useBotActivity.ts",
+      "sha256": "4be9eaa8edfea6f737f85b55828a163ec40af1c3a0723eca3c14be7550496039",
+      "byteIdentical": true
+    },
+    {
+      "local": "mobile/client/mobile/memoh/shared-useBotActivity.test.ts",
+      "upstream": "apps/web/src/pages/home/composables/useBotActivity.test.ts",
+      "sha256": "2b6a660ae19628a0360bd50d407b4f72d4899178b62698999e16e485aeb4d017",
+      "byteIdentical": true
+    }
+  ],
+  "sdkSubset": "Append only generated GET /bots/{bot_id}/activity, its exact shapes and index exports. No other SDK removals/updates.",
+  "taskTrigger": "Opens existing sessions sidebar; no SessionTasks import or detail panel from the phone composer.",
+  "displayedTaskFields": [
+    "name",
+    "state"
+  ],
+  "rowAction": "Original session navigation with existing permission recheck",
+  "newPanelAdded": false,
+  "unchanged115HAPSHA256": "3ae778ffa38e2dc12cfe8ef974730d7014f70273984d4c71b1bd568394f80b58",
+  "newHAPBuilt": false,
+  "imageProbeIncluded": false,
+  "typecheck": "passed",
+  "targetedTests": 108,
+  "lint": {
+    "errors": 0,
+    "warnings": 2,
+    "scope": "two attribute-layout warnings on the new trigger; no suppressed rules"
+  },
+  "backendDeploymentVerified": false,
+  "deviceAcceptance": false,
+  "sourceReviewOnly": true,
+  "renderedTaskFieldsOnly": [
+    "name",
+    "state"
+  ],
+  "noNewHAP": true,
+  "sidebarMeasurement": {
+    "environment": "Local compiled Chromium390x844 with synthetic7 schedules; programmatic DOM click; not ArkWeb or physical input latency",
+    "beforeFirstVisibleMs": [
+      210.7,
+      80.5,
+      86.3
+    ],
+    "afterFirstVisibleMs": [
+      185,
+      69.6,
+      61.4
+    ],
+    "beforeMedianMs": 86.3,
+    "afterMedianMs": 69.6,
+    "hiddenFileReadsBefore": 3,
+    "hiddenFileReadsAfter": 0,
+    "CSSAnimationChanged": false,
+    "phoneStutterResolved": false,
+    "sampleSize": 3,
+    "longTaskConclusion": "No long-task callback records observed; this does not establish the absence of main-thread blocking or a device root cause."
+  }
+}

@@ -1,0 +1,8 @@
+
+/workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/components/sidebar/session-activity-trigger.vue
+  16:27  warning  'size' should be on a new line    vue/max-attributes-per-line
+  16:37  warning  '@click' should be on a new line  vue/max-attributes-per-line
+
+✖ 2 problems (0 errors, 2 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+

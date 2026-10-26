@@ -57,8 +57,8 @@
       "upstreamSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122"
     },
     "apps/web/src/pages/home/components/chat-pane.vue": {
-      "adaptedSHA256": "814362243ed4aae9306d1daf7e4070d6ea812a92499a8200504ebe8783dfc231",
-      "upstreamSHA256": "3b3f89ab3ff1df338a604bb08126aa81c05b3e4deee1d561e3b5abf7f590f3e1"
+      "adaptedSHA256": "f19601dfb71442de123c585e529a14f222cb016ad096546e38d45ea43db730f2",
+      "upstreamSHA256": "0af9d3318a01e5421cd2be19f4b51b90cafbffffb85e544f2e5868924f02937c"
     },
     "apps/web/src/pages/home/components/display-pane.vue": {
       "adaptedSHA256": "404914e72d1bcfa7ae23e2f1fdd9545a6f9dec6bfc728f19b9e99e9f81f7f974",

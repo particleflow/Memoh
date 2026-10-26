@@ -7,8 +7,9 @@ import type { RuntimeCurrentRunView, SessionSummary } from '@/composables/api/us
 import en from '@/i18n/locales/en.json'
 import SessionActivity from './session-activity.vue'
 
-const api = vi.hoisted(() => ({ tasks: vi.fn(), delegations: vi.fn(), delegation: vi.fn(), session: vi.fn(), open: vi.fn(), close: vi.fn(), select: vi.fn(), push: vi.fn() }))
+const api = vi.hoisted(() => ({ activity: vi.fn(), tasks: vi.fn(), delegations: vi.fn(), delegation: vi.fn(), session: vi.fn(), open: vi.fn(), close: vi.fn(), select: vi.fn(), push: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
+  getBotsByBotIdActivity: api.activity,
   getBotsByBotIdSessionsBySessionIdTasks: api.tasks,
   getBotsByBotIdSessionsBySessionIdDelegations: api.delegations,
   getBotsByBotIdSessionsBySessionIdDelegationsByDelegationId: api.delegation,
@@ -54,6 +55,7 @@ beforeEach(() => {
   known.value = [{ id: 'parent', bot_id: 'bot', title: 'Generate snow landscape' }, { id: 'child', bot_id: 'bot', title: 'Review image reference' }]
   Object.keys(observations).forEach(key => { delete observations[key] })
   Object.values(api).forEach(mock => mock.mockReset())
+  api.activity.mockRejectedValue({ status: 404 })
   api.tasks.mockResolvedValue({ data: { items: [] } }); api.delegations.mockResolvedValue({ data: { items: [] } })
   api.delegation.mockResolvedValue({ data: delegation })
   api.session.mockResolvedValue({ data: { id: 'expert-session', bot_id: 'specialist', title: 'Specialist original session' } })
@@ -62,6 +64,29 @@ beforeEach(() => {
 afterEach(() => { app?.unmount(); root?.remove(); vi.useRealTimers(); vi.restoreAllMocks() })
 
 describe('compact activity outside the task dialog', () => {
+  it('discovers an Agent in another accessible Bot without opening its conversation first', async () => {
+    api.activity.mockImplementation(async ({ path }: { path: { bot_id: string } }) => ({ data: { items: path.bot_id === 'specialist'
+      ? [{ id: 'unopened-run', kind: 'agent', bot_id: 'specialist', session_id: 'expert-session', name: 'Unopened specialist Agent', state: 'running' }] : [] } }))
+    await mount()
+    expect(api.activity).toHaveBeenCalledTimes(2)
+    expect(api.tasks).not.toHaveBeenCalled(); expect(api.delegations).not.toHaveBeenCalled()
+    expect(root.textContent).toContain('Unopened specialist Agent')
+    expect(root.textContent).not.toContain('unopened-run')
+    root.querySelector('button')!.click(); await settled()
+    expect(api.session).toHaveBeenCalledWith(expect.objectContaining({ path: { bot_id: 'specialist', session_id: 'expert-session' } }))
+    expect(api.open).toHaveBeenCalledWith({ sessionId: 'expert-session', title: 'Specialist original session' })
+  })
+  it('does not replace a denied aggregate with current cached runtime success', async () => {
+    observations.parent = { synchronized: true, run: { run_id: 'cached', turn_id: 't', generation: 'g', status: 'running', started_at: '', updated_at: '', messages: [] } }
+    api.activity.mockRejectedValue({ status: 403 }); await mount()
+    expect(root.querySelector('section')).toBeNull(); expect(api.tasks).not.toHaveBeenCalled()
+  })
+  it('does not substitute the Bot name for an unnamed Agent', async () => {
+    api.activity.mockImplementation(async ({ path }: { path: { bot_id: string } }) => ({ data: { items: path.bot_id === 'specialist'
+      ? [{ id: 'run', kind: 'agent', bot_id: 'specialist', session_id: 'expert-session', name: '', state: 'running' }] : [] } }))
+    await mount(); expect(root.textContent).toContain(en.chat.tasks.types.subagent)
+    expect(root.textContent).not.toContain('Image specialist')
+  })
   it('does not keep a hidden desktop/mobile navigation host polling', async () => {
     hostVisible.value = false; await mount(); expect(api.tasks).not.toHaveBeenCalled()
     hostVisible.value = true; await settled(); expect(api.tasks).toHaveBeenCalledOnce()

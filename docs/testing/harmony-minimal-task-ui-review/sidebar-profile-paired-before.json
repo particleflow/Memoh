@@ -1,0 +1,72 @@
+{
+  "label": "paired-before",
+  "viewport": "390x844",
+  "samples": [
+    {
+      "firstVisibleMs": 210.69999998807907,
+      "fullWidthMs": 343.90000000596046,
+      "rect": {
+        "left": -4.57763671875e-05,
+        "right": 287.9999542236328,
+        "width": 288,
+        "state": "open"
+      },
+      "longTasks": []
+    },
+    {
+      "firstVisibleMs": 80.5,
+      "fullWidthMs": 213.5,
+      "rect": {
+        "left": 0,
+        "right": 288,
+        "width": 288,
+        "state": "open"
+      },
+      "longTasks": []
+    },
+    {
+      "firstVisibleMs": 86.30000001192093,
+      "fullWidthMs": 215.90000000596046,
+      "rect": {
+        "left": -4.57763671875e-05,
+        "right": 287.9999542236328,
+        "width": 288,
+        "state": "open"
+      },
+      "longTasks": []
+    }
+  ],
+  "requestsDuringThreeOpens": [
+    {
+      "kind": "files",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    },
+    {
+      "kind": "files",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    },
+    {
+      "kind": "files",
+      "method": "GET"
+    },
+    {
+      "kind": "other",
+      "method": "GET"
+    }
+  ],
+  "pageErrors": [],
+  "deviceMeasurement": false,
+  "scope": "Compiled app/local Chromium and synthetic 7 schedules. Programmatic DOM click to first visible frame; not physical phone input latency."
+}

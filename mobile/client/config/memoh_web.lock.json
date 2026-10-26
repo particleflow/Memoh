@@ -155,12 +155,17 @@
     }
   },
   "sharedActivity": {
-    "commit": "d2bade8b30e4b6df778bc2c0b402f3b1fe592eeb",
-    "scope": "Existing shared sidebar name/status/session navigation only. Restore the original current-session task monitor entry and expose the existing Bot management route. Excludes Web media recovery and file-tree changes.",
+    "commit": "4d23244c683aca4c436efec4db375921fdf60472",
+    "scope": "Exact unified Bot-wide activity component/reader and generated activity GET/types only; existing phone task trigger opens the same existing sidebar, never the old task detail panel. Hidden file/schedule panels are not mounted while chat is selected. No HAP build.",
     "files": {
-      "apps/web/src/components/sidebar/session-activity.vue": "a466123f5e0b9de3644edc0c795ef7886a20335e3ac68541375299c8736b6862",
-      "apps/web/src/components/sidebar/session-activity.test.ts": "1ece68bfb687d543ad88d596b9acc7a790d304b50bd05d15f5bc97159e1bfffd",
-      "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d"
-    }
+      "apps/web/src/components/sidebar/session-activity.vue": "8a4ef38a0e96143fb0dca570645a1d06fe15ed55c0132d3732d042ad4aafa5d1",
+      "apps/web/src/components/sidebar/session-activity.test.ts": "11f9d45caef012a54052d192a2c2e40ee24ae928111475cc03b13f967bb20d7f",
+      "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d",
+      "apps/web/src/pages/home/composables/useBotActivity.ts": "4be9eaa8edfea6f737f85b55828a163ec40af1c3a0723eca3c14be7550496039",
+      "apps/web/src/pages/home/composables/useBotActivity.test.ts": "2b6a660ae19628a0360bd50d407b4f72d4899178b62698999e16e485aeb4d017",
+      "apps/web/src/components/sidebar/session-activity-trigger.vue": "4e0e772a471c69d6ea2cd46e6e0bc225c5d7cdac6a1fba1d63ea40b5b65a88d5",
+      "apps/web/src/components/sidebar/session-activity-trigger.test.ts": "44067c1fc4c078c545a3fb77e23643983cf095228f83041e97bd37b07069f57a"
+    },
+    "sdkOverlaySHA256": "28838d768702181920719351e64d3a20ad0895d7ff8f677412ecbb01fe20e812"
   }
 }
