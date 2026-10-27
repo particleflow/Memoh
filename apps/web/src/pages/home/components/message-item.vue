@@ -285,8 +285,19 @@
                 v-else-if="node.block.type === 'error' && (node.block.code || node.block.content)"
                 tone="destructive"
                 size="sm"
-                :description="errorBlockContent(node.block)"
-              />
+                :description="recoveryErrorContent(node.block)"
+                :clickable="recoverableError(node.block) && !recovery.blocked.value"
+                :disabled="recoverableError(node.block) && recovery.busy.value"
+                :aria-busy="recoverableError(node.block) && recovery.busy.value"
+                @click="recoverableError(node.block) && recovery.recover()"
+              >
+                <template
+                  v-if="recoverableError(node.block) && recovery.busy.value"
+                  #icon
+                >
+                  <Spinner class="size-3.5" />
+                </template>
+              </CalloutBanner>
 
               <!-- Runtime notice block: a degradation the runtime wants the
                    user to see (tools unavailable, an interaction declined).
@@ -408,8 +419,11 @@ if (typeof document !== 'undefined') {
 import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue'
 import { Sparkles, Target } from 'lucide-vue-next'
 import { formatRelativeTime, formatDateTime, formatCalendarTime } from '@/utils/date-time'
-import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Textarea } from '@felinic/ui'
+import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Spinner, Textarea } from '@felinic/ui'
 import MarkdownRender, { enableKatex, enableMermaid } from 'markstream-vue'
+import { useLocalStorage } from '@vueuse/core'
+import { useAcceptedUserInputRecovery } from '../composables/useAcceptedUserInputRecovery'
+import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSettingsStore } from '@/store/settings'
 import ToolCallGroup from './tool-call-group.vue'
 import ChatAnswersCard from './chat-answers-card.vue'
@@ -463,6 +477,9 @@ const props = defineProps<{
   message: ChatMessage
   botId?: string
   sessionId?: string
+  recoveryOriginalRunId?: string
+  recoveryEnabled?: boolean
+  recoveryVisible?: boolean
   // Group layout for third-party synced threads: every turn left-aligned with
   // an avatar + sender name + channel badge (including the bot's own replies).
   channelThread?: boolean
@@ -482,6 +499,17 @@ const props = defineProps<{
 }>()
 
 provideNativeTaskResumeScope(props)
+const recoveryToken = useLocalStorage('token', '')
+const recovery = useAcceptedUserInputRecovery(computed(() => ({ bot: props.botId || '', session: props.sessionId || '', run: props.recoveryOriginalRunId,
+  enabled: props.recoveryEnabled === true && !!props.botId && !!props.sessionId, visible: props.recoveryVisible !== false })), toRef(props, 'message'), recoveryToken)
+const recoveryStates = new Set(['accepted', 'submitted', 'running', 'waiting_decision', 'finishing', 'completed', 'failed', 'aborted', 'lost', 'unknown'])
+function recoverableError(block: ErrorBlock) { return block.code === 'runtime_run_failed' && !!recovery.candidate.value }
+function recoveryErrorContent(block: ErrorBlock) {
+  if (!recoverableError(block)) return errorBlockContent(block)
+  if (recovery.blocked.value && recovery.error.value) return resolveApiErrorMessage(recovery.error.value, errorBlockContent(block))
+  if (recovery.state.value) return t('chat.tools.userInputRecoveryState', { state: t(`chat.tasks.statuses.${recoveryStates.has(recovery.state.value) ? recovery.state.value : 'unknown'}`) })
+  return errorBlockContent(block)
+}
 
 // Compare the whole reply, including tools separated by assistant text.
 const showExecutionLocation = computed(() => {

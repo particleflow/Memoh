@@ -132,6 +132,9 @@
                         :message="msg"
                         :bot-id="currentBotId"
                         :session-id="activeSessionId"
+                        :recovery-original-run-id="originalFailedRunId(msg)"
+                        :recovery-enabled="!activeChatReadOnly && !isChannelThread"
+                        :recovery-visible="isVisible"
                         :channel-thread="isChannelThread"
                         :channel-platform="channelPlatform"
                         :bot-name="currentBot?.name"
@@ -1678,6 +1681,16 @@ const latestEditableUserTurnId = computed(() => {
 
 // Both halves of a round share one turn id, so the role decides which
 // affordance a message gets: retry belongs to the reply, edit to the request.
+// A synchronized original turn match is identity evidence; never substitute
+// another/latest run for an error whose historical run ID is unavailable.
+function originalFailedRunId(message: ChatMessage): string | undefined {
+  if (message.role !== 'assistant') return
+  if (message.runtimeRunId) return message.runtimeRunId
+  const observation = chatStore.runtimeObservationFor(currentBotId.value || '', activeSessionId.value || '')
+  const run = observation.run
+  return observation.synchronized && run?.status === 'errored' && !!message.turnId && run.turn_id === message.turnId ? run.run_id : undefined
+}
+
 function isRetryableTurn(message: ChatMessage): boolean {
   const turnId = latestRetryableAssistantTurnId.value
   return message.role === 'assistant' && turnId !== '' && turnId === (message.turnId?.trim() ?? '')

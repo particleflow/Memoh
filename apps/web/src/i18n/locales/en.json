@@ -1557,6 +1557,7 @@
       "unanswered": "No answer"
     },
     "tools": {
+      "userInputRecoveryState": "Recovery: {state}",
       "elapsedRunning": "Running · {seconds}s",
       "read": "Read",
       "read_image": "View image",

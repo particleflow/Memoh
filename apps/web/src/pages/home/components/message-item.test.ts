@@ -7,6 +7,9 @@ import { handleBrowserKeyboardShortcut } from '@/lib/browser-keyboard-shortcuts'
 import { keyboardBindings, resolveKeyboardBinding } from '@/lib/keyboard-bindings'
 import { appKeyboardCommands, createKeyboardCommandRegistry } from '@/lib/keyboard-commands'
 
+const recoveryApi = vi.hoisted(() => ({ recover: vi.fn(), observe: vi.fn() }))
+vi.mock('@memohai/sdk', async importOriginal => ({ ...(await importOriginal<typeof import('@memohai/sdk')>()), postBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecover: recoveryApi.recover, getBotsByBotIdSessionsBySessionIdInvocationsByInvocationId: recoveryApi.observe }))
+
 const Stub = defineComponent({ inheritAttrs: false, setup: () => () => h('div') })
 
 vi.mock('markstream-vue', () => ({ default: Stub, setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))
@@ -25,8 +28,8 @@ vi.mock('./message-actions.vue', () => ({
     setup: props => () => h('button', { 'data-edit': '', onClick: () => props.onEdit?.() }),
   }),
 }))
-vi.mock('@felinic/ui', () => ({
-  Avatar: Stub, AvatarImage: Stub, AvatarFallback: Stub, Button: Stub, CalloutBanner: Stub,
+vi.mock('@felinic/ui', async importOriginal => ({
+  Avatar: Stub, AvatarImage: Stub, AvatarFallback: Stub, Button: Stub, Spinner: Stub, CalloutBanner: (await importOriginal<typeof import('@felinic/ui')>()).CalloutBanner,
   Textarea: defineComponent({
     inheritAttrs: false,
     props: { modelValue: String },
@@ -40,7 +43,7 @@ vi.mock('@felinic/ui', () => ({
 }))
 vi.mock('vue-i18n', async importOriginal => ({
   ...await importOriginal<typeof import('vue-i18n')>(),
-  useI18n: () => ({ t: (key: string) => key, te: () => false, locale: ref('en') }),
+  useI18n: () => ({ t: (key: string, args?: Record<string, string>) => key === 'chat.tools.userInputRecoveryState' ? `Recovery: ${args?.state}` : key, te: () => false, locale: ref('en') }),
 }))
 vi.mock('@/store/settings', () => ({ useSettingsStore: () => ({}) }))
 vi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: {} }) }))
@@ -102,5 +105,34 @@ describe('message-item edit', () => {
     } finally {
       window.removeEventListener('keydown', dispatch)
     }
+  })
+})
+
+
+describe('accepted-answer failure hint', () => {
+  it.each(['submitted', 'pending'])('uses the existing single hint for %s input, never the whole-turn retry action', async status => {
+    localStorage.setItem('token', 'synthetic-account')
+    recoveryApi.recover.mockReset().mockResolvedValue({ data: { original_run_id: 'original-run', decision_id: 'original-decision', recovery_run_id: 'recovery-run', invocation_id: 'recovery-invocation', state: 'accepted', started: true } })
+    recoveryApi.observe.mockReset().mockImplementation(() => new Promise(() => {}))
+    const retry = vi.fn(), MessageItem = (await import('./message-item.vue')).default
+    root = document.createElement('div'); document.body.append(root)
+    app = createApp(MessageItem, {
+      botId: 'bot', sessionId: 'session', recoveryEnabled: true, recoveryVisible: true, isScrolling: false, onRetryMessage: retry,
+      message: { id: 'original-message', role: 'assistant', timestamp: '2026-10-27T07:00:00Z', streaming: false, turnId: 'original-turn', runtimeRunId: 'original-run', messages: [
+        { id: 1, type: 'tool', name: 'ask_user', input: {}, tool_call_id: 'call', toolCallId: 'call', toolName: 'ask_user', result: null, done: true, running: false, userInput: { user_input_id: 'original-decision', status, answers: [] } },
+        { id: 2, type: 'error', code: 'runtime_run_failed', content: '' },
+      ] },
+    })
+    app.config.globalProperties.$t = (key: string) => key; app.mount(root); await nextTick()
+    const hints = root.querySelectorAll<HTMLElement>('[data-slot="callout-banner"]'); expect(hints).toHaveLength(1)
+    expect(hints[0]!.tagName).toBe(status === 'submitted' ? 'BUTTON' : 'DIV')
+    hints[0]!.click(); hints[0]!.click(); await nextTick(); for (let i = 0; i < 10; i++) await Promise.resolve(); await nextTick()
+    expect(retry).not.toHaveBeenCalled(); expect(recoveryApi.recover).toHaveBeenCalledTimes(status === 'submitted' ? 1 : 0)
+    if (status === 'submitted') {
+      expect(recoveryApi.recover).toHaveBeenCalledWith(expect.objectContaining({ body: { original_run_id: 'original-run' }, path: { bot_id: 'bot', session_id: 'session', decision_id: 'original-decision' } }))
+      expect(root.textContent).toContain('Recovery: chat.tasks.statuses.accepted')
+      expect(root.querySelectorAll('[data-slot="callout-banner"]')).toHaveLength(1)
+    }
+    localStorage.removeItem('token')
   })
 })

@@ -1569,6 +1569,7 @@
       "unanswered": "未作答"
     },
     "tools": {
+      "userInputRecoveryState": "恢复：{state}",
       "elapsedRunning": "执行中 · {seconds} 秒",
       "read": "读取",
       "read_image": "查看图片",

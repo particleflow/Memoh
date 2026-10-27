@@ -1538,6 +1538,7 @@
       "unanswered": "未回答"
     },
     "tools": {
+      "userInputRecoveryState": "再開：{state}",
       "elapsedRunning": "実行中 · {seconds} 秒",
       "read": "読む",
       "read_image": "画像を見る",

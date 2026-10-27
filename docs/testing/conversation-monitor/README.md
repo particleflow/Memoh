@@ -23,7 +23,7 @@ Synthetic production-build screenshots: [desktop](desktop.png), [390px mobile](m
 
 The same identified `runtime_run_failed` already present in its assistant reply suppresses the composer duplicate. Frontend-only run/turn metadata follows the existing send/retry/edit result. Other errors, standalone failures and failures belonging to a different run/turn remain visible. There is no matching on translated text. The underlying reply/error history is unchanged.
 
-The remaining inline hint is NOT wired to whole-turn retry. An accepted answer followed by a failed continuation cannot be safely recovered by repeating the answer, `retry_message` or the lost-run recovery path. The backend owner is implementing the original decision/run recovery contract; clickable continuation remains unfinished until that contract is available.
+At the original 40765b9e checkpoint the safe recovery endpoint was pending. The subsequent accepted-answer integration now wires this same inline hint to the explicit original decision/run recovery endpoint; see [click contract and validation](../accepted-user-input-click/README.md). It never repeats the answer, uses `retry_message`, or substitutes lost-run recovery.
 
 ## Provenance of the duplicate surfaces
 
