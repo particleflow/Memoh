@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/Memoh
+
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  11:21:23
+   Duration  387ms (transform 165ms, setup 0ms, import 295ms, tests 32ms, environment 1ms)
+

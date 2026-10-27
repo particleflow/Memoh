@@ -917,10 +917,8 @@
                         </svg>
                       </Button>
                     </div>
-                    <!-- Send and stop are one brand circle: the surface never
-                         changes between the two states, only the glyph cross-fades
-                         (arrow ⇄ stop square), so the button can't blink color or
-                         shape mid-turn. While streaming it stays clickable to abort. -->
+                    <!-- One control: a draft sends to the existing queue;
+                         only an empty running composer offers stop. -->
                     <div
                       class="absolute inset-0 [transition:opacity_150ms_ease,scale_281ms_cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
                       :class="sendButtonVisible ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0'"
@@ -929,12 +927,13 @@
                         type="button"
                         variant="brand"
                         shape="circle"
-                        :disabled="attachmentUploading || (streaming ? false : (!showSend || !currentBotId || activeChatReadOnly || loadingMessages || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason))"
+                        :disabled="attachmentUploading || !currentBotId || activeChatReadOnly || loadingMessages || (streaming ? showSend && (pendingFiles.length > 0 || requestedSkills.length > 0) : !showSend || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason)"
                         :title="goalSubmissionBlocked ? goalExecutionBlockedReason : undefined"
                         :class="runtimeModeChanging && !streaming && showSend && !!currentBotId && !activeChatReadOnly && !loadingMessages && !composerAgentConfigPending && !composerHasNoModel ? 'disabled:opacity-100' : undefined"
                         :aria-busy="firstSendAwaiting || attachmentUploading || undefined"
-                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : (streaming ? 'Stop generating response' : 'Send message')"
+                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : $t(streaming ? 'chat.stopGenerating' : 'chat.send')"
                         class="size-full"
+                        @keydown.enter="$event.repeat && $event.preventDefault()"
                         @click="handleSendButton"
                       >
                         <span
@@ -946,13 +945,13 @@
                           <SendMorphIcon
                             :busy="firstSendAwaiting || attachmentUploading"
                             class="col-start-1 row-start-1 size-[18px] max-md:size-5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
-                            :class="streaming && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
+                            :class="streaming && !showSend && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
                           />
                           <svg
                             viewBox="0 0 24 24"
                             fill="currentColor"
                             class="col-start-1 row-start-1 size-4 max-md:size-4.5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
-                            :class="streaming && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'"
+                            :class="streaming && !showSend && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'"
                           >
                             <rect
                               x="4"
@@ -3396,11 +3395,8 @@ const voiceInputEnabled = false
 
 // Whether the trailing slot shows the send button (vs. its inactive
 // occupant — see inactiveSlotVisible just below, its exact complement).
-// Streaming always wins the slot for stop, same as before; unlike the old
-// ring-era rule this no longer special-cases ACP: the inactive occupant —
-// not a dimmed disabled send — is what fills the slot on empty input in
-// EVERY mode (the mic when voice input is on, a look-alike placeholder while
-// it's shelved).
+// Keep the one action slot visible during a run: send for a draft, stop
+// only when the existing content predicate says the composer is empty.
 const sendButtonVisible = computed(() => showSend.value || streaming.value)
 
 // The slot's inactive occupant: a grayed send stand-in while voice input is
@@ -4432,13 +4428,23 @@ async function handleSend() {
   }
 }
 
-function handleSendButton() {
+let lastSendButtonActivation = -Infinity
+function handleSendButton(event?: MouseEvent) {
   // A first send waits for the server to confirm it.
   if (firstSendAwaiting.value) return
+  const now = performance.now()
+  if ((event?.detail ?? 0) > 1) return
   if (streaming.value && !showSend.value) {
+    // Clearing a sent draft changes this same button into stop. Keep mouse
+    // multi-clicks, rapid taps and keyboard repeats in that send gesture.
+    if (now - lastSendButtonActivation < 500) {
+      lastSendButtonActivation = now
+      return
+    }
     chatStore.abort(paneTarget.value)
     return
   }
+  lastSendButtonActivation = now
   void handleSend()
 }
 

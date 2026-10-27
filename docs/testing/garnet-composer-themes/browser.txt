@@ -1,0 +1,1 @@
+PASS browser interactions and all 10 theme variants

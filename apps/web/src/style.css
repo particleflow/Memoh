@@ -30,6 +30,11 @@
  * tames "too big", both per-CJK-glyph and language-agnostic. */
 @import "./styles/misans-vf.css";
 
+/* Dark palettes use a light brand fill; its glyphs need the dark surface tone. */
+:root.dark {
+  --brand-foreground: var(--background);
+}
+
 /* `can-hover:` — applies only on devices that can actually hover (mouse /
  * trackpad). Tailwind v4 already wraps `hover:`/`group-hover:` in
  * `@media (hover: hover)`, so a "hidden until hovered" affordance written as
