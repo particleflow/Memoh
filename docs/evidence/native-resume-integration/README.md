@@ -24,19 +24,27 @@ Agent/runtime/contextview changes relative to cbcee. Schema remains 176.
 
 ## Executed combination checks
 
+This table records the historical combined-candidate checkpoint above. The raw
+logs `targeted-go.log`, `postgres-gate.log`, `server-build.log`,
+`core-boundary.log`, `browser.log` and `browser-first-locator-failure.log` were
+not published in this repository snapshot and cannot be read back here. The
+recorded outcomes below are not newly verified results or current acceptance;
+other linked proof, manifest and screenshot files remain separate evidence.
+
 | Check | Result |
 | --- | --- |
-| `go test -p=1 -count=1 -v -timeout=3m ./internal/nativeherdr ./internal/agenvo ./internal/computertask -run 'Test(PowerShellCLI\|AdoptBatchWorkspace\|ContinueBatch\|BatchResume\|NativeBatchExplicitResume)'` | Exit 0; 20 top-level PASS, 82 including subtests; one explicit Linux PowerShell SKIP. [Log](targeted-go.log) |
-| `bash scripts/test-computer-operations-postgres.sh` | Exit 1 before tests: race compilation exhausted the local temporary filesystem. The captured [log](postgres-gate.log) is truncated at 4096 bytes by that failure. This is not a PG pass; the exact merged-head remote gate is required. |
-| `go build -p=1 -o <EVIDENCE_ROOT>/server ./cmd/agent` | Exit 0. [Empty successful output](server-build.log) |
-| `bash scripts/check-agent-core-boundary.sh` | Exit 0, matches official `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`. [Log](core-boundary.log) |
+| `go test -p=1 -count=1 -v -timeout=3m ./internal/nativeherdr ./internal/agenvo ./internal/computertask -run 'Test(PowerShellCLI\|AdoptBatchWorkspace\|ContinueBatch\|BatchResume\|NativeBatchExplicitResume)'` | Exit 0; 20 top-level PASS, 82 including subtests; one explicit Linux PowerShell SKIP. Raw log not published (`targeted-go.log`). |
+| `bash scripts/test-computer-operations-postgres.sh` | Exit 1 before tests: race compilation exhausted the local temporary filesystem. The recorded log was truncated at 4096 bytes by that failure; `postgres-gate.log` was not published. This is not a PG pass; the exact merged-head remote gate is required. |
+| `go build -p=1 -o <EVIDENCE_ROOT>/server ./cmd/agent` | Exit 0. Recorded output was empty; `server-build.log` was not published. |
+| `bash scripts/check-agent-core-boundary.sh` | Exit 0, matches official `bf0318c5e363b62dd67ddf3fe8855a5b7c8b0046`. Raw log not published (`core-boundary.log`). |
 | Shell syntax, staged whitespace, required-test union | Passed; the union contains all 17 required PG test names. [Summary](integration-checks.json) |
-| Current compiled Server + existing isolated PG + actual Vite Web | Exit 0. Existing unknown operation and owning session stay identical after page reload; zero writes, device reads, replay or browser errors. [Log](browser.log), [proof](browser-proof.json), [screenshot](combined-unknown-task.png) |
+| Current compiled Server + existing isolated PG + actual Vite Web | Exit 0. Existing unknown operation and owning session stay identical after page reload; zero writes, device reads, replay or browser errors. Raw `browser.log` was not published; [proof](browser-proof.json), [screenshot](combined-unknown-task.png) |
 
 The first browser check selected the nonexistent exact text `Unknown` and timed
 out. The UI correctly says `Execution status unknown`; only the test locator
-was corrected. Its [original failure](browser-first-locator-failure.log) is
-retained. The screenshot was inspected and continues to show unverified business
+was corrected. The original failure was recorded as
+`browser-first-locator-failure.log`; that raw log was not published and cannot be
+read back from this snapshot. The screenshot was inspected and continues to show unverified business
 completion and no invented attachment result. No product change was needed.
 
 The application was restarted with the combined binary against the same
