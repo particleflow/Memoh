@@ -73,6 +73,7 @@ vi.mock('@/store/bot-create-progress', () => ({
     start: mocks.startBotCreate,
     status: 'idle',
     reset: vi.fn(),
+    restorePending: vi.fn(() => false),
   }),
 }))
 

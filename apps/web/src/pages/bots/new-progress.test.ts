@@ -7,6 +7,8 @@ import { useBotCreateProgressStore } from '@/store/bot-create-progress'
 
 const routerReplace = vi.fn()
 const invalidateQueries = vi.fn()
+vi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: { id: 'user-1' } }) }))
+vi.mock('@/lib/api-client', () => ({ sdkApiBaseUrl: () => 'https://example.test/api' }))
 
 function translate(key: string, ...args: unknown[]) {
   const params = args[0]
@@ -71,10 +73,11 @@ vi.mock('@felinic/ui', async () => {
 
 const nextStep = vi.fn()
 const prevStep = vi.fn()
+const goToStep = vi.fn()
 const getBot = vi.fn()
 const getBotChecks = vi.fn()
 const putSettings = vi.fn()
-vi.mock('@/composables/useOnboarding', () => ({ useOnboarding: () => ({ nextStep, prevStep }) }))
+vi.mock('@/composables/useOnboarding', () => ({ useOnboarding: () => ({ nextStep, prevStep, goToStep }) }))
 vi.mock('@/store/install-created-agent', () => ({ installCreatedAgent: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({
   getBotsById: (...args: unknown[]) => getBot(...args),
@@ -326,7 +329,7 @@ describe('bot create progress route', () => {
   })
 
   it('resumes the persisted Bot after a refresh instead of returning to the form', async () => {
-    sessionStorage.setItem('memoh:new-bot:authorization', JSON.stringify({ botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null, settings: { chat_model_id: 'm1' } }))
+    sessionStorage.setItem('memoh:new-bot:authorization', JSON.stringify({ scope: JSON.stringify(['https://example.test/api', 'user-1']), botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null, settings: { chat_model_id: 'm1' } }))
     const mounted = await mountIdleProgress()
     expect(routerReplace).not.toHaveBeenCalledWith({ name: 'bot-new' })
     expect(getBot).toHaveBeenCalledWith(expect.objectContaining({ path: { id: 'bot-1' } }))
@@ -339,7 +342,7 @@ describe('bot create progress route', () => {
   })
 
   it('shows the failed workspace after an onboarding refresh without creating again', async () => {
-    sessionStorage.setItem('memoh:onboarding:creation', JSON.stringify({ botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null }))
+    sessionStorage.setItem('memoh:onboarding:creation', JSON.stringify({ scope: JSON.stringify(['https://example.test/api', 'user-1']), botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null }))
     getBot.mockResolvedValue({ data: { id: 'bot-1', name: 'prog', display_name: 'Prog', status: 'failed' } })
     getBotChecks.mockResolvedValue({ data: { items: [{ type: 'container.init', status: 'error', detail: 'image pull failed' }] } })
     const mounted = await mountIdleProgress(true)

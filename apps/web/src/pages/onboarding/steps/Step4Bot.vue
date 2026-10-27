@@ -64,6 +64,10 @@ const store = useBotCreateProgressStore()
 const userStore = useUserStore()
 
 onMounted(() => {
+  if (store.restorePending(true) || store.status === 'creating') {
+    nextStep()
+    return
+  }
   if (readOnboardingBotResult()) {
     nextStep()
     return
@@ -79,7 +83,7 @@ async function adoptExistingBot() {
   // A dev replay explicitly wants to exercise creation again; a creation that
   // is in flight or resumable in this tab is still owned by the progress step.
   if (import.meta.env.DEV && safeLocalGet(ONBOARDING_KEYS.forceOnboarding)?.trim() === '1') return
-  if (store.status !== 'idle' || readCreatedBotSession(true)) return
+  if (store.status !== 'idle' || readCreatedBotSession(true, store.createScope())) return
   submitting.value = true
   try {
     const { data } = await getBots({ throwOnError: true })
