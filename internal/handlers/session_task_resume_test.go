@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -43,9 +44,10 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 	calls := 0
 	var failure error
 	late := false
+	var wantedInputs []string
 	native := resumeHTTPFixture{resume: func(ctx context.Context, b toolcontext.ComputerBinding, id string, in computertask.Submit) (computertask.Result, error) {
 		trusted, ok := toolcontext.HostComputerBinding(ctx)
-		if !ok || trusted != b || b.BotID != taskBot || b.UserID != taskUser || b.SessionID != taskChild || b.TargetID != taskTarget || b.RunID != "" || id != taskOp || in.ResumeOperationID != "" || in.Task != "original synthetic instruction" {
+		if !ok || trusted != b || b.BotID != taskBot || b.UserID != taskUser || b.SessionID != taskChild || b.TargetID != taskTarget || b.RunID != "" || id != taskOp || in.ResumeOperationID != "" || in.Task != "original synthetic instruction" || !slices.Equal(in.Inputs, wantedInputs) {
 			t.Fatal("HTTP caller invented a run or escaped original task authority")
 		}
 		calls++
@@ -127,6 +129,10 @@ func TestSessionTaskResumeHTTPAuthorityAndNoModelRun(t *testing.T) {
 			t.Fatal(body)
 		}
 	}
+	failure = nil
+	wantedInputs = []string{strings.Repeat("a", 64)}
+	call(path, taskUser, strings.TrimSuffix(in, "}")+`,"inputs":["`+wantedInputs[0]+`"]}`, 200)
+	wantedInputs = nil
 	failure = computertask.ErrConflict
 	call(path, taskUser, in, 409)
 	failure = nil

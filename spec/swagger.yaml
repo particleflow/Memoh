@@ -4731,6 +4731,10 @@ definitions:
         items:
           $ref: '#/definitions/deliverymeta.Artifact'
         type: array
+      inputs:
+        items:
+          type: string
+        type: array
       kind:
         enum:
         - herdr_pi_task

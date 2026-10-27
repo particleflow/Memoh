@@ -2663,6 +2663,7 @@ export type HandlersNativeTaskFollowupResponse = {
 export type HandlersNativeTaskResumeInput = {
     artifact?: DeliverymetaArtifact;
     artifacts?: Array<DeliverymetaArtifact>;
+    inputs?: Array<string>;
     kind: 'herdr_pi_task';
     target_id?: string;
     task: string;

@@ -25,6 +25,7 @@ type nativeBatchResumer interface {
 // NativeTaskResumeInput carries the original tool arguments, not identity or
 // native references. The existing service verifies the original request hash.
 type NativeTaskResumeInput struct {
+	Inputs    []string                `json:"inputs,omitempty"`
 	Kind      string                  `json:"kind" validate:"required" enums:"herdr_pi_task"`
 	Task      string                  `json:"task" validate:"required"`
 	TargetID  string                  `json:"target_id,omitempty"`
@@ -85,7 +86,7 @@ func (h *SessionTaskHandler) Resume(c echo.Context) error {
 	if in.Task == "" {
 		return apperror.FieldRequired("task")
 	}
-	out, callErr := native.ResumeNative(ctx, b, c.Param("task_id"), computertask.Submit{Kind: in.Kind, Task: in.Task, TargetID: in.TargetID, WorkDir: in.WorkDir, Artifact: in.Artifact, Artifacts: in.Artifacts})
+	out, callErr := native.ResumeNative(ctx, b, c.Param("task_id"), computertask.Submit{Kind: in.Kind, Task: in.Task, TargetID: in.TargetID, WorkDir: in.WorkDir, Inputs: in.Inputs, Artifact: in.Artifact, Artifacts: in.Artifacts})
 	if err := h.recheckNative(c, b); err != nil {
 		return err
 	}

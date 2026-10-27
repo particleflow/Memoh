@@ -27277,6 +27277,12 @@ const docTemplate = `{
                         "$ref": "#/definitions/deliverymeta.Artifact"
                     }
                 },
+                "inputs": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
                 "kind": {
                     "type": "string",
                     "enum": [

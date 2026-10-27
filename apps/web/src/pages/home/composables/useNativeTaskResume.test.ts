@@ -28,6 +28,17 @@ beforeEach(() => {
 afterEach(() => { owners.splice(0).forEach(owner => owner.stop()); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })
 
 describe('explicit original native batch continuation', () => {
+  it('preserves original input hashes through the existing resume request', async () => {
+    const inputs = ['a'.repeat(64), 'b'.repeat(64)]
+    const block = tool(); block.input = { ...args, inputs }
+    const { view } = setup(block); await settle(); await view.send()
+    expect(api.send).toHaveBeenCalledTimes(1)
+    expect(api.send.mock.calls[0]![0].body).toEqual({ ...args, inputs })
+    for (const invalid of ['hash', [7], ['not-a-hash']]) {
+      block.input = { ...args, inputs: invalid }
+      expect(originalNativeTaskResume(block)).toBeUndefined()
+    }
+  })
   it('sends nothing on mount or elapsed time, then uses the exact original scope, operation and arguments once', async () => {
     const { view } = setup(); await settle(); await vi.advanceTimersByTimeAsync(120000)
     expect(api.send).not.toHaveBeenCalled(); expect(view.canSend.value).toBe(true)

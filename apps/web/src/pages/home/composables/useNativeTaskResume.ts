@@ -12,7 +12,7 @@ export interface NativeTaskResumeScope {
 }
 export type NativeTaskResumeStatus = 'ready' | 'sending' | 'submitted' | 'unchanged' | 'unknown' | 'unavailable' | 'blocked' | 'unsupported' | 'unauthorized' | 'forbidden' | 'storageUnavailable'
 const phases = new Set(['batch_creating_workspace', 'batch_workspace_adopted', 'batch_tab_adopted'])
-const inputKeys = new Set(['kind', 'task', 'target_id', 'work_dir', 'artifact', 'artifacts'])
+const inputKeys = new Set(['kind', 'task', 'target_id', 'work_dir', 'inputs', 'artifact', 'artifacts'])
 function record(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === 'object' && !Array.isArray(value)
 }
@@ -27,6 +27,7 @@ export function originalNativeTaskResume(block: ToolCallBlock) {
   if (!record(input) || Object.keys(input).some(key => !inputKeys.has(key))
     || input.kind !== 'herdr_pi_task' || typeof input.task !== 'string' || !input.task.trim()
     || ['target_id', 'work_dir'].some(key => key in input && typeof input[key] !== 'string')
+    || ('inputs' in input && (!Array.isArray(input.inputs) || !input.inputs.every(hash => typeof hash === 'string' && /^[a-f0-9]{64}$/.test(hash))))
     || ('artifact' in input && !artifact(input.artifact))
     || ('artifacts' in input && (!Array.isArray(input.artifacts) || !input.artifacts.every(artifact)))) return
   if (receipt.kind !== 'herdr_pi_task' || receipt.state !== 'unknown' || !phases.has(String(receipt.phase))
