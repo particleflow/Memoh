@@ -124,11 +124,40 @@ describe('temporary image timing at real phone component seams', () => {
       { startTime: 51, responseEnd: 61, initiatorType: 'fetch', name: 'PRIVATE_URL', transferSize: 0 },
     ] as PerformanceResourceTiming[])
     control.arm(); const att = {}; timing.imageTimingCard(att)
-    timing.imageTimingResource(timing.imageTimingHandle(att), 'https://PRIVATE_URL')
+    const handle = timing.imageTimingHandle(att)
+    await timing.imageTimingFetch(handle, vi.fn(async () => new Response()))('https://PRIVATE_URL')
+    timing.imageTimingResource(handle, 'https://PRIVATE_URL')
     await vi.advanceTimersByTimeAsync(0)
     const row = control.take().rows[0]!
     expect(row.responseEnd).toBe(61); expect(row.bytes).toBeUndefined()
     expect(JSON.stringify(row)).not.toContain('PRIVATE')
+  })
+  it('uses only entries after this request and rejects ambiguous concurrent entries', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(performance, 'now').mockReturnValue(50)
+    const read = vi.spyOn(performance, 'getEntriesByName')
+    control.arm(); const att = {}; timing.imageTimingCard(att); const handle = timing.imageTimingHandle(att)
+    await timing.imageTimingFetch(handle, vi.fn(async () => new Response()))('https://PRIVATE_URL')
+    read.mockReturnValue([{ startTime: 49, responseStart: 51, responseEnd: 60, initiatorType: 'fetch' },
+      { startTime: 51, responseStart: 52, responseEnd: 61, encodedBodySize: 42, transferSize: 50, initiatorType: 'fetch' }] as PerformanceResourceTiming[])
+    timing.imageTimingResource(handle, 'https://PRIVATE_URL'); await vi.advanceTimersByTimeAsync(0)
+    let row = control.take().rows[0]!
+    expect([row.resourceMatch, row.responseStart, row.responseEnd, row.encodedBodySize, row.transferSize]).toEqual([1, 52, 61, 42, 50])
+    control.arm(); const other = {}; timing.imageTimingCard(other); const h = timing.imageTimingHandle(other)
+    await timing.imageTimingFetch(h, vi.fn(async () => new Response()))('https://PRIVATE_URL')
+    read.mockReturnValue([{ startTime: 51, responseEnd: 61, initiatorType: 'fetch' }, { startTime: 52, responseEnd: 62, initiatorType: 'fetch' }] as PerformanceResourceTiming[])
+    timing.imageTimingResource(h, 'https://PRIVATE_URL'); await vi.advanceTimersByTimeAsync(0)
+    row = control.take().rows[0]!
+    expect(row.resourceMatch).toBe(2); expect(row.responseEnd).toBeUndefined(); expect(row.transferSize).toBeUndefined()
+  })
+  it('leaves cached, masked and missing resource fields unknown', async () => {
+    vi.useFakeTimers(); vi.spyOn(performance, 'now').mockReturnValue(50)
+    vi.spyOn(performance, 'getEntriesByName').mockReturnValue([{ startTime: 51, responseStart: 0, responseEnd: 61, encodedBodySize: 0, transferSize: 0, initiatorType: 'fetch' }] as PerformanceResourceTiming[])
+    control.arm(); const att = {}; timing.imageTimingCard(att); const h = timing.imageTimingHandle(att)
+    await timing.imageTimingFetch(h, vi.fn(async () => new Response()))('https://PRIVATE_URL')
+    timing.imageTimingResource(h, 'https://PRIVATE_URL'); await vi.advanceTimersByTimeAsync(0)
+    const row = control.take().rows[0]!
+    expect(row.resourceMatch).toBe(1); expect(row.responseStart).toBeUndefined(); expect(row.encodedBodySize).toBeUndefined(); expect(row.transferSize).toBeUndefined()
   })
   it('records element renderTime only when supported and actually delivered', () => {
     let callback!: (list: { getEntries(): object[] }) => void

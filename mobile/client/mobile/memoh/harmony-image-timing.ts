@@ -2,7 +2,8 @@
 import { onAuthSessionCleared } from './auth-session'
 
 type Handle = { generation: number; id: number }
-type Row = { id: number; card: number; request?: number; headers?: number; responseEnd?: number;
+type Row = { id: number; card: number; request?: number; headers?: number; responseStart?: number; responseEnd?: number;
+  encodedBodySize?: number; transferSize?: number; resourceMatch?: number;
   body?: number; bytes?: number; hashStart?: number; hashEnd?: number; blob?: number;
   load?: number; decodeStart?: number; decodeEnd?: number; render?: number; error?: number }
 const lifetime = 120_000
@@ -83,10 +84,20 @@ export function imageTimingResource(handle: Handle | undefined, url: string): vo
   // The original fetch may queue its entry after arrayBuffer resolves. Do not invent a value.
   setTimeout(() => {
     const value = row(handle); if (!value || !armed) return
-    const entries = performance.getEntriesByName(url, 'resource') as PerformanceResourceTiming[]
-    const entry = entries.filter(entry => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType)
-      && entry.startTime >= value.card).at(-1)
-    if (entry && entry.responseEnd > 0) value.responseEnd = entry.responseEnd
+    if (value.request === undefined) return
+    delete value.resourceMatch; delete value.responseStart; delete value.responseEnd
+    delete value.encodedBodySize; delete value.transferSize
+    const entries = (performance.getEntriesByName(url, 'resource') as PerformanceResourceTiming[])
+      .filter(entry => ['fetch', 'xmlhttprequest'].includes(entry.initiatorType)
+        && entry.startTime >= value.request!)
+    if (entries.length > 1) { value.resourceMatch = 2; return }
+    const entry = entries[0]
+    if (!entry) return
+    value.resourceMatch = 1
+    if (Number.isFinite(entry.responseStart) && entry.responseStart > 0) value.responseStart = entry.responseStart
+    if (Number.isFinite(entry.responseEnd) && entry.responseEnd > 0) value.responseEnd = entry.responseEnd
+    if (Number.isSafeInteger(entry.encodedBodySize) && entry.encodedBodySize > 0) value.encodedBodySize = entry.encodedBodySize
+    if (Number.isSafeInteger(entry.transferSize) && entry.transferSize > 0) value.transferSize = entry.transferSize
   }, 0)
 }
 export function imageTimingBlob(handle: Handle | undefined, blob: Blob): void {

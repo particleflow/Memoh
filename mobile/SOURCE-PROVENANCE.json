@@ -1431,7 +1431,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-image-timing.ts",
-      "sha256": "60b2eaf0965e6afbeb80731ec8a45fdb7dadd70bde36c78bf840b84bae815e5e",
+      "sha256": "1d56efa945d276815e9736e2505b9924e863119a7d9ee9913ee4616894ae377c",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
@@ -1442,7 +1442,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-image-timing.test.ts",
-      "sha256": "601a1dd5b6e7d61572cb0dc3ae760bf65956cd35689abd5c1f7e0eac53794eb8",
+      "sha256": "62a97ed7421b1b37ec9530fc0870fa0f904f7ba3ae9e286c783a14cc424130fe",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
@@ -1452,7 +1452,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ImageTimingDump.ets",
-      "sha256": "e0850c8157e13481514cb0993b657581f49a9e07fa0c3f4df9a569ef4c296131",
+      "sha256": "061a43a206af240a9345de764f66af8af8bfc67b5e206089caa5f899f0547e23",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
@@ -1461,7 +1461,7 @@
     },
     {
       "path": "mobile/client/mobile/image_timing_readback.py",
-      "sha256": "f0acf315f94a5c1c0cedff07941c4268ed281a78e7980d7f051a7ff13a822bff",
+      "sha256": "aea09aa1d3a4d8cb6c37f5fffc989ec2c41e17bb594021bb9cbc95ca6993b4c9",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
@@ -1470,7 +1470,7 @@
     },
     {
       "path": "mobile/client/tests/unit/image-timing-dump.test.cjs",
-      "sha256": "b47a3ce185a00df99dd791ed435ae46f2cd671469852713665c0e35d3740db33",
+      "sha256": "e986bb9a04621fc11fab81fd0e42c36327dadbc46d22229baa5c80d42b1cb748",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [
@@ -1479,7 +1479,7 @@
     },
     {
       "path": "mobile/client/tests/unit/image-timing-readback.test.py",
-      "sha256": "5f74cf6e22f159c7caa1dab4a6146bee5064a67c99be358636ec17a9fcd56fa2",
+      "sha256": "c197aa0986219f24964280e5633164f71816b61a324106e672055624a6d44314",
       "origin": "New project-authored temporary local numeric image timing; not restored historical source",
       "licenseReview": "Project source; no third-party component added.",
       "preparationChanges": [

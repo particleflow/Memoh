@@ -41,6 +41,12 @@ function setup() {
     D.command('take'); await flush()
     assert.deepEqual(result().rows, [{ id: 1, card: 1, bytes: 42 }]); assert(!JSON.stringify(result()).includes('PRIVATE'))
   })
+  await test('preserves bounded timing fields and omits zero byte counts', async () => {
+    const { D, result, flush } = setup()
+    const input = { version: 1, rows: [{ id: 1, responseStart: 10, responseEnd: 20, encodedBodySize: 42, transferSize: 50, resourceMatch: 1 }, { id: 2, encodedBodySize: 0, transferSize: 0, resourceMatch: 2 }] }
+    D.bind({ getUrl: () => 'begonia-client://app/index.html', runJavaScript: () => Promise.resolve(JSON.stringify(input)) }, () => true)
+    D.command('take'); await flush(); assert.deepEqual(result().rows, input.rows.map((r, i) => i ? { id: 2, resourceMatch: 2 } : r))
+  })
   await test('accepts one ArkWeb string wrapper and expires local output', async () => {
     const { D, result, flush, timers } = setup()
     const input = { version: 1, active: false, paintSupported: false, rows: [{ id: 1, card: 2 }] }

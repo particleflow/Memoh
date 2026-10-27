@@ -17,6 +17,15 @@ class ReadbackTest(unittest.TestCase):
         self.assertEqual(result['rows'], [{'id': 1, 'card': 1, 'bytes': 42}])
         self.assertNotIn('PRIVATE', json.dumps(result))
 
+    def test_resource_fields_and_unknown_zero(self):
+        data = {'version': 1, 'rows': [{'id': 1, 'responseStart': 10, 'responseEnd': 20,
+                'encodedBodySize': 42, 'transferSize': 50, 'resourceMatch': 1},
+                {'id': 2, 'responseStart': 0, 'encodedBodySize': 0, 'transferSize': 0, 'resourceMatch': 2}]}
+        rows = module.sanitize('GarnetImageTiming:' + json.dumps(data))['rows']
+        self.assertEqual(rows[0]['encodedBodySize'], 42)
+        self.assertEqual(rows[0]['transferSize'], 50)
+        self.assertEqual(rows[1], {'id': 2, 'resourceMatch': 2})
+
     def test_missing_or_oversized_payload(self):
         for text in ['DEVICE_PRIVATE', 'GarnetImageTiming:null', 'GarnetImageTiming:' + json.dumps({'version': 1, 'rows': [{'id': 1}] * 6})]:
             with self.assertRaises((ValueError, TypeError)):

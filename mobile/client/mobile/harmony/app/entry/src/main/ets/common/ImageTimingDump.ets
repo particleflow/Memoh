@@ -1,7 +1,8 @@
 import { webview } from '@kit.ArkWeb';
 
 interface ImageTimingRow {
-  id: number; card?: number; request?: number; headers?: number; responseEnd?: number;
+  id: number; card?: number; request?: number; headers?: number; responseStart?: number; responseEnd?: number;
+  encodedBodySize?: number; transferSize?: number; resourceMatch?: number;
   body?: number; bytes?: number; hashStart?: number; hashEnd?: number; blob?: number;
   load?: number; decodeStart?: number; decodeEnd?: number; render?: number; error?: number;
 }
@@ -48,7 +49,12 @@ export class ImageTimingDump {
         for (const item of source.rows) {
           if (!Number.isInteger(item.id) || item.id < 1 || item.id > 5) { return; }
           rows.push({ id: item.id, card: ImageTimingDump.number(item.card), request: ImageTimingDump.number(item.request),
-            headers: ImageTimingDump.number(item.headers), responseEnd: ImageTimingDump.number(item.responseEnd),
+            headers: ImageTimingDump.number(item.headers),
+            responseStart: typeof item.responseStart === 'number' && item.responseStart > 0 ? ImageTimingDump.number(item.responseStart) : undefined,
+            responseEnd: typeof item.responseEnd === 'number' && item.responseEnd > 0 ? ImageTimingDump.number(item.responseEnd) : undefined,
+            encodedBodySize: typeof item.encodedBodySize === 'number' && item.encodedBodySize > 0 ? ImageTimingDump.number(item.encodedBodySize) : undefined,
+            transferSize: typeof item.transferSize === 'number' && item.transferSize > 0 ? ImageTimingDump.number(item.transferSize) : undefined,
+            resourceMatch: item.resourceMatch === 1 || item.resourceMatch === 2 ? item.resourceMatch : undefined,
             body: ImageTimingDump.number(item.body), bytes: ImageTimingDump.number(item.bytes),
             hashStart: ImageTimingDump.number(item.hashStart), hashEnd: ImageTimingDump.number(item.hashEnd),
             blob: ImageTimingDump.number(item.blob), load: ImageTimingDump.number(item.load),

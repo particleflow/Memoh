@@ -99,10 +99,16 @@ access or actual ArkWeb execution.
 | decodeStart → decodeEnd | Explicit decode-promise completion after load; not isolated decoder CPU cost |
 | render | Only actual ElementTiming renderTime when the engine supplies it |
 
-`responseEnd` is copied only from a recent matching ResourceTiming fetch. Missing
-or masked data stays absent. The [Resource Timing specification](https://www.w3.org/TR/resource-timing/)
-limits cross-origin phase/size data; zero or missing transfer-size values are
-not evidence of zero bytes. Full `bytes` is the already-read body size. To
+`card` is the component watcher observation time, not proof of a displayed card
+or paint. Resource Timing candidates must be fetch/XHR entries whose start is at
+or after this specific request invocation. `resourceMatch: 1` denotes exactly
+one candidate; `resourceMatch: 2` denotes multiple candidates and emits no
+Resource Timing phase or size fields. Missing candidates have no match value.
+`responseStart`, `responseEnd`, `encodedBodySize` and `transferSize` are copied
+only from a unique candidate, and zero, masked or missing fields remain absent.
+Do not treat a cached response or positive transfer size alone as a measurement
+of external network throughput. The [Resource Timing specification](https://www.w3.org/TR/resource-timing/)
+limits cross-origin phase/size data. Full `bytes` is the already-read body size. To
 estimate body-read MB/s, use bytes / 1,000,000 divided by positive
 (body − headers)/1000; report it separately from card-to-load latency and from
 MiB/s. It is not a TCP throughput/ACK measurement or the user's 5 MB/s acceptance.
@@ -140,3 +146,17 @@ with a synthetic controller; they are not official ArkWeb/ArkTS execution.
 No HAP was rebuilt, signed, uploaded or deployed in this round.
 
 Published text logs normalize trailing whitespace only; original logs remain in the local evidence directory. Reproducible local evidence: [types](types.txt), [Web build](web-build.txt), [component/attachment run](collector-components-tests.txt), [same two baseline failures](baseline-attachment-tests.txt), [native isolation](native-readback-tests.txt), [desktop filter](desktop-filter-tests.txt), [source inventory](source-check.txt), [lint](lint.txt). The old all-in-one Node/Python subprocess-filter trial stalled and was stopped; the final Python filter tests run directly and pass, while the native test remains a separate seven-case runner.
+
+## Request correlation follow-up
+
+The Web collector, existing ArkTS numeric whitelist and Windows filter now carry
+`responseStart`, `encodedBodySize`, `transferSize` and numeric `resourceMatch`
+(1 unique, 2 ambiguous). They retain the same fixed arm/take/onDump instructions
+above, five-row limit, 120-second expiry and default-off behavior. No extra fetch,
+permission, TLS setting, UI, service or persistent logging is introduced.
+
+Synthetic unit/adapter checks cover old and concurrent same-URL entries, unique
+matching, zero/missing cached or masked fields and whitelist filtering. They do
+not establish physical ArkWeb timing. The previous five 69-byte synthetic PNGs
+are fixtures, not measurements of the user's five existing images. Actual
+phone timing and the requested 5 MB/s outcome remain unverified.
