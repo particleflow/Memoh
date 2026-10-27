@@ -785,6 +785,19 @@ type ModelVariant struct {
 	TeamID    pgtype.UUID        `json:"team_id"`
 }
 
+type NativeProfileCutoverIntent struct {
+	BackendPid    int32         `json:"backend_pid"`
+	TransactionID pgtype.Uint64 `json:"transaction_id"`
+	TeamID        pgtype.UUID   `json:"team_id"`
+	OwnerID       pgtype.UUID   `json:"owner_id"`
+	RuntimeID     pgtype.UUID   `json:"runtime_id"`
+	TargetID      pgtype.UUID   `json:"target_id"`
+	InstanceID    string        `json:"instance_id"`
+	RequestID     pgtype.UUID   `json:"request_id"`
+	Revision      int64         `json:"revision"`
+	NewDir        string        `json:"new_dir"`
+}
+
 type Provider struct {
 	ID                 pgtype.UUID        `json:"id"`
 	ProviderTemplateID pgtype.UUID        `json:"provider_template_id"`

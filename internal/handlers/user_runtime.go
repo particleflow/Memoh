@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -48,6 +49,7 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.GET("", h.List)
 	g.DELETE("/:id", h.Delete)
 	g.PUT("/:id/native-herdr", h.ConfigureNativeHerdr)
+	g.PUT("/:id/native-herdr/profile-cutover", h.CutoverPausedNativeProfile)
 	g.GET("/:id/admission", h.ReadAdmission)
 	g.PUT("/:id/admission", h.SetAdmission)
 	g.GET("/:id/workspace-storage", h.WorkspaceDirectories)
@@ -56,6 +58,38 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	// Keep unknown Runtime paths inside this namespace; the generic users/:id
 	// route must not consume them as account updates.
 	g.Any("/*", func(echo.Context) error { return echo.ErrNotFound })
+}
+
+// CutoverPausedNativeProfile godoc
+// @Summary Switch the Pi configuration directory while admission stays paused
+// @Description Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir; no host action, task dispatch or unpause. A lost response requires rereading the current state.
+// @Tags user-runtimes
+// @Accept json
+// @Param id path string true "Existing native Runtime ID"
+// @Param request body agenvo.NativeProfileCutoverRequest true "Cutover CAS facts"
+// @Success 204 "No Content"
+// @Failure 400,401,403,409,500 {object} server.Problem
+// @Router /users/me/runtimes/{id}/native-herdr/profile-cutover [put].
+func (h *UserRuntimeHandler) CutoverPausedNativeProfile(c echo.Context) error {
+	if _, err := auth.ChatTokenFromContext(c); err == nil {
+		return apperror.New(apperror.CodeHTTPForbidden, nil)
+	}
+	owner, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	body, err := io.ReadAll(http.MaxBytesReader(c.Response(), c.Request().Body, 64*1024))
+	if err != nil {
+		return apperror.FieldInvalid("body", err)
+	}
+	in, err := agenvo.DecodeNativeProfileCutover(body)
+	if err != nil {
+		return apperror.FieldInvalid("body", err)
+	}
+	if err = h.service.CutoverPausedNativeProfile(c.Request().Context(), owner, strings.TrimSpace(c.Param("id")), in); err != nil {
+		return runtimeHTTPError(err)
+	}
+	return c.NoContent(http.StatusNoContent)
 }
 
 // ConfigureNativeHerdr godoc

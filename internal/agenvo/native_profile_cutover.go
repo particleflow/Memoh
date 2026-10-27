@@ -2,6 +2,7 @@ package agenvo
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
@@ -28,6 +29,51 @@ type NativeProfileCutoverRequest struct {
 	AgentConfigDir            string `json:"agent_config_dir"`
 }
 
+type nativeProfileCutoverStore interface {
+	admissionStore
+	OwnedNativeProfileTarget(context.Context, string, string, string) (bool, error)
+	CutoverPausedNativeProfile(context.Context, string, string, string, dbstore.JSON, dbstore.JSON, string, string, int64) error
+}
+
+// CutoverPausedNativeProfile uses the owned registration and existing paused
+// gate. The SQL operation independently rechecks the snapshot atomically.
+func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, runtime string, in NativeProfileCutoverRequest) error {
+	if s == nil || s.store == nil {
+		return ErrUnavailable
+	}
+	store, ok := s.store.(nativeProfileCutoverStore)
+	if !ok {
+		return ErrUnavailable
+	}
+	if runtime != in.RuntimeID {
+		return ErrForbidden
+	}
+	row, err := store.OwnedNativeHerdrRuntime(ctx, owner, runtime)
+	if err != nil {
+		return ErrForbidden
+	}
+	target, err := DecodeNativeTarget(row.ID, row.ProviderConfig)
+	if err != nil {
+		return ErrInvalidTarget
+	}
+	gate, err := store.ReadComputerAdmission(ctx, owner, target.ConnectionID, target.DeviceID, target.InstanceID)
+	if err != nil {
+		return err
+	}
+	owned, err := store.OwnedNativeProfileTarget(ctx, owner, runtime, in.TargetID)
+	if err != nil {
+		return err
+	}
+	if !owned {
+		return ErrForbidden
+	}
+	next, err := ValidateNativeProfileCutover(owner, in.TargetID, row, gate, in)
+	if err != nil {
+		return err
+	}
+	return store.CutoverPausedNativeProfile(ctx, owner, runtime, in.TargetID, row.ProviderConfig, next, in.InstanceID, in.PauseRequestID, gate.Revision)
+}
+
 // DecodeNativeProfileCutover rejects unknown or concatenated request fields.
 // A future handler must also apply its existing request-body size limit.
 func DecodeNativeProfileCutover(raw []byte) (NativeProfileCutoverRequest, error) {
@@ -46,9 +92,9 @@ func DecodeNativeProfileCutover(raw []byte) (NativeProfileCutoverRequest, error)
 	return request, nil
 }
 
-// nativeProfileConfigDigest hashes a canonical JSON value, not credentials in
+// NativeProfileConfigDigest hashes a canonical JSON value, not credentials in
 // an API response. Preserve numbers without float conversion or truncation.
-func nativeProfileConfigDigest(raw []byte) (string, error) {
+func NativeProfileConfigDigest(raw []byte) (string, error) {
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.UseNumber()
 	var value map[string]any
@@ -87,7 +133,7 @@ func ValidateNativeProfileCutover(owner, ownedTargetID string, row dbstore.UserR
 	if err != nil || target.InstanceID != in.InstanceID || target.Agent.ExecutionMode != "pi-json-v1" {
 		return nil, ErrNativeProfileConflict
 	}
-	digest, err := nativeProfileConfigDigest(row.ProviderConfig)
+	digest, err := NativeProfileConfigDigest(row.ProviderConfig)
 	if err != nil || digest != in.ExpectedConfigSHA256 || TargetFingerprint(target) != in.ExpectedTargetFingerprint {
 		return nil, ErrNativeProfileConflict
 	}

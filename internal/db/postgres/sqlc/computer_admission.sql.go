@@ -41,6 +41,61 @@ func (q *Queries) ChangeComputerAdmission(ctx context.Context, arg ChangeCompute
 	return receipt, err
 }
 
+const cutoverPausedNativeProfile = `-- name: CutoverPausedNativeProfile :one
+SELECT public.memoh_cutover_paused_native_profile(
+    $1::uuid, $2::uuid, $3::uuid,
+    $4::jsonb, $5::jsonb,
+    $6::text, $7::uuid, $8::bigint
+)::jsonb AS receipt
+`
+
+type CutoverPausedNativeProfileParams struct {
+	OwnerID          pgtype.UUID `json:"owner_id"`
+	RuntimeID        pgtype.UUID `json:"runtime_id"`
+	TargetID         pgtype.UUID `json:"target_id"`
+	ExpectedConfig   []byte      `json:"expected_config"`
+	ProposedConfig   []byte      `json:"proposed_config"`
+	InstanceID       string      `json:"instance_id"`
+	RequestID        pgtype.UUID `json:"request_id"`
+	ExpectedRevision int64       `json:"expected_revision"`
+}
+
+func (q *Queries) CutoverPausedNativeProfile(ctx context.Context, arg CutoverPausedNativeProfileParams) ([]byte, error) {
+	row := q.db.QueryRow(ctx, cutoverPausedNativeProfile,
+		arg.OwnerID,
+		arg.RuntimeID,
+		arg.TargetID,
+		arg.ExpectedConfig,
+		arg.ProposedConfig,
+		arg.InstanceID,
+		arg.RequestID,
+		arg.ExpectedRevision,
+	)
+	var receipt []byte
+	err := row.Scan(&receipt)
+	return receipt, err
+}
+
+const ownedNativeProfileTarget = `-- name: OwnedNativeProfileTarget :one
+SELECT EXISTS (SELECT 1 FROM bot_remote_runtime_bindings b JOIN bots bot
+  ON bot.team_id=b.team_id AND bot.id=b.bot_id
+  WHERE b.team_id=public.memoh_current_team_id() AND b.id=$1
+    AND b.runtime_id=$2 AND bot.owner_user_id=$3)
+`
+
+type OwnedNativeProfileTargetParams struct {
+	TargetID  pgtype.UUID `json:"target_id"`
+	RuntimeID pgtype.UUID `json:"runtime_id"`
+	OwnerID   pgtype.UUID `json:"owner_id"`
+}
+
+func (q *Queries) OwnedNativeProfileTarget(ctx context.Context, arg OwnedNativeProfileTargetParams) (bool, error) {
+	row := q.db.QueryRow(ctx, ownedNativeProfileTarget, arg.TargetID, arg.RuntimeID, arg.OwnerID)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const readComputerAdmission = `-- name: ReadComputerAdmission :one
 SELECT team_id, owner_id, connection_id, device_id, instance_id, request_id, paused, revision, updated_at FROM computer_admission_gates
 WHERE team_id=public.memoh_current_team_id() AND owner_id=$1

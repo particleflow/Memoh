@@ -19,7 +19,7 @@ func TestNativeProfileCutoverProposalPreservesGateAndOtherFields(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	digest, err := nativeProfileConfigDigest(raw)
+	digest, err := NativeProfileConfigDigest(raw)
 	if err != nil {
 		t.Fatal(err)
 	}

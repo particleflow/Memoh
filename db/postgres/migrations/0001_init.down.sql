@@ -1,3 +1,6 @@
+DROP FUNCTION IF EXISTS public.memoh_cutover_paused_native_profile(uuid,uuid,uuid,jsonb,jsonb,text,uuid,bigint);
+DROP FUNCTION IF EXISTS public.memoh_guard_paused_registration() CASCADE;
+DROP TABLE IF EXISTS public.native_profile_cutover_intents;
 DROP FUNCTION IF EXISTS public.memoh_guard_paused_registration() CASCADE;
 DROP FUNCTION IF EXISTS public.memoh_guard_computer_admission() CASCADE;
 DROP FUNCTION IF EXISTS public.memoh_assert_computer_admission(UUID,UUID);

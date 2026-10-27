@@ -793,6 +793,25 @@ definitions:
     - session
     - work_dir
     type: object
+  agenvo.NativeProfileCutoverRequest:
+    properties:
+      agent_config_dir:
+        type: string
+      expected_config_sha256:
+        type: string
+      expected_pause_revision:
+        type: string
+      expected_target_fingerprint:
+        type: string
+      instance_id:
+        type: string
+      pause_request_id:
+        type: string
+      runtime_id:
+        type: string
+      target_id:
+        type: string
+    type: object
   agenvo.ProducerLocator:
     properties:
       config_dir:
@@ -8287,6 +8306,8 @@ definitions:
     type: object
   userruntime.NativeHerdrIdentity:
     properties:
+      config_sha256:
+        type: string
       connection_id:
         type: string
       device_id:
@@ -21903,6 +21924,52 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Configure Herdr on an existing owned native Runtime
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/native-herdr/profile-cutover:
+    put:
+      consumes:
+      - application/json
+      description: Owner account only. Checks the current config digest, target fingerprint
+        and paused request/revision. Atomic CAS changes only agent.config_dir; no
+        host action, task dispatch or unpause. A lost response requires rereading
+        the current state.
+      parameters:
+      - description: Existing native Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Cutover CAS facts
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.NativeProfileCutoverRequest'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Switch the Pi configuration directory while admission stays paused
       tags:
       - user-runtimes
   /users/me/runtimes/{id}/transfer-credential:
