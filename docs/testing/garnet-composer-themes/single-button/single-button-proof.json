@@ -25,7 +25,7 @@
       "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
       "method": "POST",
       "body": {
-        "invocation_id": "b6e3fe97-470e-426b-a4d0-96777d6eed2e",
+        "invocation_id": "a06dfb79-7d9d-4f0f-b219-c65942e20638",
         "text": "有内容只排队"
       }
     },
@@ -35,14 +35,14 @@
         "abort_reason": "user_stop",
         "run_id": "30000000-0000-4000-8000-000000000001",
         "session_id": "20000000-0000-4000-8000-000000000001",
-        "control_id": "0eeaa1f2-7f0e-4041-b7c2-6a7021172f78"
+        "control_id": "e96d7f44-0f71-436c-a71d-c4d9bddf754d"
       }
     },
     {
       "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
       "method": "POST",
       "body": {
-        "invocation_id": "e0a49dfc-6fa2-4233-a00f-4ca058b50bd0",
+        "invocation_id": "da4d237f-32c8-4ad8-82e8-369ffe23bdd7",
         "text": "触摸连击"
       }
     },
@@ -50,7 +50,7 @@
       "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
       "method": "POST",
       "body": {
-        "invocation_id": "14c61789-c54f-4ff6-9510-4d48bc508f21",
+        "invocation_id": "ff678157-5e29-4f88-aace-ac884cb01337",
         "text": "按住按钮回车"
       }
     },
@@ -58,7 +58,7 @@
       "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
       "method": "POST",
       "body": {
-        "invocation_id": "f30cc899-81a2-454f-9e94-352f9d8e366e",
+        "invocation_id": "9bc40088-3e1e-493d-8ff9-80661f287e46",
         "text": "键盘输入框发送"
       }
     },
@@ -66,7 +66,7 @@
       "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
       "method": "POST",
       "body": {
-        "invocation_id": "f7ded0a3-8cab-4ede-890e-d370147a16af",
+        "invocation_id": "ae577fab-a5c8-496c-bd23-c2dc4df12b75",
         "text": "明确重试"
       }
     },
@@ -74,7 +74,7 @@
       "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
       "method": "POST",
       "body": {
-        "invocation_id": "f7ded0a3-8cab-4ede-890e-d370147a16af",
+        "invocation_id": "ae577fab-a5c8-496c-bd23-c2dc4df12b75",
         "text": "明确重试"
       }
     },
@@ -89,7 +89,7 @@
         "abort_reason": "user_stop",
         "run_id": "30000000-0000-4000-8000-000000000001",
         "session_id": "20000000-0000-4000-8000-000000000001",
-        "control_id": "e46e02d5-7faf-4036-8fa5-150a2e25d6c7"
+        "control_id": "8e43e25d-ae24-4c19-ad76-e574be120776"
       }
     }
   ],

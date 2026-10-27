@@ -933,6 +933,7 @@
                         :aria-busy="firstSendAwaiting || attachmentUploading || undefined"
                         :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : $t(streaming ? 'chat.stopGenerating' : 'chat.send')"
                         class="size-full"
+                        @keydown.enter="$event.repeat && $event.preventDefault()"
                         @click="handleSendButton"
                       >
                         <span

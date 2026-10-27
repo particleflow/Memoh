@@ -73,7 +73,7 @@ await p.touchscreen.tap(tapBox.x+tapBox.width/2,tapBox.y+tapBox.height/2)
 await p.touchscreen.tap(tapBox.x+tapBox.width/2,tapBox.y+tapBox.height/2)
 await p.waitForTimeout(150);assert.equal(queued().length,2);assert.equal(aborts().length,1)
 await input.fill('按住按钮回车');await send().focus()
-await p.keyboard.down('Enter')
+await p.keyboard.down('Enter');await p.waitForTimeout(650)
 for(let i=0;i<8;i++){await p.waitForTimeout(100);await p.keyboard.down('Enter')}
 await p.keyboard.up('Enter');await p.waitForTimeout(100)
 assert.equal(queued().length,3);assert.equal(aborts().length,1)
