@@ -30,6 +30,12 @@ contexts = ["workspace"]
 command = ["./transferqueue.exe", "-action", "collect-result"]
 
 [[actions]]
+id = "advance-snapshots"
+title = "Advance one retained upload snapshot"
+contexts = ["workspace"]
+command = ["./transferqueue.exe", "-action", "advance-snapshots"]
+
+[[actions]]
 id = "lifecycle-summary"
 title = "Read delivery lifecycle summary"
 contexts = ["workspace"]

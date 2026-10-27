@@ -379,6 +379,18 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		return err
 	}
 	defer func() { _ = journal.Close() }()
+	if q.snapshotOnly {
+		// Recheck under the actual job lock, before prepareRegistered and before
+		// recording a run or making a request. Selection alone is not authority.
+		if !retainedUploadSnapshot(r) {
+			return ErrNoWork
+		}
+		_, release, err := q.openSnapshot(r)
+		if err != nil {
+			return err
+		}
+		release()
+	}
 	if r.Registered && !r.Admitted {
 		r, err = q.prepareRegistered(ctx, r, journal, now)
 		if err != nil {

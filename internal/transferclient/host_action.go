@@ -37,6 +37,10 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		}
 	}
 	local := HerdrAction{Kind: action.Kind, DeliveryID: action.DeliveryID, Job: action.Job}
+	if action.Kind == "advance-snapshot" {
+		q.snapshotOnly = true
+		action.Kind, local.Kind = "advance", "advance"
+	}
 	if action.Kind == "advance-next" {
 		cfg, err := OpenHostConfig(getenv)
 		if err != nil {
@@ -62,7 +66,9 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 		return QueueStatus{}, err
 	}
 	defer func() { _ = cfg.Close() }()
-	q.openSource = cfg.OpenSource
+	if !q.snapshotOnly {
+		q.openSource = cfg.OpenSource
+	}
 	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" {
 		return q.enqueueConfigured(ctx, cfg, action, transport, now)
 	}
@@ -140,6 +146,10 @@ func (q *DiskQueue) nextDue(now time.Time) (string, error) {
 }
 
 func (q *DiskQueue) nextDueForBinding(now time.Time, binding string) (string, error) {
+	return q.nextDueMatching(now, binding, nil)
+}
+
+func (q *DiskQueue) nextDueMatching(now time.Time, binding string, include func(QueueStatus) bool) (string, error) {
 	global, err := q.lock("admission")
 	if err != nil {
 		return "", err
@@ -156,6 +166,9 @@ func (q *DiskQueue) nextDueForBinding(now time.Time, binding string) (string, er
 			return err
 		}
 		if !recordEligible(r) || recordDue(r).After(now) || binding != "" && (r.Job.HostBinding != binding || !r.Job.Task.valid()) {
+			return nil
+		}
+		if include != nil && !include(r) {
 			return nil
 		}
 		at := recordDue(r)

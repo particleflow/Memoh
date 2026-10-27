@@ -210,12 +210,16 @@ func AdvanceProducer(ctx context.Context, getenv func(string) string, revision s
 }
 
 func advanceProducerID(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, id string, transport *http.Client, now time.Time) (QueueStatus, error) {
+	return advanceProducerIDWithKind(ctx, getenv, revision, limits, id, "advance", transport, now)
+}
+
+func advanceProducerIDWithKind(ctx context.Context, getenv func(string) string, revision string, limits QueueLimits, id, kind string, transport *http.Client, now time.Time) (QueueStatus, error) {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
 	var status QueueStatus
 	for range 64 {
 		var err error
-		status, err = InvokeConfiguredHerdr(ctx, getenv, revision, limits, ConfiguredAction{Kind: "advance", DeliveryID: id}, transport, now)
+		status, err = InvokeConfiguredHerdr(ctx, getenv, revision, limits, ConfiguredAction{Kind: kind, DeliveryID: id}, transport, now)
 		if err != nil {
 			if errors.Is(err, ErrAdmissionPending) {
 				return status, nil

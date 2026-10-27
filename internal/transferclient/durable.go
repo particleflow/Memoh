@@ -50,6 +50,7 @@ type DiskQueue struct {
 	historyHook        func(string)
 	budgetBase         int64 // Nonzero only for explicitly upgraded locator v4.
 	openSource         func(string) (*os.File, error)
+	snapshotOnly       bool // finite invocation capability, never persisted or inferred from a job
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
