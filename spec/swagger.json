@@ -10084,6 +10084,97 @@
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/decisions/{decision_id}/recover": {
+            "post": {
+                "description": "Account/session-authenticated owner action for a failed native retry run whose accepted answer has no persisted tool result. Uses only the original saved input and accepted decision. Reconciles its exact hidden history and admits one idempotent continuation run; keeps the original run failed. Never resubmits the answer or retries the whole original turn. Repeated requests return the same recovery run, including failed/unknown outcomes. No automatic invocation on reconnect. A successful response acknowledges admission, not model or business completion.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Explicitly continue a submitted ask_user answer after history failure",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned chat session ID",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Original submitted ask_user decision ID",
+                        "name": "decision_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Original failed run identity",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AcceptedUserInputRecoveryInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/application.UserInputRecoveryResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/sessions/{session_id}/delegations": {
             "get": {
                 "description": "Persisted facts only. Follow nonempty next_cursor even for an empty page. Reads do not dispatch, poll devices or retry delivery.",
@@ -21228,6 +21319,32 @@
                 "FaultCanceled"
             ]
         },
+        "application.UserInputRecoveryResult": {
+            "type": "object",
+            "properties": {
+                "decision_id": {
+                    "type": "string"
+                },
+                "invocation_id": {
+                    "type": "string"
+                },
+                "original_run_id": {
+                    "type": "string"
+                },
+                "recovery_run_id": {
+                    "type": "string"
+                },
+                "replayed": {
+                    "type": "boolean"
+                },
+                "started": {
+                    "type": "boolean"
+                },
+                "state": {
+                    "type": "string"
+                }
+            }
+        },
         "audio.ConfigSchema": {
             "type": "object",
             "properties": {
@@ -25078,6 +25195,18 @@
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.AcceptedUserInputRecoveryInput": {
+            "type": "object",
+            "required": [
+                "original_run_id"
+            ],
+            "properties": {
+                "original_run_id": {
+                    "type": "string",
+                    "format": "uuid"
                 }
             }
         },
