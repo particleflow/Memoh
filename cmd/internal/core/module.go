@@ -149,6 +149,7 @@ func ServerModule() fx.Option {
 			setupAgenvoService,
 			injectToolProviders,
 			injectBotDelegation,
+			injectComputerResultAssociator,
 			injectBackgroundTaskEvents,
 			injectACPToolProviders,
 			injectBotConnectorLifecycle,
