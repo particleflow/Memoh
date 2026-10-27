@@ -1,6 +1,6 @@
 # Restored Harmony runtime configuration and download integration
 
-Current checkpoint: [official API26 native compilation and HAP integrity checks passed](harmony-native-api26.md). The new artifact is unsigned; device/runtime acceptance remains unexecuted. Earlier blocked-stage records below are historical.
+This is the historical restored-runtime integration audit, retained for its scoped download/configuration checks and original failed-stage evidence. Use [the current mobile entry](../mobile/README.md) and [1.0.19 qualification](testing/harmony-unified-1.0.19/README.md) for the active source, build status and package identity. The source pins, file counts and preparation failures below belong to this audit checkpoint.
 
 This checkpoint follows `732f09d8f25893b63f5b2d5ba6d35c5f3d28fd15` on the
 recovery branch. It retains the recovered native shell and overlay builder,
@@ -29,9 +29,10 @@ pinned to unified Memoh `40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`.
 There is no automatic LAN/IPv6 selection, HostBinding migration, new service,
 new routing configuration or cross-process download scheduler. Scoped original
 references remain exact delegation paths; denial does not widen to Bot/hash.
-The historical `sharedObservation` overlay metadata is retained for its older
-standalone preparation helper; the active builder consumes the complete pinned
-40f archive and does not invoke that helper.
+At this audit checkpoint, the complete pinned 40f archive replaced the older
+standalone observation preparation path. The current producer's archive and
+overlays are documented in [the reproduction guide](../mobile/BUILD-REPRODUCTION.md).
+The unused legacy helper/metadata is an explicit [retirement handoff](../mobile/SHARED-OBSERVATION.md), not a required current build step.
 
 ## Executed checks
 
@@ -71,10 +72,10 @@ was enabled; zero such requests occurred. Screenshots were inspected and remain
 in the private workspace. This is a browser preview, not native runtime or
 backend acceptance. See [browser evidence](testing/harmony-native-integration/native-config-browser.json).
 
-## Remaining build and acceptance blockers
+## Historical build blockers and remaining acceptance
 
-The official Linux x64 Command Line Tools 26.0.0.851 and SDK API26 / 26.0.0.105
-are absent from the available saved toolchain assets. The previous official
+At the blocked stage recorded by this audit, the official Linux x64 Command
+Line Tools 26.0.0.851 and SDK API26 / 26.0.0.105 were absent from the saved assets. The previous official
 entry visit failed with `net::ERR_CERT_AUTHORITY_INVALID`. No download retry,
 certificate bypass or alternate browser was attempted in this checkpoint.
 The supported acquisition entry remains
@@ -87,11 +88,14 @@ The later [metadata bootstrap correction](harmony-materials-bootstrap.md)
 generates and verifies the previously missing native resource inputs. No SDK/CLT
 or dependency binary is published here.
 
-ArkTS/native C++ compilation, HAP production/signing, Harmony permission/TLS
-behavior, OS picker operation, NAS authentication, phone-to-NAS-to-phone transfer
-and human QA remain unexecuted. The full development services are not running;
-the browser preview does not satisfy full runtime acceptance. No old A11 package
-is offered as a new result. The 19 historical later cloud modifications remain
+This stage did not execute ArkTS/native C++ compilation or produce/sign a HAP.
+Subsequent official compilation and package qualification are recorded by the
+versioned build reports linked above; this old acquisition failure is no longer
+a current compiler blocker. Harmony permission/TLS behavior, OS picker operation,
+NAS authentication, phone-to-NAS-to-phone transfer and human QA were not established
+by this audit. Full development services were not running for its browser preview,
+which does not satisfy runtime acceptance. No old A11 package is offered as a new
+result. The 19 historical later cloud modifications remain
 unverified; this commit does not claim identity with the unavailable 5a7 snapshot.
 Original ZIPs, private configuration/backups and all preceding commits remain
 preserved.
