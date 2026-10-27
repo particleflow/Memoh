@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,6 +14,10 @@ import (
 
 	"github.com/felinics/memoh/internal/deliverymeta"
 )
+
+// Only SGR presentation styling is removed from the direct ANSI snapshot.
+// Other terminal controls remain untrusted and cannot bypass frame/hash checks.
+var batchSnapshotSGR = regexp.MustCompile(`\x1b\[[0-9;:]*m`)
 
 type batchPane struct {
 	ID        string `json:"pane_id"`
@@ -141,7 +146,11 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 	if json.Unmarshal(r.Result, &out) != nil || out.Output == nil || out.Session != target.Session {
 		return "", ErrUnknown
 	}
-	return *out.Output, nil
+	text := *out.Output
+	if target.NativeRuntimeID != "" {
+		text = batchSnapshotSGR.ReplaceAllString(text, "")
+	}
+	return text, nil
 }
 
 // ObserveBatch never types into Pi, including after timeout or cancellation.

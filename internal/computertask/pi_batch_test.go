@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/google/jsonschema-go/jsonschema"
 	sdkmcp "github.com/modelcontextprotocol/go-sdk/mcp"
@@ -83,6 +84,7 @@ type batchTransport struct {
 	readSchema                                       *jsonschema.Resolved
 	columns, delay, remaining, maxLines, oversized   int
 	pending                                          string
+	framePrefix, frameSuffix                         string
 	rejectRead                                       bool
 	pageOffsets                                      []int
 	completion                                       []byte
@@ -291,7 +293,7 @@ func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agen
 				data[0] ^= 1
 			}
 			f.control += "\r\nPS C:\\Synthetic> " + command + "\r\n"
-			f.pending = "\r\nMEMOH_FILE_" + m[1] + ":" + base64.StdEncoding.EncodeToString(data) + ":END_FILE_" + m[1] + "\r\nPS C:\\Synthetic>\r\n"
+			f.pending = "\r\n" + f.framePrefix + "MEMOH_FILE_" + m[1] + ":" + base64.StdEncoding.EncodeToString(data) + ":END_FILE_" + m[1] + f.frameSuffix + "\r\nPS C:\\Synthetic>\r\n"
 			f.remaining = f.delay
 			if f.onPage != nil {
 				f.onPage()
@@ -431,6 +433,30 @@ func batchLogsUntilReady(t *testing.T, c *sdkmcp.ClientSession, id string) Resul
 	}
 	t.Fatal("bounded diagnostic collection did not finish")
 	return Result{}
+}
+
+func TestNativeBatchColoredFramesAndOtherControls(t *testing.T) {
+	source, store, f, _ := setupBatch(t)
+	f.hiddenFrame = true
+	f.framePrefix, f.frameSuffix = "\x1b[32m", "\x1b[0m"
+	c := standardClient(t, source, "pc-a", false)
+	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
+	got := batchResultUntilReady(t, c, r.ID)
+	if got.PiResult == nil || got.PiResult.Outcome != "succeeded" || got.Output != "42 中文 ✓" {
+		t.Fatalf("colored result: %+v", got)
+	}
+	f.framePrefix, f.frameSuffix = "\x1b[2J", ""
+	ctx, cancel := context.WithTimeout(t.Context(), 250*time.Millisecond)
+	defer cancel()
+	var d Details
+	if err := json.Unmarshal(store.records[r.ID].Details, &d); err != nil || d.Batch == nil || d.Batch.Receipt == nil {
+		t.Fatalf("saved batch: %+v %v", d.Batch, err)
+	}
+	beforeReads := f.reads
+	data, err := source.service.relay.ReadBatchPage(ctx, agenvo.Scope{BotID: "bot-a", UserID: "user-a", TargetID: "pc-a"}, d.Batch.Progress, *d.Batch.Receipt, d.Batch.Receipt.Stdout, 0)
+	if !errors.Is(err, agenvo.ErrUnknown) || len(data) != 0 || f.runs != 1 || f.reads != beforeReads+1 {
+		t.Fatalf("control-bearing frame accepted: bytes=%d err=%v runs=%d reads=%d before=%d", len(data), err, f.runs, f.reads, beforeReads)
+	}
 }
 
 func TestStandardMCPPiBatchCompletesWithReadyHashedResults(t *testing.T) {
