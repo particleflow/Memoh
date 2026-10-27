@@ -70,6 +70,20 @@ func (f *nativeTaskFixture) invoke(ctx context.Context, scope agenvo.Scope, targ
 	if scope.BotID != f.binding.BotID || scope.UserID != f.binding.UserID || scope.TargetID != f.binding.TargetID || target.NativeRuntimeID != mount.RuntimeID || target.ConnectionID != mount.RuntimeID || target.DeviceID != mount.RuntimeID || target.InstanceID != f.profile.InstanceID {
 		f.t.Fatalf("native dispatch lost selected Runtime identity: scope=%+v target=%+v", scope, target)
 	}
+	if method == "pane.read" {
+		if format, ok := params["format"]; ok {
+			if format != "ansi" {
+				f.t.Fatalf("unexpected native snapshot format: %v", format)
+			}
+			copyParams := make(map[string]any, len(params)-1)
+			for key, value := range params {
+				if key != "format" {
+					copyParams[key] = value
+				}
+			}
+			params = copyParams
+		}
+	}
 	return f.batch.call(ctx, scope, target, method, params)
 }
 

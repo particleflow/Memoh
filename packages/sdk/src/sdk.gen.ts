@@ -3165,7 +3165,7 @@ export const getUsersMeRuntimesByIdAdmission = <ThrowOnError extends boolean = f
 /**
  * Pause or resume new work for an owned native instance
  *
- * Atomically fences new operation claims and follow-up reservations across matching mounts. Agenvo uses the existing owner connection and a read-only probe; configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
+ * Atomically fences new operation claims across matching mounts. Configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
  */
 export const putUsersMeRuntimesByIdAdmission = <ThrowOnError extends boolean = false>(options: Options<PutUsersMeRuntimesByIdAdmissionData, ThrowOnError>): RequestResult<PutUsersMeRuntimesByIdAdmissionResponses, PutUsersMeRuntimesByIdAdmissionErrors, ThrowOnError> => (options.client ?? client).put<PutUsersMeRuntimesByIdAdmissionResponses, PutUsersMeRuntimesByIdAdmissionErrors, ThrowOnError>({
     url: '/users/me/runtimes/{id}/admission',

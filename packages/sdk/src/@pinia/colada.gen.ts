@@ -5661,7 +5661,7 @@ export const getUsersMeRuntimesByIdAdmissionQuery = defineQueryOptions<Options<G
 /**
  * Pause or resume new work for an owned native instance
  *
- * Atomically fences new operation claims and follow-up reservations across matching mounts. Agenvo uses the existing owner connection and a read-only probe; configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
+ * Atomically fences new operation claims across matching mounts. Configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
  */
 export const putUsersMeRuntimesByIdAdmissionMutation = (options?: Partial<Options<PutUsersMeRuntimesByIdAdmissionData>>): UseMutationOptions<PutUsersMeRuntimesByIdAdmissionResponse, Options<PutUsersMeRuntimesByIdAdmissionData>, PutUsersMeRuntimesByIdAdmissionError> => ({
     mutation: async (vars) => {

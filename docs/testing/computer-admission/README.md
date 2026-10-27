@@ -1,3 +1,5 @@
+> Historical record: this describes an earlier Agenvo implementation. Its MCP probe and endpoint configuration routes have been retired and are not current operating instructions.
+
 # Durable owner admission pause
 
 Base: `acdb3c7aba0931929243921271abbb63afc54024`. This extends the existing owner runtime service and operation store. It does not modify Agent runtime/contextview, Herdr, Pi, credentials, production configuration or Windows files. The previous [read-only reconciliation](../computer-operation-reconciliation/README.md) remains unchanged.
