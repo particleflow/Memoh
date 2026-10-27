@@ -151,6 +151,7 @@ func (h *SessionHandler) Register(e *echo.Echo) {
 	g.GET("/model-preference-seed", h.ModelPreferenceSeed)
 	g.GET("/:session_id", h.GetSession)
 	g.GET("/:session_id/invocations/:invocation_id", h.GetSessionInvocation)
+	g.POST("/:session_id/decisions/:decision_id/recover", h.RecoverAcceptedUserInput)
 	g.GET("/:session_id/runtime-controls", h.GetRuntimeControls)
 	g.PATCH("/:session_id/runtime-controls/mode", h.SetRuntimeMode)
 	g.GET("/:session_id/runtime-controls/goal", h.GetRuntimeGoal)

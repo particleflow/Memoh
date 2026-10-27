@@ -494,6 +494,16 @@ export type AgenvoReferenceObservation = {
 
 export type ApperrorFault = 'client' | 'server' | 'dependency' | 'canceled';
 
+export type ApplicationUserInputRecoveryResult = {
+    decision_id?: string;
+    invocation_id?: string;
+    original_run_id?: string;
+    recovery_run_id?: string;
+    replayed?: boolean;
+    started?: boolean;
+    state?: string;
+};
+
 export type AudioConfigSchema = {
     fields?: Array<AudioFieldSchema>;
 };
@@ -1943,6 +1953,10 @@ export type GithubComFelinicsMemohInternalMcpConnection = {
     tools_cache?: Array<McpToolDescriptor>;
     type?: string;
     updated_at?: string;
+};
+
+export type HandlersAcceptedUserInputRecoveryInput = {
+    original_run_id: string;
 };
 
 export type HandlersAgentAuthorizationClaimRequest = {
@@ -12927,6 +12941,67 @@ export type GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses = {
 };
 
 export type GetBotsByBotIdSessionsBySessionIdContextLifecycleResponse = GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses[keyof GetBotsByBotIdSessionsBySessionIdContextLifecycleResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverData = {
+    /**
+     * Original failed run identity
+     */
+    body: HandlersAcceptedUserInputRecoveryInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned chat session ID
+         */
+        session_id: string;
+        /**
+         * Original submitted ask_user decision ID
+         */
+        decision_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/decisions/{decision_id}/recover';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverError = PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors[keyof PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses = {
+    /**
+     * Accepted
+     */
+    202: ApplicationUserInputRecoveryResult;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponse = PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses[keyof PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses];
 
 export type GetBotsByBotIdSessionsBySessionIdDelegationsData = {
     body?: never;

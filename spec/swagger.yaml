@@ -835,6 +835,23 @@ definitions:
     - FaultServer
     - FaultDependency
     - FaultCanceled
+  application.UserInputRecoveryResult:
+    properties:
+      decision_id:
+        type: string
+      invocation_id:
+        type: string
+      original_run_id:
+        type: string
+      recovery_run_id:
+        type: string
+      replayed:
+        type: boolean
+      started:
+        type: boolean
+      state:
+        type: string
+    type: object
   audio.ConfigSchema:
     properties:
       fields:
@@ -3511,6 +3528,14 @@ definitions:
         type: string
       updated_at:
         type: string
+    type: object
+  handlers.AcceptedUserInputRecoveryInput:
+    properties:
+      original_run_id:
+        format: uuid
+        type: string
+    required:
+    - original_run_id
     type: object
   handlers.AgentAuthorizationClaimRequest:
     properties:
@@ -15235,6 +15260,74 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Get session context lifecycle
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/decisions/{decision_id}/recover:
+    post:
+      consumes:
+      - application/json
+      description: Account/session-authenticated owner action for a failed native
+        retry run whose accepted answer has no persisted tool result. Uses only the
+        original saved input and accepted decision. Reconciles its exact hidden history
+        and admits one idempotent continuation run; keeps the original run failed.
+        Never resubmits the answer or retries the whole original turn. Repeated requests
+        return the same recovery run, including failed/unknown outcomes. No automatic
+        invocation on reconnect. A successful response acknowledges admission, not
+        model or business completion.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned chat session ID
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Original submitted ask_user decision ID
+        in: path
+        name: decision_id
+        required: true
+        type: string
+      - description: Original failed run identity
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.AcceptedUserInputRecoveryInput'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/application.UserInputRecoveryResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Explicitly continue a submitted ask_user answer after history failure
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/delegations:
