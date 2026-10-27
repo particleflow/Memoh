@@ -45,7 +45,7 @@ Windows injects its existing private config before signing the private derivativ
 ## Qualified candidate and handoff
 
 Final source is `c9c00580052d09d5dce273e958ec384bef2ebed3`.
-[Generic 1.0.9 artifact and Windows procedure](../../../artifacts/harmony/1.0.9-c9c005800/README.md).
+[Historical 1.0.9 artifact identity and Git recovery](../../../artifacts/harmony/1.0.9-c9c005800/README.md).
 The official API26 build and integrity checks passed with the retained SDK:
 [summary](build-summary.json), [package scan](package-verification.json),
 [actual HAP synthetic injection](real-hap-injection-test.json).

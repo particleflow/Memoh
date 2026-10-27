@@ -23,7 +23,7 @@ The Web/SDK pin remains `68be06092a1ea85d961115aac404082982bdecf4`.
   [mismatch retained](compiled-mismatch-retained.png), inspected by the agent.
 
 [Windows procedure](../harmony-service-migration/README.md) and
-[generic unsigned artifact](../../../artifacts/harmony/1.0.8-ee00ff76a/README.md).
+[historical artifact identity and Git recovery](../../../artifacts/harmony/1.0.8-ee00ff76a/README.md).
 The exact old-package binding is held by the original Windows task, not cloud.
 These checks are not Windows execution, official signing, native WebView/phone
 runtime, actual 1.0.6/1.0.7 overwrite-install, live NAS authentication or human QA.

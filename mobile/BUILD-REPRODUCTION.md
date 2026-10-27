@@ -85,9 +85,11 @@ certify older HAPs as safe rollback targets for a newer installation. The 1.0.7
 binary has one concrete reader: `docs/testing/harmony-service-migration/build-input-test.py`
 checks that the real old package without an injection slot is rejected. That
 optional regression branch is its current identified use, not a field rollback
-claim. No active build/test reader of the 1.0.8/1.0.9 binary copies was found;
-their retention or removal needs the original release owner's specific audit
-requirement. They are explicit pending items, not indefinite compatibility
-exceptions. No old package is offered here as the current deliverable. The 19
+claim. The unused 1.0.8/1.0.9 binary copies have been removed from the current
+tree; their exact byte/hash/blob identities and normal Git recovery commands
+remain in the [1.0.8 record](../artifacts/harmony/1.0.8-ee00ff76a/README.md) and
+[1.0.9 record](../artifacts/harmony/1.0.9-c9c005800/README.md). Those records audit
+past qualification and do not offer the old payloads as current installation
+or rollback targets. Current 1.0.18/1.0.19 delivery is unchanged. The 19
 unidentified later historical edits remain unverified, independently of the
 current build's successful qualification.
