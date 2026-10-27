@@ -37,7 +37,7 @@ func (s *profileCutoverHTTPStore) ReadComputerAdmission(context.Context, string,
 	return s.gate, nil
 }
 
-func (_ *profileCutoverHTTPStore) ChangeComputerAdmission(context.Context, string, string, dbstore.JSON, string, int64, bool) (dbstore.ComputerAdmission, error) {
+func (*profileCutoverHTTPStore) ChangeComputerAdmission(context.Context, string, string, dbstore.JSON, string, int64, bool) (dbstore.ComputerAdmission, error) {
 	return dbstore.ComputerAdmission{}, errors.New("not used")
 }
 
