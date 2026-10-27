@@ -20315,10 +20315,12 @@ export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverError = PutUsersMeRun
 
 export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses = {
     /**
-     * No Content
+     * OK
      */
-    204: unknown;
+    200: AgenvoAdmission;
 };
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponse = PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses[keyof PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses];
 
 export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;

@@ -21931,9 +21931,10 @@ paths:
       consumes:
       - application/json
       description: Owner account only. Checks the current config digest, target fingerprint
-        and paused request/revision. Atomic CAS changes only agent.config_dir; no
-        host action, task dispatch or unpause. A lost response requires rereading
-        the current state.
+        and paused request/revision. Atomic CAS changes only agent.config_dir and
+        advances the paused admission revision; use the returned revision for the
+        next cutover or resume. No host action, task dispatch or unpause. A lost response
+        requires rereading the current state.
       parameters:
       - description: Existing native Runtime ID
         in: path
@@ -21947,8 +21948,10 @@ paths:
         schema:
           $ref: '#/definitions/agenvo.NativeProfileCutoverRequest'
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
         "400":
           description: Bad Request
           schema:

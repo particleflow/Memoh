@@ -19432,7 +19432,7 @@ const docTemplate = `{
         },
         "/users/me/runtimes/{id}/native-herdr/profile-cutover": {
             "put": {
-                "description": "Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir; no host action, task dispatch or unpause. A lost response requires rereading the current state.",
+                "description": "Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir and advances the paused admission revision; use the returned revision for the next cutover or resume. No host action, task dispatch or unpause. A lost response requires rereading the current state.",
                 "consumes": [
                     "application/json"
                 ],
@@ -19459,8 +19459,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",

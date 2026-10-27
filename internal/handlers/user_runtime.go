@@ -62,12 +62,12 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 
 // CutoverPausedNativeProfile godoc
 // @Summary Switch the Pi configuration directory while admission stays paused
-// @Description Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir; no host action, task dispatch or unpause. A lost response requires rereading the current state.
+// @Description Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir and advances the paused admission revision; use the returned revision for the next cutover or resume. No host action, task dispatch or unpause. A lost response requires rereading the current state.
 // @Tags user-runtimes
 // @Accept json
 // @Param id path string true "Existing native Runtime ID"
 // @Param request body agenvo.NativeProfileCutoverRequest true "Cutover CAS facts"
-// @Success 204 "No Content"
+// @Success 200 {object} agenvo.Admission
 // @Failure 400,401,403,409,500 {object} server.Problem
 // @Router /users/me/runtimes/{id}/native-herdr/profile-cutover [put].
 func (h *UserRuntimeHandler) CutoverPausedNativeProfile(c echo.Context) error {
@@ -86,10 +86,11 @@ func (h *UserRuntimeHandler) CutoverPausedNativeProfile(c echo.Context) error {
 	if err != nil {
 		return apperror.FieldInvalid("body", err)
 	}
-	if err = h.service.CutoverPausedNativeProfile(c.Request().Context(), owner, strings.TrimSpace(c.Param("id")), in); err != nil {
+	out, err := h.service.CutoverPausedNativeProfile(c.Request().Context(), owner, strings.TrimSpace(c.Param("id")), in)
+	if err != nil {
 		return runtimeHTTPError(err)
 	}
-	return c.NoContent(http.StatusNoContent)
+	return c.JSON(http.StatusOK, out)
 }
 
 // ConfigureNativeHerdr godoc

@@ -45,9 +45,10 @@ func (s *profileCutoverHTTPStore) OwnedNativeProfileTarget(_ context.Context, _,
 	return target == s.target, nil
 }
 
-func (s *profileCutoverHTTPStore) CutoverPausedNativeProfile(_ context.Context, _, _, _ string, _, _ dbstore.JSON, _, _ string, _ int64) error {
+func (s *profileCutoverHTTPStore) CutoverPausedNativeProfile(_ context.Context, _, _, _ string, _, _ dbstore.JSON, _, _ string, _ int64) (dbstore.ComputerAdmission, error) {
 	s.writes++
-	return nil
+	s.gate.Revision++
+	return s.gate, nil
 }
 
 func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
@@ -107,9 +108,15 @@ func TestNativeProfileCutoverHTTPAccountBoundary(t *testing.T) {
 			}
 			rec := httptest.NewRecorder()
 			srv.ServeHTTP(rec, req)
-			want := map[string]int{"account": 204, "anonymous": 401, "chat_route": 403, "revoked": 401, "foreign_owner": 403, "stale_revision": 409, "unknown_field": 400}[scenario]
+			want := map[string]int{"account": 200, "anonymous": 401, "chat_route": 403, "revoked": 401, "foreign_owner": 403, "stale_revision": 409, "unknown_field": 400}[scenario]
 			if rec.Code != want || (store.writes == 1) != (scenario == "account") {
 				t.Fatalf("status=%d want=%d writes=%d", rec.Code, want, store.writes)
+			}
+			if scenario == "account" {
+				var receipt agenvo.Admission
+				if err := json.Unmarshal(rec.Body.Bytes(), &receipt); err != nil || receipt.Revision != "2" || !receipt.Paused || receipt.RequestID != pause {
+					t.Fatalf("cutover receipt: %+v %v", receipt, err)
+				}
 			}
 			if rec.Header().Get("Cache-Control") != "no-store" {
 				t.Fatal("missing no-store")

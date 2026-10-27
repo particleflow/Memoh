@@ -31,46 +31,47 @@ type NativeProfileCutoverRequest struct {
 type nativeProfileCutoverStore interface {
 	admissionStore
 	OwnedNativeProfileTarget(context.Context, string, string, string) (bool, error)
-	CutoverPausedNativeProfile(context.Context, string, string, string, dbstore.JSON, dbstore.JSON, string, string, int64) error
+	CutoverPausedNativeProfile(context.Context, string, string, string, dbstore.JSON, dbstore.JSON, string, string, int64) (dbstore.ComputerAdmission, error)
 }
 
 // CutoverPausedNativeProfile uses the owned registration and existing paused
 // gate. The SQL operation independently rechecks the snapshot atomically.
-func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, runtime string, in NativeProfileCutoverRequest) error {
+func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, runtime string, in NativeProfileCutoverRequest) (Admission, error) {
 	if s == nil || s.store == nil {
-		return ErrUnavailable
+		return Admission{}, ErrUnavailable
 	}
 	store, ok := s.store.(nativeProfileCutoverStore)
 	if !ok {
-		return ErrUnavailable
+		return Admission{}, ErrUnavailable
 	}
 	if runtime != in.RuntimeID {
-		return ErrForbidden
+		return Admission{}, ErrForbidden
 	}
 	row, err := store.OwnedNativeHerdrRuntime(ctx, owner, runtime)
 	if err != nil {
-		return ErrForbidden
+		return Admission{}, ErrForbidden
 	}
 	target, err := DecodeNativeTarget(row.ID, row.ProviderConfig)
 	if err != nil {
-		return ErrInvalidTarget
+		return Admission{}, ErrInvalidTarget
 	}
 	gate, err := store.ReadComputerAdmission(ctx, owner, target.ConnectionID, target.DeviceID, target.InstanceID)
 	if err != nil {
-		return err
+		return Admission{}, err
 	}
 	owned, err := store.OwnedNativeProfileTarget(ctx, owner, runtime, in.TargetID)
 	if err != nil {
-		return err
+		return Admission{}, err
 	}
 	if !owned {
-		return ErrForbidden
+		return Admission{}, ErrForbidden
 	}
 	next, err := ValidateNativeProfileCutover(owner, in.TargetID, row, gate, in)
 	if err != nil {
-		return err
+		return Admission{}, err
 	}
-	return store.CutoverPausedNativeProfile(ctx, owner, runtime, in.TargetID, row.ProviderConfig, next, in.InstanceID, in.PauseRequestID, gate.Revision)
+	receipt, err := store.CutoverPausedNativeProfile(ctx, owner, runtime, in.TargetID, row.ProviderConfig, next, in.InstanceID, in.PauseRequestID, gate.Revision)
+	return admissionResponse(receipt), err
 }
 
 // DecodeNativeProfileCutover rejects unknown or concatenated request fields.

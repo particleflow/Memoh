@@ -75,30 +75,36 @@ func (s *Store) OwnedNativeProfileTarget(ctx context.Context, owner, runtime, ta
 
 // CutoverPausedNativeProfile executes a single SQL statement. The database
 // function rechecks all admission and configuration facts under the owner lock.
-func (s *Store) CutoverPausedNativeProfile(ctx context.Context, owner, runtime, target string, before, after dbstore.JSON, instance, request string, revision int64) error {
+func (s *Store) CutoverPausedNativeProfile(ctx context.Context, owner, runtime, target string, before, after dbstore.JSON, instance, request string, revision int64) (dbstore.ComputerAdmission, error) {
 	u, err := db.ParseUUID(owner)
 	if err != nil {
-		return err
+		return dbstore.ComputerAdmission{}, err
 	}
 	r, err := db.ParseUUID(runtime)
 	if err != nil {
-		return err
+		return dbstore.ComputerAdmission{}, err
 	}
 	t, err := db.ParseUUID(target)
 	if err != nil {
-		return err
+		return dbstore.ComputerAdmission{}, err
 	}
 	id, err := db.ParseUUID(request)
 	if err != nil {
-		return err
+		return dbstore.ComputerAdmission{}, err
 	}
 	params := dbsqlc.CutoverPausedNativeProfileParams{OwnerID: u, RuntimeID: r, TargetID: t, ExpectedConfig: before, ProposedConfig: after, InstanceID: instance, RequestID: id, ExpectedRevision: revision}
+	var raw []byte
 	for attempt := 0; attempt < 2; attempt++ {
-		_, err = s.queries.CutoverPausedNativeProfile(ctx, params)
+		raw, err = s.queries.CutoverPausedNativeProfile(ctx, params)
 		var pgErr *pgconn.PgError
 		if !errors.As(err, &pgErr) || pgErr.Code != "40P01" || ctx.Err() != nil {
 			break
 		}
 	}
-	return mapQueryErr(err)
+	if err != nil {
+		return dbstore.ComputerAdmission{}, mapQueryErr(err)
+	}
+	var out dbstore.ComputerAdmission
+	err = json.Unmarshal(raw, &out)
+	return out, err
 }

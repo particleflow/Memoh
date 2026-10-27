@@ -3242,7 +3242,7 @@ export const putUsersMeRuntimesByIdNativeHerdr = <ThrowOnError extends boolean =
 /**
  * Switch the Pi configuration directory while admission stays paused
  *
- * Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir; no host action, task dispatch or unpause. A lost response requires rereading the current state.
+ * Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir and advances the paused admission revision; use the returned revision for the next cutover or resume. No host action, task dispatch or unpause. A lost response requires rereading the current state.
  */
 export const putUsersMeRuntimesByIdNativeHerdrProfileCutover = <ThrowOnError extends boolean = false>(options: Options<PutUsersMeRuntimesByIdNativeHerdrProfileCutoverData, ThrowOnError>): RequestResult<PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses, PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors, ThrowOnError> => (options.client ?? client).put<PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses, PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors, ThrowOnError>({
     url: '/users/me/runtimes/{id}/native-herdr/profile-cutover',

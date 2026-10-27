@@ -53,9 +53,9 @@ func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, pr
 	return runtime, nil
 }
 
-func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, id string, in agenvo.NativeProfileCutoverRequest) error {
+func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, id string, in agenvo.NativeProfileCutoverRequest) (agenvo.Admission, error) {
 	if s.agenvo == nil {
-		return agenvo.ErrUnavailable
+		return agenvo.Admission{}, agenvo.ErrUnavailable
 	}
 	return s.agenvo.CutoverPausedNativeProfile(ctx, owner, id, in)
 }

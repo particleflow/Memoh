@@ -81,6 +81,10 @@ func TestPausedNativeProfileCutoverAtomic(t *testing.T) {
 	if err = tx.Rollback(t.Context()); err != nil {
 		t.Fatal(err)
 	}
+	rollbackGate, rollbackErr := f.store.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, gate.InstanceID)
+	if rollbackErr != nil || rollbackGate != gate {
+		t.Fatalf("rollback changed gate: %+v %v", rollbackGate, rollbackErr)
+	}
 	var oldStill bool
 	if err = f.conn.QueryRow(t.Context(), `SELECT provider_config=$2::jsonb FROM user_runtimes WHERE id=$1`, f.runtime, old).Scan(&oldStill); err != nil || !oldStill {
 		t.Fatalf("rollback changed config: %v", err)
@@ -140,7 +144,9 @@ func TestPausedNativeProfileCutoverAtomic(t *testing.T) {
 		t.Fatalf("old PUT bypassed pause after cutover: %v", err)
 	}
 	after, err := f.store.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, gate.InstanceID)
-	if err != nil || after != gate || !after.Paused {
+	expected := gate
+	expected.Revision++
+	if err != nil || after != expected || !after.Paused {
 		t.Fatalf("pause changed: %v", err)
 	}
 	if err = f.conn.QueryRow(t.Context(), `SELECT count(*) FROM native_profile_cutover_intents`).Scan(&intents); err != nil || intents != 0 {
@@ -198,28 +204,31 @@ func TestPausedNativeProfileOwnerService(t *testing.T) {
 	}
 	in := agenvo.NativeProfileCutoverRequest{RuntimeID: f.runtime, TargetID: f.mount, InstanceID: target.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: agenvo.TargetFingerprint(target), PauseRequestID: request, ExpectedPauseRevision: "1", AgentConfigDir: `C:\Synthetic\new`}
 	service := agenvo.NewService(f.store, nil, nil)
-	if err = service.CutoverPausedNativeProfile(t.Context(), uuid.NewString(), f.runtime, in); !errors.Is(err, agenvo.ErrForbidden) {
+	if _, err = service.CutoverPausedNativeProfile(t.Context(), uuid.NewString(), f.runtime, in); !errors.Is(err, agenvo.ErrForbidden) {
 		t.Fatalf("foreign owner: %v", err)
 	}
 	bad := in
 	bad.ExpectedPauseRevision = "2"
-	if err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, agenvo.ErrNativeProfileConflict) {
+	if _, err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, agenvo.ErrNativeProfileConflict) {
 		t.Fatalf("stale revision: %v", err)
 	}
 	bad = in
 	bad.TargetID = uuid.NewString()
-	if err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, agenvo.ErrForbidden) {
+	if _, err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, bad); !errors.Is(err, agenvo.ErrForbidden) {
 		t.Fatalf("foreign target: %v", err)
 	}
-	if err = service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, in); err != nil {
-		t.Fatal(err)
+	receipt, err := service.CutoverPausedNativeProfile(t.Context(), f.owner, f.runtime, in)
+	if err != nil || receipt.Revision != "2" || !receipt.Paused || receipt.RequestID != request {
+		t.Fatalf("cutover response: %+v %v", receipt, err)
 	}
 	var dir string
 	if err = f.conn.QueryRow(t.Context(), `SELECT provider_config #>> '{herdr,agent,config_dir}' FROM user_runtimes WHERE id=$1`, f.runtime).Scan(&dir); err != nil || dir != in.AgentConfigDir {
 		t.Fatalf("changed directory mismatch: %v", err)
 	}
 	after, err := f.store.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, gate.InstanceID)
-	if err != nil || after != gate {
+	expected := gate
+	expected.Revision++
+	if err != nil || after != expected {
 		t.Fatalf("pause changed: %v", err)
 	}
 }
@@ -282,5 +291,49 @@ func TestPausedNativeProfileCutoverRacesResumeAndRevocation(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestPausedNativeProfileCutoverRejectsABA(t *testing.T) {
+	f := newNativeHerdrFixture(t)
+	old := []byte(`{"herdr":{"instance_id":"synthetic-native-instance","agent":{"config_dir":"C:\\Synthetic\\A"}}}`)
+	next := []byte(`{"herdr":{"instance_id":"synthetic-native-instance","agent":{"config_dir":"C:\\Synthetic\\B"}}}`)
+	f.exec(t, `UPDATE user_runtimes SET provider_config=$2 WHERE id=$1`, f.runtime, old)
+	f.config = old
+	request := uuid.NewString()
+	gate := f.change(t, request, 0, true)
+	original := []any{f.owner, f.runtime, f.mount, old, next, gate.InstanceID, request, gate.Revision}
+	var receipt []byte
+	if err := f.conn.QueryRow(t.Context(), profileCutoverSQL, original...).Scan(&receipt); err != nil {
+		t.Fatal(err)
+	}
+	current, err := f.store.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, gate.InstanceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	back := []any{f.owner, f.runtime, f.mount, next, old, gate.InstanceID, request, current.Revision}
+	if err = f.conn.QueryRow(t.Context(), profileCutoverSQL, back...).Scan(&receipt); err != nil {
+		t.Fatal(err)
+	}
+	err = f.conn.QueryRow(t.Context(), profileCutoverSQL, original...).Scan(&receipt)
+	var pgErr *pgconn.PgError
+	if !errors.As(err, &pgErr) || pgErr.Code != "MC002" {
+		t.Fatalf("stale A→B replay accepted after A→B→A: %v", err)
+	}
+	current, err = f.store.ReadComputerAdmission(t.Context(), f.owner, f.runtime, f.runtime, gate.InstanceID)
+	if err != nil || !current.Paused || current.Revision != gate.Revision+2 || current.RequestID != request {
+		t.Fatalf("gate after ABA: %+v %v", current, err)
+	}
+	// Old resume revision must also fail, even though the configuration is A again.
+	if _, err = f.store.ChangeComputerAdmission(t.Context(), f.owner, f.runtime, old, request, gate.Revision, false); !errors.Is(err, memohdb.ErrComputerAdmissionConflict) {
+		t.Fatalf("stale resume: %v", err)
+	}
+	resumed, err := f.store.ChangeComputerAdmission(t.Context(), f.owner, f.runtime, old, request, current.Revision, false)
+	if err != nil || resumed.Paused || resumed.Revision != current.Revision+1 {
+		t.Fatalf("fresh resume: %+v %v", resumed, err)
+	}
+	var intents int
+	if err = f.conn.QueryRow(t.Context(), `SELECT count(*) FROM native_profile_cutover_intents`).Scan(&intents); err != nil || intents != 0 {
+		t.Fatalf("intents=%d %v", intents, err)
 	}
 }

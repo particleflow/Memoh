@@ -3560,7 +3560,7 @@ CREATE OR REPLACE FUNCTION public.memoh_cutover_paused_native_profile(
     p_owner uuid, p_runtime uuid, p_target uuid, p_old jsonb, p_new jsonb,
     p_instance text, p_request uuid, p_revision bigint)
 RETURNS jsonb LANGUAGE plpgsql VOLATILE AS $$
-DECLARE updated public.user_runtimes%ROWTYPE;
+DECLARE updated public.user_runtimes%ROWTYPE; gate public.computer_admission_gates%ROWTYPE;
 BEGIN
     PERFORM public.memoh_computer_admission_lock(p_owner);
     PERFORM 1 FROM public.users u JOIN public.team_members m ON m.user_id=u.id
@@ -3600,6 +3600,16 @@ BEGIN
           AND team_id=public.memoh_current_team_id() AND runtime_id=p_runtime) THEN
         RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
     END IF;
-    RETURN jsonb_build_object('runtime_id', updated.id, 'paused', true, 'revision', p_revision::text);
+    -- Advance the existing CAS fence even though admission stays paused.
+    -- Comparing only the config permits A -> B -> A to revive an old request.
+    UPDATE public.computer_admission_gates SET revision=revision+1, updated_at=now()
+        WHERE team_id=public.memoh_current_team_id() AND owner_id=p_owner
+          AND connection_id=p_runtime AND device_id=p_runtime::text
+          AND instance_id=p_instance AND request_id=p_request AND revision=p_revision AND paused
+        RETURNING * INTO gate;
+    IF NOT FOUND THEN
+        RAISE EXCEPTION USING ERRCODE='MC002', MESSAGE='computer admission revision conflict';
+    END IF;
+    RETURN to_jsonb(gate);
 END;
 $$;
