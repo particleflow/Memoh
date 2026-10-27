@@ -111,3 +111,44 @@ func TestStoredCatalogSyncUsesOnlyDiscoveredIDsAndNoInference(t *testing.T) {
 		t.Fatalf("ran=%v err=%v unexpected=%v applied=%+v", ran, err, unexpected.Load(), q.applied)
 	}
 }
+
+type notifyingCatalogFixture struct {
+	providerTestQueries
+	applied chan string
+}
+
+func (q *notifyingCatalogFixture) ApplyModelCatalog(_ context.Context, id string, _ []byte, _ string, _ []catalogsync.Model) error {
+	q.applied <- id
+	return nil
+}
+
+func TestRunModelCatalogSyncUsesExplicitFixtureTargetAndStops(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(`{"data":[{"id":"fixture-chat"}]}`))
+	}))
+	defer server.Close()
+	id := pgtype.UUID{Bytes: [16]byte{4}, Valid: true}
+	q := &notifyingCatalogFixture{providerTestQueries: providerTestQueries{provider: sqlc.Provider{ID: id, Enable: true, ClientType: string(models.ClientTypeOpenAICompletions), Config: []byte(`{"base_url":"` + server.URL + `"}`)}}, applied: make(chan string, 1)}
+	svc := NewService(nil, q, "")
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		svc.RunModelCatalogSync(ctx, func(context.Context) (string, error) { return id.String(), nil })
+	}()
+	select {
+	case got := <-q.applied:
+		if got != id.String() {
+			t.Fatalf("target = %s", got)
+		}
+	case <-time.After(5 * time.Second):
+		cancel()
+		t.Fatal("initial sync did not run")
+	}
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("lifecycle did not stop")
+	}
+}
