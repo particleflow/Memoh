@@ -2,7 +2,6 @@ package postgresstore
 
 import (
 	"context"
-	"errors"
 
 	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -141,25 +140,4 @@ func (s *Store) OwnedHTTPMCPConnectionBot(ctx context.Context, ownerID, connecti
 		return "", mapQueryErr(err)
 	}
 	return bot.String(), nil
-}
-
-func (s *Store) CreateAgenvoRuntime(ctx context.Context, ownerID, name string, config dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
-	owner, err := db.ParseUUID(ownerID)
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	// Reuse an already registered target after an interrupted response. Sharing
-	// grants and OAuth credentials is never repeated by this operation.
-	existing, err := s.queries.FindAgenvoUserRuntime(ctx, dbsqlc.FindAgenvoUserRuntimeParams{OwnerID: owner, ProviderConfig: config})
-	if err == nil {
-		return userRuntimeRecord(existing), nil
-	}
-	if !errors.Is(mapQueryErr(err), db.ErrNotFound) {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	row, err := s.queries.CreateAgenvoUserRuntime(ctx, dbsqlc.CreateAgenvoUserRuntimeParams{OwnerID: owner, Name: name, ProviderConfig: config})
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	return userRuntimeRecord(row), nil
 }

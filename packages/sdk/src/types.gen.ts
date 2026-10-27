@@ -414,8 +414,8 @@ export type AgenvoAgentObservation = {
 export type AgenvoAgentProfile = {
     config_dir?: string;
     /**
-     * Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
-     * finite official CLI invocations; no automatic protocol fallback occurs.
+     * Empty is decoded only for historical profiles. Native configuration
+     * requires pi-json-v1; no protocol fallback occurs.
      */
     execution_mode?: string;
     model?: string;
@@ -14340,7 +14340,7 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesRe
 
 export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData = {
     /**
-     * Instruction with retained idempotency ID
+     * Original input and retained request ID
      */
     body: HandlersNativeTaskFollowupInput;
     path: {
@@ -19925,7 +19925,7 @@ export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;
     path: {
         /**
-         * Existing Agenvo runtime ID
+         * Existing native Runtime ID
          */
         id: string;
     };
@@ -19966,7 +19966,7 @@ export type GetUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;
     path: {
         /**
-         * Existing Agenvo runtime ID
+         * Existing native Runtime ID
          */
         id: string;
     };
@@ -20003,7 +20003,7 @@ export type PostUsersMeRuntimesByIdTransferCredentialData = {
     body: UserruntimeChangeTransferCredentialRequest;
     path: {
         /**
-         * Existing Agenvo runtime ID
+         * Existing native Runtime ID
          */
         id: string;
     };

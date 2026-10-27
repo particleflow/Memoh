@@ -8,7 +8,6 @@ This adapter replaces the interactive OAuth transport for one explicitly configu
 | --- | --- | --- | --- |
 | NAS local workspace | `native` | existing local provider | `target_id = native` |
 | Windows native Remote Runtime | `remote` | `memoh` | Bot mount `target_id`; registry `runtime_id` |
-| Existing Agenvo target | `remote` | `agenvo` | Existing Bot mount and MCP reference |
 
 Do not infer Windows routing from the word “native.” The selected Bot mount is resolved on every call. The adapter requires a ready Windows (`windows` or `win32`) remote connection; it never selects the NAS bridge or the Bot's current default as a fallback. Workspace target listing retains the existing connection-status path, with no OAuth probe.
 
@@ -40,7 +39,7 @@ These example paths and names are not discovered production settings. `agent` is
 
 `producer` is optional for tasks without file declarations, and required before a native task with declared files can be claimed. It references the existing finite producer EXE and existing `HERDR_PLUGIN_CONFIG_DIR` / `HERDR_PLUGIN_STATE_DIR` pair. All three values are required together, use canonical local Windows paths with backslashes and no redundant/trailing separator, and are pinned by the existing target fingerprint. The existing producer configuration's `source_root` must match the task work directory. No new directory, profile manager, queue or credential is created by this configuration. Updating these references cannot silently redirect an old task.
 
-On native task completion, and on a permitted bounded delivery wakeup, Memoh invokes that exact EXE with `-action collect-result` and explicitly sets both directory variables for that process. It does not invoke the retired `herdr plugin action` hook, inherit its directory pair, or substitute `advance-results` for first registration. Agenvo tasks retain their existing plugin hook.
+On native task completion, and on a permitted bounded delivery wakeup, Memoh invokes that exact EXE with `-action collect-result` and explicitly sets both directory variables for that process. It does not invoke the retired `herdr plugin action` hook, inherit its directory pair, or substitute `advance-results` for first registration. Historical Agenvo tasks are retained as evidence and cannot dispatch or invoke their old plugin hook.
 
 The returned Runtime DTO and owner Runtime list expose optional `native_herdr = {connection_id, device_id, instance_id, session, target_fingerprint}` for a valid configured profile, including while offline. The first two fields both equal the DTO's `id`; the fingerprint identifies the current full profile. This is a read-only binding for host/transfer consistency checks, not a third selector or a credential. Bot task requests continue to use their existing mount `target_id`. Invalid or unconfigured profiles and Agenvo records omit this native binding.
 
@@ -86,7 +85,7 @@ No new task HTTP API, scheduler, queue, task ID, or tool name is introduced. Reu
 | `computer_task_cancel` | Record cancellation intent; does not prove process termination |
 | `computer_task_artifact`, `computer_task_logs` | Existing committed producer references and explicit diagnostic flow |
 
-`computer_task_followup` remains available for its existing supported legacy operations; this adapter does not manufacture asynchronous `agent.start` receipts or promise TUI follow-up for finite Pi invocations. Unsupported operations fail closed.
+`computer_task_followup` only replays existing historical input receipts with their original request ID and fingerprint. New TUI input and startup implementations are removed. Finite Pi invocations use the batch protocol; unsupported input fails closed.
 
 Keep `operation_id`, original `run_id`, attempt, generation, request hash, target fingerprint, workspace/pane/terminal references and producer task identity. Reconnection queries the original operation. `unknown`, an interrupted write or an incomplete receipt is never permission to submit again. Raw `exec` on a configured Herdr mount is gated through computer tasks, so it cannot bypass unresolved operations or paused admission.
 

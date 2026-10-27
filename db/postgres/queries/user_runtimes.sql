@@ -252,18 +252,3 @@ WHERE connection.team_id = public.memoh_current_team_id()
   AND connection.id = sqlc.arg(connection_id)
   AND bot.owner_user_id = sqlc.arg(owner_id)
   AND connection.is_active AND connection.type = 'http';
-
--- name: CreateAgenvoUserRuntime :one
-INSERT INTO user_runtimes (user_id, name, api_token, provider, provider_config, activated_at, pending_expires_at)
-VALUES (sqlc.arg(owner_id), sqlc.arg(name), 'agenvo_' || gen_random_uuid()::text, 'agenvo', sqlc.arg(provider_config), now(), NULL)
-ON CONFLICT (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL
-DO UPDATE SET updated_at = user_runtimes.updated_at
-WHERE user_runtimes.provider_config = EXCLUDED.provider_config
-RETURNING *;
-
--- name: FindAgenvoUserRuntime :one
-SELECT * FROM user_runtimes
-WHERE team_id = public.memoh_current_team_id() AND user_id = sqlc.arg(owner_id)
-  AND provider = 'agenvo' AND provider_config = sqlc.arg(provider_config)
-  AND revoked_at IS NULL
-ORDER BY created_at LIMIT 1;

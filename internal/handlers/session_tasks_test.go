@@ -104,18 +104,11 @@ func (f *taskHTTPFixture) ReadComputerOperation(context.Context, dbstore.Compute
 }
 
 func (f *taskHTTPFixture) GetMount(_ context.Context, bot, id string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
-	if !f.grant || bot != taskBot || id != taskTarget {
+	if !f.grant || !f.source || bot != taskBot || id != taskTarget {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, errors.New("SECRET")
 	}
-	raw, _ := json.Marshal(f.registration)
-	return dbstore.BotRemoteRuntimeBindingRecord{ID: taskTarget, BotID: taskBot, RuntimeUserID: taskOwner, BotOwnerUserID: taskOwner, RuntimeProvider: "agenvo", RuntimeProviderConfig: raw}, nil
-}
-
-func (f *taskHTTPFixture) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	if !f.source {
-		return "", errors.New("SECRET")
-	}
-	return taskBot, nil
+	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: f.registration.InstanceID, Session: f.registration.Session, WorkDir: f.registration.WorkDir, BashPath: f.registration.BashPath, HerdrCLI: f.registration.HerdrCLI, HerdrConfigRoot: f.registration.HerdrConfigRoot}})
+	return dbstore.BotRemoteRuntimeBindingRecord{ID: taskTarget, BotID: taskBot, RuntimeUserID: taskOwner, BotOwnerUserID: taskOwner, RuntimeID: taskTarget, RuntimeProvider: "memoh", RuntimeProviderConfig: raw}, nil
 }
 
 func (f *taskHTTPFixture) HasBotPermission(_ context.Context, bot, user, permission string) (bool, error) {
@@ -123,11 +116,11 @@ func (f *taskHTTPFixture) HasBotPermission(_ context.Context, bot, user, permiss
 }
 
 func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
-	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
 	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", CancelRequested: true, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET","artifact_hash":"SECRET"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		f.relayCalls++
-		return nil, errors.New("unexpected dispatch")
+		return agenvo.Receipt{}, errors.New("unexpected dispatch")
 	})
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, relay, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
 	e := echo.New()
@@ -316,7 +309,7 @@ func (f *taskHTTPFixture) ListComputerDeliveryEntries(_ context.Context, r dbsto
 }
 
 func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
-	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
 	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Revision: 42, Details: []byte(`{"kind":"herdr_pi_task","output":"SECRET"}`)}
 	for i := range 35 {
 		outcome := "committed"
@@ -342,9 +335,9 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 		}
 		f.entries = append(f.entries, dbstore.ComputerDeliveryEntry{DeliveryID: fmt.Sprintf("file_%d", i), Ordinal: int64(i + 1), Version: version, Data: data})
 	}
-	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		f.relayCalls++
-		return nil, errors.New("unexpected dispatch")
+		return agenvo.Receipt{}, errors.New("unexpected dispatch")
 	})
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
@@ -417,4 +410,14 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 	if f.relayCalls != 0 || f.op.Revision != 42 {
 		t.Fatal("read dispatched or mutated")
 	}
+}
+
+func taskHTTPNativeRegistration() agenvo.Target {
+	p := agenvo.NativeHerdrProfile{InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`}
+	raw, _ := json.Marshal(map[string]any{"herdr": p})
+	target, err := agenvo.DecodeNativeTarget(taskTarget, raw)
+	if err != nil {
+		panic(err)
+	}
+	return target
 }

@@ -29,11 +29,11 @@ func (f observationReaderFunc) Recover(ctx context.Context, b toolcontext.Comput
 }
 
 func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
-	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
 	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Details: []byte(`{"kind":"herdr_pi_task"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		t.Fatal("HTTP ownership lookup contacted relay")
-		return nil, nil
+		return agenvo.Receipt{}, nil
 	})
 	calls := 0
 	revoke := false

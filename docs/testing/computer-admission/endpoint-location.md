@@ -1,3 +1,5 @@
+> Historical record: this describes an earlier Agenvo implementation. Its MCP probe and endpoint configuration routes have been retired and are not current operating instructions.
+
 # Owner endpoint location (configuration only)
 
 Base checkpoint: `8d583a14f355630a5f4d71976c8265ec1575846c`. This increment does

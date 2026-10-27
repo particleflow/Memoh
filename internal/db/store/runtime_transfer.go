@@ -14,7 +14,6 @@ type RuntimeTransferRecord struct {
 }
 
 type RuntimeTransferStore interface {
-	OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
 	ReadOwnedRuntimeTransfer(context.Context, string, string) (RuntimeTransferRecord, error)
 	ReadRuntimeTransfer(context.Context, string) (RuntimeTransferRecord, error)
 	ChangeRuntimeTransfer(context.Context, RuntimeTransferRecord, RuntimeTransferRecord) (bool, error)

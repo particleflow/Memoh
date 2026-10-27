@@ -48,16 +48,6 @@ JOIN mcp_connections candidate ON candidate.team_id=user_runtimes.team_id
  AND candidate.id::text=sqlc.arg(connection_id)::text
 WHERE user_runtimes.team_id=public.memoh_current_team_id() AND user_runtimes.provider='agenvo';
 
--- name: GetOwnedAgenvoRuntime :one
-SELECT * FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
-AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id) AND provider='agenvo' AND revoked_at IS NULL;
-
--- name: UpdateAgenvoRuntimeConfig :one
-UPDATE user_runtimes SET provider_config=sqlc.arg(provider_config),updated_at=now()
-WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id)
-AND provider='agenvo' AND revoked_at IS NULL AND provider_config=sqlc.arg(expected_config)
-RETURNING *;
-
 -- name: PreviousComputerPiOperation :one
 -- Called only after owning the unsettled slot. A missing receipt in the latest
 -- operation is evidence of uncertainty, never permission to search past it.

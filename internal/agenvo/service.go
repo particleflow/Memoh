@@ -8,7 +8,6 @@ import (
 	"errors"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 
@@ -27,82 +26,21 @@ var ErrLegacyRetired = errors.New("legacy Agenvo targets are retired; use a nati
 
 var ErrComputerTaskRequired = errors.New("computer commands require computer_task_submit so unresolved operations cannot be bypassed with exec")
 
-// SourceCaller resolves the existing MCP connection under ownerID and uses its
-// existing OAuth transport. A target never supplies an endpoint or a token.
-type (
-	SourceCaller      func(context.Context, string, string, string, map[string]any) (json.RawMessage, error)
-	PermissionChecker interface {
-		HasBotPermission(context.Context, string, string, string) (bool, error)
-	}
-)
+type PermissionChecker interface {
+	HasBotPermission(context.Context, string, string, string) (bool, error)
+}
 
 type Service struct {
 	store       dbstore.AgenvoRuntimeStore
 	permissions PermissionChecker
-	call        SourceCaller
 	callNative  NativeCaller
 }
 
 func (s *Service) SetNativeCaller(call NativeCaller) { s.callNative = call }
 
-// DiscoveredInstance contains only the fields needed to choose a target. It
-// deliberately excludes instance context, provider credentials and scope data.
-type DiscoveredInstance struct {
-	DeviceID   string `json:"device_id"`
-	DeviceName string `json:"device_name"`
-	InstanceID string `json:"instance_id"`
-	Name       string `json:"name"`
-	Online     bool   `json:"online"`
-}
-
-func (s *Service) Discover(ctx context.Context, ownerID, connectionID string) ([]DiscoveredInstance, error) {
-	if s == nil || s.store == nil || s.call == nil {
-		return nil, ErrUnavailable
-	}
-	if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, ownerID, connectionID); err != nil {
-		return nil, ErrForbidden
-	}
-	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
-	raw, err := s.call(ctx, ownerID, connectionID, "search", map[string]any{"query": ""})
-	if err != nil {
-		return nil, ErrUnavailable
-	}
-	value, err := decodeToolResult(raw)
-	if err != nil {
-		return nil, err
-	}
-	var response struct {
-		Execution string          `json:"execution"`
-		Error     json.RawMessage `json:"error"`
-		Result    struct {
-			Items []struct {
-				DeviceID    string `json:"deviceId"`
-				DeviceLabel string `json:"deviceLabel"`
-				InstanceID  string `json:"instanceId"`
-				Label       string `json:"label"`
-				Kind        string `json:"kind"`
-				Online      bool   `json:"online"`
-				Available   bool   `json:"available"`
-			} `json:"items"`
-		} `json:"result"`
-	}
-	if json.Unmarshal(value, &response) != nil || response.Execution != "accepted" || (len(response.Error) > 0 && string(response.Error) != "null") {
-		return nil, ErrUnknown
-	}
-	items := []DiscoveredInstance{}
-	for _, item := range response.Result.Items {
-		if item.Kind == "herdr" {
-			items = append(items, DiscoveredInstance{DeviceID: item.DeviceID, DeviceName: item.DeviceLabel, InstanceID: item.InstanceID, Name: item.Label, Online: item.Online && item.Available})
-		}
-	}
-	return items, nil
-}
-
-// NewService uses the native caller when call is nil, as in all production
-// wiring. A legacy SourceCaller is retained only for archived protocol fixtures.
-func NewService(store dbstore.AgenvoRuntimeStore, permissions PermissionChecker, call SourceCaller) *Service {
-	return &Service{store: store, permissions: permissions, call: call}
+// NewService resolves native execution targets through the existing Bot mounts.
+func NewService(store dbstore.AgenvoRuntimeStore, permissions PermissionChecker, call NativeCaller) *Service {
+	return &Service{store: store, permissions: permissions, callNative: call}
 }
 
 func DecodeTarget(raw []byte) (Target, error) {
@@ -181,6 +119,12 @@ func (s *Service) ResolveTarget(ctx context.Context, scope Scope) (Target, error
 	return t, err
 }
 
+// ResolveHistoricalTarget authorizes a stored identity without enabling execution.
+func (s *Service) ResolveHistoricalTarget(ctx context.Context, scope Scope) (Target, error) {
+	t, _, err := s.resolveForHistory(ctx, scope, true)
+	return t, err
+}
+
 func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, error) {
 	target, owner, err := s.resolve(ctx, scope)
 	if err != nil {
@@ -192,63 +136,15 @@ func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, err
 			return Target{}, ErrTargetChanged
 		}
 		return t, err
-	}, func(ctx context.Context, id, name string, args map[string]any) (json.RawMessage, error) {
-		if s.call == nil {
-			return nil, ErrUnavailable
-		}
-		return s.call(ctx, owner, id, name, args)
-	})
-	c.callNative = s.callNative
+	}, s.callNative)
 	return c, target, nil
 }
 
-func (s *Service) Register(ctx context.Context, ownerID, name string, target Target) (dbstore.UserRuntimeRecord, error) {
-	if s == nil || s.store == nil || s.call == nil {
-		return dbstore.UserRuntimeRecord{}, ErrUnavailable
-	}
-	if err := validateTarget(target); err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	if target.NativeRuntimeID != "" || target.HerdrCLI != "" || target.HerdrConfigRoot != "" || target.Producer != (ProducerLocator{}) {
-		return dbstore.UserRuntimeRecord{}, ErrInvalidTarget
-	}
-	// Verify ownership before contacting the relay. Existing Bot membership or
-	// administrator status alone does not authorize sharing somebody else's MCP.
-	if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, ownerID, target.ConnectionID); err != nil {
-		return dbstore.UserRuntimeRecord{}, ErrForbidden
-	}
-	raw, err := json.Marshal(target)
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, ErrInvalidTarget
-	}
-	if err := s.Probe(ctx, ownerID, raw); err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	return s.store.CreateAgenvoRuntime(ctx, ownerID, name, raw)
-}
-
-func (s *Service) Probe(ctx context.Context, ownerID string, raw []byte) error {
-	if s == nil || s.store == nil || s.call == nil {
-		return ErrUnavailable
-	}
-	target, err := DecodeTarget(raw)
-	if err != nil {
-		return err
-	}
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-	client := NewClient(func(ctx context.Context, _ Scope) (Target, error) {
-		if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, ownerID, target.ConnectionID); err != nil {
-			return Target{}, ErrForbidden
-		}
-		return target, nil
-	}, func(ctx context.Context, id, name string, args map[string]any) (json.RawMessage, error) {
-		return s.call(ctx, ownerID, id, name, args)
-	})
-	return client.Probe(ctx, Scope{BotID: "account-probe", TargetID: "account-probe", UserID: ownerID})
-}
-
 func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, error) {
+	return s.resolveForHistory(ctx, scope, false)
+}
+
+func (s *Service) resolveForHistory(ctx context.Context, scope Scope, history bool) (Target, string, error) {
 	if err := toolcontext.CheckDelegationTarget(ctx, scope.BotID, scope.TargetID, "workspace_exec"); err != nil {
 		return Target{}, "", err
 	}
@@ -266,17 +162,22 @@ func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, err
 	if err != nil || record.BotID != scope.BotID || record.ID != scope.TargetID || record.RuntimeRevoked || record.RuntimeUserID != record.BotOwnerUserID {
 		return Target{}, "", ErrForbidden
 	}
-	// Production installs no legacy caller. Keep decoding old records for
-	// historical fixtures without allowing a native service to contact OAuth/MCP.
-	if record.RuntimeProvider == Provider && s.call == nil {
+	// Historical registrations retain their stored identity, but cannot execute.
+	if record.RuntimeProvider == Provider && !history {
 		return Target{}, "", ErrLegacyRetired
 	}
 	target, err := DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
 	if err != nil {
 		return Target{}, "", err
 	}
-	if target.NativeRuntimeID == "" {
-		if _, err := s.store.OwnedHTTPMCPConnectionBot(ctx, record.RuntimeUserID, target.ConnectionID); err != nil {
+	if record.RuntimeProvider == Provider {
+		owned, ok := s.store.(interface {
+			OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
+		})
+		if !ok || record.RuntimeID == "" || record.RuntimeUserID == "" {
+			return Target{}, "", ErrForbidden
+		}
+		if _, err := owned.OwnedHTTPMCPConnectionBot(ctx, record.RuntimeUserID, target.ConnectionID); err != nil {
 			return Target{}, "", ErrForbidden
 		}
 	}

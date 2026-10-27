@@ -13,7 +13,6 @@ import (
 )
 
 type legacyTaskBridge struct {
-	relay *agenvo.Service
 	calls int
 }
 
@@ -29,12 +28,10 @@ func (*legacyTaskBridge) ListWorkspaceTargets(context.Context, string) ([]worksp
 	return nil, nil
 }
 
-func (p *legacyTaskBridge) ResolveWorkspaceTarget(_ context.Context, bot, id string) (workspacepkg.ResolvedWorkspaceTarget, error) {
-	return workspacepkg.ResolvedWorkspaceTarget{TargetID: id, Kind: "remote", Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo, OS: "windows", DefaultWorkDir: `C:\Synthetic`}, Execute: func(ctx context.Context, req agenvo.Request) (agenvo.Result, error) {
+func (p *legacyTaskBridge) ResolveWorkspaceTarget(_ context.Context, _ string, id string) (workspacepkg.ResolvedWorkspaceTarget, error) {
+	return workspacepkg.ResolvedWorkspaceTarget{TargetID: id, Kind: "remote", Client: bridge.UnsupportedClient(), Info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote, OS: "windows", DefaultWorkDir: `C:\Synthetic`}, Execute: func(context.Context, agenvo.Request) (agenvo.Result, error) {
 		p.calls++
-		req.Scope.BotID = bot
-		req.Scope.TargetID = id
-		return p.relay.Execute(ctx, req)
+		return agenvo.Result{State: "not_started"}, agenvo.ErrComputerTaskRequired
 	}}, nil
 }
 
@@ -48,7 +45,7 @@ func TestStandardMCPUnknownCannotBeRetriedThroughLegacyExec(t *testing.T) {
 	}
 	// A NAS-scoped caller is allowed to target this PC but cannot bypass the
 	// task ledger using the formerly supported ordinary exec tool.
-	bridge := &legacyTaskBridge{relay: source.service.relay}
+	bridge := &legacyTaskBridge{}
 	provider := tools.NewContainerProvider(nil, bridge, nil, "/data")
 	registered, err := provider.Tools(t.Context(), tools.SessionContext{BotID: "bot-a", UserID: "user-a", SessionID: "session-a", WorkspaceTargetID: "native"})
 	if err != nil {
@@ -65,7 +62,7 @@ func TestStandardMCPUnknownCannotBeRetriedThroughLegacyExec(t *testing.T) {
 			t.Fatal("old exec bypassed ledger", err)
 		}
 	}
-	if !found || bridge.calls != 0 || f.runs != 1 {
+	if !found || bridge.calls != 1 || f.runs != 1 {
 		t.Fatalf("found=%v old-route=%d submissions=%d", found, bridge.calls, f.runs)
 	}
 }

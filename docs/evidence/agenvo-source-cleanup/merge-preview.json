@@ -1,0 +1,37 @@
+{
+  "base": "e2cb0767eb12a54abd670d754c72ab7b4b7798c8",
+  "release": "98ebb47ba8de52e88f4e27f130766f96d36ffd58",
+  "method": "git merge-file -p on temporary files; no branch or worktree merge",
+  "files": [
+    {
+      "path": "cmd/internal/core/computer_tasks_preflight_test.go",
+      "clean": true,
+      "conflict_count": 0
+    },
+    {
+      "path": "internal/agenvo/pi_batch_service.go",
+      "clean": true,
+      "conflict_count": 0
+    },
+    {
+      "path": "internal/computertask/native_runtime_test.go",
+      "clean": false,
+      "conflict_count": 1
+    },
+    {
+      "path": "internal/computertask/service.go",
+      "clean": true,
+      "conflict_count": 0
+    },
+    {
+      "path": "internal/computertask/source.go",
+      "clean": true,
+      "conflict_count": 0
+    },
+    {
+      "path": "internal/handlers/user_runtime.go",
+      "clean": false,
+      "conflict_count": 2
+    }
+  ]
+}

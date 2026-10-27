@@ -20,17 +20,9 @@ type observationTransport struct {
 	after   func()
 }
 
-func (f *observationTransport) call(_ context.Context, _, _, _ string, args map[string]any) (json.RawMessage, error) {
+func (f *observationTransport) call(_ context.Context, _ agenvo.Scope, _ agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.t.Helper()
-	code := args["code"].(string)
-	var parts []json.RawMessage
-	if err := json.Unmarshal([]byte("["+strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");")+"]"), &parts); err != nil || len(parts) != 3 {
-		f.t.Fatal("nonliteral native invocation")
-	}
-	var method string
-	var params map[string]string
-	_ = json.Unmarshal(parts[1], &method)
-	_ = json.Unmarshal(parts[2], &params)
+
 	f.methods = append(f.methods, method)
 	if params["session"] != "synthetic" {
 		f.t.Fatal("wrong native session")
@@ -39,10 +31,10 @@ func (f *observationTransport) call(_ context.Context, _, _, _ string, args map[
 		f.after()
 	}
 	if f.fault == "authentication" {
-		return nil, errors.Join(agenvo.ErrAuthenticationUnavailable, errors.New("PRIVATE token"))
+		return agenvo.Receipt{}, errors.Join(agenvo.ErrAuthenticationUnavailable, errors.New("PRIVATE token"))
 	}
 	if f.fault == "connection" {
-		return nil, errors.New("PRIVATE 401 device_offline")
+		return agenvo.Receipt{}, errors.New("PRIVATE 401 device_offline")
 	}
 	if f.fault == "offline" || f.fault == "runtime_unavailable" {
 		code := f.fault
@@ -50,8 +42,13 @@ func (f *observationTransport) call(_ context.Context, _, _, _ string, args map[
 			code = "device_offline"
 		}
 		v, _ := json.Marshal(map[string]any{"execution": "not_started", "error": map[string]any{"code": code, "private": "SECRET"}})
-		raw, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": string(v)}}})
-		return raw, nil
+		var receipt agenvo.Receipt
+		_ = json.Unmarshal(v, &receipt)
+		err := agenvo.ErrNativeUnavailable
+		if code == "device_offline" {
+			err = agenvo.ErrDeviceOffline
+		}
+		return receipt, errors.Join(agenvo.ErrRejected, err)
 	}
 	var body any
 	switch method {
@@ -227,11 +224,10 @@ func TestWorkspaceDiscoveryAndRecoveryRejectScopeAndLateRevocation(t *testing.T)
 			case "revoked":
 				store.revoked = true
 			case "fingerprint":
-				var target agenvo.Target
-				_ = json.Unmarshal(mount.RuntimeProviderConfig, &target)
+				target := fixtureTarget(mount)
 				target.Session = "other"
 				m := mount
-				m.RuntimeProviderConfig, _ = json.Marshal(target)
+				m.RuntimeProviderConfig = fixtureConfig(target)
 				store.mounts["pc-a"] = m
 			}
 			before := len(f.methods)

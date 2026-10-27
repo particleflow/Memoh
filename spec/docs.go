@@ -11979,7 +11979,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup": {
             "post": {
-                "description": "Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.",
+                "description": "Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.",
                 "consumes": [
                     "application/json"
                 ],
@@ -11989,7 +11989,7 @@ const docTemplate = `{
                 "tags": [
                     "sessions"
                 ],
-                "summary": "Send one instruction to this task's existing interactive Agent",
+                "summary": "Read a retained interactive Agent input receipt",
                 "parameters": [
                     {
                         "type": "string",
@@ -12023,7 +12023,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Instruction with retained idempotency ID",
+                        "description": "Original input and retained request ID",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -18916,7 +18916,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Atomically fences new operation claims and follow-up reservations across matching mounts. Agenvo uses the existing owner connection and a read-only probe; configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.",
+                "description": "Atomically fences new operation claims across matching mounts. Configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.",
                 "consumes": [
                     "application/json"
                 ],
@@ -19050,7 +19050,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing Agenvo runtime ID",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -19092,7 +19092,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing Agenvo runtime ID",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -19148,7 +19148,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Existing Agenvo runtime ID",
+                        "description": "Existing native Runtime ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -20761,7 +20761,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "execution_mode": {
-                    "description": "Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into\nfinite official CLI invocations; no automatic protocol fallback occurs.",
+                    "description": "Empty is decoded only for historical profiles. Native configuration\nrequires pi-json-v1; no protocol fallback occurs.",
                     "type": "string"
                 },
                 "model": {

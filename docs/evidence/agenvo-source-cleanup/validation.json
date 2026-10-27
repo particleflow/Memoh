@@ -1,0 +1,38 @@
+{
+  "starting_head": "910589c10e363545dd220cc3b9c212def0c815ec",
+  "application_go": "1.25.7",
+  "sqlc": "1.31.1",
+  "lint": "2.10.1",
+  "checks": {
+    "native_adapters": "passed",
+    "native_task_race": "passed",
+    "isolated_postgres": "passed",
+    "error_and_handler_suites": "passed",
+    "native_owner_and_core_preflight": "passed",
+    "frontend_error_assertions": 123,
+    "agent_core_boundary": "passed",
+    "server_build": "passed",
+    "real_login_and_computers_ui": "passed",
+    "retired_http_paths": "passed",
+    "source_inventory": "passed",
+    "diff_lint": "passed, golangci-lint v2.10.1, six affected package scopes"
+  },
+  "unverified": [
+    "independent review",
+    "unified source integration",
+    "Windows and PowerShell",
+    "live Runtime/Herdr/Pi execution and results",
+    "real historical device receipt UI",
+    "PC/NAS retirement",
+    "per-schedule retirement",
+    "human QA"
+  ],
+  "scope_exclusions": [
+    "official Agent runtime/contextview",
+    "Bot authority implementation",
+    "PR89/contact changes",
+    "Windows repository",
+    "release refs/deployment",
+    "real devices/credentials/permissions"
+  ]
+}

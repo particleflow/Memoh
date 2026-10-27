@@ -212,9 +212,6 @@ func (s *Service) targets(ctx context.Context, b toolcontext.ComputerBinding) ([
 			caps = append(caps, "herdr_pi_task")
 		}
 		protocol := t.Agent.ExecutionMode
-		if t.Agent != (agenvo.AgentProfile{}) && protocol == "" {
-			protocol = "herdr-tui-observation"
-		}
 		items = append(items, Target{ID: r.ID, Name: r.RuntimeName, Capabilities: caps, Availability: "not_probed", AgentProtocol: protocol})
 	}
 	return items, nil
@@ -268,6 +265,10 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if in.Kind == "herdr_pi_task" && target.Agent == (agenvo.AgentProfile{}) {
 		return Result{}, agenvo.ErrAgentNotConfigured
 	}
+	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode != "pi-json-v1" {
+		return Result{}, agenvo.ErrUnsupported
+	}
+
 	if err := agenvo.ValidateWorkDir(target.WorkDir, in.WorkDir); err != nil {
 		return Result{}, err
 	}
@@ -403,24 +404,18 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		}
 		return result(r, d), runErr
 	}
-	d.Agent.Name = "m" + strings.ReplaceAll(uuid.NewString(), "-", "")[:30]
-	p, runErr := s.relay.SubmitAgent(work, scope(b, id), in.Task, in.WorkDir, d.Agent, func(p agenvo.AgentProgress) error { d.Agent = p; d.Phase = p.Phase; return save("dispatching") })
-	d.Agent = p
-	d.Phase = p.Phase
-	state := "submitted"
-	if runErr != nil {
-		state = "unknown"
-		if p.Phase == "prompt_rejected" && errors.Is(runErr, agenvo.ErrRejected) {
-			state = "rejected"
-		}
-	}
-	if err := save(state); err != nil {
-		return result(r, d), err
-	}
-	return result(r, d), runErr
+	return result(r, d), agenvo.ErrUnsupported
 }
 
 func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
+	return s.loadWithResolver(ctx, b, id, s.relay.ResolveTarget)
+}
+
+func (s *Service) loadHistory(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
+	return s.loadWithResolver(ctx, b, id, s.relay.ResolveHistoricalTarget)
+}
+
+func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBinding, id string, resolve func(context.Context, agenvo.Scope) (agenvo.Target, error)) (dbstore.ComputerOperationRecord, Details, error) {
 	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID})
 	if err != nil || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID {
 		return r, Details{}, ErrDenied
@@ -428,7 +423,7 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 	if err := toolcontext.CheckComputerTarget(ctx, r.TargetID); err != nil {
 		return r, Details{}, ErrDenied
 	}
-	t, err := s.relay.ResolveTarget(ctx, scope(b, r.TargetID))
+	t, err := resolve(ctx, scope(b, r.TargetID))
 	if err != nil {
 		return r, Details{}, ErrDenied
 	}
@@ -459,7 +454,11 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 }
 
 func (s *Service) observe(ctx context.Context, b toolcontext.ComputerBinding, id string, refresh bool) (Result, error) {
-	r, d, err := s.load(ctx, b, id)
+	load := s.loadHistory
+	if refresh {
+		load = s.load
+	}
+	r, d, err := load(ctx, b, id)
 	if err != nil {
 		return Result{}, err
 	}

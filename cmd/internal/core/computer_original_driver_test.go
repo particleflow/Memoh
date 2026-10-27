@@ -75,8 +75,8 @@ func TestComputerOriginalDriversReachLauncherWithPCTaskScope(t *testing.T) {
 			}
 			agents := botagents.NewService(slog.Default(), q)
 			credentials := agentcredential.NewService(q, config.Config{Auth: config.AuthConfig{AgentCredentialsEncryptionKey: base64.StdEncoding.EncodeToString(key)}})
-			source := &nativeHostFixture{guardedRuntimeFixture: guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo}, client: &bridge.Client{}}}
-			host := containerRuntimeBridge{source: source, runtime: runtime}
+			source := &nativeHostFixture{guardedRuntimeFixture: guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote}, client: &bridge.Client{}}}
+			host := containerRuntimeBridge{source: source}
 			probe := &hostLauncherProbe{t: t, stop: errors.New("synthetic launcher boundary")}
 			var driver external.Driver
 			if runtime == "claude-code" {

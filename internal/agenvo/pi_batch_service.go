@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -13,6 +14,10 @@ import (
 
 	"github.com/felinics/memoh/internal/deliverymeta"
 )
+
+// Only SGR presentation styling is removed from the direct ANSI snapshot.
+// Other terminal controls remain untrusted and cannot bypass frame/hash checks.
+var batchSnapshotSGR = regexp.MustCompile(`\x1b\[[0-9;:]*m`)
 
 type batchPane struct {
 	ID        string `json:"pane_id"`
@@ -100,7 +105,7 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 		return p, err
 	}
 	command := launchBatchScript(script, target)
-	// Agenvo's official pane.run contract has a 48,000-character limit.
+	// The fixed pane.run command contract has a 48,000-character limit.
 	if len(command) > 48000 {
 		return p, ErrUnsupported
 	}
@@ -114,11 +119,15 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 }
 
 func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, pane string, lines int) (string, error) {
-	// Agenvo v0.2.0 herdr.ts uses z.number().int().min(1).max(500).
+	// Herdr pane snapshots are bounded to the existing 1..500 row contract.
 	if lines < 1 || lines > batchReadMaxLines {
 		return "", ErrUnknown
 	}
-	r, err := c.native(ctx, scope, target, "pane.read", map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"})
+	params := map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"}
+	if target.NativeRuntimeID != "" {
+		params["format"] = "ansi"
+	}
+	r, err := c.native(ctx, scope, target, "pane.read", params)
 	if err != nil {
 		if r.Error != nil && r.Error.Code == "result_too_large" {
 			return "", errBatchSnapshotTooLarge
@@ -137,7 +146,11 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 	if json.Unmarshal(r.Result, &out) != nil || out.Output == nil || out.Session != target.Session {
 		return "", ErrUnknown
 	}
-	return *out.Output, nil
+	text := *out.Output
+	if target.NativeRuntimeID != "" {
+		text = batchSnapshotSGR.ReplaceAllString(text, "")
+	}
+	return text, nil
 }
 
 // ObserveBatch never types into Pi, including after timeout or cancellation.

@@ -55,7 +55,7 @@ func (d dirs) Get(_ context.Context, bot, id string) (workdir.Workdir, error) {
 	return v, nil
 }
 
-func (f *fixture) ResolveTarget(_ context.Context, s agenvo.Scope) (agenvo.Target, error) {
+func (f *fixture) ResolveHistoricalTarget(_ context.Context, s agenvo.Scope) (agenvo.Target, error) {
 	v, ok := f.targets[s.TargetID]
 	if !ok || s.BotID != "bot" || s.UserID != "user" {
 		return v, ErrUnavailable

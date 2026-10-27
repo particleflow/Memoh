@@ -171,3 +171,20 @@ func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, p 
 	}
 	return updated, err
 }
+
+func replaceRegistrationField(raw dbstore.JSON, key string, value any) (dbstore.JSON, error) {
+	var config map[string]json.RawMessage
+	if json.Unmarshal(raw, &config) != nil || config == nil {
+		return nil, ErrInvalidTarget
+	}
+	if value == nil {
+		delete(config, key)
+	} else {
+		encoded, err := json.Marshal(value)
+		if err != nil {
+			return nil, err
+		}
+		config[key] = encoded
+	}
+	return json.Marshal(config)
+}

@@ -2,7 +2,6 @@ package core
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/felinics/memoh/internal/agent/runtime/external"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -23,8 +22,7 @@ type nativeRuntimeHost interface {
 // Upstream drivers remain unchanged: a command-only target cannot host their
 // container executable, filesystem, credentials or persistent process.
 type containerRuntimeBridge struct {
-	source  runtimeBridgeSource
-	runtime string
+	source runtimeBridgeSource
 }
 
 func (b containerRuntimeBridge) WorkspaceInfo(ctx context.Context, botID string) (bridge.WorkspaceInfo, error) {
@@ -43,9 +41,6 @@ func (b containerRuntimeBridge) WorkspaceInfo(ctx context.Context, botID string)
 	}
 	if err != nil {
 		return bridge.WorkspaceInfo{}, err
-	}
-	if info.Backend == bridge.WorkspaceBackendAgenvo {
-		return bridge.WorkspaceInfo{}, fmt.Errorf("%w: %s on workspace backend %q", external.ErrContainerWorkspaceRequired, b.runtime, info.Backend)
 	}
 	return info, nil
 }

@@ -691,7 +691,7 @@ func provideACPSessionPool(lc fx.Lifecycle, log *slog.Logger, runner *acpclient.
 
 func provideCodexDriver(lc fx.Lifecycle, log *slog.Logger, workspaceManager *workspace.Manager, botAgents *botagents.Service, credentials *agentcredential.Service, toolApproval *toolapproval.Service, userInput *userinput.Service, toolGateway *mcp.ToolGatewayService, toolContexts *mcp.ToolSessionContextStore, workspaceDeps *workspacedeps.Service) *codexruntime.Driver {
 	driver := codexruntime.NewDriver(
-		containerRuntimeBridge{source: workspaceManager, runtime: codexruntime.RuntimeType},
+		containerRuntimeBridge{source: workspaceManager},
 		botAgents,
 		credentials,
 		toolApproval,
@@ -715,7 +715,7 @@ func provideCodexDriver(lc fx.Lifecycle, log *slog.Logger, workspaceManager *wor
 
 func provideClaudeCodeDriver(log *slog.Logger, workspaceManager *workspace.Manager, botAgents *botagents.Service, credentials *agentcredential.Service, toolApproval *toolapproval.Service, userInput *userinput.Service, toolGateway *mcp.ToolGatewayService, toolContexts *mcp.ToolSessionContextStore, workspaceDeps *workspacedeps.Service) *claudecoderuntime.Driver {
 	driver := claudecoderuntime.NewDriver(
-		containerRuntimeBridge{source: workspaceManager, runtime: claudecoderuntime.RuntimeType},
+		containerRuntimeBridge{source: workspaceManager},
 		botAgents,
 		credentials,
 		toolApproval,
@@ -729,7 +729,7 @@ func provideClaudeCodeDriver(log *slog.Logger, workspaceManager *workspace.Manag
 
 func provideGrokDriver(lc fx.Lifecycle, log *slog.Logger, workspaceManager *workspace.Manager, botAgents *botagents.Service, credentials *agentcredential.Service, toolApproval *toolapproval.Service, userInput *userinput.Service, toolGateway *mcp.ToolGatewayService, toolContexts *mcp.ToolSessionContextStore, workspaceDeps *workspacedeps.Service) *grokruntime.Driver {
 	driver := grokruntime.NewDriver(
-		containerRuntimeBridge{source: workspaceManager, runtime: grokruntime.RuntimeType},
+		containerRuntimeBridge{source: workspaceManager},
 		botAgents,
 		credentials,
 		toolApproval,

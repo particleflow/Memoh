@@ -13,7 +13,7 @@ import (
 
 type admissionStore interface {
 	dbstore.ComputerAdmissionStore
-	OwnedAgenvoRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error)
+	OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error)
 }
 
 // Admission reports only new-input admission for the registered native identity.
@@ -46,32 +46,18 @@ func (s *Service) admissionTarget(ctx context.Context, owner, runtime string) (a
 	if !ok {
 		return nil, dbstore.UserRuntimeRecord{}, Target{}, ErrUnavailable
 	}
-	row, err := store.OwnedAgenvoRuntime(ctx, owner, runtime)
-	if errors.Is(err, db.ErrNotFound) {
-		if native, ok := s.store.(nativeProfileStore); ok {
-			row, err = native.OwnedNativeHerdrRuntime(ctx, owner, runtime)
-		}
-	}
+	row, err := store.OwnedNativeHerdrRuntime(ctx, owner, runtime)
 	if err != nil {
 		return nil, row, Target{}, ErrForbidden
 	}
-	if row.Provider != "memoh" && s.call == nil {
+	if row.Provider != "memoh" {
 		return nil, row, Target{}, ErrLegacyRetired
 	}
-	var target Target
-	if row.Provider == "memoh" {
-		target, err = DecodeNativeTarget(row.ID, row.ProviderConfig)
-	} else {
-		target, err = DecodeTarget(row.ProviderConfig)
-	}
+	target, err := DecodeNativeTarget(row.ID, row.ProviderConfig)
 	if err != nil {
 		return nil, row, target, db.ErrComputerAdmissionScope
 	}
-	if target.NativeRuntimeID == "" {
-		if _, err = s.store.OwnedHTTPMCPConnectionBot(ctx, owner, target.ConnectionID); err != nil {
-			return nil, row, target, ErrForbidden
-		}
-	}
+
 	return store, row, target, nil
 }
 
@@ -89,9 +75,9 @@ func (s *Service) ReadAdmission(ctx context.Context, owner, runtime string) (Adm
 	return admissionResponse(row), err
 }
 
-// SetAdmission uses the existing owner's MCP authorization and native read-only
-// probe. The database compares the same registration again under the admission
-// lock; request ID and revision must be retained across an uncertain response.
+// SetAdmission checks the existing owned native registration. The database
+// compares that registration under the admission lock; retain request ID and
+// revision across an uncertain response. No remote call is required.
 func (s *Service) SetAdmission(ctx context.Context, owner, runtime string, in ChangeAdmission) (Admission, error) {
 	request, err := uuid.Parse(in.RequestID)
 	revision, revErr := strconv.ParseInt(in.ExpectedRevision, 10, 64)
@@ -104,11 +90,6 @@ func (s *Service) SetAdmission(ctx context.Context, owner, runtime string, in Ch
 	}
 	// Native admission is an owner control-plane change and remains available
 	// while the PC is disconnected. It does not grant execution or resume work.
-	if record.Provider != "memoh" {
-		if err = s.Probe(ctx, owner, record.ProviderConfig); err != nil {
-			return Admission{}, err
-		}
-	}
 	row, err := store.ChangeComputerAdmission(ctx, owner, runtime, record.ProviderConfig, in.RequestID, revision, *in.Paused)
 	return admissionResponse(row), err
 }

@@ -7,7 +7,8 @@ import (
 
 func TestNativeOnlyWiringRejectsLegacyBeforeAnyTransport(t *testing.T) {
 	legacy, store, f := serviceFixture(t)
-	s := NewService(store, legacy.permissions, nil) // Same wiring as core and delivery.
+	store.record.RuntimeProvider = Provider
+	s := NewService(store, legacy.permissions, f.call) // Same wiring as core and delivery.
 	original := string(store.record.RuntimeProviderConfig)
 	if _, err := s.ResolveTarget(t.Context(), request().Scope); !errors.Is(err, ErrLegacyRetired) {
 		t.Fatal(err)
@@ -16,7 +17,7 @@ func TestNativeOnlyWiringRejectsLegacyBeforeAnyTransport(t *testing.T) {
 	if !errors.Is(err, ErrLegacyRetired) || out.State != "not_started" {
 		t.Fatalf("%+v %v", out, err)
 	}
-	if len(f.calls) != 0 || store.created != 0 || string(store.record.RuntimeProviderConfig) != original {
+	if len(f.calls) != 0 || string(store.record.RuntimeProviderConfig) != original {
 		t.Fatal("retired target caused a call, write, or configuration change")
 	}
 }

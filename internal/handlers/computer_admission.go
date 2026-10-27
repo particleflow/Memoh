@@ -37,7 +37,7 @@ func (h *UserRuntimeHandler) ReadAdmission(c echo.Context) error {
 
 // SetAdmission godoc
 // @Summary Pause or resume new work for an owned native instance
-// @Description Atomically fences new operation claims and follow-up reservations across matching mounts. Agenvo uses the existing owner connection and a read-only probe; configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
+// @Description Atomically fences new operation claims across matching mounts. Configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
 // @Tags user-runtimes
 // @Accept json
 // @Produce json

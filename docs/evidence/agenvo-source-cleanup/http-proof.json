@@ -1,0 +1,31 @@
+{
+  "base": "http://127.0.0.1:28080",
+  "checks": [
+    {
+      "path": "/users/me/runtimes/00000000-0000-4000-8000-000000000001/agenvo-endpoint",
+      "method": "PUT",
+      "status": 404,
+      "code": "http.not_found"
+    },
+    {
+      "path": "/users/me/runtimes/00000000-0000-4000-8000-000000000001/agenvo-agent",
+      "method": "PUT",
+      "status": 404,
+      "code": "http.not_found"
+    },
+    {
+      "path": "/users/me/runtimes/agenvo/discover",
+      "method": "GET",
+      "status": 404,
+      "code": "http.not_found"
+    },
+    {
+      "path": "/users/me/runtimes",
+      "method": "POST",
+      "status": 400,
+      "code": "request.field_invalid"
+    }
+  ],
+  "runtime_rows_unchanged": true,
+  "runtime_count": 0
+}

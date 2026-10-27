@@ -20,6 +20,7 @@ import (
 	"github.com/felinics/memoh/internal/config"
 	memohdb "github.com/felinics/memoh/internal/db"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
+	dbstore "github.com/felinics/memoh/internal/db/store"
 	mcpgw "github.com/felinics/memoh/internal/mcp"
 	"github.com/felinics/memoh/internal/mcp/sources/federation"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -70,9 +71,7 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	}
 	legacy := agenvo.Target{ConnectionID: connection.ID, DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "legacy", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}
 	raw, _ := json.Marshal(legacy)
-	if _, err = f.store.ConfigureAgenvoRuntime(t.Context(), f.owner, legacyRuntime, previous, raw); err != nil {
-		t.Fatal(err)
-	}
+	f.exec(t, `UPDATE user_runtimes SET provider_config=$2 WHERE id=$1`, legacyRuntime, raw)
 	f.exec(t, `INSERT INTO mcp_oauth_tokens(connection_id,token_endpoint,access_token,refresh_token,expires_at) VALUES($1,$2,'synthetic-access','synthetic-refresh',now()-interval '1 hour')`, connection.ID, oauthServer.URL+"/token")
 	f.exec(t, `UPDATE user_runtimes SET transfer_credential_id='synthetic-transfer-id',transfer_credential_digest='synthetic-transfer-digest' WHERE id=$1`, legacyRuntime)
 	profile := agenvo.NativeHerdrProfile{InstanceID: "synthetic-native-instance", Session: "native", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\config`}}
@@ -151,10 +150,8 @@ func TestNativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths(t *testing.T) {
 	otherTarget := legacy
 	otherTarget.ConnectionID, otherTarget.Session = other.ID, "other-active"
 	otherConfig, _ := json.Marshal(otherTarget)
-	otherRuntime, err := f.store.CreateAgenvoRuntime(t.Context(), f.owner, "unrelated-active-agenvo", otherConfig)
-	if err != nil {
-		t.Fatal(err)
-	}
+	otherRuntime := dbstore.UserRuntimeRecord{ID: uuid.NewString()}
+	f.exec(t, "INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'agenvo',$5,now(),NULL)", otherRuntime.ID, f.owner, "unrelated-active-agenvo", uuid.NewString(), otherConfig)
 	otherMount := uuid.NewString()
 	f.exec(t, `INSERT INTO bot_remote_runtime_bindings(id,bot_id,runtime_id) VALUES($1,$2,$3)`, otherMount, f.bot, otherRuntime.ID)
 	assertInventories := func() {
@@ -313,10 +310,8 @@ func TestNativeRuntimeCutoverListsRecognizeUUIDTextForms(t *testing.T) {
 				profile["connection_id"] = tc.value
 			}
 			raw, _ := json.Marshal(profile)
-			runtime, err := f.store.CreateAgenvoRuntime(t.Context(), f.owner, "format-"+tc.name, raw)
-			if err != nil {
-				t.Fatal(err)
-			}
+			runtime := dbstore.UserRuntimeRecord{ID: uuid.NewString()}
+			f.exec(t, "INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'agenvo',$5,now(),NULL)", runtime.ID, f.owner, "format-"+tc.name, uuid.NewString(), raw)
 			mount := uuid.NewString()
 			f.exec(t, `INSERT INTO bot_remote_runtime_bindings(id,bot_id,runtime_id) VALUES($1,$2,$3)`, mount, f.bot, runtime.ID)
 			runtimes, err := owners.ListRuntimes(t.Context(), f.owner)

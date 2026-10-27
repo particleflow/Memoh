@@ -156,6 +156,13 @@ func buildCommand(method string, params map[string]any, target agenvo.Target) ([
 			return nil, agenvo.ErrUnsupported
 		}
 		argv = append(strings.Split(method, "."), ref, "--lines", strconv.Itoa(lines), "--source", source)
+		if _, exists := params["format"]; exists && method == "pane.read" {
+			format, ok := str("format", "text", 16, false)
+			if !ok || format != "text" && format != "ansi" {
+				return nil, agenvo.ErrUnsupported
+			}
+			argv = append(argv, "--format", format)
+		}
 	case "pane.run", "pane.send-text", "agent.prompt":
 		key := "paneId"
 		if method == "agent.prompt" {

@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/Memoh-pr90
+
+
+ Test Files  2 passed (2)
+      Tests  123 passed (123)
+   Start at  14:40:16
+   Duration  2.25s (transform 2.01s, setup 0ms, import 2.84s, tests 126ms, environment 1ms)

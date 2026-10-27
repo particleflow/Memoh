@@ -50,6 +50,9 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.PUT("/:id/native-herdr", h.ConfigureNativeHerdr)
 	g.GET("/:id/admission", h.ReadAdmission)
 	g.PUT("/:id/admission", h.SetAdmission)
+	// Keep unknown Runtime paths inside this namespace; the generic users/:id
+	// route must not consume them as account updates.
+	g.Any("/*", func(echo.Context) error { return echo.ErrNotFound })
 }
 
 // ConfigureNativeHerdr godoc
@@ -161,7 +164,7 @@ func (h *UserRuntimeHandler) Delete(c echo.Context) error {
 
 func runtimeHTTPError(err error) error {
 	switch {
-	case errors.Is(err, agenvo.ErrEndpointConfigConflict), errors.Is(err, agenvo.ErrNativeProfileConflict):
+	case errors.Is(err, agenvo.ErrNativeProfileConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
 		return apperror.Wrap(apperror.CodeComputerAdmissionPaused, err, nil)

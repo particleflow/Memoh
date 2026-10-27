@@ -1919,9 +1919,9 @@ export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContent = <
 export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesData, ThrowOnError>): RequestResult<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors, ThrowOnError>({ url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries', ...options });
 
 /**
- * Send one instruction to this task's existing interactive Agent
+ * Read a retained interactive Agent input receipt
  *
- * Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.
+ * Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.
  */
 export const postBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowup = <ThrowOnError extends boolean = false>(options: Options<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData, ThrowOnError>): RequestResult<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses, PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors, ThrowOnError> => (options.client ?? client).post<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses, PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors, ThrowOnError>({
     url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup',
@@ -3165,7 +3165,7 @@ export const getUsersMeRuntimesByIdAdmission = <ThrowOnError extends boolean = f
 /**
  * Pause or resume new work for an owned native instance
  *
- * Atomically fences new operation claims and follow-up reservations across matching mounts. Agenvo uses the existing owner connection and a read-only probe; configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
+ * Atomically fences new operation claims across matching mounts. Configured native Runtimes use the owned registry identity and remain manageable while offline. Retain request_id after an uncertain response. Resume requires the pause request ID and current revision. Does not stop processes, drain accepted work or authorize a host restart.
  */
 export const putUsersMeRuntimesByIdAdmission = <ThrowOnError extends boolean = false>(options: Options<PutUsersMeRuntimesByIdAdmissionData, ThrowOnError>): RequestResult<PutUsersMeRuntimesByIdAdmissionResponses, PutUsersMeRuntimesByIdAdmissionErrors, ThrowOnError> => (options.client ?? client).put<PutUsersMeRuntimesByIdAdmissionResponses, PutUsersMeRuntimesByIdAdmissionErrors, ThrowOnError>({
     url: '/users/me/runtimes/{id}/admission',

@@ -24,14 +24,11 @@ func (s *Service) AdvanceBatchDelivery(ctx context.Context, scope Scope, p Batch
 	if p.Producer.Task.RootHash != deliverymeta.RootHash(target.WorkDir) {
 		return ErrTargetChanged
 	}
-	command := `& { herdr plugin action invoke collect-result --plugin memoh.delivery *> $null }`
-	if target.NativeRuntimeID != "" {
-		collect, err := nativeProducerCollectCommand(target.Producer)
-		if err != nil {
-			return err
-		}
-		command = launchBashScript(collect+" >/dev/null 2>&1", target.BashPath)
+	collect, err := nativeProducerCollectCommand(target.Producer)
+	if err != nil {
+		return err
 	}
+	command := launchBashScript(collect+" >/dev/null 2>&1", target.BashPath)
 	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
 	if err != nil {
 		return err
@@ -91,18 +88,12 @@ export MEMOH_DELIVERY_CONTEXT_FILE="$(cygpath -w "$memoh_attempt/%s")"`, base64.
 	script = strings.Replace(script, `if cd "$memoh_cwd" &&`, `if `+guards.String()+`cd "$memoh_cwd" &&`, 1)
 	// One bounded hook per envelope. Remaining manifests stay for later existing
 	// task queries/host actions; never rerun Pi or add a background worker.
-	hook := `
-if [ "$memoh_started" = true ] && command -v herdr >/dev/null; then
-  herdr plugin action invoke collect-result --plugin memoh.delivery > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true
-fi
-`
-	if target.NativeRuntimeID != "" {
-		collect, err := nativeProducerCollectCommand(target.Producer)
-		if err != nil {
-			return "", err
-		}
-		hook = "\nif [ \"$memoh_started\" = true ]; then\n  " + collect + ` > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true` + "\nfi\n"
+	collect, err := nativeProducerCollectCommand(target.Producer)
+	if err != nil {
+		return "", err
 	}
+	hook := "\nif [ \"$memoh_started\" = true ]; then\n  " + collect + ` > "$memoh_attempt/producer-trigger.json" 2> "$memoh_attempt/producer-trigger-error.txt" || true` + "\nfi\n"
+
 	result := script + closures.String() + hook
 	// Leave headroom below Windows CreateProcessW's 32767-character bound.
 	// The connector's existing larger command cap alone is insufficient here.
