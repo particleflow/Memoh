@@ -1,0 +1,8 @@
+--- FAIL: TestCommittedResultAssociationVerifiesBytesAndLiveLedger (0.01s)
+    --- FAIL: TestCommittedResultAssociationVerifiesBytesAndLiveLedger/committed (0.00s)
+        result_association_test.go:194: committed=<nil> links=1
+    --- FAIL: TestCommittedResultAssociationVerifiesBytesAndLiveLedger/committed-rows (0.00s)
+        result_association_test.go:194: committed=<nil> links=1
+FAIL
+FAIL	github.com/felinics/memoh/internal/computertask	0.019s
+FAIL
