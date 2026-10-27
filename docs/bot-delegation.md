@@ -101,6 +101,17 @@ Authorized NAS cloud connectors/MCP remain available. Existing PC restrictions
 and managed computer endpoint guards remain in effect; computer operations use
 the constrained service and the current Bot/device intersection.
 
+### Native Runtime registration
+
+New shared-device plans use existing activated `memoh` Runtime registrations and
+`DecodeRuntimeTarget`. Both Bots must mount the same Runtime and current target
+fingerprint; native registration is rechecked against the owner-scoped registry.
+Workspace permissions remain the intersection of both Bots' current grants.
+Historical Agenvo records remain readable under existing authorization, but new
+plans do not select legacy devices or restore legacy execution. See the
+[native delegation regression evidence](validation/native-bot-delegation/README.md)
+for differential checks and the outstanding live acceptance boundary.
+
 ## Persistence, integration and limits
 
 Migration `0173_bot_delegations` is reserved for this feature. It records immutable

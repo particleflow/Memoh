@@ -88,8 +88,14 @@ func (f *authorityFixture) GetMount(_ context.Context, bot, id string) (dbstore.
 	if !ok {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, db.ErrNotFound
 	}
-	m.RuntimeProviderConfig, _ = json.Marshal(f.targets[bot+"/"+id])
+	if len(m.RuntimeProviderConfig) == 0 {
+		m.RuntimeProviderConfig, _ = json.Marshal(f.targets[bot+"/"+id])
+	}
 	return m, nil
+}
+
+func (*authorityFixture) OwnedNativeHerdrRuntime(context.Context, string, string) (dbstore.UserRuntimeRecord, error) {
+	return dbstore.UserRuntimeRecord{}, db.ErrNotFound
 }
 
 func (*authorityFixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {

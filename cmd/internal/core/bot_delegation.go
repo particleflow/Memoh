@@ -9,13 +9,13 @@ import (
 	"slices"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"go.uber.org/fx"
 
 	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/agent/application"
 	historyfrag "github.com/felinics/memoh/internal/agent/context/history"
 	"github.com/felinics/memoh/internal/agent/turn"
-	"github.com/felinics/memoh/internal/agenvo"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
 	"github.com/felinics/memoh/internal/boot"
 	"github.com/felinics/memoh/internal/botdelegation"
@@ -165,15 +165,29 @@ func (h *delegationHost) resultAssets(ctx context.Context, bot, user, root strin
 }
 
 func (h *delegationHost) Plan(ctx context.Context, b botdelegation.Identity, selected string) ([]botdelegation.DevicePair, string, error) {
+	return planDelegationDevices(ctx, h.store, h.service.Authority, b, selected)
+}
+
+type delegationMountPlanner interface {
+	ListMounts(context.Context, string) ([]dbstore.BotRemoteRuntimeBindingRecord, error)
+	GetMount(context.Context, string, string) (dbstore.BotRemoteRuntimeBindingRecord, error)
+	DelegationMountForRuntime(context.Context, sqlc.DelegationMountForRuntimeParams) (pgtype.UUID, error)
+}
+
+func planDelegationDevices(ctx context.Context, store delegationMountPlanner, authority *botdelegation.Authority, b botdelegation.Identity, selected string) ([]botdelegation.DevicePair, string, error) {
+	current, err := authority.Authorize(ctx, b)
+	if err != nil || current != selected {
+		return nil, "", botdelegation.ErrDenied
+	}
 	var candidates []dbstore.BotRemoteRuntimeBindingRecord
 	if selected == "native" {
 		var err error
-		candidates, err = h.store.ListMounts(ctx, b.SourceBotID)
+		candidates, err = store.ListMounts(ctx, b.SourceBotID)
 		if err != nil {
 			return nil, "", err
 		}
 	} else {
-		m, err := h.store.GetMount(ctx, b.SourceBotID, selected)
+		m, err := store.GetMount(ctx, b.SourceBotID, selected)
 		if err != nil {
 			return nil, "", botdelegation.ErrDenied
 		}
@@ -182,31 +196,31 @@ func (h *delegationHost) Plan(ctx context.Context, b botdelegation.Identity, sel
 	pairs := []botdelegation.DevicePair{}
 	target := "native"
 	for _, m := range candidates {
-		if m.RuntimeRevoked || m.RuntimeUserID != m.BotOwnerUserID || m.RuntimeProvider != agenvo.Provider {
+		if m.BotID != b.SourceBotID || m.ID == "" || m.RuntimeID == "" || m.RuntimeRevoked || m.RuntimeUserID != m.BotOwnerUserID || m.RuntimeProvider != "memoh" {
 			continue
 		}
-		id, err := h.store.DelegationMountForRuntime(ctx, sqlc.DelegationMountForRuntimeParams{BotID: db.ParseUUIDOrEmpty(b.TargetBotID), RuntimeID: db.ParseUUIDOrEmpty(m.RuntimeID)})
+		id, err := store.DelegationMountForRuntime(ctx, sqlc.DelegationMountForRuntimeParams{BotID: db.ParseUUIDOrEmpty(b.TargetBotID), RuntimeID: db.ParseUUIDOrEmpty(m.RuntimeID)})
 		if errors.Is(err, pgx.ErrNoRows) {
 			continue
 		}
 		if err != nil {
 			return nil, "", err
 		}
-		tm, err := h.store.GetMount(ctx, b.TargetBotID, id.String())
+		pair, err := authority.PlanDevice(ctx, b, m.ID, id.String())
+		if errors.Is(err, botdelegation.ErrDenied) {
+			continue
+		}
 		if err != nil {
 			return nil, "", err
 		}
-		t, err := agenvo.DecodeTarget(m.RuntimeProviderConfig)
-		if err != nil {
+		// The lookup candidate and freshly authorized pair must still name the
+		// same runtime if a mount changed while this plan was being assembled.
+		if pair.RuntimeID != m.RuntimeID {
 			continue
 		}
-		tt, err := agenvo.DecodeTarget(tm.RuntimeProviderConfig)
-		if err != nil || tm.RuntimeRevoked || tm.RuntimeUserID != tm.BotOwnerUserID || tm.RuntimeProvider != agenvo.Provider || agenvo.TargetFingerprint(t) != agenvo.TargetFingerprint(tt) {
-			continue
-		}
-		pairs = append(pairs, botdelegation.DevicePair{SourceMountID: m.ID, TargetMountID: tm.ID, RuntimeID: m.RuntimeID, Fingerprint: agenvo.TargetFingerprint(t)})
+		pairs = append(pairs, pair)
 		if selected != "native" {
-			target = tm.ID
+			target = pair.TargetMountID
 		}
 	}
 	if selected != "native" && target == "native" {
