@@ -1,31 +1,43 @@
-# Historical Harmony 1.0.9 unsigned specimen
+# Historical Harmony 1.0.9 artifact record
 
-Source: `c9c00580052d09d5dce273e958ec384bef2ebed3`.
-Shared Web/SDK: `8a2422935916f56b5bacfac2f991824d1cb9bd9f`.
-Bundle: `cloud.begonia.workassistant`; version: **1.0.9 / 1000009**.
-File: `memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap`.
-Size: **37,053,849 bytes**. SHA-256:
-`ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4`.
+The obsolete unsigned HAP has been removed from the current working tree.
+Git history has not been deleted or rewritten. It is not a current release or
+rollback target; the [current 1.0.19 handoff](../../../docs/testing/harmony-unified-1.0.19/README.md)
+and the separate 1.0.18 field/rollback baseline remain unchanged.
 
-This unsigned specimen is superseded as a delivery candidate; it is not a
-current installation or rollback instruction. Use the
-[1.0.19 package/source handoff](../../../docs/testing/harmony-unified-1.0.19/README.md)
-for the current qualification. Matching app identity does not prove safe downgrade.
+| Field | Original artifact identity |
+| --- | --- |
+| Version | 1.0.9 / 1000009 |
+| Source | `c9c00580052d09d5dce273e958ec384bef2ebed3` |
+| Shared Web/SDK | `8a2422935916f56b5bacfac2f991824d1cb9bd9f` |
+| Bundle | `cloud.begonia.workassistant` |
+| Historical filename | `memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap` |
+| Bytes | 37053849 |
+| SHA256 | `ebe3b6168ec013d1e78a2a523a155c07e2122000c98e99316ff88997ca948ae4` |
+| Git blob | `d909bd204a7ad5993f3b50a931a90f7ee7c8387f` |
+| Original distribution commit | `1bd851eca27bfb86adad690d01907b56f4b3f82f` |
 
-[build-identity.json](build-identity.json) and the
-[exact qualification report](../../../docs/testing/harmony-unified-8a24229/README.md)
-record the shared-source alignment and injection-slot check on this artifact.
-The injector changed only its reserved resource and preserved ZIP offsets/CRCs
-in a synthetic test. Those records do not establish current Windows signing,
-phone upgrade or live NAS acceptance.
+The original bytes remain available at the
+[immutable historical artifact](https://github.com/particleflow/Memoh/blob/1bd851eca27bfb86adad690d01907b56f4b3f82f/artifacts/harmony/1.0.9-c9c005800/memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap).
+Normal Git recovery from the repository root is:
 
-No active builder or required current regression consumer of this binary has
-been established by the cleanup scan. The original release owner must decide
-whether reproducing that exact old qualification still requires the binary;
-otherwise remove its current-tree copy and repair its metadata/references
-coherently, preserving Git history. This is a pending retirement item, not a
-blanket justification to keep obsolete build products.
+```sh
+git restore --source=1bd851eca27bfb86adad690d01907b56f4b3f82f --worktree -- artifacts/harmony/1.0.9-c9c005800/memoh-harmony-1.0.9-1000009-c9c005800-api26-unsigned.hap
+```
 
-The former delivery recipe is retained in this file's Git history. No private
-configuration, configured/signed derivative, binding data or signing material
-is introduced or published by this audit.
+Use that only for explicit historical reproduction. After restoring the old
+payload, run `sha256sum -c SHA256SUMS` from this record's directory and compare
+the byte length above. The checksum file identifies restored historical bytes;
+it does not promise that a HAP remains beside it in the current tree.
+
+The [original qualification record](../../../docs/testing/harmony-unified-8a24229/README.md)
+and [build-identity.json](build-identity.json)
+preserve the exact source/package and configuration-slot audit. They do not
+certify a current Windows signing operation, device install or downgrade.
+No tracked build, runtime or test reader for this obsolete binary was found.
+The historical record is retained so old source/hash and injection reports can
+be interpreted and independently recovered; no binary copy was moved elsewhere.
+
+The 1.0.7 HAP is separately retained for its actual no-injection-slot rejection
+fixture. Private configuration, signing inputs and user data are outside this
+cleanup; no such material is added, accessed or deleted here.
