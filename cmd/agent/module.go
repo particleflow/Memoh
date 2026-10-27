@@ -80,6 +80,7 @@ func commonOptions() fx.Option {
 		channelmodule.FoundationModule(),
 		coremodule.ServerModule(),
 		fx.Provide(
+			provideCatalogTargetResolver,
 			provideServerHandler(handlers.NewPingHandler),
 			provideServerHandler(handlers.NewWebhookTunnelHandler),
 			provideServerHandler(provideAuthHandler),

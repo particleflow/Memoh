@@ -94,6 +94,7 @@ type Config struct {
 	Postgres              PostgresConfig              `toml:"postgres"`
 	PGVector              PGVectorConfig              `toml:"pgvector"`
 	Registry              RegistryConfig              `toml:"registry"`
+	ModelCatalogSync      ModelCatalogSyncConfig      `toml:"model_catalog_sync"`
 	Supermarket           SupermarketConfig           `toml:"supermarket"`
 	WorkspaceDependencies WorkspaceDependenciesConfig `toml:"workspace_dependencies"`
 	OAuthClients          OAuthClientsConfig          `toml:"oauth_clients"`
@@ -103,6 +104,12 @@ type Config struct {
 	WebhookTunnel         WebhookTunnelConfig         `toml:"webhook_tunnel"`
 	ConnectIt             ConnectItConfig             `toml:"connect_it"`
 	Telemetry             TelemetryConfig             `toml:"telemetry"`
+}
+
+// ModelCatalogSyncConfig identifies one existing provider to synchronize.
+// ProviderID is a non-secret, stable provider UUID; empty disables discovery.
+type ModelCatalogSyncConfig struct {
+	ProviderID string `toml:"provider_id"`
 }
 
 // TelemetryConfig configures OpenTelemetry trace and metric export. It is off

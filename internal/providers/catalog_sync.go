@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 
 	"github.com/felinics/memoh/internal/catalogsync"
 	"github.com/felinics/memoh/internal/db"
@@ -146,7 +149,7 @@ func (s *catalogSyncState) finish(id string, now time.Time, success bool) {
 }
 
 // SyncStoredModelCatalog connects discovery to the existing transactional store.
-// Explicit provider selection and lifecycle scheduling remain caller-owned.
+// Explicit provider selection and lifecycle scheduling are supplied by the caller.
 func (s *Service) SyncStoredModelCatalog(ctx context.Context, id string) (bool, error) {
 	store, ok := s.queries.(interface {
 		ApplyModelCatalog(context.Context, string, []byte, string, []catalogsync.Model) error
@@ -181,6 +184,33 @@ func (s *Service) SyncStoredModelCatalog(ctx context.Context, id string) (bool, 
 	})
 }
 
+// ResolveCatalogSyncTarget checks the explicitly configured provider against
+// the current team-scoped row on every iteration. It never infers a target.
+func (s *Service) ResolveCatalogSyncTarget(ctx context.Context, id string) (string, error) {
+	if strings.TrimSpace(id) == "" {
+		return "", nil
+	}
+	parsed, err := db.ParseUUID(strings.TrimSpace(id))
+	if err != nil {
+		return "", err
+	}
+	row, err := s.queries.GetProviderByID(ctx, parsed)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	typ := models.ClientType(row.ClientType)
+	if !row.Enable || (typ != models.ClientTypeOpenAICompletions && typ != models.ClientTypeOpenAIResponses) {
+		return "", nil
+	}
+	if !row.ID.Valid || row.ID != parsed {
+		return "", errors.New("provider identity mismatch")
+	}
+	return row.ID.String(), nil
+}
+
 // CatalogTargetResolver returns the one explicitly selected existing provider ID.
 // It must return an empty ID until that identity is established. It must never
 // derive a provider from a hostname or from its model names.
@@ -188,7 +218,7 @@ type CatalogTargetResolver func(context.Context) (string, error)
 
 // RunModelCatalogSync runs inside the existing server lifecycle. The caller
 // supplies the established provider identity and cancels ctx on shutdown. The
-// target resolver is the only integration seam; no new provider config exists.
+// target resolver is supplied by the Server's persisted provider binding.
 func (s *Service) RunModelCatalogSync(ctx context.Context, resolve CatalogTargetResolver) {
 	if resolve == nil {
 		return

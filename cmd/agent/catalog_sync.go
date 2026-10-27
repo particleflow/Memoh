@@ -5,15 +5,24 @@ import (
 
 	"go.uber.org/fx"
 
+	"github.com/felinics/memoh/internal/config"
 	"github.com/felinics/memoh/internal/providers"
 )
+
+// provideCatalogTargetResolver binds the worker to the single explicit,
+// persisted non-secret UUID. It checks the current provider row each time.
+func provideCatalogTargetResolver(cfg config.Config, service *providers.Service) providers.CatalogTargetResolver {
+	return func(ctx context.Context) (string, error) {
+		return service.ResolveCatalogSyncTarget(ctx, cfg.ModelCatalogSync.ProviderID)
+	}
+}
 
 type catalogSyncLifecycleParams struct {
 	fx.In
 	Lifecycle fx.Lifecycle
 	Service   *providers.Service
-	// The integration supplies the existing, verified provider identity. Without
-	// a binding, this remains nil and the server does not discover any provider.
+	// The production graph supplies a resolver backed by the persisted UUID.
+	// Optional supports minimal Fx graphs that do not configure this worker.
 	Resolver providers.CatalogTargetResolver `optional:"true"`
 }
 
