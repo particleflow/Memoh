@@ -300,13 +300,14 @@ jobs:
           : "${TEST_POSTGRES_DSN:?Delegation and task observation tests require PostgreSQL}"
           set -o pipefail
           go test -json -race -tags=integration -count=1 -timeout 90s \
-            -run '^Test(BotDelegationPostgresClaimIsolationAndDescendantAssets|SessionTasksPostgresOwnedTreeAndStableCursor|SessionTasksPostgresLatestChildRunAndMessage|BotActivityPostgresUnopenedRunsScopeAndReadOnly|WorkspaceStoragePostgresHTTPPreservesRegistration|PostgresPrivateChatIsolationAndConcurrentReuse|PostgresPrivateChatLifecycle)$' ./internal/db | tee delegation-postgres-tests.jsonl
+            -run '^Test(BotDelegationPostgresClaimIsolationAndDescendantAssets|SessionTasksPostgresOwnedTreeAndStableCursor|SessionTasksPostgresLatestChildRunAndMessage|BotActivityPostgresUnopenedRunsScopeAndReadOnly|WorkspaceStoragePostgresHTTPPreservesRegistration|PostgresPrivateChatIsolationAndConcurrentReuse|PostgresPrivateChatLifecycle|PostgresPrivateChatNavigation)$' ./internal/db | tee delegation-postgres-tests.jsonl
           python3 - <<'PY'
           import json
           from pathlib import Path
           required = {
               "TestPostgresPrivateChatIsolationAndConcurrentReuse",
               "TestPostgresPrivateChatLifecycle",
+              "TestPostgresPrivateChatNavigation",
               "TestBotActivityPostgresUnopenedRunsScopeAndReadOnly",
               "TestWorkspaceStoragePostgresHTTPPreservesRegistration",
               "TestBotDelegationPostgresClaimIsolationAndDescendantAssets",

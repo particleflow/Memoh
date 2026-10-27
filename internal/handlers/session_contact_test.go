@@ -143,3 +143,89 @@ func TestPrivateChatHTTPUsesOnlyAuthenticatedAccount(t *testing.T) {
 		})
 	}
 }
+
+type contactNavigationRecorder struct {
+	contactRecorder
+	navigationCalls int
+}
+
+func (r *contactNavigationRecorder) InspectPrivateChat(_ context.Context, bot, user, _ string, _ ...string) (route.PrivateChatEntry, error) {
+	r.navigationCalls++
+	r.bot, r.user = bot, user
+	return route.PrivateChatEntry{Candidates: []thread.Thread{}}, r.err
+}
+
+func (r *contactNavigationRecorder) BindPrivateChat(_ context.Context, bot, user, id string) (thread.Thread, error) {
+	r.navigationCalls++
+	r.bot, r.user = bot, user
+	return thread.Thread{ID: id, BotID: bot, CreatedByUserID: user}, r.err
+}
+
+func TestPrivateChatNavigationHTTPAccountAndInputBoundary(t *testing.T) {
+	for _, scenario := range []string{"inspect", "bind", "anonymous", "chat_route", "injected_identity", "invalid_session", "extra_body", "conflict", "revoked_bot"} {
+		t.Run(scenario, func(t *testing.T) {
+			const secret = "synthetic-contact-navigation-secret"
+			q := newInvocationTestQueries(invocationTestSession(invocationTestSessionA, invocationTestOwnerID))
+			h := newInvocationTestHandler(q, nil)
+			navigator := &contactNavigationRecorder{}
+			h.SetPrivateChatResolver(navigator)
+			e := echo.New()
+			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.New(slog.DiscardHandler))
+			e.Use(auth.JWTMiddleware(secret, nil, nil))
+			h.Register(e)
+			token, _, err := auth.GenerateToken(invocationTestOwnerID, secret, time.Minute)
+			if err != nil {
+				t.Fatal(err)
+			}
+			method, path, body, want := http.MethodPost, "/bots/"+invocationTestBotID+"/sessions/contact/bind", `{"session_id":"`+invocationTestSessionA+`"}`, http.StatusOK
+			switch scenario {
+			case "inspect":
+				method, path, body = http.MethodGet, "/bots/"+invocationTestBotID+"/sessions/contact", ""
+			case "anonymous":
+				token = ""
+				want = http.StatusUnauthorized
+			case "chat_route":
+				token, _, err = auth.GenerateChatToken(auth.ChatToken{BotID: invocationTestBotID, ChatID: invocationTestBotID, UserID: invocationTestOwnerID}, secret, time.Minute)
+				if err != nil {
+					t.Fatal(err)
+				}
+				want = http.StatusForbidden
+			case "injected_identity":
+				body = `{"session_id":"` + invocationTestSessionA + `","user_id":"` + invocationTestOtherUser + `"}`
+				want = http.StatusBadRequest
+			case "invalid_session":
+				body = `{"session_id":"not-a-uuid"}`
+				want = http.StatusBadRequest
+			case "extra_body":
+				body += `{}`
+				want = http.StatusBadRequest
+			case "conflict":
+				navigator.err = route.ErrContactConflict
+				want = http.StatusConflict
+			case "revoked_bot":
+				q.permissions = []byte(`[]`)
+				want = http.StatusForbidden
+			}
+			req := httptest.NewRequest(method, path, strings.NewReader(body))
+			req.Header.Set("Content-Type", "application/json")
+			if token != "" {
+				req.Header.Set("Authorization", "Bearer "+token)
+			}
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			if rec.Code != want {
+				t.Fatalf("status %d want %d body %s", rec.Code, want, rec.Body.String())
+			}
+			if want == http.StatusOK || scenario == "conflict" {
+				if navigator.navigationCalls != 1 || navigator.bot != invocationTestBotID || navigator.user != invocationTestOwnerID {
+					t.Fatal("wrong authoritative scope")
+				}
+			} else if navigator.navigationCalls != 0 {
+				t.Fatal("invalid request reached binding")
+			}
+			if navigator.calls != 0 {
+				t.Fatal("navigation invoked contact creation")
+			}
+		})
+	}
+}

@@ -165,6 +165,8 @@ import {
   Spinner,
 } from '@felinic/ui'
 import { Check, ChevronsUpDown, GripVertical, Plus, Settings2 } from 'lucide-vue-next'
+import { toast } from '@felinic/ui'
+import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useChatStore } from '@/store/chat-list'
 import { firstAvatarCharacter } from '@/composables/useAvatarInitials'
 import { usePinnedBots } from '@/composables/usePinnedBots'
@@ -226,8 +228,7 @@ function handleSelect(bot: BotsBot) {
   const id = bot.id ?? ''
   if (!id) return
   menuOpen.value = false
-  if (id === currentBotId.value) return
-  void chatStore.selectBot(id)
+  void chatStore.selectBot(id).catch(error => toast.error(resolveApiErrorMessage(error, t('chat.contact.failed'))))
   void router.push({ name: 'bot', params: { botName: bot.name ?? id } })
 }
 

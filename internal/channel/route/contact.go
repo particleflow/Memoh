@@ -82,7 +82,7 @@ func (c *ThreadCoordinator) EnsurePrivateChat(ctx context.Context, bot, user str
 				}
 				// Check even tombstones: a foreign deleted row cannot authorize
 				// replacing this account's contact pointer.
-				if stored.BotID != previous.BotID || stored.CreatedByUserID != (pgtype.UUID{Bytes: uid, Valid: true}) || stored.RouteID != previous.ID || stored.ChannelType.String != "local" || stored.Visibility != string(thread.VisibilityUser) || stored.ParentSessionID.Valid {
+				if stored.BotID != previous.BotID || stored.CreatedByUserID != (pgtype.UUID{Bytes: uid, Valid: true}) || stored.RouteID != previous.ID || (stored.ChannelType.String != "local" && stored.ChannelType.String != "") || stored.Visibility != string(thread.VisibilityUser) || stored.ParentSessionID.Valid {
 					return ErrContactUnavailable
 				}
 			}

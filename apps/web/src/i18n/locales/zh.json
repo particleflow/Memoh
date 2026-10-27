@@ -1989,7 +1989,7 @@
       "description": "切换 Bot、对话、文件、日程和设置"
     },
     "activityBar": {
-      "sessions": "对话",
+      "sessions": "联系人",
       "files": "文件",
       "search": "搜索",
       "schedule": "日程"
@@ -2172,6 +2172,17 @@
         "running": "工具正在运行",
         "unconfirmed": "工具结果未确认"
       }
+    },
+    "contact": {
+      "contacts": "联系人",
+      "history": "历史与调试",
+      "chooseTitle": "选择持续对话",
+      "chooseDescription": "选择今后与这个 Bot 持续使用的对话。其他历史仍可查看。",
+      "startNew": "开始新的持续对话",
+      "more": "更多对话",
+      "failed": "暂时无法打开 Bot 对话，请重试。",
+      "historyFailed": "无法打开这段历史对话。",
+      "current": "当前对话"
     }
   },
   "chatExamples": {

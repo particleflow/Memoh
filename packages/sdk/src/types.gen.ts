@@ -2132,6 +2132,10 @@ export type HandlersBatchDeleteRequest = {
     ids?: Array<string>;
 };
 
+export type HandlersBindPrivateChatRequest = {
+    session_id?: string;
+};
+
 export type HandlersBotUserCandidate = {
     avatar_url?: string;
     display_name?: string;
@@ -4160,6 +4164,12 @@ export type ReasoningOptions = {
      * are then empty and no control should be rendered at all.
      */
     supported?: boolean;
+};
+
+export type RoutePrivateChatEntry = {
+    candidates?: Array<SessionSession>;
+    next_cursor?: string;
+    session?: SessionSession;
 };
 
 export type ScheduleCreateRequest = {
@@ -12375,6 +12385,69 @@ export type PostBotsByBotIdSessionsResponses = {
 
 export type PostBotsByBotIdSessionsResponse = PostBotsByBotIdSessionsResponses[keyof PostBotsByBotIdSessionsResponses];
 
+export type GetBotsByBotIdSessionsContactData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: {
+        /**
+         * Candidate ID cursor
+         */
+        after?: string;
+        /**
+         * Explicitly opened conversation; eligibility is verified before offering
+         */
+        selected_session_id?: string;
+    };
+    url: '/bots/{bot_id}/sessions/contact';
+};
+
+export type GetBotsByBotIdSessionsContactErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdSessionsContactError = GetBotsByBotIdSessionsContactErrors[keyof GetBotsByBotIdSessionsContactErrors];
+
+export type GetBotsByBotIdSessionsContactResponses = {
+    /**
+     * OK
+     */
+    200: RoutePrivateChatEntry;
+};
+
+export type GetBotsByBotIdSessionsContactResponse = GetBotsByBotIdSessionsContactResponses[keyof GetBotsByBotIdSessionsContactResponses];
+
 export type PostBotsByBotIdSessionsContactData = {
     body?: never;
     path: {
@@ -12424,6 +12497,63 @@ export type PostBotsByBotIdSessionsContactResponses = {
 };
 
 export type PostBotsByBotIdSessionsContactResponse = PostBotsByBotIdSessionsContactResponses[keyof PostBotsByBotIdSessionsContactResponses];
+
+export type PostBotsByBotIdSessionsContactBindData = {
+    /**
+     * Explicitly selected conversation
+     */
+    body: HandlersBindPrivateChatRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/contact/bind';
+};
+
+export type PostBotsByBotIdSessionsContactBindErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsContactBindError = PostBotsByBotIdSessionsContactBindErrors[keyof PostBotsByBotIdSessionsContactBindErrors];
+
+export type PostBotsByBotIdSessionsContactBindResponses = {
+    /**
+     * OK
+     */
+    200: SessionSession;
+};
+
+export type PostBotsByBotIdSessionsContactBindResponse = PostBotsByBotIdSessionsContactBindResponses[keyof PostBotsByBotIdSessionsContactBindResponses];
 
 export type GetBotsByBotIdSessionsEventsData = {
     body?: never;

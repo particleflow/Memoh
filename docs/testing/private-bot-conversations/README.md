@@ -1,5 +1,9 @@
 # Private Bot conversation integration checkpoint
 
+The later [contact navigation revision](navigation/README.md) implements the independent
+contact/history entry flow on top of the lifecycle revision; its current evidence and
+remaining product acceptance limits take precedence over this historical checkpoint.
+
 The later [contact lifecycle revision](lifecycle/README.md) records an independent
 backend-only correction and real PostgreSQL/application evidence against `5c45c97f`.
 The checkpoint below describes its original source and limits; its local PG failure

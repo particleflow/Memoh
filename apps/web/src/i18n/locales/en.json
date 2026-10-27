@@ -1977,7 +1977,7 @@
       "description": "Switch bots, chat, files, schedule, and settings"
     },
     "activityBar": {
-      "sessions": "Chat",
+      "sessions": "Contacts",
       "files": "Files",
       "search": "Search",
       "schedule": "Schedule"
@@ -2172,6 +2172,17 @@
         "running": "Tool is running",
         "unconfirmed": "Tool result unconfirmed"
       }
+    },
+    "contact": {
+      "contacts": "Contacts",
+      "history": "History & debug",
+      "chooseTitle": "Continue a conversation",
+      "chooseDescription": "Choose which conversation to keep using with this Bot. Other history stays available.",
+      "startNew": "Start a new ongoing conversation",
+      "more": "More conversations",
+      "failed": "Could not open the Bot conversation. Please try again.",
+      "historyFailed": "Could not open this history link.",
+      "current": "current conversation"
     }
   },
   "chatExamples": {

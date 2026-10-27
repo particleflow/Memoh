@@ -149,6 +149,8 @@ func (h *SessionHandler) Register(e *echo.Echo) {
 	g := e.Group("/bots/:bot_id/sessions")
 	g.POST("", h.CreateSession)
 	g.POST("/contact", h.ResolvePrivateChat)
+	g.GET("/contact", h.InspectPrivateChat)
+	g.POST("/contact/bind", h.BindPrivateChat)
 	g.GET("", h.ListSessions)
 	g.GET("/model-preference-seed", h.ModelPreferenceSeed)
 	g.GET("/:session_id", h.GetSession)
