@@ -4,24 +4,27 @@ Base: `3d5f145c452dda5e17861d401de049b7ddded2e6`. Independent UI branch; no depl
 
 ## Behavior
 
-The former busy control showed a stop square even when its click enqueued text. Once text cleared, a second click could abort. Send now retains its arrow and calls only the existing send path. A separate stop control retains abort. An empty busy draft disables send; unsupported queued attachments/skills remain in the composer. The existing follow-up API, explicit queue-item promotion, invocation gate and same-identity failure retry remain unchanged. Explicit `/steer` retains its existing meaning.
+The composer uses **one button**, as explicitly requested. While running, the existing content predicate (trimmed text, files or skills) selects the send arrow; empty or whitespace-only input selects the stop square. Sending calls the original follow-up path; stopping calls the original abort path. Unsupported queued attachments/skills remain in the composer. The original queue-item promotion, invocation gate and same-identity failure retry remain unchanged. Explicit `/steer` retains its meaning.
+
+The same DOM button survives the icon/action change. Mouse multi-click continuation is ignored; after sending, rapid taps or keyboard repeats on the newly empty button extend a 500ms quiet window and cannot become abort. A fresh activation after that quiet window stops normally. No extra button, confirmation, protocol or request is added. First-send and attachment preparation behavior is retained.
 
 Appearance retains all five schemes (`memoh`, `ocean`, `forest`, `rose`, `amber`) and their light/dark variants. Default and realtime system following, persistence keys and explicit user preferences are unchanged. The existing appearance row now names its three modes visibly and stacks at narrow width. First-run appearance adds the missing system choice. Dark brand foreground uses the existing background token so its icon remains readable on the light brand fill; no raw color or platform palette is added.
 
-Wireframe: existing composer text/queue rows → existing model selector → independent stop → existing send slot. Existing appearance row → existing segmented mode control; existing scheme selector. No additional page or panel.
+Wireframe: existing composer text/queue rows → existing model selector → one send/stop slot. Existing appearance row → existing segmented mode control; existing scheme selector. No additional page or panel.
 
 ## Verification
 
 Environment: prepared Go server + embedded Channel, PostgreSQL/pgvector and Vite, current source at `http://127.0.0.1:18082`. Backend rebuilt from the base and healthy; real authenticated `users/me` read. Bot/session/model/queue HTTP and runtime WS data in the browser are synthetic, with no real model or device dispatch. This verifies the mounted application, event handling, outgoing request identities and rendering, not backend execution acceptance.
 
-- 55 directed existing tests passed: queue/submission gate, queue rendering, send context and upload lifecycle.
+- Original baseline: 55 existing tests passed for queue/submission gate, rendering, send context and upload lifecycle. The current single-button delta reran only its 19 queue/submission tests, affected lint, token guard, typecheck and actual browser scenarios; no production build was repeated.
 - Whole Web typecheck, affected ESLint and UI contract passed (three inherited contract warnings).
-- Chromium: click/double-click yields one follow-up enqueue, no steer until the original queue item is clicked, empty Enter does not abort, Shift+Enter inserts newline, IME Enter does not submit, failure retry reuses invocation ID, busy/idle changes preserve separate controls, a prepared file is retained rather than queued as text, and stop sends one abort.
-- 390×844 Chinese dark composer: stop and send remain visible with no horizontal overflow.
+- Current Chromium delta: the same DOM button shows exactly one correct arrow/stop affordance. Real mouse double-click, rapid touchscreen taps and held Enter on the button never turn a cleared send into abort. A deliberate fresh empty click stops. Whitespace, textarea Enter/Shift+Enter/IME, failure with same-invocation retry, explicit queue-item promotion, busy/idle change and retained busy attachment passed. No WS message or immediate steer was introduced.
+- 390×844 Chinese dark composer: the single button switches correctly between send and stop with no horizontal overflow.
 - Actual appearance controls selected all 10 scheme/mode combinations. First default is system; browser OS emulation changes it live. Explicit dark ignores a subsequent light OS change, survives reload along with amber, then selecting system restores live following. Browser proof contains measured primary text, muted text and brand icon contrast. Primary text minimum 14.98:1, muted text minimum 5.19:1, brand icon minimum 3.60:1. Disabled-control contrast is not claimed.
 - Original busy-square defect reproduced by temporarily running the exact base composer, then restored and rerun on the final modified source. Screenshots were inspected. Initial harness errors (dev-source API glob, incomplete fixture arrays and option accessible names) were corrected in the harness; they were not product failures.
 
-Evidence: [before](before-busy.png), [desktop after](busy-desktop.png), [390px dark after](busy-narrow-dark.png), [ocean dark settings](theme-dark-ocean.png), [forest light settings](theme-light-forest.png), [machine-readable interactions and 10-variant contrast](browser-proof.json). Other `theme-*.png` files cover every variant. `browser.mjs` reuses an existing local authenticated token from `GARNET_TOKEN_FILE`; it does not record that token.
+Current evidence: [content → send](single-button/single-content-send.png), [empty → stop](single-button/single-empty-stop.png), [390px send](single-button/single-narrow-send.png), [390px stop](single-button/single-narrow-stop.png), [gesture/request proof](single-button/single-button-proof.json). Earlier `busy-*.png` and the earlier browser script describe the superseded split-button iteration and are historical only. The unchanged palette screenshots and ten-variant measurements remain in `theme-*.png` / `browser-proof.json`. The current regression script is `single-button/browser.mjs`.
+
 
 ## Platform handoff / remaining acceptance
 

@@ -770,32 +770,6 @@
                     </DropdownMenuContent>
                   </DropdownMenu>
 
-                  <Button
-                    v-if="streaming"
-                    type="button"
-                    variant="secondary"
-                    size="icon-sm"
-                    shape="circle"
-                    :aria-label="$t('chat.stopGenerating')"
-                    class="shrink-0 max-md:size-11"
-                    @click="chatStore.abort(paneTarget)"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      class="size-4 max-md:size-4.5"
-                      aria-hidden="true"
-                    >
-                      <rect
-                        x="4"
-                        y="4"
-                        width="16"
-                        height="16"
-                        rx="3"
-                      />
-                    </svg>
-                  </Button>
-
                   <!-- While voice owns the composer the trailing slot holds
                        the voice pair instead of mic/send: ✗ cancels (also
                        aborts an in-flight transcription), ✓ stops and
@@ -943,9 +917,8 @@
                         </svg>
                       </Button>
                     </div>
-                    <!-- Sending during a run uses the existing follow-up queue.
-                         Stop has its own control so an emptied draft or double
-                         click can never turn a send gesture into an abort. -->
+                    <!-- One control: a draft sends to the existing queue;
+                         only an empty running composer offers stop. -->
                     <div
                       class="absolute inset-0 [transition:opacity_150ms_ease,scale_281ms_cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
                       :class="sendButtonVisible ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0'"
@@ -954,11 +927,11 @@
                         type="button"
                         variant="brand"
                         shape="circle"
-                        :disabled="attachmentUploading || !showSend || !currentBotId || activeChatReadOnly || loadingMessages || (streaming ? pendingFiles.length > 0 || requestedSkills.length > 0 : composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason)"
+                        :disabled="attachmentUploading || !currentBotId || activeChatReadOnly || loadingMessages || (streaming ? showSend && (pendingFiles.length > 0 || requestedSkills.length > 0) : !showSend || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason)"
                         :title="goalSubmissionBlocked ? goalExecutionBlockedReason : undefined"
                         :class="runtimeModeChanging && !streaming && showSend && !!currentBotId && !activeChatReadOnly && !loadingMessages && !composerAgentConfigPending && !composerHasNoModel ? 'disabled:opacity-100' : undefined"
                         :aria-busy="firstSendAwaiting || attachmentUploading || undefined"
-                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : $t('chat.send')"
+                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : $t(streaming ? 'chat.stopGenerating' : 'chat.send')"
                         class="size-full"
                         @click="handleSendButton"
                       >
@@ -971,7 +944,22 @@
                           <SendMorphIcon
                             :busy="firstSendAwaiting || attachmentUploading"
                             class="col-start-1 row-start-1 size-[18px] max-md:size-5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
+                            :class="streaming && !showSend && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
                           />
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="col-start-1 row-start-1 size-4 max-md:size-4.5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
+                            :class="streaming && !showSend && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'"
+                          >
+                            <rect
+                              x="4"
+                              y="4"
+                              width="16"
+                              height="16"
+                              rx="3"
+                            />
+                          </svg>
                         </span>
                       </Button>
                     </div>
@@ -3406,8 +3394,8 @@ const voiceInputEnabled = false
 
 // Whether the trailing slot shows the send button (vs. its inactive
 // occupant — see inactiveSlotVisible just below, its exact complement).
-// Keep the send slot visible during a run, disabled on empty input.
-// The separate stop control remains available alongside it.
+// Keep the one action slot visible during a run: send for a draft, stop
+// only when the existing content predicate says the composer is empty.
 const sendButtonVisible = computed(() => showSend.value || streaming.value)
 
 // The slot's inactive occupant: a grayed send stand-in while voice input is
@@ -4439,9 +4427,23 @@ async function handleSend() {
   }
 }
 
-function handleSendButton() {
+let lastSendButtonActivation = -Infinity
+function handleSendButton(event?: MouseEvent) {
   // A first send waits for the server to confirm it.
   if (firstSendAwaiting.value) return
+  const now = performance.now()
+  if ((event?.detail ?? 0) > 1) return
+  if (streaming.value && !showSend.value) {
+    // Clearing a sent draft changes this same button into stop. Keep mouse
+    // multi-clicks, rapid taps and keyboard repeats in that send gesture.
+    if (now - lastSendButtonActivation < 500) {
+      lastSendButtonActivation = now
+      return
+    }
+    chatStore.abort(paneTarget.value)
+    return
+  }
+  lastSendButtonActivation = now
   void handleSend()
 }
 
