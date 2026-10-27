@@ -91,6 +91,15 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 	}
 	b, err := toolcontext.ResolveComputerBinding(ctx, session)
 	if err != nil {
+		if s.logger != nil {
+			bound, present := toolcontext.HostComputerBinding(ctx)
+			s.logger.WarnContext(ctx, "computer tool host binding unavailable",
+				slog.String("tool", name), slog.String("run_id", session.RunID), slog.String("tool_call_id", session.ToolCallID),
+				slog.Bool("binding_present", present), slog.Bool("public_request", session.PublicRequest),
+				slog.Bool("bot_matches", present && bound.BotID == session.BotID),
+				slog.Bool("session_matches", present && bound.SessionID == session.SessionID),
+				slog.Bool("user_matches", present && (session.UserID == "" || bound.UserID == session.UserID)))
+		}
 		return nil, err
 	}
 	if s.service == nil {

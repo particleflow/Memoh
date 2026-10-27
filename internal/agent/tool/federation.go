@@ -10,6 +10,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	"github.com/felinics/memoh/internal/mcp"
+	"github.com/felinics/memoh/internal/toolcontext"
 )
 
 // FederationProvider adapts a mcp.ToolSource (federated MCP connections)
@@ -54,6 +55,13 @@ func (f *FederationProvider) Tools(ctx context.Context, session SessionContext) 
 		return nil, nil
 	}
 	mcpSession := toMCPSession(session)
+	// Tool callbacks may carry only transport cancellation. Keep the owning
+	// host context just as native runtime tool mounts do; routing fields and
+	// model arguments cannot establish or replace this authority.
+	mcpSession.RunContext = ctx
+	if binding, ok := toolcontext.HostComputerBinding(ctx); ok {
+		mcpSession.RunID = binding.RunID
+	}
 	descriptors, err := f.source.ListTools(ctx, mcpSession)
 	if err != nil {
 		// Not fatal for the turn: the agent keeps its other tools. The gap is
@@ -83,7 +91,9 @@ func (f *FederationProvider) Tools(ctx context.Context, session SessionContext) 
 			Parameters:  schema,
 			Execute: func(ctx *toolexec.ToolExecContext, input sdk.ToolArguments) (sdk.ToolOutput, error) {
 				args := inputAsMap(input)
-				result, err := src.CallTool(ctx.Context, sess, desc.Name, args)
+				callSession := sess
+				callSession.ToolCallID = ctx.ToolCallID
+				result, err := src.CallTool(ctx.Context, callSession, desc.Name, args)
 				if err != nil {
 					return sdk.ToolOutput{}, err
 				}
