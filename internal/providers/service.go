@@ -478,6 +478,12 @@ func remoteModelsFromTemplate(def registry.ProviderDefinition) []RemoteModel {
 }
 
 func (s *Service) fetchRemoteModelsViaSDK(ctx context.Context, provider sqlc.Provider) ([]RemoteModel, error) {
+	return s.fetchRemoteModelsViaSDKWithEmbeddingProbe(ctx, provider, true)
+}
+
+// fetchRemoteModelsViaSDKWithEmbeddingProbe can avoid chargeable inference when
+// discovery runs without an interactive user explicitly requesting an import.
+func (s *Service) fetchRemoteModelsViaSDKWithEmbeddingProbe(ctx context.Context, provider sqlc.Provider, allowEmbeddingProbe bool) ([]RemoteModel, error) {
 	cfg := providerConfig(provider.Config)
 	baseURL := strings.TrimRight(configString(cfg, "base_url"), "/")
 	clientType := models.ClientType(provider.ClientType)
@@ -545,6 +551,10 @@ func (s *Service) fetchRemoteModelsViaSDK(ctx context.Context, provider sqlc.Pro
 				// probe would spend tokens and can spuriously fail on gateways
 				// whose key lacks embedding permission.
 				dimensions = template.Dimensions
+			case !allowEmbeddingProbe:
+				// An embedding row cannot be stored without dimensions. Leave it
+				// out rather than infer dimensions with a potentially paid request.
+				continue
 			default:
 				dim, err := models.InferEmbeddingDimensions(ctx, string(clientType), baseURL, creds.APIKey, m.ID, probeTimeout, nil)
 				if err != nil {

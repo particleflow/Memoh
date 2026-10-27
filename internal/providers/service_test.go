@@ -1176,6 +1176,28 @@ models:
 	}
 }
 
+func TestBackgroundDiscoverySkipsUnknownEmbeddingProbe(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet || r.URL.Path != "/models" {
+			t.Errorf("unexpected chargeable request: %s %s", r.Method, r.URL.Path)
+			http.Error(w, "unexpected", http.StatusInternalServerError)
+			return
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{"models": []map[string]any{
+			{"name": "models/embedding", "supportedGenerationMethods": []string{"embedContent"}},
+		}})
+	}))
+	defer server.Close()
+	svc := NewService(nil, nil, "")
+	items, err := svc.fetchRemoteModelsViaSDKWithEmbeddingProbe(context.Background(), sqlc.Provider{
+		ClientType: string(models.ClientTypeGoogleGenerativeAI),
+		Config:     []byte(`{"base_url":"` + server.URL + `","api_key":"synthetic"}`),
+	}, false)
+	if err != nil || len(items) != 0 {
+		t.Fatalf("items = %#v, err = %v; expected unknown embedding skipped", items, err)
+	}
+}
+
 // providerTestQueries stubs dbstore.Queries with the single row Test needs;
 // every other method nil-panics, which keeps this test honest about how
 // little the probe path is allowed to touch the database.
