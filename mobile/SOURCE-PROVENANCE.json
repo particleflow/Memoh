@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "7679f2e9bac015875b9076f1807c0766b1526ad50bae384ca2dd87c0356f3b66",
+      "sha256": "e146b36c338c5f841d2ca8ae52184ad4e7e5922391cb36da3f759d18064fa272",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "b7c51d3e9f31a6ce53036a8005b8182c0c8bfe9bac35278c5b28672a7d78f491",
+      "sha256": "2998c502f92f6aef522cfff91e58f48adbbf36e2d41a68db9ca0b2eceb070fc5",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1734,6 +1734,15 @@
       "licenseReview": "Memoh upstream source license retained.",
       "preparationChanges": [
         "Local catalog refresh and unavailable label only; no Bot creation or provider execution."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-bot-create-recovery-changes.json",
+      "sha256": "eb7f0738fc67607971fd046047b65c15d97798888f256cb0d8d329f5d88ec79b",
+      "origin": "Exact shared Bot creation recovery 434d82a46f48e4b2047d067282f0af434cc4f0bd",
+      "licenseReview": "Memoh upstream source license retained.",
+      "preparationChanges": [
+        "Shared pending request recovery and account/API-scoped cleanup only; no HAP or field deployment."
       ]
     }
   ],

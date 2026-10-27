@@ -69,6 +69,7 @@ def inputs():
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-contact-navigation-changes.json', 'shared-contact-navigation-sdk.json', 'shared-contact-navigation-i18n.json'))
     files.append(ROOT / 'mobile/memoh/shared-conversation-relation-row.test.ts')
     files.append(ROOT / 'mobile/memoh/shared-model-catalog-changes.json')
+    files.append(ROOT / 'mobile/memoh/shared-bot-create-recovery-changes.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -894,6 +895,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     catalog = lock['sharedModelCatalog']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / catalog['local']) == catalog['sha256'], 'Model catalog source drift'
     catalog_sources = json.loads((ROOT / 'mobile/memoh' / catalog['local']).read_text())
+    bot_recovery = lock['sharedBotCreateRecovery']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / bot_recovery['local']) == bot_recovery['sha256'], 'Bot recovery source drift'
+    bot_recovery_sources = json.loads((ROOT / 'mobile/memoh' / bot_recovery['local']).read_text())
 
 
 
@@ -1089,6 +1093,15 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             if name in workspace_sources:
                 assert data is not None and hashlib.sha256(data).hexdigest() == shared_file_metadata[name]['baseSHA256'], 'Workspace baseline drift'
                 data = workspace_sources[name]
+            if name in bot_recovery_sources['existingFiles']:
+                review = bot_recovery_sources['existingFiles'][name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Bot recovery baseline drift'
+                text = data.decode()
+                for before, after, expected in review['replacements']:
+                    assert text.count(before) == expected, 'Bot recovery seam drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == review['sharedSHA256'], 'Bot recovery shared output drift'
             if name in catalog_sources['existingFiles']:
                 review = catalog_sources['existingFiles'][name]
                 assert data is not None and hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Catalog baseline drift'
@@ -1244,7 +1257,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
-        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles']}.items():
+        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles']}.items():
             assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected shared source destination'
             data = item['source'].encode()
             assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added shared source drift'

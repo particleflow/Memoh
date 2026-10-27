@@ -1,0 +1,355 @@
+{
+  "existingFiles": {
+    "apps/web/src/composables/api/useBotCreateStream.ts": {
+      "baseSHA256": "18e6fa45c0993a5ecf30eb5b2ba589bd4ec033e38a1c4f3aa75089c085bca98b",
+      "sharedSHA256": "0ea98ee0d33c22a938d06ae3c41a267496c72712b3a2568c2ead283ffcf014ef",
+      "replacements": [
+        [
+          "\nexport type CollectBotCreateProgressStreamOptions = {\n  initialState?: BotCreateProgressState\n  onState?: (state: BotCreateProgressState) => void\n  onEvent?: (event: BotCreateStreamEvent) => void\n}\n",
+          "\nexport type CollectBotCreateProgressStreamOptions = {\n  initialState?: BotCreateProgressState\n  terminalEvent?: 'ready' | 'complete'\n  onState?: (state: BotCreateProgressState) => void\n  onEvent?: (event: BotCreateStreamEvent) => void\n}\n",
+          1
+        ],
+        [
+          "  try {\n    for await (const event of stream) {\n      options.onEvent?.(event)\n      if (event.type === 'ready') {\n        ready = true\n      }\n      update(reduceBotCreateProgressEvent(state, event))\n",
+          "  try {\n    for await (const event of stream) {\n      options.onEvent?.(event)\n      if (event.type === (options.terminalEvent ?? 'ready')) {\n        ready = true\n      }\n      update(reduceBotCreateProgressEvent(state, event))\n",
+          1
+        ],
+        [
+          "      setupError: message,\n      progress: { phase: 'error', error: message },\n    })\n  }\n\n  return state\n",
+          "      setupError: message,\n      progress: { phase: 'error', error: message },\n    })\n  }\n\n  // A clean EOF can still be a truncated SSE response. Only the endpoint's\n  // terminal event proves success; callers can resume by polling the Bot.\n  if (!ready && !state.setupError) {\n    const message = 'Workspace creation stream ended before completion'\n    update({ ...state, setupError: message, progress: { phase: 'error', error: message } })\n  }\n\n  return state\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/lib/auth-session.ts": {
+      "baseSHA256": "ce918d79ee32502a63ae3c3a08a2a80d95c9f82f84c416b8d707d96e1badf564",
+      "sharedSHA256": "a6defa712cf87269bb20310afb13bfa279996abd30ec5be878f482dc9f51113d",
+      "replacements": [
+        [
+          "  // Cross-reload query-cache snapshot (lib/query-cache-persistence.ts) —\n  // without this the next account would see the previous one's catalog data.\n  QUERY_CACHE_STORAGE_KEY,\n]\n\nexport function clearPersistedUserScopedState() {\n  for (const key of USER_SCOPED_STORAGE_KEYS) {\n    if (typeof localStorage !== 'undefined') localStorage.removeItem(key)\n    if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(key)\n  }\n}\n\n",
+          "  // Cross-reload query-cache snapshot (lib/query-cache-persistence.ts) —\n  // without this the next account would see the previous one's catalog data.\n  QUERY_CACHE_STORAGE_KEY,\n  'memoh:new-bot:pending',\n  'memoh:onboarding:pending',\n  'memoh:new-bot:authorization',\n  'memoh:onboarding:creation',\n]\n\nexport function clearPersistedUserScopedState() {\n  for (const key of USER_SCOPED_STORAGE_KEYS) {\n    if (typeof localStorage !== 'undefined') localStorage.removeItem(key)\n    if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(key)\n  }\n  if (typeof sessionStorage !== 'undefined') {\n    for (let i = sessionStorage.length - 1; i >= 0; i--) {\n      const key = sessionStorage.key(i)\n      if (key?.startsWith('memoh:new-bot:pending:') || key?.startsWith('memoh:onboarding:pending:')) sessionStorage.removeItem(key)\n    }\n  }\n}\n\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/bots/created-bot-session.ts": {
+      "baseSHA256": "c5b4ffca105ff3c64ac8d51817a26dd7ababbd8c5b22fb9d33cb3a3fd8442255",
+      "sharedSHA256": "e4abbe06b5d609c023f07895682e04eb4d3463306fbc58e0bc6428545f24973a",
+      "replacements": [
+        [
+          "// posting a second create (which would take another Bot slot or collide on the\n// name). Agent fields are only present for the direct runtime flows.\nexport interface CreatedBotSession {\n  botId: string\n  botName: string\n  displayName: string\n",
+          "// posting a second create (which would take another Bot slot or collide on the\n// name). Agent fields are only present for the direct runtime flows.\nexport interface CreatedBotSession {\n  scope?: string\n  botId: string\n  botName: string\n  displayName: string\n",
+          1
+        ],
+        [
+          "}\n\n// Keep only the created target, never credentials or a device login session.\nexport function readCreatedBotSession(onboarding = false): CreatedBotSession | null {\n  try {\n    const value = JSON.parse(safeSessionGet(onboarding ? ONBOARDING_KEY : KEY) || 'null') as Partial<CreatedBotSession> | null\n    if (!value || typeof value.botId !== 'string' || !value.botId.trim()) return null\n    // A saved Agent must name a supported direct runtime; anything else is a\n    // stale shape from an older client and is dropped as a whole.\n    if (value.runtime !== undefined && !isDirectBotAgentRuntime(value.runtime)) return null\n    if (value.agentId !== undefined && typeof value.agentId !== 'string') return null\n    return {\n      botId: value.botId,\n      botName: typeof value.botName === 'string' ? value.botName : '',\n      displayName: typeof value.displayName === 'string' ? value.displayName : '',\n",
+          "}\n\n// Keep only the created target, never credentials or a device login session.\nexport function readCreatedBotSession(onboarding = false, scope?: string): CreatedBotSession | null {\n  try {\n    const value = JSON.parse(safeSessionGet(onboarding ? ONBOARDING_KEY : KEY) || 'null') as Partial<CreatedBotSession> | null\n    if (!value || typeof value.botId !== 'string' || !value.botId.trim()) return null\n    if (scope !== undefined && (!scope || value.scope !== scope)) return null\n    // A saved Agent must name a supported direct runtime; anything else is a\n    // stale shape from an older client and is dropped as a whole.\n    if (value.runtime !== undefined && !isDirectBotAgentRuntime(value.runtime)) return null\n    if (value.agentId !== undefined && typeof value.agentId !== 'string') return null\n    return {\n      ...(value.scope && { scope: value.scope }),\n      botId: value.botId,\n      botName: typeof value.botName === 'string' ? value.botName : '',\n      displayName: typeof value.displayName === 'string' ? value.displayName : '',\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/bots/new-progress.test.ts": {
+      "baseSHA256": "43dd328988cd7857b1fa6c314dd650adf7d44b6e683d7d0ed69b14ea9db4f9fa",
+      "sharedSHA256": "939ea0bd91714a361b931461527a964133f996de0faa185ceb79284028dbcc48",
+      "replacements": [
+        [
+          "\nconst routerReplace = vi.fn()\nconst invalidateQueries = vi.fn()\n\nfunction translate(key: string, ...args: unknown[]) {\n  const params = args[0]\n",
+          "\nconst routerReplace = vi.fn()\nconst invalidateQueries = vi.fn()\nvi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: { id: 'user-1' } }) }))\nvi.mock('@/lib/api-client', () => ({ sdkApiBaseUrl: () => 'https://example.test/api' }))\n\nfunction translate(key: string, ...args: unknown[]) {\n  const params = args[0]\n",
+          1
+        ],
+        [
+          "\nconst nextStep = vi.fn()\nconst prevStep = vi.fn()\nconst getBot = vi.fn()\nconst getBotChecks = vi.fn()\nconst putSettings = vi.fn()\nvi.mock('@/composables/useOnboarding', () => ({ useOnboarding: () => ({ nextStep, prevStep }) }))\nvi.mock('@/store/install-created-agent', () => ({ installCreatedAgent: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({\n  getBotsById: (...args: unknown[]) => getBot(...args),\n",
+          "\nconst nextStep = vi.fn()\nconst prevStep = vi.fn()\nconst goToStep = vi.fn()\nconst getBot = vi.fn()\nconst getBotChecks = vi.fn()\nconst putSettings = vi.fn()\nvi.mock('@/composables/useOnboarding', () => ({ useOnboarding: () => ({ nextStep, prevStep, goToStep }) }))\nvi.mock('@/store/install-created-agent', () => ({ installCreatedAgent: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({\n  getBotsById: (...args: unknown[]) => getBot(...args),\n",
+          1
+        ],
+        [
+          "  })\n\n  it('resumes the persisted Bot after a refresh instead of returning to the form', async () => {\n    sessionStorage.setItem('memoh:new-bot:authorization', JSON.stringify({ botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null, settings: { chat_model_id: 'm1' } }))\n    const mounted = await mountIdleProgress()\n    expect(routerReplace).not.toHaveBeenCalledWith({ name: 'bot-new' })\n    expect(getBot).toHaveBeenCalledWith(expect.objectContaining({ path: { id: 'bot-1' } }))\n",
+          "  })\n\n  it('resumes the persisted Bot after a refresh instead of returning to the form', async () => {\n    sessionStorage.setItem('memoh:new-bot:authorization', JSON.stringify({ scope: JSON.stringify(['https://example.test/api', 'user-1']), botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null, settings: { chat_model_id: 'm1' } }))\n    const mounted = await mountIdleProgress()\n    expect(routerReplace).not.toHaveBeenCalledWith({ name: 'bot-new' })\n    expect(getBot).toHaveBeenCalledWith(expect.objectContaining({ path: { id: 'bot-1' } }))\n",
+          1
+        ],
+        [
+          "  })\n\n  it('shows the failed workspace after an onboarding refresh without creating again', async () => {\n    sessionStorage.setItem('memoh:onboarding:creation', JSON.stringify({ botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null }))\n    getBot.mockResolvedValue({ data: { id: 'bot-1', name: 'prog', display_name: 'Prog', status: 'failed' } })\n    getBotChecks.mockResolvedValue({ data: { items: [{ type: 'container.init', status: 'error', detail: 'image pull failed' }] } })\n    const mounted = await mountIdleProgress(true)\n",
+          "  })\n\n  it('shows the failed workspace after an onboarding refresh without creating again', async () => {\n    sessionStorage.setItem('memoh:onboarding:creation', JSON.stringify({ scope: JSON.stringify(['https://example.test/api', 'user-1']), botId: 'bot-1', botName: 'prog', displayName: 'Prog', setupError: null }))\n    getBot.mockResolvedValue({ data: { id: 'bot-1', name: 'prog', display_name: 'Prog', status: 'failed' } })\n    getBotChecks.mockResolvedValue({ data: { items: [{ type: 'container.init', status: 'error', detail: 'image pull failed' }] } })\n    const mounted = await mountIdleProgress(true)\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/bots/new-progress.vue": {
+      "baseSHA256": "31671eeedd77aea9cc0898dc08f468a0d11da29751eca9eb71f82de8fc09d8bc",
+      "sharedSHA256": "59f511243e3bbfcc572704e577b1c862bbd98e9f689c5b2fe584ee0f99c7732c",
+      "replacements": [
+        [
+          "          variant=\"outline\"\n          @click=\"handleBack\"\n        >\n          {{ $t('bots.create.back') }}\n        </Button>\n        <Button\n          v-if=\"canOpenExisting\"\n",
+          "          variant=\"outline\"\n          @click=\"handleBack\"\n        >\n          {{ $t(canRetry ? 'bots.create.continueLater' : 'bots.create.back') }}\n        </Button>\n        <Button\n          v-if=\"canOpenExisting\"\n",
+          1
+        ],
+        [
+          "const { t } = useI18n()\nconst queryCache = useQueryCache()\nconst store = useBotCreateProgressStore()\nconst { status, lines, display, bot, setupError, errorCode, createdAgent, authorizationId, modelConfigured, canRetry } = storeToRefs(store)\nif (store.status === 'idle') {\n  // A refresh lands here with an empty store. The created Bot is persisted from\n  // the first `bot_created` event, so resume on it instead of creating again.\n  const saved = readCreatedBotSession(props.onboarding)\n  const previous = props.onboarding ? readOnboardingBotResult() : null\n  if (saved) void store.restore(saved, props.onboarding)\n  else if (previous?.agent && isDirectBotAgentRuntime(previous.agent.agentId)) {\n    void store.restore({ botId: previous.botId, botName: '', displayName: '', agentId: previous.agent.botAgentId,\n      runtime: previous.agent.agentId, authorizationId: previous.agent.authorizationId, setupError: null }, true)\n",
+          "const { t } = useI18n()\nconst queryCache = useQueryCache()\nconst store = useBotCreateProgressStore()\nstore.syncScope()\nconst { status, lines, display, bot, setupError, errorCode, createdAgent, authorizationId, modelConfigured, canRetry } = storeToRefs(store)\nif (store.status === 'idle') {\n  // A refresh lands here with an empty store. The created Bot is persisted from\n  // the first `bot_created` event, so resume on it instead of creating again.\n  const saved = readCreatedBotSession(props.onboarding, store.createScope())\n  const previous = props.onboarding ? readOnboardingBotResult() : null\n  if (store.restorePending(props.onboarding)) { /* Replay with the original request key. */ }\n  else if (saved) void store.restore(saved, props.onboarding)\n  else if (previous?.agent && isDirectBotAgentRuntime(previous.agent.agentId)) {\n    void store.restore({ botId: previous.botId, botName: '', displayName: '', agentId: previous.agent.botAgentId,\n      runtime: previous.agent.agentId, authorizationId: previous.agent.authorizationId, setupError: null }, true)\n",
+          1
+        ],
+        [
+          "    })\n    void queryCache.invalidateQueries({ key: getBotsQueryKey() })\n    onboardingSteps.nextStep()\n    store.reset()\n    return\n  }\n",
+          "    })\n    void queryCache.invalidateQueries({ key: getBotsQueryKey() })\n    onboardingSteps.nextStep()\n    store.finishResolved()\n    store.reset()\n    return\n  }\n",
+          1
+        ],
+        [
+          "  // Reset only after navigation has committed, so the still-mounted terminal\n  // never flashes empty before the view swaps.\n  writeCreatedBotSession(null)\n  store.reset()\n}\n\n",
+          "  // Reset only after navigation has committed, so the still-mounted terminal\n  // never flashes empty before the view swaps.\n  writeCreatedBotSession(null)\n  store.finishResolved()\n  store.reset()\n}\n\n",
+          1
+        ],
+        [
+          "}\n\nfunction handleBack() {\n  store.reset()\n  if (props.onboarding) onboardingSteps.prevStep()\n  else router.replace({ name: 'bot-new' })\n}\n</script>\n",
+          "}\n\nfunction handleBack() {\n  const unresolved = canRetry.value\n  store.reset()\n  if (props.onboarding) {\n    if (unresolved) onboardingSteps.goToStep(2)\n    else onboardingSteps.prevStep()\n  } else router.replace({ name: unresolved ? 'bots' : 'bot-new' })\n}\n</script>\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/bots/new.test.ts": {
+      "baseSHA256": "1c04080a60e3bd5cbaef09c021a8e49d06e29741bf471f77fc784b782f6da0d7",
+      "sharedSHA256": "60d54664c8a065a50dbbf0d561e961241c17903a10e0015a007cf2a95d82985b",
+      "replacements": [
+        [
+          "    start: mocks.startBotCreate,\n    status: 'idle',\n    reset: vi.fn(),\n  }),\n}))\n\n",
+          "    start: mocks.startBotCreate,\n    status: 'idle',\n    reset: vi.fn(),\n    restorePending: vi.fn(() => false),\n  }),\n}))\n\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/bots/new.vue": {
+      "baseSHA256": "ce9ab6e8c3330ecf29b8d76339a3c893907503d2a2a2883e5c02126b54ad703d",
+      "sharedSHA256": "ba221d6d0742a5313dcd1b89fe7116698a19bc277a035708f79a1a41fd311b47",
+      "replacements": [
+        [
+          "  TooltipTrigger,\n} from '@felinic/ui'\nimport { SquarePen, CircleHelp, Check, X, LoaderCircle } from 'lucide-vue-next'\nimport { ref, reactive, computed, watch } from 'vue'\nimport { useDebounceFn } from '@vueuse/core'\nimport { useRouter, useRoute } from 'vue-router'\nimport { useI18n } from 'vue-i18n'\n",
+          "  TooltipTrigger,\n} from '@felinic/ui'\nimport { SquarePen, CircleHelp, Check, X, LoaderCircle } from 'lucide-vue-next'\nimport { ref, reactive, computed, watch, onMounted } from 'vue'\nimport { useDebounceFn } from '@vueuse/core'\nimport { useRouter, useRoute } from 'vue-router'\nimport { useI18n } from 'vue-i18n'\n",
+          1
+        ],
+        [
+          "})\n\nconst store = useBotCreateProgressStore()\nconst submitLoading = ref(false)\nconst isCreateFlowBlocked = computed(() => submitLoading.value)\n\n",
+          "})\n\nconst store = useBotCreateProgressStore()\nonMounted(() => {\n  if (store.restorePending(false) || store.status === 'creating') {\n    void router.replace({ name: 'bot-create-progress' })\n  }\n})\nconst submitLoading = ref(false)\nconst isCreateFlowBlocked = computed(() => submitLoading.value)\n\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/onboarding/steps/Step4Bot.vue": {
+      "baseSHA256": "23d8f782bef35a131e3af5cfdf8f98cdcdc164a03b6e37b8c0d3b4924a81e749",
+      "sharedSHA256": "d286ae938ebbd8e0bc3790008a8cd18b2852bb2a67a802dfd9c8ad02cf8b5895",
+      "replacements": [
+        [
+          "const userStore = useUserStore()\n\nonMounted(() => {\n  if (readOnboardingBotResult()) {\n    nextStep()\n    return\n",
+          "const userStore = useUserStore()\n\nonMounted(() => {\n  if (store.restorePending(true) || store.status === 'creating') {\n    nextStep()\n    return\n  }\n  if (readOnboardingBotResult()) {\n    nextStep()\n    return\n",
+          1
+        ],
+        [
+          "  // A dev replay explicitly wants to exercise creation again; a creation that\n  // is in flight or resumable in this tab is still owned by the progress step.\n  if (import.meta.env.DEV && safeLocalGet(ONBOARDING_KEYS.forceOnboarding)?.trim() === '1') return\n  if (store.status !== 'idle' || readCreatedBotSession(true)) return\n  submitting.value = true\n  try {\n    const { data } = await getBots({ throwOnError: true })\n",
+          "  // A dev replay explicitly wants to exercise creation again; a creation that\n  // is in flight or resumable in this tab is still owned by the progress step.\n  if (import.meta.env.DEV && safeLocalGet(ONBOARDING_KEYS.forceOnboarding)?.trim() === '1') return\n  if (store.status !== 'idle' || readCreatedBotSession(true, store.createScope())) return\n  submitting.value = true\n  try {\n    const { data } = await getBots({ throwOnError: true })\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/router-guards/onboarding.ts": {
+      "baseSHA256": "c4f1e7354581db0a8d47d27df190f8951465841f3aabd709ce11dc4add52d0a6",
+      "sharedSHA256": "57792b5f830259eec443c7b757280e2ec1659e01019ba75fddb1c51a9c56d178",
+      "replacements": [
+        [
+          "import { ONBOARDING_KEYS } from '@/pages/onboarding/constants'\nimport { readOnboardingBotResult } from '@/pages/onboarding/session'\nimport { readCreatedBotSession } from '@/pages/bots/created-bot-session'\n\nfunction shouldForceOnboarding(): boolean {\n  return import.meta.env.DEV && localStorage.getItem(ONBOARDING_KEYS.forceOnboarding)?.trim() === '1'\n",
+          "import { ONBOARDING_KEYS } from '@/pages/onboarding/constants'\nimport { readOnboardingBotResult } from '@/pages/onboarding/session'\nimport { readCreatedBotSession } from '@/pages/bots/created-bot-session'\nimport { sdkApiBaseUrl } from '@/lib/api-client'\nimport { readPendingBotSession } from '@/pages/bots/pending-bot-session'\n\nfunction shouldForceOnboarding(): boolean {\n  return import.meta.env.DEV && localStorage.getItem(ONBOARDING_KEYS.forceOnboarding)?.trim() === '1'\n",
+          1
+        ],
+        [
+          "// still be installing it, applying its settings, or showing the final step.\n// Such a tab keeps its place in the wizard, refreshes included.\nexport function hasOnboardingInProgress(): boolean {\n  return !!readCreatedBotSession(true) || !!readOnboardingBotResult()\n}\n",
+          "// still be installing it, applying its settings, or showing the final step.\n// Such a tab keeps its place in the wizard, refreshes included.\nexport function hasOnboardingInProgress(): boolean {\n  const id = useUserStore().userInfo.id\n  const scope = id ? JSON.stringify([sdkApiBaseUrl(), id]) : ''\n  return !!readPendingBotSession(scope, true) || !!readCreatedBotSession(true, scope) || !!readOnboardingBotResult()\n}\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/bot-create-progress.test.ts": {
+      "baseSHA256": "b00b13f60e6fd68a5d709e32c44e283bacbde66acb6e3a140024c28374a8db08",
+      "sharedSHA256": "d6ca30cf2ea1873cae7e9016865231702786a92450866bce68320d5f11463d5a",
+      "replacements": [
+        [
+          "import type { BotCreateStreamEvent } from '@/composables/api/useBotCreateStream'\nimport { renderI18nMessage } from '@/utils/api-error'\nimport { readCreatedBotSession } from '@/pages/bots/created-bot-session'\n\nconst postBotsStream = vi.fn()\nconst postContainerStream = vi.fn()\n",
+          "import type { BotCreateStreamEvent } from '@/composables/api/useBotCreateStream'\nimport { renderI18nMessage } from '@/utils/api-error'\nimport { readCreatedBotSession } from '@/pages/bots/created-bot-session'\nimport { notifyAuthSessionCleared } from '@/lib/auth-session'\n\nconst postBotsStream = vi.fn()\nconst postContainerStream = vi.fn()\n",
+          1
+        ],
+        [
+          "const getBot = vi.fn()\nconst getBotChecks = vi.fn()\nconst grantAccess = vi.fn()\nvi.mock('./install-created-agent', () => ({ installCreatedAgent: (...args: unknown[]) => installAgent(...args) }))\n\nvi.mock('@/composables/api/useBotCreateStream', async (importActual) => {\n",
+          "const getBot = vi.fn()\nconst getBotChecks = vi.fn()\nconst grantAccess = vi.fn()\nconst identity = vi.hoisted(() => ({ id: 'user-1', server: 'https://example.test/api' }))\nvi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: identity }) }))\nvi.mock('@/lib/api-client', () => ({ sdkApiBaseUrl: () => identity.server }))\nvi.mock('./install-created-agent', () => ({ installCreatedAgent: (...args: unknown[]) => installAgent(...args) }))\n\nvi.mock('@/composables/api/useBotCreateStream', async (importActual) => {\n",
+          1
+        ],
+        [
+          "\ndescribe('useBotCreateProgressStore', () => {\n  beforeEach(() => {\n    setActivePinia(createPinia())\n    sessionStorage.clear()\n    installAgent.mockReset().mockResolvedValue(undefined)\n",
+          "\ndescribe('useBotCreateProgressStore', () => {\n  beforeEach(() => {\n    identity.id = 'user-1'\n    identity.server = 'https://example.test/api'\n    setActivePinia(createPinia())\n    sessionStorage.clear()\n    installAgent.mockReset().mockResolvedValue(undefined)\n",
+          1
+        ],
+        [
+          "    expect(store.bot).toEqual(bot)\n    expect(store.lines.map(l => l.kind)).toEqual(['command', 'bot-created', 'pulling', 'creating', 'ready'])\n    expect(store.lines.at(-1)).toMatchObject({ kind: 'ready', status: 'done' })\n  })\n\n  it('treats a hard failure with no bot as an error status', async () => {\n",
+          "    expect(store.bot).toEqual(bot)\n    expect(store.lines.map(l => l.kind)).toEqual(['command', 'bot-created', 'pulling', 'creating', 'ready'])\n    expect(store.lines.at(-1)).toMatchObject({ kind: 'ready', status: 'done' })\n  })\n\n  it('checks the same Bot after a clean stream ending before ready', async () => {\n    const bot = { id: 'bot-1', name: 'ada' }\n    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'creating' }]))\n    getBot.mockResolvedValue({ data: { ...bot, status: 'failed' } })\n\n    const store = useBotCreateProgressStore()\n    await store.start({ name: 'ada', display_name: 'Ada' })\n\n    expect(getBot).toHaveBeenCalledWith(expect.objectContaining({ path: { id: 'bot-1' } }))\n    expect(store.bot?.id).toBe('bot-1')\n    expect(store.status).toBe('workspace-error')\n    expect(store.lines.some(line => line.kind === 'ready')).toBe(false)\n  })\n\n  it('checks the same Bot when a workspace retry stream ends before completion', async () => {\n    const bot = { id: 'bot-1', name: 'ada' }\n    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'error', code: 'workspace.unreachable', message: 'failed' }]))\n    postContainerStream.mockResolvedValue(streamOf([{ type: 'creating' }]))\n    getBot.mockResolvedValue({ data: { ...bot, status: 'failed' } })\n\n    const store = useBotCreateProgressStore()\n    await store.start({ name: 'ada', display_name: 'Ada' })\n    await store.retry()\n\n    expect(postContainerStream).toHaveBeenCalledWith(expect.objectContaining({ path: { bot_id: 'bot-1' } }))\n    expect(getBot).toHaveBeenCalled()\n    expect(store.status).toBe('workspace-error')\n    expect(store.bot?.id).toBe('bot-1')\n  })\n\n  it('treats a hard failure with no bot as an error status', async () => {\n",
+          1
+        ],
+        [
+          "    expect(store.bot).toEqual(bot)\n  })\n\n  it('gives every create from the form its own Idempotency-Key', async () => {\n    postBotsStream.mockImplementation(async () => brokenStreamOf([], new Error('Failed to fetch')))\n\n    const store = useBotCreateProgressStore()\n",
+          "    expect(store.bot).toEqual(bot)\n  })\n\n  it('keeps the Idempotency-Key after returning from an uncertain create', async () => {\n    postBotsStream.mockImplementation(async () => brokenStreamOf([], new Error('Failed to fetch')))\n\n    const store = useBotCreateProgressStore()\n",
+          1
+        ],
+        [
+          "    await store.start({ name: 'ada', display_name: 'Ada' })\n\n    const [first, second] = postBotsStream.mock.calls.map(([options]) => options.headers['Idempotency-Key'])\n    expect(second).not.toBe(first)\n  })\n\n  it('keeps the stable code when bot creation returns an HTTP problem', async () => {\n",
+          "    await store.start({ name: 'ada', display_name: 'Ada' })\n\n    const [first, second] = postBotsStream.mock.calls.map(([options]) => options.headers['Idempotency-Key'])\n    expect(second).toBe(first)\n  })\n\n  it('replays an uncertain create after refresh with its original request and key', async () => {\n    postBotsStream.mockResolvedValueOnce(brokenStreamOf([], new Error('connection lost')))\n      .mockResolvedValueOnce(streamOf([{ type: 'bot_created', bot: { id: 'bot-1' } }, { type: 'ready', bot: { id: 'bot-1' } }]))\n    const firstStore = useBotCreateProgressStore()\n    await firstStore.start({ name: 'ada', display_name: 'Ada' })\n    const first = postBotsStream.mock.calls[0]![0]\n    setActivePinia(createPinia())\n    const reloaded = useBotCreateProgressStore()\n    expect(reloaded.restorePending()).toBe(true)\n    await vi.waitFor(() => expect(reloaded.status).toBe('ready'))\n    expect(postBotsStream.mock.calls[1]![0]).toMatchObject({ body: first.body, headers: first.headers })\n    expect(reloaded.bot?.id).toBe('bot-1')\n  })\n\n  it('does not restore an uncertain create for a different account or server', async () => {\n    postBotsStream.mockResolvedValue(brokenStreamOf([], new Error('connection lost')))\n    await useBotCreateProgressStore().start({ name: 'ada', display_name: 'Ada' })\n    identity.id = 'user-2'\n    setActivePinia(createPinia())\n    expect(useBotCreateProgressStore().restorePending()).toBe(false)\n    identity.id = 'user-1'\n    identity.server = 'https://other.test/api'\n    setActivePinia(createPinia())\n    expect(useBotCreateProgressStore().restorePending()).toBe(false)\n    expect(postBotsStream).toHaveBeenCalledTimes(1)\n  })\n\n  it('retains a server-scoped request when another server starts its own create', async () => {\n    postBotsStream.mockResolvedValue(brokenStreamOf([], new Error('connection lost')))\n    await useBotCreateProgressStore().start({ name: 'ada', display_name: 'Ada' })\n    const originalKey = postBotsStream.mock.calls[0]![0].headers['Idempotency-Key']\n    identity.server = 'https://other.test/api'\n    setActivePinia(createPinia())\n    await useBotCreateProgressStore().start({ name: 'other', display_name: 'Other' })\n    identity.server = 'https://example.test/api'\n    setActivePinia(createPinia())\n    expect(useBotCreateProgressStore().restorePending()).toBe(true)\n    await vi.waitFor(() => expect(postBotsStream).toHaveBeenCalledTimes(3))\n    expect(postBotsStream.mock.calls[2]![0].headers['Idempotency-Key']).toBe(originalKey)\n    expect(postBotsStream.mock.calls[2]![0].body.name).toBe('ada')\n  })\n\n  it('clears a pending request only after its Bot is known and the user leaves it', async () => {\n    const bot = { id: 'bot-1', name: 'ada' }\n    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'error', code: 'workspace.unreachable', message: 'failed' }]))\n    const store = useBotCreateProgressStore()\n    await store.start({ name: 'ada', display_name: 'Ada' })\n    expect(sessionStorage.getItem(`memoh:new-bot:pending:${encodeURIComponent(store.createScope())}`)).not.toBeNull()\n    store.finishResolved()\n    expect(sessionStorage.getItem(`memoh:new-bot:pending:${encodeURIComponent(store.createScope())}`)).toBeNull()\n    store.reset()\n    expect(store.restorePending()).toBe(false)\n  })\n\n  it('sends only one request when the submit action is repeated while pending', async () => {\n    let resolveStream!: (value: ReturnType<typeof streamOf>) => void\n    postBotsStream.mockReturnValue(new Promise(resolve => { resolveStream = resolve }))\n    const store = useBotCreateProgressStore()\n    const first = store.start({ name: 'ada', display_name: 'Ada' })\n    await store.start({ name: 'ada', display_name: 'Ada' })\n    expect(postBotsStream).toHaveBeenCalledTimes(1)\n    resolveStream(streamOf([{ type: 'bot_created', bot: { id: 'bot-1' } }, { type: 'ready', bot: { id: 'bot-1' } }]))\n    await first\n  })\n\n  it('does not send an unrecoverable create when session storage is blocked', async () => {\n    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })\n    const store = useBotCreateProgressStore()\n    await store.start({ name: 'ada', display_name: 'Ada' })\n    expect(postBotsStream).not.toHaveBeenCalled()\n    expect(store.status).toBe('error')\n    setItem.mockRestore()\n  })\n\n  it('ignores the old response after an account switch', async () => {\n    let resolveStream!: (value: ReturnType<typeof streamOf>) => void\n    postBotsStream.mockReturnValue(new Promise(resolve => { resolveStream = resolve }))\n    const store = useBotCreateProgressStore()\n    const first = store.start({ name: 'ada', display_name: 'Ada' })\n    notifyAuthSessionCleared('login')\n    identity.id = 'user-2'\n    resolveStream(streamOf([{ type: 'bot_created', bot: { id: 'bot-1' } }, { type: 'ready', bot: { id: 'bot-1' } }]))\n    await first\n    expect(store.status).toBe('idle')\n    expect(store.bot).toBeNull()\n    expect(putBotsByBotIdSettings).not.toHaveBeenCalled()\n    expect(Array.from({ length: sessionStorage.length }, (_, i) => sessionStorage.key(i)).some(key => key?.startsWith('memoh:new-bot:pending:'))).toBe(false)\n  })\n\n  it('keeps the stable code when bot creation returns an HTTP problem', async () => {\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/bot-create-progress.ts": {
+      "baseSHA256": "be00bef9a6a2ba08c86fcbf682529dbc87576c78ce79f8bb02e0e55ef6ab9b45",
+      "sharedSHA256": "c429342c47b947e0420701fe53081f2dd1d99ee6459c0750048f733d62f076e7",
+      "replacements": [
+        [
+          "import { defineStore } from 'pinia'\nimport { computed, ref } from 'vue'\nimport { getAgentAuthorizationsById, getBotsById, getBotsByIdChecks, getBotsByBotIdAgents, getBotsByBotIdAgentsById, patchBotsByBotIdAgentsById, postBotsByBotIdAgents, postBotsByBotIdAgentsByIdCredentialClaim, postBotsByBotIdUserAccess, putBotsByBotIdSettings } from '@memohai/sdk'\nimport type { BotagentsBotAgent, BotsBot, BotsCreateBotRequest } from '@memohai/sdk'\nimport {\n",
+          "import { defineStore } from 'pinia'\nimport { computed, onScopeDispose, ref } from 'vue'\nimport { getAgentAuthorizationsById, getBotsById, getBotsByIdChecks, getBotsByBotIdAgents, getBotsByBotIdAgentsById, patchBotsByBotIdAgentsById, postBotsByBotIdAgents, postBotsByBotIdAgentsByIdCredentialClaim, postBotsByBotIdUserAccess, putBotsByBotIdSettings } from '@memohai/sdk'\nimport type { BotagentsBotAgent, BotsBot, BotsCreateBotRequest } from '@memohai/sdk'\nimport {\n",
+          1
+        ],
+        [
+          "import { externalAgentDisplayName } from '@/utils/external-agent'\nimport { writeCreatedBotSession, type CreatedBotSession } from '@/pages/bots/created-bot-session'\nimport { randomUUID } from '@/utils/uuid'\nimport { installCreatedAgent } from './install-created-agent'\n\n// The Bot row exists from the first `bot_created` event on, so every failure\n",
+          "import { externalAgentDisplayName } from '@/utils/external-agent'\nimport { writeCreatedBotSession, type CreatedBotSession } from '@/pages/bots/created-bot-session'\nimport { randomUUID } from '@/utils/uuid'\nimport { useUserStore } from '@/store/user'\nimport { sdkApiBaseUrl } from '@/lib/api-client'\nimport { clearPendingBotSession, readPendingBotSession, writePendingBotSession } from '@/pages/bots/pending-bot-session'\nimport { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'\nimport { installCreatedAgent } from './install-created-agent'\n\n// The Bot row exists from the first `bot_created` event on, so every failure\n",
+          1
+        ],
+        [
+          "  botId: string,\n  grants: BotCreateGrant[] | undefined,\n  onError?: (message: string) => void,\n): Promise<void> {\n  for (const grant of grants ?? []) {\n    if (grant.subject_type === 'user' && !grant.user_id) continue\n    if (grant.permissions.length === 0) continue\n    try {\n",
+          "  botId: string,\n  grants: BotCreateGrant[] | undefined,\n  onError?: (message: string) => void,\n  current: () => boolean = () => true,\n): Promise<void> {\n  for (const grant of grants ?? []) {\n    if (!current()) return\n    if (grant.subject_type === 'user' && !grant.user_id) continue\n    if (grant.permissions.length === 0) continue\n    try {\n",
+          1
+        ],
+        [
+          "        throwOnError: true,\n      })\n    } catch (error) {\n      onError?.(resolveApiErrorMessage(error, localFailureMessage()))\n    }\n  }\n}\n",
+          "        throwOnError: true,\n      })\n    } catch (error) {\n      if (current()) onError?.(resolveApiErrorMessage(error, localFailureMessage()))\n    }\n  }\n}\n",
+          1
+        ],
+        [
+          "// Polls the Bot until the server has settled its workspace one way or the\n// other. Returns the last observation even when the budget runs out while the\n// Bot is still creating; the caller decides what that means.\nasync function awaitBotSettled(botId: string): Promise<BotsBot> {\n  const deadline = Date.now() + BOT_STATUS_POLL_BUDGET_MS\n  for (;;) {\n    const { data } = await getBotsById({ path: { id: botId }, throwOnError: true })\n    if (data.status !== BOT_STATUS_CREATING || Date.now() >= deadline) return data\n    await sleep(BOT_STATUS_POLL_INTERVAL_MS)\n",
+          "// Polls the Bot until the server has settled its workspace one way or the\n// other. Returns the last observation even when the budget runs out while the\n// Bot is still creating; the caller decides what that means.\nasync function awaitBotSettled(botId: string, current: () => boolean = () => true): Promise<BotsBot> {\n  const deadline = Date.now() + BOT_STATUS_POLL_BUDGET_MS\n  for (;;) {\n    if (!current()) throw new Error('Session changed')\n    const { data } = await getBotsById({ path: { id: botId }, throwOnError: true })\n    if (data.status !== BOT_STATUS_CREATING || Date.now() >= deadline) return data\n    await sleep(BOT_STATUS_POLL_INTERVAL_MS)\n",
+          1
+        ],
+        [
+          "// from the create form to the dedicated progress route. Views read this store\n// and own navigation/onboarding side effects.\nexport const useBotCreateProgressStore = defineStore('bot-create-progress', () => {\n  const status = ref<BotCreateStatus>('idle')\n  const display = ref<BotCreateDisplay | null>(null)\n  const progress = ref<BotCreateProgress | null>(null)\n",
+          "// from the create form to the dedicated progress route. Views read this store\n// and own navigation/onboarding side effects.\nexport const useBotCreateProgressStore = defineStore('bot-create-progress', () => {\n  const userStore = useUserStore()\n  const scope = () => userStore.userInfo.id ? JSON.stringify([sdkApiBaseUrl(), userStore.userInfo.id]) : ''\n  const status = ref<BotCreateStatus>('idle')\n  const display = ref<BotCreateDisplay | null>(null)\n  const progress = ref<BotCreateProgress | null>(null)\n",
+          1
+        ],
+        [
+          "  // with the Bot already made; each start() from the form mints a new key.\n  let lastRequestKey = ''\n  let grantsApplied = false\n\n  const percent = computed(() => botCreateProgressPercent(progress.value))\n  const isActive = computed(() => status.value === 'creating')\n",
+          "  // with the Bot already made; each start() from the form mints a new key.\n  let lastRequestKey = ''\n  let grantsApplied = false\n  let activeScope = ''\n\n  const percent = computed(() => botCreateProgressPercent(progress.value))\n  const isActive = computed(() => status.value === 'creating')\n",
+          1
+        ],
+        [
+          "    lastPayload = null\n    hasPayload.value = false\n    grantsApplied = false\n    writeCreatedBotSession(null, lastOptions.onboarding)\n    lastOptions = {}\n    modelConfigured.value = false\n  }\n\n  function ensureErrorLine(message: string) {\n",
+          "    lastPayload = null\n    hasPayload.value = false\n    grantsApplied = false\n    activeScope = ''\n    writeCreatedBotSession(null, lastOptions.onboarding)\n    lastOptions = {}\n    modelConfigured.value = false\n  }\n  const stopAuthListener = onAuthSessionCleared(reset)\n  onScopeDispose(stopAuthListener)\n\n  function syncScope() {\n    if (activeScope && activeScope !== scope()) reset()\n  }\n\n  function ensureErrorLine(message: string) {\n",
+          1
+        ],
+        [
+          "    if (!bot.value?.id) return\n    const runtime = directRuntimeOf(lastOptions.agent)\n    writeCreatedBotSession({\n      botId: bot.value.id, botName: bot.value.name ?? '', displayName: display.value?.display_name ?? '',\n      avatarUrl: display.value?.avatar_url, settings: lastOptions.settings, setupError: setupError.value,\n      ...(runtime && { runtime, agentId: createdAgent.value?.id ?? '', authorizationId: authorizationId.value || undefined }),\n",
+          "    if (!bot.value?.id) return\n    const runtime = directRuntimeOf(lastOptions.agent)\n    writeCreatedBotSession({\n      scope: scope(),\n      botId: bot.value.id, botName: bot.value.name ?? '', displayName: display.value?.display_name ?? '',\n      avatarUrl: display.value?.avatar_url, settings: lastOptions.settings, setupError: setupError.value,\n      ...(runtime && { runtime, agentId: createdAgent.value?.id ?? '', authorizationId: authorizationId.value || undefined }),\n",
+          1
+        ],
+        [
+          "    const message = resolveApiErrorMessage(error, localFailureMessage())\n    setupError.value = message\n    errorCode.value = parseMemohError(error)?.code ?? (apiErrorStatus(error) === 409 ? 'bot.name_taken' : null)\n    progress.value = { phase: 'error', error: message }\n    ensureErrorLine(message)\n    status.value = 'error'\n",
+          "    const message = resolveApiErrorMessage(error, localFailureMessage())\n    setupError.value = message\n    errorCode.value = parseMemohError(error)?.code ?? (apiErrorStatus(error) === 409 ? 'bot.name_taken' : null)\n    if (parseMemohError(error)?.code === 'bot.name_taken' && scope()) clearPendingBotSession(scope(), lastOptions.onboarding)\n    progress.value = { phase: 'error', error: message }\n    ensureErrorLine(message)\n    status.value = 'error'\n",
+          1
+        ],
+        [
+          "  async function applySetup(recovering = false): Promise<BotCreateStartResult> {\n    const options = lastOptions\n    const botId = bot.value?.id\n    let settingsApplied = !hasSettings(options.settings)\n    let agentApplied = !options.agent\n    const directAgent = !!options.agent && botAgentRuntimeForProvider(options.agent.provider) !== 'acp'\n",
+          "  async function applySetup(recovering = false): Promise<BotCreateStartResult> {\n    const options = lastOptions\n    const botId = bot.value?.id\n    const operationScope = scope()\n    const generation = authSessionGeneration()\n    const current = () => scope() === operationScope && authSessionGeneration() === generation\n    const check = () => { if (!current()) throw new Error('Session changed') }\n    let settingsApplied = !hasSettings(options.settings)\n    let agentApplied = !options.agent\n    const directAgent = !!options.agent && botAgentRuntimeForProvider(options.agent.provider) !== 'acp'\n",
+          1
+        ],
+        [
+          "        if (recovering) {\n          if (createdAgent.value?.id) {\n            const { data } = await getBotsByBotIdAgentsById({ path: { bot_id: botId, id: createdAgent.value.id }, throwOnError: true })\n            createdAgent.value = data\n          } else {\n            const { data } = await getBotsByBotIdAgents({ path: { bot_id: botId }, throwOnError: true })\n            createdAgent.value = data.items?.find(agent => agent.runtime === runtime) ?? null\n          }\n          if (authorizationId.value && !createdAgent.value?.agent_credential_id) {\n            const { data } = await getAgentAuthorizationsById({ path: { id: authorizationId.value }, throwOnError: true })\n            metadata = { ...metadata, auth: agentAuthForCredentialKind(data.auth_kind) }\n          }\n        }\n",
+          "        if (recovering) {\n          if (createdAgent.value?.id) {\n            const { data } = await getBotsByBotIdAgentsById({ path: { bot_id: botId, id: createdAgent.value.id }, throwOnError: true })\n            check()\n            createdAgent.value = data\n          } else {\n            const { data } = await getBotsByBotIdAgents({ path: { bot_id: botId }, throwOnError: true })\n            check()\n            createdAgent.value = data.items?.find(agent => agent.runtime === runtime) ?? null\n          }\n          if (authorizationId.value && !createdAgent.value?.agent_credential_id) {\n            const { data } = await getAgentAuthorizationsById({ path: { id: authorizationId.value }, throwOnError: true })\n            check()\n            metadata = { ...metadata, auth: agentAuthForCredentialKind(data.auth_kind) }\n          }\n        }\n",
+          1
+        ],
+        [
+          "            body: { name: options.agent.name.trim(), runtime, ...(directAgent && { enabled: false }), metadata },\n            throwOnError: true,\n          })\n          createdAgent.value = { ...data, runtime: data.runtime ?? runtime }\n          saveSession()\n        }\n",
+          "            body: { name: options.agent.name.trim(), runtime, ...(directAgent && { enabled: false }), metadata },\n            throwOnError: true,\n          })\n          check()\n          createdAgent.value = { ...data, runtime: data.runtime ?? runtime }\n          saveSession()\n        }\n",
+          1
+        ],
+        [
+          "        if (authorizationId.value && !createdAgent.value.agent_credential_id) {\n          if (recovering && createdAgent.value.metadata?.auth !== metadata.auth) {\n            await patchBotsByBotIdAgentsById({ path: { bot_id: botId, id: agentId }, body: { metadata }, throwOnError: true })\n          }\n          const { data } = await postBotsByBotIdAgentsByIdCredentialClaim({\n            path: { bot_id: botId, id: agentId }, body: { authorization_id: authorizationId.value }, throwOnError: true,\n          })\n          createdAgent.value.agent_credential_id = data.id\n        }\n      }\n",
+          "        if (authorizationId.value && !createdAgent.value.agent_credential_id) {\n          if (recovering && createdAgent.value.metadata?.auth !== metadata.auth) {\n            await patchBotsByBotIdAgentsById({ path: { bot_id: botId, id: agentId }, body: { metadata }, throwOnError: true })\n            check()\n          }\n          const { data } = await postBotsByBotIdAgentsByIdCredentialClaim({\n            path: { bot_id: botId, id: agentId }, body: { authorization_id: authorizationId.value }, throwOnError: true,\n          })\n          check()\n          createdAgent.value.agent_credential_id = data.id\n        }\n      }\n",
+          1
+        ],
+        [
+          "          body: { ...settingsBody(options.settings ?? {}), ...(!directAgent && createdAgent.value?.id ? { default_bot_agent_id: createdAgent.value.id } : {}) },\n          throwOnError: true,\n        })\n        settingsApplied = true\n        if (!directAgent) agentApplied = true\n      }\n",
+          "          body: { ...settingsBody(options.settings ?? {}), ...(!directAgent && createdAgent.value?.id ? { default_bot_agent_id: createdAgent.value.id } : {}) },\n          throwOnError: true,\n        })\n        check()\n        settingsApplied = true\n        if (!directAgent) agentApplied = true\n      }\n",
+          1
+        ],
+        [
+          "          kind: 'installing-agent', status: 'running', message: externalAgentDisplayName(agent.runtime ?? '', agent.name ?? ''),\n        })\n        await installCreatedAgent(botId, agent)\n        if (!agent.enabled) {\n          await patchBotsByBotIdAgentsById({ path: { bot_id: botId, id: agentId }, body: { enabled: true }, throwOnError: true })\n          agent.enabled = true\n        }\n        await putBotsByBotIdSettings({ path: { bot_id: botId }, body: { default_bot_agent_id: agentId }, throwOnError: true })\n        agentApplied = true\n        lines.value = finalizeBotCreateTerminalLines(lines.value)\n      }\n      if (!setupError.value) lines.value = pushBotCreateTerminalLine(lines.value, { kind: 'ready', status: 'done' })\n      status.value = 'ready'\n    } catch (error) {\n      setupError.value = resolveApiErrorMessage(error, localFailureMessage())\n      errorCode.value = parseMemohError(error)?.code ?? null\n      lines.value = finalizeBotCreateTerminalLines(lines.value, 'error')\n",
+          "          kind: 'installing-agent', status: 'running', message: externalAgentDisplayName(agent.runtime ?? '', agent.name ?? ''),\n        })\n        await installCreatedAgent(botId, agent)\n        check()\n        if (!agent.enabled) {\n          await patchBotsByBotIdAgentsById({ path: { bot_id: botId, id: agentId }, body: { enabled: true }, throwOnError: true })\n          check()\n          agent.enabled = true\n        }\n        await putBotsByBotIdSettings({ path: { bot_id: botId }, body: { default_bot_agent_id: agentId }, throwOnError: true })\n        check()\n        agentApplied = true\n        lines.value = finalizeBotCreateTerminalLines(lines.value)\n      }\n      if (!setupError.value) lines.value = pushBotCreateTerminalLine(lines.value, { kind: 'ready', status: 'done' })\n      status.value = 'ready'\n    } catch (error) {\n      if (!current()) return NOTHING_APPLIED\n      setupError.value = resolveApiErrorMessage(error, localFailureMessage())\n      errorCode.value = parseMemohError(error)?.code ?? null\n      lines.value = finalizeBotCreateTerminalLines(lines.value, 'error')\n",
+          1
+        ],
+        [
+          "  // once per Bot; a workspace retry or a resumed flow does not re-share.\n  async function finishSetup(recovering = false): Promise<BotCreateStartResult> {\n    const botId = bot.value?.id\n    if (botId && !grantsApplied) {\n      grantsApplied = true\n      await applyGrants(botId, lastOptions.grants, message => { setupError.value = message })\n    }\n    const result = await applySetup(recovering)\n    // The setup that onboarding asked for lives only in this tab. Once it has\n    // all been applied, a user who leaves before the final step must not be\n",
+          "  // once per Bot; a workspace retry or a resumed flow does not re-share.\n  async function finishSetup(recovering = false): Promise<BotCreateStartResult> {\n    const botId = bot.value?.id\n    const operationScope = scope()\n    const generation = authSessionGeneration()\n    const current = () => scope() === operationScope && authSessionGeneration() === generation\n    if (botId && !grantsApplied) {\n      grantsApplied = true\n      await applyGrants(botId, lastOptions.grants, message => { setupError.value = message }, current)\n    }\n    if (!current()) return NOTHING_APPLIED\n    const result = await applySetup(recovering)\n    // The setup that onboarding asked for lives only in this tab. Once it has\n    // all been applied, a user who leaves before the final step must not be\n",
+          1
+        ],
+        [
+          "  // Relays a workspace provisioning stream (create or container retry) into\n  // the terminal. Returns the settled state; a stream that broke without a\n  // server error event leaves `errorCode` empty.\n  async function followWorkspaceStream(stream: AsyncGenerator<BotCreateStreamEvent, void, unknown>) {\n    return await collectBotCreateProgressStream(stream, {\n      initialState: bot.value ? { bot: bot.value } : undefined,\n      onState: (state) => {\n        progress.value = state.progress ?? progress.value\n        if (state.bot) { bot.value = state.bot; saveSession() }\n      },\n      onEvent: (event) => {\n        // Installation and Agent activation must finish before the ready line.\n        if (event.type !== 'ready') lines.value = appendBotCreateTerminalLine(lines.value, event)\n      },\n",
+          "  // Relays a workspace provisioning stream (create or container retry) into\n  // the terminal. Returns the settled state; a stream that broke without a\n  // server error event leaves `errorCode` empty.\n  async function followWorkspaceStream(stream: AsyncGenerator<BotCreateStreamEvent, void, unknown>, terminalEvent: 'ready' | 'complete' = 'ready', stillCurrent?: () => boolean) {\n    const streamScope = scope()\n    const generation = authSessionGeneration()\n    return await collectBotCreateProgressStream(stream, {\n      terminalEvent,\n      initialState: bot.value ? { bot: bot.value } : undefined,\n      onState: (state) => {\n        if (scope() !== streamScope || authSessionGeneration() !== generation || (stillCurrent && !stillCurrent())) return\n        progress.value = state.progress ?? progress.value\n        if (state.bot) { bot.value = state.bot; saveSession() }\n      },\n      onEvent: (event) => {\n        if (scope() !== streamScope || authSessionGeneration() !== generation || (stillCurrent && !stillCurrent())) return\n        // Installation and Agent activation must finish before the ready line.\n        if (event.type !== 'ready') lines.value = appendBotCreateTerminalLine(lines.value, event)\n      },\n",
+          1
+        ],
+        [
+          "  async function resume(): Promise<BotCreateStartResult> {\n    const botId = bot.value?.id\n    if (!botId) return NOTHING_APPLIED\n    beginStep()\n    if (lines.value.at(-1)?.kind !== 'creating') {\n      lines.value = pushBotCreateTerminalLine(lines.value, { kind: 'creating', status: 'running' })\n    }\n    progress.value = { phase: 'creating' }\n    try {\n      const current = await awaitBotSettled(botId)\n      bot.value = { ...bot.value, ...current }\n      if (!display.value?.display_name && current.display_name) {\n        display.value = { display_name: current.display_name, avatar_url: current.avatar_url }\n      }\n      if (current.status === BOT_STATUS_FAILED) {\n        const failure = await workspaceFailure(botId)\n        failWorkspace(failure.detail, failure.code ?? 'workspace_setup_failed')\n        return NOTHING_APPLIED\n      }\n",
+          "  async function resume(): Promise<BotCreateStartResult> {\n    const botId = bot.value?.id\n    if (!botId) return NOTHING_APPLIED\n    const operationScope = scope()\n    const generation = authSessionGeneration()\n    const currentScope = () => scope() === operationScope && authSessionGeneration() === generation\n    beginStep()\n    if (lines.value.at(-1)?.kind !== 'creating') {\n      lines.value = pushBotCreateTerminalLine(lines.value, { kind: 'creating', status: 'running' })\n    }\n    progress.value = { phase: 'creating' }\n    try {\n      const current = await awaitBotSettled(botId, currentScope)\n      if (!currentScope()) return NOTHING_APPLIED\n      bot.value = { ...bot.value, ...current }\n      if (!display.value?.display_name && current.display_name) {\n        display.value = { display_name: current.display_name, avatar_url: current.avatar_url }\n      }\n      if (current.status === BOT_STATUS_FAILED) {\n        const failure = await workspaceFailure(botId)\n        if (!currentScope()) return NOTHING_APPLIED\n        failWorkspace(failure.detail, failure.code ?? 'workspace_setup_failed')\n        return NOTHING_APPLIED\n      }\n",
+          1
+        ],
+        [
+          "      lines.value = finalizeBotCreateTerminalLines(lines.value)\n      return await finishSetup(true)\n    } catch (error) {\n      if (apiErrorStatus(error) === 404) {\n        // The Bot was deleted meanwhile; there is nothing left to resume on.\n        bot.value = null\n",
+          "      lines.value = finalizeBotCreateTerminalLines(lines.value)\n      return await finishSetup(true)\n    } catch (error) {\n      if (!currentScope()) return NOTHING_APPLIED\n      if (apiErrorStatus(error) === 404) {\n        // The Bot was deleted meanwhile; there is nothing left to resume on.\n        bot.value = null\n",
+          1
+        ],
+        [
+          "  async function retryWorkspace(): Promise<BotCreateStartResult> {\n    const botId = bot.value?.id\n    if (!botId) return NOTHING_APPLIED\n    beginStep()\n    progress.value = { phase: 'pulling' }\n    try {\n      const { stream } = await postBotsByBotIdContainerStream({ path: { bot_id: botId }, body: {}, throwOnError: true })\n      const result = await followWorkspaceStream(stream)\n      if (result.setupError) {\n        if (!result.errorCode) return await resume()\n        failWorkspace(result.setupError, result.errorCode)\n",
+          "  async function retryWorkspace(): Promise<BotCreateStartResult> {\n    const botId = bot.value?.id\n    if (!botId) return NOTHING_APPLIED\n    const operationScope = scope()\n    const generation = authSessionGeneration()\n    const current = () => scope() === operationScope && authSessionGeneration() === generation\n    beginStep()\n    progress.value = { phase: 'pulling' }\n    try {\n      const { stream } = await postBotsByBotIdContainerStream({ path: { bot_id: botId }, body: {}, throwOnError: true })\n      if (!current()) return NOTHING_APPLIED\n      const result = await followWorkspaceStream(stream, 'complete')\n      if (!current()) return NOTHING_APPLIED\n      if (result.setupError) {\n        if (!result.errorCode) return await resume()\n        failWorkspace(result.setupError, result.errorCode)\n",
+          1
+        ],
+        [
+          "      lines.value = finalizeBotCreateTerminalLines(lines.value)\n      return await finishSetup()\n    } catch (error) {\n      failWorkspace(resolveApiErrorMessage(error, localFailureMessage()), parseMemohError(error)?.code ?? null)\n      return NOTHING_APPLIED\n    }\n",
+          "      lines.value = finalizeBotCreateTerminalLines(lines.value)\n      return await finishSetup()\n    } catch (error) {\n      if (!current()) return NOTHING_APPLIED\n      failWorkspace(resolveApiErrorMessage(error, localFailureMessage()), parseMemohError(error)?.code ?? null)\n      return NOTHING_APPLIED\n    }\n",
+          1
+        ],
+        [
+          "    options: StartBotCreateOptions = {},\n    requestKey: string = randomUUID(),\n  ): Promise<BotCreateStartResult> {\n    if (status.value === 'creating') return NOTHING_APPLIED\n    lastPayload = payload\n    hasPayload.value = true\n    lastOptions = options\n",
+          "    options: StartBotCreateOptions = {},\n    requestKey: string = randomUUID(),\n  ): Promise<BotCreateStartResult> {\n    syncScope()\n    if (status.value === 'creating') return NOTHING_APPLIED\n    const requestScope = scope()\n    const generation = authSessionGeneration()\n    const pending = readPendingBotSession(requestScope, options.onboarding)\n    const recovering = !!pending\n    if (pending) {\n      payload = pending.payload\n      options = pending.options\n      requestKey = pending.requestKey\n    }\n    if (!writePendingBotSession(requestScope, requestKey, payload, options)) {\n      failWithoutBot(new Error('Unable to safely save the Bot creation request'))\n      return NOTHING_APPLIED\n    }\n    activeScope = requestScope\n    lastPayload = payload\n    hasPayload.value = true\n    lastOptions = options\n",
+          1
+        ],
+        [
+          "    lines.value = pushBotCreateTerminalLine([], { kind: 'command', status: 'info', message: display.value.display_name })\n    try {\n      const { stream } = await postBotsStream({ body: payload, headers: { 'Idempotency-Key': requestKey }, throwOnError: true })\n      const result = await followWorkspaceStream(stream)\n      bot.value = result.bot ?? null\n      if (!bot.value) {\n        setupError.value = result.setupError ?? null\n",
+          "    lines.value = pushBotCreateTerminalLine([], { kind: 'command', status: 'info', message: display.value.display_name })\n    try {\n      const { stream } = await postBotsStream({ body: payload, headers: { 'Idempotency-Key': requestKey }, throwOnError: true })\n      const result = await followWorkspaceStream(stream, 'ready', () => scope() === requestScope && authSessionGeneration() === generation)\n      if (scope() !== requestScope || authSessionGeneration() !== generation) return NOTHING_APPLIED\n      bot.value = result.bot ?? null\n      if (!bot.value) {\n        setupError.value = result.setupError ?? null\n",
+          1
+        ],
+        [
+          "        failWorkspace(result.setupError, result.errorCode)\n        return NOTHING_APPLIED\n      }\n      return await finishSetup()\n    } catch (error) {\n      if (bot.value) {\n        failWorkspace(resolveApiErrorMessage(error, localFailureMessage()), parseMemohError(error)?.code ?? null)\n        return NOTHING_APPLIED\n      }\n      failWithoutBot(error)\n      return NOTHING_APPLIED\n    }\n  }\n\n",
+          "        failWorkspace(result.setupError, result.errorCode)\n        return NOTHING_APPLIED\n      }\n      const setup = await finishSetup(recovering)\n      if (scope() === requestScope && authSessionGeneration() === generation && status.value === 'ready') clearPendingBotSession(requestScope, options.onboarding)\n      return setup\n    } catch (error) {\n      if (scope() !== requestScope || authSessionGeneration() !== generation) return NOTHING_APPLIED\n      if (bot.value) {\n        failWorkspace(resolveApiErrorMessage(error, localFailureMessage()), parseMemohError(error)?.code ?? null)\n        return NOTHING_APPLIED\n      }\n      failWithoutBot(error)\n      return NOTHING_APPLIED\n    }\n  }\n\n  function restorePending(onboarding = false) {\n    syncScope()\n    if (status.value !== 'idle') return false\n    const pending = readPendingBotSession(scope(), onboarding)\n    if (!pending) return false\n    void start(pending.payload, pending.options, pending.requestKey)\n    return true\n  }\n\n  function finishResolved() {\n    if (bot.value?.id && readPendingBotSession(scope(), lastOptions.onboarding)) {\n      clearPendingBotSession(scope(), lastOptions.onboarding)\n    }\n  }\n\n",
+          1
+        ],
+        [
+          "  }\n\n  function restore(saved: CreatedBotSession, onboarding = false) {\n    if (status.value !== 'idle') return\n    bot.value = { id: saved.botId, name: saved.botName }\n    display.value = { display_name: saved.displayName, avatar_url: saved.avatarUrl }\n    createdAgent.value = saved.runtime && saved.agentId ? { id: saved.agentId, runtime: saved.runtime } : null\n",
+          "  }\n\n  function restore(saved: CreatedBotSession, onboarding = false) {\n    syncScope()\n    if (status.value !== 'idle') return\n    activeScope = scope()\n    bot.value = { id: saved.botId, name: saved.botName }\n    display.value = { display_name: saved.displayName, avatar_url: saved.avatarUrl }\n    createdAgent.value = saved.runtime && saved.agentId ? { id: saved.agentId, runtime: saved.runtime } : null\n",
+          1
+        ],
+        [
+          "    errorCode,\n    modelConfigured,\n    restore,\n    percent,\n    isActive,\n    canRetry,\n",
+          "    errorCode,\n    modelConfigured,\n    restore,\n    restorePending,\n    finishResolved,\n    createScope: scope,\n    syncScope,\n    percent,\n    isActive,\n    canRetry,\n",
+          1
+        ]
+      ]
+    }
+  },
+  "addedFiles": {
+    "apps/web/src/pages/bots/pending-bot-session.test.ts": {
+      "sha256": "15a14cd1d5ebfc069f6e90d36d997579836737a495b0db059c07b1cbda65ad55",
+      "source": "// @vitest-environment jsdom\nimport { beforeEach, expect, it } from 'vitest'\nimport { readPendingBotSession, writePendingBotSession } from './pending-bot-session'\n\nbeforeEach(() => sessionStorage.clear())\n\nit('scopes a pending request and never saves Agent metadata', () => {\n  expect(writePendingBotSession('server-a/user-a', 'key-1', { name: 'cat' }, {\n    agent: { name: 'Codex', provider: 'codex', metadata: { provider: 'codex', auth: 'api_key' }, authorizationId: 'auth-1' },\n  })).toBe(true)\n  const raw = sessionStorage.getItem(sessionStorage.key(0)!)!\n  expect(raw).not.toContain('api_key')\n  expect(readPendingBotSession('server-b/user-a')).toBeNull()\n  expect(readPendingBotSession('server-a/user-b')).toBeNull()\n  expect(readPendingBotSession('server-a/user-a')?.requestKey).toBe('key-1')\n})\n\nit('does not persist arbitrary request metadata', () => {\n  expect(writePendingBotSession('scope', 'key', { metadata: { api_key: 'secret' } }, {})).toBe(false)\n  expect(sessionStorage.length).toBe(0)\n})\n"
+    },
+    "apps/web/src/pages/bots/pending-bot-session.ts": {
+      "sha256": "764a156fe9a4bc2cbec2db0c73f3eaba92e1b63e581bf2946a41ac331b989c71",
+      "source": "import type { BotsCreateBotRequest } from '@memohai/sdk'\nimport { safeSessionGet, safeSessionRemove, safeSessionSet } from '@/utils/safe-storage'\nimport type { StartBotCreateOptions } from '@/store/bot-create-progress'\nimport { directBotAgentMetadata, isDirectBotAgentRuntime } from '@/utils/bot-agent'\n\nconst KEY = 'memoh:new-bot:pending'\nconst ONBOARDING_KEY = 'memoh:onboarding:pending'\nconst storageKey = (scope: string, onboarding = false) => `${onboarding ? ONBOARDING_KEY : KEY}:${encodeURIComponent(scope)}`\n\nexport interface PendingBotSession {\n  scope: string\n  requestKey: string\n  payload: BotsCreateBotRequest\n  options: StartBotCreateOptions\n}\n\n// Persist an allowlist: request metadata and Agent metadata can hold secrets.\nexport function writePendingBotSession(scope: string, requestKey: string, payload: BotsCreateBotRequest, options: StartBotCreateOptions): boolean {\n  if (!scope || !requestKey || (payload.metadata && Object.keys(payload.metadata).length)) return false\n  const runtime = options.agent?.provider.trim().toLowerCase()\n  if (runtime && !/^[a-z0-9_-]+$/.test(runtime)) return false\n  if (options.agent?.metadata && Object.keys(options.agent.metadata).some(key => key !== 'provider' && key !== 'auth')) return false\n  const value: PendingBotSession = {\n    scope, requestKey,\n    payload: { name: payload.name, display_name: payload.display_name, avatar_url: payload.avatar_url, timezone: payload.timezone, is_active: payload.is_active, acl_preset: payload.acl_preset, wait_for_ready: payload.wait_for_ready },\n    options: {\n      onboarding: options.onboarding,\n      display: options.display && { name: options.display.name, display_name: options.display.display_name, avatar_url: options.display.avatar_url },\n      settings: options.settings && { chat_model_id: options.settings.chat_model_id, memory_enabled: options.settings.memory_enabled, reasoning_effort: options.settings.reasoning_effort },\n      grants: options.grants?.map(grant => ({ subject_type: grant.subject_type, user_id: grant.user_id, permissions: grant.permissions })),\n      ...(runtime && { agent: { name: options.agent!.name, provider: runtime, authorizationId: options.agent!.authorizationId } }),\n    },\n  }\n  return safeSessionSet(storageKey(scope, options.onboarding), JSON.stringify(value))\n}\n\nexport function readPendingBotSession(scope: string, onboarding = false): PendingBotSession | null {\n  if (!scope) return null\n  try {\n    const value = JSON.parse(safeSessionGet(storageKey(scope, onboarding)) || 'null') as PendingBotSession | null\n    if (!value || value.scope !== scope || !value.requestKey || !value.payload || !value.options) return null\n    if (value.options.agent) {\n      if (!/^[a-z0-9_-]+$/.test(value.options.agent.provider)) return null\n      if (isDirectBotAgentRuntime(value.options.agent.provider)) value.options.agent.metadata = directBotAgentMetadata(value.options.agent.provider)\n    }\n    return value\n  } catch { return null }\n}\n\nexport function clearPendingBotSession(scope: string, onboarding = false) {\n  safeSessionRemove(storageKey(scope, onboarding))\n}\n"
+    }
+  }
+}

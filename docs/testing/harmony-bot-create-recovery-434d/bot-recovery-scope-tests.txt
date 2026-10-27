@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/bots/created-bot-session.test.ts apps/web/src/lib/harmony-bot-create-scope.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  2 passed (2)
+      Tests  7 passed (7)
+   Start at  19:21:09
+   Duration  7.28s (transform 3.31s, setup 0ms, import 4.32s, tests 21ms, environment 2.26s)

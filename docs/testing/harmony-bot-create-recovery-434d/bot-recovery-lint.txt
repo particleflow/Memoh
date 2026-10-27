@@ -1,0 +1,6 @@
+
+/workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web/src/pages/bots/new-progress.test.ts
+  110:25  warning  There is more than one component in this file  vue/one-component-per-file
+  144:25  warning  There is more than one component in this file  vue/one-component-per-file
+
+✖ 2 problems (0 errors, 2 warnings)

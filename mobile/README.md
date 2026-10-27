@@ -44,3 +44,5 @@ must not return to the public repository. No automatic route, identity or token
 migration is implied by the new version or by this source inventory.
 
 The pending [model catalog and unavailable-label source alignment](../docs/testing/harmony-model-catalog-7af/README.md) is pinned to `7af02cb35f85582713213cb98c382d36df744ea3`. It is not included in the qualified 1.0.20 artifact and awaits the final unified combination.
+
+Pending source-only [Bot creation recovery and account-scoped storage alignment](../docs/testing/harmony-bot-create-recovery-434d/README.md) consumes stable `434d82a46f48e4b2047d067282f0af434cc4f0bd`. The qualified 1.0.20 artifact is unchanged; the next package waits for the final unified Web/SDK combination.

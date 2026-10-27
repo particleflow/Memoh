@@ -1,0 +1,23 @@
+{
+  "sharedCommit": "434d82a46f48e4b2047d067282f0af434cc4f0bd",
+  "files": [
+    "apps/web/src/composables/api/useBotCreateStream.ts",
+    "apps/web/src/lib/auth-session.ts",
+    "apps/web/src/pages/bots/created-bot-session.ts",
+    "apps/web/src/pages/bots/new-progress.test.ts",
+    "apps/web/src/pages/bots/new-progress.vue",
+    "apps/web/src/pages/bots/new.test.ts",
+    "apps/web/src/pages/bots/new.vue",
+    "apps/web/src/pages/bots/pending-bot-session.test.ts",
+    "apps/web/src/pages/bots/pending-bot-session.ts",
+    "apps/web/src/pages/onboarding/steps/Step4Bot.vue",
+    "apps/web/src/router-guards/onboarding.ts",
+    "apps/web/src/store/bot-create-progress.test.ts",
+    "apps/web/src/store/bot-create-progress.ts"
+  ],
+  "generatedFilesMatchShared": true,
+  "tests": 58,
+  "HAPBuilt": false,
+  "needsNextHAPAfterFinalCombination": true,
+  "existing120HashesUnchanged": true
+}

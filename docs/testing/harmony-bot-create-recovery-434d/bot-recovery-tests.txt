@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/bots/new-progress.test.ts apps/web/src/pages/bots/new.test.ts apps/web/src/pages/bots/pending-bot-session.test.ts apps/web/src/store/bot-create-progress.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  4 passed (4)
+      Tests  51 passed (51)
+   Start at  19:20:35
+   Duration  24.10s (transform 13.69s, setup 0ms, import 18.49s, tests 1.25s, environment 3.37s)
