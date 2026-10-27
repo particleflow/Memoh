@@ -6,6 +6,9 @@ and [artifact identity](../docs/testing/harmony-unified-1.0.19/unsigned-verifica
 record the existing unsigned build. This guide describes its current input
 contract; it does not request a rebuild of an already qualified artifact.
 Signing, installation and physical-device/production acceptance remain separate.
+The existing package belongs to its recorded 167-entry source checkpoint. Removing
+unused inputs and their lock metadata changes the future formal source identity;
+no old receipt is rewritten to bind it to this 162-entry cleanup tree.
 
 ## Inputs
 
@@ -18,7 +21,7 @@ Signing, installation and physical-device/production acceptance remain separate.
   compatible backend source is `69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee`; that
   value is not a replacement for the base archive pin. Repinning requires
   reviewing the generated baseline and removing any already-consumed overlays.
-- `SOURCE-PROVENANCE.json` describes 167 reviewed source entries and records
+- `SOURCE-PROVENANCE.json` describes 162 reviewed source entries and records
   origins/current hashes. `scripts/check-harmony-source.py` expects exactly
   45 non-test and 2 original phone test adaptations. Read the current lock and
   guard rather than copying a patch count from an older checkpoint.
@@ -49,9 +52,9 @@ python3 -B mobile/harmony/tools/build_api26.py --toolchain-root /absolute/path/t
 
 The official SDK belongs at
 `/absolute/path/to/toolchains/commandline-tools/command-line-tools`.
-The guarded `build_memoh_web.py` context is the current Web producer. The legacy
-`prepare_shared_observation.py` is not called by that producer and is not an
-additional preparation step.
+The guarded `build_memoh_web.py` context is the current Web producer. The obsolete
+standalone observation preparer and its exclusive host/adapter regressions have
+been removed; no second preparation step is required.
 
 The Web builder verifies frozen dependencies, typechecks and bundles the
 composed source. Packaging verifies resource hashes and generates the shared

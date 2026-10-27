@@ -32,7 +32,7 @@ references remain exact delegation paths; denial does not widen to Bot/hash.
 At this audit checkpoint, the complete pinned 40f archive replaced the older
 standalone observation preparation path. The current producer's archive and
 overlays are documented in [the reproduction guide](../mobile/BUILD-REPRODUCTION.md).
-The unused legacy helper/metadata is an explicit [retirement handoff](../mobile/SHARED-OBSERVATION.md), not a required current build step.
+The legacy helper/host/adapter and unused metadata have been [retired](../mobile/SHARED-OBSERVATION.md); their archived audit descriptions do not make them current build steps.
 
 ## Executed checks
 
