@@ -56,7 +56,7 @@ describe('conversation monitor entry', () => {
     await mount()
     const row = [...document.querySelectorAll<HTMLButtonElement>('button')].find(node => node.textContent?.includes('Deep Agent'))!
     row.click(); await settle()
-    expect(api.select).toHaveBeenCalledWith('bot')
+    expect(api.select).toHaveBeenCalledWith('bot', { sessionId: 'b' })
     expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'b', title: 'Deep Agent' })
     expect(api.global).not.toHaveBeenCalled()
   })
@@ -67,7 +67,8 @@ describe('conversation monitor entry', () => {
     expect(dialog.textContent).not.toContain('Review'); expect(dialog.textContent).not.toContain('Unrelated Bot')
     const row = [...dialog.querySelectorAll<HTMLButtonElement>('button')].find(node => node.textContent?.includes('Image expert'))!
     row.click(); await settle()
-    expect(api.select).toHaveBeenCalledWith('expert')
+    expect(api.select).toHaveBeenCalledWith('expert', { sessionId: 'expert' })
+    expect(api.push).toHaveBeenCalledWith({ name: 'bot', params: { botName: 'expert' }, query: { session: 'expert' } })
     expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'expert', title: 'Expert conversation' })
   })
   it('keeps one pending navigation for repeated clicks and verifies the returned session identity', async () => {
