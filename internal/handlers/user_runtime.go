@@ -161,7 +161,7 @@ func (h *UserRuntimeHandler) Delete(c echo.Context) error {
 
 func runtimeHTTPError(err error) error {
 	switch {
-	case errors.Is(err, agenvo.ErrEndpointConfigConflict), errors.Is(err, agenvo.ErrNativeProfileConflict):
+	case errors.Is(err, agenvo.ErrNativeProfileConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
 		return apperror.Wrap(apperror.CodeComputerAdmissionPaused, err, nil)

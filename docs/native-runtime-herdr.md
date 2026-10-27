@@ -8,7 +8,6 @@ This adapter replaces the interactive OAuth transport for one explicitly configu
 | --- | --- | --- | --- |
 | NAS local workspace | `native` | existing local provider | `target_id = native` |
 | Windows native Remote Runtime | `remote` | `memoh` | Bot mount `target_id`; registry `runtime_id` |
-| Existing Agenvo target | `remote` | `agenvo` | Existing Bot mount and MCP reference |
 
 Do not infer Windows routing from the word “native.” The selected Bot mount is resolved on every call. The adapter requires a ready Windows (`windows` or `win32`) remote connection; it never selects the NAS bridge or the Bot's current default as a fallback. Workspace target listing retains the existing connection-status path, with no OAuth probe.
 
@@ -40,7 +39,7 @@ These example paths and names are not discovered production settings. `agent` is
 
 `producer` is optional for tasks without file declarations, and required before a native task with declared files can be claimed. It references the existing finite producer EXE and existing `HERDR_PLUGIN_CONFIG_DIR` / `HERDR_PLUGIN_STATE_DIR` pair. All three values are required together, use canonical local Windows paths with backslashes and no redundant/trailing separator, and are pinned by the existing target fingerprint. The existing producer configuration's `source_root` must match the task work directory. No new directory, profile manager, queue or credential is created by this configuration. Updating these references cannot silently redirect an old task.
 
-On native task completion, and on a permitted bounded delivery wakeup, Memoh invokes that exact EXE with `-action collect-result` and explicitly sets both directory variables for that process. It does not invoke the retired `herdr plugin action` hook, inherit its directory pair, or substitute `advance-results` for first registration. Agenvo tasks retain their existing plugin hook.
+On native task completion, and on a permitted bounded delivery wakeup, Memoh invokes that exact EXE with `-action collect-result` and explicitly sets both directory variables for that process. It does not invoke the retired `herdr plugin action` hook, inherit its directory pair, or substitute `advance-results` for first registration. Historical Agenvo tasks are retained as evidence and cannot dispatch or invoke their old plugin hook.
 
 The returned Runtime DTO and owner Runtime list expose optional `native_herdr = {connection_id, device_id, instance_id, session, target_fingerprint}` for a valid configured profile, including while offline. The first two fields both equal the DTO's `id`; the fingerprint identifies the current full profile. This is a read-only binding for host/transfer consistency checks, not a third selector or a credential. Bot task requests continue to use their existing mount `target_id`. Invalid or unconfigured profiles and Agenvo records omit this native binding.
 

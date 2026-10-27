@@ -11,8 +11,22 @@ import (
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
+// This store supplies historical rows for admission preservation regressions.
+// It has no legacy profile or endpoint mutation operation.
+type admissionRecordStore struct {
+	*serviceStore
+	config dbstore.JSON
+}
+
+func (s *admissionRecordStore) OwnedAgenvoRuntime(_ context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
+	if owner != "owner" || id != "existing" {
+		return dbstore.UserRuntimeRecord{}, ErrForbidden
+	}
+	return dbstore.UserRuntimeRecord{ID: id, UserID: owner, ProviderConfig: s.config}, nil
+}
+
 type admissionTestStore struct {
-	*agentProfileStore
+	*admissionRecordStore
 	gate    dbstore.ComputerAdmission
 	changes int
 	failure error
@@ -40,7 +54,7 @@ func (s *admissionTestStore) ChangeComputerAdmission(_ context.Context, owner, r
 
 func TestAdmissionOwnerBindingAndReadOnlyProbe(t *testing.T) {
 	service, base, relay := serviceFixture(t)
-	store := &admissionTestStore{agentProfileStore: &agentProfileStore{serviceStore: base, config: base.record.RuntimeProviderConfig}}
+	store := &admissionTestStore{admissionRecordStore: &admissionRecordStore{serviceStore: base, config: base.record.RuntimeProviderConfig}}
 	service.store = store
 	got, err := service.ReadAdmission(t.Context(), "owner", "existing")
 	if err != nil || got.Paused || got.Revision != "0" || len(relay.calls) != 0 {
