@@ -525,7 +525,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "c243e8fe4fe29ae9f5cdfb14b85101f463a3b310699a41a87b9ce61e2c086844",
+      "sha256": "b10471a512d17965a39d56e88b7bc627f2602f710563297f8a1c86b5257ca249",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",

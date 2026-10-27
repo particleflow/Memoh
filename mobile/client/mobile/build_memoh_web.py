@@ -1037,6 +1037,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     changes['apps/web/src/pages/appearance/index.vue'].append((
         '            :items="themeItems"',
         '            :items="themeItems"\n            class="max-w-full flex-wrap"', 1))
+    changes['apps/web/src/pages/home/components/chat-pane.vue'].append((
+        '                        @click="handleSendButton"',
+        '                        @keydown.enter="$event.repeat && $event.preventDefault()"\n                        @click="handleSendButton"', 1))
     patches = {}
     context = base / 'official-context.tar'
     if platform == 'harmony':
