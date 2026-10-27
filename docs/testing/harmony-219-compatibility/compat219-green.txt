@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/composables/useNativeTaskResume.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  32 passed (32)
+   Start at  22:19:56
+   Duration  15.59s (transform 11.22s, setup 0ms, import 14.37s, tests 62ms, environment 918ms)

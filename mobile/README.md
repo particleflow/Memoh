@@ -48,3 +48,5 @@ The pending [model catalog and unavailable-label source alignment](../docs/testi
 Pending source-only [Bot creation recovery and account-scoped storage alignment](../docs/testing/harmony-bot-create-recovery-434d/README.md) consumes stable `434d82a46f48e4b2047d067282f0af434cc4f0bd`. The qualified 1.0.20 artifact is unchanged; the next package waits for the final unified Web/SDK combination.
 
 The 1.0.21 generic unsigned handoff locks the final feffaf Web/SDK combination, including the recorded model and creation alignments. Earlier pending-source paragraphs describe their original checkpoints; 1.0.20 remains a separate preserved artifact.
+
+The [219/schema179 compatibility review](../docs/testing/harmony-219-compatibility/README.md) records that the qualified 1.0.21 retains existing chat/media compatibility but omits the new `inputs`-bearing explicit native task resume. The source-only correction is not relabeled as the existing signed package.

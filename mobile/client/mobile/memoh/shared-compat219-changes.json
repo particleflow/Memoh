@@ -1,0 +1,29 @@
+{
+  "apps/web/src/pages/home/composables/useNativeTaskResume.ts": {
+    "baseSHA256": "58872a03c9e401c5d3e1a5329f6c0a3e6055bf18dffdcebd2566063659c1143d",
+    "sharedSHA256": "05e3de7fc7c56f965df71f3a9f6b4a8de956e6d91d561c019b4fbecb6da4e806",
+    "replacements": [
+      [
+        "}\nexport type NativeTaskResumeStatus = 'ready' | 'sending' | 'submitted' | 'unchanged' | 'unknown' | 'unavailable' | 'blocked' | 'unsupported' | 'unauthorized' | 'forbidden' | 'storageUnavailable'\nconst phases = new Set(['batch_creating_workspace', 'batch_workspace_adopted', 'batch_tab_adopted'])\nconst inputKeys = new Set(['kind', 'task', 'target_id', 'work_dir', 'artifact', 'artifacts'])\nfunction record(value: unknown): value is Record<string, unknown> {\n  return !!value && typeof value === 'object' && !Array.isArray(value)\n}\n",
+        "}\nexport type NativeTaskResumeStatus = 'ready' | 'sending' | 'submitted' | 'unchanged' | 'unknown' | 'unavailable' | 'blocked' | 'unsupported' | 'unauthorized' | 'forbidden' | 'storageUnavailable'\nconst phases = new Set(['batch_creating_workspace', 'batch_workspace_adopted', 'batch_tab_adopted'])\nconst inputKeys = new Set(['kind', 'task', 'target_id', 'work_dir', 'inputs', 'artifact', 'artifacts'])\nfunction record(value: unknown): value is Record<string, unknown> {\n  return !!value && typeof value === 'object' && !Array.isArray(value)\n}\n",
+        1
+      ],
+      [
+        "  if (!record(input) || Object.keys(input).some(key => !inputKeys.has(key))\n    || input.kind !== 'herdr_pi_task' || typeof input.task !== 'string' || !input.task.trim()\n    || ['target_id', 'work_dir'].some(key => key in input && typeof input[key] !== 'string')\n    || ('artifact' in input && !artifact(input.artifact))\n    || ('artifacts' in input && (!Array.isArray(input.artifacts) || !input.artifacts.every(artifact)))) return\n  if (receipt.kind !== 'herdr_pi_task' || receipt.state !== 'unknown' || !phases.has(String(receipt.phase))\n",
+        "  if (!record(input) || Object.keys(input).some(key => !inputKeys.has(key))\n    || input.kind !== 'herdr_pi_task' || typeof input.task !== 'string' || !input.task.trim()\n    || ['target_id', 'work_dir'].some(key => key in input && typeof input[key] !== 'string')\n    || ('inputs' in input && (!Array.isArray(input.inputs) || !input.inputs.every(hash => typeof hash === 'string' && /^[a-f0-9]{64}$/.test(hash))))\n    || ('artifact' in input && !artifact(input.artifact))\n    || ('artifacts' in input && (!Array.isArray(input.artifacts) || !input.artifacts.every(artifact)))) return\n  if (receipt.kind !== 'herdr_pi_task' || receipt.state !== 'unknown' || !phases.has(String(receipt.phase))\n",
+        1
+      ]
+    ]
+  },
+  "apps/web/src/pages/home/composables/useNativeTaskResume.test.ts": {
+    "baseSHA256": "872890ef915aafa3edbd455ab7568c07cff1a0161d2d91054073a858301edc02",
+    "sharedSHA256": "c2b98aada77542d772d87db827d9130602a94f83c6c5a10447bdf52c28cd7cf8",
+    "replacements": [
+      [
+        "afterEach(() => { owners.splice(0).forEach(owner => owner.stop()); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })\n\ndescribe('explicit original native batch continuation', () => {\n  it('sends nothing on mount or elapsed time, then uses the exact original scope, operation and arguments once', async () => {\n    const { view } = setup(); await settle(); await vi.advanceTimersByTimeAsync(120000)\n    expect(api.send).not.toHaveBeenCalled(); expect(view.canSend.value).toBe(true)\n",
+        "afterEach(() => { owners.splice(0).forEach(owner => owner.stop()); vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers() })\n\ndescribe('explicit original native batch continuation', () => {\n  it('preserves original input hashes through the existing resume request', async () => {\n    const inputs = ['a'.repeat(64), 'b'.repeat(64)]\n    const block = tool(); block.input = { ...args, inputs }\n    const { view } = setup(block); await settle(); await view.send()\n    expect(api.send).toHaveBeenCalledTimes(1)\n    expect(api.send.mock.calls[0]![0].body).toEqual({ ...args, inputs })\n    for (const invalid of ['hash', [7], ['not-a-hash']]) {\n      block.input = { ...args, inputs: invalid }\n      expect(originalNativeTaskResume(block)).toBeUndefined()\n    }\n  })\n  it('sends nothing on mount or elapsed time, then uses the exact original scope, operation and arguments once', async () => {\n    const { view } = setup(); await settle(); await vi.advanceTimersByTimeAsync(120000)\n    expect(api.send).not.toHaveBeenCalled(); expect(view.canSend.value).toBe(true)\n",
+        1
+      ]
+    ]
+  }
+}

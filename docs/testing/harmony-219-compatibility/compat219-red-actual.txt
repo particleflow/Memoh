@@ -1,0 +1,32 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/composables/useNativeTaskResume.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+ ❯ |web| src/pages/home/composables/useNativeTaskResume.test.ts (32 tests | 1 failed) 75ms
+     × preserves original input hashes through the existing resume request 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/useNativeTaskResume.test.ts > explicit original native batch continuation > preserves original input hashes through the existing resume request
+AssertionError: expected "vi.fn()" to be called 1 times, but got 0 times
+ ❯ src/pages/home/composables/useNativeTaskResume.test.ts:35:22
+     33|     const block = tool(); block.input = { ...args, inputs }
+     34|     const { view } = setup(block); await settle(); await view.send()
+     35|     expect(api.send).toHaveBeenCalledTimes(1)
+       |                      ^
+     36|     expect(api.send.mock.calls[0]![0].body).toEqual({ ...args, inputs …
+     37|     for (const invalid of ['hash', [7], ['not-a-hash']]) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 31 passed (32)
+   Start at  22:18:50
+   Duration  12.15s (transform 8.84s, setup 0ms, import 11.30s, tests 75ms, environment 586ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

@@ -71,6 +71,7 @@ def inputs():
     files.append(ROOT / 'mobile/memoh/shared-model-catalog-changes.json')
     files.append(ROOT / 'mobile/memoh/shared-bot-create-recovery-changes.json')
     files.append(ROOT / 'mobile/memoh/shared-native-profile-sdk.json')
+    files.append(ROOT / 'mobile/memoh/shared-compat219-changes.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -905,6 +906,11 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     bot_recovery = lock['sharedBotCreateRecovery']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / bot_recovery['local']) == bot_recovery['sha256'], 'Bot recovery source drift'
     bot_recovery_sources = json.loads((ROOT / 'mobile/memoh' / bot_recovery['local']).read_text())
+    compat = lock['sharedCompatibility219']
+    assert sha(ROOT / 'mobile/memoh' / compat['local']) == compat['sha256'], 'Compatibility source drift'
+    for name, review in json.loads((ROOT / 'mobile/memoh' / compat['local']).read_text()).items():
+        assert name not in bot_recovery_sources['existingFiles'], 'Duplicate shared source target'
+        bot_recovery_sources['existingFiles'][name] = review
 
 
 

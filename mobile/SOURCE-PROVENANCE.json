@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "8c40a5affc4d1c3fca2e96452eb4b1be85549b74b88cc4d4295e6523a49bf113",
+      "sha256": "6c425e796b556297d6dec1e9f1a1e117bca77e7d73d21797adabac5e7361dc57",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "e960da9581ed6674aae13335ce71d53c7be112c66a7dfec98232b89ae5983bd3",
+      "sha256": "32f427b3cdf84d931869dba4d825a94b0678047f927797e93f9d54f8b327f423",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1747,11 +1747,20 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-native-profile-sdk.json",
-      "sha256": "51b6c0e0e5e556f69b22fac89f19997fc07de5e60db98f4b3898b9650c2223c1",
+      "sha256": "9d5fe3759eca0aaa3e0d106cd946fa8e1ee48691d5d0e33a6b8c995dc4cf3a01",
       "origin": "Exact generated SDK native profile surface feffaf66be4bc8999479fc76bd6a87be1a3b3789",
       "licenseReview": "Memoh upstream source license retained.",
       "preparationChanges": [
         "Generated declaration alignment only; no native runtime or profile action executed."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-compat219-changes.json",
+      "sha256": "546fbe9380f60e8af48652a9314ca077a79d3378ba9d8227674bb9eb475fc003",
+      "origin": "Exact shared native task input resume compatibility 219a722da3b8e4a316164011dd106350dfab2c9e",
+      "licenseReview": "Memoh source license retained.",
+      "preparationChanges": [
+        "Preserve original input hashes, scope and operation; no transfer protocol or retry rule added."
       ]
     }
   ],

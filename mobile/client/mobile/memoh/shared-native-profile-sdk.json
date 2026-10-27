@@ -9,6 +9,16 @@
       "export type UserruntimeNativeHerdrIdentity = {\n    connection_id?: string;\n    device_id?: string;\n    instance_id?: string;\n    session?: string;\n    target_fingerprint?: string;\n};",
       "export type UserruntimeNativeHerdrIdentity = {\n    config_sha256?: string;\n    connection_id?: string;\n    device_id?: string;\n    instance_id?: string;\n    session?: string;\n    target_fingerprint?: string;\n};",
       1
+    ],
+    [
+      "export type HandlersNativeTaskResumeInput = {\n    artifact?: DeliverymetaArtifact;\n    artifacts?: Array<DeliverymetaArtifact>;\n    kind: 'herdr_pi_task';\n    target_id?: string;\n    task: string;\n    work_dir?: string;\n};",
+      "export type HandlersNativeTaskResumeInput = {\n    artifact?: DeliverymetaArtifact;\n    artifacts?: Array<DeliverymetaArtifact>;\n    inputs?: Array<string>;\n    kind: 'herdr_pi_task';\n    target_id?: string;\n    task: string;\n    work_dir?: string;\n};",
+      1
+    ],
+    [
+      "export type HandlersSessionAbortControlResponse = {\n    /**\n     * ClientReason is a client-reported enum, not proof of a human action.\n     */\n    client_reason?: string;\n    received_at?: string;\n    /**\n     * Source is assigned by the receiving server, not inferred from a user agent.\n     */\n    source?: string;\n};",
+      "export type HandlersSessionAbortControlResponse = {\n    /**\n     * Applied is the observed control return, not proof of a unique abort cause.\n     */\n    applied?: boolean;\n    /**\n     * ClientReason is a client-reported enum, not proof of a human action.\n     */\n    client_reason?: string;\n    /**\n     * CompletedAt is a stored server return observation, not the run finish time.\n     */\n    completed_at?: string;\n    error_class?: string;\n    received_at?: string;\n    /**\n     * ServerSource names the server branch; it is not an authenticated actor.\n     */\n    server_source?: string;\n    /**\n     * Source is assigned by the receiving server, not inferred from a user agent.\n     */\n    source?: string;\n};",
+      1
     ]
   ],
   "overlays": {

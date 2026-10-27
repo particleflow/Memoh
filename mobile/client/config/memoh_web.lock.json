@@ -375,7 +375,14 @@
     "commit": "feffaf66be4bc8999479fc76bd6a87be1a3b3789",
     "tree": "7588a78f825a9290e8a3a5c4d0c64ac9a46b23de",
     "local": "shared-native-profile-sdk.json",
-    "sha256": "51b6c0e0e5e556f69b22fac89f19997fc07de5e60db98f4b3898b9650c2223c1",
-    "scope": "Fixed generated native profile-cutover endpoint and admission identity fields; no automatic cutover, configuration migration or added UI."
+    "sha256": "9d5fe3759eca0aaa3e0d106cd946fa8e1ee48691d5d0e33a6b8c995dc4cf3a01",
+    "scope": "Fixed generated native profile-cutover endpoint and admission identity fields; no automatic cutover, configuration migration or added UI.",
+    "additiveCancelAndInputsCommit": "219a722da3b8e4a316164011dd106350dfab2c9e"
+  },
+  "sharedCompatibility219": {
+    "commit": "219a722da3b8e4a316164011dd106350dfab2c9e",
+    "local": "shared-compat219-changes.json",
+    "sha256": "546fbe9380f60e8af48652a9314ca077a79d3378ba9d8227674bb9eb475fc003",
+    "scope": "Original native task resume inputs SHA256 preservation; additive optional cancel observation fields. Generic media transport and original navigation unchanged."
   }
 }
