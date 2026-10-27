@@ -2,7 +2,7 @@
   "schema": 1,
   "sourceCheckpoint": "1.0.11-dev.deliverybe686",
   "memohWebBase": "6ddf61dcd8199758e4110398645c556a3d6d7375",
-  "scope": "Reviewed source-only subset; inherited build prerequisites and generated artifacts excluded.",
+  "scope": "Current reviewed publishable source inventory. sourceCheckpoint, sourceCommit and memohWebBase identify the original publication; current archive/overlay inputs are in client/config/memoh_web.lock.json. Historical follow-up records describe their own fixed checkpoints; dependencies/toolchain binaries and generated artifacts are excluded.",
   "entries": [
     {
       "path": "mobile/client/config/memoh_client.json",
@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "f5245d2a56de90ff8dfdd9cad8d38573575d71908bc2c0c945cb9203c91c554a",
+      "sha256": "a983736df7e2b8ddb19b917248646a1d84ab99e0efabd3d5ab291488683d1bf9",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -46,7 +46,8 @@
         "Source-only correction: task trigger reuses the unified minimal activity list, never SessionTasks detail; sync only activity GET/type contract and avoid inactive mobile panel mounts. No version bump or HAP build.",
         "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP.",
         "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover.",
-        "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment."
+        "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
+        "Remove the unused standalone sharedObservation lock object and legacy helper/host/adapter regressions after current complete-archive production was confirmed. Preserve every active lock value and all runtime sources; this intentionally changes future source identity, without relabeling/rebuilding the existing 1.0.19 HAP."
       ],
       "checkpointSHA256": "3fa17474c3e2e05ca1123ea1df45a5c62342acd43f93036a573cc27613dc6088",
       "recoveryBaseSHA256": "8a44c9f411962ffd2d29677bef50d761476cd9e0900cd05435804c055e4238e1",
@@ -55,7 +56,8 @@
       "taskDeliveryBaseSHA256": "fe95b261675c36bdbd855727231d167feb1a38599b337a9736dc99fe26a804ef",
       "unifiedNative9e6BaseSHA256": "42e5bc67d9d61fb439163a213b5d2e87d2169a38727fbe27bfee2ed4b5b016ff",
       "unifiedImages51bBaseSHA256": "ce095c26dcce82a163fa966c7f5bd79c9314486c6846e3fba03243ea9aa765d7",
-      "preNativeRuntimeUIBaseSHA256": "619f6ad287cfd85b68178aa696346e733ac7b26ad4448df004af9460bb9679ee"
+      "preNativeRuntimeUIBaseSHA256": "619f6ad287cfd85b68178aa696346e733ac7b26ad4448df004af9460bb9679ee",
+      "preLegacyObservationRetirementSHA256": "f5245d2a56de90ff8dfdd9cad8d38573575d71908bc2c0c945cb9203c91c554a"
     },
     {
       "path": "mobile/client/mobile/client_config.py",
@@ -121,16 +123,6 @@
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot."
       ]
-    },
-    {
-      "path": "mobile/client/mobile/memoh/HarmonyTasks.vue",
-      "sha256": "a962d3b2196bf506a7cc1bd98bff0e55d546b6a2f7fd4f702a728a47d2d962cc",
-      "origin": "project client addition developed during cloud alignment",
-      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": [
-        "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
-      ],
-      "checkpointSHA256": "94486a5f932269a8f7580339257860558f9d63e641927e4b7b8a8dfc2fa0257a"
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-chat-scope.ts",
@@ -211,20 +203,6 @@
       "preparationChanges": []
     },
     {
-      "path": "mobile/client/mobile/memoh/harmony-tasks-sdk.ts",
-      "sha256": "6037fb299486ed0ed2ab7e7523841b4aab8c5f6780d0c4c0619f3c6aaa0416aa",
-      "origin": "project client addition developed during cloud alignment",
-      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
-    },
-    {
-      "path": "mobile/client/mobile/memoh/harmony-tasks.ts",
-      "sha256": "390c61427d902caa456c81a9dc39d5238c3743d2283efc54222f2e981cce5398",
-      "origin": "project client addition developed during cloud alignment",
-      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
-    },
-    {
       "path": "mobile/client/mobile/memoh/licenses/noble-hashes.txt",
       "sha256": "4f221aee6e072336700c408c68ab3b96a3fc09f6aebe6f48f1bd99e5ef13faec",
       "origin": "third-party license notice",
@@ -237,18 +215,6 @@
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": []
-    },
-    {
-      "path": "mobile/client/mobile/prepare_shared_observation.py",
-      "sha256": "18c5fb32708a8318cde51217906d890ed494fdf66b7f2d644d9b2b13c2428544",
-      "origin": "project addition for local shared-observation integration",
-      "licenseReview": "No new license assignment; fixed shared modules remain upstream dependencies, not copied source files.",
-      "preparationChanges": [
-        "Explicit shared-observation build integration and fresh-checkout receipt handling",
-        "Recovery follow-up after 6a2a3b1: pin five existing scoped-attachment modules and three upstream tests from dfc7cf5; reject baseline drift and expose attachment-only source preparation without the missing builder."
-      ],
-      "checkpointSHA256": "affc851d383002e441da0b3ea43a121bb230f122e369be2028c1c7f9d82dc86d",
-      "recoveryBaseSHA256": "bfc8d0a1b2055753ca4cdb60878ebf47a94a368f6d13b08b6d5ff7dd2c69547c"
     },
     {
       "path": "mobile/client/tests/stage2/harmony_106_migration_ui.py",
@@ -447,13 +413,6 @@
         "Local shared-observation integration: explicit dependency pin, host wiring, or source-only test label"
       ],
       "checkpointSHA256": "8878cfe389436c9aec0c30f11cffef9f6530fa2539f44484448b41f912b93b44"
-    },
-    {
-      "path": "mobile/client/tests/stage2/harmony_tasks.cjs",
-      "sha256": "39ce93b0e2f899a99e6bcbfa260a767b1d414a99ea050e6b103b0fc5b072265a",
-      "origin": "project client addition developed during cloud alignment",
-      "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
-      "preparationChanges": []
     },
     {
       "path": "mobile/client/tests/stage2/harmony_voice_style_ui.py",
@@ -1745,7 +1704,6 @@
     "private handoff records and unlisted files"
   ],
   "sourceCommit": "a01a3ec207326987d13b857f5b11c97f3511c6d4",
-  "sharedObservationCommit": "be6862497a58a01ef8c6f4168f02d5624cd44061",
   "recoveryFollowup": {
     "baseCommit": "6a2a3b1a8a799114a8e41a66fedc6207e89e4ba1",
     "modifiedPaths": [

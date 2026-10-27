@@ -1,15 +1,16 @@
-# Scoped attachment source preparation
+# Historical scoped attachment preparation audit
 
-The recovered client's pinned Web base (`6ddf61dc`) lacks the delegation-scoped
-attachment routes already present in candidate `dfc7cf5`. The existing
-`mobile/client/mobile/prepare_shared_observation.py` now consumes five exact
-upstream production files and three upstream test files. Their source and base
-SHA256 values are pinned under `sharedObservation.delegatedAttachments` in
-`mobile/client/config/memoh_web.lock.json`.
+This report records partial-recovery checkpoint `84ca0e5d764b9944fc0b6c9b8264562288477744`.
+Its raw `6ddf61dc` Web base lacked the scoped routes from `dfc7cf5`; a temporary
+standalone preparer applied five production modules and three upstream tests.
+That preparer, its exclusive tests and obsolete lock object have now been removed.
+Use [the active complete-archive producer](../mobile/BUILD-REPRODUCTION.md) and
+[current observation entry](../mobile/SHARED-OBSERVATION.md) for this tree. The
+record below preserves the exact guard/failure audit, not current build commands.
 
 This is a new follow-up to recovery checkpoint
 `6a2a3b1a8a799114a8e41a66fedc6207e89e4ba1`, not a reconstruction of missing private
-revisions. The 72-path missing-input inventory remains unresolved. No native
+revisions. The 72-path inventory was unresolved at that checkpoint; subsequent source restoration is recorded in the current source manifest. No native
 shell, builder, transport service, server or Agent code is recreated here.
 This report records checkpoint `84ca0e5`. The later explicit-LAN and native
 download admission changes are documented in `harmony-endpoint-native-scope.md`.
@@ -35,28 +36,19 @@ inputs and repeated application are rejected. A rejected preparation leaves the
 checkout's files unchanged; missing or unexpected source is never overwritten by
 a guessed replacement.
 
-## Narrow reproduction
+## Reproducing the historical checkpoint
 
-Use a clean checkout of `6ddf61dcd8199758e4110398645c556a3d6d7375`, its pinned UI
-`f69402a55dd87a59c10722fe11507ad8fd7048f5`, and compatible dependencies. The
-repository supplying Git objects must contain those commits and `dfc7cf5`.
+The original preparer and exclusive tests are available in the
+[exact 84ca0e5 source tree](https://github.com/particleflow/Memoh/tree/84ca0e5d764b9944fc0b6c9b8264562288477744).
+They are not preparation steps or executable test paths in the current tree.
+That checkpoint required an unmodified `6ddf61dcd8199758e4110398645c556a3d6d7375`
+Web base, UI `f69402a55dd87a59c10722fe11507ad8fd7048f5`, and exact `dfc7cf5`
+objects. Its attachment-only path produced an integrity receipt without a build.
 
-```sh
-python3 mobile/client/mobile/prepare_shared_observation.py \
-  --attachments-only --checkout /path/to/clean-web-base \
-  --repository /path/to/Memoh
-python3 tests/harmony/test_attachment_inputs.py -v
-```
-
-`--attachments-only` prepares source and emits an integrity receipt. It does not
-compile Web/HAP, install dependencies, inject a replacement builder, or apply the
-shared task/SDK adapter. The ordinary complete preparation path remains guarded.
-On the raw base it rejects `packages/sdk/src/types.gen.ts`: the old lock expects
-`3b62ca7e3f1dc7976583dbee92b693506e38a5c0cc4b0723bfc7b9ae7900a784`, while the
-actual base is `df24fb67371413c7464f60d15337ac116e3d0eed1023a9ebeaeae433efa00eda`.
-The unavailable builder's preprocessing was not guessed or bypassed. Its order
-relative to native overlays must be verified when recovered; an overlay that
-already changes one of the pinned input files will be rejected deliberately.
+Its complete legacy SDK preparation correctly rejected a baseline digest
+mismatch. No missing builder preprocessing was guessed or guard bypassed.
+Current production uses the complete guarded archive/overlay context instead;
+replaying that old SDK extraction against current inputs would be incorrect.
 
 ## Validation performed
 
@@ -80,7 +72,7 @@ already changes one of the pinned input files will be rejected deliberately.
 See `testing/harmony-attachment-scope/results.json`. No complete client build,
 native runtime, phone installation, UI screenshot or human QA was performed.
 
-## Unified endpoint and remaining native boundaries
+## Native boundaries at the audited checkpoint
 
 The public client has one `apiOrigin`; `hapDownloadUrl` is an installer location,
 not another attachment transport endpoint. `NativeResumableUpload.ets` sends
@@ -88,13 +80,13 @@ files to the configured service's `/bots/{bot}/media` and upload subroutes.
 `harmony-resumable.ts` exchanges handles, metadata and authorization with the
 native bridge while file bytes stay in native-owned files/HTTP bodies. The
 recovered modules do not start a phone-local transport listener. The unavailable
-composer integration still prevents complete verification of the final message
-attachment-reference contract.
+composer prevented complete verification at that partial-recovery checkpoint;
+this is not a statement that the current source lacks its composer.
 
 The configured service must be the unified service endpoint; no additional
 device-local or Linux-download service is introduced by this change. However,
-the existing `harmony-service-url.ts` explicitly rejects private IPv4, local
-names and non-global IPv6. It implements neither LAN priority nor IPv6 fallback.
+the then-current `harmony-service-url.ts` rejected private IPv4, local
+names and non-global IPv6. That checkpoint implemented neither LAN priority nor IPv6 fallback.
 Changing routes also interacts with endpoint-bound authentication; that work
 must retain a single authenticated service identity and be verified with the
 native configuration code once recovered.
@@ -106,13 +98,12 @@ native interface. Native scoped downloads, LAN/IPv6 selection and a real
 phone-to-service-to-phone round trip remain unverified and unimplemented where
 not demonstrated by the available source.
 
-## Library blocker
+## Historical materialization failure
 
-The current official Library skill and its materialization reference provide no
-authentication refresh, reconnect or runtime-auth diagnostic operation. The
-failed action was the consuming environment's official helper accessing hosted
-apps `tools/list`, which returned HTTP 401 before any transfer. Metadata search
-works, so this is not evidence that the user's Library connection is disconnected.
-The runtime authentication for that helper-to-hosted-apps request must be
-restored through a supported environment mechanism. No token was requested or
-printed, and no alternate route or blind download retry was attempted.
+The original source materialization helper failed at hosted-app `tools/list`
+with HTTP 401 before transfer. Metadata search still worked, so the failure did
+not establish that the user's Library was disconnected. No token or alternate
+credential route was requested. That failure remains a checkpoint audit fact;
+it is not a current source-restoration blocker or an instruction to retry an
+old helper. Later restoration and build results are recorded by the current
+mobile entry and versioned package reports.

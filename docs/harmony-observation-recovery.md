@@ -1,5 +1,10 @@
 # Harmony task observation and bound-login audit
 
+This is a fixed historical audit. The legacy preparer/dialog/adapter discussed
+below have since been removed; [current observation production](../mobile/SHARED-OBSERVATION.md)
+uses the complete archive and guarded overlays. The old source hashes and
+results below retain their original qualification.
+
 The existing cloud recovery workspace, branch `recovery/harmony-source-20261023`,
 source checkpoint `796ed4487167ebc8985d16fa1d9fef6c79eebb39` and official API26
 SDK 26.0.0.105 remained available. No environment replacement, SDK download,
