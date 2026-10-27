@@ -66,7 +66,7 @@ func (s *admissionHTTPStore) ChangeComputerAdmission(_ context.Context, _, _ str
 func TestComputerAdmissionHTTPUsesOwnerSessionAndRejectsRouteInjection(t *testing.T) {
 	const secret = "synthetic-admission-http-signing-key" //nolint:gosec // G101: isolated test-only signing key.
 	owner, runtime := uuid.NewString(), uuid.NewString()
-	target := agenvo.Target{ConnectionID: uuid.NewString(), DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
+	target := agenvo.Target{InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
 	raw, _ := json.Marshal(map[string]any{"private_fixture": "SYNTHETIC-PRIVATE-CONFIG", "herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{ExecutionMode: "pi-json-v1", Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`}}})
 	store := &admissionHTTPStore{owner: owner, runtime: runtime, config: raw, row: dbstore.ComputerAdmission{ConnectionID: runtime, DeviceID: runtime, InstanceID: target.InstanceID}}
 	service := userruntime.NewService(store, nil)
