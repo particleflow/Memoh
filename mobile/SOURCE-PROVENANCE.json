@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "a983736df7e2b8ddb19b917248646a1d84ab99e0efabd3d5ab291488683d1bf9",
+      "sha256": "7fee7e2df47141cd29c1f625e2f5e2075edc54d1f501c9435f2a2c1195b09601",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "b10471a512d17965a39d56e88b7bc627f2602f710563297f8a1c86b5257ca249",
+      "sha256": "767275d1e7b8742f96440238b20f7f7adf8bb1d716239f61157f87916bbcfd79",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1587,7 +1587,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-relation-row.vue",
-      "sha256": "765a2808f2f4671222dfc03f5507226338783e4a089b02c97ab562360bddaa7b",
+      "sha256": "76b48c260941864455138794f1700a79774f3ac79525ccf24aafaf311ffc3d60",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1692,6 +1692,40 @@
       "preparationChanges": [
         "Consume accepted user input recovery through its existing inline hint; no whole-turn retry or answer resubmission."
       ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-contact-navigation-changes.json",
+      "sha256": "5f1341ccd2dd53def9c64125da67f6dfd75c67c29a64d46aae3d8d829deec65c",
+      "origin": "Fixed shared PR89 contact navigation 8fe72f9573f4a85b0d2226d959598180d4c39961, exact source hunks and generated declarations",
+      "licenseReview": "Memoh upstream repository source license retained.",
+      "preparationChanges": [
+        "Reuse account/Bot contact resolve and explicitly selected original history; retain original drafts/tasks and phone adapters. Source-only, no HAP/signing/deployment."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-contact-navigation-sdk.json",
+      "sha256": "2406709af61690b681b5bf32b609d358f90077fb00649c835f6217a54b9e4d64",
+      "origin": "Fixed shared PR89 contact navigation 8fe72f9573f4a85b0d2226d959598180d4c39961, exact source hunks and generated declarations",
+      "licenseReview": "Memoh upstream repository source license retained.",
+      "preparationChanges": [
+        "Reuse account/Bot contact resolve and explicitly selected original history; retain original drafts/tasks and phone adapters. Source-only, no HAP/signing/deployment."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-contact-navigation-i18n.json",
+      "sha256": "5de56212f2cbc7f73b7ee3ab3082f2c59552d97284ab5c000512f5b84ed47b44",
+      "origin": "Fixed shared PR89 contact navigation 8fe72f9573f4a85b0d2226d959598180d4c39961, exact source hunks and generated declarations",
+      "licenseReview": "Memoh upstream repository source license retained.",
+      "preparationChanges": [
+        "Reuse account/Bot contact resolve and explicitly selected original history; retain original drafts/tasks and phone adapters. Source-only, no HAP/signing/deployment."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-conversation-relation-row.test.ts",
+      "sha256": "f8846f25ddedca378a9b23f968fa0f49fdb5f604369d8704404bca03222e6fe1",
+      "origin": "Exact shared dbff0e472c616f7241635a58e6085442f30a7d2a regression",
+      "licenseReview": "Memoh upstream source terms retained.",
+      "preparationChanges": []
     }
   ],
   "excludedSourcePaths": [],

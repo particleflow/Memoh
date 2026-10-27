@@ -25,16 +25,16 @@
       "upstreamSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df"
     },
     "apps/web/src/i18n/locales/en.json": {
-      "adaptedSHA256": "ec85168ff55c0180a3ea98c39c671f8edc869fb82687ed3bf9570ecb31e1ce7d",
-      "upstreamSHA256": "9abf10ad54f7cc9010db4f3b5c21d0fdd10018d2b67faec4950d970c2e95437f"
+      "adaptedSHA256": "8fce05439b4bc8393ead6e3b567a36324a25647c5b8ecc7df5244768237d45ee",
+      "upstreamSHA256": "eb8f360425f49e46264977ae48912ce40f63725743937bd816c90dc5ef717a18"
     },
     "apps/web/src/i18n/locales/ja.json": {
       "adaptedSHA256": "284c00a1c03795f2135b1fdc608d86989fefd8b97494f19dbe5ca76ca8656e7e",
       "upstreamSHA256": "6d4753a67b583850fe56bc17d0fc58914baedffa4267626f8bc56355175157e3"
     },
     "apps/web/src/i18n/locales/zh.json": {
-      "adaptedSHA256": "03afd6a61c8f3fc88522720f6a1b6f1371f12e6936d7406dba989ddaed940a42",
-      "upstreamSHA256": "fc265be6b4f0eb102496a222240fd6b88c3f8869007ea2f66cf18e87df690fff"
+      "adaptedSHA256": "9fd9b3a5e1cf863252eecef878b969bda90424f4928d732ee697a3babe2cbd48",
+      "upstreamSHA256": "1ef3f8d90893ed6f0be08bbfa3d12de480191f29935f7ec5f72f655ec35e9dbf"
     },
     "apps/web/src/lib/api-client.ts": {
       "adaptedSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
@@ -105,8 +105,8 @@
       "upstreamSHA256": "f58ec2bf7395ba50eab2c106873bf941df4909d8a2907bba6866bbf378cecd7e"
     },
     "apps/web/src/pages/home/index.vue": {
-      "adaptedSHA256": "9aeb142133ff8c4f0815e89855cc373525e810412c0518a35dcabb5e87ebdce9",
-      "upstreamSHA256": "b91439b9d6285d3a2d3dd37d741818d07b1c1735fe6261ce2b323e1b38c06ead"
+      "adaptedSHA256": "f7e85459af950e9855dfc52ec70b1a70586114af1f47dc30ad04273501285ed3",
+      "upstreamSHA256": "d72230dce5d7c592a95e85fde4af14d5ffec5fa632dacdd4803636ac17c1ddc3"
     },
     "apps/web/src/pages/login/index.vue": {
       "adaptedSHA256": "81d0150579bd7481bf03bad2703c73fc24fe20488445b9e7e4992e5852c0d97d",
@@ -133,8 +133,8 @@
       "upstreamSHA256": "475f6220617508045c79694f148348ad24c99edfb3cf63b48b950a831ff4b61b"
     },
     "apps/web/src/store/chat-list.test.ts": {
-      "adaptedSHA256": "02edfc3eec79c8b3f048d59dc7edfc30f5d86cb7176445342159a7baad028684",
-      "upstreamSHA256": "ca65e42f4662eca54640a86418f2803a000cc46eff1d2958e2e8670b6b97c5cd"
+      "adaptedSHA256": "12b6a7a4e79bdbdee9f15219e06c807672dfd82d6742ed6dda1a86facda5e692",
+      "upstreamSHA256": "79077a5bf3a9e481d7c2c9259842bdd774731b626718bb4420afe832164b5f3a"
     },
     "apps/web/src/store/chat/send.ts": {
       "adaptedSHA256": "975b862dfa4d84cc001de047eaf548827d7a706d8e85fe198e03eccaf7db9dcd",
@@ -161,8 +161,8 @@
       "upstreamSHA256": "9799e94546de64b230e5ad031c109836c2c53fa54386e116171c39008148d78e"
     },
     "apps/web/src/store/workspace-tabs.ts": {
-      "adaptedSHA256": "c1e566ac48bf40b640960500c68028f90cf84c5a64e83cdc7cc0cfdab9108e85",
-      "upstreamSHA256": "d59e4a528b4308fac5c1fa04035754e81a354be291e98584d3028c3683b066ce"
+      "adaptedSHA256": "e62e42cded1b29a44a95572813a33481ca34b09acf0d9014da76d2642fd0975e",
+      "upstreamSHA256": "be5f05ee631ae7428cc15a18b475266c22d2c7da36ee255cbb540ac487438a04"
     },
     "apps/web/src/style.css": {
       "adaptedSHA256": "3742cd7bbf1a78d0753390cb715ec380d7dcbd5060a118767273cd9a9ab11dee",

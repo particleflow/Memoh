@@ -66,6 +66,8 @@ def inputs():
         'shared-workspace-settings-sidebar.vue', 'shared-workspace-storage-sdk.json',
         'shared-workspace-storage-i18n.json'))
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-useAcceptedUserInputRecovery.ts', 'shared-useAcceptedUserInputRecovery.test.ts', 'shared-accepted-input-sdk.json', 'shared-accepted-input-i18n.json'))
+    files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-contact-navigation-changes.json', 'shared-contact-navigation-sdk.json', 'shared-contact-navigation-i18n.json'))
+    files.append(ROOT / 'mobile/memoh/shared-conversation-relation-row.test.ts')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -89,6 +91,10 @@ def verify_modules(modules):
 def context_archive(lock, base=BASE, platform='harmony'):
     entry_name = json.loads((ROOT / 'config/memoh_client.json').read_text())['productName'] or 'Memoh'
     assert isinstance(entry_name, str) and entry_name.strip(), 'Product entry name is required'
+    entry_title = "'" + entry_name.translate(str.maketrans({
+        "\\": "\\\\", "'": "\\'", "\n": "\\n", "\r": "\\r",
+        "\u2028": "\\u2028", "\u2029": "\\u2029",
+    })) + "'"
     warm = json.loads((ROOT / 'contracts/ui_theme.json').read_text())['themes']['warm-theme']
     colors = warm['colors']
     # Map the centralized warm surfaces onto the existing official semantic tokens.
@@ -195,7 +201,7 @@ watch([collapseKey, liveThinking], ([key, thinking]) => {
             ('<title>Memoh</title>', '<title>' + html.escape(entry_name) + '</title>', 1),
         ],
         'apps/web/src/pages/home/index.vue': [
-            ('useTitle(() => {', 'const appTitle = ' + json.dumps(entry_name) + '\nuseTitle(() => {', 1),
+            ('useTitle(() => {', 'const appTitle = ' + entry_title + '\nuseTitle(() => {', 1),
             ("if (!isChatRoute() || !currentBotId.value || !session || chatStore.isSessionTentative(session.id)) return 'Memoh'",
              'if (!isChatRoute() || !currentBotId.value || !session || chatStore.isSessionTentative(session.id)) return appTitle', 1),
             ('return `Memoh · ${title}`', 'return `${appTitle} · ${title}`', 1),
@@ -839,11 +845,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     ]
     # Reuse only approved shared activity navigation; no Web media-transfer overlay.
     shared_changes = {
-        'apps/web/src/components/sidebar/index.vue': [('    <div class="relative min-h-0 flex-1 overflow-hidden">\n      <PanelSessions\n        v-show="sidebarView === \'sessions\'"\n        class="h-full"\n      />\n      <PanelFiles\n', '    <div class="relative min-h-0 flex-1 overflow-hidden">\n      <PanelSessions\n        v-show="sidebarView === \'sessions\'"\n        :activity-visible="workbenchOpen && sidebarView === \'sessions\'"\n        class="h-full"\n      />\n      <PanelFiles\n', 1)],
-        'apps/web/src/components/sidebar/panel-sessions.vue': [('      class="sidebar-scroll min-h-0 flex-1"\n      :scroll-hide-delay="300"\n    >\n      <FoldersSection />\n\n      <Recents :scroll-el="listScrollEl" />\n', '      class="sidebar-scroll min-h-0 flex-1"\n      :scroll-hide-delay="300"\n    >\n      <SessionActivity :visible="activityVisible" />\n      <FoldersSection />\n\n      <Recents :scroll-el="listScrollEl" />\n', 1), ("import FoldersSection from './folders-section.vue'\nimport Recents from './recents.vue'\nimport SessionSelectionBar from './session-selection-bar.vue'\nimport { createSessionSelection, SessionSelectionKey } from './session-selection'\nimport '@/styles/sidebar-scroll.css'\n\nconst { t } = useI18n()\n\n// The one scrollport for Folders + Recents. Recents needs the scrolling\n// element itself for its load-more sentinel root, so it is passed down rather\n", "import FoldersSection from './folders-section.vue'\nimport Recents from './recents.vue'\nimport SessionSelectionBar from './session-selection-bar.vue'\nimport SessionActivity from './session-activity.vue'\nimport { createSessionSelection, SessionSelectionKey } from './session-selection'\nimport '@/styles/sidebar-scroll.css'\n\nconst { t } = useI18n()\nwithDefaults(defineProps<{ activityVisible?: boolean }>(), { activityVisible: true })\n\n// The one scrollport for Folders + Recents. Recents needs the scrolling\n// element itself for its load-more sentinel root, so it is passed down rather\n", 1), ("        {{ t('chat.botSettings') }}\n      </SidebarNavButton>\n    </div>", '        {{ t(\'chat.botSettings\') }}\n      </SidebarNavButton>\n      <SidebarNavButton @click="handleManageBots">\n        <Settings2 :stroke-width="1.75" class="size-[18px]" />\n        {{ t(\'sidebar.manageBots\') }}\n      </SidebarNavButton>\n    </div>', 1), ("// Navigate to the current bot's settings overview.", "// Reuse the existing management route and dismiss the mobile drawer.\nfunction handleManageBots() {\n  void router.push({ name: 'bots' })\n  workspaceTabs.closeMobileNav()\n}\n\n// Navigate to the current bot's settings overview.", 1)],
         'apps/web/src/pages/home/composables/useBotDelegationHistory.ts': [("\n// Navigation rechecks the source relation and the target's ordinary session\n// permission. It never dispatches a turn or treats a UUID as an access grant.\nexport function useBotDelegationHistory(scope: Ref<TaskScope | null>, visible: Ref<boolean>, reader: ReturnType<typeof useBotDelegations>, navigate: (target: { bot: string, session: string, title?: string, identity: string }) => Promise<void>) {\n  const pending = ref(false), error = shallowRef<unknown>()\n  let epoch = 0, controller: AbortController | undefined\n  function invalidate() { epoch++; controller?.abort(); pending.value = false; error.value = undefined }\n  async function open() {\n    const current = scope.value, task = reader.detail.value\n    if (!current || !visible.value || pending.value || reader.error.value || reader.loading.value\n      || !task?.target_run_id || !task.target_session_id || task.source_session_id !== current.session\n      || task.delegation_id !== reader.selected.value) return\n    const generation = epoch, control = new AbortController()\n    controller = control; pending.value = true; error.value = undefined\n", "\n// Navigation rechecks the source relation and the target's ordinary session\n// permission. It never dispatches a turn or treats a UUID as an access grant.\n// Run-specific history keeps its guard; a compact session link may open an\n// admitted conversation before a run exists, using exactly the same permissions.\nexport function useBotDelegationHistory(scope: Ref<TaskScope | null>, visible: Ref<boolean>, reader: Pick<ReturnType<typeof useBotDelegations>, 'detail' | 'selected' | 'error' | 'loading'>, navigate: (target: { bot: string, session: string, title?: string, identity: string }) => Promise<void>, requireRun = true) {\n  const pending = ref(false), error = shallowRef<unknown>()\n  let epoch = 0, controller: AbortController | undefined\n  function invalidate() { epoch++; controller?.abort(); pending.value = false; error.value = undefined }\n  async function open() {\n    const current = scope.value, task = reader.detail.value\n    if (!current || !visible.value || pending.value || reader.error.value || reader.loading.value\n      || !task || (requireRun && !task.target_run_id) || !task.target_session_id || task.source_session_id !== current.session\n      || task.delegation_id !== reader.selected.value) return\n    const generation = epoch, control = new AbortController()\n    controller = control; pending.value = true; error.value = undefined\n", 1), ("      if (generation !== epoch) return\n      if (fresh.delegation_id !== task.delegation_id || fresh.source_session_id !== current.session\n        || fresh.target_bot_id !== task.target_bot_id || fresh.target_session_id !== task.target_session_id\n        || fresh.target_run_id !== task.target_run_id) throw new Error('Delegation run changed')\n      const { data: session } = await getBotsByBotIdSessionsBySessionId({\n        path: { bot_id: fresh.target_bot_id, session_id: fresh.target_session_id! },\n        signal: control.signal, cache: 'no-store', throwOnError: true,\n", "      if (generation !== epoch) return\n      if (fresh.delegation_id !== task.delegation_id || fresh.source_session_id !== current.session\n        || fresh.target_bot_id !== task.target_bot_id || fresh.target_session_id !== task.target_session_id\n        || (requireRun && fresh.target_run_id !== task.target_run_id)) throw new Error('Delegation run changed')\n      const { data: session } = await getBotsByBotIdSessionsBySessionId({\n        path: { bot_id: fresh.target_bot_id, session_id: fresh.target_session_id! },\n        signal: control.signal, cache: 'no-store', throwOnError: true,\n", 1), ("    finally { clearTimeout(timeout); if (generation === epoch) pending.value = false }\n  }\n  watch([scope, visible, reader.selected], invalidate, { flush: 'sync' })\n  watch(() => [reader.detail.value?.delegation_id, reader.detail.value?.target_bot_id, reader.detail.value?.target_session_id, reader.detail.value?.target_run_id].join(':'), invalidate, { flush: 'sync' })\n  watch(reader.error, cause => { if (cause) invalidate() }, { flush: 'sync' })\n  onScopeDispose(invalidate)\n  return computed<BotDelegationHistoryAction>(() => ({ pending: pending.value, error: error.value, open }))\n", "    finally { clearTimeout(timeout); if (generation === epoch) pending.value = false }\n  }\n  watch([scope, visible, reader.selected], invalidate, { flush: 'sync' })\n  watch(() => [reader.detail.value?.delegation_id, reader.detail.value?.target_bot_id, reader.detail.value?.target_session_id, requireRun ? reader.detail.value?.target_run_id : ''].join(':'), invalidate, { flush: 'sync' })\n  watch(reader.error, cause => { if (cause) invalidate() }, { flush: 'sync' })\n  onScopeDispose(invalidate)\n  return computed<BotDelegationHistoryAction>(() => ({ pending: pending.value, error: error.value, open }))\n", 1)],
         'apps/web/src/pages/home/components/chat-pane.vue': [('                <SessionTasks\n                  v-if="currentBotId && activeSessionId && !isWelcome"\n                  :key="`${currentBotId}:${activeSessionId}`"\n                  :bot-id="currentBotId"\n                  :session-id="activeSessionId"\n                  :selection="selectedWorkspaceTargetId"\n                  :visible="isVisible"\n                />', lock['sharedConversationMonitor']['footer']['text'], 1), ("import SessionTasks from './session-tasks.vue'", "import SessionActivityTrigger from '@/components/sidebar/session-activity-trigger.vue'", 1)],
-        'apps/web/src/pages/main-section/components/mobile-nav-sheet.vue': [('          <PanelSessions\n            v-show="sidebarView === \'sessions\'"\n            class="h-full"', '          <PanelSessions\n            v-show="sidebarView === \'sessions\'"\n            :activity-visible="mobileNavOpen && sidebarView === \'sessions\'"\n            class="h-full"', 1), ('            v-if="canWorkspaceRead"\n            v-show="sidebarView === \'files\'"', '            v-if="canWorkspaceRead && filesMounted"\n            v-show="sidebarView === \'files\'"', 1), ('          <PanelSchedule\n            v-show="sidebarView === \'schedule\'"', '          <PanelSchedule\n            v-if="scheduleMounted"\n            v-show="sidebarView === \'schedule\'"', 1), ("import { computed, watch, type Component } from 'vue'", "import { computed, ref, watch, type Component } from 'vue'", 1), ('const { mobileNavOpen, sidebarView, activeId } = storeToRefs(workspaceTabs)', "const { mobileNavOpen, sidebarView, activeId } = storeToRefs(workspaceTabs)\n// Mount a panel on first selection, then retain it while this drawer stays open.\nconst filesMounted = ref(false), scheduleMounted = ref(false)\nwatch(sidebarView, view => {\n  if (view === 'files') filesMounted.value = true\n  if (view === 'schedule') scheduleMounted.value = true\n}, { immediate: true })", 1)],
+        'apps/web/src/pages/main-section/components/mobile-nav-sheet.vue': [('            v-if="canWorkspaceRead"\n            v-show="sidebarView === \'files\'"', '            v-if="canWorkspaceRead && filesMounted"\n            v-show="sidebarView === \'files\'"', 1), ('          <PanelSchedule\n            v-show="sidebarView === \'schedule\'"', '          <PanelSchedule\n            v-if="scheduleMounted"\n            v-show="sidebarView === \'schedule\'"', 1), ("import { computed, watch, type Component } from 'vue'", "import { computed, ref, watch, type Component } from 'vue'", 1), ('const { mobileNavOpen, sidebarView, activeId } = storeToRefs(workspaceTabs)', "const { mobileNavOpen, sidebarView, activeId } = storeToRefs(workspaceTabs)\n// Mount a panel on first selection, then retain it while this drawer stays open.\nconst filesMounted = ref(false), scheduleMounted = ref(false)\nwatch(sidebarView, view => {\n  if (view === 'files') filesMounted.value = true\n  if (view === 'schedule') scheduleMounted.value = true\n}, { immediate: true })", 1)],
     }
     assert sha(ROOT / 'mobile/memoh/shared-activity-sdk.json') == lock['sharedActivity']['sdkOverlaySHA256'], 'Activity SDK source drift'
     sdk_overlay = json.loads((ROOT / 'mobile/memoh/shared-activity-sdk.json').read_text())
@@ -878,6 +882,15 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected recovery SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
     recovery_locales = json.loads((ROOT / 'mobile/memoh' / recovery['locales']['local']).read_text())
+    contact = lock['sharedContactNavigation']
+    for kind in ('sourceChanges', 'sdkOverlay', 'locales'):
+        assert sha(ROOT / 'mobile/memoh' / contact[kind]['local']) == contact[kind]['sha256'], 'Contact source drift'
+    contact_sources = json.loads((ROOT / 'mobile/memoh' / contact['sourceChanges']['local']).read_text())
+    for name, addition in json.loads((ROOT / 'mobile/memoh' / contact['sdkOverlay']['local']).read_text()).items():
+        assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected contact SDK target'
+        sdk_overlay[name] = sdk_overlay.get(name, '') + addition
+    contact_locales = json.loads((ROOT / 'mobile/memoh' / contact['locales']['local']).read_text())
+
 
 
     # Apply this small shared UI delta after the reviewed phone adaptations.
@@ -1072,6 +1085,22 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             if name in workspace_sources:
                 assert data is not None and hashlib.sha256(data).hexdigest() == shared_file_metadata[name]['baseSHA256'], 'Workspace baseline drift'
                 data = workspace_sources[name]
+            if name in contact_sources['existingFiles']:
+                review = contact_sources['existingFiles'][name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Contact baseline drift'
+                text = data.decode()
+                for before, after, expected in review['replacements']:
+                    assert text.count(before) == expected, 'Contact source seam drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == review['sharedSHA256'], 'Contact shared output drift'
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in contact_locales}:
+                language = Path(name).stem
+                value = json.loads(data)
+                assert 'contact' not in value['chat'], 'Contact locale already present'
+                value['chat']['contact'] = contact_locales[language]['contact']
+                value['chat']['activityBar']['sessions'] = contact_locales[language]['sessions']
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
             if name in {f'apps/web/src/i18n/locales/{language}.json' for language in recovery_locales}:
                 language = Path(name).stem
                 value = json.loads(data)
@@ -1191,6 +1220,14 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             if item['baseSHA256'] is not None:
                 continue
             data = workspace_sources[destination]
+            entry = tarfile.TarInfo(destination)
+            entry.size = len(data)
+            entry.mode = 0o644
+            target.addfile(entry, io.BytesIO(data))
+        for destination, item in contact_sources['addedFiles'].items():
+            assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected contact source destination'
+            data = item['source'].encode()
+            assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added contact source drift'
             entry = tarfile.TarInfo(destination)
             entry.size = len(data)
             entry.mode = 0o644

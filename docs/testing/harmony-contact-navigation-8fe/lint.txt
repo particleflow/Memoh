@@ -1,0 +1,6 @@
+
+/workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web/src/pages/home/index.vue
+  122:18  error  Strings must use singlequote  quotes
+
+✖ 1 problem (1 error, 0 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.

@@ -1,0 +1,14 @@
+{
+  "changed": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/store/chat-list.test.ts",
+    "apps/web/src/store/workspace-tabs.ts"
+  ],
+  "preserved": 40,
+  "productAdapters": 45,
+  "testAdapters": 2,
+  "reason": "Exact contact locale keys, home deep link, shared chat-list test fixture and pinned contact workspace panel. No assertion/count relaxation.",
+  "sharedNavigationReplacement": "Retire only global activity sidebar overlay; retain drawer lazy file/schedule mount and same-session relation trigger."
+}

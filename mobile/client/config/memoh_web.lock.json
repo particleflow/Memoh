@@ -173,8 +173,9 @@
       },
       "apps/web/src/pages/home/components/conversation-relation-row.vue": {
         "local": "shared-conversation-relation-row.vue",
-        "sha256": "765a2808f2f4671222dfc03f5507226338783e4a089b02c97ab562360bddaa7b",
-        "baseSHA256": null
+        "sha256": "76b48c260941864455138794f1700a79774f3ac79525ccf24aafaf311ffc3d60",
+        "baseSHA256": null,
+        "sourceCommit": "dbff0e472c616f7241635a58e6085442f30a7d2a"
       },
       "apps/web/src/pages/home/components/composer-error.ts": {
         "local": "shared-composer-error.ts",
@@ -195,6 +196,12 @@
         "local": "shared-useAcceptedUserInputRecovery.test.ts",
         "sha256": "7bb98c786fb1b6965705d0d3fcb010f0ce3ec745e2ab54fdc4199aabb9163325",
         "baseSHA256": null
+      },
+      "apps/web/src/pages/home/components/conversation-relation-row.test.ts": {
+        "local": "shared-conversation-relation-row.test.ts",
+        "sha256": "f8846f25ddedca378a9b23f968fa0f49fdb5f604369d8704404bca03222e6fe1",
+        "baseSHA256": null,
+        "sourceCommit": "dbff0e472c616f7241635a58e6085442f30a7d2a"
       }
     },
     "chatPaneChanges": {
@@ -221,6 +228,10 @@
       "local": "shared-conversation-store-changes.json",
       "sha256": "04c73bd5a58a2e8933827dff35ae51dcbe80eb25c74c7cb1db7caf81056e1004",
       "scope": "Verbatim final shared store/type/test differences reconstructed with complete base/result SHA guards, before the existing phone adapter; no whole shared file copy."
+    },
+    "statusLocalization": {
+      "commit": "dbff0e472c616f7241635a58e6085442f30a7d2a",
+      "scope": "Existing native errored→failed/admitting→accepted mapping; keep original raw state, name and click object; three-language regression."
     }
   },
   "sharedAcceptedRecovery": {
@@ -278,5 +289,61 @@
     "singleActionControl": true,
     "officialArkWebAutoDark": true,
     "privateConfigEmpty": true
+  },
+  "sharedContactNavigation": {
+    "commit": "8fe72f9573f4a85b0d2226d959598180d4c39961",
+    "tree": "c86392ef591c45d413ea49faab868d7392d018c6",
+    "sourceChanges": {
+      "local": "shared-contact-navigation-changes.json",
+      "sha256": "5f1341ccd2dd53def9c64125da67f6dfd75c67c29a64d46aae3d8d829deec65c"
+    },
+    "sdkOverlay": {
+      "local": "shared-contact-navigation-sdk.json",
+      "sha256": "2406709af61690b681b5bf32b609d358f90077fb00649c835f6217a54b9e4d64",
+      "types": [
+        "GetBotsByBotIdSessionsContactData",
+        "GetBotsByBotIdSessionsContactError",
+        "GetBotsByBotIdSessionsContactErrors",
+        "GetBotsByBotIdSessionsContactResponse",
+        "GetBotsByBotIdSessionsContactResponses",
+        "HandlersBindPrivateChatRequest",
+        "PostBotsByBotIdSessionsContactBindData",
+        "PostBotsByBotIdSessionsContactBindError",
+        "PostBotsByBotIdSessionsContactBindErrors",
+        "PostBotsByBotIdSessionsContactBindResponse",
+        "PostBotsByBotIdSessionsContactBindResponses",
+        "PostBotsByBotIdSessionsContactData",
+        "PostBotsByBotIdSessionsContactError",
+        "PostBotsByBotIdSessionsContactErrors",
+        "PostBotsByBotIdSessionsContactResponse",
+        "PostBotsByBotIdSessionsContactResponses",
+        "RoutePrivateChatEntry"
+      ],
+      "functions": [
+        "getBotsByBotIdSessionsContact",
+        "postBotsByBotIdSessionsContact",
+        "postBotsByBotIdSessionsContactBind"
+      ],
+      "coladaHooks": [
+        "getBotsByBotIdSessionsContactQueryKey",
+        "getBotsByBotIdSessionsContactQuery",
+        "postBotsByBotIdSessionsContactMutation",
+        "postBotsByBotIdSessionsContactBindMutation"
+      ],
+      "sourceFileSHA256": {
+        "packages/sdk/src/types.gen.ts": "28d307891514576ce4f8cc3a887c5e942e6f93c5af11d91572cb4751d50e97c9",
+        "packages/sdk/src/sdk.gen.ts": "1fe4614f134b0d061b6842dedaf5f4cb8a534527347a9dadf047bb9c3f448748",
+        "packages/sdk/src/index.ts": "d0ab0988b4d6831e4433a7a0d3378b933e8b51e6cbd1f0e5fe64675d96b1fdb0",
+        "packages/sdk/src/@pinia/colada.gen.ts": "8c9c40311f6f4ecb894f0800f99bcefce69601ac2bc21e20200fe3d826a47dc7"
+      }
+    },
+    "locales": {
+      "local": "shared-contact-navigation-i18n.json",
+      "sha256": "5de56212f2cbc7f73b7ee3ab3082f2c59552d97284ab5c000512f5b84ed47b44"
+    },
+    "serverCompatibilityRequired": true,
+    "structuralCandidateNotDeployed": true,
+    "preserveOriginalHistoryDraftTaskIDs": true,
+    "scope": "Reuse fixed shared contacts, unambiguous historical adoption, explicit-history deep links and native resolve/bind contract. No additional grant, alternate navigation protocol, task reassignment or Agent core change."
   }
 }

@@ -1,0 +1,30 @@
+{
+  "en": {
+    "contact": {
+      "contacts": "Contacts",
+      "history": "History & debug",
+      "chooseTitle": "Continue a conversation",
+      "chooseDescription": "Choose which conversation to keep using with this Bot. Other history stays available.",
+      "startNew": "Start a new ongoing conversation",
+      "more": "More conversations",
+      "failed": "Could not open the Bot conversation. Please try again.",
+      "historyFailed": "Could not open this history link.",
+      "current": "current conversation"
+    },
+    "sessions": "Contacts"
+  },
+  "zh": {
+    "contact": {
+      "contacts": "联系人",
+      "history": "历史与调试",
+      "chooseTitle": "选择持续对话",
+      "chooseDescription": "选择今后与这个 Bot 持续使用的对话。其他历史仍可查看。",
+      "startNew": "开始新的持续对话",
+      "more": "更多对话",
+      "failed": "暂时无法打开 Bot 对话，请重试。",
+      "historyFailed": "无法打开这段历史对话。",
+      "current": "当前对话"
+    },
+    "sessions": "联系人"
+  }
+}

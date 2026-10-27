@@ -1,0 +1,9 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/store/workspace-tabs.ts(11,42): error TS2307: Cannot find module '@/lib/media-transfer' or its corresponding type declarations.
+src/store/workspace-tabs.ts(1402,9): error TS1117: An object literal cannot have multiple properties with the same name.
+/workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

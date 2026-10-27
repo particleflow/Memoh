@@ -8,6 +8,8 @@ records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
 
+Pending source-only structure alignment: [PR89 contacts and original history deep links](../docs/testing/harmony-contact-navigation-8fe/README.md), pinned to `8fe72f9573f4a85b0d2226d959598180d4c39961`, with shared status localization `dbff0e472c616f7241635a58e6085442f30a7d2a`. This candidate requires the matching contact APIs and is not contained in, or a relabeling of, the qualified 1.0.19 HAP. No new HAP/signing/deployment is implied.
+
 The [source manifest](SOURCE-PROVENANCE.json) records **162 reviewed entries**,
 zero excluded source paths and 19 unidentified historical later edits. Those 19
 are an unresolved provenance boundary, not missing current build inputs and not

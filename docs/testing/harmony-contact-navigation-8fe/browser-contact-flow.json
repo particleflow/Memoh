@@ -1,0 +1,57 @@
+{
+  "sharedContactSource": "8fe72f9573f4a85b0d2226d959598180d4c39961",
+  "viewport": [
+    390,
+    844
+  ],
+  "cases": [
+    {
+      "case": "bound",
+      "contactPOSTs": 0,
+      "bindPOSTs": 0,
+      "noExtraPermissionPrompt": true,
+      "originalSessionIDs": true,
+      "loginRetained": true,
+      "horizontalOverflow": false
+    },
+    {
+      "case": "unique",
+      "contactPOSTs": 0,
+      "bindPOSTs": 1,
+      "noExtraPermissionPrompt": true,
+      "originalSessionIDs": true,
+      "loginRetained": true,
+      "horizontalOverflow": false
+    },
+    {
+      "case": "new",
+      "contactPOSTs": 1,
+      "bindPOSTs": 0,
+      "noExtraPermissionPrompt": true,
+      "originalSessionIDs": true,
+      "loginRetained": true,
+      "horizontalOverflow": false
+    },
+    {
+      "case": "multiple",
+      "contactPOSTs": 0,
+      "bindPOSTs": 1,
+      "noExtraPermissionPrompt": true,
+      "originalSessionIDs": true,
+      "loginRetained": true,
+      "horizontalOverflow": false
+    }
+  ],
+  "uniqueCandidateNoDialog": true,
+  "ambiguousCancelNoBinding": true,
+  "confirmedHistoryAndReloadSameID": true,
+  "coldHistoryURLNoContactReadOrMutation": true,
+  "contactAndHistoryDraftsPreserved": true,
+  "singleControlAndThemesUnchanged": true,
+  "nonContactBusinessWrites": 0,
+  "phone": false,
+  "productionBackend": false,
+  "TLSAcceptance": false,
+  "paidCalls": 0,
+  "pageErrors": []
+}
