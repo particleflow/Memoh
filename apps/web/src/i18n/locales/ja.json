@@ -2175,6 +2175,8 @@
     }
   },
   "models": {
+    "unknownSelection": "利用できないモデル",
+    "unavailableSelection": "{name}（利用不可）",
     "title": "モデル",
     "searchPlaceholder": "プロバイダーを検索…",
     "addModel": "モデルを追加",

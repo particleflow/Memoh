@@ -152,3 +152,128 @@ func TestRunModelCatalogSyncUsesExplicitFixtureTargetAndStops(t *testing.T) {
 		t.Fatal("lifecycle did not stop")
 	}
 }
+
+type lifecycleCatalogFixture struct {
+	providerTestQueries
+	mu        sync.Mutex
+	snapshots [][]catalogsync.Model
+}
+
+func (q *lifecycleCatalogFixture) ApplyModelCatalog(_ context.Context, _ string, _ []byte, _ string, records []catalogsync.Model) error {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	q.snapshots = append(q.snapshots, append([]catalogsync.Model(nil), records...))
+	return nil
+}
+func (q *lifecycleCatalogFixture) snapshotIDs() [][]string {
+	q.mu.Lock()
+	defer q.mu.Unlock()
+	out := make([][]string, 0, len(q.snapshots))
+	for _, records := range q.snapshots {
+		var ids []string
+		for _, m := range records {
+			ids = append(ids, m.ID)
+		}
+		out = append(out, ids)
+	}
+	return out
+}
+
+func TestCatalogSyncContinuousLifecycleRetryAndCancellation(t *testing.T) {
+	var clock atomic.Int64
+	clock.Store(time.Unix(1_000_000, 0).Unix())
+	var mode atomic.Int64
+	var gets, nonGets atomic.Int64
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			nonGets.Add(1)
+			http.Error(w, "inference not allowed", 405)
+			return
+		}
+		gets.Add(1)
+		switch mode.Load() {
+		case 1:
+			http.Error(w, "upstream unavailable", 503)
+		case 2:
+			_, _ = w.Write([]byte(`{"data":[{"id":"fixture/beta"}]}`))
+		case 3:
+			_, _ = w.Write([]byte(`{"data":[{"id":"fixture/gamma"}]}`))
+		default:
+			_, _ = w.Write([]byte(`{"data":[{"id":"fixture/alpha"}]}`))
+		}
+	}))
+	defer server.Close()
+	id := pgtype.UUID{Bytes: [16]byte{5}, Valid: true}
+	q := &lifecycleCatalogFixture{providerTestQueries: providerTestQueries{provider: sqlc.Provider{ID: id, Enable: true, ClientType: string(models.ClientTypeOpenAICompletions), Config: []byte(`{"base_url":"` + server.URL + `"}`)}}}
+	svc := NewService(nil, q, "")
+	svc.catalogSync.now = func() time.Time { return time.Unix(clock.Load(), 0) }
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	ticks := make(chan time.Time)
+	completed := make(chan struct{}, 1)
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		svc.runModelCatalogSync(ctx, func(context.Context) (string, error) { return id.String(), nil }, ticks, func() { completed <- struct{}{} })
+	}()
+	wait := func() {
+		t.Helper()
+		select {
+		case <-completed:
+		case <-time.After(5 * time.Second):
+			t.Fatal("lifecycle iteration timed out")
+		}
+	}
+	step := func(delta time.Duration) {
+		t.Helper()
+		clock.Add(int64(delta / time.Second))
+		ticks <- time.Unix(clock.Load(), 0)
+		wait()
+	}
+	wait()
+	if got := q.snapshotIDs(); len(got) != 1 || len(got[0]) != 1 || got[0][0] != "fixture/alpha" {
+		t.Fatalf("initial snapshots=%v", got)
+	}
+	before := gets.Load()
+	mode.Store(1)
+	step(catalogSyncInterval - time.Minute)
+	if gets.Load() != before {
+		t.Fatal("refreshed before success interval")
+	}
+	step(time.Minute) // first scheduled refresh fails
+	if gets.Load() != before+1 || len(q.snapshotIDs()) != 1 {
+		t.Fatalf("failure mutated catalog: gets=%d snapshots=%v", gets.Load(), q.snapshotIDs())
+	}
+	step(catalogRetryMin / 2)
+	if gets.Load() != before+1 {
+		t.Fatal("retried before backoff")
+	}
+	step(catalogRetryMin / 2) // retry fails; next backoff doubles
+	if gets.Load() != before+2 || len(q.snapshotIDs()) != 1 {
+		t.Fatal("failed retry changed catalog")
+	}
+	mode.Store(2)
+	step(catalogRetryMin)
+	if gets.Load() != before+2 {
+		t.Fatal("retried before doubled backoff")
+	}
+	step(catalogRetryMin) // recovery, second successful observation
+	if got := q.snapshotIDs(); len(got) != 2 || got[1][0] != "fixture/beta" {
+		t.Fatalf("recovery snapshots=%v", got)
+	}
+	mode.Store(3)
+	step(catalogSyncInterval) // another period on same service
+	if got := q.snapshotIDs(); len(got) != 3 || got[2][0] != "fixture/gamma" {
+		t.Fatalf("next period snapshots=%v", got)
+	}
+	calls := gets.Load()
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(5 * time.Second):
+		t.Fatal("lifecycle did not stop")
+	}
+	if nonGets.Load() != 0 || gets.Load() != calls {
+		t.Fatalf("after stop gets=%d non-GET=%d", gets.Load(), nonGets.Load())
+	}
+}

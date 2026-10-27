@@ -24,6 +24,7 @@ const catalogRetryMax = 15 * time.Minute
 type catalogSyncState struct {
 	mu      sync.Mutex
 	entries map[string]*catalogSyncEntry
+	now     func() time.Time
 }
 
 type catalogSyncEntry struct {
@@ -45,11 +46,11 @@ func (s *Service) SyncModelCatalog(ctx context.Context, id string, apply Catalog
 		return false, err
 	}
 	id = providerID.String()
-	if !s.catalogSync.begin(id, time.Now()) {
+	if !s.catalogSync.begin(id, s.catalogSync.timeNow()) {
 		return false, nil
 	}
 	success := false
-	defer func() { s.catalogSync.finish(id, time.Now(), success) }()
+	defer func() { s.catalogSync.finish(id, s.catalogSync.timeNow(), success) }()
 	provider, err := s.queries.GetProviderByID(ctx, providerID)
 	if err != nil {
 		return true, err
@@ -93,6 +94,14 @@ func (s *Service) SyncModelCatalog(ctx context.Context, id string, apply Catalog
 	}
 	success = true
 	return true, nil
+}
+
+// timeNow uses the real clock in production; tests may inject a controlled clock.
+func (s *catalogSyncState) timeNow() time.Time {
+	if s.now != nil {
+		return s.now()
+	}
+	return time.Now()
 }
 
 func (s *catalogSyncState) begin(id string, now time.Time) bool {
@@ -184,18 +193,29 @@ func (s *Service) RunModelCatalogSync(ctx context.Context, resolve CatalogTarget
 	}
 	tick := time.NewTicker(catalogRetryMin)
 	defer tick.Stop()
+	s.runModelCatalogSync(ctx, resolve, tick.C, nil)
+}
+
+// tick and after allow deterministic lifecycle tests without changing the
+// production clock or cadence. The completion callback is nil in production.
+func (s *Service) runModelCatalogSync(ctx context.Context, resolve CatalogTargetResolver, tick <-chan time.Time, after func()) {
 	for {
+		if ctx.Err() != nil {
+			return
+		}
 		id, err := resolve(ctx)
 		if err == nil && id != "" {
 			if _, syncErr := s.SyncStoredModelCatalog(ctx, id); syncErr != nil && ctx.Err() == nil {
-				// Do not log upstream responses, provider URLs, keys, or model IDs.
 				s.logger.WarnContext(ctx, "automatic model catalog sync failed")
 			}
+		}
+		if after != nil {
+			after()
 		}
 		select {
 		case <-ctx.Done():
 			return
-		case <-tick.C:
+		case <-tick:
 		}
 	}
 }

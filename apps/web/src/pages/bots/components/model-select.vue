@@ -51,6 +51,7 @@ import { useI18n } from 'vue-i18n'
 import type { ModelsGetResponse, ModelsModelType, ProvidersGetResponse } from '@memohai/sdk'
 import ModelOptions from './model-options.vue'
 import { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort } from './reasoning-effort'
+import { useModelSelectionLabel } from '@/composables/useModelSelectionLabel'
 
 const props = defineProps<{
   models: ModelsGetResponse[]
@@ -90,16 +91,13 @@ watch(selected, () => {
 
 const { t } = useI18n()
 
-const modelLabel = computed(() => {
-  const model = props.models.find((m) => (m.id || m.model_id) === selected.value)
-  return model?.name || model?.model_id || selected.value
-})
+const { label: modelLabel, isUnavailable } = useModelSelectionLabel(selected, () => props.models)
 
 // The effort moved inside this menu, so the trigger has to carry it — otherwise
 // the value is invisible until the menu is reopened. "Off" is not appended: a
 // bare model name leaves the provider's reasoning behavior unspecified.
 const displayLabel = computed(() => {
-  if (!props.showReasoning || !modelLabel.value) return modelLabel.value
+  if (!props.showReasoning || !modelLabel.value || isUnavailable.value) return modelLabel.value
   const model = props.models.find(m => (m.id || m.model_id) === selected.value)
   const effort = props.reasoningOptions !== undefined
     ? reasoningEffort.value
