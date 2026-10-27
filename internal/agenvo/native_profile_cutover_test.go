@@ -24,7 +24,7 @@ func TestNativeProfileCutoverProposalPreservesGateAndOtherFields(t *testing.T) {
 		t.Fatal(err)
 	}
 	gate := dbstore.ComputerAdmission{ConnectionID: row.ID, DeviceID: row.ID, InstanceID: target.InstanceID, RequestID: pauseID, Revision: 4, Paused: true}
-	in := NativeProfileCutoverRequest{RuntimeID: row.ID, TargetID: targetID, InstanceID: target.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: TargetFingerprint(target), PauseRequestID: pauseID, ExpectedPauseRevision: "4", AgentConfigDir: `C:\Synthetic\other-pi`}
+	in := NativeProfileCutoverRequest{RuntimeID: row.ID, TargetID: targetID, InstanceID: target.InstanceID, ExpectedConfigSHA256: digest, ExpectedTargetFingerprint: TargetFingerprint(target), PauseRequestID: pauseID, ExpectedPauseRevision: "4", AgentConfigDir: `C:\Synthetic\alternate-pi`}
 	next, err := ValidateNativeProfileCutover("owner", targetID, row, gate, in)
 	if err != nil {
 		t.Fatal(err)
@@ -72,7 +72,7 @@ func TestNativeProfileCutoverProposalPreservesGateAndOtherFields(t *testing.T) {
 				request.ExpectedPauseRevision = "04"
 			}
 			_, err := ValidateNativeProfileCutover(owner, authorizedTarget, original, currentGate, request)
-			if err == nil || !(errors.Is(err, ErrForbidden) || errors.Is(err, ErrInvalidTarget) || errors.Is(err, ErrNativeProfileConflict)) {
+			if err == nil || !errors.Is(err, ErrForbidden) && !errors.Is(err, ErrInvalidTarget) && !errors.Is(err, ErrNativeProfileConflict) {
 				t.Fatalf("unsafe request accepted: %v", err)
 			}
 		})
