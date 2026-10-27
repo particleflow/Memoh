@@ -3597,10 +3597,23 @@ export type HandlersOauthExchangeRequest = {
 
 export type HandlersSessionAbortControlResponse = {
     /**
+     * Applied is the observed control return, not proof of a unique abort cause.
+     */
+    applied?: boolean;
+    /**
      * ClientReason is a client-reported enum, not proof of a human action.
      */
     client_reason?: string;
+    /**
+     * CompletedAt is a stored server return observation, not the run finish time.
+     */
+    completed_at?: string;
+    error_class?: string;
     received_at?: string;
+    /**
+     * ServerSource names the server branch; it is not an authenticated actor.
+     */
+    server_source?: string;
     /**
      * Source is assigned by the receiving server, not inferred from a user agent.
      */

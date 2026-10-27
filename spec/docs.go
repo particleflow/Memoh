@@ -29579,11 +29579,26 @@ const docTemplate = `{
         "handlers.sessionAbortControlResponse": {
             "type": "object",
             "properties": {
+                "applied": {
+                    "description": "Applied is the observed control return, not proof of a unique abort cause.",
+                    "type": "boolean"
+                },
                 "client_reason": {
                     "description": "ClientReason is a client-reported enum, not proof of a human action.",
                     "type": "string"
                 },
+                "completed_at": {
+                    "description": "CompletedAt is a stored server return observation, not the run finish time.",
+                    "type": "string"
+                },
+                "error_class": {
+                    "type": "string"
+                },
                 "received_at": {
+                    "type": "string"
+                },
+                "server_source": {
+                    "description": "ServerSource names the server branch; it is not an authenticated actor.",
                     "type": "string"
                 },
                 "source": {

@@ -32,6 +32,7 @@ type Queries interface {
 	ListContactCandidates(context.Context, dbsqlc.ListContactCandidatesParams) ([]dbsqlc.BotSession, error)
 	BindContactCandidate(context.Context, dbsqlc.BindContactCandidateParams) (int64, error)
 	SessionRunMatchesAbortScope(context.Context, dbsqlc.SessionRunMatchesAbortScopeParams) (bool, error)
+	CompleteSessionRunAbortControl(context.Context, dbsqlc.CompleteSessionRunAbortControlParams) (int64, error)
 	RecordSessionRunAbortControl(context.Context, dbsqlc.RecordSessionRunAbortControlParams) (int64, error)
 	GetSessionRunAbortControl(context.Context, dbsqlc.GetSessionRunAbortControlParams) (dbsqlc.GetSessionRunAbortControlRow, error)
 	SaveSessionRunResumeContext(context.Context, dbsqlc.SaveSessionRunResumeContextParams) (int64, error)
