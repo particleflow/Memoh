@@ -1,0 +1,5 @@
+--- FAIL: TestRetiredEndpointHTTPHasNoConfigurationOrExecution (0.00s)
+    user_runtime_endpoint_test.go:63: GET 200 {"id":"","username":"","role":"admin","display_name":"","is_active":true,"principal_is_active":false,"membership_is_active":false,"created_at":"0001-01-01T00:00:00Z","updated_at":"0001-01-01T00:00:00Z","joined_at":"0001-01-01T00:00:00Z","membership_updated_at":"0001-01-01T00:00:00Z","last_login_at":"0001-01-01T00:00:00Z"}
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.046s
+FAIL

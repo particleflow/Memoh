@@ -36,22 +36,13 @@ func (f *recoveryTransport) record() (dbstore.ComputerOperationRecord, Details) 
 	return r, d
 }
 
-func (f *recoveryTransport) call(ctx context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
+func (f *recoveryTransport) call(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
-	code, _ := args["code"].(string)
-	var parts []json.RawMessage
-	if err := json.Unmarshal([]byte("["+strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");")+"]"), &parts); err != nil || len(parts) != 3 {
-		f.base.t.Fatal("invalid relay call")
+	if target.NativeRuntimeID == "" || target.InstanceID != "herdr-a" {
+		f.base.t.Fatal("recovery escaped original native Runtime")
 	}
-	var target map[string]string
-	if err := json.Unmarshal(parts[0], &target); err != nil || owner != "owner" || connection != "11111111-1111-4111-8111-111111111111" || tool != "execute" || target["deviceId"] != "device-a" || target["instanceId"] != "herdr-a" {
-		f.base.t.Fatal("recovery escaped original relay ownership or target mapping")
-	}
-	var method string
-	var params map[string]any
-	_ = json.Unmarshal(parts[1], &method)
-	_ = json.Unmarshal(parts[2], &params)
+
 	if method == "workspace.create" {
 		_, d := f.record()
 		reader := d.Batch.RecoveryReader
@@ -63,10 +54,10 @@ func (f *recoveryTransport) call(ctx context.Context, owner, connection, tool st
 			f.onCreate()
 		}
 		if f.lost {
-			return nil, errors.New("synthetic lost creation response")
+			return agenvo.Receipt{}, errors.New("synthetic lost creation response")
 		}
 		if f.timeout {
-			return nil, context.DeadlineExceeded
+			return agenvo.Receipt{}, context.DeadlineExceeded
 		}
 		workspace := "w-reader"
 		if f.malformed {
@@ -103,10 +94,8 @@ func (f *recoveryTransport) call(ctx context.Context, owner, connection, tool st
 		// Only the synthetic transport aliases this new shell, never product
 		// Progress/receipt identities or persisted offsets.
 		params["paneId"] = "control"
-		parts[2], _ = json.Marshal(params)
-		args = map[string]any{"code": "return await call(" + string(parts[0]) + "," + string(parts[1]) + "," + string(parts[2]) + ");"}
 	}
-	return f.base.call(ctx, owner, connection, tool, args)
+	return f.base.call(ctx, scope, target, method, params)
 }
 
 func installRecoveryTransport(source *Source, remote *batchTransport, id string) *recoveryTransport {

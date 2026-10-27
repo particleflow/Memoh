@@ -31,7 +31,6 @@ func newBatchResumeRelayFixture(t *testing.T) *batchResumeRelayFixture {
 	s, store, mcp := serviceFixture(t)
 	profile := syntheticNativeProfile()
 	profile.WorkDir = `C:\Synthetic`
-	store.sourceAllowed = false
 	store.record.RuntimeID, store.record.RuntimeProvider = syntheticNativeID, "memoh"
 	store.record.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": profile})
 	target, err := profile.target(syntheticNativeID)

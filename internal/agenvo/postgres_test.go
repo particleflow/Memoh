@@ -2,7 +2,6 @@ package agenvo
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"testing"
 
@@ -49,30 +48,6 @@ func TestPostgresAccountAndBotAuthorization(t *testing.T) {
 	if _, err := store.OwnedHTTPMCPConnectionBot(ctx, other, connection); err == nil {
 		t.Fatal("another account shared owner's MCP")
 	}
-	raw, _ := json.Marshal(Target{ConnectionID: connection, DeviceID: "synthetic", InstanceID: "herdr", Session: "test", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`})
-	registered, err := store.CreateAgenvoRuntime(ctx, owner, "Windows", raw)
-	if err != nil {
-		t.Fatal(err)
-	}
-	repeated, err := store.CreateAgenvoRuntime(ctx, owner, "Windows", raw)
-	if err != nil || repeated.ID != registered.ID {
-		t.Fatalf("registration not idempotent: %v", err)
-	}
-	var count int
-	if err := tx.QueryRow(ctx, "SELECT count(*) FROM bot_remote_runtime_bindings WHERE runtime_id=$1", registered.ID).Scan(&count); err != nil || count != 0 {
-		t.Fatalf("automatic grants: %d %v", count, err)
-	}
-	mount, err := store.CreateOrUpdateMount(ctx, botA, registered.ID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := store.GetMount(ctx, botB, mount.ID); err == nil {
-		t.Fatal("Bot B acquired Bot A mount")
-	}
-	record, err := store.GetMount(ctx, botA, mount.ID)
-	if err != nil || record.RuntimeProvider != Provider {
-		t.Fatalf("provider lost: %v", err)
-	}
 	// An unrelated team must not see the source or the mount, even under the
 	// database's development superuser: queries enforce the explicit team scope.
 	teamID := uuid.NewString()
@@ -80,9 +55,6 @@ func TestPostgresAccountAndBotAuthorization(t *testing.T) {
 	exec("SELECT set_config('memoh.team_id',$1,true)", teamID)
 	if _, err := store.OwnedHTTPMCPConnectionBot(ctx, owner, connection); err == nil {
 		t.Fatal("cross-team source accepted")
-	}
-	if _, err := store.GetMount(ctx, botA, mount.ID); err == nil {
-		t.Fatal("cross-team mount accepted")
 	}
 	exec("SELECT set_config('memoh.team_id','00000000-0000-0000-0000-000000000001',true)")
 	exec("UPDATE mcp_connections SET is_active=false WHERE id=$1", connection)

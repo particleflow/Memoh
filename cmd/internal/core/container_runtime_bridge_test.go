@@ -48,8 +48,8 @@ func TestComputerBindingSeparatesOriginalAgentHostFromTaskTarget(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f := &nativeHostFixture{guardedRuntimeFixture: guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo}, client: &bridge.Client{}}}
-	host := containerRuntimeBridge{source: f, runtime: "codex"}
+	f := &nativeHostFixture{guardedRuntimeFixture: guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendRemote}, client: &bridge.Client{}}}
+	host := containerRuntimeBridge{source: f}
 	for range 2 { // Both cold acquisition and a later turn must use the host.
 		info, err := host.WorkspaceInfo(ctx, "bot")
 		if err != nil || external.RequireContainerWorkspace(info, "codex") != nil {
@@ -79,25 +79,10 @@ func (f *guardedRuntimeFixture) MCPClient(context.Context, string) (*bridge.Clie
 	return f.client, nil
 }
 
-func TestHostRejectsAgenvoBeforeDirectRuntimeClientAccess(t *testing.T) {
-	for _, runtime := range []string{codex.RuntimeType, claudecode.RuntimeType, grok.RuntimeType} {
-		t.Run(runtime, func(t *testing.T) {
-			source := &guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: bridge.WorkspaceBackendAgenvo}, client: &bridge.Client{}}
-			host := containerRuntimeBridge{source: source, runtime: runtime}
-			if _, err := host.WorkspaceInfo(t.Context(), "synthetic-bot"); !errors.Is(err, external.ErrContainerWorkspaceRequired) {
-				t.Fatalf("info did not reject unsupported runtime: %v", err)
-			}
-			if client, err := host.MCPClient(t.Context(), "synthetic-bot"); client != nil || !errors.Is(err, external.ErrContainerWorkspaceRequired) || source.clientCalls != 0 {
-				t.Fatalf("unsupported target exposed a client: calls=%d err=%v", source.clientCalls, err)
-			}
-		})
-	}
-}
-
 func TestHostPreservesUpstreamWorkspaceBehavior(t *testing.T) {
 	for _, backend := range []string{bridge.WorkspaceBackendContainer, bridge.WorkspaceBackendRemote} {
 		source := &guardedRuntimeFixture{info: bridge.WorkspaceInfo{Backend: backend, DefaultWorkDir: "/synthetic"}, client: &bridge.Client{}}
-		host := containerRuntimeBridge{source: source, runtime: "codex"}
+		host := containerRuntimeBridge{source: source}
 		info, err := host.WorkspaceInfo(t.Context(), "synthetic-bot")
 		if err != nil || info != source.info {
 			t.Fatalf("host changed workspace info: %+v %v", info, err)

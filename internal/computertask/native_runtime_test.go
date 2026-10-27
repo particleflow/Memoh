@@ -18,12 +18,6 @@ import (
 
 type nativeTaskStore struct {
 	*fixtureStore
-	t *testing.T
-}
-
-func (s *nativeTaskStore) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	s.t.Fatal("native Runtime task consulted MCP/OAuth ownership")
-	return "", agenvo.ErrForbidden
 }
 
 type nativeTaskFixture struct {
@@ -44,7 +38,7 @@ func newNativeTaskFixture(t *testing.T) (*nativeTaskFixture, *Service, context.C
 	t.Helper()
 	_, store, batch, assets := setupBatch(t)
 	f := &nativeTaskFixture{
-		t: t, store: &nativeTaskStore{fixtureStore: store, t: t}, batch: batch, assets: assets,
+		t: t, store: &nativeTaskStore{fixtureStore: store}, batch: batch, assets: assets,
 		binding: toolcontext.ComputerBinding{BotID: uuid.NewString(), UserID: uuid.NewString(), SessionID: uuid.NewString(), TargetID: uuid.NewString(), RunID: "native-first-run"},
 		profile: agenvo.NativeHerdrProfile{InstanceID: "herdr-native", Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}},
 	}
@@ -64,57 +58,19 @@ func newNativeTaskFixture(t *testing.T) (*nativeTaskFixture, *Service, context.C
 }
 
 func (f *nativeTaskFixture) service() *Service {
-	relay := agenvo.NewService(f.store, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
-		f.t.Fatal("native Runtime task reached MCP/OAuth transport")
-		return nil, agenvo.ErrUnavailable
-	})
-	relay.SetNativeCaller(f.invoke)
+	relay := agenvo.NewService(f.store, f, f.invoke)
 	return NewService(f.store, f.store, relay, f.assets, func(context.Context, toolcontext.ComputerBinding, string, string, string) error { return nil })
 }
 
-// invoke adapts only the pre-existing synthetic Herdr protocol simulator. This
-// is not the production CLI transport: nativeherdr separately tests its Exec
-// stream and official CLI mapping. Both the production service's MCP callbacks
-// above are forbidden, so this fixture cannot mask accidental OAuth fallback.
+// invoke checks the selected Runtime and forwards fixed native operations to
+// the synthetic CLI fixture. nativeherdr separately tests the Exec transport.
 func (f *nativeTaskFixture) invoke(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.t.Helper()
 	mount := f.store.mounts[f.binding.TargetID]
 	if scope.BotID != f.binding.BotID || scope.UserID != f.binding.UserID || scope.TargetID != f.binding.TargetID || target.NativeRuntimeID != mount.RuntimeID || target.ConnectionID != mount.RuntimeID || target.DeviceID != mount.RuntimeID || target.InstanceID != f.profile.InstanceID {
 		f.t.Fatalf("native dispatch lost selected Runtime identity: scope=%+v target=%+v", scope, target)
 	}
-	if method == "pane.read" {
-		if params["format"] != "ansi" {
-			f.t.Fatal("native file snapshot lost its official direct format")
-		}
-		// This fixture adapts native CLI reads to the existing relay simulator;
-		// format is verified here and the production CLI argv is tested separately.
-		copyParams := make(map[string]any, len(params))
-		for key, value := range params {
-			if key != "format" {
-				copyParams[key] = value
-			}
-		}
-		params = copyParams
-	}
-	name, _ := json.Marshal(method)
-	args, _ := json.Marshal(params)
-	raw, err := f.batch.call(ctx, "owner", "11111111-1111-4111-8111-111111111111", "execute", map[string]any{
-		"code": `return await call({"deviceId":"device-a","instanceId":"herdr-a"},` + string(name) + "," + string(args) + ");",
-	})
-	if err != nil {
-		return agenvo.Receipt{}, agenvo.ErrUnknown
-	}
-	var result struct {
-		Content []struct{ Text string } `json:"content"`
-	}
-	if json.Unmarshal(raw, &result) != nil || len(result.Content) != 1 {
-		f.t.Fatal("invalid synthetic receipt")
-	}
-	var receipt agenvo.Receipt
-	if json.Unmarshal([]byte(result.Content[0].Text), &receipt) != nil {
-		f.t.Fatal("invalid synthetic receipt body")
-	}
-	return receipt, nil
+	return f.batch.call(ctx, scope, target, method, params)
 }
 
 func (f *nativeTaskFixture) restart() *Service {
@@ -130,7 +86,7 @@ func (f *nativeTaskFixture) restart() *Service {
 	if err = json.Unmarshal(raw, &reopened.records); err != nil {
 		f.t.Fatal(err)
 	}
-	f.store = &nativeTaskStore{fixtureStore: reopened, t: f.t}
+	f.store = &nativeTaskStore{fixtureStore: reopened}
 	f.batch.store = reopened
 	return f.service()
 }

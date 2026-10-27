@@ -53,6 +53,9 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.GET("/:id/workspace-storage", h.WorkspaceDirectories)
 	g.POST("/:id/workspace-storage/directories", h.CreateWorkspaceDirectory)
 	g.PUT("/:id/workspace-storage", h.SelectWorkspaceDirectory)
+	// Keep unknown Runtime paths inside this namespace; the generic users/:id
+	// route must not consume them as account updates.
+	g.Any("/*", func(echo.Context) error { return echo.ErrNotFound })
 }
 
 // ConfigureNativeHerdr godoc
@@ -170,7 +173,7 @@ func runtimeHTTPError(err error) error {
 		return apperror.FieldInvalid("path", err)
 	case errors.Is(err, userruntime.ErrWorkspaceStorageConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
-	case errors.Is(err, agenvo.ErrEndpointConfigConflict), errors.Is(err, agenvo.ErrNativeProfileConflict):
+	case errors.Is(err, agenvo.ErrNativeProfileConflict):
 		return apperror.Wrap(apperror.CodeHTTPConflict, err, nil)
 	case errors.Is(err, db.ErrComputerAdmissionPaused):
 		return apperror.Wrap(apperror.CodeComputerAdmissionPaused, err, nil)

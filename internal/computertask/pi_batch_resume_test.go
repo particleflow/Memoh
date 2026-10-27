@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -116,11 +117,7 @@ func newBatchResumeFixtureWithInput(t *testing.T, input Submit) (*batchResumeFix
 }
 
 func (f *batchResumeFixture) service() *Service {
-	relay := agenvo.NewService(f.base.store, f.base, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
-		f.t.Error("native resume reached old MCP/OAuth transport")
-		return nil, agenvo.ErrUnavailable
-	})
-	relay.SetNativeCaller(f.invoke)
+	relay := agenvo.NewService(f.base.store, f.base, f.invoke)
 	return NewService(f.store, f.base.store, relay, f.base.assets, func(context.Context, toolcontext.ComputerBinding, string, string, string) error {
 		if f.policyDenied.Load() {
 			return ErrDenied
@@ -153,7 +150,7 @@ func (f *batchResumeFixture) restart() *Service {
 	if err := json.Unmarshal(raw, &reopened.records); err != nil {
 		f.t.Fatal(err)
 	}
-	f.base.store = &nativeTaskStore{fixtureStore: reopened, t: f.t}
+	f.base.store = &nativeTaskStore{fixtureStore: reopened}
 	f.base.batch.store = reopened
 	f.store.nativeTaskStore = f.base.store
 	return f.service()
@@ -426,31 +423,19 @@ func TestNativeBatchExplicitResumeHonorsAdmission(t *testing.T) {
 
 func TestNativeBatchExplicitResumeDoesNotApplyToLegacyAgenvo(t *testing.T) {
 	source, store, transport, _ := setupBatch(t)
-	source.service.relay = agenvo.NewService(store, permissionChecker{}, func(ctx context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
-		raw, err := transport.call(ctx, owner, connection, tool, args)
-		if len(transport.calls) == 1 && transport.calls[0] == "workspace.create" {
-			return nil, agenvo.ErrUnknown
-		}
-		return raw, err
-	})
-	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "legacy-original-run"}
-	ctx, err := toolcontext.WithComputerBinding(t.Context(), binding)
-	if err != nil {
-		t.Fatal(err)
+	row := store.mounts["pc-a"]
+	target := fixtureTarget(row)
+	target.NativeRuntimeID, target.HerdrCLI, target.HerdrConfigRoot = "", "", ""
+	row.RuntimeProvider = "agenvo"
+	row.RuntimeProviderConfig, _ = json.Marshal(target)
+	store.mounts["pc-a"] = row
+	before := observationSnapshot(t, store)
+	binding := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a", RunID: "legacy-resume"}
+	if _, err := source.service.submit(t.Context(), binding, Submit{Kind: "herdr_pi_task", Task: "retired continuation", ResumeOperationID: "historical-operation"}); err == nil {
+		t.Fatal("legacy registration resumed")
 	}
-	in := Submit{Kind: "herdr_pi_task", Task: "legacy synthetic instruction"}
-	first, err := source.service.submit(ctx, binding, in)
-	if !errors.Is(err, agenvo.ErrUnknown) || first.State != "unknown" {
-		t.Fatal("legacy unknown fixture", err)
-	}
-	before := store.records[first.ID]
-	in.ResumeOperationID = first.ID
-	if _, err := source.service.submit(ctx, binding, in); err == nil {
-		t.Error("legacy Agenvo entered native-only continuation")
-	}
-	after := store.records[first.ID]
-	if len(transport.calls) != 1 || transport.runs != 0 || before.Revision != after.Revision || string(before.Details) != string(after.Details) {
-		t.Error("native resume modified or replayed legacy Agenvo operation")
+	if len(transport.calls) != 0 || !slices.Equal(before, observationSnapshot(t, store)) {
+		t.Fatal("legacy resume changed history or dispatched")
 	}
 }
 

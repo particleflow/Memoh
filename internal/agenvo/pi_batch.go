@@ -188,11 +188,8 @@ func launchBashScript(script, bashPath string) string {
 // envelope before that boundary, then pass its exact bytes to Bash over stdin,
 // rather than putting the expanded script on a second Windows command line.
 // PowerShell/.NET are already required by this transport; no host tool or
-// alternate Agent runtime is introduced. Legacy relay launches stay unchanged.
+// alternate Agent runtime is introduced.
 func launchBatchScript(script string, target Target) string {
-	if target.NativeRuntimeID == "" {
-		return launchBashScript(script, target.BashPath)
-	}
 	var packed bytes.Buffer
 	zipper := gzip.NewWriter(&packed)
 	_, _ = zipper.Write([]byte(script)) // bytes.Buffer cannot fail these writes.

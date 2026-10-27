@@ -118,10 +118,17 @@ func TestNativeProducerLocatorIsOptionalAtomicAndFingerprintBound(t *testing.T) 
 
 func TestNativeServiceChecksEveryCallWithoutMCPAndDoesNotReplay(t *testing.T) {
 	s, store, f := serviceFixture(t)
-	store.sourceAllowed = false // native identity must not depend on MCP authorization
 	store.record.RuntimeID = syntheticNativeID
 	store.record.RuntimeProvider = "memoh"
 	store.record.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": syntheticNativeProfile()})
+	s.SetNativeCaller(nil)
+	missing, _, err := s.Client(t.Context(), request().Scope)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := missing.Probe(t.Context(), request().Scope); !errors.Is(err, ErrUnavailable) {
+		t.Fatal("missing native caller lost unavailable classification", err)
+	}
 	calls := 0
 	s.SetNativeCaller(func(context.Context, Scope, Target, string, map[string]any) (Receipt, error) {
 		calls++
@@ -182,7 +189,7 @@ func TestNativeConfigurationPreservesOwnerDataAndDoesNotEnrollOrDispatch(t *test
 	}
 	var got map[string]json.RawMessage
 	_ = json.Unmarshal(row.ProviderConfig, &got)
-	if string(got["unrelated"]) != `{"version":7}` || store.writes != 1 || base.created != 0 || len(f.calls) != 0 {
+	if string(got["unrelated"]) != `{"version":7}` || store.writes != 1 || len(f.calls) != 0 {
 		t.Fatalf("unexpected side effects: %+v", got)
 	}
 	if _, err = DecodeNativeTarget(row.ID, row.ProviderConfig); err != nil {

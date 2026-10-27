@@ -44,13 +44,6 @@ func (s *computerPreflightStore) ListMounts(_ context.Context, bot string) ([]db
 	return []dbstore.BotRemoteRuntimeBindingRecord{s.mount}, nil
 }
 
-func (s *computerPreflightStore) OwnedHTTPMCPConnectionBot(_ context.Context, owner, connection string) (string, error) {
-	if owner != s.mount.RuntimeUserID || connection != "55555555-5555-4555-8555-555555555555" {
-		return "", agenvo.ErrForbidden
-	}
-	return s.mount.BotID, nil
-}
-
 func (s *computerPreflightStore) ClaimComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, bool, error) {
 	s.claims++
 	if s.operation != nil {

@@ -14,23 +14,9 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/felinics/memoh/internal/agenvo"
-	"github.com/felinics/memoh/internal/db"
-	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/userruntime"
 )
-
-func (s *admissionHTTPStore) ConfigureAgenvoRuntime(_ context.Context, owner, id string, before, after dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
-	if owner != s.owner || id != s.runtime || string(before) != string(s.config) {
-		return dbstore.UserRuntimeRecord{}, db.ErrNotFound
-	}
-	if s.row.Paused {
-		return dbstore.UserRuntimeRecord{}, db.ErrComputerAdmissionPaused
-	}
-	s.writes++
-	s.config = after
-	return dbstore.UserRuntimeRecord{ID: id, UserID: owner, ProviderConfig: after}, nil
-}
 
 func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 	const secret = "synthetic-endpoint-http-signing-key" //nolint:gosec // G101: isolated test-only signing key.
@@ -40,16 +26,12 @@ func TestRetiredEndpointHTTPHasNoConfigurationOrExecution(t *testing.T) {
 	store := &admissionHTTPStore{owner: owner, runtime: runtime, config: raw}
 	service := userruntime.NewService(store, nil)
 	calls := 0
-	service.SetAgenvoService(agenvo.NewService(store, nil, func(_ context.Context, user, connection, tool string, args map[string]any) (json.RawMessage, error) {
+	service.SetAgenvoService(agenvo.NewService(store, nil, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		calls++
-		if user != owner || connection != target.ConnectionID || tool != "execute" || !strings.Contains(args["code"].(string), `"workspace.list"`) {
-			t.Fatal("endpoint configuration attempted an unexpected native call")
-		}
-		text := `{"execution":"accepted","result":{"session":"default","result":{"workspaces":[]}}}`
-		out, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": text}}})
-		return out, nil
+		t.Fatal("owner control or retired route dispatched native operation")
+		return agenvo.Receipt{}, agenvo.ErrUnknown
 	}))
-	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{NewUserRuntimeHandler(nil, service)}}
+	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{NewUsersHandler(nil, newTestAdminAccountService("admin"), nil, nil, nil, nil, nil, nil), NewUserRuntimeHandler(nil, service)}}
 	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(context.Context, string) error { return nil }, capture)
 	sign := func(user string) string {
 		t.Helper()

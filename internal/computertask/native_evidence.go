@@ -413,7 +413,7 @@ func (s *Service) exportNative(ctx context.Context, b toolcontext.ComputerBindin
 // Read a compact page through the same operation, conversation and target
 // authorization as result/export. No provider call or storage mutation.
 func (s *Service) nativeHistory(ctx context.Context, b toolcontext.ComputerBinding, id string, offset int) (Result, error) {
-	r, d, err := s.load(ctx, b, id)
+	r, d, err := s.loadHistory(ctx, b, id)
 	if err != nil {
 		return Result{}, err
 	}

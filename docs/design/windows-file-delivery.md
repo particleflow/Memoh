@@ -22,7 +22,7 @@ nor modifies that implementation, generated SDK, Agent, runtime or contextview.
 | Frozen PR #8 `media/uploads.go`, `handlers/media_resumable.go` | Sequential 1 byte–8 MiB chunks, per-chunk/final SHA-256, durable receipts, 24h TTL, idempotent complete, cancel, current Bot permission checks. Default file limit stays 200 MiB. |
 | `handlers/message.go:ServeMedia`, `media_range_test.go` | Authenticated GET/HEAD, Range, If-Range and hash ETag already exist. Avoid public-image/preview paths and full-buffer workspace FSRead. |
 | `computertask/source.go`, `service.go` | Existing artifact action saves a bounded terminal snapshot. It does not register arbitrary Windows output files or a multi-result delivery manifest. |
-| `auth/jwt.go`, `docs/design/agenvo-execution-target.md` | Memoh account/chat authentication and Agenvo command authorization are different. No task-scoped PC upload credential or encrypted PC↔NAS route is demonstrated. |
+| `auth/jwt.go`, `docs/native-runtime-herdr.md` | Memoh account/chat authentication and Agenvo command authorization are different. No task-scoped PC upload credential or encrypted PC↔NAS route is demonstrated. |
 
 Still unverified: current authorized Windows host's language and durable store;
 stable-source/NTFS ACL and reparse-point implementation; approved TLS/private

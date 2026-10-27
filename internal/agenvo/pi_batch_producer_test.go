@@ -18,8 +18,13 @@ import (
 )
 
 // Synthetic Bash utilities, not a Herdr installation or Windows acceptance.
-func TestBatchProducerClosesOnlyDeclaredResult(t *testing.T)          { exerciseBatchProducer(t, false) }
-func TestBatchProducerClosesMultipleResultsWithoutRerun(t *testing.T) { exerciseBatchProducer(t, true) }
+func TestBatchProducerClosesOnlyDeclaredResult(t *testing.T) {
+	exerciseBatchProducer(t, false, true)
+}
+
+func TestBatchProducerClosesMultipleResultsWithoutRerun(t *testing.T) {
+	exerciseBatchProducer(t, true, true)
+}
 
 // Regression for the disabled-plugin completion reproduction supplied by the
 // file integration lane (ddb7872e). The actual generated envelope must collect.
@@ -60,7 +65,7 @@ func exerciseBatchProducer(t *testing.T, multiple bool, native ...bool) {
 		p.Producer.Artifacts = []deliverymeta.Artifact{p.Producer.Artifact, {SourceRef: "result_two", Mime: "text/plain"}, {SourceRef: "missing_result", Mime: "text/plain"}}
 		p.Producer.Artifact = deliverymeta.Artifact{}
 	}
-	target := Target{WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
+	target := Target{NativeRuntimeID: uuid.NewString(), Producer: ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}, WorkDir: `C:\Synthetic`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
 	if len(native) != 0 && native[0] {
 		target.NativeRuntimeID = uuid.NewString()
 		target.Producer = ProducerLocator{ProgramPath: `C:\Synthetic Owner's Bin\producer.exe`, ConfigDir: `C:\Native Owner's Config\$(touch MUST_NOT_EXIST)`, StateDir: `C:\Native State\queue`}
@@ -157,15 +162,15 @@ func exerciseProducerCommandBound(t *testing.T, completion int) {
 	for i := range deliverymeta.MaxArtifacts {
 		p.Producer.Artifacts = append(p.Producer.Artifacts, deliverymeta.Artifact{SourceRef: fmt.Sprintf("file_%02d", i), Mime: "application/octet-stream"})
 	}
-	target := Target{WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
+	target := Target{NativeRuntimeID: uuid.NewString(), Producer: ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}, WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`, Agent: AgentProfile{Provider: "synthetic", Model: "synthetic"}}
 	if err := ValidateBatchRequest(p, target, ".", "create declared results"); err != nil {
 		t.Fatal("16 short declarations rejected", err)
 	}
 	script := batchFixtureScript(t, p, target, target.WorkDir, "create declared results")
-	if size := len(launchBashScript(script, target.BashPath)); size > 30000 {
+	if size := len(launchBatchScript(script, target)); size > 30000 {
 		t.Fatal("launch exceeds finite producer command bound", size)
 	}
-	if err := ValidateBatchRequest(p, target, ".", strings.Repeat("x", 32000)); err == nil {
+	if err := ValidateBatchRequest(p, target, ".", variedSyntheticTask(32000)); err == nil {
 		t.Fatal("oversized launch accepted")
 	}
 }

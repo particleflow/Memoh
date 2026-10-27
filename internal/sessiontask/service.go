@@ -44,7 +44,7 @@ type Workdirs interface {
 	Get(context.Context, string, string) (workdir.Workdir, error)
 }
 type Targets interface {
-	ResolveTarget(context.Context, agenvo.Scope) (agenvo.Target, error)
+	ResolveHistoricalTarget(context.Context, agenvo.Scope) (agenvo.Target, error)
 }
 
 type Service struct {
@@ -221,7 +221,7 @@ func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thr
 		selected = candidate
 	}
 	if selected != "native" {
-		if _, err := s.targets.ResolveTarget(ctx, agenvo.Scope{BotID: bot, UserID: user, TargetID: selected}); err != nil {
+		if _, err := s.targets.ResolveHistoricalTarget(ctx, agenvo.Scope{BotID: bot, UserID: user, TargetID: selected}); err != nil {
 			return "", ErrUnavailable
 		}
 	}
@@ -296,7 +296,7 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 	if err != nil || r.ID != c.ID || r.BotID != bot || r.UserID != user || r.SessionID != c.SessionID || r.TargetID == "" || (selected != "native" && selected != r.TargetID) {
 		return Task{}, ErrUnavailable
 	}
-	target, err := s.targets.ResolveTarget(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID})
+	target, err := s.targets.ResolveHistoricalTarget(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID})
 	if err != nil || r.TargetFingerprint == "" || r.TargetFingerprint != agenvo.TargetFingerprint(target) {
 		return Task{}, ErrUnavailable
 	}

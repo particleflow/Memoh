@@ -21,6 +21,9 @@ import (
 	"github.com/felinics/memoh/internal/toolcontext"
 )
 
+// The retired writer bounded saved input receipts to this historical size.
+const historicalInputReceiptLimit = 64
+
 type evidenceTransport struct {
 	base           *followupTransport
 	status, output string
@@ -29,13 +32,12 @@ type evidenceTransport struct {
 	afterRead      func()
 }
 
-func (f *evidenceTransport) call(ctx context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
-	raw, err := f.base.call(ctx, owner, connection, tool, args)
+func (f *evidenceTransport) call(ctx context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
+	raw, err := f.base.call(ctx, scope, target, method, params)
 	if err != nil {
 		return raw, err
 	}
-	code := args["code"].(string)
-	if strings.Contains(code, `"agent.get"`) {
+	if method == "agent.get" {
 		a := map[string]any{"name": f.base.base.agentName, "agent": "pi", "workspace_id": "w-synthetic", "pane_id": "p-agent", "terminal_id": "t-agent", "agent_status": f.status, "interactive_ready": true}
 		if f.base.session != nil {
 			a["agent_session"] = f.base.session
@@ -45,12 +47,12 @@ func (f *evidenceTransport) call(ctx context.Context, owner, connection, tool st
 		}
 		return envelope(map[string]any{"session": "synthetic", "result": map[string]any{"agent": a}}), nil
 	}
-	if strings.Contains(code, `"agent.read"`) {
+	if method == "agent.read" {
 		if f.afterRead != nil {
 			f.afterRead()
 		}
 		if f.readFailure {
-			return nil, errors.New("PRIVATE lost read response")
+			return agenvo.Receipt{}, errors.New("PRIVATE lost read response")
 		}
 		return envelope(map[string]any{"session": "synthetic", "output": f.output}), nil
 	}
@@ -140,9 +142,14 @@ func TestNativeEvidenceRetainsSamplesExportsAndRestart(t *testing.T) {
 	old := parseResult(t, invoke(t, client, "computer_task_result", args, false))
 	oldID := old.NativeEvidence.LatestObservationID
 	oldExport := parseResult(t, invoke(t, client, "computer_task_artifact", args, false))
-	for range 2 {
-		invoke(t, client, "computer_task_followup", followupArgs(initial.ID, "bound_session"), false)
-	}
+	// Historical input receipts are fixture data, never newly dispatched prompts.
+	row := store.records[initial.ID]
+	var fields map[string]json.RawMessage
+	_ = json.Unmarshal(row.Details, &fields)
+	fields["followups"], _ = json.Marshal([]FollowupRecord{{RequestID: "historical-input-a", Progress: agenvo.AgentFollowupProgress{State: "accepted"}}, {RequestID: "historical-input-b", Progress: agenvo.AgentFollowupProgress{State: "accepted"}}})
+	row.Details, _ = json.Marshal(fields)
+	store.records[row.ID] = row
+
 	f.status, f.output = "working", "next round in progress"
 	next := parseResult(t, invoke(t, client, "computer_task_result", args, false))
 	assertSampleOnly(t, next)
@@ -183,11 +190,8 @@ func TestNativeEvidenceRetainsSamplesExportsAndRestart(t *testing.T) {
 	if !bytes.Equal(before, observationSnapshot(t, restored)) || !slices.Equal(calls, f.base.methods) || a.ingests != 2 {
 		t.Fatal("restart replay changed persisted history or contacted provider")
 	}
-	if len(f.base.prompts) != 2 {
-		t.Fatal("observation/export sent a new instruction")
-	}
 	for _, method := range f.base.methods {
-		if method != "agent.get" && method != "agent.read" && method != "agent.prompt" {
+		if method != "agent.get" && method != "agent.read" {
 			t.Fatalf("rebuilt Agent via %s", method)
 		}
 	}
@@ -251,7 +255,7 @@ func TestNativeEvidenceSequenceGapsSessionsAndTruncationAreOnlySamples(t *testin
 	if missing.Observation.SessionRelation != "unavailable" || missing.Observation.CompletionSeq != "" || !missing.Truncated || !missing.Observation.Truncated || len(missing.Output) > 16384 || !utf8.ValidString(missing.Output) {
 		t.Fatal("missing metadata or truncation misrepresented")
 	}
-	if len(f.base.prompts) != 0 {
+	if slices.Contains(f.base.methods, "agent.prompt") {
 		t.Fatal("sampling redispatched")
 	}
 	if storedEvidence(t, store, initial.ID).Agent.AgentSession.Value != syntheticAgentSession("original").Value {
@@ -461,7 +465,7 @@ func TestNativeEvidenceCompactPagesWithAllInputReceipts(t *testing.T) {
 	r := store.records[initial.ID]
 	var d Details
 	_ = json.Unmarshal(r.Details, &d)
-	for range maxFollowups {
+	for range historicalInputReceiptLimit {
 		d.Followups = append(d.Followups, FollowupRecord{RequestID: uuid.NewString(), Progress: agenvo.AgentFollowupProgress{State: "accepted"}})
 	}
 	r.Details, _ = json.Marshal(d)
@@ -484,7 +488,7 @@ func TestNativeEvidenceCompactPagesWithAllInputReceipts(t *testing.T) {
 	for offset := range 2 {
 		wire := invoke(t, client, "computer_task_get", map[string]any{"operation_id": r.ID, "history_offset": offset}, false)
 		got := parseResult(t, wire)
-		if got.NativeEvidence == nil || got.NativeEvidence.Count != 2 || got.NativeEvidence.HistoryOffset != offset || len(got.NativeEvidence.Observations) != 1 || len(got.NativeEvidence.Observations[0].Inputs) != maxFollowups || got.Output != "" || got.Observation != nil {
+		if got.NativeEvidence == nil || got.NativeEvidence.Count != 2 || got.NativeEvidence.HistoryOffset != offset || len(got.NativeEvidence.Observations) != 1 || len(got.NativeEvidence.Observations[0].Inputs) != historicalInputReceiptLimit || got.Output != "" || got.Observation != nil {
 			t.Fatal("bounded page lost receipts or exposed raw terminal output")
 		}
 		if offset == 0 && (got.NativeEvidence.NextHistoryOffset == nil || *got.NativeEvidence.NextHistoryOffset != 1) {
@@ -569,7 +573,7 @@ func TestNativeEvidenceHistoryPagePreservesCanceledOperationFacts(t *testing.T) 
 	if page.NativeEvidence == nil || page.NativeEvidence.Count != 1 || page.Output != "" || page.Observation != nil || len(page.Followups) != 0 {
 		t.Fatal("history page lost evidence or included unbounded latest-view content")
 	}
-	if !slices.Equal(calls, f.base.methods) || len(f.base.prompts) != 0 {
+	if !slices.Equal(calls, f.base.methods) || slices.Contains(f.base.methods, "agent.prompt") {
 		t.Fatal("cancel/history lookup contacted or redispatched the Agent")
 	}
 }

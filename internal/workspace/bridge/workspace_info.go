@@ -5,7 +5,6 @@ import "context"
 const (
 	WorkspaceBackendContainer = "container"
 	WorkspaceBackendRemote    = "remote"
-	WorkspaceBackendAgenvo    = "agenvo"
 	ToolsProxyAddr            = "127.0.0.1:18732"
 	ToolsProxyHTTPURL         = "http://" + ToolsProxyAddr + "/mcp"
 )

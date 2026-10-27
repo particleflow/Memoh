@@ -24,7 +24,7 @@ func TestNativeContentReadOnlyBoundedAndRevocation(t *testing.T) {
 	before := observationSnapshot(t, store)
 	transport.output = strings.Repeat("sample", 4000)
 	got, err := source.NativeContent(ctx, b, initial.ID)
-	if err != nil || !got.Supported || got.Observation == nil || got.Observation.OutputFidelity != "terminal_snapshot_unverified" || !got.Observation.Truncated || len(got.Observation.Output) > 16384 || got.Observation.TaskSuccessVerified {
+	if err != nil || !got.Supported || got.FollowupAvailable || got.Observation == nil || got.Observation.OutputFidelity != "terminal_snapshot_unverified" || !got.Observation.Truncated || len(got.Observation.Output) > 16384 || got.Observation.TaskSuccessVerified {
 		t.Fatalf("sample=%+v err=%v", got, err)
 	}
 	if !bytes.Equal(before, observationSnapshot(t, store)) || !slices.Equal(transport.base.methods, []string{"agent.get", "agent.read"}) {
@@ -45,32 +45,27 @@ func TestNativeContentReadOnlyBoundedAndRevocation(t *testing.T) {
 	}
 }
 
-func TestNativeViewFollowupKeepsOperationRunAndUnknownDedup(t *testing.T) {
+func TestNativeViewFollowupKeepsOriginalRunWithoutNewInput(t *testing.T) {
 	source, store, transport, initial := followupFixture(t, true)
 	b := toolcontext.ComputerBinding{BotID: "bot-a", UserID: "user-a", SessionID: "thread-a", TargetID: "pc-a"}
-	ctx, err := toolcontext.WithComputerBinding(t.Context(), b)
-	if err != nil {
-		t.Fatal(err)
-	}
-	transport.fault = "lost"
-	in := Followup{OperationID: initial.ID, RequestID: uuid.NewString(), Mode: "bound_session", Task: "synthetic followup"}
-	got, err := source.FollowupNative(ctx, b, in)
-	if !errors.Is(err, agenvo.ErrUnknown) || got.Followup == nil || got.Followup.State != "unknown" {
-		t.Fatalf("out=%+v err=%v", got, err)
-	}
-	originalRun := store.records[initial.ID].RunID
+	in := Followup{OperationID: initial.ID, RequestID: uuid.NewString(), Mode: "bound_session", Task: "original input"}
+	row := store.records[initial.ID]
 	var d Details
-	if err := json.Unmarshal(store.records[initial.ID].Details, &d); err != nil {
-		t.Fatal(err)
+	_ = json.Unmarshal(row.Details, &d)
+	d.Followups = []FollowupRecord{{RequestID: in.RequestID, Fingerprint: fingerprint(in), RunID: row.RunID, Progress: agenvo.AgentFollowupProgress{State: "unknown"}}}
+	row.Details, _ = json.Marshal(d)
+	store.records[row.ID] = row
+	before := observationSnapshot(t, store)
+	got, err := source.FollowupNative(t.Context(), b, in)
+	if !errors.Is(err, agenvo.ErrUnknown) || got.Followup == nil || got.Followup.State != "unknown" {
+		t.Fatal(got, err)
 	}
-	if len(d.Followups) != 1 || d.Followups[0].RunID != originalRun {
-		t.Fatal("host changed persisted run attribution")
-	}
-	_, _ = source.FollowupNative(ctx, b, in)
 	in.RequestID = uuid.NewString()
-	got, err = source.FollowupNative(ctx, b, in)
-	if !errors.Is(err, ErrConflict) || got.BlockedByRequest == "" || len(transport.prompts) != 1 {
-		t.Fatal("unknown submitted twice")
+	if _, err := source.FollowupNative(t.Context(), b, in); !errors.Is(err, agenvo.ErrUnsupported) {
+		t.Fatal("new retired input accepted", err)
+	}
+	if !bytes.Equal(before, observationSnapshot(t, store)) || len(transport.methods) != 0 {
+		t.Fatal("retired input changed history or dispatched")
 	}
 }
 

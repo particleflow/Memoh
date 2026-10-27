@@ -29,12 +29,9 @@ func TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation(t *test
 			before := store.records[initial.ID]
 			source.service.store = pausedComputerStore{fixtureStore: store, failure: failure}
 			client := standardClient(t, source, "pc-a", false)
-			for _, name := range []string{"computer_task_submit", "computer_task_followup"} {
+			for _, name := range []string{"computer_task_submit"} {
 				t.Run(name, func(t *testing.T) {
 					args := map[string]any{"kind": "herdr_pi_task", "task": "synthetic new task"}
-					if name == "computer_task_followup" {
-						args = followupArgs(initial.ID, "bound_session")
-					}
 					wire := invoke(t, client, name, args, true)
 					var response map[string]any
 					if err := json.Unmarshal(wire, &response); err != nil {
@@ -44,16 +41,13 @@ func TestComputerAdmissionToolRejectsWithoutDispatchOrPhantomReservation(t *test
 						t.Fatalf("missing deterministic failure: %s", wire)
 					}
 					key := "operation_created"
-					if name == "computer_task_followup" {
-						key = "request_reserved"
-					}
 					if response[key] != false {
 						t.Fatal("missing rejection facts", response)
 					}
 				})
 			}
 			after := store.records[initial.ID]
-			if after.Revision != before.Revision || string(after.Details) != string(before.Details) || len(relay.prompts) != 0 {
+			if after.Revision != before.Revision || string(after.Details) != string(before.Details) || len(relay.methods) != 0 {
 				t.Fatal("paused input mutated task or prompted Pi")
 			}
 		})

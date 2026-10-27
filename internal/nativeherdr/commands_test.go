@@ -24,6 +24,25 @@ func TestCommandPreservesTextAndSelectsNoFocus(t *testing.T) {
 	}
 }
 
+func TestPaneReadANSIArgument(t *testing.T) {
+	target := agenvo.Target{Session: "contract"}
+	params := map[string]any{"session": "contract", "paneId": "w1:p1", "lines": 8, "source": "recent-unwrapped", "format": "ansi"}
+	argv, err := buildCommand("pane.read", params, target)
+	if err != nil || !reflect.DeepEqual(argv, []string{"pane", "read", "w1:p1", "--lines", "8", "--source", "recent-unwrapped", "--format", "ansi"}) {
+		t.Fatalf("argv=%q err=%v", argv, err)
+	}
+	params["format"] = "invalid"
+	if _, err := buildCommand("pane.read", params, target); !errors.Is(err, agenvo.ErrUnsupported) {
+		t.Fatalf("invalid format: %v", err)
+	}
+	params["name"] = "agent"
+	delete(params, "paneId")
+	params["format"] = "ansi"
+	if _, err := buildCommand("agent.read", params, target); !errors.Is(err, agenvo.ErrUnsupported) {
+		t.Fatalf("agent read accepted pane format: %v", err)
+	}
+}
+
 func TestCommandFailsClosedBeforeExecution(t *testing.T) {
 	target := agenvo.Target{Session: "contract"}
 	for _, tc := range []struct {

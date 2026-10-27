@@ -184,32 +184,6 @@ func (s *Store) SaveComputerDelivery(ctx context.Context, r dbstore.ComputerOper
 	return operationRecord(row), mapQueryErr(err)
 }
 
-func (s *Store) OwnedAgenvoRuntime(ctx context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
-	user, err := db.ParseUUID(owner)
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	runtime, err := db.ParseUUID(id)
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	row, err := s.queries.GetOwnedAgenvoRuntime(ctx, dbsqlc.GetOwnedAgenvoRuntimeParams{ID: runtime, UserID: user})
-	return userRuntimeRecord(row), mapQueryErr(err)
-}
-
-func (s *Store) ConfigureAgenvoRuntime(ctx context.Context, owner, id string, previous, next dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
-	user, err := db.ParseUUID(owner)
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	runtime, err := db.ParseUUID(id)
-	if err != nil {
-		return dbstore.UserRuntimeRecord{}, err
-	}
-	row, err := s.queries.UpdateAgenvoRuntimeConfig(ctx, dbsqlc.UpdateAgenvoRuntimeConfigParams{ID: runtime, UserID: user, ExpectedConfig: previous, ProviderConfig: next})
-	return userRuntimeRecord(row), mapQueryErr(err)
-}
-
 func (s *Store) PreviousComputerPiOperation(ctx context.Context, r dbstore.ComputerOperationRecord, session string) (dbstore.ComputerOperationRecord, error) {
 	ids, err := computerIDs(r)
 	if err != nil {

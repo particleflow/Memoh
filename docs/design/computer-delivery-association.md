@@ -55,9 +55,9 @@ if it had failed. Known serialization/CAS conflicts are bounded to three attempt
 
 The PostgreSQL adapter uses one SERIALIZABLE transaction, the existing pool's
 team/RLS context, transaction-bound Bot/account services, session-task ownership
-and ancestry checks, and Agenvo target registration validation. It rechecks an
+and ancestry checks, and native Runtime target validation. It rechecks an
 active account, chat/read/write/exec grants, target ownership/revocation,
-connection ownership, current target fingerprint, and the persisted pi-json-v1
+Runtime ownership, current target fingerprint, and the persisted pi-json-v1
 attempt/generation before every commit, replay, resolve or fence. Legacy/TUI
 operations without that persisted identity fail closed in version 1.
 

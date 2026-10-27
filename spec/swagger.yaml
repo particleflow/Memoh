@@ -688,8 +688,8 @@ definitions:
         type: string
       execution_mode:
         description: |-
-          Empty preserves the explicit legacy TUI contract. pi-json-v1 opts into
-          finite official CLI invocations; no automatic protocol fallback occurs.
+          Empty is decoded only for historical profiles. Native configuration
+          requires pi-json-v1; no protocol fallback occurs.
         type: string
       model:
         type: string
@@ -16690,10 +16690,9 @@ paths:
     post:
       consumes:
       - application/json
-      description: Retain request_id before sending and across unknown outcomes. Reuses
-        existing authorization, policy and CAS deduplication. No new Agent, batch
-        resume, process stop or task retry. Accepted means input delivery only; state
-        unknown must not be retried with a new ID.
+      description: Returns the saved receipt for an exact request ID and matching
+        input. New requests are unsupported. An unknown outcome remains unknown and
+        must not be resent.
       parameters:
       - description: Bot ID
         in: path
@@ -16717,7 +16716,7 @@ paths:
         name: task_id
         required: true
         type: string
-      - description: Instruction with retained idempotency ID
+      - description: Original input and retained request ID
         in: body
         name: body
         required: true
@@ -16750,7 +16749,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/server.Problem'
-      summary: Send one instruction to this task's existing interactive Agent
+      summary: Read a retained interactive Agent input receipt
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/observation:
@@ -21822,12 +21821,11 @@ paths:
     put:
       consumes:
       - application/json
-      description: Atomically fences new operation claims and follow-up reservations
-        across matching mounts. Agenvo uses the existing owner connection and a read-only
-        probe; configured native Runtimes use the owned registry identity and remain
-        manageable while offline. Retain request_id after an uncertain response. Resume
-        requires the pause request ID and current revision. Does not stop processes,
-        drain accepted work or authorize a host restart.
+      description: Atomically fences new operation claims across matching mounts.
+        Configured native Runtimes use the owned registry identity and remain manageable
+        while offline. Retain request_id after an uncertain response. Resume requires
+        the pause request ID and current revision. Does not stop processes, drain
+        accepted work or authorize a host restart.
       parameters:
       - description: Existing owner runtime ID
         in: path
@@ -21910,7 +21908,7 @@ paths:
   /users/me/runtimes/{id}/transfer-credential:
     delete:
       parameters:
-      - description: Existing Agenvo runtime ID
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true
@@ -21940,7 +21938,7 @@ paths:
       - user-runtimes
     get:
       parameters:
-      - description: Existing Agenvo runtime ID
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true
@@ -21970,7 +21968,7 @@ paths:
         CAS; a lost response requires status read and explicit rotation. Never a per-file
         action.
       parameters:
-      - description: Existing Agenvo runtime ID
+      - description: Existing native Runtime ID
         in: path
         name: id
         required: true

@@ -5,14 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
-	"strings"
-	"time"
 	"unicode/utf8"
 )
 
 var ErrAgentNotConfigured = errors.New("this computer has no configured Pi provider profile")
 
-// AgentProgress is a private receipt, persisted before each mutating call.
+// AgentProgress decodes the private receipt of historical TUI input.
 // These native references are not accepted from a model or public MCP client.
 type AgentProgress struct {
 	Phase              string            `json:"phase"`
@@ -88,163 +86,6 @@ func (c *Client) agentInfo(ctx context.Context, scope Scope, target Target, p Ag
 		return agentInfo{}, false, ErrTargetChanged
 	}
 	return a, envelope.Startup.State == "starting" || a.LaunchPending, nil
-}
-
-// SubmitAgent uses only this fixed Herdr procedure. It never discovers a raw
-// method during a business request, runs arbitrary relay code, or resumes an
-// uncertain mutating step. A caller must durably reserve its task before entry.
-func (s *Service) SubmitAgent(ctx context.Context, scope Scope, task, workDir string, p AgentProgress, save func(AgentProgress) error) (AgentProgress, error) {
-	c, target, err := s.Client(ctx, scope)
-	if err != nil {
-		return p, err
-	}
-	if target.Agent == (AgentProfile{}) {
-		return p, ErrAgentNotConfigured
-	}
-	if target.Agent.Validate() != nil || len(task) == 0 || len(task) > 32000 || !utf8.ValidString(task) || strings.ContainsRune(task, 0) || len(p.Name) != 31 || !strings.HasPrefix(p.Name, "m") || p.Phase != "" {
-		return p, ErrUnsupported
-	}
-	cwd, err := resolveWorkDir(target.WorkDir, workDir)
-	if err != nil {
-		return p, err
-	}
-	call := func(phase, method string, args map[string]any) (Receipt, error) {
-		p.Phase = phase
-		if err := save(p); err != nil {
-			return Receipt{}, err
-		}
-		return c.relay(ctx, scope, target, method, args)
-	}
-	created, err := call("creating_workspace", "workspace.create", map[string]any{"session": target.Session, "cwd": cwd, "label": p.Name})
-	if err != nil {
-		return p, err
-	}
-	var workspace nativeWorkspace
-	if resultBody(created, &workspace) != nil || workspace.Workspace.ID == "" || workspace.Workspace.Label != p.Name {
-		return p, ErrUnknown
-	}
-	p.WorkspaceID = workspace.Workspace.ID
-	env := map[string]string{"PI_CODING_AGENT_DIR": target.Agent.ConfigDir}
-	if target.Agent.Path != "" {
-		env["PATH"] = target.Agent.Path
-	}
-	created, err = call("creating_tab", "tab.create", map[string]any{"session": target.Session, "workspaceId": p.WorkspaceID, "cwd": cwd, "label": p.Name, "env": env})
-	if err != nil {
-		return p, err
-	}
-	var tab struct {
-		RootPane struct {
-			ID        string `json:"pane_id"`
-			Terminal  string `json:"terminal_id"`
-			Workspace string `json:"workspace_id"`
-		} `json:"root_pane"`
-	}
-	if resultBody(created, &tab) != nil || tab.RootPane.ID == "" || tab.RootPane.Terminal == "" || tab.RootPane.Workspace != p.WorkspaceID {
-		return p, ErrUnknown
-	}
-	p.PaneID, p.TerminalID = tab.RootPane.ID, tab.RootPane.Terminal
-	started, err := call("starting_agent", "agent.start", map[string]any{"session": target.Session, "name": p.Name, "paneId": p.PaneID, "kind": "pi", "args": []string{"--provider", target.Agent.Provider, "--model", target.Agent.Model}, "timeoutMs": 30000})
-	if err != nil {
-		return p, err
-	}
-	var start struct {
-		Session string `json:"session"`
-		Name    string `json:"name"`
-		Query   string `json:"query"`
-	}
-	if started.Execution != "starting" || json.Unmarshal(started.Result, &start) != nil || start.Name != p.Name || start.Session != target.Session || start.Query != "agent.get" {
-		return p, ErrUnknown
-	}
-	for {
-		a, starting, err := c.agentInfo(ctx, scope, target, p)
-		if err != nil {
-			return p, err
-		}
-		if !starting && a.InteractiveReady {
-			p.BaselineCompletion = a.Completion
-			// This is optional official metadata, not a native generation or
-			// proof of uninterrupted Pi conversation continuity.
-			if a.AgentSession.Valid() {
-				p.AgentSession = a.AgentSession
-			}
-			break
-		}
-		timer := time.NewTimer(250 * time.Millisecond)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return p, ErrUnknown
-		case <-timer.C:
-		}
-	}
-	prompted, err := call("submitting_prompt", "agent.prompt", map[string]any{"session": target.Session, "name": p.Name, "text": task})
-	if err == nil || errors.Is(err, ErrRejected) {
-		err = validatePromptReceipt(prompted, target.Session, p)
-	}
-	if err != nil {
-		if errors.Is(err, ErrRejected) {
-			p.Phase = "prompt_rejected"
-		}
-		return p, err
-	}
-	// The prompt receipt can be a snapshot of the PREVIOUS round. No status
-	// in it is interpreted as this task's completion.
-	p.PromptSubmitted = true
-	p.Phase = "prompt_submitted"
-	return p, save(p)
-}
-
-// Only Herdr's pre-submission validation errors prove that no prompt was
-// delivered. timeout/agent_prompt_failed can follow partial terminal input.
-func promptRejection(r Receipt) error {
-	if r.Error == nil || (r.Execution != "rejected" && r.Execution != "not_started") {
-		return ErrUnknown
-	}
-	var native struct {
-		Code string `json:"code"`
-	}
-	if r.Error.Code != "native_error" || json.Unmarshal(r.Error.Native, &native) != nil {
-		return ErrUnknown
-	}
-	switch native.Code {
-	case "agent_not_found", "agent_not_ready", "agent_blocked", "empty_agent_prompt":
-		return ErrRejected
-	default:
-		return ErrUnknown
-	}
-}
-
-func validatePromptReceipt(r Receipt, session string, p AgentProgress) error {
-	if r.Error != nil {
-		return promptRejection(r)
-	}
-	var envelope struct {
-		ID          string          `json:"id"`
-		Session     string          `json:"session"`
-		NativeError json.RawMessage `json:"nativeError"`
-		Result      *struct {
-			Type  string     `json:"type"`
-			Agent *agentInfo `json:"agent"`
-		} `json:"result"`
-	}
-	if r.Execution != "accepted" || json.Unmarshal(r.Result, &envelope) != nil {
-		return ErrUnknown
-	}
-	if len(envelope.NativeError) != 0 && string(envelope.NativeError) != "null" {
-		var rejected Receipt
-		if json.Unmarshal(envelope.NativeError, &rejected) != nil {
-			return ErrUnknown
-		}
-		return promptRejection(rejected)
-	}
-	if envelope.ID != "cli:agent:prompt" || envelope.Session != session || envelope.Result == nil || envelope.Result.Type != "agent_prompted" || envelope.Result.Agent == nil {
-		return ErrUnknown
-	}
-	a := envelope.Result.Agent
-	if a.Name != p.Name || a.Agent != "pi" || a.WorkspaceID != p.WorkspaceID || a.PaneID != p.PaneID || a.TerminalID != p.TerminalID {
-		return ErrUnknown
-	}
-	return nil
 }
 
 func (s *Service) ObserveAgent(ctx context.Context, scope Scope, p AgentProgress) (AgentObservation, error) {

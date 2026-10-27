@@ -93,14 +93,6 @@ func (s *fixtureStore) ListMounts(ctx context.Context, bot string) ([]dbstore.Bo
 	return out, nil
 }
 
-func (*fixtureStore) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
-	return "bot-a", nil
-}
-
-func (*fixtureStore) CreateAgenvoRuntime(context.Context, string, string, dbstore.JSON) (dbstore.UserRuntimeRecord, error) {
-	return dbstore.UserRuntimeRecord{}, errors.New("registration not part of task execution")
-}
-
 type permissionChecker struct{}
 
 func (permissionChecker) HasBotPermission(_ context.Context, bot, user, _ string) (bool, error) {
@@ -108,35 +100,22 @@ func (permissionChecker) HasBotPermission(_ context.Context, bot, user, _ string
 }
 
 type transportFixture struct {
-	t           *testing.T
-	calls       []string
-	runs        int
-	nonce       string
-	lost        bool
-	agentName   string
-	promptFault string
-	cwd         string
+	t         *testing.T
+	calls     []string
+	runs      int
+	nonce     string
+	lost      bool
+	agentName string
+	cwd       string
 }
 
-func (f *transportFixture) call(_ context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
+func (f *transportFixture) call(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.t.Helper()
-	if owner != "owner" || connection != "11111111-1111-4111-8111-111111111111" || tool != "execute" {
-		f.t.Fatal("wrong transport identity")
+	if scope.BotID != "bot-a" || target.NativeRuntimeID == "" || target.InstanceID != "herdr-a" {
+		f.t.Fatal("wrong native Runtime identity")
 	}
-	code, _ := args["code"].(string)
-	var parts []json.RawMessage
-	if json.Unmarshal([]byte("["+strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");")+"]"), &parts) != nil || len(parts) != 3 {
-		f.t.Fatal("not fixed relay invocation")
-	}
-	var method string
-	var params map[string]any
-	var target map[string]string
-	_ = json.Unmarshal(parts[0], &target)
-	_ = json.Unmarshal(parts[1], &method)
-	_ = json.Unmarshal(parts[2], &params)
-	if target["deviceId"] != "device-a" {
-		f.t.Fatal("cross-device dispatch")
-	}
+
+	params = fixtureParams(params)
 	f.calls = append(f.calls, method)
 	var body any
 	switch method {
@@ -148,7 +127,7 @@ func (f *transportFixture) call(_ context.Context, owner, connection, tool strin
 	case "pane.run":
 		f.runs++
 		if f.lost {
-			return nil, errors.New("synthetic lost response")
+			return agenvo.Receipt{}, errors.New("synthetic lost response")
 		}
 		command, _ := params["command"].(string)
 		encoded := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
@@ -165,78 +144,30 @@ func (f *transportFixture) call(_ context.Context, owner, connection, tool strin
 	case "pane.read":
 		frame, _ := json.Marshal(map[string]any{"output_base64": base64.StdEncoding.EncodeToString([]byte("42\n")), "exit_code": 0, "truncated": false})
 		return envelope(map[string]any{"output": "MEMOH_" + f.nonce + ":" + base64.StdEncoding.EncodeToString(frame) + ":END_" + f.nonce + "\r\n", "session": "synthetic"}), nil
-	case "tab.create":
-		body = map[string]any{"root_pane": map[string]string{"workspace_id": "w-synthetic", "pane_id": "p-agent", "terminal_id": "t-agent"}}
-	case "agent.start":
-		f.agentName = params["name"].(string)
-		return receipt("starting", map[string]any{"session": "synthetic", "name": f.agentName, "query": "agent.get"}), nil
-	case "agent.get":
-		body = map[string]any{"agent": map[string]any{"name": f.agentName, "agent": "pi", "workspace_id": "w-synthetic", "pane_id": "p-agent", "terminal_id": "t-agent", "agent_status": "done", "interactive_ready": true, "completion_seq": 1}}
-	case "agent.prompt":
-		switch f.promptFault {
-		case "rejected":
-			return envelope(map[string]any{"nativeError": map[string]any{"execution": "rejected", "error": map[string]any{"code": "native_error", "native": map[string]string{"code": "agent_not_found"}}}}), nil
-		case "wrong-type":
-			return envelope(map[string]any{"id": "cli:agent:prompt", "session": "synthetic", "result": map[string]string{"type": "ok"}}), nil
-		case "missing":
-			return envelope(map[string]string{"session": "synthetic"}), nil
-		}
-
-		return envelope(map[string]any{"id": "cli:agent:prompt", "session": "synthetic", "result": map[string]any{"type": "agent_prompted", "agent": map[string]any{"name": f.agentName, "agent": "pi", "workspace_id": "w-synthetic", "pane_id": "p-agent", "terminal_id": "t-agent", "agent_status": "done"}}}), nil
-	case "agent.read":
-		return envelope(map[string]any{"session": "synthetic", "output": "unverified Pi output"}), nil
 	default:
 		f.t.Fatalf("unexpected method %s", method)
 	}
 	return envelope(map[string]any{"result": body, "session": "synthetic"}), nil
 }
 
-func envelope(result any) json.RawMessage {
-	return receipt("accepted", result)
+func envelope(result any) agenvo.Receipt { return receipt("accepted", result) }
+func receipt(execution string, result any) agenvo.Receipt {
+	body, _ := json.Marshal(result)
+	return agenvo.Receipt{Execution: execution, RequestID: "synthetic-request", Result: body}
 }
 
-func receipt(execution string, result any) json.RawMessage {
-	body, _ := json.Marshal(map[string]any{"execution": execution, "requestId": "synthetic-request", "result": result})
-	raw, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": string(body)}}})
+func fixtureConfig(target agenvo.Target) []byte {
+	profile := agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent, Producer: target.Producer}
+	raw, _ := json.Marshal(map[string]any{"herdr": profile})
 	return raw
 }
 
-func TestStandardMCPConfiguredHerdrTaskUsesFixedOperationsWithoutRawSearch(t *testing.T) {
-	source, store, f := setup(t)
-	record := store.mounts["pc-a"]
-	var target agenvo.Target
-	_ = json.Unmarshal(record.RuntimeProviderConfig, &target)
-	target.Agent = agenvo.AgentProfile{Provider: "synthetic-magpie", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`}
-	record.RuntimeProviderConfig, _ = json.Marshal(target)
-	store.mounts["pc-a"] = record
-	c := standardClient(t, source, "pc-a", false)
-	r := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "compute 42"}, false))
-	if r.State != "submitted" || r.Phase != "prompt_submitted" || r.ExitCode != nil {
-		t.Fatalf("Agent submission=%+v", r)
+func fixtureTarget(record dbstore.BotRemoteRuntimeBindingRecord) agenvo.Target {
+	target, err := agenvo.DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
+	if err != nil {
+		panic(err)
 	}
-	observed := parseResult(t, invoke(t, c, "computer_task_result", map[string]any{"operation_id": r.ID}, false))
-	if observed.State != "unknown" || observed.Observation == nil || observed.Observation.TaskSuccessVerified || observed.Output != "unverified Pi output" {
-		t.Fatalf("unverified observation=%+v", observed)
-	}
-	again := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": "retry with different intent"}, true))
-	if again.ID != r.ID || again.BlockedByOperation != r.ID {
-		t.Fatal("Agent prompt resubmitted")
-	}
-	starts, prompts := 0, 0
-	for _, method := range f.calls {
-		if method == "agent.start" {
-			starts++
-		}
-		if method == "agent.prompt" {
-			prompts++
-		}
-		if method == "search" || method == "workspace.close" {
-			t.Fatal("unexpected raw discovery/cleanup")
-		}
-	}
-	if starts != 1 || prompts != 1 || f.runs != 0 {
-		t.Fatalf("Agent procedure calls=%v", f.calls)
-	}
+	return target
 }
 
 func setup(t *testing.T) (*Source, *fixtureStore, *transportFixture) {
@@ -244,8 +175,8 @@ func setup(t *testing.T) (*Source, *fixtureStore, *transportFixture) {
 	store := &fixtureStore{records: map[string]dbstore.ComputerOperationRecord{}, mounts: map[string]dbstore.BotRemoteRuntimeBindingRecord{}}
 	for _, name := range []string{"a", "b"} {
 		target := agenvo.Target{ConnectionID: "11111111-1111-4111-8111-111111111111", DeviceID: "device-" + name, InstanceID: "herdr-" + name, Session: "synthetic", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}
-		raw, _ := json.Marshal(target)
-		store.mounts["pc-"+name] = dbstore.BotRemoteRuntimeBindingRecord{ID: "pc-" + name, BotID: "bot-a", RuntimeName: "PC-" + name, RuntimeUserID: "owner", BotOwnerUserID: "owner", RuntimeProvider: "agenvo", RuntimeProviderConfig: raw}
+		raw := fixtureConfig(target)
+		store.mounts["pc-"+name] = dbstore.BotRemoteRuntimeBindingRecord{ID: "pc-" + name, BotID: "bot-a", RuntimeName: "PC-" + name, RuntimeID: "11111111-1111-4111-8111-111111111111", RuntimeUserID: "owner", BotOwnerUserID: "owner", RuntimeProvider: "memoh", RuntimeProviderConfig: raw}
 	}
 	f := &transportFixture{t: t}
 	relay := agenvo.NewService(store, permissionChecker{}, f.call)
@@ -521,54 +452,13 @@ func TestStandardMCPNASAmbiguityDoesNotGuess(t *testing.T) {
 	invoke(t, c, "computer_task_submit", map[string]any{"target_id": "pc-a", "kind": "foreground_bash", "task": "printf 42"}, false)
 }
 
-func TestStandardMCPPromptFailuresHaveDurableHonestReceipts(t *testing.T) {
-	for _, fault := range []string{"rejected", "wrong-type", "missing"} {
-		t.Run(fault, func(t *testing.T) {
-			source, store, f := setup(t)
-			f.promptFault = fault
-			r := store.mounts["pc-a"]
-			var target agenvo.Target
-			_ = json.Unmarshal(r.RuntimeProviderConfig, &target)
-			target.Agent = agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic", ConfigDir: `C:\Synthetic\Pi`}
-			r.RuntimeProviderConfig, _ = json.Marshal(target)
-			store.mounts["pc-a"] = r
-			c := standardClient(t, source, "pc-a", false)
-			args := map[string]any{"kind": "herdr_pi_task", "task": "synthetic"}
-			got := parseResult(t, invoke(t, c, "computer_task_submit", args, true))
-			want := "unknown"
-			if fault == "rejected" {
-				want = "rejected"
-			}
-			var d Details
-			_ = json.Unmarshal(store.records[got.ID].Details, &d)
-			if got.State != want || d.Agent.PromptSubmitted || got.ExitCode != nil {
-				t.Fatalf("false submission: %+v %+v", got, d.Agent)
-			}
-			again := parseResult(t, invoke(t, c, "computer_task_submit", args, false))
-			if again.ID != got.ID {
-				t.Fatal("resubmitted uncertain prompt")
-			}
-			prompts := 0
-			for _, call := range f.calls {
-				if call == "agent.prompt" {
-					prompts++
-				}
-			}
-			if prompts != 1 {
-				t.Fatalf("prompts=%d", prompts)
-			}
-		})
-	}
-}
-
 func TestStandardMCPRegistrationChangeAfterClaimNeverDispatches(t *testing.T) {
 	source, store, f := setup(t)
 	store.onClaim = func() {
 		r := store.mounts["pc-a"]
-		var target agenvo.Target
-		_ = json.Unmarshal(r.RuntimeProviderConfig, &target)
+		target := fixtureTarget(r)
 		target.WorkDir = `D:\Moved`
-		r.RuntimeProviderConfig, _ = json.Marshal(target)
+		r.RuntimeProviderConfig = fixtureConfig(target)
 		store.mounts["pc-a"] = r
 	}
 	c := standardClient(t, source, "pc-a", false)
@@ -583,10 +473,9 @@ func TestStandardMCPRootRelativePathAndForegroundEvidence(t *testing.T) {
 		t.Run(tt.root+tt.input, func(t *testing.T) {
 			source, store, f := setup(t)
 			r := store.mounts["pc-a"]
-			var target agenvo.Target
-			_ = json.Unmarshal(r.RuntimeProviderConfig, &target)
+			target := fixtureTarget(r)
 			target.WorkDir = tt.root
-			r.RuntimeProviderConfig, _ = json.Marshal(target)
+			r.RuntimeProviderConfig = fixtureConfig(target)
 			store.mounts["pc-a"] = r
 			c := standardClient(t, source, "pc-a", false)
 			got := parseResult(t, invoke(t, c, "computer_task_submit", map[string]any{"kind": "foreground_bash", "task": "printf 42", "work_dir": tt.input}, false))
@@ -599,4 +488,11 @@ func TestStandardMCPRootRelativePathAndForegroundEvidence(t *testing.T) {
 			}
 		})
 	}
+}
+
+func fixtureParams(params map[string]any) map[string]any {
+	raw, _ := json.Marshal(params)
+	var decoded map[string]any
+	_ = json.Unmarshal(raw, &decoded)
+	return decoded
 }
