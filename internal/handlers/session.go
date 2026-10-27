@@ -30,6 +30,7 @@ import (
 
 // SessionHandler handles bot session CRUD endpoints.
 type SessionHandler struct {
+	privateChats      privateChatResolver
 	sessionService    *session.Service
 	threadEnricher    threadEnricher
 	acpRuntimes       acpSessionRuntimeService
@@ -147,6 +148,7 @@ func (h *SessionHandler) SetProjectionCache(cache sessionProjectionCache) {
 func (h *SessionHandler) Register(e *echo.Echo) {
 	g := e.Group("/bots/:bot_id/sessions")
 	g.POST("", h.CreateSession)
+	g.POST("/contact", h.ResolvePrivateChat)
 	g.GET("", h.ListSessions)
 	g.GET("/model-preference-seed", h.ModelPreferenceSeed)
 	g.GET("/:session_id", h.GetSession)

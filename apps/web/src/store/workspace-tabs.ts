@@ -1169,7 +1169,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
   // ephemeral slot, so firing while a file/preview tab is open would evict it.
   function ensureDraftChatPanel() {
     const dock = api.value
-    if (!dock || suppressPersist || draftChatQueued) return
+    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats) return
     if (dock.panels.length > 0) return
     if (!(currentBotId.value ?? '').trim()) return
 
@@ -1177,7 +1177,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     void nextTick(() => {
       draftChatQueued = false
       const latestDock = api.value
-      if (!latestDock || suppressPersist || latestDock.panels.length > 0) return
+      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats) return
       if (!(currentBotId.value ?? '').trim()) return
       // Only an EXPLICIT selection may refill as that session. initialize()'s
       // auto-pick leaves a non-explicit sessionId even when we refused to open
@@ -2149,6 +2149,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
   // with the dock once; later session-list refreshes never touch the dock.
   watch(() => chatStore.loadingChats, (loading) => {
     if (loading) return
+    ensureDraftChatPanel()
     alignSelectionWithDock()
     // An empty dock has not drawn its draft yet; ensureDraftChatPanel takes
     // the pick when it does.

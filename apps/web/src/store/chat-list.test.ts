@@ -28,6 +28,7 @@ const api = vi.hoisted(() => ({
   forkSessionFromTurn: vi.fn(),
   fetchSession: vi.fn(),
   fetchSessions: vi.fn(),
+  resolvePrivateChat: vi.fn(),
   fetchBots: vi.fn(),
   fetchMessagesUI: vi.fn(),
   executeQuickAction: vi.fn(),
@@ -312,6 +313,9 @@ beforeEach(() => {
       { id: 'bot-1', status: 'active', name: 'Bot' },
     ])
     api.fetchSessions.mockResolvedValue({ items: [], nextCursor: null })
+    // Existing store cases exercise compatibility with pre-contact servers;
+    // the contact-aware navigation contract has its own directed suite.
+    api.resolvePrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })
     api.fetchSession.mockResolvedValue({
       id: 'session-unknown',
       bot_id: 'bot-1',

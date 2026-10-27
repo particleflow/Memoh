@@ -12375,6 +12375,56 @@ export type PostBotsByBotIdSessionsResponses = {
 
 export type PostBotsByBotIdSessionsResponse = PostBotsByBotIdSessionsResponses[keyof PostBotsByBotIdSessionsResponses];
 
+export type PostBotsByBotIdSessionsContactData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/contact';
+};
+
+export type PostBotsByBotIdSessionsContactErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsContactError = PostBotsByBotIdSessionsContactErrors[keyof PostBotsByBotIdSessionsContactErrors];
+
+export type PostBotsByBotIdSessionsContactResponses = {
+    /**
+     * OK
+     */
+    200: SessionSession;
+};
+
+export type PostBotsByBotIdSessionsContactResponse = PostBotsByBotIdSessionsContactResponses[keyof PostBotsByBotIdSessionsContactResponses];
+
 export type GetBotsByBotIdSessionsEventsData = {
     body?: never;
     path: {

@@ -1,0 +1,55 @@
+# Private Bot conversation integration checkpoint
+
+Base: `dd7409e7157b440a5a62337b61bc4d6fac9cae76` (six remote CI runs passed, attempt 1). The shared single-button/palette delta is the exact final net difference from official-working base `3d5f145c` to source `2422db2011231d5a4e538aa0fd7b573d133cb350` (PR85). The superseded split-button implementation is not the final product tree. Historical source screenshots remain explicitly marked as superseded by that source's README.
+
+This Bot-structure delta is an independent review checkpoint. It must not be included in the binding/single-button bug-fix deployment by implication. The user requested careful structural review and joint acceptance after the fixes; no field test or migration is requested here.
+
+## Impact assessment before deciding rollout
+
+| Area | Existing/native capability and this delta | Review/acceptance still needed |
+| --- | --- | --- |
+| Configuration first | Native channel routes already reuse an active chat; Bot memory/compaction and native background subagents already exist. These require correct existing settings, not a new brain or service. | Read actual memory/model/tool settings separately; none are changed here. No native Web switch was found that alone changes workbench navigation into contacts. |
+| Main UI | An empty Bot entry can resolve one account/Bot Web contact; global activity is removed from the main sidebar, scoped Task/Bot secondary entries remain. | This is not a wholesale contacts-screen redesign. Old user history, folders, manual drafts and existing tabs remain accessible. Do not promise the full desired product experience from this delta alone. |
+| Devices/accounts/channels | Fresh clients use the same server route. Account, Bot and channel keys remain separate; no user-supplied identity is accepted. | Real multi-device/ordinary-role PostgreSQL acceptance is not proved locally. An already restored historical workspace tab remains authoritative rather than being forcibly replaced. |
+| Existing histories | No adoption by title, merging, bulk hiding, deletion or reparenting. Only new specialist handoffs become internal. | Old visible delegated chats stay visible until a separately reviewed compatibility decision. Their ledger identities, not their titles, would be necessary for any future display-only treatment. |
+| Queued/running work | Existing queue items and active runs keep their original session IDs. Contact resolution executes no task and does not move an existing queue. | Results for a pre-existing historical run remain in its original conversation; no result is copied to a new contact. Decide the in-flight-conversation presentation before rollout; this is not solved by retargeting jobs. |
+| Specialist results | Existing scoped delegation and original-source-session continuation are reused unchanged; internal visibility does not erase the target or its deep-link identity. | Real source conversation return, internal-session debug access and attachments need joint acceptance. An accepted delivery is not completion. |
+| Memory/compaction | Existing bounded per-session history, Bot-scoped memory and compaction are unchanged. | This is not a per-person memory-isolation change, automatic cross-Bot memory sharing or an infinite merged context. |
+| Schema/rollback | Existing route/session tables and visibility field; schema177 remains. | No generic migration down. Before new canonical rows exist, reverting this separate commit restores old behavior with no data work. Afterwards leave the additive records intact and assess active runs before application rollback. |
+
+Do not deploy this review tree until its SQL concurrency proof and these compatibility decisions are closed. The confirmed binding/single-button fixes are independent.
+
+## Scope and ownership
+
+- New specialist Bot handoffs set the existing `visibility=internal` on their ordinary target chat. No title filter, history migration, bulk UPDATE or DELETE. An ordinary user-created chat named `Delegated task` keeps `visibility=user`.
+- `POST /bots/{bot_id}/sessions/contact` takes no body. It requires the existing account/session authentication and Bot `chat` permission; chat-route tokens cannot call it. The account is derived from authenticated context, never a supplied user, route or session ID.
+- The existing Channel route domain resolves a Web route keyed by authenticated account and Bot under the current team. It uses the existing unique route index, a transaction-held upsert lock, normal Thread creation and the original active-session pointer. Concurrent clients cannot each commit a different chat. No migration, new table, credential, queue or network service.
+- The Thread service stages its existing validation/creation inside that transaction. Existing session-created notification and start hook run only after a known commit. An uncertain commit returns an error; repeating resolution reconciles the same route and never starts a model/agent run. A lost commit acknowledgement can omit a notification/hook; it is not permission to replay one.
+- Existing chat/Bot/creator/route/type/visibility bindings are rechecked on reuse. A foreign pointer fails closed. A deleted canonical chat may be replaced without changing the old row. A transient read error is not absence.
+- No automatic adoption or merging of old unbound histories: old records cannot reliably identify which private channel created them. Old sessions and their messages, tasks, receipts and explicit deep links remain unchanged. Existing internal session GET/debug access and original-result continuation remain in place.
+- The shared Bot entry calls the resolver when no explicit history, new-chat draft or configured external-runtime choice owns the view. Authentication/storage/unknown outcomes do not switch to another conversation. Only an explicit generic route-not-found/method-not-allowed Problem permits the old-server navigation fallback. Resource-denied 404 does not.
+- The automatic empty-workbench placeholder waits for chat initialization. The rendered application reproduced why this matters: its old automatic draft was otherwise mistaken for a deliberate new conversation and bypassed contact resolution. Explicit user drafts, historical tabs and non-chat workspace tabs retain their native ownership.
+- The project's global activity projection is removed from the primary conversation sidebar. The existing conversation-scoped Task/Bot secondary entries, their name/state/jump behavior, old history and deep links remain. No replacement dashboard, status copy or controls are added.
+
+No change to official Agent runtime/contextview, model execution, memory sharing, compaction, file transmission or old operation recovery. Built-in memory still uses its existing Bot scope; this contact-routing change does not claim a new per-person memory privacy policy or an infinite-context chat.
+
+## Verification and explicit limits
+
+- Eight HTTP scenarios plus the same-title delegation/direct-chat regression passed; directed race output contains ten test/subtest PASS events, no FAIL/SKIP. Account, anonymous, revoked account, chat token, revoked Bot permission, identity/body injection, invalid Bot ID and unavailable resolver are covered.
+- Contact navigation and existing workspace-tab selection: 112 tests passed. Existing full chat-store suite: 148 tests passed. Old store fixtures explicitly model pre-contact servers; the contact suite covers the new route separately.
+- Whole Web types, affected Web ESLint, production build, affected Go package lint, UI contract and official core boundary passed. Swagger and SDK were regenerated by their normal commands; no generated file was edited by hand.
+- The required PostgreSQL concurrency/isolation test is added to the existing scoped-delegation CI step and its no-skip PASS assertion. It covers eight concurrent clients, a fresh coordinator, distinct accounts/Bots/channels, unchanged historical row, wrong-owner pointer rejection, rollback, and unknown-commit reconciliation. **Local execution has not passed**, for the environmental reasons below. A successful compile or no-DSN skip is not PostgreSQL evidence.
+- Production Web preview at loopback port18091 passed with synthetic intercepted API/WebSocket data: automatic contact entry, second independent client subscribing to the same session, explicit old-history selection surviving reload, desktop and390px, no page errors. The first harness incorrectly expected a REST messages read; after tracing the real runtime subscription it checks that actual session ID instead. This is browser wiring evidence, not real Server/PG/phone/device acceptance. No paid model, task submission, answer/recovery or file transfer is executed. [Desktop](contact-desktop.png), [narrow](contact-narrow.png), [request/subscription proof](browser-proof.json).
+- Source PR85's 19 single-button tests and actual narrow browser gesture checks are reused; they are not repeated or claimed as fresh backend acceptance. Source Harmony PR86 `d213ee7842fc76527de712cd5b2d825a5697a613` remains separate. It does not yet contain this contact API/SDK/navigation delta; no HAP is built here.
+
+### Local database environment failure
+
+The original cloud development config points to loopback15432, which refused connections. The existing healthy development pgvector server on loopback15433 could not create the helper's isolated test database: SQLSTATE53100, no space left. No production database was contacted.
+
+The previously task-owned recovery container was stopped and its old `/tmp` bind directory was missing. Its original stopped development volume was retained (approximately193MB). A copy was attempted into that same task recovery location, but local file ownership prevented complete hash/ownership verification. The recovery container briefly attempted startup because the shell continued after the verification error; it failed with a directory permission error and was explicitly stopped. It is not healthy or reused as evidence. No credential was generated, no permission was broadened, no original volume was deleted or changed, and no global cleanup was performed. The copied directory remains for inspection; do not start it without resolving and verifying its existing ownership through the approved environment workflow.
+
+## Version and deployment boundary
+
+Production remains the parent's reported `3d5f` / signed HAP1.0.18. This work has not published images, deployed NAS, built/signed a client or run a real conversation. The new shared client requires the contact-capable server for stable account/Bot resolution; an old server retains its old navigation behavior. Schema remains177. Application rollback needs no down migration; leave the additive route/session records and original files intact. Do not run generic `migrate down`.
+
+Human QA, real PostgreSQL success, combined exact-head CI and field contact/specialist result-return acceptance remain separate requirements. This document is not a claim that any of those passed.

@@ -7,6 +7,7 @@ import {
   getBotsByBotIdSessionsBySessionId,
   postBotsByBotIdAcpRuntimes,
   postBotsByBotIdSessions,
+  postBotsByBotIdSessionsContact,
   postBotsByBotIdSessionsBySessionIdFork,
   postBotsByBotIdSessionsBySessionIdAcpRuntime,
   deleteBotsByBotIdSessionsBySessionId,
@@ -226,6 +227,12 @@ export async function fetchSession(botId: string, sessionId: string): Promise<Se
     path: { bot_id: botId.trim(), session_id: sessionId.trim() },
     throwOnError: true,
   })
+  return data as SessionSummary
+}
+
+export async function resolvePrivateChat(botId: string): Promise<SessionSummary> {
+  const { data } = await postBotsByBotIdSessionsContact({ path: { bot_id: botId }, cache: 'no-store', throwOnError: true })
+  if (!data?.id || data.bot_id !== botId) throw new Error('Private chat identity changed')
   return data as SessionSummary
 }
 

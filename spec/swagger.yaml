@@ -16876,6 +16876,52 @@ paths:
       summary: Explicitly continue one original native batch before prompt submission
       tags:
       - sessions
+  /bots/{bot_id}/sessions/contact:
+    post:
+      description: Reuses a server-owned Web route for this authenticated account
+        and Bot across devices. Atomically creates its chat only when absent. No model
+        call, task dispatch, adoption or mutation of historical sessions. Chat-route
+        tokens and client-supplied identity/route/body are not accepted.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/session.Session'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Resolve this account's persistent private chat with a Bot
+      tags:
+      - sessions
   /bots/{bot_id}/sessions/events:
     get:
       description: |-

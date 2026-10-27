@@ -88,7 +88,6 @@
       class="sidebar-scroll min-h-0 flex-1"
       :scroll-hide-delay="300"
     >
-      <SessionActivity :visible="activityVisible" />
       <FoldersSection />
 
       <Recents :scroll-el="listScrollEl" />
@@ -110,12 +109,10 @@ import SidebarNavButton from './nav-button.vue'
 import FoldersSection from './folders-section.vue'
 import Recents from './recents.vue'
 import SessionSelectionBar from './session-selection-bar.vue'
-import SessionActivity from './session-activity.vue'
 import { createSessionSelection, SessionSelectionKey } from './session-selection'
 import '@/styles/sidebar-scroll.css'
 
 const { t } = useI18n()
-withDefaults(defineProps<{ activityVisible?: boolean }>(), { activityVisible: true })
 
 // The one scrollport for Folders + Recents. Recents needs the scrolling
 // element itself for its load-more sentinel root, so it is passed down rather

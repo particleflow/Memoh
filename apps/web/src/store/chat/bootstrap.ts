@@ -1,5 +1,6 @@
 import { ref, type Ref } from 'vue'
-import { fetchSessions, type SessionSummary } from '@/composables/api/useChat'
+import { fetchSessions, resolvePrivateChat, type SessionSummary } from '@/composables/api/useChat'
+import { apiErrorStatus, isApiErrorCode } from '@/utils/api-error'
 import type { WSAbortReason } from '@/composables/api/useChat.ws'
 import type { ChatViewTarget, ExternalAgentSessionInput } from './types'
 
@@ -144,6 +145,28 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
             && !preserveExplicitEmptyComposer
             && !deps.explicitSessionSelection.value
 
+          let contact: SessionSummary | undefined
+          if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !preferDefaultExternalAgent && !restoredExplicitSession && !deps.draftIntent.value) {
+            const request = deps.currentSelectSessionRequest()
+            try {
+              contact = await resolvePrivateChat(botId)
+            } catch (error) {
+              // Old servers retain their original navigation. Auth, storage and
+              // uncertain outcomes must never fall back to a different chat.
+              const status = apiErrorStatus(error)
+              const unsupported = (status === 404 && isApiErrorCode(error, 'http.not_found'))
+                || (status === 405 && isApiErrorCode(error, 'http.method_not_allowed'))
+              if (!unsupported) throw error
+            }
+            if (generation !== deps.userScopeGeneration()) return
+            if (request !== deps.currentSelectSessionRequest()) return
+            if (deps.draftIntent.value) contact = undefined
+            if ((deps.currentBotId.value ?? '').trim() !== botId) {
+              rerunRequested = true
+              continue
+            }
+          }
+
           if (preservePendingExternalAgentStage) {
             deps.sessionId.value = null
             deps.markHistoryEmpty()
@@ -158,6 +181,11 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
             // relying on a mounted/focused composer's settings watcher.
             await deps.stageDefaultExternalAgentFromSettings(deps.currentSelectSessionRequest())
           } else if (restoredExplicitSession) {
+            deps.draftIntent.value = false
+          } else if (contact) {
+            deps.replaceSessions([contact, ...visibleSessions.filter(session => session.id !== contact.id)])
+            deps.sessionId.value = contact.id
+            deps.explicitSessionSelection.value = false
             deps.draftIntent.value = false
           } else if (!visibleSessions.length) {
             deps.sessionId.value = null

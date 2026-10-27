@@ -94,6 +94,7 @@ func provideMessageHandler(log *slog.Logger, msgService *message.DBService, sess
 func provideSessionHandler(log *slog.Logger, sessionService *sessionpkg.Service, acpPool *acpagent.SessionPool, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, workdirService *workdir.Service, botAgentsService *botagents.Service, agentService *application.Service, pipeline *timeline.Pipeline, runs ledger.Store, queries dbstore.Queries) *handlers.SessionHandler {
 	handler := handlers.NewSessionHandler(log, sessionService, acpPool, botService, accountService)
 	handler.SetThreadEnricher(routeService)
+	handler.SetPrivateChatResolver(route.NewThreadCoordinator(log, routeService, sessionService))
 	handler.SetWorkdirService(workdirService)
 	handler.SetBotAgents(botAgentsService)
 	handler.SetAgentRuntimeService(agentService)
