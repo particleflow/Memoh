@@ -100,6 +100,7 @@ export function reduceBotCreateProgressEvent(
 
 export type CollectBotCreateProgressStreamOptions = {
   initialState?: BotCreateProgressState
+  terminalEvent?: 'ready' | 'complete'
   onState?: (state: BotCreateProgressState) => void
   onEvent?: (event: BotCreateStreamEvent) => void
 }
@@ -119,7 +120,7 @@ export async function collectBotCreateProgressStream(
   try {
     for await (const event of stream) {
       options.onEvent?.(event)
-      if (event.type === 'ready') {
+      if (event.type === (options.terminalEvent ?? 'ready')) {
         ready = true
       }
       update(reduceBotCreateProgressEvent(state, event))
@@ -137,6 +138,13 @@ export async function collectBotCreateProgressStream(
       setupError: message,
       progress: { phase: 'error', error: message },
     })
+  }
+
+  // A clean EOF can still be a truncated SSE response. Only the endpoint's
+  // terminal event proves success; callers can resume by polling the Bot.
+  if (!ready && !state.setupError) {
+    const message = 'Workspace creation stream ended before completion'
+    update({ ...state, setupError: message, progress: { phase: 'error', error: message } })
   }
 
   return state

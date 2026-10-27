@@ -322,7 +322,7 @@ import {
   TooltipTrigger,
 } from '@felinic/ui'
 import { SquarePen, CircleHelp, Check, X, LoaderCircle } from 'lucide-vue-next'
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useDebounceFn } from '@vueuse/core'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -505,6 +505,11 @@ const canSubmit = computed(() => {
 })
 
 const store = useBotCreateProgressStore()
+onMounted(() => {
+  if (store.restorePending(false) || store.status === 'creating') {
+    void router.replace({ name: 'bot-create-progress' })
+  }
+})
 const submitLoading = ref(false)
 const isCreateFlowBlocked = computed(() => submitLoading.value)
 

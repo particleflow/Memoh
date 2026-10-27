@@ -4,6 +4,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import type { BotCreateStreamEvent } from '@/composables/api/useBotCreateStream'
 import { renderI18nMessage } from '@/utils/api-error'
 import { readCreatedBotSession } from '@/pages/bots/created-bot-session'
+import { notifyAuthSessionCleared } from '@/lib/auth-session'
 
 const postBotsStream = vi.fn()
 const postContainerStream = vi.fn()
@@ -18,6 +19,9 @@ const getAuthorization = vi.fn()
 const getBot = vi.fn()
 const getBotChecks = vi.fn()
 const grantAccess = vi.fn()
+const identity = vi.hoisted(() => ({ id: 'user-1', server: 'https://example.test/api' }))
+vi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: identity }) }))
+vi.mock('@/lib/api-client', () => ({ sdkApiBaseUrl: () => identity.server }))
 vi.mock('./install-created-agent', () => ({ installCreatedAgent: (...args: unknown[]) => installAgent(...args) }))
 
 vi.mock('@/composables/api/useBotCreateStream', async (importActual) => {
@@ -63,6 +67,8 @@ function brokenStreamOf(events: BotCreateStreamEvent[], error: unknown) {
 
 describe('useBotCreateProgressStore', () => {
   beforeEach(() => {
+    identity.id = 'user-1'
+    identity.server = 'https://example.test/api'
     setActivePinia(createPinia())
     sessionStorage.clear()
     installAgent.mockReset().mockResolvedValue(undefined)
@@ -113,6 +119,36 @@ describe('useBotCreateProgressStore', () => {
     expect(store.bot).toEqual(bot)
     expect(store.lines.map(l => l.kind)).toEqual(['command', 'bot-created', 'pulling', 'creating', 'ready'])
     expect(store.lines.at(-1)).toMatchObject({ kind: 'ready', status: 'done' })
+  })
+
+  it('checks the same Bot after a clean stream ending before ready', async () => {
+    const bot = { id: 'bot-1', name: 'ada' }
+    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'creating' }]))
+    getBot.mockResolvedValue({ data: { ...bot, status: 'failed' } })
+
+    const store = useBotCreateProgressStore()
+    await store.start({ name: 'ada', display_name: 'Ada' })
+
+    expect(getBot).toHaveBeenCalledWith(expect.objectContaining({ path: { id: 'bot-1' } }))
+    expect(store.bot?.id).toBe('bot-1')
+    expect(store.status).toBe('workspace-error')
+    expect(store.lines.some(line => line.kind === 'ready')).toBe(false)
+  })
+
+  it('checks the same Bot when a workspace retry stream ends before completion', async () => {
+    const bot = { id: 'bot-1', name: 'ada' }
+    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'error', code: 'workspace.unreachable', message: 'failed' }]))
+    postContainerStream.mockResolvedValue(streamOf([{ type: 'creating' }]))
+    getBot.mockResolvedValue({ data: { ...bot, status: 'failed' } })
+
+    const store = useBotCreateProgressStore()
+    await store.start({ name: 'ada', display_name: 'Ada' })
+    await store.retry()
+
+    expect(postContainerStream).toHaveBeenCalledWith(expect.objectContaining({ path: { bot_id: 'bot-1' } }))
+    expect(getBot).toHaveBeenCalled()
+    expect(store.status).toBe('workspace-error')
+    expect(store.bot?.id).toBe('bot-1')
   })
 
   it('treats a hard failure with no bot as an error status', async () => {
@@ -253,7 +289,7 @@ describe('useBotCreateProgressStore', () => {
     expect(store.bot).toEqual(bot)
   })
 
-  it('gives every create from the form its own Idempotency-Key', async () => {
+  it('keeps the Idempotency-Key after returning from an uncertain create', async () => {
     postBotsStream.mockImplementation(async () => brokenStreamOf([], new Error('Failed to fetch')))
 
     const store = useBotCreateProgressStore()
@@ -262,7 +298,96 @@ describe('useBotCreateProgressStore', () => {
     await store.start({ name: 'ada', display_name: 'Ada' })
 
     const [first, second] = postBotsStream.mock.calls.map(([options]) => options.headers['Idempotency-Key'])
-    expect(second).not.toBe(first)
+    expect(second).toBe(first)
+  })
+
+  it('replays an uncertain create after refresh with its original request and key', async () => {
+    postBotsStream.mockResolvedValueOnce(brokenStreamOf([], new Error('connection lost')))
+      .mockResolvedValueOnce(streamOf([{ type: 'bot_created', bot: { id: 'bot-1' } }, { type: 'ready', bot: { id: 'bot-1' } }]))
+    const firstStore = useBotCreateProgressStore()
+    await firstStore.start({ name: 'ada', display_name: 'Ada' })
+    const first = postBotsStream.mock.calls[0]![0]
+    setActivePinia(createPinia())
+    const reloaded = useBotCreateProgressStore()
+    expect(reloaded.restorePending()).toBe(true)
+    await vi.waitFor(() => expect(reloaded.status).toBe('ready'))
+    expect(postBotsStream.mock.calls[1]![0]).toMatchObject({ body: first.body, headers: first.headers })
+    expect(reloaded.bot?.id).toBe('bot-1')
+  })
+
+  it('does not restore an uncertain create for a different account or server', async () => {
+    postBotsStream.mockResolvedValue(brokenStreamOf([], new Error('connection lost')))
+    await useBotCreateProgressStore().start({ name: 'ada', display_name: 'Ada' })
+    identity.id = 'user-2'
+    setActivePinia(createPinia())
+    expect(useBotCreateProgressStore().restorePending()).toBe(false)
+    identity.id = 'user-1'
+    identity.server = 'https://other.test/api'
+    setActivePinia(createPinia())
+    expect(useBotCreateProgressStore().restorePending()).toBe(false)
+    expect(postBotsStream).toHaveBeenCalledTimes(1)
+  })
+
+  it('retains a server-scoped request when another server starts its own create', async () => {
+    postBotsStream.mockResolvedValue(brokenStreamOf([], new Error('connection lost')))
+    await useBotCreateProgressStore().start({ name: 'ada', display_name: 'Ada' })
+    const originalKey = postBotsStream.mock.calls[0]![0].headers['Idempotency-Key']
+    identity.server = 'https://other.test/api'
+    setActivePinia(createPinia())
+    await useBotCreateProgressStore().start({ name: 'other', display_name: 'Other' })
+    identity.server = 'https://example.test/api'
+    setActivePinia(createPinia())
+    expect(useBotCreateProgressStore().restorePending()).toBe(true)
+    await vi.waitFor(() => expect(postBotsStream).toHaveBeenCalledTimes(3))
+    expect(postBotsStream.mock.calls[2]![0].headers['Idempotency-Key']).toBe(originalKey)
+    expect(postBotsStream.mock.calls[2]![0].body.name).toBe('ada')
+  })
+
+  it('clears a pending request only after its Bot is known and the user leaves it', async () => {
+    const bot = { id: 'bot-1', name: 'ada' }
+    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'error', code: 'workspace.unreachable', message: 'failed' }]))
+    const store = useBotCreateProgressStore()
+    await store.start({ name: 'ada', display_name: 'Ada' })
+    expect(sessionStorage.getItem(`memoh:new-bot:pending:${encodeURIComponent(store.createScope())}`)).not.toBeNull()
+    store.finishResolved()
+    expect(sessionStorage.getItem(`memoh:new-bot:pending:${encodeURIComponent(store.createScope())}`)).toBeNull()
+    store.reset()
+    expect(store.restorePending()).toBe(false)
+  })
+
+  it('sends only one request when the submit action is repeated while pending', async () => {
+    let resolveStream!: (value: ReturnType<typeof streamOf>) => void
+    postBotsStream.mockReturnValue(new Promise(resolve => { resolveStream = resolve }))
+    const store = useBotCreateProgressStore()
+    const first = store.start({ name: 'ada', display_name: 'Ada' })
+    await store.start({ name: 'ada', display_name: 'Ada' })
+    expect(postBotsStream).toHaveBeenCalledTimes(1)
+    resolveStream(streamOf([{ type: 'bot_created', bot: { id: 'bot-1' } }, { type: 'ready', bot: { id: 'bot-1' } }]))
+    await first
+  })
+
+  it('does not send an unrecoverable create when session storage is blocked', async () => {
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => { throw new Error('blocked') })
+    const store = useBotCreateProgressStore()
+    await store.start({ name: 'ada', display_name: 'Ada' })
+    expect(postBotsStream).not.toHaveBeenCalled()
+    expect(store.status).toBe('error')
+    setItem.mockRestore()
+  })
+
+  it('ignores the old response after an account switch', async () => {
+    let resolveStream!: (value: ReturnType<typeof streamOf>) => void
+    postBotsStream.mockReturnValue(new Promise(resolve => { resolveStream = resolve }))
+    const store = useBotCreateProgressStore()
+    const first = store.start({ name: 'ada', display_name: 'Ada' })
+    notifyAuthSessionCleared('login')
+    identity.id = 'user-2'
+    resolveStream(streamOf([{ type: 'bot_created', bot: { id: 'bot-1' } }, { type: 'ready', bot: { id: 'bot-1' } }]))
+    await first
+    expect(store.status).toBe('idle')
+    expect(store.bot).toBeNull()
+    expect(putBotsByBotIdSettings).not.toHaveBeenCalled()
+    expect(Array.from({ length: sessionStorage.length }, (_, i) => sessionStorage.key(i)).some(key => key?.startsWith('memoh:new-bot:pending:'))).toBe(false)
   })
 
   it('keeps the stable code when bot creation returns an HTTP problem', async () => {
