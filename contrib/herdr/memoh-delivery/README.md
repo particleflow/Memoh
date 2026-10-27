@@ -22,7 +22,7 @@ complete endpoint installer or require the user to assemble separate services.
 | --- | --- | --- |
 | Dependencies | The prebuilt transfer executable needs no Go/Python runtime. The plugin declares Herdr >= 0.9.5; action paths are relative to its package. Fixture acceptance uses PowerShell. | Memoh Runtime/Herdr configuration, Pi, Node and the Git Bash tools used by the existing execution envelope are external to this bundle. It neither installs nor inventories them. |
 | Configuration and data | Herdr supplies config/state locations. One `HostConfig` reads `transfer.json`; the separate private credential is read on requests. Queue/publications use the supplied state root; source files keep their existing owner. | No endpoint-wide setup currently provisions these locations and the registered task `WorkDir` together. `source_root` is a separately supplied value checked against the task root hash, not an automatically shared registration setting. |
-| Relative paths | Plugin executable paths are package-relative; source references are logical filenames. Config/state/source roots must be clean absolute private paths, never CWD-relative or silently inferred. | No endpoint root relocation tool exists. The queue binds the configuration digest and refuses changes pending drain/migration; this is detection, not automatic relocation. |
+| Relative paths | Plugin executable paths are package-relative; source references are logical filenames. All roots must be clean absolute paths. Config/state remain private local NTFS; the task source can use an already authorized native SMB UNC root. See [task source boundaries](../../../docs/delivery-task-source.md). | No endpoint root relocation tool exists. The queue binds the configuration digest and refuses changes pending drain/migration; this is detection, not automatic relocation. |
 | Startup checks | `verify-storage` checks/opens native queue storage. Task launch checks Pi, Node and required Bash utilities; the producer hook checks Herdr when collecting. | There is no combined startup health check for all dependencies, plugin installation, device authorization and real HTTPS trust. `probe` explicitly reports `device_configuration: required`; it does not prove connectivity. |
 | Compatibility | The package records its exact source SHA and hashes. Config, locator and queue versions fail closed; Server requires the complete 171/172 schema and device verifier. | The static plugin version is not a negotiated Server/host compatibility matrix. There is no coordinated version selection or automatic upgrade migration. |
 | Update/rollback/uninstall | Queue evidence, retained receipts and NAS associations survive process restart. Only durably committed queue payloads are automatically released. | No updater, atomic package switch, rollback coordinator or uninstall ownership manifest is supplied. Replacement must preserve config/state and unresolved evidence; uninstall must never imply deleting producer files or NAS originals. |
@@ -97,8 +97,9 @@ completion receipt.
    bundle, argv, model context or terminal output. Rotation replaces that same
    private credential through the approved administrative process. Requests read
    it afresh; server revocation is checked on every request and after scans.
-5. For uploads only, configure `source_root` to the producer's approved private
-   NTFS export directory. It must not overlap config or queue state. Producers
+5. For uploads only, configure `source_root` to the producer's approved task
+   directory: local NTFS or the existing authorized native SMB UNC location.
+   It must not overlap config or queue state. Producers
    close output writers and supply one logical filename (`source_ref`, letters,
    digits, underscore or hyphen), declared hash/size/MIME and existing task
    selectors. Downloads publish under the existing queue's retained native
@@ -191,7 +192,7 @@ fence remains; never guess a new receipt after uncertain creation.
 The optional task declaration `artifact: {source_ref, mime}`, or `artifacts` with
 1–16 distinct entries in the existing declaration (never both), is available for
 `herdr_pi_task` / `pi-json-v1` at `work_dir: "."`. The registered task root must
-match the existing private `source_root`; a mismatch fails explicitly. Write and
+match the existing authorized `source_root`; a mismatch fails explicitly. Write and
 close the declared files before Pi exits. The envelope supplies non-secret
 `MEMOH_DELIVERY_CONTEXT_FILE`, closes a metadata manifest, and invokes the fixed
 `collect-result` action. This does not change Agent code or its prompt.

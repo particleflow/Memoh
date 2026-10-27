@@ -9,7 +9,6 @@ import (
 	"errors"
 	"io"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -29,28 +28,15 @@ func PublishProducerFeedback(ctx context.Context, getenv func(string) string, re
 		return ErrProducerFeedback
 	}
 	defer func() { _ = cfg.Close() }()
-	relative, ok := deliverymeta.AttemptDirectory(job.Task.Attempt)
-	if !ok || cfg.sourcePath == "" {
+	if cfg.sourcePath == "" || job.HostBinding != cfg.Binding {
 		return ErrProducerFeedback
 	}
-	root, guard, err := privateHostRoot(filepath.Join(cfg.sourcePath, filepath.FromSlash(relative)))
+	plan, root, contextFile, closePlan, err := cfg.sourcePlan(job.Task.Attempt)
 	if err != nil {
 		return ErrProducerFeedback
 	}
-	defer func() { closeQueueGuard(guard); _ = root.Close() }()
-	f, err := openPrivateFile(root, deliverymeta.ProducerContextName, os.O_RDONLY, 0)
-	if err != nil {
-		return ErrProducerFeedback
-	}
-	raw, err := io.ReadAll(io.LimitReader(f, 16385))
-	_ = f.Close()
-	if err != nil || len(raw) > 16384 {
-		return ErrProducerFeedback
-	}
-	var plan deliverymeta.Plan
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.DisallowUnknownFields()
-	if dec.Decode(&plan) != nil || dec.Decode(new(any)) != io.EOF || !plan.Valid() || !feedbackTaskMatches(plan.Task, job) || plan.Task.RootHash != deliverymeta.RootHash(cfg.sourcePath) {
+	defer closePlan()
+	if !feedbackTaskMatches(plan.Task, job) {
 		return ErrProducerFeedback
 	}
 	boundID := false
@@ -74,13 +60,22 @@ func PublishProducerFeedback(ctx context.Context, getenv func(string) string, re
 	if err != nil {
 		return err
 	}
-	raw, err = json.Marshal(report)
+	raw, err := json.Marshal(report)
 	if err != nil || len(raw) >= deliverymeta.FeedbackMaxBytes || !report.ValidFor(plan) {
 		return ErrProducerFeedback
 	}
 	// Concurrent publishers share the existing admission lock. Readers reject a
 	// partial JSON document after process death; the authoritative queue is intact.
-	f, err = openPrivateFile(root, deliverymeta.ProducerFeedbackName, os.O_CREATE|os.O_RDWR, 0o600)
+	// The original attempt context is held while projecting. A replaced context
+	// must not redirect an advisory write, including on Unix test hosts.
+	current, statErr := root.Lstat(deliverymeta.ProducerContextName)
+	opened, openedErr := contextFile.Stat()
+	contextRaw, readErr := sourceBytes(contextFile, 16384)
+	var currentPlan deliverymeta.Plan
+	if statErr != nil || openedErr != nil || !os.SameFile(current, opened) || readErr != nil || json.Unmarshal(contextRaw, &currentPlan) != nil || deliverymeta.PlanHash(currentPlan) != deliverymeta.PlanHash(plan) {
+		return ErrProducerFeedback
+	}
+	f, err := openSourceFile(root, deliverymeta.ProducerFeedbackName, os.O_CREATE|os.O_RDWR, false)
 	if err != nil {
 		return ErrProducerFeedback
 	}
@@ -88,7 +83,7 @@ func PublishProducerFeedback(ctx context.Context, getenv func(string) string, re
 	if f.Truncate(0) != nil {
 		return ErrProducerFeedback
 	}
-	if n, err := f.Write(raw); err != nil || n != len(raw) || f.Sync() != nil || syncQueueDir(root) != nil {
+	if n, err := f.Write(raw); err != nil || n != len(raw) || f.Sync() != nil || syncSourceDir(root) != nil {
 		return ErrProducerFeedback
 	}
 	return nil

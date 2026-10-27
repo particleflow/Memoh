@@ -8,8 +8,11 @@ and must match the original plan's root digest. No production directory moves or
 ACL repair are performed.
 
 The command reserves five seconds of its existing two-minute limit for this
-projection. Private directory/file validation and the queue admission lock are
-reused. An unfinished admission retains its original identity for reporting;
+projection. The queue admission lock and private queue validation are reused;
+source handles are confined to the existing authorized attempt, its original
+producer context and fixed feedback file. The job must retain the exact config
+binding. Source ACLs are not rewritten. See [task source boundaries](delivery-task-source.md).
+An unfinished admission retains its original identity for reporting;
 it does not become an admitted job. Reports contain at most 16 ordered delivery
 IDs, allowlisted status/reason/retryability, retry time and opaque change digests,
 plus the original non-secret task binding. They cannot contain a successful

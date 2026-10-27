@@ -45,15 +45,19 @@ transport diagnostics enter argv, terminal receipts or model messages.
 
 The official CLI invocation has no arbitrary stdin forwarding. The plugin's
 fixed `collect-result` command opens the closed manifest through the configured
-private source root and passes its metadata reader to the same bounded decoder
-as `transferqueue -action enqueue-result` on stdin. Source bytes are read only
-by the existing guarded snapshot admission. The collector consumes a manifest
-only after durable admission; duplicate manifests recover the original sealed
-job. Source changes after admission cannot replace that snapshot. If the source
+authorized task source root and passes its metadata reader to the same bounded decoder
+as `transferqueue -action enqueue-result` on stdin. The manifest must match the
+original attempt context and its declared file. New uploads use the existing
+metadata-first registration and guarded source indexing, without copying an
+artifact into the local queue. The collector consumes only that exact manifest
+after durable registration (or legacy admission); duplicates recover the original
+job. Source changes cannot replace its recorded identity/hash. Legacy sealed
+snapshots retain their recovery behavior. If the source
 root is later unavailable, collect still attempts bounded advancement of the
 already sealed queue. It reports `source_collection: unavailable` with nonzero
 exit even when a queued delivery advances; no queued work does not turn a missing
-source into an idle or successful collection.
+source into an idle or successful collection. See [task source boundaries](delivery-task-source.md)
+for the existing manifest/feedback writes and the separate private queue checks.
 
 Each collect handles at most one manifest and at most 64 existing queue steps
 within two minutes. `advance-results` selects one due job with persisted backoff.

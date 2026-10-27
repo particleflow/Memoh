@@ -164,8 +164,8 @@ func (h *HostConfig) Authorization(ctx context.Context) (string, error) {
 }
 
 // OpenSource accepts one logical filename, not an arbitrary path. The configured
-// private source root is resolved once and held; links and hardlinks are rejected
-// by the existing native private-file/immutable snapshot guards.
+// authorized task source root is resolved once and held. It is not queue storage;
+// links/hardlinks and source identity changes still fail the source guards.
 func (h *HostConfig) OpenSource(ref string) (*os.File, error) {
 	if h.sourcePath == "" || !validID(ref) {
 		return nil, ErrBinding
@@ -173,7 +173,7 @@ func (h *HostConfig) OpenSource(ref string) (*os.File, error) {
 	if err := h.openSources(); err != nil {
 		return nil, err
 	}
-	return openPrivateFile(h.sources, ref, os.O_RDONLY, 0)
+	return openSourceFile(h.sources, ref, os.O_RDONLY, false)
 }
 
 func (h *HostConfig) openSources() error {
@@ -182,7 +182,7 @@ func (h *HostConfig) openSources() error {
 	}
 	if h.sources == nil {
 		var err error
-		h.sources, h.sourceGuard, err = privateHostRoot(h.sourcePath)
+		h.sources, h.sourceGuard, err = openTaskSourceRoot(h.sourcePath)
 		if err != nil {
 			return err
 		}

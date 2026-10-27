@@ -64,8 +64,9 @@ immutable queue snapshots, finite actions and delivery IDs remain unchanged.
    response requires a status read and explicit current-ID rotation, not blind
    re-enrollment. Do not place the owner account JWT on the PC.
 5. Install the fixed bundle through existing Herdr facilities. Its supplied
-   config/state locations and the existing approved private `source_root` must
-   match the registered execution root. Keep the credential in the separate
+   config/state locations remain private local NTFS. The existing approved
+   `source_root` must match the registered execution root; an authorized native
+   SMB UNC task root is separate from queue storage. Keep the credential in the separate
    private `device.credential` file, never argv/logs/model context. Use normal
    HTTPS hostname/certificate validation and the already approved channel; the
    code does not repair ACLs, alter trust, open ports or create a daemon.
