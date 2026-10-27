@@ -142,6 +142,7 @@ func commonOptions() fx.Option {
 		),
 		fx.Invoke(
 			startServer,
+			startCatalogSync,
 		),
 		fx.WithLogger(func(logger *slog.Logger) fxevent.Logger {
 			return &fxevent.SlogLogger{Logger: logger.With(slog.String("component", "fx"))}
