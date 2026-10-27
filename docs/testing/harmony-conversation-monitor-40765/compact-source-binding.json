@@ -1,0 +1,8 @@
+{
+  "threeRedundantFullSharedCopiesRemoved": true,
+  "replacement": "minimal fixed shared hunks with full base/result SHA256 checks",
+  "generatedWebSDKUISourceFiles": 1389,
+  "changedGeneratedPaths": [],
+  "reuse221TestsTypesBuildAndScreenshots": true,
+  "HAPBuilt": false
+}

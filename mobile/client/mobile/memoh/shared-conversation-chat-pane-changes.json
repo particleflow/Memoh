@@ -1,0 +1,32 @@
+[
+  [
+    "import { ref, reactive, computed, onBeforeUnmount, useTemplateRef, watch, onWatcherCleanup, nextTick, onActivated, onDeactivated } from 'vue'",
+    "import { ref, shallowRef, reactive, computed, onBeforeUnmount, useTemplateRef, watch, onWatcherCleanup, nextTick, onActivated, onDeactivated } from 'vue'",
+    1
+  ],
+  [
+    "import ForkSourceDivider from './fork-source-divider.vue'",
+    "import { runtimeFailureAlreadyVisible } from './composer-error'\nimport ForkSourceDivider from './fork-source-divider.vue'",
+    1
+  ],
+  [
+    "const composerError = ref('')\n",
+    "const composerErrorText = ref('')\nconst composerFailure = shallowRef<SendMessageResult>()\nconst composerError = computed({\n  get: () => composerErrorText.value,\n  set: (value: string) => { composerErrorText.value = value; composerFailure.value = undefined },\n})\nfunction setComposerFailure(failure: Pick<SendMessageResult, 'error' | 'errorCode' | 'errorTurnId' | 'errorRunId'>) {\n  composerError.value = failure.error || ''\n  composerFailure.value = { ok: false, ...failure }\n}\n",
+    1
+  ],
+  [
+    ": runtimeModeUnavailableReason.value || composerError.value)",
+    ": runtimeModeUnavailableReason.value || (runtimeFailureAlreadyVisible(composerFailure.value, messages.value) ? '' : composerError.value))",
+    1
+  ],
+  [
+    "composerError.value = failure.error ?? t('chat.sendFailed')",
+    "setComposerFailure({ ...failure, error: failure.error ?? t('chat.sendFailed') })",
+    1
+  ],
+  [
+    "composerError.value = result.error\n",
+    "setComposerFailure(result)\n",
+    2
+  ]
+]

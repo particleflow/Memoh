@@ -1,0 +1,54 @@
+{
+  "sharedCommit": "40765b9e0979d561c49e58d2f384799e6c589e27",
+  "viewport": [
+    390,
+    844
+  ],
+  "rows": [
+    {
+      "name": "红玉",
+      "state": "执行状态未知"
+    },
+    {
+      "name": "审阅 Agent",
+      "state": "执行中"
+    },
+    {
+      "name": "深层 Agent",
+      "state": "执行状态未知"
+    },
+    {
+      "name": "图像专家",
+      "state": "等待决定"
+    },
+    {
+      "name": "专家子 Agent",
+      "state": "正在取消"
+    }
+  ],
+  "relatedBots": [
+    "红玉",
+    "图像专家"
+  ],
+  "globalSidebarOpened": false,
+  "globalActivityRequests": 0,
+  "threeLevelRelations": true,
+  "unrelatedBotExcluded": true,
+  "childOriginalSessionNavigation": true,
+  "expertOriginalBotSessionNavigation": true,
+  "existingBackClosesDialog": true,
+  "visibleRowFields": [
+    "name",
+    "state"
+  ],
+  "detailsTimeLogsRawIDsRendered": false,
+  "recoveryButtonAdded": false,
+  "wholeTurnRetryCalled": false,
+  "acceptedAnswerResubmitted": false,
+  "loginRetained": true,
+  "businessWrites": 0,
+  "pageErrors": [],
+  "API": "synthetic exact scoped read-only contract; not production",
+  "actualArkWebOrPhone": false,
+  "HAPBuilt": false
+}

@@ -120,6 +120,8 @@ export function imageTimingLoaded(event: Event): void {
 }
 
 // The native controller calls only these fixed operations; no network/console/debug entry.
-Object.defineProperty(window, '__garnetImageTiming', { value: Object.freeze({ arm, take, clear }), configurable: false })
-onAuthSessionCleared(clear)
-window.addEventListener('pagehide', clear)
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, '__garnetImageTiming', { value: Object.freeze({ arm, take, clear }), configurable: false })
+  onAuthSessionCleared(clear)
+  window.addEventListener('pagehide', clear)
+}

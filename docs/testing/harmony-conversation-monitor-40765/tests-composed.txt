@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout
+> vitest --run --testTimeout=15000 apps/web/src/components/sidebar/session-activity-trigger.test.ts apps/web/src/pages/home/composables/useConversationRelations.test.ts apps/web/src/pages/home/components/composer-error.test.ts apps/web/src/store/chat-list.test.ts apps/web/src/store/chat/runtime-integration.test.ts apps/web/src/pages/home/components/chat-pane-send.test.ts apps/web/src/lib/harmony-image-timing.test.ts apps/web/src/lib/harmony-image-timing-node.test.ts apps/web/src/lib/harmony-attachment-preparation.test.ts apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout
+
+
+ Test Files  10 passed (10)
+      Tests  221 passed (221)
+   Start at  07:48:45
+   Duration  35.41s (transform 63.71s, setup 0ms, import 90.72s, tests 3.38s, environment 6.54s)

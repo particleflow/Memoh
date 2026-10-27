@@ -1,0 +1,35 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout
+> vitest --run --testTimeout=15000 apps/web/src/components/sidebar/session-activity-trigger.test.ts apps/web/src/pages/home/composables/useConversationRelations.test.ts apps/web/src/pages/home/components/composer-error.test.ts apps/web/src/store/chat-list.test.ts apps/web/src/store/chat/runtime-integration.test.ts apps/web/src/pages/home/components/chat-pane-send.test.ts apps/web/src/lib/harmony-image-timing.test.ts apps/web/src/lib/harmony-image-timing-node.test.ts apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout
+
+ ❯ |web| src/store/chat-list.test.ts (148 tests | 1 failed) 783ms
+     × deletes a deferred draft session when requested skill preflight fails after session_created 17ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/chat-list.test.ts > chat-list store > deletes a deferred draft session when requested skill preflight fails after session_created
+AssertionError: expected "vi.fn()" to be called with arguments: [ 'bot-1', 'created-session' ]
+
+Number of calls: 0
+
+ ❯ src/store/chat-list.test.ts:4103:33
+    4101|         restoreRequestedSkills: [requestedSkill],
+    4102|       })
+    4103|       expect(api.deleteSession).toHaveBeenCalledWith('bot-1', 'created…
+       |                                 ^
+    4104|       expect(store.deletedSession).toEqual({
+    4105|         id: 'created-session',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 8 passed (9)
+      Tests  1 failed | 217 passed (218)
+   Start at  07:30:35
+   Duration  19.53s (transform 34.85s, setup 0ms, import 49.82s, tests 2.64s, environment 2.94s)
+
+ ELIFECYCLE  Test failed. See above for more details.

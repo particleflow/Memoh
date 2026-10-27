@@ -58,6 +58,21 @@ export async function verifyAttachmentReferences(botId: string, attachments: Cha
   signal.throwIfAborted()
 }
 
+// Existing phone send gate, kept with its byte/reference owner rather than growing the shared store.
+export async function prepareAttachmentsForMessage(botId: string, attachments: ChatAttachment[] | undefined,
+  prepare: ((signal: AbortSignal) => Promise<ChatAttachment[] | undefined>) | undefined,
+  signal: AbortSignal): Promise<ChatAttachment[] | undefined> {
+  try {
+    if (prepare) attachments = await prepare(signal)
+    else await verifyAttachmentReferences(botId, attachments ?? [], signal)
+    signal.throwIfAborted()
+    return attachments
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') throw new Error('附件传输已取消', { cause: error })
+    throw error
+  }
+}
+
 // Only the current wire contract goes to the model. Local files, progress and
 // native handles remain UI state and cannot be serialized into the WS payload.
 export function attachmentForWire(attachment: ChatAttachment): ChatAttachment {

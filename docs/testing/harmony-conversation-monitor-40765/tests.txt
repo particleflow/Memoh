@@ -1,0 +1,81 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout
+> vitest --run --testTimeout=15000 apps/web/src/components/sidebar/session-activity-trigger.test.ts apps/web/src/pages/home/composables/useConversationRelations.test.ts apps/web/src/pages/home/components/composer-error.test.ts apps/web/src/store/chat-list.test.ts apps/web/src/store/chat/runtime-integration.test.ts apps/web/src/pages/home/components/chat-pane-context.test.ts apps/web/src/lib/harmony-image-timing.test.ts apps/web/src/pages/home/components/session-task-results.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout
+
+ ❯ |web| src/store/chat-list.test.ts (0 test)
+stderr | src/store/chat/runtime-integration.test.ts
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:runtime-state" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:acp-selection" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:created-bot-id" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:provider-added-count" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/evidence/conversation-monitor-20261027/context/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+
+ ❯ |web| src/store/chat/runtime-integration.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/chat-list.test.ts [ apps/web/src/store/chat-list.test.ts ]
+ FAIL  |web| src/store/chat/runtime-integration.test.ts [ apps/web/src/store/chat/runtime-integration.test.ts ]
+ReferenceError: window is not defined
+ ❯ src/lib/harmony-image-timing.ts:123:23
+    121|
+    122| // The native controller calls only these fixed operations; no network…
+    123| Object.defineProperty(window, '__garnetImageTiming', { value: Object.f…
+       |                       ^
+    124| onAuthSessionCleared(clear)
+    125| window.addEventListener('pagehide', clear)
+ ❯ src/lib/harmony-files.ts:12:1
+ ❯ src/store/chat/send.ts:1:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+
+ Test Files  2 failed | 5 passed (7)
+      Tests  43 passed (43)
+   Start at  07:28:14
+   Duration  23.53s (transform 41.66s, setup 0ms, import 33.78s, tests 2.27s, environment 4.73s)
+
+ ELIFECYCLE  Test failed. See above for more details.

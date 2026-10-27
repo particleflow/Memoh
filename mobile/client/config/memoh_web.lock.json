@@ -162,9 +162,7 @@
       "apps/web/src/components/sidebar/session-activity.test.ts": "11f9d45caef012a54052d192a2c2e40ee24ae928111475cc03b13f967bb20d7f",
       "apps/web/src/pages/home/composables/useSessionActivity.ts": "0335d40238f77f48d7ada7b8041b30a2f252eb12c426b51d7d8c18d49ad0e51d",
       "apps/web/src/pages/home/composables/useBotActivity.ts": "4be9eaa8edfea6f737f85b55828a163ec40af1c3a0723eca3c14be7550496039",
-      "apps/web/src/pages/home/composables/useBotActivity.test.ts": "2b6a660ae19628a0360bd50d407b4f72d4899178b62698999e16e485aeb4d017",
-      "apps/web/src/components/sidebar/session-activity-trigger.vue": "4e0e772a471c69d6ea2cd46e6e0bc225c5d7cdac6a1fba1d63ea40b5b65a88d5",
-      "apps/web/src/components/sidebar/session-activity-trigger.test.ts": "44067c1fc4c078c545a3fb77e23643983cf095228f83041e97bd37b07069f57a"
+      "apps/web/src/pages/home/composables/useBotActivity.test.ts": "2b6a660ae19628a0360bd50d407b4f72d4899178b62698999e16e485aeb4d017"
     },
     "sdkOverlaySHA256": "28838d768702181920719351e64d3a20ad0895d7ff8f677412ecbb01fe20e812"
   },
@@ -244,6 +242,74 @@
         "retained native result read diagnostics"
       ],
       "executionRootCutover": false
+    }
+  },
+  "sharedConversationMonitor": {
+    "commit": "40765b9e0979d561c49e58d2f384799e6c589e27",
+    "tree": "bf5ad7f166b1c608f0903bda11cb1643e3bc48dd",
+    "scope": "Current-conversation names/states/navigation and same-run/turn error deduplication only. No safe recovery adapter or whole-turn retry.",
+    "files": {
+      "apps/web/src/components/sidebar/session-activity-trigger.vue": {
+        "local": "shared-conversation-monitor-trigger.vue",
+        "sha256": "b70c0bcc956c1cd2156e2d6a8a07eb1783c2dbf3aef669767b65eed915ae1966",
+        "baseSHA256": null
+      },
+      "apps/web/src/components/sidebar/session-activity-trigger.test.ts": {
+        "local": "shared-conversation-monitor-trigger.test.ts",
+        "sha256": "fda0376ebdd0d174bc924150e57ff10d7a380d930ad42390082a7ffb9e6139aa",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/composables/useConversationRelations.ts": {
+        "local": "shared-useConversationRelations.ts",
+        "sha256": "d34a260f76145ba659dec2ccd47af40636f4d2bd993e5eb6de9c6013051ad1e6",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/composables/useConversationRelations.test.ts": {
+        "local": "shared-useConversationRelations.test.ts",
+        "sha256": "f99aa31a1d144c8abd867802ae793889951dcd07d104fe99fbb084df60f6a52d",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/components/conversation-relation-row.vue": {
+        "local": "shared-conversation-relation-row.vue",
+        "sha256": "765a2808f2f4671222dfc03f5507226338783e4a089b02c97ab562360bddaa7b",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/components/composer-error.ts": {
+        "local": "shared-composer-error.ts",
+        "sha256": "3d7f177b8b7f4a6172d23dd540f0c35d16e08dc49a0b9f4e7b2488e61def34e5",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/components/composer-error.test.ts": {
+        "local": "shared-composer-error.test.ts",
+        "sha256": "144f834a3fcf9f29687958a87278df5952cd59576a8ed68dc9275063315c07f2",
+        "baseSHA256": null
+      }
+    },
+    "chatPaneChanges": {
+      "local": "shared-conversation-chat-pane-changes.json",
+      "sha256": "a82b7f4407f10c71b819897d9bcf2b6df74c3f4ca7dd50bbe3ff6f9b8b69ea40",
+      "sourceBaseCommit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
+      "sharedSourceSHA256": "dd3e98354085486f099b5a702e4a6182ac687519b39e2cd274cb3fe4b3fa918b",
+      "excludes": [
+        "Web multipart/media recovery implementation",
+        "safe continuation recovery adapter",
+        "whole-turn retry"
+      ]
+    },
+    "footer": {
+      "source": "apps/web/src/pages/home/components/chat-pane.vue",
+      "sha256": "1559e7d64016e4c639d784f2fe6fe659e14ac9a1882b225c8222e799dd5f3a5a",
+      "text": "                <template v-if=\"currentBotId && activeSessionId && !isWelcome && voiceInputState === 'idle'\">\n                  <SessionActivityTrigger\n                    :bot-id=\"currentBotId\"\n                    :session-id=\"activeSessionId\"\n                    :visible=\"isVisible\"\n                  />\n                  <SessionActivityTrigger\n                    kind=\"bots\"\n                    :bot-id=\"currentBotId\"\n                    :session-id=\"activeSessionId\"\n                    :visible=\"isVisible\"\n                  />\n                </template>"
+    },
+    "phoneTestChanges": {
+      "local": "shared-conversation-phone-test-changes.json",
+      "sha256": "fd2b990693057ac9f407a68fd375efc07b228d47d5fb97e405d595441c479d02",
+      "scope": "Use a real verified NAS reference instead of forbidden inline-base64 bytes in exactly one preflight-cleanup fixture; preserve every existing assertion and add byte-read verification."
+    },
+    "storeChanges": {
+      "local": "shared-conversation-store-changes.json",
+      "sha256": "9ac6b5a32f5822b0b850055824b1f20a3703329a60fd01690154027df197799d",
+      "scope": "Verbatim final shared store/type/test differences reconstructed with complete base/result SHA guards, before the existing phone adapter; no whole shared file copy."
     }
   }
 }

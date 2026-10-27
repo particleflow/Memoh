@@ -1,0 +1,79 @@
+{
+  "base": "d594e279dfd38208a9f5651e896c8db614cb27ba",
+  "sharedCommit": "40765b9e0979d561c49e58d2f384799e6c589e27",
+  "sharedTree": "bf5ad7f166b1c608f0903bda11cb1643e3bc48dd",
+  "sharedModules": {
+    "apps/web/src/components/sidebar/session-activity-trigger.vue": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "b70c0bcc956c1cd2156e2d6a8a07eb1783c2dbf3aef669767b65eed915ae1966",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/components/sidebar/session-activity-trigger.test.ts": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "fda0376ebdd0d174bc924150e57ff10d7a380d930ad42390082a7ffb9e6139aa",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/pages/home/composables/useConversationRelations.ts": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "d34a260f76145ba659dec2ccd47af40636f4d2bd993e5eb6de9c6013051ad1e6",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/pages/home/composables/useConversationRelations.test.ts": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "f99aa31a1d144c8abd867802ae793889951dcd07d104fe99fbb084df60f6a52d",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/pages/home/components/conversation-relation-row.vue": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "765a2808f2f4671222dfc03f5507226338783e4a089b02c97ab562360bddaa7b",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/pages/home/components/composer-error.ts": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "3d7f177b8b7f4a6172d23dd540f0c35d16e08dc49a0b9f4e7b2488e61def34e5",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/pages/home/components/composer-error.test.ts": {
+      "mode": "verbatim shared source input",
+      "sharedSHA256": "144f834a3fcf9f29687958a87278df5952cd59576a8ed68dc9275063315c07f2",
+      "generatedEqualsShared": true
+    },
+    "apps/web/src/store/chat/send.ts": {
+      "mode": "minimal shared hunks with full base/result SHA guards, then existing phone adapter",
+      "baseSHA256": "a2a53773b59761fae9bdf82c44b07b7a3720a4d98d6c933757989db6fc1068b3",
+      "sharedSHA256": "44d944a0ee2fe3d652be0e1613467c45dade762eff6893bbf7699c3569a5043f",
+      "generatedEqualsShared": false
+    },
+    "apps/web/src/store/chat/types.ts": {
+      "mode": "minimal shared hunks with full base/result SHA guards, then existing phone adapter",
+      "baseSHA256": "9aa896cbd750038a5bf55dd507684237c932173833c5331e15646d81096feeac",
+      "sharedSHA256": "4941a84b1d56c00d2e404fb962c4d6b32ff2cda9a1b1eec69bf9ab9fdd2a8720",
+      "generatedEqualsShared": false
+    },
+    "apps/web/src/store/chat-list.test.ts": {
+      "mode": "minimal shared hunks with full base/result SHA guards, then existing phone adapter",
+      "baseSHA256": "ac78834b1f37d96e044196ba2729c9eef53b9e25b3e15cc9af6dc71e80e8c726",
+      "sharedSHA256": "ca65e42f4662eca54640a86418f2803a000cc46eff1d2958e2e8670b6b97c5cd",
+      "generatedEqualsShared": false
+    }
+  },
+  "verbatimSharedInputs": 7,
+  "hashGuardedSharedPatchTargets": 3,
+  "composerChanges": 6,
+  "footerInstances": 2,
+  "oldMobileGlobalTriggerAndTestRemoved": true,
+  "globalSidebarOpenedByFooter": false,
+  "dialogVisibleFieldsOnly": [
+    "name",
+    "state"
+  ],
+  "safeRecoveryAdapterIntegrated": false,
+  "wholeTurnRetryAdded": false,
+  "acceptedAnswerReplayAdded": false,
+  "existing43PhoneAdaptersPreserved": true,
+  "additionalPhoneTestAdapter": 1,
+  "hostPatchCount": 46,
+  "HAPBuilt": false,
+  "nativeETSChanged": false,
+  "packageVersionUnchanged": "1.0.17"
+}

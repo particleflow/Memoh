@@ -1,0 +1,103 @@
+{
+  "base": "d594e279dfd38208a9f5651e896c8db614cb27ba",
+  "sharedCommit": "40765b9e0979d561c49e58d2f384799e6c589e27",
+  "tests": {
+    "files": 10,
+    "passed": 221,
+    "failed": 0
+  },
+  "typesExitCode": 0,
+  "WebBuildExitCode": 0,
+  "eslint": {
+    "exitCode": 0,
+    "errors": 0,
+    "warnings": 26,
+    "ruleRelaxed": false
+  },
+  "sourceInventory": {
+    "reviewed": 163,
+    "supportAndSourceFiles": 172,
+    "historicalLaterChangesUnverified": 19,
+    "passed": true
+  },
+  "phoneOldGlobalTriggerRemoved": true,
+  "onlyCurrentConversationRelations": true,
+  "errorDedup": "same identified run/turn only; exact shared predicate and send metadata",
+  "safeRecoveryAPIIntegrated": false,
+  "wholeTurnRetryAdded": false,
+  "acceptedAnswerResubmitted": false,
+  "nativeETSChanged": false,
+  "SDKDownloaded": false,
+  "HAPBuilt": false,
+  "signed": false,
+  "deployed": false,
+  "versionNotIncremented": "1.0.17",
+  "publicConfigurationEmpty": true,
+  "realArkWebOrPhoneAcceptance": false,
+  "browserProof": {
+    "sharedCommit": "40765b9e0979d561c49e58d2f384799e6c589e27",
+    "viewport": [
+      390,
+      844
+    ],
+    "rows": [
+      {
+        "name": "红玉",
+        "state": "执行状态未知"
+      },
+      {
+        "name": "审阅 Agent",
+        "state": "执行中"
+      },
+      {
+        "name": "深层 Agent",
+        "state": "执行状态未知"
+      },
+      {
+        "name": "图像专家",
+        "state": "等待决定"
+      },
+      {
+        "name": "专家子 Agent",
+        "state": "正在取消"
+      }
+    ],
+    "relatedBots": [
+      "红玉",
+      "图像专家"
+    ],
+    "globalSidebarOpened": false,
+    "globalActivityRequests": 0,
+    "threeLevelRelations": true,
+    "unrelatedBotExcluded": true,
+    "childOriginalSessionNavigation": true,
+    "expertOriginalBotSessionNavigation": true,
+    "existingBackClosesDialog": true,
+    "visibleRowFields": [
+      "name",
+      "state"
+    ],
+    "detailsTimeLogsRawIDsRendered": false,
+    "recoveryButtonAdded": false,
+    "wholeTurnRetryCalled": false,
+    "acceptedAnswerResubmitted": false,
+    "loginRetained": true,
+    "businessWrites": 0,
+    "pageErrors": [],
+    "API": "synthetic exact scoped read-only contract; not production",
+    "actualArkWebOrPhone": false,
+    "HAPBuilt": false
+  },
+  "screenshotSHA256": {
+    "conversation-tasks-390.png": "9292da0fd42094c0ab3ad2a2adf6a073f2d8fb61ca5a86aa82d48150ba6f0103",
+    "conversation-bots-390.png": "123d01b5bfd1d6bab51e8918a04fecf7a35e1cfb6734ad08a9fa49c66d570317",
+    "conversation-task-dialog.png": "6da8731e45f109d40e4f43d17dc45bef5b7d15605436ac61b89f78f683ef6650"
+  },
+  "sourceInputForm": {
+    "verbatimSharedInputs": 7,
+    "hashGuardedSharedPatchTargets": 3,
+    "unchangedGeneratedFiles": 1389,
+    "regeneratedSourceDifferenceCount": 0,
+    "221ChecksReused": true
+  }
+}

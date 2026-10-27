@@ -1,0 +1,55 @@
+{
+  "apps/web/src/store/chat/send.ts": {
+    "baseSHA256": "a2a53773b59761fae9bdf82c44b07b7a3720a4d98d6c933757989db6fc1068b3",
+    "sharedSHA256": "44d944a0ee2fe3d652be0e1613467c45dade762eff6893bbf7699c3569a5043f",
+    "replacements": [
+      [
+        "  sessionId: string\n  composerScope?: string\n  error: string\n  restoreInput: string\n  restoreAttachments?: ChatAttachment[]\n  restoreRequestedSkills?: RequestedSkillSelection[]\n",
+        "  sessionId: string\n  composerScope?: string\n  error: string\n  errorCode?: string\n  errorTurnId?: string\n  errorRunId?: string\n  restoreInput: string\n  restoreAttachments?: ChatAttachment[]\n  restoreRequestedSkills?: RequestedSkillSelection[]\n",
+        1
+      ],
+      [
+        "            sessionId: held ? '' : targetSessionId,\n            composerScope,\n            error: reason,\n            restoreInput: text,\n            restoreAttachments: attachments,\n            restoreRequestedSkills: cloneRequestedSkills(requestedSkills),\n",
+        "            sessionId: held ? '' : targetSessionId,\n            composerScope,\n            error: reason,\n            errorCode,\n            errorTurnId: assistantTurn?.turnId,\n            errorRunId: assistantTurn?.runtimeRunId,\n            restoreInput: text,\n            restoreAttachments: attachments,\n            restoreRequestedSkills: cloneRequestedSkills(requestedSkills),\n",
+        1
+      ],
+      [
+        "          stage,\n          error: reason,\n          errorCode,\n          restoreInput: text,\n          restoreAttachments: attachments,\n          restoreRequestedSkills: cloneRequestedSkills(requestedSkills),\n          composerScope,\n        }\n      }\n      return { ok: false, stage, error: reason, errorCode }\n    } finally {\n      stopConfirmationWatch()\n    }\n",
+        "          stage,\n          error: reason,\n          errorCode,\n          errorTurnId: assistantTurn?.turnId,\n          errorRunId: assistantTurn?.runtimeRunId,\n          restoreInput: text,\n          restoreAttachments: attachments,\n          restoreRequestedSkills: cloneRequestedSkills(requestedSkills),\n          composerScope,\n        }\n      }\n      return { ok: false, stage, error: reason, errorCode, errorTurnId: assistantTurn?.turnId, errorRunId: assistantTurn?.runtimeRunId }\n    } finally {\n      stopConfirmationWatch()\n    }\n",
+        1
+      ],
+      [
+        "      } else {\n        deps.finalizeStreamFailure(assistantTurn, botId, targetSessionId, failure)\n      }\n      return { ok: false, stage, error: reason, errorCode }\n    }\n  }\n\n",
+        "      } else {\n        deps.finalizeStreamFailure(assistantTurn, botId, targetSessionId, failure)\n      }\n      return { ok: false, stage, error: reason, errorCode, errorTurnId: assistantTurn.turnId, errorRunId: assistantTurn.runtimeRunId }\n    }\n  }\n\n",
+        1
+      ],
+      [
+        "      } else {\n        deps.finalizeStreamFailure(assistantTurn, botId, targetSessionId, failure)\n      }\n      return { ok: false, stage, error: reason, errorCode, restoreInput: text }\n    }\n  }\n\n",
+        "      } else {\n        deps.finalizeStreamFailure(assistantTurn, botId, targetSessionId, failure)\n      }\n      return { ok: false, stage, error: reason, errorCode, errorTurnId: assistantTurn.turnId, errorRunId: assistantTurn.runtimeRunId, restoreInput: text }\n    }\n  }\n\n",
+        1
+      ]
+    ]
+  },
+  "apps/web/src/store/chat/types.ts": {
+    "baseSHA256": "9aa896cbd750038a5bf55dd507684237c932173833c5331e15646d81096feeac",
+    "sharedSHA256": "4941a84b1d56c00d2e404fb962c4d6b32ff2cda9a1b1eec69bf9ab9fdd2a8720",
+    "replacements": [
+      [
+        "  stage?: SendMessageStage\n  error?: string\n  errorCode?: string\n  restoreInput?: string\n  restoreAttachments?: ChatAttachment[]\n  restoreRequestedSkills?: RequestedSkillSelection[]\n",
+        "  stage?: SendMessageStage\n  error?: string\n  errorCode?: string\n  errorTurnId?: string\n  errorRunId?: string\n  restoreInput?: string\n  restoreAttachments?: ChatAttachment[]\n  restoreRequestedSkills?: RequestedSkillSelection[]\n",
+        1
+      ]
+    ]
+  },
+  "apps/web/src/store/chat-list.test.ts": {
+    "baseSHA256": "ac78834b1f37d96e044196ba2729c9eef53b9e25b3e15cc9af6dc71e80e8c726",
+    "sharedSHA256": "ca65e42f4662eca54640a86418f2803a000cc46eff1d2958e2e8670b6b97c5cd",
+    "replacements": [
+      [
+        "        ],\n        streaming: false,\n      })\n      expect(store.startupSendFailure).toBeNull()\n    })\n\n",
+        "        ],\n        streaming: false,\n      })\n      const failedReply = store.messages[1]\n      if (failedReply?.role !== 'assistant') throw new Error('Expected the failed assistant reply')\n      expect(result).toMatchObject({ errorCode: 'runtime_run_failed', errorTurnId: failedReply.turnId, errorRunId: failedReply.runtimeRunId })\n      expect(store.startupSendFailure).toBeNull()\n    })\n\n",
+        1
+      ]
+    ]
+  }
+}
