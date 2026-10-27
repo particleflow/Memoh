@@ -208,7 +208,7 @@
     },
     "chatPaneChanges": {
       "local": "shared-conversation-chat-pane-changes.json",
-      "sha256": "2382ee96f7e1dbd18bbccf1f01623e5863906e1f6c79cf214f0006123d789203",
+      "sha256": "42d4346c4d382baab34a13a3ac664d6926542dc5b2147a2e8be99c4e0183ca86",
       "sourceBaseCommit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
       "sharedSourceSHA256": "ed7f8acab1bd0474f5c29efa8ef66f7455c7bfc886f21df49e9cb8e4eecdd4b5",
       "excludes": [
@@ -351,5 +351,15 @@
     "structuralCandidateNotDeployed": true,
     "preserveOriginalHistoryDraftTaskIDs": true,
     "scope": "Reuse fixed shared contacts, unambiguous historical adoption, explicit-history deep links and native resolve/bind contract. No additional grant, alternate navigation protocol, task reassignment or Agent core change."
+  },
+  "sharedModelCatalog": {
+    "commit": "7af02cb35f85582713213cb98c382d36df744ea3",
+    "tree": "a3cdf65ebe330f598986e3af6405b94657595070",
+    "sourceChanges": {
+      "local": "shared-model-catalog-changes.json",
+      "sha256": "5a7447bfda61c1b935f056ba4ed038837c80543b3dc4bb3a3f94c18e00e62710"
+    },
+    "scope": "Existing local catalog refresh and safe unavailable model labels; no model mutation, provider inference request or Bot-creation workflow.",
+    "chatPaneSharedSHA256": "11a8f841efcef79786e1666d08ebc36a4895a31efef2f2766d6d8de638206d30"
   }
 }

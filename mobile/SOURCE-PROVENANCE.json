@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "87a75763f78f8c81aa8564b8f9114cf612e60a0680dd95c95f9c930b530a2a56",
+      "sha256": "7679f2e9bac015875b9076f1807c0766b1526ad50bae384ca2dd87c0356f3b66",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "767275d1e7b8742f96440238b20f7f7adf8bb1d716239f61157f87916bbcfd79",
+      "sha256": "b7c51d3e9f31a6ce53036a8005b8182c0c8bfe9bac35278c5b28672a7d78f491",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1614,7 +1614,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-chat-pane-changes.json",
-      "sha256": "2382ee96f7e1dbd18bbccf1f01623e5863906e1f6c79cf214f0006123d789203",
+      "sha256": "42d4346c4d382baab34a13a3ac664d6926542dc5b2147a2e8be99c4e0183ca86",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1726,6 +1726,15 @@
       "origin": "Exact shared dbff0e472c616f7241635a58e6085442f30a7d2a regression",
       "licenseReview": "Memoh upstream source terms retained.",
       "preparationChanges": []
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-model-catalog-changes.json",
+      "sha256": "5a7447bfda61c1b935f056ba4ed038837c80543b3dc4bb3a3f94c18e00e62710",
+      "origin": "Exact shared PR79 model label/catalog revision 7af02cb35f85582713213cb98c382d36df744ea3",
+      "licenseReview": "Memoh upstream source license retained.",
+      "preparationChanges": [
+        "Local catalog refresh and unavailable label only; no Bot creation or provider execution."
+      ]
     }
   ],
   "excludedSourcePaths": [],

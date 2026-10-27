@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/composables/useCatalogRefresh.test.ts apps/web/src/composables/useModelSelectionLabel.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  2 passed (2)
+      Tests  4 passed (4)
+   Start at  17:33:42
+   Duration  2.81s (transform 417ms, setup 0ms, import 915ms, tests 136ms, environment 1.28s)

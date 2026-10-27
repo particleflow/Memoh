@@ -1,0 +1,33 @@
+{
+  "unified": "7af02cb35f85582713213cb98c382d36df744ea3",
+  "generatedChanges": [
+    "apps/web/src/App.vue",
+    "apps/web/src/composables/useCatalogRefresh.test.ts",
+    "apps/web/src/composables/useCatalogRefresh.ts",
+    "apps/web/src/composables/useModelSelectionLabel.test.ts",
+    "apps/web/src/composables/useModelSelectionLabel.ts",
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/bots/components/model-select.vue",
+    "apps/web/src/pages/home/components/chat-pane.vue"
+  ],
+  "protectedFilesIdentical": [
+    "apps/web/src/lib/harmony-image-timing.ts",
+    "apps/web/src/lib/harmony-files.ts",
+    "apps/web/src/lib/harmony-resumable.ts",
+    "apps/web/src/lib/harmony-download.ts",
+    "apps/web/src/lib/harmony-service-url.ts",
+    "apps/web/src/lib/harmony-service-config.ts",
+    "apps/web/src/components/sidebar/session-activity-trigger.vue",
+    "apps/web/src/components/sidebar/panel-sessions.vue",
+    "apps/web/src/pages/home/components/contact-choice-dialog.vue",
+    "apps/web/src/store/chat/bootstrap.ts",
+    "apps/web/src/store/workspace-tabs.ts",
+    "apps/web/src/style.css",
+    "apps/web/public/memoh_client.json",
+    "pnpm-lock.yaml"
+  ],
+  "noHAP": true,
+  "noBotCreationChanges": true
+}

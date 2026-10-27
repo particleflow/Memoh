@@ -68,6 +68,7 @@ def inputs():
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-useAcceptedUserInputRecovery.ts', 'shared-useAcceptedUserInputRecovery.test.ts', 'shared-accepted-input-sdk.json', 'shared-accepted-input-i18n.json'))
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-contact-navigation-changes.json', 'shared-contact-navigation-sdk.json', 'shared-contact-navigation-i18n.json'))
     files.append(ROOT / 'mobile/memoh/shared-conversation-relation-row.test.ts')
+    files.append(ROOT / 'mobile/memoh/shared-model-catalog-changes.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -890,6 +891,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected contact SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
     contact_locales = json.loads((ROOT / 'mobile/memoh' / contact['locales']['local']).read_text())
+    catalog = lock['sharedModelCatalog']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / catalog['local']) == catalog['sha256'], 'Model catalog source drift'
+    catalog_sources = json.loads((ROOT / 'mobile/memoh' / catalog['local']).read_text())
 
 
 
@@ -1085,6 +1089,22 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             if name in workspace_sources:
                 assert data is not None and hashlib.sha256(data).hexdigest() == shared_file_metadata[name]['baseSHA256'], 'Workspace baseline drift'
                 data = workspace_sources[name]
+            if name in catalog_sources['existingFiles']:
+                review = catalog_sources['existingFiles'][name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Catalog baseline drift'
+                text = data.decode()
+                for before, after, expected in review['replacements']:
+                    assert text.count(before) == expected, 'Catalog seam drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == review['sharedSHA256'], 'Catalog shared output drift'
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in catalog_sources['locales']}:
+                language = Path(name).stem
+                value = json.loads(data)
+                for key, label in catalog_sources['locales'][language].items():
+                    assert key not in value['models'], 'Catalog locale already present'
+                    value['models'][key] = label
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
             if name in contact_sources['existingFiles']:
                 review = contact_sources['existingFiles'][name]
                 assert data is not None and hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Contact baseline drift'
@@ -1224,10 +1244,10 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
-        for destination, item in contact_sources['addedFiles'].items():
-            assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected contact source destination'
+        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles']}.items():
+            assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected shared source destination'
             data = item['source'].encode()
-            assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added contact source drift'
+            assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added shared source drift'
             entry = tarfile.TarInfo(destination)
             entry.size = len(data)
             entry.mode = 0o644

@@ -48,5 +48,25 @@
     "const rawComposerPanelError = computed(",
     "watchVisibleComposerFailure(() => composerFailure.value, () => messages.value, () => { composerError.value = '' })\nconst rawComposerPanelError = computed(",
     1
+  ],
+  [
+    "import { useVirtualKeyboard } from '@/composables/useVirtualKeyboard'",
+    "import { useModelSelectionLabel } from '@/composables/useModelSelectionLabel'\nimport { useVirtualKeyboard } from '@/composables/useVirtualKeyboard'",
+    1
+  ],
+  [
+    "const composerDefaultModelName = computed(() => {",
+    "const { label: nativeDefaultModelLabel } = useModelSelectionLabel(\n  composerDefaultModelId,\n  composerModels,\n  () => !activeUsesExternalAgentComposer.value,\n)\nconst composerDefaultModelName = computed(() => {\n  if (!activeUsesExternalAgentComposer.value) return nativeDefaultModelLabel.value",
+    1
+  ],
+  [
+    "const selectedModelLabel = computed(() => {",
+    "const { label: nativeSelectedModelLabel, isUnavailable: nativeModelUnavailable } = useModelSelectionLabel(\n  composerModelId,\n  composerModels,\n  () => !activeUsesExternalAgentComposer.value,\n)\n\nconst selectedModelLabel = computed(() => {\n  if (!activeUsesExternalAgentComposer.value && composerModelId.value) return nativeSelectedModelLabel.value",
+    1
+  ],
+  [
+    "  reasoningActive.value\n    ? `${selectedModelLabel.value} · ${selectedReasoningLabel.value}`",
+    "  reasoningActive.value && (activeUsesExternalAgentComposer.value || !nativeModelUnavailable.value)\n    ? `${selectedModelLabel.value} · ${selectedReasoningLabel.value}`",
+    1
   ]
 ]

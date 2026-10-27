@@ -1,0 +1,68 @@
+{
+  "existingFiles": {
+    "apps/web/src/App.vue": {
+      "baseSHA256": "c8b7cbe467fc1c771c818e45e8269ee2bf5c43bd4298c1f0433c74404ee2658a",
+      "sharedSHA256": "f6e9e8c925e167c5917857b44ce17cb3fb6ea715c56abbc9d030457bcb7b1bca",
+      "replacements": [
+        [
+          "import { Toaster } from '@felinic/ui'\nimport { useSettingsStore } from '@/store/settings'\nimport MainSection from '@/pages/main-section/index.vue'\n\nuseSettingsStore()\n\n",
+          "import { Toaster } from '@felinic/ui'\nimport { useSettingsStore } from '@/store/settings'\nimport MainSection from '@/pages/main-section/index.vue'\nimport { useCatalogRefresh } from '@/composables/useCatalogRefresh'\n\nuseSettingsStore()\n\n",
+          1
+        ],
+        [
+          "const isChatRoute = computed(() => route.name === 'home' || route.name === 'bot')\nconst isSettingsRoute = computed(() => route.path.startsWith('/settings'))\nconst isAppArea = computed(() => isChatRoute.value || isSettingsRoute.value)\n\n// Localized headings for auto-shaped long-blob toasts (raw backend errors etc.).\n// @felinic/ui is i18n-agnostic, so the app supplies these; they react to locale.\n",
+          "const isChatRoute = computed(() => route.name === 'home' || route.name === 'bot')\nconst isSettingsRoute = computed(() => route.path.startsWith('/settings'))\nconst isAppArea = computed(() => isChatRoute.value || isSettingsRoute.value)\nuseCatalogRefresh(isAppArea)\n\n// Localized headings for auto-shaped long-blob toasts (raw backend errors etc.).\n// @felinic/ui is i18n-agnostic, so the app supplies these; they react to locale.\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/bots/components/model-select.vue": {
+      "baseSHA256": "a445483555267aa296add3057df48941a3c1e452a71c9764cbb580bd8c5bca84",
+      "sharedSHA256": "1d7cdc1229e54e20433b573fa667e0c11cecfb7f6b4635884f77032b9e6ce7f4",
+      "replacements": [
+        [
+          "import type { ModelsGetResponse, ModelsModelType, ProvidersGetResponse } from '@memohai/sdk'\nimport ModelOptions from './model-options.vue'\nimport { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort } from './reasoning-effort'\n\nconst props = defineProps<{\n  models: ModelsGetResponse[]\n",
+          "import type { ModelsGetResponse, ModelsModelType, ProvidersGetResponse } from '@memohai/sdk'\nimport ModelOptions from './model-options.vue'\nimport { EFFORT_LABELS, REASONING_EFFORT_DISABLE, displayedEffort } from './reasoning-effort'\nimport { useModelSelectionLabel } from '@/composables/useModelSelectionLabel'\n\nconst props = defineProps<{\n  models: ModelsGetResponse[]\n",
+          1
+        ],
+        [
+          "\nconst { t } = useI18n()\n\nconst modelLabel = computed(() => {\n  const model = props.models.find((m) => (m.id || m.model_id) === selected.value)\n  return model?.name || model?.model_id || selected.value\n})\n\n// The effort moved inside this menu, so the trigger has to carry it — otherwise\n// the value is invisible until the menu is reopened. \"Off\" is not appended: a\n// bare model name leaves the provider's reasoning behavior unspecified.\nconst displayLabel = computed(() => {\n  if (!props.showReasoning || !modelLabel.value) return modelLabel.value\n  const model = props.models.find(m => (m.id || m.model_id) === selected.value)\n  const effort = props.reasoningOptions !== undefined\n    ? reasoningEffort.value\n",
+          "\nconst { t } = useI18n()\n\nconst { label: modelLabel, isUnavailable } = useModelSelectionLabel(selected, () => props.models)\n\n// The effort moved inside this menu, so the trigger has to carry it — otherwise\n// the value is invisible until the menu is reopened. \"Off\" is not appended: a\n// bare model name leaves the provider's reasoning behavior unspecified.\nconst displayLabel = computed(() => {\n  if (!props.showReasoning || !modelLabel.value || isUnavailable.value) return modelLabel.value\n  const model = props.models.find(m => (m.id || m.model_id) === selected.value)\n  const effort = props.reasoningOptions !== undefined\n    ? reasoningEffort.value\n",
+          1
+        ]
+      ]
+    }
+  },
+  "addedFiles": {
+    "apps/web/src/composables/useCatalogRefresh.ts": {
+      "sha256": "79947f273530d4e2fd28b429072bed634fbf6aeb788d12c7e04e9e64b14a0b3b",
+      "source": "import { onScopeDispose, toValue, watch, type MaybeRefOrGetter } from 'vue'\nimport { useQueryCache } from '@pinia/colada'\n\n// The server may reconcile an upstream catalog while the app stays open.\n// Poll only Memoh's local catalog, never the provider's inference endpoints.\nexport const CATALOG_REFRESH_INTERVAL_MS = 2 * 60 * 1000\n\nexport function useCatalogRefresh(active: MaybeRefOrGetter<boolean>) {\n  const cache = useQueryCache()\n  let timer: ReturnType<typeof setInterval> | undefined\n  function stop() {\n    if (timer !== undefined) clearInterval(timer)\n    timer = undefined\n  }\n  watch(() => toValue(active), enabled => {\n    stop()\n    if (!enabled) return\n    timer = setInterval(() => {\n      if (document.visibilityState !== 'visible') return\n      void cache.invalidateQueries({ key: ['models'] }).catch(() => undefined)\n      void cache.invalidateQueries({ key: ['provider-models'] }).catch(() => undefined)\n    }, CATALOG_REFRESH_INTERVAL_MS)\n  }, { immediate: true })\n  onScopeDispose(stop)\n}\n"
+    },
+    "apps/web/src/composables/useCatalogRefresh.test.ts": {
+      "sha256": "1c8c04975e28d343f97908e3186e4c5bc5f8a376e6f40ab67598412af5dc6c3d",
+      "source": "import { effectScope, nextTick, ref } from 'vue'\nimport { afterEach, describe, expect, it, vi } from 'vitest'\nimport { CATALOG_REFRESH_INTERVAL_MS, useCatalogRefresh } from './useCatalogRefresh'\n\nconst invalidateQueries = vi.hoisted(() => vi.fn().mockResolvedValue(undefined))\nvi.mock('@pinia/colada', () => ({ useQueryCache: () => ({ invalidateQueries }) }))\n\nafterEach(() => { vi.useRealTimers(); invalidateQueries.mockClear(); vi.restoreAllMocks(); vi.unstubAllGlobals() })\n\ndescribe('useCatalogRefresh', () => {\n  it('refreshes local catalog keys only while active and visible, and stops on disposal', async () => {\n    vi.useFakeTimers()\n    const fakeDocument = { visibilityState: 'visible' }\n    vi.stubGlobal('document', fakeDocument)\n    const active = ref(false)\n    const scope = effectScope()\n    scope.run(() => useCatalogRefresh(active))\n    vi.advanceTimersByTime(CATALOG_REFRESH_INTERVAL_MS)\n    expect(invalidateQueries).not.toHaveBeenCalled()\n    active.value = true\n    await nextTick()\n    vi.advanceTimersByTime(CATALOG_REFRESH_INTERVAL_MS)\n    expect(invalidateQueries.mock.calls).toEqual([[{ key: ['models'] }], [{ key: ['provider-models'] }]])\n    fakeDocument.visibilityState = 'hidden'\n    vi.advanceTimersByTime(CATALOG_REFRESH_INTERVAL_MS)\n    expect(invalidateQueries).toHaveBeenCalledTimes(2)\n    scope.stop()\n    vi.advanceTimersByTime(CATALOG_REFRESH_INTERVAL_MS)\n    expect(invalidateQueries).toHaveBeenCalledTimes(2)\n  })\n})\n"
+    },
+    "apps/web/src/composables/useModelSelectionLabel.ts": {
+      "sha256": "df039a93e59113f1a8fa824feec2a60e18d57e458d710809603714ae731e1f83",
+      "source": "import { computed, ref, toValue, watch, type MaybeRefOrGetter } from 'vue'\nimport { useQuery } from '@pinia/colada'\nimport { getModelsById, type ModelsGetResponse } from '@memohai/sdk'\nimport { useI18n } from 'vue-i18n'\n\nconst UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i\n\n// Keep the selected label separate from the selectable catalog. The catalog\n// deliberately excludes disabled/unavailable rows; a missing row must never be\n// put back in the menu or cause the selection to change.\nexport function useModelSelectionLabel(\n  selected: MaybeRefOrGetter<string>,\n  models: MaybeRefOrGetter<ModelsGetResponse[]>,\n  lookupEnabled: MaybeRefOrGetter<boolean> = true,\n) {\n  const { t } = useI18n()\n  const selectedId = computed(() => toValue(selected)?.trim() ?? '')\n  const selectedModel = computed(() => toValue(models).find(m => (m.id || m.model_id) === selectedId.value))\n  const remembered = ref<{ id: string; label: string }>()\n  watch([selectedId, selectedModel], ([id, model]) => {\n    if (!id) { remembered.value = undefined; return }\n    if (model) remembered.value = { id, label: model.name || model.model_id || id }\n    else if (remembered.value?.id !== id) remembered.value = undefined\n  }, { immediate: true, flush: 'sync' })\n\n  // Native model UUIDs remain addressable after removal/disable. This restores\n  // the label after a page reload without putting the row in the picker.\n  const lookup = useQuery({\n    key: () => ['selected-model-label', selectedId.value],\n    query: async ({ signal }) => {\n      const { data } = await getModelsById({ path: { id: selectedId.value }, signal, throwOnError: true })\n      return data\n    },\n    enabled: () => toValue(lookupEnabled) && !!selectedId.value && !selectedModel.value && UUID.test(selectedId.value),\n  })\n\n  const isUnavailable = computed(() => !!selectedId.value && !selectedModel.value)\n  const label = computed(() => {\n    if (!selectedId.value) return ''\n    if (selectedModel.value) return selectedModel.value.name || selectedModel.value.model_id || selectedId.value\n    const prior = remembered.value?.id === selectedId.value ? remembered.value.label : ''\n    const fetched = lookup.data.value?.id === selectedId.value ? lookup.data.value : undefined\n    const name = prior || fetched?.name || fetched?.model_id\n    if (!name && lookup.isLoading.value) return t('common.loading')\n    return name ? t('models.unavailableSelection', { name }) : t('models.unknownSelection')\n  })\n  return { label, isUnavailable }\n}\n"
+    },
+    "apps/web/src/composables/useModelSelectionLabel.test.ts": {
+      "sha256": "c8ba4b75f0c6410fa354b324f20e3fb75dd60a3df156ac4dae327f3de88eb686",
+      "source": "// @vitest-environment jsdom\nimport { createApp, defineComponent, h, nextTick, ref } from 'vue'\nimport { createPinia } from 'pinia'\nimport { PiniaColada } from '@pinia/colada'\nimport { createI18n } from 'vue-i18n'\nimport { afterEach, expect, it, vi } from 'vitest'\nimport { useModelSelectionLabel } from './useModelSelectionLabel'\nimport en from '@/i18n/locales/en.json'\nimport type { ModelsGetResponse } from '@memohai/sdk'\n\nconst lookup = vi.hoisted(() => vi.fn())\nvi.mock('@memohai/sdk', () => ({ getModelsById: lookup }))\nconst id = '00000000-0000-0000-0000-000000000101'\nconst model: ModelsGetResponse = { id, model_id: 'fixture/alpha', name: 'Fixture Alpha', type: 'chat' }\nlet app: ReturnType<typeof createApp> | undefined\nlet root: HTMLDivElement | undefined\n\nafterEach(() => { app?.unmount(); root?.remove(); lookup.mockReset() })\n\nfunction mount(initial: ModelsGetResponse[]) {\n  const selected = ref(id)\n  const models = ref(initial)\n  root = document.createElement('div')\n  document.body.append(root)\n  app = createApp(defineComponent({\n    setup() {\n      const { label, isUnavailable } = useModelSelectionLabel(selected, models)\n      return () => h('span', { 'data-unavailable': String(isUnavailable.value) }, label.value)\n    },\n  }))\n  app.use(createPinia()).use(PiniaColada).use(createI18n({ legacy: false, locale: 'en', messages: { en } }))\n  app.mount(root)\n  return { selected, models }\n}\n\nit('retains the selected name and marks it unavailable without changing selection or restoring a menu row', async () => {\n  lookup.mockRejectedValue(new Error('offline'))\n  const state = mount([model])\n  expect(root?.textContent).toBe('Fixture Alpha')\n  state.models.value = []\n  await nextTick()\n  expect(root?.textContent).toBe('Fixture Alpha (unavailable)')\n  expect(root?.querySelector('span')?.dataset.unavailable).toBe('true')\n  expect(state.selected.value).toBe(id)\n  expect(state.models.value).toEqual([])\n  state.models.value = [model]\n  await nextTick()\n  expect(root?.textContent).toBe('Fixture Alpha')\n  expect(root?.querySelector('span')?.dataset.unavailable).toBe('false')\n})\n\nit('restores a missing model name after reload without making it selectable', async () => {\n  lookup.mockResolvedValue({ data: model })\n  const state = mount([])\n  await vi.waitFor(() => expect(root?.textContent).toBe('Fixture Alpha (unavailable)'))\n  expect(lookup).toHaveBeenCalledWith(expect.objectContaining({ path: { id } }))\n  expect(state.selected.value).toBe(id)\n  expect(state.models.value).toEqual([])\n})\n\nit('does not render an unknown internal UUID when the model row no longer exists', async () => {\n  lookup.mockRejectedValue(new Error('not found'))\n  mount([])\n  await vi.waitFor(() => expect(root?.textContent).toBe('Unavailable model'))\n  expect(root?.textContent).not.toContain(id)\n})\n"
+    }
+  },
+  "locales": {
+    "en": {
+      "unknownSelection": "Unavailable model",
+      "unavailableSelection": "{name} (unavailable)"
+    },
+    "ja": {
+      "unknownSelection": "利用できないモデル",
+      "unavailableSelection": "{name}（利用不可）"
+    },
+    "zh": {
+      "unknownSelection": "模型不可用",
+      "unavailableSelection": "{name}（不可用）"
+    }
+  }
+}

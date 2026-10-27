@@ -42,3 +42,5 @@ configuration do not belong in the publishable source set. The existing Windows
 owner supplies approved private configuration and signing; configured output
 must not return to the public repository. No automatic route, identity or token
 migration is implied by the new version or by this source inventory.
+
+The pending [model catalog and unavailable-label source alignment](../docs/testing/harmony-model-catalog-7af/README.md) is pinned to `7af02cb35f85582713213cb98c382d36df744ea3`. It is not included in the qualified 1.0.20 artifact and awaits the final unified combination.
