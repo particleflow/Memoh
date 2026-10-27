@@ -770,6 +770,32 @@
                     </DropdownMenuContent>
                   </DropdownMenu>
 
+                  <Button
+                    v-if="streaming"
+                    type="button"
+                    variant="secondary"
+                    size="icon-sm"
+                    shape="circle"
+                    :aria-label="$t('chat.stopGenerating')"
+                    class="shrink-0 max-md:size-11"
+                    @click="chatStore.abort(paneTarget)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      class="size-4 max-md:size-4.5"
+                      aria-hidden="true"
+                    >
+                      <rect
+                        x="4"
+                        y="4"
+                        width="16"
+                        height="16"
+                        rx="3"
+                      />
+                    </svg>
+                  </Button>
+
                   <!-- While voice owns the composer the trailing slot holds
                        the voice pair instead of mic/send: ✗ cancels (also
                        aborts an in-flight transcription), ✓ stops and
@@ -917,10 +943,9 @@
                         </svg>
                       </Button>
                     </div>
-                    <!-- Send and stop are one brand circle: the surface never
-                         changes between the two states, only the glyph cross-fades
-                         (arrow ⇄ stop square), so the button can't blink color or
-                         shape mid-turn. While streaming it stays clickable to abort. -->
+                    <!-- Sending during a run uses the existing follow-up queue.
+                         Stop has its own control so an emptied draft or double
+                         click can never turn a send gesture into an abort. -->
                     <div
                       class="absolute inset-0 [transition:opacity_150ms_ease,scale_281ms_cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
                       :class="sendButtonVisible ? 'scale-100 opacity-100' : 'pointer-events-none scale-0 opacity-0'"
@@ -929,11 +954,11 @@
                         type="button"
                         variant="brand"
                         shape="circle"
-                        :disabled="attachmentUploading || (streaming ? false : (!showSend || !currentBotId || activeChatReadOnly || loadingMessages || composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason))"
+                        :disabled="attachmentUploading || !showSend || !currentBotId || activeChatReadOnly || loadingMessages || (streaming ? pendingFiles.length > 0 || requestedSkills.length > 0 : composerConfigPending || composerHasNoModel || goalSubmissionBlocked || !!runtimeModeUnavailableReason)"
                         :title="goalSubmissionBlocked ? goalExecutionBlockedReason : undefined"
                         :class="runtimeModeChanging && !streaming && showSend && !!currentBotId && !activeChatReadOnly && !loadingMessages && !composerAgentConfigPending && !composerHasNoModel ? 'disabled:opacity-100' : undefined"
                         :aria-busy="firstSendAwaiting || attachmentUploading || undefined"
-                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : (streaming ? 'Stop generating response' : 'Send message')"
+                        :aria-label="streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.queue.enqueueFollowUp') : $t('chat.send')"
                         class="size-full"
                         @click="handleSendButton"
                       >
@@ -946,22 +971,7 @@
                           <SendMorphIcon
                             :busy="firstSendAwaiting || attachmentUploading"
                             class="col-start-1 row-start-1 size-[18px] max-md:size-5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
-                            :class="streaming && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'"
                           />
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="col-start-1 row-start-1 size-4 max-md:size-4.5 transition-opacity duration-200 ease-out motion-reduce:transition-none"
-                            :class="streaming && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'"
-                          >
-                            <rect
-                              x="4"
-                              y="4"
-                              width="16"
-                              height="16"
-                              rx="3"
-                            />
-                          </svg>
                         </span>
                       </Button>
                     </div>
@@ -3396,11 +3406,8 @@ const voiceInputEnabled = false
 
 // Whether the trailing slot shows the send button (vs. its inactive
 // occupant — see inactiveSlotVisible just below, its exact complement).
-// Streaming always wins the slot for stop, same as before; unlike the old
-// ring-era rule this no longer special-cases ACP: the inactive occupant —
-// not a dimmed disabled send — is what fills the slot on empty input in
-// EVERY mode (the mic when voice input is on, a look-alike placeholder while
-// it's shelved).
+// Keep the send slot visible during a run, disabled on empty input.
+// The separate stop control remains available alongside it.
 const sendButtonVisible = computed(() => showSend.value || streaming.value)
 
 // The slot's inactive occupant: a grayed send stand-in while voice input is
@@ -4435,10 +4442,6 @@ async function handleSend() {
 function handleSendButton() {
   // A first send waits for the server to confirm it.
   if (firstSendAwaiting.value) return
-  if (streaming.value && !showSend.value) {
-    chatStore.abort(paneTarget.value)
-    return
-  }
   void handleSend()
 }
 
