@@ -1239,6 +1239,19 @@
                   <Lightbulb class="size-3.5 shrink-0" />
                   <span class="text-label">{{ $t('chatExamples.tryThese') }}</span>
                 </Button>
+                <template v-if="currentBotId && activeSessionId && !isWelcome && voiceInputState === 'idle'">
+                  <SessionActivityTrigger
+                    :bot-id="currentBotId"
+                    :session-id="activeSessionId"
+                    :visible="isVisible"
+                  />
+                  <SessionActivityTrigger
+                    kind="bots"
+                    :bot-id="currentBotId"
+                    :session-id="activeSessionId"
+                    :visible="isVisible"
+                  />
+                </template>
                 <SessionInfoRing
                   v-if="showSessionInfoRing && voiceInputState === 'idle'"
                   class="ml-auto shrink-0"
@@ -1280,7 +1293,7 @@ import { Memoh as MemohIcon, MemohColor } from '@memohai/icon'
 import { AddIcon, UploadIcon } from '@memohai/icon/ui'
 
 import { EXTERNAL_AGENT_DEFAULT_PROJECT_MODE, EXTERNAL_AGENT_DEFAULT_PROJECT_PATH, normalizeAgentID } from '@/utils/external-agent'
-import { ref, reactive, computed, onBeforeUnmount, useTemplateRef, watch, onWatcherCleanup, nextTick, onActivated, onDeactivated } from 'vue'
+import { ref, shallowRef, reactive, computed, onBeforeUnmount, useTemplateRef, watch, onWatcherCleanup, nextTick, onActivated, onDeactivated } from 'vue'
 import {
   ImagePlus,
   ChevronDown,
@@ -1329,6 +1342,8 @@ import { isRuntimeContinuationUserTurn, isRuntimeSteerUserTurn } from '@/store/c
 import { resolveCommandErrorMessage } from '@/store/chat/messages'
 import { isAgentRuntimeType } from '@/store/chat-list.utils'
 import BgTaskPill from './bg-task-pill.vue'
+import SessionActivityTrigger from '@/components/sidebar/session-activity-trigger.vue'
+import { runtimeFailureAlreadyVisible } from './composer-error'
 import ForkSourceDivider from './fork-source-divider.vue'
 import ChatForkDialog from './chat-fork-dialog.vue'
 import ComposerDock from './composer-dock.vue'
@@ -1431,7 +1446,16 @@ function removeAttachment(index: number) {
   removePendingAttachment(index)
 }
 
-const composerError = ref('')
+const composerErrorText = ref('')
+const composerFailure = shallowRef<SendMessageResult>()
+const composerError = computed({
+  get: () => composerErrorText.value,
+  set: (value: string) => { composerErrorText.value = value; composerFailure.value = undefined },
+})
+function setComposerFailure(failure: Pick<SendMessageResult, 'error' | 'errorCode' | 'errorTurnId' | 'errorRunId'>) {
+  composerError.value = failure.error || ''
+  composerFailure.value = { ok: false, ...failure }
+}
 const forkDialogOpen = ref(false)
 const pendingForkTurnId = ref('')
 const modelPopoverOpen = ref(false)
@@ -2642,7 +2666,7 @@ const runtimeModeUnavailableReason = computed(() => unavailableRuntimeModes.valu
 // composerError, matching their precedence before dismissal existed.
 const rawComposerPanelError = computed(() => goalSubmissionBlocked.value
   ? goalExecutionBlockedReason.value
-  : runtimeModeUnavailableReason.value || composerError.value)
+  : runtimeModeUnavailableReason.value || (runtimeFailureAlreadyVisible(composerFailure.value, messages.value) ? '' : composerError.value))
 // Every error line can be dismissed, standing reasons included: a user who
 // already understands the reason should not be forced to keep reading it.
 // Dismissal hides that exact message only — a different message, or the same
@@ -3842,7 +3866,7 @@ watch([
   requestedSkills.value = skillSlashEnabled.value
     ? (failure.restoreRequestedSkills ?? []).map(skill => ({ ...skill }))
     : []
-  composerError.value = failure.error ?? t('chat.sendFailed')
+  setComposerFailure({ ...failure, error: failure.error ?? t('chat.sendFailed') })
   chatStore.clearStartupSendFailure(failure.id)
 }, { immediate: true })
 
@@ -4086,7 +4110,7 @@ async function handleRetryMessage(turnId: string) {
   finishPairSend(result.ok || result.stage === 'stream')
   await refreshACPComposerConfigAfterSelectionError(result)
   if (!result.ok && result.error) {
-    composerError.value = result.error
+    setComposerFailure(result)
   }
 }
 
@@ -4108,7 +4132,7 @@ async function handleEditMessage(turnId: string, text: string, done?: (started: 
     finishPairSend(result.ok || result.stage === 'stream')
     await refreshACPComposerConfigAfterSelectionError(result)
     if (!result.ok && result.error) {
-      composerError.value = result.error
+      setComposerFailure(result)
     }
     done?.(result.ok || result.stage === 'stream')
   } catch {

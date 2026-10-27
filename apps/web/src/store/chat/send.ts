@@ -38,6 +38,9 @@ export interface StartupSendFailure {
   sessionId: string
   composerScope?: string
   error: string
+  errorCode?: string
+  errorTurnId?: string
+  errorRunId?: string
   restoreInput: string
   restoreAttachments?: ChatAttachment[]
   restoreRequestedSkills?: RequestedSkillSelection[]
@@ -452,6 +455,9 @@ export function createChatSend(deps: ChatSendDeps) {
             sessionId: held ? '' : targetSessionId,
             composerScope,
             error: reason,
+            errorCode,
+            errorTurnId: assistantTurn?.turnId,
+            errorRunId: assistantTurn?.runtimeRunId,
             restoreInput: text,
             restoreAttachments: attachments,
             restoreRequestedSkills: cloneRequestedSkills(requestedSkills),
@@ -462,13 +468,15 @@ export function createChatSend(deps: ChatSendDeps) {
           stage,
           error: reason,
           errorCode,
+          errorTurnId: assistantTurn?.turnId,
+          errorRunId: assistantTurn?.runtimeRunId,
           restoreInput: text,
           restoreAttachments: attachments,
           restoreRequestedSkills: cloneRequestedSkills(requestedSkills),
           composerScope,
         }
       }
-      return { ok: false, stage, error: reason, errorCode }
+      return { ok: false, stage, error: reason, errorCode, errorTurnId: assistantTurn?.turnId, errorRunId: assistantTurn?.runtimeRunId }
     } finally {
       stopConfirmationWatch()
     }
@@ -556,7 +564,7 @@ export function createChatSend(deps: ChatSendDeps) {
       } else {
         deps.finalizeStreamFailure(assistantTurn, botId, targetSessionId, failure)
       }
-      return { ok: false, stage, error: reason, errorCode }
+      return { ok: false, stage, error: reason, errorCode, errorTurnId: assistantTurn.turnId, errorRunId: assistantTurn.runtimeRunId }
     }
   }
 
@@ -647,7 +655,7 @@ export function createChatSend(deps: ChatSendDeps) {
       } else {
         deps.finalizeStreamFailure(assistantTurn, botId, targetSessionId, failure)
       }
-      return { ok: false, stage, error: reason, errorCode, restoreInput: text }
+      return { ok: false, stage, error: reason, errorCode, errorTurnId: assistantTurn.turnId, errorRunId: assistantTurn.runtimeRunId, restoreInput: text }
     }
   }
 

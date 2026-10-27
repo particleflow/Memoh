@@ -230,6 +230,8 @@ export interface SendMessageResult {
   stage?: SendMessageStage
   error?: string
   errorCode?: string
+  errorTurnId?: string
+  errorRunId?: string
   restoreInput?: string
   restoreAttachments?: ChatAttachment[]
   restoreRequestedSkills?: RequestedSkillSelection[]

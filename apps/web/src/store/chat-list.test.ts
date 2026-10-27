@@ -2321,6 +2321,7 @@ describe('chat-list store', () => {
         ],
         streaming: false,
       })
+      expect(result).toMatchObject({ errorCode: 'runtime_run_failed', errorTurnId: store.messages[1]!.turnId, errorRunId: store.messages[1]!.runtimeRunId })
       expect(store.startupSendFailure).toBeNull()
     })
 
