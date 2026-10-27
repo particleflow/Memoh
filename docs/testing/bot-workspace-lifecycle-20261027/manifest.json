@@ -1,0 +1,59 @@
+{
+  "packaged_from_existing_evidence": true,
+  "new_test_runs": 0,
+  "new_containers": 0,
+  "images": [
+    {
+      "file": "screenshots/interrupted-before-first-event.png",
+      "source_filename": "interrupted-four.png",
+      "sha256": "a9ea260ba2b315abfbec0dbe5e7a2df4c50a7e2659d510849a93128140b2f7d8",
+      "byte_identical_to_capture": true
+    },
+    {
+      "file": "screenshots/resumed-after-refresh.png",
+      "source_filename": "replayed-four.png",
+      "sha256": "fa90e6bcaffb6026351cf3f5815001e6916fb26549545cf54ce25dcb9cc41d16",
+      "byte_identical_to_capture": true
+    },
+    {
+      "file": "screenshots/resumed-after-leaving.png",
+      "source_filename": "replayed-five.png",
+      "sha256": "b84ad85a9bf2062e38c475d8e05dd2d74759322510d0d5fcfebb1ad402e65b4c",
+      "byte_identical_to_capture": true
+    },
+    {
+      "file": "screenshots/runtime-running.png",
+      "source_filename": "runtime-ready-details.png",
+      "sha256": "29cce9e1950957de8ba36a207c3a3e78ffa3117da30d9fe5bb3ba189c6e92fd7",
+      "byte_identical_to_capture": true
+    },
+    {
+      "file": "screenshots/runtime-files.png",
+      "source_filename": "runtime-files.png",
+      "sha256": "56827ed1eb732ab159b4fc7aa761d7fa958448b68a34d408c6553ee55cdd92d1",
+      "byte_identical_to_capture": true
+    }
+  ],
+  "normalized_records": [
+    {
+      "file": "runtime.json",
+      "original_api_sha256": "09f240f7e8c0c4ea473db81688547e8d08ff8003f960c6b42dc66e45b9cee06b",
+      "original_recovered_inspect_sha256": "3b03481780056800802bcd2370030b252d95bc5aa00159d65c5354db1c886cd6",
+      "normalization": "Allowlisted fields only; removed owner identity, auth/browser context, host filesystem sources, environment and unrelated desktop files. No private endpoint included.",
+      "sha256": "11165e43ed70b01792df8c5221e53b5e145be87c9c5f6943bd70400b9cd9fad7"
+    },
+    {
+      "file": "image-provenance.json",
+      "original_provenance_sha256": "b072054e75bdd9cdc58a85551754f5c0a9d1d4fcfb4fa65faf973b3b54a2cbc7",
+      "original_manifest_sha256": "198499baf1926c131eab45b7bc4501820aa8a4eee7aa4c46e740f78342515dd8",
+      "normalization": "Extracted public image digests and provenance source/version; omitted the remaining build metadata.",
+      "sha256": "f5438bad308e8202b00e9dff8036e7419fd4c36292a813bd3adc759b3e70dea1"
+    },
+    {
+      "file": "targeted-tests.txt",
+      "original_sha256": "ee3a0b1677fed690e13a0f214142a4374b6588c92f91b73a59aa095c078dda2a",
+      "normalization": "Checkout path replaced with <checkout>; trailing blank lines trimmed; this is the existing run, not a new run.",
+      "sha256": "e36c6c1ceb8fb5de4c752b931571324019f57fbe47abdd315e789bcbce25155c"
+    }
+  ]
+}

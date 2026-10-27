@@ -1,0 +1,20 @@
+{
+  "image_name_source_files": [
+    "scripts/install.sh:select_workspace_image",
+    "conf/app.docker.toml:[container].default_image"
+  ],
+  "requested_official_reference": "docker.io/memohai/workspace:debian-latest",
+  "resolved_index_digest": "sha256:9bc968111563981d7ba41cb9eb7abec0b18c860b8b284ad8bdfd431b1ddcfd6b",
+  "selected_platform": "linux/amd64",
+  "platform_manifest_digest": "sha256:971da1181de171d8c252ee4f2db9f725aac411d9f25a35686ece2ec4ce774863",
+  "registry_provenance_blob": "sha256:94fa0d7ecbcd8753a9e6b668586eaa2c3da6316fc673b27b6f347fa899caae11",
+  "registry_provenance_claim": {
+    "source": "https://github.com/felinics/Memoh",
+    "commit": "58124cbe59b3341c7cb8cd33e0158f7a6444edb1",
+    "version": "v0.22.0",
+    "dockerfile": "docker/Dockerfile.workspace"
+  },
+  "image_rebuilt_locally": false,
+  "independent_signature_verification_performed": false,
+  "note": "These source/version fields are read from the registry provenance. They are not a claim that the image was built from the user fork or unified candidate."
+}

@@ -1,0 +1,159 @@
+{
+  "capture_date_utc": "2026-10-27",
+  "scope": "isolated cloud development; Docker backend; synthetic test data",
+  "state_is_historical": true,
+  "service_stopped_after_validation": true,
+  "test_containers_archived_then_removed": true,
+  "bot": {
+    "http_status": 200,
+    "body": {
+      "id": "fc248e4d-16b6-42bb-ac93-72b33a9d5162",
+      "name": "runtime-success-audit",
+      "display_name": "Runtime Success Audit",
+      "status": "ready",
+      "check_state": "ok",
+      "check_issue_count": 0,
+      "created_at": "2026-10-27T18:48:29.594259Z",
+      "updated_at": "2026-10-27T18:48:45.013189Z"
+    }
+  },
+  "container": {
+    "status": 200,
+    "body": {
+      "container_id": "workspace-fc248e4d-16b6-42bb-ac93-72b33a9d5162",
+      "workspace_backend": "container",
+      "runtime_backend": "docker",
+      "image": "docker.io/memohai/workspace@sha256:9bc968111563981d7ba41cb9eb7abec0b18c860b8b284ad8bdfd431b1ddcfd6b",
+      "status": "running",
+      "namespace": "default",
+      "container_path": "/data",
+      "task_running": true,
+      "has_preserved_data": false,
+      "legacy": false,
+      "created_at": "2026-10-27T18:48:45.006678Z",
+      "updated_at": "2026-10-27T18:48:45.009399Z"
+    }
+  },
+  "checks": {
+    "status": 200,
+    "body": {
+      "items": [
+        {
+          "id": "container.init",
+          "type": "container.init",
+          "title_key": "bots.checks.titles.containerInit",
+          "status": "ok",
+          "summary": "Initialization finished."
+        },
+        {
+          "id": "container.record",
+          "type": "container.record",
+          "title_key": "bots.checks.titles.containerRecord",
+          "status": "ok",
+          "summary": "Workspace runtime record exists.",
+          "detail": "runtime_id=workspace-fc248e4d-16b6-42bb-ac93-72b33a9d5162",
+          "metadata": {
+            "container_id": "workspace-fc248e4d-16b6-42bb-ac93-72b33a9d5162",
+            "image": "docker.io/memohai/workspace@sha256:9bc968111563981d7ba41cb9eb7abec0b18c860b8b284ad8bdfd431b1ddcfd6b",
+            "namespace": "default"
+          }
+        },
+        {
+          "id": "container.task",
+          "type": "container.task",
+          "title_key": "bots.checks.titles.containerTask",
+          "status": "ok",
+          "summary": "Workspace runtime state is reported.",
+          "detail": "status=running",
+          "metadata": {
+            "status": "running"
+          }
+        },
+        {
+          "id": "container.data_path",
+          "type": "container.data_path",
+          "title_key": "bots.checks.titles.containerDataPath",
+          "status": "ok",
+          "summary": "Workspace is reachable via gRPC."
+        }
+      ]
+    }
+  },
+  "bootstrap_files": {
+    "http_status": 200,
+    "path": "/data",
+    "verified_present": [
+      "AGENTS.md",
+      "MEMORY.md",
+      "PROFILES.md"
+    ]
+  },
+  "write": {
+    "status": 200,
+    "body": {
+      "ok": true,
+      "revision": "sha256:fdf01308a280d33ba4a922a891f0834ca501aa52d937052b9eb9346e18a727d0"
+    }
+  },
+  "read": {
+    "status": 200,
+    "body": {
+      "path": "/data/runtime-ownership-check.txt",
+      "content": "Bot fc248e4d-16b6-42bb-ac93-72b33a9d5162 workspace ownership verified\n",
+      "size": 70,
+      "revision": "sha256:fdf01308a280d33ba4a922a891f0834ca501aa52d937052b9eb9346e18a727d0"
+    }
+  },
+  "independent_container_readback": {
+    "path": "/data/runtime-ownership-check.txt",
+    "content": "Bot fc248e4d-16b6-42bb-ac93-72b33a9d5162 workspace ownership verified\n",
+    "matches_api_read": true
+  },
+  "container_labels": {
+    "memoh.bot_id": "fc248e4d-16b6-42bb-ac93-72b33a9d5162",
+    "memoh.workspace": "v3"
+  },
+  "storage_semantics": {
+    "backend": "docker",
+    "container_path": "/data",
+    "ownership": "Docker writable container layer; not a host /data bind mount",
+    "not_verified": [
+      "survival after container deletion or recreation",
+      "NAS containerd storage behavior"
+    ]
+  },
+  "bridge": {
+    "process": "/opt/memoh/bridge",
+    "log": "bridge gRPC server listening",
+    "transport_for_this_backend": "tcp :9090 through the Docker adapter",
+    "file_api_round_trip_http_status": 200
+  },
+  "recovery": {
+    "bot_id": "f7da99b3-6350-4dd8-b0c4-52c8582c4bb5",
+    "bot_name": "replay-audit-four",
+    "original_failure_phase": "image_prepare",
+    "same_bot_identity": true,
+    "new_bot_created_for_recovery": false,
+    "last_database_observation": {
+      "bot_status": "ready",
+      "desired_generation": 2,
+      "observed_generation": 2,
+      "observed_state": "running",
+      "ever_ready": true,
+      "last_error": ""
+    },
+    "container_name": "workspace-f7da99b3-6350-4dd8-b0c4-52c8582c4bb5",
+    "image": "docker.io/memohai/workspace@sha256:9bc968111563981d7ba41cb9eb7abec0b18c860b8b284ad8bdfd431b1ddcfd6b",
+    "labels": {
+      "memoh.bot_id": "f7da99b3-6350-4dd8-b0c4-52c8582c4bb5",
+      "memoh.workspace": "v3"
+    },
+    "container_started_at": "2026-10-27T18:49:21.357055077Z",
+    "state_when_archived": {
+      "Status": "exited",
+      "Running": false,
+      "ExitCode": 0
+    },
+    "note": "Container was observed running before cleanup, then stopped for archival. The database is the last reconciler observation, not current live state."
+  }
+}
