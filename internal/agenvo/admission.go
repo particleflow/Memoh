@@ -19,13 +19,16 @@ type admissionStore interface {
 // Admission reports only new-input admission for the registered native identity.
 // Paused is not a drain result, process exit proof or authorization to stop a host.
 type Admission struct {
-	ConnectionID string `json:"connection_id"`
-	DeviceID     string `json:"device_id"`
-	InstanceID   string `json:"instance_id"`
-	RequestID    string `json:"request_id,omitempty"`
-	Revision     string `json:"revision"`
-	Paused       bool   `json:"paused"`
-	Scope        string `json:"scope"`
+	ConnectionID      string `json:"connection_id"`
+	DeviceID          string `json:"device_id"`
+	InstanceID        string `json:"instance_id"`
+	RequestID         string `json:"request_id,omitempty"`
+	Revision          string `json:"revision"`
+	Paused            bool   `json:"paused"`
+	Scope             string `json:"scope"`
+	ConfigSHA256      string `json:"config_sha256,omitempty"`
+	TargetFingerprint string `json:"target_fingerprint,omitempty"`
+	AgentConfigDir    string `json:"agent_config_dir,omitempty"`
 }
 
 type ChangeAdmission struct {
@@ -63,16 +66,44 @@ func (s *Service) admissionTarget(ctx context.Context, owner, runtime string) (a
 
 // ReadAdmission performs no native call and never creates or resumes a gate.
 func (s *Service) ReadAdmission(ctx context.Context, owner, runtime string) (Admission, error) {
-	store, _, target, err := s.admissionTarget(ctx, owner, runtime)
+	if s == nil || s.store == nil {
+		return Admission{}, ErrUnavailable
+	}
+	store, ok := s.store.(dbstore.NativeAdmissionSnapshotStore)
+	if !ok {
+		return Admission{}, ErrUnavailable
+	}
+	snapshot, err := store.ReadNativeAdmissionSnapshot(ctx, owner, runtime)
 	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			return Admission{}, ErrForbidden
+		}
 		return Admission{}, err
 	}
-	row, err := store.ReadComputerAdmission(ctx, owner, target.ConnectionID, target.DeviceID, target.InstanceID)
-	if errors.Is(err, db.ErrNotFound) {
-		row = dbstore.ComputerAdmission{ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID}
-		err = nil
+	if snapshot.RuntimeID != runtime {
+		return Admission{}, ErrForbidden
 	}
-	return admissionResponse(row), err
+	if snapshot.Provider != "memoh" {
+		return Admission{}, ErrLegacyRetired
+	}
+	target, err := DecodeNativeTarget(snapshot.RuntimeID, snapshot.ProviderConfig)
+	if err != nil {
+		return Admission{}, db.ErrComputerAdmissionScope
+	}
+	gate := dbstore.ComputerAdmission{ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID}
+	if snapshot.Gate != nil {
+		gate = *snapshot.Gate
+		if gate.ConnectionID != target.ConnectionID || gate.DeviceID != target.DeviceID || gate.InstanceID != target.InstanceID {
+			return Admission{}, db.ErrComputerAdmissionScope
+		}
+	}
+	digest, err := NativeProfileConfigDigest(snapshot.ProviderConfig)
+	if err != nil {
+		return Admission{}, db.ErrComputerAdmissionScope
+	}
+	out := admissionResponse(gate)
+	out.ConfigSHA256, out.TargetFingerprint, out.AgentConfigDir = digest, TargetFingerprint(target), target.Agent.ConfigDir
+	return out, nil
 }
 
 // SetAdmission checks the existing owned native registration. The database

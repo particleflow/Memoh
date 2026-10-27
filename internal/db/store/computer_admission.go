@@ -17,3 +17,16 @@ type ComputerAdmissionStore interface {
 	ReadComputerAdmission(context.Context, string, string, string, string) (ComputerAdmission, error)
 	ChangeComputerAdmission(context.Context, string, string, JSON, string, int64, bool) (ComputerAdmission, error)
 }
+
+// NativeAdmissionSnapshot is internal: only approved identity/digest fields may
+// be projected to HTTP. The runtime registration and gate share one DB snapshot.
+type NativeAdmissionSnapshot struct {
+	RuntimeID      string             `json:"runtime_id"`
+	Provider       string             `json:"provider"`
+	ProviderConfig JSON               `json:"provider_config"`
+	Gate           *ComputerAdmission `json:"gate"`
+}
+
+type NativeAdmissionSnapshotStore interface {
+	ReadNativeAdmissionSnapshot(context.Context, string, string) (NativeAdmissionSnapshot, error)
+}

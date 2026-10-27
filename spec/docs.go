@@ -19269,7 +19269,7 @@ const docTemplate = `{
         },
         "/users/me/runtimes/{id}/admission": {
             "get": {
-                "description": "Reads the existing durable admission gate without contacting or stopping the host. A pause is not proof that accepted work has drained.",
+                "description": "Reads native profile identity and admission from one database snapshot. Includes config_sha256, target_fingerprint and agent_config_dir for owner cutover reconciliation; never returns a credential or complete provider config. A pause is not proof that accepted work has drained.",
                 "produces": [
                     "application/json"
                 ],
@@ -21342,6 +21342,12 @@ const docTemplate = `{
         "agenvo.Admission": {
             "type": "object",
             "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "config_sha256": {
+                    "type": "string"
+                },
                 "connection_id": {
                     "type": "string"
                 },
@@ -21361,6 +21367,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "scope": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
                     "type": "string"
                 }
             }

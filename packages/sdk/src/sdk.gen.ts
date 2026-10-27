@@ -3207,7 +3207,7 @@ export const deleteUsersMeRuntimesById = <ThrowOnError extends boolean = false>(
 /**
  * Read owned computer admission state
  *
- * Reads the existing durable admission gate without contacting or stopping the host. A pause is not proof that accepted work has drained.
+ * Reads native profile identity and admission from one database snapshot. Includes config_sha256, target_fingerprint and agent_config_dir for owner cutover reconciliation; never returns a credential or complete provider config. A pause is not proof that accepted work has drained.
  */
 export const getUsersMeRuntimesByIdAdmission = <ThrowOnError extends boolean = false>(options: Options<GetUsersMeRuntimesByIdAdmissionData, ThrowOnError>): RequestResult<GetUsersMeRuntimesByIdAdmissionResponses, GetUsersMeRuntimesByIdAdmissionErrors, ThrowOnError> => (options.client ?? client).get<GetUsersMeRuntimesByIdAdmissionResponses, GetUsersMeRuntimesByIdAdmissionErrors, ThrowOnError>({ url: '/users/me/runtimes/{id}/admission', ...options });
 

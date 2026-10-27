@@ -40,3 +40,24 @@ recovery, cancellation, logs and artifact operations retain their original
 execution pin. Historical references do not authorize filesystem access or
 resubmission, and unknown operations remain unknown. Reads do not update
 operation rows or contact the native transport.
+
+## Owner readback after a lost acknowledgement
+
+Use the existing authenticated owner endpoint
+`GET /users/me/runtimes/{id}/admission`. Its response now includes
+`config_sha256`, `target_fingerprint` and `agent_config_dir`, alongside the
+original identity, `request_id`, string `revision` and `paused` fields.
+The registration and gate are read in one PostgreSQL MVCC statement, so a
+concurrent atomic cutover is observed entirely before or entirely after commit.
+No credential column is selected and the full provider configuration is never
+projected to HTTP. GET does not create or update a gate and contacts no host.
+
+The owner client must match the Runtime/instance and pause request, require
+`paused: true`, and compare the current directory to its intended directory.
+Adopt the returned digest, fingerprint and revision only after those checks.
+If the directory or identity differs, retain the pause and report the observed
+winner; do not replay PUT or resume automatically. A later cutover can still
+win after GET returns, so every subsequent write must use the returned CAS
+facts and handle a conflict. This endpoint does not freeze future writes.
+Use this single readback instead of the credential-management Runtime list or
+joining two separate GET responses. No migration is required for this query.

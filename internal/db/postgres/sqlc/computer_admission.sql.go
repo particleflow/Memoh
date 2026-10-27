@@ -132,3 +132,36 @@ func (q *Queries) ReadComputerAdmission(ctx context.Context, arg ReadComputerAdm
 	)
 	return i, err
 }
+
+const readNativeAdmissionSnapshot = `-- name: ReadNativeAdmissionSnapshot :one
+SELECT jsonb_build_object(
+  'runtime_id',r.id,'provider',r.provider,'provider_config',r.provider_config,
+  'gate',to_jsonb(g))::jsonb AS snapshot
+FROM user_runtimes r
+JOIN users u ON u.id=r.user_id AND u.is_active
+JOIN team_members m ON m.user_id=u.id AND m.team_id=r.team_id AND m.is_active
+LEFT JOIN LATERAL (
+  SELECT a.team_id, a.owner_id, a.connection_id, a.device_id, a.instance_id, a.request_id, a.paused, a.revision, a.updated_at FROM computer_admission_gates a
+  WHERE a.team_id=r.team_id AND a.owner_id=r.user_id
+    AND (a.connection_id=r.id OR a.paused)
+    AND a.device_id=public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'device_id'
+    AND a.instance_id=public.memoh_computer_admission_identity(r.provider,r.id,r.provider_config)->>'instance_id'
+  ORDER BY a.paused DESC,(a.connection_id=r.id) DESC LIMIT 1
+) g ON true
+WHERE r.team_id=public.memoh_current_team_id() AND r.id=$1::uuid
+  AND r.user_id=$2::uuid AND r.activated_at IS NOT NULL AND r.revoked_at IS NULL
+`
+
+type ReadNativeAdmissionSnapshotParams struct {
+	RuntimeID pgtype.UUID `json:"runtime_id"`
+	OwnerID   pgtype.UUID `json:"owner_id"`
+}
+
+// One MVCC statement sees either side of a committed cutover, never a mix.
+// Intentionally exclude api_token and all credential columns.
+func (q *Queries) ReadNativeAdmissionSnapshot(ctx context.Context, arg ReadNativeAdmissionSnapshotParams) ([]byte, error) {
+	row := q.db.QueryRow(ctx, readNativeAdmissionSnapshot, arg.RuntimeID, arg.OwnerID)
+	var snapshot []byte
+	err := row.Scan(&snapshot)
+	return snapshot, err
+}

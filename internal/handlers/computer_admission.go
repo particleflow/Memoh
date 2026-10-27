@@ -11,11 +11,12 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	"github.com/felinics/memoh/internal/apperror"
+	"github.com/felinics/memoh/internal/auth"
 )
 
 // ReadAdmission godoc
 // @Summary Read owned computer admission state
-// @Description Reads the existing durable admission gate without contacting or stopping the host. A pause is not proof that accepted work has drained.
+// @Description Reads native profile identity and admission from one database snapshot. Includes config_sha256, target_fingerprint and agent_config_dir for owner cutover reconciliation; never returns a credential or complete provider config. A pause is not proof that accepted work has drained.
 // @Tags user-runtimes
 // @Produce json
 // @Param id path string true "Existing owner runtime ID"
@@ -24,6 +25,9 @@ import (
 // @Failure 409 {object} server.Problem
 // @Router /users/me/runtimes/{id}/admission [get].
 func (h *UserRuntimeHandler) ReadAdmission(c echo.Context) error {
+	if _, err := auth.ChatTokenFromContext(c); err == nil {
+		return apperror.New(apperror.CodeHTTPForbidden, nil)
+	}
 	owner, err := RequireChannelIdentityID(c)
 	if err != nil {
 		return err

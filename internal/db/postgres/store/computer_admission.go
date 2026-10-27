@@ -108,3 +108,26 @@ func (s *Store) CutoverPausedNativeProfile(ctx context.Context, owner, runtime, 
 	err = json.Unmarshal(raw, &out)
 	return out, err
 }
+
+func (s *Store) ReadNativeAdmissionSnapshot(ctx context.Context, owner, runtime string) (dbstore.NativeAdmissionSnapshot, error) {
+	u, err := db.ParseUUID(owner)
+	if err != nil {
+		return dbstore.NativeAdmissionSnapshot{}, err
+	}
+	r, err := db.ParseUUID(runtime)
+	if err != nil {
+		return dbstore.NativeAdmissionSnapshot{}, err
+	}
+	raw, err := s.queries.ReadNativeAdmissionSnapshot(ctx, dbsqlc.ReadNativeAdmissionSnapshotParams{OwnerID: u, RuntimeID: r})
+	if err != nil {
+		return dbstore.NativeAdmissionSnapshot{}, mapQueryErr(err)
+	}
+	var snapshot struct {
+		RuntimeID      string                     `json:"runtime_id"`
+		Provider       string                     `json:"provider"`
+		ProviderConfig json.RawMessage            `json:"provider_config"`
+		Gate           *dbstore.ComputerAdmission `json:"gate"`
+	}
+	err = json.Unmarshal(raw, &snapshot)
+	return dbstore.NativeAdmissionSnapshot{RuntimeID: snapshot.RuntimeID, Provider: snapshot.Provider, ProviderConfig: dbstore.JSON(snapshot.ProviderConfig), Gate: snapshot.Gate}, err
+}

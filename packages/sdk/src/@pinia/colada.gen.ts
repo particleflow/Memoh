@@ -5730,7 +5730,7 @@ export const getUsersMeRuntimesByIdAdmissionQueryKey = (options: Options<GetUser
 /**
  * Read owned computer admission state
  *
- * Reads the existing durable admission gate without contacting or stopping the host. A pause is not proof that accepted work has drained.
+ * Reads native profile identity and admission from one database snapshot. Includes config_sha256, target_fingerprint and agent_config_dir for owner cutover reconciliation; never returns a credential or complete provider config. A pause is not proof that accepted work has drained.
  */
 export const getUsersMeRuntimesByIdAdmissionQuery = defineQueryOptions<Options<GetUsersMeRuntimesByIdAdmissionData>, GetUsersMeRuntimesByIdAdmissionResponse, GetUsersMeRuntimesByIdAdmissionError>((options: Options<GetUsersMeRuntimesByIdAdmissionData>) => ({
     key: getUsersMeRuntimesByIdAdmissionQueryKey(options),

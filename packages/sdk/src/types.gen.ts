@@ -385,6 +385,8 @@ export type AgentcredentialPublicCredential = {
 };
 
 export type AgenvoAdmission = {
+    agent_config_dir?: string;
+    config_sha256?: string;
     connection_id?: string;
     device_id?: string;
     instance_id?: string;
@@ -392,6 +394,7 @@ export type AgenvoAdmission = {
     request_id?: string;
     revision?: string;
     scope?: string;
+    target_fingerprint?: string;
 };
 
 export type AgenvoAgentObservation = {

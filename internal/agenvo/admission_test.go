@@ -39,6 +39,16 @@ func (s *admissionTestStore) ReadComputerAdmission(_ context.Context, _, _, _, _
 	return s.gate, nil
 }
 
+func (s *admissionTestStore) ReadNativeAdmissionSnapshot(ctx context.Context, owner, id string) (dbstore.NativeAdmissionSnapshot, error) {
+	row, err := s.OwnedNativeHerdrRuntime(ctx, owner, id)
+	out := dbstore.NativeAdmissionSnapshot{RuntimeID: row.ID, Provider: row.Provider, ProviderConfig: row.ProviderConfig}
+	if s.gate.Revision > 0 {
+		gate := s.gate
+		out.Gate = &gate
+	}
+	return out, err
+}
+
 func (s *admissionTestStore) ChangeComputerAdmission(_ context.Context, owner, runtime string, raw dbstore.JSON, request string, rev int64, paused bool) (dbstore.ComputerAdmission, error) {
 	if owner != "owner" || runtime != syntheticNativeID || string(raw) != string(s.config) {
 		return dbstore.ComputerAdmission{}, db.ErrComputerAdmissionScope
@@ -93,5 +103,48 @@ func TestAdmissionOwnerBindingWithoutRemoteDispatch(t *testing.T) {
 	store.failure = db.ErrComputerAdmissionScope
 	if _, err = service.SetAdmission(t.Context(), "owner", syntheticNativeID, in); !errors.Is(err, db.ErrComputerAdmissionScope) {
 		t.Fatal("mapping conflict hidden", err)
+	}
+}
+
+type admissionSnapshotFixture struct {
+	*serviceStore
+	snapshot dbstore.NativeAdmissionSnapshot
+}
+
+func (s *admissionSnapshotFixture) ReadNativeAdmissionSnapshot(context.Context, string, string) (dbstore.NativeAdmissionSnapshot, error) {
+	return s.snapshot, nil
+}
+
+func TestAdmissionSnapshotRejectsChangedIdentityAndLegacy(t *testing.T) {
+	service, base, _ := serviceFixture(t)
+	target, err := DecodeNativeTarget(syntheticNativeID, base.record.RuntimeProviderConfig)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gate := dbstore.ComputerAdmission{ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID, Revision: 3, Paused: true}
+	original := dbstore.NativeAdmissionSnapshot{RuntimeID: syntheticNativeID, Provider: "memoh", ProviderConfig: base.record.RuntimeProviderConfig, Gate: &gate}
+	for _, kind := range []string{"runtime", "connection", "instance", "legacy", "missing_store"} {
+		t.Run(kind, func(t *testing.T) {
+			snapshot := original
+			changed := gate
+			snapshot.Gate = &changed
+			switch kind {
+			case "runtime":
+				snapshot.RuntimeID = "other"
+			case "connection":
+				changed.ConnectionID = "other"
+			case "instance":
+				changed.InstanceID = "other"
+			case "legacy":
+				snapshot.Provider = Provider
+			}
+			service.store = &admissionSnapshotFixture{serviceStore: base, snapshot: snapshot}
+			if kind == "missing_store" {
+				service.store = base
+			}
+			if _, err := service.ReadAdmission(t.Context(), "owner", syntheticNativeID); err == nil {
+				t.Fatalf("unverified %s accepted", kind)
+			}
+		})
 	}
 }
