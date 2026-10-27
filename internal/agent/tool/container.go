@@ -331,15 +331,6 @@ Delete a file:
 		}
 		toolList = append([]toolexec.Tool{locationTool}, toolList...)
 	}
-	if workspace.computerTaskOnly {
-		filtered := toolList[:0]
-		for _, tool := range toolList {
-			if tool.Name == ToolListExecutionLocations().String() {
-				filtered = append(filtered, tool)
-			}
-		}
-		return filtered, nil
-	}
 	return toolList, nil
 }
 
@@ -391,8 +382,7 @@ type execArgs struct {
 }
 
 type toolWorkspace struct {
-	computerTaskOnly bool
-	defaultWorkDir   string
+	defaultWorkDir string
 	// workdirPath is the session's working directory. It changes where
 	// relative tool paths land and what cwd exec defaults to; it never
 	// replaces defaultWorkDir, which stays the workspace root that
@@ -499,18 +489,6 @@ func toolWorkspaceFromInfo(info bridge.WorkspaceInfo, fallbackWorkDir, workdirPa
 - Do not use start to detach a command. Use run_in_background so the Runtime retains ownership of the process tree.`
 			workspace.delayInstruction = "  - Do not use timeout /t or ping loops to wait for background work; use wait_until."
 		}
-	}
-	if info.Backend == bridge.WorkspaceBackendAgenvo {
-		workspace.computerTaskOnly = true
-		workspace.windows = true
-		// The executor resolves this against the current authorized target config.
-		workspace.defaultWorkDir = "."
-		workspace.locationDescription = "on the selected Agenvo Windows machine"
-		workspace.absolutePathDescription = "Windows path"
-		workspace.shellDescription = "Git Bash on Windows"
-		workspace.commandExamples = "pwd, ls, printf 'hello\\n'"
-		workspace.platformInstructions = "- Agenvo executes foreground Bash commands through the explicitly configured Git Bash on the selected Windows machine, not WSL. Use Bash syntax. Use root-relative work_dir paths (default: .); the base is the registered Windows target root, never the server or pane cwd. Paths escaping that root are rejected. Legacy absolute paths are accepted only inside the current root. Use relative file references in Bash; cygpath is available for explicit path conversion.\n- File/HostFS tools, interactive terminals, stdin, custom environment and background tasks are unavailable.\n- Cancellation stops waiting, not the Windows process. An unknown result must not be retried automatically. Workspaces remain for manual inspection."
-		workspace.delayInstruction = ""
 	}
 	return workspace
 }
@@ -1142,9 +1120,6 @@ func (p *ContainerProvider) execExec(ctx context.Context, session SessionContext
 	command := strings.TrimSpace(args.Command)
 	if command == "" {
 		return nil, errors.New("command is required")
-	}
-	if target.workspace.computerTaskOnly {
-		return nil, agenvo.ErrComputerTaskRequired
 	}
 	workDir := strings.TrimSpace(args.WorkDir)
 	switch {

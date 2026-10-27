@@ -83,7 +83,7 @@ func (s *Service) followup(ctx context.Context, b toolcontext.ComputerBinding, i
 	if err != nil || id == uuid.Nil || id.String() != in.RequestID || in.OperationID == "" || b.RunID == "" || (in.Mode != "current_agent" && in.Mode != "bound_session") || strings.TrimSpace(in.Task) == "" || len(in.Task) > 32000 || !utf8.ValidString(in.Task) || strings.ContainsRune(in.Task, 0) {
 		return Result{}, ErrInvalid
 	}
-	r, d, err := s.load(ctx, b, in.OperationID)
+	r, d, err := s.loadHistory(ctx, b, in.OperationID)
 	if err != nil {
 		return Result{}, err
 	}

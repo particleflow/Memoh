@@ -317,9 +317,6 @@ func (m *Manager) HookConfigClient(ctx context.Context, botID string) (*bridge.C
 	if err != nil {
 		return nil, err
 	}
-	if target.Info.Backend == bridge.WorkspaceBackendAgenvo {
-		return m.nativeMCPClient(ctx, botID)
-	}
 	return target.Client, nil
 }
 

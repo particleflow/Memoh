@@ -119,6 +119,12 @@ func (s *Service) ResolveTarget(ctx context.Context, scope Scope) (Target, error
 	return t, err
 }
 
+// ResolveHistoricalTarget authorizes a stored identity without enabling execution.
+func (s *Service) ResolveHistoricalTarget(ctx context.Context, scope Scope) (Target, error) {
+	t, _, err := s.resolveForHistory(ctx, scope, true)
+	return t, err
+}
+
 func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, error) {
 	target, owner, err := s.resolve(ctx, scope)
 	if err != nil {
@@ -135,6 +141,10 @@ func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, err
 }
 
 func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, error) {
+	return s.resolveForHistory(ctx, scope, false)
+}
+
+func (s *Service) resolveForHistory(ctx context.Context, scope Scope, history bool) (Target, string, error) {
 	if err := toolcontext.CheckDelegationTarget(ctx, scope.BotID, scope.TargetID, "workspace_exec"); err != nil {
 		return Target{}, "", err
 	}
@@ -153,12 +163,23 @@ func (s *Service) resolve(ctx context.Context, scope Scope) (Target, string, err
 		return Target{}, "", ErrForbidden
 	}
 	// Historical registrations retain their stored identity, but cannot execute.
-	if record.RuntimeProvider == Provider {
+	if record.RuntimeProvider == Provider && !history {
 		return Target{}, "", ErrLegacyRetired
 	}
 	target, err := DecodeRuntimeTarget(record.RuntimeProvider, record.RuntimeID, record.RuntimeProviderConfig)
 	if err != nil {
 		return Target{}, "", err
+	}
+	if record.RuntimeProvider == Provider {
+		owned, ok := s.store.(interface {
+			OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error)
+		})
+		if !ok || record.RuntimeID == "" || record.RuntimeUserID == "" {
+			return Target{}, "", ErrForbidden
+		}
+		if _, err := owned.OwnedHTTPMCPConnectionBot(ctx, record.RuntimeUserID, target.ConnectionID); err != nil {
+			return Target{}, "", ErrForbidden
+		}
 	}
 	if pin, ok := ctx.Value(registrationPinKey{}).(registrationPin); ok && (pin.Scope != scope || pin.Fingerprint == "" || pin.Fingerprint != TargetFingerprint(target)) {
 		return Target{}, "", ErrTargetChanged
