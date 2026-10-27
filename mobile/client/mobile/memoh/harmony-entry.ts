@@ -1,6 +1,11 @@
 import { installHarmonyBack } from './harmony-back'
 import { SERVICE_CONFIG_KEY, EDIT_SERVICE_KEY, inspectServiceSetup, readDeploymentConfig, applyDeploymentConfig, deploymentNetworkPolicy, saveServiceConfig, finishServiceTransition, commitServiceTransition, editServiceConfig, type ServiceConfig } from './harmony-service-config'
 import type { TransferNetworkPolicy } from './harmony-service-url'
+import { effectScope, watch } from 'vue'
+import { useColorMode, useStorage } from '@vueuse/core'
+import { isColorSchemeId } from '../constants/color-schemes'
+import uiTheme from './harmony-theme.json'
+import '../style.css'
 import './harmony-service.css'
 
 type Bridge = { request: (raw: string) => Promise<string> }
@@ -15,6 +20,31 @@ async function nativeCommand(command: string, apiOrigin?: string, networkPolicy?
 }
 
 installHarmonyBack()
+
+// Before main mounts, the existing setup form still uses the shared preferences
+// and tokens. Release its media watchers when the shared settings store takes over.
+let stopSetupAppearance = () => {}
+function startSetupAppearance() {
+  stopSetupAppearance()
+  const scope = effectScope()
+  scope.run(() => {
+    const theme = useStorage<string>('theme', 'system')
+    const scheme = useStorage<string>('color-scheme', 'memoh')
+    const mode = useColorMode({ emitAuto: true, storageKey: null, modes: { warm: 'warm' } })
+    watch(theme, value => {
+      mode.value = value === 'light' || value === 'dark' || value === 'warm' ? value : 'auto'
+    }, { immediate: true })
+    watch(scheme, value => {
+      document.documentElement.dataset.colorScheme = isColorSchemeId(value) ? value : 'memoh'
+    }, { immediate: true })
+    watch(mode.state, value => {
+      const themeId = value === 'warm' ? 'warm-theme' : value === 'dark' ? uiTheme.defaultDark : uiTheme.defaultLight
+      void native?.request(JSON.stringify({ version: 1, command: 'client.theme', themeId })).catch(() => {})
+    }, { immediate: true })
+  })
+  stopSetupAppearance = () => scope.stop()
+}
+startSetupAppearance()
 
 let started = false
 let packagedConfig: unknown
@@ -32,6 +62,7 @@ async function boot(config: ServiceConfig) {
       config = commitServiceTransition(config)
     }
     await nativeCommand('client.configure', config.apiOrigin, deploymentNetworkPolicy(packagedConfig, config.apiOrigin))
+    stopSetupAppearance()
     await import('../main')
     const { default: router } = await import('../router')
     installHarmonyBack(router)
@@ -43,6 +74,7 @@ async function boot(config: ServiceConfig) {
     const update = () => { button.hidden = router.currentRoute.value.name !== 'Login' }
     router.afterEach(update); update()
   } catch {
+    startSetupAppearance()
     started = false
     form(config, '启动或本地配置读取失败。未连接服务，请检查配置后重试。')
   }

@@ -117,7 +117,7 @@ def context_archive(lock, base=BASE, platform='harmony'):
         'surface-composer': colors['Surface']['Container'],
         'workspace-divider-color': colors['SurfaceVariant']['ContainerLine'],
     }
-    warm_css = '\n:root.warm {\n  color-scheme: light;\n' + ''.join(
+    warm_css = '\n:root.warm[data-color-scheme] {\n  color-scheme: light;\n' + ''.join(
         '  --' + name + ': ' + value + ';\n' for name, value in warm_tokens.items()) + '}\n'
     changes = {
         'apps/web/src/pages/home/components/thinking-block.vue': [
@@ -880,6 +880,183 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     recovery_locales = json.loads((ROOT / 'mobile/memoh' / recovery['locales']['local']).read_text())
 
 
+    # Apply this small shared UI delta after the reviewed phone adaptations.
+    # Keep native attachment/voice preparation and the full existing theme set.
+    composer_appearance_changes = {'apps/web/src/pages/home/components/chat-pane.vue': [('                  <!-- While voice owns the composer',
+                                                           '                  <Button\n'
+                                                           '                    v-if="streaming"\n'
+                                                           '                    type="button"\n'
+                                                           '                    variant="secondary"\n'
+                                                           '                    size="icon-sm"\n'
+                                                           '                    shape="circle"\n'
+                                                           '                    '
+                                                           ':aria-label="$t(\'chat.stopGenerating\')"\n'
+                                                           '                    class="shrink-0 max-md:size-11"\n'
+                                                           '                    '
+                                                           '@click="chatStore.abort(paneTarget)"\n'
+                                                           '                  >\n'
+                                                           '                    <svg\n'
+                                                           '                      viewBox="0 0 24 24"\n'
+                                                           '                      fill="currentColor"\n'
+                                                           '                      class="size-4 '
+                                                           'max-md:size-4.5"\n'
+                                                           '                      aria-hidden="true"\n'
+                                                           '                    >\n'
+                                                           '                      <rect\n'
+                                                           '                        x="4"\n'
+                                                           '                        y="4"\n'
+                                                           '                        width="16"\n'
+                                                           '                        height="16"\n'
+                                                           '                        rx="3"\n'
+                                                           '                      />\n'
+                                                           '                    </svg>\n'
+                                                           '                  </Button>\n'
+                                                           '\n'
+                                                           '                  <!-- While voice owns the composer',
+                                                           1),
+                                                          ('                    <!-- Send and stop are one brand '
+                                                           'circle: the surface never\n'
+                                                           '                         changes between the two '
+                                                           'states, only the glyph cross-fades\n'
+                                                           '                         (arrow ⇄ stop square), so '
+                                                           "the button can't blink color or\n"
+                                                           '                         shape mid-turn. While '
+                                                           'streaming it stays clickable to abort. -->\n',
+                                                           '                    <!-- Sending during a run uses '
+                                                           'the existing follow-up queue.\n'
+                                                           '                         Stop has its own control so '
+                                                           'an emptied draft or double\n'
+                                                           '                         click can never turn a send '
+                                                           'gesture into an abort. -->\n',
+                                                           1),
+                                                          ('                        '
+                                                           ':disabled="attachmentUploading || (streaming ? false '
+                                                           ': (!showSend || !currentBotId || activeChatReadOnly '
+                                                           '|| loadingMessages || composerConfigPending || '
+                                                           'composerHasNoModel || goalSubmissionBlocked || '
+                                                           '!!runtimeModeUnavailableReason))"',
+                                                           '                        '
+                                                           ':disabled="attachmentUploading || '
+                                                           'nativeAttachmentBusy || !showSend || !currentBotId '
+                                                           '|| activeChatReadOnly || loadingMessages || '
+                                                           '(streaming ? pendingFiles.length > 0 || '
+                                                           'pendingNativeAttachments.length > 0 || '
+                                                           'requestedSkills.length > 0 : composerConfigPending '
+                                                           '|| composerHasNoModel || goalSubmissionBlocked || '
+                                                           '!!runtimeModeUnavailableReason)"',
+                                                           1),
+                                                          ('                        :aria-label="streaming && '
+                                                           "showSend ? $t(composerQueueCommand?.mode === 'steer' "
+                                                           "? 'chat.queue.enqueueSteer' : "
+                                                           "'chat.queue.enqueueFollowUp') : (streaming ? 'Stop "
+                                                           'generating response\' : \'Send message\')"',
+                                                           '                        :aria-label="streaming && '
+                                                           "showSend ? $t(composerQueueCommand?.mode === 'steer' "
+                                                           "? 'chat.queue.enqueueSteer' : "
+                                                           '\'chat.queue.enqueueFollowUp\') : $t(\'chat.send\')"',
+                                                           1),
+                                                          ('                            :class="streaming && '
+                                                           "!firstSendAwaiting ? 'opacity-0' : "
+                                                           '\'opacity-100\'"\n',
+                                                           '',
+                                                           1),
+                                                          ('                          <svg\n'
+                                                           '                            viewBox="0 0 24 24"\n'
+                                                           '                            fill="currentColor"\n'
+                                                           '                            class="col-start-1 '
+                                                           'row-start-1 size-4 max-md:size-4.5 '
+                                                           'transition-opacity duration-200 ease-out '
+                                                           'motion-reduce:transition-none"\n'
+                                                           '                            :class="streaming && '
+                                                           "!firstSendAwaiting ? 'opacity-100' : "
+                                                           '\'opacity-0\'"\n'
+                                                           '                          >\n'
+                                                           '                            <rect\n'
+                                                           '                              x="4"\n'
+                                                           '                              y="4"\n'
+                                                           '                              width="16"\n'
+                                                           '                              height="16"\n'
+                                                           '                              rx="3"\n'
+                                                           '                            />\n'
+                                                           '                          </svg>\n',
+                                                           '',
+                                                           1),
+                                                          ('// Streaming always wins the slot for stop, same as '
+                                                           'before; unlike the old\n'
+                                                           '// ring-era rule this no longer special-cases ACP: '
+                                                           'the inactive occupant —\n'
+                                                           '// not a dimmed disabled send — is what fills the '
+                                                           'slot on empty input in\n'
+                                                           '// EVERY mode (the mic when voice input is on, a '
+                                                           'look-alike placeholder while\n'
+                                                           "// it's shelved).\n",
+                                                           '// Keep the send slot visible during a run, disabled '
+                                                           'on empty input.\n'
+                                                           '// The separate stop control remains available '
+                                                           'alongside it.\n',
+                                                           1),
+                                                          ('  if (streaming.value && !showSend.value) {\n'
+                                                           '    chatStore.abort(paneTarget.value)\n'
+                                                           '    return\n'
+                                                           '  }\n',
+                                                           '',
+                                                           1)],
+     'apps/web/src/pages/appearance/index.vue': [('        <SettingsRow :label="t(\'settings.theme\')">',
+                                                  '        <SettingsRow\n'
+                                                  '          :label="t(\'settings.theme\')"\n'
+                                                  '          stack="sm"\n'
+                                                  '        >',
+                                                  1),
+                                                 ('                :title="item.label"\n'
+                                                  '                :aria-label="item.label"',
+                                                  '                aria-hidden="true"',
+                                                  1),
+                                                 ('<span class="sr-only">{{ item.label }}</span>',
+                                                  '<span>{{ item.label }}</span>',
+                                                  1)],
+     'apps/web/src/pages/onboarding/steps/Step2Appearance.vue': [('{ Moon, Sun }', '{ Monitor, Moon, Sun }', 1),
+                                                                 ('              <div class="flex gap-2">\n',
+                                                                  '              <div class="flex flex-wrap '
+                                                                  'gap-2">\n'
+                                                                  '                <Button\n'
+                                                                  '                  type="button"\n'
+                                                                  '                  variant="outline"\n'
+                                                                  '                  class="justify-start '
+                                                                  'gap-2"\n'
+                                                                  '                  :data-ui-selected="theme '
+                                                                  '=== \'system\' ? \'\' : undefined"\n'
+                                                                  '                  '
+                                                                  '@click="setTheme(\'system\')"\n'
+                                                                  '                >\n'
+                                                                  '                  <Monitor class="size-4" />\n'
+                                                                  '                  {{ '
+                                                                  "t('settings.themeSystem') }}\n"
+                                                                  '                </Button>\n',
+                                                                  1)],
+     'apps/web/src/i18n/locales/en.json': [('    "sendFailed":',
+                                            '    "stopGenerating": "Stop generating response",\n'
+                                            '    "sendFailed":',
+                                            1)],
+     'apps/web/src/i18n/locales/zh.json': [('    "sendFailed":',
+                                            '    "stopGenerating": "停止生成回复",\n    "sendFailed":',
+                                            1)],
+     'apps/web/src/i18n/locales/ja.json': [('    "sendFailed":',
+                                            '    "stopGenerating": "応答の生成を停止",\n    "sendFailed":',
+                                            1)],
+     'apps/web/src/style.css': [('@import "./styles/misans-vf.css";',
+                                 '@import "./styles/misans-vf.css";\n'
+                                 '\n'
+                                 '/* Dark palettes use a light brand fill; its glyphs need the dark surface '
+                                 'tone. */\n'
+                                 ':root.dark {\n'
+                                 '  --brand-foreground: var(--background);\n'
+                                 '}',
+                                 1)]}
+    for name, replacements in composer_appearance_changes.items():
+        changes.setdefault(name, []).extend(replacements)
+    changes['apps/web/src/pages/appearance/index.vue'].append((
+        '            :items="themeItems"',
+        '            :items="themeItems"\n            class="max-w-full flex-wrap"', 1))
     patches = {}
     context = base / 'official-context.tar'
     if platform == 'harmony':

@@ -1,0 +1,1 @@
+PASS generated phone setup: system/default/live + explicit light/dark/warm × 5 schemes; 390px; no JS errors

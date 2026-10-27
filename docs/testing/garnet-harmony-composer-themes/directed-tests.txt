@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ RUN  v4.1.10 /workspace/garnet-harmony-check/generated
+
+
+ Test Files  8 passed (8)
+      Tests  94 passed (94)
+   Start at  10:23:25
+   Duration  11.87s (transform 12.34s, setup 0ms, import 18.81s, tests 5.06s, environment 2.87s)
+

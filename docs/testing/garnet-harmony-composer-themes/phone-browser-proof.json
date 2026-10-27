@@ -1,0 +1,134 @@
+{
+  "realGeneratedPhoneBootstrap": true,
+  "url": "http://127.0.0.1:18084",
+  "nativeBridge": false,
+  "arkWebDevice": false,
+  "hapCompiled": false,
+  "defaultSystem": true,
+  "liveSystemChange": true,
+  "explicitThemePreserved": true,
+  "allFiveSchemesPreserved": true,
+  "results": [
+    {
+      "mode": "light",
+      "scheme": "memoh",
+      "background": "oklch(0.981 0.0026 63)",
+      "color": "oklch(0.21 0.004 95)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "ocean",
+      "background": "oklch(0.984 0.004 230)",
+      "color": "oklch(0.21 0.004 230)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "forest",
+      "background": "oklch(0.984 0.004 150)",
+      "color": "oklch(0.21 0.004 150)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "rose",
+      "background": "oklch(0.984 0.004 355)",
+      "color": "oklch(0.21 0.004 355)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "amber",
+      "background": "oklch(0.984 0.004 70)",
+      "color": "oklch(0.21 0.004 70)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "memoh",
+      "background": "oklch(0.12212 0 0)",
+      "color": "oklch(0.9 0 0)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "ocean",
+      "background": "oklch(0.12212 0.006 230)",
+      "color": "oklch(0.9 0.004 230)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "forest",
+      "background": "oklch(0.12212 0.006 150)",
+      "color": "oklch(0.9 0.004 150)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "rose",
+      "background": "oklch(0.12212 0.006 355)",
+      "color": "oklch(0.9 0.004 355)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "amber",
+      "background": "oklch(0.12212 0.006 70)",
+      "color": "oklch(0.9 0.004 70)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "warm",
+      "scheme": "memoh",
+      "background": "rgb(248, 246, 241)",
+      "color": "rgb(48, 47, 45)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "warm",
+      "scheme": "ocean",
+      "background": "rgb(248, 246, 241)",
+      "color": "rgb(48, 47, 45)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "warm",
+      "scheme": "forest",
+      "background": "rgb(248, 246, 241)",
+      "color": "rgb(48, 47, 45)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "warm",
+      "scheme": "rose",
+      "background": "rgb(248, 246, 241)",
+      "color": "rgb(48, 47, 45)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "warm",
+      "scheme": "amber",
+      "background": "rgb(248, 246, 241)",
+      "color": "rgb(48, 47, 45)",
+      "width": 390,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "errors": []
+}

@@ -152,7 +152,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "8a766c11f09069c42c366155d79ff648f58ad6238835bf53f4b3ca233a1d5e03",
+      "sha256": "1a7678f6352b53fe553d244760832bb96f87d843d05a49706c2317c9d82cb6fd",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -205,7 +205,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service.css",
-      "sha256": "0541596f1aab1824a4ce09a5a8f91fede16b458e1592b6377876e1e2e8c8bd6e",
+      "sha256": "febcc6548b5167c4745b76d0f71dcc5949858685e3b8956a8b60869b89499638",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": []
@@ -525,7 +525,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "514c286b1b77d7fb8553c47fbfa7b47ad0322bf703e027ca2272bc847b095ac7",
+      "sha256": "185bdc2cacb43686d7a39ba77729d866ab4c4405378be3c6dde470220fbd499b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -905,7 +905,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "9744db3af5fcf085348ec6720754fd41764490ae7e6d12ee53d51ca37462b4c1",
+      "sha256": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",

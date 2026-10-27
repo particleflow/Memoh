@@ -30,7 +30,7 @@ def main():
                   'apps/web/src/pages/home/components/session-tasks.test.ts'}
     assert test_files.issubset(patches), 'Phone attachment assertions missing'
     existing = {name: values for name, values in patches.items() if name not in test_files}
-    assert len(existing) == 43 and existing == baseline['existingPhonePatches'], 'Reviewed phone adaptation drift'
+    assert len(existing) == 45 and existing == baseline['existingPhonePatches'], 'Reviewed phone adaptation drift'
     checkout = BASE / 'checkout'
     checkout.mkdir(exist_ok=True)
     with tarfile.open(context) as source:

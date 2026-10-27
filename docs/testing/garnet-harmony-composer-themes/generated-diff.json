@@ -1,0 +1,17 @@
+{
+  "source": "78c89c278494f750ad45708837487b00e3a34192",
+  "changedFiles": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/lib/harmony-entry.ts",
+    "apps/web/src/lib/harmony-service.css",
+    "apps/web/src/pages/appearance/index.vue",
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/onboarding/steps/Step2Appearance.vue",
+    "apps/web/src/style.css"
+  ],
+  "noOtherGeneratedChanges": true,
+  "beforeAdaptations": 46,
+  "afterAdaptations": 47
+}

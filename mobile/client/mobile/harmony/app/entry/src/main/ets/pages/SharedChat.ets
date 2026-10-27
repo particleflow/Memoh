@@ -391,6 +391,8 @@ struct SharedChat {
             .onClick(() => { this.retry(); })
         }
         Web({ src: WEB_START, controller: this.controller })
+        .darkMode(WebDarkMode.Auto).forceDarkAccess(false)
+        .backgroundColor(this.surfaceColor)
         .javaScriptAccess(true).domStorageAccess(true).databaseAccess(true)
         .fileAccess(false).mixedMode(MixedMode.All).multiWindowAccess(true).allowWindowOpenMethod(false)
         .onContextMenuShow((event: OnContextMenuShowEvent) => {
