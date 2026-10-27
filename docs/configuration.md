@@ -22,6 +22,7 @@ The main configuration file is `config.toml` (copied from `conf/app.example.toml
 - `[internal_rpc]` — Server↔Channel internal RPC targets and shared secret; empty secret selects the embedded all-in-one mode
 - `[web]` — Web frontend address
 - `[registry]` — Provider registry (`providers_dir` pointing to `conf/providers/`)
+- `[model_catalog_sync]` — Optional `provider_id` is the non-secret UUID of one existing Magpie provider, set by the system only after that identity has been verified. Empty or omitted disables automatic discovery. The server checks that the row exists, is enabled, and uses an OpenAI-compatible client before each sync; it never infers a provider from its name or URL. Disabling or deleting the provider takes effect on the next check. Changing or clearing the UUID requires a Server restart. This binding does not change the selected Bot model.
 - `[supermarket]` — Supermarket integration (base_url)
 
 Provider YAML templates in `conf/providers/` define preset configurations for various LLM providers (OpenAI, Anthropic, GitHub Copilot, etc.).
