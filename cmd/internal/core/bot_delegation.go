@@ -193,6 +193,26 @@ func planDelegationDevices(ctx context.Context, store delegationMountPlanner, au
 		}
 		candidates = []dbstore.BotRemoteRuntimeBindingRecord{m}
 	}
+	preferredTarget := ""
+	if selected != "native" {
+		m := candidates[0]
+		if m.BotID != b.SourceBotID || m.ID != selected || m.RuntimeID == "" || m.RuntimeRevoked || m.RuntimeUserID == "" || m.RuntimeUserID != m.BotOwnerUserID || m.RuntimeProvider != "memoh" {
+			return nil, "", botdelegation.ErrDenied
+		}
+		// Source selection records provenance; it does not select the expert's
+		// computer. A specialist with no primary remote mount runs natively.
+		primary, err := authority.Mounts.GetPrimaryMount(ctx, b.TargetBotID)
+		if errors.Is(err, db.ErrNotFound) {
+			return []botdelegation.DevicePair{}, "native", nil
+		}
+		if err != nil {
+			return nil, "", err
+		}
+		if primary.BotID != b.TargetBotID || primary.ID == "" {
+			return nil, "", botdelegation.ErrDenied
+		}
+		preferredTarget = primary.ID
+	}
 	pairs := []botdelegation.DevicePair{}
 	target := "native"
 	for _, m := range candidates {
@@ -205,6 +225,9 @@ func planDelegationDevices(ctx context.Context, store delegationMountPlanner, au
 		}
 		if err != nil {
 			return nil, "", err
+		}
+		if preferredTarget != "" && id.String() != preferredTarget {
+			continue
 		}
 		pair, err := authority.PlanDevice(ctx, b, m.ID, id.String())
 		if errors.Is(err, botdelegation.ErrDenied) {
