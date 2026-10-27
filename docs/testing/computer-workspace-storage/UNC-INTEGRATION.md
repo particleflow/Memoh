@@ -104,3 +104,23 @@ F07/F08 complete.
   old UI/HAP build, model call, production DB or physical device action is run.
   This is source validation; final exact-head CI and onsite acceptance remain
   distinct gates, and human QA remains unchecked.
+
+## First Windows combination failure and fixture correction
+
+The initial integrated head cd9133f3 failed Native run 40453237386/job122020556849,
+step 6, in legacy feedback-reader tests. The new 131109-byte process recovery
+itself passed. No test timed out and no production permission was changed.
+The test helper still used privateHostRoot/openPrivateFile to read an advisory
+that the new source API intentionally creates under source permissions.
+
+A new shared-source feedback assertion reproduced that private-storage error
+on Linux before the helper correction (`feedback-reader-red.log.txt`). The
+helper now uses the pinned original source attempt, verifies the expected plan
+hash, and opens only the fixed feedback filename through the source capability.
+Existing DecodeFeedback, denial classification, unchanged-block, secret/content
+exclusion, original delivery IDs and queue assertions all remain. The previously
+failing test families and the 131109-byte recovery passed afterward
+(`feedback-reader-green.log.txt`). The follow-up changes tests only; no product
+ACL, queue validator, rule, timeout, retry or workflow is loosened. The first
+Windows failure remains linked and extracted alongside the red/green evidence;
+only a later exact-head native success can complete this gate.

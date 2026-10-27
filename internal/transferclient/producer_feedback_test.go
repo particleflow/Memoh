@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -65,13 +64,17 @@ func readProducerFeedbackFixture(t *testing.T, getenv func(string) string, plan 
 		t.Fatal(err)
 	}
 	defer func() { _ = cfg.Close() }()
-	relative, _ := deliverymeta.AttemptDirectory(plan.Task.Attempt)
-	root, guard, err := privateHostRoot(filepath.Join(cfg.sourcePath, filepath.FromSlash(relative)))
+	boundPlan, root, _, closePlan, err := cfg.sourcePlan(plan.Task.Attempt)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer func() { closeQueueGuard(guard); _ = root.Close() }()
-	f, err := openPrivateFile(root, deliverymeta.ProducerFeedbackName, os.O_RDONLY, 0)
+	defer closePlan()
+	if deliverymeta.PlanHash(boundPlan) != deliverymeta.PlanHash(plan) {
+		t.Fatal("feedback reader lost original attempt declaration")
+	}
+	// Feedback belongs to the authorized task source. Applying private queue
+	// ACL checks here would incorrectly reject the source's existing permissions.
+	f, err := openSourceFile(root, deliverymeta.ProducerFeedbackName, os.O_RDONLY, false)
 	if err != nil {
 		t.Fatal(err)
 	}

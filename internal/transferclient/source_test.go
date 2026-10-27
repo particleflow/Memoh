@@ -204,6 +204,10 @@ func TestTaskSourceProcessRecovery(t *testing.T) {
 	if err != nil || sourceErr != nil || !bytes.Equal(configBytes, unchanged) || !bytes.Equal(source, data) {
 		t.Fatal("source or original binding modified")
 	}
+	feedback := readProducerFeedbackFixture(t, getenv, closed.Plan)
+	if len(feedback.Files) != 1 || feedback.Files[0].DeliveryID != closed.DeliveryID() {
+		t.Fatal("shared-source advisory lost its original declaration")
+	}
 	_ = filepath.WalkDir(getenv("HERDR_PLUGIN_STATE_DIR"), func(_ string, entry os.DirEntry, err error) error {
 		if err != nil {
 			t.Fatal(err)
