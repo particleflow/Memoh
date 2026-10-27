@@ -45,3 +45,5 @@ The prior conversation-scoped Task/Bot lists are retained. No directory, transfe
 Synthetic screenshots: [before](before.png), [admitted](admitted.png), [409](denied.png). They contain fabricated fixture data only.
 
 Human/real-device QA, the original failed request's actual recovery and business outcome remain unverified. No paid request, production write, HAP build/signature, formal image publication or deployment was performed by this integration.
+
+The final full-repository Go test exposed a request-field literal contract missed by the directed handler package checks. The subsequent Go-only correction and original failure/red-green evidence are recorded in [field-guard](field-guard/README.md). Web/Harmony and API/SDK product files remain byte-identical to f4ef1b5d; no client rebuild is needed for that correction.

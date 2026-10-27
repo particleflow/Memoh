@@ -67,10 +67,14 @@ func (h *SessionHandler) RecoverAcceptedUserInput(c echo.Context) error {
 		return err
 	}
 	botID, sessionID, decisionID := c.Param("bot_id"), c.Param("session_id"), c.Param("decision_id")
-	for name, id := range map[string]string{"bot_id": botID, "session_id": sessionID, "decision_id": decisionID} {
-		if _, err := db.ParseUUID(id); err != nil {
-			return apperror.FieldInvalid(name, err)
-		}
+	if _, err := db.ParseUUID(botID); err != nil {
+		return apperror.FieldInvalid("bot_id", err)
+	}
+	if _, err := db.ParseUUID(sessionID); err != nil {
+		return apperror.FieldInvalid("session_id", err)
+	}
+	if _, err := db.ParseUUID(decisionID); err != nil {
+		return apperror.FieldInvalid("decision_id", err)
 	}
 	reauthorize := func(ctx context.Context) error { return h.authorizeUserInputRecovery(ctx, actor, botID, sessionID) }
 	if err := reauthorize(c.Request().Context()); err != nil {

@@ -35,7 +35,7 @@ func (s *recordingUserInputRecovery) RecoverAcceptedUserInput(ctx context.Contex
 }
 
 func TestAcceptedUserInputRecoveryHTTPUsesAccountAndOwnedSession(t *testing.T) {
-	for _, scenario := range []string{"owner", "anonymous", "revoked_account", "chat_route", "other_creator", "cross_bot", "revoked_permission", "injected_answer", "extra_json", "unknown_checkpoint", "private_error"} {
+	for _, scenario := range []string{"owner", "anonymous", "revoked_account", "chat_route", "other_creator", "cross_bot", "revoked_permission", "injected_answer", "extra_json", "unknown_checkpoint", "private_error", "invalid_bot", "invalid_session", "invalid_decision"} {
 		t.Run(scenario, func(t *testing.T) {
 			const secret = "synthetic-recovery-http-signing-key"
 			const originalRun = "aaaaaaaa-1111-4111-8111-111111111111"
@@ -58,9 +58,16 @@ func TestAcceptedUserInputRecoveryHTTPUsesAccountAndOwnedSession(t *testing.T) {
 				t.Fatal(err)
 			}
 			body := `{"original_run_id":"` + originalRun + `"}`
-			botID := invocationTestBotID
+			botID, sessionID, decisionID := invocationTestBotID, invocationTestSessionA, decision
+			wantField := ""
 			wantStatus := http.StatusAccepted
 			switch scenario {
+			case "invalid_bot":
+				botID, wantField, wantStatus = "invalid", "bot_id", http.StatusBadRequest
+			case "invalid_session":
+				sessionID, wantField, wantStatus = "invalid", "session_id", http.StatusBadRequest
+			case "invalid_decision":
+				decisionID, wantField, wantStatus = "invalid", "decision_id", http.StatusBadRequest
 			case "anonymous":
 				token, wantStatus = "", http.StatusUnauthorized
 			case "revoked_account":
@@ -89,7 +96,7 @@ func TestAcceptedUserInputRecoveryHTTPUsesAccountAndOwnedSession(t *testing.T) {
 			case "private_error":
 				service.err, wantStatus = errors.New("SYNTHETIC_PRIVATE_RECOVERY_CAUSE"), http.StatusInternalServerError
 			}
-			request := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions/"+invocationTestSessionA+"/decisions/"+decision+"/recover", strings.NewReader(body))
+			request := httptest.NewRequest(http.MethodPost, "/bots/"+botID+"/sessions/"+sessionID+"/decisions/"+decisionID+"/recover", strings.NewReader(body))
 			request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			if token != "" {
 				request.Header.Set(echo.HeaderAuthorization, "Bearer "+token)
@@ -98,6 +105,15 @@ func TestAcceptedUserInputRecoveryHTTPUsesAccountAndOwnedSession(t *testing.T) {
 			e.ServeHTTP(recorder, request)
 			if recorder.Code != wantStatus {
 				t.Fatalf("status=%d want=%d body=%s", recorder.Code, wantStatus, recorder.Body.String())
+			}
+			if wantField != "" {
+				var problem struct {
+					Code string            `json:"code"`
+					Args map[string]string `json:"args"`
+				}
+				if err := json.Unmarshal(recorder.Body.Bytes(), &problem); err != nil || problem.Code != "request.field_invalid" || problem.Args["field"] != wantField {
+					t.Fatalf("field contract: %+v %v", problem, err)
+				}
 			}
 			allowed := scenario == "owner" || scenario == "unknown_checkpoint" || scenario == "private_error"
 			if (service.calls == 1) != allowed {
