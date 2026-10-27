@@ -1,0 +1,74 @@
+{
+  "versionName": "1.0.19",
+  "versionCode": 1000019,
+  "bundleName": "cloud.begonia.workassistant",
+  "hapName": "garnet-assistant-1.0.19-1000019-api26-release-unsigned.hap",
+  "hapBytes": 35655466,
+  "hapSHA256": "2b935a85edc4c44e59554c6bf5041a72343a0c82a49dc36f88da6f9109ad2aeb",
+  "sourceIdentitySHA256": "460c10abb3b5a74d38ed099b3cd8eb8a98775814ee487709a778034fb28bab30",
+  "formalInputs": 138,
+  "sdkVersion": "26.0.0.105",
+  "officialApi26Compile": true,
+  "crc": true,
+  "resourceDigests": true,
+  "identityPermissionsUnchanged": true,
+  "releaseMode": true,
+  "signed": false,
+  "publicConfigurationEmpty": true,
+  "publicConfigBytes": 8192,
+  "packageMemberCount": 817,
+  "featurePresence": {
+    "workspace-storage": [
+      "resources/rawfile/client-web/assets/router-BbxbbvJa.js",
+      "resources/rawfile/client-web/assets/settings-section-CTzoOkNp.js",
+      "resources/rawfile/client-web/assets/sdk.gen-BMx63rZv.js",
+      "resources/rawfile/source-build.json",
+      "ets/modules.abc"
+    ],
+    "__garnetImageTiming": [
+      "resources/rawfile/client-web/assets/chat-list-BzDC5ZKA.js",
+      "ets/modules.abc"
+    ],
+    "GarnetImageTiming:": [
+      "ets/modules.abc"
+    ],
+    "/decisions/{decision_id}/recover": [
+      "resources/rawfile/client-web/assets/sdk.gen-BMx63rZv.js"
+    ],
+    "original_run_id": [
+      "resources/rawfile/client-web/assets/main-PDz6N6d_.js"
+    ],
+    "recovery_run_id": [
+      "resources/rawfile/client-web/assets/main-PDz6N6d_.js"
+    ]
+  },
+  "explicitCredentialAndPrivateAuthorityScan": {
+    "members": 817,
+    "findings": [],
+    "arbitraryEncodingExhaustiveness": false
+  },
+  "reusedNativeUIEvidence": {
+    "source": "d213ee7842fc76527de712cd5b2d825a5697a613",
+    "previousDirectedTests": 55,
+    "attachmentImageTaskBaseline": 94,
+    "finalSingleControlTests": 19
+  },
+  "harmonyDeltaCommit": "d213ee7842fc76527de712cd5b2d825a5697a613",
+  "sharedUICommit": "2422db2011231d5a4e538aa0fd7b573d133cb350",
+  "contactStructureIncluded": false,
+  "unifiedCommit": "69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee",
+  "unifiedTree": "b8e5c2b01a47b2b2a48aa6b885e39c99d3363235",
+  "compatibleBackendCommit": "69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee",
+  "workspaceAPISharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "phoneProductAdaptations": 45,
+  "phoneTestAdaptations": 2,
+  "privateConfigurationInjected": false,
+  "executionRootCutover": false,
+  "arbitraryNASDirectoryAccess": false,
+  "physicalLAN": false,
+  "crossBotFieldAcceptance": false,
+  "ArkWebImagePerformanceMeasured": false,
+  "phoneAcceptance": false,
+  "productionRecoveryExecuted": false,
+  "SDKDownloaded": false
+}

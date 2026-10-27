@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "d831de19aa65dbc35c00f05c81246f73557c6595e2fa2905ea9a30e0f8ef980b",
+      "sha256": "f5245d2a56de90ff8dfdd9cad8d38573575d71908bc2c0c945cb9203c91c554a",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -569,7 +569,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "e27d05a373713695b4bab4f4a8457a1920beb784524b358acb29089331c8a246",
+      "sha256": "0d0111e6d20744ecc02f7b47c891052493e9ce7e1220cd47fd14a411076ab8ca",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",

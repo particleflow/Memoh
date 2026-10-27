@@ -1,0 +1,27 @@
+{
+  "commit": "69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee",
+  "tree": "b8e5c2b01a47b2b2a48aa6b885e39c99d3363235",
+  "sharedUICommit": "2422db2011231d5a4e538aa0fd7b573d133cb350",
+  "harmonySourceCommit": "d213ee7842fc76527de712cd5b2d825a5697a613",
+  "webSDKByteIdenticalToSharedUI": true,
+  "files": {
+    "apps/web/src/i18n/locales/en.json": "cc3cd70752073745161791a4be243d150175d929f85326fa8611743d414da404",
+    "apps/web/src/i18n/locales/ja.json": "57cbf46806a3f03b7234ea8b386c02944b3b610173e60304088ecc85c15eafee",
+    "apps/web/src/i18n/locales/zh.json": "a41964e02c6f54a793abefacf983573b8f4eb79a2af2e4227ce429c5262a0275",
+    "apps/web/src/pages/appearance/index.vue": "2f7e55d707dcbbcfc765a8f79242f838aa3e267201218577184484c2d4ba09ad",
+    "apps/web/src/pages/home/components/chat-pane.vue": "9868233c86c46c2a1094d35070bcecb122c4407d1376b96931e762ac1a4ca33e",
+    "apps/web/src/pages/onboarding/steps/Step2Appearance.vue": "e1de267e0b773930af42aa716ac9db9eb741d2c4a795d50557caa8eb272c108c",
+    "apps/web/src/style.css": "443456480529f452ce700c0b42ddfd1d71d42946a83813b2748c474050cd656e"
+  },
+  "contactStructureIncluded": false,
+  "singleActionControl": true,
+  "officialArkWebAutoDark": true,
+  "privateConfigEmpty": true,
+  "versionName": "1.0.19",
+  "versionCode": 1000019,
+  "sourceBase": "78c89c278494f750ad45708837487b00e3a34192",
+  "archiveBaseUnchanged": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "noNewSDKDownload": true,
+  "phoneAcceptance": false,
+  "backendDeployment": false
+}
