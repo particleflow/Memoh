@@ -1,0 +1,68 @@
+{
+  "versionName": "1.0.18",
+  "versionCode": 1000018,
+  "bundleName": "cloud.begonia.workassistant",
+  "hapName": "garnet-assistant-1.0.18-1000018-api26-release-unsigned.hap",
+  "hapBytes": 35652954,
+  "hapSHA256": "1ed8e88bcc62bab3b11f06b8331b016fccec57c34a783b2d46ebbca8fad18bc7",
+  "sourceIdentitySHA256": "88b63a072e722d9725907252c0636bccc69790260e9a68484b5d0c696827a33a",
+  "formalInputs": 138,
+  "sdkVersion": "26.0.0.105",
+  "officialApi26Compile": true,
+  "crc": true,
+  "resourceDigests": true,
+  "identityPermissionsUnchanged": true,
+  "releaseMode": true,
+  "signed": false,
+  "publicConfigurationEmpty": true,
+  "publicConfigBytes": 8192,
+  "packageMemberCount": 818,
+  "featurePresence": {
+    "workspace-storage": [
+      "resources/rawfile/client-web/assets/router-D-rX2KnM.js",
+      "resources/rawfile/client-web/assets/settings-section-Pu-xXuir.js",
+      "resources/rawfile/client-web/assets/sdk.gen-BMx63rZv.js",
+      "resources/rawfile/source-build.json",
+      "ets/modules.abc"
+    ],
+    "__garnetImageTiming": [
+      "resources/rawfile/client-web/assets/chat-list-DPoe94pg.js",
+      "ets/modules.abc"
+    ],
+    "GarnetImageTiming:": [
+      "ets/modules.abc"
+    ],
+    "/decisions/{decision_id}/recover": [
+      "resources/rawfile/client-web/assets/sdk.gen-BMx63rZv.js"
+    ],
+    "original_run_id": [
+      "resources/rawfile/client-web/assets/main-W4ZXlE0q.js"
+    ],
+    "recovery_run_id": [
+      "resources/rawfile/client-web/assets/main-W4ZXlE0q.js"
+    ]
+  },
+  "explicitCredentialAndPrivateAuthorityScan": {
+    "members": 818,
+    "findings": [],
+    "arbitraryEncodingExhaustiveness": false
+  },
+  "affectedUniqueTests": 65,
+  "combinedRunPassed": 63,
+  "unchangedMessageItemIsolatedPassed": 5,
+  "unchangedTimeoutMs": 15000,
+  "unifiedCommit": "f4ef1b5d17abdc322de8ca33963a6e45f00a00c1",
+  "unifiedTree": "4db364c91c41ecc9c25d6a17c3bedd88143e6012",
+  "compatibleBackendCommit": "3d5f145c452dda5e17861d401de049b7ddded2e6",
+  "workspaceAPISharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "phoneAdaptersRetained": 43,
+  "privateConfigurationInjected": false,
+  "executionRootCutover": false,
+  "arbitraryNASDirectoryAccess": false,
+  "physicalLAN": false,
+  "crossBotFieldAcceptance": false,
+  "ArkWebImagePerformanceMeasured": false,
+  "phoneAcceptance": false,
+  "productionRecoveryExecuted": false,
+  "SDKDownloaded": false
+}

@@ -65,6 +65,7 @@ def inputs():
         'shared-workspace-directory-picker.vue', 'shared-workspace-routes.ts',
         'shared-workspace-settings-sidebar.vue', 'shared-workspace-storage-sdk.json',
         'shared-workspace-storage-i18n.json'))
+    files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-useAcceptedUserInputRecovery.ts', 'shared-useAcceptedUserInputRecovery.test.ts', 'shared-accepted-input-sdk.json', 'shared-accepted-input-i18n.json'))
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -869,6 +870,15 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         assert name in sdk_overlay, 'Unexpected workspace SDK target'
         sdk_overlay[name] += addition
     workspace_locales = json.loads((ROOT / 'mobile/memoh' / workspace['locales']['local']).read_text())
+    recovery = lock['sharedAcceptedRecovery']
+    for kind in ('sdkOverlay', 'locales'):
+        assert sha(ROOT / 'mobile/memoh' / recovery[kind]['local']) == recovery[kind]['sha256'], 'Accepted recovery source drift'
+    recovery_sdk = json.loads((ROOT / 'mobile/memoh' / recovery['sdkOverlay']['local']).read_text())
+    for name, addition in recovery_sdk.items():
+        assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected recovery SDK target'
+        sdk_overlay[name] = sdk_overlay.get(name, '') + addition
+    recovery_locales = json.loads((ROOT / 'mobile/memoh' / recovery['locales']['local']).read_text())
+
 
     patches = {}
     context = base / 'official-context.tar'
@@ -902,6 +912,12 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             if name in workspace_sources:
                 assert data is not None and hashlib.sha256(data).hexdigest() == shared_file_metadata[name]['baseSHA256'], 'Workspace baseline drift'
                 data = workspace_sources[name]
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in recovery_locales}:
+                language = Path(name).stem
+                value = json.loads(data)
+                assert 'userInputRecoveryState' not in value['chat']['tools'], 'Recovery locale already present'
+                value['chat']['tools']['userInputRecoveryState'] = recovery_locales[language]
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
             if name in {f'apps/web/src/i18n/locales/{language}.json' for language in workspace_locales}:
                 language = Path(name).stem
                 value = json.loads(data)

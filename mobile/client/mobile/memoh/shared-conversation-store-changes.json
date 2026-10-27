@@ -51,5 +51,57 @@
         1
       ]
     ]
+  },
+  "apps/web/src/pages/home/components/message-item.vue": {
+    "baseSHA256": "4c097a7bdb32fdd5f134f68dceb1ffaf46432c2ee114542b483ae85a389014f6",
+    "sharedSHA256": "5e0f24f5857055bbbffe1009bd322964996b7d1d329c2ef2221fdc93e2720cc9",
+    "replacements": [
+      [
+        "                v-else-if=\"node.block.type === 'error' && (node.block.code || node.block.content)\"\n                tone=\"destructive\"\n                size=\"sm\"\n                :description=\"errorBlockContent(node.block)\"\n              />\n\n              <!-- Runtime notice block: a degradation the runtime wants the\n                   user to see (tools unavailable, an interaction declined).\n",
+        "                v-else-if=\"node.block.type === 'error' && (node.block.code || node.block.content)\"\n                tone=\"destructive\"\n                size=\"sm\"\n                :description=\"recoveryErrorContent(node.block)\"\n                :clickable=\"recoverableError(node.block) && !recovery.blocked.value\"\n                :disabled=\"recoverableError(node.block) && recovery.busy.value\"\n                :aria-busy=\"recoverableError(node.block) && recovery.busy.value\"\n                @click=\"recoverableError(node.block) && recovery.recover()\"\n              >\n                <template\n                  v-if=\"recoverableError(node.block) && recovery.busy.value\"\n                  #icon\n                >\n                  <Spinner class=\"size-3.5\" />\n                </template>\n              </CalloutBanner>\n\n              <!-- Runtime notice block: a degradation the runtime wants the\n                   user to see (tools unavailable, an interaction declined).\n",
+        1
+      ],
+      [
+        "import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue'\nimport { Sparkles, Target } from 'lucide-vue-next'\nimport { formatRelativeTime, formatDateTime, formatCalendarTime } from '@/utils/date-time'\nimport { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Textarea } from '@felinic/ui'\nimport MarkdownRender, { enableKatex, enableMermaid } from 'markstream-vue'\nimport { useSettingsStore } from '@/store/settings'\nimport ToolCallGroup from './tool-call-group.vue'\nimport ChatAnswersCard from './chat-answers-card.vue'\n",
+        "import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue'\nimport { Sparkles, Target } from 'lucide-vue-next'\nimport { formatRelativeTime, formatDateTime, formatCalendarTime } from '@/utils/date-time'\nimport { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Spinner, Textarea } from '@felinic/ui'\nimport MarkdownRender, { enableKatex, enableMermaid } from 'markstream-vue'\nimport { useLocalStorage } from '@vueuse/core'\nimport { useAcceptedUserInputRecovery } from '../composables/useAcceptedUserInputRecovery'\nimport { resolveApiErrorMessage } from '@/utils/api-error'\nimport { useSettingsStore } from '@/store/settings'\nimport ToolCallGroup from './tool-call-group.vue'\nimport ChatAnswersCard from './chat-answers-card.vue'\n",
+        1
+      ],
+      [
+        "  message: ChatMessage\n  botId?: string\n  sessionId?: string\n  // Group layout for third-party synced threads: every turn left-aligned with\n  // an avatar + sender name + channel badge (including the bot's own replies).\n  channelThread?: boolean\n",
+        "  message: ChatMessage\n  botId?: string\n  sessionId?: string\n  recoveryOriginalRunId?: string\n  recoveryEnabled?: boolean\n  recoveryVisible?: boolean\n  // Group layout for third-party synced threads: every turn left-aligned with\n  // an avatar + sender name + channel badge (including the bot's own replies).\n  channelThread?: boolean\n",
+        1
+      ],
+      [
+        "}>()\n\nprovideNativeTaskResumeScope(props)\n\n// Compare the whole reply, including tools separated by assistant text.\nconst showExecutionLocation = computed(() => {\n",
+        "}>()\n\nprovideNativeTaskResumeScope(props)\nconst recoveryToken = useLocalStorage('token', '')\nconst recovery = useAcceptedUserInputRecovery(computed(() => ({ bot: props.botId || '', session: props.sessionId || '', run: props.recoveryOriginalRunId,\n  enabled: props.recoveryEnabled === true && !!props.botId && !!props.sessionId, visible: props.recoveryVisible !== false })), toRef(props, 'message'), recoveryToken)\nconst recoveryStates = new Set(['accepted', 'submitted', 'running', 'waiting_decision', 'finishing', 'completed', 'failed', 'aborted', 'lost', 'unknown'])\nfunction recoverableError(block: ErrorBlock) { return block.code === 'runtime_run_failed' && !!recovery.candidate.value }\nfunction recoveryErrorContent(block: ErrorBlock) {\n  if (!recoverableError(block)) return errorBlockContent(block)\n  if (recovery.blocked.value && recovery.error.value) return resolveApiErrorMessage(recovery.error.value, errorBlockContent(block))\n  if (recovery.state.value) return t('chat.tools.userInputRecoveryState', { state: t(`chat.tasks.statuses.${recoveryStates.has(recovery.state.value) ? recovery.state.value : 'unknown'}`) })\n  return errorBlockContent(block)\n}\n\n// Compare the whole reply, including tools separated by assistant text.\nconst showExecutionLocation = computed(() => {\n",
+        1
+      ]
+    ]
+  },
+  "apps/web/src/pages/home/components/message-item.test.ts": {
+    "baseSHA256": "860bbb93101cc88002baeb7dda4b8262f3bd7fb221f1c741f024d2f944c531dc",
+    "sharedSHA256": "1f226bee59dae07f690d2081c8508b361eb0f16975c80e5689b78f57fc4b1426",
+    "replacements": [
+      [
+        "import { keyboardBindings, resolveKeyboardBinding } from '@/lib/keyboard-bindings'\nimport { appKeyboardCommands, createKeyboardCommandRegistry } from '@/lib/keyboard-commands'\n\nconst Stub = defineComponent({ inheritAttrs: false, setup: () => () => h('div') })\n\nvi.mock('markstream-vue', () => ({ default: Stub, setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))\n",
+        "import { keyboardBindings, resolveKeyboardBinding } from '@/lib/keyboard-bindings'\nimport { appKeyboardCommands, createKeyboardCommandRegistry } from '@/lib/keyboard-commands'\n\nconst recoveryApi = vi.hoisted(() => ({ recover: vi.fn(), observe: vi.fn() }))\nvi.mock('@memohai/sdk', async importOriginal => ({ ...(await importOriginal<typeof import('@memohai/sdk')>()), postBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecover: recoveryApi.recover, getBotsByBotIdSessionsBySessionIdInvocationsByInvocationId: recoveryApi.observe }))\n\nconst Stub = defineComponent({ inheritAttrs: false, setup: () => () => h('div') })\n\nvi.mock('markstream-vue', () => ({ default: Stub, setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))\n",
+        1
+      ],
+      [
+        "    setup: props => () => h('button', { 'data-edit': '', onClick: () => props.onEdit?.() }),\n  }),\n}))\nvi.mock('@felinic/ui', () => ({\n  Avatar: Stub, AvatarImage: Stub, AvatarFallback: Stub, Button: Stub, CalloutBanner: Stub,\n  Textarea: defineComponent({\n    inheritAttrs: false,\n    props: { modelValue: String },\n",
+        "    setup: props => () => h('button', { 'data-edit': '', onClick: () => props.onEdit?.() }),\n  }),\n}))\nvi.mock('@felinic/ui', async importOriginal => ({\n  Avatar: Stub, AvatarImage: Stub, AvatarFallback: Stub, Button: Stub, Spinner: Stub, CalloutBanner: (await importOriginal<typeof import('@felinic/ui')>()).CalloutBanner,\n  Textarea: defineComponent({\n    inheritAttrs: false,\n    props: { modelValue: String },\n",
+        1
+      ],
+      [
+        "}))\nvi.mock('vue-i18n', async importOriginal => ({\n  ...await importOriginal<typeof import('vue-i18n')>(),\n  useI18n: () => ({ t: (key: string) => key, te: () => false, locale: ref('en') }),\n}))\nvi.mock('@/store/settings', () => ({ useSettingsStore: () => ({}) }))\nvi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: {} }) }))\n",
+        "}))\nvi.mock('vue-i18n', async importOriginal => ({\n  ...await importOriginal<typeof import('vue-i18n')>(),\n  useI18n: () => ({ t: (key: string, args?: Record<string, string>) => key === 'chat.tools.userInputRecoveryState' ? `Recovery: ${args?.state}` : key, te: () => false, locale: ref('en') }),\n}))\nvi.mock('@/store/settings', () => ({ useSettingsStore: () => ({}) }))\nvi.mock('@/store/user', () => ({ useUserStore: () => ({ userInfo: {} }) }))\n",
+        1
+      ],
+      [
+        "    }\n  })\n})\n",
+        "    }\n  })\n})\n\n\ndescribe('accepted-answer failure hint', () => {\n  it.each(['submitted', 'pending'])('uses the existing single hint for %s input, never the whole-turn retry action', async status => {\n    localStorage.setItem('token', 'synthetic-account')\n    recoveryApi.recover.mockReset().mockResolvedValue({ data: { original_run_id: 'original-run', decision_id: 'original-decision', recovery_run_id: 'recovery-run', invocation_id: 'recovery-invocation', state: 'accepted', started: true } })\n    recoveryApi.observe.mockReset().mockImplementation(() => new Promise(() => {}))\n    const retry = vi.fn(), MessageItem = (await import('./message-item.vue')).default\n    root = document.createElement('div'); document.body.append(root)\n    app = createApp(MessageItem, {\n      botId: 'bot', sessionId: 'session', recoveryEnabled: true, recoveryVisible: true, isScrolling: false, onRetryMessage: retry,\n      message: { id: 'original-message', role: 'assistant', timestamp: '2026-10-27T07:00:00Z', streaming: false, turnId: 'original-turn', runtimeRunId: 'original-run', messages: [\n        { id: 1, type: 'tool', name: 'ask_user', input: {}, tool_call_id: 'call', toolCallId: 'call', toolName: 'ask_user', result: null, done: true, running: false, userInput: { user_input_id: 'original-decision', status, answers: [] } },\n        { id: 2, type: 'error', code: 'runtime_run_failed', content: '' },\n      ] },\n    })\n    app.config.globalProperties.$t = (key: string) => key; app.mount(root); await nextTick()\n    const hints = root.querySelectorAll<HTMLElement>('[data-slot=\"callout-banner\"]'); expect(hints).toHaveLength(1)\n    expect(hints[0]!.tagName).toBe(status === 'submitted' ? 'BUTTON' : 'DIV')\n    hints[0]!.click(); hints[0]!.click(); await nextTick(); for (let i = 0; i < 10; i++) await Promise.resolve(); await nextTick()\n    expect(retry).not.toHaveBeenCalled(); expect(recoveryApi.recover).toHaveBeenCalledTimes(status === 'submitted' ? 1 : 0)\n    if (status === 'submitted') {\n      expect(recoveryApi.recover).toHaveBeenCalledWith(expect.objectContaining({ body: { original_run_id: 'original-run' }, path: { bot_id: 'bot', session_id: 'session', decision_id: 'original-decision' } }))\n      expect(root.textContent).toContain('Recovery: chat.tasks.statuses.accepted')\n      expect(root.querySelectorAll('[data-slot=\"callout-banner\"]')).toHaveLength(1)\n    }\n    localStorage.removeItem('token')\n  })\n})\n",
+        1
+      ]
+    ]
   }
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { runtimeFailureAlreadyVisible } from './composer-error'
+import { effectScope, ref } from 'vue'
+import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'
 import type { ChatAssistantTurn, SendMessageResult } from '@/store/chat/types'
 
 const failure: SendMessageResult = { ok: false, errorCode: 'runtime_run_failed', errorTurnId: 'original-turn', errorRunId: 'original-run', error: 'localized failure' }
@@ -21,4 +22,16 @@ describe('one identified runtime failure surface', () => {
     expect(runtimeFailureAlreadyVisible(failure, [reply({ turnId: 'different-turn' })])).toBe(false)
     expect(runtimeFailureAlreadyVisible(failure, [{ id: 'user', role: 'user', isSelf: true, text: 'localized failure', attachments: [], timestamp: '2026-10-27T06:00:00Z', streaming: false }])).toBe(false)
   })
+})
+
+
+it('does not resurrect the old composer banner after recovery/history replaces the reply projection', () => {
+  const owner = effectScope(), copy = ref('localized failure'), current = ref<SendMessageResult | undefined>(failure), messages = ref<ChatAssistantTurn[]>([])
+  owner.run(() => watchVisibleComposerFailure(() => current.value, () => messages.value, () => { copy.value = ''; current.value = undefined }))
+  expect(copy.value).toBe('localized failure')
+  messages.value = [reply()]; expect(copy.value).toBe('')
+  messages.value = []; expect(copy.value).toBe('')
+  current.value = { ...failure, errorCode: 'workspace.unreachable' }; copy.value = 'independent workspace error'
+  messages.value = [reply()]; expect(copy.value).toBe('independent workspace error')
+  owner.stop()
 })

@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "316d8314d562c50a158a0da04f39df0a323c9276607c8ad6cbf7922dad6b98e4",
+      "sha256": "d831de19aa65dbc35c00f05c81246f73557c6595e2fa2905ea9a30e0f8ef980b",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -525,7 +525,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "d0ce4975f7a0701859da357b729c65306498a9229839555f0666dd88310c485a",
+      "sha256": "514c286b1b77d7fb8553c47fbfa7b47ad0322bf703e027ca2272bc847b095ac7",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -569,7 +569,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "5d7d677613e21ae3ac4e31e4f25222c14e3b46f61d557511cb635a3222e63e9b",
+      "sha256": "e27d05a373713695b4bab4f4a8457a1920beb784524b358acb29089331c8a246",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -1637,7 +1637,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-composer-error.ts",
-      "sha256": "3d7f177b8b7f4a6172d23dd540f0c35d16e08dc49a0b9f4e7b2488e61def34e5",
+      "sha256": "c2976de8e3267ad1a18cf9d60b45ddc3b0bbea80ebb7e592556115dac48553b4",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1646,7 +1646,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-composer-error.test.ts",
-      "sha256": "144f834a3fcf9f29687958a87278df5952cd59576a8ed68dc9275063315c07f2",
+      "sha256": "543bde21aac543543b713847926b26dae3f4009cf8b3db374aa8d04066a117bf",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1655,7 +1655,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-chat-pane-changes.json",
-      "sha256": "a82b7f4407f10c71b819897d9bcf2b6df74c3f4ca7dd50bbe3ff6f9b8b69ea40",
+      "sha256": "2382ee96f7e1dbd18bbccf1f01623e5863906e1f6c79cf214f0006123d789203",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1691,11 +1691,47 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-store-changes.json",
-      "sha256": "9ac6b5a32f5822b0b850055824b1f20a3703329a60fd01690154027df197799d",
+      "sha256": "04c73bd5a58a2e8933827dff35ae51dcbe80eb25c74c7cb1db7caf81056e1004",
       "origin": "Exact shared 9020-to-40765 store/type/test differences, with full base/result SHA guards; replaces three redundant full-source copies.",
       "licenseReview": "Existing Memoh source/license; no dependency change.",
       "preparationChanges": [
         "Generated Web/SDK/UI must remain byte-identical to the 221-tested context."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-accepted-input-i18n.json",
+      "sha256": "d4f345df89fd2d8477f68d46ff93d14e288c91d0a55a66cb9df9e4d9383d4ae3",
+      "origin": "Exact shared f4ef1b5d17abdc322de8ca33963a6e45f00a00c1 source or minimal generated SDK/i18n overlay",
+      "licenseReview": "Inherited Memoh source license retained.",
+      "preparationChanges": [
+        "Consume accepted user input recovery through its existing inline hint; no whole-turn retry or answer resubmission."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-accepted-input-sdk.json",
+      "sha256": "732725af9cd67202242209a64daa14cf89851919a71747b9f540b803bf9cf8ec",
+      "origin": "Exact shared f4ef1b5d17abdc322de8ca33963a6e45f00a00c1 source or minimal generated SDK/i18n overlay",
+      "licenseReview": "Inherited Memoh source license retained.",
+      "preparationChanges": [
+        "Consume accepted user input recovery through its existing inline hint; no whole-turn retry or answer resubmission."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-useAcceptedUserInputRecovery.ts",
+      "sha256": "ae037c66c80a4e82366093784c6a714292c70d99094d282998735ee8809cc78d",
+      "origin": "Exact shared f4ef1b5d17abdc322de8ca33963a6e45f00a00c1 source or minimal generated SDK/i18n overlay",
+      "licenseReview": "Inherited Memoh source license retained.",
+      "preparationChanges": [
+        "Consume accepted user input recovery through its existing inline hint; no whole-turn retry or answer resubmission."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-useAcceptedUserInputRecovery.test.ts",
+      "sha256": "7bb98c786fb1b6965705d0d3fcb010f0ce3ec745e2ab54fdc4199aabb9163325",
+      "origin": "Exact shared f4ef1b5d17abdc322de8ca33963a6e45f00a00c1 source or minimal generated SDK/i18n overlay",
+      "licenseReview": "Inherited Memoh source license retained.",
+      "preparationChanges": [
+        "Consume accepted user input recovery through its existing inline hint; no whole-turn retry or answer resubmission."
       ]
     }
   ],

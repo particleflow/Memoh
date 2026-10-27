@@ -1,0 +1,44 @@
+{
+  "shared": "f4ef1b5d17abdc322de8ca33963a6e45f00a00c1",
+  "viewport": [
+    390,
+    844
+  ],
+  "positivePOSTs": 1,
+  "denied409POSTs": 1,
+  "sameOriginalDecisionRunIDs": true,
+  "observations": [
+    {
+      "case": 0,
+      "state": "accepted",
+      "sameInvocation": true
+    },
+    {
+      "case": 0,
+      "state": "running",
+      "sameInvocation": true
+    },
+    {
+      "case": 0,
+      "state": "completed",
+      "sameInvocation": true
+    }
+  ],
+  "202IsAdmissionNotCompletion": true,
+  "doubleClickOnePOST": true,
+  "existingHintOnly": true,
+  "409OneInlineFeedback": true,
+  "autoPOSTOnMountOrReconnect": false,
+  "acceptedAnswerReplay": false,
+  "wholeTurnRetry": false,
+  "wsMessageTypes": [
+    "runtime_subscribe",
+    "runtime_unsubscribe"
+  ],
+  "loginRetained": true,
+  "pageErrors": [],
+  "contract": "synthetic HTTP + actual WS client with synthetic runtime snapshot",
+  "actualPhone": false,
+  "paidCalls": 0,
+  "productionRecovery": false
+}

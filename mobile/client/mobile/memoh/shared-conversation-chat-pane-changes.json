@@ -28,5 +28,25 @@
     "composerError.value = result.error\n",
     "setComposerFailure(result)\n",
     2
+  ],
+  [
+    "                        :session-id=\"activeSessionId\"\n                        :channel-thread=\"isChannelThread\"",
+    "                        :session-id=\"activeSessionId\"\n                        :recovery-original-run-id=\"originalFailedRunId(msg)\"\n                        :recovery-enabled=\"!activeChatReadOnly && !isChannelThread\"\n                        :recovery-visible=\"isVisible\"\n                        :channel-thread=\"isChannelThread\"",
+    1
+  ],
+  [
+    "import { runtimeFailureAlreadyVisible } from './composer-error'",
+    "import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'",
+    1
+  ],
+  [
+    "function isRetryableTurn(",
+    "function originalFailedRunId(message: ChatMessage): string | undefined {\n  if (message.role !== 'assistant') return\n  if (message.runtimeRunId) return message.runtimeRunId\n  const observation = chatStore.runtimeObservationFor(currentBotId.value || '', activeSessionId.value || '')\n  const run = observation.run\n  return observation.synchronized && run?.status === 'errored' && !!message.turnId && run.turn_id === message.turnId ? run.run_id : undefined\n}\n\nfunction isRetryableTurn(",
+    1
+  ],
+  [
+    "const rawComposerPanelError = computed(",
+    "watchVisibleComposerFailure(() => composerFailure.value, () => messages.value, () => { composerError.value = '' })\nconst rawComposerPanelError = computed(",
+    1
   ]
 ]

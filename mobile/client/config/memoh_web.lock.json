@@ -245,9 +245,9 @@
     }
   },
   "sharedConversationMonitor": {
-    "commit": "40765b9e0979d561c49e58d2f384799e6c589e27",
-    "tree": "bf5ad7f166b1c608f0903bda11cb1643e3bc48dd",
-    "scope": "Current-conversation names/states/navigation and same-run/turn error deduplication only. No safe recovery adapter or whole-turn retry.",
+    "commit": "f4ef1b5d17abdc322de8ca33963a6e45f00a00c1",
+    "tree": "4db364c91c41ecc9c25d6a17c3bedd88143e6012",
+    "scope": "Shared conversation relation/name/state/navigation and identified-error surface; final accepted-input recovery is pinned separately in sharedAcceptedRecovery.",
     "files": {
       "apps/web/src/components/sidebar/session-activity-trigger.vue": {
         "local": "shared-conversation-monitor-trigger.vue",
@@ -276,23 +276,32 @@
       },
       "apps/web/src/pages/home/components/composer-error.ts": {
         "local": "shared-composer-error.ts",
-        "sha256": "3d7f177b8b7f4a6172d23dd540f0c35d16e08dc49a0b9f4e7b2488e61def34e5",
+        "sha256": "c2976de8e3267ad1a18cf9d60b45ddc3b0bbea80ebb7e592556115dac48553b4",
         "baseSHA256": null
       },
       "apps/web/src/pages/home/components/composer-error.test.ts": {
         "local": "shared-composer-error.test.ts",
-        "sha256": "144f834a3fcf9f29687958a87278df5952cd59576a8ed68dc9275063315c07f2",
+        "sha256": "543bde21aac543543b713847926b26dae3f4009cf8b3db374aa8d04066a117bf",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/composables/useAcceptedUserInputRecovery.ts": {
+        "local": "shared-useAcceptedUserInputRecovery.ts",
+        "sha256": "ae037c66c80a4e82366093784c6a714292c70d99094d282998735ee8809cc78d",
+        "baseSHA256": null
+      },
+      "apps/web/src/pages/home/composables/useAcceptedUserInputRecovery.test.ts": {
+        "local": "shared-useAcceptedUserInputRecovery.test.ts",
+        "sha256": "7bb98c786fb1b6965705d0d3fcb010f0ce3ec745e2ab54fdc4199aabb9163325",
         "baseSHA256": null
       }
     },
     "chatPaneChanges": {
       "local": "shared-conversation-chat-pane-changes.json",
-      "sha256": "a82b7f4407f10c71b819897d9bcf2b6df74c3f4ca7dd50bbe3ff6f9b8b69ea40",
+      "sha256": "2382ee96f7e1dbd18bbccf1f01623e5863906e1f6c79cf214f0006123d789203",
       "sourceBaseCommit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
-      "sharedSourceSHA256": "dd3e98354085486f099b5a702e4a6182ac687519b39e2cd274cb3fe4b3fa918b",
+      "sharedSourceSHA256": "ed7f8acab1bd0474f5c29efa8ef66f7455c7bfc886f21df49e9cb8e4eecdd4b5",
       "excludes": [
         "Web multipart/media recovery implementation",
-        "safe continuation recovery adapter",
         "whole-turn retry"
       ]
     },
@@ -308,8 +317,44 @@
     },
     "storeChanges": {
       "local": "shared-conversation-store-changes.json",
-      "sha256": "9ac6b5a32f5822b0b850055824b1f20a3703329a60fd01690154027df197799d",
+      "sha256": "04c73bd5a58a2e8933827dff35ae51dcbe80eb25c74c7cb1db7caf81056e1004",
       "scope": "Verbatim final shared store/type/test differences reconstructed with complete base/result SHA guards, before the existing phone adapter; no whole shared file copy."
     }
+  },
+  "sharedAcceptedRecovery": {
+    "commit": "f4ef1b5d17abdc322de8ca33963a6e45f00a00c1",
+    "tree": "4db364c91c41ecc9c25d6a17c3bedd88143e6012",
+    "sdkOverlay": {
+      "local": "shared-accepted-input-sdk.json",
+      "sha256": "732725af9cd67202242209a64daa14cf89851919a71747b9f540b803bf9cf8ec",
+      "types": [
+        "ApplicationUserInputRecoveryResult",
+        "HandlersAcceptedUserInputRecoveryInput",
+        "PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverData",
+        "PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverError",
+        "PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverErrors",
+        "PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponse",
+        "PostBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverResponses"
+      ],
+      "functions": [
+        "postBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecover"
+      ],
+      "coladaHooks": [
+        "postBotsByBotIdSessionsBySessionIdDecisionsByDecisionIdRecoverMutation"
+      ],
+      "sourceFileSHA256": {
+        "packages/sdk/src/types.gen.ts": "cfcb2cb90f00947742f36b84fc061b69b1e58de5f77dab144e4ac5c96c7660db",
+        "packages/sdk/src/sdk.gen.ts": "950972c0ed0c2138c997ad87d9baa408e9790a50d88af0f2cfef2364efa70fe2",
+        "packages/sdk/src/index.ts": "637be29325637094a6ec816e6c73085fd7ab4610514f0035d19cddd9aa0e0af6",
+        "packages/sdk/src/@pinia/colada.gen.ts": "53f4d4f40e25c3906f836deb47ee4d0f3de92627510b7ec3aaa2a6f7c15aa544"
+      }
+    },
+    "locales": {
+      "local": "shared-accepted-input-i18n.json",
+      "sha256": "d4f345df89fd2d8477f68d46ff93d14e288c91d0a55a66cb9df9e4d9383d4ae3"
+    },
+    "scope": "Original submitted decision + exact failed run only; 202 admission, same invocation GET observation; never whole-turn retry or accepted-answer replay",
+    "serverCompatibilityRequired": true,
+    "paidFieldExecution": false
   }
 }
