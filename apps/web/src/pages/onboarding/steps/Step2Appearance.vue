@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/store/settings'
 import { useOnboarding } from '@/composables/useOnboarding'
 import { Button, FieldStack, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@felinic/ui'
-import { Moon, Sun } from 'lucide-vue-next'
+import { Monitor, Moon, Sun } from 'lucide-vue-next'
 import ColorSchemeCard from '@/components/color-scheme-card/index.vue'
 import { colorSchemes } from '@/constants/color-schemes'
 import { LOCALE_OPTIONS, type Locale } from '@/i18n'
@@ -63,7 +63,17 @@ const { visible, exiting, leave } = useStepTransition()
             :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'"
           >
             <FieldStack :label="t('settings.theme')">
-              <div class="flex gap-2">
+              <div class="flex flex-wrap gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  class="justify-start gap-2"
+                  :data-ui-selected="theme === 'system' ? '' : undefined"
+                  @click="setTheme('system')"
+                >
+                  <Monitor class="size-4" />
+                  {{ t('settings.themeSystem') }}
+                </Button>
                 <Button
                   type="button"
                   variant="outline"

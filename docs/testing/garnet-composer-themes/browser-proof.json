@@ -1,0 +1,300 @@
+{
+  "environment": "running Vite + Go server and PG; synthetic bot/session/HTTP and WS run fixtures; authenticated real users/me read",
+  "url": "http://127.0.0.1:18082",
+  "realModelCalls": 0,
+  "deviceCalls": 0,
+  "productionWrites": 0,
+  "writes": [
+    {
+      "ws": {
+        "type": "runtime_subscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
+      "method": "POST",
+      "body": {
+        "invocation_id": "e370da65-4738-409a-9151-923f66304f44",
+        "text": "完成当前任务后，再处理这一条"
+      }
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue/item-2/steer",
+      "method": "POST",
+      "body": null
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
+      "method": "POST",
+      "body": {
+        "invocation_id": "3094a5cb-5d2a-4163-893c-a7aa1bf227bd",
+        "text": "键盘排队"
+      }
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
+      "method": "POST",
+      "body": {
+        "invocation_id": "d86c69d8-e371-4895-a3d8-4eadf1b6446e",
+        "text": "失败后重试同一条"
+      }
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/follow-up-queue",
+      "method": "POST",
+      "body": {
+        "invocation_id": "d86c69d8-e371-4895-a3d8-4eadf1b6446e",
+        "text": "失败后重试同一条"
+      }
+    },
+    {
+      "ws": {
+        "type": "abort",
+        "abort_reason": "user_stop",
+        "run_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "20000000-0000-4000-8000-000000000001",
+        "control_id": "af2e03ad-2c59-4dda-9923-ac439356382e"
+      }
+    },
+    {
+      "ws": {
+        "type": "runtime_subscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "ws": {
+        "type": "runtime_unsubscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "ws": {
+        "type": "runtime_subscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001",
+        "cursor": {
+          "epoch": "ui-epoch",
+          "seq": 5
+        }
+      }
+    },
+    {
+      "ws": {
+        "type": "runtime_subscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "ws": {
+        "type": "runtime_unsubscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001"
+      }
+    },
+    {
+      "ws": {
+        "type": "runtime_subscribe",
+        "session_id": "20000000-0000-4000-8000-000000000001",
+        "cursor": {
+          "epoch": "ui-epoch",
+          "seq": 7
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "themes": [
+    {
+      "mode": "light",
+      "scheme": "memoh",
+      "background": [
+        250,
+        248,
+        247
+      ],
+      "foreground": [
+        25,
+        24,
+        22
+      ],
+      "brandContrast": 5.151272793003058,
+      "mutedContrast": 5.19048928064046,
+      "contrast": 16.758432307540733,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "ocean",
+      "background": [
+        247,
+        250,
+        252
+      ],
+      "foreground": [
+        22,
+        25,
+        26
+      ],
+      "brandContrast": 4.151676686475836,
+      "mutedContrast": 5.213152998489587,
+      "contrast": 16.863069572562665,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "forest",
+      "background": [
+        248,
+        251,
+        248
+      ],
+      "foreground": [
+        23,
+        25,
+        23
+      ],
+      "brandContrast": 5.3884115282701925,
+      "mutedContrast": 5.254218700478876,
+      "contrast": 16.959648559726897,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "rose",
+      "background": [
+        252,
+        249,
+        250
+      ],
+      "foreground": [
+        26,
+        24,
+        24
+      ],
+      "brandContrast": 4.527907901481706,
+      "mutedContrast": 5.307063482238885,
+      "contrast": 16.897095022108896,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "light",
+      "scheme": "amber",
+      "background": [
+        251,
+        249,
+        247
+      ],
+      "foreground": [
+        25,
+        24,
+        22
+      ],
+      "brandContrast": 3.5973498817301035,
+      "mutedContrast": 5.271323363997684,
+      "contrast": 16.89391966416827,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "memoh",
+      "background": [
+        6,
+        6,
+        6
+      ],
+      "foreground": [
+        222,
+        222,
+        222
+      ],
+      "brandContrast": 7.730245587129983,
+      "mutedContrast": 7.56282589061134,
+      "contrast": 15.06065691033608,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "ocean",
+      "background": [
+        4,
+        6,
+        8
+      ],
+      "foreground": [
+        219,
+        222,
+        224
+      ],
+      "brandContrast": 8.433496545900523,
+      "mutedContrast": 7.603621768642785,
+      "contrast": 15.015567965203125,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "forest",
+      "background": [
+        5,
+        7,
+        5
+      ],
+      "foreground": [
+        220,
+        223,
+        220
+      ],
+      "brandContrast": 6.863376104869445,
+      "mutedContrast": 7.557869781197838,
+      "contrast": 15.044387963017423,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "rose",
+      "background": [
+        8,
+        5,
+        6
+      ],
+      "foreground": [
+        224,
+        221,
+        222
+      ],
+      "brandContrast": 8.181225831161898,
+      "mutedContrast": 7.589708789285774,
+      "contrast": 15.045312201979428,
+      "noHorizontalOverflow": true
+    },
+    {
+      "mode": "dark",
+      "scheme": "amber",
+      "background": [
+        7,
+        6,
+        4
+      ],
+      "foreground": [
+        224,
+        221,
+        219
+      ],
+      "brandContrast": 9.920980713552268,
+      "mutedContrast": 7.59306839104617,
+      "contrast": 14.983001340603831,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "defaultSystem": true,
+  "liveSystemChanges": true,
+  "explicitPreferenceSurvivesReload": true,
+  "doubleClickOneEnqueue": true,
+  "emptyEnterNoAbort": true,
+  "shiftEnterNewline": true,
+  "imeEnterNoSend": true,
+  "failedRetrySameInvocation": true,
+  "queuedItemExplicitPromotion": true,
+  "busyIdleSwitch": true,
+  "busyAttachmentRetained": true,
+  "narrowWidth": 390
+}

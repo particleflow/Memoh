@@ -1484,6 +1484,7 @@
     "pdfTooLargeForNative": "This PDF exceeds 12MB, so it will be saved to the workspace as a path; the model can't view its content directly.",
     "pdfUnsupportedByModel": "The current model can't read PDFs natively. The file will be saved to the workspace as a path, but the model won't be able to view its content.",
     "send": "Send",
+    "stopGenerating": "Stop generating response",
     "sendFailed": "Message failed to send",
     "sendOutcomeUnknown": "The server hasn't confirmed this message, so it may already have been received. Check the conversation list before sending it again.",
     "sendWorkdirUnsupported": "The server couldn't start this chat in the selected folder. Update the server, or send without a folder.",

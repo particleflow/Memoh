@@ -25,7 +25,10 @@
           </Select>
         </SettingsRow>
 
-        <SettingsRow :label="t('settings.theme')">
+        <SettingsRow
+          :label="t('settings.theme')"
+          stack="sm"
+        >
           <SegmentedControl
             :model-value="theme"
             :items="themeItems"
@@ -36,7 +39,9 @@
               <component
                 :is="themeIcons[item.value]"
                 class="size-4"
+                aria-hidden="true"
               />
+              <span>{{ t(`settings.theme${item.value.charAt(0).toUpperCase()}${item.value.slice(1)}`) }}</span>
             </template>
           </SegmentedControl>
         </SettingsRow>
