@@ -25,3 +25,18 @@ This correction updates unreleased migration 0178 and canonical 0001. A database
 that already applied the earlier development copy of 0178 needs an explicit
 migration upgrade during integration; rerunning a migration runner alone will
 not apply a changed file. No deployed production migration was changed here.
+
+## Historical metadata after cutover
+
+`computer_task_get` and the existing session-task projection continue to read
+persisted operation state and receipt metadata after a native profile change.
+They require the current Bot grant, original user/session ownership and the
+same mounted Runtime/instance. The saved target snapshot must match the
+operation's original fingerprint. Rows without a snapshot keep the exact
+current fingerprint check; legacy registrations keep their existing rules.
+
+This comparison is used only by metadata projection. Result collection, live
+recovery, cancellation, logs and artifact operations retain their original
+execution pin. Historical references do not authorize filesystem access or
+resubmission, and unknown operations remain unknown. Reads do not update
+operation rows or contact the native transport.

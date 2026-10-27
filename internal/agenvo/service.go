@@ -113,6 +113,26 @@ func TargetFingerprint(t Target) string {
 	return hex.EncodeToString(sum[:])
 }
 
+// HistoricalTargetMatches compares a ledger snapshot with a currently authorized
+// registration. Native profile changes do not invalidate persisted metadata on
+// the same Runtime/instance. This is never an execution or filesystem permit.
+// Legacy rows without a snapshot retain the exact fingerprint requirement.
+func HistoricalTargetMatches(current Target, snapshot *Target, fingerprint string) bool {
+	if fingerprint == "" {
+		return false
+	}
+	if snapshot == nil {
+		return TargetFingerprint(current) == fingerprint
+	}
+	if TargetFingerprint(*snapshot) != fingerprint {
+		return false
+	}
+	if current.NativeRuntimeID == "" || snapshot.NativeRuntimeID == "" {
+		return TargetFingerprint(current) == fingerprint
+	}
+	return current.NativeRuntimeID == snapshot.NativeRuntimeID && current.ConnectionID == snapshot.ConnectionID && current.DeviceID == snapshot.DeviceID && current.InstanceID == snapshot.InstanceID
+}
+
 // ResolveTarget exposes only a grant-checked registration to the host service.
 func (s *Service) ResolveTarget(ctx context.Context, scope Scope) (Target, error) {
 	t, _, err := s.resolve(ctx, scope)

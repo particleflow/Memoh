@@ -451,14 +451,14 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 }
 
 func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
-	return s.loadWithResolver(ctx, b, id, s.relay.ResolveTarget)
+	return s.loadWithResolver(ctx, b, id, s.relay.ResolveTarget, false)
 }
 
 func (s *Service) loadHistory(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
-	return s.loadWithResolver(ctx, b, id, s.relay.ResolveHistoricalTarget)
+	return s.loadWithResolver(ctx, b, id, s.relay.ResolveHistoricalTarget, true)
 }
 
-func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBinding, id string, resolve func(context.Context, agenvo.Scope) (agenvo.Target, error)) (dbstore.ComputerOperationRecord, Details, error) {
+func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBinding, id string, resolve func(context.Context, agenvo.Scope) (agenvo.Target, error), history bool) (dbstore.ComputerOperationRecord, Details, error) {
 	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id, BotID: b.BotID, SessionID: b.SessionID, UserID: b.UserID})
 	if err != nil || r.BotID != b.BotID || r.SessionID != b.SessionID || r.UserID != b.UserID {
 		return r, Details{}, ErrDenied
@@ -470,12 +470,16 @@ func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBi
 	if err != nil {
 		return r, Details{}, ErrDenied
 	}
-	if agenvo.TargetFingerprint(t) != r.TargetFingerprint {
-		return r, Details{}, agenvo.ErrTargetChanged
-	}
 	var d Details
 	if json.Unmarshal(r.Details, &d) != nil {
 		return r, d, agenvo.ErrUnknown
+	}
+	if history {
+		if !agenvo.HistoricalTargetMatches(t, d.TargetSnapshot, r.TargetFingerprint) {
+			return r, d, agenvo.ErrTargetChanged
+		}
+	} else if agenvo.TargetFingerprint(t) != r.TargetFingerprint {
+		return r, d, agenvo.ErrTargetChanged
 	}
 	if d.TargetSnapshot != nil && agenvo.TargetFingerprint(*d.TargetSnapshot) != r.TargetFingerprint {
 		return r, d, agenvo.ErrUnknown
