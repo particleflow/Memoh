@@ -81,8 +81,8 @@ type ChatRequest struct {
 	SkipMemoryExtraction      bool                  `json:"-"`
 	SkipHistoryTurn           bool                  `json:"-"`
 	// TurnReplacement is set only for an admitted retry/edit run. Its step
-	// output stays hidden until the queue coordinator reaches the true final
-	// boundary and publishes this replacement in its own transaction.
+	// output stays hidden until the queue coordinator reaches a final or
+	// deferred-decision boundary and publishes it in its own transaction.
 	TurnReplacement     *messagepkg.TurnReplacement `json:"-"`
 	SkipTitleGeneration bool                        `json:"-"`
 	ForceFreshRuntime   bool                        `json:"-"`
