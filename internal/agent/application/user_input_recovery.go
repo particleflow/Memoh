@@ -147,7 +147,11 @@ func (s *Service) RecoverAcceptedUserInput(ctx context.Context, in UserInputReco
 		defer cancel()
 		defer endActive()
 		err := s.runRecoveredUserInput(runCtx, in, snapshot, admission)
-		finish(RunOutcome{Cause: err})
+		if err != nil {
+			finish(failedRunOutcome(err))
+		} else {
+			finish(RunOutcome{})
+		}
 	}()
 	return result, nil
 }
@@ -259,7 +263,7 @@ func (s *Service) runRecoveredUserInput(ctx context.Context, in UserInputRecover
 	if err := in.Reauthorize(ctx); err != nil {
 		return err
 	}
-	ctx, req, err := s.prepareWorkspaceRequest(ctx, ChatRequest{BotID: in.BotID, ChatID: in.BotID, ThreadID: in.SessionID, UserID: in.ActorID, SourceChannelIdentityID: in.ActorID, WorkspaceTargetID: saved.decision.WorkspaceTargetID, CurrentChannel: saved.resume.CurrentChannel, ReplyTarget: saved.resume.ReplyTarget, ConversationType: saved.resume.ConversationType})
+	ctx, req, err := s.prepareWorkspaceRequest(ctx, ChatRequest{BotID: in.BotID, ChatID: in.BotID, ThreadID: in.SessionID, RunID: admission.RunID, UserID: in.ActorID, SourceChannelIdentityID: in.ActorID, WorkspaceTargetID: saved.decision.WorkspaceTargetID, CurrentChannel: saved.resume.CurrentChannel, ReplyTarget: saved.resume.ReplyTarget, ConversationType: saved.resume.ConversationType})
 	if err != nil {
 		return err
 	}
