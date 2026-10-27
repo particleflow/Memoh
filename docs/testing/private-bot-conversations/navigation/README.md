@@ -70,8 +70,27 @@ service, memory mechanism, Agent core change or Harmony implementation is includ
   `session.not_found`, permission/storage failures and unknown outcomes do not
   authorize a different conversation. Old server fallback is not the new product.
 - No schema migration or automatic backfill is added. Before rollout, both new
-  server and client must be reviewed together. To roll back, return to the previous
-  client/server and retain durable bindings/history; do not delete routes/data.
+  server and client must be reviewed together. Provide the compatible server
+  before enabling history adoption in the new client.
+
+Rollback requires a forward-compatible contact reader, not simply an older
+server/client pair. After adopting a native Web conversation whose stored channel
+type is NULL/empty, the contact reader in `e6574f4d` rejects that binding because
+it accepts only `local`. Retaining the data alone does not make that reader
+compatible. The earlier `5c45c97f` lacks the lifecycle revision; it is not a safe
+rollback target simply because it lacks this channel restriction.
+
+- A client rollback must retain a server that reads both NULL/empty historical
+  Web channels and `local`, with the account/team/Bot ownership and original-route
+  validation intact.
+- A server rollback candidate must preserve that reader compatibility and the
+  lifecycle revision's transaction, lock-order and unknown-outcome handling.
+  Review and verify that combination before rollback; this draft does not claim
+  that an arbitrary previous server version is safe or that field rollback was
+  tested.
+- Retain durable route/session bindings, original history and work identities.
+  Do not delete routes/data, bulk rewrite channel types, repoint old work or replay
+  unknown work to make an incompatible reader appear usable.
 
 The known-successful creation callback guarantee and hook limitations documented
 in [the lifecycle revision](../lifecycle/README.md) are unchanged. First native
