@@ -208,7 +208,7 @@
     },
     "chatPaneChanges": {
       "local": "shared-conversation-chat-pane-changes.json",
-      "sha256": "42d4346c4d382baab34a13a3ac664d6926542dc5b2147a2e8be99c4e0183ca86",
+      "sha256": "8c5bca0da344d51970e59221701a6702d0b8e8a4032eaf84bf60ade98406a7a4",
       "sourceBaseCommit": "9020c93f7f99bd98f7f8b4e15db1ea685ef27ea2",
       "sharedSourceSHA256": "ed7f8acab1bd0474f5c29efa8ef66f7455c7bfc886f21df49e9cb8e4eecdd4b5",
       "excludes": [
@@ -301,7 +301,7 @@
     "tree": "c86392ef591c45d413ea49faab868d7392d018c6",
     "sourceChanges": {
       "local": "shared-contact-navigation-changes.json",
-      "sha256": "5f1341ccd2dd53def9c64125da67f6dfd75c67c29a64d46aae3d8d829deec65c"
+      "sha256": "db997b3a8f64310cbff611c52c4324297c385357e1feea372562771c5db7e167"
     },
     "sdkOverlay": {
       "local": "shared-contact-navigation-sdk.json",
@@ -384,5 +384,9 @@
     "local": "shared-compat219-changes.json",
     "sha256": "546fbe9380f60e8af48652a9314ca077a79d3378ba9d8227674bb9eb475fc003",
     "scope": "Original native task resume inputs SHA256 preservation; additive optional cancel observation fields. Generic media transport and original navigation unchanged."
+  },
+  "sharedCrossBotNavigation457": {
+    "commit": "45788bed060e73a6e5f9e183e927e4898689766f",
+    "scope": "Exact three shared product-file navigation race correction, with route/panel tests. No API, SDK, migration, task retry or new UI."
   }
 }

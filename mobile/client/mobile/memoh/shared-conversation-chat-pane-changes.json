@@ -68,5 +68,10 @@
     "  reasoningActive.value\n    ? `${selectedModelLabel.value} · ${selectedReasoningLabel.value}`",
     "  reasoningActive.value && (activeUsesExternalAgentComposer.value || !nativeModelUnavailable.value)\n    ? `${selectedModelLabel.value} · ${selectedReasoningLabel.value}`",
     1
+  ],
+  [
+    "const {\n  currentBotId,\n  bots,\n  loadingChats,\n  hasExplicitSessionSelection,\n} = storeToRefs(chatStore)",
+    "const {\n  bots,\n  loadingChats,\n  hasExplicitSessionSelection,\n} = storeToRefs(chatStore)\n// The keyed panel owns this Bot until disposal; Dockview may flush child\n// watchers after global selection changes but before removing the old pane.\nconst currentBotId = ref(chatStore.currentBotId)",
+    1
   ]
 ]

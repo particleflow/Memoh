@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/index.navigation.test.ts apps/web/src/pages/home/components/dockview/panel-chat.test.ts apps/web/src/pages/home/composables/useComposerPair.test.ts apps/web/src/pages/home/composables/useConversationRelations.test.ts apps/web/src/components/sidebar/session-activity-trigger.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  5 passed (5)
+      Tests  37 passed (37)
+   Start at  23:06:26
+   Duration  17.27s (transform 9.15s, setup 0ms, import 12.78s, tests 806ms, environment 2.71s)

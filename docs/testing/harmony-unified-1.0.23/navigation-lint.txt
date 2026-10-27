@@ -1,0 +1,31 @@
+
+/workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web/src/pages/home/components/chat-pane.vue
+  359:44   warning  'type' should be on a new line                         vue/max-attributes-per-line
+  359:56   warning  'accept' should be on a new line                       vue/max-attributes-per-line
+  359:73   warning  'multiple' should be on a new line                     vue/max-attributes-per-line
+  359:82   warning  'class' should be on a new line                        vue/max-attributes-per-line
+  359:97   warning  '@change' should be on a new line                      vue/max-attributes-per-line
+  548:70   warning  ':key' should be on a new line                         vue/max-attributes-per-line
+  549:1    warning  Expected indentation of 26 spaces but found 24 spaces  vue/html-indent
+  549:91   warning  ':file' should be on a new line                        vue/max-attributes-per-line
+  549:112  warning  'removable' should be on a new line                    vue/max-attributes-per-line
+  549:122  warning  '@remove' should be on a new line                      vue/max-attributes-per-line
+  550:1    warning  Expected indentation of 26 spaces but found 24 spaces  vue/html-indent
+  551:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  552:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  553:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  554:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  555:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  556:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  557:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  558:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  559:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  560:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  561:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  562:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  563:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  564:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  565:1    warning  Expected indentation of 26 spaces but found 24 spaces  vue/html-indent
+
+✖ 26 problems (0 errors, 26 warnings)
+  0 errors and 20 warnings potentially fixable with the `--fix` option.

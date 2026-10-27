@@ -57,8 +57,8 @@
       "upstreamSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122"
     },
     "apps/web/src/pages/home/components/chat-pane.vue": {
-      "adaptedSHA256": "7cdaa52bb88675d9e35daabb3b843d7765218ce0b2c39754a1ae6399ce43066d",
-      "upstreamSHA256": "e45f1ae21e777c9e373ac0fef9adb8098027a3468156c3f7257603aa59dbf85e"
+      "adaptedSHA256": "1247e874da6f7587033bf35e6aa864598e640ffd5af601d8999c7264364f61a8",
+      "upstreamSHA256": "f039ed260895eafdb5ceb0d0f850c835237a3d951fe15f419c690f58f9f62d1e"
     },
     "apps/web/src/pages/home/components/display-pane.vue": {
       "adaptedSHA256": "404914e72d1bcfa7ae23e2f1fdd9545a6f9dec6bfc728f19b9e99e9f81f7f974",
@@ -105,8 +105,8 @@
       "upstreamSHA256": "f58ec2bf7395ba50eab2c106873bf941df4909d8a2907bba6866bbf378cecd7e"
     },
     "apps/web/src/pages/home/index.vue": {
-      "adaptedSHA256": "f7e85459af950e9855dfc52ec70b1a70586114af1f47dc30ad04273501285ed3",
-      "upstreamSHA256": "d72230dce5d7c592a95e85fde4af14d5ffec5fa632dacdd4803636ac17c1ddc3"
+      "adaptedSHA256": "f31c88dd6e4a6418d16f8649dff200a074ee72feaa96ce49bec9eadeb0ed04a6",
+      "upstreamSHA256": "a037d0a5e31ec1b47aa78da4d89075edcac71d96f493808c2a43c0ac7bf41fa6"
     },
     "apps/web/src/pages/login/index.vue": {
       "adaptedSHA256": "81d0150579bd7481bf03bad2703c73fc24fe20488445b9e7e4992e5852c0d97d",
