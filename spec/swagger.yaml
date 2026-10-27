@@ -3867,6 +3867,11 @@ definitions:
           type: string
         type: array
     type: object
+  handlers.BindPrivateChatRequest:
+    properties:
+      session_id:
+        type: string
+    type: object
   handlers.BotUserCandidate:
     properties:
       avatar_url:
@@ -7251,6 +7256,17 @@ definitions:
           Supported is false when the model has no thinking concept; the other fields
           are then empty and no control should be rendered at all.
         type: boolean
+    type: object
+  route.PrivateChatEntry:
+    properties:
+      candidates:
+        items:
+          $ref: '#/definitions/session.Session'
+        type: array
+      next_cursor:
+        type: string
+      session:
+        $ref: '#/definitions/session.Session'
     type: object
   schedule.CreateRequest:
     properties:
@@ -16877,6 +16893,63 @@ paths:
       tags:
       - sessions
   /bots/{bot_id}/sessions/contact:
+    get:
+      description: Returns the bound conversation or eligible user-owned local model
+        chats. Candidates require explicit confirmation; ID ordering is not a preference.
+        A known deleted contact is resolved by POST. No task or hook is dispatched.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Candidate ID cursor
+        in: query
+        name: after
+        type: string
+      - description: Explicitly opened conversation; eligibility is verified before
+          offering
+        in: query
+        name: selected_session_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/route.PrivateChatEntry'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Inspect this account's Bot contact without changing history
+      tags:
+      - sessions
     post:
       description: Reuses a server-owned Web route for this authenticated account
         and Bot across devices. Atomically creates its chat only when absent. No model
@@ -16920,6 +16993,65 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Resolve this account's persistent private chat with a Bot
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/contact/bind:
+    post:
+      consumes:
+      - application/json
+      description: First binding only. The server verifies account ownership, ordinary
+        local model chat, user visibility, no parent/channel route/delegation. Does
+        not merge, copy, retarget tasks, replay hooks or replace another device's
+        binding. On conflict or uncertain outcome, inspect the contact before deciding
+        again.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Explicitly selected conversation
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.BindPrivateChatRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/session.Session'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Confirm an existing conversation as this account's Bot contact
       tags:
       - sessions
   /bots/{bot_id}/sessions/events:

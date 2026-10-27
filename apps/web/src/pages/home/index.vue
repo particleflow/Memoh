@@ -1,8 +1,16 @@
 <template>
   <div class="flex h-full overflow-hidden">
-    <ChatWorkspace v-if="currentBotId" />
+    <ChatWorkspace
+      v-if="currentBotId"
+      v-show="!historyError && !historyLoading"
+    />
+    <ContactChoiceDialog />
+    <PanePlaceholder
+      v-if="historyError || historyLoading"
+      :title="historyLoading ? t('common.loading') : historyError"
+    />
     <div
-      v-else
+      v-else-if="!currentBotId"
       class="flex-1 bg-card"
     >
       <PanePlaceholder
@@ -30,7 +38,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { getBotsByBotIdAgents, getBotsById } from '@memohai/sdk'
 import { fetchBot } from '@/composables/api/useBot'
-import { PanePlaceholder } from '@felinic/ui'
+import { PanePlaceholder, toast } from '@felinic/ui'
 import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'
 import { useChatStore } from '@/store/chat-list'
 import { routeConversationLabel } from '@/store/chat-list.utils'
@@ -38,6 +46,9 @@ import { useComposerPrefillStore } from '@/store/composer-prefill'
 import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 import { ACP_NO_PROJECT_MODE, createACPNoProjectPath } from '@/utils/acp'
 import { botAgentProvider } from '@/utils/bot-agent'
+import ContactChoiceDialog from './components/contact-choice-dialog.vue'
+import { fetchSession } from '@/composables/api/useChat'
+import { resolveApiErrorMessage } from '@/utils/api-error'
 import ChatWorkspace from './components/chat-workspace.vue'
 import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'
 
@@ -91,6 +102,9 @@ let suppressUrlSync = false
 // The URL's bot identifier when the server has no such bot. While set, the
 // pane shows the not-found state and the URL is left as the user typed it.
 const missingBotName = ref('')
+const historyError = ref('')
+const historyLoading = ref(false)
+let historyRequest = 0
 
 // home is now mounted persistently (via main-container, which App.vue keeps
 // alive across chat↔settings) rather than torn down when leaving chat. So these
@@ -167,7 +181,15 @@ async function maybeStartExternalAgentSession() {
 
 async function syncStoreFromUrl(rawName: string) {
   const urlName = rawName.trim()
+  const request = ++historyRequest
+  historyError.value = ''
+  historyLoading.value = !!route.query.session
   if (!urlName) {
+    if (route.query.session) {
+      historyLoading.value = false
+      historyError.value = t('chat.contact.historyFailed')
+      return
+    }
     missingBotName.value = ''
     if (!currentBotId.value) {
       await chatStore.initializeWithRecovery()
@@ -178,10 +200,21 @@ async function syncStoreFromUrl(rawName: string) {
   let resolvedId: string | null
   try {
     resolvedId = await resolveBotIdFromName(urlName)
-  } catch {
+  } catch (error) {
+    if (request === historyRequest) {
+      historyLoading.value = false
+      historyError.value = resolveApiErrorMessage(error, t('chat.contact.historyFailed'))
+    }
     return
   }
   if (!resolvedId) {
+    if (route.query.session) {
+      if (request === historyRequest) {
+        historyLoading.value = false
+        historyError.value = t('bots.notFoundDescription')
+      }
+      return
+    }
     // The URL may have moved on while the lookup was in flight; only the
     // current URL may clear the selection.
     if (((route.params.botName as string) ?? '').trim() !== urlName) return
@@ -197,7 +230,25 @@ async function syncStoreFromUrl(rawName: string) {
     return
   }
   missingBotName.value = ''
-  if (resolvedId !== (currentBotId.value ?? '').trim()) {
+  const historyId = typeof route.query.session === 'string' ? route.query.session.trim() : ''
+  if (historyId) {
+    try {
+      const session = await fetchSession(resolvedId, historyId)
+      if (request !== historyRequest || route.query.session !== historyId || route.params.botName !== rawName) return
+      suppressUrlSync = true
+      try { await chatStore.selectBot(resolvedId, { sessionId: session.id }) }
+      finally { suppressUrlSync = false }
+      await nextTick()
+      if (route.query.session === historyId && currentBotId.value === resolvedId) {
+        chatStore.cancelContactChoice()
+        workspaceTabs.openSessionChatPinned({ sessionId: session.id, title: session.title })
+      }
+    } catch (error) {
+      if (request === historyRequest) historyError.value = resolveApiErrorMessage(error, t('chat.contact.historyFailed'))
+    } finally {
+      if (request === historyRequest) historyLoading.value = false
+    }
+  } else if (resolvedId !== (currentBotId.value ?? '').trim()) {
     suppressUrlSync = true
     try {
       await chatStore.selectBot(resolvedId)
@@ -205,18 +256,19 @@ async function syncStoreFromUrl(rawName: string) {
       suppressUrlSync = false
     }
   }
-  await maybeStartExternalAgentSession()
+  if (!historyId) await maybeStartExternalAgentSession()
   // Canonicalize the URL to the bot's name slug. This covers entry points that
   // navigate with a UUID (e.g. returning from settings), where currentBotId is
   // unchanged so the watcher below never fires.
   const canonicalName = await resolveBotNameFromId(resolvedId)
+  if (request !== historyRequest) return
   if (canonicalName && urlName !== canonicalName) {
-    void router.replace({ name: 'bot', params: { botName: canonicalName } })
+    void router.replace({ name: 'bot', params: { botName: canonicalName }, query: route.query })
   }
 }
 
 watch(
-  () => [route.name, route.params.botName] as const,
+  () => [route.name, route.params.botName, route.query.session] as const,
   ([routeName, paramBotName], prev) => {
     if (!CHAT_ROUTE_NAMES.has(routeName as string)) return
     // Returning to chat from a non-chat route (settings overlay): per-bot config
@@ -231,7 +283,7 @@ watch(
     if (prevName !== undefined && !CHAT_ROUTE_NAMES.has(prevName)) {
       void chatStore.refreshBots()
     }
-    void syncStoreFromUrl((paramBotName as string) ?? '')
+    void syncStoreFromUrl((paramBotName as string) ?? '').catch(error => toast.error(resolveApiErrorMessage(error, t('chat.contact.failed'))))
   },
   { immediate: true },
 )
@@ -258,4 +310,16 @@ watch(currentBotId, async (newBotId) => {
   })
 })
 
+let openedContactRequest: unknown = null
+watch(
+  () => [chatStore.contactOpenRequested, workspaceTabs.api, chatStore.loadingChats, route.query.session] as const,
+  async ([request, api, loading]) => {
+    if (!request || !api || loading || request === openedContactRequest || route.query.session || currentBotId.value !== request.botId) return
+    await nextTick()
+    if (chatStore.contactOpenRequested !== request || currentBotId.value !== request.botId || route.query.session) return
+    openedContactRequest = request
+    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false })
+  },
+  { immediate: true },
+)
 </script>

@@ -1,0 +1,75 @@
+internal/db/grok_build_runtime_migration_integration_test.go:106:32: Function `resetToEmpty->teamMigrationDSN->teamMigrationDSN$1` should pass the context parameter (contextcheck)
+		canonicalPool := resetToEmpty(t)
+		                             ^
+internal/db/grok_build_runtime_migration_integration_test.go:107:45: Function `teamMigrationDSN->teamMigrationDSN$1` should pass the context parameter (contextcheck)
+		applyCanonicalInitOnly(t, teamMigrationDSN(t))
+		                                          ^
+internal/db/session_model_preference_migration_integration_test.go:146:26: Function `teamMigrationDSN->teamMigrationDSN$1` should pass the context parameter (contextcheck)
+		dsn := teamMigrationDSN(t)
+		                       ^
+internal/db/session_model_preference_migration_integration_test.go:147:23: Function `resetToEmpty->teamMigrationDSN->teamMigrationDSN$1` should pass the context parameter (contextcheck)
+		pool := resetToEmpty(t)
+		                    ^
+internal/db/computer_transfer_registry_integration_test.go:188:28: Error return value of `response.Body.Close` is not checked (errcheck)
+		defer response.Body.Close()
+		                         ^
+internal/db/grok_build_runtime_migration_integration_test.go:165:20: Error return value of `driver.Close` is not checked (errcheck)
+	defer driver.Close()
+	                  ^
+internal/db/session_model_preference_migration_integration_test.go:47:20: Error return value of `tx.Rollback` is not checked (errcheck)
+		defer tx.Rollback(ctx)
+		                 ^
+internal/db/team_view_rls_integration_test.go:81:19: comparing with != will fail on wrapped errors. Use errors.Is to check for a specific error (errorlint)
+	if err != nil && err != pgx.ErrNoRows {
+	                 ^
+internal/db/pi_batch_history_integration_test.go:10:1: File is not properly formatted (gci)
+
+^
+internal/db/computer_transfer_registry_integration_test.go:115:3: ifElseChain: rewrite if-else to switch statement (gocritic)
+		if err == nil {
+		^
+internal/db/contact_chat_integration_test.go:47:1: File is not properly formatted (gofumpt)
+}
+^
+internal/db/contact_lifecycle_integration_test.go:44:1: File is not properly formatted (gofumpt)
+}
+^
+internal/db/computer_transfer_registry_integration_test.go:184:37: G704: SSRF via taint analysis (gosec)
+		response, err := https.Client().Do(req)
+		                                  ^
+internal/db/workspace_storage_integration_test.go:99:41: G704: SSRF via taint analysis (gosec)
+		response, err := http.DefaultClient.Do(req)
+		                                      ^
+internal/db/workspace_storage_integration_test.go:149:10: G204: Subprocess launched with variable (gosec)
+		cmd := exec.CommandContext(t.Context(), "node", script)
+		       ^
+internal/db/contact_lifecycle_integration_test.go:40:3: variable copy has same name as predeclared identifier (predeclared)
+		copy := *q
+		^
+internal/db/computer_delivery_integration_test.go:168:27: QF1001: could apply De Morgan's law (staticcheck)
+				if p != permission && !(permission == "workspace_read" && p == "workspace_write") {
+				                      ^
+internal/db/computer_transfer_principal_integration_test.go:29:6: type pgTransferVerifier is unused (unused)
+type pgTransferVerifier struct {
+     ^
+internal/db/computer_transfer_principal_integration_test.go:36:30: func (*pgTransferVerifier).VerifyDevice is unused (unused)
+func (v *pgTransferVerifier) VerifyDevice(ctx context.Context, credential string) (computertask.VerifiedTransferDevice, error) {
+                             ^
+internal/db/computer_transfer_principal_integration_test.go:43:30: func (*pgTransferVerifier).RevalidateDevice is unused (unused)
+func (v *pgTransferVerifier) RevalidateDevice(ctx context.Context, device computertask.VerifiedTransferDevice) error {
+                             ^
+internal/db/computer_transfer_principal_integration_test.go:50:6: func pgDeviceIdentity is unused (unused)
+func pgDeviceIdentity(ctx context.Context, t *testing.T, store *postgresstore.Store, id computertask.DeliveryIdentity) computertask.VerifiedTransferDevice {
+     ^
+internal/db/computer_transfer_principal_integration_test.go:67:30: func (*pgTransferVerifier).Verify is unused (unused)
+func (v *pgTransferVerifier) Verify(ctx context.Context, credential string) (computertask.VerifiedTransfer, error) {
+                             ^
+internal/db/computer_transfer_principal_integration_test.go:74:30: func (*pgTransferVerifier).Revalidate is unused (unused)
+func (v *pgTransferVerifier) Revalidate(ctx context.Context, p computertask.VerifiedTransfer) error {
+                             ^
+internal/db/bot_activity_postgres_integration_test.go:103:29: "GET" can be replaced by http.MethodGet (usestdlibvars)
+	req := httptest.NewRequest("GET", "/bots/"+bot+"/activity", nil)
+	                           ^
+internal/db/team_schema_guard_integration_test.go:141:2: unnecessary trailing newline (whitespace)
+	}
+	^

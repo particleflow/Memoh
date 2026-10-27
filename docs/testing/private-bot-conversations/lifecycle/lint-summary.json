@@ -1,0 +1,21 @@
+{
+  "affected_package_lint_exit": 0,
+  "full_integration_lint_exit": 1,
+  "initial_diagnostics": 25,
+  "revision_diagnostics_corrected": 3,
+  "diagnostics_in_untouched_files": 22,
+  "untouched_files": [
+    "internal/db/bot_activity_postgres_integration_test.go",
+    "internal/db/computer_delivery_integration_test.go",
+    "internal/db/computer_transfer_principal_integration_test.go",
+    "internal/db/computer_transfer_registry_integration_test.go",
+    "internal/db/grok_build_runtime_migration_integration_test.go",
+    "internal/db/pi_batch_history_integration_test.go",
+    "internal/db/session_model_preference_migration_integration_test.go",
+    "internal/db/team_schema_guard_integration_test.go",
+    "internal/db/team_view_rls_integration_test.go",
+    "internal/db/workspace_storage_integration_test.go"
+  ],
+  "integration_delta_lint_exit": 0,
+  "delta_base": "5c45c97f3c47c56788ad7a137b4627c4fd66052c"
+}

@@ -9384,6 +9384,87 @@ const docTemplate = `{
             }
         },
         "/bots/{bot_id}/sessions/contact": {
+            "get": {
+                "description": "Returns the bound conversation or eligible user-owned local model chats. Candidates require explicit confirmation; ID ordering is not a preference. A known deleted contact is resolved by POST. No task or hook is dispatched.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Inspect this account's Bot contact without changing history",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Candidate ID cursor",
+                        "name": "after",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Explicitly opened conversation; eligibility is verified before offering",
+                        "name": "selected_session_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/route.PrivateChatEntry"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Reuses a server-owned Web route for this authenticated account and Bot across devices. Atomically creates its chat only when absent. No model call, task dispatch, adoption or mutation of historical sessions. Chat-route tokens and client-supplied identity/route/body are not accepted.",
                 "produces": [
@@ -9429,6 +9510,89 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/bots/{bot_id}/sessions/contact/bind": {
+            "post": {
+                "description": "First binding only. The server verifies account ownership, ordinary local model chat, user visibility, no parent/channel route/delegation. Does not merge, copy, retarget tasks, replay hooks or replace another device's binding. On conflict or uncertain outcome, inspect the contact before deciding again.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Confirm an existing conversation as this account's Bot contact",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Explicitly selected conversation",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.BindPrivateChatRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/session.Session"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -25756,6 +25920,14 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.BindPrivateChatRequest": {
+            "type": "object",
+            "properties": {
+                "session_id": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.BotUserCandidate": {
             "type": "object",
             "properties": {
@@ -30585,6 +30757,23 @@ const docTemplate = `{
                 "supported": {
                     "description": "Supported is false when the model has no thinking concept; the other fields\nare then empty and no control should be rendered at all.",
                     "type": "boolean"
+                }
+            }
+        },
+        "route.PrivateChatEntry": {
+            "type": "object",
+            "properties": {
+                "candidates": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/session.Session"
+                    }
+                },
+                "next_cursor": {
+                    "type": "string"
+                },
+                "session": {
+                    "$ref": "#/definitions/session.Session"
                 }
             }
         },

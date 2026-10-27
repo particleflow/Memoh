@@ -29,6 +29,8 @@ const api = vi.hoisted(() => ({
   fetchSession: vi.fn(),
   fetchSessions: vi.fn(),
   resolvePrivateChat: vi.fn(),
+  inspectPrivateChat: vi.fn(),
+  bindPrivateChat: vi.fn(),
   fetchBots: vi.fn(),
   fetchMessagesUI: vi.fn(),
   executeQuickAction: vi.fn(),
@@ -315,7 +317,7 @@ beforeEach(() => {
     api.fetchSessions.mockResolvedValue({ items: [], nextCursor: null })
     // Existing store cases exercise compatibility with pre-contact servers;
     // the contact-aware navigation contract has its own directed suite.
-    api.resolvePrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })
+    api.inspectPrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })
     api.fetchSession.mockResolvedValue({
       id: 'session-unknown',
       bot_id: 'bot-1',
@@ -1321,7 +1323,7 @@ describe('chat-list store', () => {
       }))
     })
 
-  it('does not restore an auto-picked historical session when default chat runtime is ACP', async () => {
+  it('opens the ordinary contact despite an external runtime default', async () => {
       api.fetchSessions.mockResolvedValue({
         items: [{
           id: 'history-session-1',
@@ -1336,6 +1338,7 @@ describe('chat-list store', () => {
           chat_runtime: 'codex',
         },
       })
+      api.inspectPrivateChat.mockResolvedValue({ session: { id: 'ordinary-contact', bot_id: 'bot-1', type: 'chat' }, candidates: [], nextCursor: null })
       const selection = useChatSelectionStore()
       selection.setBot('bot-1')
       selection.setSession('history-session-1')
@@ -1344,11 +1347,11 @@ describe('chat-list store', () => {
       await store.initialize()
       await flushPromises()
 
-      expect(sdk.getBotsByBotIdSettings).toHaveBeenCalled()
-      expect(store.sessionId).toBeNull()
+      expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
+      expect(store.sessionId).toBe('ordinary-contact')
       expect(store.hasExplicitSessionSelection).toBe(false)
       expect(store.messages).toEqual([])
-      expect(api.fetchMessagesUI).not.toHaveBeenCalled()
+      expect(store.pendingExternalAgentSessionMetadata).toBeNull()
     })
 
   it('restores an explicitly selected historical session when default chat runtime is ACP', async () => {
@@ -1373,7 +1376,7 @@ describe('chat-list store', () => {
 
       await store.initialize()
 
-      expect(sdk.getBotsByBotIdSettings).toHaveBeenCalled()
+      expect(sdk.getBotsByBotIdSettings).not.toHaveBeenCalled()
       expect(store.sessionId).toBe('history-session-1')
       expect(store.hasExplicitSessionSelection).toBe(true)
       expect(store.pendingExternalAgentSessionMetadata).toBeNull()

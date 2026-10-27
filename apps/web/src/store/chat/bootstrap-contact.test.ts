@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import type { SessionSummary } from '@/composables/api/useChat.types'
 import { createChatBootstrap, type ChatBootstrapDeps } from './bootstrap'
 
-const api = vi.hoisted(() => ({ fetchSessions: vi.fn(), resolvePrivateChat: vi.fn() }))
+const api = vi.hoisted(() => ({ fetchSessions: vi.fn(), resolvePrivateChat: vi.fn(), inspectPrivateChat: vi.fn(), bindPrivateChat: vi.fn() }))
 vi.mock('@/composables/api/useChat', () => api)
 
 const conversation = (id: string): SessionSummary => ({ id, bot_id: 'bot', title: id, type: 'chat', created_at: '', updated_at: '' })
@@ -16,7 +16,7 @@ function fixture() {
     prepareForInitialization: vi.fn(), resetRefreshCoordinator: vi.fn(), resetSessionActivity: vi.fn(), stopStreams: vi.fn(), stopWebSocket: vi.fn(),
     ensureBot: async () => deps.currentBotId.value,
     replaceSessions: vi.fn((items: SessionSummary[]) => { for (const item of items) remembered.set(item.id, item); return items }),
-    sessionsCursor: ref<string | null>(null), hasMoreSessions: ref(false), defaultRuntimeIsExternalAgent: vi.fn(async () => false),
+    sessionsCursor: ref<string | null>(null), hasMoreSessions: ref(false),
     ensureSessionSummary: vi.fn(async (_bot: string, id: string) => remembered.get(id) || conversation(id)),
     pendingExternalAgentSessionInput: ref(null), clearPendingExternalAgentSession: vi.fn(), clearHistoryView: vi.fn(), markHistoryEmpty: vi.fn(),
     knownSessionSummary: id => remembered.get(id), startWebSocket: vi.fn(), startBotSessionsActivityStream: vi.fn(), startSessionRuntime: vi.fn(),
@@ -29,6 +29,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   api.fetchSessions.mockResolvedValue({ items: [conversation('latest-historical-chat')], nextCursor: null })
   api.resolvePrivateChat.mockResolvedValue(conversation('server-owned-contact'))
+  api.inspectPrivateChat.mockResolvedValue({ candidates: [], nextCursor: null })
 })
 
 describe('Bot contact entry', () => {
@@ -49,12 +50,12 @@ describe('Bot contact entry', () => {
     await bootstrap.initialize()
     expect(api.resolvePrivateChat).not.toHaveBeenCalled(); expect(deps.sessionId.value).toBe('old-history')
   })
-  it('keeps an explicit new-chat draft and configured external runtime', async () => {
+  it('keeps an explicit draft but opens the ordinary contact despite an external runtime default', async () => {
     const draft = fixture(); draft.deps.draftIntent.value = true; draft.deps.explicitSessionSelection.value = true
     await draft.bootstrap.initialize(); expect(api.resolvePrivateChat).not.toHaveBeenCalled()
-    const external = fixture(); vi.mocked(external.deps.defaultRuntimeIsExternalAgent).mockResolvedValue(true)
-    await external.bootstrap.initialize(); expect(api.resolvePrivateChat).not.toHaveBeenCalled()
-    expect(external.deps.stageDefaultExternalAgentFromSettings).toHaveBeenCalledOnce()
+    const external = fixture()
+    await external.bootstrap.initialize(); expect(api.resolvePrivateChat).toHaveBeenCalledOnce()
+    expect(external.deps.stageDefaultExternalAgentFromSettings).not.toHaveBeenCalled()
   })
   it('retains old-server navigation only for an absent contact route', async () => {
     api.resolvePrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })
@@ -73,4 +74,61 @@ describe('Bot contact entry', () => {
     invalidate(); resolve(conversation('stale-contact')); await pending
     expect(deps.sessionId.value).toBeNull(); expect(deps.startSessionRuntime).not.toHaveBeenCalled()
   })
+  it('offers multiple eligible old chats once without choosing the latest or creating', async () => {
+    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('first'), conversation('second')], nextCursor: null })
+    const { deps, bootstrap } = fixture(); await bootstrap.initialize()
+    expect(deps.sessionId.value).toBeNull()
+    expect(bootstrap.contactChoice.value?.candidates.map(s => s.id)).toEqual(['first', 'second'])
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+    api.bindPrivateChat.mockResolvedValue(conversation('second'))
+    await bootstrap.confirmContact('second')
+    expect(api.bindPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', 'second')
+    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('second')
+  })
+  it('never resolves or binds a contact for an explicit historical URL', async () => {
+    const { deps, bootstrap } = fixture(); deps.hasHistoryEntry = () => true
+    await bootstrap.initialize()
+    expect(api.inspectPrivateChat).not.toHaveBeenCalled()
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+  })
+  it('reconciles a concurrent device binding before confirming a stale candidate', async () => {
+    api.inspectPrivateChat.mockResolvedValueOnce({ candidates: [conversation('old'), conversation('another')], nextCursor: null })
+      .mockResolvedValue({ session: conversation('other-device'), candidates: [], nextCursor: null })
+    const { bootstrap } = fixture(); await bootstrap.initialize(); await bootstrap.confirmContact('old')
+    expect(api.bindPrivateChat).not.toHaveBeenCalled()
+    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('other-device')
+  })
+  it('returns to a bound contact on a same-Bot click without resetting the composer', async () => {
+    api.inspectPrivateChat.mockResolvedValue({ session: conversation('bound'), candidates: [], nextCursor: null })
+    const { deps, bootstrap } = fixture(); deps.sessionId.value = 'history'
+    await bootstrap.selectBot('bot')
+    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('bound')
+    expect(deps.resetToEmptyComposer).not.toHaveBeenCalled()
+    expect(deps.abortAllAssistantStreams).not.toHaveBeenCalled()
+  })
+
+  it('continues a single verified existing conversation without a permission or task-management step', async () => {
+    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('only-history')], nextCursor: null })
+    api.bindPrivateChat.mockResolvedValue(conversation('only-history'))
+    const { deps, bootstrap } = fixture(); await bootstrap.initialize()
+    expect(bootstrap.contactChoice.value).toBeNull()
+    expect(api.bindPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', 'only-history')
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+    expect(deps.sessionId.value).toBe('only-history')
+  })
+
+  it('does not leave the next Bot busy after an outstanding contact read completes late', async () => {
+    let complete!: (value: { candidates: SessionSummary[], nextCursor: null }) => void
+    api.inspectPrivateChat.mockImplementationOnce(() => new Promise(done => { complete = done }))
+    const { deps, bootstrap } = fixture()
+    const previous = bootstrap.openContact()
+    expect(bootstrap.contactBusy.value).toBe(true)
+    await bootstrap.selectBot('other-bot', { sessionId: 'explicit-history' })
+    complete({ candidates: [conversation('stale')], nextCursor: null }); await previous
+    expect(bootstrap.contactBusy.value).toBe(false)
+    expect(bootstrap.contactChoice.value).toBeNull()
+    expect(deps.currentBotId.value).toBe('other-bot')
+    expect(deps.sessionId.value).toBe('explicit-history')
+  })
+
 })
