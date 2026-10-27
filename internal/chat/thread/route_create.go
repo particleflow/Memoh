@@ -2,6 +2,7 @@ package thread
 
 import (
 	"context"
+	"sync"
 
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
@@ -16,8 +17,11 @@ func (s *Service) StageRouteSession(ctx context.Context, queries dbstore.Queries
 	if err != nil {
 		return Thread{}, nil, err
 	}
+	var once sync.Once
 	return created, func() {
-		s.publishThreadCreated(created)
-		s.runThreadStartHook(context.WithoutCancel(ctx), created)
+		once.Do(func() {
+			s.publishThreadCreated(created)
+			s.runThreadStartHook(context.WithoutCancel(ctx), created)
+		})
 	}, nil
 }

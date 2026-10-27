@@ -61,5 +61,11 @@ func (h *SessionHandler) ResolvePrivateChat(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+	// A contact keeps its identity after a legal descriptor change. Reuse the
+	// normal read authorization, including workspace_exec for external runtimes.
+	_, _, session, err = h.authorizeSession(c, user, bot, session.ID)
+	if err != nil {
+		return err
+	}
 	return c.JSON(http.StatusOK, session)
 }

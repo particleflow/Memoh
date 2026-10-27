@@ -1,5 +1,10 @@
 # Private Bot conversation integration checkpoint
 
+The later [contact lifecycle revision](lifecycle/README.md) records an independent
+backend-only correction and real PostgreSQL/application evidence against `5c45c97f`.
+The checkpoint below describes its original source and limits; its local PG failure
+is historical, not the outcome of the later revision. Product rollout remains separate.
+
 Base: `dd7409e7157b440a5a62337b61bc4d6fac9cae76` (six remote CI runs passed, attempt 1). The shared single-button/palette delta is the exact final net difference from official-working base `3d5f145c` to source `2422db2011231d5a4e538aa0fd7b573d133cb350` (PR85). The superseded split-button implementation is not the final product tree. Historical source screenshots remain explicitly marked as superseded by that source's README.
 
 This Bot-structure delta is an independent review checkpoint. It must not be included in the binding/single-button bug-fix deployment by implication. The user requested careful structural review and joint acceptance after the fixes; no field test or migration is requested here.

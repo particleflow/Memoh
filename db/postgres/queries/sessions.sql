@@ -291,6 +291,16 @@ WHERE team_id = public.memoh_current_team_id()
   AND bot_id = sqlc.arg(bot_id)
 FOR UPDATE;
 
+-- name: LockSessionForContact :one
+-- Preserve the full binding, including a tombstone, before taking a route lock.
+-- A missing or foreign row is not evidence that a contact may be recreated.
+SELECT *
+FROM bot_sessions
+WHERE team_id = public.memoh_current_team_id()
+  AND id = sqlc.arg(session_id)
+  AND bot_id = sqlc.arg(bot_id)
+FOR UPDATE;
+
 -- name: LockSessionRuntimeFence :one
 SELECT runtime_fencing_token
 FROM bot_sessions

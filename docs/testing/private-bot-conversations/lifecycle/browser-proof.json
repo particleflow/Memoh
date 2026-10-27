@@ -1,0 +1,540 @@
+{
+  "server": "current source, real local PostgreSQL; no intercepted responses",
+  "api": "http://127.0.0.1:18180",
+  "web": "http://127.0.0.1:18182",
+  "bot_id": "a3fca982-3331-4c1e-b629-dd87017de421",
+  "canonical_session_id": "32c3794f-069b-4ff7-92f0-e8b45454992b",
+  "contacts": [
+    {
+      "id": "32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "bot_id": "a3fca982-3331-4c1e-b629-dd87017de421",
+      "mode": "chat",
+      "runtime": "model"
+    },
+    {
+      "id": "32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "bot_id": "a3fca982-3331-4c1e-b629-dd87017de421",
+      "mode": "chat",
+      "runtime": "model"
+    },
+    {
+      "id": "32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "bot_id": "a3fca982-3331-4c1e-b629-dd87017de421",
+      "mode": "discuss",
+      "runtime": "model"
+    },
+    {
+      "id": "32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "bot_id": "a3fca982-3331-4c1e-b629-dd87017de421",
+      "mode": "discuss",
+      "runtime": "model"
+    }
+  ],
+  "subscriptions": [
+    {
+      "type": "runtime_subscribe",
+      "session_id": "32c3794f-069b-4ff7-92f0-e8b45454992b"
+    },
+    {
+      "type": "runtime_subscribe",
+      "session_id": "32c3794f-069b-4ff7-92f0-e8b45454992b"
+    },
+    {
+      "type": "runtime_subscribe",
+      "session_id": "32c3794f-069b-4ff7-92f0-e8b45454992b"
+    },
+    {
+      "type": "runtime_subscribe",
+      "session_id": "32c3794f-069b-4ff7-92f0-e8b45454992b"
+    }
+  ],
+  "calls": [
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/contact-review",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workdirs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/container",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/events",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/contact",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/queue",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/acp/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/agents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/skills/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workspace-targets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/contact-review",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/container",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workdirs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/events",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/contact",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/queue",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/acp/profiles",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/models",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/agents",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/skills/catalog",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workspace-targets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/providers",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workdirs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workspace-targets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/status",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/queue",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/events",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/contact",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/settings",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/contact-review",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/events",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/contact",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/messages",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workdirs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/queue",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/workspace-targets",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/media/limits",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/bots/a3fca982-3331-4c1e-b629-dd87017de421/sessions/32c3794f-069b-4ff7-92f0-e8b45454992b/status",
+      "status": 200
+    }
+  ],
+  "page_errors": [],
+  "business_messages_sent": 0
+}

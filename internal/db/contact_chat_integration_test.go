@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/google/uuid"
@@ -24,21 +25,33 @@ type contactFaultQueries struct {
 	dbstore.Queries
 	base                          *postgresstore.Queries
 	failActivation, unknownCommit bool
+	activationCalls, commitCalls  *atomic.Int64
 }
+
+var errContactActivationProbe = errors.New("synthetic contact activation failure")
 
 func (*contactFaultQueries) SupportsTransactions() bool { return true }
 func (q *contactFaultQueries) InTx(ctx context.Context, f func(dbstore.Queries) error) error {
 	err := q.base.InTx(ctx, func(tx dbstore.Queries) error {
-		return f(&contactFaultQueries{Queries: tx, failActivation: q.failActivation})
+		staged := *q
+		staged.Queries = tx
+		return f(&staged)
 	})
+	if err == nil && q.commitCalls != nil {
+		q.commitCalls.Add(1)
+	}
 	if err == nil && q.unknownCommit {
 		return db.ErrCommitOutcomeUnknown
 	}
 	return err
 }
+
 func (q *contactFaultQueries) SetRouteActiveSession(ctx context.Context, p dbsqlc.SetRouteActiveSessionParams) error {
+	if q.activationCalls != nil {
+		q.activationCalls.Add(1)
+	}
 	if q.failActivation {
-		return errors.New("synthetic activation failure")
+		return errContactActivationProbe
 	}
 	return q.Queries.SetRouteActiveSession(ctx, p)
 }
@@ -145,8 +158,13 @@ func TestPostgresPrivateChatIsolationAndConcurrentReuse(t *testing.T) {
 	// Activation failure rolls back both new route and session.
 	failedUser := uuid.NewString()
 	exec("INSERT INTO users(id,username) VALUES($1::uuid,$1::text)", failedUser)
-	if _, err := coordinator(&contactFaultQueries{Queries: q, base: q, failActivation: true}).EnsurePrivateChat(ctx, bot, failedUser); err == nil {
-		t.Fatal("activation failure succeeded")
+	exec("INSERT INTO team_members(user_id) VALUES($1)", failedUser)
+	var activations, commits atomic.Int64
+	if _, err := coordinator(&contactFaultQueries{Queries: q, base: q, failActivation: true, activationCalls: &activations, commitCalls: &commits}).EnsurePrivateChat(ctx, bot, failedUser); !errors.Is(err, errContactActivationProbe) {
+		t.Fatalf("activation injection not reached: %v", err)
+	}
+	if activations.Load() != 1 || commits.Load() != 0 {
+		t.Fatalf("activation=%d commits=%d", activations.Load(), commits.Load())
 	}
 	if err := pool.QueryRow(ctx, "SELECT count(*) FROM bot_sessions WHERE created_by_user_id=$1", failedUser).Scan(&count); err != nil || count != 0 {
 		t.Fatalf("rollback left a chat: %d %v", count, err)
@@ -154,8 +172,13 @@ func TestPostgresPrivateChatIsolationAndConcurrentReuse(t *testing.T) {
 	// A lost commit acknowledgement is reconciled through the same route/key.
 	unknownUser := uuid.NewString()
 	exec("INSERT INTO users(id,username) VALUES($1::uuid,$1::text)", unknownUser)
-	if _, err := coordinator(&contactFaultQueries{Queries: q, base: q, unknownCommit: true}).EnsurePrivateChat(ctx, bot, unknownUser); !errors.Is(err, db.ErrCommitOutcomeUnknown) {
+	exec("INSERT INTO team_members(user_id) VALUES($1)", unknownUser)
+	activations.Store(0)
+	if _, err := coordinator(&contactFaultQueries{Queries: q, base: q, unknownCommit: true, activationCalls: &activations, commitCalls: &commits}).EnsurePrivateChat(ctx, bot, unknownUser); !errors.Is(err, db.ErrCommitOutcomeUnknown) {
 		t.Fatalf("lost acknowledgement=%v", err)
+	}
+	if activations.Load() != 1 || commits.Load() != 1 {
+		t.Fatalf("unknown acknowledgement did not follow one real commit: activation=%d commits=%d", activations.Load(), commits.Load())
 	}
 	recovered, err := coordinator(q).EnsurePrivateChat(ctx, bot, unknownUser)
 	if err != nil || recovered.ID == "" {
