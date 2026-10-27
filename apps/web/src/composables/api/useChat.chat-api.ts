@@ -7,6 +7,9 @@ import {
   getBotsByBotIdSessionsBySessionId,
   postBotsByBotIdAcpRuntimes,
   postBotsByBotIdSessions,
+  postBotsByBotIdSessionsContact,
+  getBotsByBotIdSessionsContact,
+  postBotsByBotIdSessionsContactBind,
   postBotsByBotIdSessionsBySessionIdFork,
   postBotsByBotIdSessionsBySessionIdAcpRuntime,
   deleteBotsByBotIdSessionsBySessionId,
@@ -226,6 +229,29 @@ export async function fetchSession(botId: string, sessionId: string): Promise<Se
     path: { bot_id: botId.trim(), session_id: sessionId.trim() },
     throwOnError: true,
   })
+  return data as SessionSummary
+}
+
+export async function resolvePrivateChat(botId: string): Promise<SessionSummary> {
+  const { data } = await postBotsByBotIdSessionsContact({ path: { bot_id: botId }, cache: 'no-store', throwOnError: true })
+  if (!data?.id || data.bot_id !== botId) throw new Error('Private chat identity changed')
+  return data as SessionSummary
+}
+
+export interface PrivateChatEntry {
+  session?: SessionSummary
+  candidates: SessionSummary[]
+  nextCursor: string | null
+}
+
+export async function inspectPrivateChat(botId: string, after?: string, selectedSessionId?: string): Promise<PrivateChatEntry> {
+  const { data } = await getBotsByBotIdSessionsContact({ path: { bot_id: botId }, query: { after, selected_session_id: selectedSessionId }, cache: 'no-store', throwOnError: true })
+  return { session: data.session as SessionSummary | undefined, candidates: (data.candidates ?? []) as SessionSummary[], nextCursor: data.next_cursor || null }
+}
+
+export async function bindPrivateChat(botId: string, sessionId: string): Promise<SessionSummary> {
+  const { data } = await postBotsByBotIdSessionsContactBind({ path: { bot_id: botId }, body: { session_id: sessionId }, throwOnError: true })
+  if (!data?.id || data.bot_id !== botId) throw new Error('Private chat identity changed')
   return data as SessionSummary
 }
 

@@ -96,10 +96,6 @@ export function createExternalAgentDefaults(deps: {
     }
   }
 
-  async function defaultRuntimeIsExternalAgent(botId: string) {
-    return await inputFromSettings(botId) !== null
-  }
-
   async function stageFromSettings(requestId: number) {
     const botId = (deps.currentBotId.value ?? '').trim()
     if (!botId || deps.sessionId.value || deps.explicitSessionSelection.value) return
@@ -123,7 +119,6 @@ export function createExternalAgentDefaults(deps: {
 
   return {
     settingsForAgent,
-    defaultRuntimeIsExternalAgent,
     stageFromSettings,
   }
 }

@@ -230,7 +230,7 @@ func planDelegationDevices(ctx context.Context, store delegationMountPlanner, au
 }
 
 func (h *delegationHost) CreateSession(ctx context.Context, r botdelegation.Record) (string, error) {
-	s, err := h.sessions.Create(ctx, thread.CreateInput{BotID: r.Identity.TargetBotID, Type: thread.TypeChat, CreatedByUserID: r.Identity.UserID, ChannelType: "web", Title: "Delegated task", Metadata: map[string]any{"workspace_target_id": r.Payload.TargetSelection}})
+	s, err := h.sessions.Create(ctx, thread.CreateInput{BotID: r.Identity.TargetBotID, Type: thread.TypeChat, Visibility: thread.VisibilityInternal, CreatedByUserID: r.Identity.UserID, ChannelType: "web", Title: "Delegated task", Metadata: map[string]any{"workspace_target_id": r.Payload.TargetSelection}})
 	return s.ID, err
 }
 

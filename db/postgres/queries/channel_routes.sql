@@ -48,6 +48,20 @@ WHERE team_id = public.memoh_current_team_id()
   AND COALESCE(external_thread_id, '') = COALESCE(sqlc.narg(thread_id), '')
 LIMIT 1;
 
+-- name: EnsurePrivateChatRoute :one
+-- The server derives conversation_id from the authenticated account. The no-op
+-- conflict update locks this existing route until its session is committed.
+INSERT INTO bot_channel_routes AS route (
+  bot_id, channel_type, external_conversation_id, conversation_type,
+  default_reply_target, metadata
+) VALUES (sqlc.arg(bot_id), 'web', sqlc.arg(conversation_id), 'private', sqlc.arg(reply_target), '{}')
+ON CONFLICT (team_id, bot_id, channel_type, external_conversation_id, (COALESCE(external_thread_id, ''::text)))
+DO UPDATE SET active_session_id = route.active_session_id
+RETURNING id, bot_id, channel_type AS platform, channel_config_id,
+  external_conversation_id AS conversation_id, external_thread_id AS thread_id,
+  conversation_type, default_reply_target AS reply_target, active_session_id,
+  metadata, created_at, updated_at;
+
 -- name: GetChatRouteByID :one
 SELECT
   id,

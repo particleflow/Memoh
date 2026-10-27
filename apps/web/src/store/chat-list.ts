@@ -1,5 +1,6 @@
+import { routerKey } from 'vue-router'
 import { defineStore, storeToRefs } from 'pinia'
-import { computed, onScopeDispose, ref } from 'vue'
+import { computed, hasInjectionContext, inject, onScopeDispose, ref } from 'vue'
 import { toast } from '@felinic/ui'
 import { useChatSelectionStore } from '@/store/chat-selection'
 import { useWorkdirsStore } from '@/store/workdirs'
@@ -28,15 +29,9 @@ import {
   sendFailedMessage,
   userInputConnectionLostMessage, workdirMismatchMessage, sendOutcomeUnknownMessage,
 } from './chat/messages'
-import {
-  createBackgroundTaskTracker,
-} from './chat/background-tasks'
+import { createBackgroundTaskTracker } from './chat/background-tasks'
 import { fetchSessions } from '@/composables/api/useChat'
-import {
-  bindBotIdInitializeWatch,
-  createInitializeRecovery,
-  createSessionListSnapshot,
-} from './chat/session-list-init-recovery'
+import { bindBotIdInitializeWatch, createInitializeRecovery, createSessionListSnapshot } from './chat/session-list-init-recovery'
 
 import type {
   ChatAssistantTurn,
@@ -331,7 +326,6 @@ export const useChatStore = defineStore('chat', () => {
   } = externalAgents.orchestration
   const {
     settingsForAgent: defaultExternalAgentSettingsForAgent,
-    defaultRuntimeIsExternalAgent,
     stageFromSettings: stageDefaultExternalAgentFromSettings,
   } = externalAgents.defaults
   const {
@@ -409,7 +403,8 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const {
-    loadingChats,
+    loadingChats, contactChoice, contactBusy, contactOpenRequested,
+    openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     initialize,
     selectBot,
     selectSession,
@@ -417,6 +412,7 @@ export const useChatStore = defineStore('chat', () => {
     selectDraft,
     reset: resetBootstrap,
   } = createChatBootstrap({
+    hasHistoryEntry: (() => { const router = hasInjectionContext() ? inject(routerKey, null) : null; return () => !!router?.currentRoute.value.query.session })(),
     currentBotId,
     sessionId,
     draftIntent,
@@ -433,7 +429,6 @@ export const useChatStore = defineStore('chat', () => {
     replaceSessions,
     sessionsCursor,
     hasMoreSessions,
-    defaultRuntimeIsExternalAgent,
     ensureSessionSummary,
     pendingExternalAgentSessionInput,
     clearPendingExternalAgentSession,
@@ -602,6 +597,8 @@ export const useChatStore = defineStore('chat', () => {
     pendingExternalAgentMatchesInput,
     sessionId, hasExplicitSessionSelection, currentBotId, bots,
     activeChatTarget, isSessionStreaming,
+    contactChoice, contactBusy, contactOpenRequested,
+    openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     loadingChats, loadingMessages, loadingOlder, hasMoreOlder,
     // Exposed for tests only — do not branch on this in components. The
     // leading underscore reflects the test-only contract at the call site.

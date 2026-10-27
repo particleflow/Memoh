@@ -115,6 +115,62 @@ func (q *Queries) DeleteChatRoute(ctx context.Context, id pgtype.UUID) error {
 	return err
 }
 
+const ensurePrivateChatRoute = `-- name: EnsurePrivateChatRoute :one
+INSERT INTO bot_channel_routes AS route (
+  bot_id, channel_type, external_conversation_id, conversation_type,
+  default_reply_target, metadata
+) VALUES ($1, 'web', $2, 'private', $3, '{}')
+ON CONFLICT (team_id, bot_id, channel_type, external_conversation_id, (COALESCE(external_thread_id, ''::text)))
+DO UPDATE SET active_session_id = route.active_session_id
+RETURNING id, bot_id, channel_type AS platform, channel_config_id,
+  external_conversation_id AS conversation_id, external_thread_id AS thread_id,
+  conversation_type, default_reply_target AS reply_target, active_session_id,
+  metadata, created_at, updated_at
+`
+
+type EnsurePrivateChatRouteParams struct {
+	BotID          pgtype.UUID `json:"bot_id"`
+	ConversationID string      `json:"conversation_id"`
+	ReplyTarget    pgtype.Text `json:"reply_target"`
+}
+
+type EnsurePrivateChatRouteRow struct {
+	ID               pgtype.UUID        `json:"id"`
+	BotID            pgtype.UUID        `json:"bot_id"`
+	Platform         string             `json:"platform"`
+	ChannelConfigID  pgtype.UUID        `json:"channel_config_id"`
+	ConversationID   string             `json:"conversation_id"`
+	ThreadID         pgtype.Text        `json:"thread_id"`
+	ConversationType pgtype.Text        `json:"conversation_type"`
+	ReplyTarget      pgtype.Text        `json:"reply_target"`
+	ActiveSessionID  pgtype.UUID        `json:"active_session_id"`
+	Metadata         []byte             `json:"metadata"`
+	CreatedAt        pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt        pgtype.Timestamptz `json:"updated_at"`
+}
+
+// The server derives conversation_id from the authenticated account. The no-op
+// conflict update locks this existing route until its session is committed.
+func (q *Queries) EnsurePrivateChatRoute(ctx context.Context, arg EnsurePrivateChatRouteParams) (EnsurePrivateChatRouteRow, error) {
+	row := q.db.QueryRow(ctx, ensurePrivateChatRoute, arg.BotID, arg.ConversationID, arg.ReplyTarget)
+	var i EnsurePrivateChatRouteRow
+	err := row.Scan(
+		&i.ID,
+		&i.BotID,
+		&i.Platform,
+		&i.ChannelConfigID,
+		&i.ConversationID,
+		&i.ThreadID,
+		&i.ConversationType,
+		&i.ReplyTarget,
+		&i.ActiveSessionID,
+		&i.Metadata,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const findChatRoute = `-- name: FindChatRoute :one
 SELECT
   id,

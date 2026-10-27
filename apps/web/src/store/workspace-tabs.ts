@@ -898,7 +898,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
    * right-click means "give me a separate tab" — so it lands as a pinned chat
    * tab the preview slot can never evict. An already-open tab for the session is
    * promoted to pinned + focused. */
-  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string }) {
+  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean }) {
     const dock = api.value
     if (!dock) return
     const sid = opts.sessionId.trim()
@@ -913,7 +913,10 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     if (existing) {
       existing.api.setTitle(title)
       pinPanel(existing.id)
+      existing.api.updateParameters({ explicitSelection: opts.explicitSelection !== false })
+      setNextChatActivationExplicit(existing.id, opts.explicitSelection !== false)
       focusPanel(existing)
+      selectChatSession(sid, opts.explicitSelection !== false)
       return
     }
     const target = tabPosition(dock, opts.groupId)
@@ -921,7 +924,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       id: nextChatPanelId(bid),
       component: 'chat',
       title,
-      params: { sessionId: sid, explicitSelection: true },
+      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false },
       renderer: 'always',
       ...(target ? { position: target } : {}),
     })
@@ -1169,7 +1172,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
   // ephemeral slot, so firing while a file/preview tab is open would evict it.
   function ensureDraftChatPanel() {
     const dock = api.value
-    if (!dock || suppressPersist || draftChatQueued) return
+    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats || chatStore.contactChoice) return
     if (dock.panels.length > 0) return
     if (!(currentBotId.value ?? '').trim()) return
 
@@ -1177,7 +1180,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     void nextTick(() => {
       draftChatQueued = false
       const latestDock = api.value
-      if (!latestDock || suppressPersist || latestDock.panels.length > 0) return
+      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats || chatStore.contactChoice) return
       if (!(currentBotId.value ?? '').trim()) return
       // Only an EXPLICIT selection may refill as that session. initialize()'s
       // auto-pick leaves a non-explicit sessionId even when we refused to open
@@ -2147,8 +2150,11 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
 
   // initialize() settled the selection (kept, picked, or cleared it). Align it
   // with the dock once; later session-list refreshes never touch the dock.
+  watch(() => chatStore.contactChoice, choice => { if (!choice) ensureDraftChatPanel() })
+
   watch(() => chatStore.loadingChats, (loading) => {
     if (loading) return
+    ensureDraftChatPanel()
     alignSelectionWithDock()
     // An empty dock has not drawn its draft yet; ensureDraftChatPanel takes
     // the pick when it does.

@@ -26,6 +26,11 @@ type HistoryTurn struct {
 // Queries is the transitional database interface implemented by sqlc-backed stores.
 // Domain-specific stores should replace this broad interface module by module.
 type Queries interface {
+	GetContactCandidate(context.Context, dbsqlc.GetContactCandidateParams) (dbsqlc.BotSession, error)
+	InsertContactBindingRoute(context.Context, dbsqlc.InsertContactBindingRouteParams) (pgtype.UUID, error)
+	ReadContactSession(context.Context, dbsqlc.ReadContactSessionParams) (dbsqlc.BotSession, error)
+	ListContactCandidates(context.Context, dbsqlc.ListContactCandidatesParams) ([]dbsqlc.BotSession, error)
+	BindContactCandidate(context.Context, dbsqlc.BindContactCandidateParams) (int64, error)
 	SessionRunMatchesAbortScope(context.Context, dbsqlc.SessionRunMatchesAbortScopeParams) (bool, error)
 	RecordSessionRunAbortControl(context.Context, dbsqlc.RecordSessionRunAbortControlParams) (int64, error)
 	GetSessionRunAbortControl(context.Context, dbsqlc.GetSessionRunAbortControlParams) (dbsqlc.GetSessionRunAbortControlRow, error)
@@ -119,6 +124,7 @@ type Queries interface {
 	DeleteUserChannelIdentityBinding(ctx context.Context, arg dbsqlc.DeleteUserChannelIdentityBindingParams) error
 	ListUserIDsByChannelIdentity(ctx context.Context, channelIdentityID pgtype.UUID) ([]pgtype.UUID, error)
 	LockBotForRuntimeReset(ctx context.Context, botID pgtype.UUID) (pgtype.UUID, error)
+	LockBotForSessionWrite(ctx context.Context, id pgtype.UUID) (pgtype.UUID, error)
 	GetBotUserGrantByID(ctx context.Context, id pgtype.UUID) (dbsqlc.BotUserGrant, error)
 	ListBotUserGrants(ctx context.Context, botID pgtype.UUID) ([]dbsqlc.ListBotUserGrantsRow, error)
 	ListBotUserGrantsForUser(ctx context.Context, arg dbsqlc.ListBotUserGrantsForUserParams) ([]dbsqlc.ListBotUserGrantsForUserRow, error)
@@ -130,6 +136,7 @@ type Queries interface {
 	ListAccessibleBots(ctx context.Context, ownerUserID pgtype.UUID) ([]dbsqlc.ListAccessibleBotsRow, error)
 	CreateChannelIdentity(ctx context.Context, arg dbsqlc.CreateChannelIdentityParams) (dbsqlc.ChannelIdentity, error)
 	CreateChatRoute(ctx context.Context, arg dbsqlc.CreateChatRouteParams) (dbsqlc.CreateChatRouteRow, error)
+	EnsurePrivateChatRoute(context.Context, dbsqlc.EnsurePrivateChatRouteParams) (dbsqlc.EnsurePrivateChatRouteRow, error)
 	CreateCompactionLog(ctx context.Context, arg dbsqlc.CreateCompactionLogParams) (dbsqlc.BotHistoryMessageCompact, error)
 	CreateContextLifecycle(ctx context.Context, arg dbsqlc.CreateContextLifecycleParams) (dbsqlc.CreateContextLifecycleRow, error)
 	CreateFetchProvider(ctx context.Context, arg dbsqlc.CreateFetchProviderParams) (dbsqlc.FetchProvider, error)
@@ -289,6 +296,7 @@ type Queries interface {
 	GetTurnAgentTurnID(ctx context.Context, arg dbsqlc.GetTurnAgentTurnIDParams) (string, error)
 	SetRoundAgentTurnID(ctx context.Context, arg dbsqlc.SetRoundAgentTurnIDParams) (int64, error)
 	LockSessionForCommitReconciliation(ctx context.Context, arg dbsqlc.LockSessionForCommitReconciliationParams) (pgtype.UUID, error)
+	LockSessionForContact(ctx context.Context, arg dbsqlc.LockSessionForContactParams) (dbsqlc.BotSession, error)
 	GetSessionDiscussCursor(ctx context.Context, arg dbsqlc.GetSessionDiscussCursorParams) (dbsqlc.BotSessionDiscussCursor, error)
 	GetSessionCacheStats(ctx context.Context, sessionID pgtype.UUID) (dbsqlc.GetSessionCacheStatsRow, error)
 	GetSessionUsedSkills(ctx context.Context, sessionID pgtype.UUID) ([]string, error)
