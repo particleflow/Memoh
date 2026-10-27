@@ -1,9 +1,9 @@
 # Garnet Assistant Harmony source
 
-The current source tree declares **1.0.21 / 1000021**. Its compatible backend
-is `feffaf66be4bc8999479fc76bd6a87be1a3b3789`; the shared composer UI is
+The current source tree declares **1.0.22 / 1000022**. Its compatible backend
+is `219a722da3b8e4a316164011dd106350dfab2c9e`; the shared composer UI is
 `2422db2011231d5a4e538aa0fd7b573d133cb350`, with the original Harmony adaptations.
-The [1.0.21 build record](../docs/testing/harmony-unified-1.0.21/README.md)
+The [1.0.22 build record](../docs/testing/harmony-unified-1.0.22/README.md)
 records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
@@ -50,3 +50,5 @@ Pending source-only [Bot creation recovery and account-scoped storage alignment]
 The 1.0.21 generic unsigned handoff locks the final feffaf Web/SDK combination, including the recorded model and creation alignments. Earlier pending-source paragraphs describe their original checkpoints; 1.0.20 remains a separate preserved artifact.
 
 The [219/schema179 compatibility review](../docs/testing/harmony-219-compatibility/README.md) records that the qualified 1.0.21 retains existing chat/media compatibility but omits the new `inputs`-bearing explicit native task resume. The source-only correction is not relabeled as the existing signed package.
+
+The1.0.22 unsigned handoff delivers the documented original-inputs resume fix against219; earlier compatibility statements describe1.0.21, which is preserved unchanged. Device/signing acceptance remains with the original onsite writer.

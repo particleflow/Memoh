@@ -528,7 +528,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "b13f0d9f197ebf62db1ef41473c7630544a5b4c6fb1082a10f7507cb93b3dcbf",
+      "sha256": "080dc8d54bae3ad1d3cd5900eeb5978de5febd42a56fec43f3544e6f4f5fb92b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
