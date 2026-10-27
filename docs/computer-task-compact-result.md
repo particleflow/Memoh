@@ -87,7 +87,7 @@ receipt-hash phase; a pending receipt remains unknown to a bounded caller.
   Existing pane lookup/run races across a Herdr restart are not solved here.
   The Windows account can alter its own files; this protocol is not a sandbox
   against that account or a cryptographic attestation of business success.
-- The fixed helper adds launcher bytes; the existing 48,000-character Agenvo
+- The fixed helper adds launcher bytes; the bounded native command
   preflight limit still rejects oversized requests before a claim/mutation.
   No silent truncation or fallback is added.
 
@@ -96,7 +96,7 @@ receipt-hash phase; a pending receipt remains unknown to a bounded caller.
 ### Connection preflight classification
 
 An Agent submission checks the existing target policy through the workspace
-resolver. For Agenvo this includes a read-only `workspace.list` probe. A failed
+resolver. Native Herdr uses a read-only `workspace.list` probe. A failed
 connection probe used to become a workspace-offline error and then a generic
 conversation denial. This could mislead a caller into changing the target or
 retrying with an omitted target, although no operation had been claimed.
@@ -118,7 +118,7 @@ There is no fabricated operation ID or receipt. The existing ledger still
 governs uncertain business submissions; this preflight envelope does not make
 those submissions retryable. No automatic retry or credential repair is added.
 
-The real tool source, authorizer, workspace resolver and Agenvo probe are
+The real tool source, authorizer, workspace resolver and native probe are
 covered together with a synthetic failing transport. Explicit and inferred PC
 targets in a native root conversation both reproduce the old error; missing
 binding, mismatched session, another selected PC and each missing permission

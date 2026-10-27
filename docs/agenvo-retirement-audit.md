@@ -12,12 +12,12 @@ The project delivery checklist was successfully read on 2026-10-26; its private 
 | A: removed | `internal/handlers/user_runtime.go`, deleted `user_runtime_endpoint.go` | Remove `/users/me/runtimes/agenvo/discover`, `/{id}/agenvo-agent` and GET/PUT `/{id}/agenvo-endpoint`. Remove their userruntime wrappers. Keep native Herdr and admission routes. The HTTP regression asserts authenticated 404 with no configuration/native effect. |
 | A: rejected | `internal/userruntime/{service,types}.go` | Reject legacy provider or legacy `agenvo` payload before issuing credentials or touching a connection. Retain the old request field only to reject old clients; exclude it from the public schema. Provider schema advertises only `memoh`. |
 | A: removed from selection and grant creation | `db/postgres/queries/user_runtimes.sql` and generated sqlc | Account Runtime list, Bot mount list and account grant list now filter unconditionally to `provider=memoh`, regardless of old MCP activation or malformed connection IDs. New mount creation also requires `memoh`. These are query predicates, not row deletion, migration, default reassignment or revocation. |
-| A: transport disconnected | `cmd/internal/core/agenvo.go` → `agenvo.Service` → `nativeherdr.Executor` | Production constructs the shared adapter with a nil legacy SourceCaller. The old `OwnedHTTPMCPConnectionBot → OAuth/federation gateway → search/execute` closure and its dependencies are removed. Generic MCP OAuth setup remains owned by the existing general providers. Native Exec injection remains unchanged. |
-| A: old selection fails closed | `internal/agenvo/service.go`, `internal/workspace/remote.go` | A service without a legacy caller rejects a stored Agenvo registration before transport. Mount listing suppresses legacy records defensively; direct mount lookup rejects them; resolving an old primary returns a retirement error rather than silently selecting another machine. The legacy workspace probe/resolve branch is removed. Task discovery/submit/follow-up/recovery use this shared resolver, so an old task cannot dispatch via its saved target. |
+| A: transport disconnected | `cmd/internal/core/agenvo.go` → `agenvo.Service` → `nativeherdr.Executor` | The shared adapter accepts only the native Runtime caller. The old `OwnedHTTPMCPConnectionBot → OAuth/federation gateway → search/execute` closure and its dependencies are removed. Generic MCP OAuth setup remains owned by the existing general providers. Native Exec injection remains unchanged. |
+| A: old selection fails closed | `internal/agenvo/service.go`, `internal/workspace/remote.go` | The service unconditionally rejects a stored Agenvo registration before transport. Mount listing suppresses legacy records defensively; direct mount lookup rejects them; resolving an old primary returns a retirement error rather than silently selecting another machine. The legacy workspace probe/resolve branch is removed. Task discovery/submit/follow-up/recovery use this shared resolver, so an old task cannot dispatch via its saved target. |
 | A: old transfer rejected | `runtime_transfer_credentials.sql`, `internal/userruntime/transfer.go` | Only native Memoh Herdr registrations can enroll/verify transfer credentials. Legacy credentials remain stored and are not rotated or deleted. Target decoding also rejects a legacy provider if a storage implementation returns one. |
 | A: misleading active copy removed | Web locales, composer, `workspace-target.ts`, `internal/computertask/source.go`, `internal/agent/tool/container.go`, `contrib/bot-skills`, current documentation | Remove connection/install fields and old capability badges. Native tool descriptions refer to Memoh Runtime/Herdr. Old online snapshots cannot authorize a clickable action. Preserve receipt warnings under `computerExec`, including unknown outcomes and retained workspaces. Change shared errors from Agenvo-specific labels to computer-target labels. |
 | B: retained native dependency | `internal/agenvo` task types, fingerprints, admission, batch/receipt/result code; `internal/nativeherdr`; workspace/task/session/delivery adapters; generated `Agenvo*` shared types | Native provider is `memoh`; core installs `nativeherdr.Executor.Invoke`. Native tasks use the same grant checks, operation ledger, path validation, Herdr/Pi command mapping and result verification. The old package/type name does not imply an Agenvo connection. Do not delete the directory or rename durable JSON/fingerprints. |
-| C: retained history/compatibility | Historical migrations, `provider=agenvo` database rows and private compatibility queries, wire decoders, old protocol fixtures, `docs/validation`, `docs/evidence`, archived design | Retain old task/queue/history/credential data, including unknown operations. Low-level legacy transport helpers still remain and require a separate native-fixture conversion/removal; they are executable residue, not a historical-data requirement; no production constructor installs their caller and no enrollment/configuration route exposes them. Existing reserved-MCP connection checks remain so old stored endpoints/credentials do not reopen raw federation. |
+| C: retained history/compatibility | Historical migrations, `provider=agenvo` database rows and private compatibility queries, wire decoders, old protocol fixtures, `docs/validation`, `docs/evidence`, archived design | Retain old task/queue/history/credential data, including unknown operations. Legacy caller, relay, registration, configuration writer, TUI input and plugin-dispatch implementations are removed; native fixtures use the NativeCaller port directly. Existing reserved-MCP connection checks remain so old stored endpoints/credentials do not reopen raw federation. |
 
 Current connection configuration is `/users/me/runtimes/{id}/native-herdr` on an already activated owned Memoh Runtime. Its Pi profile remains an `agent` subobject. No installation, OAuth flow, credential rotation, new runtime service, protocol or approval mechanism is introduced.
 
@@ -55,24 +55,39 @@ unconditional native-only selection/rejection, direct producer collection and
 original-history preservation. They no longer advertise live Agenvo inventory,
 active old targets or a retained old plugin-dispatch path.
 
-This is **not zero-residue completion**. Remaining executable residue is precise:
-`internal/agenvo/service.go` still contains `Discover`, `Register`, `Probe` and a
-`SourceCaller`; `internal/agenvo/client.go` still has the MCP `callTool`/relay
-branch; private store/SQL legacy mutation helpers remain. Production wiring
-supplies no legacy caller, but obsolete executable implementations must be
-removed after migrating useful native regression fixtures. Historical migrations,
-private row decoders and stored receipt identity are a different category and
-must remain. Do not rename the shared package or rewrite durable fields to make
-a string scan empty.
+The additional cleanup removes `SourceCaller`, `CallTool`, MCP JavaScript relay
+encoding/decoding, discovery/registration/account probes, legacy runtime creation
+and configuration helpers and their SQL queries. SQL bindings are regenerated
+with sqlc v1.31.1. `Client.Probe` still probes native execution through the
+existing grant-checked Runtime. Native execution retains the same receipt and
+unknown rules, including no automatic replay. Retired TUI startup and prompt
+writers, their reservation/CAS helpers, and legacy producer/plugin and launcher
+fallbacks are deleted. Useful fixture coverage uses native profiles and direct
+native receipts; historical receipt fixtures are inserted as saved data, without
+creating retired input or registrations through product helpers.
 
-The Windows endpoint PR5 at `1537fe3` separately still ships schema 1/2 legacy
-launch/qualification, old npm dependency pin, packaged example and active CI
-fixtures. Its independent follow-up inventories exact files and supplies an
-offline reference-only retirement planner. It does not modify installed PC/NAS
-files or the general cleanup owner's UI verification files.
+Retained independent uses are explicit: `DecodeTarget`, durable fields and
+fingerprints decode historical identities; Agent/followup structs and projection
+functions preserve original receipts and unknown facts; migration SQL and direct
+historical database fixtures preserve old rows and admission protections;
+`OwnedHTTPMCPConnectionBot` authorizes historical receipt reads, including the
+existing PR88 compatibility branch; reserved-MCP endpoint/credential checks
+prevent reopening old transports. Native `Client.Probe`, batch generation,
+Herdr/Pi adapters and bounded observation decoders remain current functions.
+No package or persisted field is renamed to hide the inventory.
 
-Verification of this follow-up is recorded separately from the old all-green
-checkpoint. No current dev UI, screenshot, Windows runtime or onsite acceptance
-is asserted by this text. The original task result bodies remain unavailable
-in the isolated environment's tools; the repository evidence is not a substitute
-for reading those thread results.
+This source cleanup does not establish Windows, unified integration or onsite
+retirement acceptance. PR88 is already present in the unified release tree;
+its authority implementation is not redeveloped here. The unified owner must
+retain its Runtime/mount/fingerprint checks and resolve the known
+`Register` and `runtimeHTTPError` merge hunks: preserve workspace-storage routes
+and errors, add the Runtime namespace 404 fallback after the specific routes,
+and remove only the retired endpoint conflict mapping.
+
+Windows endpoint cleanup and installed PC/NAS retirement belong to separate
+owners. This source audit makes no claim about their current heads or acceptance.
+
+Current isolated source, PostgreSQL, real application and screenshot checks are
+recorded in [source cleanup evidence](evidence/agenvo-source-cleanup/README.md).
+They supersede the earlier PR90 environment limitation for those specific checks,
+without replacing independent review, unified integration or onsite acceptance.

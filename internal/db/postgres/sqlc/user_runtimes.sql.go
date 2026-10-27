@@ -108,45 +108,6 @@ func (q *Queries) ClearBotRemoteRuntimePrimary(ctx context.Context, botID pgtype
 	return err
 }
 
-const createAgenvoUserRuntime = `-- name: CreateAgenvoUserRuntime :one
-INSERT INTO user_runtimes (user_id, name, api_token, provider, provider_config, activated_at, pending_expires_at)
-VALUES ($1, $2, 'agenvo_' || gen_random_uuid()::text, 'agenvo', $3, now(), NULL)
-ON CONFLICT (team_id, user_id, (md5(provider_config::text))) WHERE provider = 'agenvo' AND revoked_at IS NULL
-DO UPDATE SET updated_at = user_runtimes.updated_at
-WHERE user_runtimes.provider_config = EXCLUDED.provider_config
-RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
-`
-
-type CreateAgenvoUserRuntimeParams struct {
-	OwnerID        pgtype.UUID `json:"owner_id"`
-	Name           string      `json:"name"`
-	ProviderConfig []byte      `json:"provider_config"`
-}
-
-func (q *Queries) CreateAgenvoUserRuntime(ctx context.Context, arg CreateAgenvoUserRuntimeParams) (UserRuntime, error) {
-	row := q.db.QueryRow(ctx, createAgenvoUserRuntime, arg.OwnerID, arg.Name, arg.ProviderConfig)
-	var i UserRuntime
-	err := row.Scan(
-		&i.TransferCredentialID,
-		&i.TransferCredentialDigest,
-		&i.TransferTargetDigest,
-		&i.TransferExpiresAt,
-		&i.ID,
-		&i.UserID,
-		&i.Name,
-		&i.ApiToken,
-		&i.Provider,
-		&i.ProviderConfig,
-		&i.RevokedAt,
-		&i.ActivatedAt,
-		&i.PendingExpiresAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.TeamID,
-	)
-	return i, err
-}
-
 const createOrUpdateBotRemoteRuntimeMount = `-- name: CreateOrUpdateBotRemoteRuntimeMount :one
 INSERT INTO bot_remote_runtime_bindings (bot_id, runtime_id)
 SELECT b.id, r.id
@@ -273,43 +234,6 @@ WHERE binding.team_id = public.memoh_current_team_id()
 func (q *Queries) ExpirePendingUserRuntimes(ctx context.Context, userID pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, expirePendingUserRuntimes, userID)
 	return err
-}
-
-const findAgenvoUserRuntime = `-- name: FindAgenvoUserRuntime :one
-SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes
-WHERE team_id = public.memoh_current_team_id() AND user_id = $1
-  AND provider = 'agenvo' AND provider_config = $2
-  AND revoked_at IS NULL
-ORDER BY created_at LIMIT 1
-`
-
-type FindAgenvoUserRuntimeParams struct {
-	OwnerID        pgtype.UUID `json:"owner_id"`
-	ProviderConfig []byte      `json:"provider_config"`
-}
-
-func (q *Queries) FindAgenvoUserRuntime(ctx context.Context, arg FindAgenvoUserRuntimeParams) (UserRuntime, error) {
-	row := q.db.QueryRow(ctx, findAgenvoUserRuntime, arg.OwnerID, arg.ProviderConfig)
-	var i UserRuntime
-	err := row.Scan(
-		&i.TransferCredentialID,
-		&i.TransferCredentialDigest,
-		&i.TransferTargetDigest,
-		&i.TransferExpiresAt,
-		&i.ID,
-		&i.UserID,
-		&i.Name,
-		&i.ApiToken,
-		&i.Provider,
-		&i.ProviderConfig,
-		&i.RevokedAt,
-		&i.ActivatedAt,
-		&i.PendingExpiresAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.TeamID,
-	)
-	return i, err
 }
 
 const getBotRemoteRuntimeMount = `-- name: GetBotRemoteRuntimeMount :one

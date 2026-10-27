@@ -43,12 +43,9 @@ func TestNativeBatchLauncherWindowsPowerShell(t *testing.T) {
 	}
 }
 
-func TestNativeBatchLauncherRoundTripAndLegacyCompatibility(t *testing.T) {
+func TestNativeBatchLauncherRoundTrip(t *testing.T) {
 	script := "printf '%s' '雪🙂\" $(not-source)'\r\n" + strings.Repeat("# fixture\n", 4000)
 	target := Target{BashPath: `C:\Synthetic Owner's Bin\bash.exe`}
-	if got := launchBatchScript(script, target); got != launchBashScript(script, target.BashPath) {
-		t.Fatal("legacy relay command changed")
-	}
 	target.NativeRuntimeID = "synthetic-native-runtime"
 	command := launchBatchScript(script, target)
 	match := regexp.MustCompile(`FromBase64String\('([A-Za-z0-9+/=]+)'\)`).FindStringSubmatch(command)

@@ -33,7 +33,6 @@ func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBindin
 	out.Supported = true
 	saved := result(r, d)
 	out.SessionBinding, out.Followups = saved.SessionBinding, saved.Followups
-	out.FollowupAvailable = d.Agent.PromptSubmitted && d.Agent.Phase == "prompt_submitted" && !r.CancelRequested && r.RunID != ""
 	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
 	read, cancel := context.WithTimeout(pinned, 10*time.Second)
 	defer cancel()
@@ -49,7 +48,6 @@ func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBindin
 		return NativeContent{}, agenvo.ErrTargetChanged
 	}
 	out.Followups = result(r, current).Followups
-	out.FollowupAvailable = out.FollowupAvailable && !r.CancelRequested
 	out.Availability = agenvo.Availability(readErr)
 	if readErr == nil {
 		out.Observation = &obs
@@ -58,7 +56,7 @@ func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBindin
 }
 
 // FollowupNative uses the operation's persisted run attribution; an HTTP caller
-// cannot invent a run or native reference. Existing policy/CAS/dedup owns input.
+// cannot invent a run or native reference. Only persisted input receipts replay.
 func (s *Source) FollowupNative(ctx context.Context, b toolcontext.ComputerBinding, in Followup) (Result, error) {
 	r, _, err := s.service.load(ctx, b, in.OperationID)
 	if err != nil {

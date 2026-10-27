@@ -1,0 +1,30 @@
+{
+  "url": "http://127.0.0.1:28082/settings/runtimes",
+  "body": "B\nSelect a Bot\nChat\nSchedule\nSupermarket\nQuick Actions\nNew Session\nBot Settings\nRecents\nSee what Memoh can do\nAD\nadmin\n\nSelect a Bot\n\nChoose a bot from the sidebar to start chatting\n\nSettings\nBots\nProviders\nComputers\nSupermarket\nTeam\nMembers\nUsage\nPersonal\nAccount\nAppearance\nKeyboard Shortcuts\nAbout\nComputers\nConnect computer\n\nNo computers connected\n\nCreate a connection command, then run it on the computer you want Memoh to use.",
+  "errors": [],
+  "buttons": [
+    "BSelect a Bot",
+    "Chat",
+    "Schedule",
+    "Supermarket",
+    "",
+    " New Session",
+    " Bot Settings",
+    "Recents",
+    "",
+    "See what Memoh can do",
+    "ADadmin",
+    "Settings",
+    "Bots",
+    "Providers",
+    "Computers",
+    "Supermarket",
+    "Members",
+    "Usage",
+    "Account",
+    "Appearance",
+    "Keyboard Shortcuts",
+    "About",
+    " Connect computer"
+  ]
+}

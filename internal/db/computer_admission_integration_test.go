@@ -57,13 +57,11 @@ func (f admissionFixture) exec(t *testing.T, query string, args ...any) {
 func (f admissionFixture) registration(t *testing.T, connection, session string) (string, string, dbstore.JSON) {
 	t.Helper()
 	raw, _ := json.Marshal(map[string]string{"connection_id": connection, "device_id": "synthetic-device", "instance_id": "synthetic-herdr", "session": session})
-	r, err := f.store.CreateAgenvoRuntime(t.Context(), f.owner, uuid.NewString(), raw)
-	if err != nil {
-		t.Fatal(err)
-	}
+	runtime := uuid.NewString()
+	f.exec(t, "INSERT INTO user_runtimes(id,user_id,name,api_token,provider,provider_config,activated_at,pending_expires_at) VALUES($1,$2,$3,$4,'agenvo',$5,now(),NULL)", runtime, f.owner, uuid.NewString(), uuid.NewString(), raw)
 	mount := uuid.NewString()
-	f.exec(t, "INSERT INTO bot_remote_runtime_bindings(id,bot_id,runtime_id) VALUES($1,$2,$3)", mount, f.bot, r.ID)
-	return r.ID, mount, raw
+	f.exec(t, "INSERT INTO bot_remote_runtime_bindings(id,bot_id,runtime_id) VALUES($1,$2,$3)", mount, f.bot, runtime)
+	return runtime, mount, raw
 }
 
 func (f admissionFixture) operation(mount string) dbstore.ComputerOperationRecord {
@@ -121,9 +119,6 @@ func TestComputerAdmissionDurabilityCoverageAndReservations(t *testing.T) {
 	}
 	if got, err := f.store.ReadComputerOperation(t.Context(), saved); err != nil || got.Revision != saved.Revision || string(got.Details) != string(saved.Details) {
 		t.Fatal("rejected reservation changed receipt", err)
-	}
-	if _, err = f.store.ConfigureAgenvoRuntime(t.Context(), f.owner, f.runtime, f.config, []byte(`{}`)); !errors.Is(err, memohdb.ErrComputerAdmissionPaused) {
-		t.Fatal("paused mapping changed", err)
 	}
 	if _, err = f.store.ChangeComputerAdmission(t.Context(), f.owner, f.runtime, f.config, uuid.NewString(), gate.Revision, false); !errors.Is(err, memohdb.ErrComputerAdmissionConflict) {
 		t.Fatal("foreign pause released", err)

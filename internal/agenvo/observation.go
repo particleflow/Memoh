@@ -16,7 +16,7 @@ var (
 )
 
 // Availability is a fixed, non-secret observation, never an inference from an
-// error's text. Only Agenvo's explicit device_offline outcome means offline.
+// error's text. Only the explicit device_offline native outcome means offline.
 func Availability(err error) string {
 	switch {
 	case err == nil:
@@ -29,20 +29,6 @@ func Availability(err error) string {
 		return "runtime_unavailable"
 	default:
 		return "connection_unavailable"
-	}
-}
-
-func nativeAvailability(r Receipt) error {
-	if r.Error == nil || (r.Execution != "not_started" && r.Execution != "rejected") {
-		return nil
-	}
-	switch r.Error.Code {
-	case "device_offline":
-		return ErrDeviceOffline
-	case "runtime_unavailable":
-		return ErrNativeUnavailable
-	default:
-		return nil
 	}
 }
 

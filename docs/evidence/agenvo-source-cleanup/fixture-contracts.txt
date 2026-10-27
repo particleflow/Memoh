@@ -1,0 +1,3 @@
+ok  	github.com/felinics/memoh/internal/computertask	1.233s
+ok  	github.com/felinics/memoh/internal/handlers	0.024s
+ok  	github.com/felinics/memoh/cmd/internal/core	0.032s

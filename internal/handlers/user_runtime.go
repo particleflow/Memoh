@@ -50,6 +50,9 @@ func (h *UserRuntimeHandler) Register(e *echo.Echo) {
 	g.PUT("/:id/native-herdr", h.ConfigureNativeHerdr)
 	g.GET("/:id/admission", h.ReadAdmission)
 	g.PUT("/:id/admission", h.SetAdmission)
+	// Keep unknown Runtime paths inside this namespace; the generic users/:id
+	// route must not consume them as account updates.
+	g.Any("/*", func(echo.Context) error { return echo.ErrNotFound })
 }
 
 // ConfigureNativeHerdr godoc

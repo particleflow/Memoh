@@ -85,7 +85,7 @@ No new task HTTP API, scheduler, queue, task ID, or tool name is introduced. Reu
 | `computer_task_cancel` | Record cancellation intent; does not prove process termination |
 | `computer_task_artifact`, `computer_task_logs` | Existing committed producer references and explicit diagnostic flow |
 
-`computer_task_followup` remains available for its existing supported legacy operations; this adapter does not manufacture asynchronous `agent.start` receipts or promise TUI follow-up for finite Pi invocations. Unsupported operations fail closed.
+`computer_task_followup` only replays existing historical input receipts with their original request ID and fingerprint. New TUI input and startup implementations are removed. Finite Pi invocations use the batch protocol; unsupported input fails closed.
 
 Keep `operation_id`, original `run_id`, attempt, generation, request hash, target fingerprint, workspace/pane/terminal references and producer task identity. Reconnection queries the original operation. `unknown`, an interrupted write or an incomplete receipt is never permission to submit again. Raw `exec` on a configured Herdr mount is gated through computer tasks, so it cannot bypass unresolved operations or paused admission.
 

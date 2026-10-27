@@ -68,11 +68,8 @@ type BotRemoteRuntimeBindingRecord struct {
 	UpdatedAt             time.Time
 }
 
-// AgenvoRuntimeStore extends the existing account computer registry. It stores
-// only references to an existing owner-authorized MCP connection, never tokens.
+// AgenvoRuntimeStore reads existing Bot mounts for the shared native task ledger.
 type AgenvoRuntimeStore interface {
-	CreateAgenvoRuntime(ctx context.Context, ownerID, name string, config JSON) (UserRuntimeRecord, error)
-	OwnedHTTPMCPConnectionBot(ctx context.Context, ownerID, connectionID string) (string, error)
 	GetMount(ctx context.Context, botID, targetID string) (BotRemoteRuntimeBindingRecord, error)
 }
 

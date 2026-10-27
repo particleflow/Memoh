@@ -29,19 +29,12 @@ type admissionHTTPStore struct {
 	reads, writes  int
 }
 
-func (s *admissionHTTPStore) OwnedAgenvoRuntime(_ context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
+func (s *admissionHTTPStore) OwnedNativeHerdrRuntime(_ context.Context, owner, id string) (dbstore.UserRuntimeRecord, error) {
 	s.reads++
 	if owner != s.owner || id != s.runtime {
 		return dbstore.UserRuntimeRecord{}, db.ErrNotFound
 	}
-	return dbstore.UserRuntimeRecord{ID: id, UserID: owner, ProviderConfig: s.config}, nil
-}
-
-func (s *admissionHTTPStore) OwnedHTTPMCPConnectionBot(_ context.Context, owner, _ string) (string, error) {
-	if owner != s.owner {
-		return "", agenvo.ErrForbidden
-	}
-	return privateDeviceBot, nil
+	return dbstore.UserRuntimeRecord{ID: id, UserID: owner, Provider: "memoh", ProviderConfig: s.config}, nil
 }
 
 func (s *admissionHTTPStore) ReadComputerAdmission(context.Context, string, string, string, string) (dbstore.ComputerAdmission, error) {
@@ -63,18 +56,14 @@ func TestComputerAdmissionHTTPUsesOwnerSessionAndRejectsRouteInjection(t *testin
 	const secret = "synthetic-admission-http-signing-key" //nolint:gosec // G101: isolated test-only signing key.
 	owner, runtime := uuid.NewString(), uuid.NewString()
 	target := agenvo.Target{ConnectionID: uuid.NewString(), DeviceID: "synthetic-device", InstanceID: "synthetic-herdr", Session: "default", WorkDir: `C:\Synthetic`, BashPath: `C:\Synthetic\bash.exe`}
-	raw, _ := json.Marshal(target)
+	raw, _ := json.Marshal(map[string]any{"herdr": agenvo.NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`}})
 	store := &admissionHTTPStore{owner: owner, runtime: runtime, config: raw, row: dbstore.ComputerAdmission{ConnectionID: target.ConnectionID, DeviceID: target.DeviceID, InstanceID: target.InstanceID}}
 	service := userruntime.NewService(store, nil)
 	calls := 0
-	service.SetAgenvoService(agenvo.NewService(store, nil, func(_ context.Context, user, connection, tool string, args map[string]any) (json.RawMessage, error) {
+	service.SetAgenvoService(agenvo.NewService(store, nil, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		calls++
-		if user != owner || connection != target.ConnectionID || tool != "execute" || !strings.Contains(args["code"].(string), `"workspace.list"`) {
-			t.Fatal("unexpected control call")
-		}
-		text := `{"execution":"accepted","result":{"session":"default","result":{"workspaces":[]}}}`
-		result, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": text}}})
-		return result, nil
+		t.Fatal("owner control or retired route dispatched native operation")
+		return agenvo.Receipt{}, agenvo.ErrUnknown
 	}))
 	capture := &privateDeviceHTTPHandlers{handlers: []server.Handler{NewUserRuntimeHandler(nil, service)}}
 	_ = server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), ":0", secret, func(context.Context, string) error { return nil }, capture)
@@ -120,7 +109,7 @@ func TestComputerAdmissionHTTPUsesOwnerSessionAndRejectsRouteInjection(t *testin
 	body := `{"paused":true,"request_id":"` + uuid.NewString() + `","expected_revision":"0"}`
 	request(http.MethodPut, token, body, 200)
 	response := request(http.MethodPut, token, body, 409) // fixture CAS; DB separately tests idempotency.
-	if !strings.Contains(string(response), `"code":"computer.admission_conflict"`) || store.writes != 1 || calls != 2 {
+	if !strings.Contains(string(response), `"code":"computer.admission_conflict"`) || store.writes != 1 || calls != 0 {
 		t.Fatal("conflict contract", string(response), store.writes, calls)
 	}
 }

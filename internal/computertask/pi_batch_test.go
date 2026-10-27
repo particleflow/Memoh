@@ -63,7 +63,7 @@ func (a *batchAssets) Open(_ context.Context, _, hash string) (io.ReadCloser, me
 	return io.NopCloser(bytes.NewReader(b)), media.Asset{ContentHash: hash}, nil
 }
 
-// This fixture is a standard MCP -> service -> fixed Agenvo transport test.
+// This fixture is a standard MCP tool -> service -> direct native port test.
 // Pi/Herdr are synthetic: it is not a vendor binary or Windows acceptance.
 type batchTransport struct {
 	t                                                *testing.T
@@ -136,25 +136,14 @@ func batchFile(name string, raw []byte) agenvo.BatchFile {
 	return agenvo.BatchFile{Name: name, Hash: hex.EncodeToString(h[:]), Size: int64(len(raw))}
 }
 
-func (f *batchTransport) call(_ context.Context, owner, connection, tool string, args map[string]any) (json.RawMessage, error) {
+func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.t.Helper()
-	if owner != "owner" || connection != "11111111-1111-4111-8111-111111111111" || tool != "execute" {
-		f.t.Fatal("wrong relay identity")
+	mount := f.store.mounts[scope.TargetID]
+	if scope.BotID != mount.BotID || target.NativeRuntimeID != mount.RuntimeID || target.InstanceID != fixtureTarget(mount).InstanceID {
+		f.t.Fatal("wrong native Runtime mapping")
 	}
-	code, _ := args["code"].(string)
-	var parts []json.RawMessage
-	if json.Unmarshal([]byte("["+strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");")+"]"), &parts) != nil || len(parts) != 3 {
-		f.t.Fatal("arbitrary relay call")
-	}
-	var target map[string]string
-	var method string
-	var params map[string]any
-	_ = json.Unmarshal(parts[0], &target)
-	_ = json.Unmarshal(parts[1], &method)
-	_ = json.Unmarshal(parts[2], &params)
-	if target["deviceId"] != "device-a" || target["instanceId"] != "herdr-a" {
-		f.t.Fatalf("wrong device mapping: %v", target)
-	}
+
+	params = fixtureParams(params)
 	f.calls = append(f.calls, method)
 	f.projectCompletion()
 	body := map[string]any{}
@@ -165,13 +154,6 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 		body = map[string]any{"root_pane": map[string]string{"pane_id": "job", "terminal_id": "job-terminal", "workspace_id": "w-test"}}
 	case "pane.run":
 		command, _ := params["command"].(string)
-		if command == `& { herdr plugin action invoke collect-result --plugin memoh.delivery *> $null }` {
-			if params["paneId"] != "control" {
-				f.t.Fatal("producer wake on Pi pane")
-			}
-			f.producerWakes++
-			return envelope(map[string]any{"session": "synthetic", "result": map[string]string{"type": "accepted"}}), nil
-		}
 		match := regexp.MustCompile(`printf %s ([A-Za-z0-9+/=]+) \| base64`).FindStringSubmatch(command)
 		packed := false
 		if len(match) != 2 {
@@ -229,7 +211,7 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 				f.receipt.History = &agenvo.BatchHistoryReport{Before: before, After: after, Evidence: &agenvo.BatchHistoryEvidence{File: "synthetic.jsonl", Size: 1024, Hash: strings.Repeat("e", 64)}}
 			}
 			if f.lost {
-				return nil, errors.New("lost dispatch reply")
+				return agenvo.Receipt{}, agenvo.ErrUnknown
 			}
 		case "control":
 			f.reads++
@@ -293,10 +275,10 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 	case "pane.read":
 		if err := f.readSchema.Validate(params); err != nil {
 			f.t.Errorf("Agenvo v0.2.0 pane.read schema rejected params: %v", err)
-			return nil, err
+			return agenvo.Receipt{}, err
 		}
 		if strings.HasPrefix(params["paneId"].(string), "-") {
-			return nil, errors.New("vendor pane ID refinement rejected leading dash")
+			return agenvo.Receipt{}, errors.New("vendor pane ID refinement rejected leading dash")
 		}
 		lines := int(params["lines"].(float64))
 		f.maxLines = max(f.maxLines, lines)
@@ -339,10 +321,11 @@ func (f *batchTransport) call(_ context.Context, owner, connection, tool string,
 	return envelope(map[string]any{"session": "synthetic", "result": body}), nil
 }
 
-func batchReadError(execution, code string) json.RawMessage {
-	body, _ := json.Marshal(map[string]any{"execution": execution, "error": map[string]string{"code": code, "message": "PRIVATE-read-diagnostic"}})
-	raw, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": string(body)}}})
-	return raw
+func batchReadError(execution, code string) agenvo.Receipt {
+	body, _ := json.Marshal(map[string]any{"execution": execution, "error": map[string]string{"code": code}})
+	var receipt agenvo.Receipt
+	_ = json.Unmarshal(body, &receipt)
+	return receipt
 }
 
 func renderedTail(text string, columns, limit int) string {
@@ -363,10 +346,10 @@ func setupBatch(t *testing.T) (*Source, *fixtureStore, *batchTransport, *batchAs
 	t.Helper()
 	source, store, _ := setup(t)
 	r := store.mounts["pc-a"]
-	var target agenvo.Target
-	_ = json.Unmarshal(r.RuntimeProviderConfig, &target)
+	target := fixtureTarget(r)
+	target.Producer = agenvo.ProducerLocator{ProgramPath: `C:\Synthetic\producer.exe`, ConfigDir: `C:\Synthetic\producer-config`, StateDir: `C:\Synthetic\producer-state`}
 	target.Agent = agenvo.AgentProfile{Provider: "synthetic", Model: "synthetic-model", ConfigDir: `C:\Synthetic\Pi`, ExecutionMode: "pi-json-v1"}
-	r.RuntimeProviderConfig, _ = json.Marshal(target)
+	r.RuntimeProviderConfig = fixtureConfig(target)
 	store.mounts["pc-a"] = r
 	raw, err := os.ReadFile("testdata/agenvo-v0.2.0-pane-read.schema.json")
 	if err != nil {
@@ -575,7 +558,7 @@ func TestStandardMCPPiBatchFailureBoundaries(t *testing.T) {
 func TestStandardMCPPiBatchRejectsOversizeBeforeClaim(t *testing.T) {
 	source, store, f, _ := setupBatch(t)
 	c := standardClient(t, source, "pc-a", false)
-	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": strings.Repeat("x", 32000)}, true)
+	invoke(t, c, "computer_task_submit", map[string]any{"kind": "herdr_pi_task", "task": strings.Repeat("x", 32001)}, true)
 	if len(store.records) != 0 || len(f.calls) != 0 {
 		t.Fatal("oversized launch reserved or dispatched")
 	}

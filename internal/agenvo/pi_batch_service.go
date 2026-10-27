@@ -100,7 +100,7 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 		return p, err
 	}
 	command := launchBatchScript(script, target)
-	// Agenvo's official pane.run contract has a 48,000-character limit.
+	// The fixed pane.run command contract has a 48,000-character limit.
 	if len(command) > 48000 {
 		return p, ErrUnsupported
 	}
@@ -114,7 +114,7 @@ func (s *Service) SubmitBatch(ctx context.Context, scope Scope, task, workDir st
 }
 
 func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, pane string, lines int) (string, error) {
-	// Agenvo v0.2.0 herdr.ts uses z.number().int().min(1).max(500).
+	// Herdr pane snapshots are bounded to the existing 1..500 row contract.
 	if lines < 1 || lines > batchReadMaxLines {
 		return "", ErrUnknown
 	}

@@ -111,11 +111,6 @@ func (s *TransferCredentials) Enroll(ctx context.Context, owner, runtime string,
 	if err != nil {
 		return TransferCredentialEnrollment{}, ErrTransferCredential
 	}
-	if target.NativeRuntimeID == "" {
-		if _, err = s.store.OwnedHTTPMCPConnectionBot(ctx, owner, target.ConnectionID); err != nil {
-			return TransferCredentialEnrollment{}, ErrTransferCredential
-		}
-	}
 	next := old
 	next.ExpiresAt = time.Time{}
 	if req.ExpiresAt != nil {

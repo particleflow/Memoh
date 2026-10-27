@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -37,11 +36,11 @@ func (f nativeHTTPFixture) FollowupNative(ctx context.Context, b toolcontext.Com
 }
 
 func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
-	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: agenvo.Target{ConnectionID: taskTarget, DeviceID: "synthetic", InstanceID: "synthetic", Session: "synthetic", WorkDir: `C:\synthetic`, BashPath: `C:\Git\bin\bash.exe`}}
+	f := &taskHTTPFixture{chat: true, exec: true, source: true, grant: true, registration: taskHTTPNativeRegistration()}
 	f.op = dbstore.ComputerOperationRecord{ID: taskOp, BotID: taskBot, UserID: taskUser, SessionID: taskChild, TargetID: taskTarget, TargetFingerprint: agenvo.TargetFingerprint(f.registration), State: "unknown", Details: []byte(`{"kind":"herdr_pi_task"}`)}
-	relay := agenvo.NewService(f, f, func(context.Context, string, string, string, map[string]any) (json.RawMessage, error) {
+	relay := agenvo.NewService(f, f, func(context.Context, agenvo.Scope, agenvo.Target, string, map[string]any) (agenvo.Receipt, error) {
 		t.Fatal("ownership lookup called native")
-		return nil, nil
+		return agenvo.Receipt{}, nil
 	})
 	calls := 0
 	late := false

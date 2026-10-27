@@ -33,7 +33,7 @@ type fixture struct {
 }
 
 func newFixture(t *testing.T) (*fixture, *Executor) {
-	f := &fixture{t: t, target: Target{ConnectionID: "connection", DeviceID: "device", InstanceID: "windows", Session: "default", WorkDir: `C:\synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}, grants: map[Scope]bool{{"bot-a", "mount-a", "user"}: true, {"bot-b", "mount-b", "user"}: true}, labels: map[string]string{}, panes: map[string]string{}, output: "synthetic result"}
+	f := &fixture{t: t, target: Target{NativeRuntimeID: "runtime", ConnectionID: "runtime", DeviceID: "device", InstanceID: "windows", Session: "default", WorkDir: `C:\synthetic`, BashPath: `C:\Synthetic\Git\bin\bash.exe`}, grants: map[Scope]bool{{"bot-a", "mount-a", "user"}: true, {"bot-b", "mount-b", "user"}: true}, labels: map[string]string{}, panes: map[string]string{}, output: "synthetic result"}
 	c := NewClient(func(_ context.Context, scope Scope) (Target, error) {
 		if !f.grants[scope] {
 			return Target{}, errors.New("permission denied")
@@ -45,30 +45,12 @@ func newFixture(t *testing.T) (*fixture, *Executor) {
 	return f, e
 }
 
-func (f *fixture) call(_ context.Context, connection, tool string, args map[string]any) (json.RawMessage, error) {
+func (f *fixture) call(_ context.Context, _ Scope, target Target, method string, params map[string]any) (Receipt, error) {
 	f.t.Helper()
-	if connection != f.target.ConnectionID || tool != "execute" {
-		f.t.Fatalf("unexpected transport target: %q %q", connection, tool)
-	}
-	code, _ := args["code"].(string)
-	if !strings.HasPrefix(code, "return await call(") || !strings.HasSuffix(code, ");") {
-		f.t.Fatal("unexpected relay code")
-	}
-	// Parse the three JSON arguments, without evaluating any caller code.
-	arguments := "[" + strings.TrimSuffix(strings.TrimPrefix(code, "return await call("), ");") + "]"
-	var nativeArgs []json.RawMessage
-	if err := json.Unmarshal([]byte(arguments), &nativeArgs); err != nil || len(nativeArgs) != 3 {
-		f.t.Fatalf("invalid call arguments: %v", err)
-	}
-	var target struct{ DeviceID, InstanceID string }
-	var method string
-	var params map[string]any
-	if json.Unmarshal(nativeArgs[0], &target) != nil || target.DeviceID != "device" || target.InstanceID != "windows" {
+	if target != f.target || target.NativeRuntimeID == "" {
 		f.t.Fatal("native target changed")
 	}
-	if json.Unmarshal(nativeArgs[1], &method) != nil || json.Unmarshal(nativeArgs[2], &params) != nil {
-		f.t.Fatal("invalid native arguments")
-	}
+
 	f.calls = append(f.calls, method)
 	if params["session"] != "default" {
 		f.t.Fatal("native session changed")
@@ -111,10 +93,10 @@ func (f *fixture) call(_ context.Context, connection, tool string, args map[stri
 			f.afterSubmit()
 		}
 		if f.submitErr {
-			return nil, errors.New("synthetic lost response containing PRIVATE")
+			return Receipt{}, ErrUnknown
 		}
 		if f.nativeRejected {
-			return mcpValue(map[string]any{"execution": "rejected", "error": map[string]string{"code": "native_error", "message": "PRIVATE"}}), nil
+			return fixtureReceipt(map[string]any{"execution": "rejected", "error": map[string]string{"code": "native_error", "message": "PRIVATE"}}), ErrRejected
 		}
 		result = map[string]any{"accepted": true}
 	case "pane.read":
@@ -126,20 +108,21 @@ func (f *fixture) call(_ context.Context, connection, tool string, args map[stri
 			payload, _ := json.Marshal(map[string]any{"output_base64": base64.StdEncoding.EncodeToString([]byte(f.output)), "exit_code": f.exit, "truncated": f.truncated})
 			output += "MEMOH_" + f.nonce + ":" + base64.StdEncoding.EncodeToString(payload) + ":END_" + f.nonce + "\r\n"
 		}
-		return mcpValue(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"output": output, "session": "default"}}), nil
+		return fixtureReceipt(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"output": output, "session": "default"}}), nil
 
 	case "workspace.close":
 		f.t.Fatal("automatic close is forbidden without atomic generation matching")
 	default:
 		f.t.Fatalf("unexpected native method %s", method)
 	}
-	return mcpValue(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"result": result, "session": "default"}}), nil
+	return fixtureReceipt(map[string]any{"execution": "accepted", "requestId": "synthetic-request", "result": map[string]any{"result": result, "session": "default"}}), nil
 }
 
-func mcpValue(value any) json.RawMessage {
-	text, _ := json.Marshal(value)
-	result, _ := json.Marshal(map[string]any{"content": []map[string]string{{"type": "text", "text": string(text)}}, "isError": false})
-	return result
+func fixtureReceipt(value any) Receipt {
+	raw, _ := json.Marshal(value)
+	var receipt Receipt
+	_ = json.Unmarshal(raw, &receipt)
+	return receipt
 }
 
 func request() Request {
@@ -191,7 +174,7 @@ func TestExecuteLostSubmissionResponseNeverRetriesOrReportsSuccess(t *testing.T)
 	}
 }
 
-func TestExecuteNativeRejectionInsideSuccessfulMCPResult(t *testing.T) {
+func TestExecuteNativeRejectionRetainsUnknownOutcome(t *testing.T) {
 	f, e := newFixture(t)
 	f.nativeRejected = true
 	r, err := e.Execute(t.Context(), request())
@@ -249,8 +232,8 @@ func TestUnsupportedExecOptionsNeverReachRelay(t *testing.T) {
 
 func TestUnavailableTargetHasNoNativeFallback(t *testing.T) {
 	f, e := newFixture(t)
-	e.client.callTool = func(context.Context, string, string, map[string]any) (json.RawMessage, error) {
-		return nil, errors.New("offline PRIVATE")
+	e.client.callNative = func(context.Context, Scope, Target, string, map[string]any) (Receipt, error) {
+		return Receipt{}, errors.Join(ErrUnknown, errors.New("offline PRIVATE"))
 	}
 	r, err := e.Execute(t.Context(), request())
 	if !errors.Is(err, ErrUnknown) || r.State != "not_started" || f.runs != 0 {

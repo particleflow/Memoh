@@ -166,40 +166,6 @@ func (q *Queries) GetComputerOperation(ctx context.Context, arg GetComputerOpera
 	return i, err
 }
 
-const getOwnedAgenvoRuntime = `-- name: GetOwnedAgenvoRuntime :one
-SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
-AND id=$1 AND user_id=$2 AND provider='agenvo' AND revoked_at IS NULL
-`
-
-type GetOwnedAgenvoRuntimeParams struct {
-	ID     pgtype.UUID `json:"id"`
-	UserID pgtype.UUID `json:"user_id"`
-}
-
-func (q *Queries) GetOwnedAgenvoRuntime(ctx context.Context, arg GetOwnedAgenvoRuntimeParams) (UserRuntime, error) {
-	row := q.db.QueryRow(ctx, getOwnedAgenvoRuntime, arg.ID, arg.UserID)
-	var i UserRuntime
-	err := row.Scan(
-		&i.TransferCredentialID,
-		&i.TransferCredentialDigest,
-		&i.TransferTargetDigest,
-		&i.TransferExpiresAt,
-		&i.ID,
-		&i.UserID,
-		&i.Name,
-		&i.ApiToken,
-		&i.Provider,
-		&i.ProviderConfig,
-		&i.RevokedAt,
-		&i.ActivatedAt,
-		&i.PendingExpiresAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.TeamID,
-	)
-	return i, err
-}
-
 const getOwnedNativeHerdrRuntime = `-- name: GetOwnedNativeHerdrRuntime :one
 SELECT transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id FROM user_runtimes WHERE team_id=public.memoh_current_team_id()
 AND id=$1 AND user_id=$2 AND provider='memoh' AND revoked_at IS NULL
@@ -318,49 +284,6 @@ func (q *Queries) PreviousComputerPiOperation(ctx context.Context, arg PreviousC
 		&i.Revision,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const updateAgenvoRuntimeConfig = `-- name: UpdateAgenvoRuntimeConfig :one
-UPDATE user_runtimes SET provider_config=$1,updated_at=now()
-WHERE team_id=public.memoh_current_team_id() AND id=$2 AND user_id=$3
-AND provider='agenvo' AND revoked_at IS NULL AND provider_config=$4
-RETURNING transfer_credential_id, transfer_credential_digest, transfer_target_digest, transfer_expires_at, id, user_id, name, api_token, provider, provider_config, revoked_at, activated_at, pending_expires_at, created_at, updated_at, team_id
-`
-
-type UpdateAgenvoRuntimeConfigParams struct {
-	ProviderConfig []byte      `json:"provider_config"`
-	ID             pgtype.UUID `json:"id"`
-	UserID         pgtype.UUID `json:"user_id"`
-	ExpectedConfig []byte      `json:"expected_config"`
-}
-
-func (q *Queries) UpdateAgenvoRuntimeConfig(ctx context.Context, arg UpdateAgenvoRuntimeConfigParams) (UserRuntime, error) {
-	row := q.db.QueryRow(ctx, updateAgenvoRuntimeConfig,
-		arg.ProviderConfig,
-		arg.ID,
-		arg.UserID,
-		arg.ExpectedConfig,
-	)
-	var i UserRuntime
-	err := row.Scan(
-		&i.TransferCredentialID,
-		&i.TransferCredentialDigest,
-		&i.TransferTargetDigest,
-		&i.TransferExpiresAt,
-		&i.ID,
-		&i.UserID,
-		&i.Name,
-		&i.ApiToken,
-		&i.Provider,
-		&i.ProviderConfig,
-		&i.RevokedAt,
-		&i.ActivatedAt,
-		&i.PendingExpiresAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.TeamID,
 	)
 	return i, err
 }
