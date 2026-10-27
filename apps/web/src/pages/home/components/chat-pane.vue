@@ -1346,7 +1346,7 @@ import { resolveCommandErrorMessage } from '@/store/chat/messages'
 import { isAgentRuntimeType } from '@/store/chat-list.utils'
 import BgTaskPill from './bg-task-pill.vue'
 import SessionActivityTrigger from '@/components/sidebar/session-activity-trigger.vue'
-import { runtimeFailureAlreadyVisible } from './composer-error'
+import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'
 import ForkSourceDivider from './fork-source-divider.vue'
 import ChatForkDialog from './chat-fork-dialog.vue'
 import ComposerDock from './composer-dock.vue'
@@ -2677,6 +2677,7 @@ const runtimeModeUnavailableReason = computed(() => unavailableRuntimeModes.valu
 // What the dock's error line shows. Standing reasons (goal blocked by plan
 // mode, runtime mode without a usable model) win over the transient
 // composerError, matching their precedence before dismissal existed.
+watchVisibleComposerFailure(() => composerFailure.value, () => messages.value, () => { composerError.value = '' })
 const rawComposerPanelError = computed(() => goalSubmissionBlocked.value
   ? goalExecutionBlockedReason.value
   : runtimeModeUnavailableReason.value || (runtimeFailureAlreadyVisible(composerFailure.value, messages.value) ? '' : composerError.value))
