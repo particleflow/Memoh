@@ -1,41 +1,41 @@
-# Recovered Harmony client
+# Garnet Assistant Harmony source
 
-The [task observation recovery](../docs/harmony-observation-recovery.md) is now
-included in a [new API26 unsigned HAP](../docs/harmony-observation-hap.md), built
-from `7ceca0e3eecbc83f0f8edd11be73e711e377d125`. Its compile, integrity and private
-Library readback checks passed. The earlier 1.0.7 package remains separate.
-Login persistence code remains unchanged; signing and device acceptance are pending.
+The current source tree declares **1.0.19 / 1000019**. Its compatible backend
+is `69ef2fac2ceeaf68458f0f68bc30d0e8a31872ee`; the shared composer UI is
+`2422db2011231d5a4e538aa0fd7b573d133cb350`, with the original Harmony adaptations.
+The [1.0.19 build record](../docs/testing/harmony-unified-1.0.19/README.md)
+records the official API26 compile and unsigned artifact identity. It does not
+establish signing, installation, phone/NAS execution or human acceptance.
+The old 1.0.18 package is a separate preserved field baseline.
 
-The existing client source has been restored and aligned with unified Memoh
-`40f0a69fd4b7e34dfcf36ec8a44a9805403e7be8`. The Web build, official API26 native
-compilation and HAP integrity qualification have passed. The new HAP is unsigned;
-installation, physical-device runtime, NAS transfers and human acceptance remain
-unverified. The current unsigned package is `1.0.7 / 1000007`, above the reported
-installed 1.0.6, with unchanged bundle, permissions and persistence code. See
-the [upgrade preparation evidence](../docs/harmony-upgrade-107.md) and
-[first native build checkpoint](../docs/harmony-native-api26.md).
+The [source manifest](SOURCE-PROVENANCE.json) records **167 reviewed entries**,
+zero excluded source paths and 19 unidentified historical later edits. Those 19
+are an unresolved provenance boundary, not missing current build inputs and not
+permission to reconstruct the unavailable original Git snapshot. The original
+restoration hashes remain necessary to audit the recovered source's origin.
 
-`SOURCE-PROVENANCE.json` records 116 reviewed source entries, their archive
-origins, current hashes and subsequent alignment changes. The two source ZIPs
-restored all 72 formerly excluded paths plus two tests. The historical 19 later
-cloud edits remain unverified; this is not a claim to recover the unavailable
-5a7 Git tree. Original archives and private backups remain preserved.
+The complete shared archive pin and every overlay live in
+`client/config/memoh_web.lock.json`. The base archive is `9bb6fc3d`, not the final
+compatible backend commit; the guarded builder composes the reviewed overlays.
+Use [BUILD-REPRODUCTION.md](BUILD-REPRODUCTION.md) for the active sequence,
+[REGRESSIONS.md](REGRESSIONS.md) for version-specific validation, and
+[SHARED-OBSERVATION.md](SHARED-OBSERVATION.md) for the active observation entry.
+Do not invoke the legacy standalone observation preparer as a current build step.
 
-The existing native shell, Web overlay builder, packaging helpers and upstream
-license notices are retained. No SDK/CLT binaries, dependency caches, generated
-Web resources, HAP, signing material, private endpoint or account credentials
-belong in this source tree. Runtime service configuration and exact delegation
-attachment authorization are preserved; there is no new transfer service or
-automatic LAN/IPv6 route/token migration.
-
-Follow [BUILD-REPRODUCTION.md](BUILD-REPRODUCTION.md) for the exercised build
-sequence and pinned external inputs. Source inventory verification remains:
+The source-only manifest/syntax check is:
 
 ```sh
 python3 mobile/check_source_subset.py
 ```
 
-That command only verifies source hashes and syntax; its `fullClientBuild: false`
-field describes that check, not the separately recorded official compiler run.
-Previous partial-import and blocked-stage evidence remains in Git history and
-linked checkpoint documents; it must not be used as the current build status.
+Its `fullClientBuild: false` describes that check; it neither undoes the recorded
+1.0.19 compilation nor substitutes for a fresh runtime test. This documentation
+cleanup does not rebuild or change the existing HAP.
+
+Keep the native shell, attachment/voice adapters, exact scoped authorization,
+source hashes and [license notices](PROVENANCE-AND-LICENSES.md) intact. Generated
+Web resources, SDK/CLT binaries, dependency caches, signing material and private
+configuration do not belong in the publishable source set. The existing Windows
+owner supplies approved private configuration and signing; configured output
+must not return to the public repository. No automatic route, identity or token
+migration is implied by the new version or by this source inventory.

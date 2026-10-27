@@ -1,44 +1,40 @@
-# Existing frozen-checkpoint evidence
+# Harmony validation map
 
-No full build or behavioral suite was rerun for this source-only publication.
-Previously recorded evidence belongs to the full private source checkpoint:
+The current source version is **1.0.19 / 1000019**. Evidence belongs to the
+specific source/build that produced it; documentation cleanup does not rerun
+or relabel any test, screenshot or package.
 
-- Final source `a01a3ec207326987d13b857f5b11c97f3511c6d4`: clean exported Web
-  typecheck/build/source checks exit 0; shared component/reader/delivery tests
-  77 passed; configuration checks 46 passed; official SDK API26 compilation and
-  resource qualification exit 0.
-- Browser suites ran on `f0a37b442eb2ed08c14163f354b9e2ea411c87b4` before a final
-  template-formatting change. All 798 compiled resources were byte-identical to
-  a01a3ec2, resource-map SHA256
-  `a1e0ecfacd2adf7b16db4aa51e9b0e161b1825a6bfb30b00ec38c870cd246156`.
-  Do not describe them as rerun on a01a3ec2.
-- Adapted Web ESLint: 0 errors, 37 inherited warnings, no new warning instances;
-  UI contract: 3 existing warnings. Native build log contains 324 warning lines,
-  not 324 distinct defects. Neither build is claimed warning-free.
-
-All ten browser suites below use compiled Web in real Chromium at 390x844,
-synthetic HTTP and, where applicable, a synthetic native bridge. Their recorded
-exit codes are 0 with no page errors. They do not demonstrate a Harmony emulator,
-phone installation, microphone/ASR, production API or server authorization.
-
-| Harness under `client/tests/stage2/` | Actual scope |
+| Evidence | Recorded scope and boundary |
 | --- | --- |
-| `harmony_106_migration_ui.py` | Old unbound endpoint needs configuration/relogin; old token is never sent after binding; no account re-registration. |
-| `harmony_r1_upgrade_ui.py` | Same browser origin/profile survives resource upgrade and process restart; revoke/expiry invalidate login. Not signed HAP upgrade. |
-| `harmony_service_config_ui.py` | Empty/invalid/valid settings, service switch isolation, distinct download address, logout/revoke; no refresh renewal claim. |
-| `harmony_task_lifecycle_ui.py` | Duplicate open, actual timeout, late response, network recovery, return/pagehide, focus/keyboard. |
-| `harmony_task_results_ui.py` | Safe plain final text, truncation/unknown, denied/error clearing, late scope/identity replies and unsaved computer choice. |
-| `harmony_bot_navigation.py` | Bot creation/settings/back restored; cancel has no POST, double submit one POST, deliberate denial respected. Not successful production creation. |
-| `harmony_combined_ui.py` | Pending synthetic upload and task view coexist; task denial does not clear attachment; discard/auth close use original scope. Not real large upload or ready-to-model proof. |
-| `harmony_voice_style_ui.py` | Recording gestures, spinner and synthetic bridge/ASR completion/cancel. No device recording. |
-| `harmony_delegations_ui.py` | Shared read-only body in HTML dialog, independent pagination, safe text, unsupported/scoped errors, scope cleanup. |
-| `harmony_delivery_ui.py` | Read-only host has no action, no mutation on open, duplicate click one delivery POST, accepted is not processed, error/revocation and late reply isolation. |
+| [1.0.19 qualification](../docs/testing/harmony-unified-1.0.19/README.md) | Existing formal Web/type pipeline and official API26 unsigned build; 45 product plus 2 original phone test adaptations, empty public configuration. No signed install or field acceptance. |
+| [1.0.19 identity](../docs/testing/harmony-unified-1.0.19/unsigned-verification.json) | Exact package/source/resource identity, CRC and unchanged identity/permissions. It is a recorded result, not a new artifact readback performed by this cleanup. |
+| [Composer/theme source evidence](../docs/testing/garnet-harmony-composer-themes/README.md) | Final single-button gesture/queue browser cases, all existing schemes, warm setup and system following. Synthetic browser/native seams do not establish ArkWeb device behavior. |
+| [Accepted-input recovery](../docs/testing/harmony-accepted-input-recovery-f4ef/README.md) | Previous 1.0.18 recovery and artifact evidence; preserved as that recovery boundary, not a current test rerun. |
+| [Scoped native download audit](../docs/harmony-native-integration.md) | Historical IO/auth/cancellation failure cases and exact source/fixture boundary; later compilation is recorded by the versioned build reports. |
 
-Old-server unsupported behavior is a fixture, not a production request. Scoped
-attachments and absent cancel/continue/followup APIs are not represented by fake
-buttons. Background recovery, gallery synchronization and true device large-file
-memory behavior remain bounded by separate implementation/OS evidence.
+`python3 mobile/check_source_subset.py` verifies source inventory and Python/CJS
+syntax only. `python3 scripts/check-harmony-source.py` additionally checks the
+locked archive, exact generated adaptations and empty public configuration;
+it prepares a generated context and is not an SDK/HAP build. Invoke the relevant
+existing check for an actual affected input, rather than repeating a completed
+matrix for a documentation edit.
 
-Full development-runtime and production UI acceptance, uploaded screenshots,
-signing, real-device upgrade and human QA remain incomplete. Existing browser
-screenshots/evidence are private and are not part of this source publication.
+The current single-button runner and setup runner remain in
+`docs/testing/garnet-harmony-composer-themes/`. The obsolete two-button runner
+and its two after-screenshots were removed; their original Git checkpoint is
+linked in that evidence README. Unchanged palette measurements and source/UI
+failure records retain their original qualification. The full generated token
+guard's four inherited voice-adapter diagnostics remain failures; a passing
+source-only check does not turn that guard green.
+
+The old ten-suite stage2 report at source `a01a3ec2` is available in
+[its exact historical document](https://github.com/particleflow/Memoh/blob/2a20c75c3c1cbe022f7e316aed3f55b5c7a2ce9f/mobile/REGRESSIONS.md).
+Those frozen browser/API-shape fixtures are not the current product matrix.
+Legacy adapter tests that no longer exercise generated inputs are part of the
+[explicit native-owner retirement handoff](SHARED-OBSERVATION.md), not a reason
+to retain an unused product implementation indefinitely.
+
+Signing, real-device upgrade, native OS/IME/pickers, actual queue/model execution,
+NAS transfers and human QA remain outside the browser/source evidence above.
+Keep original source/identity and unknown outcomes intact while verifying those
+separate acceptance boundaries.
