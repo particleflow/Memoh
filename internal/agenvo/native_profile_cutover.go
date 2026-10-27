@@ -15,9 +15,8 @@ import (
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
-// NativeProfileCutoverRequest is a proposed owner control-plane contract.
-// It is not wired to an endpoint or a write until an atomic admission-fenced
-// database operation implements the same comparisons under the owner lock.
+// NativeProfileCutoverRequest supplies the owner control-plane CAS facts.
+// The database rechecks them atomically while admission remains paused.
 type NativeProfileCutoverRequest struct {
 	RuntimeID                 string `json:"runtime_id"`
 	TargetID                  string `json:"target_id"`
