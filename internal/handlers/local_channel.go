@@ -1704,11 +1704,16 @@ func (h *LocalChannelHandler) abortWSRun(ctx context.Context, writer *wsWriter, 
 		applied bool
 		err     error
 	)
-	h.observeAbortControl(ctx, botID, sessionID, runID, controlID, msg.AbortReason)
+	completeObservation := h.observeAbortControl(ctx, botID, sessionID, runID, controlID, msg.AbortReason)
+	serverSource := "runtime_controller"
 	if h.agentService != nil {
+		serverSource = "agent_service"
 		applied, err = h.agentService.AbortRuntimeRun(ctx, botID, sessionID, runID, controlID)
 	} else {
 		applied, err = controller.AbortControl(ctx, botID, sessionID, runID, controlID)
+	}
+	if completeObservation != nil {
+		completeObservation(applied, err, serverSource)
 	}
 	if err != nil {
 		failWSControl(ctx, h.logger, writer, botID, ref, "ws.control.abort", "abort", controlID, string(apperror.CodeOf(err)), err)

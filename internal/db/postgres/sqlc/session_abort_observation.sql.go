@@ -11,8 +11,59 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const completeSessionRunAbortControl = `-- name: CompleteSessionRunAbortControl :execrows
+INSERT INTO public.session_run_abort_controls AS control
+    (team_id,run_id,session_id,request_hash,received_at,source,client_reason,
+     completed_at,applied,error_class,server_source)
+SELECT r.team_id,r.run_id,r.session_id,$1,$2,
+       'websocket',$3,$4,$5,
+       $6,$7
+FROM public.session_runs r
+WHERE r.team_id=public.memoh_current_team_id() AND r.bot_id=$8
+  AND r.session_id=$9 AND r.run_id=$10
+ON CONFLICT (team_id,run_id,request_hash) DO UPDATE SET
+    completed_at=EXCLUDED.completed_at,applied=EXCLUDED.applied,
+    error_class=EXCLUDED.error_class,server_source=EXCLUDED.server_source
+WHERE control.completed_at IS NULL
+`
+
+type CompleteSessionRunAbortControlParams struct {
+	RequestHash  string             `json:"request_hash"`
+	ReceivedAt   pgtype.Timestamptz `json:"received_at"`
+	ClientReason string             `json:"client_reason"`
+	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
+	Applied      pgtype.Bool        `json:"applied"`
+	ErrorClass   pgtype.Text        `json:"error_class"`
+	ServerSource pgtype.Text        `json:"server_source"`
+	BotID        pgtype.UUID        `json:"bot_id"`
+	SessionID    pgtype.UUID        `json:"session_id"`
+	RunID        pgtype.UUID        `json:"run_id"`
+}
+
+// Completion may beat the best-effort incoming insert. Preserve the incoming
+// observation, and retain the first stored return for this control hash.
+func (q *Queries) CompleteSessionRunAbortControl(ctx context.Context, arg CompleteSessionRunAbortControlParams) (int64, error) {
+	result, err := q.db.Exec(ctx, completeSessionRunAbortControl,
+		arg.RequestHash,
+		arg.ReceivedAt,
+		arg.ClientReason,
+		arg.CompletedAt,
+		arg.Applied,
+		arg.ErrorClass,
+		arg.ServerSource,
+		arg.BotID,
+		arg.SessionID,
+		arg.RunID,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
 const getSessionRunAbortControl = `-- name: GetSessionRunAbortControl :one
-SELECT control.received_at, control.source, control.client_reason
+SELECT control.received_at, control.source, control.client_reason,
+ control.completed_at,control.applied,control.error_class,control.server_source
 FROM public.session_run_abort_controls control
 JOIN public.session_runs run USING (team_id, session_id, run_id)
 WHERE run.team_id = public.memoh_current_team_id()
@@ -33,13 +84,25 @@ type GetSessionRunAbortControlRow struct {
 	ReceivedAt   pgtype.Timestamptz `json:"received_at"`
 	Source       string             `json:"source"`
 	ClientReason string             `json:"client_reason"`
+	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
+	Applied      pgtype.Bool        `json:"applied"`
+	ErrorClass   pgtype.Text        `json:"error_class"`
+	ServerSource pgtype.Text        `json:"server_source"`
 }
 
 // Earliest observed request is not necessarily the request that caused abort.
 func (q *Queries) GetSessionRunAbortControl(ctx context.Context, arg GetSessionRunAbortControlParams) (GetSessionRunAbortControlRow, error) {
 	row := q.db.QueryRow(ctx, getSessionRunAbortControl, arg.BotID, arg.SessionID, arg.RunID)
 	var i GetSessionRunAbortControlRow
-	err := row.Scan(&i.ReceivedAt, &i.Source, &i.ClientReason)
+	err := row.Scan(
+		&i.ReceivedAt,
+		&i.Source,
+		&i.ClientReason,
+		&i.CompletedAt,
+		&i.Applied,
+		&i.ErrorClass,
+		&i.ServerSource,
+	)
 	return i, err
 }
 

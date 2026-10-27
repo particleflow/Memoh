@@ -914,6 +914,10 @@ type SessionRunAbortControl struct {
 	ReceivedAt   pgtype.Timestamptz `json:"received_at"`
 	Source       string             `json:"source"`
 	ClientReason string             `json:"client_reason"`
+	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
+	Applied      pgtype.Bool        `json:"applied"`
+	ErrorClass   pgtype.Text        `json:"error_class"`
+	ServerSource pgtype.Text        `json:"server_source"`
 }
 
 type Snapshot struct {

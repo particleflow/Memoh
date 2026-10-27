@@ -19,6 +19,7 @@ type abortObservationQueries struct {
 	scopeMatched bool
 	scopeCalls   atomic.Int32
 	writeCh      chan sqlc.RecordSessionRunAbortControlParams
+	completionCh chan sqlc.CompleteSessionRunAbortControlParams
 	release      <-chan struct{}
 	reads        []sqlc.GetSessionRunAbortControlParams
 	row          sqlc.GetSessionRunAbortControlRow
@@ -40,6 +41,13 @@ func (q *abortObservationQueries) RecordSessionRunAbortControl(ctx context.Conte
 		case <-ctx.Done():
 			return 0, ctx.Err()
 		}
+	}
+	return 1, q.err
+}
+
+func (q *abortObservationQueries) CompleteSessionRunAbortControl(_ context.Context, arg sqlc.CompleteSessionRunAbortControlParams) (int64, error) {
+	if q.completionCh != nil {
+		q.completionCh <- arg
 	}
 	return 1, q.err
 }

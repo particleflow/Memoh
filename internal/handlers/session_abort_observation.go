@@ -17,6 +17,7 @@ import (
 
 type sessionAbortObservationStore interface {
 	SessionRunMatchesAbortScope(context.Context, sqlc.SessionRunMatchesAbortScopeParams) (bool, error)
+	CompleteSessionRunAbortControl(context.Context, sqlc.CompleteSessionRunAbortControlParams) (int64, error)
 	RecordSessionRunAbortControl(context.Context, sqlc.RecordSessionRunAbortControlParams) (int64, error)
 	GetSessionRunAbortControl(context.Context, sqlc.GetSessionRunAbortControlParams) (sqlc.GetSessionRunAbortControlRow, error)
 }
@@ -64,13 +65,13 @@ func safeAbortClientReason(reason string) string {
 }
 
 //nolint:contextcheck // observation must not delay cancellation or depend on socket lifetime.
-func (h *LocalChannelHandler) observeAbortControl(ctx context.Context, botID, sessionID, runID, controlID, reason string) {
+func (h *LocalChannelHandler) observeAbortControl(ctx context.Context, botID, sessionID, runID, controlID, reason string) func(bool, error, string) {
 	if h.abortObservations == nil {
-		return
+		return nil
 	}
 	var bot, session, run pgtype.UUID
 	if bot.Scan(botID) != nil || session.Scan(sessionID) != nil || run.Scan(runID) != nil {
-		return
+		return nil
 	}
 	// The identifier is for deduplication only; arbitrary client strings must
 	// not become public metadata or logs. Legacy empty IDs share one observation.
@@ -90,6 +91,40 @@ func (h *LocalChannelHandler) observeAbortControl(ctx context.Context, botID, se
 			h.logger.WarnContext(observationCtx, "record abort control observation failed", slog.String("run_id", runID))
 		}
 	}()
+	return func(applied bool, resultErr error, serverSource string) {
+		if serverSource != "agent_service" && serverSource != "runtime_controller" {
+			return
+		}
+		completion := sqlc.CompleteSessionRunAbortControlParams{
+			BotID: args.BotID, SessionID: args.SessionID, RunID: args.RunID,
+			RequestHash: args.RequestHash, ReceivedAt: args.ReceivedAt, ClientReason: args.ClientReason,
+			CompletedAt:  pgtype.Timestamptz{Time: time.Now().UTC(), Valid: true},
+			Applied:      pgtype.Bool{Bool: applied, Valid: true},
+			ErrorClass:   pgtype.Text{String: abortOutcomeErrorClass(resultErr), Valid: true},
+			ServerSource: pgtype.Text{String: serverSource, Valid: true},
+		}
+		go func() {
+			observationCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), time.Second)
+			defer cancel()
+			if _, err := h.abortObservations.CompleteSessionRunAbortControl(observationCtx, completion); err != nil && h.logger != nil {
+				h.logger.WarnContext(observationCtx, "record abort control outcome failed", slog.String("run_id", runID))
+			}
+		}()
+	}
+}
+
+// Classification is server-generated and bounded; raw errors never enter the audit.
+func abortOutcomeErrorClass(err error) string {
+	switch {
+	case err == nil:
+		return "none"
+	case errors.Is(err, context.Canceled):
+		return "canceled"
+	case errors.Is(err, context.DeadlineExceeded):
+		return "deadline_exceeded"
+	default:
+		return "control_error"
+	}
 }
 
 type sessionAbortControlResponse struct {
@@ -98,6 +133,13 @@ type sessionAbortControlResponse struct {
 	Source string `json:"source"`
 	// ClientReason is a client-reported enum, not proof of a human action.
 	ClientReason string `json:"client_reason"`
+	// CompletedAt is a stored server return observation, not the run finish time.
+	CompletedAt *time.Time `json:"completed_at,omitempty"`
+	// Applied is the observed control return, not proof of a unique abort cause.
+	Applied    *bool  `json:"applied,omitempty"`
+	ErrorClass string `json:"error_class,omitempty"`
+	// ServerSource names the server branch; it is not an authenticated actor.
+	ServerSource string `json:"server_source,omitempty"`
 }
 
 func (h *SessionHandler) readAbortControl(ctx context.Context, botID, sessionID, runID string) (*sessionAbortControlResponse, error) {
@@ -128,9 +170,29 @@ func (h *SessionHandler) readAbortControl(ctx context.Context, botID, sessionID,
 	if row.Source == "websocket" {
 		source = "websocket"
 	}
-	return &sessionAbortControlResponse{
+	out := &sessionAbortControlResponse{
 		ReceivedAt:   row.ReceivedAt.Time,
 		Source:       source,
 		ClientReason: safeAbortClientReason(row.ClientReason),
-	}, nil
+	}
+	if row.CompletedAt.Valid && row.Applied.Valid && row.ErrorClass.Valid && row.ServerSource.Valid {
+		switch row.ErrorClass.String {
+		case "none", "canceled", "deadline_exceeded", "control_error":
+			out.ErrorClass = row.ErrorClass.String
+		}
+		switch row.ServerSource.String {
+		case "agent_service", "runtime_controller":
+			out.ServerSource = row.ServerSource.String
+		}
+		if out.ErrorClass != "" && out.ServerSource != "" {
+			at := row.CompletedAt.Time
+			applied := row.Applied.Bool
+			out.CompletedAt = &at
+			out.Applied = &applied
+		} else {
+			out.ErrorClass = ""
+			out.ServerSource = ""
+		}
+	}
+	return out, nil
 }

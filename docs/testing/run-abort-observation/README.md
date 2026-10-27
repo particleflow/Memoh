@@ -51,3 +51,32 @@ node .husky/checks.mjs
 ```
 
 The first complete affected-package run failed only `TestMediaHTTPUploadConfiguredAbove200MiB` with HTTP 500 while temporary storage was constrained. After removing this task's unused Vite cache, the unchanged test passed in isolation. This resource correlation is not proof of the initial 500's internal cause. No test was removed, disabled or weakened. The first Go lint run found S1016 in the new PostgreSQL fixture; that conversion was corrected. An initial aggregate run also failed the large-upload acceptance/limit cases while temporary space fell to about 325 MiB. After removing only obsolete task build and Vite caches, the unchanged final aggregate passed (exit 0): staged Web lint, Go lint and all affected package tests. Full remote CI has not run.
+
+## Server return observation increment
+
+Migration 0179 adds nullable `completed_at`, `applied`, `error_class` and
+`server_source` to the existing control observation. It does not modify applied
+0177/0178 migrations or derive a return from an old run's terminal state.
+The handler observes the existing abort call's return before sending its existing
+acknowledgement; persistence remains asynchronous and bounded. No Agent runtime
+core, cancellation result, retry rule or Images request correlation is changed.
+
+Completion uses the same authorized Bot/session/run and hashed control ID.
+It can insert the incoming facts if its write beats the original observation;
+a late incoming insert cannot clear it. The first stored completion wins on
+repeated controls. The invocation GET projects only these bounded fields.
+`error_class` is one of `none`, `canceled`, `deadline_exceeded`, `control_error`;
+`server_source` names `agent_service` or `runtime_controller`, not an actor.
+`applied` is the observed return, not proof of a unique cancellation cause.
+Existing client reasons remain untrusted declarations. Missing completion remains
+unknown, including after crash or storage failure. Migration down removes only
+the new result columns, losing those observations while preserving incoming
+controls and the original run. It does not undo a cancellation.
+
+The increment uses isolated synthetic handler and PostgreSQL fixtures. Checks
+cover safe classes, false applied, original acknowledgements, slow/failed
+storage, completion-first ordering, duplicate results, old nullable observations,
+0179 down/up/repeated-up, forced team RLS and byte-preserved run history.
+No new field UI acceptance, production deployment, model call or original snow
+run recovery is claimed. Earlier UI screenshots above remain historical evidence
+for the earlier source only.
