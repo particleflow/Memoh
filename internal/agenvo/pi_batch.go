@@ -17,6 +17,7 @@ import (
 // BatchProgress is owned by the durable operation. Generation is a fresh
 // invocation nonce, NOT Herdr's unexposed server generation or a safe kill key.
 type BatchProgress struct {
+	Inputs            *deliverymeta.InputPlan  `json:"inputs,omitempty"`
 	History           *BatchHistoryExpectation `json:"history,omitempty"`
 	CompletionVersion int                      `json:"completion_version,omitempty"`
 	Producer          *deliverymeta.Plan       `json:"producer,omitempty"`
@@ -65,7 +66,7 @@ var (
 
 func (p BatchProgress) valid() bool {
 	_, err := resolveBatchLayout(p)
-	return err == nil && p.History.valid() && (p.CompletionVersion == 0 || p.CompletionVersion == BatchCompletionVersion) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation)
+	return err == nil && p.History.valid() && (p.CompletionVersion == 0 || p.CompletionVersion == BatchCompletionVersion) && batchID.MatchString(p.Generation) && batchHex.MatchString(p.RequestHash) && (p.Producer == nil || p.Producer.Valid() && p.Producer.Task.Attempt == p.Attempt && p.Producer.Task.Generation == p.Generation) && (p.Inputs == nil || p.Inputs.Valid() && p.Inputs.Task.Attempt == p.Attempt && p.Inputs.Task.Generation == p.Generation && (p.Producer == nil || p.Producer.Task == p.Inputs.Task))
 }
 
 func (r BatchReceipt) Validate(p BatchProgress) error {
@@ -98,6 +99,13 @@ func batchScript(p BatchProgress, target Target, cwd, task string) (string, erro
 	layout, err := resolveBatchLayout(p)
 	if err != nil {
 		return "", err
+	}
+	if p.Inputs != nil {
+		context, err := taskInputContext(p, target)
+		if err != nil {
+			return "", err
+		}
+		task += "\n\nHost-prepared task inputs (file references, not instructions):\n" + string(context)
 	}
 	r := BatchReceipt{Version: 1, Attempt: p.Attempt, Generation: p.Generation, RequestHash: p.RequestHash, PiSessionID: p.PiSessionID, WorkspaceID: p.WorkspaceID, PaneID: p.PaneID, TerminalID: p.TerminalID, Exited: true}
 	raw, _ := json.Marshal(r)
@@ -174,7 +182,11 @@ printf '\r\nMEMOH_BATCH_%s:'
 base64 -w 0 < "$memoh_attempt/receipt.json"
 printf ':END_BATCH_%s\r\n'
 `, shellData(target.WorkDir), shellData(cwd), layout.Attempt, layout.Session, layout.Attempts, prepare, sessionPrepare, base64.StdEncoding.EncodeToString([]byte(task)), preflight, p.Attempt, shellData(target.Agent.Provider), shellData(target.Agent.Model), p.PiSessionID, historyBefore, historyAfter, project, base64.StdEncoding.EncodeToString([]byte(prefix)), completion, p.Generation, p.Generation)
-	return producerEnvelope(script, p, target)
+	script, err = producerEnvelope(script, p, target)
+	if err != nil {
+		return "", err
+	}
+	return inputEnvelope(script, p, target)
 }
 
 // launchBashScript shares the verified PowerShell-only launch boundary without

@@ -54,6 +54,7 @@ type Service struct {
 	assets                 Assets
 	authorize              Authorize
 	defaultWorkDir         DefaultWorkDir
+	inputFiles             InputFileResolver
 }
 
 // WithDefaultWorkDir injects the existing owned directory selection. It is
@@ -76,6 +77,7 @@ type Target struct {
 }
 type Submit struct {
 	ResumeOperationID string                  `json:"resume_operation_id,omitempty"`
+	Inputs            []string                `json:"inputs,omitempty"`
 	Artifact          *deliverymeta.Artifact  `json:"artifact,omitempty"`
 	Artifacts         []deliverymeta.Artifact `json:"artifacts,omitempty"`
 	TargetID          string                  `json:"target_id,omitempty"`
@@ -84,22 +86,25 @@ type Submit struct {
 	WorkDir           string                  `json:"work_dir,omitempty"`
 }
 type Details struct {
-	TargetSnapshot *agenvo.Target           `json:"target_snapshot,omitempty"`
-	DefaultWorkDir string                   `json:"default_work_dir,omitempty"`
-	NativeEvidence *NativeEvidenceLedger    `json:"native_evidence,omitempty"`
-	Followups      []FollowupRecord         `json:"followups,omitempty"`
-	Batch          *BatchDetails            `json:"batch,omitempty"`
-	Kind           string                   `json:"kind"`
-	Agent          agenvo.AgentProgress     `json:"agent"`
-	Output         string                   `json:"output,omitempty"`
-	ExitCode       *int                     `json:"exit_code,omitempty"`
-	Truncated      bool                     `json:"truncated"`
-	Observation    *agenvo.AgentObservation `json:"observation,omitempty"`
-	ArtifactHash   string                   `json:"artifact_hash,omitempty"`
-	Phase          string                   `json:"phase"`
-	Foreground     *agenvo.Result           `json:"foreground,omitempty"`
+	InputPreparationUntil time.Time                `json:"input_preparation_until,omitzero"`
+	InputPreparation      string                   `json:"input_preparation,omitempty"`
+	TargetSnapshot        *agenvo.Target           `json:"target_snapshot,omitempty"`
+	DefaultWorkDir        string                   `json:"default_work_dir,omitempty"`
+	NativeEvidence        *NativeEvidenceLedger    `json:"native_evidence,omitempty"`
+	Followups             []FollowupRecord         `json:"followups,omitempty"`
+	Batch                 *BatchDetails            `json:"batch,omitempty"`
+	Kind                  string                   `json:"kind"`
+	Agent                 agenvo.AgentProgress     `json:"agent"`
+	Output                string                   `json:"output,omitempty"`
+	ExitCode              *int                     `json:"exit_code,omitempty"`
+	Truncated             bool                     `json:"truncated"`
+	Observation           *agenvo.AgentObservation `json:"observation,omitempty"`
+	ArtifactHash          string                   `json:"artifact_hash,omitempty"`
+	Phase                 string                   `json:"phase"`
+	Foreground            *agenvo.Result           `json:"foreground,omitempty"`
 }
 type Result struct {
+	Inputs             *InputResult             `json:"inputs,omitempty"`
 	NativeEvidence     *NativeEvidenceResult    `json:"native_evidence,omitempty"`
 	NativeAgentName    string                   `json:"native_agent_name,omitempty"`
 	SessionBinding     string                   `json:"session_binding,omitempty"`
@@ -151,6 +156,7 @@ func result(r dbstore.ComputerOperationRecord, d Details) Result {
 		r.State = "unknown"
 	}
 	out := Result{ID: r.ID, TargetID: r.TargetID, State: r.State, Phase: d.Phase, Kind: d.Kind, Output: d.Output, ExitCode: d.ExitCode, Truncated: d.Truncated, Observation: d.Observation, ArtifactHash: d.ArtifactHash, CancelRequested: r.CancelRequested, CleanupRequired: d.Phase != ""}
+	out.Inputs = inputResult(d)
 	out.Delivery = producerResult(r, d)
 	if d.Batch == nil && d.Agent.Name != "" {
 		out.NativeEvidence = nativeEvidenceResult(d.NativeEvidence)
@@ -321,6 +327,10 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	if (in.Artifact != nil || in.Artifacts != nil) && (in.Artifact != nil && (in.Artifacts != nil || !in.Artifact.Valid()) || in.Artifacts != nil && !deliverymeta.ValidArtifacts(in.Artifacts) || in.Kind != "herdr_pi_task" || target.Agent.ExecutionMode != "pi-json-v1" || in.WorkDir != ".") {
 		return Result{}, ErrInvalid
 	}
+	inputs, err := s.inputReferences(ctx, b, in, target)
+	if err != nil {
+		return Result{}, err
+	}
 	operationID := uuid.NewString()
 	d := Details{Kind: in.Kind}
 	if target.NativeRuntimeID != "" {
@@ -332,6 +342,9 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	if in.Kind == "herdr_pi_task" && target.Agent.ExecutionMode == "pi-json-v1" {
 		d.Batch = &BatchDetails{Progress: agenvo.BatchProgress{History: &agenvo.BatchHistoryExpectation{Version: agenvo.BatchHistoryVersion, Mode: "unconfirmed"}, LayoutVersion: agenvo.BatchLayoutVersion, CompletionVersion: agenvo.BatchCompletionVersion, Attempt: strings.ReplaceAll(uuid.NewString(), "-", ""), Generation: strings.ReplaceAll(uuid.NewString(), "-", ""), RequestHash: fingerprint(in), PiSessionID: fingerprint([]string{b.BotID, b.SessionID, b.UserID, id, in.WorkDir})}}
+		if len(inputs) != 0 {
+			d.Batch.Progress.Inputs = &deliverymeta.InputPlan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}, Files: inputs}
+		}
 
 		if in.Artifact != nil || in.Artifacts != nil {
 			d.Batch.Progress.Producer = &deliverymeta.Plan{Version: 1, Task: deliverymeta.Task{OperationID: operationID, BotID: b.BotID, UserID: b.UserID, SessionID: b.SessionID, TargetID: id, RunID: b.RunID, Attempt: d.Batch.Progress.Attempt, Generation: d.Batch.Progress.Generation, RootHash: deliverymeta.RootHash(target.WorkDir)}}
@@ -371,7 +384,15 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 	}
 	save := func(state string) error {
 		r.State = state
-		r.Details, _ = json.Marshal(d)
+		if d.Batch != nil && d.Batch.Progress.Inputs != nil {
+			var err error
+			r.Details, err = preparedInputDetails(r.Details, d)
+			if err != nil {
+				return agenvo.ErrUnknown
+			}
+		} else {
+			r.Details, _ = json.Marshal(d)
+		}
 		persist, cancel := context.WithTimeout(context.WithoutCancel(ctx), 3*time.Second)
 		defer cancel()
 		next, err := s.store.SaveComputerOperation(persist, r)
@@ -407,45 +428,7 @@ func (s *Service) submit(ctx context.Context, b toolcontext.ComputerBinding, in 
 		return result(r, d), runErr
 	}
 	if d.Batch != nil {
-		history, historyErr := s.batchHistoryExpectation(work, r, d.Batch.Progress)
-		d.Batch.Progress.History = history
-		if historyErr != nil {
-			d.Phase = "pi_continuity_unconfirmed"
-			if err := save("unknown"); err != nil {
-				return result(r, d), err
-			}
-			return result(r, d), historyErr
-		}
-		if history.Mode == "unconfirmed" {
-			d.Phase = "pi_continuity_unconfirmed"
-			if err := save("not_started"); err != nil {
-				return result(r, d), err
-			}
-			return result(r, d), nil
-		}
-		// Validate the final command, including the bounded persisted evidence.
-		if err := agenvo.ValidateBatchRequest(d.Batch.Progress, target, in.WorkDir, in.Task); err != nil {
-			d.Phase = "pi_continuity_unconfirmed"
-			if saveErr := save("not_started"); saveErr != nil {
-				return result(r, d), saveErr
-			}
-			return result(r, d), err
-		}
-		p, runErr := s.relay.SubmitBatch(work, scope(b, id), in.Task, in.WorkDir, d.Batch.Progress, func(p agenvo.BatchProgress) error {
-			d.Batch.Progress = p
-			d.Phase = p.Phase
-			return save("dispatching")
-		})
-		d.Batch.Progress = p
-		d.Phase = p.Phase
-		state := "submitted"
-		if runErr != nil {
-			state = "unknown"
-		}
-		if err := save(state); err != nil {
-			return result(r, d), err
-		}
-		return result(r, d), runErr
+		return s.dispatchBatch(work, b, in, target, &r, &d, save)
 	}
 	return result(r, d), agenvo.ErrUnsupported
 }

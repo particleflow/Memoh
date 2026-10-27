@@ -29,6 +29,9 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 	if r.TargetID != in.TargetID || r.TargetFingerprint != agenvo.TargetFingerprint(target) || r.Fingerprint != fingerprint(in) || d.Kind != in.Kind || d.Batch == nil || d.Batch.Progress.RequestHash != r.Fingerprint {
 		return result(r, d), ErrConflict
 	}
+	if d.Batch.Progress.Inputs != nil && d.Batch.Progress.Phase == "" && (d.InputPreparation == "preparing" || d.InputPreparation == "unavailable" || d.InputPreparation == "verified") {
+		return s.resumeInputPreparation(ctx, b, in, target, r, d)
+	}
 	if r.State != "unknown" {
 		// A concurrent continuation or a known submission is an observation,
 		// not permission to execute any of its stages again.
@@ -53,6 +56,9 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 		if errors.Is(err, ErrPreflightUnavailable) {
 			return result(r, d), agenvo.ErrUnavailable
 		}
+		return result(r, d), err
+	}
+	if err := s.checkTaskInputAuthority(ctx, b, in, target, r, d.Batch.Progress.Inputs); err != nil {
 		return result(r, d), err
 	}
 	pinned := agenvo.PinRegistration(ctx, scope(b, r.TargetID), r.TargetFingerprint)
@@ -85,6 +91,10 @@ func (s *Service) resumeBatchWorkspace(ctx context.Context, b toolcontext.Comput
 				if errors.Is(err, ErrPreflightUnavailable) {
 					return agenvo.ErrUnavailable
 				}
+				return err
+			}
+			if err := s.checkTaskInputAuthority(work, b, in, target, r, p.Inputs); err != nil {
+				persistenceFailed = true
 				return err
 			}
 		}

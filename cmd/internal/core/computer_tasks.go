@@ -26,6 +26,15 @@ func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, rel
 	authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, approval.EvaluatePolicy)
 	service := computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit)
 	service.WithDefaultWorkDir(computerTaskWorkspaceDefault(store.GetMount, runtimes.SelectedWorkspaceDirectory))
+	service.WithInputFiles(func(ctx context.Context, binding toolcontext.ComputerBinding, targetID string, target agenvo.Target) (computertask.InputFileSystem, error) {
+		// Resolve the same already-authorized native mount. Explicit root context
+		// suppresses account directory defaults; it never maps a NAS /data path.
+		resolved, err := manager.ResolveWorkspaceTarget(toolcontext.WithExplicitWorkdir(ctx, target.WorkDir), binding.BotID, targetID)
+		if err != nil || resolved.TargetID != targetID || resolved.Client == nil {
+			return nil, computertask.ErrDenied
+		}
+		return resolved.Client.FilesOnly(), nil
+	})
 	source := computertask.NewSource(service)
 	source.SetLogger(log)
 	return source
