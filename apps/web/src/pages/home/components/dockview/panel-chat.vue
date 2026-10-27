@@ -2,8 +2,8 @@
   <DockPanelFrame>
     <KeepAlive>
       <ChatPane
-        v-if="visible"
-        :key="`chat-pane:${currentBotId}:${panelId}`"
+        v-if="visible && currentBotId === panelBotId"
+        :key="`chat-pane:${panelBotId}:${panelId}`"
         :tab-id="panelId"
         :session-id="paramsSessionId"
         :visible="visible"
@@ -39,6 +39,8 @@ const props = defineProps<{
 
 const chatStore = useChatStore()
 const { currentBotId } = storeToRefs(chatStore)
+// Dock cleanup follows the Bot change; this panel still belongs to its creator.
+const panelBotId = currentBotId.value?.trim() ?? ''
 
 const visible = usePanelVisible(props.params.api)
 const focused = usePanelFocused(props.params.api)
@@ -47,7 +49,7 @@ const paramsSessionId = computed(() => props.params.params.sessionId ?? null)
 
 watch([currentBotId, paramsSessionId, visible], ([botId, sessionId, isVisible]) => {
   const bid = botId?.trim() ?? ''
-  if (!bid) return
+  if (!bid || bid !== panelBotId) return
   chatStore.bindChatView(panelId, {
     botId: bid,
     sessionId,

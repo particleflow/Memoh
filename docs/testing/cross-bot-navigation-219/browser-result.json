@@ -1,0 +1,281 @@
+{
+  "calls": [
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/settings",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/11111111-1111-4111-8111-111111111111/sessions/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/settings",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/container",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions",
+      "query": "types=chat%2Cdiscuss%2Cacp_agent%2Cschedule&hide_schedule_runs=true&limit=50"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/media/limits",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/workdirs",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/model-preference-seed",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/starter-prompts",
+      "query": "locale=zh"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/settings",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/agents",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/workspace-targets",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/skills/catalog",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/messages",
+      "query": "session_id=dddddddd-dddd-4ddd-8ddd-dddddddddddd&limit=30"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd/status",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd/queue",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd/status",
+      "query": "model_id=fixture-model"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/media/limits",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/messages",
+      "query": "session_id=dddddddd-dddd-4ddd-8ddd-dddddddddddd&limit=30&before_message_id=fixture-expert-turn"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions",
+      "query": "types=chat%2Cdiscuss%2Cacp_agent%2Cschedule&hide_schedule_runs=true&limit=50"
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/messages",
+      "query": "session_id=dddddddd-dddd-4ddd-8ddd-dddddddddddd&limit=30"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/ping",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/workdirs",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd/queue",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/users/me/runtimes",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/dddddddd-dddd-4ddd-8ddd-dddddddddddd/status",
+      "query": "model_id=fixture-model"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/workspace-targets",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/media/limits",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/messages",
+      "query": "session_id=dddddddd-dddd-4ddd-8ddd-dddddddddddd&limit=30&before_message_id=fixture-expert-turn"
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/media/limits",
+      "query": ""
+    },
+    {
+      "method": "GET",
+      "path": "/bots/22222222-2222-4222-8222-222222222222/sessions/events",
+      "query": ""
+    }
+  ],
+  "url": "http://127.0.0.1:18407/bot/expert?session=dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+  "errors": []
+}

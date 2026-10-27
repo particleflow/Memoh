@@ -182,6 +182,7 @@ async function maybeStartExternalAgentSession() {
 async function syncStoreFromUrl(rawName: string) {
   const urlName = rawName.trim()
   const request = ++historyRequest
+  const requestedRoute = route.fullPath
   historyError.value = ''
   historyLoading.value = !!route.query.session
   if (!urlName) {
@@ -207,6 +208,8 @@ async function syncStoreFromUrl(rawName: string) {
     }
     return
   }
+  // A previous Bot lookup must never consume the next route's session query.
+  if (request !== historyRequest || route.fullPath !== requestedRoute) return
   if (!resolvedId) {
     if (route.query.session) {
       if (request === historyRequest) {
@@ -301,8 +304,9 @@ watch(currentBotId, async (newBotId) => {
     }
     return
   }
+  const requestedRoute = route.fullPath
   const botName = await resolveBotNameFromId(storeBot)
-  if (!botName) return
+  if (!botName || currentBotId.value !== storeBot || !isChatRoute() || route.fullPath !== requestedRoute) return
   if (((route.params.botName as string) ?? '').trim() === botName) return
   void router.replace({
     name: 'bot',

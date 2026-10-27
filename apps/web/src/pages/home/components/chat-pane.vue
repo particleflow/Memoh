@@ -1471,11 +1471,13 @@ const agentChanging = ref(false)
 const acpConfigChangeScope = ref('')
 
 const {
-  currentBotId,
   bots,
   loadingChats,
   hasExplicitSessionSelection,
 } = storeToRefs(chatStore)
+// The keyed panel owns this Bot until disposal; Dockview may flush child
+// watchers after global selection changes but before removing the old pane.
+const currentBotId = ref(chatStore.currentBotId)
 
 const isActive = computed(() => props.active !== false)
 const { welcomeDismissed } = useChatExamplesUi()
