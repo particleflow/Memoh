@@ -2321,7 +2321,9 @@ describe('chat-list store', () => {
         ],
         streaming: false,
       })
-      expect(result).toMatchObject({ errorCode: 'runtime_run_failed', errorTurnId: store.messages[1]!.turnId, errorRunId: store.messages[1]!.runtimeRunId })
+      const failedReply = store.messages[1]
+      if (failedReply?.role !== 'assistant') throw new Error('Expected the failed assistant reply')
+      expect(result).toMatchObject({ errorCode: 'runtime_run_failed', errorTurnId: failedReply.turnId, errorRunId: failedReply.runtimeRunId })
       expect(store.startupSendFailure).toBeNull()
     })
 

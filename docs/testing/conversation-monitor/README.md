@@ -17,6 +17,8 @@ The trigger accepts optional `botId`, `sessionId`, `visible` and `kind`; omitted
 
 Harmony's builder currently copies `mobile/client/mobile/memoh/shared-session-activity-trigger.vue` over this shared path. That old overlay calls `openMobileNav()` and must stop overwriting the fixed shared implementation. Preserve the mobile shell, login, media bridge and other adaptations; do not import its entire tree into Web. No HAP was built by this checkpoint.
 
+Synthetic production-build screenshots: [desktop](desktop.png), [390px mobile](mobile.png). These contain only fabricated fixture records; they are not field screenshots.
+
 ## One failure surface
 
 The same identified `runtime_run_failed` already present in its assistant reply suppresses the composer duplicate. Frontend-only run/turn metadata follows the existing send/retry/edit result. Other errors, standalone failures and failures belonging to a different run/turn remain visible. There is no matching on translated text. The underlying reply/error history is unchanged.
@@ -41,3 +43,7 @@ The screenshot's two layouts match the inline reply and composer error component
 - Chromium ran the production build with synthetic, read-only API responses. Actual Task/Bot entry clicks, three-level nesting, unrelated Bot exclusion, child and expert original-session navigation, 390px layout, and zero API writes passed. Desktop and narrow screenshots were inspected. No real server/PG, provider, device, model, production or HAP acceptance is claimed by this browser fixture.
 - Early fixture shape errors were corrected in the test harness, not product code. An external Google Fonts certificate request failed under the environment's existing trust settings; trust/TLS was not relaxed, and normal font fallback rendered the page. The final browser run has no JavaScript exception; an unused starter-prompts request aborted during navigation.
 - Human/field QA is not complete. No paid call, accepted-answer replay, image generation, production deployment or new package signing was performed.
+
+The first staged Web check stopped because this environment's pnpm 11 tried an unsolicited dependency install into an unavailable home path. No product/dependency configuration changed. Reusing the already verified installed dependencies with `pnpm_config_verify_deps_before_run=false node .husky/checks.mjs` ran the same lint-staged/ESLint check successfully (6.17 seconds); this disables auto-install, not lint or a repository gate. Initial added test-fixture typing errors were corrected to the actual assistant-turn schema without changing product behavior.
+
+The adapter source `daba5a37a4804cd6c7659a1bdc290a24ddbe03d2` is combined separately with origin recorded by cherry-pick. It publishes an existing deferred retry/edit replacement before answer continuation. It does not provide recovery for a historical failed run. Combination checks use directed application tests and the existing core boundary; source PostgreSQL/race evidence remains in `docs/evidence/deferred-decision-replacement/README.md` and is not claimed as rerun here.
