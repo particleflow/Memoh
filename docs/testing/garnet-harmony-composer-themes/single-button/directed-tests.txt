@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/garnet-harmony-check/generated
+
+
+ Test Files  2 passed (2)
+      Tests  19 passed (19)
+   Start at  11:27:30
+   Duration  279ms (transform 111ms, setup 0ms, import 187ms, tests 22ms, environment 1ms)
+

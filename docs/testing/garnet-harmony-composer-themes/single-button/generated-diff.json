@@ -1,0 +1,8 @@
+{
+  "base": "dd7fb93e7f3a0f88763bf3a53009a6279ad7f277",
+  "changedAdaptations": [
+    "apps/web/src/pages/home/components/chat-pane.vue"
+  ],
+  "allOtherAdaptationHashesUnchanged": true,
+  "sharedArchivePinUnchanged": true
+}

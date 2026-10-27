@@ -882,39 +882,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
 
     # Apply this small shared UI delta after the reviewed phone adaptations.
     # Keep native attachment/voice preparation and the full existing theme set.
-    composer_appearance_changes = {'apps/web/src/pages/home/components/chat-pane.vue': [('                  <!-- While voice owns the composer',
-                                                           '                  <Button\n'
-                                                           '                    v-if="streaming"\n'
-                                                           '                    type="button"\n'
-                                                           '                    variant="secondary"\n'
-                                                           '                    size="icon-sm"\n'
-                                                           '                    shape="circle"\n'
-                                                           '                    '
-                                                           ':aria-label="$t(\'chat.stopGenerating\')"\n'
-                                                           '                    class="shrink-0 max-md:size-11"\n'
-                                                           '                    '
-                                                           '@click="chatStore.abort(paneTarget)"\n'
-                                                           '                  >\n'
-                                                           '                    <svg\n'
-                                                           '                      viewBox="0 0 24 24"\n'
-                                                           '                      fill="currentColor"\n'
-                                                           '                      class="size-4 '
-                                                           'max-md:size-4.5"\n'
-                                                           '                      aria-hidden="true"\n'
-                                                           '                    >\n'
-                                                           '                      <rect\n'
-                                                           '                        x="4"\n'
-                                                           '                        y="4"\n'
-                                                           '                        width="16"\n'
-                                                           '                        height="16"\n'
-                                                           '                        rx="3"\n'
-                                                           '                      />\n'
-                                                           '                    </svg>\n'
-                                                           '                  </Button>\n'
-                                                           '\n'
-                                                           '                  <!-- While voice owns the composer',
-                                                           1),
-                                                          ('                    <!-- Send and stop are one brand '
+    composer_appearance_changes = {'apps/web/src/pages/home/components/chat-pane.vue': [('                    <!-- Send and stop are one brand '
                                                            'circle: the surface never\n'
                                                            '                         changes between the two '
                                                            'states, only the glyph cross-fades\n'
@@ -922,12 +890,10 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                                                            "the button can't blink color or\n"
                                                            '                         shape mid-turn. While '
                                                            'streaming it stays clickable to abort. -->\n',
-                                                           '                    <!-- Sending during a run uses '
-                                                           'the existing follow-up queue.\n'
-                                                           '                         Stop has its own control so '
-                                                           'an emptied draft or double\n'
-                                                           '                         click can never turn a send '
-                                                           'gesture into an abort. -->\n',
+                                                           '                    <!-- One control: a draft sends '
+                                                           'to the existing queue;\n'
+                                                           '                         only an empty running '
+                                                           'composer offers stop. -->\n',
                                                            1),
                                                           ('                        '
                                                            ':disabled="attachmentUploading || (streaming ? false '
@@ -937,12 +903,13 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                                                            '!!runtimeModeUnavailableReason))"',
                                                            '                        '
                                                            ':disabled="attachmentUploading || '
-                                                           'nativeAttachmentBusy || !showSend || !currentBotId '
-                                                           '|| activeChatReadOnly || loadingMessages || '
-                                                           '(streaming ? pendingFiles.length > 0 || '
+                                                           'nativeAttachmentBusy || !currentBotId || '
+                                                           'activeChatReadOnly || loadingMessages || (streaming '
+                                                           '? showSend && (pendingFiles.length > 0 || '
                                                            'pendingNativeAttachments.length > 0 || '
-                                                           'requestedSkills.length > 0 : composerConfigPending '
-                                                           '|| composerHasNoModel || goalSubmissionBlocked || '
+                                                           'requestedSkills.length > 0) : !showSend || '
+                                                           'composerConfigPending || composerHasNoModel || '
+                                                           'goalSubmissionBlocked || '
                                                            '!!runtimeModeUnavailableReason)"',
                                                            1),
                                                           ('                        :aria-label="streaming && '
@@ -953,33 +920,18 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                                                            '                        :aria-label="streaming && '
                                                            "showSend ? $t(composerQueueCommand?.mode === 'steer' "
                                                            "? 'chat.queue.enqueueSteer' : "
-                                                           '\'chat.queue.enqueueFollowUp\') : $t(\'chat.send\')"',
+                                                           "'chat.queue.enqueueFollowUp') : $t(streaming ? "
+                                                           '\'chat.stopGenerating\' : \'chat.send\')"',
                                                            1),
-                                                          ('                            :class="streaming && '
-                                                           "!firstSendAwaiting ? 'opacity-0' : "
-                                                           '\'opacity-100\'"\n',
-                                                           '',
+                                                          (':class="streaming && !firstSendAwaiting ? '
+                                                           '\'opacity-0\' : \'opacity-100\'"',
+                                                           ':class="streaming && !showSend && !firstSendAwaiting '
+                                                           '? \'opacity-0\' : \'opacity-100\'"',
                                                            1),
-                                                          ('                          <svg\n'
-                                                           '                            viewBox="0 0 24 24"\n'
-                                                           '                            fill="currentColor"\n'
-                                                           '                            class="col-start-1 '
-                                                           'row-start-1 size-4 max-md:size-4.5 '
-                                                           'transition-opacity duration-200 ease-out '
-                                                           'motion-reduce:transition-none"\n'
-                                                           '                            :class="streaming && '
-                                                           "!firstSendAwaiting ? 'opacity-100' : "
-                                                           '\'opacity-0\'"\n'
-                                                           '                          >\n'
-                                                           '                            <rect\n'
-                                                           '                              x="4"\n'
-                                                           '                              y="4"\n'
-                                                           '                              width="16"\n'
-                                                           '                              height="16"\n'
-                                                           '                              rx="3"\n'
-                                                           '                            />\n'
-                                                           '                          </svg>\n',
-                                                           '',
+                                                          (':class="streaming && !firstSendAwaiting ? '
+                                                           '\'opacity-100\' : \'opacity-0\'"',
+                                                           ':class="streaming && !showSend && !firstSendAwaiting '
+                                                           '? \'opacity-100\' : \'opacity-0\'"',
                                                            1),
                                                           ('// Streaming always wins the slot for stop, same as '
                                                            'before; unlike the old\n'
@@ -990,16 +942,44 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                                                            '// EVERY mode (the mic when voice input is on, a '
                                                            'look-alike placeholder while\n'
                                                            "// it's shelved).\n",
-                                                           '// Keep the send slot visible during a run, disabled '
-                                                           'on empty input.\n'
-                                                           '// The separate stop control remains available '
-                                                           'alongside it.\n',
+                                                           '// Keep the one action slot visible during a run: '
+                                                           'send for a draft, stop\n'
+                                                           '// only when the existing content predicate says the '
+                                                           'composer is empty.\n',
                                                            1),
-                                                          ('  if (streaming.value && !showSend.value) {\n'
+                                                          ('function handleSendButton() {',
+                                                           'let lastSendButtonActivation = -Infinity\n'
+                                                           'function handleSendButton(event?: MouseEvent) {',
+                                                           1),
+                                                          ('  // A first send waits for the server to confirm '
+                                                           'it.\n'
+                                                           '  if (firstSendAwaiting.value) return\n'
+                                                           '  if (streaming.value && !showSend.value) {\n'
                                                            '    chatStore.abort(paneTarget.value)\n'
                                                            '    return\n'
-                                                           '  }\n',
-                                                           '',
+                                                           '  }\n'
+                                                           '  void handleSend()\n'
+                                                           '}\n',
+                                                           '  // A first send waits for the server to confirm '
+                                                           'it.\n'
+                                                           '  if (firstSendAwaiting.value) return\n'
+                                                           '  const now = performance.now()\n'
+                                                           '  if ((event?.detail ?? 0) > 1) return\n'
+                                                           '  if (streaming.value && !showSend.value) {\n'
+                                                           '    // Clearing a sent draft changes this same '
+                                                           'button into stop. Keep mouse\n'
+                                                           '    // multi-clicks, rapid taps and keyboard repeats '
+                                                           'in that send gesture.\n'
+                                                           '    if (now - lastSendButtonActivation < 500) {\n'
+                                                           '      lastSendButtonActivation = now\n'
+                                                           '      return\n'
+                                                           '    }\n'
+                                                           '    chatStore.abort(paneTarget.value)\n'
+                                                           '    return\n'
+                                                           '  }\n'
+                                                           '  lastSendButtonActivation = now\n'
+                                                           '  void handleSend()\n'
+                                                           '}\n',
                                                            1)],
      'apps/web/src/pages/appearance/index.vue': [('        <SettingsRow :label="t(\'settings.theme\')">',
                                                   '        <SettingsRow\n'
