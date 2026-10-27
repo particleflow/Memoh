@@ -115,6 +115,36 @@ describe('useBotCreateProgressStore', () => {
     expect(store.lines.at(-1)).toMatchObject({ kind: 'ready', status: 'done' })
   })
 
+  it('checks the same Bot after a clean stream ending before ready', async () => {
+    const bot = { id: 'bot-1', name: 'ada' }
+    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'creating' }]))
+    getBot.mockResolvedValue({ data: { ...bot, status: 'failed' } })
+
+    const store = useBotCreateProgressStore()
+    await store.start({ name: 'ada', display_name: 'Ada' })
+
+    expect(getBot).toHaveBeenCalledWith(expect.objectContaining({ path: { id: 'bot-1' } }))
+    expect(store.bot?.id).toBe('bot-1')
+    expect(store.status).toBe('workspace-error')
+    expect(store.lines.some(line => line.kind === 'ready')).toBe(false)
+  })
+
+  it('checks the same Bot when a workspace retry stream ends before completion', async () => {
+    const bot = { id: 'bot-1', name: 'ada' }
+    postBotsStream.mockResolvedValue(streamOf([{ type: 'bot_created', bot }, { type: 'error', code: 'workspace.unreachable', message: 'failed' }]))
+    postContainerStream.mockResolvedValue(streamOf([{ type: 'creating' }]))
+    getBot.mockResolvedValue({ data: { ...bot, status: 'failed' } })
+
+    const store = useBotCreateProgressStore()
+    await store.start({ name: 'ada', display_name: 'Ada' })
+    await store.retry()
+
+    expect(postContainerStream).toHaveBeenCalledWith(expect.objectContaining({ path: { bot_id: 'bot-1' } }))
+    expect(getBot).toHaveBeenCalled()
+    expect(store.status).toBe('workspace-error')
+    expect(store.bot?.id).toBe('bot-1')
+  })
+
   it('treats a hard failure with no bot as an error status', async () => {
     postBotsStream.mockResolvedValue(streamOf([
       { type: 'pulling', image: 'img' },

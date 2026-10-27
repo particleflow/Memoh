@@ -378,8 +378,9 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
   // Relays a workspace provisioning stream (create or container retry) into
   // the terminal. Returns the settled state; a stream that broke without a
   // server error event leaves `errorCode` empty.
-  async function followWorkspaceStream(stream: AsyncGenerator<BotCreateStreamEvent, void, unknown>) {
+  async function followWorkspaceStream(stream: AsyncGenerator<BotCreateStreamEvent, void, unknown>, terminalEvent: 'ready' | 'complete' = 'ready') {
     return await collectBotCreateProgressStream(stream, {
+      terminalEvent,
       initialState: bot.value ? { bot: bot.value } : undefined,
       onState: (state) => {
         progress.value = state.progress ?? progress.value
@@ -442,7 +443,7 @@ export const useBotCreateProgressStore = defineStore('bot-create-progress', () =
     progress.value = { phase: 'pulling' }
     try {
       const { stream } = await postBotsByBotIdContainerStream({ path: { bot_id: botId }, body: {}, throwOnError: true })
-      const result = await followWorkspaceStream(stream)
+      const result = await followWorkspaceStream(stream, 'complete')
       if (result.setupError) {
         if (!result.errorCode) return await resume()
         failWorkspace(result.setupError, result.errorCode)
