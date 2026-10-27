@@ -68,7 +68,7 @@ func (s *Service) BindScope(ctx context.Context, r Record) context.Context {
 				target = r.Payload.TargetSelection
 			}
 			if target == "native" {
-				if r.SourceSelection != "native" {
+				if r.SourceSelection != "native" && r.Payload.TargetSelection != "native" {
 					return ErrDenied
 				}
 				if permission != "" {
@@ -103,7 +103,7 @@ func (s *Service) BindScope(ctx context.Context, r Record) context.Context {
 				return nil, ErrDenied
 			}
 			ids := []string{}
-			if r.SourceSelection == "native" {
+			if r.SourceSelection == "native" || r.Payload.TargetSelection == "native" {
 				ids = append(ids, "native")
 			}
 			for _, p := range r.Payload.Devices {

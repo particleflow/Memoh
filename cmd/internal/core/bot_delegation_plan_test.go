@@ -31,6 +31,8 @@ type delegationPlanFixture struct {
 	session       thread.Thread
 	registration  dbstore.UserRuntimeRecord
 	missingTarget bool
+	nativeTarget  bool
+	primaryErr    error
 	denied        bool
 	lookups       int
 }
@@ -70,7 +72,13 @@ func (f *delegationPlanFixture) GetMount(_ context.Context, bot, mount string) (
 	return m, nil
 }
 
-func (*delegationPlanFixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
+func (f *delegationPlanFixture) GetPrimaryMount(ctx context.Context, bot string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
+	if f.primaryErr != nil {
+		return dbstore.BotRemoteRuntimeBindingRecord{}, f.primaryErr
+	}
+	if !f.nativeTarget {
+		return f.GetMount(ctx, bot, planTargetMount)
+	}
 	return dbstore.BotRemoteRuntimeBindingRecord{}, db.ErrNotFound
 }
 
@@ -164,5 +172,15 @@ func TestNativeDelegationPlanFailsClosed(t *testing.T) {
 				}
 			})
 		}
+	}
+}
+
+func TestNativeSpecialistPlanDoesNotHidePrimaryLookupFailure(t *testing.T) {
+	f, a, b := newDelegationPlanFixture(t, planSourceMount)
+	f.nativeTarget = true
+	f.primaryErr = errors.New("synthetic registry unavailable")
+	pairs, _, err := planDelegationDevices(t.Context(), f, a, b, planSourceMount)
+	if !errors.Is(err, f.primaryErr) || len(pairs) != 0 {
+		t.Fatalf("lookup failure became native fallback: %v %v", pairs, err)
 	}
 }

@@ -87,8 +87,13 @@ broader Bot/hash route.
 
 A handoff is not a grant. Each access checks the live user, both Bot chat grants,
 same team, complete owned source ancestry, target ownership, and unchanged source
-selection. Source PC-A can use only the specialist's mount of that same RuntimeID
-and registration fingerprint. Source NAS uses the existing resource intersection.
+selection. Source selection is provenance, not the specialist's execution choice.
+A specialist with no primary remote mount runs in its native workspace even when
+the source conversation selected a PC. No device pair or PC access is granted in
+that case. If the specialist selects a remote primary mount, it must be the same
+RuntimeID and registration fingerprint through both Bots' existing mounts.
+Lookup failures or an incompatible selected remote target are rejected. Source
+NAS retains the existing resource intersection.
 Selection metadata is read without requiring execution permission; actual device
 reads, writes and execution retain their separate permission checks.
 
