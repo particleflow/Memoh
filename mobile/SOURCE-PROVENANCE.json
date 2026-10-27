@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "7fee7e2df47141cd29c1f625e2f5e2075edc54d1f501c9435f2a2c1195b09601",
+      "sha256": "87a75763f78f8c81aa8564b8f9114cf612e60a0680dd95c95f9c930b530a2a56",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -1551,7 +1551,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-monitor-trigger.vue",
-      "sha256": "b70c0bcc956c1cd2156e2d6a8a07eb1783c2dbf3aef669767b65eed915ae1966",
+      "sha256": "72572ce1541ffacc5d8a14d2b1170ef6475a83c9228271c0023a4cf99108b26c",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1560,7 +1560,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-monitor-trigger.test.ts",
-      "sha256": "fda0376ebdd0d174bc924150e57ff10d7a380d930ad42390082a7ffb9e6139aa",
+      "sha256": "60f3f7bdae7924190b1b1e2760478b845713f251655706a76c39d60e6dccfcca",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [

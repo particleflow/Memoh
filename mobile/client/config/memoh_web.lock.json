@@ -153,13 +153,15 @@
     "files": {
       "apps/web/src/components/sidebar/session-activity-trigger.vue": {
         "local": "shared-conversation-monitor-trigger.vue",
-        "sha256": "b70c0bcc956c1cd2156e2d6a8a07eb1783c2dbf3aef669767b65eed915ae1966",
-        "baseSHA256": null
+        "sha256": "72572ce1541ffacc5d8a14d2b1170ef6475a83c9228271c0023a4cf99108b26c",
+        "baseSHA256": null,
+        "sourceCommit": "fa35692ff6da4b1e672d68bc75a757d87038eefe"
       },
       "apps/web/src/components/sidebar/session-activity-trigger.test.ts": {
         "local": "shared-conversation-monitor-trigger.test.ts",
-        "sha256": "fda0376ebdd0d174bc924150e57ff10d7a380d930ad42390082a7ffb9e6139aa",
-        "baseSHA256": null
+        "sha256": "60f3f7bdae7924190b1b1e2760478b845713f251655706a76c39d60e6dccfcca",
+        "baseSHA256": null,
+        "sourceCommit": "fa35692ff6da4b1e672d68bc75a757d87038eefe"
       },
       "apps/web/src/pages/home/composables/useConversationRelations.ts": {
         "local": "shared-useConversationRelations.ts",
@@ -232,6 +234,10 @@
     "statusLocalization": {
       "commit": "dbff0e472c616f7241635a58e6085442f30a7d2a",
       "scope": "Existing native errored→failed/admitting→accepted mapping; keep original raw state, name and click object; three-language regression."
+    },
+    "delegatedHistoryNavigation": {
+      "commit": "fa35692ff6da4b1e672d68bc75a757d87038eefe",
+      "scope": "Pass the verified original session to selectBot and the bot history URL; no default contact resolution or new operation."
     }
   },
   "sharedAcceptedRecovery": {

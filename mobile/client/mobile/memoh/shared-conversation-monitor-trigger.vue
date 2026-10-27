@@ -51,9 +51,9 @@ async function navigate(row: ConversationRelation) {
     const { data: session } = await getBotsByBotIdSessionsBySessionId({ path: { bot_id: row.bot, session_id: row.session }, signal: control.signal, cache: 'no-store', throwOnError: true })
     if (generation !== epoch || token.value !== identity) return
     if (session.id !== row.session || session.bot_id !== row.bot) throw new Error('Session identity changed')
-    await chat.selectBot(row.bot)
+    await chat.selectBot(row.bot, { sessionId: session.id })
     if (token.value !== identity || chat.currentBotId !== row.bot) return
-    await router.push({ name: 'bot', params: { botName: row.bot } })
+    await router.push({ name: 'bot', params: { botName: row.bot }, query: { session: session.id } })
     await until(() => tabs.api).toBeTruthy({ timeout: 5000, throwOnTimeout: true })
     if (token.value !== identity || chat.currentBotId !== row.bot) return
     tabs.openSessionChat({ sessionId: session.id, title: session.title }); tabs.closeMobileNav(); open.value = false
