@@ -641,6 +641,10 @@ definitions:
     type: object
   agenvo.Admission:
     properties:
+      agent_config_dir:
+        type: string
+      config_sha256:
+        type: string
       connection_id:
         type: string
       device_id:
@@ -654,6 +658,8 @@ definitions:
       revision:
         type: string
       scope:
+        type: string
+      target_fingerprint:
         type: string
     type: object
   agenvo.AgentObservation:
@@ -792,6 +798,25 @@ definitions:
     - instance_id
     - session
     - work_dir
+    type: object
+  agenvo.NativeProfileCutoverRequest:
+    properties:
+      agent_config_dir:
+        type: string
+      expected_config_sha256:
+        type: string
+      expected_pause_revision:
+        type: string
+      expected_target_fingerprint:
+        type: string
+      instance_id:
+        type: string
+      pause_request_id:
+        type: string
+      runtime_id:
+        type: string
+      target_id:
+        type: string
     type: object
   agenvo.ProducerLocator:
     properties:
@@ -8287,6 +8312,8 @@ definitions:
     type: object
   userruntime.NativeHerdrIdentity:
     properties:
+      config_sha256:
+        type: string
       connection_id:
         type: string
       device_id:
@@ -21792,8 +21819,10 @@ paths:
       - user-runtimes
   /users/me/runtimes/{id}/admission:
     get:
-      description: Reads the existing durable admission gate without contacting or
-        stopping the host. A pause is not proof that accepted work has drained.
+      description: Reads native profile identity and admission from one database snapshot.
+        Includes config_sha256, target_fingerprint and agent_config_dir for owner
+        cutover reconciliation; never returns a credential or complete provider config.
+        A pause is not proof that accepted work has drained.
       parameters:
       - description: Existing owner runtime ID
         in: path
@@ -21903,6 +21932,55 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Configure Herdr on an existing owned native Runtime
+      tags:
+      - user-runtimes
+  /users/me/runtimes/{id}/native-herdr/profile-cutover:
+    put:
+      consumes:
+      - application/json
+      description: Owner account only. Checks the current config digest, target fingerprint
+        and paused request/revision. Atomic CAS changes only agent.config_dir and
+        advances the paused admission revision; use the returned revision for the
+        next cutover or resume. No host action, task dispatch or unpause. A lost response
+        requires rereading the current state.
+      parameters:
+      - description: Existing native Runtime ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Cutover CAS facts
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/agenvo.NativeProfileCutoverRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/agenvo.Admission'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Switch the Pi configuration directory while admission stays paused
       tags:
       - user-runtimes
   /users/me/runtimes/{id}/transfer-credential:

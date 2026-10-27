@@ -385,6 +385,8 @@ export type AgentcredentialPublicCredential = {
 };
 
 export type AgenvoAdmission = {
+    agent_config_dir?: string;
+    config_sha256?: string;
     connection_id?: string;
     device_id?: string;
     instance_id?: string;
@@ -392,6 +394,7 @@ export type AgenvoAdmission = {
     request_id?: string;
     revision?: string;
     scope?: string;
+    target_fingerprint?: string;
 };
 
 export type AgenvoAgentObservation = {
@@ -474,6 +477,17 @@ export type AgenvoNativeHerdrProfile = {
     producer?: AgenvoProducerLocator;
     session: string;
     work_dir: string;
+};
+
+export type AgenvoNativeProfileCutoverRequest = {
+    agent_config_dir?: string;
+    expected_config_sha256?: string;
+    expected_pause_revision?: string;
+    expected_target_fingerprint?: string;
+    instance_id?: string;
+    pause_request_id?: string;
+    runtime_id?: string;
+    target_id?: string;
 };
 
 export type AgenvoProducerLocator = {
@@ -4799,6 +4813,7 @@ export type UserruntimeCreateRuntimeRequest = {
 };
 
 export type UserruntimeNativeHerdrIdentity = {
+    config_sha256?: string;
     connection_id?: string;
     device_id?: string;
     instance_id?: string;
@@ -20260,6 +20275,55 @@ export type PutUsersMeRuntimesByIdNativeHerdrResponses = {
 };
 
 export type PutUsersMeRuntimesByIdNativeHerdrResponse = PutUsersMeRuntimesByIdNativeHerdrResponses[keyof PutUsersMeRuntimesByIdNativeHerdrResponses];
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverData = {
+    /**
+     * Cutover CAS facts
+     */
+    body: AgenvoNativeProfileCutoverRequest;
+    path: {
+        /**
+         * Existing native Runtime ID
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/users/me/runtimes/{id}/native-herdr/profile-cutover';
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverError = PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors[keyof PutUsersMeRuntimesByIdNativeHerdrProfileCutoverErrors];
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses = {
+    /**
+     * OK
+     */
+    200: AgenvoAdmission;
+};
+
+export type PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponse = PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses[keyof PutUsersMeRuntimesByIdNativeHerdrProfileCutoverResponses];
 
 export type DeleteUsersMeRuntimesByIdTransferCredentialData = {
     body?: never;

@@ -53,6 +53,13 @@ func (s *Service) ConfigureNativeHerdr(ctx context.Context, owner, id string, pr
 	return runtime, nil
 }
 
+func (s *Service) CutoverPausedNativeProfile(ctx context.Context, owner, id string, in agenvo.NativeProfileCutoverRequest) (agenvo.Admission, error) {
+	if s.agenvo == nil {
+		return agenvo.Admission{}, agenvo.ErrUnavailable
+	}
+	return s.agenvo.CutoverPausedNativeProfile(ctx, owner, id, in)
+}
+
 func (s *Service) ReadComputerAdmission(ctx context.Context, owner, runtime string) (agenvo.Admission, error) {
 	if s.agenvo == nil {
 		return agenvo.Admission{}, agenvo.ErrUnavailable
@@ -339,10 +346,12 @@ func runtimeFromRecord(row dbstore.UserRuntimeRecord, connection *Connection) Ru
 	}
 	target, targetErr := agenvo.DecodeRuntimeTarget(row.Provider, row.ID, row.ProviderConfig)
 	if targetErr == nil && target.NativeRuntimeID != "" {
+		digest, _ := agenvo.NativeProfileConfigDigest(row.ProviderConfig)
 		runtime.NativeHerdr = &NativeHerdrIdentity{
 			ConnectionID: target.ConnectionID, DeviceID: target.DeviceID,
 			InstanceID: target.InstanceID, Session: target.Session,
 			TargetFingerprint: agenvo.TargetFingerprint(target),
+			ConfigSHA256:      digest,
 		}
 	}
 	if connection == nil {

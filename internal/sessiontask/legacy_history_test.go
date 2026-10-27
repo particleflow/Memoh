@@ -54,3 +54,36 @@ func TestOldIdentityTaskProjectionRequiresCurrentAuthorization(t *testing.T) {
 		t.Fatalf("revocation: %v", err)
 	}
 }
+
+func TestNativeProfileChangedTaskProjectionPreservesHistory(t *testing.T) {
+	f := newFixture()
+	current := f.targets[f.operations[f.op].TargetID]
+	current.NativeRuntimeID = "synthetic-runtime"
+	current.ConnectionID = current.NativeRuntimeID
+	current.InstanceID = "synthetic-instance"
+	old := current
+	old.Agent.ConfigDir = `C:\Synthetic\original`
+	current.Agent.ConfigDir = `C:\Synthetic\changed`
+	r := f.operations[f.op]
+	r.TargetFingerprint = agenvo.TargetFingerprint(old)
+	r.State = "unknown"
+	r.Details, _ = json.Marshal(map[string]any{"kind": "herdr_pi_task", "target_snapshot": old})
+	f.operations[f.op] = r
+	f.targets[r.TargetID] = current
+	before, _ := json.Marshal(f.operations)
+	got, err := f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op)
+	if err != nil || got.Status != "unknown" {
+		t.Fatalf("history after profile change: %+v %v", got, err)
+	}
+	if _, err = f.service.Get(t.Context(), "bot", "other", f.root, ComputerOperation, f.op); err == nil {
+		t.Fatal("foreign user read")
+	}
+	delete(f.targets, r.TargetID)
+	if _, err = f.service.Get(t.Context(), "bot", "user", f.root, ComputerOperation, f.op); err == nil {
+		t.Fatal("revoked target read")
+	}
+	after, _ := json.Marshal(f.operations)
+	if string(before) != string(after) {
+		t.Fatal("history modified")
+	}
+}

@@ -297,17 +297,21 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 		return Task{}, ErrUnavailable
 	}
 	target, err := s.targets.ResolveHistoricalTarget(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID})
-	if err != nil || r.TargetFingerprint == "" || r.TargetFingerprint != agenvo.TargetFingerprint(target) {
+	if err != nil {
 		return Task{}, ErrUnavailable
 	}
 	// Decode only approved persisted facts. Top-level output, observations,
 	// raw JSONL, transfer refs and arbitrary metadata are not display content.
 	var facts struct {
-		Kind     string            `json:"kind"`
-		ExitCode *int              `json:"exit_code"`
-		Batch    *persistedPiFacts `json:"batch"`
+		TargetSnapshot *agenvo.Target    `json:"target_snapshot"`
+		Kind           string            `json:"kind"`
+		ExitCode       *int              `json:"exit_code"`
+		Batch          *persistedPiFacts `json:"batch"`
 	}
 	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &facts) != nil {
+		return Task{}, ErrUnavailable
+	}
+	if !agenvo.HistoricalTargetMatches(target, facts.TargetSnapshot, r.TargetFingerprint) {
 		return Task{}, ErrUnavailable
 	}
 	t.TargetID = r.TargetID

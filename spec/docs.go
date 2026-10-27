@@ -19269,7 +19269,7 @@ const docTemplate = `{
         },
         "/users/me/runtimes/{id}/admission": {
             "get": {
-                "description": "Reads the existing durable admission gate without contacting or stopping the host. A pause is not proof that accepted work has drained.",
+                "description": "Reads native profile identity and admission from one database snapshot. Includes config_sha256, target_fingerprint and agent_config_dir for owner cutover reconciliation; never returns a credential or complete provider config. A pause is not proof that accepted work has drained.",
                 "produces": [
                     "application/json"
                 ],
@@ -19423,6 +19423,74 @@ const docTemplate = `{
                     },
                     "409": {
                         "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
+        "/users/me/runtimes/{id}/native-herdr/profile-cutover": {
+            "put": {
+                "description": "Owner account only. Checks the current config digest, target fingerprint and paused request/revision. Atomic CAS changes only agent.config_dir and advances the paused admission revision; use the returned revision for the next cutover or resume. No host action, task dispatch or unpause. A lost response requires rereading the current state.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user-runtimes"
+                ],
+                "summary": "Switch the Pi configuration directory while admission stays paused",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Existing native Runtime ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Cutover CAS facts",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.NativeProfileCutoverRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/agenvo.Admission"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/server.Problem"
                         }
@@ -21274,6 +21342,12 @@ const docTemplate = `{
         "agenvo.Admission": {
             "type": "object",
             "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "config_sha256": {
+                    "type": "string"
+                },
                 "connection_id": {
                     "type": "string"
                 },
@@ -21293,6 +21367,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "scope": {
+                    "type": "string"
+                },
+                "target_fingerprint": {
                     "type": "string"
                 }
             }
@@ -21493,6 +21570,35 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "work_dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "agenvo.NativeProfileCutoverRequest": {
+            "type": "object",
+            "properties": {
+                "agent_config_dir": {
+                    "type": "string"
+                },
+                "expected_config_sha256": {
+                    "type": "string"
+                },
+                "expected_pause_revision": {
+                    "type": "string"
+                },
+                "expected_target_fingerprint": {
+                    "type": "string"
+                },
+                "instance_id": {
+                    "type": "string"
+                },
+                "pause_request_id": {
+                    "type": "string"
+                },
+                "runtime_id": {
+                    "type": "string"
+                },
+                "target_id": {
                     "type": "string"
                 }
             }
@@ -32145,6 +32251,9 @@ const docTemplate = `{
         "userruntime.NativeHerdrIdentity": {
             "type": "object",
             "properties": {
+                "config_sha256": {
+                    "type": "string"
+                },
                 "connection_id": {
                     "type": "string"
                 },

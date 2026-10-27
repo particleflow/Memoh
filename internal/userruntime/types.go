@@ -34,6 +34,7 @@ type NativeHerdrIdentity struct {
 	InstanceID        string `json:"instance_id"`
 	Session           string `json:"session"`
 	TargetFingerprint string `json:"target_fingerprint"`
+	ConfigSHA256      string `json:"config_sha256"`
 }
 
 type CreateRuntimeRequest struct {
