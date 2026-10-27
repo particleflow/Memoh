@@ -1,9 +1,9 @@
 # Garnet Assistant Harmony source
 
-The current source tree declares **1.0.20 / 1000020**. Its compatible backend
-is `fa35692ff6da4b1e672d68bc75a757d87038eefe`; the shared composer UI is
+The current source tree declares **1.0.21 / 1000021**. Its compatible backend
+is `feffaf66be4bc8999479fc76bd6a87be1a3b3789`; the shared composer UI is
 `2422db2011231d5a4e538aa0fd7b573d133cb350`, with the original Harmony adaptations.
-The [1.0.20 build record](../docs/testing/harmony-unified-1.0.20/README.md)
+The [1.0.21 build record](../docs/testing/harmony-unified-1.0.21/README.md)
 records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
@@ -46,3 +46,5 @@ migration is implied by the new version or by this source inventory.
 The pending [model catalog and unavailable-label source alignment](../docs/testing/harmony-model-catalog-7af/README.md) is pinned to `7af02cb35f85582713213cb98c382d36df744ea3`. It is not included in the qualified 1.0.20 artifact and awaits the final unified combination.
 
 Pending source-only [Bot creation recovery and account-scoped storage alignment](../docs/testing/harmony-bot-create-recovery-434d/README.md) consumes stable `434d82a46f48e4b2047d067282f0af434cc4f0bd`. The qualified 1.0.20 artifact is unchanged; the next package waits for the final unified Web/SDK combination.
+
+The 1.0.21 generic unsigned handoff locks the final feffaf Web/SDK combination, including the recorded model and creation alignments. Earlier pending-source paragraphs describe their original checkpoints; 1.0.20 remains a separate preserved artifact.

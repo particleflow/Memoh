@@ -370,5 +370,12 @@
       "sha256": "eb7f0738fc67607971fd046047b65c15d97798888f256cb0d8d329f5d88ec79b"
     },
     "scope": "Exact shared account/API-scoped pending Bot creation recovery, idempotency and logout cleanup. No alternate creation protocol, credential storage, native login migration or deployment."
+  },
+  "sharedNativeProfileSDK": {
+    "commit": "feffaf66be4bc8999479fc76bd6a87be1a3b3789",
+    "tree": "7588a78f825a9290e8a3a5c4d0c64ac9a46b23de",
+    "local": "shared-native-profile-sdk.json",
+    "sha256": "51b6c0e0e5e556f69b22fac89f19997fc07de5e60db98f4b3898b9650c2223c1",
+    "scope": "Fixed generated native profile-cutover endpoint and admission identity fields; no automatic cutover, configuration migration or added UI."
   }
 }

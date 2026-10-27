@@ -70,6 +70,7 @@ def inputs():
     files.append(ROOT / 'mobile/memoh/shared-conversation-relation-row.test.ts')
     files.append(ROOT / 'mobile/memoh/shared-model-catalog-changes.json')
     files.append(ROOT / 'mobile/memoh/shared-bot-create-recovery-changes.json')
+    files.append(ROOT / 'mobile/memoh/shared-native-profile-sdk.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -853,6 +854,12 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     }
     assert sha(ROOT / 'mobile/memoh/shared-activity-sdk.json') == lock['sharedActivity']['sdkOverlaySHA256'], 'Activity SDK source drift'
     sdk_overlay = json.loads((ROOT / 'mobile/memoh/shared-activity-sdk.json').read_text())
+    profile = lock['sharedNativeProfileSDK']
+    assert sha(ROOT / 'mobile/memoh' / profile['local']) == profile['sha256'], 'Profile SDK drift'
+    profile_sdk = json.loads((ROOT / 'mobile/memoh' / profile['local']).read_text())
+    for name, addition in profile_sdk['overlays'].items():
+        assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected profile SDK target'
+        sdk_overlay[name] = sdk_overlay.get(name, '') + addition
     workspace = lock['sharedWorkspaceStorage']
     monitor = lock['sharedConversationMonitor']
     assert sha(ROOT / 'mobile/memoh' / monitor['chatPaneChanges']['local']) == monitor['chatPaneChanges']['sha256'], 'Conversation composer patch drift'
@@ -1149,6 +1156,12 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                 value['errors']['workspace']['storage_unavailable'] = workspace_locales[language]['storageUnavailable']
                 data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
 
+            if name == 'packages/sdk/src/types.gen.ts':
+                text = data.decode()
+                for before, after, expected in profile_sdk['typeReplacements']:
+                    assert text.count(before) == expected, 'Profile SDK baseline drift'
+                    text = text.replace(before, after)
+                data = text.encode()
             if name in sdk_overlay:
                 data += sdk_overlay[name].encode('utf-8')
                 entry.size = len(data)
