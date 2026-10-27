@@ -112,24 +112,34 @@ func (a *Authority) Bind(ctx context.Context, user, sourceBot, sourceSession, ta
 // Authorize rechecks stored identity against current data. An administrator's
 // Bot access does not waive source-session ownership or same-team membership.
 func (a *Authority) Authorize(ctx context.Context, b Identity) (string, error) {
-	path, err := a.sourcePath(ctx, b)
-	if err != nil || b.TeamID == "" || path[0].TeamID != b.TeamID || path[len(path)-1].ID != b.SourceRootID {
-		return "", ErrDenied
-	}
-	if err := a.authorizeBots(ctx, b); err != nil {
+	path, err := a.authorizeHistory(ctx, b)
+	if err != nil {
 		return "", err
-	}
-	if b.TargetSessionID != "" {
-		s, err := a.Sessions.Get(ctx, b.TargetSessionID)
-		if err != nil || s.ID != b.TargetSessionID || s.TeamID != b.TeamID || s.BotID != b.TargetBotID || s.CreatedByUserID != b.UserID || s.ParentThreadID != "" || s.Type != thread.TypeChat {
-			return "", ErrDenied
-		}
 	}
 	selected, err := a.selection(ctx, b, path)
 	if err != nil || (b.SourceSelection != "" && b.SourceSelection != selected) {
 		return "", ErrDenied
 	}
 	return selected, nil
+}
+
+// authorizeHistory checks conversation ownership and live Bot grants without
+// transferring an old execution binding to the currently selected computer.
+func (a *Authority) authorizeHistory(ctx context.Context, b Identity) ([]thread.Thread, error) {
+	path, err := a.sourcePath(ctx, b)
+	if err != nil || b.TeamID == "" || path[0].TeamID != b.TeamID || path[len(path)-1].ID != b.SourceRootID {
+		return nil, ErrDenied
+	}
+	if err := a.authorizeBots(ctx, b); err != nil {
+		return nil, err
+	}
+	if b.TargetSessionID != "" {
+		s, err := a.Sessions.Get(ctx, b.TargetSessionID)
+		if err != nil || s.ID != b.TargetSessionID || s.TeamID != b.TeamID || s.BotID != b.TargetBotID || s.CreatedByUserID != b.UserID || s.ParentThreadID != "" || s.Type != thread.TypeChat {
+			return nil, ErrDenied
+		}
+	}
+	return path, nil
 }
 
 func (a *Authority) authorizeBots(ctx context.Context, b Identity) error {

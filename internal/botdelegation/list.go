@@ -103,7 +103,7 @@ func (s *Service) List(ctx context.Context, bot, user, session string, limit int
 		r := rows[0]
 		c.BeforeTime, c.BeforeID = r.CreatedAt, r.ID
 		scanned++
-		v, err := s.project(ctx, r)
+		v, err := s.projectHistory(ctx, r)
 		if err != nil && !errors.Is(err, ErrDenied) {
 			return p, err
 		}

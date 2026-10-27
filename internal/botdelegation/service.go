@@ -310,6 +310,39 @@ func (s *Service) project(ctx context.Context, r Record) (View, error) {
 	if _, err := s.Authority.Authorize(ctx, r.Identity); err != nil {
 		return View{}, err
 	}
+	v, err := s.projectMetadata(ctx, r)
+	if err != nil {
+		return View{}, err
+	}
+	if v.State == "completed" {
+		v.Summary = r.Result.Summary
+		for _, hash := range r.Result.Outputs {
+			a, err := s.Attachments(r).Describe(ctx, hash, true)
+			if err != nil {
+				return View{}, err
+			}
+			a.URL = AttachmentURL(r, hash)
+			v.Attachments = append(v.Attachments, a)
+		}
+	}
+	return v, nil
+}
+
+// A past handoff remains a conversation reference after its execution binding
+// changes. This fallback grants no summary, attachment, continuation or delivery.
+func (s *Service) projectHistory(ctx context.Context, r Record) (View, error) {
+	v, err := s.project(ctx, r)
+	if !errors.Is(err, ErrDenied) {
+		return v, err
+	}
+	if _, err := s.Authority.authorizeHistory(ctx, r.Identity); err != nil {
+		return View{}, err
+	}
+	return s.projectMetadata(ctx, r)
+}
+
+// Callers must first authorize either the full projection or the history reference.
+func (s *Service) projectMetadata(ctx context.Context, r Record) (View, error) {
 	state := r.State
 	if _, active := s.active.Load(r.ID); !active && (state == "running" || state == "accepted") {
 		state = "unknown"
@@ -322,17 +355,6 @@ func (s *Service) project(ctx context.Context, r Record) (View, error) {
 	if run != nil {
 		v.TargetRunID, v.TargetRunState = run.ID, run.State
 		v.TargetRunCreatedAt, v.TargetRunUpdatedAt = &run.CreatedAt, &run.UpdatedAt
-	}
-	if state == "completed" {
-		v.Summary = r.Result.Summary
-		for _, hash := range r.Result.Outputs {
-			a, err := s.Attachments(r).Describe(ctx, hash, true)
-			if err != nil {
-				return View{}, err
-			}
-			a.URL = AttachmentURL(r, hash)
-			v.Attachments = append(v.Attachments, a)
-		}
 	}
 	return v, nil
 }
