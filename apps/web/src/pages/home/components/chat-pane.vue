@@ -1383,6 +1383,7 @@ import { captureChatPaneSendContext, clearComposerPairDraft, composerRestoreForS
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { useACPRuntime } from '@/composables/useACPRuntime'
 import { useAgentModelCatalog } from '@/composables/useAgentModelCatalog'
+import { useModelSelectionLabel } from '@/composables/useModelSelectionLabel'
 import { useVirtualKeyboard } from '@/composables/useVirtualKeyboard'
 import { isACPAgentConfigured } from '@/utils/acp'
 import { BOT_AGENT_RUNTIME_ACP, BOT_AGENT_RUNTIME_CODEX, botAgentIcon, botAgentName, botAgentProvider, isDirectBotAgentConfigured, isDirectBotAgentRuntime, normalizeBotAgentRuntime } from '@/utils/bot-agent'
@@ -2710,7 +2711,13 @@ const composerModelProviders = computed(() => composerModelCatalog.value.provide
 const composerDefaultModelId = computed(() => activeUsesDirectRuntime.value
   ? composerModelCatalog.value.configuredModelId || composerModelCatalog.value.defaultModelId
   : !activeUsesExternalAgentComposer.value ? botSettings.value?.chat_model_id ?? '' : '')
+const { label: nativeDefaultModelLabel } = useModelSelectionLabel(
+  composerDefaultModelId,
+  composerModels,
+  () => !activeUsesExternalAgentComposer.value,
+)
 const composerDefaultModelName = computed(() => {
+  if (!activeUsesExternalAgentComposer.value) return nativeDefaultModelLabel.value
   const id = composerDefaultModelId.value.trim()
   // Claude may advertise only its opaque `default` alias; that real model
   // option already supplies the Default row, without a second empty option.
@@ -2942,7 +2949,14 @@ const composerHasNoModel = computed(() =>
   hasNoComposerModel(activeUsesExternalAgentComposer.value, overrideModelId.value),
 )
 
+const { label: nativeSelectedModelLabel, isUnavailable: nativeModelUnavailable } = useModelSelectionLabel(
+  composerModelId,
+  composerModels,
+  () => !activeUsesExternalAgentComposer.value,
+)
+
 const selectedModelLabel = computed(() => {
+  if (!activeUsesExternalAgentComposer.value && composerModelId.value) return nativeSelectedModelLabel.value
   const current = composerModels.value.find(model => model.id === composerModelId.value)
   if (current?.name || current?.model_id) return current.name || current.model_id
   // A configured-but-missing id still shows the raw id rather than "None": the
@@ -2977,7 +2991,7 @@ const reasoningActive = computed(() =>
 )
 
 const modelTriggerLabel = computed(() =>
-  reasoningActive.value
+  reasoningActive.value && (activeUsesExternalAgentComposer.value || !nativeModelUnavailable.value)
     ? `${selectedModelLabel.value} · ${selectedReasoningLabel.value}`
     : selectedModelLabel.value,
 )

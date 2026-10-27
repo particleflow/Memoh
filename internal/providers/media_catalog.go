@@ -40,6 +40,8 @@ type MediaCatalogModel struct {
 	Input            []string `json:"input"`
 	Output           []string `json:"output"`
 	CapabilitySource string   `json:"capability_source"`
+	ContextWindow    *int     `json:"-" swaggerignore:"true"`
+	MaxOutputTokens  *int     `json:"-" swaggerignore:"true"`
 }
 
 type MediaCatalogResponse struct {
@@ -109,9 +111,11 @@ func (s *Service) DiscoverMediaCatalog(ctx context.Context, id string) (MediaCat
 	}
 	var catalog struct {
 		Data *[]struct {
-			ID         string `json:"id"`
-			Kind       string `json:"kind"`
-			Modalities struct {
+			ID              string `json:"id"`
+			Kind            string `json:"kind"`
+			ContextWindow   *int   `json:"context_window"`
+			MaxOutputTokens *int   `json:"max_output_tokens"`
+			Modalities      struct {
 				Input  []string `json:"input"`
 				Output []string `json:"output"`
 			} `json:"modalities"`
@@ -130,6 +134,12 @@ func (s *Service) DiscoverMediaCatalog(ctx context.Context, id string) (MediaCat
 		}
 		seen[row.ID] = true
 		model := MediaCatalogModel{ID: row.ID, Input: catalogModalities(row.Modalities.Input), Output: catalogModalities(row.Modalities.Output), CapabilitySource: "unspecified"}
+		if row.ContextWindow != nil && *row.ContextWindow > 0 {
+			model.ContextWindow = row.ContextWindow
+		}
+		if row.MaxOutputTokens != nil && *row.MaxOutputTokens > 0 {
+			model.MaxOutputTokens = row.MaxOutputTokens
+		}
 		switch row.Kind {
 		case "video", "image", "audio", "transcription", "chat", "embedding", "rerank", "decision":
 			model.Kind = row.Kind

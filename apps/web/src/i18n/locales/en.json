@@ -2217,6 +2217,8 @@
     }
   },
   "models": {
+    "unknownSelection": "Unavailable model",
+    "unavailableSelection": "{name} (unavailable)",
     "title": "Models",
     "searchPlaceholder": "Search providers…",
     "addModel": "Add Model",

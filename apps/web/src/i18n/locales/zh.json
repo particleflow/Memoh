@@ -2217,6 +2217,8 @@
     }
   },
   "models": {
+    "unknownSelection": "模型不可用",
+    "unavailableSelection": "{name}（不可用）",
     "title": "模型",
     "searchPlaceholder": "搜索服务商…",
     "addModel": "添加模型",
