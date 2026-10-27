@@ -118,7 +118,11 @@ func (c *Client) readBatchPane(ctx context.Context, scope Scope, target Target, 
 	if lines < 1 || lines > batchReadMaxLines {
 		return "", ErrUnknown
 	}
-	r, err := c.native(ctx, scope, target, "pane.read", map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"})
+	params := map[string]any{"session": target.Session, "paneId": pane, "lines": lines, "source": "recent-unwrapped"}
+	if target.NativeRuntimeID != "" {
+		params["format"] = "ansi"
+	}
+	r, err := c.native(ctx, scope, target, "pane.read", params)
 	if err != nil {
 		if r.Error != nil && r.Error.Code == "result_too_large" {
 			return "", errBatchSnapshotTooLarge

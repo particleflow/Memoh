@@ -1919,9 +1919,9 @@ export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdContent = <
 export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveries = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesData, ThrowOnError>): RequestResult<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesResponses, GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesErrors, ThrowOnError>({ url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/deliveries', ...options });
 
 /**
- * Send one instruction to this task's existing interactive Agent
+ * Read a retained interactive Agent input receipt
  *
- * Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.
+ * Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.
  */
 export const postBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowup = <ThrowOnError extends boolean = false>(options: Options<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData, ThrowOnError>): RequestResult<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses, PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors, ThrowOnError> => (options.client ?? client).post<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponses, PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupErrors, ThrowOnError>({
     url: '/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup',

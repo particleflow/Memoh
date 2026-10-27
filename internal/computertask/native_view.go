@@ -58,7 +58,7 @@ func (s *Source) NativeContent(ctx context.Context, b toolcontext.ComputerBindin
 // FollowupNative uses the operation's persisted run attribution; an HTTP caller
 // cannot invent a run or native reference. Only persisted input receipts replay.
 func (s *Source) FollowupNative(ctx context.Context, b toolcontext.ComputerBinding, in Followup) (Result, error) {
-	r, _, err := s.service.load(ctx, b, in.OperationID)
+	r, _, err := s.service.loadHistory(ctx, b, in.OperationID)
 	if err != nil {
 		return Result{}, err
 	}

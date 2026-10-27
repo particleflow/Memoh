@@ -3263,9 +3263,9 @@ export const getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesQ
 }));
 
 /**
- * Send one instruction to this task's existing interactive Agent
+ * Read a retained interactive Agent input receipt
  *
- * Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.
+ * Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.
  */
 export const postBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupMutation = (options?: Partial<Options<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData>>): UseMutationOptions<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupResponse, Options<PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData>, PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupError> => ({
     mutation: async (vars) => {

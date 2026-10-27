@@ -106,8 +106,8 @@ func (h *SessionTaskHandler) Content(c echo.Context) error {
 }
 
 // Followup godoc
-// @Summary Send one instruction to this task's existing interactive Agent
-// @Description Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.
+// @Summary Read a retained interactive Agent input receipt
+// @Description Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.
 // @Tags sessions
 // @Accept json
 // @Produce json
@@ -115,7 +115,7 @@ func (h *SessionTaskHandler) Content(c echo.Context) error {
 // @Param session_id path string true "Owned parent session ID"
 // @Param task_type path string true "Task discriminator" Enums(computer_operation)
 // @Param task_id path string true "Computer operation ID"
-// @Param body body NativeTaskFollowupInput true "Instruction with retained idempotency ID"
+// @Param body body NativeTaskFollowupInput true "Original input and retained request ID"
 // @Success 200 {object} NativeTaskFollowupResponse
 // @Failure 400,401,403,404,500 {object} server.Problem
 // @Router /bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup [post].

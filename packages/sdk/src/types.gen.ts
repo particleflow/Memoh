@@ -14340,7 +14340,7 @@ export type GetBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdDeliveriesRe
 
 export type PostBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskIdFollowupData = {
     /**
-     * Instruction with retained idempotency ID
+     * Original input and retained request ID
      */
     body: HandlersNativeTaskFollowupInput;
     path: {

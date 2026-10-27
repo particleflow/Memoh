@@ -136,6 +136,39 @@ func batchFile(name string, raw []byte) agenvo.BatchFile {
 	return agenvo.BatchFile{Name: name, Hash: hex.EncodeToString(h[:]), Size: int64(len(raw))}
 }
 
+func adaptNativePaneRead(target agenvo.Target, params map[string]any) (map[string]any, error) {
+	if target.NativeRuntimeID == "" {
+		return params, nil
+	}
+	if params["format"] != "ansi" {
+		return nil, errors.New("native pane.read requires format=ansi")
+	}
+	adapted := make(map[string]any, len(params)-1)
+	for key, value := range params {
+		if key != "format" {
+			adapted[key] = value
+		}
+	}
+	return adapted, nil
+}
+
+func TestNativeBatchSnapshotRequiresANSI(t *testing.T) {
+	target := agenvo.Target{NativeRuntimeID: "native"}
+	for _, params := range []map[string]any{{}, {"format": "plain"}} {
+		if _, err := adaptNativePaneRead(target, params); err == nil {
+			t.Fatal("accepted missing or non-ANSI format")
+		}
+	}
+	params := map[string]any{"format": "ansi", "source": "recent-unwrapped"}
+	adapted, err := adaptNativePaneRead(target, params)
+	if err != nil || adapted["source"] != "recent-unwrapped" || params["format"] != "ansi" {
+		t.Fatalf("invalid native adaptation: %v %v", adapted, err)
+	}
+	if _, ok := adapted["format"]; ok {
+		t.Fatal("legacy simulator received native-only format")
+	}
+}
+
 func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agenvo.Target, method string, params map[string]any) (agenvo.Receipt, error) {
 	f.t.Helper()
 	mount := f.store.mounts[scope.TargetID]
@@ -273,6 +306,12 @@ func (f *batchTransport) call(_ context.Context, scope agenvo.Scope, target agen
 		}
 		body = map[string]any{"type": "pane_info", "pane": map[string]string{"pane_id": "control", "terminal_id": terminal, "workspace_id": f.progress.WorkspaceID}}
 	case "pane.read":
+		var err error
+		params, err = adaptNativePaneRead(target, params)
+		if err != nil {
+			f.t.Error(err)
+			return agenvo.Receipt{}, err
+		}
 		if err := f.readSchema.Validate(params); err != nil {
 			f.t.Errorf("Agenvo v0.2.0 pane.read schema rejected params: %v", err)
 			return agenvo.Receipt{}, err

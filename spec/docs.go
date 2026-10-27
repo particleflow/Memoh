@@ -11979,7 +11979,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/tasks/{task_type}/{task_id}/followup": {
             "post": {
-                "description": "Retain request_id before sending and across unknown outcomes. Reuses existing authorization, policy and CAS deduplication. No new Agent, batch resume, process stop or task retry. Accepted means input delivery only; state unknown must not be retried with a new ID.",
+                "description": "Returns the saved receipt for an exact request ID and matching input. New requests are unsupported. An unknown outcome remains unknown and must not be resent.",
                 "consumes": [
                     "application/json"
                 ],
@@ -11989,7 +11989,7 @@ const docTemplate = `{
                 "tags": [
                     "sessions"
                 ],
-                "summary": "Send one instruction to this task's existing interactive Agent",
+                "summary": "Read a retained interactive Agent input receipt",
                 "parameters": [
                     {
                         "type": "string",
@@ -12023,7 +12023,7 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Instruction with retained idempotency ID",
+                        "description": "Original input and retained request ID",
                         "name": "body",
                         "in": "body",
                         "required": true,
