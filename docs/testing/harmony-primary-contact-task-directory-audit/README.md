@@ -1,5 +1,7 @@
 # Harmony audit: fixed Bot contact and persisted task directory
 
+Phone Back follow-up: [minimal task-link return consumer and conditional shared-combination verification](../harmony-task-link-back/README.md). The audit below retains its original1155614 source findings; only the Back consumer gap is addressed by that follow-up.
+
 Read-only consumer audit against Harmony product source `1155614c210c131968a4eb3e586cb515ad7d625b`. No product, shared UI, server, SDK, permission, version, HAP, signing, icon or field configuration is changed. The original cloud worktree is executable and clean at this source; the previously downloaded SDK remains present. No environment replacement or SDK download was used.
 
 ## Verified incoming source

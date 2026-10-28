@@ -1,0 +1,42 @@
+{
+  "synthetic": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [],
+  "writes": [
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/contact",
+      "method": "POST"
+    }
+  ],
+  "pageErrors": [],
+  "checks": [
+    "modal consumes back before explicit task route",
+    "one route-owned contact return, original task tab and login retained; actual contact root unhandled",
+    "original explicit task deep link reopens its retained draft without rebinding"
+  ],
+  "navigation": [
+    {
+      "owner": "route",
+      "to": {
+        "name": "bot",
+        "params": {
+          "botName": "primary-bot"
+        }
+      }
+    },
+    {
+      "owner": "shared-contact",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "panels": [
+    {
+      "id": "chat:1",
+      "session": "20000000-0000-4000-8000-000000000001"
+    },
+    {
+      "id": "chat:2",
+      "session": "30000000-0000-4000-8000-000000000003"
+    }
+  ]
+}

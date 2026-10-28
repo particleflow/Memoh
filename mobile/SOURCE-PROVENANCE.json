@@ -1374,11 +1374,12 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-back.ts",
-      "sha256": "708f389a43d08b63c225bd05c2d65d1ce63653735ccbb8da188061987f2c7c14",
+      "sha256": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
       "origin": "project phone host adapter developed for verified system-back gap",
       "licenseReview": "Project source; uses existing shared UI/router, no added dependency.",
       "preparationChanges": [
-        "Dispatch native back to existing topmost Web dismissal/back action before root background; no shared component changes."
+        "Dispatch native back to existing topmost Web dismissal/back action before root background; no shared component changes.",
+        "Source-only task-link Back correction: route-owned plain Bot return before native root backgrounding; no selection-store write, history merge, login change or task closure. Requires the separately owned fixed-contact shared navigation."
       ]
     },
     {

@@ -1,0 +1,50 @@
+{
+  "parent": "e27f100b096f7d8ec3195500be9866b30038d32c",
+  "consumerProductBaseline": "1155614c210c131968a4eb3e586cb515ad7d625b",
+  "ownedProductChange": "mobile/client/mobile/memoh/harmony-back.ts",
+  "ownedProductSHA256": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+  "tests": "docs/testing/harmony-system-back/harmony-back.test.ts",
+  "testsSHA256": "4ac9320b8279bb55979500717d92eb0e60a806e7d47b1fca3f1ef57811fcdaf6",
+  "fixedContactSharedDependency": "9f3dc3a288dd472aa039b8098b9f0d6808a2a46a",
+  "privateValidationInputsOnly": [
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "sourceCommit": "9f3dc3a288dd472aa039b8098b9f0d6808a2a46a",
+      "sourceSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "validationPhoneSHA256": "71e19ea0aa90be1e2d9a46ee05d91aa5a2b125074fc0827554a0d8361a0bd519",
+      "consumerBaselineSHA256": "f31c88dd6e4a6418d16f8649dff200a074ee72feaa96ce49bec9eadeb0ed04a6",
+      "productChangeIncludedInThisCommit": false
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "sourceCommit": "9f3dc3a288dd472aa039b8098b9f0d6808a2a46a",
+      "sourceSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "validationPhoneSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "consumerBaselineSHA256": "bd5fe0bf4d4e8740c3aeac0393c6a40664217c623b8cddc339040c1079b77405",
+      "productChangeIncludedInThisCommit": false
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "sourceCommit": "9f3dc3a288dd472aa039b8098b9f0d6808a2a46a",
+      "sourceSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "validationPhoneSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "consumerBaselineSHA256": "35056c2471ea4edc14bdeea44c6497ac7aec3aa5cb2f914563029500472228dc",
+      "productChangeIncludedInThisCommit": false
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.ts",
+      "sourceCommit": "9f3dc3a288dd472aa039b8098b9f0d6808a2a46a",
+      "sourceSHA256": "188d4d156fe9930b7ff7390867a500c020ecb3a2615d0274e9828801bbc046db",
+      "validationPhoneSHA256": "a8715cc9bcf581b71fe37b6655be960ca9c5308e3f3ece276aec7fd1f65a06b0",
+      "consumerBaselineSHA256": "e62e42cded1b29a44a95572813a33481ca34b09acf0d9014da76d2642fd0975e",
+      "productChangeIncludedInThisCommit": false
+    }
+  ],
+  "directoryP2ImplementationConsumed": false,
+  "versionChanged": false,
+  "hapBuilt": false,
+  "officialSDKRecompiled": false,
+  "deviceAcceptance": false,
+  "providerCalls": 0,
+  "temporarySharedValidationFilesRestored": true
+}

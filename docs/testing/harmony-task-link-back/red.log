@@ -1,0 +1,59 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 apps/web/src/lib/harmony-back.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+ ❯ |web| src/lib/harmony-back.test.ts (15 tests | 2 failed) 334ms
+     × consumes an explicit task link and returns only to its routed Bot contact 10ms
+     × uses one route write even when the previously selected Bot differs; root back stays unhandled 18ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-back.test.ts > system back to existing Web owners > consumes an explicit task link and returns only to its routed Bot contact
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/lib/harmony-back.test.ts:27:34
+     25|     Object.assign(r.currentRoute.value, { params: { botName: 'original…
+     26|     localStorage.setItem('token', 'synthetic-retained-login')
+     27|     expect(handleHarmonyBack(r)).toBe(true)
+       |                                  ^
+     28|     expect(r.replace).toHaveBeenCalledExactlyOnceWith({ name: 'bot', p…
+     29|     expect(localStorage.getItem('token')).toBe('synthetic-retained-log…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/lib/harmony-back.test.ts > system back to existing Web owners > uses one route write even when the previously selected Bot differs; root back stays unhandled
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/lib/harmony-back.test.ts:41:34
+     39|     selection.setBot('previous-other-bot'); selection.setSession('prev…
+     40|     const setBot = vi.spyOn(selection, 'setBot'), setSession = vi.spyO…
+     41|     expect(handleHarmonyBack(r)).toBe(true)
+       |                                  ^
+     42|     await vi.waitFor(() => expect(r.currentRoute.value.query).toEqual(…
+     43|     expect(r.currentRoute.value.params.botName).toBe('original-bot')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 13 passed (15)
+   Start at  20:43:33
+   Duration  2.28s (transform 414ms, setup 0ms, import 618ms, tests 334ms, environment 1.05s)
+
+ ELIFECYCLE  Test failed. See above for more details.

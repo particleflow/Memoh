@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 apps/web/src/lib/harmony-back.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  15 passed (15)
+   Start at  20:43:43
+   Duration  2.30s (transform 280ms, setup 0ms, import 439ms, tests 873ms, environment 722ms)

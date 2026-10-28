@@ -39,6 +39,13 @@ export function handleHarmonyBack(router?: Router): boolean {
       || !!element.querySelector('svg.lucide-chevron-left')))
   if (back) { back.click(); return true }
 
+  // An explicit execution/history URL is below this Bot's fixed contact.
+  // Let that route own selection; selecting the Bot first races the old URL.
+  if (route.name === 'bot' && typeof route.query?.session === 'string' && route.query.session.trim()
+    && typeof route.params?.botName === 'string' && route.params.botName.trim()) {
+    void router.replace({ name: 'bot', params: { botName: route.params.botName } })
+    return true
+  }
   if (route.path.startsWith('/settings/')) { void router.replace('/settings'); return true }
   if (route.path === '/settings') { void router.replace({ name: 'home' }); return true }
   if (route.name === 'Login' || route.name === 'home' || route.name === 'bot'
