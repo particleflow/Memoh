@@ -13,6 +13,7 @@ import (
 	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/apperror"
 	audiopkg "github.com/felinics/memoh/internal/audio"
+	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/httpx"
@@ -149,6 +150,12 @@ func (h *BotAudioHandler) SetPlaybackAccess(botService *bots.Service, accountSer
 // @Failure 500 {object} server.Problem
 // @Router /bots/{bot_id}/tts/playback [post].
 func (h *BotAudioHandler) Playback(c echo.Context) error {
+	// Playback uses configured Bot credentials and requires an account JWT.
+	// Chat-route JWTs skip account session validation in the JWT middleware;
+	// reject them before Bot ownership or grants can authorize synthesis.
+	if _, err := auth.ChatTokenFromContext(c); err == nil {
+		return apperror.New(apperror.CodeHTTPForbidden, nil)
+	}
 	botID, err := httpx.RequiredParam(c, "bot_id")
 	if err != nil {
 		return err
