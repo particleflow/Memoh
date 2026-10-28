@@ -32,7 +32,10 @@ const reader = useConversationRelations(scope, visible, id => {
   const observation = current ? chat.runtimeObservationFor(current.bot, current.session) : undefined
   return observation?.synchronized ? observation.run?.status || '' : ''
 })
-const rows = computed(() => props.kind === 'bots' ? reader.bots.value : reader.items.value)
+// Bot nodes establish membership, but Tasks opens the associated Agent entries.
+// A computer receipt's owning session can be the Bot itself; it is not an
+// Agent destination. Keep those records in the existing task/history APIs.
+const rows = computed(() => props.kind === 'bots' ? reader.bots.value : reader.items.value.filter(row => row.kind === 'agent'))
 const roots = computed(() => {
   const keys = new Set(rows.value.map(row => row.key))
   return rows.value.filter(row => !row.parent || !keys.has(row.parent))

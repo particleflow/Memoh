@@ -2,6 +2,7 @@
 import { createApp, nextTick, ref } from 'vue'
 import { createI18n } from 'vue-i18n'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import en from '@/i18n/locales/en.json'
 import SessionActivityTrigger from './session-activity-trigger.vue'
 
@@ -15,7 +16,7 @@ vi.mock('@/store/chat-list', () => ({ useChatStore: () => ({
 }) }))
 vi.mock('@/pages/home/composables/useChatViewContext', () => ({ useChatViewTarget: () => ref({ botId: 'bot', sessionId: 'root', viewId: 'chat' }) }))
 vi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: {}, openSessionChat: api.open, closeMobileNav: api.close, openMobileNav: api.global }) }))
-vi.mock('vue-router', () => ({ useRouter: () => ({ push: api.push }) }))
+vi.mock('vue-router', async importOriginal => ({ ...await importOriginal<typeof import('vue-router')>(), useRouter: () => ({ push: api.push }) }))
 let app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement
 const sessions: Record<string, { id: string, bot_id: string, title: string, parent_session_id?: string }> = {
   root: { bot_id: 'bot', id: 'root', title: 'Conversation' },
@@ -44,12 +45,12 @@ beforeEach(() => {
 afterEach(() => { app?.unmount(); root?.remove(); app = undefined; document.body.innerHTML = ''; localStorage.clear(); vi.unstubAllGlobals() })
 
 describe('conversation monitor entry', () => {
-  it('opens the current conversation tree, with only names/states and genuine nesting', async () => {
+  it('opens only this conversation\'s task Agents, with names/states and genuine Agent nesting', async () => {
     await mount()
     const dialog = document.querySelector('[role="dialog"]')!
-    expect(dialog.textContent).toContain('Supervisor'); expect(dialog.textContent).toContain('Review'); expect(dialog.textContent).toContain('Deep Agent')
-    expect(dialog.querySelectorAll('ul ul ul')).toHaveLength(1)
-    for (const hidden of ['Unrelated Bot', 'PRIVATE', 'opaque-', 'original-delegation']) expect(dialog.textContent).not.toContain(hidden)
+    expect(dialog.textContent).toContain('Review'); expect(dialog.textContent).toContain('Deep Agent')
+    expect(dialog.querySelectorAll('ul ul')).toHaveLength(1)
+    for (const hidden of ['Supervisor', 'Image expert', 'Unrelated Bot', 'PRIVATE', 'opaque-', 'original-delegation']) expect(dialog.textContent).not.toContain(hidden)
     expect(api.global).not.toHaveBeenCalled(); expect(api.open).not.toHaveBeenCalled()
   })
   it('opens the exact downstream Agent session on a whole-row click', async () => {
@@ -57,8 +58,84 @@ describe('conversation monitor entry', () => {
     const row = [...document.querySelectorAll<HTMLButtonElement>('button')].find(node => node.textContent?.includes('Deep Agent'))!
     row.click(); await settle()
     expect(api.select).toHaveBeenCalledWith('bot', { sessionId: 'b' })
+    expect(api.push).toHaveBeenCalledWith({ name: 'bot', params: { botName: 'bot' }, query: { session: 'b' } })
     expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'b', title: 'Deep Agent' })
     expect(api.global).not.toHaveBeenCalled()
+  })
+  it('preserves distinct same-name Agents and routes the clicked sibling rather than its Bot or first Agent', async () => {
+    const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/bot/:botName', name: 'bot', component: {} }] })
+    await router.push({ name: 'bot', params: { botName: 'bot' }, query: { session: 'root' } })
+    api.push.mockImplementation(target => router.push(target))
+    api.session.mockImplementation(({ path }) => Promise.resolve({ data: path.session_id === 'root' ? sessions.root
+      : { id: path.session_id, bot_id: 'bot', title: 'Same Agent', parent_session_id: 'root' } }))
+    api.tasks.mockResolvedValue({ data: { items: [task('a', 'root'), { ...task('b', 'root'), status: 'unknown' }] } })
+    api.delegations.mockResolvedValue({ data: { items: [] } })
+    await mount()
+    const rows = [...document.querySelectorAll<HTMLButtonElement>('[role="dialog"] li > button')]
+    expect(rows).toHaveLength(2)
+    expect(rows.every(row => row.textContent?.includes('Same Agent'))).toBe(true)
+    expect(rows[0]!.textContent).toContain(en.chat.tasks.statuses.running)
+    expect(rows[1]!.textContent).toContain(en.chat.tasks.statuses.unknown)
+    rows[1]!.click(); await settle()
+    expect(api.select).toHaveBeenCalledExactlyOnceWith('bot', { sessionId: 'b' })
+    expect(router.currentRoute.value.fullPath).toBe('/bot/bot?session=b')
+    expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'b', title: 'Same Agent' })
+  })
+  it('keeps a linked Bot\'s task Agent without making the linked Bot a task entry', async () => {
+    api.session.mockImplementation(({ path }) => Promise.resolve({ data: path.session_id === 'expert-child'
+      ? { id: 'expert-child', bot_id: 'expert', title: 'Expert task Agent', parent_session_id: 'expert' } : sessions[path.session_id] }))
+    api.tasks.mockImplementation(({ path }) => Promise.resolve({ data: { items: path.session_id === 'expert'
+      ? [{ ...task('expert-child', 'expert'), parent_session_id: 'expert', status: 'waiting_decision' }] : [] } }))
+    await mount()
+    const dialog = document.querySelector('[role="dialog"]')!
+    expect(dialog.textContent).not.toContain('Image expert'); expect(dialog.textContent).not.toContain('Supervisor')
+    const row = dialog.querySelector<HTMLButtonElement>('li > button')!
+    expect(row.textContent).toContain('Expert task Agent'); expect(row.textContent).toContain(en.chat.tasks.statuses.waiting_decision)
+    row.click(); await settle()
+    expect(api.select).toHaveBeenCalledExactlyOnceWith('expert', { sessionId: 'expert-child' })
+    expect(api.push).toHaveBeenCalledWith({ name: 'bot', params: { botName: 'expert' }, query: { session: 'expert-child' } })
+    expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'expert-child', title: 'Expert task Agent' })
+  })
+  it('shows the existing empty state when only Bot and old computer receipts have no task Agent session', async () => {
+    api.tasks.mockResolvedValue({ data: { items: [{ task_type: 'computer_operation', task_id: 'old-receipt', session_id: 'root', parent_session_id: 'root', status: 'submitted' }] } })
+    await mount()
+    const dialog = document.querySelector('[role="dialog"]')!
+    expect(dialog.textContent).toContain(en.chat.tasks.empty)
+    expect(dialog.querySelectorAll('li > button')).toHaveLength(0)
+    expect(api.select).not.toHaveBeenCalled(); expect(api.open).not.toHaveBeenCalled()
+  })
+  it.each([401, 403, 404])('does not substitute a Bot or another Agent for a missing/inaccessible old Agent (%s)', async status => {
+    api.tasks.mockResolvedValue({ data: { items: [task('old-agent', 'root')] } })
+    api.session.mockImplementation(({ path }) => path.session_id === 'old-agent' ? Promise.reject({ status }) : Promise.resolve({ data: sessions[path.session_id] }))
+    await mount()
+    const dialog = document.querySelector('[role="dialog"]')!
+    expect(dialog.querySelectorAll('li > button')).toHaveLength(0)
+    expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.toHaveBeenCalled(); expect(api.open).not.toHaveBeenCalled()
+  })
+  it.each([401, 403, 404])('rechecks the clicked Agent and never falls back after navigation denial (%s)', async status => {
+    await mount()
+    api.session.mockRejectedValue({ status })
+    const row = [...document.querySelectorAll<HTMLButtonElement>('button')].find(node => node.textContent?.includes('Deep Agent'))!
+    row.click(); await settle()
+    expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.toHaveBeenCalled(); expect(api.open).not.toHaveBeenCalled()
+  })
+  it.each([{ id: 'a', bot_id: 'bot' }, { id: 'b', bot_id: 'expert' }])('rejects a changed Agent session identity $id/$bot_id before routing', async returned => {
+    await mount()
+    api.session.mockResolvedValue({ data: returned })
+    const row = [...document.querySelectorAll<HTMLButtonElement>('button')].find(node => node.textContent?.includes('Deep Agent'))!
+    row.click(); await settle()
+    expect(api.select).not.toHaveBeenCalled(); expect(api.push).not.toHaveBeenCalled(); expect(api.open).not.toHaveBeenCalled()
+  })
+  it('keeps an unnamed old Agent as an Agent entry without substituting the Bot name or prompt', async () => {
+    api.session.mockImplementation(({ path }) => Promise.resolve({ data: path.session_id === 'a' ? { ...sessions.a, title: '' } : sessions[path.session_id] }))
+    api.tasks.mockResolvedValue({ data: { items: [task('a', 'root')] } })
+    await mount()
+    const dialog = document.querySelector('[role="dialog"]')!
+    expect(dialog.textContent).toContain(en.chat.tasks.types.subagent)
+    expect(dialog.textContent).not.toContain('Supervisor'); expect(dialog.textContent).not.toContain('PRIVATE')
+    dialog.querySelector<HTMLButtonElement>('li > button')!.click(); await settle()
+    expect(api.select).toHaveBeenCalledExactlyOnceWith('bot', { sessionId: 'a' })
+    expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'a', title: '' })
   })
   it('limits the Bot entry to this conversation and navigates its linked original session', async () => {
     await mount('bots')
