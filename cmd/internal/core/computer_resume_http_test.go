@@ -44,8 +44,10 @@ func (resumeHTTPBotQueries) GetContainerByBotID(context.Context, pgtype.UUID) (s
 }
 
 // Ordinary owned inputs have no delegation or returned-output references.
-type resumeHTTPNoOutputs struct{ sqlc.DBTX }
-type resumeHTTPEmptyRows struct{ pgx.Rows }
+type (
+	resumeHTTPNoOutputs struct{ sqlc.DBTX }
+	resumeHTTPEmptyRows struct{ pgx.Rows }
+)
 
 func (resumeHTTPNoOutputs) Query(context.Context, string, ...any) (pgx.Rows, error) {
 	return resumeHTTPEmptyRows{}, nil
@@ -74,12 +76,14 @@ func (f *resumeHTTPStore) ClaimComputerOperation(_ context.Context, r dbstore.Co
 	f.op = r
 	return r, true, nil
 }
+
 func (f *resumeHTTPStore) ReadComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {
 	if r.ID != f.op.ID || r.BotID != f.op.BotID || r.UserID != f.op.UserID || r.SessionID != f.op.SessionID {
 		return r, db.ErrNotFound
 	}
 	return f.op, nil
 }
+
 func (f *resumeHTTPStore) SaveComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {
 	if r.ID != f.op.ID || r.Revision != f.op.Revision {
 		return r, db.ErrNotFound
@@ -89,18 +93,23 @@ func (f *resumeHTTPStore) SaveComputerOperation(_ context.Context, r dbstore.Com
 	f.op = r
 	return r, nil
 }
+
 func (f *resumeHTTPStore) SaveComputerOperationWithAdmission(ctx context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {
 	return f.SaveComputerOperation(ctx, r)
 }
+
 func (*resumeHTTPStore) PreviousComputerPiOperation(context.Context, dbstore.ComputerOperationRecord, string) (dbstore.ComputerOperationRecord, error) {
 	return dbstore.ComputerOperationRecord{}, db.ErrNotFound
 }
+
 func (f *resumeHTTPStore) ListSessionTaskCandidates(context.Context, dbstore.SessionTaskFilter) ([]dbstore.SessionTaskCandidate, error) {
 	return []dbstore.SessionTaskCandidate{{Type: "computer_operation", ID: f.op.ID, SessionID: f.op.SessionID, CreatedAt: f.op.CreatedAt}}, nil
 }
+
 func (*resumeHTTPStore) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	return dbstore.BotRemoteRuntimeBindingRecord{}, db.ErrNotFound
 }
+
 func (f *resumeHTTPStore) GetMount(_ context.Context, bot, target string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	m, ok := f.mounts[bot+"/"+target]
 	if !ok {
@@ -108,6 +117,7 @@ func (f *resumeHTTPStore) GetMount(_ context.Context, bot, target string) (dbsto
 	}
 	return m, nil
 }
+
 func (f *resumeHTTPStore) ListMounts(_ context.Context, bot string) ([]dbstore.BotRemoteRuntimeBindingRecord, error) {
 	var out []dbstore.BotRemoteRuntimeBindingRecord
 	for _, m := range f.mounts {
@@ -117,6 +127,7 @@ func (f *resumeHTTPStore) ListMounts(_ context.Context, bot string) ([]dbstore.B
 	}
 	return out, nil
 }
+
 func (f *resumeHTTPStore) OwnedNativeHerdrRuntime(_ context.Context, user, id string) (dbstore.UserRuntimeRecord, error) {
 	for _, m := range f.mounts {
 		if m.RuntimeUserID == user && m.RuntimeID == id {
@@ -125,12 +136,15 @@ func (f *resumeHTTPStore) OwnedNativeHerdrRuntime(_ context.Context, user, id st
 	}
 	return dbstore.UserRuntimeRecord{}, db.ErrNotFound
 }
+
 func (*resumeHTTPStore) OwnedHTTPMCPConnectionBot(context.Context, string, string) (string, error) {
 	return "", db.ErrNotFound
 }
+
 func (f *resumeHTTPStore) HasBotPermission(_ context.Context, bot, user, _ string) (bool, error) {
 	return !f.revoked && bot == imageSpawnBot && user == imageSpawnUser, nil
 }
+
 func (f *resumeHTTPStore) Stat(_ context.Context, path string) (*pb.FileEntry, error) {
 	if f.dirs[path] {
 		return &pb.FileEntry{Path: path, IsDir: true}, nil
@@ -140,10 +154,12 @@ func (f *resumeHTTPStore) Stat(_ context.Context, path string) (*pb.FileEntry, e
 	}
 	return nil, bridge.ErrNotFound
 }
+
 func (f *resumeHTTPStore) Mkdir(_ context.Context, path string) error {
 	f.dirs[path] = true
 	return nil
 }
+
 func (f *resumeHTTPStore) ReadRaw(_ context.Context, path string) (io.ReadCloser, error) {
 	data, ok := f.files[path]
 	if !ok {
@@ -151,6 +167,7 @@ func (f *resumeHTTPStore) ReadRaw(_ context.Context, path string) (io.ReadCloser
 	}
 	return io.NopCloser(bytes.NewReader(data)), nil
 }
+
 func (f *resumeHTTPStore) WriteRaw(_ context.Context, path string, r io.Reader) (int64, error) {
 	data, err := io.ReadAll(r)
 	if err != nil {
@@ -160,6 +177,7 @@ func (f *resumeHTTPStore) WriteRaw(_ context.Context, path string, r io.Reader) 
 	f.writes++
 	return int64(len(data)), nil
 }
+
 func (f *resumeHTTPStore) ListDir(ctx context.Context, parent string, _ bool, _, _, _ int32) (*bridge.ListDirResult, error) {
 	out := &bridge.ListDirResult{}
 	for path := range f.dirs {
@@ -176,6 +194,7 @@ func (f *resumeHTTPStore) ListDir(ctx context.Context, parent string, _ bool, _,
 	}
 	return out, nil
 }
+
 func (f *resumeHTTPStore) native(_ context.Context, _ agenvo.Scope, target agenvo.Target, method string, args map[string]any) (agenvo.Receipt, error) {
 	body := map[string]any{}
 	switch method {
