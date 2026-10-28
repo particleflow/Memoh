@@ -100,10 +100,16 @@ completion receipt.
 5. For uploads only, configure `source_root` to the producer's approved task
    directory: local NTFS or the existing authorized native SMB UNC location.
    It must not overlap config or queue state. Producers
-   close output writers and supply one logical filename (`source_ref`, letters,
-   digits, underscore or hyphen), declared hash/size/MIME and existing task
+   close output writers and supply the exact flat filename including its actual
+   extension (`source_ref`, 1–64 ASCII letters, digits, underscores, hyphens and
+   single separating dots), declared hash/size/MIME and existing task
    selectors. Downloads publish under the existing queue's retained native
    publication store; no arbitrary overwrite destination is exposed.
+
+The Server and this adapter must both support explicit filename extensions.
+No suffix inference or directory search occurs. An existing task's declaration,
+context, delivery ID and configuration digest must not be rewritten to add an
+extension; historical name mismatch recovery is not provided by this change.
 
 `transfer.json` is resolved once per invocation. Its digest is recorded in the
 existing queue journal. Changing the endpoint or source root (even formatting)

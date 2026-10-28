@@ -21,7 +21,7 @@ const (
 
 var (
 	reservedName = regexp.MustCompile(`^(COM|LPT)[1-9]$`)
-	logicalID    = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,64}$`)
+	sourceName   = regexp.MustCompile(`^[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*$`)
 	hex32        = regexp.MustCompile(`^[a-f0-9]{32}$`)
 	hex64        = regexp.MustCompile(`^[a-f0-9]{64}$`)
 )
@@ -33,13 +33,23 @@ type Artifact struct {
 	Mime      string `json:"mime"`
 }
 
-func (a Artifact) Valid() bool {
-	name := strings.ToUpper(a.SourceRef)
+// ValidSourceName accepts an exact flat result filename, including an explicitly
+// declared extension. It does not infer a suffix or resolve a filesystem path.
+func ValidSourceName(ref string) bool {
+	if len(ref) > 64 || !sourceName.MatchString(ref) || strings.HasPrefix(ref, ManifestPrefix) {
+		return false
+	}
+	stem, _, _ := strings.Cut(ref, ".")
+	name := strings.ToUpper(stem)
 	if name == "CON" || name == "PRN" || name == "AUX" || name == "NUL" || reservedName.MatchString(name) {
 		return false
 	}
+	return true
+}
+
+func (a Artifact) Valid() bool {
 	kind, params, err := mime.ParseMediaType(a.Mime)
-	return logicalID.MatchString(a.SourceRef) && !strings.HasPrefix(a.SourceRef, ManifestPrefix) && err == nil && len(params) == 0 && kind == a.Mime && len(a.Mime) <= 255
+	return ValidSourceName(a.SourceRef) && err == nil && len(params) == 0 && kind == a.Mime && len(a.Mime) <= 255
 }
 
 // Task comes from the original durable operation/BatchProgress, not a new

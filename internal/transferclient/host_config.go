@@ -167,7 +167,7 @@ func (h *HostConfig) Authorization(ctx context.Context) (string, error) {
 // authorized task source root is resolved once and held. It is not queue storage;
 // links/hardlinks and source identity changes still fail the source guards.
 func (h *HostConfig) OpenSource(ref string) (*os.File, error) {
-	if h.sourcePath == "" || !validID(ref) {
+	if h.sourcePath == "" || !validSourceRef(ref) {
 		return nil, ErrBinding
 	}
 	if err := h.openSources(); err != nil {
