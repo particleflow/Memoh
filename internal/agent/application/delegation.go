@@ -9,7 +9,15 @@ import (
 
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/turn"
+	messagepkg "github.com/felinics/memoh/internal/chat/message"
 )
+
+func botTaskResultMetadata(req ChatRequest) map[string]any {
+	// The existing source marker lets a0 history readers hide the input too.
+	// The subtype distinguishes a new result turn from mid-turn feedback,
+	// which must instead bind to an already-persisted user request.
+	return map[string]any{messagepkg.MessageSourceMetadataKey: messagepkg.MessageSourceInternalFeedback, messagepkg.InternalInputKindMetadataKey: messagepkg.InternalInputKindBotTaskResult, "delegation_id": req.DelegationResultID}
+}
 
 // SetDelegationScope installs the host-owned durable scope lookup. Runtime and
 // prompt code remain unaware of delegation; ordinary sessions are unchanged.

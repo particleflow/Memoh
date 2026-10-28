@@ -37,9 +37,10 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 	if s.allowedTeam != "" && cmd.TeamID != s.allowedTeam {
 		return nil, fmt.Errorf("%w: %s", turn.ErrTeamNotServed, cmd.TeamID)
 	}
+	req := chatRequestFromCommand(cmd)
 	if s.delegationScope != nil {
 		var err error
-		ctx, _, err = s.delegationScope(ctx, chatRequestFromCommand(cmd))
+		ctx, req, err = s.delegationScope(ctx, req)
 		if err != nil {
 			return nil, err
 		}
@@ -82,7 +83,6 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 		assets  = authorizedDelegationResultAssets(runCtx, cmd)
 	)
 
-	req := chatRequestFromCommand(cmd)
 	req.RunID = admission.RunID
 	req.RunHandle = admission.Handle
 	req.TurnID = admission.TurnID

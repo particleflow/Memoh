@@ -288,10 +288,18 @@ type Service interface {
 const (
 	MessageSourceMetadataKey      = "message_source"
 	MessageSourceInternalFeedback = "internal_feedback"
+	// Host task results lead their own durable turn, unlike mid-turn feedback.
+	// They remain model history but must never impersonate user speech.
+	InternalInputKindMetadataKey   = "internal_input_kind"
+	InternalInputKindBotTaskResult = "bot_task_result"
 )
 
-func IsInternalFeedback(metadata map[string]any) bool {
+func IsInternalInput(metadata map[string]any) bool {
 	return metadata[MessageSourceMetadataKey] == MessageSourceInternalFeedback
+}
+
+func IsInternalFeedback(metadata map[string]any) bool {
+	return IsInternalInput(metadata) && metadata[InternalInputKindMetadataKey] != InternalInputKindBotTaskResult
 }
 
 func historyBindingRole(role string, metadata map[string]any) string {
