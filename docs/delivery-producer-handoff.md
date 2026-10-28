@@ -11,8 +11,12 @@ trust remain the separately approved setup in [device-transfer-setup.md](device-
 or `artifacts: [{source_ref, mime}, ...]` (1–16 entries, never both), for
 `herdr_pi_task` using `pi-json-v1`, with `work_dir: "."`. Each entry selects a
 nonempty file; directories and automatic log imports are excluded. The
-source reference is a flat logical filename (letters, digits, underscore,
-hyphen; Windows devices and case-insensitive duplicates are rejected). The task
+source reference is the exact flat filename, including its actual extension
+(1–64 ASCII letters, digits, underscores, hyphens and single separating dots;
+Windows device stems, leading/trailing/repeated dots, manifest names and
+case-insensitive duplicates are rejected). For example, declare
+`windows_photo_a0_result.png` when Pi is to write that PNG. No collector infers
+an extension, searches for a similar name, or renames the source. The task
 must write those declared files and close all writers before it exits. Any
 pre-existing declared file prevents Pi from
 starting; it is not reused as this task's result.
@@ -23,6 +27,13 @@ target, run, attempt and generation. The deterministic delivery ID uses the
 original operation/attempt/generation/source reference, never a new retry ID.
 The metadata is not authority; the Server verifies the configured reusable
 device credential and rechecks the operation and current grants on requests.
+
+The explicit-extension declaration needs matching Server and producer adapter
+versions; older adapters reject it. Existing declarations, task context bytes,
+request hashes and delivery IDs are unchanged. Changing an old `source_ref` to
+add an extension creates a different delivery ID and is not a recovery method.
+See [result-name recovery design](delivery-result-name-recovery.md) for the
+separate, unimplemented historical-operation mapping boundary.
 
 The existing registered execution root and private `transfer.json` `source_root`
 must denote the same Windows location. A normalized location digest detects

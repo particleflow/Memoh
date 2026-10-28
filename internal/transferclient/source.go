@@ -38,6 +38,12 @@ func sourceLeaf(name string) bool {
 	return name != "" && name != "." && name != ".." && filepath.Base(name) == name && !strings.ContainsAny(name, `\/:`)
 }
 
+// Preserve legacy source/manifest references, adding only the explicit bounded
+// result filename contract. Queue, receipt and transport IDs still use validID.
+func validSourceRef(ref string) bool {
+	return validID(ref) || deliverymeta.ValidSourceName(ref)
+}
+
 func sourceManifestName(name string) bool {
 	return strings.HasPrefix(name, deliverymeta.ManifestPrefix) && validHash(strings.TrimPrefix(name, deliverymeta.ManifestPrefix))
 }
