@@ -110,6 +110,7 @@
       ref="uploadInputRef"
       type="file"
       class="hidden"
+      multiple
       :disabled="operationLoading || !canWrite"
       @change="handleUpload"
     >
@@ -704,7 +705,7 @@ async function handleDirectoryInputUpload(event: Event) {
   }
 }
 
-// Shared upload engine for every multi-entry upload (folder picker, drag-drop).
+// Shared upload engine for every multi-entry upload (file/folder picker, drop).
 // Owns the busy gate and the progress line; the RESULT toast is the caller's,
 // because only the caller knows whether the user dropped files, a folder, or
 // both. Directories are created first and sequentially: a nested file upload
@@ -713,6 +714,7 @@ async function runUploadBatch(
   directories: string[],
   files: { path: string, file: File }[],
 ): Promise<{ failed: number, total: number }> {
+  const botId = props.botId
   const total = directories.length + files.length
   let completed = 0
   let failed = 0
@@ -726,7 +728,7 @@ async function runUploadBatch(
     for (const dir of directories) {
       try {
         await postBotsByBotIdContainerFsMkdir({
-          path: { bot_id: props.botId },
+          path: { bot_id: botId },
           body: { path: dir },
           throwOnError: true,
         })
@@ -749,7 +751,7 @@ async function runUploadBatch(
         if (!item) return
         try {
           await postBotsByBotIdContainerFsUpload({
-            path: { bot_id: props.botId },
+            path: { bot_id: botId },
             body: { path: item.path, file: item.file } as never,
             throwOnError: true,
           })
@@ -804,20 +806,21 @@ async function uploadDirectoryPayload(payload: DirectoryUploadPayload) {
 }
 
 async function handleUpload(event: Event) {
-  if (!props.canWrite) return
+  if (!props.canWrite || uploadBusy.value) return
   const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
+  const files = Array.from(input.files ?? [])
+  if (files.length === 0) return
 
-  const destPath = joinPath(uploadTarget.value, file.name)
+  const target = uploadTarget.value
+  const botId = props.botId
   try {
-    await postBotsByBotIdContainerFsUpload({
-      path: { bot_id: props.botId },
-      body: { path: destPath, file } as never,
-      throwOnError: true,
-    })
-    toast.success(t('bots.files.uploadSuccess'))
-    if (uploadTarget.value !== rootPath) navigateTo(uploadTarget.value)
+    const { failed, total } = await runUploadBatch([], files.map(file => ({ path: joinPath(target, file.name), file })))
+    if (failed > 0) {
+      toast.error(t('bots.files.uploadPartialFailed', { failed, total }))
+    } else {
+      toast.success(t('bots.files.uploadSuccess'))
+    }
+    if (props.botId === botId && target !== rootPath) navigateTo(target)
     reloadAndBroadcast()
   } catch (error) {
     toast.error(resolveApiErrorMessage(error, t('bots.files.uploadFailed')))
