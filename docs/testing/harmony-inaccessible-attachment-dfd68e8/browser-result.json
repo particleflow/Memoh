@@ -1,0 +1,40 @@
+{
+  "environment": "isolated generated Harmony components; real authenticated originalBlob/hash/Blob path with synthetic HTTP responses; not full server or phone",
+  "url": "http://127.0.0.1:18952/review-inaccessible.html",
+  "requests": [
+    {
+      "method": "GET",
+      "scoped": true,
+      "denied": true
+    },
+    {
+      "method": "GET",
+      "scoped": true,
+      "denied": true
+    },
+    {
+      "method": "GET",
+      "scoped": true,
+      "denied": false
+    },
+    {
+      "method": "GET",
+      "scoped": true,
+      "denied": true
+    },
+    {
+      "method": "GET",
+      "scoped": true,
+      "denied": false
+    }
+  ],
+  "initialDeniedReaders": 2,
+  "explicitFirstGalleryDeniedReader": 1,
+  "failedNavigationAndReopenRetries": 0,
+  "broaderBotHashFallbacks": 0,
+  "writes": 0,
+  "referenceJSONUnchanged": true,
+  "healthyImageDecoded": true,
+  "desktopAnd390pxDark": true,
+  "pageErrors": []
+}

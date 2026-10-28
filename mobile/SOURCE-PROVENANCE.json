@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "9136741132f9f0abfc4b1a2a881e978c6d60e30e9e6292ec6a2aea64e33cca94",
+      "sha256": "339497f05bddaf86ac96a634b84cafaedcdf062add3cd6a756fe31a5228a350f",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "32f427b3cdf84d931869dba4d825a94b0678047f927797e93f9d54f8b327f423",
+      "sha256": "c0281dcde444d9f161d7fa29aa9ebb7b4284ba5ea2859b177899c4b763dec90b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1761,6 +1761,15 @@
       "licenseReview": "Memoh source license retained.",
       "preparationChanges": [
         "Preserve original input hashes, scope and operation; no transfer protocol or retry rule added."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-inaccessible-attachment-changes.json",
+      "sha256": "ee404f00e262875d0268e923b3fbd085cf1d28288b2a955eac39c5f4f5177276",
+      "origin": "Shared presentation delta from dfd68e8058b2f982c877be0e36e402c7f2d0c163 (parent 45788bed), plus phone-only verified-reader regression. Not historical recovery.",
+      "licenseReview": "Derived Memoh source under the retained repository license. No dependency, toolchain or private configuration.",
+      "preparationChanges": [
+        "Five product-file deltas only. Native original read/decode failures retain scoped identity and enter the same mounted-lifetime inaccessible state, without retry or fallback."
       ]
     }
   ],

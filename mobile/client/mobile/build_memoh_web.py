@@ -386,7 +386,7 @@ import ChatAttachmentCard from './chat-attachment-card.vue'""", 1),
 
 ''', '', 1),
                     ("import { saveOriginal } from '@/lib/harmony-files'", "import { originalBlob, saveOriginal } from '@/lib/harmony-files'", 1),
-            ('function getUrl(att: AttachmentItem): string {\n  return resolveUrl(att)\n}', "// This component only exposes complete, verified NAS image bytes.\nconst imageUrls = reactive<Record<string, string>>({})\n\nfunction imageReferenceKey(att: AttachmentItem): string {\n  return JSON.stringify([att.content_hash, att.bot_id ?? att.metadata?.bot_id,\n    att.storage_key ?? att.metadata?.storage_key, att.size, att.mime, att.metadata?.delegation_url])\n}\n\nwatch(() => JSON.stringify([...new Set(props.block.attachments.filter(isImage).map(imageReferenceKey))].sort()),\n  (_keys, _previous, onCleanup) => {\n    const controller = new AbortController()\n    const urls: string[] = []\n    const seen = new Set<string>()\n    onCleanup(() => {\n      controller.abort()\n      for (const url of urls) URL.revokeObjectURL(url)\n      for (const key of Object.keys(imageUrls)) delete imageUrls[key]\n    })\n    for (const att of props.block.attachments.filter(isImage)) {\n      const key = imageReferenceKey(att)\n      if (seen.has(key)) continue\n      seen.add(key)\n      void originalBlob(att, controller.signal).then((blob) => {\n        if (controller.signal.aborted) return\n        const url = URL.createObjectURL(blob)\n        urls.push(url)\n        imageUrls[key] = url\n      }).catch(() => { /* Existing non-accessible file card stays visible. */ })\n    }\n  }, { immediate: true })\n\nfunction getUrl(att: AttachmentItem): string {\n  return isImage(att) ? imageUrls[imageReferenceKey(att)] || '' : resolveUrl(att)\n}", 1),
+            ('function getUrl(att: AttachmentItem): string {\n  return resolveUrl(att)\n}', "// This component only exposes complete, verified NAS image bytes.\nconst imageUrls = reactive<Record<string, string>>({})\nconst failedImages = reactive(new Set<string>())\n\nfunction imageReferenceKey(att: AttachmentItem): string {\n  return JSON.stringify([att.content_hash, att.bot_id ?? att.metadata?.bot_id,\n    att.storage_key ?? att.metadata?.storage_key, att.size, att.mime, att.metadata?.delegation_url])\n}\n\nwatch(() => JSON.stringify([...new Set(props.block.attachments.filter(isImage).map(imageReferenceKey))].sort()),\n  (_keys, _previous, onCleanup) => {\n    const controller = new AbortController()\n    const urls: string[] = []\n    const seen = new Set<string>()\n    onCleanup(() => {\n      controller.abort()\n      for (const url of urls) URL.revokeObjectURL(url)\n      for (const key of Object.keys(imageUrls)) delete imageUrls[key]\n    })\n    for (const att of props.block.attachments.filter(isImage)) {\n      const key = imageReferenceKey(att)\n      if (seen.has(key)) continue\n      seen.add(key)\n      if (failedImages.has(key)) continue\n      void originalBlob(att, controller.signal).then((blob) => {\n        if (controller.signal.aborted) return\n        const url = URL.createObjectURL(blob)\n        urls.push(url)\n        imageUrls[key] = url\n      }).catch(() => { if (!controller.signal.aborted) failedImages.add(key) })\n    }\n  }, { immediate: true })\n\nfunction getUrl(att: AttachmentItem): string {\n  return isImage(att) ? imageUrls[imageReferenceKey(att)] || '' : resolveUrl(att)\n}", 1),
             ('function handleMediaClick(att: AttachmentItem, event: Event) {\n  const src = getUrl(att)', 'function handleMediaClick(att: AttachmentItem, event: Event) {\n  const src = isImage(att) ? resolveUrl({ ...att }) : getUrl(att)', 1),
         ],
         'apps/web/src/pages/home/components/chat-attachment-card.vue': [
@@ -497,8 +497,8 @@ function closeActivePanel() {''', 1),
             ('<Transition name="lightbox">', '<Transition name="lightbox" @enter="enterFromThumbnail" @before-leave="leaveToThumbnail">', 1),
             ('  openIndex: number | null', '  openIndex: number | null\n  origin?: HTMLElement | null', 1),
             ('            draggable="false"', '            draggable="false"\n            @load="fitImage($event.currentTarget)"', 1),
-            ('''v-if="currentItem?.type === 'image'"
-            :src="currentItem.src"''', '''v-if="currentItem?.type === 'image'"
+            ('''v-else-if="currentItem?.type === 'image'"
+            :src="currentItem.src"''', '''v-else-if="currentItem?.type === 'image'"
             :src="currentItem.original ? harmonyImageSrc || undefined : currentItem.src"''', 1),
             ("import { computed, watchEffect,", "import { computed, watch, watchEffect,", 1),
             ('  src: string\n', '  src: string\n  original?: () => Promise<Blob>\n', 1),
@@ -564,12 +564,12 @@ watch([() => currentItem.value?.src, () => !!currentItem.value?.original], (_ide
   let active = true
   let url = ''
   harmonyImageSrc.value = ''
-  if (item?.type === 'image' && item.original) {
+  if (item?.type === 'image' && item.original && !unavailableSources.has(item.src)) {
     void item.original().then((blob) => {
       if (!active) return
       url = URL.createObjectURL(blob)
       harmonyImageSrc.value = url
-    }).catch(() => { if (active) close() })
+    }).catch(() => { if (active) unavailableSources.add(item.src) })
   }
   onCleanup(() => { active = false; if (url) URL.revokeObjectURL(url) })
 }, { immediate: true })
@@ -612,15 +612,15 @@ function close() {''', 1),
             ('    transform: none;\n  }', '    transform: none;\n    clip-path: none;\n  }\n  .lightbox-enter-active, .lightbox-leave-active { transition-duration: 0.12s; }', 1),
             ('<Transition name="lightbox" @enter="enterFromThumbnail" @before-leave="leaveToThumbnail">', '<Transition name="lightbox" @enter="enterFromThumbnail" @after-enter="imageEntered" @before-leave="leaveToThumbnail" @after-leave="resetImageInteraction">', 1),
             ('            @load="fitImage($event.currentTarget)"\n            @click="close"', '            @load="fitImage($event.currentTarget)"\n            @pointerdown="imagePointerDown"\n            @pointermove="imagePointerMove"\n            @pointerup="imagePointerUp"\n            @pointercancel="imagePointerCancelled"\n            @lostpointercapture="imagePointerCancelled"\n            @contextmenu="imageContextMenu"\n            @click="imageClick"', 1),
-            ("import { computed, watch, watchEffect, nextTick, ref } from 'vue'", "import { computed, watch, watchEffect, nextTick, ref, onBeforeUnmount } from 'vue'", 1),
+            ("import { computed, watch, watchEffect, nextTick, reactive, ref } from 'vue'", "import { computed, watch, watchEffect, nextTick, reactive, ref, onBeforeUnmount } from 'vue'", 1),
             ('function close() {', "type ImagePoint = { x: number; y: number }\ntype ImagePose = ImagePoint & { scale: number }\ntype ImageBounds = { width: number; height: number; center: ImagePoint; viewportWidth: number; viewportHeight: number }\n\nconst imagePointers = new Map<number, ImagePoint>()\nlet interactionImage: HTMLImageElement | null = null\nlet imagePose: ImagePose = { scale: 1, x: 0, y: 0 }\nlet imageBounds: ImageBounds | null = null\nlet imageAnchor: { points: ImagePoint[]; pose: ImagePose } | null = null\nlet imageClickConsumed = false\nlet imageMotionActive = false\n\nfunction boundImagePose(pose: ImagePose, bounds: ImageBounds): ImagePose {\n  const scale = Math.max(1, pose.scale)\n  const xLimit = Math.max(0, (bounds.width * scale - bounds.viewportWidth) / 2)\n  const yLimit = Math.max(0, (bounds.height * scale - bounds.viewportHeight) / 2)\n  return { scale, x: Math.max(-xLimit, Math.min(xLimit, pose.x)), y: Math.max(-yLimit, Math.min(yLimit, pose.y)) }\n}\n\nfunction projectImagePose(points: ImagePoint[], anchor: { points: ImagePoint[]; pose: ImagePose }, bounds: ImageBounds): ImagePose {\n  const first = points[0]\n  const start = anchor.points[0]\n  if (!first || !start) return anchor.pose\n  if (points[1] && anchor.points[1]) {\n    const second = points[1]\n    const startSecond = anchor.points[1]\n    const distance = Math.hypot(second.x - first.x, second.y - first.y)\n    const startDistance = Math.hypot(startSecond.x - start.x, startSecond.y - start.y)\n    if (!startDistance) return anchor.pose\n    const scale = Math.max(1, anchor.pose.scale * distance / startDistance)\n    const startX = (start.x + startSecond.x) / 2 - bounds.center.x\n    const startY = (start.y + startSecond.y) / 2 - bounds.center.y\n    return boundImagePose({ scale,\n      x: (first.x + second.x) / 2 - bounds.center.x - (startX - anchor.pose.x) * scale / anchor.pose.scale,\n      y: (first.y + second.y) / 2 - bounds.center.y - (startY - anchor.pose.y) * scale / anchor.pose.scale,\n    }, bounds)\n  }\n  return boundImagePose({ scale: anchor.pose.scale,\n    x: anchor.pose.x + first.x - start.x, y: anchor.pose.y + first.y - start.y,\n  }, bounds)\n}\n\nfunction clearImagePointers() {\n  const ids = [...imagePointers.keys()]\n  imagePointers.clear()\n  imageAnchor = null\n  for (const id of ids) {\n    if (interactionImage?.hasPointerCapture(id)) interactionImage.releasePointerCapture(id)\n  }\n}\n\nfunction resetImageInteraction() {\n  clearImagePointers()\n  interactionImage?.style.removeProperty('transform')\n  interactionImage?.style.removeProperty('transition')\n  interactionImage = null\n  imageBounds = null\n  imagePose = { scale: 1, x: 0, y: 0 }\n  imageClickConsumed = false\n  imageMotionActive = false\n}\n\nfunction rebaseImageGesture() {\n  const image = interactionImage\n  const dialog = image?.closest<HTMLElement>('[role=\"dialog\"]')\n  if (!image || !dialog || imageMotionActive || !imagePointers.size) return\n  const rect = image.getBoundingClientRect()\n  const viewport = dialog.getBoundingClientRect()\n  if (!rect.width || !rect.height || !viewport.width || !viewport.height) return\n  imageBounds = { width: rect.width / imagePose.scale, height: rect.height / imagePose.scale,\n    center: { x: rect.left + rect.width / 2 - imagePose.x, y: rect.top + rect.height / 2 - imagePose.y },\n    viewportWidth: viewport.width, viewportHeight: viewport.height }\n  imageAnchor = { points: [...imagePointers.values()].slice(0, 2), pose: { ...imagePose } }\n  // Only the actual image transform changes during direct manipulation.\n  image.style.transition = 'none'\n}\n\nfunction imagePointerDown(event: PointerEvent) {\n  if (event.pointerType !== 'touch' || !(event.currentTarget instanceof HTMLImageElement)) return\n  if (!imagePointers.size) imageClickConsumed = false\n  interactionImage = event.currentTarget\n  imagePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })\n  interactionImage.setPointerCapture(event.pointerId)\n  if (imagePointers.size > 1) imageClickConsumed = true\n  rebaseImageGesture()\n}\n\nfunction imagePointerMove(event: PointerEvent) {\n  if (!imagePointers.has(event.pointerId)) return\n  imagePointers.set(event.pointerId, { x: event.clientX, y: event.clientY })\n  if (imageMotionActive) return\n  if (!imageAnchor || !imageBounds) { rebaseImageGesture(); return }\n  // Coincident fingers have no scale baseline; establish one without a jump.\n  const first = imageAnchor.points[0]\n  const second = imageAnchor.points[1]\n  if (first && second && first.x === second.x && first.y === second.y) {\n    rebaseImageGesture()\n    return\n  }\n  const next = projectImagePose([...imagePointers.values()].slice(0, 2), imageAnchor, imageBounds)\n  if (next.scale === imagePose.scale && next.x === imagePose.x && next.y === imagePose.y) return\n  imageClickConsumed = true\n  imagePose = next\n  interactionImage!.style.transform = `translate(${imagePose.x}px, ${imagePose.y}px) scale(${imagePose.scale})`\n}\n\nfunction imagePointerUp(event: PointerEvent) {\n  if (!imagePointers.delete(event.pointerId)) return\n  if (interactionImage?.hasPointerCapture(event.pointerId)) interactionImage.releasePointerCapture(event.pointerId)\n  imageAnchor = null\n  rebaseImageGesture()\n}\n\nfunction imagePointerCancelled(event: PointerEvent) {\n  if (!imagePointers.has(event.pointerId)) return\n  imageClickConsumed = true\n  imagePointerUp(event)\n}\n\nfunction imageContextMenu() {\n  // Observe only. ArkWeb's existing authenticated system sheet remains in charge.\n  imageClickConsumed = true\n  clearImagePointers()\n}\n\nfunction imageClick(event: MouseEvent) {\n  if (imageClickConsumed) { event.preventDefault(); event.stopPropagation(); return }\n  close()\n}\n\nfunction imageEntered() {\n  imageMotionActive = false\n  // Touches begun during the thumbnail transition start from its settled pose.\n  rebaseImageGesture()\n}\n\nfunction beginImageLeave(element: Element) {\n  imageMotionActive = true\n  const dialog = element as HTMLElement\n  const image = element.querySelector<HTMLImageElement>('.lightbox-media img')\n  if (image) {\n    // Vue's leave-from class keeps this exact pose until the return transition.\n    dialog.style.setProperty('--lightbox-close-from-transform', getComputedStyle(image).transform)\n    image.style.removeProperty('transform')\n    image.style.removeProperty('transition')\n  }\n  clearImagePointers()\n}\n\nwatch(() => [props.openIndex, currentItem.value?.src], () => {\n  if (!isOpen.value) return // Keep the closing pose until Vue's after-leave.\n  const hadPointers = imagePointers.size > 0\n  resetImageInteraction()\n  imageClickConsumed = hadPointers\n})\nonBeforeUnmount(resetImageInteraction)\n\nfunction close() {", 1),
             ('function enterFromThumbnail(element: Element) {\n', 'function enterFromThumbnail(element: Element) {\n  resetImageInteraction()\n  imageMotionActive = true\n', 1),
             ('function leaveToThumbnail(element: Element) {\n  thumbnailTransform(element)', 'function leaveToThumbnail(element: Element) {\n  beginImageLeave(element)\n  thumbnailTransform(element)', 1),
             ('.lightbox-media img {\n  width: min(90vw,', '.lightbox-media img {\n  touch-action: none;\n  width: min(90vw,', 1),
             ('.lightbox-enter-from .lightbox-media img,\n.lightbox-leave-to .lightbox-media img {', '.lightbox-leave-from .lightbox-media img {\n  transform: var(--lightbox-close-from-transform, none);\n}\n.lightbox-enter-from .lightbox-media img,\n.lightbox-leave-to .lightbox-media img {', 1),
-            ('v-if="isOpen"', 'v-if="isOpen && (!currentItem?.original || !!harmonyImageSrc)"', 1),
+            ('v-if="isOpen"', 'v-if="isOpen && (!currentItem?.original || !!harmonyImageSrc || unavailableSources.has(currentItem.src))"', 1),
             ('void item.original().then((blob) => {\n      if (!active) return\n      url = URL.createObjectURL(blob)\n      harmonyImageSrc.value = url', 'void item.original().then(async (blob) => {\n      if (!active) return\n      url = URL.createObjectURL(blob)\n      const decoded = new Image()\n      decoded.src = url\n      await decoded.decode()\n      if (active) harmonyImageSrc.value = url', 1),
-            ('watchEffect(() => {\n  if (isOpen.value) {', 'watchEffect(() => {\n  if (isOpen.value && (!currentItem.value?.original || harmonyImageSrc.value)) {', 1),
+            ('watchEffect(() => {\n  if (isOpen.value) {', 'watchEffect(() => {\n  if (isOpen.value && (!currentItem.value?.original || harmonyImageSrc.value || unavailableSources.has(currentItem.value.src))) {', 1),
             ('.lightbox-media img {\n  touch-action: none;', '.lightbox-media img {\n  touch-action: none;\n  aspect-ratio: var(--lightbox-ratio, auto);', 1),
         ],
         'apps/web/src/pages/home/components/message-item.vue': [
@@ -750,14 +750,26 @@ function close() {''', 1),
     changes['apps/web/src/pages/home/components/attachment-block.vue'].extend([
         ("import { originalBlob, saveOriginal } from '@/lib/harmony-files'",
          "import { originalBlob, saveOriginal } from '@/lib/harmony-files'\nimport { imageTimingCard, imageTimingURL, imageTimingElement, imageTimingLoaded, imageTimingFailed } from '@/lib/harmony-image-timing'", 1),
-        ('      seen.add(key)\n      void originalBlob',
-         '      seen.add(key)\n      imageTimingCard(att)\n      void originalBlob', 1),
+        ('      seen.add(key)\n      if (failedImages.has(key)) continue\n      void originalBlob',
+         '      seen.add(key)\n      if (failedImages.has(key)) continue\n      imageTimingCard(att)\n      void originalBlob', 1),
         ('        const url = URL.createObjectURL(blob)\n        urls.push(url)',
          '        const url = URL.createObjectURL(blob)\n        imageTimingURL(blob, url)\n        urls.push(url)', 1),
         ('          loading="eager"\n          decoding="async"',
-         '          loading="eager"\n          decoding="async"\n          :elementtiming="imageTimingElement(getUrl(att))"\n          @load="imageTimingLoaded"\n          @error="imageTimingFailed"', 1),
+         '          loading="eager"\n          decoding="async"\n          :elementtiming="imageTimingElement(getUrl(att))"\n          @load="imageTimingLoaded"', 1),
         ('          :src="getUrl(att)"\n          :video="isVideo(att)"',
          '          :src="getUrl(att)"\n          :video="isVideo(att)"\n          :element-timing="imageTimingElement(getUrl(att))"\n          @load.capture="imageTimingLoaded"\n          @error.capture="imageTimingFailed"', 1),
+    ])
+    changes['apps/web/src/pages/home/components/attachment-block.vue'].extend([
+        ('unavailableSources.has(getUrl(att))',
+         'failedImages.has(imageReferenceKey(att)) || unavailableSources.has(getUrl(att))', 1),
+        ('@error="handleMediaError"', '@error="imageTimingFailed($event); handleMediaError($event)"', 1),
+        ('@media-error="src => unavailableSources.add(src)"', '@media-error="markImageUnavailable"', 1),
+        ('  if (src) unavailableSources.add(src)', '  if (src) markImageUnavailable(src)', 1),
+        ('function isImage(att: AttachmentItem): boolean {', "function markImageUnavailable(src: string) {\n  unavailableSources.add(src)\n  for (const [key, url] of Object.entries(imageUrls)) {\n    if (url === src) failedImages.add(key)\n  }\n}\n\nfunction isImage(att: AttachmentItem): boolean {", 1),
+    ])
+    changes['apps/web/src/pages/home/components/media-gallery-lightbox.vue'].extend([
+        ("  if (src) unavailableSources.add(src)",
+         "  if (src && currentItem.value) unavailableSources.add(currentItem.value.src)", 1),
     ])
     changes['apps/web/src/pages/home/components/chat-attachment-card.vue'].extend([
         ('  src?: string', '  src?: string\n  elementTiming?: string', 1),
@@ -911,6 +923,10 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     for name, review in json.loads((ROOT / 'mobile/memoh' / compat['local']).read_text()).items():
         assert name not in bot_recovery_sources['existingFiles'], 'Duplicate shared source target'
         bot_recovery_sources['existingFiles'][name] = review
+
+    inaccessible = lock['sharedInaccessibleAttachment']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / inaccessible['local']) == inaccessible['sha256'], 'Attachment presentation source drift'
+    inaccessible_sources = json.loads((ROOT / 'mobile/memoh' / inaccessible['local']).read_text())
 
 
 
@@ -1179,6 +1195,20 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                     shared_text = shared_text.replace(old, new)
                 data = shared_text.encode('utf-8')
                 entry.size = len(data)
+            if name in inaccessible_sources['existingFiles']:
+                review = inaccessible_sources['existingFiles'][name]
+                assert hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Attachment presentation baseline drift'
+                text = data.decode()
+                for before, after, expected in review['replacements']:
+                    assert text.count(before) == expected, 'Attachment presentation seam drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                assert hashlib.sha256(data).hexdigest() == review['sharedSHA256'], 'Attachment presentation output drift'
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in inaccessible_sources['locales']}:
+                value = json.loads(data)
+                assert 'attachmentUnavailable' not in value['chat'], 'Attachment presentation locale already present'
+                value['chat']['attachmentUnavailable'] = inaccessible_sources['locales'][Path(name).stem]
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
             original_data = data
             # One declared, dependency-free waveform player; keep every other
             # upstream package/lock resolution byte-for-byte unchanged.
@@ -1276,7 +1306,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
-        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles']}.items():
+        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles']}.items():
             assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected shared source destination'
             data = item['source'].encode()
             assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added shared source drift'

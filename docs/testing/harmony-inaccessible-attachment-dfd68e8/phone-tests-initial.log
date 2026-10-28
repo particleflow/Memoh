@@ -1,0 +1,120 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/components/harmony-inaccessible-attachment.test.ts apps/web/src/pages/home/components/media-gallery-lightbox.failure.test.ts apps/web/src/pages/home/components/attachment-block.test.ts apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts apps/web/src/pages/home/composables/useMediaGallery.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+ ❯ |web| src/pages/home/components/harmony-inaccessible-attachment.test.ts (8 tests | 1 failed) 399ms
+     × retains an inaccessible gallery decode identity through navigation and reopen 18ms
+ ❯ |web| src/pages/home/components/attachment-block.test.ts (8 tests | 2 failed) 87ms
+     × does not fetch a large history.txt and preserves size and explicit download 13ms
+     × does not fetch a large history.csv and preserves size and explicit download 5ms
+ ❯ |web| src/pages/home/composables/useMediaGallery.test.ts (3 tests | 1 failed) 19ms
+     × skips background task system turns when collecting media 15ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.txt and preserves size and explicit download
+ FAIL  |web| src/pages/home/components/attachment-block.test.ts > history attachment automatic line counts > does not fetch a large history.csv and preserves size and explicit download
+AssertionError: expected "click" to be called once, but got 0 times
+ ❯ src/pages/home/components/attachment-block.test.ts:72:22
+     70|     })
+     71|     host.querySelector('button')!.click()
+     72|     expect(download).toHaveBeenCalledOnce()
+       |                      ^
+     73|     expect(fetchMock).not.toHaveBeenCalled()
+     74|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |web| src/pages/home/components/harmony-inaccessible-attachment.test.ts > phone verified original inaccessible presentation > retains an inaccessible gallery decode identity through navigation and reopen
+TypeError: Cannot read properties of null (reading 'dispatchEvent')
+ ❯ src/pages/home/components/harmony-inaccessible-attachment.test.ts:77:60
+     75|   mount(() => h(Gallery, { items, openIndex: index.value, 'onUpdate:op…
+     76|   await settle()
+     77|   if (failure === 'decode') { document.querySelector('img')!.dispatchE…
+       |                                                            ^
+     78|   expect(document.querySelector('[role="dialog"] [role="status"]')?.te…
+     79|   expect(document.querySelector('[role="dialog"] img')).toBeNull()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |web| src/pages/home/composables/useMediaGallery.test.ts > useMediaGallery > skips background task system turns when collecting media
+AssertionError: expected [ { …(4) } ] to deeply equal [ { …(3) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "name": undefined,
++     "original": [Function anonymous],
+      "src": "https://example.com/image.png",
+      "type": "image",
+    },
+  ]
+
+ ❯ src/pages/home/composables/useMediaGallery.test.ts:70:33
+     68|
+     69|     expect(() => gallery.items.value).not.toThrow()
+     70|     expect(gallery.items.value).toEqual([
+       |                                 ^
+     71|       {
+     72|         src: 'https://example.com/image.png',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 2 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: [vitest] No "toast" export is defined on the "@felinic/ui" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("@felinic/ui"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ VitestMocker.createError ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:62:17
+ ❯ Object.get ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:327:16
+ ❯ apps/web/src/pages/home/components/attachment-block.vue:382:40
+ ❯ processTicksAndRejections node:internal/process/task_queues:104:5
+
+This error originated in "apps/web/src/pages/home/components/attachment-block.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: [vitest] No "toast" export is defined on the "@felinic/ui" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("@felinic/ui"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ VitestMocker.createError ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:62:17
+ ❯ Object.get ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/chunks/startVitestModuleRunner.DB-7oCpn.js:327:16
+ ❯ apps/web/src/pages/home/components/attachment-block.vue:382:40
+ ❯ processTicksAndRejections node:internal/process/task_queues:104:5
+
+This error originated in "apps/web/src/pages/home/components/attachment-block.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  3 failed | 2 passed (5)
+      Tests  4 failed | 23 passed (27)
+     Errors  2 errors
+   Start at  09:05:59
+   Duration  30.15s (transform 17.56s, setup 0ms, import 24.29s, tests 593ms, environment 4.10s)
+
+ ELIFECYCLE  Test failed. See above for more details.

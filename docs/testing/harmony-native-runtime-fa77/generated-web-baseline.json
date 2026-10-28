@@ -25,16 +25,16 @@
       "upstreamSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df"
     },
     "apps/web/src/i18n/locales/en.json": {
-      "adaptedSHA256": "cbd412ee2be1719e0be48a932c426b2b3ec971c6bcb26f48615dc734da2ee1ec",
-      "upstreamSHA256": "f8b5e7019611963d697217f21197fccc732c62ef340d6a13e31c872b71c91f7b"
+      "upstreamSHA256": "05e293f9eda0ea8c02ecbb0b2490e22846b786f5b78a1bd06c6263687da57266",
+      "adaptedSHA256": "189c37b38a0a137b59938050bd347be45de094fb96d3797233db13ddfc0bac0b"
     },
     "apps/web/src/i18n/locales/ja.json": {
       "adaptedSHA256": "ebf496a0e11b0ce91143b7b0deaba357670ab8736445b8e027f30322cb70c089",
       "upstreamSHA256": "4bff31abb36cdbbfbfbda808f0dc08291189c10cc54f4cce6574623e1317fbed"
     },
     "apps/web/src/i18n/locales/zh.json": {
-      "adaptedSHA256": "ce76cf3ca228746b7122aa96e9c8ce5c46893475cd0cf78dbd7d7c15721fe84c",
-      "upstreamSHA256": "b180e097cee85e47278f4fb829da215bb4e5296fa82322e4cd5770c7cc51a13d"
+      "upstreamSHA256": "d3dea02f2a9c78b84e1655369387c9fb5acaf2836c3298a4bc103ce30739627d",
+      "adaptedSHA256": "98daa650f2403e0a43d5fa3716ce765c65ece8406e0d0cdd40f2a1714d674bbe"
     },
     "apps/web/src/lib/api-client.ts": {
       "adaptedSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
@@ -49,12 +49,12 @@
       "upstreamSHA256": "517b1e901fa6d2557e8972570808d879f617c4c3de9186e5d660f11a27d34020"
     },
     "apps/web/src/pages/home/components/attachment-block.vue": {
-      "adaptedSHA256": "70c4da060f425fe9f64b06edb25127dfe7734082f61ec2aacbe53006f36b5d61",
-      "upstreamSHA256": "e18409ebd3b615e3578839871361756a2a093e378764cd12241499a9994eab77"
+      "upstreamSHA256": "0fa6d8c5ccd5ee8eba6db18a7c171c36e3a26a0b1b9b2920abd7bae4ae478c1c",
+      "adaptedSHA256": "35f4570809f580a6f813158c41d2e2128ae87dee791caea3b688238dfea5a05c"
     },
     "apps/web/src/pages/home/components/chat-attachment-card.vue": {
-      "adaptedSHA256": "57ea48d9baf67c29bd8f4a4e508a1187fc1568528e16630965e3e557dd334e44",
-      "upstreamSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122"
+      "upstreamSHA256": "62d9ee50e1039c692aef0dde4e0ab426eb3dd38a69c4fb1f25a92e1b1d38b73d",
+      "adaptedSHA256": "be144f97673b53ed671ad8da7b5a70294b1152c96a3b04360d121edc9c4327ac"
     },
     "apps/web/src/pages/home/components/chat-pane.vue": {
       "adaptedSHA256": "1247e874da6f7587033bf35e6aa864598e640ffd5af601d8999c7264364f61a8",
@@ -69,8 +69,8 @@
       "upstreamSHA256": "c7019425035f5d51f3d6bc8bbdaa6f544ded973b66cb84df017d810ffb858fd3"
     },
     "apps/web/src/pages/home/components/media-gallery-lightbox.vue": {
-      "adaptedSHA256": "a1ce4017255992ad0899debe5114f2500afb5fab5ff0c090c560ff9190641a31",
-      "upstreamSHA256": "b5235f5a9222d7ef74955515bc3d92238b35dae521425913eb504d3cc49d2ec8"
+      "upstreamSHA256": "764060bd20412af6edc7c9c3f9c917225036fc0276abece3a1a43d8aeb814792",
+      "adaptedSHA256": "c228c2a442a2bf551f135d3ac77a5a4edc005c06ca807754d40716e3d3362275"
     },
     "apps/web/src/pages/home/components/message-item.vue": {
       "adaptedSHA256": "5fbc272403e6e01230ee84e450bea3a2cb63c83260b78e5b262cce6152329f51",

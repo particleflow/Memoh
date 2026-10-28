@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/components/harmony-inaccessible-attachment.test.ts apps/web/src/pages/home/components/media-gallery-lightbox.failure.test.ts apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  3 passed (3)
+      Tests  17 passed (17)
+   Start at  09:09:02
+   Duration  23.93s (transform 15.14s, setup 0ms, import 19.77s, tests 707ms, environment 2.14s)

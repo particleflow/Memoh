@@ -1,0 +1,116 @@
+{
+  "commit": "dfd68e8058b2f982c877be0e36e402c7f2d0c163",
+  "parent": "45788bed060e73a6e5f9e183e927e4898689766f",
+  "existingFiles": {
+    "apps/web/src/pages/home/components/attachment-block.vue": {
+      "baseSHA256": "e18409ebd3b615e3578839871361756a2a093e378764cd12241499a9994eab77",
+      "sharedSHA256": "0fa6d8c5ccd5ee8eba6db18a7c171c36e3a26a0b1b9b2920abd7bae4ae478c1c",
+      "upstreamSHA256": "5016438690f3c637ecc64f689acce1b4525017b798631c7563d72bfd306e06f4",
+      "replacements": [
+        [
+          "import { inject, reactive, watch } from 'vue'",
+          "import { inject, reactive, watch } from 'vue'\nimport { useI18n } from 'vue-i18n'",
+          1
+        ],
+        [
+          "    >\n      <!-- Content image/video (assistant body): an image the bot posts into the\n",
+          "    >\n      <div\n        v-if=\"unavailableSources.has(getUrl(att))\"\n        role=\"status\"\n        class=\"text-body text-muted-foreground\"\n      >\n        <span>{{ getDisplayName(att) }}</span>\n        <p>{{ t('chat.attachmentUnavailable') }}</p>\n      </div>\n\n      <!-- Content image/video (assistant body): an image the bot posts into the\n",
+          1
+        ],
+        [
+          "        v-if=\"variant === 'content' && (isImage(att) || isVideo(att)) && getUrl(att)\"\n",
+          "        v-else-if=\"variant === 'content' && (isImage(att) || isVideo(att)) && getUrl(att)\"\n",
+          1
+        ],
+        [
+          "          decoding=\"async\"\n        >\n",
+          "          decoding=\"async\"\n          @error=\"handleMediaError\"\n        >\n",
+          1
+        ],
+        [
+          "          :name=\"String(att.name ?? '')\"\n          interactive\n        />\n      </button>\n",
+          "          :name=\"String(att.name ?? '')\"\n          interactive\n          @media-error=\"src => unavailableSources.add(src)\"\n        />\n      </button>\n",
+          1
+        ],
+        [
+          "const openAssetPreview = inject(openAssetPreviewKey, undefined)\n",
+          "const openAssetPreview = inject(openAssetPreviewKey, undefined)\nconst { t } = useI18n()\nconst unavailableSources = reactive(new Set<string>())\n",
+          1
+        ],
+        [
+          "  return resolveUrl(att)\n}\n",
+          "  return resolveUrl(att)\n}\n\nfunction handleMediaError(event: Event) {\n  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')\n  if (src) unavailableSources.add(src)\n}\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/chat-attachment-card.vue": {
+      "baseSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122",
+      "sharedSHA256": "62d9ee50e1039c692aef0dde4e0ab426eb3dd38a69c4fb1f25a92e1b1d38b73d",
+      "upstreamSHA256": "62d9ee50e1039c692aef0dde4e0ab426eb3dd38a69c4fb1f25a92e1b1d38b73d",
+      "replacements": [
+        [
+          "          @error=\"mediaLoaded = true\"\n",
+          "          @error=\"handleMediaError\"\n",
+          1
+        ],
+        [
+          "const emit = defineEmits<{ remove: []; preview: [] }>()\n",
+          "const emit = defineEmits<{ remove: []; preview: []; mediaError: [src: string] }>()\n",
+          1
+        ],
+        [
+          "const mediaLoaded = ref(false)\nwatch(() => props.src, () => {\n",
+          "const mediaLoaded = ref(false)\nfunction handleMediaError(event: Event) {\n  mediaLoaded.value = true\n  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')\n  if (src) emit('mediaError', src)\n}\n\nwatch(() => props.src, () => {\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/media-gallery-lightbox.vue": {
+      "baseSHA256": "b5235f5a9222d7ef74955515bc3d92238b35dae521425913eb504d3cc49d2ec8",
+      "sharedSHA256": "764060bd20412af6edc7c9c3f9c917225036fc0276abece3a1a43d8aeb814792",
+      "upstreamSHA256": "764060bd20412af6edc7c9c3f9c917225036fc0276abece3a1a43d8aeb814792",
+      "replacements": [
+        [
+          "        >\n          <img\n",
+          "        >\n          <p\n            v-if=\"currentItem && unavailableSources.has(currentItem.src)\"\n            role=\"status\"\n            :class=\"counterClass\"\n          >\n            {{ t('chat.attachmentUnavailable') }}\n          </p>\n          <img\n",
+          1
+        ],
+        [
+          "            v-if=\"currentItem?.type === 'image'\"\n",
+          "            v-else-if=\"currentItem?.type === 'image'\"\n",
+          1
+        ],
+        [
+          "            @click=\"close\"\n          >\n",
+          "            @click=\"close\"\n            @error=\"handleMediaError\"\n          >\n",
+          1
+        ],
+        [
+          "import { computed, watchEffect, nextTick, ref } from 'vue'\n",
+          "import { computed, watchEffect, nextTick, reactive, ref } from 'vue'\nimport { useI18n } from 'vue-i18n'\n",
+          1
+        ],
+        [
+          "}>()\n\n",
+          "}>()\n\nconst { t } = useI18n()\nconst unavailableSources = reactive(new Set<string>())\n\nfunction handleMediaError(event: Event) {\n  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')\n  if (src) unavailableSources.add(src)\n}\n\n",
+          1
+        ]
+      ]
+    }
+  },
+  "locales": {
+    "en": "Attachment inaccessible",
+    "zh": "附件不可访问"
+  },
+  "addedFiles": {
+    "apps/web/src/pages/home/components/media-gallery-lightbox.failure.test.ts": {
+      "sha256": "96a9c273fba01d7724039a79fc36a39fb26227d1ab4ddaf54bfc9a618fcd1fd8",
+      "source": "// @vitest-environment jsdom\nimport { createApp, h, nextTick, ref, type App } from 'vue'\nimport { afterEach, describe, expect, it, vi } from 'vitest'\nimport MediaGalleryLightbox from './media-gallery-lightbox.vue'\n\nvi.mock('@/composables/useKeyboardCommand', () => ({ useKeyboardCommand: vi.fn() }))\nvi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))\n\nlet app: App | undefined\nafterEach(() => { app?.unmount(); document.body.replaceChildren() })\n\ndescribe('media preview failure', () => {\n  it('shows one inaccessible state and does not request the failed URL again on navigation or reopening', async () => {\n    const host = document.createElement('div')\n    document.body.append(host)\n    const index = ref<number | null>(0)\n    const id = '10000000-0000-4000-8000-000000000001'\n    const src = `/bots/${id}/sessions/${id}/delegations/${id}/attachments/${'a'.repeat(64)}`\n    const items = [{ src, type: 'image' as const, name: 'original.png' }, { src: 'data:image/png;base64,synthetic', type: 'image' as const, name: 'other.png' }]\n    const snapshot = JSON.stringify(items)\n    app = createApp({ render: () => h(MediaGalleryLightbox, { items, openIndex: index.value, 'onUpdate:openIndex': value => { index.value = value } }) })\n    app.mount(host)\n    await nextTick()\n    document.querySelector('img')!.dispatchEvent(new Event('error'))\n    await nextTick()\n    expect(document.querySelector('img')).toBeNull()\n    expect(document.querySelector('[role=\"status\"]')?.textContent).toBe('chat.attachmentUnavailable')\n    index.value = 1\n    await nextTick()\n    expect(document.querySelector('img')?.getAttribute('src')).toBe(items[1]!.src)\n    index.value = 0\n    await nextTick()\n    expect(document.querySelector('img')).toBeNull()\n    index.value = null\n    await nextTick()\n    index.value = 0\n    await nextTick()\n    expect(document.querySelector('img')).toBeNull()\n    expect(document.querySelectorAll('[role=\"status\"]')).toHaveLength(1)\n    expect(JSON.stringify(items)).toBe(snapshot)\n  })\n})\n"
+    },
+    "apps/web/src/pages/home/components/harmony-inaccessible-attachment.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, h, nextTick, ref, type App } from 'vue'\nimport { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\nimport AttachmentBlock from './attachment-block.vue'\nimport Gallery from './media-gallery-lightbox.vue'\nimport type { AttachmentItem } from '@/store/chat-list'\nconst native = vi.hoisted(() => ({ original: vi.fn(), save: vi.fn() }))\nvi.mock('@/lib/harmony-files', () => ({ originalBlob: native.original, saveOriginal: native.save }))\nvi.mock('@/store/chat-list', () => ({ useChatStore: () => ({ currentBotId: 'bot-unused' }) }))\nvi.mock('../composables/useMediaGallery', () => ({ resolveUrl: (att: AttachmentItem) => att.url || '' }))\nvi.mock('@felinic/ui', () => ({ Skeleton: 'span', toast: { error: vi.fn() } }))\nvi.mock('@/composables/useKeyboardCommand', () => ({ useKeyboardCommand: vi.fn() }))\nvi.mock('vue-i18n', () => ({ useI18n: () => ({ t: (key: string) => key }) }))\nlet app: App | undefined\nconst src = '/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000002/delegations/30000000-0000-4000-8000-000000000003/attachments/' + 'a'.repeat(64)\nconst attachment = { type: 'image', name: 'original.png', mime: 'image/png', content_hash: 'a'.repeat(64), bot_id: '10000000-0000-4000-8000-000000000001', url: src, metadata: { delegation_url: src } }\nconst settle = async () => { await Promise.resolve(); await nextTick(); await Promise.resolve(); await nextTick() }\nbeforeEach(() => {\n vi.clearAllMocks()\n Object.defineProperty(HTMLImageElement.prototype, 'decode', { configurable: true, value: vi.fn().mockResolvedValue(undefined) })\n vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => { cb(0); return 0 })\n vi.stubGlobal('fetch', vi.fn(() => { throw new Error('unexpected fallback') }))\n vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:verified-synthetic')\n vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})\n})\nafterEach(() => { app?.unmount(); app = undefined; document.body.replaceChildren(); vi.restoreAllMocks(); vi.unstubAllGlobals() })\nfunction mount(render: () => ReturnType<typeof h>) {\n const host = document.createElement('div'); document.body.append(host)\n app = createApp({ render }); app.mount(host); return host\n}\ndescribe('phone verified original inaccessible presentation', () => {\n it.each(['attachment', 'content'] as const)('shows one inaccessible state for a rejected %s reader, preserving the scoped reference and not retrying', async variant => {\n  native.original.mockRejectedValue(new Error('denied'))\n  const items = ref([attachment]); const snapshot = JSON.stringify(attachment); const open = vi.fn()\n  const host = mount(() => h(AttachmentBlock, { variant, onOpenMedia: open, block: { id: 1, type: 'attachments', attachments: items.value } }))\n  await settle()\n  expect(host.querySelector('[role=\"status\"]')?.textContent).toContain('chat.attachmentUnavailable')\n  expect(host.textContent).toContain('original.png'); expect(host.querySelector('img,button')).toBeNull()\n  // Adding an unrelated original restarts this watcher, but must not re-read the denied identity.\n  items.value = [attachment, { ...attachment, content_hash: 'b'.repeat(64), url: src + '-other' }]\n  await settle()\n  expect(native.original.mock.calls.filter(call => call[0].content_hash === attachment.content_hash)).toHaveLength(1)\n  host.click(); expect(open).not.toHaveBeenCalled(); expect(native.save).not.toHaveBeenCalled()\n  expect(fetch).not.toHaveBeenCalled(); expect(JSON.stringify(attachment)).toBe(snapshot)\n  expect(native.original.mock.calls[0]![0].metadata.delegation_url).toBe(src)\n })\n it.each(['attachment', 'content'] as const)('retires a decoded Blob failure in the %s variant', async variant => {\n  native.original.mockResolvedValue(new Blob(['synthetic'], { type: 'image/png' }))\n  const items = ref([attachment]); const open = vi.fn(); const host = mount(() => h(AttachmentBlock, { variant, onOpenMedia: open, block: { id: 1, type: 'attachments', attachments: items.value } }))\n  await settle(); expect(host.querySelector('img')?.getAttribute('src')).toBe('blob:verified-synthetic')\n  host.querySelector('img')!.dispatchEvent(new Event('error')); await settle()\n  expect(host.querySelector('img,button')).toBeNull(); expect(host.querySelectorAll('[role=\"status\"]')).toHaveLength(1)\n  host.click(); expect(open).not.toHaveBeenCalled(); expect(native.original).toHaveBeenCalledTimes(1)\n  items.value = [attachment, { ...attachment, content_hash: 'b'.repeat(64) }]; await settle()\n  expect(native.original.mock.calls.filter(call => call[0].content_hash === attachment.content_hash)).toHaveLength(1)\n })\n it('keeps a healthy verified preview and original scoped click destination', async () => {\n  native.original.mockResolvedValue(new Blob(['synthetic'], { type: 'image/png' }))\n  const open = vi.fn(); const host = mount(() => h(AttachmentBlock, { onOpenMedia: open, block: { id: 1, type: 'attachments', attachments: [attachment] } }))\n  await settle(); host.querySelector('img')!.dispatchEvent(new Event('load')); await settle()\n  host.querySelector('button')!.click(); expect(open).toHaveBeenCalledWith(src, expect.any(HTMLElement))\n  expect(host.querySelector('[role=\"status\"]')).toBeNull(); expect(fetch).not.toHaveBeenCalled()\n })\n it('does not display an obsolete aborted reader failure on its replacement', async () => {\n  let reject!: (reason: Error) => void\n  native.original.mockImplementationOnce(() => new Promise((_resolve, fail) => { reject = fail }))\n  native.original.mockResolvedValue(new Blob(['synthetic'], { type: 'image/png' }))\n  const items = ref([attachment]); const host = mount(() => h(AttachmentBlock, { block: { id: 1, type: 'attachments', attachments: items.value } }))\n  await settle(); items.value = [{ ...attachment, content_hash: 'b'.repeat(64) }]; await settle(); reject(new Error('aborted')); await settle()\n  expect(host.querySelector('[role=\"status\"]')).toBeNull(); expect(host.querySelector('img')).not.toBeNull()\n })\n it.each(['read', 'decode', 'predecode'] as const)('retains an inaccessible gallery %s identity through navigation and reopen', async failure => {\n  const reader = vi.fn().mockRejectedValue(new Error('denied'))\n  if (failure !== 'read') reader.mockResolvedValue(new Blob(['synthetic']))\n  if (failure === 'predecode') vi.mocked(HTMLImageElement.prototype.decode).mockRejectedValue(new Error('decode failed'))\n  const index = ref<number | null>(0)\n  const items = [{ src, type: 'image' as const, name: 'original.png', original: reader }, { src: 'data:image/png;base64,synthetic', type: 'image' as const, name: 'other.png' }]\n  const snapshot = JSON.stringify(items)\n  mount(() => h(Gallery, { items, openIndex: index.value, 'onUpdate:openIndex': value => { index.value = value } }))\n  await settle()\n  if (failure === 'decode') { document.querySelector('img')!.dispatchEvent(new Event('error')); await settle() }\n  expect(document.querySelector('[role=\"dialog\"] [role=\"status\"]')?.textContent).toBe('chat.attachmentUnavailable')\n  expect(document.querySelector('[role=\"dialog\"] img')).toBeNull()\n  index.value = 1; await settle(); expect(document.querySelector('img')?.getAttribute('src')).toBe(items[1]!.src)\n  index.value = 0; await settle(); index.value = null; await settle(); index.value = 0; await settle()\n  expect(document.querySelectorAll('[role=\"dialog\"] [role=\"status\"]')).toHaveLength(1)\n  expect(reader).toHaveBeenCalledTimes(1); expect(JSON.stringify(items)).toBe(snapshot); expect(fetch).not.toHaveBeenCalled()\n })\n})\n",
+      "sha256": "aaf13e2a10b93e1d92b40d7b2396620eb626725222ca1bb77b9d430512999a3f"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "upstream": "dfd68e8058b2f982c877be0e36e402c7f2d0c163",
+  "parent": "45788bed060e73a6e5f9e183e927e4898689766f",
+  "files": {
+    "apps/web/src/pages/home/components/attachment-block.vue": {
+      "baseSHA256": "e18409ebd3b615e3578839871361756a2a093e378764cd12241499a9994eab77",
+      "sharedSHA256": "0fa6d8c5ccd5ee8eba6db18a7c171c36e3a26a0b1b9b2920abd7bae4ae478c1c",
+      "upstreamSHA256": "5016438690f3c637ecc64f689acce1b4525017b798631c7563d72bfd306e06f4"
+    },
+    "apps/web/src/pages/home/components/chat-attachment-card.vue": {
+      "baseSHA256": "06f2629c4de0eb0f6d2b8f3f321b2c2df0dbb6deabbb93df2517ffb244e78122",
+      "sharedSHA256": "62d9ee50e1039c692aef0dde4e0ab426eb3dd38a69c4fb1f25a92e1b1d38b73d",
+      "upstreamSHA256": "62d9ee50e1039c692aef0dde4e0ab426eb3dd38a69c4fb1f25a92e1b1d38b73d"
+    },
+    "apps/web/src/pages/home/components/media-gallery-lightbox.vue": {
+      "baseSHA256": "b5235f5a9222d7ef74955515bc3d92238b35dae521425913eb504d3cc49d2ec8",
+      "sharedSHA256": "764060bd20412af6edc7c9c3f9c917225036fc0276abece3a1a43d8aeb814792",
+      "upstreamSHA256": "764060bd20412af6edc7c9c3f9c917225036fc0276abece3a1a43d8aeb814792"
+    },
+    "apps/web/src/i18n/locales/en.json": {
+      "path": "chat.attachmentUnavailable",
+      "value": "Attachment inaccessible"
+    },
+    "apps/web/src/i18n/locales/zh.json": {
+      "path": "chat.attachmentUnavailable",
+      "value": "附件不可访问"
+    }
+  }
+}

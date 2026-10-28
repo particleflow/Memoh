@@ -1,0 +1,12 @@
+import { createRequire } from 'node:module'; import fs from 'node:fs'; import path from 'node:path'; import {fileURLToPath} from 'node:url';
+const C=process.env.HARMONY_GENERATED_CONTEXT; if (!C) throw new Error('Set HARMONY_GENERATED_CONTEXT to the prepared source checkout');
+const E=path.dirname(fileURLToPath(import.meta.url));
+for (const name of ['review-inaccessible.html','review-inaccessible.ts']) fs.copyFileSync(E+'/'+name,C+'/apps/web/'+name);
+const require=createRequire(C+'/apps/web/package.json');
+const {createServer}=await import(require.resolve('vite'));
+const vue=(await import(require.resolve('@vitejs/plugin-vue'))).default;
+const tailwind=(await import(require.resolve('@tailwindcss/vite'))).default;
+fs.writeFileSync(E+'/store-stub.ts',"export const useChatStore = () => ({ currentBotId: '10000000-0000-4000-8000-000000000001' })\n");
+fs.writeFileSync(E+'/keyboard-stub.ts','export const useKeyboardCommand = () => {}\n');
+const server=await createServer({configFile:false,root:C+'/apps/web',plugins:[vue(),tailwind()],resolve:{dedupe:['vue'],alias:[{find:'@/store/chat-list',replacement:E+'/store-stub.ts'},{find:'@/composables/useKeyboardCommand',replacement:E+'/keyboard-stub.ts'},{find:'#',replacement:C+'/packages/ui/src'},{find:'@',replacement:C+'/apps/web/src'}]},server:{host:'127.0.0.1',port:18952,strictPort:true,fs:{allow:[C,E,fs.realpathSync(C+'/node_modules')]}}});
+await server.listen();console.log('isolated source component server ready 18952');

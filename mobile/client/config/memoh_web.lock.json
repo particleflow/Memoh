@@ -388,5 +388,14 @@
   "sharedCrossBotNavigation457": {
     "commit": "45788bed060e73a6e5f9e183e927e4898689766f",
     "scope": "Exact three shared product-file navigation race correction, with route/panel tests. No API, SDK, migration, task retry or new UI."
+  },
+  "sharedInaccessibleAttachment": {
+    "commit": "dfd68e8058b2f982c877be0e36e402c7f2d0c163",
+    "parent": "45788bed060e73a6e5f9e183e927e4898689766f",
+    "sourceChanges": {
+      "local": "shared-inaccessible-attachment-changes.json",
+      "sha256": "ee404f00e262875d0268e923b3fbd085cf1d28288b2a955eac39c5f4f5177276"
+    },
+    "scope": "Five shared product-file presentation deltas only; retain native verified original readers and scoped authorization, with local mounted-lifetime failure state. No access recovery, retry, API, SDK or history change."
   }
 }
