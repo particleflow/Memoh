@@ -55,6 +55,7 @@ type Service struct {
 	authorize              Authorize
 	defaultWorkDir         DefaultWorkDir
 	inputFiles             InputFileResolver
+	inputReference         InputReferenceOpener
 }
 
 // WithDefaultWorkDir injects the existing owned directory selection. It is

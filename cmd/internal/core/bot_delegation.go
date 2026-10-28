@@ -497,6 +497,11 @@ func (a *delegationAssetLoader) shared(ctx context.Context, bot, hash string) (*
 	if !ok || i.bot != bot || i.user == "" || i.session == "" {
 		return nil, false, nil
 	}
+	return a.sharedForConversation(ctx, i, hash)
+}
+
+func (a *delegationAssetLoader) sharedForConversation(ctx context.Context, i delegationMediaIdentity, hash string) (*botdelegation.AttachmentSet, bool, error) {
+	bot := i.bot
 	r, err := a.host.service.ForSession(ctx, bot, i.user, i.session)
 	if err == nil {
 		if slices.Contains(r.Payload.Inputs, hash) {

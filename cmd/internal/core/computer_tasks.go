@@ -9,6 +9,7 @@ import (
 	"github.com/felinics/memoh/internal/accounts"
 	toolapproval "github.com/felinics/memoh/internal/agent/decision/approval"
 	"github.com/felinics/memoh/internal/agenvo"
+	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/computertask"
 	"github.com/felinics/memoh/internal/config"
@@ -21,10 +22,12 @@ import (
 	"github.com/felinics/memoh/internal/workspace"
 )
 
-func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, cfg config.Config) *computertask.Source {
+func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, relay *agenvo.Service, assets *media.Service, manager *workspace.Manager, approval *toolapproval.Service, botService *bots.Service, accountService *accounts.Service, runtimes *userruntime.Service, delegations *botdelegation.Service, cfg config.Config) *computertask.Source {
 	permissions := &applicationBotPermissionChecker{bots: botService, accounts: accountService}
 	authorize := computerTaskAuthorizer(permissions, manager.ResolveWorkspaceTarget, approval.EvaluatePolicy)
 	service := computertask.NewService(store, store, relay, assets, authorize).WithNativeObservationLimit(cfg.ComputerTasks.NativeObservationLimit)
+	loader := &delegationAssetLoader{host: delegations.Host.(*delegationHost)}
+	service.WithInputReferences(loader.openComputerInput)
 	service.WithDefaultWorkDir(computerTaskWorkspaceDefault(store.GetMount, runtimes.SelectedWorkspaceDirectory))
 	service.WithInputFiles(func(ctx context.Context, binding toolcontext.ComputerBinding, targetID string, target agenvo.Target) (computertask.InputFileSystem, error) {
 		// Resolve the same already-authorized native mount. Explicit root context
@@ -38,6 +41,24 @@ func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, rel
 	source := computertask.NewSource(service)
 	source.SetLogger(log)
 	return source
+}
+
+// Use the same persisted attachment bridge as image tools, with the trusted
+// computer conversation binding (including same-Bot child threads). The task
+// ledger remains owned by the specialist; the original retains its source Bot.
+func (a *delegationAssetLoader) openComputerInput(ctx context.Context, b toolcontext.ComputerBinding, hash string) (media.ReadSeekCloser, string, error) {
+	if current, ok := toolcontext.HostComputerBinding(ctx); !ok || current != b {
+		return nil, "", computertask.ErrDenied
+	}
+	set, result, err := a.sharedForConversation(ctx, delegationMediaIdentity{bot: b.BotID, user: b.UserID, session: b.SessionID}, hash)
+	if err != nil || set == nil {
+		return nil, "", err
+	}
+	if !result && (!toolcontext.HasDelegationScope(ctx) || toolcontext.CheckDelegation(ctx) != nil) {
+		return nil, "", computertask.ErrDenied
+	}
+	reader, attachment, err := set.OpenSeekable(ctx, hash, result)
+	return reader, attachment.Mime, err
 }
 
 func computerTaskAuthorizer(permissions agenvo.PermissionChecker, resolve func(context.Context, string, string) (workspace.ResolvedWorkspaceTarget, error), evaluate func(context.Context, toolapproval.CreatePendingInput) (toolapproval.Evaluation, error)) computertask.Authorize {
