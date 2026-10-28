@@ -136,6 +136,7 @@
                         >
                           <MessageItem
                             :message="msg"
+                            :hide-process-activity="contactView && activeChatTarget.runtimeType === 'model'"
                             :bot-id="currentBotId"
                             :session-id="activeSessionId"
                             :recovery-original-run-id="originalFailedRunId(msg)"
@@ -1452,11 +1453,15 @@ const props = withDefaults(defineProps<{
   // The session this pane renders (null = unsaved draft). Decoupled from tabId so
   // a draft→real promotion never remounts this pane.
   sessionId?: string | null
+  // Presentation intent from the resolved contact entry, scoped to this pane.
+  // Task/history panes keep the unabridged transcript for the same session.
+  contactView?: boolean
   visible?: boolean
   active?: boolean
 }>(), {
   tabId: 'chat',
   sessionId: null,
+  contactView: false,
   visible: true,
   active: true,
 })

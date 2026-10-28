@@ -1484,6 +1484,29 @@ describe('workspace layout store', () => {
     expect(dock.activePanel?.params.sessionId).toBe('contact')
   })
 
+  it('keeps contact and history projections separate even for the same session', async () => {
+    chatStoreMock.contactNavigationPending = true
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    await nextTick()
+    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false, contactView: true })
+    const contactId = dock.activePanel!.id
+    expect(dock.activePanel?.params.contactView).toBe(true)
+    store.openSessionChatPinned({ sessionId: 'contact' })
+    const historyId = dock.activePanel!.id
+    expect(historyId).not.toBe(contactId)
+    expect(dock.activePanel?.params.contactView).toBe(false)
+    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false, contactView: true })
+    expect(dock.activePanel?.id).toBe(contactId)
+    store.openSessionChat({ sessionId: 'contact' })
+    expect(dock.activePanel?.id).toBe(historyId)
+    store.openSubagentSession({ sessionId: 'contact' })
+    expect(dock.activePanel?.id).toBe(historyId)
+    expect(dock.getPanel(contactId)?.params.contactView).toBe(true)
+    expect(dock.panels).toHaveLength(2)
+  })
+
   it('reconciles an auto-picked session to the restored chat panel without opening another tab', async () => {
     const restoredLayout = persistedLayoutWithPanel(
       'chat:bot-1:1',
