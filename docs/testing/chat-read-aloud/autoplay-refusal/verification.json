@@ -1,0 +1,23 @@
+{
+  "browser_command_exit_code": 0,
+  "changed_runner_eslint_exit_code": 0,
+  "policy_checkpoints_passed": 5,
+  "product_files_changed": [],
+  "native_play_promise_substituted": false,
+  "browser_play_errors_injected": false,
+  "websocket_fixture": "real loopback WebSocketServer behind task-owned Vite proxy; no Playwright routeWebSocket",
+  "trusted_gestures": "CDP Input mouse and text/key events; captured isTrusted=true",
+  "original_evidence_preserved": true,
+  "loopback_preview": "http://127.0.0.1:18482",
+  "loopback_preview_closed_after_run": true,
+  "temporary_fixture_closed_after_run": true,
+  "production_browser_accessed": false,
+  "real_provider_calls": 0,
+  "official_references": {
+    "chrome_autoplay": "https://developer.chrome.com/blog/autoplay",
+    "cdp_runtime_evaluate": "https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-evaluate",
+    "playwright_userGesture": "https://github.com/microsoft/playwright/blob/main/packages/playwright-core/src/server/chromium/crExecutionContext.ts"
+  },
+  "cdp_runtime_evaluate_userGesture": false,
+  "command": "READ_ALOUD_EVIDENCE=/tmp/memoh-autoplay-refusal/native-ws node docs/testing/chat-read-aloud/browser-autoplay-refusal.mjs"
+}

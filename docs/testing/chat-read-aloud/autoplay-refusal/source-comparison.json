@@ -1,0 +1,65 @@
+{
+  "tested_source": "62abcbe1a50f2c0b9f29de855222dcf7d3da9661",
+  "reported_deployed_source": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+  "files": [
+    {
+      "file": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+      "byte_equal": true,
+      "sha256": [
+        "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+        "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3"
+      ]
+    },
+    {
+      "file": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "byte_equal": true,
+      "sha256": [
+        "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+        "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd"
+      ]
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "byte_equal": true,
+      "sha256": [
+        "adefac8e7788162468baad44b6cf7c3c3acf958de2b0ad509954db7b3ece2f35",
+        "adefac8e7788162468baad44b6cf7c3c3acf958de2b0ad509954db7b3ece2f35"
+      ]
+    },
+    {
+      "file": "apps/web/src/pages/home/components/message-item.vue",
+      "byte_equal": true,
+      "sha256": [
+        "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+        "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9"
+      ]
+    },
+    {
+      "file": "apps/web/src/pages/home/components/message-actions.vue",
+      "byte_equal": true,
+      "sha256": [
+        "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6",
+        "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6"
+      ]
+    },
+    {
+      "file": "apps/web/src/style.css",
+      "byte_equal": true,
+      "sha256": [
+        "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2",
+        "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2"
+      ]
+    }
+  ],
+  "locales": {
+    "en": {
+      "keys_equal": true
+    },
+    "zh": {
+      "keys_equal": true
+    },
+    "ja": {
+      "keys_equal": true
+    }
+  }
+}

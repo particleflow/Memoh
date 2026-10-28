@@ -1,0 +1,407 @@
+{
+  "source": "62abcbe1a50f2c0b9f29de855222dcf7d3da9661",
+  "syntheticServerAndWav": true,
+  "realNativePolicyRefusal": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "第2段拒绝恢复验证：这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。"
+    },
+    {
+      "text": "第3段拒绝恢复验证：这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。这是合成音频的队列验证，打断后旧片段必须取消。"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [
+    "native unmuted play rejects with genuine NotAllowedError/DOMException before any activation; blocked UI and zero frame motion",
+    "trusted browser pointer activates Enable; same native media/URL resumes; no resynthesis; only current bubble animates",
+    "trusted message click stops resumed media/frame and clears long-reply chunks plus later queued reply; nothing resumes past old audio duration or repeated completed snapshot",
+    "trusted right-click/menu replay explicitly synthesizes only the selected message after cancellation",
+    "trusted native text input stops explicit replay and pending chunks; clearing the draft and later snapshots do not restore audio/frame"
+  ],
+  "observations": [
+    {
+      "label": "native-policy-refused",
+      "requestCount": 1,
+      "active": false,
+      "hasBeenActive": false,
+      "bubbles": [
+        {
+          "state": "blocked",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": false,
+          "hasBeenActive": false,
+          "muted": false,
+          "volume": 1,
+          "outcome": "rejected",
+          "name": "NotAllowedError",
+          "message": "play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD",
+          "isDOMException": true
+        }
+      ],
+      "inputs": [],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": []
+    },
+    {
+      "label": "trusted-enable-gesture-resumed",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "27.9984deg"
+        },
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": false,
+          "time": 0.167388,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "duration": 2
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": false,
+          "hasBeenActive": false,
+          "muted": false,
+          "volume": 1,
+          "outcome": "rejected",
+          "name": "NotAllowedError",
+          "message": "play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD",
+          "isDOMException": true
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "SPAN",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.001038,
+          "paused": false
+        }
+      ]
+    },
+    {
+      "label": "message-click-cancelled-all-queued-work",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        },
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": false,
+          "hasBeenActive": false,
+          "muted": false,
+          "volume": 1,
+          "outcome": "rejected",
+          "name": "NotAllowedError",
+          "message": "play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD",
+          "isDOMException": true
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "SPAN",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "SPAN",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.001038,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "trusted-input-stopped-and-draft-cleared",
+      "requestCount": 2,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        },
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": false,
+          "hasBeenActive": false,
+          "muted": false,
+          "volume": 1,
+          "outcome": "rejected",
+          "name": "NotAllowedError",
+          "message": "play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD",
+          "isDOMException": true
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/71afa850-aebc-4cab-8292-b481625b3d5a",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18482/32d4bc4c-9653-4228-b92c-0f2b6bad904c",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "SPAN",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "SPAN",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "contextmenu",
+          "trusted": true,
+          "tag": "SPAN",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.001038,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.000569,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    }
+  ],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ]
+}
