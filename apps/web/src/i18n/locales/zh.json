@@ -2195,6 +2195,7 @@
       "current": "当前对话"
     },
     "taskDirectory": {
+      "historyUnavailable": "无法在这段历史中定位原始执行。",
       "empty": "这个 Bot 暂无任务记录。",
       "types": {
         "native_agent": "Agent 任务",

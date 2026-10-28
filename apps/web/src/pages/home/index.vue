@@ -1,12 +1,14 @@
 <template>
-  <div class="flex h-full overflow-hidden">
+  <div class="relative flex h-full overflow-hidden">
+    <!-- Preserve Dockview dimensions while a history link is being authorized. -->
     <ChatWorkspace
       v-if="currentBotId"
-      v-show="!historyError && !historyLoading && !chatStore.contactNavigationPending"
+      :class="{ invisible: historyError || historyLoading || chatStore.contactNavigationPending }"
     />
     <ContactChoiceDialog />
     <PanePlaceholder
       v-if="historyError || historyLoading || chatStore.contactNavigationPending"
+      class="absolute inset-0"
       :title="historyError || t('common.loading')"
     />
     <div
@@ -49,6 +51,7 @@ import { botAgentProvider } from '@/utils/bot-agent'
 import ContactChoiceDialog from './components/contact-choice-dialog.vue'
 import { fetchSession } from '@/composables/api/useChat'
 import { resolveApiErrorMessage } from '@/utils/api-error'
+import { hasTaskHistoryQuery, resolveTaskHistoryAnchor } from '@/utils/task-history-link'
 import ChatWorkspace from './components/chat-workspace.vue'
 import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'
 
@@ -185,6 +188,11 @@ async function syncStoreFromUrl(rawName: string) {
   const requestedRoute = route.fullPath
   historyError.value = ''
   historyLoading.value = !!route.query.session
+  if (hasTaskHistoryQuery(route.query) && !route.query.session) {
+    historyLoading.value = false
+    historyError.value = t('chat.contact.historyFailed')
+    return
+  }
   if (route.query.session !== undefined && (typeof route.query.session !== 'string' || !route.query.session.trim())) {
     historyLoading.value = false
     historyError.value = t('chat.contact.historyFailed')
@@ -243,15 +251,17 @@ async function syncStoreFromUrl(rawName: string) {
   const historyId = typeof route.query.session === 'string' ? route.query.session.trim() : ''
   if (historyId) {
     try {
+      const taskAnchor = await resolveTaskHistoryAnchor(route.query, resolvedId, historyId)
+      if (request !== historyRequest || route.fullPath !== requestedRoute) return
       const session = await fetchSession(resolvedId, historyId)
       if (request !== historyRequest || route.query.session !== historyId || route.params.botName !== rawName) return
       suppressUrlSync = true
       try { await chatStore.selectBot(resolvedId, { sessionId: session.id }) }
       finally { suppressUrlSync = false }
       await nextTick()
-      if (route.query.session === historyId && currentBotId.value === resolvedId) {
+      if (request === historyRequest && route.fullPath === requestedRoute && route.query.session === historyId && currentBotId.value === resolvedId) {
         chatStore.cancelContactChoice()
-        workspaceTabs.openSessionChatPinned({ sessionId: session.id, title: session.title })
+        workspaceTabs.openSessionChatPinned({ sessionId: session.id, title: session.title, taskAnchor })
       }
     } catch (error) {
       if (request === historyRequest) historyError.value = resolveApiErrorMessage(error, t('chat.contact.historyFailed'))
@@ -278,7 +288,11 @@ async function syncStoreFromUrl(rawName: string) {
 }
 
 watch(
-  () => [route.name, route.params.botName, route.query.session] as const,
+  [
+    () => route.name, () => route.params.botName, () => route.query.session,
+    () => route.query.task_bot, () => route.query.task_type, () => route.query.task_id,
+    () => route.query.task_record, () => route.query.run,
+  ],
   ([routeName, paramBotName], prev) => {
     if (!CHAT_ROUTE_NAMES.has(routeName as string)) return
     // Returning to chat from a non-chat route (settings overlay): per-bot config

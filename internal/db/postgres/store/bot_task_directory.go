@@ -42,3 +42,19 @@ func (s *Store) ListBotTaskDirectoryCandidates(ctx context.Context, f dbstore.Se
 	}
 	return out, nil
 }
+
+func (s *Store) ReadBotTaskRun(ctx context.Context, bot, session, run string) (dbstore.BotTaskRunReference, error) {
+	bid, err := db.ParseUUID(bot)
+	if err != nil {
+		return dbstore.BotTaskRunReference{}, err
+	}
+	sid, err := db.ParseUUID(session)
+	if err != nil {
+		return dbstore.BotTaskRunReference{}, err
+	}
+	r, err := s.queries.ReadBotTaskRun(ctx, dbsqlc.ReadBotTaskRunParams{BotID: bid, SessionID: sid, RunID: run})
+	if err != nil {
+		return dbstore.BotTaskRunReference{}, mapQueryErr(err)
+	}
+	return dbstore.BotTaskRunReference{BotID: r.BotID.String(), SessionID: r.SessionID.String(), RunID: r.RunID.String(), TurnID: r.TurnID.String(), InvocationID: r.InvocationID}, nil
+}

@@ -2195,6 +2195,7 @@
       "current": "current conversation"
     },
     "taskDirectory": {
+      "historyUnavailable": "The original execution could not be located in this history.",
       "empty": "No tasks are recorded for this Bot.",
       "types": {
         "native_agent": "Agent task",

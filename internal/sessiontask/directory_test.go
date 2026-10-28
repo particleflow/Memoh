@@ -11,6 +11,7 @@ import (
 
 	"github.com/felinics/memoh/internal/botdelegation"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
@@ -19,6 +20,19 @@ type directoryFixture struct {
 	candidates []dbstore.BotTaskDirectoryCandidate
 	handoff    botdelegation.View
 	denied     bool
+	runs       map[string]dbstore.BotTaskRunReference
+	runErr     error
+}
+
+func (f *directoryFixture) ReadBotTaskRun(_ context.Context, _, _, run string) (dbstore.BotTaskRunReference, error) {
+	if f.runErr != nil {
+		return dbstore.BotTaskRunReference{}, f.runErr
+	}
+	r, ok := f.runs[run]
+	if !ok {
+		return r, db.ErrNotFound
+	}
+	return r, nil
 }
 
 func (f *directoryFixture) ListBotTaskDirectoryCandidates(_ context.Context, q dbstore.SessionTaskFilter) ([]dbstore.BotTaskDirectoryCandidate, error) {
@@ -54,13 +68,14 @@ func (f *directoryFixture) DirectoryMetadata(_ context.Context, bot, user, sessi
 }
 
 func directorySetup() (*directoryFixture, *Service) {
-	f := &directoryFixture{fixture: newFixture()}
+	f := &directoryFixture{fixture: newFixture(), runs: map[string]dbstore.BotTaskRunReference{}}
 	s := NewService(f, f, dirs{f.fixture}, f, "directory-test").WithDelegationDirectory(f)
 	return f, s
 }
 
 func (f *directoryFixture) native(id, state string, at time.Time) dbstore.BotTaskDirectoryCandidate {
 	run := uuid.NewString()
+	f.runs[run] = dbstore.BotTaskRunReference{BotID: "bot", SessionID: f.child, RunID: run, TurnID: uuid.NewString(), InvocationID: "subagent:" + id}
 	return dbstore.BotTaskDirectoryCandidate{Type: "native_agent", ID: id, RecordID: run, RunID: run, SessionID: f.child, SourceSessionID: f.root, SourceBotID: "bot", State: state, Name: "Same name", CreatedAt: at}
 }
 func owner(s thread.Thread) (bool, error) { return s.CreatedByUserID == "user", nil }
@@ -132,6 +147,9 @@ func TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination(t *testing
 	f.sessions[target] = thread.Thread{ID: target, BotID: "expert", CreatedByUserID: "user", Type: "chat", Title: "Delegated job"}
 	f.handoff = botdelegation.View{ID: id, TargetBotID: "expert", TargetSessionID: target, State: "unknown"}
 	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: "bot_delegation", ID: id, RecordID: id, SourceBotID: "bot", SourceSessionID: f.root, OwnerUserID: "user", State: "running", CreatedAt: at}, {Type: "schedule_fire", ID: uuid.NewString(), RecordID: uuid.NewString(), SourceBotID: "bot", State: "failed", CreatedAt: at}}
+	run := uuid.NewString()
+	f.candidates[0].RunID = run
+	f.runs[run] = dbstore.BotTaskRunReference{BotID: "expert", SessionID: target, RunID: run, TurnID: uuid.NewString(), InvocationID: "bot-delegation:" + id}
 	for _, bot := range []string{"bot", "expert"} {
 		p, err := s.ListDirectory(t.Context(), bot, "user", 20, "", owner, false)
 		if err != nil || len(p.Items) != 1 || p.Items[0].State != "unknown" || p.Items[0].Destination.BotID != "expert" {
@@ -150,12 +168,59 @@ func TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant(t *testing.T) {
 	r := f.operations[f.op]
 	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: ComputerOperation, ID: r.ID, RecordID: r.ID, SourceBotID: "bot", SessionID: r.SessionID, RunID: "opaque/provider/run/not-uuid", State: "unknown", CreatedAt: r.CreatedAt}}
 	p, err := s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
-	if err != nil || len(p.Items) != 1 || p.Items[0].State != "unknown" || p.Items[0].Destination.RunID != "" {
+	if err != nil || len(p.Items) != 1 || p.Items[0].State != "unknown" || p.Items[0].Destination != nil {
 		t.Fatalf("computer %+v %v", p, err)
 	}
+	run, turn := uuid.NewString(), uuid.NewString()
+	f.candidates[0].RunID = run
+	f.runs[run] = dbstore.BotTaskRunReference{BotID: "bot", SessionID: r.SessionID, RunID: run, TurnID: turn}
+	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 1 || p.Items[0].Destination == nil || p.Items[0].Destination.RunID != run || p.Items[0].Destination.TurnID != turn {
+		t.Fatalf("native computer anchor %+v %v", p, err)
+	}
+
 	delete(f.targets, "pc-a")
 	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
 	if err != nil || len(p.Items) != 0 {
 		t.Fatalf("revoked computer %+v %v", p, err)
+	}
+}
+
+func TestDirectoryExactRunBindingNeverFallsBackToLatest(t *testing.T) {
+	for _, mismatch := range []string{"missing", "bot", "session", "run", "invocation", "turn", "read-error"} {
+		t.Run(mismatch, func(t *testing.T) {
+			f, s := directorySetup()
+			row := f.native("original-task", "unknown", time.Now().Add(-time.Minute))
+			original := f.runs[row.RunID]
+			other := f.native("later-task", "completed", time.Now())
+			f.candidates = []dbstore.BotTaskDirectoryCandidate{row, other}
+			switch mismatch {
+			case "missing":
+				delete(f.runs, row.RunID)
+			case "bot":
+				original.BotID = "foreign"
+			case "session":
+				original.SessionID = "foreign"
+			case "run":
+				original.RunID = other.RunID
+			case "invocation":
+				original.InvocationID = "subagent:later-task"
+			case "turn":
+				original.TurnID = ""
+			case "read-error":
+				f.runErr = errors.New("storage unavailable")
+			}
+			if mismatch != "missing" {
+				f.runs[row.RunID] = original
+			}
+			got, err := s.GetDirectoryTask(t.Context(), "bot", "user", row.Type, row.RecordID, owner, true)
+			if mismatch == "read-error" {
+				if !errors.Is(err, f.runErr) {
+					t.Fatal("read failure concealed", err)
+				}
+			} else if err != nil || got.TaskID != row.ID || got.State != "unknown" || got.Destination != nil {
+				t.Fatalf("invalid run became a history destination: %+v %v", got, err)
+			}
+		})
 	}
 }

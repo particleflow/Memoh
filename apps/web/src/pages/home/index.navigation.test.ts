@@ -6,10 +6,10 @@ import { createMemoryHistory, createRouter } from 'vue-router'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import Home from './index.vue'
 
-const api = vi.hoisted(() => ({ bot: vi.fn(), session: vi.fn(), lookup: vi.fn(), open: vi.fn(), select: vi.fn() }))
+const api = vi.hoisted(() => ({ bot: vi.fn(), session: vi.fn(), lookup: vi.fn(), open: vi.fn(), select: vi.fn(), task: vi.fn() }))
 vi.mock('@/composables/api/useBot', () => ({ fetchBot: api.bot }))
 vi.mock('@/composables/api/useChat', () => ({ fetchSession: api.session }))
-vi.mock('@memohai/sdk', () => ({ getBotsById: api.lookup, getBotsByBotIdAgents: vi.fn() }))
+vi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasksByTaskTypeByRecordId: api.task, getBotsById: api.lookup, getBotsByBotIdAgents: vi.fn() }))
 vi.mock('@felinic/ui', () => ({ PanePlaceholder: { template: '<div><slot /></div>' }, toast: { error: vi.fn() } }))
 vi.mock('./components/chat-workspace.vue', () => ({ default: { template: '<div data-chat />' } }))
 vi.mock('./components/contact-choice-dialog.vue', () => ({ default: { render: () => null } }))
@@ -19,7 +19,7 @@ vi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: 
 const useChat = defineStore('navigation-fixture', {
   state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false }),
   actions: {
-    async selectBot(botId: string, options?: { sessionId?: string }) { this.currentBotId = botId; api.select(botId, options) },
+    async selectBot(botId: string, options?: { sessionId?: string }) { this.currentBotId = botId; await api.select(botId, options) },
     cancelContactChoice() {}, isSessionTentative() { return false },
   },
 })
@@ -38,7 +38,7 @@ async function mount(path: string) {
 beforeEach(() => {
   api.bot.mockReset(); api.session.mockReset().mockImplementation(async (bot, session) => ({ id: session, bot_id: bot, title: session }))
   api.lookup.mockReset().mockImplementation(async ({ path }) => ({ data: { name: path.id } }))
-  api.open.mockReset(); api.select.mockReset()
+  api.open.mockReset(); api.select.mockReset(); api.task.mockReset()
 })
 afterEach(() => { app?.unmount(); root?.remove(); app = undefined })
 
@@ -52,7 +52,7 @@ it('does not combine a late source Bot lookup with the new expert session', asyn
   expect(api.session).not.toHaveBeenCalledWith('source', 'expert-history')
   expect(api.session).toHaveBeenCalledWith('expert', 'expert-history')
   expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')
-  expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'expert-history', title: 'expert-history' })
+  expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'expert-history', title: 'expert-history', taskAnchor: undefined })
 })
 
 it('does not replace a newer expert route after an earlier Bot-name lookup completes', async () => {
@@ -94,4 +94,33 @@ it.each(['?session=', '?session=first&session=second'])('rejects malformed task 
   expect(api.select).not.toHaveBeenCalled()
   expect(api.open).not.toHaveBeenCalled()
   expect(api.session).not.toHaveBeenCalled()
+})
+
+const runQuery = (id: string) => `?session=history&task_bot=source&task_type=native_agent&task_id=${id}&task_record=${id}&run=${id}`
+function taskResponse(id: string) {
+  return { data: { task_type: 'native_agent', task_id: id, record_id: id, destination: { bot_id: 'source', session_id: 'history', run_id: id, turn_id: id+'-turn' } } }
+}
+it('changes runs within one session without letting a late selection restore the old anchor', async () => {
+  api.task.mockImplementation(async ({ path }) => taskResponse(path.record_id))
+  let release!: () => void
+  api.select.mockImplementationOnce(() => new Promise<void>(resolve => { release=resolve }))
+  const router=await mount('/bot/source'+runQuery('old')); await settle()
+  await router.push('/bot/source'+runQuery('new')); await settle()
+  release(); await settle()
+  expect(api.open).toHaveBeenCalledTimes(1)
+  expect(api.open.mock.calls[0]?.[0].taskAnchor).toMatchObject({ runId: 'new', turnId: 'new-turn' })
+  expect(router.currentRoute.value.query.run).toBe('new')
+})
+it.each(['wrong-run', 'denied', 'missing-session'])('rejects an untrusted task link before selecting history (%s)', async kind => {
+  api.task.mockResolvedValue(taskResponse('old'))
+  if (kind==='denied') api.task.mockRejectedValue({ status: 403 })
+  const path=kind==='missing-session' ? '/bot/source?run=old' : '/bot/source'+runQuery(kind==='wrong-run' ? 'new' : 'old')
+  await mount(path); await settle()
+  expect(api.open).not.toHaveBeenCalled(); expect(api.select).not.toHaveBeenCalled(); expect(api.session).not.toHaveBeenCalled()
+})
+
+it('does not reopen contact for unrelated URL query changes', async () => {
+  const router=await mount('/bot/source'); await settle(); api.select.mockClear()
+  await router.replace('/bot/source?view=unchanged'); await settle()
+  expect(api.select).not.toHaveBeenCalled()
 })

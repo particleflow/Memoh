@@ -18,3 +18,13 @@ type BotTaskDirectoryCandidate struct {
 type BotTaskDirectoryReader interface {
 	ListBotTaskDirectoryCandidates(context.Context, SessionTaskFilter) ([]BotTaskDirectoryCandidate, error)
 }
+
+// BotTaskRunReference is an exact persisted conversation run, never a latest-run
+// projection or an opaque computer/provider run inferred to be a native run.
+type BotTaskRunReference struct {
+	BotID, SessionID, RunID, TurnID, InvocationID string
+}
+
+type BotTaskRunReader interface {
+	ReadBotTaskRun(context.Context, string, string, string) (BotTaskRunReference, error)
+}

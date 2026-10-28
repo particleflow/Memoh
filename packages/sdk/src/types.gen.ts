@@ -4625,6 +4625,7 @@ export type SessiontaskTaskDestination = {
     bot_id: string;
     run_id?: string;
     session_id: string;
+    turn_id?: string;
 };
 
 export type SettingsSettings = {

@@ -2152,6 +2152,7 @@
       }
     },
     "taskDirectory": {
+      "historyUnavailable": "この履歴で元の実行を確認できませんでした。",
       "empty": "この Bot のタスク記録はありません。",
       "types": {
         "native_agent": "Agent タスク",

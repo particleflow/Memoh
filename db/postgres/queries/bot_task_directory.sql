@@ -77,3 +77,13 @@ WHERE created_at<=sqlc.arg(snapshot_at)::timestamptz
     (created_at,task_type COLLATE "C",record_id)<(sqlc.arg(before_time)::timestamptz,sqlc.arg(before_type)::text COLLATE "C",sqlc.arg(before_id)::uuid))
 ORDER BY created_at DESC,task_type COLLATE "C" DESC,record_id DESC
 LIMIT sqlc.arg(page_size)::integer;
+
+-- name: ReadBotTaskRun :one
+-- Computer receipts carry opaque TEXT. Compare without casting that value, and
+-- expose an anchor only if it is an actual run in the original Bot/session.
+SELECT bot_id, session_id, run_id, turn_id, invocation_id
+FROM session_runs
+WHERE team_id=public.memoh_current_team_id()
+  AND bot_id=sqlc.arg(bot_id)::uuid AND session_id=sqlc.arg(session_id)::uuid
+  AND run_id::text=sqlc.arg(run_id)::text
+  AND COALESCE(error_code,'')<>'history_reset';

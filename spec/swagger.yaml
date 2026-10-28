@@ -8019,6 +8019,9 @@ definitions:
       session_id:
         format: uuid
         type: string
+      turn_id:
+        format: uuid
+        type: string
     required:
     - bot_id
     - session_id

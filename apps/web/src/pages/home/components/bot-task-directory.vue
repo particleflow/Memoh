@@ -8,6 +8,7 @@ import { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBod
 import { getBotsByBotIdTasksByTaskTypeByRecordId, getBotsByBotIdSessionsBySessionId, type SessiontaskDirectoryTask } from '@memohai/sdk'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { resolveApiErrorMessage } from '@/utils/api-error'
+import { taskHistoryQuery } from '@/utils/task-history-link'
 import { useBotTaskDirectory } from '../composables/useBotTaskDirectory'
 
 const props = withDefaults(defineProps<{ botId: string, visible?: boolean }>(), { visible: true })
@@ -34,13 +35,14 @@ async function navigate(row: SessiontaskDirectoryTask) {
     if (!current()) return
     const destination = task.destination
     if (task.task_id !== row.task_id || task.record_id !== row.record_id || task.task_type !== row.task_type || !destination
-      || destination.bot_id !== row.destination.bot_id || destination.session_id !== row.destination.session_id) throw new Error('Task destination changed')
+      || destination.bot_id !== row.destination.bot_id || destination.session_id !== row.destination.session_id
+      || destination.run_id !== row.destination.run_id) throw new Error('Task destination changed')
     const { data: session } = await getBotsByBotIdSessionsBySessionId({ path: { bot_id: destination.bot_id, session_id: destination.session_id }, cache: 'no-store', signal: control.signal, throwOnError: true })
     if (!current()) return
     if (session.id !== destination.session_id || session.bot_id !== destination.bot_id) throw new Error('Execution context changed')
     // The explicit route owns selection and the pinned execution tab. Updating
     // global Bot selection first lets the old primary URL restore its contact.
-    await router.push({ name: 'bot', params: { botName: destination.bot_id }, query: { session: session.id } })
+    await router.push({ name: 'bot', params: { botName: destination.bot_id }, query: { session: session.id, ...taskHistoryQuery(sourceBot, task) } })
     open.value = false
   } catch (cause) {
     if (generation === epoch && !control.signal.aborted) toast.error(resolveApiErrorMessage(cause, t('chat.delegations.historyUnavailable')))

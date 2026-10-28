@@ -32060,6 +32060,10 @@ const docTemplate = `{
                 "session_id": {
                     "type": "string",
                     "format": "uuid"
+                },
+                "turn_id": {
+                    "type": "string",
+                    "format": "uuid"
                 }
             }
         },
