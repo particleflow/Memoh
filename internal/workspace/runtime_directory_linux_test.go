@@ -95,7 +95,12 @@ func TestCleanupBotContainerRetainsNonemptyDirectoryAndRetries(t *testing.T) {
 	if err := m.CleanupBotContainer(context.Background(), runtimeDirectoryTestBotID, false); !errors.Is(err, unix.ENOTEMPTY) {
 		t.Fatalf("cleanup = %v, want ENOTEMPTY", err)
 	}
-	if data, err := os.ReadFile(file); err != nil || string(data) != "do not delete" {
+	root, err := os.OpenRoot(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = root.Close() })
+	if data, err := root.ReadFile("retained.txt"); err != nil || string(data) != "do not delete" {
 		t.Fatalf("unexpected data change: %q, %v", data, err)
 	}
 	if err := os.Remove(file); err != nil {
@@ -183,11 +188,12 @@ func TestRuntimeDirectoryCleanupRefusesSymlinks(t *testing.T) {
 				t.Fatalf("symlink was changed: %v", err)
 			}
 			requireRuntimePath(t, victim, true)
-			if location == "run" {
+			switch location {
+			case "run":
 				requireRuntimePath(t, filepath.Join(victim, runtimeDirectoryTestBotID), true)
-			} else if location == "data-root" {
+			case "data-root":
 				requireRuntimePath(t, filepath.Join(victim, "run", runtimeDirectoryTestBotID), true)
-			} else if location == "ancestor" {
+			case "ancestor":
 				requireRuntimePath(t, filepath.Join(victim, "nested", "run", runtimeDirectoryTestBotID), true)
 			}
 		})
