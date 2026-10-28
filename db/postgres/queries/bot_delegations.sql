@@ -18,7 +18,7 @@ SELECT * FROM bot_delegations WHERE team_id=public.memoh_current_team_id()
 AND target_bot_id=sqlc.arg(target_bot_id) AND target_session_id=sqlc.arg(target_session_id);
 
 -- name: UpdateBotDelegation :one
-UPDATE bot_delegations SET target_session_id=sqlc.narg(target_session_id),run_id=sqlc.arg(run_id),state=sqlc.arg(state),delivery_state=sqlc.arg(delivery_state),result=sqlc.arg(result),revision=revision+1,updated_at=now()
+UPDATE bot_delegations SET target_session_id=sqlc.narg(target_session_id),run_id=sqlc.arg(run_id),state=sqlc.arg(state),delivery_state=sqlc.arg(delivery_state),result=(sqlc.arg(result)::jsonb - 'result_delivery') || CASE WHEN result ? 'result_delivery' THEN jsonb_build_object('result_delivery',result->'result_delivery') ELSE '{}'::jsonb END,revision=revision+1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=sqlc.arg(id) AND user_id=sqlc.arg(user_id)
 AND revision=sqlc.arg(revision) AND (target_session_id IS NULL OR target_session_id=sqlc.narg(target_session_id))
 RETURNING *;

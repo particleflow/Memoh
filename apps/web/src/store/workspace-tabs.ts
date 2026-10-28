@@ -761,17 +761,18 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     return typeof sid === 'string' && sid.trim() ? sid : null
   }
 
-  function chatPanelForSession(sid: string) {
+  function chatPanelForSession(sid: string, contactView?: boolean) {
     const dock = api.value
     if (!dock) return undefined
     return dock.panels.find(
-      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === sid,
+      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === sid
+        && (contactView === undefined || (p.params?.contactView === true) === contactView),
     )
   }
 
   function resetDeletedChatPanelToDraft(panel: { id: string, api: { updateParameters(params: Record<string, unknown>): void, setTitle(title: string): void } }) {
     const explicitSelection = chatStore.hasExplicitSessionSelection === true
-    panel.api.updateParameters({ sessionId: null, explicitSelection })
+    panel.api.updateParameters({ sessionId: null, explicitSelection, contactView: false })
     panel.api.setTitle(defaultChatTitle())
     markEphemeral(panel.id)
     if (api.value?.activePanel?.id === panel.id) {
@@ -818,9 +819,9 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     const activate = opts.activate !== false
     const existing = opts.groupLocal && opts.groupId
       ? dock.getGroup(opts.groupId)?.panels.find(
-          panel => panelComponentOf(panel.id) === 'chat' && panelSessionId(panel) === sid,
+          panel => panelComponentOf(panel.id) === 'chat' && panelSessionId(panel) === sid && panel.params?.contactView !== true,
         )
-      : chatPanelForSession(sid)
+      : chatPanelForSession(sid, false)
     if (existing) {
       existing.api.setTitle(title)
       existing.api.updateParameters({ explicitSelection })
@@ -848,7 +849,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         )
       : undefined
     if (reusable) {
-      reusable.api.updateParameters({ sessionId: sid, explicitSelection })
+      reusable.api.updateParameters({ sessionId: sid, explicitSelection, contactView: false })
       reusable.api.setTitle(title)
       if (!activate) return
       setNextChatActivationExplicit(reusable.id, explicitSelection)
@@ -898,7 +899,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
    * right-click means "give me a separate tab" — so it lands as a pinned chat
    * tab the preview slot can never evict. An already-open tab for the session is
    * promoted to pinned + focused. */
-  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean }) {
+  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean, contactView?: boolean }) {
     const dock = api.value
     if (!dock) return
     const sid = opts.sessionId.trim()
@@ -909,7 +910,9 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     // the sidebar, so refuse to (re)open a session being deleted for this bot.
     if (isDeletedSessionForCurrentBot(sid)) return
     const title = opts.title?.trim() || chatTitleFallbackFor(sid)
-    const existing = chatPanelForSession(sid)
+    // Only the server-resolved contact entry requests this projection. History
+    // and task links retain a separate full transcript, even for this session.
+    const existing = chatPanelForSession(sid, opts.contactView === true)
     if (existing) {
       existing.api.setTitle(title)
       pinPanel(existing.id)
@@ -924,7 +927,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       id: nextChatPanelId(bid),
       component: 'chat',
       title,
-      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false },
+      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false, contactView: opts.contactView === true },
       renderer: 'always',
       ...(target ? { position: target } : {}),
     })
@@ -947,7 +950,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     if (isDeletedSessionForCurrentBot(sid)) return
     const title = opts.title?.trim() || chatTitleFallbackFor(sid)
 
-    const existing = chatPanelForSession(sid)
+    const existing = chatPanelForSession(sid, false)
     if (existing) {
       existing.api.setTitle(title)
       pinPanel(existing.id)

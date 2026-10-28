@@ -12,12 +12,15 @@ vi.mock('@memohai/sdk', async importOriginal => ({ ...(await importOriginal<type
 
 const Stub = defineComponent({ inheritAttrs: false, setup: () => () => h('div') })
 
-vi.mock('markstream-vue', () => ({ default: Stub, setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))
+vi.mock('markstream-vue', () => ({ default: defineComponent({ props: { content: { type: String, default: '' } }, setup: props => () => h('p', props.content) }), setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))
 vi.mock('@/components/markdown', () => ({ registerSharedMarkdownComponents: vi.fn() }))
 vi.mock('@/components/themed-mermaid-block/index.vue', () => ({ default: Stub }))
 vi.mock('@/components/chat-list/channel-badge/index.vue', () => ({ default: Stub }))
-for (const child of ['chat-code-block', 'tool-call-group', 'chat-answers-card', 'attachment-block', 'background-task-block', 'dependency-missing-block']) {
+for (const child of ['chat-code-block', 'attachment-block', 'dependency-missing-block']) {
   vi.doMock(`./${child}.vue`, () => ({ default: Stub }))
+}
+for (const child of ['tool-call-group', 'chat-answers-card', 'background-task-block']) {
+  vi.doMock(`./${child}.vue`, () => ({ default: defineComponent({ setup: () => () => h('div', { 'data-process-test': child }) }) }))
 }
 vi.mock('./collapsible-user-text.vue', () => ({
   default: defineComponent({ props: { text: String }, setup: props => () => h('p', props.text) }),
@@ -117,7 +120,7 @@ describe('accepted-answer failure hint', () => {
     const retry = vi.fn(), MessageItem = (await import('./message-item.vue')).default
     root = document.createElement('div'); document.body.append(root)
     app = createApp(MessageItem, {
-      botId: 'bot', sessionId: 'session', recoveryEnabled: true, recoveryVisible: true, isScrolling: false, onRetryMessage: retry,
+      botId: 'bot', sessionId: 'session', recoveryEnabled: true, recoveryVisible: true, hideProcessActivity: true, isScrolling: false, onRetryMessage: retry,
       message: { id: 'original-message', role: 'assistant', timestamp: '2026-10-27T07:00:00Z', streaming: false, turnId: 'original-turn', runtimeRunId: 'original-run', messages: [
         { id: 1, type: 'tool', name: 'ask_user', input: {}, tool_call_id: 'call', toolCallId: 'call', toolName: 'ask_user', result: null, done: true, running: false, userInput: { user_input_id: 'original-decision', status, answers: [] } },
         { id: 2, type: 'error', code: 'runtime_run_failed', content: '' },
@@ -159,5 +162,49 @@ describe('message speech state', () => {
       expect(root.querySelectorAll('[data-speech-state="playing"]')).toHaveLength(0)
       expect(root.querySelector('[role="status"]')).toBeNull()
     }
+  })
+})
+
+describe('contact transcript projection', () => {
+  it.each([true, false])('keeps ordinary text and completed Q&A while hiding structured process (streaming=%s)', async streaming => {
+    const MessageItem = (await import('./message-item.vue')).default
+    const hide = ref(true)
+    const text = 'Spawn agent in background; execution state: unknown'
+    const tool = { id: 1, type: 'tool' as const, name: 'exec', input: {}, tool_call_id: 'call', toolCallId: 'call', toolName: 'exec', result: 'raw result', done: true, running: false }
+    const message = { id: 'projection', role: 'assistant' as const, timestamp: '', streaming, messages: [
+      tool,
+      { id: 2, type: 'reasoning' as const, content: 'private process' },
+      { id: 3, type: 'text' as const, content: text },
+      { ...tool, id: 4, toolName: 'ask_user', result: { answers: [] } },
+    ] }
+    root = document.createElement('div'); document.body.append(root)
+    app = createApp(defineComponent({ setup: () => () => h(MessageItem, { message, hideProcessActivity: hide.value, isScrolling: false }) }))
+    app.config.globalProperties.$t = (key: string) => key; app.mount(root); await nextTick()
+    expect(root.textContent).toContain(text)
+    expect(root.querySelectorAll('[data-process-test="tool-call-group"]')).toHaveLength(0)
+    expect(root.querySelectorAll('[data-process-test="chat-answers-card"]')).toHaveLength(1)
+    expect(message.messages[0]).toBe(tool)
+    expect(tool.result).toBe('raw result')
+    hide.value = false; await nextTick()
+    expect(root.querySelectorAll('[data-process-test="tool-call-group"]')).toHaveLength(1)
+    expect(root.textContent).toContain(text)
+  })
+
+  it.each(['tool-only', 'background', 'user'] as const)('projects %s by structured role and kind, never by wording', async kind => {
+    const MessageItem = (await import('./message-item.vue')).default
+    const hide = ref(true)
+    const text = 'Spawn agent in background; execution state: unknown'
+    const message = kind === 'user'
+      ? { id: 'user', role: 'user', text, attachments: [], messages: [], timestamp: '' }
+      : kind === 'background'
+        ? { id: 'background', role: 'system', kind: 'background_task', backgroundTask: {}, timestamp: '' }
+        : { id: 'tool-only', role: 'assistant', timestamp: '', streaming: false, messages: [{ id: 1, type: 'tool', toolName: 'exec', done: true }] }
+    root = document.createElement('div'); document.body.append(root)
+    app = createApp(defineComponent({ setup: () => () => h(MessageItem, { message: message as never, hideProcessActivity: hide.value, isScrolling: false }) }))
+    app.config.globalProperties.$t = (key: string) => key; app.mount(root); await nextTick()
+    if (kind === 'user') expect(root.textContent).toContain(text)
+    else expect(root.children).toHaveLength(0)
+    hide.value = false; await nextTick()
+    expect(root.children.length).toBeGreaterThan(0)
   })
 })

@@ -244,8 +244,8 @@ func TestNativeHandoffReturnsToSourceAndNeverRedispatches(t *testing.T) {
 				if h.deliveries.Load() != 1 || replay.DeliveryState != "accepted" || replay.SourceSessionID != b.SourceSessionID || r.Identity.SourceSessionID != b.SourceSessionID || r.Identity.SourceRootID != b.SourceRootID || r.Payload.ReturnRoute.ReplyTarget != b.SourceBotID || r.Payload.TargetSelection != p.TargetMountID || r.Identity.TargetBotID != target || r.Identity.TargetSessionID != b.TargetSessionID {
 					t.Fatalf("result lost original conversation: %+v", r)
 				}
-			} else if h.deliveries.Load() != 0 || replay.Summary != nil {
-				t.Fatal("unknown result delivered")
+			} else if h.deliveries.Load() != 1 || replay.DeliveryState != "accepted" || replay.Summary != nil {
+				t.Fatal("opted-in unknown notification missing or exposed an unconfirmed result")
 			}
 			if f.mcpCalls != 0 {
 				t.Fatal("legacy MCP fallback")

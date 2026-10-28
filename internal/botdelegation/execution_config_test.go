@@ -31,7 +31,7 @@ func TestDelegationDeadlineIsUnknownAndNeverReexecutes(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if v.State == "unknown" {
+		if v.State == "unknown" && h.deliveries.Load() == 1 {
 			break
 		}
 		select {
@@ -40,11 +40,11 @@ func TestDelegationDeadlineIsUnknownAndNeverReexecutes(t *testing.T) {
 		case <-time.After(time.Millisecond):
 		}
 	}
-	if v.Summary != nil || len(v.Attachments) != 0 || h.deliveries.Load() != 0 {
-		t.Fatal("expired result delivered")
+	if v.Summary != nil || len(v.Attachments) != 0 || h.deliveries.Load() != 1 {
+		t.Fatal("unknown notification exposed an expired success result")
 	}
-	if _, err := s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID); !errors.Is(err, ErrConflict) {
-		t.Fatalf("unknown delivery retried: %v", err)
+	if _, err := s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID); err != nil {
+		t.Fatalf("unknown status could not be reported: %v", err)
 	}
 	replay, err := s.Submit(t.Context(), "manager", "user", "child", in)
 	if err != nil || replay.ID != v.ID || h.runs.Load() != 1 {

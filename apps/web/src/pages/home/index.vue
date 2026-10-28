@@ -335,7 +335,7 @@ watch(
     await nextTick()
     if (chatStore.contactOpenRequested !== request || currentBotId.value !== request.botId || route.query.session) return
     openedContactRequest = request
-    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false })
+    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false, contactView: true })
     chatStore.completeContactOpen(request)
   },
   { immediate: true },

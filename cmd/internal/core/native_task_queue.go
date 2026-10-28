@@ -102,6 +102,22 @@ func (q *nativeTaskQueueHost) Enqueue(ctx context.Context, s tools.SessionContex
 		return r, false, err
 	}
 	r = dbstore.NativeTaskReceipt{Version: 1, ID: id, TaskID: "bg_" + strings.ReplaceAll(id, "-", ""), SourceRunID: source.RunID.String(), BotID: s.BotID, ParentSessionID: s.SessionID, UserID: s.UserID, SessionID: child, AgentID: agent, CallID: call, CallFingerprint: tools.NativeTaskCallFingerprint(ctx), State: "queued", Message: message, Description: description, Config: conf, Parent: snapshot}
+	b, err := q.host.service.Authority.Source(ctx, r.UserID, r.BotID, r.ParentSessionID)
+	if err != nil {
+		return r, false, err
+	}
+	routing, err := q.host.SourceRoute(ctx, b)
+	if err != nil {
+		return r, false, err
+	}
+	r.ReturnRoute, _ = json.Marshal(routing)
+	sourceSession, err := q.host.sessions.Get(ctx, r.ParentSessionID)
+	if err != nil {
+		return r, false, err
+	}
+	if routing.Channel == "web" && (sourceSession.RuntimeType == "" || sourceSession.RuntimeType == thread.RuntimeModel) {
+		r.ResultDeliveryVersion = 1
+	}
 	// The source run/tool call, resolved original child and immutable request form
 	// the retry boundary. State/claim/run observations are outside this hash.
 	immutable, _ := json.Marshal(r)
@@ -237,6 +253,7 @@ func (q *nativeTaskQueueHost) Claim(ctx context.Context, r dbstore.NativeTaskRec
 }
 
 func (q *nativeTaskQueueHost) Finish(ctx context.Context, r dbstore.NativeTaskReceipt, run, state string) (string, error) {
+	defer q.host.wakeResults(ctx)
 	if r.ClaimToken == "" {
 		return "unknown", errors.New("native task has no claim")
 	}
@@ -308,6 +325,7 @@ func (q *nativeTaskQueueHost) Pending(ctx context.Context) ([]dbstore.NativeTask
 }
 
 func (q *nativeTaskQueueHost) Cancel(task string) error {
+	defer q.host.wakeResults(context.Background())
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	data, err := q.host.store.FindNativeTask(ctx, task)
@@ -332,6 +350,7 @@ func (q *nativeTaskQueueHost) Cancel(task string) error {
 }
 
 func (q *nativeTaskQueueHost) Reject(ctx context.Context, r dbstore.NativeTaskReceipt) error {
+	defer q.host.wakeResults(ctx)
 	_, err := q.host.store.RejectQueuedNativeTask(ctx, dbsqlc.RejectQueuedNativeTaskParams{SourceRunID: nativeTaskUUID(r.SourceRunID), BotID: nativeTaskUUID(r.BotID), TaskKey: r.ID})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil

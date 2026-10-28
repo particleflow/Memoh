@@ -6,6 +6,7 @@
         :key="`chat-pane:${panelBotId}:${panelId}`"
         :tab-id="panelId"
         :session-id="paramsSessionId"
+        :contact-view="params.params.contactView === true"
         :visible="visible"
         :active="focused"
       />
@@ -31,7 +32,7 @@ import DockPanelFrame from './panel-frame.vue'
 // No breadcrumb: the tab already carries the session title.
 const props = defineProps<{
   params: {
-    params: { sessionId?: string | null }
+    params: { sessionId?: string | null, contactView?: boolean }
     api: DockviewPanelApi
     containerApi: DockviewApi
   }

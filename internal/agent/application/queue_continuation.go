@@ -37,7 +37,7 @@ func encodeQueueCommand(cmd turn.StartTurnCommand) ([]byte, error) {
 	if text == "" {
 		text = strings.TrimSpace(cmd.Query)
 	}
-	if cmd.DelegationResultID != "" {
+	if cmd.DelegationResultID != "" || cmd.TaskResultReceipt != "" {
 		return json.Marshal(queuePayload{InternalCommand: &cmd})
 	}
 	return json.Marshal(queuePayload{Text: text, Command: &cmd})
@@ -49,7 +49,7 @@ func decodeQueuePayload(payload []byte) queuePayload {
 		return queuePayload{}
 	}
 	if body.InternalCommand != nil {
-		if body.Command != nil || body.InternalCommand.DelegationResultID == "" {
+		if body.Command != nil || (body.InternalCommand.DelegationResultID == "" && body.InternalCommand.TaskResultReceipt == "") {
 			return queuePayload{}
 		}
 		body.Command = body.InternalCommand
@@ -76,7 +76,7 @@ func rewriteQueuePayloadText(payload []byte, editorUserID, text string) ([]byte,
 	}
 	body := decodeQueuePayload(payload)
 	editor := strings.TrimSpace(editorUserID)
-	if body.Command == nil || body.Command.DelegationResultID != "" || editor == "" || strings.TrimSpace(body.Command.UserID) != editor {
+	if body.Command == nil || (body.Command.DelegationResultID != "" || body.Command.TaskResultReceipt != "") || editor == "" || strings.TrimSpace(body.Command.UserID) != editor {
 		return nil, ErrQueueItemNotEditable
 	}
 	body.Text = text
@@ -90,7 +90,7 @@ func rewriteQueuePayloadText(payload []byte, editorUserID, text string) ([]byte,
 // fall back to the raw envelope, which can contain a deferred command credential.
 func QueuePayloadText(payload []byte) string {
 	body := decodeQueuePayload(payload)
-	if body.Command != nil && body.Command.DelegationResultID != "" {
+	if body.Command != nil && (body.Command.DelegationResultID != "" || body.Command.TaskResultReceipt != "") {
 		return ""
 	}
 	if text := strings.TrimSpace(body.Text); text != "" {

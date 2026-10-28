@@ -71,6 +71,10 @@ func (s *Service) SetResumeReadiness(check func(context.Context, string, string)
 }
 
 func (s *Service) recordRunResumeContext(ctx context.Context, req ChatRequest) error {
+	// A result summary restarts from its durable outbox, never an execution checkpoint.
+	if req.TaskResultReceipt != "" {
+		return nil
+	}
 	if s.resumeSecret == "" || s.queries == nil || req.RunID == "" || req.ShutdownResume {
 		return nil
 	}

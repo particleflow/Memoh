@@ -354,7 +354,7 @@ func (s *Service) buildPersistInputs(ctx context.Context, req ChatRequest, messa
 				displayText = strings.TrimSpace(turnpkg.UnwrapUserMessageEnvelope(displayText))
 				assets = chatAttachmentsToAssetRefs(req.Attachments)
 				persistMeta = mergeMetadata(meta, buildInteractionMetadata(req))
-				if req.DelegationResultID != "" {
+				if req.DelegationResultID != "" || req.TaskResultReceipt != "" {
 					displayText = ""
 					persistMeta = mergeMetadata(persistMeta, botTaskResultMetadata(req))
 				}

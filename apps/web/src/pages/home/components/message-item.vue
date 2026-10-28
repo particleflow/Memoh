@@ -486,6 +486,7 @@ const emit = defineEmits<{
 
 const props = defineProps<{
   message: ChatMessage
+  hideProcessActivity?: boolean
   botId?: string
   sessionId?: string
   recoveryOriginalRunId?: string
@@ -874,6 +875,7 @@ const hasVisibleAssistantBlocks = computed(() =>
 )
 
 const runtimeStatusText = computed(() => {
+  if (props.hideProcessActivity) return ''
   if (props.message.role !== 'assistant' || !props.message.streaming) return ''
   const status = props.message.messages.find(block => block.type === 'status')
   if (status?.type !== 'status' || !status.name) return ''
@@ -881,12 +883,20 @@ const runtimeStatusText = computed(() => {
   return te(key) ? t(key, status.args ?? {}) : ''
 })
 
-const shouldRenderMessage = computed(() =>
-  props.message.role !== 'assistant' || hasVisibleAssistantBlocks.value || props.message.streaming,
-)
+const shouldRenderMessage = computed(() => {
+  if (props.hideProcessActivity && props.message.role === 'system' && props.message.kind === 'background_task') return false
+  return props.message.role !== 'assistant' || hasVisibleAssistantBlocks.value || props.message.streaming
+})
 
 function isVisibleAssistantBlock(block: ContentBlock): boolean {
   if (block.type === 'status') return false
+  // Project only trusted structured process blocks; ordinary text (including
+  // quoted tool output) and interactive Q&A remain conversation content. This
+  // is render-only: approvals and task/debug panes read the intact transcript.
+  if (props.hideProcessActivity) {
+    if (block.type === 'reasoning') return false
+    if (block.type === 'tool') return isCompletedAskUser(block)
+  }
   if (block.type === 'tool') return true
   if (block.type === 'text') return Boolean(block.content)
   if (block.type === 'command') return Boolean(block.content)

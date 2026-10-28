@@ -66,7 +66,7 @@ func (s *Service) persistUserTurn(ctx context.Context, req ChatRequest) (message
 	senderChannelIdentityID, senderUserID := s.resolvePersistSenderIDs(ctx, req)
 	sessionMode, runtimeType := s.persistSessionRuntimeSnapshot(ctx, req)
 	metadata := mergeMetadata(mergeMetadata(buildRouteMetadata(req), buildInteractionMetadata(req)), workspaceTargetMetadata(req.WorkspaceTarget))
-	if req.DelegationResultID != "" {
+	if req.DelegationResultID != "" || req.TaskResultReceipt != "" {
 		displayText = ""
 		metadata = mergeMetadata(metadata, botTaskResultMetadata(req))
 	}

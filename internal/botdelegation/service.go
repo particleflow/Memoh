@@ -15,6 +15,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 
+	"github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/job"
 )
 
@@ -136,12 +137,22 @@ func (s *Service) Submit(ctx context.Context, bot, user, session string, in Inpu
 	if err != nil {
 		return View{}, err
 	}
+	// Opt in only where the native result-only publication proof is supported.
+	// Other ingress/runtime types keep their existing delivery behavior.
+	resultVersion := 0
+	source, err := s.Authority.Sessions.Get(ctx, b.SourceSessionID)
+	if err != nil {
+		return View{}, err
+	}
+	if returnRoute.Channel == "web" && (source.RuntimeType == "" || source.RuntimeType == thread.RuntimeModel) {
+		resultVersion = 1
+	}
 	canonical, _ := json.Marshal(struct {
 		Target, Message string
 		Inputs          []string
 	}{in.TargetBotID, in.Message, hashes})
 	fp := sha256.Sum256(canonical)
-	r := Record{Identity: b, ID: uuid.NewString(), RequestID: in.RequestID, RunID: uuid.NewString(), Fingerprint: hex.EncodeToString(fp[:]), SourceSelection: selected, State: "accepted", DeliveryState: "pending", Payload: Payload{Message: in.Message, Inputs: hashes, Devices: devices, TargetSelection: target, ReturnRoute: &returnRoute}}
+	r := Record{Identity: b, ID: uuid.NewString(), RequestID: in.RequestID, RunID: uuid.NewString(), Fingerprint: hex.EncodeToString(fp[:]), SourceSelection: selected, State: "accepted", DeliveryState: "pending", Payload: Payload{ResultDeliveryVersion: resultVersion, Message: in.Message, Inputs: hashes, Devices: devices, TargetSelection: target, ReturnRoute: &returnRoute}}
 	r, created, err := s.Ledger.Claim(ctx, r)
 	if err != nil {
 		return View{}, err
@@ -220,7 +231,9 @@ func (s *Service) execute(ctx context.Context, r Record) error {
 	if err != nil {
 		return err
 	}
-	if state == "unknown" {
+	// Legacy records and unvalidated ingress/runtime types keep their original
+	// unknown behavior. Only persisted Web/native opt-in permits notification.
+	if state == "unknown" && r.Payload.ResultDeliveryVersion != 1 {
 		return runErr
 	}
 	if _, err = s.Authority.Authorize(saveCtx, r.Identity); err != nil {
@@ -275,10 +288,10 @@ func (s *Service) RetryDelivery(ctx context.Context, bot, user, session, id stri
 	if err != nil {
 		return View{}, err
 	}
-	if r.State != "completed" && r.State != "failed" {
+	if r.State != "completed" && r.State != "failed" && !(r.State == "unknown" && r.Payload.ResultDeliveryVersion == 1) {
 		return View{}, ErrConflict
 	}
-	if r.DeliveryState == "accepted" {
+	if r.DeliveryState == "accepted" && r.Payload.ResultDeliveryVersion == 0 {
 		return s.project(ctx, r)
 	}
 	if s.Host == nil {

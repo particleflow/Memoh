@@ -37,15 +37,17 @@ import (
 )
 
 type delegationHost struct {
-	store       *postgresstore.Store
-	accounts    *accounts.Service
-	permissions *applicationBotPermissionChecker
-	sessions    *thread.Service
-	agent       *application.Service
-	service     *botdelegation.Service
-	messages    *messagepkg.DBService
-	media       *media.Service
-	routes      delegationRouteReader
+	store        *postgresstore.Store
+	accounts     *accounts.Service
+	permissions  *applicationBotPermissionChecker
+	sessions     *thread.Service
+	agent        *application.Service
+	service      *botdelegation.Service
+	messages     *messagepkg.DBService
+	media        *media.Service
+	routes       delegationRouteReader
+	resultWake   *resultDeliveryWake
+	resultSubmit func(context.Context, string, turn.StartTurnCommand) error
 }
 
 func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, media *media.Service, messages *messagepkg.DBService, runtime *boot.RuntimeConfig, routes *route.DBService, cfg config.Config) (*botdelegation.Service, error) {
@@ -59,7 +61,15 @@ func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstor
 	s.SetCursorSecret(runtime.JwtSecret)
 	h.service = s
 	s.Host = h
-	lc.Append(fx.Hook{OnStop: func(context.Context) error { s.Close(); return nil }})
+	resultCtx, resultCancel := context.WithCancel(context.Background())
+	h.resultWake = &resultDeliveryWake{ctx: resultCtx, cancel: resultCancel, log: log}
+	lc.Append(fx.Hook{OnStart: func(ctx context.Context) error {
+		if err := h.recoverUnadmittedResults(ctx); err != nil {
+			return err
+		}
+		h.wakeResults(ctx)
+		return nil
+	}, OnStop: func(context.Context) error { resultCancel(); h.resultWake.wg.Wait(); s.Close(); return nil }})
 	return s, nil
 }
 
@@ -87,7 +97,9 @@ func (w delegationWorkdirs) Get(ctx context.Context, bot, id string) (workdir.Wo
 func injectBotDelegation(s *botdelegation.Service, agent *application.Service, assets *media.Service) {
 	h := s.Host.(*delegationHost)
 	h.agent = agent
+	h.resultSubmit = agent.EnqueueAuthorizedFollowUp
 	agent.SetDelegationScope(h.prepare)
+	agent.SetTaskResultWake(h.wakeResults)
 	agent.SetGatewayAssetLoader(&delegationAssetLoader{base: &gatewayAssetLoaderAdapter{media: assets}, host: h})
 }
 
@@ -351,6 +363,12 @@ func (h *delegationHost) Run(ctx context.Context, r botdelegation.Record, starte
 }
 
 func (h *delegationHost) Deliver(ctx context.Context, r botdelegation.Record) error {
+	if r.Payload.ResultDeliveryVersion == 1 {
+		return h.reconcileResult(ctx, "bot_delegation", r.ID, r.Identity.SourceBotID, r.Identity.UserID, r.Identity.SourceSessionID)
+	}
+	if r.State == "unknown" {
+		return botdelegation.ErrDenied
+	}
 	routing, err := h.deliveryRoute(ctx, r)
 	if err != nil {
 		return err
@@ -450,7 +468,13 @@ func (h *delegationHost) outboundRefs(ctx context.Context, r botdelegation.Recor
 
 func (h *delegationHost) prepare(ctx context.Context, req application.ChatRequest) (context.Context, application.ChatRequest, error) {
 	ctx = context.WithValue(ctx, delegationMediaKey{}, delegationMediaIdentity{req.BotID, req.UserID, req.ThreadID})
-	if req.DelegationResultID != "" {
+	if req.TaskResultReceipt != "" {
+		var err error
+		ctx, req, err = h.prepareResult(ctx, req)
+		if err != nil {
+			return ctx, req, err
+		}
+	} else if req.DelegationResultID != "" {
 		r, err := h.service.ReadRecord(ctx, req.BotID, req.UserID, req.ThreadID, req.DelegationResultID)
 		if err != nil || (r.State != "completed" && r.State != "failed") {
 			return ctx, req, botdelegation.ErrDenied

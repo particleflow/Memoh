@@ -13,6 +13,7 @@ import (
 // channel and function fields below are strictly in-process runtime state.
 type ChatRequest struct {
 	DelegationResultID       string `json:"-"`
+	TaskResultReceipt        string `json:"-"`
 	discussCurrentSources    []turn.ContextMessageSource
 	discussOmittedSources    []turn.ContextMessageSource
 	discussMessages          []turn.DiscussMessage
