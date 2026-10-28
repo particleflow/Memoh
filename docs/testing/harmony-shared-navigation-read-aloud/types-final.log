@@ -1,0 +1,9 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/composables/harmony-read-aloud.integration.test.ts(42,98): error TS2322: Type '{ id: string; turnId: string; runtimeRunId: string; serverId?: string | undefined; role: "user"; text: string; userMessageKind?: string | undefined; skillActivation?: UISkillActivation | undefined; ... 16 more ...; __optimistic?: boolean | undefined; } | { ...; } | { ...; }' is not assignable to type 'ChatMessage | { id: string; serverId?: string | undefined; role: "user"; text: string; userMessageKind?: string | undefined; skillActivation?: { skills?: { name: string; display_name?: string | undefined; description?: string | undefined; source_kind?: string | undefined; state?: string | undefined; }[] | undefined;...'.
+  Object literal may only specify known properties, and 'runtimeRunId' does not exist in type 'ChatSystemTurn | { id: string; serverId?: string | undefined; role: "system"; kind: "background_task"; backgroundTask: { taskId: string; status: string; event?: string | undefined; ... 11 more ...; stalled?: boolean | undefined; }; ... 5 more ...; settled?: boolean | undefined; }'.
+/workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

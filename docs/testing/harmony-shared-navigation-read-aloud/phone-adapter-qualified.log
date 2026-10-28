@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/composables/harmony-read-aloud.integration.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  17:40:17
+   Duration  6.22s (transform 1.34s, setup 0ms, import 1.76s, tests 89ms, environment 3.57s)

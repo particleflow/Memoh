@@ -2,6 +2,7 @@ import { computed, onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'
 import { getBotsByBotIdSessionsBySessionId, getBotsByBotIdSessionsBySessionIdDelegations, getBotsByBotIdSessionsBySessionIdTasks } from '@memohai/sdk'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 import { apiErrorStatus } from '@/utils/api-error'
+import { isAgentRuntimeType, normalizedRuntimeType, normalizedSessionMode } from '@/store/chat-list.utils'
 import type { TaskScope } from './useSessionTasks'
 
 export interface ConversationRelation {
@@ -12,9 +13,16 @@ export interface ConversationRelation {
   name: string
   state: string
   parent?: string
+  // Task identity belongs to the scoped receipt; its owner is a navigation
+  // destination only when that persisted session is itself an Agent.
+  task?: { id: string, root: string, agentSession?: string }
 }
 
 export const relationSessionKey = (bot: string, session: string) => `session:${bot}:${session}`
+export const relationHasDestination = (row: ConversationRelation) => row.kind !== 'task'
+  || (!!row.task?.agentSession && row.task.agentSession === row.session)
+export const isTaskAgentSession = (session: { type?: string, session_mode?: string, runtime_type?: string }) =>
+  normalizedSessionMode(session) === 'subagent' || isAgentRuntimeType(normalizedRuntimeType(session))
 
 // Use only persisted session ancestry and scoped delegation links. The global
 // Bot/activity list is not a source of conversation membership or queue state.
@@ -35,6 +43,7 @@ export function useConversationRelations(scope: Ref<TaskScope | null>, visible: 
     controller = control; loading.value = true
     const timeout = setTimeout(() => control.abort(), 15000)
     const rows = new Map<string, ConversationRelation>()
+    const taskRoots = new Map<string, string>()
     let partialError: unknown
     const sessions = new Map<string, Awaited<ReturnType<typeof getBotsByBotIdSessionsBySessionId<true>>>['data']>()
     const tasksRead = new Set<string>(), delegationsRead = new Set<string>()
@@ -82,19 +91,22 @@ export function useConversationRelations(scope: Ref<TaskScope | null>, visible: 
             tasksRead.add(key)
             const tasks = await pages(async cursor => (await getBotsByBotIdSessionsBySessionIdTasks({ ...options, path, query: { limit: 100, cursor } })).data)
             for (const task of tasks) {
-              if (task.parent_session_id !== node.session || !task.session_id) continue
+              if (task.parent_session_id !== node.session) continue
               let owner
-              try { owner = await session(node.bot, task.session_id) } catch { continue }
-              if (task.direct_parent_session_id && owner.parent_session_id !== task.direct_parent_session_id) continue
+              try { if (task.session_id) owner = await session(node.bot, task.session_id) } catch { /* Retain the receipt without a destination. */ }
+              const parentMatches = !task.direct_parent_session_id || owner?.parent_session_id === task.direct_parent_session_id
               const owning = sessionKey(node.bot, task.session_id)
               if (task.task_type === 'subagent') {
-                if (task.session_id === node.session) continue
+                if (!owner || !parentMatches || task.session_id === node.session) continue
                 rows.set(owning, { key: owning, kind: 'agent', bot: node.bot, session: task.session_id, name: owner.title || '', state: task.status,
                   parent: owner.parent_session_id ? sessionKey(node.bot, owner.parent_session_id) : undefined })
                 queue.push({ bot: node.bot, session: task.session_id, tasks: false })
-              } else {
+              } else if (task.task_type === 'computer_operation') {
                 const taskKey = `task:${node.bot}:${task.task_id}`
-                rows.set(taskKey, { key: taskKey, kind: 'task', bot: node.bot, session: task.session_id, name: owner.title || '', state: task.status, parent: owning })
+                const agent = owner && parentMatches && isTaskAgentSession(owner) ? owner : undefined
+                rows.set(taskKey, { key: taskKey, kind: 'task', bot: node.bot, session: task.session_id, name: agent?.title || '', state: task.status, parent: owning,
+                  task: { id: task.task_id, root: node.session, agentSession: agent?.id } })
+                taskRoots.set(taskKey, key)
               }
             }
           }
@@ -115,6 +127,13 @@ export function useConversationRelations(scope: Ref<TaskScope | null>, visible: 
           else partialError = cause
           if (key === sessionKey(current.bot, current.session)) throw cause
         }
+      }
+      // A computer-only receipt need not have a separate subagent ledger row.
+      // Its scoped API already established root membership; keep it visible
+      // even if the old owner is missing or no longer readable.
+      for (const [id, root] of taskRoots) {
+        const row = rows.get(id)!
+        if (!row.parent || !rows.has(row.parent)) row.parent = root
       }
       if (generation === epoch && !control.signal.aborted) { records.value = [...rows.values()]; error.value = partialError }
     } catch (cause) {

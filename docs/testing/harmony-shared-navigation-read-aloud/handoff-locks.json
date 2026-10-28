@@ -1,0 +1,66 @@
+{
+  "sourceParent": "87477f610a68cf99d383bc505266c322d242d747",
+  "navigationHandoff": "ee4cf1663c18397a4057164105314e19102e521b",
+  "navigationSource": "2b3ffb40fe615426a01bff8720111eef22e6e0e3",
+  "navigationMirrors": [
+    {
+      "web_file": "apps/web/src/components/sidebar/session-activity-trigger.vue",
+      "overlay_file": "mobile/client/mobile/memoh/shared-conversation-monitor-trigger.vue",
+      "before_sha256": "72572ce1541ffacc5d8a14d2b1170ef6475a83c9228271c0023a4cf99108b26c",
+      "after_sha256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d",
+      "source_commit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
+    },
+    {
+      "web_file": "apps/web/src/components/sidebar/session-activity-trigger.test.ts",
+      "overlay_file": "mobile/client/mobile/memoh/shared-conversation-monitor-trigger.test.ts",
+      "before_sha256": "60f3f7bdae7924190b1b1e2760478b845713f251655706a76c39d60e6dccfcca",
+      "after_sha256": "e2ec792cd4a6e236e3d2f961dde587d94b6025280af1cefa4fcec0a89be31679",
+      "source_commit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
+    },
+    {
+      "web_file": "apps/web/src/pages/home/composables/useConversationRelations.ts",
+      "overlay_file": "mobile/client/mobile/memoh/shared-useConversationRelations.ts",
+      "before_sha256": "d34a260f76145ba659dec2ccd47af40636f4d2bd993e5eb6de9c6013051ad1e6",
+      "after_sha256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8",
+      "source_commit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
+    },
+    {
+      "web_file": "apps/web/src/pages/home/composables/useConversationRelations.test.ts",
+      "overlay_file": "mobile/client/mobile/memoh/shared-useConversationRelations.test.ts",
+      "before_sha256": "f99aa31a1d144c8abd867802ae793889951dcd07d104fe99fbb084df60f6a52d",
+      "after_sha256": "2f2a540a9948e72dcfbb5e388233fe0d09702ab75bb968e0de94ae36e4dbb30c",
+      "source_commit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
+    },
+    {
+      "web_file": "apps/web/src/pages/home/components/conversation-relation-row.vue",
+      "overlay_file": "mobile/client/mobile/memoh/shared-conversation-relation-row.vue",
+      "before_sha256": "76b48c260941864455138794f1700a79774f3ac79525ccf24aafaf311ffc3d60",
+      "after_sha256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb",
+      "source_commit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
+    }
+  ],
+  "readAloudSource": "9c361d60371703c157d344dcebfd439acc6d78de",
+  "readAloudOverlay": {
+    "path": "mobile/client/mobile/memoh/shared-read-aloud-changes.json",
+    "sha256": "933506123733ea45cbdc39df8daa870003bbe46a55002f6921e6c057d53fa086"
+  },
+  "builderSHA256": "91480355aa9947afa335b91cf773b47241fa60180fb25ae502315866a3b6c167",
+  "webLockSHA256": "b2f63b5210e1f7ce5a55dec2d413c0a075fc05e4fcaa3354b3927b116f1f102d",
+  "playbackEndpoint": "POST /bots/{bot_id}/tts/playback",
+  "backendPlaybackReadyForRelease": false,
+  "newVersionOrHAPBuilt": false,
+  "realProviderCalls": 0,
+  "unchangedNativeAndAuthInputSHA256": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets": "db7f752d2685741f23eda9cc99e24508997b18c095ac4dc25f488c9747baf945",
+    "mobile/client/mobile/memoh/HarmonyVoiceInput.vue": "69c8a2da35cb026083b6a2cc71a2dc699f69efd657e7362a22eead3748e74652",
+    "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+    "mobile/client/mobile/memoh/harmony-voice.ts": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+    "mobile/client/mobile/memoh/harmony-files.ts": "f6beece8e9fdeb5d3f1aacfc69b0df88fd5932cc50229f1a822942951a8cce35",
+    "mobile/client/mobile/memoh/harmony-download.ts": "6990c567e495a20c5a089f37b656bde8ec93cd9a723bc5a4ab4597fc7cccbdb0",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+    "mobile/client/mobile/memoh/harmony-resumable.ts": "e55acc09fd3925cf6f7480acae6474ecfcc7e32909cdefc23f71af8312621ae5",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "22a3b89f7609660ef6401da08452255a8e102a16b651c93b50e0ccdf72d87473"
+  }
+}

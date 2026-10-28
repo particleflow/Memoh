@@ -25,16 +25,16 @@
       "upstreamSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df"
     },
     "apps/web/src/i18n/locales/en.json": {
-      "upstreamSHA256": "05e293f9eda0ea8c02ecbb0b2490e22846b786f5b78a1bd06c6263687da57266",
-      "adaptedSHA256": "189c37b38a0a137b59938050bd347be45de094fb96d3797233db13ddfc0bac0b"
+      "upstreamSHA256": "3bacc10467b65f2b31a9078ac97bd6b9dd00a3452c7945685bee7fe593f0fe74",
+      "adaptedSHA256": "37c849f992c885887903d2db2fca258680631a32973cef1fc98232605bbeb1eb"
     },
     "apps/web/src/i18n/locales/ja.json": {
-      "adaptedSHA256": "ebf496a0e11b0ce91143b7b0deaba357670ab8736445b8e027f30322cb70c089",
-      "upstreamSHA256": "4bff31abb36cdbbfbfbda808f0dc08291189c10cc54f4cce6574623e1317fbed"
+      "upstreamSHA256": "92711dbbff60a65682a3444b9afbe37015eb62a8e7db870ae1bab968bbe5eb70",
+      "adaptedSHA256": "af9ec285d778bb1f791315135d2b6b1de678e85f2a29aa6bb9638febb7aa69da"
     },
     "apps/web/src/i18n/locales/zh.json": {
-      "upstreamSHA256": "d3dea02f2a9c78b84e1655369387c9fb5acaf2836c3298a4bc103ce30739627d",
-      "adaptedSHA256": "98daa650f2403e0a43d5fa3716ce765c65ece8406e0d0cdd40f2a1714d674bbe"
+      "upstreamSHA256": "f23950bedf5f0e86319e08c590c47aa6cb51f95772d9b81c8a7470cad16a67a9",
+      "adaptedSHA256": "a390904036b7374bd068b4bc33d65fb4e2f41e22616cb288081afbb88eabee0c"
     },
     "apps/web/src/lib/api-client.ts": {
       "adaptedSHA256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
@@ -57,8 +57,8 @@
       "adaptedSHA256": "be144f97673b53ed671ad8da7b5a70294b1152c96a3b04360d121edc9c4327ac"
     },
     "apps/web/src/pages/home/components/chat-pane.vue": {
-      "adaptedSHA256": "1247e874da6f7587033bf35e6aa864598e640ffd5af601d8999c7264364f61a8",
-      "upstreamSHA256": "f039ed260895eafdb5ceb0d0f850c835237a3d951fe15f419c690f58f9f62d1e"
+      "upstreamSHA256": "db073b39a251d3065a38375578cad8cfa488ddda11cdaeaec34492502d9a9c11",
+      "adaptedSHA256": "ae68d88ab722aa34425500a85b9b95e786346ac4af8bf72731aa5126b542b986"
     },
     "apps/web/src/pages/home/components/display-pane.vue": {
       "adaptedSHA256": "404914e72d1bcfa7ae23e2f1fdd9545a6f9dec6bfc728f19b9e99e9f81f7f974",
@@ -73,8 +73,8 @@
       "adaptedSHA256": "c228c2a442a2bf551f135d3ac77a5a4edc005c06ca807754d40716e3d3362275"
     },
     "apps/web/src/pages/home/components/message-item.vue": {
-      "adaptedSHA256": "5fbc272403e6e01230ee84e450bea3a2cb63c83260b78e5b262cce6152329f51",
-      "upstreamSHA256": "5e0f24f5857055bbbffe1009bd322964996b7d1d329c2ef2221fdc93e2720cc9"
+      "upstreamSHA256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+      "adaptedSHA256": "c642cb7dd4f782c8f3d583e43c33a750d15ae4c62b32d057ef8d413362e8fb4a"
     },
     "apps/web/src/pages/home/components/process-collapse.ts": {
       "adaptedSHA256": "e51f0e52622a7d1259336d3def4f2afecb6797d5ec387ff417010093b4ad31c9",
@@ -165,8 +165,8 @@
       "upstreamSHA256": "be5f05ee631ae7428cc15a18b475266c22d2c7da36ee255cbb540ac487438a04"
     },
     "apps/web/src/style.css": {
-      "adaptedSHA256": "3742cd7bbf1a78d0753390cb715ec380d7dcbd5060a118767273cd9a9ab11dee",
-      "upstreamSHA256": "105df494bb43daf3d29a6d73781a353f9dc4755b01bb7eeed389c3a565f993e8"
+      "upstreamSHA256": "6b89ad277b93a509d1463d6cfb986ead2430722c46528393b0c5cb29a265f26f",
+      "adaptedSHA256": "27935fe743d60dec38ba9a1e3d15b371a55a581ce6f4031c81e9e85dd83614bb"
     },
     "apps/web/vite.config.ts": {
       "adaptedSHA256": "b8321e5a1a93d1937b628b536384f56524a2ac03728e6356cfd44a0db85ab923",

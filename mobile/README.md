@@ -8,6 +8,8 @@ records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
 
+Current [source-only navigation/read-aloud preparation](../docs/testing/harmony-shared-navigation-read-aloud/README.md) is ahead of the qualified1.0.26 package. It does not change the version or package identity. Playback backend authentication/readiness and the final shared/icon composition remain release prerequisites.
+
 The [directory-read guard](../docs/testing/harmony-files-directory-guard/README.md) restores original-Bot/activity checks around reads and retries and is now included in1.0.26. The existing1.0.25 and1.0.24 records/packages remain independently preserved.
 
 Contact navigation, original history deep links and account-scoped Bot creation recovery are retained. The current build adds the original-Bot/activity directory-read guard while retaining F04 multi-selection and scoped inaccessible-attachment presentation; old1.0.25 and1.0.24 remain separately preserved.

@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "63c5ce7156fa80c73c57cde05ee252140678e1c51e35fa61ecf7307d9fddc64c",
+      "sha256": "b2f63b5210e1f7ce5a55dec2d413c0a075fc05e4fcaa3354b3927b116f1f102d",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "976a9c264b9aa22c7d95aaaf49415a83485027070068af05f1ba5f31ffb652a6",
+      "sha256": "91480355aa9947afa335b91cf773b47241fa60180fb25ae502315866a3b6c167",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1551,7 +1551,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-monitor-trigger.vue",
-      "sha256": "72572ce1541ffacc5d8a14d2b1170ef6475a83c9228271c0023a4cf99108b26c",
+      "sha256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1560,7 +1560,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-monitor-trigger.test.ts",
-      "sha256": "60f3f7bdae7924190b1b1e2760478b845713f251655706a76c39d60e6dccfcca",
+      "sha256": "e2ec792cd4a6e236e3d2f961dde587d94b6025280af1cefa4fcec0a89be31679",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1569,7 +1569,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-useConversationRelations.ts",
-      "sha256": "d34a260f76145ba659dec2ccd47af40636f4d2bd993e5eb6de9c6013051ad1e6",
+      "sha256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1578,7 +1578,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-useConversationRelations.test.ts",
-      "sha256": "f99aa31a1d144c8abd867802ae793889951dcd07d104fe99fbb084df60f6a52d",
+      "sha256": "2f2a540a9948e72dcfbb5e388233fe0d09702ab75bb968e0de94ae36e4dbb30c",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1587,7 +1587,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-conversation-relation-row.vue",
-      "sha256": "76b48c260941864455138794f1700a79774f3ac79525ccf24aafaf311ffc3d60",
+      "sha256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb",
       "origin": "Fixed shared conversation monitor/error metadata source 40765b9e0979d561c49e58d2f384799e6c589e27, or explicitly reviewed phone build/test seam; not historical restoration.",
       "licenseReview": "Existing Memoh/project source; no dependency or license change.",
       "preparationChanges": [
@@ -1780,6 +1780,15 @@
       "preparationChanges": [
         "Apply only multiple selection, existing concurrency-four upload batch and original Bot binding. Keep native save adapter and existing directory read logic.",
         "Source-only follow-up after built1.0.25: restore exact parent5b directory active/Bot read guard; add nine directed stale response/retry regressions. Existing5 picker tests unchanged. No HAP rebuilt."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-read-aloud-changes.json",
+      "sha256": "933506123733ea45cbdc39df8daa870003bbe46a55002f6921e6c057d53fa086",
+      "origin": "Frontend and exact generated playback endpoint additions from9c361d60371703c157d344dcebfd439acc6d78de plus four phone SDK seam regressions. Not recovered historical source.",
+      "licenseReview": "Derived Memoh source under retained repository license; no new external dependency, SDK binary, private configuration or signing material.",
+      "preparationChanges": [
+        "Apply guarded deltas to actual current pre-phone context; preserve native attachment audio/recording/save/TLS. Playback backend auth/readiness remains a release prerequisite."
       ]
     }
   ],

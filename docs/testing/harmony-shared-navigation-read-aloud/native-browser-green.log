@@ -1,0 +1,23 @@
+REQUESTFAILED https://api.example.invalid/api/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/status?model_id=synthetic-chat net::ERR_ABORTED
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   'signal is aborted without reason'
++ ]
+- []
+
+    at file:///workspace/harmony-recovery-20261023/evidence/shared-ui-readaloud-20261028/phone-native-browser.mjs:132:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [ 'signal is aborted without reason' ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

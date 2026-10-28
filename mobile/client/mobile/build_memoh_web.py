@@ -746,6 +746,12 @@ function close() {''', 1),
 
 
     }
+    # The existing native microphone consumes pointerdown. Stop reply playback
+    # in its current composer ancestor before that event begins recording.
+    changes['apps/web/src/pages/home/components/chat-pane.vue'].extend([
+        ('@click="handleComposerClick"', '@pointerdown.capture="stopReadAloudForNativeInput"\n                @click="handleComposerClick"', 1),
+        ('function harmonyVoiceEditorTarget() {', "function stopReadAloudForNativeInput(event: PointerEvent) {\n  if (event.target instanceof Element && event.target.closest('.harmony-voice-mic')) readAloud.stop()\n}\nfunction harmonyVoiceEditorTarget() {", 1),
+    ])
     # Temporary opt-in image timing adds no display, request, or authorization path.
     changes['apps/web/src/pages/home/components/attachment-block.vue'].extend([
         ("import { originalBlob, saveOriginal } from '@/lib/harmony-files'",
@@ -930,6 +936,12 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     multi_upload = lock['sharedFilesMultiUpload']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / multi_upload['local']) == multi_upload['sha256'], 'Files multi-upload source drift'
     multi_upload_sources = json.loads((ROOT / 'mobile/memoh' / multi_upload['local']).read_text())
+    read_aloud = lock['sharedReadAloud']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / read_aloud['local']) == read_aloud['sha256'], 'Read-aloud source drift'
+    read_aloud_sources = json.loads((ROOT / 'mobile/memoh' / read_aloud['local']).read_text())
+    for name, addition in read_aloud_sources['sdkOverlays'].items():
+        assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected playback SDK target'
+        sdk_overlay[name] = sdk_overlay.get(name, '') + addition
 
 
 
@@ -1198,7 +1210,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                     shared_text = shared_text.replace(old, new)
                 data = shared_text.encode('utf-8')
                 entry.size = len(data)
-            for sources in (inaccessible_sources, multi_upload_sources):
+            for sources in (inaccessible_sources, multi_upload_sources, read_aloud_sources):
                 if name in sources['existingFiles']:
                     review = sources['existingFiles'][name]
                     assert hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Shared presentation baseline drift'
@@ -1212,6 +1224,11 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                 value = json.loads(data)
                 assert 'attachmentUnavailable' not in value['chat'], 'Attachment presentation locale already present'
                 value['chat']['attachmentUnavailable'] = inaccessible_sources['locales'][Path(name).stem]
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in read_aloud_sources['locales']}:
+                value = json.loads(data)
+                assert 'readAloud' not in value['chat'], 'Read-aloud locale already present'
+                value['chat']['readAloud'] = read_aloud_sources['locales'][Path(name).stem]
                 data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
             original_data = data
             # One declared, dependency-free waveform player; keep every other
@@ -1310,7 +1327,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
-        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles'], **multi_upload_sources['addedFiles']}.items():
+        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles'], **multi_upload_sources['addedFiles'], **read_aloud_sources['addedFiles']}.items():
             assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected shared source destination'
             data = item['source'].encode()
             assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added shared source drift'

@@ -11,9 +11,10 @@ vi.mock('@memohai/sdk', () => ({
   getBotsByBotIdSessionsBySessionIdDelegations: api.delegations,
 }))
 const scopes: ReturnType<typeof effectScope>[] = []
-const sessions = new Map<string, { id: string, bot_id: string, title: string, parent_session_id?: string }>()
-function add(bot: string, id: string, parent?: string, title = id) { sessions.set(`${bot}/${id}`, { bot_id: bot, id, title, parent_session_id: parent }) }
+const sessions = new Map<string, { id: string, bot_id: string, title: string, parent_session_id?: string, type?: string, runtime_type?: string }>()
+function add(bot: string, id: string, parent?: string, title = id, descriptor: { type?: string, runtime_type?: string } = {}) { sessions.set(`${bot}/${id}`, { bot_id: bot, id, title, parent_session_id: parent, ...descriptor }) }
 const task = (id: string, parent: string, state = 'running') => ({ task_id: id, task_type: 'subagent', session_id: id, parent_session_id: 'root', direct_parent_session_id: parent, status: state, summary: 'DO_NOT_SHOW_PROMPT' })
+const computer = (id: string, owner = 'root', status = 'submitted') => ({ task_id: id, task_type: 'computer_operation', session_id: owner, parent_session_id: 'root', status, summary: 'DO_NOT_SHOW_PROMPT' })
 const link = (source = 'root', bot = 'expert', target = 'expert-session') => ({ source_session_id: source, target_bot_id: bot, target_session_id: target, state: 'running', target_run_state: 'waiting_decision', delegation_id: 'delegation' })
 async function settle() { for (let i = 0; i < 60; i++) await Promise.resolve(); await nextTick() }
 function mount() {
@@ -34,6 +35,46 @@ beforeEach(() => {
 afterEach(() => { for (const scope of scopes.splice(0)) scope.stop(); vi.useRealTimers() })
 
 describe('conversation-owned relations', () => {
+  it('retains computer-only current and historical tasks without claiming their Bot owner is an Agent', async () => {
+    api.tasks.mockResolvedValue({ data: { items: [computer('pending'), computer('old', 'root', 'completed'), computer('uncertain', 'root', 'unknown')] } })
+    const { reader } = mount(); await settle()
+    expect(reader.items.value.filter(row => row.kind === 'task').map(row => [row.key, row.state, row.task])).toEqual([
+      ['task:bot:pending', 'submitted', { id: 'pending', root: 'root', agentSession: undefined }],
+      ['task:bot:old', 'completed', { id: 'old', root: 'root', agentSession: undefined }],
+      ['task:bot:uncertain', 'unknown', { id: 'uncertain', root: 'root', agentSession: undefined }],
+    ])
+    expect(reader.items.value.filter(row => row.kind === 'agent')).toEqual([])
+    expect(JSON.stringify(reader.items.value)).not.toContain('DO_NOT_SHOW_PROMPT')
+  })
+  it.each([
+    { type: 'subagent' }, { type: 'acp_agent' },
+    { type: 'chat', runtime_type: 'codex' }, { type: 'chat', runtime_type: 'claude-code' },
+    { type: 'chat', runtime_type: 'grok-build' },
+  ])('uses the persisted owning Agent session $type/$runtime_type without a separate subagent row', async descriptor => {
+    const owner = descriptor.type === 'subagent' ? 'owner' : 'root'
+    add('bot', owner, owner === 'root' ? undefined : 'root', 'Actual Agent', descriptor)
+    api.tasks.mockResolvedValue({ data: { items: [computer('pc-task', owner)] } })
+    const { reader } = mount(); await settle()
+    expect(reader.items.value.find(row => row.kind === 'task')).toMatchObject({
+      session: owner, name: 'Actual Agent', state: 'submitted', parent: 'session:bot:root',
+      task: { id: 'pc-task', root: 'root', agentSession: owner },
+    })
+  })
+  it('preserves task nesting independently of receipt/subagent list order', async () => {
+    add('bot', 'a', 'root', 'Actual Agent', { type: 'subagent' })
+    api.tasks.mockResolvedValue({ data: { items: [computer('pc-task', 'a'), task('a', 'root')] } })
+    const { reader } = mount(); await settle()
+    expect(reader.items.value.find(row => row.kind === 'task')?.parent).toBe('session:bot:a')
+  })
+  it('retains missing and mismatched old owner receipts without borrowing another Agent destination', async () => {
+    add('bot', 'a', 'root', 'Other Agent', { type: 'subagent' }); add('bot', 'moved', 'elsewhere', 'Moved Agent', { type: 'subagent' })
+    api.tasks.mockResolvedValue({ data: { items: [task('a', 'root'), computer('missing', 'gone'), { ...computer('moved-task', 'moved'), direct_parent_session_id: 'root' }, computer('no-owner', '')] } })
+    const { reader } = mount(); await settle()
+    const receipts = reader.items.value.filter(row => row.kind === 'task')
+    expect(receipts).toHaveLength(3)
+    expect(receipts.every(row => row.task?.agentSession === undefined && row.name === '')).toBe(true)
+    expect(receipts.every(row => row.parent === 'session:bot:root')).toBe(true)
+  })
   it('keeps the current associated Bot without turning an inactive run into an active Agent', async () => {
     const { reader } = mount(); await settle()
     expect(reader.items.value.filter(row => row.kind === 'agent')).toEqual([])

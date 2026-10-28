@@ -153,31 +153,33 @@
     "files": {
       "apps/web/src/components/sidebar/session-activity-trigger.vue": {
         "local": "shared-conversation-monitor-trigger.vue",
-        "sha256": "72572ce1541ffacc5d8a14d2b1170ef6475a83c9228271c0023a4cf99108b26c",
+        "sha256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d",
         "baseSHA256": null,
-        "sourceCommit": "fa35692ff6da4b1e672d68bc75a757d87038eefe"
+        "sourceCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
       },
       "apps/web/src/components/sidebar/session-activity-trigger.test.ts": {
         "local": "shared-conversation-monitor-trigger.test.ts",
-        "sha256": "60f3f7bdae7924190b1b1e2760478b845713f251655706a76c39d60e6dccfcca",
+        "sha256": "e2ec792cd4a6e236e3d2f961dde587d94b6025280af1cefa4fcec0a89be31679",
         "baseSHA256": null,
-        "sourceCommit": "fa35692ff6da4b1e672d68bc75a757d87038eefe"
+        "sourceCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
       },
       "apps/web/src/pages/home/composables/useConversationRelations.ts": {
         "local": "shared-useConversationRelations.ts",
-        "sha256": "d34a260f76145ba659dec2ccd47af40636f4d2bd993e5eb6de9c6013051ad1e6",
-        "baseSHA256": null
+        "sha256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8",
+        "baseSHA256": null,
+        "sourceCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
       },
       "apps/web/src/pages/home/composables/useConversationRelations.test.ts": {
         "local": "shared-useConversationRelations.test.ts",
-        "sha256": "f99aa31a1d144c8abd867802ae793889951dcd07d104fe99fbb084df60f6a52d",
-        "baseSHA256": null
+        "sha256": "2f2a540a9948e72dcfbb5e388233fe0d09702ab75bb968e0de94ae36e4dbb30c",
+        "baseSHA256": null,
+        "sourceCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
       },
       "apps/web/src/pages/home/components/conversation-relation-row.vue": {
         "local": "shared-conversation-relation-row.vue",
-        "sha256": "76b48c260941864455138794f1700a79774f3ac79525ccf24aafaf311ffc3d60",
+        "sha256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb",
         "baseSHA256": null,
-        "sourceCommit": "dbff0e472c616f7241635a58e6085442f30a7d2a"
+        "sourceCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
       },
       "apps/web/src/pages/home/components/composer-error.ts": {
         "local": "shared-composer-error.ts",
@@ -410,5 +412,16 @@
     "scope": "Existing multiple selection/concurrency-four upload plus original-Bot and active guards around directory reads/retries/results. Full shared files-pane now565 before native save adapter. No UI, API, SDK, native shell, permission or configuration change.",
     "unifiedCompatibleCommit": "565c0b4b3386d87d057234efe6828479d35fcee0",
     "directoryReadGuardCommit": "5b797fb970f4b67ab4d79d27a530f0ea540a8ccb"
+  },
+  "sharedReadAloud": {
+    "commit": "9c361d60371703c157d344dcebfd439acc6d78de",
+    "parent": "565c0b4b3386d87d057234efe6828479d35fcee0",
+    "sourceChanges": {
+      "local": "shared-read-aloud-changes.json",
+      "sha256": "933506123733ea45cbdc39df8daa870003bbe46a55002f6921e6c057d53fa086"
+    },
+    "scope": "Current-source read-aloud UI/styles/locales and generated playback endpoint, with original phone adapters preserved. No synthesize fallback; backend readiness/security is a release prerequisite.",
+    "backendPlaybackReadyForRelease": false,
+    "navigationCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
   }
 }
