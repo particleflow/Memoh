@@ -366,6 +366,9 @@ func (h *delegationHost) Deliver(ctx context.Context, r botdelegation.Record) er
 	if r.Payload.ResultDeliveryVersion == 1 {
 		return h.reconcileResult(ctx, "bot_delegation", r.ID, r.Identity.SourceBotID, r.Identity.UserID, r.Identity.SourceSessionID)
 	}
+	if r.State == "unknown" {
+		return botdelegation.ErrDenied
+	}
 	routing, err := h.deliveryRoute(ctx, r)
 	if err != nil {
 		return err
@@ -473,7 +476,7 @@ func (h *delegationHost) prepare(ctx context.Context, req application.ChatReques
 		}
 	} else if req.DelegationResultID != "" {
 		r, err := h.service.ReadRecord(ctx, req.BotID, req.UserID, req.ThreadID, req.DelegationResultID)
-		if err != nil || (r.State != "completed" && r.State != "failed" && r.State != "unknown") {
+		if err != nil || (r.State != "completed" && r.State != "failed") {
 			return ctx, req, botdelegation.ErrDenied
 		}
 		// Revalidate again at queued-turn admission, including after restart.

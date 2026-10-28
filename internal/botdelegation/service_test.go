@@ -251,7 +251,7 @@ func TestUnknownAndDeliveryFailureDoNotRerunBusiness(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if h.runs.Load() != 1 || (state == "unknown" && (got.Summary != nil || h.deliveries.Load() != 0)) || (state == "completed" && got.DeliveryState != "unknown") {
+			if h.runs.Load() != 1 || h.deliveries.Load() != 1 || got.DeliveryState != "unknown" || (state == "unknown" && got.Summary != nil) {
 				t.Fatalf("dishonest state or rerun: %+v runs=%d", got, h.runs.Load())
 			}
 		})

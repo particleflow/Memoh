@@ -231,6 +231,11 @@ func (s *Service) execute(ctx context.Context, r Record) error {
 	if err != nil {
 		return err
 	}
+	// Legacy records and unvalidated ingress/runtime types keep their original
+	// unknown behavior. Only persisted Web/native opt-in permits notification.
+	if state == "unknown" && r.Payload.ResultDeliveryVersion != 1 {
+		return runErr
+	}
 	if _, err = s.Authority.Authorize(saveCtx, r.Identity); err != nil {
 		r.DeliveryState = "unavailable"
 	} else if err = s.Host.Deliver(saveCtx, r); err != nil {
@@ -283,7 +288,7 @@ func (s *Service) RetryDelivery(ctx context.Context, bot, user, session, id stri
 	if err != nil {
 		return View{}, err
 	}
-	if r.State != "completed" && r.State != "failed" && r.State != "unknown" {
+	if r.State != "completed" && r.State != "failed" && !(r.State == "unknown" && r.Payload.ResultDeliveryVersion == 1) {
 		return View{}, ErrConflict
 	}
 	if r.DeliveryState == "accepted" && r.Payload.ResultDeliveryVersion == 0 {
