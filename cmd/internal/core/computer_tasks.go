@@ -6,6 +6,8 @@ import (
 	"errors"
 	"log/slog"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/felinics/memoh/internal/accounts"
 	toolapproval "github.com/felinics/memoh/internal/agent/decision/approval"
 	"github.com/felinics/memoh/internal/agenvo"
@@ -39,8 +41,31 @@ func provideComputerTaskSource(log *slog.Logger, store *postgresstore.Store, rel
 		return resolved.Client.FilesOnly(), nil
 	})
 	source := computertask.NewSource(service)
+	source.SetResumeContext(computerTaskResumeContext(delegations))
 	source.SetLogger(log)
 	return source
+}
+
+// HTTP management has no active turn scope. Rebuild it from the operation's
+// authenticated owning conversation, preserving both recorded mount snapshots.
+func computerTaskResumeContext(delegations *botdelegation.Service) func(context.Context, toolcontext.ComputerBinding) (context.Context, error) {
+	return func(ctx context.Context, b toolcontext.ComputerBinding) (context.Context, error) {
+		if current, ok := toolcontext.HostComputerBinding(ctx); !ok || current != b || b.RunID == "" {
+			return ctx, computertask.ErrDenied
+		}
+		r, err := delegations.ForSession(ctx, b.BotID, b.UserID, b.SessionID)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return ctx, nil
+		}
+		if err != nil {
+			return ctx, computertask.ErrDenied
+		}
+		ctx = delegations.BindScope(ctx, r)
+		if toolcontext.CheckDelegationTarget(ctx, b.BotID, b.TargetID, "") != nil {
+			return ctx, computertask.ErrDenied
+		}
+		return ctx, nil
+	}
 }
 
 // Use the same persisted attachment bridge as image tools, with the trusted
