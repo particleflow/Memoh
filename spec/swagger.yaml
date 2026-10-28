@@ -17624,6 +17624,55 @@ paths:
       summary: Unified MCP tools gateway
       tags:
       - containerd
+  /bots/{bot_id}/tts/playback:
+    post:
+      consumes:
+      - application/json
+      description: Ephemeral playback only; does not create a message, attachment
+        or history record. Uses the configured TTS model and voice. Maximum 500 Unicode
+        characters per request. Requires Bot chat permission.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Text to read aloud
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.synthesizeRequest'
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: Audio bytes; Content-Type is the configured model's audio format
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read text aloud using a bot's configured voice
+      tags:
+      - bots
   /bots/{bot_id}/tts/synthesize:
     post:
       consumes:

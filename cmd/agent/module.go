@@ -129,7 +129,7 @@ func commonOptions() fx.Option {
 			provideServerHandler(handlers.NewNetworkHandler),
 			provideServerHandler(handlers.NewAudioHandler),
 			provideServerHandler(handlers.NewVideoHandler),
-			provideServerHandler(handlers.NewBotAudioHandler),
+			provideServerHandler(provideBotAudioHandler),
 			provideServerHandler(handlers.NewMCPHandler),
 			provideServerHandler(handlers.NewMCPOAuthHandler),
 			provideServerHandler(handlers.NewConnectorsHandler),

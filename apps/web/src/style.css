@@ -1393,3 +1393,43 @@
     }
   }
 }
+
+/* Only the reply whose media element emitted `playing` receives this frame.
+ * A masked conic stroke travels around the edge without rotating the content. */
+@property --chat-speech-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+:root {
+  --chat-speech-inset: -0.375rem;
+  --chat-speech-stroke: 2px;
+  --chat-speech-cycle: 3s;
+}
+.chat-speech-bubble { position: relative; }
+.chat-speech-bubble[data-speech-state='playing']::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  inset: var(--chat-speech-inset);
+  border-radius: var(--radius-xl);
+  padding: var(--chat-speech-stroke);
+  background: conic-gradient(from var(--chat-speech-angle), transparent, var(--primary), transparent);
+  mask: linear-gradient(currentColor 0 0) content-box, linear-gradient(currentColor 0 0);
+  mask-composite: exclude;
+  animation: chat-speech-orbit var(--chat-speech-cycle) linear infinite, chat-speech-breathe var(--chat-speech-cycle) ease-in-out infinite;
+}
+@keyframes chat-speech-orbit { to { --chat-speech-angle: 360deg; } }
+@keyframes chat-speech-breathe { 50% { opacity: 0.45; } }
+@media (prefers-reduced-motion: reduce) {
+  .chat-speech-bubble[data-speech-state='playing']::after {
+    animation: none;
+    background: var(--primary);
+  }
+}
+@media (forced-colors: active) {
+  .chat-speech-bubble[data-speech-state='playing']::after {
+    animation: none;
+    outline: var(--chat-speech-stroke) solid CanvasText;
+  }
+}

@@ -121,39 +121,61 @@
                       @open-source="handleForkSourceClick"
                     />
 
-                    <div
-                      :data-message-id="msg.id"
-                      :data-external-message-id="(msg.role === 'user' || msg.role === 'assistant') ? msg.externalMessageId : undefined"
-                      class="transition-[background-color] duration-500 scroll-mt-2 px-2 -mx-2"
-                      :class="highlightedMessageId === msg.id ? 'bg-muted/45' : ''"
-                      :data-anchor="msg.id"
-                    >
-                      <MessageItem
-                        :message="msg"
-                        :bot-id="currentBotId"
-                        :session-id="activeSessionId"
-                        :recovery-original-run-id="originalFailedRunId(msg)"
-                        :recovery-enabled="!activeChatReadOnly && !isChannelThread"
-                        :recovery-visible="isVisible"
-                        :channel-thread="isChannelThread"
-                        :channel-platform="channelPlatform"
-                        :bot-name="currentBot?.name"
-                        :bot-avatar-url="currentBot?.avatar_url"
-                        :on-open-media="galleryOpenBySrc"
-                        :on-reply-click="handleReplyJump"
-                        :on-retry-message="handleRetryMessage"
-                        :can-retry-latest-assistant="isRetryableTurn(msg)"
-                        :can-edit-latest-user="isEditableTurn(msg)"
-                        :can-fork-assistant="isForkableTurn(msg)"
-                        :inline-actions="isDirectBotAgentRuntime(activeChatTarget.runtimeType)"
-                        :goal-runtime="activeChatTarget.runtimeType"
-                        :is-scrolling="isScrolling"
-                        :is-last-message="msg.id === lastMessageId"
-                        @active="onMessageActive"
-                        @edit-message="handleEditMessage"
-                        @fork-message="handleForkMessage"
-                      />
-                    </div>
+                    <ContextMenu>
+                      <ContextMenuTrigger
+                        as-child
+                        :disabled="!readAloud.canReplay(msg)"
+                      >
+                        <div
+                          :data-message-id="msg.id"
+                          :data-external-message-id="(msg.role === 'user' || msg.role === 'assistant') ? msg.externalMessageId : undefined"
+                          class="transition-[background-color] duration-500 scroll-mt-2 px-2 -mx-2"
+                          :class="highlightedMessageId === msg.id ? 'bg-muted/45' : ''"
+                          :data-anchor="msg.id"
+                          @click.capture="readAloud.stop()"
+                        >
+                          <MessageItem
+                            :message="msg"
+                            :bot-id="currentBotId"
+                            :session-id="activeSessionId"
+                            :recovery-original-run-id="originalFailedRunId(msg)"
+                            :recovery-enabled="!activeChatReadOnly && !isChannelThread"
+                            :recovery-visible="isVisible"
+                            :channel-thread="isChannelThread"
+                            :channel-platform="channelPlatform"
+                            :bot-name="currentBot?.name"
+                            :bot-avatar-url="currentBot?.avatar_url"
+                            :on-open-media="galleryOpenBySrc"
+                            :on-reply-click="handleReplyJump"
+                            :on-retry-message="handleRetryMessage"
+                            :can-retry-latest-assistant="isRetryableTurn(msg)"
+                            :can-edit-latest-user="isEditableTurn(msg)"
+                            :can-fork-assistant="isForkableTurn(msg)"
+                            :inline-actions="isDirectBotAgentRuntime(activeChatTarget.runtimeType)"
+                            :goal-runtime="activeChatTarget.runtimeType"
+                            :is-scrolling="isScrolling"
+                            :is-last-message="msg.id === lastMessageId"
+                            :speech-enabled="readAloud.enabled.value"
+                            :speech-status="readAloud.status(msg)"
+                            @replay-speech="readAloud.replay(msg)"
+                            @active="onMessageActive"
+                            @edit-message="handleEditMessage"
+                            @fork-message="handleForkMessage"
+                          />
+                        </div>
+                      </ContextMenuTrigger>
+                      <ContextMenuContent v-if="readAloud.canReplay(msg)">
+                        <ContextMenuItem @select="readAloud.replay(msg)">
+                          {{ $t('chat.readAloud.replay') }}
+                        </ContextMenuItem>
+                        <ContextMenuItem
+                          v-if="readAloud.status(msg) !== 'idle'"
+                          @select="readAloud.stop()"
+                        >
+                          {{ $t('chat.readAloud.stop') }}
+                        </ContextMenuItem>
+                      </ContextMenuContent>
+                    </ContextMenu>
 
                     <ForkSourceDivider
                       v-if="showForkSourceDividerAfter(msg, turn.start + msgIndex)"
@@ -650,6 +672,7 @@
                   :disabled="!currentBotId || activeChatReadOnly || loadingMessages || firstSendAwaiting || attachmentUploading"
                   class="order-none max-h-52 w-full basis-full field-sizing-content resize-none break-words bg-transparent pl-2 pr-1 pt-2 pb-1.5 text-base leading-[var(--chat-leading)] outline-none placeholder:text-[var(--field-placeholder)] disabled:cursor-not-allowed"
                   :class="[isWelcome ? 'min-h-12' : 'min-h-10', composerPreviewShown ? 'text-transparent' : 'text-foreground']"
+                  @input="readAloud.stop()"
                   @keydown="handleComposerKeydown"
                   @paste="handlePaste"
                 />
@@ -974,6 +997,28 @@
                  mode pills, with the context-pressure ring pinned right.
                  Keep this row's height while recording so the dock stays
                  stable. -->
+              <div
+                v-if="readAloud.state.value.status !== 'idle' && readAloud.state.value.status !== 'error'"
+                class="pointer-events-auto flex items-center gap-2 px-2"
+                role="status"
+              >
+                <TextButton
+                  v-if="readAloud.state.value.status === 'blocked' || readAloud.state.value.status === 'paused'"
+                  @click="readAloud.resume()"
+                >
+                  {{ $t(readAloud.state.value.status === 'blocked' ? 'chat.readAloud.enable' : 'chat.readAloud.resume') }}
+                </TextButton>
+                <TextButton @click="readAloud.stop()">
+                  {{ $t('chat.readAloud.stop') }}
+                </TextButton>
+              </div>
+              <p
+                v-else-if="readAloud.state.value.status === 'error'"
+                class="px-2 text-caption text-muted-foreground"
+                role="status"
+              >
+                {{ $t('chat.readAloud.failed') }}
+              </p>
               <div
                 data-composer-context-row
                 class="flex min-w-0 items-center gap-1 px-2"
@@ -1311,7 +1356,7 @@ import {
   Lightbulb,
   Target,
 } from 'lucide-vue-next'
-import { Button, Command, CommandGroup, CommandItem, CommandKeyBridge, CommandList, CommandSeparator, ConfirmDeleteDialog, Dialog, DialogContent, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InlineLoadingRow, PanePlaceholder, ScrollArea, Skeleton, Spinner, TextButton, toast } from '@felinic/ui'
+import { Button, ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem, Command, CommandGroup, CommandItem, CommandKeyBridge, CommandList, CommandSeparator, ConfirmDeleteDialog, Dialog, DialogContent, DialogHeader, DialogTitle, DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, InlineLoadingRow, PanePlaceholder, ScrollArea, Skeleton, Spinner, TextButton, toast } from '@felinic/ui'
 import { useChatStore, type ExternalAgentSessionInput, type ChatMessage, type ChatWorkspaceTargetSnapshot, type SendMessageResult } from '@/store/chat-list'
 import { useWorkdirsStore } from '@/store/workdirs'
 import type { BotWorkdir } from '@/composables/api/useWorkdirs'
@@ -1331,6 +1376,7 @@ import { useFileDropZone } from '@/composables/useFileDropZone'
 import { registerChatFileDropTarget } from '../composables/chat-file-drop-target'
 import { readDroppedFiles } from '@/utils/dropped-files'
 import MessageItem from './message-item.vue'
+import { useChatReadAloud } from '../composables/useChatReadAloud'
 import ComposerContinueOn from './composer-continue-on.vue'
 import ComposerConnectorsMenu from './composer-connectors-menu.vue'
 import RuntimeModeIcon from './runtime-mode-icon.vue'
@@ -3373,6 +3419,15 @@ const {
 } = useMediaGallery(messages)
 
 const inputText = ref('')
+const readAloud = useChatReadAloud({
+  botId: currentBotId,
+  scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),
+  enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value
+    && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),
+  loading: computed(() => loadingMessages.value || loadingChats.value),
+  draft: inputText,
+  messages,
+})
 const queueSubmissionGate = new SessionQueueSubmissionGate()
 const composerQueueCommand = computed(() => parseSessionQueueCommand(inputText.value, composerRuntimeCommands.value))
 const composerPlaceholder = computed(() => {
@@ -4169,6 +4224,7 @@ async function handleEditMessage(turnId: string, text: string, done?: (started: 
 }
 
 async function handleSend() {
+  readAloud.stop()
   if (!isActive.value || attachmentUploading.value || firstSendAwaiting.value) return
   if (!skillSlashEnabled.value && requestedSkills.value.length) {
     requestedSkills.value = []

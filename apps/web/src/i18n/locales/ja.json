@@ -1024,6 +1024,14 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "readAloud": {
+      "replay": "もう一度読み上げる",
+      "stop": "読み上げを停止",
+      "enable": "読み上げを有効にする",
+      "resume": "読み上げを再開",
+      "playing": "この返信を読み上げています",
+      "failed": "読み上げが停止しました。もう一度読み上げて再試行できます。"
+    },
     "delegations": {
       "nativeRun": "専門 Bot のセッション実行",
       "runId": "実行 ID",
