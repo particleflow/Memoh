@@ -1312,6 +1312,7 @@
       "unsupported": "此服务器尚未启用附件续传。",
       "reselect": "请重新选择原文件以续传：{names}"
     },
+    "attachmentUnavailable": "附件不可访问",
     "uploadingAttachments": "正在上传附件…",
     "attachmentUploadTooLarge": "“{name}”超过此服务器的 {limit} 字节上限，请选择更小的文件。",
     "workspaceLinkUnavailable": "此处无法打开工作区链接，请在有工作区访问权限的 Memoh 对话中打开。",

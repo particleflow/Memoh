@@ -4,12 +4,21 @@
       v-for="(att, i) in block.attachments"
       :key="i"
     >
+      <div
+        v-if="unavailableSources.has(getUrl(att))"
+        role="status"
+        class="text-body text-muted-foreground"
+      >
+        <span>{{ getDisplayName(att) }}</span>
+        <p>{{ t('chat.attachmentUnavailable') }}</p>
+      </div>
+
       <!-- Content image/video (assistant body): an image the bot posts into the
            reply is content, not an attachment chip, so it keeps its natural
            aspect ratio (a screenshot stays a rectangle) — bounded by the column
            width and a max height, never cropped square. -->
       <button
-        v-if="variant === 'content' && (isImage(att) || isVideo(att)) && getUrl(att)"
+        v-else-if="variant === 'content' && (isImage(att) || isVideo(att)) && getUrl(att)"
         type="button"
         class="block w-fit max-w-[min(28rem,100%)] cursor-pointer overflow-hidden rounded-lg border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
         @click="handleMediaClick(att)"
@@ -29,6 +38,7 @@
           class="block h-auto max-h-80 w-auto max-w-full object-contain"
           loading="eager"
           decoding="async"
+          @error="handleMediaError"
         >
       </button>
 
@@ -45,6 +55,7 @@
           :video="isVideo(att)"
           :name="String(att.name ?? '')"
           interactive
+          @media-error="src => unavailableSources.add(src)"
         />
       </button>
 
@@ -141,6 +152,7 @@ const chatStore = useChatStore()
 const openInFileManager = inject(openInFileManagerKey, undefined)
 const openAssetPreview = inject(openAssetPreviewKey, undefined)
 const { t } = useI18n()
+const unavailableSources = reactive(new Set<string>())
 let downloadController: AbortController | undefined
 onScopeDispose(() => downloadController?.abort())
 
@@ -209,6 +221,11 @@ function isCounting(att: AttachmentItem): boolean {
 
 function getUrl(att: AttachmentItem): string {
   return resolveUrl(att)
+}
+
+function handleMediaError(event: Event) {
+  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')
+  if (src) unavailableSources.add(src)
 }
 
 function isImage(att: AttachmentItem): boolean {

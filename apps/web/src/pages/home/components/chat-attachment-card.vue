@@ -38,7 +38,7 @@
           loading="eager"
           decoding="async"
           @load="mediaLoaded = true"
-          @error="mediaLoaded = true"
+          @error="handleMediaError"
         >
         <div
           v-else
@@ -154,7 +154,7 @@ const props = defineProps<{
   removeLabel?: string
 }>()
 
-const emit = defineEmits<{ remove: []; preview: [] }>()
+const emit = defineEmits<{ remove: []; preview: []; mediaError: [src: string] }>()
 const { t } = useI18n()
 
 const resolvedRemoveLabel = computed(() =>
@@ -174,6 +174,12 @@ const sizeLabel = computed(() => {
 })
 
 const mediaLoaded = ref(false)
+function handleMediaError(event: Event) {
+  mediaLoaded.value = true
+  const src = (event.currentTarget as HTMLMediaElement | HTMLImageElement).getAttribute('src')
+  if (src) emit('mediaError', src)
+}
+
 watch(() => props.src, () => {
   // Keep an already-painted frame on screen across an in-place src swap — e.g.
   // an optimistic base64 preview being reconciled to its persisted asset URL

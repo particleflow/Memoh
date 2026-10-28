@@ -1312,6 +1312,7 @@
       "unsupported": "Resumable attachments are unavailable on this server.",
       "reselect": "Select the original files again to resume: {names}"
     },
+    "attachmentUnavailable": "Attachment inaccessible",
     "uploadingAttachments": "Uploading attachments…",
     "attachmentUploadTooLarge": "“{name}” exceeds this server’s limit of {limit} bytes. Choose a smaller file.",
     "workspaceLinkUnavailable": "This workspace link is unavailable here. Open the conversation in Memoh with workspace access.",
