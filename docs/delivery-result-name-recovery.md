@@ -73,6 +73,19 @@ before GET** here; do not label that request read-only or use it to populate an
 empty ledger. Owner-confirmed existing bindings make the reservation a no-op;
 the normal guard still rechecks identity and current grants.
 
+There is a second server-side distinction: the existing
+`ComputerTransferHandler.readUpload` calls `RecordTransferReady` when Media is
+already ready but the original ledger has no cached ready proof. That GET can
+CAS-update the original ledger/operation without issuing Create, Commit or
+Resolve. Uploading receipts and already-cached ready proofs were observed to
+leave those rows unchanged. Thus **GET-only is not universally PostgreSQL
+write-free**. The current CLI's `recovery_scope: read_only` output must not be
+used as evidence of a read-only server transaction. This test-only follow-up
+does not change that product label or the established ready-proof recovery
+semantics. A requirement for zero server writes even in the cold-ready gap
+remains an explicit integration decision; do not silently remove the normal
+ready-proof repair or add an alternate protocol to claim it is solved.
+
 1. **Reconcile unknown results first.** Read the original operation and validated
    completion normally, then the private journal, exact manifest and any known
    upload receipt through their existing authorized boundaries. Use existing
@@ -119,6 +132,11 @@ The mapping is stored only in the existing job journal, version **6**. Existing
 unmapped jobs retain their previous versions and bytes. Older producer writers
 must not handle mapped jobs: their strict decoder/version gate rejects the new
 field/version. No global queue layout migration or old-job rebinding is added.
+An old writer may also stop an admission-directory scan when it encounters a
+mapped v6 record; rejection does not guarantee it can keep advancing other
+unmapped jobs in that directory. Preserve all records and use a compatible v6
+writer, or stop that queue during rollback. Do not delete records, strip the
+mapping, downgrade frames or loosen decoding to make an old scan succeed.
 Each configured source reopen verifies the original protected context, receipt,
 compact completion, identities and mapping. Existing resumable indexing and
 Merkle reads verify actual content; reopening does not rehash the entire file.
@@ -160,6 +178,66 @@ Command: `go test ./internal/transferclient ./internal/computertask
 Windows ACL/UNC/reparse behavior, actual production host activation and UI/field
 acceptance remain unverified. The explicit entry is not called automatically by
 task observation, and has not been invoked for any real operation.
+
+## Real PostgreSQL and handler receipt follow-up
+
+`TestResultRecoveryReceiptPostgresHandlerBoundary` uses the existing isolated
+full-migration PostgreSQL fixture, a NOSUPERUSER/NOBYPASSRLS application role,
+actual runtime credential registry verification, `NewPostgresDeliveryService`,
+the production device transfer handler, resumable Media store and real TLS HTTP
+requests. No fake successful HTTP responses or synthetic authorization decision
+stand in for those components. The native registration is synthetic; Linux
+source/proof paths test the local receipt gate, not Windows root matching or
+the separate native owner preparation/dispatch. Existing six unit/differential
+tests and three queue compatibility tests are reused, not rerun here.
+
+- Missing original NAS binding and persisted unknown-create fence each stop
+  recovery before HTTP: receipt GET=0, all other HTTP=0. The missing-binding
+  fixtures append an orphan-receipt frame only to their newly created synthetic
+  private v6 journals; no prior frame or production record is edited or removed.
+- A candidate receipt inconsistent with the original local receipt also stops
+  before GET. Current NAS state is read through the real PostgreSQL row adapter.
+- For an existing uploading receipt, and again for an already-cached ready
+  proof, recovery issues exactly one original receipt GET and no other request.
+  Operation/ledger row bytes plus `xmin`/`ctid`, every private queue file, and
+  Media receipt/content bytes remain identical.
+- The first Media read can materialize a fixed zero-byte coordination lock
+  (`UploadStore.lock`), not a receipt or ledger update. The test explicitly
+  verifies this setup changes no existing file, permits only that exact empty
+  lock, then includes it in all subsequent byte snapshots. No general file
+  exclusion hides changes.
+- Real account deactivation and then registry credential revocation return HTTP
+  401. No receipt, byte metadata or credential appears in the denial body or
+  observation; operation, ledger, private journal and Media bytes remain intact.
+- Independent negative control: a direct original-task GET against an absent
+  binding returns 403 **but creates a reserved PG ledger row** and changes the
+  operation revision/row version. This proves the recovery preflight is needed;
+  it is not an inference from the earlier TLS protocol fixture.
+- Independent cold-ready control: fixture-only local Media append/completion
+  models the existing interruption between Media readiness and durable ready
+  proof. One recovery GET records the exact original receipt/hash/size proof in
+  PG. The original scope, content reference, receipt ID and private journal stay
+  unchanged; no new HTTP Create/PATCH/Complete/Commit/Resolve occurs. A subsequent
+  GET with cached proof is row-stable. This is the server-write limitation above.
+
+There is one real HTTP Create in fixture setup to obtain the original uploading
+receipt, before the measured recovery calls; no HTTP file payload is uploaded.
+The cold-ready control uses only small synthetic local bytes, never an actual
+completed field result. Tests create/drop only their own isolated database and
+test role. No deployed NAS, real operation, model, configuration or existing
+queue/history is changed.
+
+Run only this new target with the established test DSN:
+
+```sh
+go test -race -tags=integration ./internal/db \
+  -run '^TestResultRecoveryReceiptPostgresHandlerBoundary$' -count=1 -timeout 120s -v
+```
+
+Observed result: the parent test and all four subtests passed with `-race`, no
+skips, test elapsed 4.50 seconds (package elapsed 5.580 seconds). Account and
+credential revocation both returned 401 without receipt metadata or row/journal
+updates. This is isolated PG/handler evidence, not deployed NAS acceptance.
 
 ## Reused explicit-filename differential evidence
 
