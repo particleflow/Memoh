@@ -35,7 +35,7 @@ func (s *Store) ListBotTaskDirectoryCandidates(ctx context.Context, f dbstore.Se
 	for _, r := range rows {
 		out = append(out, dbstore.BotTaskDirectoryCandidate{Type: r.TaskType, ID: r.TaskID, RecordID: r.RecordID.String(), SessionID: r.SessionID.String(), RunID: r.RunID,
 			SourceBotID: r.SourceBotID.String(), SourceSessionID: r.SourceSessionID.String(), ScheduleID: r.ScheduleID.String(), OwnerUserID: r.OwnerUserID.String(),
-			Name: r.Name, State: r.State, CreatedAt: r.CreatedAt.Time, UpdatedAt: r.UpdatedAt.Time})
+			Name: r.Name, State: r.State, QueueAdmission:r.QueueAdmission, CreatedAt: r.CreatedAt.Time, UpdatedAt: r.UpdatedAt.Time})
 	}
 	return out, nil
 }

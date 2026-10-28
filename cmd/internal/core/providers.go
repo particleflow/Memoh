@@ -564,7 +564,7 @@ func agentLoopReselectModeFromConfig(log *slog.Logger, cfg config.AgentConfig) n
 	return native.LoopReselectMode(mode)
 }
 
-func injectToolProviders(a *native.Agent, msgService *message.DBService, hookService *hookspkg.Service, agentService *application.Service, providers []agenttools.ToolProvider) {
+func injectToolProviders(lc fx.Lifecycle, a *native.Agent, msgService *message.DBService, hookService *hookspkg.Service, agentService *application.Service, providers []agenttools.ToolProvider, delegations *botdelegation.Service, bgManager *background.Manager, log *slog.Logger) {
 	a.SetToolProviders(delegationScopedTools(providers))
 	for _, p := range providers {
 		if cp, ok := p.(*agenttools.ContainerProvider); ok {
@@ -588,6 +588,17 @@ func injectToolProviders(a *native.Agent, msgService *message.DBService, hookSer
 			// A spawned turn takes its thread's single run slot like any other,
 			// so without admission this provider starts nothing.
 			sp.SetSubagentAdmitter(agentService)
+			queue := &nativeTaskQueueHost{host: delegations.Host.(*delegationHost)}
+			sp.SetNativeTaskQueue(queue)
+			bgManager.SetBeforeAgentCancel(queue.Cancel)
+			lc.Append(fx.Hook{OnStart: func(ctx context.Context) error {
+				// Reconstruct only never-claimed work into the existing provider's
+				// serial queues. Unknown work is retained without executing it.
+				if err := sp.RecoverNativeTasks(ctx); err != nil {
+					log.Warn("restore queued native tasks", slog.Any("error", err))
+				}
+				return nil
+			}})
 		}
 	}
 }

@@ -1116,6 +1116,7 @@
         "computer_operation": "コンピュータータスク"
       },
       "statuses": {
+        "queued": "待機中",
         "unknown": "実行状態は不明",
         "submitted": "送信を記録済み",
         "process_exited": "プロセス終了",

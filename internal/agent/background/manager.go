@@ -64,10 +64,11 @@ type ReadFileFunc func(ctx context.Context, path string) ([]byte, error)
 
 // Manager tracks background tasks and emits live task events.
 type Manager struct {
-	mu        sync.Mutex
-	tasks     map[string]*Task // taskID -> Task
-	logger    *slog.Logger
-	eventFunc func(TaskEvent) // optional callback for live UI task updates
+	mu                sync.Mutex
+	tasks             map[string]*Task // taskID -> Task
+	logger            *slog.Logger
+	eventFunc         func(TaskEvent) // optional callback for live UI task updates
+	beforeAgentCancel func(string) error
 }
 
 // New creates a new background task Manager.
@@ -85,6 +86,14 @@ func New(logger *slog.Logger) *Manager {
 func (m *Manager) SetEventFunc(fn func(TaskEvent)) {
 	m.mu.Lock()
 	m.eventFunc = fn
+	m.mu.Unlock()
+}
+
+// SetBeforeAgentCancel lets the host persist queued cancellation before the
+// in-memory task can report it. Running execution still uses its native stop.
+func (m *Manager) SetBeforeAgentCancel(fn func(string) error) {
+	m.mu.Lock()
+	m.beforeAgentCancel = fn
 	m.mu.Unlock()
 }
 
@@ -586,6 +595,7 @@ func appendLogError(output string, err error) string {
 // single authority that wakes waiters as killed, failed, or completed.
 func (m *Manager) Kill(taskID string) error {
 	m.mu.Lock()
+	beforeCancel := m.beforeAgentCancel
 	task, ok := m.tasks[taskID]
 	m.mu.Unlock()
 	if !ok {
@@ -595,6 +605,12 @@ func (m *Manager) Kill(taskID string) error {
 	if task.Status != TaskRunning && task.Status != TaskQueued {
 		task.mu.Unlock()
 		return fmt.Errorf("task %s is not running (status: %s)", taskID, task.Status)
+	}
+	if task.Kind == KindAgent && beforeCancel != nil {
+		if err := beforeCancel(taskID); err != nil {
+			task.mu.Unlock()
+			return err
+		}
 	}
 	if (task.Kind == KindAgent || task.Kind == KindDependency) && task.Status == TaskRunning {
 		if task.stopRequested {
