@@ -137,7 +137,7 @@ func (s *Service) checkTaskInputAuthority(ctx context.Context, b toolcontext.Com
 		return ErrDeliveryAsset
 	}
 	for _, file := range p.Files {
-		reader, actual, err := s.openTaskInput(ctx, b.BotID, file.ContentHash)
+		reader, actual, err := s.openTaskInput(ctx, b, file.ContentHash)
 		if err != nil {
 			return ErrDeliveryAsset
 		}
@@ -236,15 +236,43 @@ func (s *Service) WithInputFiles(resolve InputFileResolver) *Service {
 	return s
 }
 
+// InputReferenceOpener resolves a server-owned conversation reference, retaining
+// its original owner and live authorization on Read/Seek. A nil reader with no
+// error means there is no shared reference; any error forbids an owned-media
+// fallback. This port never receives caller-provided URLs or storage keys.
+type InputReferenceOpener func(context.Context, toolcontext.ComputerBinding, string) (media.ReadSeekCloser, string, error)
+
+func (s *Service) WithInputReferences(open InputReferenceOpener) *Service {
+	s.inputReference = open
+	return s
+}
+
+func (s *Service) taskInputReader(ctx context.Context, b toolcontext.ComputerBinding, hash string) (media.ReadSeekCloser, string, error) {
+	if s.inputReference != nil {
+		reader, mime, err := s.inputReference(ctx, b, hash)
+		if err != nil || reader != nil {
+			return reader, mime, err
+		}
+	}
+	assets, ok := s.assets.(DeliveryAssets)
+	if !ok {
+		return nil, "", ErrDeliveryAsset
+	}
+	reader, asset, err := assets.OpenSeekable(ctx, b.BotID, hash)
+	if err != nil || asset.BotID != b.BotID || asset.ContentHash != hash {
+		if reader != nil {
+			_ = reader.Close()
+		}
+		return nil, "", ErrDeliveryAsset
+	}
+	return reader, asset.Mime, nil
+}
+
 // Ordinary media.Open metadata intentionally has no SizeBytes. Reuse the
 // existing verified seek/range source and derive length from that exact stream,
 // just like the NAS delivery verifier; never trust a caller/filename length.
-func (s *Service) openTaskInput(ctx context.Context, bot, hash string) (media.ReadSeekCloser, deliverymeta.Input, error) {
-	assets, ok := s.assets.(DeliveryAssets)
-	if !ok {
-		return nil, deliverymeta.Input{}, ErrDeliveryAsset
-	}
-	reader, asset, err := assets.OpenSeekable(ctx, bot, hash)
+func (s *Service) openTaskInput(ctx context.Context, b toolcontext.ComputerBinding, hash string) (media.ReadSeekCloser, deliverymeta.Input, error) {
+	reader, mime, err := s.taskInputReader(ctx, b, hash)
 	if err != nil || reader == nil {
 		if reader != nil {
 			_ = reader.Close()
@@ -253,8 +281,8 @@ func (s *Service) openTaskInput(ctx context.Context, bot, hash string) (media.Re
 	}
 	size, seekErr := reader.Seek(0, io.SeekEnd)
 	_, resetErr := reader.Seek(0, io.SeekStart)
-	file := deliverymeta.Input{ContentHash: hash, SizeBytes: size, Mime: asset.Mime}
-	if seekErr != nil || resetErr != nil || asset.BotID != bot || asset.ContentHash != hash || !file.Valid() {
+	file := deliverymeta.Input{ContentHash: hash, SizeBytes: size, Mime: mime}
+	if seekErr != nil || resetErr != nil || !file.Valid() {
 		_ = reader.Close()
 		return nil, deliverymeta.Input{}, ErrDeliveryAsset
 	}
@@ -275,7 +303,7 @@ func (s *Service) inputReferences(ctx context.Context, b toolcontext.ComputerBin
 			return nil, ErrInvalid
 		}
 		seen[hash] = true
-		reader, file, err := s.openTaskInput(ctx, b.BotID, hash)
+		reader, file, err := s.openTaskInput(ctx, b, hash)
 		if err != nil {
 			return nil, ErrDeliveryAsset
 		}
@@ -330,7 +358,7 @@ func (s *Service) materializeInputs(ctx context.Context, b toolcontext.ComputerB
 		if err != nil || agenvo.TargetFingerprint(current) != fingerprint || ctx.Err() != nil {
 			return ErrDenied
 		}
-		reader, currentFile, err := s.openTaskInput(ctx, b.BotID, file.ContentHash)
+		reader, currentFile, err := s.openTaskInput(ctx, b, file.ContentHash)
 		if err != nil {
 			return ErrDeliveryAsset
 		}
@@ -380,7 +408,7 @@ func (s *Service) materializeInputs(ctx context.Context, b toolcontext.ComputerB
 				return err
 			}
 		case errors.Is(err, bridge.ErrNotFound):
-			reader, sourceFile, err := s.openTaskInput(ctx, b.BotID, file.ContentHash)
+			reader, sourceFile, err := s.openTaskInput(ctx, b, file.ContentHash)
 			if err != nil || reader == nil {
 				return ErrDeliveryAsset
 			}

@@ -19,9 +19,10 @@ import (
 // Source exposes the same service to any standard MCP tools client. Authority
 // comes from the existing host-owned tool mount, never an MCP session header.
 type Source struct {
-	service   *Service
-	logger    *slog.Logger
-	associate func(context.Context, dbstore.ComputerOperationRecord, []DeliveryRequest) error
+	service       *Service
+	logger        *slog.Logger
+	associate     func(context.Context, dbstore.ComputerOperationRecord, []DeliveryRequest) error
+	resumeContext func(context.Context, toolcontext.ComputerBinding) (context.Context, error)
 }
 
 func NewSource(service *Service) *Source { return &Source{service: service} }

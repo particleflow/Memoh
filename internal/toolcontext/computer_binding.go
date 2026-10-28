@@ -32,6 +32,18 @@ func HostComputerBinding(ctx context.Context) (ComputerBinding, bool) {
 	return b, ok
 }
 
+// RestoreComputerRun fills only the missing run of an authenticated host
+// binding. The caller must first load and authorize the original operation;
+// the run comes from that ledger, never HTTP headers or request arguments.
+func RestoreComputerRun(ctx context.Context, run string) (context.Context, error) {
+	b, ok := HostComputerBinding(ctx)
+	if !ok || ctx.Err() != nil || run == "" || (b.RunID != "" && b.RunID != run) {
+		return ctx, ErrComputerBinding
+	}
+	b.RunID = run
+	return context.WithValue(ctx, computerBindingKey{}, b), nil
+}
+
 // DeriveComputerBinding is called only after the host has admitted a persisted
 // child thread and verified its parent. Only the child thread/run change.
 func DeriveComputerBinding(ctx context.Context, bot, parent, child, run string) (context.Context, error) {
