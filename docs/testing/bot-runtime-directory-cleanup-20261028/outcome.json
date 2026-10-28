@@ -1,0 +1,90 @@
+{
+  "date_utc": "2026-10-28",
+  "source": {
+    "baseline": "ba602dc5e7ad62323245cb6cae6040ea54d045bd",
+    "fix_commit": "6235839bbc3162bad8c83fbefea45dc64dd9bd50",
+    "server_build_recorded_vcs_revision": "ba602dc5e7ad62323245cb6cae6040ea54d045bd",
+    "server_build_vcs_modified": true
+  },
+  "environment": {
+    "kind": "isolated cloud development",
+    "platform": "linux/amd64",
+    "runtime_backend": "docker",
+    "database_scope": "new dedicated databases in the owned test PostgreSQL and pgvector services",
+    "test_service_stopped_after_evidence": true,
+    "production_actions": 0,
+    "model_calls": 0
+  },
+  "image": "docker.io/memohai/workspace@sha256:9bc968111563981d7ba41cb9eb7abec0b18c860b8b284ad8bdfd431b1ddcfd6b",
+  "before": {
+    "bot_id": "a8d4b0c9-5061-4215-a7bf-92f3a11b310a",
+    "container_name": "workspace-a8d4b0c9-5061-4215-a7bf-92f3a11b310a",
+    "runtime_backend": "docker",
+    "container_running_before": true,
+    "runtime_directory_before": {
+      "path_template": "<isolated-data-root>/run/<bot-id>",
+      "exists": true,
+      "empty": true,
+      "is_symlink": false
+    },
+    "shared_parent_before": true,
+    "sibling_before": true,
+    "backup_before": true
+  },
+  "browser_action": {
+    "delete_requests": [
+      {
+        "method": "DELETE",
+        "target": "/bots/<test-bot-id>",
+        "http_status": 202
+      }
+    ],
+    "elapsed_seconds_to_list": 1.703,
+    "returned_to_bot_list": true,
+    "bot_name_absent_from_list": false
+  },
+  "server_events": {
+    "accepted_at_utc": "2026-10-28T10:25:50.709Z",
+    "workspace_teardown_completed_at_utc": "2026-10-28T10:25:54.212Z",
+    "bot_delete_completed_at_utc": "2026-10-28T10:25:54.330Z",
+    "bot_delete_latency_seconds": 3.622494162,
+    "delete_http_status": 202
+  },
+  "independent_after": {
+    "bot_id": "a8d4b0c9-5061-4215-a7bf-92f3a11b310a",
+    "database_counts": {
+      "bots": 0,
+      "bot_workspaces": 0,
+      "containers": 0
+    },
+    "container_absent": true,
+    "runtime_directory_absent": true,
+    "shared_run_parent_present": true,
+    "sibling_present": true,
+    "backup_marker_unchanged": true,
+    "poll_elapsed_seconds": 0.109,
+    "manual_directory_removal": false,
+    "manual_container_removal": false
+  },
+  "settled_authenticated_get_bots": {
+    "http_status": 200,
+    "body": {
+      "items": []
+    }
+  },
+  "final_fresh_login_ui": {
+    "bot_absent": true,
+    "screenshot": "screenshots/settled-empty-list.png"
+  },
+  "limits": {
+    "acceptance_202_is_not_completion": true,
+    "initial_list_still_contained_bot_before_background_completion": true,
+    "repeated_http_delete_not_tested": true,
+    "cleanup_method_idempotency_tested": true,
+    "zfs_not_tested": true,
+    "host_data_path_hash_not_tested": true,
+    "persistence_after_recreation_not_tested": true,
+    "production_retest_not_performed": true,
+    "non_linux_cleanup_unchanged": true
+  }
+}

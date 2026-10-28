@@ -1,0 +1,46 @@
+{
+  "packaging_only": true,
+  "files": [
+    {
+      "file": "screenshots/confirm-delete.png",
+      "original_filename": "confirm-delete.png",
+      "sha256": "563da31a1640f39b000d6a8bdd9b60d58484067c9aeb4d8f6badf042439aac78",
+      "byte_identical": true
+    },
+    {
+      "file": "screenshots/settled-empty-list.png",
+      "original_filename": "after-delete-fresh-list.png",
+      "sha256": "5bb22b7410586b420237f7713a3e3095358bca39bd0b9cdac97d7949b5d2c1df",
+      "byte_identical": true
+    },
+    {
+      "file": "outcome.json",
+      "sha256": "71ec53d422762be6454c4570297a4e4a4da02f6cccd0357f632741ec87a111c0",
+      "normalization": "Combined allowlisted existing observations. Host filesystem inode/device omitted; root represented by a template. No config, environment, token, browser state, or production endpoint published.",
+      "source_sha256": {
+        "before.json": "994f3ef8441c4ff8423ac08e14a1ae090eff60167d5925fb6a0991d60f9c592c",
+        "after.json": "1519f21d16088f615b5a9aceccd5965fe42740b9453a3e6b7a306d3ae974626e",
+        "browser-delete.json": "3a644ba5c3a459297e270d787c328fff2d6096e90085ab1db0ea48dbc8e9f4b2",
+        "settled-list.json": "e4d16fb31229e7794a0a8d8e0cc87788ae353ed0116815aae6d98d63b4b5b47d",
+        "server.log": "29f0401c0725fc4ef7952495cfd3372f4ed4a8c54d043ec692812fd5922a86d4"
+      }
+    },
+    {
+      "file": "red.log",
+      "sha256": "430fd6d689f6b4a3ec9055fd994cf4ce5d13b9b601ec310a874ee64a52a10bba",
+      "original_sha256": "f273ce8f16e0df558d10feaf1789d3932e3397ed2d0a5d855ff6a73a6e028ff4",
+      "normalization": "Temporary host path replaced with a template; trailing blank lines trimmed."
+    },
+    {
+      "file": "green.log",
+      "sha256": "37c2c3184978d4c9ce3eb8c0ad00e1d1ecfad1cd3139ab57683ac47444c23c89",
+      "original_sha256": "37c2c3184978d4c9ce3eb8c0ad00e1d1ecfad1cd3139ab57683ac47444c23c89",
+      "normalization": "Temporary host path replaced with a template; trailing blank lines trimmed."
+    },
+    {
+      "file": "source-files.json",
+      "sha256": "542ff909823ae31831dfd15a4454e984fa94f658d3726a50c776b19404235a18",
+      "normalization": "Tracked file content hashes from the verified source tree."
+    }
+  ]
+}

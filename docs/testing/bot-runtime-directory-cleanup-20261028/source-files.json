@@ -1,0 +1,9 @@
+{
+  "fix_commit": "6235839bbc3162bad8c83fbefea45dc64dd9bd50",
+  "paths": {
+    "internal/workspace/manager.go": "0de28b873f819ae50b0c3b11f121b4ae90acf0b051d9791cdc341e35643712f7",
+    "internal/workspace/runtime_directory_linux.go": "c951a27effad235c0f229b854d86221b5258e297367a5c5a1d08a614686c2ced",
+    "internal/workspace/runtime_directory_other.go": "39923a8a758c5852727dc66e6fe140b1cd7111c920384b30ea143bfa3de53a24",
+    "internal/workspace/runtime_directory_linux_test.go": "5cf762fb8bc0ab96adc8b04908e10ae827dabef253cdef38322902e82df3d09f"
+  }
+}
