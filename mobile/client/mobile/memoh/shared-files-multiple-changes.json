@@ -1,0 +1,65 @@
+{
+  "commit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "parent": "5b797fb970f4b67ab4d79d27a530f0ea540a8ccb",
+  "scope": "Exact ordinary-picker multi-file delta only. Retain native save bridge. The separate parent listDirectory guard is not imported.",
+  "existingFiles": {
+    "apps/web/src/components/sidebar/files-pane.vue": {
+      "baseSHA256": "4a7829baa94faaed58e0802acb09ebe9fed2763b18dfdc27ec2fedc061cbefb6",
+      "sharedSHA256": "df22160e80d249e5da37b7a30513938d9362122e1ed87c490146eb6f7656e131",
+      "upstreamSHA256": "f2339f46ef671af0d88ddb9567b9aca7ba6d4202c0112d266a1da6366536ae2e",
+      "replacements": [
+        [
+          "      class=\"hidden\"\n      :disabled=\"operationLoading || !canWrite\"\n",
+          "      class=\"hidden\"\n      multiple\n      :disabled=\"operationLoading || !canWrite\"\n",
+          1
+        ],
+        [
+          "\n// Shared upload engine for every multi-entry upload (folder picker, drag-drop).\n// Owns the busy gate and the progress line; the RESULT toast is the caller's,\n",
+          "\n// Shared upload engine for every multi-entry upload (file/folder picker, drop).\n// Owns the busy gate and the progress line; the RESULT toast is the caller's,\n",
+          1
+        ],
+        [
+          "): Promise<{ failed: number, total: number }> {\n  const total = directories.length + files.length\n",
+          "): Promise<{ failed: number, total: number }> {\n  const botId = props.botId\n  const total = directories.length + files.length\n",
+          1
+        ],
+        [
+          "        await postBotsByBotIdContainerFsMkdir({\n          path: { bot_id: props.botId },\n          body: { path: dir },\n",
+          "        await postBotsByBotIdContainerFsMkdir({\n          path: { bot_id: botId },\n          body: { path: dir },\n",
+          1
+        ],
+        [
+          "          await postBotsByBotIdContainerFsUpload({\n            path: { bot_id: props.botId },\n            body: { path: item.path, file: item.file } as never,\n",
+          "          await postBotsByBotIdContainerFsUpload({\n            path: { bot_id: botId },\n            body: { path: item.path, file: item.file } as never,\n",
+          1
+        ],
+        [
+          "async function handleUpload(event: Event) {\n  if (!props.canWrite) return\n  const input = event.target as HTMLInputElement\n",
+          "async function handleUpload(event: Event) {\n  if (!props.canWrite || uploadBusy.value) return\n  const input = event.target as HTMLInputElement\n",
+          1
+        ],
+        [
+          "  const input = event.target as HTMLInputElement\n  const file = input.files?.[0]\n  if (!file) return\n\n",
+          "  const input = event.target as HTMLInputElement\n  const files = Array.from(input.files ?? [])\n  if (files.length === 0) return\n\n",
+          1
+        ],
+        [
+          "\n  const destPath = joinPath(uploadTarget.value, file.name)\n  try {\n",
+          "\n  const target = uploadTarget.value\n  const botId = props.botId\n  try {\n",
+          1
+        ],
+        [
+          "  try {\n    await postBotsByBotIdContainerFsUpload({\n      path: { bot_id: props.botId },\n      body: { path: destPath, file } as never,\n      throwOnError: true,\n    })\n    toast.success(t('bots.files.uploadSuccess'))\n    if (uploadTarget.value !== rootPath) navigateTo(uploadTarget.value)\n    reloadAndBroadcast()\n",
+          "  try {\n    const { failed, total } = await runUploadBatch([], files.map(file => ({ path: joinPath(target, file.name), file })))\n    if (failed > 0) {\n      toast.error(t('bots.files.uploadPartialFailed', { failed, total }))\n    } else {\n      toast.success(t('bots.files.uploadSuccess'))\n    }\n    if (props.botId === botId && target !== rootPath) navigateTo(target)\n    reloadAndBroadcast()\n",
+          1
+        ]
+      ]
+    }
+  },
+  "addedFiles": {
+    "apps/web/src/components/sidebar/files-pane.upload.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, h, nextTick, reactive } from 'vue'\nimport { createI18n } from 'vue-i18n'\nimport { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\nimport FilesPane from './files-pane.vue'\nimport en from '@/i18n/locales/en.json'\n\nconst api = vi.hoisted(() => ({ list: vi.fn(), upload: vi.fn(), error: vi.fn(), success: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({\n  getBotsByBotIdContainerFsList: api.list,\n  postBotsByBotIdContainerFsUpload: api.upload,\n  postBotsByBotIdContainerFsMkdir: vi.fn(), postBotsByBotIdContainerFsDelete: vi.fn(),\n  postBotsByBotIdContainerFsRename: vi.fn(), postBotsByBotIdContainerFsWrite: vi.fn(),\n}))\nvi.mock('@felinic/ui', async importOriginal => ({ ...await importOriginal<object>(), toast: { error: api.error, success: api.success } }))\nvi.mock('pinia', async importOriginal => ({ ...await importOriginal<object>(), storeToRefs: (await import('vue')).toRefs }))\nconst chat = reactive({ fsChangedAt: 0, markFsChanged() { chat.fsChangedAt++ } })\nconst tabs = reactive({ activeId: null })\nvi.mock('@/store/chat-list', () => ({ useChatStore: () => chat }))\nvi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => tabs }))\n\nconst props = reactive({ botId: 'original-bot', active: false, canWrite: true })\nlet app: ReturnType<typeof createApp> | undefined\nlet root: HTMLDivElement\n\nasync function settled() {\n  await nextTick()\n  await vi.advanceTimersByTimeAsync(5)\n  await nextTick()\n}\n\nasync function mount() {\n  root = document.createElement('div')\n  document.body.append(root)\n  app = createApp({ render: () => h(FilesPane, props) })\n  app.use(createI18n({ legacy: false, locale: 'en', messages: { en } }))\n  app.mount(root)\n  await settled()\n  return root.querySelector<HTMLInputElement>('input[type=\"file\"]:not([webkitdirectory])')!\n}\n\nfunction select(input: HTMLInputElement, files: File[]) {\n  // Deliberate FileList-shaped jsdom fixture. Real native-selector FileList\n  // observations remain separate from this compiled-component dispatch test.\n  Object.defineProperty(input, 'files', { configurable: true, value: files })\n  expect(input.files).toHaveLength(files.length)\n  input.dispatchEvent(new Event('change', { bubbles: true }))\n}\n\nfunction threeFiles() {\n  return [\n    new File([new Uint8Array([0, 255, 3, 17])], 'first.bin', { type: 'application/octet-stream' }),\n    new File(['second 雪'], 'second.txt', { type: 'text/plain' }),\n    new File([new Uint8Array([5, 4, 3, 2, 1])], 'third.dat', { type: 'application/octet-stream' }),\n  ]\n}\n\nbeforeEach(() => {\n  vi.useFakeTimers()\n  vi.clearAllMocks()\n  api.upload.mockReset()\n  api.upload.mockResolvedValue({ data: {} })\n  api.list.mockResolvedValue({ data: { entries: [] } })\n  props.botId = 'original-bot'\n  props.active = false\n  props.canWrite = true\n  chat.fsChangedAt = 0\n})\nafterEach(() => { app?.unmount(); root?.remove(); vi.useRealTimers() })\n\ndescribe('ordinary Files upload selector', () => {\n  it('supports multiple loose files independently of the directory selector', async () => {\n    const input = await mount()\n    expect(input.multiple).toBe(true)\n    expect(input.hasAttribute('webkitdirectory')).toBe(false)\n    const folder = root.querySelector<HTMLInputElement>('input[webkitdirectory]')!\n    expect(folder).not.toBe(input)\n    expect(folder.multiple).toBe(true)\n  })\n\n  it('dispatches all three selected File objects once to their own paths', async () => {\n    const input = await mount()\n    const files = threeFiles()\n    select(input, files)\n    await settled()\n    expect(api.upload).toHaveBeenCalledTimes(3)\n    for (const file of files) {\n      expect(api.upload).toHaveBeenCalledWith({\n        path: { bot_id: 'original-bot' }, body: { path: `/data/${file.name}`, file }, throwOnError: true,\n      })\n    }\n    expect(api.upload.mock.calls.map(([request]) => request.body.file)).toEqual(files)\n    expect(api.success).toHaveBeenCalledOnce()\n    expect(api.error).not.toHaveBeenCalled()\n    expect(input.value).toBe('')\n    expect(chat.fsChangedAt).toBe(1)\n  })\n\n  it('attempts the other files and reports partial failure when one upload fails', async () => {\n    api.upload.mockImplementation(async ({ body }) => {\n      if (body.file.name === 'second.txt') throw { status: 403, code: 'http.forbidden' }\n      return { data: {} }\n    })\n    const input = await mount()\n    select(input, threeFiles())\n    await settled()\n    expect(api.upload).toHaveBeenCalledTimes(3)\n    expect(api.error).toHaveBeenCalledWith(en.bots.files.uploadPartialFailed.replace('{failed}', '1').replace('{total}', '3'))\n    expect(api.success).not.toHaveBeenCalled()\n    expect(input.disabled).toBe(false)\n    expect(chat.fsChangedAt).toBe(1)\n  })\n\n  it('does not dispatch a read-only selection or an empty selection', async () => {\n    props.canWrite = false\n    const input = await mount()\n    expect(input.disabled).toBe(true)\n    select(input, threeFiles())\n    await settled()\n    props.canWrite = true\n    await settled()\n    select(input, [])\n    await settled()\n    expect(api.upload).not.toHaveBeenCalled()\n    expect(api.success).not.toHaveBeenCalled()\n  })\n\n  it('keeps the busy gate and original Bot for queued work after switching Bots', async () => {\n    const release: (() => void)[] = []\n    api.upload.mockImplementation(() => new Promise(resolve => release.push(() => resolve({ data: {} }))))\n    const input = await mount()\n    const files = Array.from({ length: 6 }, (_, index) => new File([`body-${index}`], `file-${index}.txt`))\n    select(input, files)\n    await settled()\n    expect(api.upload).toHaveBeenCalledTimes(4)\n    expect(input.disabled).toBe(true)\n    select(input, threeFiles())\n    await settled()\n    expect(api.upload).toHaveBeenCalledTimes(4)\n    props.botId = 'different-bot'\n    release.splice(0).forEach(finish => finish())\n    await settled()\n    expect(api.upload).toHaveBeenCalledTimes(6)\n    for (const [request] of api.upload.mock.calls) expect(request.path.bot_id).toBe('original-bot')\n    release.splice(0).forEach(finish => finish())\n    await settled()\n    expect(input.disabled).toBe(false)\n    expect(api.success).toHaveBeenCalledOnce()\n  })\n})\n",
+      "sha256": "26f128ca7d6ee9b70da0c34b26c5d026e3dd96414e3fdb9d03de1e2bbfcd4a00"
+    }
+  }
+}

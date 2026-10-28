@@ -17,8 +17,8 @@
       "upstreamSHA256": "0e706abd7a0b8e157d6a3afdf9fff7a2e2c70bafca42ef4d24601e186e1e349e"
     },
     "apps/web/src/components/sidebar/files-pane.vue": {
-      "adaptedSHA256": "c1bd58a8f1adef29b6e8cc07efde46b2c7c09e410e3cfd41f92d6a53f7dfaf4c",
-      "upstreamSHA256": "4a7829baa94faaed58e0802acb09ebe9fed2763b18dfdc27ec2fedc061cbefb6"
+      "upstreamSHA256": "df22160e80d249e5da37b7a30513938d9362122e1ed87c490146eb6f7656e131",
+      "adaptedSHA256": "c2e2a12730334272813440f4e184e2f55c94e1d31e215a99cad76c47669da05e"
     },
     "apps/web/src/composables/useBotDisplayConnection.ts": {
       "adaptedSHA256": "d97ee31883a15e1c94d395eb8fe2e0f069654de82768050eb397dc869b92b5df",

@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/components/sidebar/files-pane.upload.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  14:17:38
+   Duration  28.04s (transform 17.84s, setup 0ms, import 23.00s, tests 469ms, environment 3.63s)

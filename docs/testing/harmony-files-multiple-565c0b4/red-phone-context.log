@@ -1,0 +1,78 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/components/sidebar/files-pane.upload.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+ ❯ |web| src/components/sidebar/files-pane.upload.test.ts (5 tests | 4 failed) 793ms
+     × supports multiple loose files independently of the directory selector 318ms
+     × dispatches all three selected File objects once to their own paths 103ms
+     × attempts the other files and reports partial failure when one upload fails 137ms
+     × keeps the busy gate and original Bot for queued work after switching Bots 125ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.upload.test.ts > ordinary Files upload selector > supports multiple loose files independently of the directory selector
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/components/sidebar/files-pane.upload.test.ts:74:28
+     72|   it('supports multiple loose files independently of the directory sel…
+     73|     const input = await mount()
+     74|     expect(input.multiple).toBe(true)
+       |                            ^
+     75|     expect(input.hasAttribute('webkitdirectory')).toBe(false)
+     76|     const folder = root.querySelector<HTMLInputElement>('input[webkitd…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.upload.test.ts > ordinary Files upload selector > dispatches all three selected File objects once to their own paths
+AssertionError: expected "vi.fn()" to be called 3 times, but got 1 times
+ ❯ src/components/sidebar/files-pane.upload.test.ts:86:24
+     84|     select(input, files)
+     85|     await settled()
+     86|     expect(api.upload).toHaveBeenCalledTimes(3)
+       |                        ^
+     87|     for (const file of files) {
+     88|       expect(api.upload).toHaveBeenCalledWith({
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.upload.test.ts > ordinary Files upload selector > attempts the other files and reports partial failure when one upload fails
+AssertionError: expected "vi.fn()" to be called 3 times, but got 1 times
+ ❯ src/components/sidebar/files-pane.upload.test.ts:107:24
+    105|     select(input, threeFiles())
+    106|     await settled()
+    107|     expect(api.upload).toHaveBeenCalledTimes(3)
+       |                        ^
+    108|     expect(api.error).toHaveBeenCalledWith(en.bots.files.uploadPartial…
+    109|     expect(api.success).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.upload.test.ts > ordinary Files upload selector > keeps the busy gate and original Bot for queued work after switching Bots
+AssertionError: expected "vi.fn()" to be called 4 times, but got 1 times
+ ❯ src/components/sidebar/files-pane.upload.test.ts:135:24
+    133|     select(input, files)
+    134|     await settled()
+    135|     expect(api.upload).toHaveBeenCalledTimes(4)
+       |                        ^
+    136|     expect(input.disabled).toBe(true)
+    137|     select(input, threeFiles())
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 1 passed (5)
+   Start at  14:16:30
+   Duration  23.94s (transform 16.06s, setup 0ms, import 20.68s, tests 793ms, environment 1.99s)
+
+ ELIFECYCLE  Test failed. See above for more details.

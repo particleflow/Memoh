@@ -1,0 +1,11 @@
+{
+  "productParent": "a72a3406d6376026d2c8d4dbfdd0cc6b1fa8a406",
+  "unchangedFilesSHA256": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+    "mobile/client/mobile/memoh/harmony-files.ts": "f6beece8e9fdeb5d3f1aacfc69b0df88fd5932cc50229f1a822942951a8cce35"
+  },
+  "officialSDKVersion": "26.0.0.105",
+  "officialDeclaration": "ets/component/web.d.ts:1348 FileOpenMultipleMode = 1",
+  "phoneRuntimeVerified": false
+}

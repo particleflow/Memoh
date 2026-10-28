@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "78c6ba551c11e885a6ba228038460f357a20c1b122ade3be31fd94f278b729eb",
+      "sha256": "a2de2892899719e7d6c16a2538b073eb2a7df7d53d78f8b2b0bfaccf12d1f522",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "c0281dcde444d9f161d7fa29aa9ebb7b4284ba5ea2859b177899c4b763dec90b",
+      "sha256": "976a9c264b9aa22c7d95aaaf49415a83485027070068af05f1ba5f31ffb652a6",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1770,6 +1770,15 @@
       "licenseReview": "Derived Memoh source under the retained repository license. No dependency, toolchain or private configuration.",
       "preparationChanges": [
         "Five product-file deltas only. Native original read/decode failures retain scoped identity and enter the same mounted-lifetime inaccessible state, without retry or fallback."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-files-multiple-changes.json",
+      "sha256": "ec6aa4e0cf9582301673b0c69046d35c351b9e5d5d6de3644831ef372c5f2b63",
+      "origin": "Exact ordinary Files picker delta and five upstream tests from 565c0b4b3386d87d057234efe6828479d35fcee0, direct parent 5b797fb970f4b67ab4d79d27a530f0ea540a8ccb. Not historical recovery.",
+      "licenseReview": "Derived Memoh source under retained repository license; no third-party dependency or private configuration.",
+      "preparationChanges": [
+        "Apply only multiple selection, existing concurrency-four upload batch and original Bot binding. Keep native save adapter and existing directory read logic."
       ]
     }
   ],

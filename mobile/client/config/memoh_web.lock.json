@@ -399,5 +399,14 @@
     "scope": "Five shared product-file presentation deltas only; retain native verified original readers and scoped authorization, with local mounted-lifetime failure state. No access recovery, retry, API, SDK or history change.",
     "unifiedCompatibleCommit": "7bf48c2cc6cfcd6f4c8b3812210cfbf44d3b2ac8",
     "unifiedWebAndSDKIdenticalTo": "dfd68e8058b2f982c877be0e36e402c7f2d0c163"
+  },
+  "sharedFilesMultiUpload": {
+    "commit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+    "parent": "5b797fb970f4b67ab4d79d27a530f0ea540a8ccb",
+    "sourceChanges": {
+      "local": "shared-files-multiple-changes.json",
+      "sha256": "ec6aa4e0cf9582301673b0c69046d35c351b9e5d5d6de3644831ef372c5f2b63"
+    },
+    "scope": "Ordinary Files picker multiple selection, existing bounded concurrency four, original-Bot batch binding. No alternate protocol, native save or directory read change."
   }
 }

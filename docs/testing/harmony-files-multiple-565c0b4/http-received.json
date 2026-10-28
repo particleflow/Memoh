@@ -1,0 +1,23 @@
+[
+  {
+    "name": "second.txt",
+    "bytes": 5643,
+    "sha256": "d1d35570ea185349e346a6054f9a11b0d4d8ab8a3b0afb6d422c39a72dd57d11",
+    "destination": "/data/second.txt",
+    "originalBot": true
+  },
+  {
+    "name": "third.dat",
+    "bytes": 545,
+    "sha256": "348c32e9c55d1aa894e181ce0d3827baa993118a1f733e211300e22e8da6a0b8",
+    "destination": "/data/third.dat",
+    "originalBot": true
+  },
+  {
+    "name": "first.bin",
+    "bytes": 262149,
+    "sha256": "95283f00cbd0914cc0248815fb0dcf7149bae4b3aa776282207530673fe4714e",
+    "destination": "/data/first.bin",
+    "originalBot": true
+  }
+]

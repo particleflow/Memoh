@@ -927,6 +927,9 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     inaccessible = lock['sharedInaccessibleAttachment']['sourceChanges']
     assert sha(ROOT / 'mobile/memoh' / inaccessible['local']) == inaccessible['sha256'], 'Attachment presentation source drift'
     inaccessible_sources = json.loads((ROOT / 'mobile/memoh' / inaccessible['local']).read_text())
+    multi_upload = lock['sharedFilesMultiUpload']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / multi_upload['local']) == multi_upload['sha256'], 'Files multi-upload source drift'
+    multi_upload_sources = json.loads((ROOT / 'mobile/memoh' / multi_upload['local']).read_text())
 
 
 
@@ -1195,15 +1198,16 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                     shared_text = shared_text.replace(old, new)
                 data = shared_text.encode('utf-8')
                 entry.size = len(data)
-            if name in inaccessible_sources['existingFiles']:
-                review = inaccessible_sources['existingFiles'][name]
-                assert hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Attachment presentation baseline drift'
-                text = data.decode()
-                for before, after, expected in review['replacements']:
-                    assert text.count(before) == expected, 'Attachment presentation seam drift'
-                    text = text.replace(before, after)
-                data = text.encode()
-                assert hashlib.sha256(data).hexdigest() == review['sharedSHA256'], 'Attachment presentation output drift'
+            for sources in (inaccessible_sources, multi_upload_sources):
+                if name in sources['existingFiles']:
+                    review = sources['existingFiles'][name]
+                    assert hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Shared presentation baseline drift'
+                    text = data.decode()
+                    for before, after, expected in review['replacements']:
+                        assert text.count(before) == expected, 'Shared presentation seam drift'
+                        text = text.replace(before, after)
+                    data = text.encode()
+                    assert hashlib.sha256(data).hexdigest() == review['sharedSHA256'], 'Shared presentation output drift'
             if name in {f'apps/web/src/i18n/locales/{language}.json' for language in inaccessible_sources['locales']}:
                 value = json.loads(data)
                 assert 'attachmentUnavailable' not in value['chat'], 'Attachment presentation locale already present'
@@ -1306,7 +1310,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
-        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles']}.items():
+        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles'], **multi_upload_sources['addedFiles']}.items():
             assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected shared source destination'
             data = item['source'].encode()
             assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added shared source drift'
