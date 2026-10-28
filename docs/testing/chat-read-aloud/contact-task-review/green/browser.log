@@ -1,0 +1,186 @@
+{
+  "source": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "syntheticServerAndWav": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "主管 Bot 转述后台任务结果第2段。"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [
+    "candidate result-only run with no user bubble speaks extracted assistant text",
+    "pending same-Bot return stops old task audio and frame before contact response",
+    "resolved main contact does not restore old task playback"
+  ],
+  "observations": [
+    {
+      "label": "contact-return-pending-mask",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18483/03507611-0b2a-4595-8e0d-87c1abf091de",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.00129,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "contact-resolved-without-catch-up",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18483/03507611-0b2a-4595-8e0d-87c1abf091de",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.00129,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    }
+  ],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ],
+  "navigation": {
+    "url": "/bot/10000000-0000-4000-8000-000000000001",
+    "pending": true,
+    "visibleSpeech": [
+      {
+        "state": "idle",
+        "visible": false,
+        "content": "主管 Bot 转述后台任务结果第2段。"
+      }
+    ],
+    "body": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n\n加载中..."
+  }
+}

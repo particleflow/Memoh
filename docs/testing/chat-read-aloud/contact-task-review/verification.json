@@ -1,0 +1,41 @@
+{
+  "sourceFixCommit": "bbbb448a0c6fd6f35f90d28316f4d5a51c5e9dc6",
+  "sourceFixParent": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "checks": [
+    {
+      "command": "unpatched candidate targeted browser runner",
+      "exitCode": 1,
+      "result": "expected red: pending contact return must stop old task audio before resolution"
+    },
+    {
+      "command": "candidate plus one-line gate targeted browser runner",
+      "exitCode": 0,
+      "result": "3 targeted checkpoints passed"
+    },
+    {
+      "command": "eslint apps/web/src/pages/home/components/chat-pane.vue (candidate worktree)",
+      "exitCode": 0
+    },
+    {
+      "command": "eslint retained browser runner and test-only Vite config",
+      "exitCode": 0
+    },
+    {
+      "command": "node --check docs/testing/chat-read-aloud/browser-contact-task-review.mjs",
+      "exitCode": 0
+    }
+  ],
+  "ownedPreviewPortAfterRunner": {
+    "host": "127.0.0.1",
+    "port": 18483,
+    "connectErrorCode": 111,
+    "closed": true
+  },
+  "artifacts": {
+    "docs/testing/chat-read-aloud/contact-task-review/red/failure.json": "f54a4c417f3ffc200bc5a14e7e66caf3f149af667cedddc700227b19f86be5cd",
+    "docs/testing/chat-read-aloud/contact-task-review/green/result.json": "09a4ab3082bdcac47bad43efa9aad39a04a4f966ab06a9a29ab3a9201cb8520b",
+    "docs/testing/chat-read-aloud/contact-task-review/candidate-contact-gate.patch": "11d7040142f98b94b084a3157e7478f3e1832f740761fe00d5817adafecdd4c8",
+    "docs/testing/chat-read-aloud/contact-task-review/source-audit.json": "31c9fffda70bd9cbfc8bed03cb3380545c2015e98ae6d7b2dfa36b54a77a3b42",
+    "docs/testing/chat-read-aloud/browser-contact-task-review.mjs": "d34000d29dc010b6234fcbc595fbe307ab230e7efba11c64145ea2bae0fba421"
+  }
+}

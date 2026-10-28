@@ -1,0 +1,12 @@
+diff --git a/apps/web/src/pages/home/components/chat-pane.vue b/apps/web/src/pages/home/components/chat-pane.vue
+index 40d895896..881d91de8 100644
+--- a/apps/web/src/pages/home/components/chat-pane.vue
++++ b/apps/web/src/pages/home/components/chat-pane.vue
+@@ -3424,6 +3424,7 @@ const readAloud = useChatReadAloud({
+   botId: currentBotId,
+   scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),
+   enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value
++    && !chatStore.contactNavigationPending
+     && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),
+   loading: computed(() => loadingMessages.value || loadingChats.value),
+   draft: inputText,

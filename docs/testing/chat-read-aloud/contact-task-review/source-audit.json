@@ -1,0 +1,111 @@
+{
+  "base": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+  "candidate": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "files": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+      "baseSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "candidateSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+      "baseSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "candidateSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+      "candidateSHA256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/components/message-actions.vue": {
+      "baseSHA256": "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6",
+      "candidateSHA256": "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6",
+      "byteEqual": true
+    },
+    "apps/web/src/style.css": {
+      "baseSHA256": "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2",
+      "candidateSHA256": "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2",
+      "byteEqual": true
+    },
+    "apps/web/src/store/chat/runtime-projection.ts": {
+      "baseSHA256": "e6d5337a66851d23b84a0b4fb418702d3f86860a5310b7a0b9e26c43c839273e",
+      "candidateSHA256": "e6d5337a66851d23b84a0b4fb418702d3f86860a5310b7a0b9e26c43c839273e",
+      "byteEqual": true
+    },
+    "apps/web/src/store/chat/runtime-transcript-merge.ts": {
+      "baseSHA256": "02b1fe685fcdaa5e1d19060908a8af0beb60d64dbba4d4ccea1ee94df1d2dc88",
+      "candidateSHA256": "02b1fe685fcdaa5e1d19060908a8af0beb60d64dbba4d4ccea1ee94df1d2dc88",
+      "byteEqual": true
+    },
+    "apps/web/src/store/chat/types.ts": {
+      "baseSHA256": "4941a84b1d56c00d2e404fb962c4d6b32ff2cda9a1b1eec69bf9ab9fdd2a8720",
+      "candidateSHA256": "4941a84b1d56c00d2e404fb962c4d6b32ff2cda9a1b1eec69bf9ab9fdd2a8720",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/components/dockview/panel-chat.vue": {
+      "baseSHA256": "f9b3755d41103946f37be77ee63787c38ac76cf07033a50d7b1ca7bf744efb24",
+      "candidateSHA256": "f9b3755d41103946f37be77ee63787c38ac76cf07033a50d7b1ca7bf744efb24",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/components/dockview/use-panel-visible.ts": {
+      "baseSHA256": "7a30092d14ab29c1303c154c569e0c15f92b3cfdb8c63a91fab9958a783b7030",
+      "candidateSHA256": "7a30092d14ab29c1303c154c569e0c15f92b3cfdb8c63a91fab9958a783b7030",
+      "byteEqual": true
+    }
+  },
+  "harmony": {
+    "source": "2195e92f1ff0a354e6cb4ab4bc86a4f1533d42c7",
+    "version": "1.0.27",
+    "sharedParentProvided": "b66c1b3eb1f93f765379c97dbf4bf7d3ac7a9ae0",
+    "readAloudOverlaySHA256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2",
+    "contactOverlaySHA256": "93a171264e57a495ae470f8d0ba8c87191abe601445338fdf4b1ebf032e44308",
+    "readAloudSources": {
+      "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+        "sha256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+        "matchesWeb": true
+      },
+      "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+        "sha256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+        "matchesWeb": true
+      }
+    },
+    "newPendingMask": true,
+    "oldGateWithoutPending": true,
+    "sharedReadAloud": {
+      "commit": "9c361d60371703c157d344dcebfd439acc6d78de",
+      "parent": "565c0b4b3386d87d057234efe6828479d35fcee0",
+      "sourceChanges": {
+        "local": "shared-read-aloud-changes.json",
+        "sha256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2"
+      },
+      "scope": "Final a0a821a4 source mapping for current read-aloud UI and generated playback SDK; original phone adapters preserved. No synthesize fallback. Deployment/device readiness is not inferred from source checks.",
+      "backendPlaybackReadyForRelease": false,
+      "navigationCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3",
+      "unifiedCompatibleCommit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+      "localFollowup": "Detached status invalidation consumes rejected completion while preserving cache errors; native voice uses existing Spinner/muted-soft tokens. No new UI or retry.",
+      "backendReleaseReadinessNote": "The final upstream includes the reviewed account-JWT playback auth correction. This source-only task does not independently verify the deployed endpoint or device playback."
+    },
+    "sharedBotContactTaskDirectory": {
+      "commit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+      "tree": "f832a984bd2d8c1ea7844655fca7cc880f43ef42",
+      "sharedBase": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+      "sourceChanges": {
+        "local": "shared-fixed-contact-task-directory.json",
+        "sha256": "93a171264e57a495ae470f8d0ba8c87191abe601445338fdf4b1ebf032e44308"
+      },
+      "scope": "Only final shared fixed-contact/task-directory delta; preserve existing phone-specific source divergences, native media journals, approved send button, image timing, Back and artwork. No backend code or unknown follow-up.",
+      "serverCompatibilityRequired": true,
+      "nativeBackConsumer": "5445b299657dfe092083c916f146b1e5ba078844",
+      "approvedArtwork": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc",
+      "directoryScope": "Persisted native admission, computer operation, incoming/outgoing delegation, schedule fire only; unknown follow-up not included.",
+      "localCancellationNowEquivalentUpstream": {
+        "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+        "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+        "apps/web/src/pages/home/composables/turn-end-invalidation.ts": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a"
+      },
+      "hapBuilt": false,
+      "compatibleReleaseBackend": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+      "releaseWebSDKEquivalentTo": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2"
+    }
+  }
+}

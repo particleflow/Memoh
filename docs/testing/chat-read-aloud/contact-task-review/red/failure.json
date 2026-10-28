@@ -1,0 +1,81 @@
+{
+  "source": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "syntheticServerAndWav": true,
+  "realNativePolicyRefusal": false,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "主管 Bot 转述后台任务结果第2段。"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [
+    "candidate result-only run with no user bubble speaks extracted assistant text"
+  ],
+  "observations": [
+    {
+      "label": "contact-return-pending-mask",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": false,
+          "time": 0.206245,
+          "src": "blob:http://127.0.0.1:18483/e9c7608d-1c29-46de-9053-8a671647830b",
+          "duration": 10
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18483/e9c7608d-1c29-46de-9053-8a671647830b",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.026956,
+          "paused": false
+        }
+      ]
+    }
+  ],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ]
+}
