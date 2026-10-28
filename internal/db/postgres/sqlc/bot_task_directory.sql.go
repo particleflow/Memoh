@@ -169,3 +169,41 @@ func (q *Queries) ListBotTaskDirectoryCandidates(ctx context.Context, arg ListBo
 	}
 	return items, nil
 }
+
+const readBotTaskRun = `-- name: ReadBotTaskRun :one
+SELECT bot_id, session_id, run_id, turn_id, invocation_id
+FROM session_runs
+WHERE team_id=public.memoh_current_team_id()
+  AND bot_id=$1::uuid AND session_id=$2::uuid
+  AND run_id::text=$3::text
+  AND COALESCE(error_code,'')<>'history_reset'
+`
+
+type ReadBotTaskRunParams struct {
+	BotID     pgtype.UUID `json:"bot_id"`
+	SessionID pgtype.UUID `json:"session_id"`
+	RunID     string      `json:"run_id"`
+}
+
+type ReadBotTaskRunRow struct {
+	BotID        pgtype.UUID `json:"bot_id"`
+	SessionID    pgtype.UUID `json:"session_id"`
+	RunID        pgtype.UUID `json:"run_id"`
+	TurnID       pgtype.UUID `json:"turn_id"`
+	InvocationID string      `json:"invocation_id"`
+}
+
+// Computer receipts carry opaque TEXT. Compare without casting that value, and
+// expose an anchor only if it is an actual run in the original Bot/session.
+func (q *Queries) ReadBotTaskRun(ctx context.Context, arg ReadBotTaskRunParams) (ReadBotTaskRunRow, error) {
+	row := q.db.QueryRow(ctx, readBotTaskRun, arg.BotID, arg.SessionID, arg.RunID)
+	var i ReadBotTaskRunRow
+	err := row.Scan(
+		&i.BotID,
+		&i.SessionID,
+		&i.RunID,
+		&i.TurnID,
+		&i.InvocationID,
+	)
+	return i, err
+}

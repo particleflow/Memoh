@@ -35,7 +35,23 @@ func (s *Store) ListBotTaskDirectoryCandidates(ctx context.Context, f dbstore.Se
 	for _, r := range rows {
 		out = append(out, dbstore.BotTaskDirectoryCandidate{Type: r.TaskType, ID: r.TaskID, RecordID: r.RecordID.String(), SessionID: r.SessionID.String(), RunID: r.RunID,
 			SourceBotID: r.SourceBotID.String(), SourceSessionID: r.SourceSessionID.String(), ScheduleID: r.ScheduleID.String(), OwnerUserID: r.OwnerUserID.String(),
-			Name: r.Name, State: r.State, QueueAdmission:r.QueueAdmission, CreatedAt: r.CreatedAt.Time, UpdatedAt: r.UpdatedAt.Time})
+			Name: r.Name, State: r.State, QueueAdmission: r.QueueAdmission, CreatedAt: r.CreatedAt.Time, UpdatedAt: r.UpdatedAt.Time})
 	}
 	return out, nil
+}
+
+func (s *Store) ReadBotTaskRun(ctx context.Context, bot, session, run string) (dbstore.BotTaskRunReference, error) {
+	bid, err := db.ParseUUID(bot)
+	if err != nil {
+		return dbstore.BotTaskRunReference{}, err
+	}
+	sid, err := db.ParseUUID(session)
+	if err != nil {
+		return dbstore.BotTaskRunReference{}, err
+	}
+	r, err := s.queries.ReadBotTaskRun(ctx, dbsqlc.ReadBotTaskRunParams{BotID: bid, SessionID: sid, RunID: run})
+	if err != nil {
+		return dbstore.BotTaskRunReference{}, mapQueryErr(err)
+	}
+	return dbstore.BotTaskRunReference{BotID: r.BotID.String(), SessionID: r.SessionID.String(), RunID: r.RunID.String(), TurnID: r.TurnID.String(), InvocationID: r.InvocationID}, nil
 }

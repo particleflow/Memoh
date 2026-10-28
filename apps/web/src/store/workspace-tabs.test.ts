@@ -1507,6 +1507,26 @@ describe('workspace layout store', () => {
     expect(dock.panels).toHaveLength(2)
   })
 
+  it('replaces exact run anchors in one session and clears them on ordinary history navigation', async () => {
+    chatStoreMock.contactNavigationPending = true
+    const store = useWorkspaceTabsStore(), dock = createFakeDock()
+    store.registerApi(dock as never)
+    await nextTick()
+    const taskAnchor = { directoryBotId: 'bot-1', taskType: 'native_agent', taskId: 'old', recordId: 'old-record', runId: 'old-run', turnId: 'old-turn' }
+    store.openSessionChatPinned({ sessionId: 'task-session', taskAnchor })
+    const id = dock.activePanel!.id
+    expect(dock.activePanel?.params.taskAnchor).toEqual(taskAnchor)
+    const newer = { ...taskAnchor, taskId: 'new', recordId: 'new-record', runId: 'new-run', turnId: 'new-turn' }
+    store.openSessionChatPinned({ sessionId: 'task-session', taskAnchor: newer })
+    expect(dock.activePanel?.id).toBe(id)
+    expect(dock.activePanel?.params.taskAnchor).toEqual(newer)
+    store.openSessionChat({ sessionId: 'task-session' })
+    expect(dock.activePanel?.params.taskAnchor).toBeNull()
+    store.openSessionChatPinned({ sessionId: 'task-session', taskAnchor })
+    store.openSessionChatPinned({ sessionId: 'task-session' })
+    expect(dock.activePanel?.params.taskAnchor).toBeNull()
+  })
+
   it('reconciles an auto-picked session to the restored chat panel without opening another tab', async () => {
     const restoredLayout = persistedLayoutWithPanel(
       'chat:bot-1:1',

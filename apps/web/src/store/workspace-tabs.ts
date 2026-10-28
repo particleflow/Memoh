@@ -772,7 +772,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
 
   function resetDeletedChatPanelToDraft(panel: { id: string, api: { updateParameters(params: Record<string, unknown>): void, setTitle(title: string): void } }) {
     const explicitSelection = chatStore.hasExplicitSessionSelection === true
-    panel.api.updateParameters({ sessionId: null, explicitSelection, contactView: false })
+    panel.api.updateParameters({ sessionId: null, explicitSelection, contactView: false, taskAnchor: null })
     panel.api.setTitle(defaultChatTitle())
     markEphemeral(panel.id)
     if (api.value?.activePanel?.id === panel.id) {
@@ -824,7 +824,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       : chatPanelForSession(sid, false)
     if (existing) {
       existing.api.setTitle(title)
-      existing.api.updateParameters({ explicitSelection })
+      existing.api.updateParameters({ explicitSelection, taskAnchor: null })
       if (!activate) return
       if (dock.activePanel?.id === existing.id) {
         selectChatSession(sid, explicitSelection)
@@ -849,7 +849,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
         )
       : undefined
     if (reusable) {
-      reusable.api.updateParameters({ sessionId: sid, explicitSelection, contactView: false })
+      reusable.api.updateParameters({ sessionId: sid, explicitSelection, contactView: false, taskAnchor: null })
       reusable.api.setTitle(title)
       if (!activate) return
       setNextChatActivationExplicit(reusable.id, explicitSelection)
@@ -899,7 +899,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
    * right-click means "give me a separate tab" — so it lands as a pinned chat
    * tab the preview slot can never evict. An already-open tab for the session is
    * promoted to pinned + focused. */
-  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean, contactView?: boolean }) {
+  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean, contactView?: boolean, taskAnchor?: import('@/utils/task-history-link').TaskHistoryAnchor }) {
     const dock = api.value
     if (!dock) return
     const sid = opts.sessionId.trim()
@@ -916,7 +916,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     if (existing) {
       existing.api.setTitle(title)
       pinPanel(existing.id)
-      existing.api.updateParameters({ explicitSelection: opts.explicitSelection !== false })
+      existing.api.updateParameters({ explicitSelection: opts.explicitSelection !== false, taskAnchor: opts.taskAnchor ?? null })
       setNextChatActivationExplicit(existing.id, opts.explicitSelection !== false)
       focusPanel(existing)
       selectChatSession(sid, opts.explicitSelection !== false)
@@ -927,7 +927,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       id: nextChatPanelId(bid),
       component: 'chat',
       title,
-      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false, contactView: opts.contactView === true },
+      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false, contactView: opts.contactView === true, taskAnchor: opts.taskAnchor ?? null },
       renderer: 'always',
       ...(target ? { position: target } : {}),
     })

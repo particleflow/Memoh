@@ -24,6 +24,10 @@ type directoryHTTPFixture struct {
 	denyDuringRead      bool
 }
 
+func (f directoryHTTPFixture) ReadBotTaskRun(context.Context, string, string, string) (dbstore.BotTaskRunReference, error) {
+	return dbstore.BotTaskRunReference{BotID: taskBot, SessionID: taskChild, RunID: taskOp, TurnID: taskOp, InvocationID: "subagent:bg_original"}, nil
+}
+
 func (f directoryHTTPFixture) ListBotUserGrantsForUser(ctx context.Context, p sqlc.ListBotUserGrantsForUserParams) ([]sqlc.ListBotUserGrantsForUserRow, error) {
 	if f.reads > 0 {
 		if f.permissionReadError {

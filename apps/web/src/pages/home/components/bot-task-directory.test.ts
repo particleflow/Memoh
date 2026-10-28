@@ -8,7 +8,7 @@ import Directory from './bot-task-directory.vue'
 const api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), session: vi.fn(), push: vi.fn() }))
 vi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasks: api.list, getBotsByBotIdTasksByTaskTypeByRecordId: api.detail, getBotsByBotIdSessionsBySessionId: api.session }))
 vi.mock('vue-router', () => ({ useRouter: () => ({ push: api.push }) }))
-const row = (id: string, state = 'failed') => ({ task_type: 'native_agent', task_id: 'bg_original', record_id: id, name: 'Same task', state, created_at: '2026-01-01', destination: { bot_id: 'bot', session_id: 'execution' } })
+const row = (id: string, state = 'failed') => ({ task_type: 'native_agent', task_id: 'bg_original', record_id: id, name: 'Same task', state, created_at: '2026-01-01', destination: { bot_id: 'bot', session_id: 'execution', run_id: id, turn_id: 'turn-'+id } })
 let app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement
 async function settle() { await nextTick(); for (let i = 0; i < 80; i++) await Promise.resolve(); await nextTick() }
 async function mount() {
@@ -34,7 +34,7 @@ it('lists real same-name historical tasks and rechecks the clicked occurrence be
   expect(dialog.textContent).not.toContain('bg_original'); expect(dialog.textContent).not.toContain('run-2')
   rows[1]!.click(); await settle()
   expect(api.detail.mock.calls[0]![0].path).toEqual({ bot_id: 'bot', task_type: 'native_agent', record_id: 'run-2' })
-  expect(api.push).toHaveBeenCalledExactlyOnceWith({ name: 'bot', params: { botName: 'bot' }, query: { session: 'execution' } })
+  expect(api.push).toHaveBeenCalledExactlyOnceWith({ name: 'bot', params: { botName: 'bot' }, query: { session: 'execution', task_bot: 'bot', task_type: 'native_agent', task_id: 'bg_original', task_record: 'run-2', run: 'run-2' } })
 })
 it('keeps failed tasks without an execution destination visible and disabled', async () => {
   api.list.mockResolvedValue({ data: { items: [{ ...row('fire'), task_type: 'schedule_fire', destination: undefined }] } })

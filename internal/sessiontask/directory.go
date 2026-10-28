@@ -9,6 +9,7 @@ import (
 
 	"github.com/felinics/memoh/internal/botdelegation"
 	thread "github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
@@ -44,6 +45,32 @@ type TaskDestination struct {
 	BotID     string `json:"bot_id" validate:"required" format:"uuid"`
 	SessionID string `json:"session_id" validate:"required" format:"uuid"`
 	RunID     string `json:"run_id,omitempty"`
+	TurnID    string `json:"turn_id,omitempty" format:"uuid"`
+}
+
+// Resolve only the exact original execution, after the caller authorizes its
+// full session ancestry. Missing/invalid associations retain the task without
+// a destination; storage errors remain errors. No latest-session fallback.
+func (s *Service) directoryDestination(ctx context.Context, bot, session, run, invocation string) (*TaskDestination, error) {
+	if run == "" {
+		return nil, nil
+	}
+	reader, ok := s.store.(dbstore.BotTaskRunReader)
+	if !ok {
+		return nil, ErrUnavailable
+	}
+	r, err := reader.ReadBotTaskRun(ctx, bot, session, run)
+	if errors.Is(err, db.ErrNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	turn, err := uuid.Parse(r.TurnID)
+	if err != nil || turn == uuid.Nil || r.BotID != bot || r.SessionID != session || r.RunID != run || (invocation != "" && r.InvocationID != invocation) {
+		return nil, nil
+	}
+	return &TaskDestination{BotID: bot, SessionID: session, RunID: run, TurnID: r.TurnID}, nil
 }
 
 type DirectoryPage struct {
@@ -101,7 +128,12 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 				return item, err
 			}
 			item.Name = path[0].Title
-			item.Destination = &TaskDestination{BotID: v.TargetBotID, SessionID: v.TargetSessionID, RunID: v.TargetRunID}
+			// Directory history does not inherit the current-generation fence of
+			// the execution/result projection. Verify the saved run independently.
+			item.Destination, err = s.directoryDestination(ctx, v.TargetBotID, v.TargetSessionID, row.RunID, "bot-delegation:"+row.ID)
+			if err != nil {
+				return item, err
+			}
 		}
 		return item, nil
 	}
@@ -138,11 +170,18 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 			return item, err
 		}
 		item.State = projected.Status
-		// A provider run_id is opaque TEXT, never a native conversation run.
-		row.RunID = ""
 	}
-	item.Destination = &TaskDestination{BotID: bot, SessionID: row.SessionID, RunID: row.RunID}
-	return item, nil
+	invocation := ""
+	switch row.Type {
+	case "native_agent":
+		invocation = "subagent:" + row.ID
+	case "schedule_fire":
+		invocation = "schedule:" + row.ScheduleID + ":" + row.RecordID
+	}
+	// For computer tasks, the host-owned receipt's run may be opaque. It is
+	// navigable only when the exact value resolves in the original Bot/session.
+	item.Destination, err = s.directoryDestination(ctx, bot, row.SessionID, row.RunID, invocation)
+	return item, err
 }
 
 // ListDirectory scans all persisted task occurrences, including terminal and

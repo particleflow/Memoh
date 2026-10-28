@@ -16,7 +16,12 @@
     <template v-else>
       <section class="flex-1 relative w-full px-3 sm:px-5 lg:px-8">
         <section class="absolute inset-0">
+          <PanePlaceholder
+            v-if="taskAnchor && taskRunAnchor.status.value !== 'located'"
+            :title="taskRunAnchor.status.value === 'unavailable' ? $t('chat.taskDirectory.historyUnavailable') : $t('common.loading')"
+          />
           <ScrollArea
+            v-show="!taskAnchor || taskRunAnchor.status.value === 'located'"
             ref="scrollContainer"
             class="h-full"
           >
@@ -1439,6 +1444,9 @@ import { UserFacingError, isApiErrorCode, parseMemohError, resolveApiErrorMessag
 import { hasBotPermission } from '@/utils/bot-permissions'
 import { workspaceTargetAvailable } from '@/utils/workspace-target'
 import { findLatestPendingChatDecision } from './chat-pending-decision'
+import { useTaskRunAnchor } from '../composables/useTaskRunAnchor'
+import type { TaskHistoryAnchor } from '@/utils/task-history-link'
+import { revalidateTaskHistoryAnchor } from '@/utils/task-history-link'
 import {
   runtimeCommandComposerText,
   composerLocalQuickActionID,
@@ -1456,12 +1464,14 @@ const props = withDefaults(defineProps<{
   // Presentation intent from the resolved contact entry, scoped to this pane.
   // Task/history panes keep the unabridged transcript for the same session.
   contactView?: boolean
+  taskAnchor?: TaskHistoryAnchor
   visible?: boolean
   active?: boolean
 }>(), {
   tabId: 'chat',
   sessionId: null,
   contactView: false,
+  taskAnchor: undefined,
   visible: true,
   active: true,
 })
@@ -4006,6 +4016,7 @@ const lastMessageId = computed(() => messages.value[messages.value.length - 1]?.
 const {
   isScrolling,
   highlightedMessageId,
+  lockScroll,
   showJumpToBottom: showJumpToBottomFromScroll,
   scrollToBottom,
   scrollToMessage,
@@ -4028,6 +4039,19 @@ const {
   messages,
   isActive: isVisible,
   sessionId: computed(() => paneTarget.value.sessionId ?? `draft:${paneTarget.value.viewId}`),
+})
+
+const taskRunAnchor = useTaskRunAnchor({
+  anchor: () => props.taskAnchor,
+  session: () => props.sessionId,
+  visible: () => isVisible.value,
+  messages: () => messages.value,
+  loading: () => loadingMessages.value,
+  loadingOlder: () => loadingOlder.value,
+  hasMore: () => hasMoreOlder.value,
+  validate: anchor => revalidateTaskHistoryAnchor(anchor, currentBotId.value ?? '', props.sessionId ?? ''),
+  loadOlder: () => chatStore.loadOlderMessages(paneTarget.value),
+  scroll: scrollToMessage,
 })
 
 useQueueTurnAnchors(messages, pinAfterSteer, pinAfterFollowUp)
@@ -4082,7 +4106,14 @@ useIntersectionObserver(
 )
 
 onActivated(() => {
-  onActivatedRestoreScroll(loadingMessages)
+  if (props.taskAnchor) {
+    // The authorized execution anchor owns restoration in a task pane.
+    // A remembered arbitrary position must not override its async scroll.
+    lockScroll.value = false
+    markEscaped()
+  } else {
+    onActivatedRestoreScroll(loadingMessages)
+  }
 })
 
 onDeactivated(() => {
