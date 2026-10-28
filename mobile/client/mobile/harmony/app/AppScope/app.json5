@@ -2,8 +2,8 @@
   "app": {
     "bundleName": "cloud.begonia.workassistant",
     "vendor": "Begonia",
-    "versionCode": 1000026,
-    "versionName": "1.0.26",
+    "versionCode": 1000027,
+    "versionName": "1.0.27",
     "icon": "$media:app_icon",
     "label": "$string:app_name"
   }

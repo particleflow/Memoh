@@ -445,6 +445,8 @@
       "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
       "apps/web/src/pages/home/composables/turn-end-invalidation.ts": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a"
     },
-    "hapBuilt": false
+    "hapBuilt": false,
+    "compatibleReleaseBackend": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+    "releaseWebSDKEquivalentTo": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2"
   }
 }
