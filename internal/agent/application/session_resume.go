@@ -52,6 +52,10 @@ type resumeContext struct {
 	// resume admits it again behind its instructions.
 	DiscussMessages       []turn.DiscussMessage       `json:"discuss_messages,omitempty"`
 	DiscussOmittedSources []turn.ContextMessageSource `json:"discuss_omitted_sources,omitempty"`
+	// Version 3 preserves host origin. Older consumers reject this version
+	// instead of resuming a result as ordinary user input without authority.
+	DelegationResultID string `json:"delegation_result_id,omitempty"`
+	RouteID            string `json:"route_id,omitempty"`
 }
 
 // errResumeUnrecoverable marks an interrupted intent that no later scan can
@@ -99,6 +103,10 @@ func (s *Service) recordRunResumeContext(ctx context.Context, req ChatRequest) e
 	if req.discussMessages != nil {
 		data.Version, data.Query = 2, ""
 		data.DiscussMessages, data.DiscussOmittedSources = req.discussMessages, req.discussOmittedSources
+	}
+	if req.DelegationResultID != "" {
+		data.Version, data.Query = 3, req.Query
+		data.DelegationResultID, data.RouteID = req.DelegationResultID, req.RouteID
 	}
 	raw, err := json.Marshal(data)
 	if err != nil {
@@ -364,6 +372,18 @@ func (s *Service) resumeInterruptedSession(ctx context.Context, row sqlc.Session
 	if data.DeadlineAt != nil && !time.Now().Before(*data.DeadlineAt) {
 		return nil, fmt.Errorf("%w: execution budget expired", errResumeUnrecoverable)
 	}
+	if data.DelegationResultID != "" {
+		if s.delegationScope == nil {
+			return nil, fmt.Errorf("%w: task result authorization unavailable", errResumeUnrecoverable)
+		}
+		// Recheck before admission as well as inside the actual stream. A
+		// restarted task result must never lose either Bot's live authority.
+		var err error
+		ctx, _, err = s.delegationScope(ctx, ChatRequest{BotID: row.BotID.String(), ThreadID: row.SessionID.String(), UserID: data.UserID, ChatID: data.ChatID, RouteID: data.RouteID, CurrentChannel: data.CurrentChannel, ReplyTarget: data.ReplyTarget, ConversationType: data.ConversationType, DelegationResultID: data.DelegationResultID})
+		if err != nil {
+			return nil, err
+		}
+	}
 	decisionContext, err := s.interruptedDecisionContext(ctx, row, input.DecisionContinuations)
 	if err != nil {
 		return nil, err
@@ -417,6 +437,7 @@ func (s *Service) resumeInterruptedSession(ctx context.Context, row sqlc.Session
 		ConversationType: data.ConversationType, Model: data.Model, ReasoningEffort: data.ReasoningEffort,
 		WorkspaceTargetID: data.WorkspaceTargetID, SessionType: data.SessionType, ToolHTTPURL: data.ToolHTTPURL,
 		UserMessagePersisted: true, SkipMemoryExtraction: true, SkipTitleGeneration: true, ShutdownResume: true,
+		DelegationResultID: data.DelegationResultID, RouteID: data.RouteID,
 	}
 	if decisionContext != "" {
 		req.discussPromptSuffix = "\n\n" + decisionContext
@@ -426,6 +447,9 @@ func (s *Service) resumeInterruptedSession(ctx context.Context, row sqlc.Session
 		req.discussMessages, req.discussOmittedSources, req.discussRecoveryExhausted = data.DiscussMessages, data.DiscussOmittedSources, true
 		req.discussPromptPrefix = resumeInstruction
 		req.Query = resumeInstruction + discussAgentFullContextPrompt(data.DiscussMessages) + req.discussPromptSuffix
+	}
+	if data.Version == 3 {
+		req.Query = data.Query
 	}
 	chunks, errs := s.streamTurnChat(runCtx, req)
 	h := &runHandle{
@@ -448,6 +472,8 @@ func (data resumeContext) resumable() bool {
 		return data.SessionType != string(turn.ModeDiscuss) || strings.TrimSpace(data.Query) != ""
 	case 2:
 		return len(data.DiscussMessages) > 0
+	case 3:
+		return data.DelegationResultID != "" && data.SessionType != string(turn.ModeDiscuss) && strings.TrimSpace(data.Query) != ""
 	default:
 		return false
 	}

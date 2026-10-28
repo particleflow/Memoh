@@ -21,10 +21,15 @@ type forkAnchorMessageService struct {
 
 type replacementOperationMessageService struct {
 	recordingMessageService
-	latest      messagepkg.HistoryTurn
-	latestErr   error
-	turnByMsg   messagepkg.HistoryTurn
-	turnByMsgID string
+	latest          messagepkg.HistoryTurn
+	latestErr       error
+	turnByMsg       messagepkg.HistoryTurn
+	turnByMsgID     string
+	requestMetadata map[string]any
+}
+
+func (s *replacementOperationMessageService) GetByIDBySession(_ context.Context, session, id string) (messagepkg.Message, error) {
+	return messagepkg.Message{ID: id, SessionID: session, Role: "user", Metadata: s.requestMetadata}, nil
 }
 
 func (s *replacementOperationMessageService) GetLatestVisibleTurnBySession(context.Context, string) (messagepkg.HistoryTurn, error) {

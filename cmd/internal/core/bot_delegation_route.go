@@ -76,7 +76,10 @@ func delegationDeliveryCommand(r botdelegation.Record, routing botdelegation.Ret
 	return turn.StartTurnCommand{
 		DelegationResultID: r.ID, SchemaVersion: 1, TeamID: r.Identity.TeamID, Mode: turn.ModeChat,
 		BotID: r.Identity.SourceBotID, ChatID: routing.ChatID, ThreadID: r.Identity.SourceSessionID,
+		// Keep the old invocation payload stable on delivery retry. Visibility
+		// follows the authorized result origin, never an empty text sentinel.
 		UserID: r.Identity.UserID, SourceChannelIdentityID: r.Identity.UserID, Query: text, UserVisibleText: text, Attachments: attachments,
+		SkipTitleGeneration: true, SkipMemoryExtraction: true,
 		CurrentChannel: routing.Channel, RouteID: routing.RouteID, ReplyTarget: routing.ReplyTarget, ConversationType: routing.ConversationType,
 	}
 }

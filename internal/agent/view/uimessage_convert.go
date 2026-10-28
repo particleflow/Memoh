@@ -247,7 +247,7 @@ func ConvertMessagesToUITurns(messages []messagepkg.Message) []UITurn {
 	for i := range messages {
 		raw := messages[i]
 		ensurePersistedMetadata(&raw)
-		if raw.Role == "user" && messagepkg.IsInternalFeedback(raw.Metadata) {
+		if raw.Role == "user" && messagepkg.IsInternalInput(raw.Metadata) {
 			continue
 		}
 		rawTurnID := strings.TrimSpace(raw.TurnID)
