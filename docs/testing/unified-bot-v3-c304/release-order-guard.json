@@ -1,0 +1,23 @@
+{
+  "base": "3c8ec6e211bb7ce2adefc1f60d05185214a38759",
+  "held_increment": "1b7200d768c1231179725cfa2f85c8c3452882fb",
+  "exact_reverse_tree": "bfb495b6a79e0ceb7cee7357d0c0ef78315b5f84",
+  "changed_paths": [
+    "contrib/herdr/memoh-delivery/README.md",
+    "docs/delivery-producer-handoff.md",
+    "docs/delivery-result-name-recovery.md",
+    "internal/agenvo/pi_result_filename_test.go",
+    "internal/computertask/result_filename_test.go",
+    "internal/computertask/source.go",
+    "internal/deliverymeta/producer.go",
+    "internal/deliverymeta/source_filename_test.go",
+    "internal/transferclient/host_config.go",
+    "internal/transferclient/registration.go",
+    "internal/transferclient/result_filename_test.go",
+    "internal/transferclient/result_filename_unix_test.go",
+    "internal/transferclient/source.go"
+  ],
+  "web_sdk_delta": [],
+  "all_other_3c_content_preserved": true,
+  "initial_guard_note": "A whole-file comparison against the older 1b parent rejected source.go because legitimate later changes exist. Replaced that overbroad assertion with an exact inverse-patch tree against 3c; no source was overwritten from the older parent."
+}

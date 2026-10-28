@@ -54,7 +54,7 @@ func (*Source) ListTools(context.Context, mcp.ToolSessionContext) ([]mcp.ToolDes
 		}
 		return map[string]any{"type": "object", "properties": properties, "required": required, "additionalProperties": false}
 	}
-	artifact := schema(map[string]any{"source_ref": text("Exact closed result filename including its actual extension, in the configured producer root; 1-64 ASCII letters, digits, underscore, hyphen and single separating dots. Pi must write this exact name. Requires pi-json-v1 and work_dir dot; no subdirectories, logs or arbitrary paths."), "mime": text("Canonical MIME type of this requested result.")}, "source_ref", "mime")
+	artifact := schema(map[string]any{"source_ref": text("Explicit closed result filename in the configured producer root; letters, digits, underscore or hyphen. Requires pi-json-v1 and work_dir dot; no logs or arbitrary paths."), "mime": text("Canonical MIME type of this requested result.")}, "source_ref", "mime")
 	id := schema(map[string]any{"operation_id": text("Receipt ID returned by computer_task_submit in this conversation.")}, "operation_id")
 	return []mcp.ToolDescriptor{
 		{Name: "computer_workspaces", Description: "List existing native workspaces on one currently authorized computer. Read-only metadata; no cwd, terminal output, new workspace, task execution or automatic retry. A selected-PC conversation can query only that PC; NAS scope still requires a Bot grant. Native status is not task success. A truncated list has no implied continuation cursor.", InputSchema: schema(map[string]any{"target_id": text("Memoh computer target ID from computer_targets; omit only when unambiguous.")})},

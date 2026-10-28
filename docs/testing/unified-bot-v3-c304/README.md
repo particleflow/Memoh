@@ -6,6 +6,39 @@ push triggered normal CI, recorded below. This is not a published or deployed
 version and does not establish whole-product acceptance. Human QA remains
 unconfirmed.
 
+## Independent Bot/UI release ordering
+
+The next local candidate retains the full `3c8ec6e211bb7ce2adefc1f60d05185214a38759`
+history but reverses only the unpublished filename slice
+`1b7200d768c1231179725cfa2f85c8c3452882fb`. This is release sequencing, not removal
+of the PC requirement. The original source and reviewed recovery slice
+`3ca78ae033229e71430459dd047cf750b65acd5b` remain inputs for the later paired
+Server/actual-producer/Windows-entry batch. Recovery3ca is not included here.
+
+The production Windows producer is still reported as57, and the new Windows
+entry has not passed. Existing locator/probe/admission fields do not negotiate
+filename syntax. This candidate therefore does not advertise or accept the new
+dotted-filename declaration while leaving that old producer installed. It does
+not fix the existing original-result recovery failure, pause a PC, downgrade an
+EXE, change a root/config/state directory, or alter any live operation.
+
+[Exact inverse guard](release-order-guard.json) independently applies the reverse
+1b patch to3c in a private index and matches the staged tree. All13 affected
+paths are exactly that reversal; later legitimate changes in shared files are
+preserved. An initial overbroad whole-file comparison against the older1b parent
+rejected `source.go`; no file was restored wholesale from that older version.
+Web and SDK have zero diff against3c, and all Botv3 and3bc source is retained.
+The parent reports HAPb66 maps to the same6a1/3c shared inputs, so this is a
+transitive shared-input identity proof, not an independent read of a new phone
+commit or package. No new HAP build or unchanged test/CI matrix was run.
+
+The existing3c six-green evidence is reused for unchanged slices, not relabeled
+as final-head CI for this new release candidate. The new exact head still needs
+its normal affected validation before release. NAS Server/Web and matching HAP
+must use the same Bot directory contract; publishing only the new frontend
+against the older Server is not a compatible deployment. Summary/unknown
+delivery remains the dedicated owner's next independent increment.
+
 ## Lint-only follow-up to the initial integration
 
 The original `6a1fdcc1d61427c5cb02e0184a2b48a92645dac2` Go workflow
@@ -104,8 +137,8 @@ producer-local and are not claimed as consumer-local screenshots.
 | Consumer | State at this checkpoint |
 | --- | --- |
 | NAS Server/Web | Parent reports deployed `a0a821a4cdaa32121a945d04e80c76bba4b6f2b4`, schema179. This local integration has not been published or deployed. |
-| Existing c304 fixes | Turn-end cancellation and explicit declared result filenames remain byte-identical. |
-| Windows producer | Explicit filename support still needs the matching actual producer executable; the old 57/d034 labels or unchanged 0.10.1 string do not prove adoption. No Windows files or queues were migrated here. |
+| Existing c304 fixes | Turn-end cancellation remains. The unpublished1b filename increment is held separately for paired PC delivery, with all original history preserved. |
+| Windows producer | Production57 is unchanged. This independent Bot candidate restores the pre-1b declaration contract; later explicit filename/recovery delivery still needs a matching actual producer and verified Windows entry. No Windows files or queues were migrated here. |
 | Harmony shared source | Must consume the reviewed contact/directory files, queued locales and matching generated-source inputs. This NAS source integration does not imply those phone inputs have been consumed. |
 | Harmony Back | Separate reviewed consumer `5445b299657dfe092083c916f146b1e5ba078844`, dependent on fixed-contact shared navigation. Not merged into NAS source. |
 | Harmony artwork | Separate owner reports `bd0b3933d24d944973fdca8e7d22c6f6b2a507bc`, parent5445, tree `45a2916d09d84ea81760faa302c3533a28702c1b`. Prior independent resource-tree review is retained; this is not a remotely read-back commit or a built/signed package. |

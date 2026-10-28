@@ -19,7 +19,7 @@ type QueuedSource struct {
 }
 
 func (s *QueuedSource) valid() bool {
-	return s != nil && validSourceRef(s.Ref) && len(s.Identity) > 0 && len(s.Identity) <= 128
+	return s != nil && validID(s.Ref) && len(s.Identity) > 0 && len(s.Identity) <= 128
 }
 
 func recordVersion(r QueueStatus) int {
@@ -30,7 +30,7 @@ func recordVersion(r QueueStatus) int {
 }
 
 func describeSource(ref string, f *os.File, size int64) (*QueuedSource, error) {
-	if !validSourceRef(ref) || f == nil {
+	if !validID(ref) || f == nil {
 		return nil, ErrSnapshot
 	}
 	info, err := f.Stat()
@@ -51,7 +51,7 @@ func (q *DiskQueue) RegisterUpload(ctx context.Context, job Job, ref string, ope
 	if ctx.Err() != nil {
 		return QueueStatus{}, ctx.Err()
 	}
-	if !job.valid() || job.Phase != "queued" || job.Offset != 0 || job.ReceiptID != "" || job.CancelRequested || job.Attempts != 0 || job.SnapshotID != job.DeliveryID || job.LocatorRevision != q.revision || job.DeliveryID == "admission" || !validSourceRef(ref) || open == nil {
+	if !job.valid() || job.Phase != "queued" || job.Offset != 0 || job.ReceiptID != "" || job.CancelRequested || job.Attempts != 0 || job.SnapshotID != job.DeliveryID || job.LocatorRevision != q.revision || job.DeliveryID == "admission" || !validID(ref) || open == nil {
 		return QueueStatus{}, ErrInvalid
 	}
 	global, err := q.lock("admission")
