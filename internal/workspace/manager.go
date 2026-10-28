@@ -975,9 +975,18 @@ func (m *Manager) Delete(ctx context.Context, botID string, preserveData bool) e
 		m.logger.WarnContext(ctx, "delete: delete task failed",
 			slog.String("container_id", containerID), slog.Any("error", err))
 	}
-	return m.service.DeleteContainer(ctx, containerID, &ctr.DeleteContainerOptions{
+	err := m.service.DeleteContainer(ctx, containerID, &ctr.DeleteContainerOptions{
 		CleanupSnapshot: true,
 	})
+	if err != nil && !ctr.IsNotFound(err) {
+		return err
+	}
+	// The runtime has released its bind mount. Remove only this Bot's empty
+	// runtime directory, including when a previous attempt removed the container.
+	if cleanupErr := m.cleanupBotRunDirectory(botID); cleanupErr != nil {
+		return cleanupErr
+	}
+	return err
 }
 
 func (m *Manager) dataRoot() string {
