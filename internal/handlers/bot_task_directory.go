@@ -14,7 +14,7 @@ import (
 	"github.com/felinics/memoh/internal/sessiontask"
 )
 
-func (h *SessionTaskHandler) directoryAuthority(c echo.Context) (string, func(thread.Thread) bool, bool, error) {
+func (h *SessionTaskHandler) directoryAuthority(c echo.Context) (string, func(thread.Thread) (bool, error), bool, error) {
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-store")
 	if _, err := auth.ChatTokenFromContext(c); err == nil {
 		return "", nil, false, apperror.New(apperror.CodeHTTPForbidden, nil)
@@ -42,9 +42,12 @@ func (h *SessionTaskHandler) directoryAuthority(c echo.Context) (string, func(th
 	}
 	// Incoming/outgoing handoffs can name another Bot. Its current session read
 	// permission must be checked as well as the delegation's dual-Bot authority.
-	readable := func(session thread.Thread) bool {
+	readable := func(session thread.Thread) (bool, error) {
 		current, err := h.bots.ResolveUserPermissions(c.Request().Context(), session.BotID, user, admin)
-		return err == nil && canAccessSession(session, user, current)
+		if err != nil {
+			return false, err
+		}
+		return canAccessSession(session, user, current), nil
 	}
 	return user, readable, bots.HasPermission(perms, bots.PermissionManage), nil
 }
