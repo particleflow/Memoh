@@ -11,6 +11,7 @@ import (
 func chatRequestFromCommand(cmd turn.StartTurnCommand) ChatRequest {
 	return ChatRequest{
 		DelegationResultID:        cmd.DelegationResultID,
+		TaskResultReceipt:         cmd.TaskResultReceipt,
 		BotID:                     cmd.BotID,
 		ChatID:                    cmd.ChatID,
 		ThreadID:                  cmd.ThreadID,

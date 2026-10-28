@@ -134,6 +134,7 @@ type Service struct {
 	botPermissions          botPermissionChecker
 	workspaceTargets        workspaceTargetResolver
 	delegationScope         func(context.Context, ChatRequest) (context.Context, ChatRequest, error)
+	taskResultWake          func(context.Context)
 	workdirs                sessionWorkdirResolver
 	pipeline                *timeline.Pipeline
 	streamHTTPClient        *http.Client
@@ -523,6 +524,10 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 			slog.Any("error", err),
 		)
 		return resolvedContext{}, req, err
+	}
+
+	if req.TaskResultReceipt != "" {
+		runCfg.SupportsToolCall = false
 	}
 
 	// Persist explicit selections before generation and advance the revision

@@ -422,7 +422,7 @@ func (q *Queries) ListBotDelegations(ctx context.Context, arg ListBotDelegations
 }
 
 const updateBotDelegation = `-- name: UpdateBotDelegation :one
-UPDATE bot_delegations SET target_session_id=$1,run_id=$2,state=$3,delivery_state=$4,result=$5,revision=revision+1,updated_at=now()
+UPDATE bot_delegations SET target_session_id=$1,run_id=$2,state=$3,delivery_state=$4,result=($5::jsonb - 'result_delivery') || CASE WHEN result ? 'result_delivery' THEN jsonb_build_object('result_delivery',result->'result_delivery') ELSE '{}'::jsonb END,revision=revision+1,updated_at=now()
 WHERE team_id=public.memoh_current_team_id() AND id=$6 AND user_id=$7
 AND revision=$8 AND (target_session_id IS NULL OR target_session_id=$1)
 RETURNING id, team_id, user_id, source_bot_id, source_session_id, source_root_id, target_bot_id, target_session_id, request_id, run_id, fingerprint, source_selection, state, delivery_state, payload, result, revision, created_at, updated_at

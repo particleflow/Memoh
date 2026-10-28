@@ -335,6 +335,10 @@ func (s *Service) StreamChat(ctx context.Context, req ChatRequest) (<-chan Strea
 			return
 		}
 		if dispatch.kind == dispatchExternal {
+			if streamReq.TaskResultReceipt != "" {
+				fail(errors.New("result summaries require the native result-only runtime"))
+				return
+			}
 			if err := rejectExternalAgentWorkspaceTarget(streamReq); err != nil {
 				fail(err)
 				return

@@ -16,7 +16,7 @@ func botTaskResultMetadata(req ChatRequest) map[string]any {
 	// The existing source marker lets a0 history readers hide the input too.
 	// The subtype distinguishes a new result turn from mid-turn feedback,
 	// which must instead bind to an already-persisted user request.
-	return map[string]any{messagepkg.MessageSourceMetadataKey: messagepkg.MessageSourceInternalFeedback, messagepkg.InternalInputKindMetadataKey: messagepkg.InternalInputKindBotTaskResult, "delegation_id": req.DelegationResultID}
+	return map[string]any{messagepkg.MessageSourceMetadataKey: messagepkg.MessageSourceInternalFeedback, messagepkg.InternalInputKindMetadataKey: messagepkg.InternalInputKindBotTaskResult, "delegation_id": req.DelegationResultID, "task_result_receipt": req.TaskResultReceipt}
 }
 
 // SetDelegationScope installs the host-owned durable scope lookup. Runtime and
@@ -63,7 +63,7 @@ func (s *Service) EnqueueAuthorizedFollowUp(ctx context.Context, invocation stri
 	}
 	// The durable turn idempotency key is derived from the queue item ID. Keep
 	// that ID stable as well, even if an uncertain delivery outlives queue memory.
-	id := uuid.NewSHA1(uuid.NameSpaceURL, []byte("memoh/host-follow-up/v1\x00"+cmd.BotID+"\x00"+cmd.ThreadID+"\x00"+invocation)).String()
+	id := hostFollowUpID(cmd.BotID, cmd.ThreadID, invocation)
 	// Use exactly the command that a queued continuation restores. A delivery
 	// racing with the terminal observer, or retried after queue memory is lost,
 	// must address the same durable invocation and the same payload.
@@ -100,4 +100,13 @@ func (s *Service) EnqueueAuthorizedFollowUp(ctx context.Context, invocation stri
 		// enqueue with the same identity; exhaustion remains an unknown delivery.
 	}
 	return turn.ErrSessionBusy
+}
+
+// HostFollowUpInvocation is the exact durable admission identity used by the
+// queue continuation and by direct delivery when the source thread is idle.
+func HostFollowUpInvocation(bot, thread, invocation string) string {
+	return "follow-up:" + hostFollowUpID(bot, thread, invocation)
+}
+func hostFollowUpID(bot, thread, invocation string) string {
+	return uuid.NewSHA1(uuid.NameSpaceURL, []byte("memoh/host-follow-up/v1\x00"+bot+"\x00"+thread+"\x00"+invocation)).String()
 }

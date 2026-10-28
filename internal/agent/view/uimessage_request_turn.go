@@ -54,7 +54,7 @@ func UIAttachmentsFromTurnAttachments(botID string, attachments []turn.Attachmen
 func NewRequestUserTurn(cmd turn.StartTurnCommand, turnID string) *UITurn {
 	// The host reauthorizes this ledger reference before admission. Its input
 	// is machine context, including on old queue payloads with visible text.
-	if cmd.DelegationResultID != "" {
+	if cmd.DelegationResultID != "" || cmd.TaskResultReceipt != "" {
 		return nil
 	}
 	if strings.TrimSpace(cmd.Query) == "" && strings.TrimSpace(cmd.UserMessageKind) != turn.UserMessageKindSkillActivation {

@@ -79,8 +79,20 @@ func (s *Service) SetSessionRuntime(manager *sessionruntime.Manager) {
 		// a stale steer that still names the finished run.
 		s.closeSteerQueueForRun(ctx, terminal)
 		s.startFollowUpAfterTerminal(ctx, terminal)
+		if s.taskResultWake != nil {
+			s.taskResultWake(ctx)
+		}
 	})
-	manager.SetTerminalReconciler(s.reconcileTerminalContextLifecycles)
+	manager.SetTerminalReconciler(func(ctx context.Context) error {
+		err := s.reconcileTerminalContextLifecycles(ctx)
+		// Reuse the runtime's existing bounded repair wake. A transient database
+		// failure after the last terminal callback must not strand a saved result
+		// until another user message or a process restart happens to arrive.
+		if s.taskResultWake != nil {
+			s.taskResultWake(ctx)
+		}
+		return err
+	})
 }
 
 func drainDeferredTurn(handle turn.RunHandle) {
@@ -499,6 +511,7 @@ func turnInvocationID(cmd turn.StartTurnCommand) string {
 // per-attempt ids, and attachments by content hash rather than by bytes.
 func turnSubmissionPayload(cmd turn.StartTurnCommand) ([]byte, error) {
 	return json.Marshal(struct {
+		TaskResultReceipt string   `json:"task_result_receipt,omitempty"`
 		Mode              string   `json:"mode"`
 		BotID             string   `json:"bot_id"`
 		ThreadID          string   `json:"thread_id"`
@@ -508,6 +521,7 @@ func turnSubmissionPayload(cmd turn.StartTurnCommand) ([]byte, error) {
 		UserMessageKind   string   `json:"user_message_kind,omitempty"`
 		Attachments       []string `json:"attachments,omitempty"`
 	}{
+		TaskResultReceipt: cmd.TaskResultReceipt,
 		Mode:              string(cmd.Mode),
 		BotID:             strings.TrimSpace(cmd.BotID),
 		ThreadID:          strings.TrimSpace(cmd.ThreadID),
