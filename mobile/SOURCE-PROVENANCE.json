@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "41b529632041e4e04d9c1e4a837e050ea553e1e224e044fb5359e246512202cb",
+      "sha256": "640d5f248b3c26ad9b3674992e178614433121788e9585d6f2fb5ad65d6edeb4",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "91480355aa9947afa335b91cf773b47241fa60180fb25ae502315866a3b6c167",
+      "sha256": "552d651f624634c4edd60355f5c8cd63e861b0ebe0e76d761f900b573f2ac803",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -1803,6 +1803,15 @@
       "licenseReview": "User authorized these project artwork resources for this public source handoff; existing licenses unchanged.",
       "preparationChanges": [
         "Metadata or existing offline derivation source only; consumer does not rerun the derivation."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/shared-fixed-contact-task-directory.json",
+      "sha256": "93a171264e57a495ae470f8d0ba8c87191abe601445338fdf4b1ebf032e44308",
+      "origin": "Fixed reviewed shared contact/task-directory source and exact SDK additions from6a1fdcc1d61427c5cb02e0184a2b48a92645dac2; not historical recovery.",
+      "licenseReview": "Existing Memoh source under retained licenses; no new third-party binary or dependency.",
+      "preparationChanges": [
+        "Only a0-to6a shared delta is applied over existing phone-specific divergences; retains native transfer owners, approved send control, login, TLS, Back and approved artwork. Cancellation is already byte-equivalent and not stacked."
       ]
     }
   ],

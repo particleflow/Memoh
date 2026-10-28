@@ -1,0 +1,196 @@
+{
+  "sourceParent": "afa677e031a56940a44798ac6dfc124954ebf0a5",
+  "effectiveSharedCommit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+  "effectiveSharedTree": "f832a984bd2d8c1ea7844655fca7cc880f43ef42",
+  "sourceChangesSHA256": "93a171264e57a495ae470f8d0ba8c87191abe601445338fdf4b1ebf032e44308",
+  "webLockSHA256": "640d5f248b3c26ad9b3674992e178614433121788e9585d6f2fb5ad65d6edeb4",
+  "builderSHA256": "552d651f624634c4edd60355f5c8cd63e861b0ebe0e76d761f900b573f2ac803",
+  "generatedFiles": [
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "upstreamSHA256": "1a686f4466fc52300a552daac0861fd3799daffd7f6b11d8c80755564a4512b7",
+      "generatedPhoneSHA256": "fab58511ce35efdd962d0042f36e9bda15d80d4c890607ac3a756b04ef1b9592",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "upstreamSHA256": "5123163d6912533d6d858d35a612a220983badc9c1f49f237f7b6042e3264e20",
+      "generatedPhoneSHA256": "55495f2c465c91e9ad13e2729f370ac10ba3133e677e705d5a690df76cef6727",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "upstreamSHA256": "fe71fa74624780dc527392c3eead17c39429cc2cd94dd25dc1d5e49e3fcb575c",
+      "generatedPhoneSHA256": "57916a0ec9c09baae25edd165e50cb7c571fa89587df509ef29a39ac3147081b",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/bot-task-directory.test.ts",
+      "upstreamSHA256": "61c8c5beda37e182d18e459415e9ab1bfca3db03e8962bcd690bcf30bec3a050",
+      "generatedPhoneSHA256": "61c8c5beda37e182d18e459415e9ab1bfca3db03e8962bcd690bcf30bec3a050",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/bot-task-directory.vue",
+      "upstreamSHA256": "59d5195678ef35826415dba96a7bb7157763ae2ce25653d0a550a07d7886d0a7",
+      "generatedPhoneSHA256": "59d5195678ef35826415dba96a7bb7157763ae2ce25653d0a550a07d7886d0a7",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "upstreamSHA256": "023436adf7e8ff5eab823ec70829f52c9555d5a1d426700cdca1b44b290ecdc3",
+      "generatedPhoneSHA256": "5cf80ede08da8f79f35d2da696a570cf8be1cc3fdeeb19b62afef6d6d19830f9",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts",
+      "upstreamSHA256": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+      "generatedPhoneSHA256": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts",
+      "upstreamSHA256": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+      "generatedPhoneSHA256": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/turn-end-invalidation.ts",
+      "upstreamSHA256": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a",
+      "generatedPhoneSHA256": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useBotTaskDirectory.test.ts",
+      "upstreamSHA256": "b39c0479fccc18e4fa1b239454a00c7e802bdfa9a60ec543c2d30c76c7da73cf",
+      "generatedPhoneSHA256": "b39c0479fccc18e4fa1b239454a00c7e802bdfa9a60ec543c2d30c76c7da73cf",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useBotTaskDirectory.ts",
+      "upstreamSHA256": "49e3136f789148410f5957492179b32123f9dfb2a94a0ca4208c73876658553d",
+      "generatedPhoneSHA256": "49e3136f789148410f5957492179b32123f9dfb2a94a0ca4208c73876658553d",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.navigation.test.ts",
+      "upstreamSHA256": "e35ebe39499caad94e913a98f4131ad6851750f2e9bd8cc453f533f9e9e70ee7",
+      "generatedPhoneSHA256": "e35ebe39499caad94e913a98f4131ad6851750f2e9bd8cc453f533f9e9e70ee7",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.not-found.test.ts",
+      "upstreamSHA256": "4f3d8b07e16d573c1cbc24e4b883424c26159e68d3763f1fdabc9bd95c5d68d7",
+      "generatedPhoneSHA256": "4f3d8b07e16d573c1cbc24e4b883424c26159e68d3763f1fdabc9bd95c5d68d7",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "upstreamSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "generatedPhoneSHA256": "71e19ea0aa90be1e2d9a46ee05d91aa5a2b125074fc0827554a0d8361a0bd519",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.test.ts",
+      "upstreamSHA256": "65989782f49bf03443eb8b0abfd35e7115d2e3d31d48822a6e60efa54bcd3b14",
+      "generatedPhoneSHA256": "f90178364b4c4c2fcaec3c676c34835b99cfb54d8d70a3184522dbd23a151fc8",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "upstreamSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "generatedPhoneSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap-contact.test.ts",
+      "upstreamSHA256": "dd6e41d7cfb4f32b666336504bc559f173fc190ebdaf117b608e9aa0c8ce87cf",
+      "generatedPhoneSHA256": "dd6e41d7cfb4f32b666336504bc559f173fc190ebdaf117b608e9aa0c8ce87cf",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "upstreamSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "generatedPhoneSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "wholeFileExact": true,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.test.ts",
+      "upstreamSHA256": "e81ce38425dcbf7658fdabf4b2cb647e7b9150b388d274579abe9a942c8508eb",
+      "generatedPhoneSHA256": "bd56a075727a6ad7ed4003b52e4bf165fc4c2954c47319a0f062b00712ecdaf1",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.ts",
+      "upstreamSHA256": "188d4d156fe9930b7ff7390867a500c020ecb3a2615d0274e9828801bbc046db",
+      "generatedPhoneSHA256": "a8715cc9bcf581b71fe37b6655be960ca9c5308e3f3ece276aec7fd1f65a06b0",
+      "wholeFileExact": false,
+      "consumption": "upstream delta over retained native divergences/adapters"
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "upstreamSHA256": "7dc7c518aed1022e16b13d5d0002a2b123d78e4f7b7913072152f6996b588122",
+      "generatedPhoneSHA256": "77a7bd8a288035f229a8b83d78ce92a64b16f0b585e3344976b9041cd727304f",
+      "wholeFileExact": false,
+      "consumption": "append-only generated SDK declarations"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "upstreamSHA256": "7b9e8083197cb5a6ae5c760871fa4f75514785630f2f1d3c15e41b13bf605799",
+      "generatedPhoneSHA256": "433377cc61551e06d8c3267d700140d90490a4742cb71541a50f90d6c5bd0565",
+      "wholeFileExact": false,
+      "consumption": "append-only generated SDK declarations"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "upstreamSHA256": "d3743b48439afa053db3926d68ea9e89bc51bec56963911c072ac2e4afce4aae",
+      "generatedPhoneSHA256": "1cbe73fcde14caec3bb63f46d7383b13c8d739dca30f54a0ba115bebf34f3e49",
+      "wholeFileExact": false,
+      "consumption": "append-only generated SDK declarations"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "upstreamSHA256": "10aed7d7568791eec72f412bec5ea4ae9d6822f72acd4886cada4b97b2b365a5",
+      "generatedPhoneSHA256": "8f70813dfc6156d221e93aed1835cebeaa4e3a4dff8190d3d4514ea086b2c2ae",
+      "wholeFileExact": false,
+      "consumption": "append-only generated SDK declarations"
+    }
+  ],
+  "SDKAppendOnly": true,
+  "sourceArchivePinIsUnchanged": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4",
+  "newStableHeadFetchedDirectlyFromOriginalGit": true,
+  "libraryInputUsed": false,
+  "noVersionBumpOrHAP": true,
+  "criticalRetained": {
+    "mobile/client/config/memoh_client.json": "92d2fc85d947461b414201a10ce543d3009572feec5d2dfebc642741308067e1",
+    "mobile/client/mobile/memoh/harmony-back.ts": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+    "mobile/client/mobile/memoh/harmony-resumable.ts": "e55acc09fd3925cf6f7480acae6474ecfcc7e32909cdefc23f71af8312621ae5",
+    "mobile/client/mobile/memoh/harmony-files.ts": "f6beece8e9fdeb5d3f1aacfc69b0df88fd5932cc50229f1a822942951a8cce35",
+    "mobile/client/mobile/memoh/harmony-download.ts": "6990c567e495a20c5a089f37b656bde8ec93cd9a723bc5a4ab4597fc7cccbdb0",
+    "mobile/client/mobile/memoh/harmony-service.css": "f927eb9df225b323734ab60b7a3f3e2cb3ac37718fbf4eaf238930501f355c9b",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "22a3b89f7609660ef6401da08452255a8e102a16b651c93b50e0ccdf72d87473",
+    "mobile/client/mobile/harmony/app/entry/src/main/module.json5": "cb4b3594d1cc7323f8eba2d904d63c18ae349c361ccb5bbb700d955c46eeaa5f",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871"
+  }
+}

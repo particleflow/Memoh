@@ -423,8 +423,28 @@
     "scope": "Final a0a821a4 source mapping for current read-aloud UI and generated playback SDK; original phone adapters preserved. No synthesize fallback. Deployment/device readiness is not inferred from source checks.",
     "backendPlaybackReadyForRelease": false,
     "navigationCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3",
-    "unifiedCompatibleCommit": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+    "unifiedCompatibleCommit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
     "localFollowup": "Detached status invalidation consumes rejected completion while preserving cache errors; native voice uses existing Spinner/muted-soft tokens. No new UI or retry.",
     "backendReleaseReadinessNote": "The final upstream includes the reviewed account-JWT playback auth correction. This source-only task does not independently verify the deployed endpoint or device playback."
+  },
+  "sharedBotContactTaskDirectory": {
+    "commit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+    "tree": "f832a984bd2d8c1ea7844655fca7cc880f43ef42",
+    "sharedBase": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+    "sourceChanges": {
+      "local": "shared-fixed-contact-task-directory.json",
+      "sha256": "93a171264e57a495ae470f8d0ba8c87191abe601445338fdf4b1ebf032e44308"
+    },
+    "scope": "Only final shared fixed-contact/task-directory delta; preserve existing phone-specific source divergences, native media journals, approved send button, image timing, Back and artwork. No backend code or unknown follow-up.",
+    "serverCompatibilityRequired": true,
+    "nativeBackConsumer": "5445b299657dfe092083c916f146b1e5ba078844",
+    "approvedArtwork": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc",
+    "directoryScope": "Persisted native admission, computer operation, incoming/outgoing delegation, schedule fire only; unknown follow-up not included.",
+    "localCancellationNowEquivalentUpstream": {
+      "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+      "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+      "apps/web/src/pages/home/composables/turn-end-invalidation.ts": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a"
+    },
+    "hapBuilt": false
   }
 }

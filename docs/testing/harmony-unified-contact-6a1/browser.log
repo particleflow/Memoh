@@ -1,0 +1,20 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ ''
+- 'Synthetic task draft retained'
+
+    at file:///workspace/harmony-recovery-20261023/evidence/unified-6a1-contact-20261028/browser.mjs:156:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '',
+  expected: 'Synthetic task draft retained',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

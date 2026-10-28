@@ -1,0 +1,371 @@
+{
+  "commit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+  "tree": "f832a984bd2d8c1ea7844655fca7cc880f43ef42",
+  "sharedBase": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+  "consumerBase": "afa677e031a56940a44798ac6dfc124954ebf0a5",
+  "scope": "Only final shared fixed-contact/task-directory delta; preserve existing phone-specific source divergences, native media journals, approved send button, image timing, Back and artwork. No backend code or unknown follow-up.",
+  "existingFiles": {
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "baseSHA256": "db073b39a251d3065a38375578cad8cfa488ddda11cdaeaec34492502d9a9c11",
+      "sharedSHA256": "0ec07aa891c58c38e41dd3d323b6cd861cbaa0bfece538de1610b12a70196bf1",
+      "upstreamBaseSHA256": "adefac8e7788162468baad44b6cf7c3c3acf958de2b0ad509954db7b3ece2f35",
+      "upstreamSHA256": "023436adf7e8ff5eab823ec70829f52c9555d5a1d426700cdca1b44b290ecdc3",
+      "replacements": [
+        [
+          "import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'\n",
+          "import BotTaskDirectory from './bot-task-directory.vue'\nimport { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'\n",
+          1
+        ],
+        [
+          "                  <SessionActivityTrigger\n                    :bot-id=\"currentBotId\"\n                    :session-id=\"activeSessionId\"\n                    :visible=\"isVisible\"\n                  />\n",
+          "",
+          1
+        ],
+        [
+          "                <template v-if=\"currentBotId && activeSessionId && !isWelcome && voiceInputState === 'idle'\">\n",
+          "                <BotTaskDirectory\n                  v-if=\"currentBotId && voiceInputState === 'idle'\"\n                  :bot-id=\"currentBotId\"\n                  :visible=\"isVisible\"\n                />\n                <template v-if=\"currentBotId && activeSessionId && !isWelcome && voiceInputState === 'idle'\">\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/index.not-found.test.ts": {
+      "baseSHA256": "78b48ba00f002e54eea3c0e573ec044fd5292ba6083fc47b030ada4793de95f6",
+      "sharedSHA256": "4f3d8b07e16d573c1cbc24e4b883424c26159e68d3763f1fdabc9bd95c5d68d7",
+      "upstreamBaseSHA256": "78b48ba00f002e54eea3c0e573ec044fd5292ba6083fc47b030ada4793de95f6",
+      "upstreamSHA256": "4f3d8b07e16d573c1cbc24e4b883424c26159e68d3763f1fdabc9bd95c5d68d7",
+      "replacements": [
+        [
+          "\nconst existingBot = { id: 'bot-1', name: 'errs-bot' }\n",
+          "vi.mock('./components/contact-choice-dialog.vue', () => ({ default: { render: () => null } }))\n\nconst existingBot = { id: 'bot-1', name: 'errs-bot' }\n",
+          1
+        ],
+        [
+          "    PanePlaceholder: (props: { title?: string }, { slots }: { slots: Slots }) =>\n",
+          "    toast: { error: vi.fn() },\n    PanePlaceholder: (props: { title?: string }, { slots }: { slots: Slots }) =>\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/index.vue": {
+      "baseSHA256": "a037d0a5e31ec1b47aa78da4d89075edcac71d96f493808c2a43c0ac7bf41fa6",
+      "sharedSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "upstreamBaseSHA256": "a037d0a5e31ec1b47aa78da4d89075edcac71d96f493808c2a43c0ac7bf41fa6",
+      "upstreamSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "replacements": [
+        [
+          "    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false })\n",
+          "    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false })\n    chatStore.completeContactOpen(request)\n",
+          1
+        ],
+        [
+          "    void syncStoreFromUrl((paramBotName as string) ?? '').catch(error => toast.error(resolveApiErrorMessage(error, t('chat.contact.failed'))))\n",
+          "    const requestedRoute = route.fullPath\n    void syncStoreFromUrl((paramBotName as string) ?? '').catch(error => {\n      if (route.fullPath !== requestedRoute) return\n      historyLoading.value = false\n      historyError.value = resolveApiErrorMessage(error, t('chat.contact.failed'))\n      toast.error(historyError.value)\n    })\n",
+          1
+        ],
+        [
+          "  } else if (resolvedId !== (currentBotId.value ?? '').trim()) {\n",
+          "  } else {\n",
+          1
+        ],
+        [
+          "      await chatStore.initializeWithRecovery()\n",
+          "      await chatStore.initializeWithRecovery()\n    } else {\n      await chatStore.selectBot(currentBotId.value)\n",
+          1
+        ],
+        [
+          "  if (!urlName) {\n",
+          "  if (route.query.session !== undefined && (typeof route.query.session !== 'string' || !route.query.session.trim())) {\n    historyLoading.value = false\n    historyError.value = t('chat.contact.historyFailed')\n    return\n  }\n  if (!urlName) {\n",
+          1
+        ],
+        [
+          "      v-if=\"historyError || historyLoading\"\n      :title=\"historyLoading ? t('common.loading') : historyError\"\n",
+          "      v-if=\"historyError || historyLoading || chatStore.contactNavigationPending\"\n      :title=\"historyError || t('common.loading')\"\n",
+          1
+        ],
+        [
+          "      v-show=\"!historyError && !historyLoading\"\n",
+          "      v-show=\"!historyError && !historyLoading && !chatStore.contactNavigationPending\"\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/chat-list.test.ts": {
+      "baseSHA256": "79077a5bf3a9e481d7c2c9259842bdd774731b626718bb4420afe832164b5f3a",
+      "sharedSHA256": "65989782f49bf03443eb8b0abfd35e7115d2e3d31d48822a6e60efa54bcd3b14",
+      "upstreamBaseSHA256": "79077a5bf3a9e481d7c2c9259842bdd774731b626718bb4420afe832164b5f3a",
+      "upstreamSHA256": "65989782f49bf03443eb8b0abfd35e7115d2e3d31d48822a6e60efa54bcd3b14",
+      "replacements": [
+        [
+          "    api.fetchSession.mockResolvedValue({\n",
+          "    api.resolvePrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })\n    api.fetchSession.mockResolvedValue({\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/chat-list.ts": {
+      "baseSHA256": "bd5fe0bf4d4e8740c3aeac0393c6a40664217c623b8cddc339040c1079b77405",
+      "sharedSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "upstreamBaseSHA256": "bd5fe0bf4d4e8740c3aeac0393c6a40664217c623b8cddc339040c1079b77405",
+      "upstreamSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "replacements": [
+        [
+          "    contactChoice, contactBusy, contactOpenRequested,\n",
+          "    contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,\n",
+          1
+        ],
+        [
+          "    hasHistoryEntry: (() => { const router = hasInjectionContext() ? inject(routerKey, null) : null; return () => !!router?.currentRoute.value.query.session })(),\n",
+          "    hasHistoryEntry: () => !!router?.currentRoute.value.query.session,\n    hasContactEntry: () => !!router && CHAT_ROUTE_NAMES.has(router.currentRoute.value.name as string) && !router.currentRoute.value.query.session,\n",
+          1
+        ],
+        [
+          "    loadingChats, contactChoice, contactBusy, contactOpenRequested,\n",
+          "    loadingChats, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,\n",
+          1
+        ],
+        [
+          "  const selectionStore = useChatSelectionStore()\n",
+          "  const router = hasInjectionContext() ? inject(routerKey, null) : null\n  const selectionStore = useChatSelectionStore()\n",
+          1
+        ],
+        [
+          "import { defineStore, storeToRefs } from 'pinia'\n",
+          "import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'\nimport { defineStore, storeToRefs } from 'pinia'\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/chat/bootstrap.ts": {
+      "baseSHA256": "35056c2471ea4edc14bdeea44c6497ac7aec3aa5cb2f914563029500472228dc",
+      "sharedSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "upstreamBaseSHA256": "35056c2471ea4edc14bdeea44c6497ac7aec3aa5cb2f914563029500472228dc",
+      "upstreamSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "replacements": [
+        [
+          "    loadingChats, contactChoice, contactBusy, contactOpenRequested,\n",
+          "    loadingChats, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,\n",
+          1
+        ],
+        [
+          "    loadingChats.value = false\n    initializing.value = false\n",
+          "    contactNavigationPending.value = deps.hasContactEntry?.() === true\n    loadingChats.value = false\n    initializing.value = false\n",
+          1
+        ],
+        [
+          "    const explicitSelection = options.explicitSelection === true\n",
+          "    cancelContactNavigation()\n    const explicitSelection = options.explicitSelection === true\n",
+          1
+        ],
+        [
+          "  async function createNewSession(options: { explicitSelection?: boolean } = {}) {\n",
+          "  async function createNewSession(options: { explicitSelection?: boolean } = {}) {\n    cancelContactNavigation()\n",
+          1
+        ],
+        [
+          "    const previousSessionId = (deps.sessionId.value ?? '').trim()\n",
+          "    cancelContactNavigation()\n    const previousSessionId = (deps.sessionId.value ?? '').trim()\n",
+          1
+        ],
+        [
+          "      if (deps.currentBotId.value !== targetBotId) return\n",
+          "      if (deps.currentBotId.value !== targetBotId || navigation !== contactRequest) return\n",
+          1
+        ],
+        [
+          "    if (deps.currentBotId.value === targetBotId) {\n",
+          "    cancelContactNavigation()\n    contactNavigationPending.value = !options.sessionId\n    const navigation = contactRequest\n    if (deps.currentBotId.value === targetBotId) {\n",
+          1
+        ],
+        [
+          "            if (deps.draftIntent.value) contact = undefined\n",
+          "            if ((!preferContact && deps.draftIntent.value) || deps.hasHistoryEntry?.()) contact = undefined\n",
+          1
+        ],
+        [
+          "              if (!unsupported) throw error\n",
+          "              if (!unsupported) throw error\n              contactNavigationPending.value = false\n",
+          1
+        ],
+        [
+          "              contact = await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.())\n",
+          "              contact = preferContact\n                ? await resolvePrivateChat(botId)\n                : await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.())\n",
+          1
+        ],
+        [
+          "          if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !restoredExplicitSession && !deps.draftIntent.value && !deps.hasHistoryEntry?.()) {\n",
+          "          if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !restoredExplicitSession && (preferContact || !deps.draftIntent.value) && !deps.hasHistoryEntry?.()) {\n",
+          1
+        ],
+        [
+          "          const preserveExplicitEmptyComposer = deps.explicitSessionSelection.value\n",
+          "          const preserveExplicitEmptyComposer = !preferContact && deps.explicitSessionSelection.value\n",
+          1
+        ],
+        [
+          "          const preservePendingExternalAgentStage = !!deps.pendingExternalAgentSessionInput.value\n",
+          "          const preservePendingExternalAgentStage = !preferContact && !!deps.pendingExternalAgentSessionInput.value\n",
+          1
+        ],
+        [
+          "          const restoredExplicitSession = restoredSessionId\n",
+          "          const preferContact = contactNavigationPending.value && !deps.hasHistoryEntry?.()\n          const restoredExplicitSession = !preferContact && restoredSessionId\n",
+          1
+        ],
+        [
+          "      if (request === contactRequest) contactBusy.value = false\n    }\n",
+          "      if (request === contactRequest) contactBusy.value = false\n    }\n  }\n\n  function completeContactOpen(request: { botId: string, sessionId: string }) {\n    if (contactOpenRequested.value !== request) return\n    contactOpenRequested.value = null\n    contactNavigationPending.value = false\n  }\n\n  function cancelContactNavigation() {\n    contactRequest++\n    contactBusy.value = false\n    contactNavigationPending.value = false\n    contactOpenRequested.value = null\n",
+          1
+        ],
+        [
+          "      if (request === contactRequest) contactBusy.value = false\n",
+          "      if (request === contactRequest) {\n        contactBusy.value = false\n        if (!contactOpenRequested.value) contactNavigationPending.value = false\n      }\n",
+          1
+        ],
+        [
+          "      const session = await resolveContact(botId, () => request === contactRequest && selectionRequest === deps.currentSelectSessionRequest() && generation === deps.userScopeGeneration() && deps.currentBotId.value === botId)\n",
+          "      // The primary entrance resolves the server-owned identity directly. It\n      // must not adopt a historical session because it happened to be focused.\n      const session = await resolvePrivateChat(botId)\n",
+          1
+        ],
+        [
+          "    const generation = deps.userScopeGeneration()\n    contactBusy.value = true\n",
+          "    const generation = deps.userScopeGeneration()\n    contactBusy.value = true\n    contactNavigationPending.value = true\n",
+          1
+        ],
+        [
+          "    const generation = deps.userScopeGeneration()\n    contactBusy.value = true\n",
+          "    const generation = deps.userScopeGeneration()\n    contactOpenRequested.value = null\n    contactBusy.value = true\n",
+          1
+        ],
+        [
+          "  let contactRequest = 0\n",
+          "  // Route intent is separate from persisted tab focus. A restored task tab is\n  // never evidence that the user entered that task instead of the Bot contact.\n  const contactNavigationPending = ref(deps.hasContactEntry?.() === true)\n  let contactRequest = 0\n",
+          1
+        ],
+        [
+          "  currentBotId: Ref<string | null>\n",
+          "  hasContactEntry?: () => boolean\n  currentBotId: Ref<string | null>\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/workspace-tabs.test.ts": {
+      "baseSHA256": "5305e8da6f5e34eee87c16f0d9ebbc6892efdb2457e7439905a8cfb7623bbcc2",
+      "sharedSHA256": "bd56a075727a6ad7ed4003b52e4bf165fc4c2954c47319a0f062b00712ecdaf1",
+      "upstreamBaseSHA256": "605cd51f99a988220402a667d69d06c95e722b663b03cffe40efdaeb882ee750",
+      "upstreamSHA256": "e81ce38425dcbf7658fdabf4b2cb647e7b9150b388d274579abe9a942c8508eb",
+      "replacements": [
+        [
+          "    expect(useChatSelectionStore().sessionId).toBe('session-1')\n",
+          "    expect(useChatSelectionStore().sessionId).toBe('session-1')\n  })\n\n  it('retains restored task panels without allowing them to overwrite a primary contact entry', async () => {\n    localStorage.setItem('workspace-layout', JSON.stringify({\n      'bot-1': {\n        layout: persistedLayoutWithPanel('chat:bot-1:1', 'chat', { sessionId: 'old-task', explicitSelection: true }, 'Old task'),\n        ephemeralIds: [],\n      },\n    }))\n    chatStoreMock.contactNavigationPending = true\n    chatStoreMock.loadingChats = true\n    chatStoreMock.sessionId = 'old-task'\n    chatStoreMock.hasExplicitSessionSelection = true\n    const store = useWorkspaceTabsStore()\n    const dock = createFakeDock()\n    store.registerApi(dock as never)\n    await nextTick()\n    expect(chatStoreMock.selectSession).not.toHaveBeenCalled()\n    chatStoreMock.sessionId = 'contact'\n    chatStoreMock.hasExplicitSessionSelection = false\n    useChatSelectionStore().setSession('contact', { explicitSelection: false })\n    chatStoreMock.loadingChats = false\n    await nextTick()\n    expect(chatStoreMock.selectSession).not.toHaveBeenCalled()\n    expect(useChatSelectionStore().sessionId).toBe('contact')\n    expect(dock.getPanel('chat:bot-1:1')?.params.sessionId).toBe('old-task')\n    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false })\n    chatStoreMock.contactNavigationPending = false\n    expect(dock.activePanel?.params.sessionId).toBe('contact')\n    expect(dock.getPanel('chat:bot-1:1')?.params.sessionId).toBe('old-task')\n  })\n\n  it('does not let empty-layout draft fallback cancel pending contact navigation', async () => {\n    chatStoreMock.contactNavigationPending = true\n    const store = useWorkspaceTabsStore()\n    const dock = createFakeDock()\n    store.registerApi(dock as never)\n    await nextTick()\n    await flushDraftChatFallback()\n    expect(dock.panels).toHaveLength(0)\n    expect(chatStoreMock.selectDraft).not.toHaveBeenCalled()\n    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false })\n    expect(dock.panels).toHaveLength(1)\n    expect(dock.activePanel?.params.sessionId).toBe('contact')\n",
+          1
+        ],
+        [
+          "    // Reactive like the real store's ref: the workspace aligns its selection\n",
+          "    chatStoreMock.contactNavigationPending = false\n    // Reactive like the real store's ref: the workspace aligns its selection\n",
+          1
+        ],
+        [
+          "      return chatStoreMock.loadingChats\n",
+          "      return chatStoreMock.loadingChats\n    },\n    get contactNavigationPending() {\n      return chatStoreMock.contactNavigationPending\n",
+          1
+        ],
+        [
+          "  sessions: [] as Array<{ id: string, title?: string }>,\n",
+          "  contactNavigationPending: false,\n  sessions: [] as Array<{ id: string, title?: string }>,\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/workspace-tabs.ts": {
+      "baseSHA256": "be5f05ee631ae7428cc15a18b475266c22d2c7da36ee255cbb540ac487438a04",
+      "sharedSHA256": "1357ad873f38a0c01084380c8a0ad6e2d583da12f75a6e38ef50691cdca3c4b5",
+      "upstreamBaseSHA256": "a8a9e701e128d61b647be3ce6b7ec4c3f981cc1cef2e0377be31ae6e4b83fe97",
+      "upstreamSHA256": "188d4d156fe9930b7ff7390867a500c020ecb3a2615d0274e9828801bbc046db",
+      "replacements": [
+        [
+          "      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats || chatStore.contactChoice) return\n",
+          "      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats || chatStore.contactChoice || chatStore.contactNavigationPending || chatStore.contactOpenRequested) return\n",
+          1
+        ],
+        [
+          "    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats || chatStore.contactChoice) return\n",
+          "    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats || chatStore.contactChoice || chatStore.contactNavigationPending || chatStore.contactOpenRequested) return\n",
+          1
+        ],
+        [
+          "    const sid = (chatStore.sessionId ?? '').trim()\n    const explicitSelection = chatStore.hasExplicitSessionSelection === true\n",
+          "    // Preserve the restored panels, but let an explicit Bot entrance open its\n    // contact before layout focus can write a task back into global selection.\n    if (chatStore.contactNavigationPending || chatStore.contactOpenRequested) return\n    const sid = (chatStore.sessionId ?? '').trim()\n    const explicitSelection = chatStore.hasExplicitSessionSelection === true\n",
+          1
+        ]
+      ]
+    }
+  },
+  "addedFiles": {
+    "apps/web/src/pages/home/components/bot-task-directory.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, nextTick } from 'vue'\nimport { createI18n } from 'vue-i18n'\nimport { afterEach, beforeEach, expect, it, vi } from 'vitest'\nimport en from '@/i18n/locales/en.json'\nimport { notifyAuthSessionCleared } from '@/lib/auth-session'\nimport Directory from './bot-task-directory.vue'\nconst api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), session: vi.fn(), push: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasks: api.list, getBotsByBotIdTasksByTaskTypeByRecordId: api.detail, getBotsByBotIdSessionsBySessionId: api.session }))\nvi.mock('vue-router', () => ({ useRouter: () => ({ push: api.push }) }))\nconst row = (id: string, state = 'failed') => ({ task_type: 'native_agent', task_id: 'bg_original', record_id: id, name: 'Same task', state, created_at: '2026-01-01', destination: { bot_id: 'bot', session_id: 'execution' } })\nlet app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement\nasync function settle() { await nextTick(); for (let i = 0; i < 80; i++) await Promise.resolve(); await nextTick() }\nasync function mount() {\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(Directory, { botId: 'bot' }); app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root); await settle()\n  root.querySelector('button')!.click(); await settle()\n}\nbeforeEach(() => {\n  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })\n  localStorage.clear(); localStorage.setItem('token', 'fixture-account')\n  api.list.mockReset().mockResolvedValue({ data: { items: [row('run-1'), row('run-2', 'unknown')] } })\n  api.detail.mockReset().mockImplementation(({ path }) => Promise.resolve({ data: row(path.record_id) }))\n  api.session.mockReset().mockResolvedValue({ data: { id: 'execution', bot_id: 'bot', title: 'Original execution' } })\n  api.push.mockReset().mockResolvedValue(undefined)\n})\nafterEach(() => { app?.unmount(); root?.remove(); document.body.innerHTML = ''; vi.unstubAllGlobals() })\nit('lists real same-name historical tasks and rechecks the clicked occurrence before opening execution', async () => {\n  await mount(); const dialog = document.querySelector('[role=\"dialog\"]')!\n  const rows = dialog.querySelectorAll<HTMLButtonElement>('li > button')\n  expect(rows).toHaveLength(2)\n  expect(rows[0]!.textContent).toContain(en.chat.tasks.statuses.failed)\n  expect(rows[1]!.textContent).toContain(en.chat.tasks.statuses.unknown)\n  expect(dialog.textContent).not.toContain('bg_original'); expect(dialog.textContent).not.toContain('run-2')\n  rows[1]!.click(); await settle()\n  expect(api.detail.mock.calls[0]![0].path).toEqual({ bot_id: 'bot', task_type: 'native_agent', record_id: 'run-2' })\n  expect(api.push).toHaveBeenCalledExactlyOnceWith({ name: 'bot', params: { botName: 'bot' }, query: { session: 'execution' } })\n})\nit('keeps failed tasks without an execution destination visible and disabled', async () => {\n  api.list.mockResolvedValue({ data: { items: [{ ...row('fire'), task_type: 'schedule_fire', destination: undefined }] } })\n  await mount(); const button = document.querySelector<HTMLButtonElement>('[role=\"dialog\"] li > button')!\n  expect(button.disabled).toBe(true); expect(button.textContent).toContain(en.chat.tasks.statuses.failed)\n  expect(api.session).not.toHaveBeenCalled()\n})\nit('does not navigate after task permissions are revoked', async () => {\n  api.detail.mockRejectedValue({ status: 403 }); await mount()\n  document.querySelector<HTMLButtonElement>('[role=\"dialog\"] li > button')!.click(); await settle()\n  expect(api.session).not.toHaveBeenCalled(); expect(api.push).not.toHaveBeenCalled()\n})\nit('does not navigate after logout while execution history authorization is pending', async () => {\n  let finish!: (value: unknown) => void\n  api.session.mockImplementation(() => new Promise(resolve => { finish = resolve }))\n  await mount()\n  document.querySelector<HTMLButtonElement>('[role=\"dialog\"] li > button')!.click(); await settle()\n  expect(api.session).toHaveBeenCalledOnce()\n  notifyAuthSessionCleared('logout'); finish({ data: { id: 'execution', bot_id: 'bot' } }); await settle()\n  expect(api.push).not.toHaveBeenCalled()\n})\n",
+      "sha256": "61c8c5beda37e182d18e459415e9ab1bfca3db03e8962bcd690bcf30bec3a050"
+    },
+    "apps/web/src/pages/home/components/bot-task-directory.vue": {
+      "source": "<script setup lang=\"ts\">\nimport { computed, onScopeDispose, ref, watch } from 'vue'\nimport { useLocalStorage } from '@vueuse/core'\nimport { useI18n } from 'vue-i18n'\nimport { useRouter } from 'vue-router'\nimport { ListTree } from 'lucide-vue-next'\nimport { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, Spinner, CalloutBanner, toast } from '@felinic/ui'\nimport { getBotsByBotIdTasksByTaskTypeByRecordId, getBotsByBotIdSessionsBySessionId, type SessiontaskDirectoryTask } from '@memohai/sdk'\nimport { onAuthSessionCleared } from '@/lib/auth-session'\nimport { resolveApiErrorMessage } from '@/utils/api-error'\nimport { useBotTaskDirectory } from '../composables/useBotTaskDirectory'\n\nconst props = withDefaults(defineProps<{ botId: string, visible?: boolean }>(), { visible: true })\nconst { t, te } = useI18n(), router = useRouter()\nconst token = useLocalStorage('token', ''), open = ref(false), navigating = ref(false)\nconst bot = computed(() => props.botId), visible = computed(() => open.value && props.visible)\nconst reader = useBotTaskDirectory(bot, token, visible)\nconst name = (row: SessiontaskDirectoryTask) => row.name || t(`chat.taskDirectory.types.${row.task_type}`)\nconst state = (row: SessiontaskDirectoryTask) => t(`chat.tasks.statuses.${te(`chat.tasks.statuses.${row.state}`) ? row.state : 'unknown'}`)\nlet epoch = 0, controller: AbortController | undefined\nfunction invalidate() { epoch++; controller?.abort(); navigating.value = false }\nwatch([bot, token, visible], invalidate, { flush: 'sync' })\nconst off = onAuthSessionCleared(() => { open.value = false; invalidate() })\nonScopeDispose(() => { off(); invalidate() })\n\nasync function navigate(row: SessiontaskDirectoryTask) {\n  if (!row.destination || !visible.value || navigating.value) return\n  const sourceBot = bot.value, identity = token.value, generation = epoch, control = new AbortController()\n  controller = control; navigating.value = true\n  const timeout = setTimeout(() => control.abort(), 15000)\n  const current = () => generation === epoch && token.value === identity && reader.items.value.some(item => item.record_id === row.record_id && item.task_type === row.task_type && item.task_id === row.task_id)\n  try {\n    const { data: task } = await getBotsByBotIdTasksByTaskTypeByRecordId({ path: { bot_id: sourceBot, task_type: row.task_type, record_id: row.record_id }, cache: 'no-store', signal: control.signal, throwOnError: true })\n    if (!current()) return\n    const destination = task.destination\n    if (task.task_id !== row.task_id || task.record_id !== row.record_id || task.task_type !== row.task_type || !destination\n      || destination.bot_id !== row.destination.bot_id || destination.session_id !== row.destination.session_id) throw new Error('Task destination changed')\n    const { data: session } = await getBotsByBotIdSessionsBySessionId({ path: { bot_id: destination.bot_id, session_id: destination.session_id }, cache: 'no-store', signal: control.signal, throwOnError: true })\n    if (!current()) return\n    if (session.id !== destination.session_id || session.bot_id !== destination.bot_id) throw new Error('Execution context changed')\n    // The explicit route owns selection and the pinned execution tab. Updating\n    // global Bot selection first lets the old primary URL restore its contact.\n    await router.push({ name: 'bot', params: { botName: destination.bot_id }, query: { session: session.id } })\n    open.value = false\n  } catch (cause) {\n    if (generation === epoch && !control.signal.aborted) toast.error(resolveApiErrorMessage(cause, t('chat.delegations.historyUnavailable')))\n  } finally {\n    clearTimeout(timeout)\n    if (generation === epoch) navigating.value = false\n    if (controller === control) controller = undefined\n  }\n}\n</script>\n\n<template>\n  <Dialog v-model:open=\"open\">\n    <DialogTrigger as-child>\n      <Button\n        variant=\"ghost\"\n        size=\"sm\"\n        :disabled=\"!botId || !token\"\n      >\n        <ListTree />{{ t('chat.tasks.title') }}\n      </Button>\n    </DialogTrigger>\n    <DialogPanel :show-close-button=\"false\">\n      <DialogViewHeader>{{ t('chat.tasks.title') }}</DialogViewHeader>\n      <DialogBody>\n        <Spinner v-if=\"reader.loading.value && !reader.items.value.length\" />\n        <CalloutBanner\n          v-if=\"reader.error.value\"\n          tone=\"destructive\"\n          size=\"sm\"\n          :description=\"t('chat.tasks.loadFailed')\"\n        />\n        <ul v-if=\"reader.items.value.length\">\n          <li\n            v-for=\"row in reader.items.value\"\n            :key=\"`${row.task_type}:${row.record_id}`\"\n          >\n            <Button\n              variant=\"ghost\"\n              size=\"sm\"\n              class=\"w-full justify-between\"\n              :disabled=\"navigating || !row.destination\"\n              @click=\"navigate(row)\"\n            >\n              <span class=\"min-w-0 truncate\">{{ name(row) }}</span>\n              <span class=\"shrink-0 text-caption text-muted-foreground\">{{ state(row) }}</span>\n            </Button>\n          </li>\n        </ul>\n        <p\n          v-else-if=\"!reader.error.value && !reader.loading.value\"\n          class=\"text-label text-muted-foreground\"\n        >\n          {{ t(reader.nextCursor.value ? 'chat.tasks.filteredPage' : 'chat.taskDirectory.empty') }}\n        </p>\n        <div class=\"flex justify-between gap-2\">\n          <Button\n            variant=\"ghost\"\n            size=\"sm\"\n            :disabled=\"reader.loading.value\"\n            @click=\"reader.newest\"\n          >\n            {{ t('chat.tasks.newest') }}\n          </Button>\n          <Button\n            v-if=\"reader.nextCursor.value\"\n            variant=\"ghost\"\n            size=\"sm\"\n            :disabled=\"reader.loading.value\"\n            @click=\"reader.next\"\n          >\n            {{ t('chat.tasks.next') }}\n          </Button>\n        </div>\n      </DialogBody>\n    </DialogPanel>\n  </Dialog>\n</template>\n",
+      "sha256": "59d5195678ef35826415dba96a7bb7157763ae2ce25653d0a550a07d7886d0a7"
+    },
+    "apps/web/src/pages/home/composables/useBotTaskDirectory.test.ts": {
+      "source": "import { effectScope, ref } from 'vue'\nimport { afterEach, beforeEach, expect, it, vi } from 'vitest'\nimport { useBotTaskDirectory } from './useBotTaskDirectory'\nconst api = vi.hoisted(() => ({ list: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasks: api.list }))\nlet owner: ReturnType<typeof effectScope> | undefined\nconst row = (id: string) => ({ task_type: 'native_agent', task_id: 'bg_original', record_id: id, name: 'Same name', state: 'failed', created_at: '2026-01-01', destination: { bot_id: 'bot', session_id: 'execution' } })\nconst settle = async () => { for (let i = 0; i < 20; i++) await Promise.resolve() }\nfunction setup() {\n  owner = effectScope(); const bot = ref('bot'), identity = ref('account'), visible = ref(true)\n  const reader = owner.run(() => useBotTaskDirectory(bot, identity, visible))!\n  return { bot, identity, visible, reader }\n}\nbeforeEach(() => { vi.useFakeTimers(); api.list.mockReset() })\nafterEach(() => { owner?.stop(); vi.useRealTimers() })\nit('keeps separate original occurrences and follows an empty filtered page', async () => {\n  api.list.mockResolvedValueOnce({ data: { items: [], next_cursor: 'more' } }).mockResolvedValueOnce({ data: { items: [row('run-1'), row('run-2')] } })\n  const { reader } = setup(); await settle()\n  expect(reader.items.value).toEqual([]); expect(reader.nextCursor.value).toBe('more')\n  reader.next(); await settle()\n  expect(reader.items.value.map(r => r.record_id)).toEqual(['run-1', 'run-2'])\n  expect(api.list.mock.calls[1]![0]).toMatchObject({ path: { bot_id: 'bot' }, query: { cursor: 'more' }, cache: 'no-store' })\n})\nit('does not publish an older account or Bot result after scope changes', async () => {\n  let finish!: (value: unknown) => void\n  api.list.mockImplementationOnce(() => new Promise(resolve => { finish = resolve })).mockResolvedValue({ data: { items: [row('new-account')] } })\n  const { reader, identity } = setup(); identity.value = 'new'; await settle()\n  finish({ data: { items: [row('old-account')] } }); await settle()\n  expect(reader.items.value.map(r => r.record_id)).toEqual(['new-account'])\n})\nit('clears revoked results and never falls back to sessions or activity', async () => {\n  api.list.mockResolvedValueOnce({ data: { items: [row('old')] } }).mockRejectedValue({ status: 403 })\n  const { reader } = setup(); await settle(); await reader.refresh()\n  expect(reader.items.value).toEqual([]); expect(reader.error.value).toEqual({ status: 403 })\n})\n",
+      "sha256": "b39c0479fccc18e4fa1b239454a00c7e802bdfa9a60ec543c2d30c76c7da73cf"
+    },
+    "apps/web/src/pages/home/composables/useBotTaskDirectory.ts": {
+      "source": "import { onScopeDispose, ref, shallowRef, watch, type Ref } from 'vue'\nimport { getBotsByBotIdTasks, type SessiontaskDirectoryTask } from '@memohai/sdk'\nimport { onAuthSessionCleared } from '@/lib/auth-session'\n\nexport function useBotTaskDirectory(bot: Ref<string>, identity: Ref<string>, visible: Ref<boolean>) {\n  const items = shallowRef<SessiontaskDirectoryTask[]>([])\n  const loading = ref(false), error = shallowRef<unknown>(), nextCursor = ref(''), cursor = ref('')\n  let generation = 0, controller: AbortController | undefined\n  function clear() {\n    generation++; controller?.abort(); controller = undefined\n    items.value = []; loading.value = false; error.value = undefined\n    cursor.value = ''; nextCursor.value = ''\n  }\n  async function refresh() {\n    if (!bot.value || !identity.value || !visible.value || loading.value) return\n    const epoch = generation, control = new AbortController()\n    controller = control; loading.value = true\n    const timeout = setTimeout(() => control.abort(), 15000)\n    try {\n      const { data } = await getBotsByBotIdTasks({ path: { bot_id: bot.value }, query: { limit: 20, cursor: cursor.value || undefined }, signal: control.signal, cache: 'no-store', throwOnError: true })\n      if (epoch !== generation || control.signal.aborted) return\n      if (data.next_cursor && data.next_cursor === cursor.value) throw new Error('Repeated task cursor')\n      items.value = data.items; nextCursor.value = data.next_cursor || ''; error.value = undefined\n    } catch (cause) {\n      if (epoch === generation) { items.value = []; nextCursor.value = ''; error.value = cause }\n    } finally {\n      clearTimeout(timeout)\n      if (epoch === generation) { loading.value = false; controller = undefined }\n    }\n  }\n  function next() {\n    if (loading.value || !nextCursor.value) return\n    cursor.value = nextCursor.value; items.value = []; nextCursor.value = ''; void refresh()\n  }\n  function newest() { clear(); void refresh() }\n  watch([bot, identity, visible], newest, { immediate: true, flush: 'sync' })\n  const timer = setInterval(() => { void refresh() }, 5000)\n  const off = onAuthSessionCleared(clear)\n  onScopeDispose(() => { clear(); clearInterval(timer); off() })\n  return { items, loading, error, nextCursor, cursor, refresh, next, newest }\n}\n",
+      "sha256": "49e3136f789148410f5957492179b32123f9dfb2a94a0ca4208c73876658553d"
+    },
+    "apps/web/src/pages/home/index.navigation.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, nextTick } from 'vue'\nimport { createPinia, defineStore } from 'pinia'\nimport { createI18n } from 'vue-i18n'\nimport { createMemoryHistory, createRouter } from 'vue-router'\nimport { afterEach, beforeEach, expect, it, vi } from 'vitest'\nimport Home from './index.vue'\n\nconst api = vi.hoisted(() => ({ bot: vi.fn(), session: vi.fn(), lookup: vi.fn(), open: vi.fn(), select: vi.fn() }))\nvi.mock('@/composables/api/useBot', () => ({ fetchBot: api.bot }))\nvi.mock('@/composables/api/useChat', () => ({ fetchSession: api.session }))\nvi.mock('@memohai/sdk', () => ({ getBotsById: api.lookup, getBotsByBotIdAgents: vi.fn() }))\nvi.mock('@felinic/ui', () => ({ PanePlaceholder: { template: '<div><slot /></div>' }, toast: { error: vi.fn() } }))\nvi.mock('./components/chat-workspace.vue', () => ({ default: { template: '<div data-chat />' } }))\nvi.mock('./components/contact-choice-dialog.vue', () => ({ default: { render: () => null } }))\nvi.mock('./composables/useComposerPrefillResolver', () => ({ useComposerPrefillResolver: vi.fn() }))\nvi.mock('@/store/composer-prefill', () => ({ useComposerPrefillStore: () => ({ pending: null }) }))\nvi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: {}, openSessionChatPinned: api.open }) }))\nconst useChat = defineStore('navigation-fixture', {\n  state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false }),\n  actions: {\n    async selectBot(botId: string, options?: { sessionId?: string }) { this.currentBotId = botId; api.select(botId, options) },\n    cancelContactChoice() {}, isSessionTentative() { return false },\n  },\n})\nvi.mock('@/store/chat-list', () => ({ useChatStore: () => useChat() }))\nlet app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement\nasync function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }\nasync function mount(path: string) {\n  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/bot/:botName', name: 'bot', component: Home }] })\n  await router.push(path)\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(Home); app.use(createPinia()); app.use(router)\n  app.use(createI18n({ legacy: false, locale: 'en', messages: { en: {} }, missingWarn: false, fallbackWarn: false }))\n  app.mount(root)\n  return router\n}\nbeforeEach(() => {\n  api.bot.mockReset(); api.session.mockReset().mockImplementation(async (bot, session) => ({ id: session, bot_id: bot, title: session }))\n  api.lookup.mockReset().mockImplementation(async ({ path }) => ({ data: { name: path.id } }))\n  api.open.mockReset(); api.select.mockReset()\n})\nafterEach(() => { app?.unmount(); root?.remove(); app = undefined })\n\nit('does not combine a late source Bot lookup with the new expert session', async () => {\n  let resolve!: (bot: { id: string }) => void\n  api.bot.mockImplementationOnce(() => new Promise(done => { resolve = done }))\n  const router = await mount('/bot/source-alias?session=source-history')\n  await settle(); expect(api.bot).toHaveBeenCalledWith('source-alias')\n  await router.push('/bot/expert?session=expert-history'); await settle()\n  resolve({ id: 'source' }); await settle()\n  expect(api.session).not.toHaveBeenCalledWith('source', 'expert-history')\n  expect(api.session).toHaveBeenCalledWith('expert', 'expert-history')\n  expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')\n  expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'expert-history', title: 'expert-history' })\n})\n\nit('does not replace a newer expert route after an earlier Bot-name lookup completes', async () => {\n  let resolve!: (value: { data: { name: string } }) => void\n  const router = await mount('/bot/source?session=source-history'); await settle()\n  const chat = useChat(); chat.bots = []\n  api.lookup.mockImplementationOnce(() => new Promise(done => { resolve = done }))\n  chat.currentBotId = 'source-uncached'; await settle()\n  chat.bots = [{ id: 'expert', name: 'expert' }]\n  await router.push('/bot/expert?session=expert-history'); await settle()\n  resolve({ data: { name: 'source-uncached' } }); await settle()\n  expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')\n})\n\nit.each([401, 403, 404])('preserves a denied historical route without selecting a different session (HTTP %s)', async status => {\n  api.session.mockRejectedValue({ status })\n  const router = await mount('/bot/expert?session=expert-history'); await settle()\n  expect(api.session).toHaveBeenCalledExactlyOnceWith('expert', 'expert-history')\n  expect(api.select).not.toHaveBeenCalled()\n  expect(api.open).not.toHaveBeenCalled()\n  expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')\n})\n\nit('returns to the contact when the same Bot URL loses its task deep link', async () => {\n  const router = await mount('/bot/source?session=task-history'); await settle()\n  api.select.mockClear(); api.open.mockClear()\n  await router.push('/bot/source'); await settle()\n  expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefined)\n  expect(api.open).not.toHaveBeenCalled()\n})\n\nit('resolves a same-Bot cold entrance even when the stored Bot already matches', async () => {\n  await mount('/bot/source'); await settle()\n  expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefined)\n})\n\nit.each(['?session=', '?session=first&session=second'])('rejects malformed task links without opening contact (%s)', async query => {\n  await mount('/bot/source' + query); await settle()\n  expect(api.select).not.toHaveBeenCalled()\n  expect(api.open).not.toHaveBeenCalled()\n  expect(api.session).not.toHaveBeenCalled()\n})\n",
+      "sha256": "e35ebe39499caad94e913a98f4131ad6851750f2e9bd8cc453f533f9e9e70ee7",
+      "upstreamSHA256": "e35ebe39499caad94e913a98f4131ad6851750f2e9bd8cc453f533f9e9e70ee7"
+    },
+    "apps/web/src/store/chat/bootstrap-contact.test.ts": {
+      "source": "import { beforeEach, describe, expect, it, vi } from 'vitest'\nimport { ref } from 'vue'\nimport type { SessionSummary } from '@/composables/api/useChat.types'\nimport { createChatBootstrap, type ChatBootstrapDeps } from './bootstrap'\n\nconst api = vi.hoisted(() => ({ fetchSessions: vi.fn(), resolvePrivateChat: vi.fn(), inspectPrivateChat: vi.fn(), bindPrivateChat: vi.fn() }))\nvi.mock('@/composables/api/useChat', () => api)\n\nconst conversation = (id: string): SessionSummary => ({ id, bot_id: 'bot', title: id, type: 'chat', created_at: '', updated_at: '' })\nfunction fixture(contactEntry = false) {\n  let generation = 0\n  const remembered = new Map<string, SessionSummary>()\n  const deps: ChatBootstrapDeps = {\n    hasContactEntry: () => contactEntry,\n    currentBotId: ref('bot'), sessionId: ref<string | null>(null), draftIntent: ref(false), explicitSessionSelection: ref(false),\n    userScopeGeneration: () => generation, bumpSelectSessionRequest: vi.fn(() => 1), currentSelectSessionRequest: () => 1,\n    prepareForInitialization: vi.fn(), resetRefreshCoordinator: vi.fn(), resetSessionActivity: vi.fn(), stopStreams: vi.fn(), stopWebSocket: vi.fn(),\n    ensureBot: async () => deps.currentBotId.value,\n    replaceSessions: vi.fn((items: SessionSummary[]) => { for (const item of items) remembered.set(item.id, item); return items }),\n    sessionsCursor: ref<string | null>(null), hasMoreSessions: ref(false),\n    ensureSessionSummary: vi.fn(async (_bot: string, id: string) => remembered.get(id) || conversation(id)),\n    pendingExternalAgentSessionInput: ref(null), clearPendingExternalAgentSession: vi.fn(), clearHistoryView: vi.fn(), markHistoryEmpty: vi.fn(),\n    knownSessionSummary: id => remembered.get(id), startWebSocket: vi.fn(), startBotSessionsActivityStream: vi.fn(), startSessionRuntime: vi.fn(),\n    releasePreviousSession: vi.fn(), abort: vi.fn(), abortAllAssistantStreams: vi.fn(), clearFsForBotSwitch: vi.fn(), clearRememberedSessions: vi.fn(),\n    resetToEmptyComposer: vi.fn(), stageDefaultExternalAgentFromSettings: vi.fn(async () => {}),\n  }\n  return { deps, bootstrap: createChatBootstrap(deps), invalidate: () => generation++ }\n}\nbeforeEach(() => {\n  vi.clearAllMocks()\n  api.fetchSessions.mockResolvedValue({ items: [conversation('latest-historical-chat')], nextCursor: null })\n  api.resolvePrivateChat.mockResolvedValue(conversation('server-owned-contact'))\n  api.inspectPrivateChat.mockResolvedValue({ candidates: [], nextCursor: null })\n})\n\ndescribe('Bot contact entry', () => {\n  it('opens the server contact instead of requiring a historical session choice', async () => {\n    const { deps, bootstrap } = fixture(); await bootstrap.initialize()\n    expect(api.resolvePrivateChat).toHaveBeenCalledExactlyOnceWith('bot')\n    expect(deps.sessionId.value).toBe('server-owned-contact')\n    expect(deps.startSessionRuntime).toHaveBeenCalledWith('bot', 'server-owned-contact')\n    expect(deps.replaceSessions).toHaveBeenLastCalledWith([conversation('server-owned-contact'), conversation('latest-historical-chat')])\n  })\n  it('uses the same persisted contact in a second independent client', async () => {\n    const a = fixture(), b = fixture(); await a.bootstrap.initialize(); await b.bootstrap.initialize()\n    expect(a.deps.sessionId.value).toBe(b.deps.sessionId.value)\n    expect(api.resolvePrivateChat).toHaveBeenCalledTimes(2)\n  })\n  it('keeps explicitly opened history without repointing it', async () => {\n    const { deps, bootstrap } = fixture(); deps.sessionId.value = 'old-history'; deps.explicitSessionSelection.value = true\n    await bootstrap.initialize()\n    expect(api.resolvePrivateChat).not.toHaveBeenCalled(); expect(deps.sessionId.value).toBe('old-history')\n  })\n  it('keeps an explicit draft but opens the ordinary contact despite an external runtime default', async () => {\n    const draft = fixture(); draft.deps.draftIntent.value = true; draft.deps.explicitSessionSelection.value = true\n    await draft.bootstrap.initialize(); expect(api.resolvePrivateChat).not.toHaveBeenCalled()\n    const external = fixture()\n    await external.bootstrap.initialize(); expect(api.resolvePrivateChat).toHaveBeenCalledOnce()\n    expect(external.deps.stageDefaultExternalAgentFromSettings).not.toHaveBeenCalled()\n  })\n  it('retains old-server navigation only for an absent contact route', async () => {\n    api.resolvePrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })\n    const { deps, bootstrap } = fixture(); await bootstrap.initialize(); expect(deps.sessionId.value).toBe('latest-historical-chat')\n  })\n  it.each([401, 403, 404, 409, 500, 503])('does not switch to another conversation after HTTP %s', async status => {\n    api.resolvePrivateChat.mockRejectedValue({ status })\n    const { deps, bootstrap } = fixture(); await expect(bootstrap.initialize()).rejects.toEqual({ status })\n    expect(deps.sessionId.value).toBeNull(); expect(deps.startSessionRuntime).not.toHaveBeenCalled()\n  })\n  it('ignores a late contact result after account scope changed', async () => {\n    let resolve!: (value: SessionSummary) => void\n    api.resolvePrivateChat.mockImplementationOnce(() => new Promise<SessionSummary>(done => { resolve = done }))\n    const { deps, bootstrap, invalidate } = fixture(); const pending = bootstrap.initialize()\n    await vi.waitFor(() => expect(api.resolvePrivateChat).toHaveBeenCalledOnce())\n    invalidate(); resolve(conversation('stale-contact')); await pending\n    expect(deps.sessionId.value).toBeNull(); expect(deps.startSessionRuntime).not.toHaveBeenCalled()\n  })\n  it('offers multiple eligible old chats once without choosing the latest or creating', async () => {\n    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('first'), conversation('second')], nextCursor: null })\n    const { deps, bootstrap } = fixture(); await bootstrap.initialize()\n    expect(deps.sessionId.value).toBeNull()\n    expect(bootstrap.contactChoice.value?.candidates.map(s => s.id)).toEqual(['first', 'second'])\n    expect(api.resolvePrivateChat).not.toHaveBeenCalled()\n    api.bindPrivateChat.mockResolvedValue(conversation('second'))\n    await bootstrap.confirmContact('second')\n    expect(api.bindPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', 'second')\n    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('second')\n  })\n  it('never resolves or binds a contact for an explicit historical URL', async () => {\n    const { deps, bootstrap } = fixture(); deps.hasHistoryEntry = () => true\n    await bootstrap.initialize()\n    expect(api.inspectPrivateChat).not.toHaveBeenCalled()\n    expect(api.resolvePrivateChat).not.toHaveBeenCalled()\n  })\n  it('reconciles a concurrent device binding before confirming a stale candidate', async () => {\n    api.inspectPrivateChat.mockResolvedValueOnce({ candidates: [conversation('old'), conversation('another')], nextCursor: null })\n      .mockResolvedValue({ session: conversation('other-device'), candidates: [], nextCursor: null })\n    const { bootstrap } = fixture(); await bootstrap.initialize(); await bootstrap.confirmContact('old')\n    expect(api.bindPrivateChat).not.toHaveBeenCalled()\n    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('other-device')\n  })\n  it('returns to a bound contact on a same-Bot click without resetting the composer', async () => {\n    api.resolvePrivateChat.mockResolvedValue(conversation('bound'))\n    const { deps, bootstrap } = fixture(); deps.sessionId.value = 'history'\n    await bootstrap.selectBot('bot')\n    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('bound')\n    expect(deps.resetToEmptyComposer).not.toHaveBeenCalled()\n    expect(deps.abortAllAssistantStreams).not.toHaveBeenCalled()\n  })\n\n  it('continues a single verified existing conversation without a permission or task-management step', async () => {\n    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('only-history')], nextCursor: null })\n    api.bindPrivateChat.mockResolvedValue(conversation('only-history'))\n    const { deps, bootstrap } = fixture(); await bootstrap.initialize()\n    expect(bootstrap.contactChoice.value).toBeNull()\n    expect(api.bindPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', 'only-history')\n    expect(api.resolvePrivateChat).not.toHaveBeenCalled()\n    expect(deps.sessionId.value).toBe('only-history')\n  })\n\n  it('does not leave the next Bot busy after an outstanding contact read completes late', async () => {\n    let complete!: (value: SessionSummary) => void\n    api.resolvePrivateChat.mockImplementationOnce(() => new Promise(done => { complete = done }))\n    const { deps, bootstrap } = fixture()\n    const previous = bootstrap.openContact()\n    expect(bootstrap.contactBusy.value).toBe(true)\n    await bootstrap.selectBot('other-bot', { sessionId: 'explicit-history' })\n    complete(conversation('stale')); await previous\n    expect(bootstrap.contactBusy.value).toBe(false)\n    expect(bootstrap.contactChoice.value).toBeNull()\n    expect(deps.currentBotId.value).toBe('other-bot')\n    expect(deps.sessionId.value).toBe('explicit-history')\n  })\n\n  it.each(['persisted-task', 'persisted-draft'])('gives a primary Bot entry priority over %s', async restored => {\n    const { deps, bootstrap } = fixture(true)\n    deps.sessionId.value = restored === 'persisted-task' ? restored : null\n    deps.explicitSessionSelection.value = true\n    deps.draftIntent.value = restored === 'persisted-draft'\n    await bootstrap.initialize()\n    expect(deps.sessionId.value).toBe('server-owned-contact')\n    expect(api.inspectPrivateChat).not.toHaveBeenCalled()\n    expect(api.bindPrivateChat).not.toHaveBeenCalled()\n    expect(bootstrap.contactNavigationPending.value).toBe(true)\n    bootstrap.completeContactOpen(bootstrap.contactOpenRequested.value!)\n    expect(bootstrap.contactNavigationPending.value).toBe(false)\n  })\n\n  it('never adopts even a unique historical candidate on a primary Bot entry', async () => {\n    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('only-history')], nextCursor: null })\n    const { deps, bootstrap } = fixture(true)\n    await bootstrap.initialize()\n    expect(deps.sessionId.value).toBe('server-owned-contact')\n    expect(api.bindPrivateChat).not.toHaveBeenCalled()\n    expect(bootstrap.contactChoice.value).toBeNull()\n  })\n\n  it('keeps a newer task selection when a pending contact resolves', async () => {\n    let finish!: (value: SessionSummary) => void\n    api.resolvePrivateChat.mockImplementationOnce(() => new Promise(done => { finish = done }))\n    const { deps, bootstrap } = fixture()\n    const pending = bootstrap.openContact()\n    await bootstrap.selectSession('newer-task')\n    finish(conversation('late-contact')); await pending\n    expect(deps.sessionId.value).toBe('newer-task')\n    expect(bootstrap.contactOpenRequested.value).toBeNull()\n    expect(bootstrap.contactNavigationPending.value).toBe(false)\n    expect(bootstrap.contactBusy.value).toBe(false)\n  })\n\n  it('does not subscribe to restored task history when contact authorization fails', async () => {\n    api.resolvePrivateChat.mockRejectedValue({ status: 403 })\n    const { deps, bootstrap } = fixture(true)\n    deps.sessionId.value = 'persisted-task'\n    deps.explicitSessionSelection.value = true\n    await expect(bootstrap.initialize()).rejects.toEqual({ status: 403 })\n    expect(deps.startSessionRuntime).not.toHaveBeenCalled()\n    expect(bootstrap.contactOpenRequested.value).toBeNull()\n    expect(bootstrap.contactNavigationPending.value).toBe(true)\n  })\n})\n",
+      "sha256": "dd6e41d7cfb4f32b666336504bc559f173fc190ebdaf117b608e9aa0c8ce87cf",
+      "upstreamSHA256": "dd6e41d7cfb4f32b666336504bc559f173fc190ebdaf117b608e9aa0c8ce87cf"
+    }
+  },
+  "locales": {
+    "en": {
+      "empty": "No tasks are recorded for this Bot.",
+      "types": {
+        "native_agent": "Agent task",
+        "computer_operation": "Computer task",
+        "bot_delegation": "Delegated task",
+        "schedule_fire": "Scheduled task"
+      }
+    },
+    "zh": {
+      "empty": "这个 Bot 暂无任务记录。",
+      "types": {
+        "native_agent": "Agent 任务",
+        "computer_operation": "电脑任务",
+        "bot_delegation": "委派任务",
+        "schedule_fire": "计划任务"
+      }
+    },
+    "ja": {
+      "empty": "この Bot のタスク記録はありません。",
+      "types": {
+        "native_agent": "Agent タスク",
+        "computer_operation": "コンピュータータスク",
+        "bot_delegation": "委任タスク",
+        "schedule_fire": "スケジュールタスク"
+      }
+    }
+  },
+  "sdkOverlays": {
+    "packages/sdk/src/types.gen.ts": "\nexport type GetBotsByBotIdTasksByTaskTypeByRecordIdData = {\n    body?: never;\n    path: {\n        /**\n         * Directory Bot ID\n         */\n        bot_id: string;\n        /**\n         * Original task type\n         */\n        task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';\n        /**\n         * Durable occurrence ID\n         */\n        record_id: string;\n    };\n    query?: never;\n    url: '/bots/{bot_id}/tasks/{task_type}/{record_id}';\n};\n\nexport type GetBotsByBotIdTasksByTaskTypeByRecordIdError = GetBotsByBotIdTasksByTaskTypeByRecordIdErrors[keyof GetBotsByBotIdTasksByTaskTypeByRecordIdErrors];\n\nexport type GetBotsByBotIdTasksByTaskTypeByRecordIdErrors = {\n    /**\n     * Bad Request\n     */\n    400: ServerProblem;\n    /**\n     * Unauthorized\n     */\n    401: ServerProblem;\n    /**\n     * Forbidden\n     */\n    403: ServerProblem;\n    /**\n     * Not Found\n     */\n    404: ServerProblem;\n    /**\n     * Internal Server Error\n     */\n    500: ServerProblem;\n};\n\nexport type GetBotsByBotIdTasksByTaskTypeByRecordIdResponse = GetBotsByBotIdTasksByTaskTypeByRecordIdResponses[keyof GetBotsByBotIdTasksByTaskTypeByRecordIdResponses];\n\nexport type GetBotsByBotIdTasksByTaskTypeByRecordIdResponses = {\n    /**\n     * OK\n     */\n    200: SessiontaskDirectoryTask;\n};\n\nexport type GetBotsByBotIdTasksData = {\n    body?: never;\n    path: {\n        /**\n         * Bot ID\n         */\n        bot_id: string;\n    };\n    query?: {\n        /**\n         * Page size 1-100\n         */\n        limit?: number;\n        /**\n         * Opaque Bot and account scoped continuation\n         */\n        cursor?: string;\n    };\n    url: '/bots/{bot_id}/tasks';\n};\n\nexport type GetBotsByBotIdTasksError = GetBotsByBotIdTasksErrors[keyof GetBotsByBotIdTasksErrors];\n\nexport type GetBotsByBotIdTasksErrors = {\n    /**\n     * Bad Request\n     */\n    400: ServerProblem;\n    /**\n     * Unauthorized\n     */\n    401: ServerProblem;\n    /**\n     * Forbidden\n     */\n    403: ServerProblem;\n    /**\n     * Not Found\n     */\n    404: ServerProblem;\n    /**\n     * Internal Server Error\n     */\n    500: ServerProblem;\n};\n\nexport type GetBotsByBotIdTasksResponse = GetBotsByBotIdTasksResponses[keyof GetBotsByBotIdTasksResponses];\n\nexport type GetBotsByBotIdTasksResponses = {\n    /**\n     * OK\n     */\n    200: SessiontaskDirectoryPage;\n};\n\nexport type SessiontaskDirectoryPage = {\n    items: Array<SessiontaskDirectoryTask>;\n    next_cursor?: string;\n};\n\nexport type SessiontaskDirectoryTask = {\n    created_at: string;\n    destination?: SessiontaskTaskDestination;\n    name: string;\n    record_id: string;\n    state: string;\n    task_id: string;\n    task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';\n};\n\nexport type SessiontaskTaskDestination = {\n    bot_id: string;\n    run_id?: string;\n    session_id: string;\n};\n",
+    "packages/sdk/src/sdk.gen.ts": "\nimport type { GetBotsByBotIdTasksByTaskTypeByRecordIdData, GetBotsByBotIdTasksByTaskTypeByRecordIdErrors, GetBotsByBotIdTasksByTaskTypeByRecordIdResponses, GetBotsByBotIdTasksData, GetBotsByBotIdTasksErrors, GetBotsByBotIdTasksResponses } from './types.gen';\nexport const getBotsByBotIdTasks = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdTasksData, ThrowOnError>): RequestResult<GetBotsByBotIdTasksResponses, GetBotsByBotIdTasksErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdTasksResponses, GetBotsByBotIdTasksErrors, ThrowOnError>({ url: '/bots/{bot_id}/tasks', ...options });\n\nexport const getBotsByBotIdTasksByTaskTypeByRecordId = <ThrowOnError extends boolean = false>(options: Options<GetBotsByBotIdTasksByTaskTypeByRecordIdData, ThrowOnError>): RequestResult<GetBotsByBotIdTasksByTaskTypeByRecordIdResponses, GetBotsByBotIdTasksByTaskTypeByRecordIdErrors, ThrowOnError> => (options.client ?? client).get<GetBotsByBotIdTasksByTaskTypeByRecordIdResponses, GetBotsByBotIdTasksByTaskTypeByRecordIdErrors, ThrowOnError>({ url: '/bots/{bot_id}/tasks/{task_type}/{record_id}', ...options });\n",
+    "packages/sdk/src/@pinia/colada.gen.ts": "\nimport { getBotsByBotIdTasks, getBotsByBotIdTasksByTaskTypeByRecordId } from '../sdk.gen';\nimport type { GetBotsByBotIdTasksByTaskTypeByRecordIdData, GetBotsByBotIdTasksByTaskTypeByRecordIdError, GetBotsByBotIdTasksByTaskTypeByRecordIdResponse, GetBotsByBotIdTasksData, GetBotsByBotIdTasksError, GetBotsByBotIdTasksResponse } from '../types.gen';\nexport const getBotsByBotIdTasksByTaskTypeByRecordIdQuery = defineQueryOptions<Options<GetBotsByBotIdTasksByTaskTypeByRecordIdData>, GetBotsByBotIdTasksByTaskTypeByRecordIdResponse, GetBotsByBotIdTasksByTaskTypeByRecordIdError>((options: Options<GetBotsByBotIdTasksByTaskTypeByRecordIdData>) => ({\n    key: getBotsByBotIdTasksByTaskTypeByRecordIdQueryKey(options),\n    query: async (context) => {\n        const { data } = await getBotsByBotIdTasksByTaskTypeByRecordId({\n            ...options,\n            ...context,\n            throwOnError: true\n        });\n        return data;\n    }\n}));\n\nexport const getBotsByBotIdTasksByTaskTypeByRecordIdQueryKey = (options: Options<GetBotsByBotIdTasksByTaskTypeByRecordIdData>) => createQueryKey('getBotsByBotIdTasksByTaskTypeByRecordId', options);\n\nexport const getBotsByBotIdTasksQuery = defineQueryOptions<Options<GetBotsByBotIdTasksData>, GetBotsByBotIdTasksResponse, GetBotsByBotIdTasksError>((options: Options<GetBotsByBotIdTasksData>) => ({\n    key: getBotsByBotIdTasksQueryKey(options),\n    query: async (context) => {\n        const { data } = await getBotsByBotIdTasks({\n            ...options,\n            ...context,\n            throwOnError: true\n        });\n        return data;\n    }\n}));\n\nexport const getBotsByBotIdTasksQueryKey = (options: Options<GetBotsByBotIdTasksData>) => createQueryKey('getBotsByBotIdTasks', options);\n",
+    "packages/sdk/src/index.ts": "\nexport { getBotsByBotIdTasks, getBotsByBotIdTasksByTaskTypeByRecordId } from './sdk.gen';\nexport type { GetBotsByBotIdTasksByTaskTypeByRecordIdData, GetBotsByBotIdTasksByTaskTypeByRecordIdError, GetBotsByBotIdTasksByTaskTypeByRecordIdErrors, GetBotsByBotIdTasksByTaskTypeByRecordIdResponse, GetBotsByBotIdTasksByTaskTypeByRecordIdResponses, GetBotsByBotIdTasksData, GetBotsByBotIdTasksError, GetBotsByBotIdTasksErrors, GetBotsByBotIdTasksResponse, GetBotsByBotIdTasksResponses, SessiontaskDirectoryPage, SessiontaskDirectoryTask, SessiontaskTaskDestination } from './types.gen';\n"
+  },
+  "equivalentFiles": {
+    "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+    "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+    "apps/web/src/pages/home/composables/turn-end-invalidation.ts": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a"
+  }
+}

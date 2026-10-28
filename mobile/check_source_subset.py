@@ -11,7 +11,7 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 manifest = json.loads((HERE / 'SOURCE-PROVENANCE.json').read_text())
 entries = manifest['entries']
-assert len(entries) == 174
+assert len(entries) == 175
 assert len({item['path'] for item in entries}) == len(entries)
 for item in entries:
     relative = Path(item['path'])

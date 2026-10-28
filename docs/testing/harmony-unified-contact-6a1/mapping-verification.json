@@ -1,0 +1,31 @@
+{
+  "consumerBase": "afa677e031a56940a44798ac6dfc124954ebf0a5",
+  "effectiveShared": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+  "tree": "f832a984bd2d8c1ea7844655fca7cc880f43ef42",
+  "reviewedPhoneAdaptations": 45,
+  "testAdaptations": 2,
+  "changedAdapterHashes": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/store/chat-list.test.ts",
+    "apps/web/src/store/workspace-tabs.ts"
+  ],
+  "unchangedAdapterHashes": 38,
+  "equivalentCancellationFiles": {
+    "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+    "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+    "apps/web/src/pages/home/composables/turn-end-invalidation.ts": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a"
+  },
+  "sdkAppendOnly": true,
+  "addedOrOverriddenFilesExact": true,
+  "sourceDeltaCount": 8,
+  "newSDKFunctions": [
+    "getBotsByBotIdTasks",
+    "getBotsByBotIdTasksByTaskTypeByRecordId"
+  ],
+  "existingNativeMediaRecoveryExclusionsPreserved": true,
+  "versionOrHAPBuilt": false
+}

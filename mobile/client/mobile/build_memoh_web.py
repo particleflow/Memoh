@@ -72,6 +72,7 @@ def inputs():
     files.append(ROOT / 'mobile/memoh/shared-bot-create-recovery-changes.json')
     files.append(ROOT / 'mobile/memoh/shared-native-profile-sdk.json')
     files.append(ROOT / 'mobile/memoh/shared-compat219-changes.json')
+    files.append(ROOT / 'mobile/memoh/shared-fixed-contact-task-directory.json')
     files.extend(ROOT / 'mobile/memoh/licenses' / name for name in NOTICES)
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in files}
 
@@ -942,6 +943,12 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
     for name, addition in read_aloud_sources['sdkOverlays'].items():
         assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected playback SDK target'
         sdk_overlay[name] = sdk_overlay.get(name, '') + addition
+    fixed_contact = lock['sharedBotContactTaskDirectory']['sourceChanges']
+    assert sha(ROOT / 'mobile/memoh' / fixed_contact['local']) == fixed_contact['sha256'], 'Fixed contact/task directory source drift'
+    fixed_contact_sources = json.loads((ROOT / 'mobile/memoh' / fixed_contact['local']).read_text())
+    for name, addition in fixed_contact_sources['sdkOverlays'].items():
+        assert name in {'packages/sdk/src/types.gen.ts', 'packages/sdk/src/sdk.gen.ts', 'packages/sdk/src/index.ts', 'packages/sdk/src/@pinia/colada.gen.ts'}, 'Unexpected task directory SDK target'
+        sdk_overlay[name] = sdk_overlay.get(name, '') + addition
 
 
 
@@ -1210,7 +1217,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                     shared_text = shared_text.replace(old, new)
                 data = shared_text.encode('utf-8')
                 entry.size = len(data)
-            for sources in (inaccessible_sources, multi_upload_sources, read_aloud_sources):
+            for sources in (inaccessible_sources, multi_upload_sources, read_aloud_sources, fixed_contact_sources):
                 if name in sources['existingFiles']:
                     review = sources['existingFiles'][name]
                     assert hashlib.sha256(data).hexdigest() == review['baseSHA256'], 'Shared presentation baseline drift'
@@ -1229,6 +1236,11 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
                 value = json.loads(data)
                 assert 'readAloud' not in value['chat'], 'Read-aloud locale already present'
                 value['chat']['readAloud'] = read_aloud_sources['locales'][Path(name).stem]
+                data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
+            if name in {f'apps/web/src/i18n/locales/{language}.json' for language in fixed_contact_sources['locales']}:
+                value = json.loads(data)
+                assert 'taskDirectory' not in value['chat'], 'Task directory locale already present'
+                value['chat']['taskDirectory'] = fixed_contact_sources['locales'][Path(name).stem]
                 data = (json.dumps(value, ensure_ascii=False, indent=2) + '\n').encode()
             original_data = data
             # One declared, dependency-free waveform player; keep every other
@@ -1327,7 +1339,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
-        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles'], **multi_upload_sources['addedFiles'], **read_aloud_sources['addedFiles']}.items():
+        for destination, item in {**contact_sources['addedFiles'], **catalog_sources['addedFiles'], **bot_recovery_sources['addedFiles'], **inaccessible_sources['addedFiles'], **multi_upload_sources['addedFiles'], **read_aloud_sources['addedFiles'], **fixed_contact_sources['addedFiles']}.items():
             assert destination.startswith('apps/web/src/') and '..' not in Path(destination).parts, 'Unexpected shared source destination'
             data = item['source'].encode()
             assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Added shared source drift'
