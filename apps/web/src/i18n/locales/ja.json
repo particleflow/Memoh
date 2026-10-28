@@ -2149,6 +2149,15 @@
         "running": "ツールを実行中",
         "unconfirmed": "ツール結果は未確認"
       }
+    },
+    "taskDirectory": {
+      "empty": "この Bot のタスク記録はありません。",
+      "types": {
+        "native_agent": "Agent タスク",
+        "computer_operation": "コンピュータータスク",
+        "bot_delegation": "委任タスク",
+        "schedule_fire": "スケジュールタスク"
+      }
     }
   },
   "chatExamples": {

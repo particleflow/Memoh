@@ -1,6 +1,7 @@
 # Bot contact and task execution contract
 
-Status: local result-origin and contact-navigation slices, incomplete. Base commit:
+Status: local result-origin, contact-navigation and persisted-directory slices,
+incomplete. Base commit:
 `a0a821a4cdaa32121a945d04e80c76bba4b6f2b4`. No production deployment,
 model configuration, migration, package signing or paid model invocation.
 
@@ -31,7 +32,7 @@ self-delegation: both authority and schema173 reject source==target.
 `runtime_type=codex/acp`, a session title and a configured `bot_agents` row are
 not task roles or proof of a task admission.
 
-## Proposed directory seam (not implemented)
+## Directory contract (four persisted sources implemented)
 
 Use one additive read projection at `/bots/{bot_id}/tasks` on existing handlers,
 services and persisted models. Do not rename `/activity` or the per-session task
@@ -122,7 +123,7 @@ not ready for integration or production acceptance. A scripted loopback provider
 was prepared but did not receive a model request.
 
 Still unimplemented: durable self-background admission integration,
-the complete Bot task directory, and unknown-state
+the remaining sources of the complete Bot task directory, and unknown-state
 notification/reconciliation. Current unknown results remain persisted and are
 not automatically redispatched, but their existing no-notification gap remains.
 These are implementation gaps, not tasks completed by this origin fix.
@@ -167,3 +168,89 @@ task focus; task deep links and reload retain the original execution; a 390px
 browser uses the same contact identity. Inspected screenshots and
 `contact-ui-evidence.json` preserve these observations. No model call was made.
 The narrow-browser check is not native mobile or production acceptance.
+
+## Implemented slice: persisted Bot task directory
+
+The main Tasks control now reads the Bot-wide directory, including from an empty
+contact. It no longer depends on the selected session or the active-only
+`/activity` projection. The existing Bots control and old per-session APIs retain
+their compatibility behavior. The additive SQL query unions original native
+Agent admissions, computer operation receipts, incoming/outgoing handoffs and
+schedule fire logs. It reads every occurrence, not each session's latest run.
+An ordinary conversation run or a configured Agent contributes no task row.
+
+Native task IDs are opaque and can recur across processes; the original run UUID
+is a separate `record_id`, also used in the scoped keyset cursor. The original
+background ID remains `task_id`. Admission input and authorized ancestry establish
+the native relationship. A computer provider run ID remains opaque TEXT.
+Schedule links use the exact schedule/fire invocation, and a fire without an
+execution session remains visible. An unfinished fire is not successful merely
+because the log defaults its status to `ok`.
+
+Both list and detail reject chat-scoped tokens, use account authorization and
+`no-store`, and recheck readable ancestry plus existing source-specific grants.
+Handoff metadata checks original source identity, both live Bot grants and
+ownership without exporting results or requiring yesterday's execution binding
+to equal today's selection. Computer receipts retain their stricter original
+owner/target/fingerprint checks. Schedule logs retain Manage authorization.
+The 200-candidate scan limit is per page; an empty filtered page can continue.
+
+The dialog displays names and states. Missing destinations disable navigation
+without deleting the task. It rechecks the exact occurrence and original session
+before pushing the explicit history route. That route alone owns selection and
+tab opening: a real browser regression caught the competing old primary URL
+when the dialog first updated global Bot selection. Account/Bot changes, closing
+the dialog and logout invalidate pending reads. It never submits work.
+
+Directed validation: four service tests, one delegation authority test and one
+HTTP boundary test; seven frontend tests, Web typecheck/build and UI contract
+checks. A rollback-only test on the existing isolated schema179 database checks
+nine original occurrences, repeated native IDs, multiple runs per session,
+opaque computer run IDs, incoming handoffs and unfinished/failed/completed fires.
+It excludes ordinary and prefix-only forged runs. No migration was added.
+The initial generated SQL alias error and an invalid schedule test-fixture
+status were caught by real PostgreSQL, corrected, and the test passed.
+
+Actual Server/Web at ports 28080/28082 returns three original handoffs in both
+Bots, with failed/completed states. The unchanged active-only API returns zero.
+Chromium opens the correct original execution, then returns to the fixed contact;
+desktop and 390px screenshots were inspected. The task reads leave the original
+11 runs and three delegations unchanged. Unknown rendering is covered by the
+component fixture and PostgreSQL test, not a claimed production unknown run.
+
+## Review findings and remaining acceptance gates
+
+The prior internal-result slice's authority remains in the host: preparation
+re-reads the durable record and delivery route at admission/resume and again at
+execution, reconstructs model context, and preserves the original delivery key.
+Queue/live/history origin filters and resume-v3 rejection of older consumers
+remain intact. Existing two-result/replay and isolated model evidence are reused,
+not promoted to proof of all concurrent collision orders.
+
+The following are unresolved implementation or acceptance work, not tool denials:
+
+- Native `background.Manager` still keeps queued entries and exec/spawn/video
+  tasks in an in-memory map. Its event callback returns no error; observing a
+  started event is not a fail-closed durable admission. The directory currently
+  covers native work only once an original `session_runs` admission exists.
+  Existing tool-result/history and dependency-operation ledgers need a separate
+  exact-association adapter, with unknown retained after restart. Do not invent
+  self-delegation, silently infer task roles from runtime type, or modify the
+  official Agent core to hide this gap.
+- Delegation `execute` still returns after saving `unknown`; `RetryDelivery`
+  and host preparation currently admit completed/failed results only. A separate
+  idempotent unknown notification and observation path is needed; neither this
+  directory nor its detail endpoint retries execution.
+- Cancellation/late-result suppression and user-message versus result publication
+  ordering need controlled-barrier tests. Acceptance, result delivery and final
+  assistant publication have different identities; text/time matching cannot
+  prove exactly-once response or that a newer user message was answered.
+- Autonomous same-Bot task selection, contact execution-log suppression beyond
+  internal result inputs, loss of wake-ups/restart recovery, real model behavior,
+  media/computer and native-mobile acceptance remain unproven. The first local
+  end-to-end delegated task was submitted through the real HTTP API, not selected
+  autonomously by a real model.
+
+The parent's Grok/Rakazo research is additional design input, not code adopted
+or independently reproduced here. Hiding execution logs is this user's explicit
+requirement; this work does not claim all Grok behavior hides them.

@@ -53,6 +53,7 @@ type Service struct {
 	workdirs     Workdirs
 	targets      Targets
 	cursorCipher cipher.AEAD
+	delegations  DelegationDirectory
 }
 
 func NewService(store dbstore.SessionTaskReader, sessions Sessions, workdirs Workdirs, targets Targets, cursorSecret string) *Service {
@@ -134,13 +135,20 @@ func (s *Service) decodeCursor(raw, bot, user, parent string) (cursor, error) {
 		return c, ErrCursor
 	}
 	data, err = s.cursorCipher.Open(nil, data[:s.cursorCipher.NonceSize()], data[s.cursorCipher.NonceSize():], nil)
-	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || (c.Before.Type != Subagent && c.Before.Type != ComputerOperation && (parent != activityCursorScope || c.Before.Type != sessionRun)) {
+	if err != nil || json.Unmarshal(data, &c) != nil || c.Version != 1 || c.Bot != bot || c.User != user || c.Parent != parent || c.Snapshot.IsZero() || c.Before.CreatedAt.IsZero() || c.Before.CreatedAt.After(c.Snapshot) || !validCursorType(parent, c.Before.Type) {
 		return c, ErrCursor
 	}
 	if _, err := uuid.Parse(c.Before.ID); err != nil {
 		return c, ErrCursor
 	}
 	return c, nil
+}
+
+func validCursorType(scope, kind string) bool {
+	if scope == directoryCursorScope {
+		return directoryKind(kind)
+	}
+	return kind == Subagent || kind == ComputerOperation || (scope == activityCursorScope && kind == sessionRun)
 }
 
 func (s *Service) encodeCursor(c cursor) (string, error) {
