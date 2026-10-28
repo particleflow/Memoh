@@ -197,7 +197,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-service.css",
-      "sha256": "febcc6548b5167c4745b76d0f71dcc5949858685e3b8956a8b60869b89499638",
+      "sha256": "f927eb9df225b323734ab60b7a3f3e2cb3ac37718fbf4eaf238930501f355c9b",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": []
@@ -563,17 +563,6 @@
       ]
     },
     {
-      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.svg",
-      "sha256": "ea0a3474d61fd09ebdef42dd38dc40b962611f8ad495c747579eb9bb2e311d89",
-      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
-      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
-      "archiveOriginalSHA256": "804100c2c460662789f7a697f3b9adfceb4680f39f605f57aec23dee30503d0c",
-      "archiveCheckpointSHA256": "804100c2c460662789f7a697f3b9adfceb4680f39f605f57aec23dee30503d0c",
-      "preparationChanges": [
-        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
-      ]
-    },
-    {
       "path": "mobile/client/mobile/harmony/app/build-profile.json5",
       "sha256": "6cef8672b7ddb77c42f1841dd96a9836a48bf6167113560fc836bdb29e6ca8f9",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
@@ -889,7 +878,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/module.json5",
-      "sha256": "693bbe2692009c271abfdf403530a33c6b608da8e27741624a132b7aca9ac563",
+      "sha256": "cb4b3594d1cc7323f8eba2d904d63c18ae349c361ccb5bbb700d955c46eeaa5f",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "88c4ed24330f93f9e3ab27b8f9c68134d8cbed84f18fe30db65c3bdbf50a1fbc",
@@ -900,7 +889,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/color.json",
-      "sha256": "b750c557fd0de5aa061bc7622687d8f7904b1fc3e77a9648fe1209878ad693a4",
+      "sha256": "26f6e195ab88786f18e15ea7a9769faaf968c0a631192ed8100fd2cf17d87d97",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "cf74f8ef86f99823f72f96039938a14ea63fbc0f205125383c4f36d8490c8ab1",
@@ -920,14 +909,6 @@
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
         "Use the explicitly requested display name Garnet Assistant; keep bundle, paths and application identity unchanged."
       ]
-    },
-    {
-      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.svg",
-      "sha256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
-      "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
-      "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
-      "archiveOriginalSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210",
-      "archiveCheckpointSHA256": "675376aca508e4ebb8a0c398f6c326851a8f58b23ecbf222e15061dc88142210"
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/profile/main_pages.json",
@@ -1796,6 +1777,33 @@
         "Apply guarded deltas to actual current pre-phone context; preserve native attachment audio/recording/save/TLS. Playback backend auth/readiness remains a release prerequisite.",
         "Verify all16 final a0a821a4 upstream hashes and consume a rejected detached status refresh without clearing the real query error or prior snapshot. Real-Colada cancellation/error tests included."
       ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/derive_watermark.py",
+      "sha256": "79ebfbf654c051603991fa32acd8f0ccc80f7bc8d8de300cc8f421f267827a29",
+      "origin": "User-approved artwork source/derivation metadata consumed unchanged from bd0b3933d24d944973fdca8e7d22c6f6b2a507bc. No image regeneration executed.",
+      "licenseReview": "User authorized these project artwork resources for this public source handoff; existing licenses unchanged.",
+      "preparationChanges": [
+        "Metadata or existing offline derivation source only; consumer does not rerun the derivation."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/provenance.json",
+      "sha256": "c033ab5d2e170fee4c2e2fcf32376ad46e90a177f9ff8bcffbff3c99b489585c",
+      "origin": "User-approved artwork source/derivation metadata consumed unchanged from bd0b3933d24d944973fdca8e7d22c6f6b2a507bc. No image regeneration executed.",
+      "licenseReview": "User authorized these project artwork resources for this public source handoff; existing licenses unchanged.",
+      "preparationChanges": [
+        "Metadata or existing offline derivation source only; consumer does not rerun the derivation."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/watermark-derivation.json",
+      "sha256": "2ac88d71b969b6fb91bdeadd4cdc1c6d66c8fc4011c46f3e7ef3a57baafcbbda",
+      "origin": "User-approved artwork source/derivation metadata consumed unchanged from bd0b3933d24d944973fdca8e7d22c6f6b2a507bc. No image regeneration executed.",
+      "licenseReview": "User authorized these project artwork resources for this public source handoff; existing licenses unchanged.",
+      "preparationChanges": [
+        "Metadata or existing offline derivation source only; consumer does not rerun the derivation."
+      ]
     }
   ],
   "excludedSourcePaths": [],
@@ -2310,5 +2318,66 @@
     "sharedWebSDKChangedFiles": 10,
     "evidence": "docs/testing/harmony-unified-68be060/README.md",
     "historicalLaterEditsUnverified": 19
+  },
+  "approvedArtworkImages": [
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.png",
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "bytes": 1480302,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.png",
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "bytes": 1480302,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/startup_art.png",
+      "sha256": "e8e00500e14b444789cc27a891206f29eaef61b4f48c3828b12ee669de1b2917",
+      "bytes": 1569576,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/approved/whale.png",
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "bytes": 1480302,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/approved/koi-lotus.png",
+      "sha256": "e8e00500e14b444789cc27a891206f29eaef61b4f48c3828b12ee669de1b2917",
+      "bytes": 1569576,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/watermark-light.png",
+      "sha256": "04ae2d4003d46a782068a74c9b1865677b88ee33c391fe9d2ce6545b45ce4d6a",
+      "bytes": 29921,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/watermark-dark.png",
+      "sha256": "59e089b2e6f925c3581263c95310f27a832e7f0f92f29f231fcd6a812a9d2dbf",
+      "bytes": 30195,
+      "mediaType": "image/png",
+      "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc"
+    }
+  ],
+  "approvedArtworkIntegration": {
+    "sourceCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc",
+    "sourceTree": "45a2916d09d84ea81760faa302c3533a28702c1b",
+    "parent": "5445b299657dfe092083c916f146b1e5ba078844",
+    "approvedResourcePathsUnmodified": true,
+    "maxWatermarkAlpha": 6,
+    "noLibraryTransfer": true,
+    "noRegeneration": true,
+    "hapBuilt": false
   }
 }

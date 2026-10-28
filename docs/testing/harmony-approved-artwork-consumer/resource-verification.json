@@ -1,0 +1,106 @@
+{
+  "approvedCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc",
+  "approvedTree": "45a2916d09d84ea81760faa302c3533a28702c1b",
+  "parent": "5445b299657dfe092083c916f146b1e5ba078844",
+  "resourceDeltaFiles": [
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.png",
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "bytes": 1480302
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/AppScope/resources/base/media/app_icon.svg",
+      "status": "deleted"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/module.json5",
+      "sha256": "cb4b3594d1cc7323f8eba2d904d63c18ae349c361ccb5bbb700d955c46eeaa5f",
+      "bytes": 1714
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/color.json",
+      "sha256": "26f6e195ab88786f18e15ea7a9769faaf968c0a631192ed8100fd2cf17d87d97",
+      "bytes": 99
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.png",
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "bytes": 1480302
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/app_icon.svg",
+      "status": "deleted"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/resources/base/media/startup_art.png",
+      "sha256": "e8e00500e14b444789cc27a891206f29eaef61b4f48c3828b12ee669de1b2917",
+      "bytes": 1569576
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/approved/koi-lotus.png",
+      "sha256": "e8e00500e14b444789cc27a891206f29eaef61b4f48c3828b12ee669de1b2917",
+      "bytes": 1569576
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/approved/whale.png",
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "bytes": 1480302
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/derive_watermark.py",
+      "sha256": "79ebfbf654c051603991fa32acd8f0ccc80f7bc8d8de300cc8f421f267827a29",
+      "bytes": 3255
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/provenance.json",
+      "sha256": "c033ab5d2e170fee4c2e2fcf32376ad46e90a177f9ff8bcffbff3c99b489585c",
+      "bytes": 1796
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/watermark-dark.png",
+      "sha256": "59e089b2e6f925c3581263c95310f27a832e7f0f92f29f231fcd6a812a9d2dbf",
+      "bytes": 30195
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/watermark-derivation.json",
+      "sha256": "2ac88d71b969b6fb91bdeadd4cdc1c6d66c8fc4011c46f3e7ef3a57baafcbbda",
+      "bytes": 977
+    },
+    {
+      "path": "mobile/client/mobile/harmony/artwork/watermark-light.png",
+      "sha256": "04ae2d4003d46a782068a74c9b1865677b88ee33c391fe9d2ce6545b45ce4d6a",
+      "bytes": 29921
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-service.css",
+      "sha256": "f927eb9df225b323734ab60b7a3f3e2cb3ac37718fbf4eaf238930501f355c9b",
+      "bytes": 82010
+    }
+  ],
+  "approvedResourceDeltaUnmodified": true,
+  "unchangedLoginIdentityPermissionAndProductInputs": {
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "22a3b89f7609660ef6401da08452255a8e102a16b651c93b50e0ccdf72d87473",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+    "mobile/client/config/memoh_client.json": "92d2fc85d947461b414201a10ce543d3009572feec5d2dfebc642741308067e1",
+    "mobile/client/config/memoh_web.lock.json": "41b529632041e4e04d9c1e4a837e050ea553e1e224e044fb5359e246512202cb",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+    "mobile/client/mobile/memoh/harmony-back.ts": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+    "mobile/client/mobile/build_memoh_web.py": "91480355aa9947afa335b91cf773b47241fa60180fb25ae502315866a3b6c167",
+    "mobile/client/mobile/memoh/shared-read-aloud-changes.json": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2"
+  },
+  "moduleOnlyChange": "startWindowIcon app_icon -> startup_art",
+  "colorOnlyChange": "start_window_background #101C2B -> #FFFFFF",
+  "embeddedWatermarkBytesExact": true,
+  "maxAlpha": 6,
+  "sourcePolicy": {
+    "textEntries": 174,
+    "closedListPNGEntries": 7,
+    "trackedMobileFiles": 190,
+    "SDKCLTHAPNotAdmitted": true
+  },
+  "noLibraryAccess": true,
+  "noRegeneration": true,
+  "noVersionBump": true,
+  "noHAPBuild": true
+}
