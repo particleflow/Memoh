@@ -268,6 +268,15 @@ func (h *delegationHost) inputAttachments(ctx context.Context, r botdelegation.R
 		if err != nil {
 			return nil, err
 		}
+		if a.SizeBytes <= 0 {
+			a.SizeBytes, err = delegationOriginalSize(ctx, func(ctx context.Context) (media.ReadSeekCloser, error) {
+				reader, _, err := h.service.Attachments(r).OpenSeekable(ctx, hash, result)
+				return reader, err
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
 		typ := "file"
 		if len(a.Mime) > 6 && a.Mime[:6] == "image/" {
 			typ = "image"
@@ -415,6 +424,20 @@ func (h *delegationHost) outboundRefs(ctx context.Context, r botdelegation.Recor
 				return nil, err
 			}
 			asset = a
+		}
+		if asset.SizeBytes <= 0 {
+			asset.SizeBytes, err = delegationOriginalSize(ctx, func(ctx context.Context) (media.ReadSeekCloser, error) {
+				reader, _, err := h.media.OpenSeekable(ctx, asset.BotID, asset.ContentHash)
+				return reader, err
+			})
+			if err != nil {
+				return nil, err
+			}
+			// Metadata I/O is not an authority snapshot. Recheck before linking
+			// the result if either Bot/session grant changed while it was read.
+			if _, err := h.service.Authority.Authorize(ctx, r.Identity); err != nil {
+				return nil, err
+			}
 		}
 		refs = append(refs, messagepkg.AssetRef{ContentHash: asset.ContentHash, Role: "attachment", Ordinal: len(refs), Mime: asset.Mime, SizeBytes: asset.SizeBytes, Metadata: map[string]any{"delegation_url": botdelegation.AttachmentURL(r, asset.ContentHash)}})
 	}
