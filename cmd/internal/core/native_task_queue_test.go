@@ -9,6 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/felinics/memoh/internal/accounts"
 	tools "github.com/felinics/memoh/internal/agent/tool"
 	"github.com/felinics/memoh/internal/botdelegation"
@@ -19,8 +22,6 @@ import (
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/runtimefence"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // Requires an explicitly supplied, migrated, isolated PostgreSQL database.
@@ -224,7 +225,7 @@ func TestNativeTaskQueuePostgresRestartAndDuplicateClaims(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 	if _, err = tx.Exec(ctx, `SELECT id FROM bots WHERE id=$1 FOR NO KEY UPDATE`, bot); err != nil {
 		t.Fatal(err)
 	}

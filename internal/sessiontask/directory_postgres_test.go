@@ -7,12 +7,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/team"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 // Uses a rollback-only transaction in a previously migrated isolated database.
@@ -27,12 +28,12 @@ func TestDirectoryPostgresAllOriginalSourcesAndHistory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close(context.Background())
+	defer func() { _ = conn.Close(context.Background()) }()
 	tx, err := conn.Begin(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer tx.Rollback(context.Background())
+	defer func() { _ = tx.Rollback(context.Background()) }()
 	exec := func(query string, args ...any) {
 		t.Helper()
 		if _, err := tx.Exec(ctx, query, args...); err != nil {

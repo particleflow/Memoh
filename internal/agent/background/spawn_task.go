@@ -2,6 +2,7 @@ package background
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
@@ -76,7 +77,7 @@ func (m *Manager) StartAgentTask(parentCtx context.Context, botID, sessionID, ag
 // It never replaces an existing in-process task or generates a new identity.
 func (m *Manager) RestoreAgentTask(parentCtx context.Context, taskID, botID, sessionID, agentID, agentSessionID, message, description string, queued bool) (string, context.Context, error) {
 	if taskID == "" {
-		return "", nil, fmt.Errorf("persisted task identity is required")
+		return "", nil, errors.New("persisted task identity is required")
 	}
 	return m.restoreAgentTask(parentCtx, taskID, botID, sessionID, agentID, agentSessionID, message, description, queued)
 }
@@ -102,7 +103,7 @@ func (m *Manager) restoreAgentTask(parentCtx context.Context, taskID, botID, ses
 		if cancel != nil {
 			cancel()
 		}
-		return "", nil, fmt.Errorf("task identity already installed")
+		return "", nil, errors.New("task identity already installed")
 	}
 	task := &Task{
 		ID:             taskID,

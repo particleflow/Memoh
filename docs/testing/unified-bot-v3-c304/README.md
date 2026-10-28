@@ -1,9 +1,35 @@
 # Reviewed Bot v3 integration on c304
 
-This is a local source integration, not a published or deployed version. It does
-not establish whole-product acceptance. No CI, full test suite, Server/Web/HAP
-build, paid model request, or production action was started for this integration.
-Human QA remains unconfirmed.
+The initial local source integration was prepared without a fresh CI/test/build
+matrix, paid model request or production action. Its later authorized source
+push triggered normal CI, recorded below. This is not a published or deployed
+version and does not establish whole-product acceptance. Human QA remains
+unconfirmed.
+
+## Lint-only follow-up to the initial integration
+
+The original `6a1fdcc1d61427c5cb02e0184a2b48a92645dac2` Go workflow
+`40772835444` passed Test, pgvector, Agent boundary, Redis, Valkey and PostgreSQL
+fencing jobs, but Lint job `123114289444`, step4, failed. Its
+[22 original diagnostics](go-lint-6a1-failure.txt) are retained: four cleanup
+return-value checks, eight import-group findings, two conditional-chain findings,
+five formatting findings, two constant-error constructors and one HTTP method
+constant. They are source findings, not an infrastructure failure.
+
+The follow-up only addresses those diagnostics in ten source/test files. It
+preserves the claim transaction, post-lock authorization, terminal-state choices,
+unknown/no-replay behavior and test assertions. CI configuration is unchanged;
+3ca result recovery is not included. The union snapshot below describes the
+pre-lint integration, not byte identity after this formatting/style correction.
+
+This workspace resolves `go` directly to `/usr/bin/go`, with no shell alias; that
+nonstandard executable cannot run `go version` or `go env`. No matching installed
+toolchain was found in the checked normal locations. CI uses setup-go with
+`go.mod` (Go1.25.7); the older mise pin is not changed by this fix. No toolchain
+was downloaded. The existing standalone formatter applied the correction, but
+its gci/goimports phases reported the unavailable `go env` and are not claimed
+as a local full-lint pass. The separate gofumpt-only diff check and
+`git diff --check` passed; full lint/type validation remains a remote CI gate.
 
 ## Exact provenance
 

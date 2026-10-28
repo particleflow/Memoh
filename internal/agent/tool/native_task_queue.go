@@ -25,8 +25,10 @@ type NativeTaskQueue interface {
 	RestoreSession(context.Context, dbstore.NativeTaskReceipt) (context.Context, SessionContext, error)
 }
 
-type nativeTaskCallKey struct{}
-type nativeTaskCall struct{ ID, Fingerprint string }
+type (
+	nativeTaskCallKey struct{}
+	nativeTaskCall    struct{ ID, Fingerprint string }
+)
 
 func withNativeTaskCall(ctx context.Context, id, name string, args any) context.Context {
 	data, _ := json.Marshal(args)
@@ -120,13 +122,14 @@ func (p *SpawnProvider) finishRecordedAgentTask(ctx context.Context, req *agentR
 		state = "failed"
 	}
 	state, err := p.taskQueue.Finish(context.WithoutCancel(ctx), *req.receipt, req.admission.RunID, state)
-	if err != nil || state == "unknown" {
+	switch {
+	case err != nil || state == "unknown":
 		result.Status = string(background.TaskUnknown)
 		result.Error = "Task execution outcome could not be recorded; inspect the original execution before retrying."
 		result.Text = ""
-	} else if state == "aborted" {
+	case state == "aborted":
 		result.Status = string(background.TaskKilled)
-	} else if state == "failed" {
+	case state == "failed":
 		result.Status = string(background.TaskFailed)
 		if result.Error == "" {
 			result.Error = "Task execution failed"

@@ -10,6 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"github.com/felinics/memoh/internal/agent/application"
 	tools "github.com/felinics/memoh/internal/agent/tool"
 	"github.com/felinics/memoh/internal/bots"
@@ -20,9 +24,6 @@ import (
 	"github.com/felinics/memoh/internal/oauthctx"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/toolcontext"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // nativeTaskQueueHost adapts existing source-run storage and tool queue ports.
@@ -71,6 +72,7 @@ func decodeNativeTask(data []byte) (dbstore.NativeTaskReceipt, error) {
 	}
 	return r, nil
 }
+
 func (q *nativeTaskQueueHost) read(ctx context.Context, r dbstore.NativeTaskReceipt) (dbstore.NativeTaskReceipt, error) {
 	raw, err := q.host.store.ReadNativeTask(ctx, dbsqlc.ReadNativeTaskParams{SourceRunID: nativeTaskUUID(r.SourceRunID), BotID: nativeTaskUUID(r.BotID), TaskKey: r.ID})
 	if err != nil {
@@ -200,7 +202,7 @@ func (q *nativeTaskQueueHost) Claim(ctx context.Context, r dbstore.NativeTaskRec
 	if err != nil {
 		return r, false, err
 	}
-	defer tx.Rollback(context.WithoutCancel(ctx))
+	defer func() { _ = tx.Rollback(context.WithoutCancel(ctx)) }()
 	query := q.host.store.SQLC().WithTx(tx)
 	if _, err = query.LockBotForSessionRunClaim(ctx, nativeTaskUUID(r.BotID)); err != nil {
 		return r, false, err
@@ -245,7 +247,8 @@ func (q *nativeTaskQueueHost) Finish(ctx context.Context, r dbstore.NativeTaskRe
 	}
 	// A runtime run is authoritative when present; a tool's narration is not.
 	actual, err := q.host.store.GetSessionRunByInvocation(ctx, dbsqlc.GetSessionRunByInvocationParams{SessionID: nativeTaskUUID(r.SessionID), InvocationID: "subagent:" + r.TaskID})
-	if err == nil {
+	switch {
+	case err == nil:
 		if actual.BotID.String() != r.BotID || (run != "" && actual.RunID.String() != run) {
 			return "unknown", errors.New("native task execution identity changed")
 		}
@@ -254,9 +257,9 @@ func (q *nativeTaskQueueHost) Finish(ctx context.Context, r dbstore.NativeTaskRe
 		if state != "completed" && state != "failed" && state != "aborted" {
 			state = "unknown"
 		}
-	} else if !errors.Is(err, pgx.ErrNoRows) {
+	case !errors.Is(err, pgx.ErrNoRows):
 		return state, err
-	} else if run != "" || state == "completed" {
+	case run != "" || state == "completed":
 		state = "unknown"
 	}
 	_, err = q.host.store.FinishNativeTask(ctx, dbsqlc.FinishNativeTaskParams{SourceRunID: nativeTaskUUID(r.SourceRunID), BotID: nativeTaskUUID(r.BotID), TaskKey: r.ID, ClaimToken: r.ClaimToken, TaskState: state, RunID: run})

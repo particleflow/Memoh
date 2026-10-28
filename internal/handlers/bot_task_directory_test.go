@@ -4,10 +4,13 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
@@ -15,7 +18,6 @@ import (
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/sessiontask"
-	"github.com/labstack/echo/v4"
 )
 
 type directoryHTTPFixture struct {
@@ -124,7 +126,7 @@ func TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess(t *testing.T) {
 			if detail {
 				path += "/native_agent/" + taskOp
 			}
-			req := httptest.NewRequest("GET", path, nil)
+			req := httptest.NewRequest(http.MethodGet, path, nil)
 			req.Header.Set("Authorization", "Bearer "+token)
 			rec := httptest.NewRecorder()
 			e.ServeHTTP(rec, req)

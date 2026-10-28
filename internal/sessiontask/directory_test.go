@@ -7,10 +7,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/felinics/memoh/internal/botdelegation"
 	thread "github.com/felinics/memoh/internal/chat/thread"
 	dbstore "github.com/felinics/memoh/internal/db/store"
-	"github.com/google/uuid"
 )
 
 type directoryFixture struct {
@@ -44,17 +45,20 @@ func (f *directoryFixture) ListBotTaskDirectoryCandidates(_ context.Context, q d
 	}
 	return out, nil
 }
+
 func (f *directoryFixture) DirectoryMetadata(_ context.Context, bot, user, session, id string) (botdelegation.View, error) {
 	if f.denied || bot != "bot" || user != "user" || session != f.root || id != f.handoff.ID {
 		return botdelegation.View{}, botdelegation.ErrDenied
 	}
 	return f.handoff, nil
 }
+
 func directorySetup() (*directoryFixture, *Service) {
 	f := &directoryFixture{fixture: newFixture()}
 	s := NewService(f, f, dirs{f.fixture}, f, "directory-test").WithDelegationDirectory(f)
 	return f, s
 }
+
 func (f *directoryFixture) native(id, state string, at time.Time) dbstore.BotTaskDirectoryCandidate {
 	run := uuid.NewString()
 	return dbstore.BotTaskDirectoryCandidate{Type: "native_agent", ID: id, RecordID: run, RunID: run, SessionID: f.child, SourceSessionID: f.root, SourceBotID: "bot", State: state, Name: "Same name", CreatedAt: at}
@@ -100,6 +104,7 @@ func TestDirectoryPreservesOriginalOccurrencesAndCursorScope(t *testing.T) {
 		t.Fatal("ancestor revocation ignored", err)
 	}
 }
+
 func TestDirectoryContinuesAfterAnEmptyFilteredScan(t *testing.T) {
 	f, s := directorySetup()
 	at := time.Now().Add(-time.Minute)
@@ -118,6 +123,7 @@ func TestDirectoryContinuesAfterAnEmptyFilteredScan(t *testing.T) {
 		t.Fatalf("continuation %+v %v", p, err)
 	}
 }
+
 func TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination(t *testing.T) {
 	f, s := directorySetup()
 	at := time.Now().Add(-time.Minute)
@@ -138,6 +144,7 @@ func TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination(t *testing
 		t.Fatalf("revoked/missing destination %+v %v", p, err)
 	}
 }
+
 func TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant(t *testing.T) {
 	f, s := directorySetup()
 	r := f.operations[f.op]

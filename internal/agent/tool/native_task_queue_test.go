@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sync"
+	"testing"
+	"time"
+
 	"github.com/felinics/memoh/internal/agent/background"
 	"github.com/felinics/memoh/internal/agent/toolexec"
 	thread "github.com/felinics/memoh/internal/chat/thread"
 	dbstore "github.com/felinics/memoh/internal/db/store"
-	"sync"
-	"testing"
-	"time"
 )
 
 type nativeQueueFixture struct {
@@ -30,6 +31,7 @@ func (f *nativeQueueFixture) Lookup(_ context.Context, _ SessionContext, call, h
 	}
 	return r, ok, nil
 }
+
 func (f *nativeQueueFixture) Enqueue(ctx context.Context, s SessionContext, call, agent, child string, cfg thread.SubagentConfig, msg, description string) (dbstore.NativeTaskReceipt, bool, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -45,6 +47,7 @@ func (f *nativeQueueFixture) Enqueue(ctx context.Context, s SessionContext, call
 	f.parent = s
 	return r, true, nil
 }
+
 func (f *nativeQueueFixture) Claim(_ context.Context, r dbstore.NativeTaskReceipt) (dbstore.NativeTaskReceipt, bool, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -57,6 +60,7 @@ func (f *nativeQueueFixture) Claim(_ context.Context, r dbstore.NativeTaskReceip
 	f.rows[r.CallID] = old
 	return old, true, nil
 }
+
 func (f *nativeQueueFixture) Finish(_ context.Context, r dbstore.NativeTaskReceipt, run, state string) (string, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -68,6 +72,7 @@ func (f *nativeQueueFixture) Finish(_ context.Context, r dbstore.NativeTaskRecei
 	f.rows[r.CallID] = r
 	return state, nil
 }
+
 func (f *nativeQueueFixture) Reject(_ context.Context, r dbstore.NativeTaskReceipt) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -75,6 +80,7 @@ func (f *nativeQueueFixture) Reject(_ context.Context, r dbstore.NativeTaskRecei
 	f.rows[r.CallID] = r
 	return nil
 }
+
 func (f *nativeQueueFixture) Pending(context.Context) ([]dbstore.NativeTaskReceipt, error) {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -86,6 +92,7 @@ func (f *nativeQueueFixture) Pending(context.Context) ([]dbstore.NativeTaskRecei
 	}
 	return out, nil
 }
+
 func (f *nativeQueueFixture) RestoreSession(ctx context.Context, _ dbstore.NativeTaskReceipt) (context.Context, SessionContext, error) {
 	return ctx, f.parent, nil
 }
