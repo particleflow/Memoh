@@ -8,7 +8,9 @@ cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 test_log=$(mktemp)
 trap 'rm -f "$test_log"' EXIT
 
-go test -json -race -tags=integration -count=1 -timeout 90s \
+# The unchanged aggregate has passed at 82s and exhausted 90s after 13 passes;
+# retain every contract with bounded headroom for PostgreSQL fixture I/O.
+go test -json -race -tags=integration -count=1 -timeout 180s \
   -run '^Test(Computer(OperationsMigrationAndDurableIsolation|Admission.*)|NativeHerdr.*|NativeProducerCLIUsesPinnedDirectoryPairAndRecoversUnknownCommit|NativeRuntimeCutoverStopsLegacyAutomaticOAuthPaths)$' ./internal/db | tee "$test_log"
 
 # Keep the same-operation dispatch transaction checks in a separate bounded
