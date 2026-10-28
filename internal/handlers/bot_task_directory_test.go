@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http/httptest"
 	"strings"
@@ -10,13 +11,30 @@ import (
 
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
+	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/server"
 	"github.com/felinics/memoh/internal/sessiontask"
 	"github.com/labstack/echo/v4"
 )
 
-type directoryHTTPFixture struct{ *taskHTTPFixture }
+type directoryHTTPFixture struct {
+	*taskHTTPFixture
+	permissionReadError bool
+	denyDuringRead      bool
+}
+
+func (f directoryHTTPFixture) ListBotUserGrantsForUser(ctx context.Context, p sqlc.ListBotUserGrantsForUserParams) ([]sqlc.ListBotUserGrantsForUserRow, error) {
+	if f.reads > 0 {
+		if f.permissionReadError {
+			return nil, errors.New("SECRET permission storage unavailable")
+		}
+		if f.denyDuringRead {
+			return nil, nil
+		}
+	}
+	return f.taskHTTPFixture.ListBotUserGrantsForUser(ctx, p)
+}
 
 func (f directoryHTTPFixture) ListBotTaskDirectoryCandidates(_ context.Context, q dbstore.SessionTaskFilter) ([]dbstore.BotTaskDirectoryCandidate, error) {
 	f.reads++
@@ -27,7 +45,7 @@ func (f directoryHTTPFixture) ListBotTaskDirectoryCandidates(_ context.Context, 
 }
 
 func TestBotTaskDirectoryHTTPAccountRevocationAndNoStore(t *testing.T) {
-	f := directoryHTTPFixture{&taskHTTPFixture{chat: true}}
+	f := directoryHTTPFixture{taskHTTPFixture: &taskHTTPFixture{chat: true}}
 	h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, nil, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
 	e := echo.New()
 	e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
@@ -86,5 +104,43 @@ func TestBotTaskDirectoryHTTPAccountRevocationAndNoStore(t *testing.T) {
 	}
 	if f.reads != reads || f.relayCalls != 0 {
 		t.Fatal("revocation read or runtime dispatch")
+	}
+}
+
+func TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess(t *testing.T) {
+	for _, detail := range []bool{false, true} {
+		for _, failed := range []bool{false, true} {
+			f := directoryHTTPFixture{taskHTTPFixture: &taskHTTPFixture{chat: true}, permissionReadError: failed, denyDuringRead: !failed}
+			h := NewSessionTaskHandler(sessiontask.NewService(f, f, taskHTTPWorkdirs{}, nil, "test-secret"), bots.NewService(nil, f), newTestAdminAccountService("user"), nil)
+			e := echo.New()
+			e.HTTPErrorHandler = server.NewHTTPErrorHandler(slog.Default())
+			e.Use(auth.JWTMiddleware("test-secret", func(echo.Context) bool { return false }))
+			h.Register(e)
+			token, _, err := auth.GenerateToken(taskUser, "test-secret", time.Minute)
+			if err != nil {
+				t.Fatal(err)
+			}
+			path := "/bots/" + taskBot + "/tasks"
+			if detail {
+				path += "/native_agent/" + taskOp
+			}
+			req := httptest.NewRequest("GET", path, nil)
+			req.Header.Set("Authorization", "Bearer "+token)
+			rec := httptest.NewRecorder()
+			e.ServeHTTP(rec, req)
+			want := 200
+			if detail {
+				want = 404
+			}
+			if failed {
+				want = 500
+			}
+			if rec.Code != want || strings.Contains(rec.Body.String(), "SECRET") {
+				t.Fatalf("detail=%v failed=%v: %d %s", detail, failed, rec.Code, rec.Body.String())
+			}
+			if !failed && !detail && !strings.Contains(rec.Body.String(), `"items":[]`) {
+				t.Fatal(rec.Body.String())
+			}
+		}
 	}
 }

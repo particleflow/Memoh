@@ -51,7 +51,25 @@ type DirectoryPage struct {
 	NextCursor string          `json:"next_cursor,omitempty"`
 }
 
-func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbstore.BotTaskDirectoryCandidate, readable func(thread.Thread) bool, schedules bool) (DirectoryTask, error) {
+// Preserve read failures separately from a confirmed access denial. The shared
+// activity traversal has a boolean visibility port, so retain its first error.
+func (s *Service) directoryPath(ctx context.Context, bot, id string, readable func(thread.Thread) (bool, error)) ([]thread.Thread, error) {
+	var readErr error
+	path, err := s.activityPath(ctx, bot, id, func(row thread.Thread) bool {
+		if readErr != nil {
+			return false
+		}
+		var allowed bool
+		allowed, readErr = readable(row)
+		return allowed && readErr == nil
+	})
+	if readErr != nil {
+		return nil, readErr
+	}
+	return path, err
+}
+
+func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbstore.BotTaskDirectoryCandidate, readable func(thread.Thread) (bool, error), schedules bool) (DirectoryTask, error) {
 	item := DirectoryTask{TaskType: row.Type, TaskID: row.ID, RecordID: row.RecordID, Name: row.Name, State: row.State, CreatedAt: row.CreatedAt}
 	if !directoryKind(row.Type) || row.ID == "" || row.RecordID == "" {
 		return item, ErrUnavailable
@@ -73,12 +91,12 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 		if v.ID != row.ID || (row.SourceBotID != bot && v.TargetBotID != bot) {
 			return item, ErrUnavailable
 		}
-		if _, err := s.activityPath(ctx, row.SourceBotID, row.SourceSessionID, readable); err != nil {
+		if _, err := s.directoryPath(ctx, row.SourceBotID, row.SourceSessionID, readable); err != nil {
 			return item, err
 		}
 		item.State = v.State
 		if v.TargetSessionID != "" {
-			path, err := s.activityPath(ctx, v.TargetBotID, v.TargetSessionID, readable)
+			path, err := s.directoryPath(ctx, v.TargetBotID, v.TargetSessionID, readable)
 			if err != nil {
 				return item, err
 			}
@@ -99,7 +117,7 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 			return item, nil
 		}
 	}
-	path, err := s.activityPath(ctx, bot, row.SessionID, readable)
+	path, err := s.directoryPath(ctx, bot, row.SessionID, readable)
 	if err != nil {
 		// Managers may retain schedule-log facts after history deletion, but
 		// there is no navigable session to expose. Other errors are not success.
@@ -129,7 +147,7 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 
 // ListDirectory scans all persisted task occurrences, including terminal and
 // unknown states. The bound is per page, never a cap on historical discovery.
-func (s *Service) ListDirectory(ctx context.Context, bot, user string, limit int, raw string, readable func(thread.Thread) bool, schedules bool) (DirectoryPage, error) {
+func (s *Service) ListDirectory(ctx context.Context, bot, user string, limit int, raw string, readable func(thread.Thread) (bool, error), schedules bool) (DirectoryPage, error) {
 	page := DirectoryPage{Items: []DirectoryTask{}}
 	if limit < 1 || limit > 100 {
 		return page, ErrCursor
@@ -164,7 +182,7 @@ func (s *Service) ListDirectory(ctx context.Context, bot, user string, limit int
 	return page, nil
 }
 
-func (s *Service) GetDirectoryTask(ctx context.Context, bot, user, kind, recordID string, readable func(thread.Thread) bool, schedules bool) (DirectoryTask, error) {
+func (s *Service) GetDirectoryTask(ctx context.Context, bot, user, kind, recordID string, readable func(thread.Thread) (bool, error), schedules bool) (DirectoryTask, error) {
 	if !directoryKind(kind) {
 		return DirectoryTask{}, ErrUnavailable
 	}

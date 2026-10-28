@@ -59,7 +59,7 @@ func (f *directoryFixture) native(id, state string, at time.Time) dbstore.BotTas
 	run := uuid.NewString()
 	return dbstore.BotTaskDirectoryCandidate{Type: "native_agent", ID: id, RecordID: run, RunID: run, SessionID: f.child, SourceSessionID: f.root, SourceBotID: "bot", State: state, Name: "Same name", CreatedAt: at}
 }
-func owner(s thread.Thread) bool { return s.CreatedByUserID == "user" }
+func owner(s thread.Thread) (bool, error) { return s.CreatedByUserID == "user", nil }
 func TestDirectoryPreservesOriginalOccurrencesAndCursorScope(t *testing.T) {
 	f, s := directorySetup()
 	at := time.Now().Add(-time.Minute)
