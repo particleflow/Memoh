@@ -1,6 +1,6 @@
 # Bot contact and task execution contract
 
-Status: first local result-origin slice, incomplete. Base commit:
+Status: local result-origin and contact-navigation slices, incomplete. Base commit:
 `a0a821a4cdaa32121a945d04e80c76bba4b6f2b4`. No production deployment,
 model configuration, migration, package signing or paid model invocation.
 
@@ -121,14 +121,49 @@ background-result natural reply UI flow is **not verified**, and this slice is
 not ready for integration or production acceptance. A scripted loopback provider
 was prepared but did not receive a model request.
 
-Still unimplemented: contact/default/layout precedence, durable self-background
-admission integration, the complete Bot task directory, and unknown-state
+Still unimplemented: durable self-background admission integration,
+the complete Bot task directory, and unknown-state
 notification/reconciliation. Current unknown results remain persisted and are
 not automatically redispatched, but their existing no-notification gap remains.
 These are implementation gaps, not tasks completed by this origin fix.
 
-Next turn: use the same dedicated task with the parent-authorized Astra/high
-review. Audit this slice's architecture, dual-Bot authority, history/queue/resume
-compatibility and remaining task sources before expanding or combining versions.
+Continue in the same dedicated task. The parent reports configuring Astra/high;
+the worker cannot independently inspect the serving model, which is not a
+product-work prerequisite. Audit the result slice's architecture, dual-Bot
+authority, history/queue/resume compatibility and remaining task sources before
+combining versions.
 The unified line owns composition only after a fixed, independently reviewed
 module handoff. No field work is assigned to this owner.
+
+## Implemented slice: primary contact navigation
+
+A plain Bot route now resolves the account's server-owned contact even when the
+stored Bot already matches. Initial route intent takes priority over persisted
+task or draft focus. Explicit task/history URLs keep their exact original session;
+malformed session parameters fail closed. Primary contact navigation calls the
+existing resolve endpoint directly, without adopting even a unique historical
+candidate. The explicit historical binding APIs remain unchanged.
+
+While a contact entrance is pending, layout restoration keeps its panels but
+cannot replace global selection, and an empty layout cannot create a fallback
+draft that cancels contact navigation. Once the contact panel opens, ordinary
+manual task-tab selection works again. A later user selection invalidates an
+outstanding contact response. The page masks stale task content during contact
+resolution and shows errors instead of displaying that task under a failed
+primary entrance. No schema, runtime/core or backend authority changes.
+
+Differential checks against 27d2352f reproduce six failing assertions covering
+same-Bot entry, restored task/draft priority, layout overwrite and automatic
+history adoption. The changed frontend has 134 directed contact/navigation/dock
+tests and 151 adjacent store/navigation tests passing, plus Web typechecking.
+The neighboring legacy-server fixture now marks both contact endpoints absent;
+the not-found page fixture stubs the already-existing contact dialog.
+
+Real Chromium at `http://127.0.0.1:28082/bot/local-worker`, against the existing
+isolated schema179 database and actual Server/Web, verified: explicit delegated
+execution history; clicking the same Bot returns to its existing contact; the
+task tab survives and remains readable; cold plain-Bot reload overrides saved
+task focus; task deep links and reload retain the original execution; a 390px
+browser uses the same contact identity. Inspected screenshots and
+`contact-ui-evidence.json` preserve these observations. No model call was made.
+The narrow-browser check is not native mobile or production acceptance.

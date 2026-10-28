@@ -2,12 +2,12 @@
   <div class="flex h-full overflow-hidden">
     <ChatWorkspace
       v-if="currentBotId"
-      v-show="!historyError && !historyLoading"
+      v-show="!historyError && !historyLoading && !chatStore.contactNavigationPending"
     />
     <ContactChoiceDialog />
     <PanePlaceholder
-      v-if="historyError || historyLoading"
-      :title="historyLoading ? t('common.loading') : historyError"
+      v-if="historyError || historyLoading || chatStore.contactNavigationPending"
+      :title="historyError || t('common.loading')"
     />
     <div
       v-else-if="!currentBotId"
@@ -185,6 +185,11 @@ async function syncStoreFromUrl(rawName: string) {
   const requestedRoute = route.fullPath
   historyError.value = ''
   historyLoading.value = !!route.query.session
+  if (route.query.session !== undefined && (typeof route.query.session !== 'string' || !route.query.session.trim())) {
+    historyLoading.value = false
+    historyError.value = t('chat.contact.historyFailed')
+    return
+  }
   if (!urlName) {
     if (route.query.session) {
       historyLoading.value = false
@@ -194,6 +199,8 @@ async function syncStoreFromUrl(rawName: string) {
     missingBotName.value = ''
     if (!currentBotId.value) {
       await chatStore.initializeWithRecovery()
+    } else {
+      await chatStore.selectBot(currentBotId.value)
     }
     await maybeStartExternalAgentSession()
     return
@@ -251,7 +258,7 @@ async function syncStoreFromUrl(rawName: string) {
     } finally {
       if (request === historyRequest) historyLoading.value = false
     }
-  } else if (resolvedId !== (currentBotId.value ?? '').trim()) {
+  } else {
     suppressUrlSync = true
     try {
       await chatStore.selectBot(resolvedId)
@@ -286,7 +293,13 @@ watch(
     if (prevName !== undefined && !CHAT_ROUTE_NAMES.has(prevName)) {
       void chatStore.refreshBots()
     }
-    void syncStoreFromUrl((paramBotName as string) ?? '').catch(error => toast.error(resolveApiErrorMessage(error, t('chat.contact.failed'))))
+    const requestedRoute = route.fullPath
+    void syncStoreFromUrl((paramBotName as string) ?? '').catch(error => {
+      if (route.fullPath !== requestedRoute) return
+      historyLoading.value = false
+      historyError.value = resolveApiErrorMessage(error, t('chat.contact.failed'))
+      toast.error(historyError.value)
+    })
   },
   { immediate: true },
 )
@@ -323,6 +336,7 @@ watch(
     if (chatStore.contactOpenRequested !== request || currentBotId.value !== request.botId || route.query.session) return
     openedContactRequest = request
     workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false })
+    chatStore.completeContactOpen(request)
   },
   { immediate: true },
 )

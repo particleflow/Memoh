@@ -1058,6 +1058,9 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
   function alignSelectionWithDock() {
     const dock = api.value
     if (!dock) return
+    // Preserve the restored panels, but let an explicit Bot entrance open its
+    // contact before layout focus can write a task back into global selection.
+    if (chatStore.contactNavigationPending || chatStore.contactOpenRequested) return
     const sid = (chatStore.sessionId ?? '').trim()
     const explicitSelection = chatStore.hasExplicitSessionSelection === true
     // A non-explicit pick may still be overridden by the default External
@@ -1172,7 +1175,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
   // ephemeral slot, so firing while a file/preview tab is open would evict it.
   function ensureDraftChatPanel() {
     const dock = api.value
-    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats || chatStore.contactChoice) return
+    if (!dock || suppressPersist || draftChatQueued || chatStore.loadingChats || chatStore.contactChoice || chatStore.contactNavigationPending || chatStore.contactOpenRequested) return
     if (dock.panels.length > 0) return
     if (!(currentBotId.value ?? '').trim()) return
 
@@ -1180,7 +1183,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     void nextTick(() => {
       draftChatQueued = false
       const latestDock = api.value
-      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats || chatStore.contactChoice) return
+      if (!latestDock || suppressPersist || latestDock.panels.length > 0 || chatStore.loadingChats || chatStore.contactChoice || chatStore.contactNavigationPending || chatStore.contactOpenRequested) return
       if (!(currentBotId.value ?? '').trim()) return
       // Only an EXPLICIT selection may refill as that session. initialize()'s
       // auto-pick leaves a non-explicit sessionId even when we refused to open

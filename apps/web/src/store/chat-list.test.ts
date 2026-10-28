@@ -318,6 +318,7 @@ beforeEach(() => {
     // Existing store cases exercise compatibility with pre-contact servers;
     // the contact-aware navigation contract has its own directed suite.
     api.inspectPrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })
+    api.resolvePrivateChat.mockRejectedValue({ status: 404, code: 'http.not_found' })
     api.fetchSession.mockResolvedValue({
       id: 'session-unknown',
       bot_id: 'bot-1',

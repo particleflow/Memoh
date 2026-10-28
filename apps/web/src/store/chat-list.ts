@@ -1,4 +1,5 @@
 import { routerKey } from 'vue-router'
+import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, hasInjectionContext, inject, onScopeDispose, ref } from 'vue'
 import { toast } from '@felinic/ui'
@@ -49,6 +50,7 @@ export type { FsChangeBatch, FsChangeEvent, FsToolKind } from './chat/fs-beacon'
 export type { ChatViewEntry, ChatViewTarget } from './chat/view-registry'
 
 export const useChatStore = defineStore('chat', () => {
+  const router = hasInjectionContext() ? inject(routerKey, null) : null
   const selectionStore = useChatSelectionStore()
   const workdirsStore = useWorkdirsStore()
   const { currentBotId, sessionId, draftIntent, explicitSelection: explicitSessionSelection } = storeToRefs(selectionStore)
@@ -403,7 +405,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const {
-    loadingChats, contactChoice, contactBusy, contactOpenRequested,
+    loadingChats, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
     openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     initialize,
     selectBot,
@@ -412,7 +414,8 @@ export const useChatStore = defineStore('chat', () => {
     selectDraft,
     reset: resetBootstrap,
   } = createChatBootstrap({
-    hasHistoryEntry: (() => { const router = hasInjectionContext() ? inject(routerKey, null) : null; return () => !!router?.currentRoute.value.query.session })(),
+    hasHistoryEntry: () => !!router?.currentRoute.value.query.session,
+    hasContactEntry: () => !!router && CHAT_ROUTE_NAMES.has(router.currentRoute.value.name as string) && !router.currentRoute.value.query.session,
     currentBotId,
     sessionId,
     draftIntent,
@@ -597,7 +600,7 @@ export const useChatStore = defineStore('chat', () => {
     pendingExternalAgentMatchesInput,
     sessionId, hasExplicitSessionSelection, currentBotId, bots,
     activeChatTarget, isSessionStreaming,
-    contactChoice, contactBusy, contactOpenRequested,
+    contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
     openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     loadingChats, loadingMessages, loadingOlder, hasMoreOlder,
     // Exposed for tests only — do not branch on this in components. The
