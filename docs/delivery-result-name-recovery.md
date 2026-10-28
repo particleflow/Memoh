@@ -79,12 +79,67 @@ already ready but the original ledger has no cached ready proof. That GET can
 CAS-update the original ledger/operation without issuing Create, Commit or
 Resolve. Uploading receipts and already-cached ready proofs were observed to
 leave those rows unchanged. Thus **GET-only is not universally PostgreSQL
-write-free**. The current CLI's `recovery_scope: read_only` output must not be
-used as evidence of a read-only server transaction. This test-only follow-up
-does not change that product label or the established ready-proof recovery
-semantics. A requirement for zero server writes even in the cold-ready gap
-remains an explicit integration decision; do not silently remove the normal
-ready-proof repair or add an alternate protocol to claim it is solved.
+write-free**. The misleading CLI `recovery_scope: read_only` value from 3ca/8db
+has been replaced with the explicit status below. Existing ready-proof recovery
+semantics are unchanged; no alternate GET, permission or protocol is introduced.
+
+### Receipt observation status and compatibility
+
+The existing `recover-result` CLI receipt branch emits:
+
+```json
+{"state":"receipt_observed","recovery_scope":"receipt_get_only","server_effects":"ready_proof_may_be_recorded"}
+```
+
+| Field | Meaning |
+| --- | --- |
+| `state: receipt_observed` | The original receipt GET succeeded; not proof of upload/association completion. This value is unchanged. |
+| `recovery_scope: receipt_get_only` | This client made only the guarded receipt GET, without a client mutation request or producer feedback write. Replaces `read_only`. |
+| `server_effects: ready_proof_may_be_recorded` | The existing handler can record the original ready proof. This reports a possibility, not an observed write or a committed delivery. |
+
+The same status is emitted for cold-ready and cached-proof reads: the existing
+HTTP response does not reveal whether the handler recorded a proof. The client
+must not infer a zero-write transaction, or an actual write, from that response.
+Missing/unknown/conflicting bindings still stop before GET, and blocked output
+does not contain the receipt-observation scope or server-effects fields.
+
+Consumer inspection at the 8db checkout found the product field's sole writer
+in `cmd/transferqueue/main.go` and no repository parser, schema or caller that
+branches on `recovery_scope` or `receipt_observed`. The official project owner
+route in `RecoverBatchDelivery` redirects this CLI stdout to `/dev/null`; task
+delivery still uses existing feedback and the committed NAS ledger. This is a
+real product status correction, not just a test-description edit. Web, SDK and
+Harmony interfaces do not change. No repository consumer migration is needed.
+
+External scripts are not covered by that repository audit. A script strictly
+matching the old `read_only` enum must accept the new `receipt_get_only` value
+and optional `server_effects` field; unknown values must never authorize a
+transfer or imply server immutability. The old misleading value is not retained
+as an alias. Old binary output and historical logs remain unchanged; use the
+updated producer binary to obtain the corrected status. The state name,
+source_ref, delivery ID, completion evidence, HostBinding, roots, journal v6 and
+HTTP file/receipt contract are unchanged. No new network query path is used.
+
+The new isolated `cli_cold_ready_and_cached_proof_report_get_scope` subtest
+builds only the changed production CLI once and invokes real child processes
+against the existing real PG/registry/handler fixture. In both phases stdout
+has the corrected two-part scope; receipt GET=1, client mutations=0, and private
+journal/Media bytes are unchanged. Cold-ready records the original PG proof;
+the subsequent cached-proof read leaves the PG rows/row versions unchanged.
+The same original ID/hash/size/receipt is retained. A missing-binding invocation
+returns `recovery_blocked`, omits observation labels, and performs HTTP=0 with
+unchanged PG rows and journal. This is not a Windows or field acceptance claim.
+The selected new subtest passed with `-race` and no skips using the actual
+changed CLI (one build, three child invocations). Prior 8db cases and the 6+3
+matrix were not rerun for this output-only correction.
+
+Run only that new difference, reusing the prior 8db and 6+3 evidence:
+
+```sh
+go test -race -tags=integration ./internal/db \
+  -run '^TestResultRecoveryReceiptPostgresHandlerBoundary$/^cli_cold_ready_and_cached_proof_report_get_scope$' \
+  -count=1 -timeout 120s -v
+```
 
 1. **Reconcile unknown results first.** Read the original operation and validated
    completion normally, then the private journal, exact manifest and any known
@@ -234,7 +289,7 @@ go test -race -tags=integration ./internal/db \
   -run '^TestResultRecoveryReceiptPostgresHandlerBoundary$' -count=1 -timeout 120s -v
 ```
 
-Observed result: the parent test and all four subtests passed with `-race`, no
+Observed result at 8db: the parent test and all four subtests passed with `-race`, no
 skips, test elapsed 4.50 seconds (package elapsed 5.580 seconds). Account and
 credential revocation both returned 401 without receipt metadata or row/journal
 updates. This is isolated PG/handler evidence, not deployed NAS acceptance.

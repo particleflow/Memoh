@@ -132,8 +132,10 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 			return 1
 		}
 		if observation.ReceiptObserved != nil {
-			// No feedback write: this mode is strictly receipt readback only.
-			return writeFixed(output, `{"state":"receipt_observed","recovery_scope":"read_only"}`)
+			// No client mutation or feedback write. The existing GET handler may
+			// still persist the original ready proof; its response cannot tell us
+			// whether that happened, so never promise a write-free server read.
+			return writeFixed(output, `{"state":"receipt_observed","recovery_scope":"receipt_get_only","server_effects":"ready_proof_may_be_recorded"}`)
 		}
 		return writeStatus(output, observation.Queue, "", publish(observation.Queue), nil)
 	}

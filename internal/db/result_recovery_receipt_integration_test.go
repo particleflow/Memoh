@@ -9,12 +9,14 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -133,14 +135,20 @@ func TestResultRecoveryReceiptPostgresHandlerBoundary(t *testing.T) {
 		}
 	}
 	type task struct {
-		op      dbstore.ComputerOperationRecord
-		request deliverymeta.ResultRecovery
-		getenv  func(string) string
-		state   string
-		queue   transferclient.QueueStatus
+		op       dbstore.ComputerOperationRecord
+		request  deliverymeta.ResultRecovery
+		getenv   func(string) string
+		state    string
+		queue    transferclient.QueueStatus
+		revision string
+		limits   transferclient.QueueLimits
 	}
-	newTask := func(t *testing.T) task {
+	newTask := func(t *testing.T, revisions ...string) task {
 		t.Helper()
+		revision, queueLimits := "fixture", limits
+		if len(revisions) != 0 {
+			revision, queueLimits = revisions[0], transferclient.DefaultHostQueueLimits()
+		}
 		dir := t.TempDir()
 		config, state, source := filepath.Join(dir, "config"), filepath.Join(dir, "state"), filepath.Join(dir, "source")
 		for _, path := range []string{config, state, source} {
@@ -197,11 +205,11 @@ func TestResultRecoveryReceiptPostgresHandlerBoundary(t *testing.T) {
 			}
 			return ""
 		}
-		registered, err := transferclient.RecoverResultSource(ctx, getenv, "fixture", limits, request, https.Client())
+		registered, err := transferclient.RecoverResultSource(ctx, getenv, revision, queueLimits, request, https.Client())
 		if err != nil || registered.Queue.Version != 6 {
 			t.Fatal("original-ID journal v6", err)
 		}
-		return task{op, request, getenv, state, registered.Queue}
+		return task{op: op, request: request, getenv: getenv, state: state, queue: registered.Queue, revision: revision, limits: queueLimits}
 	}
 	projection := func(t *testing.T, item task) deliverymeta.ResultRecovery {
 		t.Helper()
@@ -391,6 +399,99 @@ func TestResultRecoveryReceiptPostgresHandlerBoundary(t *testing.T) {
 			t.Fatal("control issued a mutation request or touched journal")
 		}
 		t.Log("negative control: direct receipt GET=1 HTTP=403 yet actual PG creates reserved ledger row and changes operation revision/xmin; no Create/Commit/Resolve; recovery cases must stop before this GET")
+	})
+	t.Run("cli_cold_ready_and_cached_proof_report_get_scope", func(t *testing.T) {
+		item := newTask(t, "native-profile-v1")
+		created, err := transferclient.InvokeConfiguredHerdr(ctx, item.getenv, item.revision, item.limits, transferclient.ConfiguredAction{Kind: "advance", DeliveryID: item.queue.Job.DeliveryID}, https.Client(), time.Now())
+		if err != nil || created.Job.ReceiptID == "" || created.Version != 6 {
+			t.Fatal("original real handler receipt setup", err)
+		}
+		request := projection(t, item)
+		if request.RemoteOutcome != "existing" || request.KnownReceipt != created.Job.ReceiptID {
+			t.Fatal("original receipt not bound")
+		}
+		if _, err := assets.Uploads().Append(ctx, f.owner, f.bot, request.KnownReceipt, 0, int64(len(data)), request.SHA256, bytes.NewReader(data)); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := assets.Uploads().Complete(ctx, f.owner, f.bot, request.KnownReceipt); err != nil {
+			t.Fatal(err)
+		}
+		// Build only this changed CLI, once; run it against the real PG/handler
+		// fixture. No image/distribution build or old test matrix is repeated.
+		binary := filepath.Join(t.TempDir(), "transferqueue")
+		build := exec.CommandContext(ctx, "go", "build", "-buildvcs=false", "-o", binary, "../../cmd/transferqueue") //nolint:gosec // Fixed current source and isolated test output.
+		if out, err := build.CombinedOutput(); err != nil {
+			t.Fatalf("changed CLI build: %v %s", err, out)
+		}
+		certificate := filepath.Join(t.TempDir(), "synthetic-ca.pem")
+		write(certificate, pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: https.Certificate().Raw}))
+		invoke := func(input deliverymeta.ResultRecovery, wantExit int) map[string]string {
+			t.Helper()
+			raw, _ := json.Marshal(input)
+			cmd := exec.CommandContext(ctx, binary, "-action", "recover-result") //nolint:gosec // Built local CLI and fixed explicit entry.
+			cmd.Env = append(os.Environ(), "HERDR_PLUGIN_CONFIG_DIR="+item.getenv("HERDR_PLUGIN_CONFIG_DIR"), "HERDR_PLUGIN_STATE_DIR="+item.state, "SSL_CERT_FILE="+certificate)
+			cmd.Stdin = bytes.NewReader(raw)
+			var stdout, stderr bytes.Buffer
+			cmd.Stdout, cmd.Stderr = &stdout, &stderr
+			err := cmd.Run()
+			exit := 0
+			if err != nil {
+				var exited *exec.ExitError
+				if !errors.As(err, &exited) {
+					t.Fatal(err)
+				}
+				exit = exited.ExitCode()
+			}
+			for _, private := range []string{verifier.token, item.request.PhysicalName, item.state, https.URL} {
+				if bytes.Contains(stdout.Bytes(), []byte(private)) || bytes.Contains(stderr.Bytes(), []byte(private)) {
+					t.Fatal("CLI status exposed private fixture metadata")
+				}
+			}
+			var output map[string]string
+			if exit != wantExit || stderr.Len() != 0 || json.Unmarshal(stdout.Bytes(), &output) != nil {
+				t.Fatal("CLI status/exit", exit, stdout.String(), stderr.String())
+			}
+			return output
+		}
+		for _, phase := range []string{"cold-ready", "cached-proof"} {
+			before := snapshot(t, item)
+			queueBefore := nativeProducerTreeDigest(t, item.state)
+			mediaBefore := nativeProducerTreeDigest(t, originals)
+			oldCalls, oldGets, oldMutations := calls.Load(), gets.Load(), mutations.Load()
+			output := invoke(request, 0)
+			if output["state"] != "receipt_observed" || output["recovery_scope"] != "receipt_get_only" || output["server_effects"] != "ready_proof_may_be_recorded" {
+				t.Fatal("CLI claimed server read-only or omitted possible proof write", output)
+			}
+			changed := snapshot(t, item) != before
+			if changed != (phase == "cold-ready") || calls.Load()-oldCalls != 1 || gets.Load()-oldGets != 1 || mutations.Load() != oldMutations || !reflect.DeepEqual(queueBefore, nativeProducerTreeDigest(t, item.state)) || !reflect.DeepEqual(mediaBefore, nativeProducerTreeDigest(t, originals)) {
+				t.Fatal("scope label does not match measured client/server effects", phase)
+			}
+			entry, err := store.ReadComputerDeliveryEntry(ctx, item.op, item.queue.Job.DeliveryID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var bound struct {
+				Transfer struct {
+					UploadID string        `json:"upload_id"`
+					Ready    *media.Upload `json:"ready"`
+				} `json:"transfer"`
+			}
+			if json.Unmarshal(entry.Data, &bound) != nil || bound.Transfer.UploadID != request.KnownReceipt || bound.Transfer.Ready == nil || bound.Transfer.Ready.ContentHash != request.SHA256 || bound.Transfer.Ready.SizeBytes != request.SizeBytes {
+				t.Fatal("original ready proof/receipt lost")
+			}
+			t.Logf("actual CLI %s: receipt_get_only + ready_proof_may_be_recorded; GET=1 client mutations=0; PG proof changed=%t; original id/proof/journal v6 unchanged", phase, changed)
+		}
+		// New status is emitted only after the existing gate. A missing binding
+		// cannot obtain this observation or trigger a GET under the new label.
+		absent := request
+		absent.RemoteOutcome, absent.KnownReceipt = "absent", ""
+		before := snapshot(t, item)
+		queueBefore := nativeProducerTreeDigest(t, item.state)
+		oldCalls := calls.Load()
+		output := invoke(absent, 1)
+		if output["state"] != "recovery_blocked" || output["recovery_scope"] != "" || output["server_effects"] != "" || calls.Load() != oldCalls || snapshot(t, item) != before || !reflect.DeepEqual(queueBefore, nativeProducerTreeDigest(t, item.state)) {
+			t.Fatal("status correction bypassed original binding gate")
+		}
 	})
 	t.Run("existing_and_conflicting_receipt_and_revocation", func(t *testing.T) {
 		item := newTask(t)
