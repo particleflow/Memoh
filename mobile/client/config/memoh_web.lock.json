@@ -407,6 +407,7 @@
       "local": "shared-files-multiple-changes.json",
       "sha256": "ec6aa4e0cf9582301673b0c69046d35c351b9e5d5d6de3644831ef372c5f2b63"
     },
-    "scope": "Ordinary Files picker multiple selection, existing bounded concurrency four, original-Bot batch binding. No alternate protocol, native save or directory read change."
+    "scope": "Ordinary Files picker multiple selection, existing bounded concurrency four, original-Bot batch binding. No alternate protocol, native save or directory read change.",
+    "unifiedCompatibleCommit": "565c0b4b3386d87d057234efe6828479d35fcee0"
   }
 }

@@ -1,0 +1,110 @@
+{
+  "versionName": "1.0.25",
+  "versionCode": 1000025,
+  "bundleName": "cloud.begonia.workassistant",
+  "hapName": "garnet-assistant-1.0.25-1000025-api26-release-unsigned.hap",
+  "hapBytes": 35669806,
+  "hapSHA256": "abba93e0984949ce9bb9bafd42638a353b2e27b4f27fcaffdebc60f5dec73006",
+  "sourceIdentitySHA256": "360f115e94f212334474d56ce19956bb49adc3289e2c883f9fa9b34c9e8372a4",
+  "formalInputs": 145,
+  "sdkVersion": "26.0.0.105",
+  "officialApi26Compile": true,
+  "crc": true,
+  "resourceDigests": true,
+  "identityPermissionsUnchanged": true,
+  "releaseMode": true,
+  "signed": false,
+  "publicConfigurationEmpty": true,
+  "publicConfigBytes": 8192,
+  "packageMemberCount": 817,
+  "featurePresence": {
+    "attachmentUnavailable": [
+      "resources/rawfile/client-web/assets/main-CmM3FUKj.js",
+      "resources/rawfile/client-web/assets/ja-DMJldZV0.js"
+    ],
+    "workspace-storage": [
+      "resources/rawfile/client-web/assets/settings-section-Cmq-iolC.js",
+      "resources/rawfile/client-web/assets/router-CucR-rF7.js",
+      "resources/rawfile/client-web/assets/sdk.gen-CjMAIsr9.js",
+      "resources/rawfile/source-build.json",
+      "ets/modules.abc"
+    ],
+    "__garnetImageTiming": [
+      "resources/rawfile/client-web/assets/chat-list-CyWEfETB.js",
+      "ets/modules.abc"
+    ],
+    "GarnetImageTiming:": [
+      "ets/modules.abc"
+    ],
+    "responseStart": [
+      "resources/rawfile/client-web/assets/chat-list-CyWEfETB.js",
+      "ets/modules.abc"
+    ],
+    "encodedBodySize": [
+      "resources/rawfile/client-web/assets/chat-list-CyWEfETB.js",
+      "ets/modules.abc"
+    ],
+    "transferSize": [
+      "resources/rawfile/client-web/assets/chat-list-CyWEfETB.js",
+      "ets/modules.abc"
+    ],
+    "resourceMatch": [
+      "resources/rawfile/client-web/assets/chat-list-CyWEfETB.js",
+      "ets/modules.abc"
+    ],
+    "/decisions/{decision_id}/recover": [
+      "resources/rawfile/client-web/assets/sdk.gen-CjMAIsr9.js"
+    ],
+    "original_run_id": [
+      "resources/rawfile/client-web/assets/main-CmM3FUKj.js"
+    ],
+    "recovery_run_id": [
+      "resources/rawfile/client-web/assets/main-CmM3FUKj.js"
+    ]
+  },
+  "explicitCredentialAndPrivateAuthorityScan": {
+    "members": 817,
+    "findings": [],
+    "arbitraryEncodingExhaustiveness": false
+  },
+  "reusedNativeUIEvidence": {
+    "source": "d213ee7842fc76527de712cd5b2d825a5697a613",
+    "previousDirectedTests": 55,
+    "attachmentImageTaskBaseline": 94,
+    "finalSingleControlTests": 19
+  },
+  "harmonyDeltaCommit": "d213ee7842fc76527de712cd5b2d825a5697a613",
+  "sharedUICommit": "2422db2011231d5a4e538aa0fd7b573d133cb350",
+  "contactStructureIncluded": true,
+  "unifiedCommit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "unifiedTree": "9c979d84f054452d9baeae579b110f0dd3ed9b4d",
+  "compatibleBackendCommit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "workspaceAPISharedCommit": "56b38d39fadda858963b36e597dcabd3a0fb0a1d",
+  "phoneProductAdaptations": 45,
+  "phoneTestAdaptations": 2,
+  "privateConfigurationInjected": false,
+  "executionRootCutover": false,
+  "arbitraryNASDirectoryAccess": false,
+  "physicalLAN": false,
+  "crossBotFieldAcceptance": false,
+  "ArkWebImagePerformanceMeasured": false,
+  "phoneAcceptance": false,
+  "productionRecoveryExecuted": false,
+  "SDKDownloaded": false,
+  "nativeInputsResumeFixed": true,
+  "nativeInputsResumeSharedCommit": "219a722da3b8e4a316164011dd106350dfab2c9e",
+  "crossBotNavigationFixed": true,
+  "crossBotNavigationSharedCommit": "45788bed060e73a6e5f9e183e927e4898689766f",
+  "inaccessibleAttachmentPresentationFixed": true,
+  "inaccessibleAttachmentSharedCommit": "dfd68e8058b2f982c877be0e36e402c7f2d0c163",
+  "reusedAttachmentCloudTests": 17,
+  "oldBrowserTestsKnownBaselineFailures": 3,
+  "pausedVoiceGuardReports": 4,
+  "ordinaryFilesMultiSelectFixed": true,
+  "ordinaryFilesSharedCommit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "reusedFilesPickerTests": 5,
+  "realBrowserThreeFileByteChecks": true,
+  "phoneNativeFilePickerVerified": false,
+  "fullSharedTreeIdentity": false,
+  "sharedArchiveCommit": "9bb6fc3d84387012b4e2f5daffcc95d81ece5db4"
+}

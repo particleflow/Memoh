@@ -1,0 +1,12 @@
+{
+  "versionName": "1.0.25",
+  "versionCode": 1000025,
+  "productSourceParent": "f67bbd9bc1318c2efbb1609bb5cc9069cf27cda7",
+  "compatibleUnifiedCommit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "unifiedTree": "9c979d84f054452d9baeae579b110f0dd3ed9b4d",
+  "scope": "Only F04 ordinary Files input and existing upload batch. Unrelated parent directory guard and voice changes excluded. Not whole-tree equality.",
+  "reusedDirectedTests": 5,
+  "reusedBrowserThreeFileByteChecks": true,
+  "SDKDownloadRequired": false,
+  "old124Preserved": true
+}

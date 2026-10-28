@@ -1,16 +1,16 @@
 # Garnet Assistant Harmony source
 
-The current source tree declares **1.0.24 / 1000024**. Its compatible backend
-is `7bf48c2cc6cfcd6f4c8b3812210cfbf44d3b2ac8`; the shared composer UI is
+The current source tree declares **1.0.25 / 1000025**. Its compatible backend
+is `565c0b4b3386d87d057234efe6828479d35fcee0`; the shared composer UI is
 `2422db2011231d5a4e538aa0fd7b573d133cb350`, with the original Harmony adaptations.
-The [1.0.24 build record](../docs/testing/harmony-unified-1.0.24/README.md)
+The [1.0.25 build record](../docs/testing/harmony-unified-1.0.25/README.md)
 records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
 
-Contact navigation, original history deep links and account-scoped Bot creation recovery are retained. The current build adds the scoped inaccessible-attachment presentation; the old 1.0.23 package remains separately preserved.
+Contact navigation, original history deep links and account-scoped Bot creation recovery are retained. The current build adds F04 ordinary Files multi-selection while retaining scoped inaccessible-attachment presentation; the old 1.0.24 package remains separately preserved.
 
-The [source manifest](SOURCE-PROVENANCE.json) records **171 reviewed entries**,
+The [source manifest](SOURCE-PROVENANCE.json) records **172 reviewed entries**,
 zero excluded source paths and 19 unidentified historical later edits. Those 19
 are an unresolved provenance boundary, not missing current build inputs and not
 permission to reconstruct the unavailable original Git snapshot. The original
