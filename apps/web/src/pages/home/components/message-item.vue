@@ -203,7 +203,15 @@
 
       <!-- Assistant blocks and the live process preview share one vertical rhythm. -->
       <div v-else>
-        <div class="[--chat-process-gap:0.85rem] space-y-[var(--chat-process-gap)]">
+        <div
+          class="chat-speech-bubble [--chat-process-gap:0.85rem] space-y-[var(--chat-process-gap)]"
+          :data-speech-state="speechStatus ?? 'idle'"
+        >
+          <span
+            v-if="speechStatus === 'playing'"
+            class="sr-only"
+            role="status"
+          >{{ t('chat.readAloud.playing') }}</span>
           <template
             v-for="node in renderNodes"
             :key="node.key"
@@ -358,6 +366,7 @@
           class="mt-2"
           role="assistant"
           :copy-text="assistantPlainText"
+          :on-replay="canReplaySpeech ? () => emit('replaySpeech') : undefined"
           :inline-actions="inlineActions"
           :time-label="calendarTimestamp"
           :full-time="fullTimestamp"
@@ -450,6 +459,7 @@ import { structuredToolResult } from '@/store/chat-list.normalize'
 import { runtimeGoalObjective } from '@/utils/runtime-slash-commands'
 import { provideNativeTaskResumeScope } from '../composables/native-task-resume-scope'
 import { withLiteralSingleDollars } from '@/utils/markdown-dollar'
+import { speechText, type SpeechStatus } from '../composables/chat-read-aloud'
 
 import { resolveUrl } from '../composables/useMediaGallery'
 import { useElementVisibility } from '@vueuse/core'
@@ -471,6 +481,7 @@ const emit = defineEmits<{
   active: [isActive: boolean, { id: string, top: number,  }]
   editMessage: [messageId: string, text: string, done: (started: boolean) => void]
   forkMessage: [turnId: string]
+  replaySpeech: []
 }>()
 
 const props = defineProps<{
@@ -496,8 +507,11 @@ const props = defineProps<{
   goalRuntime?: string
   isScrolling: boolean
   isLastMessage?: boolean
+  speechEnabled?: boolean
+  speechStatus?: SpeechStatus
 }>()
 
+const canReplaySpeech = computed(() => props.speechEnabled && !props.message.streaming && !!speechText(props.message))
 provideNativeTaskResumeScope(props)
 const recoveryToken = useLocalStorage('token', '')
 const recovery = useAcceptedUserInputRecovery(computed(() => ({ bot: props.botId || '', session: props.sessionId || '', run: props.recoveryOriginalRunId,

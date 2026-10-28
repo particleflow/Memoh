@@ -247,3 +247,9 @@ func (r *webSpeechModelResolver) ResolveSpeechModelID(ctx context.Context, botID
 	}
 	return s.TtsModelID, nil
 }
+
+func provideBotAudioHandler(log *slog.Logger, audioService *audiopkg.Service, settingsService *settings.Service, tempStore *audiopkg.TempStore, botService *bots.Service, accountService *accounts.Service) *handlers.BotAudioHandler {
+	h := handlers.NewBotAudioHandler(log, audioService, settingsService, tempStore)
+	h.SetPlaybackAccess(botService, accountService)
+	return h
+}

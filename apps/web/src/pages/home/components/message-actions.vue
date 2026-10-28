@@ -77,6 +77,23 @@
       </template>
 
       <template v-if="role === 'assistant'">
+        <Tooltip v-if="onReplay">
+          <TooltipTrigger as-child>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              :class="actionIconClass"
+              :aria-label="t('chat.readAloud.replay')"
+              @click="onReplay"
+            >
+              <Volume2 class="size-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {{ t('chat.readAloud.replay') }}
+          </TooltipContent>
+        </Tooltip>
         <Tooltip v-if="onRetry">
           <TooltipTrigger as-child>
             <Button
@@ -168,7 +185,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { PencilLine, RotateCcw } from 'lucide-vue-next'
+import { PencilLine, RotateCcw, Volume2 } from 'lucide-vue-next'
 import CopyActionButton from './copy-action-button.vue'
 import ForkSplitIcon from './fork-split-icon.vue'
 import DotsIcon from './dots-icon.vue'
@@ -197,6 +214,7 @@ const props = defineProps<{
   onRetry?: () => void
   onEdit?: () => void
   onFork?: () => void
+  onReplay?: () => void
 }>()
 
 const { t } = useI18n()

@@ -1,0 +1,31 @@
+REQUESTFAILED http://127.0.0.1:18082/api/bots/10000000-0000-4000-8000-000000000001/tts/playback net::ERR_ABORTED
+{
+  "synthetic": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "第2段合成回复：朗读时只有当前气泡的边缘呼吸环绕。"
+    },
+    {
+      "text": "第2段合成回复：朗读时只有当前气泡的边缘呼吸环绕。"
+    },
+    {
+      "text": "第2段合成回复：朗读时只有当前气泡的边缘呼吸环绕。"
+    },
+    {
+      "text": "第2段合成回复：朗读时只有当前气泡的边缘呼吸环绕。"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [
+    "this controlled Chromium document permitted autoplay; rejection/resume branch is covered by the mock media test",
+    "actual playback; exactly one frame; no audio controls",
+    "native audio currentTime advances; native pause removes frame; user resume restores it",
+    "left click stops audio and does not restart",
+    "right-click replay; typing interrupts and clearing draft does not replay",
+    "late synthetic audio after cancellation cannot start playback",
+    "touch pointer long-press opens replay menu",
+    "reduced-motion static frame; dark/narrow; keyboard-accessible stop action"
+  ]
+}

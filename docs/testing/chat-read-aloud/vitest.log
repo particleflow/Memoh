@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/Memoh
+
+
+ Test Files  3 passed (3)
+      Tests  15 passed | 5 skipped (20)
+   Start at  16:51:03
+   Duration  15.08s (transform 11.15s, setup 0ms, import 575ms, tests 14.08s, environment 1.30s)

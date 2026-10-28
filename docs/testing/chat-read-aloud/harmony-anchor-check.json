@@ -1,0 +1,386 @@
+{
+  "native_source": "d213ee7842fc76527de712cd5b2d825a5697a613",
+  "baseline": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "anchors": 54,
+  "changed_counts": [],
+  "checks": [
+    {
+      "file": "apps/web/src/style.css",
+      "line": 205,
+      "anchor": "/* Shell-divider owners outside dockview.",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": ":open-index=\"galleryOpenIndex\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": ":open-index=\"composerPreviewIndex\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "  openBySrc: galleryOpenBySrc,",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "  composerPreviewIndex,",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "const paneView = computed(() => chatStore.chatView(paneTarget.value))",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": ":disabled=\"!currentBotId || activeChatReadOnly || loadingMessages || firstSendAwaiting || attachmentUploading\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "    && isActive.value && isVisible.value,\n  onPaste: handlePaste,",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "function handleSendButton() {",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "            <input\n              ref=\"fileInput\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "                    <DropdownMenuItem\n                      :disabled=\"!currentBotId || activeChatReadOnly || streaming || loadingMessages\"\n",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "const { t, te, locale } = useI18n()",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": ", type ChatAttachment, type CommandActionListItem",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "import { ATTACHMENT_ANIM_MS,",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "                        <ChatAttachmentCard\n                          v-for=\"preview in pendingPreviews\"\n                          :key=\"pre",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "                          @preview=\"preview.isPasted ? (pastedViewerText = preview.pastedText) : openComposerPreview(preview.url)\"\n         ",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": ":clickable=\"preview.isPasted || (preview.isMedia && !!preview.url)\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "openComposerPreview(preview.url)\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "{{ $t('chat.pastedViewerTitle') }}",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "async function handleSend() {",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "(!text && !files.length && !skills.length)",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "  let attachments: ChatAttachment[] | undefined\n  try {\n    if (files.length) {\n      attachments = await uploadAttachments(sentContext.targ",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "const result = await chatStore.sendMessage(sendText, attachments, {",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "    pendingFiles.value = files\n    requestedSkills.value = skills\n    if (commandPanelEvent.value?.type !== 'command_error')",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "                  <!-- While voice owns the composer",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "                    v-else\n                    class=\"relative size-8 max-md:size-11 shrink-0\"",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "  const pairSend = composerPair.captureSend()\n  const sentModelId",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "    inputText.value = restore.input\n    saveInputDraft(sentDraftKey, restore.input)",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "      composerError.value = restore.error\n    }\n    return",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "import { AttachmentUploadLimitError, useComposerUpload } from '../composables/useComposerUpload'",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "const {\n  uploading: attachmentUploading,\n  upload: uploadAttachments,\n  cancel: cancelAttachmentUpload,\n} = useComposerUpload()",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "onDeactivated(() => {\n  onDeactivatedResetScroll()",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 310,
+      "anchor": "const attachmentUploading = computed(() => !!preparingView?.attachmentPreparation.value)",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/message-item.vue",
+      "line": 617,
+      "anchor": "onOpenMedia?: (src: string) => void",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/zh.json",
+      "line": 637,
+      "anchor": "\"loginFailed\": \"登录失败\",",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/zh.json",
+      "line": 642,
+      "anchor": "\"attachFiles\": \"上传文件或图片\",",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/en.json",
+      "line": 645,
+      "anchor": "\"loginFailed\": \"Login Failed\",",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/en.json",
+      "line": 650,
+      "anchor": "\"attachFiles\": \"Upload Files or Images\",",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/ja.json",
+      "line": 653,
+      "anchor": "\"loginFailed\": \"ログインに失敗しました\",",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/ja.json",
+      "line": 658,
+      "anchor": "\"attachFiles\": \"ファイルまたは画像をアップロード\",",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 845,
+      "anchor": "                <SessionTasks\n                  v-if=\"currentBotId && activeSessionId && !isWelcome\"\n                  :key=\"`${currentBotId",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 845,
+      "anchor": "import SessionTasks from './session-tasks.vue'",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 885,
+      "anchor": "                    <!-- Send and stop are one brand circle: the surface never\n                         changes between the two states, only",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 898,
+      "anchor": "                        :disabled=\"attachmentUploading || (streaming ? false : (!showSend || !currentBotId || activeChatReadOnly || loadingM",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 915,
+      "anchor": "                        :aria-label=\"streaming && showSend ? $t(composerQueueCommand?.mode === 'steer' ? 'chat.queue.enqueueSteer' : 'chat.q",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 926,
+      "anchor": ":class=\"streaming && !firstSendAwaiting ? 'opacity-0' : 'opacity-100'\"",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 931,
+      "anchor": ":class=\"streaming && !firstSendAwaiting ? 'opacity-100' : 'opacity-0'\"",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 936,
+      "anchor": "// Streaming always wins the slot for stop, same as before; unlike the old\n// ring-era rule this no longer special-cases ACP: the inactive o",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 950,
+      "anchor": "function handleSendButton() {",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/pages/home/components/chat-pane.vue",
+      "line": 954,
+      "anchor": "  // A first send waits for the server to confirm it.\n  if (firstSendAwaiting.value) return\n  if (streaming.value && !showSend.value) {\n    ",
+      "baseline_count": 0,
+      "candidate_count": 0
+    },
+    {
+      "file": "apps/web/src/i18n/locales/en.json",
+      "line": 1016,
+      "anchor": "    \"sendFailed\":",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/zh.json",
+      "line": 1020,
+      "anchor": "    \"sendFailed\":",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/i18n/locales/ja.json",
+      "line": 1023,
+      "anchor": "    \"sendFailed\":",
+      "baseline_count": 1,
+      "candidate_count": 1
+    },
+    {
+      "file": "apps/web/src/style.css",
+      "line": 1026,
+      "anchor": "@import \"./styles/misans-vf.css\";",
+      "baseline_count": 1,
+      "candidate_count": 1
+    }
+  ]
+}

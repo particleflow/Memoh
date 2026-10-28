@@ -24,8 +24,8 @@ vi.mock('./collapsible-user-text.vue', () => ({
 }))
 vi.mock('./message-actions.vue', () => ({
   default: defineComponent({
-    props: { onEdit: Function },
-    setup: props => () => h('button', { 'data-edit': '', onClick: () => props.onEdit?.() }),
+    props: { onEdit: Function, onReplay: { type: Function, default: undefined } },
+    setup: props => () => h('div', [h('button', { 'data-edit': '', onClick: () => props.onEdit?.() }), props.onReplay ? h('button', { 'data-replay': '', onClick: () => props.onReplay?.() }) : null]),
   }),
 }))
 vi.mock('@felinic/ui', async importOriginal => ({
@@ -134,5 +134,30 @@ describe('accepted-answer failure hint', () => {
       expect(root.querySelectorAll('[data-slot="callout-banner"]')).toHaveLength(1)
     }
     localStorage.removeItem('token')
+  })
+})
+
+
+describe('message speech state', () => {
+  it('scopes the frame and accessible status to actual playing and offers keyboard replay', async () => {
+    const MessageItem = (await import('./message-item.vue')).default
+    const status = ref<'playing' | 'paused' | 'error' | 'idle'>('playing')
+    const replay = vi.fn()
+    root = document.createElement('div'); document.body.append(root)
+    app = createApp(defineComponent({ setup: () => () => h(MessageItem, {
+      message: { id: 'speech', role: 'assistant', timestamp: '', streaming: false, messages: [{ id: 1, type: 'text', content: 'reply' }] },
+      isScrolling: false, speechEnabled: true, speechStatus: status.value, onReplaySpeech: replay,
+    }) }))
+    app.config.globalProperties.$t = (key: string) => key
+    app.mount(root); await nextTick()
+    expect(root.querySelectorAll('[data-speech-state="playing"]')).toHaveLength(1)
+    expect(root.querySelector('[role="status"]')?.textContent).toBe('chat.readAloud.playing')
+    expect(root.querySelectorAll('audio')).toHaveLength(0)
+    root.querySelector<HTMLButtonElement>('[data-replay]')!.click(); expect(replay).toHaveBeenCalledOnce()
+    for (const next of ['paused', 'error', 'idle'] as const) {
+      status.value = next; await nextTick()
+      expect(root.querySelectorAll('[data-speech-state="playing"]')).toHaveLength(0)
+      expect(root.querySelector('[role="status"]')).toBeNull()
+    }
   })
 })

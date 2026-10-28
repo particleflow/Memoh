@@ -15442,6 +15442,53 @@ export type PostBotsByBotIdToolsResponses = {
 
 export type PostBotsByBotIdToolsResponse = PostBotsByBotIdToolsResponses[keyof PostBotsByBotIdToolsResponses];
 
+export type PostBotsByBotIdTtsPlaybackData = {
+    /**
+     * Text to read aloud
+     */
+    body: HandlersSynthesizeRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback';
+};
+
+export type PostBotsByBotIdTtsPlaybackErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdTtsPlaybackError = PostBotsByBotIdTtsPlaybackErrors[keyof PostBotsByBotIdTtsPlaybackErrors];
+
+export type PostBotsByBotIdTtsPlaybackResponses = {
+    /**
+     * Audio bytes; Content-Type is the configured model's audio format
+     */
+    200: unknown;
+};
+
 export type PostBotsByBotIdTtsSynthesizeData = {
     /**
      * Text to synthesize

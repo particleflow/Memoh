@@ -1027,6 +1027,14 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "readAloud": {
+      "replay": "Read aloud again",
+      "stop": "Stop reading",
+      "enable": "Enable reading aloud",
+      "resume": "Resume reading",
+      "playing": "Reading this reply aloud",
+      "failed": "Reading stopped. Use Read aloud again to retry."
+    },
     "delegations": {
       "nativeRun": "Specialist session run",
       "runId": "Run ID",

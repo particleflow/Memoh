@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"context"
+	"io"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -8,17 +10,28 @@ import (
 
 	"github.com/labstack/echo/v4"
 
+	"github.com/felinics/memoh/internal/accounts"
 	"github.com/felinics/memoh/internal/apperror"
 	audiopkg "github.com/felinics/memoh/internal/audio"
+	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/httpx"
 	"github.com/felinics/memoh/internal/settings"
 )
 
+type botSpeechService interface {
+	StreamToFile(context.Context, string, string, io.Writer) (string, error)
+	Synthesize(context.Context, string, string, map[string]any) ([]byte, string, error)
+}
+type botSpeechSettings interface {
+	GetBot(context.Context, string) (settings.Settings, error)
+}
+
 // BotAudioHandler handles per-bot speech synthesis requests from the agent tool.
 type BotAudioHandler struct {
-	audioService    *audiopkg.Service
-	settingsService *settings.Service
+	audioService    botSpeechService
+	settingsService botSpeechSettings
+	playbackAccess  func(context.Context, string, string) error
 	tempStore       *audiopkg.TempStore
 	logger          *slog.Logger
 }
@@ -34,6 +47,7 @@ func NewBotAudioHandler(log *slog.Logger, audioService *audiopkg.Service, settin
 
 func (h *BotAudioHandler) Register(e *echo.Echo) {
 	e.POST("/bots/:bot_id/tts/synthesize", h.Synthesize)
+	e.POST("/bots/:bot_id/tts/playback", h.Playback)
 }
 
 type synthesizeRequest struct {
@@ -108,4 +122,70 @@ func (h *BotAudioHandler) Synthesize(c echo.Context) error {
 		ContentType: contentType,
 		Size:        size,
 	})
+}
+
+// SetPlaybackAccess uses the same Bot chat permission as local conversation access.
+// A missing authorizer fails closed; the legacy synthesize route is unchanged.
+func (h *BotAudioHandler) SetPlaybackAccess(botService *bots.Service, accountService *accounts.Service) {
+	h.playbackAccess = func(ctx context.Context, actorID, botID string) error {
+		_, err := AuthorizeBotAccessWithPermission(ctx, botService, accountService, actorID, botID, bots.PermissionChat)
+		return err
+	}
+}
+
+// Playback godoc
+// @Summary Read text aloud using a bot's configured voice
+// @Description Ephemeral playback only; does not create a message, attachment or history record. Uses the configured TTS model and voice. Maximum 500 Unicode characters per request. Requires Bot chat permission.
+// @Tags bots
+// @Accept json
+// @Produce octet-stream
+// @Param bot_id path string true "Bot ID"
+// @Param request body synthesizeRequest true "Text to read aloud"
+// @Success 200 {file} file "Audio bytes; Content-Type is the configured model's audio format"
+// @Failure 400 {object} server.Problem
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 409 {object} server.Problem
+// @Failure 500 {object} server.Problem
+// @Router /bots/{bot_id}/tts/playback [post].
+func (h *BotAudioHandler) Playback(c echo.Context) error {
+	botID, err := httpx.RequiredParam(c, "bot_id")
+	if err != nil {
+		return err
+	}
+	actorID, err := RequireChannelIdentityID(c)
+	if err != nil {
+		return err
+	}
+	if h.playbackAccess == nil {
+		return echo.NewHTTPError(http.StatusForbidden)
+	}
+	if err := h.playbackAccess(c.Request().Context(), actorID, botID); err != nil {
+		return err
+	}
+	var req synthesizeRequest
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+	text := strings.TrimSpace(req.Text)
+	if text == "" {
+		return apperror.FieldRequired("text")
+	}
+	if len([]rune(text)) > 500 {
+		return apperror.New(apperror.CodeTTSTextTooLong, map[string]string{"max": "500"})
+	}
+	botSettings, err := h.settingsService.GetBot(c.Request().Context(), botID)
+	if err != nil {
+		return errs.Wrap(err, "load bot playback settings")
+	}
+	if botSettings.TtsModelID == "" {
+		return apperror.New(apperror.CodeTTSModelNotConfigured, nil)
+	}
+	audio, contentType, err := h.audioService.Synthesize(c.Request().Context(), botSettings.TtsModelID, text, nil)
+	if err != nil {
+		return errs.Wrap(err, "synthesize bot playback")
+	}
+	c.Response().Header().Set(echo.HeaderCacheControl, "private, no-store")
+	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
+	return c.Blob(http.StatusOK, contentType, audio)
 }
