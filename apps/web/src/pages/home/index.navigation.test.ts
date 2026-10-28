@@ -75,3 +75,23 @@ it.each([401, 403, 404])('preserves a denied historical route without selecting 
   expect(api.open).not.toHaveBeenCalled()
   expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')
 })
+
+it('returns to the contact when the same Bot URL loses its task deep link', async () => {
+  const router = await mount('/bot/source?session=task-history'); await settle()
+  api.select.mockClear(); api.open.mockClear()
+  await router.push('/bot/source'); await settle()
+  expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefined)
+  expect(api.open).not.toHaveBeenCalled()
+})
+
+it('resolves a same-Bot cold entrance even when the stored Bot already matches', async () => {
+  await mount('/bot/source'); await settle()
+  expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefined)
+})
+
+it.each(['?session=', '?session=first&session=second'])('rejects malformed task links without opening contact (%s)', async query => {
+  await mount('/bot/source' + query); await settle()
+  expect(api.select).not.toHaveBeenCalled()
+  expect(api.open).not.toHaveBeenCalled()
+  expect(api.session).not.toHaveBeenCalled()
+})

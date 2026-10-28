@@ -6,6 +6,7 @@ import type { ChatViewTarget, ExternalAgentSessionInput } from './types'
 
 export interface ChatBootstrapDeps {
   hasHistoryEntry?: () => boolean
+  hasContactEntry?: () => boolean
   currentBotId: Ref<string | null>
   sessionId: Ref<string | null>
   draftIntent: Ref<boolean>
@@ -58,6 +59,9 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   const contactChoice = ref<(PrivateChatEntry & { botId: string }) | null>(null)
   const contactBusy = ref(false)
   const contactOpenRequested = ref<{ botId: string, sessionId: string } | null>(null)
+  // Route intent is separate from persisted tab focus. A restored task tab is
+  // never evidence that the user entered that task instead of the Bot contact.
+  const contactNavigationPending = ref(deps.hasContactEntry?.() === true)
   let contactRequest = 0
 
   async function resolveContact(botId: string, valid: () => boolean): Promise<SessionSummary | undefined> {
@@ -82,17 +86,37 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     const request = ++contactRequest
     const selectionRequest = deps.currentSelectSessionRequest()
     const generation = deps.userScopeGeneration()
+    contactOpenRequested.value = null
     contactBusy.value = true
+    contactNavigationPending.value = true
     try {
-      const session = await resolveContact(botId, () => request === contactRequest && selectionRequest === deps.currentSelectSessionRequest() && generation === deps.userScopeGeneration() && deps.currentBotId.value === botId)
+      // The primary entrance resolves the server-owned identity directly. It
+      // must not adopt a historical session because it happened to be focused.
+      const session = await resolvePrivateChat(botId)
       if (request !== contactRequest || selectionRequest !== deps.currentSelectSessionRequest() || generation !== deps.userScopeGeneration() || deps.currentBotId.value !== botId) return
       if (session) {
         contactChoice.value = null
         contactOpenRequested.value = { botId, sessionId: session.id }
       }
     } finally {
-      if (request === contactRequest) contactBusy.value = false
+      if (request === contactRequest) {
+        contactBusy.value = false
+        if (!contactOpenRequested.value) contactNavigationPending.value = false
+      }
     }
+  }
+
+  function completeContactOpen(request: { botId: string, sessionId: string }) {
+    if (contactOpenRequested.value !== request) return
+    contactOpenRequested.value = null
+    contactNavigationPending.value = false
+  }
+
+  function cancelContactNavigation() {
+    contactRequest++
+    contactBusy.value = false
+    contactNavigationPending.value = false
+    contactOpenRequested.value = null
   }
 
   async function loadContactCandidates() {
@@ -203,7 +227,8 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
           deps.startBotSessionsActivityStream(botId)
 
           const restoredSessionId = (deps.sessionId.value ?? '').trim()
-          const restoredExplicitSession = restoredSessionId
+          const preferContact = contactNavigationPending.value && !deps.hasHistoryEntry?.()
+          const restoredExplicitSession = !preferContact && restoredSessionId
             && deps.explicitSessionSelection.value
             ? await deps.ensureSessionSummary(botId, restoredSessionId)
             : null
@@ -212,15 +237,17 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
             rerunRequested = true
             continue
           }
-          const preservePendingExternalAgentStage = !!deps.pendingExternalAgentSessionInput.value
+          const preservePendingExternalAgentStage = !preferContact && !!deps.pendingExternalAgentSessionInput.value
             && !deps.sessionId.value
-          const preserveExplicitEmptyComposer = deps.explicitSessionSelection.value
+          const preserveExplicitEmptyComposer = !preferContact && deps.explicitSessionSelection.value
             && !deps.sessionId.value
           let contact: SessionSummary | undefined
-          if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !restoredExplicitSession && !deps.draftIntent.value && !deps.hasHistoryEntry?.()) {
+          if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !restoredExplicitSession && (preferContact || !deps.draftIntent.value) && !deps.hasHistoryEntry?.()) {
             const request = deps.currentSelectSessionRequest()
             try {
-              contact = await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.())
+              contact = preferContact
+                ? await resolvePrivateChat(botId)
+                : await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.())
             } catch (error) {
               // Old servers retain their original navigation. Auth, storage and
               // uncertain outcomes must never fall back to a different chat.
@@ -228,10 +255,11 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
               const unsupported = (status === 404 && isApiErrorCode(error, 'http.not_found'))
                 || (status === 405 && isApiErrorCode(error, 'http.method_not_allowed'))
               if (!unsupported) throw error
+              contactNavigationPending.value = false
             }
             if (generation !== deps.userScopeGeneration()) return
             if (request !== deps.currentSelectSessionRequest()) return
-            if (deps.draftIntent.value) contact = undefined
+            if ((!preferContact && deps.draftIntent.value) || deps.hasHistoryEntry?.()) contact = undefined
             if ((deps.currentBotId.value ?? '').trim() !== botId) {
               rerunRequested = true
               continue
@@ -304,11 +332,14 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   }
 
   async function selectBot(targetBotId: string, options: { sessionId?: string } = {}) {
+    cancelContactNavigation()
+    contactNavigationPending.value = !options.sessionId
+    const navigation = contactRequest
     if (deps.currentBotId.value === targetBotId) {
       // A cold URL can arrive before bootstrap opens the socket. Wait for
       // that transport boundary before selecting the historical runtime.
       if (initializePromise) await initializePromise
-      if (deps.currentBotId.value !== targetBotId) return
+      if (deps.currentBotId.value !== targetBotId || navigation !== contactRequest) return
       if (options.sessionId) await selectSession(options.sessionId)
       else await openContact()
       return
@@ -340,6 +371,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   ) {
     const sessionId = targetSessionId.trim()
     if (!sessionId) return
+    cancelContactNavigation()
     const previousSessionId = (deps.sessionId.value ?? '').trim()
     const sameSession = sessionId === previousSessionId
     const requestId = deps.bumpSelectSessionRequest()
@@ -353,6 +385,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   }
 
   async function createNewSession(options: { explicitSelection?: boolean } = {}) {
+    cancelContactNavigation()
     const botId = await deps.ensureBot()
     if (!botId) return
     deps.resetToEmptyComposer({
@@ -362,6 +395,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   }
 
   function selectDraft(options: { explicitSelection?: boolean } = {}) {
+    cancelContactNavigation()
     const explicitSelection = options.explicitSelection === true
     deps.resetToEmptyComposer({
       clearPendingExternalAgent: false,
@@ -378,6 +412,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     contactChoice.value = null
     contactBusy.value = false
     contactOpenRequested.value = null
+    contactNavigationPending.value = deps.hasContactEntry?.() === true
     loadingChats.value = false
     initializing.value = false
     rerunRequested = false
@@ -386,7 +421,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   }
 
   return {
-    loadingChats, contactChoice, contactBusy, contactOpenRequested,
+    loadingChats, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
     openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     initialize,
     selectBot,

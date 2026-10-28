@@ -130,6 +130,7 @@ const chatStoreMock = vi.hoisted(() => ({
   sessionId: null as string | null,
   hasExplicitSessionSelection: false,
   loadingChats: false,
+  contactNavigationPending: false,
   sessions: [] as Array<{ id: string, title?: string }>,
   knownSessions: [] as Array<{ id: string, title?: string, type?: string }>,
   createNewSession: vi.fn(async () => {}),
@@ -207,6 +208,9 @@ vi.mock('@/store/chat-list', () => ({
     knownSessions: chatStoreMock.knownSessions,
     get loadingChats() {
       return chatStoreMock.loadingChats
+    },
+    get contactNavigationPending() {
+      return chatStoreMock.contactNavigationPending
     },
     activeSession: null,
     get userSentInSession() {
@@ -670,6 +674,7 @@ describe('workspace layout store', () => {
     chatStoreMock.applyDraftViewRequest.mockClear()
     chatStoreMock.sessionId = null
     chatStoreMock.hasExplicitSessionSelection = false
+    chatStoreMock.contactNavigationPending = false
     // Reactive like the real store's ref: the workspace aligns its selection
     // when initialize() finishes loading.
     const loadingChats = ref(false)
@@ -1433,6 +1438,50 @@ describe('workspace layout store', () => {
     // Recents follows chat-session-id — pull it onto the restored panel.
     expect(chatStoreMock.selectSession).toHaveBeenCalledWith('session-1', { explicitSelection: false })
     expect(useChatSelectionStore().sessionId).toBe('session-1')
+  })
+
+  it('retains restored task panels without allowing them to overwrite a primary contact entry', async () => {
+    localStorage.setItem('workspace-layout', JSON.stringify({
+      'bot-1': {
+        layout: persistedLayoutWithPanel('chat:bot-1:1', 'chat', { sessionId: 'old-task', explicitSelection: true }, 'Old task'),
+        ephemeralIds: [],
+      },
+    }))
+    chatStoreMock.contactNavigationPending = true
+    chatStoreMock.loadingChats = true
+    chatStoreMock.sessionId = 'old-task'
+    chatStoreMock.hasExplicitSessionSelection = true
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    await nextTick()
+    expect(chatStoreMock.selectSession).not.toHaveBeenCalled()
+    chatStoreMock.sessionId = 'contact'
+    chatStoreMock.hasExplicitSessionSelection = false
+    useChatSelectionStore().setSession('contact', { explicitSelection: false })
+    chatStoreMock.loadingChats = false
+    await nextTick()
+    expect(chatStoreMock.selectSession).not.toHaveBeenCalled()
+    expect(useChatSelectionStore().sessionId).toBe('contact')
+    expect(dock.getPanel('chat:bot-1:1')?.params.sessionId).toBe('old-task')
+    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false })
+    chatStoreMock.contactNavigationPending = false
+    expect(dock.activePanel?.params.sessionId).toBe('contact')
+    expect(dock.getPanel('chat:bot-1:1')?.params.sessionId).toBe('old-task')
+  })
+
+  it('does not let empty-layout draft fallback cancel pending contact navigation', async () => {
+    chatStoreMock.contactNavigationPending = true
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    await nextTick()
+    await flushDraftChatFallback()
+    expect(dock.panels).toHaveLength(0)
+    expect(chatStoreMock.selectDraft).not.toHaveBeenCalled()
+    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false })
+    expect(dock.panels).toHaveLength(1)
+    expect(dock.activePanel?.params.sessionId).toBe('contact')
   })
 
   it('reconciles an auto-picked session to the restored chat panel without opening another tab', async () => {
