@@ -1,0 +1,72 @@
+{
+  "v6": {
+    "library_file_id": "libfile_aeb7be4b95f08191bef4fa9938346a46",
+    "version": 6,
+    "zipSHA256": "52c5b32b5cea66b36ab0b49ece69f1bf9f5f883e47a1018313f4fd56b7a6ac55",
+    "manifestMembersVerified": 151,
+    "commit": "8d48dfe7c7e84849c7986608f89a114b7bf85d75"
+  },
+  "prerequisiteContactFix": "bbbb448a0c6fd6f35f90d28316f4d5a51c5e9dc6",
+  "localPrerequisiteEquivalent": "81597deb05bac53edfa2dea3f75dbcd066382c1f",
+  "fixCommit": "b43875b5c541afef744909335004c0cb2f146c3a",
+  "source": {
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "beforeSHA256": "d3c47686702bb28c0ed778527f0fd873b65e846b3172cb5adb526126256d48be",
+      "afterSHA256": "435cd9b06a189cf8c3734856c5b9546ba8d52e8898e0a73ba2a257aaa68eeea3",
+      "byteEqual": false
+    },
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.ts": {
+      "beforeSHA256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+      "afterSHA256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+      "beforeSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "afterSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "byteEqual": true
+    },
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+      "beforeSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "afterSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "byteEqual": true
+    }
+  },
+  "checks": {
+    "composableRed": {
+      "exitCode": 1,
+      "failed": 3,
+      "passed": 1
+    },
+    "composableGreen": {
+      "exitCode": 0,
+      "passed": 4
+    },
+    "browserRed": {
+      "exitCode": 1,
+      "assertion": "pending historical run must stop old native audio"
+    },
+    "browserGreen": {
+      "exitCode": 0,
+      "newBoundaryChecks": 4,
+      "baselinePlaybackPrerequisites": 1
+    },
+    "affectedFileESLint": {
+      "exitCode": 0
+    },
+    "candidateUIContract": {
+      "exitCode": 0,
+      "existingWarnings": 3
+    }
+  },
+  "loopbackPreview": {
+    "url": "http://127.0.0.1:18484",
+    "closedAfterRunner": true
+  },
+  "paidProviderCalls": 0,
+  "browserScope": "actual pane via existing workspace openSessionChatPinned consumer and real useTaskRunAnchor; API/WS/synthesis are synthetic fixtures; no end-to-end authorization or production acceptance claimed",
+  "artifacts": {
+    "red/failure.json": "af76d070b9e1f11249ba03910b8d034b918f017f180eab650c4d5d9790655cb5",
+    "green/result.json": "39ea3639f9724b328e1f7b543a69bd33f09692c9b77f59c3ac4f254bcf2c809b",
+    "history-run-read-aloud.patch": "703d7ae487cd63c86dae37d48e5267e1ff5c059fc770ebbbacaf12d243705d9e"
+  }
+}

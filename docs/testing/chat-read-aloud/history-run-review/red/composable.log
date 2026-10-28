@@ -1,0 +1,68 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ RUN  v4.1.10 /workspace/memoh-readaloud-history-review
+
+ ❯ |web| src/pages/home/composables/useChatReadAloud.task-anchor.test.ts (4 tests | 3 failed) 77ms
+     × stops the old player and queue during same-session authorization; locating the new run never restores them 48ms
+     × keeps unavailable history silent and disables replay while later live projection changes arrive 12ms
+     × aborts in-flight synthesis at the pending boundary and discards its late result after locating another run 10ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.task-anchor.test.ts > read aloud at exact historical run boundaries > stops the old player and queue during same-session authorization; locating the new run never restores them
+AssertionError: expected 'playing' to be 'idle' // Object.is equality
+
+Expected: "idle"
+Received: "playing"
+
+ ❯ src/pages/home/composables/useChatReadAloud.task-anchor.test.ts:67:41
+     65|     expect(f.scope.value).toBe('bot:same-session')
+     66|     expect(f.locator.status.value).toBe('pending')
+     67|     expect(f.speech.state.value.status).toBe('idle')
+       |                                         ^
+     68|     expect(players[0]!.src).toBe(''); expect(players[0]!.pause).toHave…
+     69|     expect(f.speech.enabled.value).toBe(false)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.task-anchor.test.ts > read aloud at exact historical run boundaries > keeps unavailable history silent and disables replay while later live projection changes arrive
+AssertionError: expected 'playing' to be 'idle' // Object.is equality
+
+Expected: "idle"
+Received: "playing"
+
+ ❯ src/pages/home/composables/useChatReadAloud.task-anchor.test.ts:84:41
+     82|     f.props.taskAnchor = anchor('missing'); await settle()
+     83|     expect(f.locator.status.value).toBe('unavailable')
+     84|     expect(f.speech.state.value.status).toBe('idle'); expect(f.speech.…
+       |                                         ^
+     85|     expect(f.speech.canReplay(f.messages.value[0]!)).toBe(false)
+     86|     f.speech.replay(f.messages.value[0]!)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.task-anchor.test.ts > read aloud at exact historical run boundaries > aborts in-flight synthesis at the pending boundary and discards its late result after locating another run
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/pages/home/composables/useChatReadAloud.task-anchor.test.ts:101:28
+     99|     f.validate.mockImplementationOnce(() => new Promise<void>(resolve …
+    100|     f.props.taskAnchor = anchor('new'); await settle()
+    101|     expect(signal.aborted).toBe(true); expect(f.speech.state.value.sta…
+       |                            ^
+    102|     release(); await settle(); complete({ data: new Blob(['late'], { t…
+    103|     expect(players).toHaveLength(0); expect(api.playback).toHaveBeenCa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  23:29:45
+   Duration  1.13s (transform 156ms, setup 0ms, import 272ms, tests 77ms, environment 537ms)
+

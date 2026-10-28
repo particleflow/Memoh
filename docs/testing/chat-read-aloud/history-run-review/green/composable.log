@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-readaloud-history-review
+
+
+ Test Files  1 passed (1)
+      Tests  4 passed (4)
+   Start at  23:33:52
+   Duration  1.06s (transform 123ms, setup 0ms, import 204ms, tests 46ms, environment 641ms)
+
