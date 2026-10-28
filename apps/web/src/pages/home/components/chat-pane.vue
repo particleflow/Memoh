@@ -3435,16 +3435,6 @@ const {
 } = useMediaGallery(messages)
 
 const inputText = ref('')
-const readAloud = useChatReadAloud({
-  botId: currentBotId,
-  scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),
-  enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value
-    && !chatStore.contactNavigationPending
-    && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),
-  loading: computed(() => loadingMessages.value || loadingChats.value),
-  draft: inputText,
-  messages,
-})
 const queueSubmissionGate = new SessionQueueSubmissionGate()
 const composerQueueCommand = computed(() => parseSessionQueueCommand(inputText.value, composerRuntimeCommands.value))
 const composerPlaceholder = computed(() => {
@@ -4053,6 +4043,18 @@ const taskRunAnchor = useTaskRunAnchor({
   validate: anchor => revalidateTaskHistoryAnchor(anchor, currentBotId.value ?? '', props.sessionId ?? ''),
   loadOlder: () => chatStore.loadOlderMessages(paneTarget.value),
   scroll: scrollToMessage,
+})
+
+const readAloud = useChatReadAloud({
+  botId: currentBotId,
+  scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),
+  enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value
+    && !chatStore.contactNavigationPending
+    && (!props.taskAnchor || taskRunAnchor.status.value === 'located')
+    && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),
+  loading: computed(() => loadingMessages.value || loadingChats.value),
+  draft: inputText,
+  messages,
 })
 
 useQueueTurnAnchors(messages, pinAfterSteer, pinAfterFollowUp)
