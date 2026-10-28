@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/components/sidebar/files-pane.directory.test.ts apps/web/src/components/sidebar/files-pane.upload.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  15:56:20
+   Duration  29.10s (transform 18.00s, setup 0ms, import 24.93s, tests 983ms, environment 2.51s)

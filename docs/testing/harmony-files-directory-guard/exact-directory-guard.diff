@@ -1,0 +1,24 @@
+--- phone1.0.25/listDirectory
++++ parent5b/listDirectory
+@@ -1,15 +1,18 @@
+ async function listDirectory(path: string): Promise<HandlersFsFileInfo[]> {
+-  if (!props.botId) return []
++  const botId = props.botId
++  if (!botId || !props.active) return []
+   let lastError: unknown
+   for (let attempt = 0; attempt < 3; attempt++) {
++    if (!props.active || props.botId !== botId) return []
+     try {
+       const { data } = await getBotsByBotIdContainerFsList({
+-        path: { bot_id: props.botId },
++        path: { bot_id: botId },
+         query: { path },
+         throwOnError: true,
+       })
+-      return data.entries ?? []
++      return props.active && props.botId === botId ? data.entries ?? [] : []
+     } catch (error) {
++      if (!props.active || props.botId !== botId) return []
+       lastError = error
+       if (attempt < 2 && isTransientWorkspaceError(error)) {
+         await wait(500 * (attempt + 1))

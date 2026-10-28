@@ -1,0 +1,13 @@
+{
+  "sourceParent": "d87b50a0d446a5d9983d6d4f5c0434b7400226e4",
+  "guardSource": "5b797fb970f4b67ab4d79d27a530f0ea540a8ccb",
+  "sharedComponentIdenticalToBeforeNativeAdapter": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "changes": {
+    "apps/web/src/components/sidebar/files-pane.vue": "changed",
+    "apps/web/src/components/sidebar/files-pane.directory.test.ts": "added"
+  },
+  "unchangedAdapters": 44,
+  "reviewedAdapters": 45,
+  "originalTestAdapters": 2,
+  "HAPBuilt": false
+}

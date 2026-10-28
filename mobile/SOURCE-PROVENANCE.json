@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "c8171c0033007024f5090250990f537cbbc03f81fe0f0d7101d8a3abf0701984",
+      "sha256": "63c5ce7156fa80c73c57cde05ee252140678e1c51e35fa61ecf7307d9fddc64c",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -1774,11 +1774,12 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-files-multiple-changes.json",
-      "sha256": "ec6aa4e0cf9582301673b0c69046d35c351b9e5d5d6de3644831ef372c5f2b63",
+      "sha256": "86d37c7748913a07cd90e3977273e643f77ca9b337bceac6fce93c4b7f68495f",
       "origin": "Exact ordinary Files picker delta and five upstream tests from 565c0b4b3386d87d057234efe6828479d35fcee0, direct parent 5b797fb970f4b67ab4d79d27a530f0ea540a8ccb. Not historical recovery.",
       "licenseReview": "Derived Memoh source under retained repository license; no third-party dependency or private configuration.",
       "preparationChanges": [
-        "Apply only multiple selection, existing concurrency-four upload batch and original Bot binding. Keep native save adapter and existing directory read logic."
+        "Apply only multiple selection, existing concurrency-four upload batch and original Bot binding. Keep native save adapter and existing directory read logic.",
+        "Source-only follow-up after built1.0.25: restore exact parent5b directory active/Bot read guard; add nine directed stale response/retry regressions. Existing5 picker tests unchanged. No HAP rebuilt."
       ]
     }
   ],

@@ -1,0 +1,116 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/components/sidebar/files-pane.directory.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+ ❯ |web| src/components/sidebar/files-pane.directory.test.ts (9 tests | 6 failed) 30711ms
+     × does not issue reads while inactive 191ms
+     × discards an in-flight success after inactive without changing original entries 68ms
+     × discards an in-flight success after otherBot without changing original entries 63ms
+     × does not retry the original path under inactive after a transient failure 15071ms
+     × does not retry the original path under otherBot after a transient failure 15047ms
+     × suppresses a stale non-transient rejection instead of showing an error for the new Bot 83ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.directory.test.ts > phone directory activity and original Bot ownership > does not issue reads while inactive
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "isDir": false,
++     "name": "original.txt",
++     "path": "/data/original.txt",
++     "size": 7,
++   },
++ ]
+
+ ❯ src/components/sidebar/files-pane.directory.test.ts:39:82
+     37| describe('phone directory activity and original Bot ownership', () => {
+     38|  it('does not issue reads while inactive', async () => {
+     39|   props.active = false; await mount(); expect(await tree.listDirectory…
+       |                                                                                  ^
+     40|  })
+     41|  it('returns current active results for the original Bot and path', as…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.directory.test.ts > phone directory activity and original Bot ownership > discards an in-flight success after inactive without changing original entries
+ FAIL  |web| src/components/sidebar/files-pane.directory.test.ts > phone directory activity and original Bot ownership > discards an in-flight success after otherBot without changing original entries
+AssertionError: expected [ Array(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   {
++     "isDir": false,
++     "name": "original.txt",
++     "path": "/data/original.txt",
++     "size": 7,
++   },
++ ]
+
+ ❯ src/components/sidebar/files-pane.directory.test.ts:50:72
+     48|   await mount(); const snapshot = JSON.stringify(entries); const pendi…
+     49|   if (change === 'inactive') props.active = false; else props.botId = …
+     50|   await settle(); finish({ data: { entries } }); expect(await pending)…
+       |                                                                        ^
+     51|   expect(api.list).toHaveBeenCalledTimes(1); expect(api.error).not.toH…
+     52|  })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.directory.test.ts > phone directory activity and original Bot ownership > does not retry the original path under inactive after a transient failure
+ FAIL  |web| src/components/sidebar/files-pane.directory.test.ts > phone directory activity and original Bot ownership > does not retry the original path under otherBot after a transient failure
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/components/sidebar/files-pane.directory.test.ts:53:44
+     51|   expect(api.list).toHaveBeenCalledTimes(1); expect(api.error).not.toH…
+     52|  })
+     53|  it.each(['inactive', 'otherBot'] as const)('does not retry the origin…
+       |                                            ^
+     54|   api.list.mockRejectedValue({ code: 'workspace.unreachable', status: …
+     55|   await mount(); const pending = tree.listDirectory('/data/old-only');…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  |web| src/components/sidebar/files-pane.directory.test.ts > phone directory activity and original Bot ownership > suppresses a stale non-transient rejection instead of showing an error for the new Bot
+AssertionError: expected "vi.fn()" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st vi.fn() call:
+
+    Array [
+      "You do not have permission to perform this action.",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/sidebar/files-pane.directory.test.ts:64:60
+     62|   api.list.mockImplementationOnce(() => new Promise((_resolve, fail) =…
+     63|   await mount(); const pending = tree.listDirectory('/data/held'); pro…
+     64|   expect(await pending).toEqual([]); expect(api.error).not.toHaveBeenC…
+       |                                                            ^
+     65|  })
+     66|  it('retains the existing bounded retry for the same active Bot', asyn…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 3 passed (9)
+   Start at  15:54:37
+   Duration  53.01s (transform 16.07s, setup 0ms, import 20.37s, tests 30.71s, environment 1.48s)
+
+ ELIFECYCLE  Test failed. See above for more details.

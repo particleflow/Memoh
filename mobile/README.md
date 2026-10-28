@@ -8,6 +8,8 @@ records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
 
+A later [source-only directory-read guard](../docs/testing/harmony-files-directory-guard/README.md) restores original-Bot/activity checks around reads and retries. The existing1.0.25 build record and package identity remain unchanged; that package does not include this follow-up.
+
 Contact navigation, original history deep links and account-scoped Bot creation recovery are retained. The current build adds F04 ordinary Files multi-selection while retaining scoped inaccessible-attachment presentation; the old 1.0.24 package remains separately preserved.
 
 The [source manifest](SOURCE-PROVENANCE.json) records **172 reviewed entries**,
