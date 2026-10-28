@@ -1,0 +1,47 @@
+{
+  "baseCommit": "5445b299657dfe092083c916f146b1e5ba078844",
+  "approvedSources": [
+    {
+      "path": "approved/whale.png",
+      "library_file_id": "libfile_28d36db562008191b08c3b829099c8ad",
+      "version": 0,
+      "bytes": 1480302,
+      "sha256": "cea27d0e1798158a79df69d449ddbf280017b28a238eab5dbad6d8199eaef858",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "pixelsViewed": true,
+      "bytesUnchanged": true
+    },
+    {
+      "path": "approved/koi-lotus.png",
+      "library_file_id": "libfile_71fe864e294c8191bcb4d9e0ec17f487",
+      "version": 0,
+      "bytes": 1569576,
+      "sha256": "e8e00500e14b444789cc27a891206f29eaef61b4f48c3828b12ee669de1b2917",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "mode": "RGB",
+      "pixelsViewed": true,
+      "bytesUnchanged": true
+    }
+  ],
+  "nativeApplicationIcon": "app/AppScope/resources/base/media/app_icon.png",
+  "nativeLauncherIcon": "app/entry/src/main/resources/base/media/app_icon.png",
+  "nativeStartupIcon": "app/entry/src/main/resources/base/media/startup_art.png",
+  "startupBackground": "#FFFFFF",
+  "watermarkContract": "watermark-derivation.json",
+  "styleEntry": "../../memoh/harmony-service.css",
+  "scope": "Resources and background styling only; no redraw, regeneration, business layout, navigation, API, identity, permissions, version or signing change. Rejected f03d82cb artwork is excluded.",
+  "sharedFileBoundary": [
+    "No changes to build_memoh_web.py",
+    "No changes to harmony-back.ts",
+    "No changes to SharedChat.ets",
+    "No changes to shared Bot/contact/store/SDK files"
+  ],
+  "delivery": "Uncommitted review patch; combine on the unified Harmony line for a later single build. No HAP build, signing, publishing or phone installation."
+}

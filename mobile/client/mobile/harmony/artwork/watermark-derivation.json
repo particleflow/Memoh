@@ -1,0 +1,38 @@
+{
+  "sourceLibraryId": "libfile_71fe864e294c8191bcb4d9e0ec17f487",
+  "sourceSHA256": "e8e00500e14b444789cc27a891206f29eaef61b4f48c3828b12ee669de1b2917",
+  "operation": "Preserve 1254x1254 geometry; replace RGB with neutral theme ink; alpha = round(clamp((240-min(sourceRGB))/24,0,1)*6).",
+  "maxEffectiveOpacity": 0.023529411764705882,
+  "backgroundWhiteRemoved": true,
+  "cssSingleBackgroundLayer": true,
+  "derived": [
+    {
+      "path": "watermark-light.png",
+      "sha256": "04ae2d4003d46a782068a74c9b1865677b88ee33c391fe9d2ce6545b45ce4d6a",
+      "bytes": 29921,
+      "foregroundRGB": [
+        0,
+        0,
+        0
+      ],
+      "alphaRange": [
+        0,
+        6
+      ]
+    },
+    {
+      "path": "watermark-dark.png",
+      "sha256": "59e089b2e6f925c3581263c95310f27a832e7f0f92f29f231fcd6a812a9d2dbf",
+      "bytes": 30195,
+      "foregroundRGB": [
+        255,
+        255,
+        255
+      ],
+      "alphaRange": [
+        0,
+        6
+      ]
+    }
+  ]
+}
