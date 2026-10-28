@@ -1,0 +1,11 @@
+{
+  "versionName": "1.0.26",
+  "versionCode": 1000026,
+  "productSourceParent": "ca9493d3ed03b9f897f1c5e80f71e3206b0e2a7e",
+  "compatibleUnifiedCommit": "565c0b4b3386d87d057234efe6828479d35fcee0",
+  "sharedFilesPaneEquals565BeforeNativeAdapter": true,
+  "scope": "Only the restored original-Bot/active directory read guard beyond built1.0.25. No voice, API, SDK or configuration change.",
+  "reusedDirectedTests": 14,
+  "SDKDownloadRequired": false,
+  "old125And124Preserved": true
+}

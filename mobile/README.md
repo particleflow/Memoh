@@ -1,16 +1,16 @@
 # Garnet Assistant Harmony source
 
-The current source tree declares **1.0.25 / 1000025**. Its compatible backend
+The current source tree declares **1.0.26 / 1000026**. Its compatible backend
 is `565c0b4b3386d87d057234efe6828479d35fcee0`; the shared composer UI is
 `2422db2011231d5a4e538aa0fd7b573d133cb350`, with the original Harmony adaptations.
-The [1.0.25 build record](../docs/testing/harmony-unified-1.0.25/README.md)
+The [1.0.26 build record](../docs/testing/harmony-unified-1.0.26/README.md)
 records the official API26 compile and unsigned artifact identity. It does not
 establish signing, installation, phone/NAS execution or human acceptance.
 The old 1.0.18 package is a separate preserved field baseline.
 
-A later [source-only directory-read guard](../docs/testing/harmony-files-directory-guard/README.md) restores original-Bot/activity checks around reads and retries. The existing1.0.25 build record and package identity remain unchanged; that package does not include this follow-up.
+The [directory-read guard](../docs/testing/harmony-files-directory-guard/README.md) restores original-Bot/activity checks around reads and retries and is now included in1.0.26. The existing1.0.25 and1.0.24 records/packages remain independently preserved.
 
-Contact navigation, original history deep links and account-scoped Bot creation recovery are retained. The current build adds F04 ordinary Files multi-selection while retaining scoped inaccessible-attachment presentation; the old 1.0.24 package remains separately preserved.
+Contact navigation, original history deep links and account-scoped Bot creation recovery are retained. The current build adds the original-Bot/activity directory-read guard while retaining F04 multi-selection and scoped inaccessible-attachment presentation; old1.0.25 and1.0.24 remain separately preserved.
 
 The [source manifest](SOURCE-PROVENANCE.json) records **172 reviewed entries**,
 zero excluded source paths and 19 unidentified historical later edits. Those 19
