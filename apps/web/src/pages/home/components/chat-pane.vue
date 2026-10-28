@@ -1286,12 +1286,12 @@
                   <Lightbulb class="size-3.5 shrink-0" />
                   <span class="text-label">{{ $t('chatExamples.tryThese') }}</span>
                 </Button>
+                <BotTaskDirectory
+                  v-if="currentBotId && voiceInputState === 'idle'"
+                  :bot-id="currentBotId"
+                  :visible="isVisible"
+                />
                 <template v-if="currentBotId && activeSessionId && !isWelcome && voiceInputState === 'idle'">
-                  <SessionActivityTrigger
-                    :bot-id="currentBotId"
-                    :session-id="activeSessionId"
-                    :visible="isVisible"
-                  />
                   <SessionActivityTrigger
                     kind="bots"
                     :bot-id="currentBotId"
@@ -1391,6 +1391,7 @@ import { resolveCommandErrorMessage } from '@/store/chat/messages'
 import { isAgentRuntimeType } from '@/store/chat-list.utils'
 import BgTaskPill from './bg-task-pill.vue'
 import SessionActivityTrigger from '@/components/sidebar/session-activity-trigger.vue'
+import BotTaskDirectory from './bot-task-directory.vue'
 import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'
 import ForkSourceDivider from './fork-source-divider.vue'
 import ChatForkDialog from './chat-fork-dialog.vue'

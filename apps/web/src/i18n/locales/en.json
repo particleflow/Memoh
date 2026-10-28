@@ -2192,6 +2192,15 @@
       "failed": "Could not open the Bot conversation. Please try again.",
       "historyFailed": "Could not open this history link.",
       "current": "current conversation"
+    },
+    "taskDirectory": {
+      "empty": "No tasks are recorded for this Bot.",
+      "types": {
+        "native_agent": "Agent task",
+        "computer_operation": "Computer task",
+        "bot_delegation": "Delegated task",
+        "schedule_fire": "Scheduled task"
+      }
     }
   },
   "chatExamples": {

@@ -2192,6 +2192,15 @@
       "failed": "暂时无法打开 Bot 对话，请重试。",
       "historyFailed": "无法打开这段历史对话。",
       "current": "当前对话"
+    },
+    "taskDirectory": {
+      "empty": "这个 Bot 暂无任务记录。",
+      "types": {
+        "native_agent": "Agent 任务",
+        "computer_operation": "电脑任务",
+        "bot_delegation": "委派任务",
+        "schedule_fire": "计划任务"
+      }
     }
   },
   "chatExamples": {

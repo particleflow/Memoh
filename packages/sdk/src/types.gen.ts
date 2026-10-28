@@ -4564,6 +4564,21 @@ export type SessiontaskActivityPage = {
     next_cursor?: string;
 };
 
+export type SessiontaskDirectoryPage = {
+    items: Array<SessiontaskDirectoryTask>;
+    next_cursor?: string;
+};
+
+export type SessiontaskDirectoryTask = {
+    created_at: string;
+    destination?: SessiontaskTaskDestination;
+    name: string;
+    record_id: string;
+    state: string;
+    task_id: string;
+    task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';
+};
+
 export type SessiontaskPage = {
     items: Array<SessiontaskTask>;
     next_cursor?: string;
@@ -4604,6 +4619,12 @@ export type SessiontaskTask = {
     task_id: string;
     task_type: 'subagent' | 'computer_operation';
     updated_at: string;
+};
+
+export type SessiontaskTaskDestination = {
+    bot_id: string;
+    run_id?: string;
+    session_id: string;
 };
 
 export type SettingsSettings = {
@@ -15168,6 +15189,115 @@ export type PostBotsByBotIdStarterPromptsRefreshResponses = {
 };
 
 export type PostBotsByBotIdStarterPromptsRefreshResponse = PostBotsByBotIdStarterPromptsRefreshResponses[keyof PostBotsByBotIdStarterPromptsRefreshResponses];
+
+export type GetBotsByBotIdTasksData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: {
+        /**
+         * Page size 1-100
+         */
+        limit?: number;
+        /**
+         * Opaque Bot and account scoped continuation
+         */
+        cursor?: string;
+    };
+    url: '/bots/{bot_id}/tasks';
+};
+
+export type GetBotsByBotIdTasksErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdTasksError = GetBotsByBotIdTasksErrors[keyof GetBotsByBotIdTasksErrors];
+
+export type GetBotsByBotIdTasksResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskDirectoryPage;
+};
+
+export type GetBotsByBotIdTasksResponse = GetBotsByBotIdTasksResponses[keyof GetBotsByBotIdTasksResponses];
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdData = {
+    body?: never;
+    path: {
+        /**
+         * Directory Bot ID
+         */
+        bot_id: string;
+        /**
+         * Original task type
+         */
+        task_type: 'native_agent' | 'computer_operation' | 'bot_delegation' | 'schedule_fire';
+        /**
+         * Durable occurrence ID
+         */
+        record_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tasks/{task_type}/{record_id}';
+};
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdError = GetBotsByBotIdTasksByTaskTypeByRecordIdErrors[keyof GetBotsByBotIdTasksByTaskTypeByRecordIdErrors];
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdResponses = {
+    /**
+     * OK
+     */
+    200: SessiontaskDirectoryTask;
+};
+
+export type GetBotsByBotIdTasksByTaskTypeByRecordIdResponse = GetBotsByBotIdTasksByTaskTypeByRecordIdResponses[keyof GetBotsByBotIdTasksByTaskTypeByRecordIdResponses];
 
 export type GetBotsByBotIdTokenUsageData = {
     body?: never;

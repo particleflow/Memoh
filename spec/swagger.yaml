@@ -7838,6 +7838,47 @@ definitions:
     required:
     - items
     type: object
+  sessiontask.DirectoryPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/sessiontask.DirectoryTask'
+        type: array
+      next_cursor:
+        type: string
+    required:
+    - items
+    type: object
+  sessiontask.DirectoryTask:
+    properties:
+      created_at:
+        type: string
+      destination:
+        $ref: '#/definitions/sessiontask.TaskDestination'
+      name:
+        type: string
+      record_id:
+        format: uuid
+        type: string
+      state:
+        type: string
+      task_id:
+        type: string
+      task_type:
+        enum:
+        - native_agent
+        - computer_operation
+        - bot_delegation
+        - schedule_fire
+        type: string
+    required:
+    - created_at
+    - name
+    - record_id
+    - state
+    - task_id
+    - task_type
+    type: object
   sessiontask.Page:
     properties:
       items:
@@ -7967,6 +8008,20 @@ definitions:
     - task_id
     - task_type
     - updated_at
+    type: object
+  sessiontask.TaskDestination:
+    properties:
+      bot_id:
+        format: uuid
+        type: string
+      run_id:
+        type: string
+      session_id:
+        format: uuid
+        type: string
+    required:
+    - bot_id
+    - session_id
     type: object
   settings.Settings:
     properties:
@@ -17384,6 +17439,117 @@ paths:
       summary: Generate a different set of new-chat starter prompts
       tags:
       - bots
+  /bots/{bot_id}/tasks:
+    get:
+      description: Account-only read of native Agent admissions, computer receipts,
+        incoming/outgoing Bot handoffs and schedule fires. Includes terminal and unknown
+        records and multiple tasks per session. Sessions, configured Agents and ordinary
+        chat runs are not tasks. Each source rechecks its existing permissions. Native
+        task_id and provider run_id are opaque strings; record_id identifies the durable
+        occurrence. Continue nonempty next_cursor even on an empty page. Queued in-memory
+        background work without a persisted admission is not included. No execution,
+        device polling, result text or attachments.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - default: 20
+        description: Page size 1-100
+        in: query
+        name: limit
+        type: integer
+      - description: Opaque Bot and account scoped continuation
+        in: query
+        name: cursor
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.DirectoryPage'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: List original persisted tasks across this Bot's history
+      tags:
+      - sessions
+  /bots/{bot_id}/tasks/{task_type}/{record_id}:
+    get:
+      description: Same source-specific live authorization as the directory. A missing
+        destination does not remove a real failed or unknown task. This read never
+        submits or resumes work.
+      parameters:
+      - description: Directory Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Original task type
+        enum:
+        - native_agent
+        - computer_operation
+        - bot_delegation
+        - schedule_fire
+        in: path
+        name: task_type
+        required: true
+        type: string
+      - description: Durable occurrence ID
+        in: path
+        name: record_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/sessiontask.DirectoryTask'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Recheck one original task occurrence before navigation
+      tags:
+      - sessions
   /bots/{bot_id}/token-usage:
     get:
       description: Get daily aggregated token usage for a bot, split by chat, discuss,
