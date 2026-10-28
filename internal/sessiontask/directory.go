@@ -29,7 +29,7 @@ func (s *Service) WithDelegationDirectory(reader DelegationDirectory) *Service {
 
 // DirectoryTask retains an original typed task ID and its durable occurrence.
 // Native bg IDs are opaque and can recur across process lifetimes. RecordID is
-// the original run ID for those occurrences, not a replacement task identity.
+// the original admission ID (or run ID for legacy occurrences), not a replacement task identity.
 type DirectoryTask struct {
 	TaskType    string           `json:"task_type" validate:"required" enums:"native_agent,computer_operation,bot_delegation,schedule_fire"`
 	TaskID      string           `json:"task_id" validate:"required"`
@@ -129,7 +129,7 @@ func (s *Service) directoryTask(ctx context.Context, bot, user string, row dbsto
 	if _, err = s.scope(ctx, bot, user, path); err != nil {
 		return item, err
 	}
-	if row.Type == "native_agent" && (path[0].Type != Subagent || path[0].ParentThreadID != row.SourceSessionID || row.RunID != row.RecordID) {
+	if row.Type == "native_agent" && (path[0].Type != Subagent || path[0].ParentThreadID != row.SourceSessionID || (!row.QueueAdmission && row.RunID != row.RecordID)) {
 		return item, ErrUnavailable
 	}
 	if row.Type == ComputerOperation {

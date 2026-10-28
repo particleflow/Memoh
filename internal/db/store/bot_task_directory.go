@@ -8,6 +8,7 @@ import (
 // BotTaskDirectoryCandidate is discovery only. No field grants read access.
 // ID is the original task ID; RecordID is its durable occurrence identity.
 type BotTaskDirectoryCandidate struct {
+	QueueAdmission bool
 	Type, ID, RecordID, SessionID, RunID                  string
 	SourceBotID, SourceSessionID, ScheduleID, OwnerUserID string
 	Name, State                                           string

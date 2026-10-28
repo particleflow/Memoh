@@ -1119,6 +1119,7 @@
         "computer_operation": "Computer task"
       },
       "statuses": {
+        "queued": "Queued",
         "unknown": "Execution status unknown",
         "submitted": "Submission recorded",
         "process_exited": "Process exited",

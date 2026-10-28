@@ -1119,6 +1119,7 @@
         "computer_operation": "电脑任务"
       },
       "statuses": {
+        "queued": "排队中",
         "unknown": "执行状态未知",
         "submitted": "已记录提交",
         "process_exited": "进程已退出",
