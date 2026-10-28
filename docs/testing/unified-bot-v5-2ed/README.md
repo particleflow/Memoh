@@ -28,14 +28,22 @@ settings. No execution behavior was intentionally changed. A subsequent
 require every other admitted source file to match its reviewed source tree.
 
 The gci formatting command exited 0 but logged a local `go env -json GOMOD`
-error. There is no usable host `gofmt` at the checked standard paths and the
-host `/usr/bin/go` is the previously observed nonstandard command. A probe of
+error. There was no usable host `gofmt` at the initially checked standard paths,
+and host `/usr/bin/go` is the previously observed nonstandard command. A probe of
 the existing `web-management-workspace:fixture` image failed before container
 creation with `no space left on device`. The root overlay had 0 available
 bytes; /tmp had 7,063,314,432 available bytes and inodes were not exhausted.
 Nothing was downloaded, no system executable was modified, and no Docker
-objects or unknown data were deleted. Actual gofmt/toolchain validation and
-full lint are not claimed; that environment-dependent check remains pending.
+objects or unknown data were deleted.
+
+The follow-up hidden-directory inventory found the existing project toolchain
+at `/workspace/.memoh-cloud/go/bin`, reporting Go 1.25.7 linux/amd64. Its actual
+absolute-path `gofmt -l` passed on all six corrected files with exit 0 and empty
+stdout/stderr. Before/after source hashes match. See
+[the retained tool identity and result](gofmt-actual-toolchain.json). No container,
+download, system-tool change or cleanup was needed for that validation. Full
+lint/build/CI were not run. Root storage remains full; this check no longer
+depends on creating a container, and no unknown cache/volume was removed.
 
 Reuse the reviewed author evidence: 119 Web checks and actual isolated-browser
 live/reload/contact-versus-task projection; six legacy unknown boundary tests

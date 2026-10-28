@@ -12,7 +12,8 @@
   ],
   "extra_documents": [
     "docs/testing/unified-bot-v5-2ed/README.md",
-    "docs/testing/unified-bot-v5-2ed/source-union-guard.json"
+    "docs/testing/unified-bot-v5-2ed/source-union-guard.json",
+    "docs/testing/unified-bot-v5-2ed/gofmt-actual-toolchain.json"
   ],
   "all_other_reviewed_and_base_paths_preserved": true,
   "protected_paths_unchanged": [
@@ -34,9 +35,10 @@
   "validation": {
     "gofumpt_six_files": "passed",
     "diff_check": "passed",
-    "actual_gofmt": "blocked: root overlay full; existing container probe did not start",
+    "actual_gofmt": "passed: existing /workspace/.memoh-cloud/go/bin/gofmt (Go 1.25.7), six files, exit 0, no output, source hashes unchanged",
     "gci": "write exited 0, go env diagnostic retained; not a full lint pass",
     "functional_tests": "unchanged author evidence reused",
-    "ci_build_publish_deploy": "not performed"
+    "ci_build_publish_deploy": "not performed",
+    "full_lint_build_ci": "not run; initial gci go-env diagnostic retained"
   }
 }
