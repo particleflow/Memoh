@@ -109,7 +109,9 @@ completion receipt.
 The Server and this adapter must both support explicit filename extensions.
 No suffix inference or directory search occurs. An existing task's declaration,
 context, delivery ID and configuration digest must not be rewritten to add an
-extension; historical name mismatch recovery is not provided by this change.
+extension. Historical mismatch recovery uses the separate explicit owner entry
+described in [result-name recovery](../../../docs/delivery-result-name-recovery.md),
+never automatic suffix inference or a new task.
 
 `transfer.json` is resolved once per invocation. Its digest is recorded in the
 existing queue journal. Changing the endpoint or source root (even formatting)

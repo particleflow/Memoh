@@ -50,29 +50,31 @@ type DiskQueue struct {
 	historyHook        func(string)
 	budgetBase         int64 // Nonzero only for explicitly upgraded locator v4.
 	openSource         func(string) (*os.File, error)
+	openRecoverySource func(ResultSourceMapping) (*os.File, error)
 	snapshotOnly       bool // finite invocation capability, never persisted or inferred from a job
 }
 
 // QueueStatus is bounded transfer/outbox metadata. Associated means the host's
 // authorized registration accepted the stable reference, not task completion.
 type QueueStatus struct {
-	Version             int           `json:"version"`
-	Registered          bool          `json:"registered,omitempty"`
-	Activated           bool          `json:"activated,omitempty"`
-	Source              *QueuedSource `json:"source,omitempty"`
-	LastRun             time.Time     `json:"last_run_at,omitzero"`
-	PayloadState        string        `json:"payload_state,omitempty"`
-	Direction           string        `json:"direction"`
-	Job                 Job           `json:"job"`
-	Seal                *SnapshotSeal `json:"seal,omitempty"`
-	AdmissionVersion    int           `json:"admission_version,omitempty"`
-	Admitted            bool          `json:"admitted"`
-	Associated          bool          `json:"associated"`
-	AssociationError    string        `json:"association_error,omitempty"`
-	AssociationState    string        `json:"association_state,omitempty"`
-	AssociationAttempts int           `json:"association_attempts"`
-	AssociationDue      time.Time     `json:"association_due,omitempty"`
-	AssociationBlocked  bool          `json:"association_blocked"`
+	Recovery            *ResultSourceMapping `json:"result_source_mapping,omitempty"`
+	Version             int                  `json:"version"`
+	Registered          bool                 `json:"registered,omitempty"`
+	Activated           bool                 `json:"activated,omitempty"`
+	Source              *QueuedSource        `json:"source,omitempty"`
+	LastRun             time.Time            `json:"last_run_at,omitzero"`
+	PayloadState        string               `json:"payload_state,omitempty"`
+	Direction           string               `json:"direction"`
+	Job                 Job                  `json:"job"`
+	Seal                *SnapshotSeal        `json:"seal,omitempty"`
+	AdmissionVersion    int                  `json:"admission_version,omitempty"`
+	Admitted            bool                 `json:"admitted"`
+	Associated          bool                 `json:"associated"`
+	AssociationError    string               `json:"association_error,omitempty"`
+	AssociationState    string               `json:"association_state,omitempty"`
+	AssociationAttempts int                  `json:"association_attempts"`
+	AssociationDue      time.Time            `json:"association_due,omitempty"`
+	AssociationBlocked  bool                 `json:"association_blocked"`
 }
 
 // OpenHerdrQueue accepts Herdr's resolved locator once. Empty, relative,
@@ -354,7 +356,7 @@ func (q *DiskQueue) loadJournal(id string) (QueueStatus, *os.File, error) {
 		if dec.Decode(&next) != nil {
 			return ErrStore
 		}
-		if next.Version != 2 && next.Version != 3 && next.Version != 4 && next.Version != 5 {
+		if next.Version != 2 && next.Version != 3 && next.Version != 4 && next.Version != 5 && next.Version != 6 {
 			return ErrVersion
 		}
 		if !q.validRecord(next, id) {
@@ -420,7 +422,13 @@ func readJournalFramesMode(f *os.File, limit int64, repair bool, consume func([]
 }
 
 func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
-	if r.Version != 2 && r.Version != 3 && r.Version != 4 && r.Version != 5 {
+	if r.Version == 6 && r.Recovery == nil {
+		return false
+	}
+	if r.Recovery != nil && (!r.Registered || !r.Recovery.validFor(r.Job, r.Source)) {
+		return false
+	}
+	if r.Version != 2 && r.Version != 3 && r.Version != 4 && r.Version != 5 && r.Version != 6 {
 		return false
 	}
 	if r.PayloadState != "" || r.Version == 3 {

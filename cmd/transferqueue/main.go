@@ -29,7 +29,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, enqueue-result, enqueue-results, collect-result, advance-results, advance-snapshots, advance-snapshot, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, recover-result, enqueue-result, enqueue-results, collect-result, advance-results, advance-snapshots, advance-snapshot, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -39,7 +39,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "advance-snapshots", "advance-snapshot", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "recover-result", "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "advance-snapshots", "advance-snapshot", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -111,6 +111,31 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 			return "unavailable"
 		}
 		return "recorded"
+	}
+	if *kind == "recover-result" {
+		if *id != "" {
+			return 2
+		}
+		raw, err := readBoundedProducer(ctx, input)
+		if err != nil {
+			return 2
+		}
+		var request deliverymeta.ResultRecovery
+		d := json.NewDecoder(bytes.NewReader(raw))
+		d.DisallowUnknownFields()
+		if d.Decode(&request) != nil || d.Decode(new(any)) != io.EOF {
+			return 2
+		}
+		observation, err := transferclient.RecoverResultSource(workCtx, getenv, "native-profile-v1", limits, request, transport)
+		if err != nil {
+			_ = json.NewEncoder(output).Encode(map[string]string{"state": "recovery_blocked", "error_class": transferclient.LifecycleFailure(err).ErrorClass})
+			return 1
+		}
+		if observation.ReceiptObserved != nil {
+			// No feedback write: this mode is strictly receipt readback only.
+			return writeFixed(output, `{"state":"receipt_observed","recovery_scope":"read_only"}`)
+		}
+		return writeStatus(output, observation.Queue, "", publish(observation.Queue), nil)
 	}
 	if *kind == "migrate-publications" {
 		q, err := transferclient.OpenHerdrQueue(getenv, "native-profile-v1", limits)

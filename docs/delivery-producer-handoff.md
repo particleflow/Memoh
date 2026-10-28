@@ -32,8 +32,8 @@ The explicit-extension declaration needs matching Server and producer adapter
 versions; older adapters reject it. Existing declarations, task context bytes,
 request hashes and delivery IDs are unchanged. Changing an old `source_ref` to
 add an extension creates a different delivery ID and is not a recovery method.
-See [result-name recovery design](delivery-result-name-recovery.md) for the
-separate, unimplemented historical-operation mapping boundary.
+See [explicit result-name recovery](delivery-result-name-recovery.md) for the
+separate owner-only historical-operation mapping entry and its required proof.
 
 The existing registered execution root and private `transfer.json` `source_root`
 must denote the same Windows location. A normalized location digest detects

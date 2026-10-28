@@ -23,6 +23,9 @@ func (s *QueuedSource) valid() bool {
 }
 
 func recordVersion(r QueueStatus) int {
+	if r.Recovery != nil {
+		return 6 // Fence writers that cannot retain/revalidate the original mapping.
+	}
 	if r.Registered {
 		return 5
 	}
@@ -48,6 +51,10 @@ func describeSource(ref string, f *os.File, size int64) (*QueuedSource, error) {
 // content, reserve the declared file size, or consume an active transfer slot.
 // Existing snapshot journals are replayed unchanged, including after source loss.
 func (q *DiskQueue) RegisterUpload(ctx context.Context, job Job, ref string, open func(string) (*os.File, error)) (QueueStatus, error) {
+	return q.registerUpload(ctx, job, ref, open, nil)
+}
+
+func (q *DiskQueue) registerUpload(ctx context.Context, job Job, ref string, open func(string) (*os.File, error), recovery *ResultSourceMapping) (QueueStatus, error) {
 	if ctx.Err() != nil {
 		return QueueStatus{}, ctx.Err()
 	}
@@ -67,7 +74,7 @@ func (q *DiskQueue) RegisterUpload(ctx context.Context, job Job, ref string, ope
 	r, journal, err := q.load(job.DeliveryID)
 	if err == nil {
 		_ = journal.Close()
-		if r.Direction != "upload" || !sameAdmission(r.Job, job) || r.Registered && r.Source.Ref != ref {
+		if r.Direction != "upload" || !sameAdmission(r.Job, job) || r.Registered && r.Source.Ref != ref || !sameResultMapping(r.Recovery, recovery) {
 			return QueueStatus{}, ErrInvalid
 		}
 		return r, nil
@@ -84,7 +91,11 @@ func (q *DiskQueue) RegisterUpload(ctx context.Context, job Job, ref string, ope
 	if err != nil {
 		return QueueStatus{}, err
 	}
-	r = QueueStatus{Version: 5, Registered: true, Direction: "upload", Job: job, Source: source, AdmissionVersion: 1, AssociationState: AssociationIdle}
+	if recovery != nil && !recovery.validFor(job, source) {
+		return QueueStatus{}, ErrBinding
+	}
+	r = QueueStatus{Version: 5, Recovery: recovery, Registered: true, Direction: "upload", Job: job, Source: source, AdmissionVersion: 1, AssociationState: AssociationIdle}
+	r.Version = recordVersion(r)
 	body, err := json.Marshal(r)
 	if err != nil {
 		return QueueStatus{}, ErrStore
@@ -111,7 +122,16 @@ func (q *DiskQueue) registeredSource(r QueueStatus) (*os.File, func(), error) {
 	if !r.Registered || !r.Source.valid() || q.openSource == nil {
 		return nil, nil, ErrBinding
 	}
-	f, err := q.openSource(r.Source.Ref)
+	var f *os.File
+	var err error
+	if r.Recovery != nil {
+		if q.openRecoverySource == nil {
+			return nil, nil, ErrBinding
+		}
+		f, err = q.openRecoverySource(*r.Recovery)
+	} else {
+		f, err = q.openSource(r.Source.Ref)
+	}
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return nil, nil, errSourceMissing

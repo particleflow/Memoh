@@ -68,6 +68,7 @@ func InvokeConfiguredHerdr(ctx context.Context, getenv func(string) string, revi
 	defer func() { _ = cfg.Close() }()
 	if !q.snapshotOnly {
 		q.openSource = cfg.OpenSource
+		q.openRecoverySource = cfg.openResultMapping
 	}
 	if action.Kind == "enqueue-upload" || action.Kind == "enqueue-download" {
 		return q.enqueueConfigured(ctx, cfg, action, transport, now)

@@ -44,6 +44,47 @@ func (s *Service) AdvanceBatchDelivery(ctx context.Context, scope Scope, p Batch
 	return err
 }
 
+// RecoverBatchDelivery runs the explicit project producer recovery entry in the
+// original dedicated control pane. It does not submit Pi or advance an upload.
+// Input is prepared by the authorized original operation owner, never a model.
+func (s *Service) RecoverBatchDelivery(ctx context.Context, scope Scope, p BatchProgress, request deliverymeta.ResultRecovery) error {
+	if _, ok := request.FilePlan(); !ok || !p.valid() || p.Producer == nil || deliverymeta.PlanHash(*p.Producer) != deliverymeta.PlanHash(request.Plan) ||
+		p.RequestHash != request.RequestHash || request.Plan.Task.BotID != scope.BotID || request.Plan.Task.UserID != scope.UserID || request.Plan.Task.TargetID != scope.TargetID ||
+		p.ControlPane == "" || p.ControlTerminal == "" || p.ControlPane == p.PaneID {
+		return ErrUnsupported
+	}
+	c, target, err := s.Client(ctx, scope)
+	if err != nil {
+		return err
+	}
+	if TargetFingerprint(target) != request.TargetFingerprint || deliverymeta.RootHash(target.WorkDir) != request.Plan.Task.RootHash {
+		return ErrTargetChanged
+	}
+	collect, err := nativeProducerCollectCommand(target.Producer)
+	if err != nil {
+		return err
+	}
+	raw, _ := json.Marshal(request)
+	entry := strings.Replace(collect, "-action collect-result </dev/null", "-action recover-result", 1)
+	command := launchBatchScript("printf '%s' '"+base64.StdEncoding.EncodeToString(raw)+"' | base64 --decode | "+entry+" >/dev/null 2>&1", target)
+	if len(command) > 30000 {
+		return ErrUnsupported
+	}
+	r, err := c.native(ctx, scope, target, "pane.get", map[string]any{"session": target.Session, "paneId": p.ControlPane})
+	if err != nil {
+		return err
+	}
+	var info struct {
+		Type string    `json:"type"`
+		Pane batchPane `json:"pane"`
+	}
+	if resultBody(r, &info) != nil || info.Type != "pane_info" || info.Pane.ID != p.ControlPane || info.Pane.Terminal != p.ControlTerminal || info.Pane.Workspace != p.WorkspaceID {
+		return ErrTargetChanged
+	}
+	_, err = c.native(ctx, scope, target, "pane.run", map[string]any{"session": target.Session, "paneId": p.ControlPane, "command": command})
+	return err
+}
+
 // ReadBatchProducerFeedback reads only the fixed advisory receipt through the
 // original registered control pane. A command acceptance is not a receipt.
 func (s *Service) ReadBatchProducerFeedback(ctx context.Context, scope Scope, p BatchProgress) (*deliverymeta.Feedback, error) {
