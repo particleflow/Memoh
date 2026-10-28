@@ -1,0 +1,209 @@
+{
+  "consumerProductSource": "1155614c210c131968a4eb3e586cb515ad7d625b",
+  "contactSource": "9f3dc3a288dd472aa039b8098b9f0d6808a2a46a",
+  "directorySource": "e5a1aa75cf79267b659b63b24bc0ee60cd46b7e7",
+  "handoff": {
+    "libraryFileId": "libfile_aeb7be4b95f08191bef4fa9938346a46",
+    "version": 2,
+    "bytes": 197753,
+    "sha256": "ac46b9e5543ad5cdc00617d3a4b2594930f11cb4a3e7af5790c4834b87ceb3af",
+    "crcVerified": true,
+    "shaManifestMembersVerified": 39
+  },
+  "readOnlyAudit": true,
+  "productModified": false,
+  "versionOrHAPBuilt": false,
+  "newTypecheckOrBrowserAcceptanceClaimed": false,
+  "contactProductFiles": [
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "consumerGeneratedSHA256": "f31c88dd6e4a6418d16f8649dff200a074ee72feaa96ce49bec9eadeb0ed04a6",
+      "parentSHA256": "a037d0a5e31ec1b47aa78da4d89075edcac71d96f493808c2a43c0ac7bf41fa6",
+      "newSharedSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "currentExactlyMatchesParent": false,
+      "retainPhoneAdaptation": true
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "consumerGeneratedSHA256": "bd5fe0bf4d4e8740c3aeac0393c6a40664217c623b8cddc339040c1079b77405",
+      "parentSHA256": "bd5fe0bf4d4e8740c3aeac0393c6a40664217c623b8cddc339040c1079b77405",
+      "newSharedSHA256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "currentExactlyMatchesParent": true,
+      "retainPhoneAdaptation": false
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "consumerGeneratedSHA256": "35056c2471ea4edc14bdeea44c6497ac7aec3aa5cb2f914563029500472228dc",
+      "parentSHA256": "35056c2471ea4edc14bdeea44c6497ac7aec3aa5cb2f914563029500472228dc",
+      "newSharedSHA256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "currentExactlyMatchesParent": true,
+      "retainPhoneAdaptation": false
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.ts",
+      "consumerGeneratedSHA256": "e62e42cded1b29a44a95572813a33481ca34b09acf0d9014da76d2642fd0975e",
+      "parentSHA256": "a8a9e701e128d61b647be3ce6b7ec4c3f981cc1cef2e0377be31ae6e4b83fe97",
+      "newSharedSHA256": "188d4d156fe9930b7ff7390867a500c020ecb3a2615d0274e9828801bbc046db",
+      "currentExactlyMatchesParent": false,
+      "retainPhoneAdaptation": true
+    }
+  ],
+  "directoryProductFiles": [
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "newSharedSHA256": "023436adf7e8ff5eab823ec70829f52c9555d5a1d426700cdca1b44b290ecdc3",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "ae68d88ab722aa34425500a85b9b95e786346ac4af8bf72731aa5126b542b986"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/bot-task-directory.vue",
+      "newSharedSHA256": "59d5195678ef35826415dba96a7bb7157763ae2ce25653d0a550a07d7886d0a7",
+      "consumerFileExists": false,
+      "consumerGeneratedSHA256": null
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useBotTaskDirectory.ts",
+      "newSharedSHA256": "49e3136f789148410f5957492179b32123f9dfb2a94a0ca4208c73876658553d",
+      "consumerFileExists": false,
+      "consumerGeneratedSHA256": null
+    },
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "newSharedSHA256": "fa4fcf8db581df336a752b14d106c182b2fd275f615e534a8d1659ed18d6076a",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "37c849f992c885887903d2db2fca258680631a32973cef1fc98232605bbeb1eb"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "newSharedSHA256": "495bb8737ef57b79e35c7c909639b1b0985f3fc8c301462b5f8e9dd9257a3450",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "a390904036b7374bd068b4bc33d65fb4e2f41e22616cb288081afbb88eabee0c"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "newSharedSHA256": "ba58d4ad4382ed10127bc65e6a74891aa31558c48e6f036d80ffe4b270da0ef5",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "af9ec285d778bb1f791315135d2b6b1de678e85f2a29aa6bb9638febb7aa69da"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "newSharedSHA256": "10aed7d7568791eec72f412bec5ea4ae9d6822f72acd4886cada4b97b2b365a5",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "5dab66186c06151c213e3a69d2cbf00b92e657d1f1c69fc6cc9f2362659557d5"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "newSharedSHA256": "2bcd5fc5aabb2067491f76d900602a7446260a82fae4d459bf73ea5e831108b2",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "b8908843be9a9f8a8a64b68d7d35652bd524234d3ae921bebd7109320375abd3"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "newSharedSHA256": "7b9e8083197cb5a6ae5c760871fa4f75514785630f2f1d3c15e41b13bf605799",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "97bbc6ca32f85124ec2e6aa835578cf13fd5e25f35855d6a5fa68bd394db9ee2"
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "newSharedSHA256": "bc456a6c5bf4594d1aaaa8e772d61cbf9ba0713f740623c25ae32bbed9c4fb75",
+      "consumerFileExists": true,
+      "consumerGeneratedSHA256": "f310badbbee20590769d3e3c8ae529385c642321da41868f5478e64bb3f7afd4"
+    }
+  ],
+  "SDKAdditions": [
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "newDeclarations": [
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdData",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdError",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdErrors",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdResponse",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdResponses",
+        "GetBotsByBotIdTasksData",
+        "GetBotsByBotIdTasksError",
+        "GetBotsByBotIdTasksErrors",
+        "GetBotsByBotIdTasksResponse",
+        "GetBotsByBotIdTasksResponses",
+        "SessiontaskDirectoryPage",
+        "SessiontaskDirectoryTask",
+        "SessiontaskTaskDestination"
+      ],
+      "absentNewDeclarations": [
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdData",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdError",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdErrors",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdResponse",
+        "GetBotsByBotIdTasksByTaskTypeByRecordIdResponses",
+        "GetBotsByBotIdTasksData",
+        "GetBotsByBotIdTasksError",
+        "GetBotsByBotIdTasksErrors",
+        "GetBotsByBotIdTasksResponse",
+        "GetBotsByBotIdTasksResponses",
+        "SessiontaskDirectoryPage",
+        "SessiontaskDirectoryTask",
+        "SessiontaskTaskDestination"
+      ]
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "newDeclarations": [
+        "getBotsByBotIdTasks",
+        "getBotsByBotIdTasksByTaskTypeByRecordId"
+      ],
+      "absentNewDeclarations": [
+        "getBotsByBotIdTasks",
+        "getBotsByBotIdTasksByTaskTypeByRecordId"
+      ]
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "newDeclarations": [
+        "getBotsByBotIdTasksByTaskTypeByRecordIdQuery",
+        "getBotsByBotIdTasksByTaskTypeByRecordIdQueryKey",
+        "getBotsByBotIdTasksQuery",
+        "getBotsByBotIdTasksQueryKey"
+      ],
+      "absentNewDeclarations": [
+        "getBotsByBotIdTasksByTaskTypeByRecordIdQuery",
+        "getBotsByBotIdTasksByTaskTypeByRecordIdQueryKey",
+        "getBotsByBotIdTasksQuery",
+        "getBotsByBotIdTasksQueryKey"
+      ]
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "newDeclarations": [],
+      "absentNewDeclarations": []
+    }
+  ],
+  "unchangedNativeAuthInputs": {
+    "mobile/client/mobile/memoh/harmony-back.ts": "708f389a43d08b63c225bd05c2d65d1ce63653735ccbb8da188061987f2c7c14",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "22a3b89f7609660ef6401da08452255a8e102a16b651c93b50e0ccdf72d87473"
+  },
+  "sharedAuthLoginRouterDiffFromA0": [],
+  "facts": {
+    "contactPendingNotConsumed": true,
+    "bootstrapAndChatStoreExactlyMatchNewContactParent": true,
+    "currentTaskFooterRequiresSelectedSession": true,
+    "newDirectoryReaderComponentAndSDKNotConsumed": true,
+    "currentPhoneHashRouterRetained": true,
+    "currentMobileChatHeaderIsMenuNotBack": true,
+    "nativeBackWithoutLayerDoesNotDistinguishExplicitSession": true,
+    "nativeShellFalseBackMovesAbilityToBackground": true,
+    "existingRelatedBotTriggerHasSelectBeforeRouterTwoWriterPath": true,
+    "newDirectoryUsesRouterOnlyAfterFreshAuthorization": true
+  },
+  "anchorReview": {
+    "initialGenericHunkProbe": "Not a compatibility result: sequential context replacement caused false negatives even for byte-identical bootstrap; broad chat-pane import context differs in phone source. It was not applied.",
+    "actualStaticSeams": {
+      "unadaptedStoreAndBootstrap": "Exact current parent; consume shared delta, no native replacement needed.",
+      "homeIndex": "Preserve existing four app-title adapters while applying shared contact route pending/initial intent.",
+      "workspaceTabs": "Preserve original file ref metadata and mobile layout guards; add contact pending guards, including empty mobile dock.",
+      "chatPane": "Existing footer and SessionActivityTrigger import are each unique. Replace task trigger only with BotTaskDirectory and retain related Bots trigger; current broad upstream import context differs. Refresh guarded source hashes, not assertions."
+    },
+    "futureCombinationTypeAndRuntimeVerificationRequired": true
+  }
+}

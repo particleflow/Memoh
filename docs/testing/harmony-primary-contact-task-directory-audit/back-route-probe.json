@@ -1,0 +1,19 @@
+{
+  "synthetic": true,
+  "scope": "no modal/header back action; direct task deep link",
+  "observed": [
+    {
+      "query": {},
+      "consumed": false,
+      "routeCalls": []
+    },
+    {
+      "query": {
+        "session": "original-task-session"
+      },
+      "consumed": false,
+      "routeCalls": []
+    }
+  ],
+  "conclusion": "current native back does not distinguish task-session URL from plain Bot root; actual ArkWeb behavior not tested"
+}
