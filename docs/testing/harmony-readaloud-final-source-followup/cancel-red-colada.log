@@ -1,0 +1,73 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 3 unhandled errors during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+AbortError: This operation was aborted
+ ❯ new DOMException node:internal/per_context/domexception:76:18
+ ❯ AbortController.abort node:internal/abort_controller:565:18
+ ❯ Proxy.<anonymous> ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:436:34
+ ❯ wrappedAction ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1400:26
+ ❯ Proxy.<anonymous> ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:368:3
+ ❯ wrappedAction ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1400:26
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:296:4
+ ❯ Proxy.<anonymous> ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:295:42
+ ❯ Proxy.wrappedAction ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1400:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { code: 20, INDEX_SIZE_ERR: 1, DOMSTRING_SIZE_ERR: 2, HIERARCHY_REQUEST_ERR: 3, WRONG_DOCUMENT_ERR: 4, INVALID_CHARACTER_ERR: 5, NO_DATA_ALLOWED_ERR: 6, NO_MODIFICATION_ALLOWED_ERR: 7, NOT_FOUND_ERR: 8, NOT_SUPPORTED_ERR: 9, INUSE_ATTRIBUTE_ERR: 10, INVALID_STATE_ERR: 11, SYNTAX_ERR: 12, INVALID_MODIFICATION_ERR: 13, NAMESPACE_ERR: 14, INVALID_ACCESS_ERR: 15, VALIDATION_ERR: 16, TYPE_MISMATCH_ERR: 17, SECURITY_ERR: 18, NETWORK_ERR: 19, ABORT_ERR: 20, URL_MISMATCH_ERR: 21, QUOTA_EXCEEDED_ERR: 22, TIMEOUT_ERR: 23, INVALID_NODE_TYPE_ERR: 24, DATA_CLONE_ERR: 25 }
+This error originated in "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "handles cancellation of the detached first refetch when the follow-up replaces it". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: synthetic status unavailable
+ ❯ apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts:49:19
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+ ❯ runWithCancel ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+ ❯ runWithTimeout ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64
+
+This error originated in "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "keeps a real refetch failure in the query state and preserves prior data without an extra retry". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+Error: synthetic status unavailable
+ ❯ apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts:49:19
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:302:11
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:26
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2326:20
+ ❯ runWithCancel ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2323:10
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2305:20
+ ❯ runWithTimeout ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2272:10
+ ❯ ../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@vitest+runner@4.1.10/node_modules/@vitest/runner/dist/chunk-artifact.js:2955:64
+
+This error originated in "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "keeps a real refetch failure in the query state and preserves prior data without an extra retry". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+     Errors  3 errors
+   Start at  17:52:16
+   Duration  2.51s (transform 103ms, setup 0ms, import 275ms, tests 66ms, environment 1.78s)
+
+ ELIFECYCLE  Test failed. See above for more details.

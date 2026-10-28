@@ -1,0 +1,42 @@
+REQUESTFAILED https://api.example.invalid/api/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/status?model_id=synthetic-chat net::ERR_ABORTED
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
++ [
++   'signal is aborted without reason'
++ ]
+- []
+
+    at file:///workspace/harmony-recovery-20261023/evidence/shared-ui-readaloud-20261028/phone-native-browser.mjs:132:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [ 'signal is aborted without reason' ],
+  expected: [],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0
+
+✓ patched dependencies verified against installed content
+Current Harmony source context ready18954
+5:34:23 PM [vite] (client) [Unhandled rejection] AbortError: signal is aborted without reason
+ > Proxy.<anonymous> ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:436:33
+ > wrappedAction ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1400:25
+ > Proxy.<anonymous> ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:368:2
+ > wrappedAction ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1400:25
+ > ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:296:3
+ > Proxy.<anonymous> ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/@pinia+colada@0.21.2_pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3___vue@3.5.40_typescript@6.0.3_/node_modules/@pinia/colada/dist/index.mjs:295:41
+ > Proxy.wrappedAction ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:1400:25
+ > store.<computed> ../../../../../../repo/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/pinia@3.0.4_typescript@6.0.3_vue@3.5.40_typescript@6.0.3_/node_modules/pinia/dist/pinia.mjs:955:49
+ > invalidate src/pages/home/composables/turn-end-invalidation.ts:19:55
+    17 |    if (installed.has(queryCache)) return
+    18 |    installed.add(queryCache)
+    19 |    const invalidate = (sessionId: string) => queryCache.invalidateQueries({
+       |                                                         ^
+    20 |      predicate: entry => (entry.key[0] === 'session-status' || entry.key[0] === 'context-lifecycle') && entry.key[2] =...
+    21 |    })

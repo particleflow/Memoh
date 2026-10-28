@@ -1,0 +1,80 @@
+{
+  "synthetic": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "第2段合成回复：朗读时只有当前气泡的边缘呼吸环绕。"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "statusRequests": 5,
+  "statusAborted": 1,
+  "checks": [
+    "delayed first status refetch is actually cancelled by the follow-up; no page rejection escapes",
+    "native microphone begins on the existing bridge, stops reply audio, and cancel sends no chat message",
+    "photo selection still reaches original upload.select photos=true; synthetic cancellation adds no attachment",
+    "actual record-to-text converting state retains disabled/aria-busy and one Spinner; reduced motion disables rotation",
+    "explicit audio retains play/pause/save controls; existing download.fetch/save bridge preserved; no duplicate caption synthesis"
+  ],
+  "nativeCommands": [
+    {
+      "command": "client.theme"
+    },
+    {
+      "command": "client.configuration"
+    },
+    {
+      "command": "client.configure"
+    },
+    {
+      "command": "client.theme"
+    },
+    {
+      "command": "client.state"
+    },
+    {
+      "command": "client.state"
+    },
+    {
+      "command": "client.state"
+    },
+    {
+      "command": "voice.start"
+    },
+    {
+      "command": "voice.status"
+    },
+    {
+      "command": "voice.cancel"
+    },
+    {
+      "command": "upload.select",
+      "photos": true
+    },
+    {
+      "command": "voice.start"
+    },
+    {
+      "command": "voice.status"
+    },
+    {
+      "command": "voice.status"
+    },
+    {
+      "command": "voice.transcribe"
+    },
+    {
+      "command": "download.fetch"
+    },
+    {
+      "command": "download.save"
+    },
+    {
+      "command": "download.release"
+    },
+    {
+      "command": "client.theme"
+    }
+  ]
+}

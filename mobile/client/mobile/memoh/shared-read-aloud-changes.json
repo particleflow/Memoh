@@ -132,6 +132,30 @@
           1
         ]
       ]
+    },
+    "apps/web/src/pages/home/composables/turn-end-invalidation.ts": {
+      "baseSHA256": "7735493174e8866e2ea3393e6451e62fc00bfd94776a7b5fd4ffe1133ace7330",
+      "sharedSHA256": "055bd56c513d5372b5d801f7105d275fbb264644b1693a0e8a50d71aee10037a",
+      "upstreamSHA256": "7735493174e8866e2ea3393e6451e62fc00bfd94776a7b5fd4ffe1133ace7330",
+      "replacements": [
+        [
+          "  })\n  effectScope(true).run(() => {",
+          "  }).catch(() => {\n    // This refetch is detached. Colada already retains genuine errors in query\n    // state; replacement/unmount cancellation must not escape as an unhandled\n    // rejection. Keep the scheduled follow-up and do not add a retry or UI.\n  })\n  effectScope(true).run(() => {",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/composables/turn-end-invalidation.test.ts": {
+      "baseSHA256": "0401e595cb52afb84c512adb32784a5fceddebbb9f9b66cf27a7a95eae06d318",
+      "sharedSHA256": "f37e7c68a1c138250b277e93e14a9612ebc3fc735fa8b8a407e74f6b277280d1",
+      "upstreamSHA256": "0401e595cb52afb84c512adb32784a5fceddebbb9f9b66cf27a7a95eae06d318",
+      "replacements": [
+        [
+          "invalidateQueries: vi.fn()",
+          "invalidateQueries: vi.fn().mockResolvedValue([])",
+          1
+        ]
+      ]
     }
   },
   "addedFiles": {
@@ -154,6 +178,10 @@
     "apps/web/src/pages/home/composables/harmony-read-aloud.integration.test.ts": {
       "source": "// @vitest-environment jsdom\nimport { createApp, defineComponent, h, nextTick, ref, type App } from 'vue'\nimport { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\nimport type { ChatMessage } from '@/store/chat/types'\nimport { setupApiClient } from '@/lib/api-client'\nimport { useChatReadAloud } from './useChatReadAloud'\nconst requests: Request[] = []\nconst players: Player[] = []\nclass Player extends EventTarget {\n src = ''\n play = vi.fn(async () => {})\n pause = vi.fn()\n load = vi.fn()\n}\nlet app: App | undefined, root: HTMLDivElement | undefined\nconst tick = async () => { await nextTick(); for (let i = 0; i < 20; i++) await Promise.resolve(); await nextTick() }\nconst bot='10000000-0000-4000-8000-000000000001'\nconst message=(streaming: boolean): Extract<ChatMessage, {role:'assistant'}> => ({id:'reply',turnId:'turn',runtimeRunId:'run',role:'assistant',timestamp:'',streaming,messages:[{id:0,type:'text',content:'手机端合成验证'}]})\nfunction audioResponse() {\n const response=new Response('synthetic audio',{status:200,headers:{'Content-Type':'audio/wav'}})\n Object.defineProperty(response,'blob',{value:async()=>new Blob(['synthetic'],{type:'audio/wav'})})\n return response\n}\nbeforeEach(()=>{\n requests.length=0;players.length=0\n localStorage.setItem('token','synthetic-isolated-token')\n vi.stubGlobal('Audio',class extends Player {constructor(){super();players.push(this)}})\n vi.spyOn(URL,'createObjectURL').mockReturnValue('blob:synthetic-playback')\n vi.spyOn(URL,'revokeObjectURL').mockImplementation(()=>{})\n})\nafterEach(()=>{app?.unmount();app=undefined;root?.remove();localStorage.clear();vi.restoreAllMocks();vi.unstubAllGlobals()})\nfunction mount(fetcher: typeof fetch) {\n setupApiClient({baseUrl:'https://api.example.invalid/api',fetch:fetcher})\n const messages=ref<ChatMessage[]>([]),draft=ref('');let speech!: ReturnType<typeof useChatReadAloud>\n root=document.createElement('div');document.body.append(root)\n app=createApp(defineComponent({setup(){speech=useChatReadAloud({botId:ref(bot),scope:ref(bot+':original-session'),enabled:ref(true),loading:ref(false),draft,messages});return()=>h('div')}}));app.mount(root)\n return {messages,draft,speech}\n}\ndescribe('Harmony actual generated SDK read-aloud seam',()=>{\n it('uses the configured HTTPS API base/auth and binary playback endpoint; history is silent',async()=>{\n  const fetcher=vi.fn(async (input: RequestInfo|URL)=>{requests.push(input as Request);return audioResponse()})\n  const f=mount(fetcher);f.messages.value=[{...message(false),id:'history',turnId:'history-turn',runtimeRunId:'history-run'}];await tick();expect(requests).toHaveLength(0)\n  f.messages.value=[message(true)];await tick();f.messages.value=[message(false)];await tick()\n  expect(requests).toHaveLength(1);const request=requests[0]!\n  expect(request.url).toBe(`https://api.example.invalid/api/bots/${bot}/tts/playback`)\n  expect(request.headers.get('authorization')).toBe('Bearer synthetic-isolated-token');expect(request.method).toBe('POST')\n  expect(await request.clone().json()).toEqual({text:'手机端合成验证'});expect(players).toHaveLength(1)\n  players[0]!.dispatchEvent(new Event('playing'));expect(f.speech.status(f.messages.value[0]!)).toBe('playing')\n  f.draft.value='输入';expect(players[0]!.src).toBe('');expect(f.speech.state.value.status).toBe('idle')\n })\n it.each([403,404])('keeps HTTP%s failure explicit and never falls back to synthesize or automatically retries',async status=>{\n  const fetcher=vi.fn(async(input: RequestInfo|URL)=>{requests.push(input as Request);return new Response('{\"code\":\"http.not_found\"}',{status,headers:{'Content-Type':'application/problem+json'}})})\n  const f=mount(fetcher);f.messages.value=[message(true)];await tick();f.messages.value=[message(false)];await tick()\n  expect(f.speech.state.value.status).toBe('error');expect(players).toHaveLength(0)\n  expect(requests).toHaveLength(1);expect(requests[0]!.url.endsWith('/tts/playback')).toBe(true)\n  await tick();expect(fetcher).toHaveBeenCalledTimes(1);expect(requests.some(r=>r.url.includes('/synthesize'))).toBe(false)\n })\n it('aborts the actual fetch signal on interruption and discards a late binary response',async()=>{\n  let finish!: (r:Response)=>void\n  const fetcher=vi.fn((input: RequestInfo|URL)=>{requests.push(input as Request);return new Promise<Response>(resolve=>{finish=resolve})})\n  const f=mount(fetcher);f.messages.value=[message(true)];await tick();f.messages.value=[message(false)];await tick();expect(requests).toHaveLength(1)\n  f.speech.stop();expect(requests[0]!.signal.aborted).toBe(true);finish(audioResponse());await tick()\n  expect(players).toHaveLength(0);expect(f.speech.state.value.status).toBe('idle');expect(fetcher).toHaveBeenCalledTimes(1)\n })\n})\n",
       "sha256": "ce438467fd5b92dd541d98eb1d521c259ffe4aaedd4a60e18dfe220641671f78"
+    },
+    "apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts": {
+      "sha256": "81d8d18ec15644ba02f2d320c037d2ab4e907f393b6d318660ed380e1db72712",
+      "source": "// @vitest-environment jsdom\nimport { createApp, defineComponent, h, nextTick, ref } from 'vue'\nimport { createPinia } from 'pinia'\nimport { PiniaColada, useQuery, useQueryCache } from '@pinia/colada'\nimport { afterEach, expect, it, vi } from 'vitest'\nimport { installTurnEndInvalidation } from './turn-end-invalidation'\n\nlet app: ReturnType<typeof createApp> | undefined\nlet root: HTMLElement | undefined\nafterEach(() => { app?.unmount(); root?.remove(); vi.useRealTimers() })\n\nfunction mount(query: (context: { signal: AbortSignal }) => Promise<{ revision: string }>) {\n  const streaming = ref<string[]>(['synthetic-session'])\n  let observed: ReturnType<typeof useQuery<{ revision: string }>>\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(defineComponent({ setup() {\n    observed = useQuery({ key: ['session-status', 'synthetic-bot', 'synthetic-session', ''], query, refetchOnWindowFocus: false })\n    installTurnEndInvalidation(streaming, useQueryCache())\n    return () => h('span', observed.data.value?.revision)\n  } }))\n  app.use(createPinia()).use(PiniaColada).mount(root)\n  return { streaming, state: () => observed! }\n}\n\nit('handles cancellation of the detached first refetch when the follow-up replaces it', async () => {\n  vi.useFakeTimers()\n  let requests = 0, aborted = 0\n  const state = mount(async ({ signal }) => {\n    requests++\n    if (requests !== 2) return { revision: String(requests) }\n    return new Promise<{ revision: string }>((_resolve, reject) => {\n      signal.addEventListener('abort', () => { aborted++; reject(signal.reason) }, { once: true })\n    })\n  })\n  await vi.advanceTimersByTimeAsync(0)\n  expect(state.state().data.value).toEqual({ revision: '1' })\n  state.streaming.value = []; await nextTick()\n  expect(requests).toBe(2)\n  await vi.advanceTimersByTimeAsync(1500)\n  expect(aborted).toBe(1)\n  expect(requests).toBe(3)\n  expect(state.state().data.value).toEqual({ revision: '3' })\n  expect(state.state().error.value).toBeNull()\n})\n\nit('keeps a real refetch failure in the query state and preserves prior data without an extra retry', async () => {\n  vi.useFakeTimers()\n  let requests = 0\n  const failure = new Error('synthetic status unavailable')\n  const state = mount(async () => { requests++; if (requests > 1) throw failure; return { revision: '1' } })\n  await vi.advanceTimersByTimeAsync(0)\n  state.streaming.value = []; await nextTick(); await vi.advanceTimersByTimeAsync(0)\n  expect(state.state().error.value).toBe(failure)\n  expect(state.state().data.value).toEqual({ revision: '1' })\n  await vi.advanceTimersByTimeAsync(1500)\n  expect(state.state().error.value).toBe(failure)\n  expect(state.state().data.value).toEqual({ revision: '1' })\n  expect(requests).toBe(3)\n})\n"
     }
   },
   "locales": {
@@ -187,5 +215,79 @@
     "packages/sdk/src/sdk.gen.ts": "\nimport type { PostBotsByBotIdTtsPlaybackData, PostBotsByBotIdTtsPlaybackErrors, PostBotsByBotIdTtsPlaybackResponses } from './types.gen';\nexport const postBotsByBotIdTtsPlayback = <ThrowOnError extends boolean = false>(options: Options<PostBotsByBotIdTtsPlaybackData, ThrowOnError>): RequestResult<PostBotsByBotIdTtsPlaybackResponses, PostBotsByBotIdTtsPlaybackErrors, ThrowOnError> => (options.client ?? client).post<PostBotsByBotIdTtsPlaybackResponses, PostBotsByBotIdTtsPlaybackErrors, ThrowOnError>({\n    url: '/bots/{bot_id}/tts/playback',\n    ...options,\n    headers: {\n        'Content-Type': 'application/json',\n        ...options.headers\n    }\n});\n\n",
     "packages/sdk/src/@pinia/colada.gen.ts": "\nimport { postBotsByBotIdTtsPlayback } from '../sdk.gen';\nimport type { PostBotsByBotIdTtsPlaybackData, PostBotsByBotIdTtsPlaybackError } from '../types.gen';\nexport const postBotsByBotIdTtsPlaybackMutation = (options?: Partial<Options<PostBotsByBotIdTtsPlaybackData>>): UseMutationOptions<unknown, Options<PostBotsByBotIdTtsPlaybackData>, PostBotsByBotIdTtsPlaybackError> => ({\n    mutation: async (vars) => {\n        const { data } = await postBotsByBotIdTtsPlayback({\n            ...options,\n            ...vars,\n            throwOnError: true\n        });\n        return data;\n    }\n});\n\n",
     "packages/sdk/src/index.ts": "\nexport { postBotsByBotIdTtsPlayback } from './sdk.gen';\nexport type { PostBotsByBotIdTtsPlaybackData, PostBotsByBotIdTtsPlaybackErrors, PostBotsByBotIdTtsPlaybackError, PostBotsByBotIdTtsPlaybackResponses } from './types.gen';\n"
+  },
+  "finalSharedInputs": {
+    "commit": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+    "tree": "5a8807ea25a14047295982f8fb4b6d15e1a0627b",
+    "libraryFileId": "libfile_b1031a095ac8819198dcd4ab165c2a95",
+    "libraryVersion": 1,
+    "handoffZipSHA256": "aadb790c9d9a2f42ce640268fe2f3d38576188970b8b298e266c980ed1eb8c08",
+    "inputs": [
+      {
+        "path": "apps/web/src/components/sidebar/session-activity-trigger.vue",
+        "sha256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/en.json",
+        "sha256": "b9010c2d20358cc83b656cb94073db5718665a07d08beccca3ee2c1b435716c5"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/ja.json",
+        "sha256": "09e0ec0f2fa448c9e4a6d1140c87ec1af1050b6870d4fe4dbde26d7817144919"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/zh.json",
+        "sha256": "d56fc29f946ed69d4300c2be018b491915c49e28651ea68d2dbe3df6745e4d69"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/chat-pane.vue",
+        "sha256": "adefac8e7788162468baad44b6cf7c3c3acf958de2b0ad509954db7b3ece2f35"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/conversation-relation-row.vue",
+        "sha256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/message-actions.vue",
+        "sha256": "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/message-item.vue",
+        "sha256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+        "sha256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+        "sha256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/useConversationRelations.ts",
+        "sha256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8"
+      },
+      {
+        "path": "apps/web/src/style.css",
+        "sha256": "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2"
+      },
+      {
+        "path": "packages/sdk/src/@pinia/colada.gen.ts",
+        "sha256": "9d735558b99d6de6d8b47c44d7efed7b048402d9d7d99fc307b49fc79df10b36"
+      },
+      {
+        "path": "packages/sdk/src/index.ts",
+        "sha256": "0674b05fbfcceb55397e2337a34744fb112bd39047d7c752254e678196ba9b58"
+      },
+      {
+        "path": "packages/sdk/src/sdk.gen.ts",
+        "sha256": "09dffb05beb260df0631a5885e649d0e45eac5e4eaa8eff2ce567a54d864f4a4"
+      },
+      {
+        "path": "packages/sdk/src/types.gen.ts",
+        "sha256": "eb34ef66cbfaf563d3e3cdec3121f4aca58d349353843d1fc188944b051dd030"
+      }
+    ],
+    "verification": "Every hash checked against final git source. Exactly matches consumed9c inputs except three navigation files, which match consumed2b3. Phone-specific adaptations remain explicit."
   }
 }

@@ -1,5 +1,7 @@
 # Harmony current-context navigation and read-aloud source handoff
 
+Current follow-up: [final source mapping, UI-rule corrections and reproduced cancellation fix](../harmony-readaloud-final-source-followup/README.md). This page and its locks retain the original `aed6e425` evidence; its open cancellation/UI findings are resolved by that follow-up.
+
 Source-only follow-up to the qualified1.0.26 source `87477f610a68cf99d383bc505266c322d242d747`. No version bump, HAP build, signing, package/release publication, field operation or real provider request is performed. The icon owner remains separate; no icon resource is guessed or included here.
 
 ## Exact shared inputs and actual generated context

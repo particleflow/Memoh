@@ -96,7 +96,7 @@ onBeforeUnmount(() => { ++epoch; observer?.disconnect(); player?.destroy() })
 </script>
 
 <template>
-  <div ref="root" class="flex items-center gap-2 rounded-lg border border-border bg-muted/30 px-3 py-2 w-72 max-w-full" :data-local-voice="handle" :data-transfer="transfer" @click.stop>
+  <div ref="root" class="flex items-center gap-2 rounded-lg border border-border bg-muted-soft px-3 py-2 w-72 max-w-full" :data-local-voice="handle" :data-transfer="transfer" @click.stop>
     <Button type="button" variant="ghost" shape="circle" size="icon-sm" :disabled="!ready || !!error" :aria-label="error || (playing ? '暂停录音' : '播放录音')" :title="error || undefined" @click="toggle">
       <Pause v-if="playing" class="size-4" /><Play v-else class="size-4" />
     </Button>

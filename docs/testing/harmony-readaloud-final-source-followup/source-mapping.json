@@ -1,0 +1,203 @@
+{
+  "sourceParent": "aed6e4259c3102af18134cbc14cd8034d15d0ffc",
+  "finalShared": {
+    "commit": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+    "tree": "5a8807ea25a14047295982f8fb4b6d15e1a0627b",
+    "libraryFileId": "libfile_b1031a095ac8819198dcd4ab165c2a95",
+    "libraryVersion": 1,
+    "handoffZipSHA256": "aadb790c9d9a2f42ce640268fe2f3d38576188970b8b298e266c980ed1eb8c08",
+    "inputs": [
+      {
+        "path": "apps/web/src/components/sidebar/session-activity-trigger.vue",
+        "sha256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/en.json",
+        "sha256": "b9010c2d20358cc83b656cb94073db5718665a07d08beccca3ee2c1b435716c5"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/ja.json",
+        "sha256": "09e0ec0f2fa448c9e4a6d1140c87ec1af1050b6870d4fe4dbde26d7817144919"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/zh.json",
+        "sha256": "d56fc29f946ed69d4300c2be018b491915c49e28651ea68d2dbe3df6745e4d69"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/chat-pane.vue",
+        "sha256": "adefac8e7788162468baad44b6cf7c3c3acf958de2b0ad509954db7b3ece2f35"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/conversation-relation-row.vue",
+        "sha256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/message-actions.vue",
+        "sha256": "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/message-item.vue",
+        "sha256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+        "sha256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+        "sha256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/useConversationRelations.ts",
+        "sha256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8"
+      },
+      {
+        "path": "apps/web/src/style.css",
+        "sha256": "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2"
+      },
+      {
+        "path": "packages/sdk/src/@pinia/colada.gen.ts",
+        "sha256": "9d735558b99d6de6d8b47c44d7efed7b048402d9d7d99fc307b49fc79df10b36"
+      },
+      {
+        "path": "packages/sdk/src/index.ts",
+        "sha256": "0674b05fbfcceb55397e2337a34744fb112bd39047d7c752254e678196ba9b58"
+      },
+      {
+        "path": "packages/sdk/src/sdk.gen.ts",
+        "sha256": "09dffb05beb260df0631a5885e649d0e45eac5e4eaa8eff2ce567a54d864f4a4"
+      },
+      {
+        "path": "packages/sdk/src/types.gen.ts",
+        "sha256": "eb34ef66cbfaf563d3e3cdec3121f4aca58d349353843d1fc188944b051dd030"
+      }
+    ],
+    "verification": "Every hash checked against final git source. Exactly matches consumed9c inputs except three navigation files, which match consumed2b3. Phone-specific adaptations remain explicit."
+  },
+  "generatedContext": "/workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout",
+  "generatedInputs": [
+    {
+      "path": "apps/web/src/components/sidebar/session-activity-trigger.vue",
+      "upstreamSHA256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d",
+      "generatedSHA256": "5fb4a7ab778e033c4bae34d207b4e27a3a4e65368f9ccb4bc73436214765025d",
+      "consumption": "byte-identical"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "upstreamSHA256": "b9010c2d20358cc83b656cb94073db5718665a07d08beccca3ee2c1b435716c5",
+      "generatedSHA256": "37c849f992c885887903d2db2fca258680631a32973cef1fc98232605bbeb1eb",
+      "consumption": "exact reviewed upstream delta plus retained phone adapters"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "upstreamSHA256": "09e0ec0f2fa448c9e4a6d1140c87ec1af1050b6870d4fe4dbde26d7817144919",
+      "generatedSHA256": "af9ec285d778bb1f791315135d2b6b1de678e85f2a29aa6bb9638febb7aa69da",
+      "consumption": "exact reviewed upstream delta plus retained phone adapters"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "upstreamSHA256": "d56fc29f946ed69d4300c2be018b491915c49e28651ea68d2dbe3df6745e4d69",
+      "generatedSHA256": "a390904036b7374bd068b4bc33d65fb4e2f41e22616cb288081afbb88eabee0c",
+      "consumption": "exact reviewed upstream delta plus retained phone adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "upstreamSHA256": "adefac8e7788162468baad44b6cf7c3c3acf958de2b0ad509954db7b3ece2f35",
+      "generatedSHA256": "ae68d88ab722aa34425500a85b9b95e786346ac4af8bf72731aa5126b542b986",
+      "consumption": "exact reviewed upstream delta plus retained phone adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/conversation-relation-row.vue",
+      "upstreamSHA256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb",
+      "generatedSHA256": "bcc5a55b56b47814890ea745ddca96a5cd9c5e78c622740d794c23d9f81fafeb",
+      "consumption": "byte-identical"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-actions.vue",
+      "upstreamSHA256": "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6",
+      "generatedSHA256": "150e6a5ebcba690411f32817e064473514dda05f88df781cd532b2a3268851d6",
+      "consumption": "byte-identical"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "upstreamSHA256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+      "generatedSHA256": "c642cb7dd4f782c8f3d583e43c33a750d15ae4c62b32d057ef8d413362e8fb4a",
+      "consumption": "exact reviewed upstream delta plus retained phone adapters"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+      "upstreamSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "generatedSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "consumption": "byte-identical"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "upstreamSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "generatedSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "consumption": "byte-identical"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useConversationRelations.ts",
+      "upstreamSHA256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8",
+      "generatedSHA256": "aa4cc4a54016a56d44226c38053e43bc1555440940c43311312e65a3a55d82a8",
+      "consumption": "byte-identical"
+    },
+    {
+      "path": "apps/web/src/style.css",
+      "upstreamSHA256": "f3518504a7adf3a121fb5185971f99142ee6980f4927bff01cef40ba764d12a2",
+      "generatedSHA256": "27935fe743d60dec38ba9a1e3d15b371a55a581ce6f4031c81e9e85dd83614bb",
+      "consumption": "exact reviewed upstream delta plus retained phone adapters"
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "upstreamSHA256": "9d735558b99d6de6d8b47c44d7efed7b048402d9d7d99fc307b49fc79df10b36",
+      "generatedSHA256": "f310badbbee20590769d3e3c8ae529385c642321da41868f5478e64bb3f7afd4",
+      "consumption": "retained full SDK plus exact new playback declarations"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "upstreamSHA256": "0674b05fbfcceb55397e2337a34744fb112bd39047d7c752254e678196ba9b58",
+      "generatedSHA256": "97bbc6ca32f85124ec2e6aa835578cf13fd5e25f35855d6a5fa68bd394db9ee2",
+      "consumption": "retained full SDK plus exact new playback declarations"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "upstreamSHA256": "09dffb05beb260df0631a5885e649d0e45eac5e4eaa8eff2ce567a54d864f4a4",
+      "generatedSHA256": "b8908843be9a9f8a8a64b68d7d35652bd524234d3ae921bebd7109320375abd3",
+      "consumption": "retained full SDK plus exact new playback declarations"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "upstreamSHA256": "eb34ef66cbfaf563d3e3cdec3121f4aca58d349353843d1fc188944b051dd030",
+      "generatedSHA256": "5dab66186c06151c213e3a69d2cbf00b92e657d1f1c69fc6cc9f2362659557d5",
+      "consumption": "retained full SDK plus exact new playback declarations"
+    }
+  ],
+  "sourceLocks": {
+    "mobile/client/mobile/memoh/shared-read-aloud-changes.json": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2",
+    "mobile/client/config/memoh_web.lock.json": "41b529632041e4e04d9c1e4a837e050ea553e1e224e044fb5359e246512202cb",
+    "mobile/client/mobile/memoh/HarmonyVoiceInput.vue": "1596c121210373eed07d476fc51d6dc601ae45a8c172df12f911db47ea3983be",
+    "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue": "728336ea288c3544210073133d1b69def90fd49f9c9fb7ac31629390f0401493"
+  },
+  "noVersionBump": true,
+  "hapBuilt": false,
+  "providerCalls": 0,
+  "uiViolationsResolved": [
+    {
+      "source": "HarmonyVoiceInput.vue:205",
+      "rules": [
+        "hand-spun loader",
+        "count1 exceeds baseline0"
+      ],
+      "fix": "existing Spinner atom; no new animation/control"
+    },
+    {
+      "source": "HarmonyVoicePlayer.vue:99",
+      "rules": [
+        "hand-written alpha bg-muted/30",
+        "count1 exceeds baseline0"
+      ],
+      "fix": "existing bg-muted-soft token; no new token"
+    }
+  ]
+}

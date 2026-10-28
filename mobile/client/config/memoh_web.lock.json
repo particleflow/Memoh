@@ -418,10 +418,13 @@
     "parent": "565c0b4b3386d87d057234efe6828479d35fcee0",
     "sourceChanges": {
       "local": "shared-read-aloud-changes.json",
-      "sha256": "933506123733ea45cbdc39df8daa870003bbe46a55002f6921e6c057d53fa086"
+      "sha256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2"
     },
-    "scope": "Current-source read-aloud UI/styles/locales and generated playback endpoint, with original phone adapters preserved. No synthesize fallback; backend readiness/security is a release prerequisite.",
+    "scope": "Final a0a821a4 source mapping for current read-aloud UI and generated playback SDK; original phone adapters preserved. No synthesize fallback. Deployment/device readiness is not inferred from source checks.",
     "backendPlaybackReadyForRelease": false,
-    "navigationCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3"
+    "navigationCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3",
+    "unifiedCompatibleCommit": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
+    "localFollowup": "Detached status invalidation consumes rejected completion while preserving cache errors; native voice uses existing Spinner/muted-soft tokens. No new UI or retry.",
+    "backendReleaseReadinessNote": "The final upstream includes the reviewed account-JWT playback auth correction. This source-only task does not independently verify the deployed endpoint or device playback."
   }
 }

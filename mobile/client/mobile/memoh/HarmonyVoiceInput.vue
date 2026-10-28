@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onDeactivated, onMounted, ref } from 'vue'
-import { Button } from '@felinic/ui'
-import { Mic, LoaderCircle } from 'lucide-vue-next'
+import { Button, Spinner } from '@felinic/ui'
+import { Mic } from 'lucide-vue-next'
 import HarmonyVoiceFan from './HarmonyVoiceFan.vue'
 import uiTheme from './harmony-theme.json'
 import { voiceFanChoice, voiceFanLayout, type VoiceChoice, type VoiceOrigin, type VoiceTarget } from './harmony-voice-geometry'
@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
     <HarmonyVoiceFan ref="feedback" :origin="origin" :choice="choice" :finger="finger" :elapsed="capture.durationMs" :peaks="capture.peaks.map(value => value * 1024)" :closing="closing" :text-target="textTarget" :sent-target="sentTarget" />
   </Teleport>
   <Button type="button" variant="primary" shape="circle" size="icon-sm" class="harmony-voice-mic max-md:size-11 shrink-0" :disabled="disabled || converting || closing" :aria-label="label" :aria-busy="converting || undefined" :data-recording="!!capture && !closing" @pointerdown="down" @pointermove="move" @pointerup="up" @pointercancel="finish(true)" @lostpointercapture="finish(true)" @contextmenu.prevent @click.stop.prevent>
-    <LoaderCircle v-if="converting" class="size-4 max-md:size-5 animate-spin motion-reduce:animate-none" />
+    <Spinner v-if="converting" aria-hidden="true" class="size-4 max-md:size-5 motion-reduce:animate-none" />
     <Mic v-else class="size-4 max-md:size-5" />
   </Button>
 </template>

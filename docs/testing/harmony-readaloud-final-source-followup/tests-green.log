@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/composables/turn-end-invalidation.integration.test.ts apps/web/src/pages/home/composables/turn-end-invalidation.test.ts apps/web/src/pages/home/composables/harmony-read-aloud.integration.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  3 passed (3)
+      Tests  10 passed (10)
+   Start at  17:53:27
+   Duration  6.56s (transform 1.07s, setup 0ms, import 1.93s, tests 254ms, environment 2.73s)

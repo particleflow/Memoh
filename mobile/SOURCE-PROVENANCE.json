@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "b2f63b5210e1f7ce5a55dec2d413c0a075fc05e4fcaa3354b3927b116f1f102d",
+      "sha256": "41b529632041e4e04d9c1e4a837e050ea553e1e224e044fb5359e246512202cb",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -1070,22 +1070,26 @@
     },
     {
       "path": "mobile/client/mobile/memoh/HarmonyVoiceInput.vue",
-      "sha256": "69c8a2da35cb026083b6a2cc71a2dc699f69efd657e7362a22eead3748e74652",
+      "sha256": "1596c121210373eed07d476fc51d6dc601ae45a8c172df12f911db47ea3983be",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
       "archiveCheckpointSHA256": "0a3d1c6e995bd30a36230d1098ce720d8116bee74d9e0ca6f5a03b288a2f2d09",
       "preparationChanges": [
-        "Fix released voice feedback viewport positioning and capture-scoped target lifecycle on c530567d; retain original artwork, timing and native protocol."
+        "Fix released voice feedback viewport positioning and capture-scoped target lifecycle on c530567d; retain original artwork, timing and native protocol.",
+        "Source-only read-aloud follow-up: replace the existing converting LoaderCircle with the UI-owned Spinner, retaining busy/disabled and reduced-motion behavior. No recording logic change."
       ]
     },
     {
       "path": "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue",
-      "sha256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "sha256": "728336ea288c3544210073133d1b69def90fd49f9c9fb7ac31629390f0401493",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
-      "archiveCheckpointSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4"
+      "archiveCheckpointSHA256": "0756f4eb60d5faa74ebfe771a53951750cb964a96acedb73f93e7c291db063d4",
+      "preparationChanges": [
+        "Source-only read-aloud follow-up: replace existing bg-muted/30 with the existing muted-soft token; retain all explicit audio play/pause/save behavior."
+      ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
@@ -1784,11 +1788,12 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-changes.json",
-      "sha256": "933506123733ea45cbdc39df8daa870003bbe46a55002f6921e6c057d53fa086",
+      "sha256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2",
       "origin": "Frontend and exact generated playback endpoint additions from9c361d60371703c157d344dcebfd439acc6d78de plus four phone SDK seam regressions. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new external dependency, SDK binary, private configuration or signing material.",
       "preparationChanges": [
-        "Apply guarded deltas to actual current pre-phone context; preserve native attachment audio/recording/save/TLS. Playback backend auth/readiness remains a release prerequisite."
+        "Apply guarded deltas to actual current pre-phone context; preserve native attachment audio/recording/save/TLS. Playback backend auth/readiness remains a release prerequisite.",
+        "Verify all16 final a0a821a4 upstream hashes and consume a rejected detached status refresh without clearing the real query error or prior snapshot. Real-Colada cancellation/error tests included."
       ]
     }
   ],
