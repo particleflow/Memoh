@@ -1,0 +1,5 @@
+--- FAIL: TestCleanupBotContainerRemovesOnlyItsEmptyRuntimeDirectory (0.00s)
+    runtime_directory_linux_test.go:70: path "<test-temp>/run/<bot-id>": present=false, err=<nil>
+FAIL
+FAIL	github.com/felinics/memoh/internal/workspace	0.008s
+FAIL
