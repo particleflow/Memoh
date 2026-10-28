@@ -1,0 +1,11 @@
+{
+  "versionName": "1.0.24",
+  "versionCode": 1000024,
+  "productSourceParent": "8b2b403df125f569ebfc7ed4f354de43f520d94d",
+  "unifiedCommit": "7bf48c2cc6cfcd6f4c8b3812210cfbf44d3b2ac8",
+  "unifiedTree": "b59a0d7ba045a7eb951e1acf627432f7a27805f8",
+  "sharedWebSDKIdenticalTo": "dfd68e8058b2f982c877be0e36e402c7f2d0c163",
+  "productTestsReused": 17,
+  "SDKDownloadRequired": false,
+  "old123Preserved": true
+}

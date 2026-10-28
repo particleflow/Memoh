@@ -396,6 +396,8 @@
       "local": "shared-inaccessible-attachment-changes.json",
       "sha256": "ee404f00e262875d0268e923b3fbd085cf1d28288b2a955eac39c5f4f5177276"
     },
-    "scope": "Five shared product-file presentation deltas only; retain native verified original readers and scoped authorization, with local mounted-lifetime failure state. No access recovery, retry, API, SDK or history change."
+    "scope": "Five shared product-file presentation deltas only; retain native verified original readers and scoped authorization, with local mounted-lifetime failure state. No access recovery, retry, API, SDK or history change.",
+    "unifiedCompatibleCommit": "7bf48c2cc6cfcd6f4c8b3812210cfbf44d3b2ac8",
+    "unifiedWebAndSDKIdenticalTo": "dfd68e8058b2f982c877be0e36e402c7f2d0c163"
   }
 }
