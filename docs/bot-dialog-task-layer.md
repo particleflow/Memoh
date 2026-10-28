@@ -1,5 +1,7 @@
 # Bot contact and task execution contract
 
+> Current integration status: see [the reviewed v3 integration handoff](testing/unified-bot-v3-c304/README.md). Earlier slice findings below are retained as historical evidence; native queue admission is now implemented, while summary/unknown delivery remains incomplete.
+
 Status: local result-origin, contact-navigation and persisted-directory slices,
 incomplete. Base commit:
 `a0a821a4cdaa32121a945d04e80c76bba4b6f2b4`. No production deployment,
@@ -113,20 +115,38 @@ schema179 test confirms a result can lead its own turn and retain model history.
 
 The modified application was built and started with real Server/Web and an
 isolated schema179 database. Chromium logged in and sent an ordinary message.
-That real flow failed before reaching any model: the local test Bot has no
-workspace bridge socket and the normal user-message hook returned
-`hook.user_message_failed`. The environment has no workspace image. No hook,
-workspace readiness or permission check was disabled to bypass this failure.
-The actual failure screenshot was captured and inspected. Therefore the
-background-result natural reply UI flow is **not verified**, and this slice is
-not ready for integration or production acceptance. A scripted loopback provider
-was prepared but did not receive a model request.
+The first flow failed before model execution because the local test Bot lacked
+its workspace bridge. A normal workspace-management request pulled the configured
+workspace image. Its client timed out, but readback established a running workspace
+and the original POST's server-side success; it was not resubmitted. The worker
+workspace was likewise read back after its timeout. No hook, workspace readiness
+or permission check was disabled. The initial failure evidence remains preserved.
+
+After recovery, actual native runs against a scripted loopback model provider
+verified the slice at `http://127.0.0.1:28082/bot/local-dialog`: an independently
+delegated execution took 12 seconds while a new contact chat reply arrived in
+0.30 seconds; the original worker run and delegation became completed; its
+result extraction appeared once; delivery retry produced no extra reply; live
+and reloaded history contained no machine result user bubble. A separate actual
+provider error left the task failed, with a visible failure reply and hidden
+machine input before and after reload. Screenshots were captured and inspected;
+the successful flow reported no page errors. The delegation was submitted through
+the actual HTTP API, not autonomously chosen by a real model. No paid model was
+used. This proves local execution/projection wiring, not natural model judgment,
+mobile/PC behavior, full product requirements or production acceptance.
+
+One early test fixture unconditionally returned success even for a real failed
+worker startup. Its misleading assistant text remains in the isolated history;
+the task record was and remains failed. That fixture mistake is excluded from
+acceptance. The corrected fixture distinguishes the current result state, and
+the later completed and failed runs above were checked against actual records.
 
 Still unimplemented: durable self-background admission integration,
 the remaining sources of the complete Bot task directory, and unknown-state
 notification/reconciliation. Current unknown results remain persisted and are
 not automatically redispatched, but their existing no-notification gap remains.
 These are implementation gaps, not tasks completed by this origin fix.
+The complete feature remains unready for integration or production acceptance.
 
 Continue in the same dedicated task. The parent reports configuring Astra/high;
 the worker cannot independently inspect the serving model, which is not a
