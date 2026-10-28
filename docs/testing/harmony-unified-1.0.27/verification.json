@@ -1,0 +1,85 @@
+{
+  "productName": "Garnet Assistant",
+  "versionName": "1.0.27",
+  "versionCode": 1000027,
+  "sourceCommit": "2195e92f1ff0a354e6cb4ab4bc86a4f1533d42c7",
+  "sourceParent": "b66c1b3eb1f93f765379c97dbf4bf7d3ac7a9ae0",
+  "sourceIdentitySHA256": "9a735b6537179338ae7b9b8be48ecfbcc74458d5e1b7ea679c5b04009c28ce9e",
+  "effectiveSharedCommit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+  "compatibleBackendCommit": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "webSDKDiffEmpty": true,
+  "hapName": "garnet-assistant-1.0.27-1000027-api26-release-unsigned.hap",
+  "hapBytes": 37655842,
+  "hapSHA256": "a509b37b3a09c040ff8d2f6d461439168a7173803653a72fbc80521e097db2eb",
+  "bundleName": "cloud.begonia.workassistant",
+  "sdkVersion": "26.0.0.105",
+  "releaseMode": true,
+  "officialApi26Compile": true,
+  "signed": false,
+  "privateConfigurationInjected": false,
+  "publicConfigurationEmpty": true,
+  "publicConfigBytes": 8192,
+  "crcVerified": true,
+  "formalInputs": 155,
+  "resourceDigestsVerified": true,
+  "identityPermissionsRetained": true,
+  "approvedArtworkCommit": "bd0b3933d24d944973fdca8e7d22c6f6b2a507bc",
+  "artworkMatches": {
+    "whale": [],
+    "koi": [
+      "resources/base/media/startup_art.png"
+    ]
+  },
+  "compiledWhaleIcon": {
+    "sourceBytesUnchanged": true,
+    "officialCompiledSize": [
+      512,
+      512
+    ],
+    "compiledBytes": 317137,
+    "compiledSHA256": "c4b7243068dc6ac77b4c22ca5b03f1069436caf4ce4a7a7768f7745140ebee37",
+    "HAPByteIdenticalToSource": false
+  },
+  "watermarkMaxAlpha": 6,
+  "featurePresence": {
+    "/bots/{bot_id}/tasks": [
+      "resources/rawfile/client-web/assets/sdk.gen-DXBXIwzc.js"
+    ],
+    "/tts/playback": [
+      "resources/rawfile/client-web/assets/sdk.gen-DXBXIwzc.js"
+    ],
+    "contactNavigationPending": [
+      "resources/rawfile/client-web/assets/chat-list-C2BetuLy.js",
+      "resources/rawfile/client-web/assets/main-BvBDyqqX.js",
+      "resources/rawfile/client-web/assets/workspace-tabs-DzxiGNqn.js"
+    ],
+    "__garnetImageTiming": [
+      "resources/rawfile/client-web/assets/chat-list-C2BetuLy.js",
+      "ets/modules.abc"
+    ]
+  },
+  "packageScan": {
+    "findings": [],
+    "exhaustiveEncodingClaim": false
+  },
+  "phoneAcceptance": false,
+  "NASDeployedByThisTask": false,
+  "SDKDownloaded": false,
+  "newBuildCount": 1,
+  "compilerMetadataDifference": {
+    "module.virtualMachine": {
+      "old": "ark24.0.0.0",
+      "actual": "ark",
+      "officialReadOnlyProbe": "24.0.0.0",
+      "ABCVersionBytes": [
+        24,
+        0,
+        0,
+        0
+      ]
+    },
+    "approvedStartupIconChanged": true,
+    "allOtherIdentityPermissionsAndMetadataEqualTo26": true
+  },
+  "originalQualificationFailureRetained": true
+}

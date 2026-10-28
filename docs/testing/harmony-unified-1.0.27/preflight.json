@@ -1,0 +1,11 @@
+{
+  "version": "1.0.27",
+  "versionCode": 1000027,
+  "productSourceParent": "b66c1b3eb1f93f765379c97dbf4bf7d3ac7a9ae0",
+  "effectiveShared": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+  "compatibleRelease": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "webSDKDiffEmpty": true,
+  "remote27Absent": true,
+  "sdk": "26.0.0.105",
+  "noSDKDownload": true
+}
