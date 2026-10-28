@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Button } from '@felinic/ui'
-import type { ConversationRelation } from '../composables/useConversationRelations'
+import { relationHasDestination, type ConversationRelation } from '../composables/useConversationRelations'
 import { sessionBotRunStatus } from '../composables/session-bot-run'
 
 const props = defineProps<{ row: ConversationRelation, items: ConversationRelation[], disabled: boolean }>()
@@ -20,7 +20,7 @@ const state = computed(() => props.row.state === 'errored' || props.row.state ==
       variant="ghost"
       size="sm"
       class="w-full justify-between"
-      :disabled="disabled"
+      :disabled="disabled || !relationHasDestination(row)"
       @click="emit('open', row)"
     >
       <span class="min-w-0 truncate">{{ row.name || fallback }}</span>
