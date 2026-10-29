@@ -1,0 +1,95 @@
+=== RUN   TestBotTaskResultQueueVisibilityAndReplay
+--- PASS: TestBotTaskResultQueueVisibilityAndReplay (0.00s)
+=== RUN   TestBotTaskResultTwoQueuedResultsKeepIdentityAndHostInput
+--- PASS: TestBotTaskResultTwoQueuedResultsKeepIdentityAndHostInput (0.00s)
+=== RUN   TestBotTaskResultResumeRetainsOriginAndRejectsRevocationBeforeAdmission
+=== RUN   TestBotTaskResultResumeRetainsOriginAndRejectsRevocationBeforeAdmission/authorized
+=== RUN   TestBotTaskResultResumeRetainsOriginAndRejectsRevocationBeforeAdmission/revoked
+--- PASS: TestBotTaskResultResumeRetainsOriginAndRejectsRevocationBeforeAdmission (0.00s)
+    --- PASS: TestBotTaskResultResumeRetainsOriginAndRejectsRevocationBeforeAdmission/authorized (0.00s)
+    --- PASS: TestBotTaskResultResumeRetainsOriginAndRejectsRevocationBeforeAdmission/revoked (0.00s)
+=== RUN   TestBotTaskResultCannotBeRetriedOrEditedAsUserInput
+--- PASS: TestBotTaskResultCannotBeRetriedOrEditedAsUserInput (0.00s)
+=== RUN   TestBotTaskResultHistoryRetainsInputAndOnlyRendersExtractedReply
+--- PASS: TestBotTaskResultHistoryRetainsInputAndOnlyRendersExtractedReply (0.00s)
+=== RUN   TestBotTaskResultEarlyPersistenceUsesSameVisibility
+--- PASS: TestBotTaskResultEarlyPersistenceUsesSameVisibility (0.00s)
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply/final
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply/progress
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply/truncated
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply/interrupted
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply/steered
+=== RUN   TestTaskResultReceiptRequiresCompleteFinalReply/empty
+--- PASS: TestTaskResultReceiptRequiresCompleteFinalReply (0.00s)
+    --- PASS: TestTaskResultReceiptRequiresCompleteFinalReply/final (0.00s)
+    --- PASS: TestTaskResultReceiptRequiresCompleteFinalReply/progress (0.00s)
+    --- PASS: TestTaskResultReceiptRequiresCompleteFinalReply/truncated (0.00s)
+    --- PASS: TestTaskResultReceiptRequiresCompleteFinalReply/interrupted (0.00s)
+    --- PASS: TestTaskResultReceiptRequiresCompleteFinalReply/steered (0.00s)
+    --- PASS: TestTaskResultReceiptRequiresCompleteFinalReply/empty (0.00s)
+=== RUN   TestNativeTaskResultIsInternalAcrossQueueLiveAndResume
+--- PASS: TestNativeTaskResultIsInternalAcrossQueueLiveAndResume (0.00s)
+=== RUN   TestAdmitTurnRunRequestUserTurnReachesSubscriber
+    turn_admission_integration_test.go:41: set TEST_POSTGRES_DSN to run the turn admission PostgreSQL integration
+--- SKIP: TestAdmitTurnRunRequestUserTurnReachesSubscriber (0.00s)
+=== RUN   TestAdmitTurnRunProjectsRequestUserTurn
+=== PAUSE TestAdmitTurnRunProjectsRequestUserTurn
+=== CONT  TestAdmitTurnRunProjectsRequestUserTurn
+--- PASS: TestAdmitTurnRunProjectsRequestUserTurn (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	0.039s
+=== RUN   TestNewRequestUserTurnNilWithoutPersistedUserMessage
+=== PAUSE TestNewRequestUserTurnNilWithoutPersistedUserMessage
+=== RUN   TestNewRequestUserTurnTextMessage
+=== PAUSE TestNewRequestUserTurnTextMessage
+=== RUN   TestNewRequestUserTurnDisplayTextMirrorsPersistence
+=== PAUSE TestNewRequestUserTurnDisplayTextMirrorsPersistence
+=== RUN   TestNewRequestUserTurnBareSkillActivation
+=== PAUSE TestNewRequestUserTurnBareSkillActivation
+=== RUN   TestNewRequestUserTurnLocalPlatformHasNoSender
+=== PAUSE TestNewRequestUserTurnLocalPlatformHasNoSender
+=== RUN   TestNewRequestUserTurnReplyAndForward
+=== PAUSE TestNewRequestUserTurnReplyAndForward
+=== RUN   TestNewRequestUserTurnTimestampRecent
+=== PAUSE TestNewRequestUserTurnTimestampRecent
+=== CONT  TestNewRequestUserTurnNilWithoutPersistedUserMessage
+=== CONT  TestNewRequestUserTurnLocalPlatformHasNoSender
+--- PASS: TestNewRequestUserTurnLocalPlatformHasNoSender (0.00s)
+=== CONT  TestNewRequestUserTurnTimestampRecent
+--- PASS: TestNewRequestUserTurnTimestampRecent (0.00s)
+=== CONT  TestNewRequestUserTurnReplyAndForward
+=== CONT  TestNewRequestUserTurnDisplayTextMirrorsPersistence
+=== RUN   TestNewRequestUserTurnDisplayTextMirrorsPersistence/visible_text_wins
+=== PAUSE TestNewRequestUserTurnDisplayTextMirrorsPersistence/visible_text_wins
+--- PASS: TestNewRequestUserTurnReplyAndForward (0.00s)
+=== CONT  TestNewRequestUserTurnTextMessage
+--- PASS: TestNewRequestUserTurnTextMessage (0.00s)
+=== RUN   TestNewRequestUserTurnDisplayTextMirrorsPersistence/skill_activation_keeps_visible_text
+=== RUN   TestNewRequestUserTurnNilWithoutPersistedUserMessage/empty_command
+=== PAUSE TestNewRequestUserTurnDisplayTextMirrorsPersistence/skill_activation_keeps_visible_text
+=== PAUSE TestNewRequestUserTurnNilWithoutPersistedUserMessage/empty_command
+=== CONT  TestNewRequestUserTurnBareSkillActivation
+--- PASS: TestNewRequestUserTurnBareSkillActivation (0.00s)
+=== RUN   TestNewRequestUserTurnDisplayTextMirrorsPersistence/envelope_unwrapped
+=== PAUSE TestNewRequestUserTurnDisplayTextMirrorsPersistence/envelope_unwrapped
+=== CONT  TestNewRequestUserTurnDisplayTextMirrorsPersistence/visible_text_wins
+=== RUN   TestNewRequestUserTurnNilWithoutPersistedUserMessage/blank_query
+=== CONT  TestNewRequestUserTurnDisplayTextMirrorsPersistence/envelope_unwrapped
+=== CONT  TestNewRequestUserTurnDisplayTextMirrorsPersistence/skill_activation_keeps_visible_text
+=== PAUSE TestNewRequestUserTurnNilWithoutPersistedUserMessage/blank_query
+--- PASS: TestNewRequestUserTurnDisplayTextMirrorsPersistence (0.00s)
+    --- PASS: TestNewRequestUserTurnDisplayTextMirrorsPersistence/visible_text_wins (0.00s)
+    --- PASS: TestNewRequestUserTurnDisplayTextMirrorsPersistence/envelope_unwrapped (0.00s)
+    --- PASS: TestNewRequestUserTurnDisplayTextMirrorsPersistence/skill_activation_keeps_visible_text (0.00s)
+=== RUN   TestNewRequestUserTurnNilWithoutPersistedUserMessage/attachment_only
+=== PAUSE TestNewRequestUserTurnNilWithoutPersistedUserMessage/attachment_only
+=== CONT  TestNewRequestUserTurnNilWithoutPersistedUserMessage/empty_command
+=== CONT  TestNewRequestUserTurnNilWithoutPersistedUserMessage/blank_query
+=== CONT  TestNewRequestUserTurnNilWithoutPersistedUserMessage/attachment_only
+--- PASS: TestNewRequestUserTurnNilWithoutPersistedUserMessage (0.00s)
+    --- PASS: TestNewRequestUserTurnNilWithoutPersistedUserMessage/empty_command (0.00s)
+    --- PASS: TestNewRequestUserTurnNilWithoutPersistedUserMessage/blank_query (0.00s)
+    --- PASS: TestNewRequestUserTurnNilWithoutPersistedUserMessage/attachment_only (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/view	0.010s

@@ -1,0 +1,44 @@
+{
+  "repository": "particleflow/Memoh",
+  "branch": "fix/nas-streaming-visible-progress",
+  "sourceCommit": "12d753df21cd508f0b0d962f4b71cfd3b1830a6c",
+  "sourceTree": "12effa70eb1467ab0a15dbe4bfc6159fdf73fcd8",
+  "sourceParent": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "originalReport": "docs/testing/nas-streaming-visible-progress.md",
+  "originalReportSHA256": "d91ad600a04af4b717dcc8f13baf712ce5d97edafa1370dddcc4727626657708",
+  "artifacts": {
+    "streaming-visible-progress.patch": {
+      "sha256": "39c8db6cd670937abf839da20cff075a355b0fec431c2716af65aae0b63df28a",
+      "bytes": 232102
+    },
+    "runtime-minimal.patch": {
+      "sha256": "c8bc110366dabc952f803323e588cac3ad20f8477210ad30c5aab1192f9222a0",
+      "bytes": 1428
+    },
+    "web-tests.txt": {
+      "sha256": "449b74c9364fb0794268c56227d78218aaab7b7fde7c126bf79cbb5cdad5e5de",
+      "bytes": 334
+    },
+    "result-origin-tests.txt": {
+      "sha256": "2e401960a6d72c63965cf1068b7b1f86b413c11424f726e114bfec84209ccc5d",
+      "bytes": 6537
+    },
+    "full-lint.txt": {
+      "sha256": "e66901fa5db4937ce78224d616c0c0e7cbec82cc7e605e75be1dbf871f61b423",
+      "bytes": 7038
+    },
+    "typecheck.txt": {
+      "sha256": "a7408d0481ffdf4f1cc2cec5dd7d5b82a7a41a861349f2ec8d8f1cbf4b392012",
+      "bytes": 104
+    },
+    "existing-run-observation.md": {
+      "sha256": "42422950193243e60df3b3398d7314c2f9507e1134f4e99f4c5d6fc88b0cee96",
+      "bytes": 7238
+    },
+    "ui-timing.json": {
+      "sha256": "b2e77096319e553207d59bc7408b49a441996682c48a5880be951d5a43914ec2",
+      "bytes": 10296
+    }
+  },
+  "validation": "No tests or builds repeated for this handoff. Original source validation only; full lint failed unchanged subagent.go contextcheck at 389/401. No production/device acceptance."
+}

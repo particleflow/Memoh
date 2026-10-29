@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/streaming
+
+
+ Test Files  4 passed (4)
+      Tests  77 passed (77)
+   Start at  08:46:09
+   Duration  9.34s (transform 8.31s, setup 0ms, import 4.18s, tests 6.85s, environment 620ms)
+
