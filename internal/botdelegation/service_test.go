@@ -14,6 +14,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+
+	"github.com/felinics/memoh/internal/chat/thread"
 )
 
 type memoryLedger struct {
@@ -292,13 +294,21 @@ func TestTextAndSingleOriginalReturnThenRevocation(t *testing.T) {
 }
 
 func TestRetryDeliveryNeverRunsSpecialistAgain(t *testing.T) {
-	s, _, h, in := serviceFixture(t)
+	s, f, h, in := serviceFixture(t)
+	// This legacy contract stops after accepted delivery. The opted-in native
+	// result path instead rechecks its durable publication receipt on each retry.
+	source := f.sessions["child"]
+	source.RuntimeType = thread.RuntimeACPAgent
+	f.sessions[source.ID] = source
 	h.deliverErr = errors.New("SECRET delivery response lost")
 	v, err := s.Submit(t.Context(), "manager", "user", "child", in)
 	if err != nil {
 		t.Fatal(err)
 	}
 	s.wg.Wait()
+	if s.Ledger.(*memoryLedger).records[v.ID].Payload.ResultDeliveryVersion != 0 {
+		t.Fatal("legacy delivery fixture unexpectedly opted in")
+	}
 	h.deliverErr = nil
 	for range 3 {
 		v, err = s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID)
@@ -316,6 +326,33 @@ func TestRetryDeliveryNeverRunsSpecialistAgain(t *testing.T) {
 	if _, err = s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID); !errors.Is(err, ErrConflict) {
 		t.Fatal("unknown execution retried")
 	}
+}
+
+func TestRetryOptedInDeliveryReconcilesOriginalRecord(t *testing.T) {
+	s, _, h, in := serviceFixture(t)
+	h.deliverErr = errors.New("synthetic delivery acknowledgement lost")
+	v, err := s.Submit(t.Context(), "manager", "user", "child", in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s.wg.Wait()
+	before := s.Ledger.(*memoryLedger).records[v.ID]
+	if before.Payload.ResultDeliveryVersion != 1 || before.DeliveryState != "unknown" {
+		t.Fatalf("not an opted-in uncertain delivery: %+v", before)
+	}
+	h.deliverErr = nil
+	for range 3 {
+		got, err := s.RetryDelivery(t.Context(), "manager", "user", "child", v.ID)
+		if err != nil || got.ID != v.ID || got.DeliveryState != "accepted" {
+			t.Fatalf("reconcile=%+v %v", got, err)
+		}
+	}
+	after := s.Ledger.(*memoryLedger).records[v.ID]
+	if h.runs.Load() != 1 || h.creates.Load() != 1 || h.deliveries.Load() != 4 || after.RunID != before.RunID || after.Identity != before.Identity {
+		t.Fatal("reconciliation changed execution identity or skipped the host receipt check")
+	}
+	// Host calls count reconciliation entries, not user messages. Exactly-once
+	// publication is covered separately by the real PostgreSQL receipt test.
 }
 
 func TestListSnapshotCursorLiveStatusAndRevokedCandidateBudget(t *testing.T) {

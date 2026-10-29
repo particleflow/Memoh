@@ -288,7 +288,7 @@ func (s *Service) RetryDelivery(ctx context.Context, bot, user, session, id stri
 	if err != nil {
 		return View{}, err
 	}
-	if r.State != "completed" && r.State != "failed" && !(r.State == "unknown" && r.Payload.ResultDeliveryVersion == 1) {
+	if r.State != "completed" && r.State != "failed" && (r.State != "unknown" || r.Payload.ResultDeliveryVersion != 1) {
 		return View{}, ErrConflict
 	}
 	if r.DeliveryState == "accepted" && r.Payload.ResultDeliveryVersion == 0 {

@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -28,11 +29,11 @@ func (r Reference) String() string {
 func Parse(s string) (Reference, error) {
 	p := strings.Split(s, ":")
 	if len(p) != 4 || (p[0] != "native_task" && p[0] != "bot_delegation") || p[1] == "" || len(p[2]) != 64 {
-		return Reference{}, fmt.Errorf("invalid task result reference")
+		return Reference{}, errors.New("invalid task result reference")
 	}
 	n, e := strconv.Atoi(p[3])
 	if e != nil || n < 1 || n > MaxAttempts {
-		return Reference{}, fmt.Errorf("invalid summary attempt")
+		return Reference{}, errors.New("invalid summary attempt")
 	}
 	if _, e = hex.DecodeString(p[2]); e != nil {
 		return Reference{}, e

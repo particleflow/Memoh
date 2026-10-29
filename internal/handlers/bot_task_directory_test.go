@@ -26,7 +26,7 @@ type directoryHTTPFixture struct {
 	denyDuringRead      bool
 }
 
-func (f directoryHTTPFixture) ReadBotTaskRun(context.Context, string, string, string) (dbstore.BotTaskRunReference, error) {
+func (directoryHTTPFixture) ReadBotTaskRun(context.Context, string, string, string) (dbstore.BotTaskRunReference, error) {
 	return dbstore.BotTaskRunReference{BotID: taskBot, SessionID: taskChild, RunID: taskOp, TurnID: taskOp, InvocationID: "subagent:bg_original"}, nil
 }
 

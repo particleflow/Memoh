@@ -203,7 +203,9 @@ func TestTaskResultPostgresCrashWindows(t *testing.T) {
 		t.Fatal("already reported event can execute again")
 	}
 	var executions int
-	pool.QueryRow(ctx, `SELECT count(*) FROM session_runs WHERE session_id=$1 AND invocation_id=$2`, child, "subagent:"+r.TaskID).Scan(&executions)
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM session_runs WHERE session_id=$1 AND invocation_id=$2`, child, "subagent:"+r.TaskID).Scan(&executions); err != nil {
+		t.Fatal(err)
+	}
 	if executions != 1 {
 		t.Fatalf("external task replayed: %d", executions)
 	}

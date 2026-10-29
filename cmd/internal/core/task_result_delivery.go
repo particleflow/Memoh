@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log/slog"
 	"sync"
 	"time"
@@ -57,7 +56,7 @@ func (h *delegationHost) wakeResults(context.Context) {
 	}
 	w.running = true
 	w.wg.Add(1)
-	go func() {
+	go func(lifecycleCtx context.Context) {
 		defer w.wg.Done()
 		for {
 			w.mu.Lock()
@@ -68,14 +67,14 @@ func (h *delegationHost) wakeResults(context.Context) {
 			}
 			w.dirty = false
 			w.mu.Unlock()
-			ctx, cancel := context.WithTimeout(w.ctx, 30*time.Second)
+			ctx, cancel := context.WithTimeout(lifecycleCtx, 30*time.Second)
 			err := h.scanResults(ctx)
 			cancel()
 			if err != nil && w.log != nil {
 				w.log.Warn("task result delivery remains pending", slog.Any("error", err))
 			}
 		}
-	}()
+	}(w.ctx)
 }
 
 func (h *delegationHost) scanResults(ctx context.Context) error {
@@ -216,7 +215,8 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 			return t, errResultNotReady
 		}
 		run, e := h.store.GetSessionRunByInvocation(ctx, sqlc.GetSessionRunByInvocationParams{SessionID: nativeTaskUUID(r.SessionID), InvocationID: "subagent:" + r.TaskID})
-		if e == nil {
+		switch {
+		case e == nil:
 			if run.BotID.String() != bot || run.TeamID.String() != b.TeamID {
 				return t, botdelegation.ErrDenied
 			}
@@ -227,9 +227,9 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
 			if t.state == "lost" {
 				t.state = "unknown"
 			}
-		} else if !errors.Is(e, pgx.ErrNoRows) {
+		case !errors.Is(e, pgx.ErrNoRows):
 			return t, e
-		} else if r.State == "claimed" {
+		case r.State == "claimed":
 			return t, errResultNotReady
 		}
 		t.text = "Background task " + r.Description + " execution state: " + t.state + "."
@@ -408,7 +408,7 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
 		}
 		return h.resultSubmit(ctx, ref.String(), t.cmd)
 	}
-	return fmt.Errorf("task result changed during delivery; retained for reconciliation")
+	return errors.New("task result changed during delivery; retained for reconciliation")
 }
 
 func (h *delegationHost) prepareResult(ctx context.Context, req application.ChatRequest) (context.Context, application.ChatRequest, error) {
