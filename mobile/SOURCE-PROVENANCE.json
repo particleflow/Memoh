@@ -98,14 +98,15 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "bd0929f4703d082ff19a694705e058026863adcee632bfe77bebdf1a2a6f2b50",
+      "sha256": "72807f016b423b22dc381959f34fab4e19211b3f11904f583d5bb83d53256f9e",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "Attachment staging follow-up: preserve a published snapshot on directory-sync failure and record sanitized fixed staging failure phases; targeted isolated real-byte checks only, no phone acceptance or UI copy change."
+        "Attachment staging follow-up: preserve a published snapshot on directory-sync failure and record sanitized fixed staging failure phases; targeted isolated real-byte checks only, no phone acceptance or UI copy change.",
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
       ]
     },
     {
@@ -162,12 +163,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
-      "sha256": "e55acc09fd3925cf6f7480acae6474ecfcc7e32909cdefc23f71af8312621ae5",
+      "sha256": "a92cdbcabf3c38a45609e919462b949b732b14f08845bdebbfa44ea8d51b78d8",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration."
+        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
       ]
     },
     {
@@ -334,24 +336,26 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "774530fc2de1181bf100b0a241659dc1ba1d94b2091a5c538725054eabb270db",
+      "sha256": "85edab6640863b4c4de76bba8f8663b71d70fb5164ce30fe888f34b39a4ed366",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
-        "Attachment staging follow-up: preserve a published snapshot on directory-sync failure and record sanitized fixed staging failure phases; targeted isolated real-byte checks only, no phone acceptance or UI copy change."
+        "Attachment staging follow-up: preserve a published snapshot on directory-sync failure and record sanitized fixed staging failure phases; targeted isolated real-byte checks only, no phone acceptance or UI copy change.",
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
       ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable_frontend.cjs",
-      "sha256": "4b1e6425d4a9b9156b6dcc3c29e6a977b1b4784517e5eb0c32a050f84ad42712",
+      "sha256": "d8c74f83e811a61a38ffa58843f08577e196b1a690d7e158de6fcde0f9e0130c",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration."
+        "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
       ]
     },
     {
@@ -718,7 +722,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
-      "sha256": "dbe4568cd9a686b81b5c9d463353e509ef774477dc0d4690b302e98cc3981566",
+      "sha256": "795d086ad2d999f6ba7b9967c535b0da7afcd3b8479e764d8839e67a37adfc47",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
@@ -728,7 +732,8 @@
         "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
       ],
       "nativeIntegrationBaseSHA256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde"
     },

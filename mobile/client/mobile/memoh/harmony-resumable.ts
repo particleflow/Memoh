@@ -2,6 +2,27 @@ import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'
 export interface NativeAttachment { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; scope: string }
 export interface NativeUploadReceipt { content_hash: string; size_bytes: number; mime: string }
+export interface NativeUploadFailure { version: 1; phase: string; sdkCode: number; at: number; code: string }
+const failurePhases = ['owner-read', 'limits-read', 'picker', 'source-metadata', 'source-open', 'snapshot-create',
+  'snapshot-copy', 'snapshot-hash', 'source-verify', 'journal-publish', 'journal-dir-sync']
+const failureCodes = ['MEDIA_SHA_MISMATCH', 'MEDIA_SIZE_MISMATCH', 'MEDIA_SHORT_READ', 'MEDIA_SHORT_WRITE',
+  'UPLOAD_CANCELLED', 'UPLOAD_REQUEST', 'UPLOAD_IDENTITY', 'UPLOAD_LIMIT_INVALID', 'UPLOAD_JOURNAL_SIZE',
+  'UPLOAD_JOURNAL_WRITE', 'UPLOAD_RECEIPT_SIZE', 'UPLOAD_HTTP_413', 'VOICE_UNAVAILABLE']
+function normalizeUploadFailure(value: unknown, code: unknown): NativeUploadFailure | undefined {
+  if (!value || typeof value !== 'object') return
+  const failure = value as NativeUploadFailure
+  if (failure.version !== 1 || !failurePhases.includes(failure.phase) || !Number.isSafeInteger(failure.sdkCode)
+    || failure.sdkCode < 0 || failure.sdkCode > 2147483647 || !Number.isSafeInteger(failure.at) || failure.at <= 0) return
+  return { version: 1, phase: failure.phase, sdkCode: failure.sdkCode, at: failure.at,
+    code: typeof code === 'string' && failureCodes.includes(code) ? code : 'UNCLASSIFIED' }
+}
+// An existing error presenter can consume this without displaying raw SDK messages.
+// No network, storage, event publication or user action is performed here.
+export function nativeUploadFailure(error: unknown): NativeUploadFailure | undefined {
+  if (!error || typeof error !== 'object') return
+  const value = (error as { nativeFailure?: NativeUploadFailure }).nativeFailure
+  return normalizeUploadFailure(value, value?.code)
+}
 export const nativeAttachmentsAvailable = typeof window !== 'undefined' && !!(window as Window & { begoniaNative?: unknown }).begoniaNative
 async function bridge(command: string, fields: object) {
   const host = window as Window & { begoniaNative?: { request: (raw: string) => Promise<string> } }
@@ -50,7 +71,7 @@ export async function nativeAttachmentCommand<T>(command: string, botId: string,
       if (!reply.ok) {
         const status = /^UPLOAD_HTTP_(401|403)$/.exec(reply.error ?? '')
         if (status) return new Response(null, { status: Number(status[1]) })
-        throw new Error(reply.error === 'UPLOAD_RESUME_UNAVAILABLE' ? '服务器暂不支持恢复；原件仍保留，请稍后重试'
+        const error = new Error(reply.error === 'UPLOAD_RESUME_UNAVAILABLE' ? '服务器暂不支持恢复；原件仍保留，请稍后重试'
           : reply.error === 'UPLOAD_LEGACY_UNCERTAIN' ? '旧服务不支持续传，写入结果未确认，请先核对原件'
           : reply.error === 'UPLOAD_CREATE_UNCERTAIN' ? '创建回执未确认；原件已保留，需先核对，不能重复创建'
           : reply.error === 'UPLOAD_RECEIPT_UNAVAILABLE' ? '原上传回执不可用；原件和原回执身份已保留，需先核对'
@@ -59,6 +80,9 @@ export async function nativeAttachmentCommand<T>(command: string, botId: string,
           : reply.error === 'UPLOAD_BUSY' ? '正在处理另一份原件，请稍后重试'
           : reply.error === 'UPLOAD_HTTP_413' ? '附件为空或超过服务端限制'
           : '附件未完成：原件校验、授权或网络未通过；可从恢复入口重试')
+        const failure = normalizeUploadFailure(reply.failure, reply.error)
+        if (failure) Object.assign(error, { nativeFailure: failure })
+        throw error
       }
       return new Response(JSON.stringify(reply.data ?? null), { status: 200 })
     })(sdkApiUrl({ url: '/users/me' }), { headers: { authorization: 'Bearer ' + token } })

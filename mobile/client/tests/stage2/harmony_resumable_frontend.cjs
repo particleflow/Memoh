@@ -1,11 +1,27 @@
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict'),crypto=require('node:crypto')
-const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
+const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_TYPESCRIPT||path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
 let intake,stageBegins=0,maxLocalChunk=0;
 let generation=0,token='synthetic-a',listeners=new Set(),calls=[],mode='normal',replyLater,authResponses=[]
 const host={begoniaNative:{request:async raw=>{const q=JSON.parse(raw);assert.ok(Buffer.byteLength(raw)<100000);calls.push(q);assert.equal(q.file,undefined);assert.equal(q.bytes,undefined);assert.equal(q.base64,undefined);if(q.command==='upload.close'||q.command==='upload.pause')return '{"ok":true}';if(q.command==='upload.stage.begin'){stageBegins++;intake={handle:crypto.randomBytes(16).toString('hex'),offset:0,size:q.size,name:q.name,type:q.type,scope:q.scope,hash:crypto.createHash('sha256')};return JSON.stringify({ok:true,data:{handle:intake.handle}})}if(q.command==='upload.stage.append'){const bytes=Buffer.from(q.data,'base64');assert.ok(bytes.length<=65536);maxLocalChunk=Math.max(maxLocalChunk,bytes.length);assert.equal(q.offset,intake.offset);intake.hash.update(bytes);intake.offset+=bytes.length;return JSON.stringify({ok:true,data:{offset:intake.offset}})}if(q.command==='upload.stage.finish'){assert.equal(intake.offset,intake.size);return JSON.stringify({ok:true,data:{handle:intake.handle,name:intake.name,type:intake.type,size:intake.size,hash:intake.hash.digest('hex'),resumable:true,scope:intake.scope}})}if(mode==='hold')return new Promise(r=>replyLater=r);if(mode==='401')return '{"ok":false,"error":"UPLOAD_HTTP_401"}';return JSON.stringify({ok:true,data:[{handle:'a'.repeat(32),name:'test.bin',type:'application/octet-stream',size:209715200,hash:'b'.repeat(64),resumable:true,scope:q.scope}]})}}}
 const imports={'@/lib/api-client':{sdkAuthQuery:()=>({token}),sdkApiUrl:()=> 'http://example.test/api/users/me',createApiFetch:f=>async(...args)=>{const r=await f(...args);authResponses.push(r.status);return r}},'@/lib/auth-session':{authSessionGeneration:()=>generation,onAuthSessionCleared:f=>{listeners.add(f);return()=>listeners.delete(f)}}}
 const m={exports:{}},s=fs.readFileSync(path.join(root,'mobile/memoh/harmony-resumable.ts'),'utf8');vm.runInNewContext(ts.transpileModule(s,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>imports[n],window:host,crypto:crypto.webcrypto,Response,DOMException,Error,JSON,File,Uint8Array,btoa})
 ;(async()=>{
+ if(process.env.HARMONY_UPLOAD_FAILURE_ENVELOPE_ONLY==='1'){
+  const {nativeAttachmentCommand,nativeUploadFailure}=m.exports,original=host.begoniaNative.request,at=Date.now(),checks=[]
+  for(const [phase,sdkCode,code]of [['source-open',13900012,'VOICE_UNAVAILABLE'],['source-verify',0,'MEDIA_SHA_MISMATCH'],['limits-read',1007900007,'VOICE_UNAVAILABLE']]){
+   let count=0;host.begoniaNative.request=async()=>{count++;return JSON.stringify({ok:false,error:code,failure:{version:1,phase,sdkCode,at,uri:'SECRET_URI',authorization:'SECRET_TOKEN'}})}
+   let caught;try{await nativeAttachmentCommand('upload.select','bot-a','session-a')}catch(error){caught=error}
+   assert.deepEqual(JSON.parse(JSON.stringify(nativeUploadFailure(caught))),{version:1,phase,sdkCode,at,code});assert.equal(count,1);assert.ok(!JSON.stringify(caught).includes('SECRET'));checks.push(phase)
+  }
+  const valid={version:1,phase:'source-open',sdkCode:13900012,at}
+  for(const failure of [undefined,{...valid,version:2},{...valid,phase:'SECRET_URI'},{...valid,sdkCode:-1},{...valid,sdkCode:2147483648},{...valid,at:'SECRET'}]){
+   host.begoniaNative.request=async()=>JSON.stringify({ok:false,error:'VOICE_UNAVAILABLE',failure});let caught;try{await nativeAttachmentCommand('upload.select','bot-a','session-a')}catch(error){caught=error}assert.ok(caught);assert.equal(nativeUploadFailure(caught),undefined)
+  }
+  host.begoniaNative.request=async()=>JSON.stringify({ok:false,error:'UPLOAD_HTTP_403',failure:valid});let denied;try{await nativeAttachmentCommand('upload.select','bot-a','session-a')}catch(error){denied=error}assert.equal(nativeUploadFailure(denied),undefined);assert.equal(authResponses.at(-1),403)
+  let release;host.begoniaNative.request=async()=>new Promise(resolve=>release=resolve);const late=nativeAttachmentCommand('upload.select','bot-a','session-a');generation++;token='synthetic-new';release(JSON.stringify({ok:false,error:'VOICE_UNAVAILABLE',failure:valid}));await assert.rejects(late,error=>error.name==='AbortError'&&nativeUploadFailure(error)===undefined)
+  host.begoniaNative.request=original;assert.equal(listeners.size,1)
+  console.log(JSON.stringify({actualFrontend:true,optionalNativeFailure:checks,unknownAndLegacyAcceptedWithoutMetadata:true,extraFieldsDropped:true,noRawSDKMessage:true,shared403Handler:true,lateAccountReplyRejected:true,newNetworkRequest:false,newUI:false,nativeDevice:false}));return
+ }
  const {nativeAttachmentCommand,validateNativeAttachments}=m.exports
  assert.equal((await nativeAttachmentCommand('upload.list','bot-a','session-a')).length,1);assert.equal(listeners.size,1)
  const before=calls.length,pre=new AbortController();pre.abort();await assert.rejects(nativeAttachmentCommand('upload.run','bot-a','session-a',{},pre.signal));assert.equal(calls.length,before)
