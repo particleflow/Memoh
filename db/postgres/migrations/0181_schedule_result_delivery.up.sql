@@ -11,3 +11,7 @@ ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS claim_deadline TIMESTAMPTZ;
 ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS claim_state TEXT NOT NULL DEFAULT '';
 CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_logs_occurrence
  ON schedule_logs(team_id,schedule_id,scheduled_for) WHERE scheduled_for IS NOT NULL;
+
+-- Distinguish limit exhaustion from an explicit pause before refunding a
+-- definitively unadmitted busy fire. Legacy disabled plans stay disabled.
+ALTER TABLE schedule ADD COLUMN IF NOT EXISTS limit_disabled BOOLEAN NOT NULL DEFAULT false;

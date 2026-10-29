@@ -829,6 +829,7 @@ type ProviderOauthToken struct {
 }
 
 type Schedule struct {
+	LimitDisabled   bool               `json:"limit_disabled"`
 	ResultOrigin    []byte             `json:"result_origin"`
 	MaxRunSeconds   int32              `json:"max_run_seconds"`
 	ID              pgtype.UUID        `json:"id"`

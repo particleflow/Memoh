@@ -55,7 +55,7 @@ func (q *Queries) BindScheduleOccurrenceSession(ctx context.Context, arg BindSch
 
 const claimScheduleOccurrence = `-- name: ClaimScheduleOccurrence :one
 WITH eligible AS MATERIALIZED (
- SELECT s.result_origin, s.max_run_seconds, s.id, s.name, s.description, s.pattern, s.max_calls, s.current_calls, s.created_at, s.updated_at, s.deleted_at, s.enabled, s.command, s.bot_id, s.run_target, s.target_session_id, s.runtime_type, s.bot_agent_id, s.acp_agent_id, s.model_id, s.acp_model_id, s.reasoning_effort, s.workdir_id, s.team_id FROM schedule s
+ SELECT s.limit_disabled, s.result_origin, s.max_run_seconds, s.id, s.name, s.description, s.pattern, s.max_calls, s.current_calls, s.created_at, s.updated_at, s.deleted_at, s.enabled, s.command, s.bot_id, s.run_target, s.target_session_id, s.runtime_type, s.bot_agent_id, s.acp_agent_id, s.model_id, s.acp_model_id, s.reasoning_effort, s.workdir_id, s.team_id FROM schedule s
  WHERE s.team_id=public.memoh_current_team_id() AND s.id=$1::uuid
  AND s.deleted_at IS NULL AND s.enabled AND s.result_origin->>'version'='1'
  FOR UPDATE
@@ -68,6 +68,7 @@ WITH eligible AS MATERIALIZED (
  RETURNING scheduled_for, claim_deadline, claim_state, result_origin, result_delivery, id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id
 ), counted AS (
  UPDATE schedule s SET current_calls=s.current_calls+1,
+ limit_disabled=CASE WHEN s.max_calls IS NOT NULL AND s.current_calls+1>=s.max_calls THEN true ELSE s.limit_disabled END,
  enabled=CASE WHEN s.max_calls IS NOT NULL AND s.current_calls+1>=s.max_calls THEN false ELSE s.enabled END,
  updated_at=now()
  FROM claimed c WHERE s.team_id=c.team_id AND s.id=c.schedule_id
@@ -164,4 +165,48 @@ func (q *Queries) RecoverUnadmittedScheduleOccurrences(ctx context.Context) ([]p
 		return nil, err
 	}
 	return items, nil
+}
+
+const refundBusyScheduleOccurrence = `-- name: RefundBusyScheduleOccurrence :one
+WITH locked AS MATERIALIZED (
+ SELECT id FROM schedule WHERE team_id=public.memoh_current_team_id()
+ AND id=$1::uuid AND bot_id=$2::uuid FOR UPDATE
+), released AS (
+ UPDATE schedule_logs l SET claim_state='busy', status='error',
+ error_code='session_runtime.session_busy', completed_at=clock_timestamp()
+ FROM locked s WHERE l.team_id=public.memoh_current_team_id()
+ AND l.id=$3::uuid AND l.schedule_id=s.id
+ AND l.bot_id=$2::uuid AND l.result_origin->>'version'='1'
+ AND l.claim_state='claimed' AND l.completed_at IS NULL
+ AND NOT EXISTS (SELECT 1 FROM session_runs r WHERE r.team_id=l.team_id AND r.bot_id=l.bot_id
+   AND r.invocation_id='schedule:'||l.schedule_id::text||':'||l.id::text)
+ RETURNING l.id,l.schedule_id
+), refunded AS (
+ UPDATE schedule s SET current_calls=GREATEST(s.current_calls-1,0),
+ enabled=CASE WHEN s.limit_disabled AND s.deleted_at IS NULL
+   AND (s.max_calls IS NULL OR s.current_calls-1<s.max_calls) THEN true ELSE s.enabled END,
+ limit_disabled=CASE WHEN s.limit_disabled
+   AND (s.max_calls IS NULL OR s.current_calls-1<s.max_calls) THEN false ELSE s.limit_disabled END,
+ updated_at=now()
+ FROM released r WHERE s.team_id=public.memoh_current_team_id() AND s.id=r.schedule_id
+ RETURNING s.id
+)
+SELECT r.id FROM released r JOIN refunded s ON s.id=r.schedule_id
+`
+
+type RefundBusyScheduleOccurrenceParams struct {
+	ScheduleID pgtype.UUID `json:"schedule_id"`
+	BotID      pgtype.UUID `json:"bot_id"`
+	FireID     pgtype.UUID `json:"fire_id"`
+}
+
+// The trusted native gateway rejected admission as busy. Preserve this fire as
+// known non-execution, and return its reserved count at most once. Neither an
+// uncertain occurrence nor an existing original invocation can be refunded.
+// Lock order matches ClaimScheduleOccurrence and serializes explicit pauses.
+func (q *Queries) RefundBusyScheduleOccurrence(ctx context.Context, arg RefundBusyScheduleOccurrenceParams) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, refundBusyScheduleOccurrence, arg.ScheduleID, arg.BotID, arg.FireID)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
 }
