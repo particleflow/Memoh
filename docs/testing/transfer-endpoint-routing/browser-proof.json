@@ -1,0 +1,38 @@
+{
+  "environment": "isolated current Go Server/PostgreSQL/Vite/Chromium",
+  "logicalOrigin": "http://127.0.0.1:18683/api",
+  "physicalOrigin": "http://127.0.0.1:18684",
+  "pageErrors": [],
+  "phoneOrNasPublic": false,
+  "partial": {
+    "failure": "AbortError: signal is aborted without reason",
+    "key": "b7fc9bde19496cf762d96b10e5b87063bf4801ea2d370eb8f41f47f1a4cfde24",
+    "receipt": "44de950b-2310-4825-9183-5f1a57d531dd",
+    "hash": "45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "origin": "http://127.0.0.1:18683/api",
+    "offset": 0,
+    "phase": "patch-unknown"
+  },
+  "restored": {
+    "key": "b7fc9bde19496cf762d96b10e5b87063bf4801ea2d370eb8f41f47f1a4cfde24",
+    "hash": "45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "mime": "application/octet-stream",
+    "size": 12582949,
+    "receipt": "44de950b-2310-4825-9183-5f1a57d531dd",
+    "origin": "http://127.0.0.1:18683/api",
+    "offset": 12582949,
+    "phase": "ready",
+    "durationMs": 2048.9000000000233,
+    "restoredFiles": 1,
+    "sourceRetained": true
+  },
+  "download": {
+    "bytes": 12582949,
+    "hash": "45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "durationMs": 491
+  },
+  "uiFileSelection": true,
+  "processRestart": true,
+  "sameReceiptAndJournal": true,
+  "modelCalls": 0
+}

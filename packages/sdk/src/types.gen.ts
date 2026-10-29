@@ -3865,7 +3865,13 @@ export type McpUpsertRequest = {
     url?: string;
 };
 
+export type MediaTransferEndpoint = {
+    logical_origin?: string;
+    physical_origin?: string;
+};
+
 export type MediaTransferNetworkPolicy = {
+    endpoint?: MediaTransferEndpoint;
     lan_addresses?: Array<string>;
     version?: number;
 };
