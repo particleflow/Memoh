@@ -221,9 +221,12 @@ export function createChatViews(deps: ChatViewsDeps) {
       || !resolvedSessionId
       || resolvedBotId !== (deps.currentBotId.value ?? '').trim()
     ) return false
-    return isRuntimeRunStreaming(
-      runtimeProjectionProbe(resolvedSessionId)?.currentRunView,
-    )
+    // Local admission precedes the authoritative runtime projection. Once
+    // that projection arrives it alone owns busy state, including background
+    // handoff; an old local completion promise must not lock the contact.
+    return assistantStreams.assistantStreamsForSession(resolvedBotId, resolvedSessionId)
+      .some(stream => !stream.projectionObserved)
+      || isRuntimeRunStreaming(runtimeProjectionProbe(resolvedSessionId)?.currentRunView)
   }
 
   const streamingSessionId = computed(() => {
@@ -265,6 +268,12 @@ export function createChatViews(deps: ChatViewsDeps) {
       ? isSessionStreaming(botId, sessionId)
       : assistantStreams.isUnboundComposerStreaming(botId)
   })
+
+  function isChatViewAwaitingProjection(target: ChatViewTarget): boolean {
+    const resolved = normalizeTarget(target)
+    return assistantStreams.assistantStreamsForSession(resolved.botId, resolved.sessionId)
+      .some(stream => !stream.projectionObserved)
+  }
 
   function isChatViewStreaming(target: ChatViewTarget, composerScope?: string) {
     const resolved = normalizeTarget(target)
@@ -456,6 +465,7 @@ export function createChatViews(deps: ChatViewsDeps) {
     streamingSessionIds,
     streaming,
     isChatViewStreaming,
+    isChatViewAwaitingProjection,
     workspaceTargetSelectionFor,
     setWorkspaceTargetSelection,
     initializeWorkspaceTargetSelection,

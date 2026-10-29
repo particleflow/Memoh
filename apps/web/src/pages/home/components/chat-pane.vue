@@ -1578,7 +1578,9 @@ const firstSendEntry = computed(() => chatStore.firstSendFor(paneTarget.value))
 // External Agent's REST session creation).
 const draftSendStarting = ref(false)
 const firstSendAwaiting = computed(() =>
-  draftSendStarting.value || (!!firstSendEntry.value && !firstSendEntry.value.revealed))
+  draftSendStarting.value
+  || chatStore.isChatViewAwaitingProjection(paneTarget.value)
+  || (!!firstSendEntry.value && !firstSendEntry.value.revealed))
 // A draft whose first message is in flight is committed to its setup (the
 // folder travels with that message), even before a session id exists.
 const draftSetupEditable = computed(() => !hasRenderedSession.value && !firstSendEntry.value && !draftSendStarting.value)
