@@ -2,8 +2,11 @@
 
 This slice changes shared Web presentation only. The server-resolved contact
 entrance opens a contact-scoped panel. Native (`model`) contact panels omit
-structured assistant tool/reasoning activity, runtime process status, and typed
-background-task notifications. Ordinary user and assistant text is never matched
+raw structured assistant tool activity and typed background-task notifications.
+Provider-returned reasoning and runtime process status remain visible; the
+regression introduced by the original projection is corrected in
+[nas-streaming-visible-progress.md](nas-streaming-visible-progress.md).
+Ordinary user and assistant text is never matched
 against tool names or result wording. Completed questions, errors, notices and
 attachments remain visible; pending decisions continue to use the intact store.
 

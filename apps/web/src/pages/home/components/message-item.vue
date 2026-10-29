@@ -875,7 +875,6 @@ const hasVisibleAssistantBlocks = computed(() =>
 )
 
 const runtimeStatusText = computed(() => {
-  if (props.hideProcessActivity) return ''
   if (props.message.role !== 'assistant' || !props.message.streaming) return ''
   const status = props.message.messages.find(block => block.type === 'status')
   if (status?.type !== 'status' || !status.name) return ''
@@ -890,11 +889,10 @@ const shouldRenderMessage = computed(() => {
 
 function isVisibleAssistantBlock(block: ContentBlock): boolean {
   if (block.type === 'status') return false
-  // Project only trusted structured process blocks; ordinary text (including
-  // quoted tool output) and interactive Q&A remain conversation content. This
+  // Contact presentation may omit raw tools, but provider-returned reasoning
+  // and runtime status remain visible while a reply is being generated. This
   // is render-only: approvals and task/debug panes read the intact transcript.
   if (props.hideProcessActivity) {
-    if (block.type === 'reasoning') return false
     if (block.type === 'tool') return isCompletedAskUser(block)
   }
   if (block.type === 'tool') return true

@@ -1,0 +1,389 @@
+{
+  "red": {
+    "mode": "red",
+    "cases": [
+      {
+        "kind": "direct",
+        "url": "http://127.0.0.1:28082/bot/stream-fixture",
+        "statusVisible": false,
+        "reasoningVisible": false,
+        "reasoningBodyVisible": false,
+        "firstDeltaReleaseToDOMms": 129.20000000006985,
+        "timing": {
+          "wire": [
+            {
+              "t": 2391,
+              "seq": 3,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2683.1999999999534,
+              "seq": 4,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 3024.6999999999534,
+              "seq": 5,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 4695.900000000023,
+              "seq": 6,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 6144.800000000047,
+              "seq": 7,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 6146.400000000023,
+              "seq": 8,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 6151.099999999977,
+              "seq": 9,
+              "measurement": "before-frame-release"
+            }
+          ],
+          "dom": [
+            {
+              "key": "first-visible-content",
+              "t": 3153.9000000000233
+            },
+            {
+              "key": "First streamed fragment",
+              "t": 3655
+            },
+            {
+              "key": "; second fragment",
+              "t": 5138.400000000023
+            }
+          ]
+        },
+        "pageErrors": []
+      },
+      {
+        "kind": "result",
+        "url": "http://127.0.0.1:28082/bot/stream-fixture",
+        "statusVisible": false,
+        "reasoningVisible": false,
+        "reasoningBodyVisible": false,
+        "firstDeltaReleaseToDOMms": 132.09999999997672,
+        "timing": {
+          "wire": [
+            {
+              "t": 2220.79999999993,
+              "seq": 3,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2502.5,
+              "seq": 4,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2832.79999999993,
+              "seq": 5,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 4499.699999999953,
+              "seq": 6,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5982.899999999907,
+              "seq": 7,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5984.699999999953,
+              "seq": 8,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5989.599999999977,
+              "seq": 9,
+              "measurement": "before-frame-release"
+            }
+          ],
+          "dom": [
+            {
+              "key": "first-visible-content",
+              "t": 2964.899999999907
+            },
+            {
+              "key": "First streamed fragment",
+              "t": 3460.0999999999767
+            },
+            {
+              "key": "; second fragment",
+              "t": 4976.79999999993
+            }
+          ]
+        },
+        "pageErrors": []
+      }
+    ]
+  },
+  "green": {
+    "mode": "green",
+    "cases": [
+      {
+        "kind": "direct",
+        "url": "http://127.0.0.1:28082/bot/stream-fixture",
+        "statusVisible": true,
+        "reasoningVisible": true,
+        "reasoningBodyVisible": true,
+        "firstDeltaReleaseToDOMms": 125.59999999997672,
+        "timing": {
+          "wire": [
+            {
+              "t": 2052.5999999999767,
+              "seq": 3,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2306.0999999999767,
+              "seq": 4,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2698.5,
+              "seq": 5,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 4374.79999999993,
+              "seq": 6,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5832,
+              "seq": 7,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5833.599999999977,
+              "seq": 8,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5839.599999999977,
+              "seq": 9,
+              "measurement": "before-frame-release"
+            }
+          ],
+          "dom": [
+            {
+              "key": "first-visible-content",
+              "t": 2824.0999999999767
+            },
+            {
+              "key": "First streamed fragment",
+              "t": 3326.4000000000233
+            },
+            {
+              "key": "; second fragment",
+              "t": 4826.099999999977
+            }
+          ]
+        },
+        "pageErrors": []
+      },
+      {
+        "kind": "result",
+        "url": "http://127.0.0.1:28082/bot/stream-fixture",
+        "statusVisible": true,
+        "reasoningVisible": true,
+        "reasoningBodyVisible": true,
+        "firstDeltaReleaseToDOMms": 126.10000000009313,
+        "timing": {
+          "wire": [
+            {
+              "t": 2142.899999999907,
+              "seq": 3,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2386.0999999999767,
+              "seq": 4,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2790.399999999907,
+              "seq": 5,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 4440.199999999953,
+              "seq": 6,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5917,
+              "seq": 7,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5919.099999999977,
+              "seq": 8,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5924.399999999907,
+              "seq": 9,
+              "measurement": "before-frame-release"
+            }
+          ],
+          "dom": [
+            {
+              "key": "first-visible-content",
+              "t": 2916.5
+            },
+            {
+              "key": "First streamed fragment",
+              "t": 3396.79999999993
+            },
+            {
+              "key": "; second fragment",
+              "t": 4911.79999999993
+            }
+          ]
+        },
+        "pageErrors": []
+      }
+    ]
+  },
+  "green-narrow": {
+    "mode": "green-narrow",
+    "cases": [
+      {
+        "kind": "direct",
+        "url": "http://127.0.0.1:28082/bot/stream-fixture",
+        "statusVisible": true,
+        "reasoningVisible": true,
+        "reasoningBodyVisible": true,
+        "firstDeltaReleaseToDOMms": 131,
+        "timing": {
+          "wire": [
+            {
+              "t": 2823,
+              "seq": 3,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 3044.3000000000466,
+              "seq": 4,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 3474.6999999999534,
+              "seq": 5,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5151.699999999953,
+              "seq": 6,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 6595.800000000047,
+              "seq": 7,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 6597.199999999953,
+              "seq": 8,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 6604,
+              "seq": 9,
+              "measurement": "before-frame-release"
+            }
+          ],
+          "dom": [
+            {
+              "key": "first-visible-content",
+              "t": 3605.6999999999534
+            },
+            {
+              "key": "First streamed fragment",
+              "t": 4123.699999999953
+            },
+            {
+              "key": "; second fragment",
+              "t": 5590.5
+            }
+          ]
+        },
+        "pageErrors": []
+      },
+      {
+        "kind": "result",
+        "url": "http://127.0.0.1:28082/bot/stream-fixture",
+        "statusVisible": true,
+        "reasoningVisible": true,
+        "reasoningBodyVisible": true,
+        "firstDeltaReleaseToDOMms": 136.80000000004657,
+        "timing": {
+          "wire": [
+            {
+              "t": 2223.6999999999534,
+              "seq": 3,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2492.1999999999534,
+              "seq": 4,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 2826.6999999999534,
+              "seq": 5,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 4471,
+              "seq": 6,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5967,
+              "seq": 7,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5970,
+              "seq": 8,
+              "measurement": "before-frame-release"
+            },
+            {
+              "t": 5986.5,
+              "seq": 9,
+              "measurement": "before-frame-release"
+            }
+          ],
+          "dom": [
+            {
+              "key": "first-visible-content",
+              "t": 2963.5
+            },
+            {
+              "key": "First streamed fragment",
+              "t": 3440.29999999993
+            },
+            {
+              "key": "; second fragment",
+              "t": 4956.199999999953
+            }
+          ]
+        },
+        "pageErrors": []
+      }
+    ]
+  }
+}
