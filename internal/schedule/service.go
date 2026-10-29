@@ -63,6 +63,7 @@ type WorkdirValidator interface {
 }
 
 type Service struct {
+	resultHooks     ResultDeliveryHooks
 	lifecycleCtx    context.Context
 	stop            context.CancelFunc
 	queries         dbstore.Queries
@@ -169,7 +170,20 @@ func (s *Service) Create(ctx context.Context, botID string, req CreateRequest) (
 	if err != nil {
 		return Schedule{}, err
 	}
+	origin := resultOrigin(ctx)
+	if len(origin) > 0 {
+		if s.resultHooks == nil {
+			return Schedule{}, errors.New("schedule result authority unavailable")
+		}
+		if _, err := s.resultHooks.AuthorizeScheduleResultOrigin(ctx, botID, origin); err != nil {
+			return Schedule{}, err
+		}
+		if exec.RunTarget != RunTargetNewSession {
+			return Schedule{}, errors.New("contact schedules require an independent execution session")
+		}
+	}
 	row, err := s.queries.CreateSchedule(ctx, sqlc.CreateScheduleParams{
+		ResultOrigin:    origin,
 		Name:            req.Name,
 		Description:     req.Description,
 		Pattern:         req.Pattern,
@@ -287,6 +301,9 @@ func (s *Service) Update(ctx context.Context, id string, req UpdateRequest) (Sch
 			return Schedule{}, execErr
 		}
 		exec = normalized
+		if hasResultOrigin(existing.ResultOrigin) && exec.RunTarget != RunTargetNewSession {
+			return Schedule{}, errors.New("contact schedules require an independent execution session")
+		}
 	}
 	updated, err := s.queries.UpdateSchedule(ctx, sqlc.UpdateScheduleParams{
 		ID:              pgID,
@@ -380,20 +397,35 @@ func (s *Service) runSchedule(ctx context.Context, sched Schedule) error {
 		s.removeJob(sched.ID)
 	}
 
-	ownerUserID, err := s.resolveBotOwner(ctx, sched.BotID)
-	if err != nil {
-		return fmt.Errorf("resolve bot owner: %w", err)
+	var ownerUserID, sessionID string
+	var sessionErr error
+	if hasResultOrigin(updated.ResultOrigin) {
+		if s.resultHooks == nil {
+			sessionErr = errors.New("schedule result authority unavailable")
+		} else {
+			ownerUserID, sessionErr = s.resultHooks.AuthorizeScheduleResultOrigin(ctx, sched.BotID, updated.ResultOrigin)
+		}
+		if sessionErr == nil && sched.RunTarget != RunTargetNewSession {
+			sessionErr = errors.New("contact schedules require an independent execution session")
+		}
+	} else {
+		ownerUserID, err = s.resolveBotOwner(ctx, sched.BotID)
+		if err != nil {
+			return fmt.Errorf("resolve bot owner: %w", err)
+		}
 	}
-
-	sessionID, sessionErr := s.resolveRunSession(ctx, sched, ownerUserID)
+	if sessionErr == nil {
+		sessionID, sessionErr = s.resolveRunSession(ctx, sched, ownerUserID)
+	}
 
 	pgScheduleID := toUUID(sched.ID)
 	pgBotID := toUUID(sched.BotID)
 
 	logRow, err := s.queries.CreateScheduleLog(ctx, sqlc.CreateScheduleLogParams{
-		ScheduleID: pgScheduleID,
-		BotID:      pgBotID,
-		SessionID:  db.ParseUUIDOrEmpty(sessionID),
+		ResultOrigin: updated.ResultOrigin,
+		ScheduleID:   pgScheduleID,
+		BotID:        pgBotID,
+		SessionID:    db.ParseUUIDOrEmpty(sessionID),
 	})
 	if err != nil {
 		return fmt.Errorf("create schedule fire log: %w", err)
@@ -554,6 +586,9 @@ func failureCode(err error) apperror.Code {
 // a run whose budget expired is an execution timeout whatever else it reports.
 // A closed log announces a schedule change so run lists drop the running state.
 func (s *Service) completeLog(ctx context.Context, logID pgtype.UUID, status, resultText string, errorCode apperror.Code, usageBytes []byte, modelID pgtype.UUID) {
+	if s.resultHooks != nil {
+		defer s.resultHooks.WakeScheduleResults(ctx)
+	}
 	if errors.Is(context.Cause(ctx), ErrExecutionTimeout) {
 		status = "error"
 		errorCode = apperror.CodeScheduleExecutionTimeout

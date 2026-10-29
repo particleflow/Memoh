@@ -21,7 +21,7 @@ SET status = $2,
     model_id = $6,
     completed_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1
-RETURNING id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id
+RETURNING result_origin, result_delivery, id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id
 `
 
 type CompleteScheduleLogParams struct {
@@ -44,6 +44,8 @@ func (q *Queries) CompleteScheduleLog(ctx context.Context, arg CompleteScheduleL
 	)
 	var i ScheduleLog
 	err := row.Scan(
+		&i.ResultOrigin,
+		&i.ResultDelivery,
 		&i.ID,
 		&i.ScheduleID,
 		&i.BotID,
@@ -84,15 +86,16 @@ func (q *Queries) CountScheduleLogsBySchedule(ctx context.Context, scheduleID pg
 }
 
 const createScheduleLog = `-- name: CreateScheduleLog :one
-INSERT INTO schedule_logs (schedule_id, bot_id, session_id, started_at)
-VALUES ($1, $2, $3::uuid, now())
+INSERT INTO schedule_logs (schedule_id, bot_id, session_id, started_at, result_origin)
+VALUES ($1, $2, $3::uuid, now(), COALESCE($4::jsonb, '{}'::jsonb))
 RETURNING id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, started_at, completed_at
 `
 
 type CreateScheduleLogParams struct {
-	ScheduleID pgtype.UUID `json:"schedule_id"`
-	BotID      pgtype.UUID `json:"bot_id"`
-	SessionID  pgtype.UUID `json:"session_id"`
+	ScheduleID   pgtype.UUID `json:"schedule_id"`
+	BotID        pgtype.UUID `json:"bot_id"`
+	SessionID    pgtype.UUID `json:"session_id"`
+	ResultOrigin []byte      `json:"result_origin"`
 }
 
 type CreateScheduleLogRow struct {
@@ -110,7 +113,12 @@ type CreateScheduleLogRow struct {
 }
 
 func (q *Queries) CreateScheduleLog(ctx context.Context, arg CreateScheduleLogParams) (CreateScheduleLogRow, error) {
-	row := q.db.QueryRow(ctx, createScheduleLog, arg.ScheduleID, arg.BotID, arg.SessionID)
+	row := q.db.QueryRow(ctx, createScheduleLog,
+		arg.ScheduleID,
+		arg.BotID,
+		arg.SessionID,
+		arg.ResultOrigin,
+	)
 	var i CreateScheduleLogRow
 	err := row.Scan(
 		&i.ID,
