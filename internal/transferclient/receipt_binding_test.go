@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sync/atomic"
 	"testing"
 
 	"github.com/felinics/memoh/internal/deliverymeta"
@@ -56,13 +59,18 @@ func TestReceiptBindingReadOnlyOriginalAndHistory(t *testing.T) {
 	read := func() {
 		t.Helper()
 		before := lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))
+		configBefore := lifecycleFiles(t, env("HERDR_PLUGIN_CONFIG_DIR"))
+		sourceRoot := closedSourceRoot(t, env)
+		sourceBefore := lifecycleFiles(t, sourceRoot)
 		out, err := ReadReceiptBinding(t.Context(), env, "fixture", lifecycleLimits, closed.DeliveryID())
 		if err != nil || out.KnownReceipt != "original-receipt" || out.Task != closed.Task || out.SourceRef != closed.Artifact.SourceRef ||
 			out.ContentHash != closed.SHA256 || out.SizeBytes != closed.SizeBytes || out.ServerEffects != "none" || out.Scope != "local_queue_read_only" {
 			t.Fatal(out, err)
 		}
-		if !reflect.DeepEqual(before, lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))) {
-			t.Fatal("receipt observation mutated queue files/mtime")
+		if !reflect.DeepEqual(before, lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))) ||
+			!reflect.DeepEqual(configBefore, lifecycleFiles(t, env("HERDR_PLUGIN_CONFIG_DIR"))) ||
+			!reflect.DeepEqual(sourceBefore, lifecycleFiles(t, sourceRoot)) {
+			t.Fatal("receipt observation mutated queue/config/source bytes or mtime")
 		}
 	}
 	read()
@@ -79,6 +87,37 @@ func TestReceiptBindingReadOnlyOriginalAndHistory(t *testing.T) {
 		t.Fatal(err)
 	}
 	read()
+}
+
+func TestReceiptBindingReadWithoutCredentialSourceOrNetwork(t *testing.T) {
+	env, _, closed, _ := receiptBindingFixture(t)
+	source := filepath.Join(closedSourceRoot(t, env), closed.Artifact.SourceRef)
+	for _, file := range []string{filepath.Join(env("HERDR_PLUGIN_CONFIG_DIR"), "device.credential"), source} {
+		if err := os.Remove(file); err != nil {
+			t.Fatal(err)
+		}
+	}
+	original := http.DefaultTransport
+	transport := original.(*http.Transport).Clone()
+	var dials atomic.Int32
+	transport.Proxy = nil
+	transport.DialContext = func(context.Context, string, string) (net.Conn, error) {
+		dials.Add(1)
+		return nil, errors.New("unexpected receipt-reader network attempt")
+	}
+	http.DefaultTransport = transport
+	t.Cleanup(func() {
+		http.DefaultTransport = original
+		transport.CloseIdleConnections()
+	})
+	before := lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))
+	out, err := ReadReceiptBinding(t.Context(), env, "fixture", lifecycleLimits, closed.DeliveryID())
+	if err != nil || out.KnownReceipt != "original-receipt" || dials.Load() != 0 {
+		t.Fatal("receipt export required credentials/source/network", out, err, dials.Load())
+	}
+	if !reflect.DeepEqual(before, lifecycleFiles(t, env("HERDR_PLUGIN_STATE_DIR"))) {
+		t.Fatal("receipt read repaired or changed original queue")
+	}
 }
 
 func TestReceiptBindingReadOnlyRejectsForeignBusyAndCorrupt(t *testing.T) {
