@@ -1328,7 +1328,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
-      "sha256": "d7df2f8b2227a3e46eb9ae029be51ecc51063f07db70f932ad96b53cd160c311",
+      "sha256": "25358b1de614fbb3942496a92998c84a7afa2005db54182a946e8a93b71645ee",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
@@ -1843,7 +1843,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_endpoint_routing.cjs",
-      "sha256": "787cf193e5ae70ab8980cab3f007f7bc7825beec2c84ff21ab9b9a82a1c6efb1",
+      "sha256": "cd5b0c709789a239f4b6c322d334123392cd0e33b8d10c711e17c7895649ad73",
       "origin": "Native RCP endpoint v2 consumer regression for fixed808cf801 contract; real controlled HTTP/files/processes, synthetic-only identity.",
       "licenseReview": "Project regression source; no SDK binaries/private config."
     }

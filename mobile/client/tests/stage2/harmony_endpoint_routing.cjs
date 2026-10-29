@@ -9,6 +9,7 @@ const {NativeTransferNetwork}=load(base+'NativeTransferNetwork.ets',{'./ServiceU
 const logical='https://nas.example.invalid:18443',physical='http://127.0.0.1:18068',policy={version:2,endpoint:{logical_origin:logical,physical_origin:physical}}
 let checks=0
 async function units(){
+ assert.throws(()=>new NativeTransferNetwork('http://nas.example.invalid/api').adopt({version:1,lan_addresses:['192.0.2.10']}),/NETWORK_POLICY_HTTPS/);checks++
  for(const method of ['GET','HEAD','POST','PATCH','DELETE']){
   const route=new NativeTransferNetwork(logical+'/prefix/api');route.adopt(plain(policy));const target=logical+'/prefix/api/bots/bot/media/uploads/receipt',content=new Uint8Array([0,255,42]).buffer,destination=()=>{},tracing={marker:'retained'}
   const request={url:new URL(target),method,headers:{authorization:'Bearer synthetic-no-authority',range:'bytes=262144-','Upload-Offset':'262144'},content,destination,configuration:{transfer:{autoRedirect:true},tracing}}

@@ -3,7 +3,7 @@
   "contractHandoffCommit": "d1f2c0b943423c5899b18e28b3fd5d9bb56143a1",
   "sourceParent": "61355f0da2cf78b7b687132136983e5d2a6b11e2",
   "sourceHashes": {
-    "NativeTransferNetwork.ets": "d7df2f8b2227a3e46eb9ae029be51ecc51063f07db70f932ad96b53cd160c311",
+    "NativeTransferNetwork.ets": "25358b1de614fbb3942496a92998c84a7afa2005db54182a946e8a93b71645ee",
     "NativeResumableUpload.ets": "e8833abe6bdd1c9815cd19154a559f040cbc5ce6cc591ebde56a267390675d59",
     "NativeMediaDownload.ets": "06bba7cb592f9f2fb8e6bce2b11deb15f0a816fb2d3f84259f3d89b738d5563d"
   },
@@ -17,14 +17,14 @@
   ],
   "v1RegressionCases": 61,
   "endpointNewEvidence": {
-    "unitCases": 28,
+    "unitCases": 29,
     "bytes": 8388641,
     "uploadReceipt": "12345678-1234-4234-8234-123456789abc",
     "uploadProcessDeath": true,
     "downloadProcessDeath": true,
     "physicalPortChangedBothDirections": true,
     "uploadFirstUncertainOffset": 262144,
-    "downloadResumedOffset": 357081,
+    "downloadResumedOffset": 488153,
     "confirmedUploadBytesNotRepeated": true,
     "create": 1,
     "complete": 1,
@@ -44,5 +44,6 @@
   "privateInjectorSchemaChanged": false,
   "actualTokenHTTPAuthorizedOrSent": false,
   "phoneAcceptance": false,
-  "RCPWireEngineTLSQualification": false
+  "RCPWireEngineTLSQualification": false,
+  "v1AdoptRetainsOriginalHTTPSConstraint": true
 }

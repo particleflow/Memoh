@@ -45,6 +45,7 @@ export class NativeTransferNetwork {
     if (value === undefined || value === null) { return; }
     if (Array.isArray(value) || Object.keys(value).some((key: string): boolean => !['version', 'lan_addresses', 'endpoint'].includes(key))) { throw new Error('NETWORK_POLICY_INVALID'); }
     if (value.version === 1 && value.endpoint === undefined) {
+      if (url.URL.parseURL(this.base).protocol !== 'https:') { throw new Error('NETWORK_POLICY_HTTPS'); }
       const old: TransferNetworkPolicy = { version: 1, lan_addresses: value.lan_addresses ?? [] };
       this.policy = normalizeTransferNetworkPolicy(old); this.physicalOrigin = undefined; this.authority(this.base); return;
     }

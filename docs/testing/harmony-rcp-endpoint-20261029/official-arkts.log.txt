@@ -1,14 +1,14 @@
 > hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
-> hvigor [32mFinished :entry:default@CreateModuleInfo... after 6 ms [39m
-> hvigor [32mFinished :entry:default@ConfigureCmake... after 67 ms [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 97 ms [39m
 > hvigor [32mUP-TO-DATE :entry:default@MergeProfile...  [39m
 > hvigor [32mUP-TO-DATE :entry:default@CreateBuildProfile...  [39m
-> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 68 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 55 ms [39m
 > hvigor [32mUP-TO-DATE :entry:default@GeneratePkgContextInfo...  [39m
 > hvigor [32mUP-TO-DATE :entry:default@ProcessProfile...  [39m
 > hvigor [32mUP-TO-DATE :entry:default@ProcessRouterMap...  [39m
 > hvigor [32mUP-TO-DATE :entry:default@ProcessShareConfig...  [39m
-> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 3 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 8 ms [39m
 > hvigor [32mUP-TO-DATE :entry:default@ProcessResource...  [39m
 > hvigor [32mUP-TO-DATE :entry:default@GenerateLoaderJson...  [39m
 > hvigor [32mUP-TO-DATE :entry:default@CompileResource...  [39m
@@ -81,34 +81,37 @@
 [33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:36:28
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:55:30
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:48:19
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:59:45
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:56:30
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:73:29
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:60:45
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:74:27
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:74:29
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:115:38
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:75:27
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:116:37
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:116:38
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:127:64
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:117:37
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:130:57
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:128:64
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:132:41
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:131:57
  Function may throw exceptions. Special handling is required.
 [39m[39m
-[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:138:22
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:133:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:139:22
  Function may throw exceptions. Special handling is required.
 [39m[39m
 [33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:9:71
@@ -514,7 +517,7 @@
  Function may throw exceptions. Special handling is required.
 [39m[39m
 [39m
-> hvigor [32mFinished :entry:default@CompileArkTS... after 12 s 451 ms [39m
-> hvigor [32mBUILD SUCCESSFUL in 22 s 563 ms [39m
+> hvigor [32mFinished :entry:default@CompileArkTS... after 7 s 607 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 14 s 504 ms [39m
 
 15 tasks in total: 5 executed, 10 up-to-date
