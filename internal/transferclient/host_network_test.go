@@ -31,6 +31,8 @@ func TestHostNetworkPolicyKeepsOriginalQueueBinding(t *testing.T) {
 	for _, policy := range []string{
 		`{"version":1,"lan_addresses":["192.0.2.1","2001:db8::1"]}`,
 		`{"version":1,"lan_addresses":["2001:db8::2"]}`,
+		`{"version":2,"endpoint":{"logical_origin":"https://fixture.invalid","physical_origin":"http://127.0.0.1:18068"}}`,
+		`{"version":2,"endpoint":{"logical_origin":"https://fixture.invalid","physical_origin":"http://[::1]:18069"}}`,
 	} {
 		write(config, "transfer-network.json", []byte(policy))
 		// Avoid contacting any endpoint: re-registration and client construction
