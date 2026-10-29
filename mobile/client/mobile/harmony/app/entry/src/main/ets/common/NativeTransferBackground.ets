@@ -35,7 +35,7 @@ class SystemTransferBackground implements TransferBackgroundPlatform {
   }
   async publish(lease: backgroundTaskManager.ContinuousTaskNotification, percent: number): Promise<void> {
     const request: notificationManager.NotificationRequest = {
-      id: lease.notificationId, slotType: lease.slotType,
+      id: lease.notificationId, notificationSlotType: lease.slotType,
       content: {
         notificationContentType: notificationManager.ContentType.NOTIFICATION_CONTENT_SYSTEM_LIVE_VIEW,
         systemLiveView: { typeCode: 8, title: '文件传输', text: '正在传输并校验原件' }
@@ -54,7 +54,7 @@ class SystemTransferBackground implements TransferBackgroundPlatform {
     // Serialize this after any in-flight publish. A late publish after an OS
     // cancellation cannot leave an orphan notification behind.
     try { await notificationManager.cancel(lease.notificationId); }
-    catch (error) { if ((error as BusinessError).code !== 1600007) { throw error; } }
+    catch (error) { if ((error as BusinessError).code !== 1600007) { throw error as BusinessError; } }
   }
   onCancel(callback: (info: backgroundTaskManager.ContinuousTaskCancelInfo) => void): void {
     backgroundTaskManager.on('continuousTaskCancel', callback);

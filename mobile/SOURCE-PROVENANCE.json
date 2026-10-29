@@ -1893,7 +1893,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets",
-      "sha256": "984ad1aeef309d0deaa17421a2f8bb9230c73dfeed30705bc572cfa3feeed358",
+      "sha256": "3483f3b0da91f4a9539ada467d5f9c0c6c5c3b4ae726963218b31955451cdf33",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
       "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
     },
@@ -1905,13 +1905,13 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_transfer_background.cjs",
-      "sha256": "0ec5b8bc724a8e668f1fc27125262ca266675b200942b4c61122cc7346f0c2ca",
+      "sha256": "73fdc9b024fc37cefc1e98e34174309051a4d61c2c5c48655c4d62c087c9e3ac",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
       "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
     },
     {
       "path": "mobile/client/tests/stage2/harmony_background_sdk_types.cjs",
-      "sha256": "02246bf6c3e7d4308b145021dc5b4d759628695299db77e9cebd6c65efb16c89",
+      "sha256": "ba6cda6370039697124a38fce78cbb73e18c6904522af6deea8daca3361d8636",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
       "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
     },
@@ -2533,6 +2533,14 @@
     "officialDeclarationSurfaceOnly": true,
     "nativeDevice": false,
     "newHAP": false,
-    "deployed": false
+    "deployed": false,
+    "api26Correction": {
+      "baseCommit": "ea615a1421cadbba584c9f7eeaba68c69c7a51c1",
+      "reviewLibraryFile": "libfile_6ea77beb2a6481919d9f3243efc6f1ca",
+      "reviewCompilePassed": false,
+      "scope": "Two SDK fixes only: public notificationSlotType field and explicitly typed original BusinessError rethrow.",
+      "evidence": "docs/testing/harmony-transfer-background/api26-fix-result.json",
+      "correctedOfficialCompile": "pending with existing SDK owner"
+    }
   }
 }

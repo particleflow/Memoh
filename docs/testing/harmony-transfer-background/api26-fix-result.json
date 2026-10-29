@@ -1,0 +1,120 @@
+{
+  "baseCommit": "ea615a1421cadbba584c9f7eeaba68c69c7a51c1",
+  "externalFailureReview": {
+    "libraryFile": "libfile_6ea77beb2a6481919d9f3243efc6f1ca",
+    "SDK": "26.0.0.105/API26",
+    "exitCode": 255,
+    "diagnosticCodes": [
+      10605087,
+      10505001
+    ],
+    "distinctSourceLocations": 2,
+    "logSHA256": "07c5161bb826da7189696d064a44066351ddb987e28a31a234b6e7c7f7bc3ad7"
+  },
+  "scope": "Only two product lines plus affected assertions/provenance/evidence",
+  "checks": [
+    {
+      "name": "controller",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_transfer_background.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "log": "api26-fix-controller.log.txt",
+      "sha256": "2920c0f52273c17541cb36beed76d586b820a219aff352cd1f50354e09d4d1f6",
+      "seconds": 0.244
+    },
+    {
+      "name": "official-types",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_background_sdk_types.cjs"
+      ],
+      "environment": {
+        "HARMONY_BACKGROUND_OFFICIAL_TYPES": "/workspace/harmony-transfer-lifetime-artifacts/stage2-official"
+      },
+      "exitCode": 0,
+      "log": "api26-fix-official-types.log.txt",
+      "sha256": "4c1cbf0afda4a6ed0824050b0c256bc4dd78eda56fbafb5508d58e846a2345c8",
+      "seconds": 1.918
+    },
+    {
+      "name": "owner",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_background_owner.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "log": "api26-fix-owner.log.txt",
+      "sha256": "90f9c55dd67731c6da7a0436c85eb411c9138f9a2e342b3cdf7e997b28c7dc4d",
+      "seconds": 0.562
+    },
+    {
+      "name": "source-guard",
+      "command": [
+        "python",
+        "mobile/check_source_subset.py"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "log": "api26-fix-source-guard.log.txt",
+      "sha256": "f4606981a3bd6c64bc7ca85c231a1134364b6e0d4e81b17587f912b14f9394a2",
+      "seconds": 0.536
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "log": "api26-fix-diff-check.log.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "seconds": 0.009
+    }
+  ],
+  "allPassed": true,
+  "red": {
+    "command": [
+      "node",
+      "mobile/client/tests/stage2/harmony_transfer_background.cjs"
+    ],
+    "productionSource": "ea615a1421cadbba584c9f7eeaba68c69c7a51c1",
+    "expectedExitCode": 1,
+    "observedExitCode": 1,
+    "reason": "old SDK notification field misses notificationSlotType",
+    "log": "api26-fix-red.log.txt",
+    "sha256": "865ad62605172ce5d69687b5e462ceae329db3b4cf64c724525d7951b58be61b"
+  },
+  "sourceChanges": [
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets",
+      "before": "984ad1aeef309d0deaa17421a2f8bb9230c73dfeed30705bc572cfa3feeed358",
+      "sha256": "3483f3b0da91f4a9539ada467d5f9c0c6c5c3b4ae726963218b31955451cdf33"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_transfer_background.cjs",
+      "before": "0ec5b8bc724a8e668f1fc27125262ca266675b200942b4c61122cc7346f0c2ca",
+      "sha256": "73fdc9b024fc37cefc1e98e34174309051a4d61c2c5c48655c4d62c087c9e3ac"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_background_sdk_types.cjs",
+      "before": "02246bf6c3e7d4308b145021dc5b4d759628695299db77e9cebd6c65efb16c89",
+      "sha256": "ba6cda6370039697124a38fce78cbb73e18c6904522af6deea8daca3361d8636"
+    }
+  ],
+  "otherFiveProductSourcesByteIdenticalToBase": true,
+  "controllerScenariosPassed": 15,
+  "officialDeclarationNegativeCases": 5,
+  "ErrorObjectCodeCausePreserved": true,
+  "sourceEntries": 188,
+  "correctedOfficialAPI26Compile": "pending with existing SDK owner",
+  "SDKDownloaded": false,
+  "newHAP": false,
+  "deviceAction": false,
+  "deployed": false
+}

@@ -85,3 +85,21 @@ journals and authenticated explicit restore remain the process-restart path;
 ordinary 24-hour upload receipt expiry and task lease rules are unchanged.
 
 See `COMBINATION.md` for the exact page-network/transfer ownership seam rules.
+
+## API26 correction after ea615a142
+
+The existing SDK owner compiled exact `ea615a142` with official SDK26.0.0.105
+and found two source errors (aggregate ERROR:3, two actionable locations).
+Evidence: `libfile_6ea77beb2a6481919d9f3243efc6f1ca`. The correction changes only
+`NativeTransferBackground.ets`: public `notificationSlotType: lease.slotType`
+replaces the deprecated request field, and `throw error as BusinessError`
+preserves the original cancellation error object/code/cause. Code1600007
+remains the only ignored cleanup error. No lifecycle or state logic changes.
+
+The targeted adapter now rejects the deprecated request field and checks exact
+error identity/code/cause. The declaration check adds an invalid public-slot
+negative case. `api26-fix-result.json` records current corrected hashes and
+checks; the earlier result.json and inventory-refresh.json remain historical
+ea615a142 evidence. The corrected source still needs the existing owner's
+official narrow compile; the partial declaration checker does not validate
+ArkTS's typed-throw restriction. No SDK download, new HAP or device action.

@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+undefined !== 4
+
+    at main (/workspace/harmony-transfer-lifetime/mobile/client/tests/stage2/harmony_transfer_background.cjs:56:450) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: undefined,
+  expected: 4,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
