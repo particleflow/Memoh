@@ -41,6 +41,7 @@ import '@/styles/dockview-theme.css'
 import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 import { openInFileManagerKey, openAssetPreviewKey } from '../composables/useFileManagerProvider'
 import { normalizeFileManagerPath } from './file-manager-path'
+import { chatWorkspaceVisibleKey } from '../composables/chat-workspace-visibility'
 import { DesktopShellKey, DesktopWindowKey } from '@/lib/desktop-shell'
 import PanelChat from './dockview/panel-chat.vue'
 import PanelFile from './dockview/panel-file.vue'
@@ -194,6 +195,8 @@ provide(DesktopShellKey, desktopShell)
 // in fullscreen (see useMacTrafficReserve).
 const desktopWindow = inject(DesktopWindowKey, undefined)
 provide(DesktopWindowKey, desktopWindow)
+// Forward the reactive Home mask through Dockview's manual mount boundary too.
+provide(chatWorkspaceVisibleKey, inject(chatWorkspaceVisibleKey, ref(true)))
 
 provide(openInFileManagerKey, (path: string, isDir = false) => {
   const normalizedPath = normalizeFileManagerPath(path)

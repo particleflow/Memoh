@@ -1,7 +1,8 @@
-import { computed, onBeforeUnmount, onDeactivated, shallowRef, watch, type Ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onDeactivated, shallowRef, watch, type Ref } from 'vue'
 import { postBotsByBotIdTtsPlayback } from '@memohai/sdk'
 import type { ChatMessage } from '@/store/chat/types'
 import { ChatReadAloud, LiveSpeechReplies, speechKey, speechText, type SpeechState } from './chat-read-aloud'
+import { chatWorkspaceVisibleKey } from './chat-workspace-visibility'
 
 export function useChatReadAloud(options: {
   botId: Ref<string | null | undefined>
@@ -11,6 +12,8 @@ export function useChatReadAloud(options: {
   draft: Ref<string>
   messages: Ref<ChatMessage[]>
 }) {
+  const workspaceVisible = inject(chatWorkspaceVisibleKey, shallowRef(true))
+  const enabled = computed(() => options.enabled.value && workspaceVisible.value)
   const state = shallowRef<SpeechState>({ key: '', status: 'idle' })
   const replies = new LiveSpeechReplies()
   const controller = new ChatReadAloud({
@@ -32,15 +35,15 @@ export function useChatReadAloud(options: {
     controller.stop()
   }
   watch(options.scope, () => { stop(); replies.reset() }, { flush: 'sync' })
-  watch(options.enabled, enabled => { if (!enabled) stop() }, { flush: 'sync' })
+  watch(enabled, value => { if (!value) stop() }, { flush: 'sync' })
   // flush:sync stops the player in the input event, before any pending media task.
   watch(options.draft, stop, { flush: 'sync' })
-  watch(() => ({ messages: options.messages.value, enabled: options.enabled.value, loading: options.loading.value }), value => {
+  watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value }), value => {
     for (const reply of replies.update(value.messages, value.enabled && !options.draft.value, value.loading)) controller.enqueue(reply)
   }, { deep: true, immediate: true })
-  function canReplay(message: ChatMessage) { return options.enabled.value && !message.streaming && !!speechText(message) }
+  function canReplay(message: ChatMessage) { return enabled.value && !message.streaming && !!speechText(message) }
   function replay(message: ChatMessage) {
-    if (!options.enabled.value || message.streaming) return
+    if (!enabled.value || message.streaming) return
     const text = speechText(message)
     if (!text) return
     stop()
@@ -52,5 +55,5 @@ export function useChatReadAloud(options: {
   }
   onDeactivated(stop)
   onBeforeUnmount(stop)
-  return { state, status, stop, replay, canReplay, resume: () => controller.resume(), enabled: computed(() => options.enabled.value) }
+  return { state, status, stop, replay, canReplay, resume: () => { if (enabled.value) controller.resume() }, enabled }
 }

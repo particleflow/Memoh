@@ -3,11 +3,11 @@
     <!-- Preserve Dockview dimensions while a history link is being authorized. -->
     <ChatWorkspace
       v-if="currentBotId"
-      :class="{ invisible: historyError || historyLoading || chatStore.contactNavigationPending }"
+      :class="{ invisible: !workspaceVisible }"
     />
     <ContactChoiceDialog />
     <PanePlaceholder
-      v-if="historyError || historyLoading || chatStore.contactNavigationPending"
+      v-if="!workspaceVisible"
       class="absolute inset-0"
       :title="historyError || t('common.loading')"
     />
@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { normalizeAgentID } from '@/utils/external-agent'
-import { nextTick, ref, watch } from 'vue'
+import { computed, nextTick, provide, ref, watch } from 'vue'
 import { useTitle } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
@@ -54,6 +54,7 @@ import { resolveApiErrorMessage } from '@/utils/api-error'
 import { hasTaskHistoryQuery, resolveTaskHistoryAnchor } from '@/utils/task-history-link'
 import ChatWorkspace from './components/chat-workspace.vue'
 import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'
+import { chatWorkspaceVisibleKey } from './composables/chat-workspace-visibility'
 
 const route = useRoute()
 const router = useRouter()
@@ -107,6 +108,8 @@ let suppressUrlSync = false
 const missingBotName = ref('')
 const historyError = ref('')
 const historyLoading = ref(false)
+const workspaceVisible = computed(() => !historyError.value && !historyLoading.value && !chatStore.contactNavigationPending)
+provide(chatWorkspaceVisibleKey, workspaceVisible)
 let historyRequest = 0
 
 // home is now mounted persistently (via main-container, which App.vue keeps
