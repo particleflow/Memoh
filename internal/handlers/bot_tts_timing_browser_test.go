@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/felinics/twilight/sdk"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
@@ -95,31 +96,31 @@ func TestPlaybackTimingControlledBrowser(t *testing.T) {
 	var logs bytes.Buffer
 	h := &BotAudioHandler{audioService: &timingPlaybackAudio{playbackAudio: &playbackAudio{}, mp3: mp3, wav: wav}, settingsService: &playbackSettings{model: "synthetic-only"}, logger: slog.New(slog.NewJSONHandler(&logs, nil)), playbackAccess: func(context.Context, string, string) error { return nil }}
 	e := echo.New()
-	mux := http.NewServeMux()
-	mux.HandleFunc("/bots/bot/tts/playback", func(w http.ResponseWriter, r *http.Request) {
-		c := testAuthContext(e, r, w, "11111111-1111-1111-1111-111111111111")
-		c.SetParamNames("bot_id")
-		c.SetParamValues("bot")
+	e.POST("/bots/:bot_id/tts/playback", func(c echo.Context) error {
+		c.Set("user", &jwt.Token{Valid: true, Claims: jwt.MapClaims{
+			"sub":     "11111111-1111-1111-1111-111111111111",
+			"user_id": "11111111-1111-1111-1111-111111111111",
+		}})
 		if err := h.Playback(c); err != nil {
 			t.Errorf("timing fixture playback: %v", err)
+			return err
 		}
+		return nil
 	})
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.Handle("/bots/bot/tts/playback", e)
+	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
 		_, _ = io.WriteString(w, `<!doctype html><div id="root"></div>`)
 	})
 	server := httptest.NewServer(mux)
 	defer server.Close()
-	out := os.Getenv("MEMOH_SPEECH_TIMING_OUT")
-	if out == "" {
-		out = t.TempDir()
-	}
-	if err = os.MkdirAll(out, 0700); err != nil {
-		t.Fatal(err)
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// Keep reports inside the test-owned directory, rather than trusting an
+	// environment-provided write path. The runner logs its timing summaries.
+	out := t.TempDir()
+	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 	defer cancel()
-	cmd := exec.CommandContext(ctx, "node", filepath.Join(root, "docs/testing/chat-read-aloud/streaming/timing/native-timing.mjs"))
+	cmd := exec.CommandContext(ctx, "node", "docs/testing/chat-read-aloud/streaming/timing/native-timing.mjs")
 	cmd.Dir = root
 	cmd.Env = append(os.Environ(), "TIMING_URL="+server.URL, "TIMING_OUT="+out)
 	output, err := cmd.CombinedOutput()
@@ -140,7 +141,7 @@ func TestPlaybackTimingControlledBrowser(t *testing.T) {
 	if count != 4 {
 		t.Fatalf("expected four correlated server observations, got %d", count)
 	}
-	if err = os.WriteFile(filepath.Join(out, "server-events.jsonl"), logs.Bytes(), 0600); err != nil {
+	if err = os.WriteFile(filepath.Join(out, "server-events.jsonl"), logs.Bytes(), 0o600); err != nil {
 		t.Fatal(err)
 	}
 }

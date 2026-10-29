@@ -29,6 +29,7 @@ func newPlaybackTiming(c echo.Context, log *slog.Logger) *playbackTiming {
 	}
 	return &playbackTiming{start: time.Now(), id: id, logger: log}
 }
+
 func (t *playbackTiming) mark(event string) float64 {
 	if t == nil {
 		return 0
@@ -39,6 +40,7 @@ func (t *playbackTiming) mark(event string) float64 {
 	}
 	return ms
 }
+
 func (t *playbackTiming) firstAudio(c echo.Context) {
 	if t == nil {
 		return
