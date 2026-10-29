@@ -1,6 +1,33 @@
 export interface SpeechAudioStream { stream: ReadableStream<Uint8Array>, contentType: string }
 export interface SpeechStreamSource { url: string, done: Promise<void>, dispose(): void }
 
+/** Preserve native Audio compatibility when this browser cannot stream the
+ * response MIME through MSE. Consume the same response; never synthesize again. */
+export async function prepareSpeechSource(audio: SpeechAudioStream, signal: AbortSignal, createURL: (source: Blob | MediaSource) => string): Promise<SpeechStreamSource> {
+  const mime = audio.contentType.trim().replace(/^audio\/mp3(?=;|$)/u, 'audio/mpeg')
+  if (typeof MediaSource !== 'undefined' && MediaSource.isTypeSupported(mime)) return openSpeechStream(audio, signal, createURL)
+  const reader = audio.stream.getReader()
+  const onAbort = () => { void reader.cancel(signal.reason).catch(() => {}) }
+  signal.addEventListener('abort', onAbort, { once: true })
+  try {
+    if (signal.aborted) { onAbort(); throw signal.reason }
+    const chunks: ArrayBuffer[] = []
+    for (;;) {
+      const chunk = await reader.read()
+      if (signal.aborted) throw signal.reason
+      if (chunk.done) break
+      if (chunk.value.length) chunks.push(new Uint8Array(chunk.value).buffer)
+    }
+    const url = createURL(new Blob(chunks, { type: audio.contentType }))
+    return { url, done: Promise.resolve(), dispose() {} }
+  } finally {
+    signal.removeEventListener('abort', onAbort)
+    // Preserve the first read/abort error even if upstream cancellation stalls.
+    void reader.cancel().catch(() => {})
+    reader.releaseLock()
+  }
+}
+
 function mediaEvent(target: EventTarget, event: string, signal: AbortSignal, action?: () => void): Promise<void> {
   return new Promise((resolve, reject) => {
     const clean = () => { target.removeEventListener(event, success); target.removeEventListener('error', failure); signal.removeEventListener('abort', failure) }

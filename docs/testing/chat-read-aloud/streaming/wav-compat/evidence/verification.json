@@ -1,0 +1,37 @@
+{
+  "executedParent": "f523c815a30630ed67723674b93be04d0dddf16c",
+  "reviewLibraryId": "libfile_598d489937848191912dd0bed9de5159",
+  "reviewLibraryVersion": 12,
+  "reviewZipSHA256": "4baa516ab7934e8ca0ec292521eefc7dfc60e8e5c428087466fab6e937b785da",
+  "reviewFixtureSHA256": "0d280d2e0596a5f0159ec44a1ae6bc20c12da09aa77bc8f228c4b7877bf7945e",
+  "fixtureMatchesReview": true,
+  "wav": {
+    "channels": 1,
+    "sampleRate": 22050,
+    "sampleWidth": 2,
+    "frames": 22050
+  },
+  "productionPatchSHA256": "c5633a42269242e0a6253f6700b5b22a0c02234f264864c215685f1924a096d2",
+  "independentPatchAppliesTo2b9": true,
+  "controllerClassMatchesAfterPatch": true,
+  "audioHelperMatchesAfterPatch": true,
+  "existingMSEHelperBodyByteUnchanged": true,
+  "backendUnchangedSinceF523": {
+    "internal/audio/service.go": true,
+    "internal/handlers/bot_tts.go": true
+  },
+  "newTestsPassed": 9,
+  "old14_19_7AndF523NotRerun": true,
+  "providerCalls": 0,
+  "hardcodedProviderVoiceOrFormatGateAdded": false,
+  "physicalAudible500msPassed": false,
+  "productSourceSHA256": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "a53fe9f50fcdd21a4f2401fcc497e44e5cfdad65e7a2c9ee7639a75d5d308b8f",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": "7645c2c804cbe8f357ef2735fab8db3ee278025c89c414eaecf58a724ef4a199"
+  },
+  "admission": "SOURCE COMPATIBILITY CANDIDATE ONLY; no deployment/HAP/ArkWeb/full application UI/human QA",
+  "scopedProductionAndNewTestTypecheckPassed": true,
+  "changedProductionAndNewTestESLintPassed": true,
+  "nativeHarnessNodeSyntaxPassed": true,
+  "productionPatchWhitespace": "Empty diff context lines normalized; git apply --check and apply verified after normalization"
+}

@@ -1,6 +1,6 @@
 import type { ChatMessage } from '@/store/chat/types'
 import { visibleSpeechText } from './speech-visible-text'
-import { openSpeechStream, type SpeechAudioStream } from './speech-audio-stream'
+import { prepareSpeechSource, type SpeechAudioStream } from './speech-audio-stream'
 
 export type SpeechStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'blocked' | 'error'
 export interface SpeechState { key: string, status: SpeechStatus, error?: unknown }
@@ -203,7 +203,12 @@ export class ChatReadAloud {
       this.player ??= this.deps.createPlayer()
       if (audio instanceof Blob) this.url = this.deps.createURL(audio)
       else {
-        const stream = openSpeechStream(audio, signal, source => this.deps.createURL(source))
+        const stream = await prepareSpeechSource(audio, signal, source => this.deps.createURL(source))
+        if (token !== this.generation) {
+          stream.dispose(); this.deps.revokeURL(stream.url)
+          void stream.done.catch(() => {})
+          return
+        }
         this.url = stream.url
         this.disposeStream = stream.dispose
         void stream.done.catch(error => this.fail(token, error))

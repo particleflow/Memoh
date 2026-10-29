@@ -1,0 +1,48 @@
+{
+  "beforeEOF": {
+    "mime": "audio/wav",
+    "canPlayType": "maybe",
+    "mseSupported": false,
+    "requests": 1,
+    "cancelled": true,
+    "playing": false,
+    "complete": false,
+    "urls": 0,
+    "blobType": "",
+    "states": [
+      "idle",
+      "loading",
+      "error"
+    ],
+    "status": "error",
+    "error": "Error: Streaming playback is unsupported for audio/wav",
+    "currentTime": 0,
+    "src": ""
+  },
+  "observed": {
+    "mime": "audio/wav",
+    "canPlayType": "maybe",
+    "mseSupported": false,
+    "requests": 1,
+    "cancelled": true,
+    "playing": false,
+    "complete": false,
+    "urls": 0,
+    "blobType": "",
+    "states": [
+      "idle",
+      "loading",
+      "error"
+    ],
+    "status": "error",
+    "error": "Error: Streaming playback is unsupported for audio/wav",
+    "finishError": "TypeError: Failed to execute 'enqueue' on 'ReadableStreamDefaultController': Cannot enqueue a chunk into a closed readable stream",
+    "currentTime": 0,
+    "src": ""
+  },
+  "browser": "154.0.8037.57",
+  "providerCalls": 0,
+  "autoplayPolicyOverride": false,
+  "physicalAudible500msPassed": false,
+  "scope": "Exact v12 WAV fixture through actual current ChatReadAloud with one synthetic streaming response; native play promise unchanged. Not API, application, ArkWeb or acoustic evidence."
+}
