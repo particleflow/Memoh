@@ -1893,7 +1893,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets",
-      "sha256": "3483f3b0da91f4a9539ada467d5f9c0c6c5c3b4ae726963218b31955451cdf33",
+      "sha256": "fdb9fa347ff97e134199cf5368ad776a424836bcde93140e035b5bc0b200f8cd",
       "origin": "Independent existing-native-transfer lifetime/background follow-up from fixed a158c564; no new transport core.",
       "licenseReview": "Project source/tests only; no SDK binaries, external credentials or device configuration."
     },
@@ -2523,6 +2523,15 @@
       "scope": "Two SDK fixes only: public notificationSlotType field and explicitly typed original BusinessError rethrow.",
       "evidence": "docs/testing/harmony-transfer-background/api26-fix-result.json",
       "correctedOfficialCompile": "pending with existing SDK owner"
+    },
+    "api26ThrowCorrection": {
+      "baseCommit": "c46c663ad4761f4a3dc34bc9a5a333ee473b60bf",
+      "reviewLibraryFile": "libfile_e3b03485f9548191990ea1eb59bd0a11",
+      "reviewCompilePassed": false,
+      "reviewNotificationSlotDiagnosticResolved": true,
+      "scope": "One line: assert the unchanged original throw operand as Error instead of BusinessError.",
+      "evidence": "docs/testing/harmony-transfer-background/api26-error-type-result.json",
+      "correctedOfficialCompile": "pending original SDK owner"
     }
   }
 }

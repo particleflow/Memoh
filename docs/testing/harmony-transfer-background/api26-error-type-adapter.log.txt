@@ -1,0 +1,1 @@
+{"passed":true,"productChange":"one type assertion","emittedJavaScriptByteIdenticalToC46":true,"realSystemAdapter":true,"originalErrorObjectCodeCausePreserved":true,"code1600007OnlyIgnored":true,"existingOwnedStopPreserved":true,"fullSuitesRerun":false,"officialArkTSCompile":false}
