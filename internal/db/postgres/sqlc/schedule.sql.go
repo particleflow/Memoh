@@ -14,7 +14,7 @@ import (
 const createSchedule = `-- name: CreateSchedule :one
 INSERT INTO schedule (
   name, description, pattern, max_calls, enabled, command, bot_id,
-  run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, max_run_seconds
+  run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, max_run_seconds, result_origin
 )
 VALUES (
   $1, $2, $3, $4, $5, $6, $7,
@@ -27,9 +27,10 @@ VALUES (
   $14::text,
   $15::text,
   $16::uuid,
- COALESCE(NULLIF($17::integer, 0), 3600)
+ COALESCE(NULLIF($17::integer, 0), 3600),
+ COALESCE($18::jsonb, '{}'::jsonb)
 )
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+RETURNING limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 type CreateScheduleParams struct {
@@ -50,6 +51,7 @@ type CreateScheduleParams struct {
 	ReasoningEffort pgtype.Text `json:"reasoning_effort"`
 	WorkdirID       pgtype.UUID `json:"workdir_id"`
 	MaxRunSeconds   int32       `json:"max_run_seconds"`
+	ResultOrigin    []byte      `json:"result_origin"`
 }
 
 func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error) {
@@ -71,9 +73,13 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 		arg.ReasoningEffort,
 		arg.WorkdirID,
 		arg.MaxRunSeconds,
+		arg.ResultOrigin,
 	)
 	var i Schedule
 	err := row.Scan(
+		&i.LimitDisabled,
+		&i.RegistrationGeneration,
+		&i.ResultOrigin,
 		&i.MaxRunSeconds,
 		&i.ID,
 		&i.Name,
@@ -103,7 +109,7 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 
 const deleteSchedule = `-- name: DeleteSchedule :exec
 UPDATE schedule
-SET deleted_at = now(), enabled = false, updated_at = now()
+SET deleted_at = now(), enabled = false, limit_disabled = false, updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 `
 
@@ -116,15 +122,20 @@ func (q *Queries) DeleteSchedule(ctx context.Context, id pgtype.UUID) error {
 const disableSchedule = `-- name: DisableSchedule :one
 UPDATE schedule
 SET enabled = false,
+    registration_generation = registration_generation + 1,
+    limit_disabled = false,
     updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+RETURNING limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 func (q *Queries) DisableSchedule(ctx context.Context, id pgtype.UUID) (Schedule, error) {
 	row := q.db.QueryRow(ctx, disableSchedule, id)
 	var i Schedule
 	err := row.Scan(
+		&i.LimitDisabled,
+		&i.RegistrationGeneration,
+		&i.ResultOrigin,
 		&i.MaxRunSeconds,
 		&i.ID,
 		&i.Name,
@@ -153,7 +164,7 @@ func (q *Queries) DisableSchedule(ctx context.Context, id pgtype.UUID) (Schedule
 }
 
 const getScheduleByID = `-- name: GetScheduleByID :one
-SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+SELECT limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 FROM schedule
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 `
@@ -162,6 +173,9 @@ func (q *Queries) GetScheduleByID(ctx context.Context, id pgtype.UUID) (Schedule
 	row := q.db.QueryRow(ctx, getScheduleByID, id)
 	var i Schedule
 	err := row.Scan(
+		&i.LimitDisabled,
+		&i.RegistrationGeneration,
+		&i.ResultOrigin,
 		&i.MaxRunSeconds,
 		&i.ID,
 		&i.Name,
@@ -198,13 +212,16 @@ SET current_calls = current_calls + 1,
     END,
     updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+RETURNING limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 func (q *Queries) IncrementScheduleCalls(ctx context.Context, id pgtype.UUID) (Schedule, error) {
 	row := q.db.QueryRow(ctx, incrementScheduleCalls, id)
 	var i Schedule
 	err := row.Scan(
+		&i.LimitDisabled,
+		&i.RegistrationGeneration,
+		&i.ResultOrigin,
 		&i.MaxRunSeconds,
 		&i.ID,
 		&i.Name,
@@ -233,7 +250,7 @@ func (q *Queries) IncrementScheduleCalls(ctx context.Context, id pgtype.UUID) (S
 }
 
 const listEnabledSchedules = `-- name: ListEnabledSchedules :many
-SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+SELECT limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 FROM schedule
 WHERE team_id = public.memoh_current_team_id() AND enabled = true AND deleted_at IS NULL
 ORDER BY created_at DESC
@@ -249,6 +266,9 @@ func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) 
 	for rows.Next() {
 		var i Schedule
 		if err := rows.Scan(
+			&i.LimitDisabled,
+			&i.RegistrationGeneration,
+			&i.ResultOrigin,
 			&i.MaxRunSeconds,
 			&i.ID,
 			&i.Name,
@@ -284,7 +304,7 @@ func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) 
 }
 
 const listSchedulesByBot = `-- name: ListSchedulesByBot :many
-SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+SELECT limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 FROM schedule
 WHERE team_id = public.memoh_current_team_id() AND bot_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC
@@ -300,6 +320,9 @@ func (q *Queries) ListSchedulesByBot(ctx context.Context, botID pgtype.UUID) ([]
 	for rows.Next() {
 		var i Schedule
 		if err := rows.Scan(
+			&i.LimitDisabled,
+			&i.RegistrationGeneration,
+			&i.ResultOrigin,
 			&i.MaxRunSeconds,
 			&i.ID,
 			&i.Name,
@@ -340,21 +363,25 @@ SET name = $2,
     description = $3,
     pattern = $4,
     max_calls = $5,
+    registration_generation = CASE WHEN $9::boolean
+      OR enabled IS DISTINCT FROM $6::boolean THEN registration_generation + 1 ELSE registration_generation END,
+    limit_disabled = CASE WHEN $9::boolean OR $6::boolean
+      OR enabled IS DISTINCT FROM $6::boolean THEN false ELSE limit_disabled END,
     enabled = $6,
     command = $7,
     run_target = $8,
-    target_session_id = $9::uuid,
-    runtime_type = $10::text,
-    bot_agent_id = $11::uuid,
-    acp_agent_id = $12::text,
-    model_id = $13::uuid,
-    acp_model_id = $14::text,
-    reasoning_effort = $15::text,
-    workdir_id = $16::uuid,
-    max_run_seconds = COALESCE(NULLIF($17::integer, 0), 3600),
+    target_session_id = $10::uuid,
+    runtime_type = $11::text,
+    bot_agent_id = $12::uuid,
+    acp_agent_id = $13::text,
+    model_id = $14::uuid,
+    acp_model_id = $15::text,
+    reasoning_effort = $16::text,
+    workdir_id = $17::uuid,
+    max_run_seconds = COALESCE(NULLIF($18::integer, 0), 3600),
     updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+RETURNING limit_disabled, registration_generation, result_origin, max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 type UpdateScheduleParams struct {
@@ -366,6 +393,7 @@ type UpdateScheduleParams struct {
 	Enabled         bool        `json:"enabled"`
 	Command         string      `json:"command"`
 	RunTarget       string      `json:"run_target"`
+	EnabledExplicit bool        `json:"enabled_explicit"`
 	TargetSessionID pgtype.UUID `json:"target_session_id"`
 	RuntimeType     pgtype.Text `json:"runtime_type"`
 	BotAgentID      pgtype.UUID `json:"bot_agent_id"`
@@ -387,6 +415,7 @@ func (q *Queries) UpdateSchedule(ctx context.Context, arg UpdateScheduleParams) 
 		arg.Enabled,
 		arg.Command,
 		arg.RunTarget,
+		arg.EnabledExplicit,
 		arg.TargetSessionID,
 		arg.RuntimeType,
 		arg.BotAgentID,
@@ -399,6 +428,9 @@ func (q *Queries) UpdateSchedule(ctx context.Context, arg UpdateScheduleParams) 
 	)
 	var i Schedule
 	err := row.Scan(
+		&i.LimitDisabled,
+		&i.RegistrationGeneration,
+		&i.ResultOrigin,
 		&i.MaxRunSeconds,
 		&i.ID,
 		&i.Name,

@@ -110,6 +110,9 @@ func (h *delegationHost) scanResults(ctx context.Context) error {
 			failures = append(failures, e)
 		}
 	}
+	if err := h.scanScheduleResults(ctx); err != nil {
+		failures = append(failures, err)
+	}
 	return errors.Join(failures...)
 }
 
@@ -174,6 +177,12 @@ func (h *delegationHost) recoverUnadmittedResults(ctx context.Context) error {
 func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user, session string) (resultTask, error) {
 	t := resultTask{kind: kind, id: id, bot: bot, user: user, session: session, delivery: taskresult.Delivery{}}
 	switch kind {
+	case "schedule_fire":
+		loaded, err := h.loadScheduleResult(ctx, id, bot, user, session)
+		if err != nil {
+			return t, err
+		}
+		t = loaded
 	case "native_task":
 		data, e := h.store.FindNativeTask(ctx, id)
 		if e != nil {

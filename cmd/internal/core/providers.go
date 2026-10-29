@@ -1191,7 +1191,7 @@ func provideToolProviders(log *slog.Logger, channelRuntime channel.Runtime, regi
 		agenttools.NewAskUserProvider(log),
 		agenttools.NewMessageProvider(log, channelMessaging, channelMessaging, channelMessaging, assetResolver),
 		agenttools.NewContactsProvider(log, channelcontactadapter.NewSource(routeService)),
-		agenttools.NewScheduleProvider(log, scheduleService),
+		&scheduleContactProvider{base: agenttools.NewScheduleProvider(log, scheduleService), host: delegations.Host.(*delegationHost)},
 		agenttools.NewWorkdirProvider(log, workdirService),
 		agenttools.NewACPAgentsProvider(log, &acpRuntimePoolAdapter{pool: acpPool}, queries),
 		agenttools.NewMemoryProvider(log, memoryRegistry, settingsService, historySessions, hookService),

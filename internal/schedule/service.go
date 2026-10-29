@@ -63,6 +63,7 @@ type WorkdirValidator interface {
 }
 
 type Service struct {
+	resultHooks     ResultDeliveryHooks
 	lifecycleCtx    context.Context
 	stop            context.CancelFunc
 	queries         dbstore.Queries
@@ -169,7 +170,20 @@ func (s *Service) Create(ctx context.Context, botID string, req CreateRequest) (
 	if err != nil {
 		return Schedule{}, err
 	}
+	origin := resultOrigin(ctx)
+	if len(origin) > 0 {
+		if s.resultHooks == nil {
+			return Schedule{}, errors.New("schedule result authority unavailable")
+		}
+		if _, err := s.resultHooks.AuthorizeScheduleResultOrigin(ctx, botID, origin); err != nil {
+			return Schedule{}, err
+		}
+		if exec.RunTarget != RunTargetNewSession {
+			return Schedule{}, errors.New("contact schedules require an independent execution session")
+		}
+	}
 	row, err := s.queries.CreateSchedule(ctx, sqlc.CreateScheduleParams{
+		ResultOrigin:    origin,
 		Name:            req.Name,
 		Description:     req.Description,
 		Pattern:         req.Pattern,
@@ -287,8 +301,12 @@ func (s *Service) Update(ctx context.Context, id string, req UpdateRequest) (Sch
 			return Schedule{}, execErr
 		}
 		exec = normalized
+		if hasResultOrigin(existing.ResultOrigin) && exec.RunTarget != RunTargetNewSession {
+			return Schedule{}, errors.New("contact schedules require an independent execution session")
+		}
 	}
 	updated, err := s.queries.UpdateSchedule(ctx, sqlc.UpdateScheduleParams{
+		EnabledExplicit: req.Enabled != nil,
 		ID:              pgID,
 		Name:            name,
 		Description:     description,
@@ -359,15 +377,29 @@ func runTimeoutFor(sched Schedule) time.Duration {
 }
 
 func (s *Service) runSchedule(ctx context.Context, sched Schedule) error {
+	return s.runScheduleWithClaim(ctx, sched, nil)
+}
+
+func (s *Service) runScheduleWithClaim(ctx context.Context, sched Schedule, claim *sqlc.ScheduleLog) error {
 	if s.triggerer == nil {
 		return errors.New("schedule triggerer not configured")
 	}
-	updated, err := s.queries.IncrementScheduleCalls(ctx, toUUID(sched.ID))
+	var updated sqlc.Schedule
+	var err error
+	if claim == nil {
+		updated, err = s.queries.IncrementScheduleCalls(ctx, toUUID(sched.ID))
+	} else {
+		updated, err = s.queries.GetScheduleByID(ctx, toUUID(sched.ID))
+		updated.ResultOrigin = claim.ResultOrigin
+	}
 	if err != nil {
 		return err
 	}
 	sched = toSchedule(updated)
 	deadline := time.Now().Add(runTimeoutFor(sched))
+	if claim != nil {
+		deadline = claim.ClaimDeadline.Time
+	}
 	runCtx, cancelRun := context.WithDeadlineCause(ctx, deadline, ErrExecutionTimeout)
 	defer cancelRun()
 	if s.lifecycleCtx != nil {
@@ -380,23 +412,44 @@ func (s *Service) runSchedule(ctx context.Context, sched Schedule) error {
 		s.removeJob(sched.ID)
 	}
 
-	ownerUserID, err := s.resolveBotOwner(ctx, sched.BotID)
-	if err != nil {
-		return fmt.Errorf("resolve bot owner: %w", err)
+	var ownerUserID, sessionID string
+	var sessionErr error
+	if hasResultOrigin(updated.ResultOrigin) {
+		if s.resultHooks == nil {
+			sessionErr = errors.New("schedule result authority unavailable")
+		} else {
+			ownerUserID, sessionErr = s.resultHooks.AuthorizeScheduleResultOrigin(ctx, sched.BotID, updated.ResultOrigin)
+		}
+		if sessionErr == nil && sched.RunTarget != RunTargetNewSession {
+			sessionErr = errors.New("contact schedules require an independent execution session")
+		}
+	} else {
+		ownerUserID, err = s.resolveBotOwner(ctx, sched.BotID)
+		if err != nil {
+			return fmt.Errorf("resolve bot owner: %w", err)
+		}
 	}
-
-	sessionID, sessionErr := s.resolveRunSession(ctx, sched, ownerUserID)
+	if sessionErr == nil {
+		sessionID, sessionErr = s.resolveRunSession(ctx, sched, ownerUserID)
+	}
 
 	pgScheduleID := toUUID(sched.ID)
 	pgBotID := toUUID(sched.BotID)
 
-	logRow, err := s.queries.CreateScheduleLog(ctx, sqlc.CreateScheduleLogParams{
-		ScheduleID: pgScheduleID,
-		BotID:      pgBotID,
-		SessionID:  db.ParseUUIDOrEmpty(sessionID),
-	})
-	if err != nil {
-		return fmt.Errorf("create schedule fire log: %w", err)
+	var logRow sqlc.CreateScheduleLogRow
+	if claim == nil {
+		logRow, err = s.queries.CreateScheduleLog(ctx, sqlc.CreateScheduleLogParams{ResultOrigin: updated.ResultOrigin, ScheduleID: pgScheduleID, BotID: pgBotID, SessionID: db.ParseUUIDOrEmpty(sessionID)})
+		if err != nil {
+			return fmt.Errorf("create schedule fire log: %w", err)
+		}
+	} else {
+		logRow = sqlc.CreateScheduleLogRow{ID: claim.ID, BotID: claim.BotID, ScheduleID: claim.ScheduleID}
+		if sessionErr == nil {
+			_, err = s.queries.BindScheduleOccurrenceSession(ctx, sqlc.BindScheduleOccurrenceSessionParams{FireID: claim.ID, BotID: claim.BotID, SessionID: toUUID(sessionID)})
+			if err != nil {
+				return fmt.Errorf("bind claimed schedule execution: %w", err)
+			}
+		}
 	}
 	s.publishChanged(logRow.BotID.String(), logRow.ScheduleID.String())
 
@@ -434,6 +487,9 @@ func (s *Service) runSchedule(ctx context.Context, sched Schedule) error {
 		ReasoningEffort: sched.ReasoningEffort,
 	}, token)
 	triggerErr = withExecutionTimeout(ctx, triggerErr)
+	if claim != nil && errors.Is(triggerErr, ErrSessionBusy) {
+		return s.finishBusyOccurrence(ctx, sched, *claim, triggerErr)
+	}
 	if triggerErr != nil {
 		s.completeLog(ctx, logRow.ID, "error", "", failureCode(triggerErr), nil, pgtype.UUID{})
 		return triggerErr
@@ -554,6 +610,9 @@ func failureCode(err error) apperror.Code {
 // a run whose budget expired is an execution timeout whatever else it reports.
 // A closed log announces a schedule change so run lists drop the running state.
 func (s *Service) completeLog(ctx context.Context, logID pgtype.UUID, status, resultText string, errorCode apperror.Code, usageBytes []byte, modelID pgtype.UUID) {
+	if s.resultHooks != nil {
+		defer s.resultHooks.WakeScheduleResults(ctx)
+	}
 	if errors.Is(context.Cause(ctx), ErrExecutionTimeout) {
 		status = "error"
 		errorCode = apperror.CodeScheduleExecutionTimeout
@@ -765,6 +824,9 @@ func (s *Service) scheduleJob(ctx context.Context, schedule sqlc.Schedule) error
 	if err != nil {
 		return err
 	}
+	if hasResultOrigin(schedule.ResultOrigin) {
+		return s.registerContactOccurrence(schedule, sched, loc) //nolint:contextcheck // Persisted callbacks start from the service lifecycle, never their creator request.
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	// Re-registering the same schedule replaces its tracked cron entry.
@@ -811,15 +873,16 @@ func (s *Service) removeJob(id string) {
 
 func toSchedule(row sqlc.Schedule) Schedule {
 	item := Schedule{
-		ID:              row.ID.String(),
-		Name:            row.Name,
-		Description:     row.Description,
-		Pattern:         row.Pattern,
-		CurrentCalls:    int(row.CurrentCalls),
-		Enabled:         row.Enabled,
-		Command:         row.Command,
-		BotID:           row.BotID.String(),
-		ExecutionConfig: executionFromRow(row),
+		registrationGeneration: row.RegistrationGeneration,
+		ID:                     row.ID.String(),
+		Name:                   row.Name,
+		Description:            row.Description,
+		Pattern:                row.Pattern,
+		CurrentCalls:           int(row.CurrentCalls),
+		Enabled:                row.Enabled,
+		Command:                row.Command,
+		BotID:                  row.BotID.String(),
+		ExecutionConfig:        executionFromRow(row),
 	}
 	if row.MaxCalls.Valid {
 		maxCalls := int(row.MaxCalls.Int32)

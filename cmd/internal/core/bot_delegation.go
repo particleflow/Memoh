@@ -30,6 +30,7 @@ import (
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/media"
+	"github.com/felinics/memoh/internal/schedule"
 	"github.com/felinics/memoh/internal/storage"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
@@ -94,9 +95,10 @@ func (w delegationWorkdirs) Get(ctx context.Context, bot, id string) (workdir.Wo
 	return workdir.Workdir{ID: r.ID, BotID: r.BotID, WorkspaceTargetID: target}, nil
 }
 
-func injectBotDelegation(s *botdelegation.Service, agent *application.Service, assets *media.Service) {
+func injectBotDelegation(s *botdelegation.Service, agent *application.Service, assets *media.Service, schedules *schedule.Service) {
 	h := s.Host.(*delegationHost)
 	h.agent = agent
+	schedules.SetResultDeliveryHooks(h)
 	h.resultSubmit = agent.EnqueueAuthorizedFollowUp
 	agent.SetDelegationScope(h.prepare)
 	agent.SetTaskResultWake(h.wakeResults)

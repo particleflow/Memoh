@@ -901,6 +901,9 @@ CREATE INDEX IF NOT EXISTS idx_lifecycle_events_container_id ON lifecycle_events
 CREATE INDEX IF NOT EXISTS idx_lifecycle_events_event_type ON lifecycle_events(event_type);
 
 CREATE TABLE IF NOT EXISTS schedule (
+  limit_disabled BOOLEAN NOT NULL DEFAULT false,
+  registration_generation BIGINT NOT NULL DEFAULT 0,
+  result_origin JSONB NOT NULL DEFAULT '{}',
   max_run_seconds integer NOT NULL DEFAULT 3600 CHECK (max_run_seconds BETWEEN 300 AND 86400),
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
@@ -1028,6 +1031,11 @@ ALTER TABLE bot_history_messages ADD CONSTRAINT fk_compact_id FOREIGN KEY (compa
 
 -- schedule_logs: structured execution records for scheduled tasks.
 CREATE TABLE IF NOT EXISTS schedule_logs (
+  scheduled_for TIMESTAMPTZ,
+  claim_deadline TIMESTAMPTZ,
+  claim_state TEXT NOT NULL DEFAULT '',
+  result_origin JSONB NOT NULL DEFAULT '{}',
+  result_delivery JSONB NOT NULL DEFAULT '{}',
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   schedule_id UUID NOT NULL REFERENCES schedule(id) ON DELETE CASCADE,
   bot_id UUID NOT NULL REFERENCES bots(id) ON DELETE CASCADE,
@@ -3630,3 +3638,6 @@ ALTER TABLE public.session_run_abort_controls ADD CONSTRAINT session_abort_outco
         AND error_class IN ('none','canceled','deadline_exceeded','control_error')
         AND server_source IN ('agent_service','runtime_controller'))
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_logs_occurrence
+ ON schedule_logs(team_id,schedule_id,scheduled_for) WHERE scheduled_for IS NOT NULL;
