@@ -107,20 +107,42 @@ func TestLegacyIdentityHistoryIsReadOnlyAndRevocable(t *testing.T) {
 	other.InstanceID = "changed-instance"
 	changed.RuntimeProviderConfig, _ = json.Marshal(other)
 	store.mounts["pc-a"] = changed
-	checkPages(b, false)
-	if _, err := source.service.observe(t.Context(), b, row.ID, false); !errors.Is(err, agenvo.ErrTargetChanged) {
+	checkPages(b, true)
+	if _, err := source.service.observe(t.Context(), b, row.ID, false); err != nil {
 		t.Fatalf("changed fingerprint: %v", err)
 	}
 	store.mounts["pc-a"] = mount
 	hs.connectionRevoked = true
-	checkPages(b, false)
-	if _, err := source.service.observe(t.Context(), b, row.ID, false); err == nil {
-		t.Fatal("revoked connection read")
+	checkPages(b, true)
+	if _, err := source.service.observe(t.Context(), b, row.ID, false); err != nil {
+		t.Fatal(err)
 	}
 	hs.connectionRevoked = false
 	store.revoked = true
-	checkPages(b, false)
-	if _, err := source.service.followup(t.Context(), b, in); err == nil {
-		t.Fatal("revoked mount read")
+	checkPages(b, true)
+	source.SetResultAssociator(func(context.Context, dbstore.ComputerOperationRecord, []DeliveryRequest) error {
+		t.Fatal("history created attachment association")
+		return nil
+	})
+	delete(store.mounts, "pc-a")
+	client := standardClient(t, source, "pc-a", false)
+	read := parseResult(t, invoke(t, client, "computer_task_get", map[string]any{"operation_id": row.ID}, false))
+	if read.ID != row.ID || read.State != "unknown" {
+		t.Fatal("deleted binding changed historical receipt")
+	}
+
+	checkPages(b, true)
+	if _, err := source.service.observe(t.Context(), b, row.ID, true); err == nil {
+		t.Fatal("deleted registration allowed live refresh")
+	}
+	if string(before) != string(observationSnapshot(t, store)) || len(transport.methods) != 0 {
+		t.Fatal("history mutated or dispatched")
+	}
+	row.State = "completed"
+	store.records[row.ID] = row
+	completedBefore := observationSnapshot(t, store)
+	read = parseResult(t, invoke(t, client, "computer_task_get", map[string]any{"operation_id": row.ID}, false))
+	if read.State != "completed" || string(completedBefore) != string(observationSnapshot(t, store)) {
+		t.Fatal("completed archive changed")
 	}
 }

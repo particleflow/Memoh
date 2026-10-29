@@ -107,3 +107,29 @@ func serviceFixtureConfig(target Target) []byte {
 	raw, _ := json.Marshal(map[string]any{"herdr": NativeHerdrProfile{InstanceID: target.InstanceID, Session: target.Session, WorkDir: target.WorkDir, BashPath: target.BashPath, HerdrCLI: `C:\Synthetic\herdr.exe`, HerdrConfigRoot: `C:\Synthetic\herdr`, Agent: target.Agent}})
 	return raw
 }
+
+func TestOperationHistoryPermissionDoesNotResolveRegistration(t *testing.T) {
+	s, store, f := serviceFixture(t)
+	store.record.RuntimeRevoked = true
+	scope := request().Scope
+	if err := s.AuthorizeOperationHistory(t.Context(), scope); err != nil {
+		t.Fatal(err)
+	}
+	store.record = dbstore.BotRemoteRuntimeBindingRecord{}
+	if err := s.AuthorizeOperationHistory(t.Context(), scope); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.ResolveTarget(t.Context(), scope); err == nil {
+		t.Fatal("missing registration allowed execution")
+	}
+	if err := s.AuthorizeOperationHistory(toolcontext.WithComputerScope(t.Context(), "other"), scope); err == nil {
+		t.Fatal("cross PC history allowed")
+	}
+	scope.UserID = "other"
+	if err := s.AuthorizeOperationHistory(t.Context(), scope); err == nil {
+		t.Fatal("permission denied history allowed")
+	}
+	if len(f.calls) != 0 {
+		t.Fatal("history invoked transport")
+	}
+}

@@ -38,6 +38,7 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 	calls := 0
 	revoke := false
 	revokeChat := false
+	changeInstance := false
 	availability := "online"
 	observer := observationReaderFunc(func(ctx context.Context, b toolcontext.ComputerBinding, id string) (computertask.Recovery, error) {
 		calls++
@@ -52,6 +53,9 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 		}
 		if revokeChat {
 			f.chat = false
+		}
+		if changeInstance {
+			f.registration.InstanceID = "replacement-instance"
 		}
 		return computertask.Recovery{OperationID: id, TargetID: b.TargetID, State: "unknown", BusinessOutcome: "unknown", WorkspaceID: "w-synthetic", PaneID: "p-synthetic", Native: agenvo.ReferenceObservation{Availability: availability, AgentStatus: "done", Match: "observed"}, Reconciliation: &computertask.OperationReconciliation{Revision: "9007199254740993", TargetFingerprint: f.op.TargetFingerprint, ReceiptState: "missing", Files: []computertask.RecoveryFile{}}}, nil
 	})
@@ -105,6 +109,18 @@ func TestSessionTaskObservationHTTPHostBindingAndLateRevocation(t *testing.T) {
 		t.Fatal("unavailable observation changed receipt")
 	}
 	availability = "online"
+	changeInstance = true
+	body = call(taskUser, 404)
+	if strings.Contains(body, "w-synthetic") {
+		t.Fatal("late instance replacement leaked observation")
+	}
+	identityCalls := calls
+	changeInstance = false
+	call(taskUser, 404)
+	if calls != identityCalls {
+		t.Fatal("replacement instance reached observer")
+	}
+	f.registration.InstanceID = "synthetic"
 	revokeChat = true
 	body = call(taskUser, 403)
 	if strings.Contains(body, "w-synthetic") {

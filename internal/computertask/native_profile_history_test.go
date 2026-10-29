@@ -66,15 +66,16 @@ func TestNativeProfileHistorySurvivesCutoverWithoutExecution(t *testing.T) {
 	}
 	f.denied = false
 	f.store.revoked = true
-	if _, e := s.observe(ctx, f.binding, r.ID, false); e == nil {
-		t.Fatal("revoked mount read")
-	}
+	check()
 	f.store.revoked = false
 	profile.InstanceID = "new-instance"
 	mount.RuntimeProviderConfig, _ = json.Marshal(map[string]any{"herdr": profile})
 	f.store.mounts[f.binding.TargetID] = mount
-	if _, e := s.observe(ctx, f.binding, r.ID, false); e == nil {
-		t.Fatal("different instance read")
+	check()
+	delete(f.store.mounts, f.binding.TargetID)
+	check()
+	if _, e := s.observe(ctx, f.binding, r.ID, true); e == nil {
+		t.Fatal("deleted registration allowed live refresh")
 	}
 	if string(before) != string(observationSnapshot(t, f.store.fixtureStore)) || f.batch.runs != 0 || len(f.batch.calls) != 0 {
 		t.Fatal("history changed ledger or invoked transport")

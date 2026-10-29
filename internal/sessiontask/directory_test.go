@@ -163,7 +163,7 @@ func TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination(t *testing
 	}
 }
 
-func TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant(t *testing.T) {
+func TestDirectoryComputerUsesOriginalReceiptAndCurrentHistoryPermission(t *testing.T) {
 	f, s := directorySetup()
 	r := f.operations[f.op]
 	f.candidates = []dbstore.BotTaskDirectoryCandidate{{Type: ComputerOperation, ID: r.ID, RecordID: r.ID, SourceBotID: "bot", SessionID: r.SessionID, RunID: "opaque/provider/run/not-uuid", State: "unknown", CreatedAt: r.CreatedAt}}
@@ -181,8 +181,13 @@ func TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant(t *testing.T) {
 
 	delete(f.targets, "pc-a")
 	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
+	if err != nil || len(p.Items) != 1 || p.Items[0].State != "unknown" {
+		t.Fatalf("retired computer history %+v %v", p, err)
+	}
+	f.historyDenied = true
+	p, err = s.ListDirectory(t.Context(), "bot", "user", 20, "", owner, true)
 	if err != nil || len(p.Items) != 0 {
-		t.Fatalf("revoked computer %+v %v", p, err)
+		t.Fatalf("revoked history permission %+v %v", p, err)
 	}
 }
 

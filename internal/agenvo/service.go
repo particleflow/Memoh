@@ -145,6 +145,26 @@ func (s *Service) ResolveHistoricalTarget(ctx context.Context, scope Scope) (Tar
 	return t, err
 }
 
+// AuthorizeOperationHistory checks the current Bot permission and selected scope.
+// Callers must independently load the original owner/session/team-scoped ledger
+// row. This grants no registration, filesystem, credential or execution access.
+func (s *Service) AuthorizeOperationHistory(ctx context.Context, scope Scope) error {
+	if err := toolcontext.CheckDelegationTarget(ctx, scope.BotID, scope.TargetID, "workspace_exec"); err != nil {
+		return err
+	}
+	if err := toolcontext.CheckComputerTarget(ctx, scope.TargetID); err != nil {
+		return err
+	}
+	if s == nil || s.permissions == nil || scope.UserID == "" {
+		return ErrForbidden
+	}
+	allowed, err := s.permissions.HasBotPermission(ctx, scope.BotID, scope.UserID, "workspace_exec")
+	if err != nil || !allowed {
+		return ErrForbidden
+	}
+	return nil
+}
+
 func (s *Service) Client(ctx context.Context, scope Scope) (*Client, Target, error) {
 	target, owner, err := s.resolve(ctx, scope)
 	if err != nil {

@@ -58,7 +58,13 @@ func NewPostgresDeliveryService(store *postgresstore.Store, assets DeliveryAsset
 			if err != nil || item.SessionID != b.SessionID || item.TargetID != b.TargetID {
 				return agenvo.Target{}, ErrDenied
 			}
-			return targets.ResolveTarget(ctx, agenvo.Scope{BotID: b.BotID, UserID: b.UserID, TargetID: b.TargetID})
+			// Historical task metadata can survive retirement, but delivery must
+			// still pass the live target gate and retain its public denial.
+			target, err := targets.ResolveTarget(ctx, agenvo.Scope{BotID: b.BotID, UserID: b.UserID, TargetID: b.TargetID})
+			if err != nil {
+				return agenvo.Target{}, ErrDenied
+			}
+			return target, nil
 		}
 		if err = fn(DeliveryTransaction{Store: txStore, Authorize: authorize}); err != nil {
 			return deliveryTransactionError(err, false)

@@ -190,7 +190,11 @@ func TestCommittedResultAssociationVerifiesBytesAndLiveLedger(t *testing.T) {
 				}
 			}
 			if mode == "committed" || mode == "committed-rows" || mode == "partial" {
-				if err != nil || links != 5 {
+				wantLinks := 4
+				if mode == "partial" {
+					wantLinks = 2
+				}
+				if err != nil || links != wantLinks {
 					t.Fatalf("committed=%v links=%d", err, links)
 				}
 			} else if links != 0 {

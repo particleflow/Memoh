@@ -377,12 +377,19 @@ func TestNativeEvidenceReusesScopeForHistoryAndExports(t *testing.T) {
 			calls := slices.Clone(f.base.methods)
 			history, readErr := source.service.observe(ctx, b, initial.ID, false)
 			exported, exportErr := source.service.artifactForObservation(ctx, b, initial.ID, sampled.NativeEvidence.LatestObservationID)
-			if change == "nas" {
+			switch change {
+			case "nas":
 				if readErr != nil || exportErr != nil || history.NativeEvidence == nil || exported.ArtifactHash == "" {
 					t.Fatal("existing NAS grant not reused")
 				}
-			} else if readErr == nil || exportErr == nil || history.ID != "" || exported.ID != "" {
-				t.Fatal("scope escaped")
+			case "grant_removed":
+				if readErr != nil || history.ID != initial.ID || exportErr == nil || exported.ID != "" {
+					t.Fatal("retired history/export boundary")
+				}
+			default:
+				if readErr == nil || exportErr == nil || history.ID != "" || exported.ID != "" {
+					t.Fatal("scope escaped")
+				}
 			}
 			if !slices.Equal(calls, f.base.methods) {
 				t.Fatal("history/export contacted Agent")

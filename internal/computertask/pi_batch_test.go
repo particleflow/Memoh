@@ -536,7 +536,7 @@ func TestStandardMCPPiBatchUnknownDoesNotRetryAndCancellationStaysHonest(t *test
 	store.revoked = true
 	before := len(f.calls)
 	for _, tool := range []string{"computer_task_get", "computer_task_result", "computer_task_artifact", "computer_task_cancel", "computer_task_logs"} {
-		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, true)
+		invoke(t, c, tool, map[string]any{"operation_id": r.ID}, tool != "computer_task_get")
 	}
 	if before != len(f.calls) {
 		t.Fatal("revoked observation reached relay")
@@ -869,7 +869,7 @@ func TestCompactResultIndependentOfLogStorageAndSurvivesRestart(t *testing.T) {
 	before := len(f.calls)
 	store.revoked = true
 	for _, tool := range []string{"computer_task_result", "computer_task_get", "computer_task_logs", "computer_task_artifact"} {
-		invoke(t, resumed, tool, map[string]any{"operation_id": r.ID}, true)
+		invoke(t, resumed, tool, map[string]any{"operation_id": r.ID}, tool != "computer_task_get")
 	}
 	if len(f.calls) != before {
 		t.Fatal("revoked diagnostic request reached PC")

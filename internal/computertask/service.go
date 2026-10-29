@@ -439,6 +439,11 @@ func (s *Service) load(ctx context.Context, b toolcontext.ComputerBinding, id st
 }
 
 func (s *Service) loadHistory(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
+	return s.loadWithResolver(ctx, b, id, nil, true)
+}
+
+// Result association can write links and therefore retains registration checks.
+func (s *Service) loadBoundHistory(ctx context.Context, b toolcontext.ComputerBinding, id string) (dbstore.ComputerOperationRecord, Details, error) {
 	return s.loadWithResolver(ctx, b, id, s.relay.ResolveHistoricalTarget, true)
 }
 
@@ -450,7 +455,12 @@ func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBi
 	if err := toolcontext.CheckComputerTarget(ctx, r.TargetID); err != nil {
 		return r, Details{}, ErrDenied
 	}
-	t, err := resolve(ctx, scope(b, r.TargetID))
+	var t agenvo.Target
+	if history && resolve == nil {
+		err = s.relay.AuthorizeOperationHistory(ctx, scope(b, r.TargetID))
+	} else {
+		t, err = resolve(ctx, scope(b, r.TargetID))
+	}
 	if err != nil {
 		return r, Details{}, ErrDenied
 	}
@@ -458,14 +468,13 @@ func (s *Service) loadWithResolver(ctx context.Context, b toolcontext.ComputerBi
 	if json.Unmarshal(r.Details, &d) != nil {
 		return r, d, agenvo.ErrUnknown
 	}
-	if history {
-		if !agenvo.HistoricalTargetMatches(t, d.TargetSnapshot, r.TargetFingerprint) {
-			return r, d, agenvo.ErrTargetChanged
-		}
-	} else if agenvo.TargetFingerprint(t) != r.TargetFingerprint {
+	if history && resolve != nil && !agenvo.HistoricalTargetMatches(t, d.TargetSnapshot, r.TargetFingerprint) {
 		return r, d, agenvo.ErrTargetChanged
 	}
-	if d.TargetSnapshot != nil && agenvo.TargetFingerprint(*d.TargetSnapshot) != r.TargetFingerprint {
+	if !history && agenvo.TargetFingerprint(t) != r.TargetFingerprint {
+		return r, d, agenvo.ErrTargetChanged
+	}
+	if r.TargetFingerprint == "" || d.TargetSnapshot != nil && agenvo.TargetFingerprint(*d.TargetSnapshot) != r.TargetFingerprint {
 		return r, d, agenvo.ErrUnknown
 	}
 	if d.NativeEvidence != nil {
