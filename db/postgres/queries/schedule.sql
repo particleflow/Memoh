@@ -42,6 +42,8 @@ SET name = $2,
     description = $3,
     pattern = $4,
     max_calls = $5,
+    limit_disabled = CASE WHEN sqlc.arg(enabled_explicit)::boolean OR $6::boolean
+      OR enabled IS DISTINCT FROM $6::boolean THEN false ELSE limit_disabled END,
     enabled = $6,
     command = $7,
     run_target = $8,
@@ -61,12 +63,13 @@ RETURNING *;
 -- name: DeleteSchedule :exec
 -- Keep the original plan as the trusted parent of its execution logs.
 UPDATE schedule
-SET deleted_at = now(), enabled = false, updated_at = now()
+SET deleted_at = now(), enabled = false, limit_disabled = false, updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL;
 
 -- name: DisableSchedule :one
 UPDATE schedule
 SET enabled = false,
+    limit_disabled = false,
     updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 RETURNING *;

@@ -306,6 +306,7 @@ func (s *Service) Update(ctx context.Context, id string, req UpdateRequest) (Sch
 		}
 	}
 	updated, err := s.queries.UpdateSchedule(ctx, sqlc.UpdateScheduleParams{
+		EnabledExplicit: req.Enabled != nil,
 		ID:              pgID,
 		Name:            name,
 		Description:     description,
@@ -486,6 +487,9 @@ func (s *Service) runScheduleWithClaim(ctx context.Context, sched Schedule, clai
 		ReasoningEffort: sched.ReasoningEffort,
 	}, token)
 	triggerErr = withExecutionTimeout(ctx, triggerErr)
+	if claim != nil && errors.Is(triggerErr, ErrSessionBusy) {
+		return s.finishBusyOccurrence(ctx, sched, *claim, triggerErr)
+	}
 	if triggerErr != nil {
 		s.completeLog(ctx, logRow.ID, "error", "", failureCode(triggerErr), nil, pgtype.UUID{})
 		return triggerErr
