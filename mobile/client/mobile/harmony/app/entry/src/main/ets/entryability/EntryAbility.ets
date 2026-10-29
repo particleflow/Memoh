@@ -4,11 +4,14 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { ClientDiagnostics } from '../common/ClientDiagnostics';
 import { ImageTimingDump } from '../common/ImageTimingDump';
 import { nativeTransferOwner } from '../common/NativeTransferOwner';
+import { NativeTransferBackground } from '../common/NativeTransferBackground';
 
 export default class EntryAbility extends UIAbility {
   onCreate(_want: Want): void {
-    nativeTransferOwner(this.context).bindAbility(this.context);
     ClientDiagnostics.bind(this.context);
+    const owner = nativeTransferOwner(this.context);
+    owner.bindAbility(this.context);
+    owner.bindBackground(new NativeTransferBackground(this.context, (_reason: string): void => owner.pauseBackground()));
     ClientDiagnostics.event('SYSTEM', 'lifecycle', 'ability-create', '');
   }
   // Foregrounding must retain the current chat, drafts and native transfers.

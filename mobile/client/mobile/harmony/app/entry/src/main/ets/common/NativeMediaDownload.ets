@@ -29,7 +29,11 @@ export class NativeMediaDownload {
   private cancelled: Map<string, string> = new Map();
   private context: common.UIAbilityContext;
   private authorized: () => boolean;
-  constructor(context: common.UIAbilityContext, authorized: () => boolean) { this.context = context; this.authorized = authorized; }
+  private progress: (operation: string, received: number, total: number) => void;
+  constructor(context: common.UIAbilityContext, authorized: () => boolean,
+    progress: (operation: string, received: number, total: number) => void = (): void => {}) {
+    this.context = context; this.authorized = authorized; this.progress = progress;
+  }
   bindContext(context: common.UIAbilityContext): void { this.context = context; }
   private check(state: DownloadState): void {
     if (!this.authorized() || state.cancelled || state.epoch !== this.epoch) { throw new Error('MEDIA_DOWNLOAD_CANCELLED'); }
@@ -87,6 +91,7 @@ export class NativeMediaDownload {
     fs.renameSync(state.path + '.json.tmp', state.path + '.json');
     const dir = fs.openSync(this.context.filesDir + '/memoh-download-journal-v1', fs.OpenMode.READ_ONLY);
     try { fs.fsyncSync(dir.fd); } finally { fs.closeSync(dir); }
+    this.progress(state.operation, state.received, state.size);
   }
   private reopen(state: DownloadState): fs.File {
     const directory = this.context.filesDir + '/memoh-download-journal-v1';

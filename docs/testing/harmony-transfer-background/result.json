@@ -1,0 +1,245 @@
+{
+  "baseCommit": "4f7d7a84fddba50665f97b2cf4341e4139f37d14",
+  "scope": "stage2 DATA_TRANSFER entitlement on existing owner and engines",
+  "checks": [
+    {
+      "name": "controller",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_transfer_background.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.265,
+      "log": "controller.log.txt",
+      "sha256": "2920c0f52273c17541cb36beed76d586b820a219aff352cd1f50354e09d4d1f6"
+    },
+    {
+      "name": "owner",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_background_owner.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.719,
+      "log": "owner.log.txt",
+      "sha256": "90f9c55dd67731c6da7a0436c85eb411c9138f9a2e342b3cdf7e997b28c7dc4d"
+    },
+    {
+      "name": "official-types",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_background_sdk_types.cjs"
+      ],
+      "environment": {
+        "HARMONY_BACKGROUND_OFFICIAL_TYPES": "/workspace/harmony-transfer-lifetime-artifacts/stage2-official"
+      },
+      "exitCode": 0,
+      "seconds": 1.741,
+      "log": "official-types.log.txt",
+      "sha256": "4bbd2ab46536ef4ebfc50bca1ee02cd00add3c98ec5ddec4d466ffcef4b750b9"
+    },
+    {
+      "name": "native-lifetime",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_native_lifetime.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.768,
+      "log": "native-lifetime.log.txt",
+      "sha256": "8943c6ebaa8701d4743bdd619de7918d20f4269e84828ba498172094052b76e1"
+    },
+    {
+      "name": "entry-lifetime",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_entry_lifetime.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.402,
+      "log": "entry-lifetime.log.txt",
+      "sha256": "709a3a527038a5bd4172f9d308c9bb447a3c524652ccae55f3797a311102f963"
+    },
+    {
+      "name": "upload-frontend",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_resumable_frontend.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.402,
+      "log": "upload-frontend.log.txt",
+      "sha256": "fd7af79a871f0c0def107bca5f524394dd3d53960e9422faf290801e3ff0feca"
+    },
+    {
+      "name": "download-frontend",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_download_frontend.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.397,
+      "log": "download-frontend.log.txt",
+      "sha256": "633994900d5db60425d16d6bf04dec8b333a306eefed70123825cdd9d4563edc"
+    },
+    {
+      "name": "upload-router",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_upload_router.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.313,
+      "log": "upload-router.log.txt",
+      "sha256": "2db6375337adec63c6354d997f89e0e9132cadf3356b4b31f336114980078518"
+    },
+    {
+      "name": "service-config",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_service_config.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.377,
+      "log": "service-config.log.txt",
+      "sha256": "e8664f7f7d024144f28af3d2c1c0f24a43d7f4b13da9062e5a8c61b6a29cd7b6"
+    },
+    {
+      "name": "network-policy",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_network_policy.cjs"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.334,
+      "log": "network-policy.log.txt",
+      "sha256": "d35b1452ff51e7dfc9018a90d4ab0258f6d7ac60ba277000a426a77fc48b37a0"
+    },
+    {
+      "name": "upload-scope",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_resumable.cjs",
+        "1"
+      ],
+      "environment": {
+        "HARMONY_UPLOAD_SCOPE_ONLY": "1"
+      },
+      "exitCode": 0,
+      "seconds": 3.329,
+      "log": "upload-scope.log.txt",
+      "sha256": "695fb27f2742bfef2dbda0febc77305202258e0044e3fbffc6d3fb958126caaf"
+    },
+    {
+      "name": "upload-ready-head",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_resumable.cjs",
+        "1"
+      ],
+      "environment": {
+        "HARMONY_UPLOAD_HEAD_ONLY": "1"
+      },
+      "exitCode": 0,
+      "seconds": 1.505,
+      "log": "upload-ready-head.log.txt",
+      "sha256": "cadc7ccffe0cc4c9aec4867bd6a83982f9ccb30db4e890b2c1a4e3371465bddd"
+    },
+    {
+      "name": "download-small",
+      "command": [
+        "node",
+        "mobile/client/tests/stage2/harmony_native_download.cjs",
+        "1"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 1.45,
+      "log": "download-small.log.txt",
+      "sha256": "ea77b54958b698f78377532a389f18f5e50fad611bcf7f5f385f343bb3e56b55"
+    },
+    {
+      "name": "source-guard",
+      "command": [
+        "python",
+        "mobile/check_source_subset.py"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.728,
+      "log": "source-guard.log.txt",
+      "sha256": "f4606981a3bd6c64bc7ca85c231a1134364b6e0d4e81b17587f912b14f9394a2"
+    },
+    {
+      "name": "diff-check",
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "environment": {},
+      "exitCode": 0,
+      "seconds": 0.015,
+      "log": "diff-check.log.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "allPassed": true,
+  "sourceSHA256": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets": "984ad1aeef309d0deaa17421a2f8bb9230c73dfeed30705bc572cfa3feeed358",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets": "87d8541a1b155d5c6963e6ca968bf070d1a9ba445e59151f5abdac322a140619",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets": "198ee1d16c78effb3bdcf1d1df653e565cc71911a4cb0ee620b62701d8d5e6db",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets": "4a01f4a9ebd298003ac5ee7de75a6b4df46371aee6a87adec2ac090a1c0bff5f",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets": "c27f8a46c45f39142a9baf44bd1872eef6bdb04b0987083dd55d227bfde58ec0",
+    "mobile/client/mobile/harmony/app/entry/src/main/module.json5": "5a9e21f56233697fe1a88c227f491f3a74f3d478e2f0340c138e0128cde5a700"
+  },
+  "unchangedSHA256": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets": "985768e472b8d4be46b53ff539db1173e958bd4e481da20a988030053c7852e0",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets": "25358b1de614fbb3942496a92998c84a7afa2005db54182a946e8a93b71645ee",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferPolicy.ets": "a16553e90d843764f14b8d598c08d2bf571ffd8163474a3984be85352d2bd7f6",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "c966af1d322dbf166248b0c586c6c9538af5a01b59e1327ef2480a0cc5b0ec02",
+    "mobile/client/config/memoh_web.lock.json": "26fbf46a224badb89fcf79f880430e7e046339a34359a63e81d2498f598da477",
+    "internal/media/uploads.go": "9b882d78393877d012e7c742832675bb3da063652e34b271b86524fdde9a2798",
+    "internal/handlers/media_resumable.go": "3e3a18510b0b288550704e55571b16e28da1f1d8512aad8600c42cce6dc18c9a"
+  },
+  "manifestOnlyAdds": [
+    "ohos.permission.KEEP_BACKGROUND_RUNNING",
+    "EntryAbility.backgroundModes=dataTransfer"
+  ],
+  "stage1ExternalOfficialCompile": {
+    "passed": true,
+    "commit": "4f7d7a84fddba50665f97b2cf4341e4139f37d14",
+    "SDK": "26.0.0.105/API26",
+    "libraryFile": "libfile_30a741a4b4ac8191bacb47e451bcd5f8",
+    "stage2Qualified": false
+  },
+  "stage2OfficialAPI26Compile": false,
+  "officialDeclarationSurface": true,
+  "SDKDownloaded": false,
+  "deviceSettingsChanged": false,
+  "notificationPermissionPrompt": false,
+  "nativeDevice": false,
+  "realRcpTLS": false,
+  "newHAP": false,
+  "installed": false,
+  "signed": false,
+  "deployed": false,
+  "renderedUI": false,
+  "humanQA": false,
+  "processDeathExecution": false,
+  "WindowsChanged": false,
+  "environment": {
+    "node": "v24.19.0",
+    "nativeAdapters": "controlled Kit boundaries; real disk and controlled HTTP",
+    "stage1WebChecks": "reused immutable stage1 evidence; no Web product source changed by stage2"
+  }
+}

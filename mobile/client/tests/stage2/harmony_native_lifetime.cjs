@@ -90,6 +90,26 @@ const server = http.createServer(async (req, res) => {
   } catch (e) { res.destroy(e) }
 })
 const wait = async predicate => { for (let i = 0; i < 300; i++) { if (predicate()) return; await new Promise(r => setTimeout(r, 5)) } assert.fail('fixture did not reach held I/O') }
+const backgroundEnabled = process.env.HARMONY_BACKGROUND_OWNER === '1'
+let background, cancelBackground, backgroundStops = [], backgroundCalls = [], progressReports = []
+async function bindBackground() {
+  modules['@kit.BackgroundTasksKit'] = {}; modules['@kit.AbilityKit'] = {}; modules['@kit.NotificationKit'] = {}
+  const owner = load('NativeTransferOwner').nativeTransferOwner(context)
+  let id = 0
+  background = new (load('NativeTransferBackground').NativeTransferBackground)(context, reason => { backgroundStops.push(reason); owner.pauseBackground() }, {
+    async start() { backgroundCalls.push('start'); return { notificationId: 100 + ++id, continuousTaskId: id, slotType: 4, contentType: 5 } },
+    async publish(_lease, percent) { backgroundCalls.push(['progress', percent]); assert.ok(percent >= 0 && percent <= 100) },
+    async stop() { backgroundCalls.push('stop') }, onCancel(fn) { cancelBackground = () => fn({ id, reason: 0 }) }, offCancel() {},
+  })
+  const report = background.progress.bind(background)
+  background.progress = (key, received, total) => {
+    const upload = key.startsWith('upload:'), folder = path.join(dir, upload ? 'memoh-upload-journal-v1' : 'memoh-download-journal-v1')
+    const journals = fs.readdirSync(folder).filter(n => n.endsWith('.json')).map(n => JSON.parse(fs.readFileSync(path.join(folder,n))))
+    assert.ok(journals.some(j => (upload ? j.offset : j.received) === received && j.size === total), 'notification bytes must already be durable')
+    progressReports.push([upload ? 'upload' : 'download', received, total]); report(key, received, total)
+  }
+  owner.bindBackground(background)
+}
 let Client
 async function page() {
   const frame = 'begonia-client://app/index.html', client = new Client({ registerJavaScriptProxy() {}, deleteJavaScriptRegister() {}, getUrl: () => frame, getLastJavascriptProxyCallingFrameUrl: () => frame }, () => {}, async () => {}, context)
@@ -120,6 +140,7 @@ async function stage(p, authorization = 'Bearer alice') {
 }
 async function main() {
   await new Promise(r => server.listen(0, '127.0.0.1', r)); origin = 'http://nas.example:' + server.address().port + '/api'; Client = load('NativeClient').NativeClient
+  if (backgroundEnabled) await bindBackground()
   let p = await page(), local = await stage(p)
   holdUpload = true; const input = { ...scope(), handle: local.handle }, old = p.send({ command: 'upload.run', ...input }); await wait(() => uploadHeld)
   const before = cancelled; pageHost(p.client).aboutToDisappear(); assert.equal(cancelled, before, 'page detach cancelled accepted native upload')
@@ -188,6 +209,34 @@ async function main() {
   p.client.close(); p = await page(); await p.send({ command: 'client.state', state: 'ready', authorization: 'Bearer bob' })
   assert.equal((await changedSession).ok, false); uploadHeld(); uploadHeld = undefined
   await p.send({ command: 'client.state', state: 'login-page' }); p.client.close(); await new Promise(setImmediate)
+  if (backgroundEnabled) {
+    p = await page(); local = await stage(p); holdUpload = true
+    const input = { ...scope(), handle: local.handle }, interrupted = p.send({ command: 'upload.run', ...input })
+    await wait(() => uploadHeld); await background.settled()
+    const starts = backgroundCalls.filter(x => x === 'start').length, creates = events.filter(x => x[0] === 'POST' && x[1].endsWith('/uploads')).length
+    cancelBackground(); assert.equal((await interrupted).ok, false); await background.settled()
+    assert.equal(backgroundCalls.filter(x => x === 'start').length, starts, 'OS revoke must not reacquire itself')
+    assert.ok(backgroundStops.includes('background-system-canceled'))
+    const journalPath = path.join(dir, 'memoh-upload-journal-v1', local.handle + '.json'), checkpoint = JSON.parse(fs.readFileSync(journalPath))
+    assert.ok(checkpoint.uploadId); assert.ok(fs.existsSync(path.join(dir, 'memoh-upload-journal-v1', local.handle + '.original')))
+    uploadHeld(); uploadHeld = undefined
+    assert.equal((await p.send({ command: 'upload.run', ...scope(), handle: local.handle })).ok, true)
+    assert.equal(events.filter(x => x[0] === 'POST' && x[1].endsWith('/uploads')).length, creates, 'resume must keep the original server receipt')
+    assert.equal(JSON.parse(fs.readFileSync(journalPath)).uploadId, checkpoint.uploadId)
+    // Download revoke preserves the exact fsynced part and current account scope.
+    holdDownload = true
+    const down = { ...scope(), name: 'small.bin', url: origin + '/bots/bot-a/media/' + hash, hash, size: bytes.length }
+    const downWork = p.send({ command: 'download.fetch', ...down }); await wait(() => downloadHeld)
+    await wait(() => fs.existsSync(path.join(dir, 'memoh-download-journal-v1')) && fs.readdirSync(path.join(dir, 'memoh-download-journal-v1')).filter(n => n.endsWith('.json')).some(n => { const j = JSON.parse(fs.readFileSync(path.join(dir, 'memoh-download-journal-v1', n))); return j.received > 0 && j.received < j.size }))
+    cancelBackground(); assert.equal((await downWork).ok, false); await background.settled()
+    const downFolder = path.join(dir, 'memoh-download-journal-v1'), records = fs.readdirSync(downFolder).filter(n => n.endsWith('.json')).map(n => [n, JSON.parse(fs.readFileSync(path.join(downFolder,n)))])
+    assert.ok(records.some(([name,j]) => j.received > 0 && j.received < j.size && fs.statSync(path.join(downFolder,name.slice(0,-5))).size >= j.received))
+    downloadHeld(); downloadHeld = undefined
+    const restored = { ...down, operation: scope().operation }; assert.equal((await p.send({ command: 'download.fetch', ...restored })).ok, true)
+    assert.equal((await p.send({ command: 'download.abort', operation: restored.operation, botId: restored.botId })).ok, true)
+    await p.send({ command: 'client.state', state: 'login-page' }); p.client.close(); await background.settled()
+    console.log(JSON.stringify({ backgroundOwner: true, durableReports: progressReports.length, uploadReceiptPreserved: true, downloadPartPreserved: true, explicitResumeOnly: true, systemRevokeStops: backgroundStops.length, nativeDevice: false }))
+  }
   const owner = load('NativeTransferOwner').nativeTransferOwner(context); owner.destroyAbility(); owner.bindAbility({ filesDir: dir }); p = await page(); await p.send({ command: 'client.state', state: 'login-page' }); p.client.close()
   assert.equal(fds.size, 0)
   console.log(JSON.stringify({ realBridge: true, realEngines: true, realDiskHTTP: true, uploadSurvivesDetach: true, uploadSingleCreate: true, actualDisappearRenderRebind: true, downloadSurvivesDetach: true, noDetachedPicker: true, lateRepliesRejected: true, logoutStopsIO: true, crossAccountDenied: true, readyRevokesDifferentAccount: true, lateCleanupCannotCloseNewAccount: true, explicitPauseResumesSameReceipt: true, activeUploadListReadOnly: true, explicitAbortPreservesTombstone: true, partialIntakeNotAccepted: true, unknownCreateNotReplayed: true, explicitDownloadCancel: true, bytes: bytes.length, fds: fds.size, nativeDevice: false }))

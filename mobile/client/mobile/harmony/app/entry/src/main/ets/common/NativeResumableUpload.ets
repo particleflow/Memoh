@@ -50,13 +50,15 @@ class Running {
 export class NativeResumableUpload {
   private context: common.UIAbilityContext;
   private authorized: () => boolean;
+  private progress: (operation: string, received: number, total: number) => void;
   private epoch: number = 0;
   private running?: Running;
   private root: string;
   private visible: Map<string, Journal> = new Map();
   private previews: Map<string, fs.File> = new Map();
-  constructor(context: common.UIAbilityContext, authorized: () => boolean) {
-    this.context = context; this.authorized = authorized; this.root = context.filesDir + '/memoh-upload-journal-v1';
+  constructor(context: common.UIAbilityContext, authorized: () => boolean,
+    progress: (operation: string, received: number, total: number) => void = (): void => {}) {
+    this.progress = progress; this.context = context; this.authorized = authorized; this.root = context.filesDir + '/memoh-upload-journal-v1';
   }
   bindContext(context: common.UIAbilityContext): void { this.context = context; }
   private check(run: Running): void {
@@ -349,7 +351,7 @@ export class NativeResumableUpload {
       (r.state === 'ready' ? r.content_hash !== j.hash || r.offset !== j.size : !!r.content_hash)) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
     this.check(run); j.uploadId = r.id; j.offset = r.offset; j.expires = r.expires_at; j.state = r.state; j.type = r.mime;
     if (r.state === 'ready') { j.completePending = false; }
-    this.save(j); return r;
+    this.save(j); this.progress(run.input.operation, j.offset, j.size); return r;
   }
   private async retryCall(run: Running, path: string, method: rcp.HttpMethod = 'GET', body?: rcp.RequestContent,
     headers: rcp.RequestHeaders = {}): Promise<Reply> {
@@ -372,7 +374,7 @@ export class NativeResumableUpload {
           const headers = new Map<string, string>();
           for (const key of Object.keys(reply.headers)) { const value = reply.headers[key]; if (typeof value === 'string') { headers.set(key.toLowerCase(), value); } }
           if (headers.get('content-length') !== String(j.size) || headers.get('etag') !== '\"' + j.hash + '\"' || !headers.get('content-type')) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
-          j.state = 'ready'; j.type = headers.get('content-type') ?? j.type; j.offset = j.size; this.save(j);
+          j.state = 'ready'; j.type = headers.get('content-type') ?? j.type; j.offset = j.size; this.save(j); this.progress(run.input.operation, j.offset, j.size);
           return { content_hash: j.hash, size_bytes: j.size, mime: j.type };
         }
         if (reply.status !== 404) { this.status(reply); }
@@ -390,7 +392,7 @@ export class NativeResumableUpload {
         const reply = await this.call(run, base, 'POST', form); this.status(reply, 201);
         const ready = JSON.parse(reply.body) as MediaReply;
         if (ready.content_hash !== j.hash || ready.size_bytes !== j.size || !ready.mime) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
-        j.state = 'ready'; j.type = ready.mime; j.offset = j.size; this.save(j); return ready;
+        j.state = 'ready'; j.type = ready.mime; j.offset = j.size; this.save(j); this.progress(run.input.operation, j.offset, j.size); return ready;
       }
       j.resumable = true;
       if (j.uploadId) {

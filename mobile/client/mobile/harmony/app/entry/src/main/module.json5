@@ -14,6 +14,9 @@
     "shareFiles": "$profile:share_files",
     "requestPermissions": [
       {
+        "name": "ohos.permission.KEEP_BACKGROUND_RUNNING"
+      },
+      {
         "name": "ohos.permission.INTERNET"
       },
       {
@@ -51,6 +54,7 @@
         "name": "EntryAbility",
         "srcEntry": "./ets/entryability/EntryAbility.ets",
         "exported": true,
+        "backgroundModes": ["dataTransfer"],
         "icon": "$media:app_icon",
         "label": "$string:app_name",
         "startWindowIcon": "$media:startup_art",

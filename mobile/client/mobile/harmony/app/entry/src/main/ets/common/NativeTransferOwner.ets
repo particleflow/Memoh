@@ -1,13 +1,14 @@
 import { common } from '@kit.AbilityKit';
 import { NativeResumableUpload, UploadScope, UploadLocal, MediaReply } from './NativeResumableUpload';
 import { NativeMediaDownload, MediaDownloadInput, MediaDownloadReady } from './NativeMediaDownload';
+import { TransferBackgroundControl } from './NativeTransferBackground';
 import { MEMOH_ORIGIN } from './MemohClientConfig';
 
 interface UploadWork { key: string; input: UploadScope; pending: Promise<MediaReply>; }
 interface DownloadWork { key: string; input: MediaDownloadInput; pending: Promise<MediaDownloadReady>; }
 
 // Process-local ownership of the existing engines. No second queue, credential
-// store, journal, retry loop or background execution entitlement is introduced.
+// store, journal or retry loop is introduced.
 export class NativeTransferOwner {
   readonly uploads: NativeResumableUpload;
   readonly downloads: NativeMediaDownload;
@@ -19,11 +20,14 @@ export class NativeTransferOwner {
   private download?: DownloadWork;
   private downloadOperation: string = '';
   private uploadOperation: string = '';
+  private background?: TransferBackgroundControl;
   private draining: Promise<void> = Promise.resolve();
 
   constructor(context: common.UIAbilityContext) {
-    this.uploads = new NativeResumableUpload(context, (): boolean => this.enabled && MEMOH_ORIGIN !== '');
-    this.downloads = new NativeMediaDownload(context, (): boolean => this.enabled && MEMOH_ORIGIN !== '');
+    this.uploads = new NativeResumableUpload(context, (): boolean => this.enabled && MEMOH_ORIGIN !== '',
+      (operation: string, received: number, total: number): void => this.background?.progress('upload:' + operation, received, total));
+    this.downloads = new NativeMediaDownload(context, (): boolean => this.enabled && MEMOH_ORIGIN !== '',
+      (operation: string, received: number, total: number): void => this.background?.progress('download:' + operation, received, total));
   }
   bindAbility(context: common.UIAbilityContext): void {
     this.view++; this.revoke();
@@ -31,7 +35,17 @@ export class NativeTransferOwner {
       this.uploads.bindContext(context); this.downloads.bindContext(context);
     });
   }
-  destroyAbility(): void { this.view++; this.revoke(); }
+  bindBackground(background: TransferBackgroundControl): void {
+    const prior = this.background;
+    if (prior) { prior.destroy(); this.draining = Promise.all([this.draining, prior.settled()]).then((): void => {}); }
+    this.background = background;
+  }
+  destroyAbility(): void { this.view++; this.revoke(); this.background?.destroy(); }
+  pauseBackground(): void {
+    // OS entitlement loss pauses the existing engines, preserving their own
+    // checkpoints. It never logs out or silently reacquires a continuous task.
+    this.uploads.close(); this.downloads.close();
+  }
   attach(): number { this.view++; return this.view; }
   current(view: number): boolean { return view === this.view; }
   detach(view: number): void {
@@ -59,10 +73,11 @@ export class NativeTransferOwner {
   }
   revoke(): void {
     this.enabled = false; this.credential = ''; this.epoch++;
+    this.background?.reset();
     this.uploads.close(); this.downloads.close();
     const upload = this.upload?.pending, download = this.download?.pending;
     this.downloadOperation = '';
-    this.draining = Promise.all([this.draining,
+    this.draining = Promise.all([this.draining, this.background ? this.background.settled() : Promise.resolve(),
       upload ? upload.then((): void => {}, (): void => {}) : Promise.resolve(),
       download ? download.then((): void => {}, (): void => {}) : Promise.resolve()
     ]).then((): void => {});
@@ -82,11 +97,13 @@ export class NativeTransferOwner {
     let work = this.upload;
     if (work && work.key !== key) { throw new Error('UPLOAD_BUSY'); }
     if (!work) {
+      const background = this.background, activity = 'upload:' + input.operation;
+      if (background && !background.begin(activity)) { throw new Error('NATIVE_BACKGROUND_UNAVAILABLE'); }
       work = { key: key, input: input, pending: this.uploads.upload(input) };
       this.upload = work;
       const current = work;
-      void work.pending.then((): void => { if (this.upload === current) { this.upload = undefined; } },
-        (): void => { if (this.upload === current) { this.upload = undefined; } });
+      void work.pending.then((): void => { background?.finish(activity); if (this.upload === current) { this.upload = undefined; } },
+        (): void => { background?.finish(activity); if (this.upload === current) { this.upload = undefined; } });
     }
     this.uploadOperation = input.operation;
     const result = await work.pending; this.check(epoch); return result;
@@ -107,10 +124,13 @@ export class NativeTransferOwner {
     let work = this.download;
     if (work && work.key !== key) { throw new Error('MEDIA_DOWNLOAD_BUSY'); }
     if (!work) {
+      const background = this.background, activity = 'download:' + input.operation;
+      if (background && !background.begin(activity)) { throw new Error('NATIVE_BACKGROUND_UNAVAILABLE'); }
       work = { key: key, input: input, pending: this.downloads.fetch(input) };
       this.download = work;
       const current = work;
-      void work.pending.catch((): void => { if (this.download === current) { this.download = undefined; } });
+      void work.pending.then((): void => { background?.finish(activity); },
+        (): void => { background?.finish(activity); if (this.download === current) { this.download = undefined; } });
     }
     this.downloadOperation = input.operation;
     const result = await work.pending; this.check(epoch);
