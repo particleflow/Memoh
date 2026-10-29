@@ -187,3 +187,19 @@ is not attempted and belongs to the parent/single writer; public phone/Windows
 and deployed cloud throughput remain unmeasured. There was no approval denial
 in this increment and no real-credential transmission. No device test was
 requested and no full-chain acceptance was declared.
+
+## Final route-only combination handoff
+
+[Final path/file manifest](final-path-combination.json) expands the existing
+combination manifest with every changed file, product/evidence separation,
+per-route coverage and exact activation conditions. It introduces no new product
+change and reruns no prior tests. The shared order remains 808cf801, 9e968f8cd,
+d1f2c0b94, 68c012969 and abb2f6970; the native packet remains with its original
+owner and current generic bridge work.
+
+The central authenticated profile is also consumed by browser clients. Therefore
+a native RCP pass alone does not qualify enabling a global HTTP endpoint mapping
+for an existing HTTPS Web page. The HTTP destination must expose the original
+authenticated API with the same prefix and backend/receipt identity; a static
+package server alone is not sufficient. Real NAS API/site/CORS/port settings
+remain solely with the parent/single writer.
