@@ -1,0 +1,22 @@
+{
+  "head": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
+  "tree": "23e1e57250261333a6437a6c01b4497a3d7d1e6a",
+  "parent": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "published_reference": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "source_increment": "76471e0ef3ab9470dcf17c1d85ddb27cece14109",
+  "source_package_library_file_id": "libfile_6e53e6d54eec8191972edf3851244f9b",
+  "source_package_sha256": "8d713ff5532a5481dfbc8d7b6828037b344858409e034cf8a16f169e2c02128d",
+  "schema": 179,
+  "product_files": 4,
+  "existing_test_files": 3,
+  "reused_author_tests": 36,
+  "new_combined_seam_cases_passed": 2,
+  "Home_ESLint": "passed",
+  "remote_push": false,
+  "new_CI_started": false,
+  "formal_publication": false,
+  "NAS_or_Windows_modified": false,
+  "HAP_built": false,
+  "original_NAS_loading_cause": "unknown",
+  "recovery": "Primary bundle requires public2ed base and restores complete5a42+candidate history; increment patch targets exact5a42. Saved fixture configs contain environment-specific paths and require adjustment before replay."
+}

@@ -1,0 +1,31 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/task-anchor-cancel-20261029/context/checkout
+
+ ❯ apps/web/src/pages/home/index.cancellation-speech-seam.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/src/pages/home/index.cancellation-speech-seam.test.ts [ apps/web/src/pages/home/index.cancellation-speech-seam.test.ts ]
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ apps/web/src/pages/home/index.vue:55:1
+     53| import { resolveApiErrorMessage } from '@/utils/api-error'
+     54| import { hasTaskHistoryQuery, resolveTaskHistoryAnchor } from '@/utils…
+     55| import ChatWorkspace from './components/chat-workspace.vue'
+       | ^
+     56| import { useComposerPrefillResolver } from './composables/useComposerP…
+     57| import { chatWorkspaceVisibleKey } from './composables/chat-workspace-…
+
+Caused by: Error: ENOENT: no such file or directory, open '/workspace/unified-run-anchor-review/apps/web/src/pages/home/components/chat-pane.vue'
+ ❯ apps/web/src/pages/home/index.cancellation-speech-seam.test.ts:19:18
+ ❯ apps/web/src/pages/home/index.vue:55:1
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -2, code: 'ENOENT', syscall: 'open', path: '/workspace/unified-run-anchor-review/apps/web/src/pages/home/components/chat-pane.vue' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  07:45:47
+   Duration  4.94s (transform 2.42s, setup 0ms, import 0ms, tests 0ms, environment 1.48s)
+

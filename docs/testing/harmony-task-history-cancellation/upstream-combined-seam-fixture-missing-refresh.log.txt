@@ -1,0 +1,65 @@
+
+ RUN  v4.1.10 /workspace/unified-run-anchor-review
+
+stderr | apps/web/src/pages/home/index.cancellation-speech-seam.test.ts > cancels the masked task on leaving Home and a late denial cannot hide returned contact or restart speech
+[Vue warn]: Unhandled error during execution of watcher callback 
+  at <Index>
+[Vue warn]: Unhandled error during execution of component update 
+  at <Index>
+
+ ❯ apps/web/src/pages/home/index.cancellation-speech-seam.test.ts (2 tests | 1 failed) 81ms
+   × cancels the masked task on leaving Home and a late denial cannot hide returned contact or restart speech 21ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/src/pages/home/index.cancellation-speech-seam.test.ts > cancels the masked task on leaving Home and a late denial cannot hide returned contact or restart speech
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ apps/web/src/pages/home/index.cancellation-speech-seam.test.ts:106:80
+    104|     deny({status:403}); await settle()
+    105|     expect(api.open).toHaveBeenCalledTimes(1)
+    106|     expect(root.querySelector('[data-chat]')?.classList.contains('invi…
+       |                                                                                ^
+    107|     expect(api.speech.state.value.status).toBe('idle')
+    108|     expect(api.playback).toHaveBeenCalledTimes(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: chatStore.refreshBots is not a function
+ ❯ immediate apps/web/src/pages/home/index.vue:324:22
+    322|     const prevName = prev?.[0] as string | undefined
+    323|     if (prevName !== undefined && !CHAT_ROUTE_NAMES.has(prevName)) {
+    324|       void chatStore.refreshBots()
+       |                      ^
+    325|     }
+    326|     const requestedRoute = route.fullPath
+ ❯ callWithErrorHandling ../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling ../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ baseWatchOptions.call ../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:886:47
+ ❯ job ../Memoh/node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1928:18
+ ❯ callWithErrorHandling ../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:33
+ ❯ flushJobs ../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:405:9
+ ❯ processTicksAndRejections node:internal/process/task_queues:104:5
+
+This error originated in "apps/web/src/pages/home/index.cancellation-speech-seam.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+     Errors  1 error
+   Start at  07:31:45
+   Duration  3.67s (transform 1.61s, setup 0ms, import 2.33s, tests 81ms, environment 931ms)
+

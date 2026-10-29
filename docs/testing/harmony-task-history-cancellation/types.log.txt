@@ -1,0 +1,4 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/task-anchor-cancel-20261029/context/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+

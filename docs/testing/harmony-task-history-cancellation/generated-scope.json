@@ -1,0 +1,21 @@
+{
+  "generatedFilesChanged": [
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/pages/home/index.navigation.test.ts",
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.test.ts",
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+    "apps/web/src/utils/task-history-link.test.ts",
+    "apps/web/src/utils/task-history-link.ts"
+  ],
+  "reviewedAdaptations": 47,
+  "changedAdapterHashes": [
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/index.vue"
+  ],
+  "retainedUnchangedAdapterHashes": 45,
+  "unchangedOtherGeneratedFiles": 6978,
+  "onlyFourProductChanges": true,
+  "sdkAndNativeEntriesChanged": false,
+  "guardRelaxed": false
+}

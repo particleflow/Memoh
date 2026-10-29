@@ -1,0 +1,26 @@
+{
+  "apps/web/src/pages/home/index.vue": {
+    "wholeFileSharedIdentical": false,
+    "sharedSHA256": "02f0b48b71ee58eca28fbd36a0dd59cc5383c6ce50570d132a7e9047c64b6b3a",
+    "adaptedPreNativeSHA256": "02f0b48b71ee58eca28fbd36a0dd59cc5383c6ce50570d132a7e9047c64b6b3a",
+    "incrementHunks": 5,
+    "generatedPhoneSHA256": "ec9f4bb7ce40b7a5a0908cac4941f987f3df8b5991e27d51814b92e9ad14bbe5"
+  },
+  "apps/web/src/pages/home/components/chat-pane.vue": {
+    "wholeFileSharedIdentical": false,
+    "sharedSHA256": "66a7f94763e1804b13d869563b69209920c4ebda18ece78f06b4858932e1d312",
+    "adaptedPreNativeSHA256": "68cf6035e3f1c81f0297ad192a9bd657b0280d6a7adedf6a8867e3df13f45e63",
+    "incrementHunks": 1,
+    "generatedPhoneSHA256": "4999146dfa1180b597d89c15a277acb7b79ab13c7f9b7ddc12e4239c8e3ea09a"
+  },
+  "apps/web/src/pages/home/composables/useTaskRunAnchor.ts": {
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "6266c27065eedd273d8758f61045a6077dbec29f838538223aeac1b8813d7f47",
+    "generatedPhoneSHA256": "6266c27065eedd273d8758f61045a6077dbec29f838538223aeac1b8813d7f47"
+  },
+  "apps/web/src/utils/task-history-link.ts": {
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "ae8b09ab640cf820e43469e492f0f7f0014da10201e77ba7c894e839e52dd802",
+    "generatedPhoneSHA256": "ae8b09ab640cf820e43469e492f0f7f0014da10201e77ba7c894e839e52dd802"
+  }
+}

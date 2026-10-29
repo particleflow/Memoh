@@ -1,0 +1,15 @@
+{
+  "lintErrors": 0,
+  "lintWarnings": 26,
+  "baselineSameWarnings": true,
+  "diagnosticsEqualByFileRuleSeverityMessage": true,
+  "nativeFilesAndIdentityConfigUnchanged": true,
+  "retainedHAPSHA256": {
+    "27": "a509b37b3a09c040ff8d2f6d461439168a7173803653a72fbc80521e097db2eb",
+    "28": "67164ea48d41c766f58fe38f6f7b84dc5e37c87b05fdfe28c0578ef879bb79db"
+  },
+  "HAPBuildsThisTask": 0,
+  "sdkDownloads": 0,
+  "modelCalls": 0,
+  "realArkWebExecuted": false
+}

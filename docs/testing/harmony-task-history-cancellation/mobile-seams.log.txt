@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/task-anchor-cancel-20261029/context/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  07:46:16
+   Duration  4.94s (transform 2.80s, setup 0ms, import 3.64s, tests 96ms, environment 916ms)
+

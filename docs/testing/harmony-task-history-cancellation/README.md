@@ -1,0 +1,34 @@
+# Harmony task-history identity cancellation — source only
+
+Consumer parent **c201ac2627e0681dabf554aac6ebd14780aff25f**. Exact combined source **ac7eba92fee9c2824f058b1394a6c55362b787e8**, tree **23e1e57250261333a6437a6c01b4497a3d7d1e6a**, parent **5a42d013e801cb6229ee029113e3a63782bc3e13**; increment76471e0ef3ab9470dcf17c1d85ddb27cece14109. This consumes a verified local Git bundle, not a claim that the combined upstream head was publicly pushed or CI-qualified.
+
+## Actual input and four products
+
+The consumer officially materialized Library `libfile_598d489937848191912dd0bed9de5159` version5 into its own environment. ZIP194067 bytes, SHA256 `ee7b726306537475a0a0b38bbfd30734e5426254d5b3fcfdf1dcc316d11f3cdb`. CRC and all28 manifest hashes pass; the original bundle verifies against available2ed history. Its HEAD/tree/parent and four product bytes match the supplied map. The bundle advertised HEAD rather than a heads wildcard; importing explicit HEAD succeeded after that local ref-selection correction. No permission or transfer refusal occurred.
+
+[Authoritative four-file map](upstream-source-consumer-map.json), [consumer adaptations and complete final hashes](adaptation-map.json). Existing guarded JSON source composition is extended in place; no new overlay framework or native bridge is introduced. Home and chat-pane receive only the exact5a42→ac7 cancellation deltas; native chat-pane source remains intentionally different. useTaskRunAnchor and task-history-link are exact upstream bytes. The three existing author test slots are updated together. No template/style/label/button is added.
+
+Identity GET now has a15-second deadline and caller AbortSignal. The caller is bounded even if the transport ignores abort. New task selection releases the old pending validation; generation/controller ownership prevents old success or failure replacing the current task or releasing its validation slot. Leaving/hiding/deactivation/disposal cancels the old admission. Existing typed task/record, Bot/session, run/turn and permission checks remain; no history is authorized by timeout/cancellation. This makes no new task, retries no mutation and changes no SDK/API/backend/schema.
+
+## Consumer validation
+
+- Full generated mobile-context vue-tsc passes: [raw log](types.log.txt).
+- Two combined Home/actual read-aloud-gate seams pass on the generated phone sources: [raw log](mobile-seams.log.txt). Simulated HTTP/audio prove superseded requests cannot block the next selection or resume speech; leaving for settings and late403 cannot reopen the old task. This reuses the exact combined fixture; no models or real account calls.
+- The first local replay found an author-environment absolute path before any test body ran. [Original failure](mobile-seams-original-fixture-path-failure.log.txt) is retained; only the local fixture path changed, not product source or assertions. [Portable fixture copy](index.cancellation-speech-seam.test.ts) uses its colocated generated chat-pane; copy it to apps/web/src/pages/home before replay.
+- [Complete generated directory comparison](generated-scope.json): exactly4 products+3 existing tests change,6978 other entries remain byte-identical. Of47 reviewed adapter entries, only Home/chat-pane hashes change;45 remain unchanged. Source checks pass176 text inputs+7 approved PNG inputs/192 mobile files. All literal baseline/output guards remain enabled.
+- ESLint has0 errors/26 warnings. Baseline and candidate diagnostics are identical by file/rule/severity/message: [baseline](lint-baseline.json), [candidate](lint-candidate.json). Existing template indentation/other warnings are not silently reported as zero or expanded into unrelated refactors.
+- Reuse the author's36 cases, controlled Chromium/PostgreSQL/narrow-screen results and the upstream2 combination cases, with [author result](upstream-author-detail-cancel-RESULT.json) and [combined log](upstream-combined-seam.log.txt). Those are prior author evidence, not36 newly run local tests or real ArkWeb acceptance. No full unchanged matrix, Web production build or HAP compile was repeated.
+
+## ArkWeb source seam and actual gap
+
+Generated getBotsByBotIdTasksByTaskTypeByRecordId spreads the original options into the existing client GET. The client spreads opts into RequestInit, constructs Request and calls fetch(Request), retaining signal; there is no native HTTP/attachment bridge on this identity-read path. Existing SharedWebPolicy registers the secure local scheme with isSupportFetch=true, and SharedChat retains JavaScript/storage access and its original controller. These native files, HTTPS/login config, approved artwork, upload/download journals and permissions have no diff.
+
+Retained official SDK26.0.0.105 @ohos.web.webview.d.ts declares WebScheme.isSupportFetch(line396), getUserAgent(line3154) and runJavaScript(line3384). These declarations permit source-level WebView integration; they do **not** prove AbortSignal.reason/throwIfAborted or abort delivery inside a particular installed ArkWeb engine. The local two cases execute jsdom, not an official ArkWeb mock, emulator or phone. No connected physical ArkWeb session was used. No compatibility shim is guessed without a demonstrated engine failure; remote debugging remains disabled and no new probe/permission/UI is added.
+
+Future matched-package device acceptance must use the original signed app/owner: open a known authorized task history, switch to another while its identity read is pending, leave/return to the contact and revisit the original task. Verify the new selection is not blocked, late old success/403 cannot change the active task or resume audio, a stalled identity read exits at15 seconds without authorizing history, and completed/cancelled reads release their listener/deadline. Confirm actual installed ArkWeb supports the above signal/DOMException APIs and preserves login/drafts. Use existing read-only task records and controlled approved network conditions, never re-run a model or create tasks for this check. Actual gesture/engine/network/device behavior remains unverified.
+
+## Package and release boundary
+
+No version bump, HAP/Web production build, signing, public artifact upload or deployment occurs here. Existing1.0.28 remains source12faf4c06db01d8fffc29aad3a247b4a85e884e7/shared5a42 and does not contain this newer delta. Its exact37660218-byte HAP SHA256 stays `67164ea48d41c766f58fe38f6f7b84dc5e37c87b05fdfe28c0578ef879bb79db`;27 remains unchanged as well. Do not rebind old package identity to this source. The original field writer can finish28 independently.
+
+This corrects an independently reproduced reliability defect. The original NAS loading report's cause remains unknown. No claim of production fix, phone acceptance, general global request timeout, LAN/IPv6 performance or complete Bot delivery follows from these source checks.
