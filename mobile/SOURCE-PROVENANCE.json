@@ -539,7 +539,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "0aaa9deb737596ed223213e825270bebcad45948f5b50fdd23e00c161e56e5c3",
+      "sha256": "60ab4d180d7949b42414da7498e9e2fe72963fee4c8c08203fe22d1070dfeaf8",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -556,7 +556,8 @@
         "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
         "Advance to 1.0.15 for the confirmed monitor/management entry regression; preserve application identity, permissions and stored configuration.",
         "Advance to 1.0.16 for the approved minimal unified activity UI and hidden-panel mount change; no image probe, permissions, identity or private-config change.",
-        "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover."
+        "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover.",
+        "Release1.0.31/1000031 from qualified e256f9f5; application identity and all product implementation unchanged."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
