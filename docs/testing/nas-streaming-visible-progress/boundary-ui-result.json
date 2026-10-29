@@ -1,0 +1,10 @@
+{
+  "url": "http://127.0.0.1:28082/bot/stream-fixture",
+  "ownReasoningVisible": true,
+  "ownStatusVisible": true,
+  "firstBeforeSecondAndTerminal": true,
+  "privateToolPayloadVisible": false,
+  "unsubscribedChildDialogueVisible": false,
+  "pageErrors": [],
+  "note": "Full running local UI + existing captured runtime frames; no model call or NAS/device evidence."
+}

@@ -6,8 +6,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { handleBrowserKeyboardShortcut } from '@/lib/browser-keyboard-shortcuts'
 import { keyboardBindings, resolveKeyboardBinding } from '@/lib/keyboard-bindings'
 import { appKeyboardCommands, createKeyboardCommandRegistry } from '@/lib/keyboard-commands'
-import type { UIRuntimeEvent } from '@/composables/api/useChat.types'
+import type { ChatWebSocket, UIRuntimeEvent, UIStreamEvent } from '@/composables/api/useChat'
 import { createRuntimeClient } from '@/store/chat/runtime-client'
+import { createChatRealtimeController, type ChatRealtimeTransport } from '@/store/chat/realtime'
 import { createTranscriptController } from '@/store/chat/transcript'
 import streamFixtures from './fixtures/contact-runtime-stream.json'
 
@@ -27,7 +28,7 @@ for (const child of ['tool-call-group', 'chat-answers-card', 'background-task-bl
   vi.doMock(`./${child}.vue`, () => ({ default: defineComponent({
     props: { items: { type: Array as PropType<Array<{ type: string; content?: string }>>, default: () => [] } },
     setup: props => () => h('div', { 'data-process-test': child },
-      props.items.filter(item => item.type === 'reasoning').map(item => item.content).join('')),
+      props.items.map(item => item.type === 'reasoning' ? item.content : JSON.stringify(item)).join('')),
   }) }))
 }
 vi.mock('./collapsible-user-text.vue', () => ({
@@ -174,6 +175,121 @@ describe('message speech state', () => {
 })
 
 describe('contact transcript projection', () => {
+  it('keeps parent public deltas isolated from child, cross-Bot and internal-return traffic', async () => {
+    const scheduled: Array<FrameRequestCallback> = []
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { scheduled.push(callback); return 1 })
+    try {
+      const parentBot = 'stream-bot', targetBot = 'target-bot', parentSession = 'parent-session', childSession = 'child-session', targetSession = 'target-session'
+      const transcripts = new Map<string, ReturnType<typeof createTranscriptController>>()
+      for (const [bot, sid] of [[parentBot, parentSession], [parentBot, childSession], [targetBot, targetSession]]) {
+        transcripts.set(`${bot}/${sid}`, createTranscriptController({
+          currentBotId: ref(bot!), sessionId: ref(sid!), rememberBackgroundTask: task => task,
+          applyPendingBackgroundEventsToTool: () => {}, bumpFsChangedAtIfFsMutation: () => {},
+          fetchMessages: async () => [], locateMessage: async () => ({ items: [], target_id: '', target_external_message_id: '' }),
+        }))
+      }
+      const sockets: Array<{ bot: string; receive: (event: UIStreamEvent) => void }> = []
+      const transport: ChatRealtimeTransport = {
+        connectWebSocket: (bot, receive) => {
+          sockets.push({ bot, receive })
+          return { connected: true, send: () => {}, abort: () => {}, forget: () => {}, bindSession: () => {}, close: () => {}, onOpen: null, onClose: null } satisfies ChatWebSocket
+        },
+        streamBotSessionsActivityEvents: async () => {},
+        createRetryingStream: () => ({ start: () => {}, stop: () => {} }),
+      }
+      const controller = () => createChatRealtimeController({
+        onWebSocketEvent: () => {}, onBotSessionsActivityEvent: () => {},
+        prepareSessionRuntime: async (_bot, _sid, commit) => { await commit(() => {}) },
+        onRuntimeProjection: (bot, sid, change) => transcripts.get(`${bot}/${sid}`)!.applyRuntimeTranscript(change.current.transcript),
+      }, transport)
+      const parent = controller(), target = controller()
+      parent.startWebSocket(parentBot); parent.startSessionRuntime(parentBot, parentSession); parent.startSessionRuntime(parentBot, childSession)
+      target.startWebSocket(targetBot); target.startSessionRuntime(targetBot, targetSession)
+      const parentSocket = sockets[0]!, targetSocket = sockets[1]!
+      const fixture = (kind: 'direct' | 'result', bot: string, sid: string, run: string, prefix: string): UIRuntimeEvent[] =>
+        JSON.parse(JSON.stringify(streamFixtures[kind])
+          .replaceAll(`stream-session-${kind}`, sid).replaceAll(`stream-run-${kind}`, run).replaceAll('stream-bot', bot)
+          .replaceAll('Show progress', `${prefix} request`).replaceAll('Provider reasoning summary', `${prefix} reasoning`)
+          .replaceAll('First streamed fragment', `${prefix} first`).replaceAll('; second fragment', `; ${prefix} second`))
+      const own = fixture('direct', parentBot, parentSession, 'parent-run', 'OWN delegate_to_bot')
+      const child = fixture('direct', parentBot, childSession, 'child-run', 'PRIVATE_ALPHA')
+      const other = fixture('direct', targetBot, targetSession, 'target-run', 'PRIVATE_BETA')
+      const returned = fixture('result', parentBot, parentSession, 'summary-run', 'OWN natural outcome')
+      for (const stream of [child, other]) {
+        const status = stream[1]!
+        if (status.type === 'runtime_delta') status.delta.message_upserts = [{ id: 0, type: 'status', name: 'api_retry', args: { attempt: '1', max_retries: '3', seconds: '2' } }]
+      }
+      const settle = async () => {
+        scheduled.splice(0).forEach(callback => callback(0))
+        for (let i = 0; i < 8; i++) await Promise.resolve()
+        await nextTick()
+      }
+      const release = async (socket: typeof parentSocket, frame: UIRuntimeEvent) => { socket.receive(frame); await settle() }
+      const MessageItem = (await import('./message-item.vue')).default
+      root = document.createElement('div'); document.body.append(root)
+      const parentTranscript = transcripts.get(`${parentBot}/${parentSession}`)!
+      app = createApp(defineComponent({ setup: () => () => h('div', [
+        h('section', { 'data-boundary-contact': '' }, parentTranscript.messages.map(message => h(MessageItem, { key: message.id, message, hideProcessActivity: true, isScrolling: false }))),
+        h('section', { 'data-boundary-debug': '' }, [...transcripts.values()].flatMap(transcript => transcript.messages.map(message => h(MessageItem, { key: message.id, message, hideProcessActivity: false, isScrolling: false })))),
+      ]) }))
+      app.config.globalProperties.$t = (key: string) => key; app.mount(root)
+      const contact = () => root!.querySelector('[data-boundary-contact]')!.textContent!
+      const debug = () => root!.querySelector('[data-boundary-debug]')!.textContent!
+      const noInternalDialogue = () => {
+        for (const text of ['PRIVATE_ALPHA', 'PRIVATE_BETA', 'PRIVATE_TOOL', 'MACHINE_CONTEXT_MUST_NOT_RENDER']) expect(contact()).not.toContain(text)
+        expect(contact()).not.toContain('chat.runtimeStatus.api_retry')
+      }
+      await release(parentSocket, own[0]!); await release(parentSocket, child[0]!); await release(targetSocket, other[0]!)
+      for (let i = 1; i <= 3; i++) {
+        await release(parentSocket, child[i]!); await release(targetSocket, other[i]!); await release(parentSocket, own[i]!)
+        noInternalDialogue()
+      }
+      expect(contact()).toContain('OWN delegate_to_bot reasoning')
+      expect(contact()).toContain('chat.runtimeStatus.compacting')
+      expect(contact()).toContain('OWN delegate_to_bot first')
+      expect(contact()).not.toContain('; OWN delegate_to_bot second')
+      const toolFrame = JSON.parse(JSON.stringify(own[3])) as Extract<UIRuntimeEvent, { type: 'runtime_delta' }>
+      toolFrame.seq += 1
+      toolFrame.delta = { message_upserts: ['spawn_agent', 'send_message', 'delegate_to_bot'].map((name, i) => ({
+        id: 20 + i, type: 'tool', name, tool_call_id: `call-${i}`, running: i !== 1,
+        input: { message: `PRIVATE_TOOL_INPUT_${i}` }, output: { text: `PRIVATE_TOOL_OUTPUT_${i}` }, progress: [{ text: `PRIVATE_TOOL_PROGRESS_${i}` }],
+      })) }
+      await release(parentSocket, toolFrame)
+      noInternalDialogue()
+      expect(debug()).toContain('PRIVATE_TOOL_INPUT_0')
+      expect(debug()).toContain('PRIVATE_TOOL_OUTPUT_1')
+      expect(debug()).toContain('PRIVATE_TOOL_PROGRESS_2')
+      expect(debug()).toContain('PRIVATE_ALPHA reasoning')
+      expect(debug()).toContain('PRIVATE_BETA first')
+      expect(debug()).toContain('chat.runtimeStatus.api_retry')
+      expect(parentTranscript.messages.filter(message => message.role === 'user')).toHaveLength(1)
+      for (let i = 4; i < child.length; i++) {
+        await release(parentSocket, child[i]!); await release(targetSocket, other[i]!); noInternalDialogue()
+      }
+      for (let i = 4; i < own.length; i++) {
+        const frame = JSON.parse(JSON.stringify(own[i])) as UIRuntimeEvent; frame.seq += 1
+        await release(parentSocket, frame); noInternalDialogue()
+      }
+      // Same source Bot/session, distinct host summary run. Its actual captured
+      // contract has no request user turn; target text remains in its own view.
+      for (const frame of returned) { frame.seq += 100; await release(parentSocket, frame); noInternalDialogue() }
+      expect(contact()).toContain('OWN natural outcome first; OWN natural outcome second')
+      expect(parentTranscript.messages.filter(message => message.role === 'user')).toHaveLength(1)
+      // A late, correctly scoped target snapshot from the old socket cannot
+      // mutate its cached projection after switching the connection's Bot.
+      const targetSeq = target.runtimeProjection(targetSession)!.seq
+      target.startWebSocket(parentBot); target.startSessionRuntime(parentBot, parentSession)
+      const before = contact()
+      const lateTarget = JSON.parse(JSON.stringify(other[0])) as Extract<UIRuntimeEvent, { type: 'runtime_snapshot' }>
+      lateTarget.seq = targetSeq + 1; lateTarget.snapshot.seq = lateTarget.seq
+      await release(targetSocket, lateTarget)
+      expect(contact()).toBe(before)
+      expect(target.runtimeProjection(targetSession)!.seq).toBe(targetSeq)
+      noInternalDialogue()
+      parent.stopStreams(); target.stopStreams()
+    } finally { vi.unstubAllGlobals() }
+  })
+
   it.each(['direct', 'result'] as const)('renders captured %s runtime deltas before the next fragment or terminal event', async kind => {
     // Captured from the actual session manager + UI converter at 5a42d013.
     // Each frame is released separately: no completed answer or typewriter simulation.

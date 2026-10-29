@@ -1,0 +1,8 @@
+
+/workspace/streaming/apps/web/src/pages/home/components/message-item.test.ts
+  35:39  warning  Prop 'text' requires default value to be set        vue/require-default-prop
+  39:14  warning  Prop 'onEdit' requires default value to be set      vue/require-default-prop
+  47:14  warning  Prop 'modelValue' requires default value to be set  vue/require-default-prop
+
+✖ 3 problems (0 errors, 3 warnings)
+

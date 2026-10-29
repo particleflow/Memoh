@@ -1,0 +1,19 @@
+{
+  "originalSourceCommit": "12d753df21cd508f0b0d962f4b71cfd3b1830a6c",
+  "previousHandoffCommit": "fa39572ca4a218807a34e8348a9d3b37de71789a",
+  "productionRuntimeUnchanged": true,
+  "productionFile": "apps/web/src/pages/home/components/message-item.vue",
+  "productionBlob": "c7f574be6a4d79eb0c4da68952e0a4a6075770f7",
+  "productionSHA256": "b1ad58fc11a51c6441eaae3353109738459e99ac77dc87571765260054444d38",
+  "newTestFileSHA256": "8494488617a0cbaadb1f942a822d5e95788478b160990db7b42d43b5f63e0ff7",
+  "artifacts": {
+    "boundary-review.md": "d98d51f90666915e96103d3558c3feaeaab4a7b512196f465617f2e4bdfefc7b",
+    "boundary-mixed-test.txt": "1ed8581a19ecd084f8c2d7c4f1cba06a0dfdd1ce591a9aeb78ab6ba8651e6f1b",
+    "boundary-eslint.txt": "51cb11cac7cd6b1565c31a58c06fc7572478eaa50efdb37bdfc6402b60eb8248",
+    "boundary-typecheck.txt": "a7408d0481ffdf4f1cc2cec5dd7d5b82a7a41a861349f2ec8d8f1cbf4b392012",
+    "boundary-ui-result.json": "2284e0e783d5a464bb21e3ad29ea9b1c97b09ceb3cfc0a0059f7b23c50bfc16b",
+    "boundary-parent-first.png": "909fbbb9dd76f6d058b8baf0b87912b52603626405b2d7747b92cc80386a9404",
+    "boundary-ui.cjs.txt": "42f6c1cbe2ae1275d35479958e909749de8e6da45ac998493f1fe4298648b519"
+  },
+  "admission": "Source integration for structured event provenance boundary; no production/device acceptance, no live nonstreaming diagnosis, baseline lint not green."
+}

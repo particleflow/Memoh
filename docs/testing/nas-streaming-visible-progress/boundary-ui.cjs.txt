@@ -1,0 +1,34 @@
+const {chromium}=require('playwright');const fs=require('fs');const assert=require('assert');
+(async()=>{
+ const browser=await chromium.launch({executablePath:'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+ try {
+  const page=await browser.newPage({viewport:{width:1280,height:900}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const login=await page.request.post('http://127.0.0.1:28080/auth/login',{data:{username:'admin',password:'admin123'}});const {access_token}=await login.json();
+  const contact=await page.request.post('http://127.0.0.1:28080/bots/11111111-1111-4111-8111-111111111111/sessions/contact',{headers:{Authorization:'Bearer '+access_token}});assert.equal(contact.status(),200);const {id:sid}=await contact.json();
+  await page.addInitScript(token=>localStorage.setItem('token',token),access_token);
+  const own=JSON.parse(fs.readFileSync('/workspace/streaming-evidence/direct.json','utf8').replaceAll('stream-session-direct',sid).replaceAll('stream-bot','11111111-1111-4111-8111-111111111111'));
+  let socket,ready=false;
+  await page.routeWebSocket('**/*',ws=>{
+   if(!new URL(ws.url()).pathname.endsWith('/web/ws')){ws.connectToServer();return;}
+   socket=ws;ws.onMessage(raw=>{const m=JSON.parse(raw);if(m.type==='runtime_subscribe'&&m.session_id===sid){ws.send(JSON.stringify(own[0]));ready=true;}});
+  });
+  await page.goto('http://127.0.0.1:28082/bot/stream-fixture');
+  for(let i=0;i<100&&!ready;i++)await page.waitForTimeout(100);assert(ready);
+  for(let i=1;i<=2;i++){socket.send(JSON.stringify(own[i]));await page.waitForTimeout(160);}
+  await page.getByText(/Thinking|思考|Thought/,{exact:false}).first().click();
+  socket.send(JSON.stringify(own[3]));
+  await page.waitForFunction(()=>document.body.innerText.includes('First streamed fragment'));
+  // A legitimately shaped stale/unsubscribed child frame is ignored by identity.
+  const child=JSON.parse(JSON.stringify(own).replaceAll(sid,'isolated-child-session').replaceAll('stream-run-direct','isolated-child-run').replaceAll('Provider reasoning summary','PRIVATE_ALPHA').replaceAll('First streamed fragment','PRIVATE_CHILD_DIALOGUE'));
+  for(let i=0;i<=3;i++)socket.send(JSON.stringify(child[i]));
+  const frame={type:'runtime_delta',session_id:sid,epoch:own[3].epoch,seq:own[3].seq+1,delta:{message_upserts:['spawn_agent','send_message','delegate_to_bot'].map((name,i)=>({id:20+i,type:'tool',name,tool_call_id:'boundary-'+i,running:i!==1,input:{message:'PRIVATE_TOOL_INPUT_'+i},output:{text:'PRIVATE_TOOL_OUTPUT_'+i},progress:[{text:'PRIVATE_TOOL_PROGRESS_'+i}]}))}};
+  socket.send(JSON.stringify(frame));await page.waitForTimeout(200);
+  const before=await page.locator('body').innerText();assert(before.includes('Provider reasoning summary'));assert(before.includes('Compacting context'));assert(before.includes('First streamed fragment'));assert(!before.includes('; second fragment'));assert(!/PRIVATE_|MACHINE_CONTEXT/.test(before));
+  await page.screenshot({path:'/workspace/streaming-evidence/boundary-parent-first.png'});
+  own[4].seq+=1;socket.send(JSON.stringify(own[4]));
+  await page.waitForFunction(()=>document.body.innerText.includes('; second fragment'));assert(!/PRIVATE_|MACHINE_CONTEXT/.test(await page.locator('body').innerText()));
+  for(let i=5;i<own.length;i++){own[i].seq+=1;socket.send(JSON.stringify(own[i]));await page.waitForTimeout(50);}
+  assert.equal(errors.length,0);
+  fs.writeFileSync('/workspace/streaming-evidence/boundary-ui-result.json',JSON.stringify({url:page.url(),ownReasoningVisible:true,ownStatusVisible:true,firstBeforeSecondAndTerminal:true,privateToolPayloadVisible:false,unsubscribedChildDialogueVisible:false,pageErrors:errors,note:'Full running local UI + existing captured runtime frames; no model call or NAS/device evidence.'},null,2)+'\n');
+ } finally {await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1)});

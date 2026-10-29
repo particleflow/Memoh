@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/streaming
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed | 13 skipped (14)
+   Start at  09:36:23
+   Duration  8.36s (transform 5.85s, setup 0ms, import 1.83s, tests 5.92s, environment 422ms)
+
