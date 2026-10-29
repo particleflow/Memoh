@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "557a648de80eddefe963abdcb9d6bad73c3a3e4eedcdffa53d2f30825306e222"
+      "sha256": "c0d04c971bf5ec0b325ff02e39809c1a708bd15adcc76c9e9ed0ec5232c1e331"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -479,7 +479,7 @@
     "paired959": {
       "commit": "7a5f2bb2f7eda2a00c3af6ef6f64281c0b45475f",
       "tree": "3be3719bdd9d355dbb0ffd0b13705c97eade9fad",
-      "mappedFiles": 154,
+      "mappedFiles": 155,
       "officialSDKOperations": 382,
       "schema180AssumedDeployed": true,
       "HAP28ContainsDelta": false,
@@ -489,7 +489,18 @@
       "streamingAdmitted": true,
       "compatibleBackendCommit": "7a5f2bb2f7eda2a00c3af6ef6f64281c0b45475f",
       "admissionP1MappedFiles": 6,
-      "fileRouteAndTimingMappedFiles": 14
+      "fileRouteAndTimingMappedFiles": 14,
+      "contactTabRouteFix": {
+        "commit": "2c0e277c2cb49b5a4a99b89a5e568ef9f413ab8a",
+        "parent": "046023913592b00951d7f28fe54842080c5cdc51",
+        "path": "apps/web/src/pages/home/index.vue",
+        "upstreamBeforeSHA256": "ccc29458d705aed11f3ba2686305d8a52286466504f61f4a08eaab9448ba3806",
+        "upstreamSHA256": "fafb84726ca8f313c8e73122c6a36f9922cbe3b9841f726a3f35a036d521ddc8",
+        "phoneBeforeSHA256": "3ddb3ef756dc58732f8f79afafdd829e0640b3e26f29f3d696cca971b6a90868",
+        "phoneSHA256": "25756fa89096db1bb14ce6aaf3fb434ecd5098ce12da0f2f06b9191dd78e298b",
+        "patchSHA256": "87daad7e6a99432ba8e54ae42ed0a62d8ea1e45cff74121cb32f13e176c8e0cf",
+        "sdkOrNativeChanges": false
+      }
     }
   }
 }
