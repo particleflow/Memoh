@@ -47,7 +47,7 @@ import { botAgentProvider } from '@/utils/bot-agent'
 import ContactChoiceDialog from './components/contact-choice-dialog.vue'
 import { fetchSession } from '@/composables/api/useChat'
 import { resolveApiErrorMessage } from '@/utils/api-error'
-import { hasTaskHistoryQuery, resolveTaskHistoryAnchor } from '@/utils/task-history-link'
+import { hasTaskHistoryQuery, resolveTaskHistoryAnchor, type TaskHistoryAnchor } from '@/utils/task-history-link'
 import ChatWorkspace from './components/chat-workspace.vue'
 import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'
 import { chatWorkspaceVisibleKey } from './composables/chat-workspace-visibility'
@@ -355,6 +355,39 @@ watch(currentBotId, async (newBotId) => {
 })
 
 let openedContactRequest: unknown = null
+
+// Dock focus can change within the same Bot, without changing currentBotId.
+// Reflect that selection in the URL so a refresh/copy follows the visible chat.
+// Route-driven layout restoration is not a new navigation; its entrance still
+// owns identity validation. Task params become a link, never authorization.
+watch(() => workspaceTabs.activeId, async (panelId) => {
+  if (!panelId || !isChatRoute() || suppressUrlSync || historyLoading.value || historyError.value
+    || chatStore.loadingChats || chatStore.contactNavigationPending || chatStore.contactOpenRequested
+    || !workspaceTabs.activePanelIsChat) return
+  const panel = workspaceTabs.api?.activePanel
+  const botId = currentBotId.value
+  if (!panel || panel.id !== panelId || !botId) return
+  const sessionId = panel.params?.sessionId
+  if (typeof sessionId !== 'string' || !sessionId.trim()) return
+  const query = { ...route.query }
+  for (const key of ['session', 'task_bot', 'task_type', 'task_id', 'task_record', 'run']) delete query[key]
+  if (panel.params?.contactView !== true) {
+    query.session = sessionId
+    const anchor = panel.params?.taskAnchor as TaskHistoryAnchor | undefined
+    if (anchor) Object.assign(query, {
+      task_bot: anchor.directoryBotId, task_type: anchor.taskType,
+      task_id: anchor.taskId, task_record: anchor.recordId, run: anchor.runId,
+    })
+  }
+  const requestedRoute = route.fullPath
+  const request = historyRequest
+  const botName = await resolveBotNameFromId(botId)
+  if (!botName || historyRequest !== request || route.fullPath !== requestedRoute
+    || workspaceTabs.activeId !== panelId || currentBotId.value !== botId || !isChatRoute()) return
+  const target = { name: 'bot', params: { botName }, query }
+  if (router.resolve(target).fullPath !== route.fullPath) await router.replace(target)
+})
+
 watch(
   () => [chatStore.contactOpenRequested, workspaceTabs.api, chatStore.loadingChats, route.query.session] as const,
   async ([request, api, loading]) => {
