@@ -1,0 +1,571 @@
+> hvigor [32mUP-TO-DATE :entry:default@PreBuild...  [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 74 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@MergeProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CreateBuildProfile...  [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 34 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@GeneratePkgContextInfo...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessProfile...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessRouterMap...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessShareConfig...  [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 3 ms [39m
+> hvigor [32mUP-TO-DATE :entry:default@ProcessResource...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@GenerateLoaderJson...  [39m
+> hvigor [32mUP-TO-DATE :entry:default@CompileResource...  [39m
+> hvigor [33mWARN: [33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets:10:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets:79:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceText.ets:96:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:64:29
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:64:85
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:65:19
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:65:63
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:66:23
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:66:92
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:76:33
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:89:24
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:167:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:169:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:171:44
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:173:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:177:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:189:36
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:190:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:190:52
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:192:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:193:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:193:79
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:36:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:48:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:56:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:60:45
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:74:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:75:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:116:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:117:37
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:131:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:132:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:137:40
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:139:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:140:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:144:64
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:147:57
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:149:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:155:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:9:71
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:14:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:19:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:28:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:29:6
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:35:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:35:88
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:40:32
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:40:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:43:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:45:16
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:45:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:47:38
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:47:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:54:30
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:54:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:55:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:59:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:61:14
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:61:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:63:36
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:63:36
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:65:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:42:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:42:66
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:47:32
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:47:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:48:14
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:48:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:49:33
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:49:33
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:52:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:77:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:79:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:82:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:83:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:84:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:85:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:86:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:87:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:87:48
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:91:13
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:91:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:93:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:96:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:97:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:102:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:108:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:153:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:170:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:217:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:222:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:240:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:241:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:250:37
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:250:73
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:251:24
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:254:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:22:70
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:61:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:90:34
+ 'packing' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:94:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:98:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:102:36
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:106:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:107:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:108:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:115:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:121:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:121:35
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:122:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:84:13
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:84:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:87:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:89:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:89:101
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:96:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:100:111
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:100:134
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:110:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:114:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:116:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:117:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:118:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:122:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:123:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:123:48
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:127:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:128:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:32
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:61
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:61
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:137:33
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:137:33
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:188:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:189:95
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:193:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:208:34
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:213:18
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:215:37
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:224:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:224:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:227:68
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:230:56
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:230:79
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:287:34
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:292:18
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:294:37
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:328:66
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:416:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:421:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:422:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:441:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:480:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:490:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:505:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:506:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:34:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:35:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:75:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:75:44
+ 'searchParams' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:75:57
+ 'getAll' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:81:61
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:107:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:121:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:142:44
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:158:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets:178:35
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:20:46
+ 'getContext' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:63:12
+ This API is unavailable to phone.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:85:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:87:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:88:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:89:25
+ 'px2vp' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:90:34
+ 'px2vp' has been deprecated.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:91:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:200:36
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:203:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:204:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:205:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:207:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:252:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:9:117
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33mWARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:68:39
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[39m
+> hvigor [32mFinished :entry:default@CompileArkTS... after 7 s 94 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 13 s 107 ms [39m
+
+15 tasks in total: 5 executed, 10 up-to-date

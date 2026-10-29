@@ -14,7 +14,8 @@ entries = manifest['entries']
 # Two admitted photo regression inputs extend the previous176 text sources.
 # One admitted failure-outbox source extends the prior178 inputs.
 # One scoped RCP endpoint regression extends the prior179 inputs.
-assert len(entries) == 180
+# One native ArkWeb connection adapter and its scoped regression extend180.
+assert len(entries) == 182
 assert 'mobile/client/mobile/memoh/harmony-upload-failures.ts' in {item['path'] for item in entries}
 assert {
     'mobile/client/tests/stage2/harmony_photo_dual_mode.cjs',

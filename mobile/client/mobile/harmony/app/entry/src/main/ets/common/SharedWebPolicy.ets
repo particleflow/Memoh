@@ -20,7 +20,7 @@ export function packagedPath(value: string): string {
 }
 
 export function memohRequest(value: string): boolean {
-  if (/[\\\u0000-\u0020]/.test(value)) { return false; }
+  if (/[\\\u0000-\u0020]/.test(value) || /%(?:2f|5c|2e|25)/i.test(value.split(/[?#]/)[0])) { return false; }
   try {
     const base = url.URL.parseURL(MEMOH_ORIGIN);
     const request = url.URL.parseURL(value);

@@ -23,10 +23,12 @@ export class NativeClient {
   private downloads: NativeMediaDownload;
   private uploads: NativeResumableUpload;
   private ready: boolean = false;
+  private resetNetwork: () => void;
   constructor(controller: webview.WebviewController, stateChanged: (state: string) => void,
-    themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext) {
+    themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext, resetNetwork: () => void = (): void => {}) {
     this.controller = controller; this.stateChanged = stateChanged; this.themeChanged = themeChanged;
     this.voice = new NativeVoice(context);
+    this.resetNetwork = resetNetwork;
     this.downloads = new NativeMediaDownload(context, () => this.active && this.ready && MEMOH_ORIGIN !== '');
     this.uploads = new NativeResumableUpload(context, () => this.active && this.ready && MEMOH_ORIGIN !== '');
   }
@@ -46,6 +48,7 @@ export class NativeClient {
   }
 
   private stopTransfers(): void {
+    this.resetNetwork();
     this.ready = false; this.voice.close(); this.downloads.close(); this.uploads.close();
   }
 

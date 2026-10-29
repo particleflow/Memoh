@@ -1,0 +1,13 @@
+--- a158/generated-main.ts
++++ native-platform/generated-main.ts
+@@ -29,7 +29,10 @@
+ 
+ const service = readServiceConfig()
+ if (!service || service.resetPending) throw new Error('SERVICE_CONFIG_REQUIRED')
++// Native file dispatch remains below the logical identity guard. Older shared clients ignore this option.
++const platformFileRouting = { fileRouting: 'platform' as const }
+ setupApiClient({
++  ...platformFileRouting,
+   baseUrl: service.apiOrigin,
+   onUnauthorized: () => router.replace({ name: 'Login' }),
+ })

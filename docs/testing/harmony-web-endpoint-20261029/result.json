@@ -1,0 +1,42 @@
+{
+  "sourceBase": "a158c56488ed193ec3e9f2d57480ad4f16a58068",
+  "contract": "abb2f6970d78cd433e5f055719ad866efcd45fba",
+  "sharedConnectionProduct": "808cf8010a50b5f7d291221249591d000e7d85aa",
+  "sharedPlatformOption": "68c01296981f2d0c173226c5a3590ca4ad59e0fa",
+  "currentSharedProductUnchanged": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
+  "productSHA256": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets": "9f5f290202888a485ec07370a4d44db3b31abd10c62343194f312d37f5ef3475",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets": "535931b1e5b31ee31e73f06d780c0fe195da0f0459e4ab0d3a49e0a2d7ff1567",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "9b02f2bb438dcdfa9f3d25885a1f694e1e8575c70e5d19acff84b4b0197f7b2a",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets": "87ec4e6ec9dd12e615427dddbf2a0402a85e2ed2a67657e5c40aae234a6aad47",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "11126646158b00c4ba99e7e9bec58126d128c6fe01e444ccd76d56e8ee795563",
+    "mobile/client/mobile/build_memoh_web.py": "b98a0d8f55768fcfb3462e6748b73b481d1603a95484c63c0a323b1a86b1ee4a"
+  },
+  "api26Compile": true,
+  "controlledAdapterChecks": 23,
+  "legacyNetworkChecks": 61,
+  "generatedWebTypes": true,
+  "actualArkWebEngine": false,
+  "actualRcpWireEngine": false,
+  "deviceOrTlsAcceptance": false,
+  "realCredentialsSent": false,
+  "extraIdentityProbes": 0,
+  "writeReplay": 0,
+  "hapAssembled": false,
+  "existingHap30ContainsThisChange": false,
+  "diagnosticWipIncluded": false,
+  "verificationSourceSHA256": "d099199cd209fcaf5a0cc29eee24615d7462ef5cc260b2ae07daa0a71e4f8b7b",
+  "controlledByteResult": {
+    "passed": true,
+    "checks": 23,
+    "streamBytes": 3145767,
+    "sha256": "664555bf1da63a12af71c727333914fe1109b27453b7929ef1a5d94a5efb40d9",
+    "uploadWireBytes": 3145924,
+    "uploadWireSHA256": "38602b88be6bebaf18e56cbfa38c23d34905fb94b90a1f11de834014513f12d1",
+    "maxUploadRead": 65536,
+    "logicalOriginPreserved": true,
+    "writeReplay": 0,
+    "scope": "Actual ETS with controlled ArkWeb/RCP Kit boundaries and loopback HTTP; not actual ArkWeb/RCP engine, TLS, throughput or phone acceptance"
+  },
+  "productPatchSHA256": "219c446652f61962295e251d83febc03643e48f544f485a8014585330a98a272"
+}

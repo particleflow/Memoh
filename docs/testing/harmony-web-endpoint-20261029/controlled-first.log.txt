@@ -1,0 +1,18 @@
+(node:3499661) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [ClientRequest]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:3499661) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 error listeners added to [ClientRequest]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+true !== false
+
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_web_endpoint.cjs:87:267
+    at check (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_web_endpoint.cjs:74:37)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_web_endpoint.cjs:87:8
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: true,
+  expected: false,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

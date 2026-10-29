@@ -484,7 +484,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "5f246cabb3f7ea4577195bba498ef56208102dbe17ea314f02a21ba40fbd30b1",
+      "sha256": "b98a0d8f55768fcfb3462e6748b73b481d1603a95484c63c0a323b1a86b1ee4a",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -514,7 +514,8 @@
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP.",
         "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
-        "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol."
+        "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol.",
+        "Scoped ArkWeb endpoint connection integration after a158c564; preserve logical identity and file recovery protocol."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -713,7 +714,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
-      "sha256": "10c9d36da12c7c72071a325093e982eef30ab3f64a9d50e0fd5fd3192b03bc81",
+      "sha256": "9b02f2bb438dcdfa9f3d25885a1f694e1e8575c70e5d19acff84b4b0197f7b2a",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "3ef44f167ddf9232cde34d2c8bff8574a0c134d5c0e842de56d202efab5740b1",
@@ -723,7 +724,8 @@
         "New runtime configuration/download integration against unified 40f; not a claim to recover historical 5a7 changes.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "Scoped ArkWeb endpoint connection integration after a158c564; preserve logical identity and file recovery protocol."
       ],
       "nativeIntegrationBaseSHA256": "b3edf415a945a4f095ac1ab453e800177cd6756694093badd553c49dab1c0fde"
     },
@@ -786,13 +788,14 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
-      "sha256": "db7f752d2685741f23eda9cc99e24508997b18c095ac4dc25f488c9747baf945",
+      "sha256": "87ec4e6ec9dd12e615427dddbf2a0402a85e2ed2a67657e5c40aae234a6aad47",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "bb6266a6c5cd31a4bb0371e3004bc4ec22c89d3a831b991d366a50d9ec86ab3f",
       "archiveCheckpointSHA256": "bb6266a6c5cd31a4bb0371e3004bc4ec22c89d3a831b991d366a50d9ec86ab3f",
       "preparationChanges": [
-        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained."
+        "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
+        "Scoped ArkWeb endpoint connection integration after a158c564; preserve logical identity and file recovery protocol."
       ]
     },
     {
@@ -853,7 +856,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
-      "sha256": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+      "sha256": "11126646158b00c4ba99e7e9bec58126d128c6fe01e444ccd76d56e8ee795563",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "35efac3903bd8a26b0e7dd80db9cc33caa10af9070a9f055457dd49a90b66a3f",
@@ -862,7 +865,8 @@
         "Normalize CRLF to repository LF; remove the archived trailing empty line in harmony-voice-geometry.ts. Original ZIP bytes and archive digests retained.",
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Handle Harmony system back through existing Web dismissal/back owners; preserve drafts, transfers and root background behavior. No shared sidebar/voice changes.",
-        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP."
+        "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
+        "Scoped ArkWeb endpoint connection integration after a158c564; preserve logical identity and file recovery protocol."
       ]
     },
     {
@@ -1328,11 +1332,12 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
-      "sha256": "25358b1de614fbb3942496a92998c84a7afa2005db54182a946e8a93b71645ee",
+      "sha256": "535931b1e5b31ee31e73f06d780c0fe195da0f0459e4ab0d3a49e0a2d7ff1567",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
-        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration."
+        "Apply verified 14-file native network consumer patch 48a53dc2606f23c01c3c7d0a3beefd54e7c301141632561928c4e441c9edc178; optional signed same-base network policy, safe metadata GET route selection, no write/stream replay. Not historical source restoration.",
+        "Scoped ArkWeb endpoint connection integration after a158c564; preserve logical identity and file recovery protocol."
       ]
     },
     {
@@ -1846,6 +1851,24 @@
       "sha256": "cd5b0c709789a239f4b6c322d334123392cd0e33b8d10c711e17c7895649ad73",
       "origin": "Native RCP endpoint v2 consumer regression for fixed808cf801 contract; real controlled HTTP/files/processes, synthetic-only identity.",
       "licenseReview": "Project regression source; no SDK binaries/private config."
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets",
+      "sha256": "9f5f290202888a485ec07370a4d44db3b31abd10c62343194f312d37f5ef3475",
+      "origin": "New scoped native connection adapter against a158c564 and abb2f697; not recovered historical source.",
+      "licenseReview": "Project source under retained repository license.",
+      "preparationChanges": [
+        "Map existing authenticated logical file requests below ArkWeb URL guard; no file protocol or storage migration."
+      ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_web_endpoint.cjs",
+      "sha256": "d099199cd209fcaf5a0cc29eee24615d7462ef5cc260b2ae07daa0a71e4f8b7b",
+      "origin": "New scoped native connection adapter against a158c564 and abb2f697; not recovered historical source.",
+      "licenseReview": "Project source under retained repository license.",
+      "preparationChanges": [
+        "Map existing authenticated logical file requests below ArkWeb URL guard; no file protocol or storage migration."
+      ]
     }
   ],
   "excludedSourcePaths": [],

@@ -1,0 +1,8 @@
+{
+  "comparedFiles": 6995,
+  "changedFiles": [
+    "apps/web/src/main.ts"
+  ],
+  "missingBaselineFiles": [],
+  "noSharedProductOrSDKReplacement": true
+}

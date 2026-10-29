@@ -10,6 +10,7 @@ import { fileIo as fs, picker } from '@kit.CoreFileKit';
 import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { UiThemes } from '../common/UiTheme';
+import { NativeWebNetwork } from '../common/NativeWebNetwork';
 
 
 @Entry
@@ -20,6 +21,8 @@ struct SharedChat {
   private photoSelection: NativePhotoSelection = new NativePhotoSelection(this.context);
   private probeGeneration: number = 0;
   private nativeClient?: NativeClient;
+  private webNetwork: NativeWebNetwork = new NativeWebNetwork((): boolean =>
+    this.active && this.nativeReady && !this.loadFailed && this.webSource === WEB_START);
   private downloadDelegate?: webview.WebDownloadDelegate;
   private webDownloads: Map<string, webview.WebDownloadItem> = new Map();
   @State status: string = '正在打开聊天…';
@@ -163,8 +166,9 @@ struct SharedChat {
       this.attachDownloads();
       this.nativeClient?.close();
       this.nativeClient = new NativeClient(this.controller, (state: string) => this.clientState(state),
-        (theme: string) => this.setClientTheme(theme), this.context);
+        (theme: string) => this.setClientTheme(theme), this.context, (): void => this.webNetwork.reset());
       this.nativeReady = this.nativeClient.register();
+      if (this.nativeReady) { this.webNetwork.attach(this.controller); }
       ImageTimingDump.bind(this.controller, (): boolean => this.active && this.chatReady && this.nativeReady);
       if (!this.nativeReady) { this.status = '附件功能暂时不可用，请重新打开聊天'; }
     } catch { this.nativeReady = false; this.status = '附件功能暂时不可用，请重新打开聊天'; }
@@ -345,6 +349,7 @@ struct SharedChat {
     this.chatReady = false;
     this.loadFailed = true;
     this.status = '聊天页面加载失败，请重试';
+    this.webNetwork.reset();
     ClientDiagnostics.event('SYSTEM', 'arkweb-capability-gate', 'main-document-load-failed', 'errorCode=' + event.error.getErrorCode());
   }
   private renderExited(reason: RenderExitReason): void {

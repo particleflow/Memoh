@@ -1,0 +1,305 @@
+diff --git a/mobile/client/mobile/build_memoh_web.py b/mobile/client/mobile/build_memoh_web.py
+index bf2332b68..65b22f782 100644
+--- a/mobile/client/mobile/build_memoh_web.py
++++ b/mobile/client/mobile/build_memoh_web.py
+@@ -1163,7 +1163,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
+         changes['apps/web/index.html'].append(('/src/main.ts', '/src/lib/harmony-entry.ts', 1))
+         changes['apps/web/src/main.ts'].extend([
+             ("import { setupApiClient }", "import { readServiceConfig } from './lib/harmony-service-config'\nimport { setupApiClient }", 1),
+-            ('setupApiClient({', "const service = readServiceConfig()\nif (!service || service.resetPending) throw new Error('SERVICE_CONFIG_REQUIRED')\nsetupApiClient({\n  baseUrl: service.apiOrigin,", 1),
++            ('setupApiClient({', "const service = readServiceConfig()\nif (!service || service.resetPending) throw new Error('SERVICE_CONFIG_REQUIRED')\n// Native file dispatch remains below the logical identity guard. Older shared clients ignore this option.\nconst platformFileRouting = { fileRouting: 'platform' as const }\nsetupApiClient({\n  ...platformFileRouting,\n  baseUrl: service.apiOrigin,", 1),
+         ])
+     with tarfile.open(ROOT / lock['archive'], 'r:gz') as source, tarfile.open(context, 'w') as target:
+         for member in source:
+diff --git a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets
+index 37574df80..050e5d946 100644
+--- a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets
++++ b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets
+@@ -23,10 +23,12 @@ export class NativeClient {
+   private downloads: NativeMediaDownload;
+   private uploads: NativeResumableUpload;
+   private ready: boolean = false;
++  private resetNetwork: () => void;
+   constructor(controller: webview.WebviewController, stateChanged: (state: string) => void,
+-    themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext) {
++    themeChanged: (theme: string) => Promise<void>, context: common.UIAbilityContext, resetNetwork: () => void = (): void => {}) {
+     this.controller = controller; this.stateChanged = stateChanged; this.themeChanged = themeChanged;
+     this.voice = new NativeVoice(context);
++    this.resetNetwork = resetNetwork;
+     this.downloads = new NativeMediaDownload(context, () => this.active && this.ready && MEMOH_ORIGIN !== '');
+     this.uploads = new NativeResumableUpload(context, () => this.active && this.ready && MEMOH_ORIGIN !== '');
+   }
+@@ -46,6 +48,7 @@ export class NativeClient {
+   }
+ 
+   private stopTransfers(): void {
++    this.resetNetwork();
+     this.ready = false; this.voice.close(); this.downloads.close(); this.uploads.close();
+   }
+ 
+diff --git a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets
+index 2c149090b..21466a58f 100644
+--- a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets
++++ b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets
+@@ -124,6 +124,22 @@ export class NativeTransferNetwork {
+     this.ipv6 = ipv6; return ipv6;
+   }
+ 
++  // ArkWeb's already-authorized logical resource request. Unlike the receipt
++  // metadata reader this may include a query, but never retries a body/stream.
++  async resource(session: rcp.Session, target: string, method: rcp.HttpMethod, factory: () => rcp.Request): Promise<rcp.Response> {
++    if (/%(?:2f|5c|2e|25)/i.test(target.split(/[?#]/)[0])) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
++    const parsed = url.URL.parseURL(target);
++    const base = url.URL.parseURL(this.base);
++    if (parsed.origin !== base.origin || !parsed.pathname.startsWith(base.pathname + '/') ||
++      parsed.username || parsed.password || parsed.hash || /[\\\u0000-\u0020]/.test(target) ||
++      /%(?:2f|5c|2e|25)/i.test(parsed.pathname) || parsed.pathname.includes('//')) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
++    const build = (): rcp.Request => this.dispatch(factory, target, method);
++    if (!this.policy) { return session.fetch(build()); }
++    await this.checkProxy();
++    if (this.platform) { return session.fetch(build()); }
++    return session.fetch(this.request(build, this.selected ?? this.policy.lan_addresses[0]));
++  }
++
+   async fetch(session: rcp.Session, target: string, method: rcp.HttpMethod, factory: () => rcp.Request): Promise<rcp.Response> {
+     if (!this.policy && !this.physicalOrigin) { return session.fetch(factory()); }
+     if (!target.startsWith(this.base + '/') || target.includes('?') || target.includes('#')) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
+diff --git a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets
+new file mode 100644
+index 000000000..70bdd15d9
+--- /dev/null
++++ b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets
+@@ -0,0 +1,180 @@
++import { webview } from '@kit.ArkWeb';
++import { rcp } from '@kit.RemoteCommunicationKit';
++import { util, url } from '@kit.ArkTS';
++import { MEMOH_ORIGIN } from './MemohClientConfig';
++import { WEB_START, memohRequest } from './SharedWebPolicy';
++import { NativeTransferNetwork, NativeTransferPolicy } from './NativeTransferNetwork';
++
++interface WebIdentity { id: string; network_policy?: NativeTransferPolicy; }
++interface WebTransfer {
++  source: webview.WebSchemeHandlerRequest; sink: webview.WebResourceHandler;
++  session: rcp.Session; epoch: number; base: string; authorization: string;
++  ownerRead: boolean; stopped: boolean; request?: rcp.Request;
++}
++
++// Connection adapter below the unchanged logical URL guard. No new page URL,
++// JavaScript command, file protocol, storage key, cookie jar or persistent route.
++export class NativeWebNetwork {
++  private epoch: number = 0;
++  private authorization: string = '';
++  private owner: string = '';
++  private policySignature: string = '';
++  private route?: NativeTransferNetwork;
++  private transfers: Map<webview.WebSchemeHandlerRequest, WebTransfer> = new Map();
++  private handler: webview.WebSchemeHandler = new webview.WebSchemeHandler();
++  private alive: () => boolean;
++  constructor(alive: () => boolean) { this.alive = alive; }
++
++  attach(controller: webview.WebviewController): void {
++    this.handler.onRequestStart((source: webview.WebSchemeHandlerRequest, sink: webview.WebResourceHandler): boolean => this.start(source, sink));
++    this.handler.onRequestStop((source: webview.WebSchemeHandlerRequest): void => {
++      const state = this.transfers.get(source);
++      if (state) { this.stop(state); }
++    });
++    controller.setWebSchemeHandler('https', this.handler);
++    controller.setWebSchemeHandler('http', this.handler);
++  }
++
++  reset(): void {
++    this.epoch++; this.authorization = ''; this.owner = ''; this.policySignature = ''; this.route = undefined;
++    this.transfers.forEach((state: WebTransfer): void => {
++      try { state.sink.didFail(-3); } catch { /* ArkWeb may already have stopped it. */ }
++      this.stop(state);
++    });
++  }
++
++  private stop(state: WebTransfer): void {
++    state.stopped = true; this.transfers.delete(state.source);
++    if (state.request) { try { state.session.cancel(state.request); } catch { /* Already finished. */ } }
++    try { state.session.close(); } catch { /* Already closed. */ }
++  }
++
++  private invalidate(state: WebTransfer): void {
++    // Preserve this original profile response while canceling the invalidated
++    // identity's pending file bodies. No fallback request is created.
++    this.transfers.delete(state.source); this.reset(); state.epoch = this.epoch;
++    this.transfers.set(state.source, state);
++  }
++
++  private check(state: WebTransfer): void {
++    if (state.stopped || !this.alive() || state.epoch !== this.epoch || state.base !== MEMOH_ORIGIN ||
++      (!state.ownerRead && state.authorization !== this.authorization)) { throw new Error('WEB_NETWORK_IDENTITY'); }
++  }
++
++  private start(source: webview.WebSchemeHandlerRequest, sink: webview.WebResourceHandler): boolean {
++    const target = source.getRequestUrl();
++    // Direct physical URLs, subframes and external URLs retain the old refusal.
++    if (!this.alive() || !MEMOH_ORIGIN.startsWith('https://') || source.isMainFrame() ||
++      source.getFrameUrl().split('#')[0] !== WEB_START || !memohRequest(target)) { return false; }
++    if (!['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'].includes(source.getRequestMethod())) { return false; }
++    const ownerRead = target === MEMOH_ORIGIN + '/users/me' && source.getRequestMethod() === 'GET';
++    const path = target.slice(MEMOH_ORIGIN.length).split('?')[0];
++    const file = /^\/bots\/[^/]+\/(?:media(?:\/|$)|container\/fs(?:\/|$)|sessions\/[^/]+\/delegations\/[^/]+\/attachments\/)/.test(path);
++    if (!ownerRead && (!file || !this.route)) { return false; }
++    const auth = source.getHeader().filter((header: webview.WebHeader): boolean => header.headerKey.toLowerCase() === 'authorization');
++    const query = url.URL.parseURL(target).searchParams.getAll('token');
++    if (auth.length > 1 || query.length > 1 || ownerRead && auth.length !== 1) { return false; }
++    const authorization = auth.length === 1 ? auth[0].headerValue : query.length === 1 ? 'Bearer ' + query[0] : '';
++    if (!/^Bearer [^\s\r\n]+$/.test(authorization) || query.length === 1 && authorization !== 'Bearer ' + query[0]) { return false; }
++    if (ownerRead && authorization !== this.authorization) { this.reset(); this.authorization = authorization; }
++    else if (authorization !== this.authorization) { return false; }
++    const state: WebTransfer = { source, sink, session: rcp.createSession(), epoch: this.epoch,
++      base: MEMOH_ORIGIN, authorization, ownerRead, stopped: false };
++    this.transfers.set(source, state);
++    void this.run(state).catch(() => {
++      if (!state.stopped) { try { sink.didFail(-2); } catch { /* Stopped by ArkWeb. */ } }
++    }).finally(() => this.stop(state));
++    return true;
++  }
++
++  private response(state: WebTransfer, status: number, headers: rcp.ResponseHeaders): void {
++    this.check(state);
++    // Never let a browser redirect resend this request outside the logical guard.
++    if (status < 200 || status >= 300 && status < 400) { throw new Error('WEB_NETWORK_REDIRECT'); }
++    const encoding = headers['content-encoding'];
++    if (encoding && encoding !== 'identity') { throw new Error('WEB_NETWORK_ENCODING'); }
++    const response = new webview.WebSchemeHandlerResponse();
++    response.setUrl(state.source.getRequestUrl()); response.setStatus(status);
++    for (const key of Object.keys(headers)) {
++      if (['connection', 'transfer-encoding', 'keep-alive', 'set-cookie'].includes(key.toLowerCase())) { continue; }
++      const value = headers[key];
++      if (typeof value === 'string') {
++        response.setHeaderByName(key, value, true);
++        if (key.toLowerCase() === 'content-type') { response.setMimeType(value.split(';')[0]); }
++      }
++      else if (Array.isArray(value)) { response.setHeaderByName(key, value.join(', '), true); }
++    }
++    state.sink.didReceiveResponse(response);
++  }
++
++  private async run(state: WebTransfer): Promise<void> {
++    const source = state.source;
++    const target = source.getRequestUrl();
++    const headers: rcp.RequestHeaders = {};
++    for (const header of source.getHeader()) {
++      const key = header.headerKey.toLowerCase();
++      if (['host', 'cookie', 'connection', 'transfer-encoding', 'content-length', 'accept-encoding'].includes(key)) { continue; }
++      headers[key] = header.headerValue;
++    }
++    headers['accept-encoding'] = 'identity';
++    const body = source.getHttpBodyStream();
++    if (body) { await body.initialize(); this.check(state); }
++    const method = source.getRequestMethod() as rcp.HttpMethod;
++    const request = new rcp.Request(target, method, headers);
++    state.request = request;
++    request.configuration = { security: { remoteValidation: 'system' }, transfer: { autoRedirect: false } };
++    if (body) {
++      request.content = async (maximum: number): Promise<ArrayBuffer> => {
++        this.check(state);
++        const chunk = await body.read(Math.min(maximum, 65536));
++        this.check(state); return chunk;
++      };
++    }
++    if (state.ownerRead) {
++      // Observe the original profile read; no extra probe or physical identity GET.
++      const bytes = new Uint8Array(65536); let size = 0;
++      request.destination = (data: ArrayBuffer): void => {
++        this.check(state);
++        if (size + data.byteLength > bytes.byteLength) { throw new Error('WEB_NETWORK_PROFILE'); }
++        bytes.set(new Uint8Array(data), size); size += data.byteLength;
++      };
++      this.check(state);
++      const response = await state.session.fetch(request);
++      this.check(state);
++      if (response.statusCode === 200) {
++        try {
++          const identity = JSON.parse(new util.TextDecoder().decodeToString(bytes.subarray(0, size))) as WebIdentity;
++          if (typeof identity.id !== 'string' || !identity.id || identity.id.length > 128) { throw new Error('WEB_NETWORK_PROFILE'); }
++          if (identity.network_policy?.version === 2) {
++            const route = new NativeTransferNetwork(state.base); route.adopt(identity.network_policy);
++            const signature = JSON.stringify(identity.network_policy);
++            if (this.owner && (identity.id !== this.owner || signature !== this.policySignature)) { this.invalidate(state); }
++            this.owner = identity.id; this.policySignature = signature;
++            this.route = route; this.authorization = state.authorization;
++          } else { this.invalidate(state); }
++        } catch { this.invalidate(state); } // Invalid optional policy never authorizes a target.
++      } else { this.invalidate(state); }
++      this.response(state, response.statusCode, response.headers);
++      if (size) { state.sink.didReceiveResponseBody(bytes.buffer.slice(0, size) as ArrayBuffer); }
++    } else {
++      let status = 0; let responded = false;
++      request.configuration.tracing = { httpEventsHandler: {
++        onStatusCodeReceive: (code: number): void => { this.check(state); status = code; },
++        onHeaderReceive: (responseHeaders: rcp.ResponseHeaders): void => {
++          if (status >= 200 && !responded) { this.response(state, status, responseHeaders); responded = true; }
++        }
++      } };
++      request.destination = (data: ArrayBuffer): void => {
++        this.check(state);
++        if (!responded) { throw new Error('WEB_NETWORK_HEADERS'); }
++        state.sink.didReceiveResponseBody(data);
++      };
++      const route = this.route;
++      if (!route) { throw new Error('WEB_NETWORK_IDENTITY'); }
++      const response = await route.resource(state.session, target, method, (): rcp.Request => { this.check(state); return request; });
++      this.check(state);
++      if (!responded) { this.response(state, response.statusCode, response.headers); }
++    }
++    this.check(state); state.sink.didFinish();
++  }
++}
+diff --git a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets
+index 8cf45ba09..3e8426436 100644
+--- a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets
++++ b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets
+@@ -20,7 +20,7 @@ export function packagedPath(value: string): string {
+ }
+ 
+ export function memohRequest(value: string): boolean {
+-  if (/[\\\u0000-\u0020]/.test(value)) { return false; }
++  if (/[\\\u0000-\u0020]/.test(value) || /%(?:2f|5c|2e|25)/i.test(value.split(/[?#]/)[0])) { return false; }
+   try {
+     const base = url.URL.parseURL(MEMOH_ORIGIN);
+     const request = url.URL.parseURL(value);
+diff --git a/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets b/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets
+index 11a8808b8..ba21cd74a 100644
+--- a/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets
++++ b/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets
+@@ -10,6 +10,7 @@ import { fileIo as fs, picker } from '@kit.CoreFileKit';
+ import { window } from '@kit.ArkUI';
+ import { BusinessError } from '@kit.BasicServicesKit';
+ import { UiThemes } from '../common/UiTheme';
++import { NativeWebNetwork } from '../common/NativeWebNetwork';
+ 
+ 
+ @Entry
+@@ -20,6 +21,8 @@ struct SharedChat {
+   private photoSelection: NativePhotoSelection = new NativePhotoSelection(this.context);
+   private probeGeneration: number = 0;
+   private nativeClient?: NativeClient;
++  private webNetwork: NativeWebNetwork = new NativeWebNetwork((): boolean =>
++    this.active && this.nativeReady && !this.loadFailed && this.webSource === WEB_START);
+   private downloadDelegate?: webview.WebDownloadDelegate;
+   private webDownloads: Map<string, webview.WebDownloadItem> = new Map();
+   @State status: string = '正在打开聊天…';
+@@ -163,8 +166,9 @@ struct SharedChat {
+       this.attachDownloads();
+       this.nativeClient?.close();
+       this.nativeClient = new NativeClient(this.controller, (state: string) => this.clientState(state),
+-        (theme: string) => this.setClientTheme(theme), this.context);
++        (theme: string) => this.setClientTheme(theme), this.context, (): void => this.webNetwork.reset());
+       this.nativeReady = this.nativeClient.register();
++      if (this.nativeReady) { this.webNetwork.attach(this.controller); }
+       ImageTimingDump.bind(this.controller, (): boolean => this.active && this.chatReady && this.nativeReady);
+       if (!this.nativeReady) { this.status = '附件功能暂时不可用，请重新打开聊天'; }
+     } catch { this.nativeReady = false; this.status = '附件功能暂时不可用，请重新打开聊天'; }
+@@ -345,6 +349,7 @@ struct SharedChat {
+     this.chatReady = false;
+     this.loadFailed = true;
+     this.status = '聊天页面加载失败，请重试';
++    this.webNetwork.reset();
+     ClientDiagnostics.event('SYSTEM', 'arkweb-capability-gate', 'main-document-load-failed', 'errorCode=' + event.error.getErrorCode());
+   }
+   private renderExited(reason: RenderExitReason): void {

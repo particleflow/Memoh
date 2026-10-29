@@ -124,6 +124,22 @@ export class NativeTransferNetwork {
     this.ipv6 = ipv6; return ipv6;
   }
 
+  // ArkWeb's already-authorized logical resource request. Unlike the receipt
+  // metadata reader this may include a query, but never retries a body/stream.
+  async resource(session: rcp.Session, target: string, method: rcp.HttpMethod, factory: () => rcp.Request): Promise<rcp.Response> {
+    if (/%(?:2f|5c|2e|25)/i.test(target.split(/[?#]/)[0])) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
+    const parsed = url.URL.parseURL(target);
+    const base = url.URL.parseURL(this.base);
+    if (parsed.origin !== base.origin || !parsed.pathname.startsWith(base.pathname + '/') ||
+      parsed.username || parsed.password || parsed.hash || /[\\\u0000-\u0020]/.test(target) ||
+      /%(?:2f|5c|2e|25)/i.test(parsed.pathname) || parsed.pathname.includes('//')) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
+    const build = (): rcp.Request => this.dispatch(factory, target, method);
+    if (!this.policy) { return session.fetch(build()); }
+    await this.checkProxy();
+    if (this.platform) { return session.fetch(build()); }
+    return session.fetch(this.request(build, this.selected ?? this.policy.lan_addresses[0]));
+  }
+
   async fetch(session: rcp.Session, target: string, method: rcp.HttpMethod, factory: () => rcp.Request): Promise<rcp.Response> {
     if (!this.policy && !this.physicalOrigin) { return session.fetch(factory()); }
     if (!target.startsWith(this.base + '/') || target.includes('?') || target.includes('#')) { throw new Error('NETWORK_POLICY_AUTHORITY'); }

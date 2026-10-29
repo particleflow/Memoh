@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "files": 23,
+  "categories": [
+    "private-key",
+    "GitHub credential pattern",
+    "cloud access key pattern",
+    "private LAN URL literal"
+  ],
+  "issues": [],
+  "limit": "Scoped source/evidence pattern scan, not a claim that every encoded secret or infrastructure identity is detectable. No private configuration or signing input was consumed."
+}

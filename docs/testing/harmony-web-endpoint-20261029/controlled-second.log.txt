@@ -1,0 +1,1 @@
+{"passed":true,"checks":20,"streamBytes":3145767,"sha256":"664555bf1da63a12af71c727333914fe1109b27453b7929ef1a5d94a5efb40d9","maxUploadRead":65536,"logicalOriginPreserved":true,"writeReplay":0,"scope":"Actual ETS with controlled ArkWeb/RCP Kit boundaries and loopback HTTP; not actual ArkWeb/RCP engine, TLS, throughput or phone acceptance"}
