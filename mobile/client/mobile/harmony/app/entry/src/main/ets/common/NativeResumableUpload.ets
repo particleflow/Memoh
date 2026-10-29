@@ -15,7 +15,7 @@ export interface UploadLocal { handle: string; name: string; type: string; size:
 interface Limits { max_upload_bytes: number; resumable_enabled?: boolean; chunk_max_bytes?: number; }
 interface Identity { id: string; network_policy?: NativeTransferPolicy; }
 interface Receipt { id: string; state: string; offset: number; size_bytes: number; expires_at: string; mime: string; content_hash?: string; }
-interface MediaReply { content_hash: string; size_bytes: number; mime: string; }
+export interface MediaReply { content_hash: string; size_bytes: number; mime: string; }
 interface Reply { status: number; body: string; headers: rcp.ResponseHeaders; }
 interface UploadSDKError extends Error { code: number; }
 export interface UploadPreview { fd: number; mime: string; }
@@ -38,26 +38,29 @@ class Journal {
 }
 class Running {
   apiOrigin: string = MEMOH_ORIGIN; epoch: number = 0; cancelled: boolean = false; staged: Journal[] = []; input: UploadScope; session: rcp.Session; journal?: Journal;
-  phase: string = 'prepare';
+  phase: string = 'prepare'; accepted: boolean = false;
   failure?: StageError;
   copying: boolean = false; copyBusy: boolean = false; copyCommitted: boolean = false; copyOffset: number = 0; copyFile?: fs.File; ended: boolean = false;
   network: NativeTransferNetwork;
   constructor(input: UploadScope, epoch: number) { this.input = input; this.epoch = epoch; this.network = new NativeTransferNetwork(this.apiOrigin, MEMOH_NETWORK_POLICY); this.session = rcp.createSession(); }
 }
 
-// Foreground only. An app-owned immutable snapshot and atomic bounded journal
+// The existing app-owned immutable snapshot and atomic bounded journal
 // survive process death. Tokens, arbitrary URIs and draft/model text never do.
 export class NativeResumableUpload {
   private context: common.UIAbilityContext;
   private authorized: () => boolean;
+  private progress: (operation: string, received: number, total: number) => void;
   private epoch: number = 0;
   private running?: Running;
   private root: string;
   private visible: Map<string, Journal> = new Map();
   private previews: Map<string, fs.File> = new Map();
-  constructor(context: common.UIAbilityContext, authorized: () => boolean) {
-    this.context = context; this.authorized = authorized; this.root = context.filesDir + '/memoh-upload-journal-v1';
+  constructor(context: common.UIAbilityContext, authorized: () => boolean,
+    progress: (operation: string, received: number, total: number) => void = (): void => {}) {
+    this.progress = progress; this.context = context; this.authorized = authorized; this.root = context.filesDir + '/memoh-upload-journal-v1';
   }
+  bindContext(context: common.UIAbilityContext): void { this.context = context; }
   private check(run: Running): void {
     if (!this.authorized() || run.epoch !== this.epoch || run.cancelled) { throw new Error('UPLOAD_CANCELLED'); }
   }
@@ -348,7 +351,7 @@ export class NativeResumableUpload {
       (r.state === 'ready' ? r.content_hash !== j.hash || r.offset !== j.size : !!r.content_hash)) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
     this.check(run); j.uploadId = r.id; j.offset = r.offset; j.expires = r.expires_at; j.state = r.state; j.type = r.mime;
     if (r.state === 'ready') { j.completePending = false; }
-    this.save(j); return r;
+    this.save(j); this.progress(run.input.operation, j.offset, j.size); return r;
   }
   private async retryCall(run: Running, path: string, method: rcp.HttpMethod = 'GET', body?: rcp.RequestContent,
     headers: rcp.RequestHeaders = {}): Promise<Reply> {
@@ -359,7 +362,7 @@ export class NativeResumableUpload {
     }
   }
   async upload(input: UploadScope): Promise<MediaReply> {
-    const run = this.start(input);
+    const run = this.start(input); run.accepted = true;
     try {
       const owner = await this.owner(run), j = await this.owned(run, owner), limit = await this.limits(run);
       await this.verify(run, j); this.check(run);
@@ -371,7 +374,7 @@ export class NativeResumableUpload {
           const headers = new Map<string, string>();
           for (const key of Object.keys(reply.headers)) { const value = reply.headers[key]; if (typeof value === 'string') { headers.set(key.toLowerCase(), value); } }
           if (headers.get('content-length') !== String(j.size) || headers.get('etag') !== '\"' + j.hash + '\"' || !headers.get('content-type')) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
-          j.state = 'ready'; j.type = headers.get('content-type') ?? j.type; j.offset = j.size; this.save(j);
+          j.state = 'ready'; j.type = headers.get('content-type') ?? j.type; j.offset = j.size; this.save(j); this.progress(run.input.operation, j.offset, j.size);
           return { content_hash: j.hash, size_bytes: j.size, mime: j.type };
         }
         if (reply.status !== 404) { this.status(reply); }
@@ -389,7 +392,7 @@ export class NativeResumableUpload {
         const reply = await this.call(run, base, 'POST', form); this.status(reply, 201);
         const ready = JSON.parse(reply.body) as MediaReply;
         if (ready.content_hash !== j.hash || ready.size_bytes !== j.size || !ready.mime) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
-        j.state = 'ready'; j.type = ready.mime; j.offset = j.size; this.save(j); return ready;
+        j.state = 'ready'; j.type = ready.mime; j.offset = j.size; this.save(j); this.progress(run.input.operation, j.offset, j.size); return ready;
       }
       j.resumable = true;
       if (j.uploadId) {
@@ -506,12 +509,27 @@ export class NativeResumableUpload {
     if (fs.statSync(file.fd).size !== journal.size) { throw new Error('UPLOAD_IDENTITY'); }
     return { fd: file.fd, mime: journal.type };
   }
+  activeLocal(input: UploadScope): UploadLocal[] {
+    const run = this.running, j = run?.journal;
+    if (!run || !j || run.input.authorization !== input.authorization || j.bot !== input.botId ||
+      j.scope !== input.scope || (input.handle !== undefined && input.handle !== j.handle)) { throw new Error('UPLOAD_BUSY'); }
+    this.check(run); this.visible.set(j.handle, j); return [this.info(j)];
+  }
+  releasePreviews(): void {
+    this.visible.clear();
+    this.previews.forEach((file: fs.File) => fs.closeSync(file)); this.previews.clear();
+  }
+  detachView(): void {
+    this.releasePreviews();
+    // A partial Web File copy still needs its document to supply bytes. It has
+    // no committed original and is not an accepted network upload.
+    if (this.running && !this.running.accepted) { this.close(); }
+  }
   close(): void {
     this.epoch++; const run = this.running; run?.session.cancel();
     // Between bridge chunks there is no pending await to run a finally block.
     // During I/O, its owner keeps the FD until the epoch check unwinds it.
     if (run?.copying && !run.copyBusy) { this.end(run); }
-    this.visible.clear();
-    this.previews.forEach((file: fs.File) => fs.closeSync(file)); this.previews.clear();
+    this.releasePreviews();
   }
 }

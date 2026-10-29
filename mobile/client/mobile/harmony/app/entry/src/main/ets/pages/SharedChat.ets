@@ -152,6 +152,7 @@ struct SharedChat {
     this.probing = false;
     this.nativeReady = false;
     this.chatReady = false;
+    // Release this document observer; accepted transfers belong to the application.
     this.nativeClient?.close(); this.nativeClient = undefined;
     this.photoSelection.close();
   }
@@ -359,6 +360,7 @@ struct SharedChat {
     this.clearClientWait();
     this.probing = false; this.chatReady = false; this.loginReady = false; this.renderWaiting = false;
     this.loadFailed = true; this.nativeReady = false;
+    // Release this document observer; accepted transfers belong to the application.
     this.nativeClient?.close(); this.nativeClient = undefined;
     this.status = '聊天页面运行中断，请重新打开聊天';
     ClientDiagnostics.event('SYSTEM', 'shared-client', 'render-exited', 'reason=' + reason);

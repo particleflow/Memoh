@@ -14,8 +14,20 @@ entries = manifest['entries']
 # Two admitted photo regression inputs extend the previous176 text sources.
 # One admitted failure-outbox source extends the prior178 inputs.
 # One scoped RCP endpoint regression extends the prior179 inputs.
-# One native ArkWeb connection adapter and its scoped regression extend180.
-assert len(entries) == 182
+# Four ownership, four background and two general routing sources extend180.
+assert len(entries) == 190
+assert {
+    'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
+    'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
+    'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets',
+    'mobile/client/mobile/memoh/harmony-transfer-lifetime.ts',
+    'mobile/client/tests/stage2/harmony_entry_lifetime.cjs',
+    'mobile/client/tests/stage2/harmony_native_lifetime.cjs',
+    'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets',
+    'mobile/client/tests/stage2/harmony_background_owner.cjs',
+    'mobile/client/tests/stage2/harmony_transfer_background.cjs',
+    'mobile/client/tests/stage2/harmony_background_sdk_types.cjs',
+} <= {item['path'] for item in entries}
 assert 'mobile/client/mobile/memoh/harmony-upload-failures.ts' in {item['path'] for item in entries}
 assert {
     'mobile/client/tests/stage2/harmony_photo_dual_mode.cjs',

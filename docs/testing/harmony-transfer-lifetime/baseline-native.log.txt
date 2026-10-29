@@ -1,0 +1,12 @@
+AssertionError [ERR_ASSERTION]: page detach cancelled accepted native upload
+
+1 !== 0
+
+    at main (/workspace/harmony-transfer-lifetime/mobile/client/tests/stage2/harmony_native_lifetime.cjs:125:75) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}

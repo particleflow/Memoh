@@ -1,0 +1,1 @@
+{"passed":true,"checks":61,"productSource":true,"scope":"Node Kit adapters only; not official engine/device or TLS acceptance","sameAuthority":true,"privateSeedOnly":true,"legacyUnconfiguredUnchanged":true,"metadataSelectionAndCache":true,"writeReplay":0,"streamReplay":0,"extraProbeRequests":0,"proxyAndLiteralPlatformRouting":true,"webviewCacheWrites":0}

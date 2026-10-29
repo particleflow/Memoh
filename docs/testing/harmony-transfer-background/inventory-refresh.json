@@ -1,0 +1,116 @@
+{
+  "standaloneEntries": 188,
+  "added": [
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets",
+    "mobile/client/mobile/memoh/harmony-transfer-lifetime.ts",
+    "mobile/client/tests/stage2/harmony_entry_lifetime.cjs",
+    "mobile/client/tests/stage2/harmony_native_lifetime.cjs",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets",
+    "mobile/client/tests/stage2/harmony_background_owner.cjs",
+    "mobile/client/tests/stage2/harmony_transfer_background.cjs",
+    "mobile/client/tests/stage2/harmony_background_sdk_types.cjs"
+  ],
+  "refreshed": [
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
+      "before": "06bba7cb592f9f2fb8e6bce2b11deb15f0a816fb2d3f84259f3d89b738d5563d",
+      "sha256": "4a01f4a9ebd298003ac5ee7de75a6b4df46371aee6a87adec2ac090a1c0bff5f"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+      "before": "e8833abe6bdd1c9815cd19154a559f040cbc5ce6cc591ebde56a267390675d59",
+      "sha256": "198ee1d16c78effb3bdcf1d1df653e565cc71911a4cb0ee620b62701d8d5e6db"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/HarmonyAttachments.vue",
+      "before": "2ce45f65150a20f0da8ad0ae6ccdd2d1f71871a71469d02b1239d1c86dc28670",
+      "sha256": "0cd4bbfb5b3dff6e1e6108a5295c6fb2932668328d1a2726b71e9bb39aee3e4b"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-download.ts",
+      "before": "6990c567e495a20c5a089f37b656bde8ec93cd9a723bc5a4ab4597fc7cccbdb0",
+      "sha256": "95117563562fa8f886eda424f64a4e885c0154f22041ff330cd04ac4bab22078"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-entry.ts",
+      "before": "1a7678f6352b53fe553d244760832bb96f87d843d05a49706c2317c9d82cb6fd",
+      "sha256": "1dec04b709b35d3b508a480fb80a58bc40811b1a428e2fa2e99c9d13382c3915"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
+      "before": "def20a3f5af857e992df75be92cb112574375d2b8336a483dd00a122c1596c0b",
+      "sha256": "a261230357f7cd8397520b1f1f87a916fc21beea9e0ec2af1134110c6389b605"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_download_frontend.cjs",
+      "before": "e58ea7ffea7e495007252f00d7145d1188da9b34eec5eb96a9a556948adf4dbf",
+      "sha256": "57a8b85bd27ca7abcf10fafd9b085f06205f7f35b861f1f3db5925ca763a3917"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
+      "before": "85edab6640863b4c4de76bba8f8663b71d70fb5164ce30fe888f34b39a4ed366",
+      "sha256": "fd65c7888e80fde6a49e24ced235a86c3f9a5c0b6944054b2bb82d2284ed517e"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_resumable_frontend.cjs",
+      "before": "d6a3a01b615d32ff049c455b0ee470bd1c1954734f16c1d32368e0acf1d4b891",
+      "sha256": "36febf7d871c929d9c0d47e9cfe6d66dae79a6d7a5b3f2c09038fb0dc874d03e"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_service_config.cjs",
+      "before": "18043226c679f0de0bea61c4ad8b0e45a5700d463f01f81320431f7b6f16964e",
+      "sha256": "5b459865900e751e1f9d1c73ca7e63395428ad0070c0a2536b2cfc30947a1dc6"
+    },
+    {
+      "path": "mobile/client/mobile/build_memoh_web.py",
+      "before": "5f246cabb3f7ea4577195bba498ef56208102dbe17ea314f02a21ba40fbd30b1",
+      "sha256": "0fb18ea28c6a461361a913ebacc3e9d0e81dc225b1e5c2e39f06dcc388d21fc3"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "before": "10c9d36da12c7c72071a325093e982eef30ab3f64a9d50e0fd5fd3192b03bc81",
+      "sha256": "c966af1d322dbf166248b0c586c6c9538af5a01b59e1327ef2480a0cc5b0ec02"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
+      "before": "a0bb0c5afa7058e0ad30fe7f6e9e97247bb5a646232265c958fb53db4a5e27e3",
+      "sha256": "c27f8a46c45f39142a9baf44bd1872eef6bdb04b0987083dd55d227bfde58ec0"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
+      "before": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+      "sha256": "87f2ae97816f02d6918c9072c1af9c64e9b4c15fc5a97fe59189e605d8b75b76"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/module.json5",
+      "before": "cb4b3594d1cc7323f8eba2d904d63c18ae349c361ccb5bbb700d955c46eeaa5f",
+      "sha256": "5a9e21f56233697fe1a88c227f491f3a74f3d478e2f0340c138e0128cde5a700"
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony.ts",
+      "before": "00500d6b023f93f33c4f30a52a6ddb08ccfb11b8ad3f377c2a8b90cb6bb4a3cb",
+      "sha256": "d6d6cf6345038987946e5a28e07c96ebfad05e2d725daf8f63703d9d174752c9"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_upload_router.cjs",
+      "before": "08aa36360af6ce79b91f9f04b50f03ec28864e09767b880393f014f97c58388c",
+      "sha256": "336eac464ce6680903f4fcd6a0278a9e740b22047408f5c111f30f8cc3842548"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_network_policy.cjs",
+      "before": "83c40e2fa6eb81f7c3138166d287d143b0ec4a45b8b312827cac9c49e149f226",
+      "sha256": "84eae7db4cbde4f7fce82bdd340f7f7e7b0521735c249137501190aa185f5c23"
+    }
+  ],
+  "combined22b7InventoryMustAddItsTwoSourcesAndRehashAfterMerge": true,
+  "addedSHA256": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets": "87d8541a1b155d5c6963e6ca968bf070d1a9ba445e59151f5abdac322a140619",
+    "mobile/client/mobile/memoh/harmony-transfer-lifetime.ts": "b7576df0920b0728d50e92c4df6b5e42041f2b8934f844c0660c5186d6a9b671",
+    "mobile/client/tests/stage2/harmony_entry_lifetime.cjs": "697c456a6f50a2586d1e88e319f2d09a51568d789d3a6cb663011d8982782913",
+    "mobile/client/tests/stage2/harmony_native_lifetime.cjs": "fc2b019077964d90be4a99a08b45da51b4e1227dac2918c47826bd7db9c8c5ae",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets": "984ad1aeef309d0deaa17421a2f8bb9230c73dfeed30705bc572cfa3feeed358",
+    "mobile/client/tests/stage2/harmony_background_owner.cjs": "426ee9b069eaebb0f20f2df8dbe4c37489ae260f97db0b900e205ad9e29a22cc",
+    "mobile/client/tests/stage2/harmony_transfer_background.cjs": "0ec5b8bc724a8e668f1fc27125262ca266675b200942b4c61122cc7346f0c2ca",
+    "mobile/client/tests/stage2/harmony_background_sdk_types.cjs": "02246bf6c3e7d4308b145021dc5b4d759628695299db77e9cebd6c65efb16c89"
+  }
+}

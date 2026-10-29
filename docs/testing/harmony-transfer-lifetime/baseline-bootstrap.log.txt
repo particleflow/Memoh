@@ -1,0 +1,17 @@
+AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
++   'client.configuration',
+    'client.configure',
+    'mounted'
+  ]
+
+    at /workspace/harmony-transfer-lifetime/mobile/client/tests/stage2/harmony_entry_lifetime.cjs:57:10 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [Array],
+  expected: [Array],
+  operator: 'deepStrictEqual',
+  diff: 'simple'
+}
