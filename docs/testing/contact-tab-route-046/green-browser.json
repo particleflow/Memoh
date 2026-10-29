@@ -1,0 +1,35 @@
+{
+  "mode": "green",
+  "after_contact_tab": "http://127.0.0.1:28110/bot/local-dialog",
+  "tabs": [
+    "Local Dialog",
+    "TASK_PROJECTION_V6"
+  ],
+  "page_errors": [],
+  "contact_refresh": "http://127.0.0.1:28110/bot/local-dialog",
+  "task_tab_anchor_restored": "http://127.0.0.1:28110/bot/local-dialog?session=cd4cd90a-7b48-4978-a2f1-207c02c31789&task_bot=30000000-0000-4000-8000-000000000001&task_type=native_agent&task_id=bg_f618b30f5417502a971580e425e32263&task_record=f618b30f-5417-502a-9715-80e425e32263&run=b2a39b39-dd63-4e25-b0cc-fa84e89374aa",
+  "task_refresh_exact_turn": true,
+  "copied_contact_link": "http://127.0.0.1:28110/bot/local-dialog",
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/bots/30000000-0000-4000-8000-000000000001/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/bots/30000000-0000-4000-8000-000000000001/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/bots/30000000-0000-4000-8000-000000000001/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/bots/30000000-0000-4000-8000-000000000001/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/bots/30000000-0000-4000-8000-000000000001/sessions/contact"
+    }
+  ]
+}

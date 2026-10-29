@@ -1,0 +1,55 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/Memoh-schedule-release
+
+·················xx··
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/index.navigation.test.ts > clears the old task link when the contact tab becomes active and preserves unrelated query
+AssertionError: expected '/bot/source?session=history&task_bot=…' to be '/bot/source?view=retained' // Object.is equality
+
+Expected: "/bot/source?view=retained"
+Received: "/bot/source?session=history&task_bot=source&task_type=native_agent&task_id=old&task_record=old&run=old&view=retained"
+
+ ❯ src/pages/home/index.navigation.test.ts:168:46
+    166|   api.select.mockClear()
+    167|   activatePanel('contact', { sessionId: 'contact-C', contactView: true…
+    168|   expect(router.currentRoute.value.fullPath).toBe('/bot/source?view=re…
+       |                                              ^
+    169|   expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefin…
+    170| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/pages/home/index.navigation.test.ts > restores the original task anchor on task tab activation and rechecks authorization
+AssertionError: expected {} to deeply equal { session: 'history', …(5) }
+
+- Expected
++ Received
+
+- {
+-   "run": "old",
+-   "session": "history",
+-   "task_bot": "source",
+-   "task_id": "old",
+-   "task_record": "old",
+-   "task_type": "native_agent",
+- }
++ {}
+
+ ❯ src/pages/home/index.navigation.test.ts:176:43
+    174|   api.task.mockResolvedValue(taskResponse('old'))
+    175|   activatePanel('task', { sessionId: 'history', taskAnchor: { director…
+    176|   expect(router.currentRoute.value.query).toEqual({ session: 'history'…
+       |                                           ^
+    177|   expect(api.task).toHaveBeenCalledOnce()
+    178|   expect(api.open.mock.calls.at(-1)?.[0].taskAnchor.runId).toBe('old')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 19 passed (21)
+   Start at  22:16:31
+   Duration  4.07s (transform 2.24s, setup 0ms, import 2.79s, tests 143ms, environment 879ms)

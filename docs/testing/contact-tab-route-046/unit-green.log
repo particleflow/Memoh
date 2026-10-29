@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /workspace/Memoh-schedule-release
+
+························
+
+ Test Files  1 passed (1)
+      Tests  24 passed (24)
+   Start at  22:18:35
+   Duration  2.55s (transform 1.33s, setup 0ms, import 1.76s, tests 128ms, environment 482ms)

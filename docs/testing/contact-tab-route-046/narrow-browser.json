@@ -1,0 +1,15 @@
+{
+  "narrow_zh_dark_contact": true,
+  "page_errors": [],
+  "before": {
+    "bot_sessions": "24:1d6e01dedc59b94fdcee830b5a896793",
+    "session_runs": "76:441028f1d45e333c94486fc01ee3e4c0",
+    "bot_history_messages": "335:2a58696b615a43ca4a1221459f766257"
+  },
+  "after": {
+    "bot_sessions": "24:1d6e01dedc59b94fdcee830b5a896793",
+    "session_runs": "76:441028f1d45e333c94486fc01ee3e4c0",
+    "bot_history_messages": "335:2a58696b615a43ca4a1221459f766257"
+  },
+  "scope": "existing isolated data, no new task or model call; table IDs/counts only, not every field digest"
+}

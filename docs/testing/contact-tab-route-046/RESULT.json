@@ -1,0 +1,31 @@
+{
+  "base": "046023913592b00951d7f28fe54842080c5cdc51",
+  "product_commit": "2c0e277c2cb49b5a4a99b89a5e568ef9f413ab8a",
+  "product_tree": "881bd9e5cc03707b4a5d0fa1e037e7faf880063f",
+  "changed_product": [
+    "apps/web/src/pages/home/index.vue"
+  ],
+  "changed_tests": [
+    "apps/web/src/pages/home/index.navigation.test.ts"
+  ],
+  "red": {
+    "failed": 2,
+    "passed": 19,
+    "skip": 0
+  },
+  "green": {
+    "passed": 24,
+    "failed": 0,
+    "skip": 0
+  },
+  "eslint": 0,
+  "vue_tsc": 0,
+  "diff_check": 0,
+  "backend_reused": "37e3e8cf7cec162669701d572032c3d2639b9751",
+  "backend_directory_paths_unchanged_vs_046": true,
+  "actual_browser": true,
+  "production": false,
+  "human_qa": false,
+  "model_calls": 0,
+  "deployment": false
+}
