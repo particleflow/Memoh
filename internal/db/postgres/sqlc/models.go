@@ -838,6 +838,7 @@ type Schedule struct {
 	CurrentCalls    int32              `json:"current_calls"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
+	DeletedAt       pgtype.Timestamptz `json:"deleted_at"`
 	Enabled         bool               `json:"enabled"`
 	Command         string             `json:"command"`
 	BotID           pgtype.UUID        `json:"bot_id"`

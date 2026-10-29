@@ -387,7 +387,7 @@ WHERE s.team_id = public.memoh_current_team_id()
     OR s.type <> 'schedule'
     OR EXISTS (
       SELECT 1 FROM schedule sc
-      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id
+      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id AND sc.deleted_at IS NULL
     )
   )
   AND (
@@ -427,7 +427,7 @@ WHERE s.team_id = public.memoh_current_team_id()
     OR s.type <> 'schedule'
     OR EXISTS (
       SELECT 1 FROM schedule sc
-      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id
+      WHERE sc.team_id = s.team_id AND sc.target_session_id = s.id AND sc.deleted_at IS NULL
     )
   )
   AND (
