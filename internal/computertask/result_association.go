@@ -41,7 +41,7 @@ func (s *Source) associateResult(ctx context.Context, b toolcontext.ComputerBind
 	if s.associate == nil {
 		return nil
 	}
-	r, d, err := s.service.loadHistory(ctx, b, id)
+	r, d, err := s.service.loadBoundHistory(ctx, b, id)
 	if err != nil {
 		return ErrDenied
 	}
@@ -79,7 +79,7 @@ func (s *Source) associateResult(ctx context.Context, b toolcontext.ComputerBind
 		}
 	}
 	// Revocation/cancellation/ledger mutation during a full read must stop linking.
-	current, _, err := s.service.loadHistory(ctx, b, id)
+	current, _, err := s.service.loadBoundHistory(ctx, b, id)
 	if err != nil {
 		return ErrDenied
 	}

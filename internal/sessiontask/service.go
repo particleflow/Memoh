@@ -19,7 +19,6 @@ import (
 
 	"github.com/felinics/memoh/internal/agenvo"
 	thread "github.com/felinics/memoh/internal/chat/thread"
-	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/toolcontext"
 	"github.com/felinics/memoh/internal/workdir"
@@ -44,7 +43,7 @@ type Workdirs interface {
 	Get(context.Context, string, string) (workdir.Workdir, error)
 }
 type Targets interface {
-	ResolveHistoricalTarget(context.Context, agenvo.Scope) (agenvo.Target, error)
+	AuthorizeOperationHistory(context.Context, agenvo.Scope) error
 }
 
 type Service struct {
@@ -186,8 +185,8 @@ func (s *Service) path(ctx context.Context, bot, user, id string) ([]thread.Thre
 	return path, nil
 }
 
-// scope reads workdir records only. It must never resolve a bridge or probe a
-// device: an unavailable computer is still a valid persisted receipt target.
+// scope retains the persisted workdir/selection boundary and checks current Bot
+// permission. It never resolves a registration or probes a retired computer.
 func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thread) (string, error) {
 	selected := "native"
 	for i := len(path) - 1; i >= 0; i-- {
@@ -204,21 +203,8 @@ func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thr
 			if err != nil {
 				return "", err
 			}
-			// A missing child selection inherits its parent. Only the top
-			// unbound session falls back to the current Bot primary.
-			if candidate == "" && i == len(path)-1 {
-				primary, err := s.store.GetPrimaryMount(ctx, bot)
-				switch {
-				case errors.Is(err, db.ErrNotFound):
-					candidate = "native"
-				case err != nil:
-					return "", err
-				case primary.BotID != bot || primary.ID == "":
-					return "", ErrUnavailable
-				default:
-					candidate = primary.ID
-				}
-			}
+			// Missing selection inherits any persisted ancestor boundary. Never
+			// substitute today's primary for an original owned operation target.
 		}
 		if candidate == "" {
 			continue
@@ -229,7 +215,7 @@ func (s *Service) scope(ctx context.Context, bot, user string, path []thread.Thr
 		selected = candidate
 	}
 	if selected != "native" {
-		if _, err := s.targets.ResolveHistoricalTarget(ctx, agenvo.Scope{BotID: bot, UserID: user, TargetID: selected}); err != nil {
+		if err := s.targets.AuthorizeOperationHistory(ctx, agenvo.Scope{BotID: bot, UserID: user, TargetID: selected}); err != nil {
 			return "", ErrUnavailable
 		}
 	}
@@ -301,11 +287,10 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 		return Task{}, ErrUnavailable
 	}
 	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: c.ID, BotID: bot, UserID: user, SessionID: c.SessionID})
-	if err != nil || r.ID != c.ID || r.BotID != bot || r.UserID != user || r.SessionID != c.SessionID || r.TargetID == "" || (selected != "native" && selected != r.TargetID) {
+	if err != nil || r.ID != c.ID || r.BotID != bot || r.UserID != user || r.SessionID != c.SessionID || r.TargetID == "" || r.TargetFingerprint == "" || (selected != "native" && selected != r.TargetID) {
 		return Task{}, ErrUnavailable
 	}
-	target, err := s.targets.ResolveHistoricalTarget(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID})
-	if err != nil {
+	if err := s.targets.AuthorizeOperationHistory(toolcontext.WithComputerScope(ctx, selected), agenvo.Scope{BotID: bot, UserID: user, TargetID: r.TargetID}); err != nil {
 		return Task{}, ErrUnavailable
 	}
 	// Decode only approved persisted facts. Top-level output, observations,
@@ -319,7 +304,10 @@ func (s *Service) project(ctx context.Context, bot, user, parent string, c dbsto
 	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &facts) != nil {
 		return Task{}, ErrUnavailable
 	}
-	if !agenvo.HistoricalTargetMatches(target, facts.TargetSnapshot, r.TargetFingerprint) {
+	// The original owned ledger is the authority for historical facts. A saved
+	// snapshot must match its persisted fingerprint; legacy rows without one
+	// remain readable without fabricating a current target or execution permit.
+	if facts.TargetSnapshot != nil && agenvo.TargetFingerprint(*facts.TargetSnapshot) != r.TargetFingerprint {
 		return Task{}, ErrUnavailable
 	}
 	t.TargetID = r.TargetID

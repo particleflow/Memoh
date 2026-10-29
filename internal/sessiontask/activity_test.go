@@ -91,8 +91,8 @@ func TestActivityDiscoversUnopenedRootsBotAgentAndTask(t *testing.T) {
 	}
 }
 
-func TestActivityPermissionAncestryAndTargetRevocation(t *testing.T) {
-	for _, scenario := range []string{"session", "ancestor", "foreign-bot", "missing-parent", "cycle", "target-revoked"} {
+func TestActivityPermissionAncestryAndHistoryRevocation(t *testing.T) {
+	for _, scenario := range []string{"session", "ancestor", "foreign-bot", "missing-parent", "cycle", "history-revoked"} {
 		t.Run(scenario, func(t *testing.T) {
 			f := activityFixtureForTest()
 			f.run(f.grandchild, Subagent, "running")
@@ -107,8 +107,9 @@ func TestActivityPermissionAncestryAndTargetRevocation(t *testing.T) {
 				s.ParentThreadID = uuid.NewString()
 			case "cycle":
 				s.ParentThreadID = s.ID
-			case "target-revoked":
+			case "history-revoked":
 				s.Metadata = map[string]any{"workspace_target_id": "revoked"}
+				f.historyDenied = true
 			}
 			f.sessions[s.ID] = s
 			p, err := f.service.ListActivity(t.Context(), "bot", "user", 100, "", readable)

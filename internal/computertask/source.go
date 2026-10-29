@@ -199,7 +199,9 @@ func (s *Source) CallTool(ctx context.Context, session mcp.ToolSessionContext, n
 	default:
 		return nil, mcp.ErrToolNotFound
 	}
-	if err == nil && (name == "computer_task_result" || name == "computer_task_get" || name == "computer_task_artifact") {
+	// Reading saved details must not create attachment links or require a live
+	// registration. Result collection and artifact export retain those checks.
+	if err == nil && (name == "computer_task_result" || name == "computer_task_artifact") {
 		switch receipt := value.(type) {
 		case Result:
 			if receipt.ID != "" {
