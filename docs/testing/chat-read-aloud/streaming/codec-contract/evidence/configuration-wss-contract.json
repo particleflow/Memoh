@@ -1,0 +1,44 @@
+[
+  {
+    "case": "model_mp3_overrides_provider_wav",
+    "completeBytesEqual": true,
+    "configUnchanged": true,
+    "firstBinaryBeforeEOF": true,
+    "fixtureSHA256": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+    "localWSSTasks": 1,
+    "providerFormat": "wav",
+    "realCloudCalls": 0,
+    "responseMIME": "audio/mpeg",
+    "sampleRate": 22050,
+    "serializedFormat": "mp3",
+    "voiceUnchanged": true
+  },
+  {
+    "case": "model_wav_overrides_provider_mp3",
+    "completeBytesEqual": true,
+    "configUnchanged": true,
+    "firstBinaryBeforeEOF": true,
+    "fixtureSHA256": "0d280d2e0596a5f0159ec44a1ae6bc20c12da09aa77bc8f228c4b7877bf7945e",
+    "localWSSTasks": 1,
+    "providerFormat": "mp3",
+    "realCloudCalls": 0,
+    "responseMIME": "audio/wav",
+    "sampleRate": 22050,
+    "serializedFormat": "wav",
+    "voiceUnchanged": true
+  },
+  {
+    "case": "response_format_does_not_select_qwen_codec",
+    "completeBytesEqual": true,
+    "configUnchanged": true,
+    "firstBinaryBeforeEOF": true,
+    "fixtureSHA256": "0d280d2e0596a5f0159ec44a1ae6bc20c12da09aa77bc8f228c4b7877bf7945e",
+    "localWSSTasks": 1,
+    "providerFormat": "wav",
+    "realCloudCalls": 0,
+    "responseMIME": "audio/wav",
+    "sampleRate": 22050,
+    "serializedFormat": "wav",
+    "voiceUnchanged": true
+  }
+]

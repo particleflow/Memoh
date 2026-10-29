@@ -1,0 +1,57 @@
+{
+  "independentUnifiedTarget": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
+  "executionWorktreeHead": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
+  "testSourceMatchesWorktree": true,
+  "unifiedProductHashes": {
+    "internal/audio/service.go": "bd38265a1563b893a314470fc8fefe80eb914f324d66c36283615fa16f51835d",
+    "internal/audio/registry.go": "79bc36dcfe19a6641827a603c8b816fb7dfe1bb26457c5d611d017a495fe22f3",
+    "internal/handlers/bot_tts.go": "7f4eb2e7370f605cdbd42b50ec8fed87e27d3ff968d63bf3c5583320c13cd831",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": "7645c2c804cbe8f357ef2735fab8db3ee278025c89c414eaecf58a724ef4a199",
+    "apps/web/src/pages/speech/components/provider-setting.vue": "a80c40e50a61f92cffb3529e838babe3213919a8a8b06ff316febbf1faf8c1f1",
+    "apps/web/src/pages/speech/components/model-config-editor.vue": "16708c84ede220cbc780530acba3706ecaaf6c47827db62238c5a4d13636cae8"
+  },
+  "codecServiceAndRegistryEqualOriginalBranch": {
+    "internal/audio/service.go": true,
+    "internal/audio/registry.go": true
+  },
+  "sdkPin": "v0.7.2-0.20261002230120-f6d0ce1a0e8c",
+  "sdkSHA256": {
+    "config.go": "d42ba16a566d2008da8b8976e9bbd11f2a48096f6944e06f9f5b14e644952491",
+    "speech.go": "c409f0f1e9ef29b22e7b40ab3e1fc8cc9be258bbb6464186e25712bf6599f37a",
+    "ws.go": "f0846be785e60e5f0dc63a961d94a7b65e6b216943b5771fc1cabf110e42c042"
+  },
+  "fixtureSHA256": {
+    "sine.mp3": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+    "sine.wav": "0d280d2e0596a5f0159ec44a1ae6bc20c12da09aa77bc8f228c4b7877bf7945e"
+  },
+  "defaultContractReusedFrom": "f523c815a30630ed67723674b93be04d0dddf16c",
+  "timingReusedFrom": "0f057a4e22f614418dddbffdde0be53075dfb4ca",
+  "newCoverage": "Only format precedence and alias-key contract via actual local WSS adapter, 3 cases -race",
+  "productionChanges": false,
+  "fieldConfigurationReadOrWrite": false,
+  "actualCurrentRuntimeEncodingCaptured": false,
+  "MP3ToWavMIMEBugProven": false,
+  "currentKnownConfigDelta": [],
+  "conditionalConfigDelta": {
+    "model.config.format": "mp3",
+    "allOtherKeys": "unchanged"
+  },
+  "configurationActionExecuted": false,
+  "realCloudCalls": 0,
+  "newCloneOrAudition": false,
+  "b5DeploymentOr0f057AdmissionChanged": false,
+  "savedEvidenceReusedWithoutSecrets": {
+    "fieldEvidenceOrigin": "Trusted parent delegation relaying read-only OUTCOME.json and target-category.json; Windows files were not independently opened in this environment.",
+    "currentBinding": {
+      "clientType": "alibabacloud-speech",
+      "displayProvider": "Alibaba Cloud Speech",
+      "modelID": "qwen-audio-3.1-tts-flash",
+      "targetScheme": "WSS",
+      "targetHostCategory": "*.aliyuncs.com",
+      "configuredMagpieAddress": false,
+      "explicitFormatCodecSampleRateStream": false
+    }
+  },
+  "pinnedSDKHashesEqualEarlierInspectedSDK": true,
+  "testConfigFixtureProviderNoFormatRecommendationApplied": true
+}

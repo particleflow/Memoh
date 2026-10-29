@@ -1,0 +1,27 @@
+{
+  "knownSavedConfigurationEvidence": {
+    "source": "Previously supplied parent read-only OUTCOME/target-category evidence; no new field read",
+    "explicitFormat": false,
+    "effectiveRequestedFormat": "mp3",
+    "effectiveDeclaredMIME": "audio/mpeg",
+    "recommendedCurrentChanges": [],
+    "reason": "Adding the existing default would not change the request, playback branch or latency."
+  },
+  "conditionalOnlyIfEffectiveFormatIsWav": {
+    "scope": "Existing speech model configuration, not provider credentials",
+    "set": { "format": "mp3" },
+    "preserveEveryOtherKey": true,
+    "preserveVoiceModelSampleRate": true,
+    "reason": "A model-level format overrides an inherited provider-level WAV value. Qwen reads format, not response_format or codec."
+  },
+  "existingSettingsRoute": {
+    "field": "Current speech model editor / Format / mp3",
+    "saveAction": "Save configuration only",
+    "transport": "PUT /speech-models/{existing-model-record-id}",
+    "wirePayloadRule": "Deep-copy the complete current model config, set only config.format=mp3, and submit the full config. The API replaces config; the set object above is not a complete PUT payload.",
+    "testSynthesisRequired": false
+  },
+  "applied": false,
+  "cloudCalls": 0,
+  "productSourceChangesNeededFromCurrentEvidence": false
+}

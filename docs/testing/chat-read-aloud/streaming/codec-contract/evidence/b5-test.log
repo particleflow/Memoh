@@ -1,0 +1,10 @@
+=== RUN   TestAlibabaPlaybackCodecConfigurationContract
+=== RUN   TestAlibabaPlaybackCodecConfigurationContract/model_mp3_overrides_provider_wav
+=== RUN   TestAlibabaPlaybackCodecConfigurationContract/model_wav_overrides_provider_mp3
+=== RUN   TestAlibabaPlaybackCodecConfigurationContract/response_format_does_not_select_qwen_codec
+--- PASS: TestAlibabaPlaybackCodecConfigurationContract (0.03s)
+    --- PASS: TestAlibabaPlaybackCodecConfigurationContract/model_mp3_overrides_provider_wav (0.01s)
+    --- PASS: TestAlibabaPlaybackCodecConfigurationContract/model_wav_overrides_provider_mp3 (0.01s)
+    --- PASS: TestAlibabaPlaybackCodecConfigurationContract/response_format_does_not_select_qwen_codec (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/audio	1.048s
