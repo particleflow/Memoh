@@ -27,23 +27,26 @@ export class NativePhotoSelection {
     } else {
       uris = await new picker.DocumentViewPicker(this.context).select({ maxSelectNumber: maximum });
     }
-    const selected: string[] = [];
+    const selected: string[] = [], created: string[] = [];
     try {
       for (const uri of uris) {
-        selected.push(original ? uri : await this.displayCopy(uri, photosOnly));
+        selected.push(original ? uri : await this.displayCopy(uri, photosOnly, created));
       }
       ClientDiagnostics.event('SYSTEM', 'photo-selection', 'complete',
         'count=' + selected.length + '/original=' + original);
       return selected;
     } catch (error) {
-      selected.filter((uri: string) => uri.includes('/memoh-photo-')).forEach((uri: string) => {
-        this.remove(new fileUri.FileUri(uri).path);
+      // Include the current output even if open/write/close failed before its
+      // URI could be returned. Cleanup must not hide the conversion failure.
+      created.forEach((path: string) => {
+        try { this.remove(path); }
+        catch (cleanup) { ClientDiagnostics.failure('SYSTEM', 'photo-selection', 'cleanup-failed', cleanup as Error); }
       });
       throw error as Error;
     }
   }
 
-  private async displayCopy(uri: string, photosOnly: boolean): Promise<string> {
+  private async displayCopy(uri: string, photosOnly: boolean, created: string[]): Promise<string> {
     let name = decodeURIComponent(uri.split('/').pop() ?? 'image').split('?')[0];
     const extension = name.split('.').pop()?.toLowerCase() ?? '';
     if (!photosOnly && extension !== 'dng') {
@@ -91,6 +94,7 @@ export class NativePhotoSelection {
       fs.mkdirSync(directory);
       const path = directory + '/' + name;
       this.copies.add(path);
+      created.push(path);
       const output = await fs.open(path, fs.OpenMode.CREATE | fs.OpenMode.WRITE_ONLY);
       try {
         let offset = 0;
@@ -101,8 +105,7 @@ export class NativePhotoSelection {
         }
         fs.fsyncSync(output.fd);
         if (fs.statSync(output.fd).size !== bytes.byteLength) { throw new Error('IMAGE_WRITE_INCOMPLETE'); }
-      } catch (error) { this.remove(path); throw error as Error; }
-      finally { await fs.close(output); }
+      } finally { await fs.close(output); }
       ClientDiagnostics.event('SYSTEM', 'photo-selection', 'converted', 'bytes=' + bytes.byteLength);
       return fileUri.getUriFromPath(path);
     } finally {
@@ -115,8 +118,9 @@ export class NativePhotoSelection {
 
   private remove(path: string): void {
     if (!this.copies.has(path)) { return; }
-    try { if (fs.accessSync(path)) { fs.unlinkSync(path); } fs.rmdirSync(path.slice(0, path.lastIndexOf('/'))); }
-    finally { this.copies.delete(path); }
+    if (fs.accessSync(path)) { fs.unlinkSync(path); }
+    fs.rmdirSync(path.slice(0, path.lastIndexOf('/')));
+    this.copies.delete(path);
   }
   close(): void {
     this.copies.forEach((path: string) => {
