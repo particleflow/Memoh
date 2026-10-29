@@ -98,7 +98,7 @@ func TestScheduleOccurrencePostgresClaimAndRecovery(t *testing.T) {
 		exec(`DELETE FROM team_members WHERE user_id=$1`, user)
 		exec(`DELETE FROM users WHERE id=$1`, user)
 	}()
-	exec(`INSERT INTO schedule(id,bot_id,name,description,pattern,command,enabled,result_origin) VALUES($1,$2,'fixture','isolated','0 0 1 1 *','no model',false,'{"version":1}')`, plan, bot)
+	exec(`INSERT INTO schedule(id,bot_id,name,description,pattern,command,enabled,result_origin) VALUES($1,$2,'fixture','isolated','0 0 1 1 *','no model',true,'{"version":1}')`, plan, bot)
 	q := sqlc.New(pool)
 	row, err := q.GetScheduleByID(ctx, toUUID(plan))
 	if err != nil {
