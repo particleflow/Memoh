@@ -4040,7 +4040,7 @@ const taskRunAnchor = useTaskRunAnchor({
   loading: () => loadingMessages.value,
   loadingOlder: () => loadingOlder.value,
   hasMore: () => hasMoreOlder.value,
-  validate: anchor => revalidateTaskHistoryAnchor(anchor, currentBotId.value ?? '', props.sessionId ?? ''),
+  validate: (anchor, signal) => revalidateTaskHistoryAnchor(anchor, currentBotId.value ?? '', props.sessionId ?? '', signal),
   loadOlder: () => chatStore.loadOlderMessages(paneTarget.value),
   scroll: scrollToMessage,
 })

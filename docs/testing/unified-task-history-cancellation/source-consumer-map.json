@@ -1,0 +1,34 @@
+{
+  "base": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "source_increment": "76471e0ef3ab9470dcf17c1d85ddb27cece14109",
+  "source_parent": "8d48dfe7c7e84849c7986608f89a114b7bf85d75",
+  "source_tree": "420b8a280a89f1a506b5740e141adce39254df92",
+  "source_package_sha256": "8d713ff5532a5481dfbc8d7b6828037b344858409e034cf8a16f169e2c02128d",
+  "files": [
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "sha256": "02f0b48b71ee58eca28fbd36a0dd59cc5383c6ce50570d132a7e9047c64b6b3a"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "sha256": "66a7f94763e1804b13d869563b69209920c4ebda18ece78f06b4858932e1d312"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+      "sha256": "6266c27065eedd273d8758f61045a6077dbec29f838538223aeac1b8813d7f47"
+    },
+    {
+      "path": "apps/web/src/utils/task-history-link.ts",
+      "sha256": "ae8b09ab640cf820e43469e492f0f7f0014da10201e77ba7c894e839e52dd802"
+    }
+  ],
+  "sdk_or_backend_changes": false,
+  "notes": [
+    "Consume these four products together; do not replace a whole older chat-pane or Home snapshot.",
+    "Preserve the Home computed/provide visibility key and both pane speech gates from 5a42.",
+    "Keep native Back/artwork/login/attachment adaptations; map route/scope cancellation to the native consumer.",
+    "A client consumes AbortSignal and a 15-second read-only identity deadline; no task mutation/reattempt is added.",
+    "Original author source predates some 5a42 speech gates; use these combined file hashes or the combined incremental patch.",
+    "No claim of new HAP or physical ArkWeb acceptance."
+  ]
+}

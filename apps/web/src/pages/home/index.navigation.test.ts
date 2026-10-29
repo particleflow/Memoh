@@ -27,7 +27,7 @@ vi.mock('@/store/chat-list', () => ({ useChatStore: () => useChat() }))
 let app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement
 async function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }
 async function mount(path: string) {
-  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/bot/:botName', name: 'bot', component: Home }] })
+  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/bot/:botName', name: 'bot', component: Home }, { path: '/settings', name: 'settings', component: { render: () => null } }] })
   await router.push(path)
   root = document.createElement('div'); document.body.append(root)
   app = createApp(Home); app.use(createPinia()); app.use(router)
@@ -123,4 +123,30 @@ it('does not reopen contact for unrelated URL query changes', async () => {
   const router=await mount('/bot/source'); await settle(); api.select.mockClear()
   await router.replace('/bot/source?view=unchanged'); await settle()
   expect(api.select).not.toHaveBeenCalled()
+})
+
+it('cancels a pending task check on another task route without accepting late authorization', async () => {
+  let release!: (value: ReturnType<typeof taskResponse>) => void
+  api.task.mockImplementationOnce(() => new Promise(resolve => { release=resolve }))
+    .mockImplementation(async ({ path }) => taskResponse(path.record_id))
+  const router=await mount('/bot/source'+runQuery('old')); await settle()
+  const signal=api.task.mock.calls[0]![0].signal as AbortSignal
+  await router.push('/bot/source'+runQuery('new')); await settle()
+  expect(signal.aborted).toBe(true)
+  expect(api.open).toHaveBeenCalledTimes(1)
+  expect(api.open.mock.calls[0]![0].taskAnchor.runId).toBe('new')
+  release(taskResponse('old')); await settle()
+  expect(api.open).toHaveBeenCalledTimes(1)
+  expect(root.querySelector('[data-chat]')?.classList.contains('invisible')).toBe(false)
+})
+
+it.each(['settings', 'dispose'])('cancels task validation when leaving the history owner (%s)', async destination => {
+  api.task.mockImplementation(() => new Promise(() => {}))
+  const router=await mount('/bot/source'+runQuery('old')); await settle()
+  const signal=api.task.mock.calls[0]![0].signal as AbortSignal
+  if (destination==='settings') await router.push('/settings')
+  else { app!.unmount(); app=undefined }
+  await settle()
+  expect(signal.aborted).toBe(true)
+  expect(api.open).not.toHaveBeenCalled()
 })

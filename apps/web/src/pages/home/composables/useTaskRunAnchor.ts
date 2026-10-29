@@ -10,20 +10,29 @@ export function useTaskRunAnchor(options: {
   loading: () => boolean
   loadingOlder: () => boolean
   hasMore: () => boolean
-  validate: (anchor: TaskHistoryAnchor) => Promise<void>
+  validate: (anchor: TaskHistoryAnchor, signal: AbortSignal) => Promise<void>
   loadOlder: () => Promise<number>
   scroll: (id: string) => Promise<boolean>
 }) {
   const status = ref<'pending' | 'located' | 'unavailable'>('pending')
-  let generation = 0, busy = false, disposed = false, deactivated = false
+  let generation = 0, disposed = false, deactivated = false
+  let active: AbortController | undefined
+  function invalidate() {
+    generation++
+    active?.abort()
+    active = undefined
+    status.value = 'pending'
+  }
   async function locate() {
     const anchor = options.anchor()
-    if (!anchor || !options.visible() || options.loading() || options.loadingOlder() || busy || status.value === 'located' || disposed || deactivated) return
+    if (!anchor || !options.visible() || options.loading() || options.loadingOlder() || active || status.value === 'located' || disposed || deactivated) return
     const version = generation
-    const current = () => !disposed && !deactivated && generation === version && options.visible()
-    busy = true
+    const controller = new AbortController()
+    active = controller
+    const current = () => !disposed && !deactivated && !controller.signal.aborted
+      && active === controller && generation === version && options.visible()
     try {
-      await options.validate(anchor)
+      await options.validate(anchor, controller.signal)
       while (current()) {
         const target = options.messages().find(message => (message.role === 'user' || message.role === 'assistant') && message.turnId === anchor.turnId)
         if (target) {
@@ -40,24 +49,23 @@ export function useTaskRunAnchor(options: {
     } catch {
       if (current()) status.value = 'unavailable'
     } finally {
-      busy = false
-      if (!disposed && version !== generation) void locate()
+      // A superseded request cannot release the new request's admission slot.
+      if (active === controller) active = undefined
     }
   }
   watch([options.anchor, options.session], () => {
-    generation++
-    status.value = 'pending'
+    invalidate()
     void locate()
-  }, { immediate: true })
-  watch(options.visible, visible => { generation++; if (visible) { status.value = 'pending'; void locate() } })
+  }, { immediate: true, flush: 'sync' })
+  watch(options.visible, visible => { invalidate(); if (visible) void locate() }, { flush: 'sync' })
   // A live run may acquire its first history turn after the route was opened.
   watch(() => [options.loading(), options.loadingOlder(), options.messages().length], () => { void locate() }, { flush: 'post' })
   // Dockview's KeepAlive can deactivate a pane without delivering visible=false.
   // Treat reactivation as a fresh admission even when its props are unchanged.
   if (getCurrentInstance()) {
-    onDeactivated(() => { deactivated = true; generation++; status.value = 'pending' })
-    onActivated(() => { deactivated = false; generation++; status.value = 'pending'; void locate() })
+    onDeactivated(() => { deactivated = true; invalidate() })
+    onActivated(() => { deactivated = false; invalidate(); void locate() })
   }
-  onScopeDispose(() => { disposed = true; generation++ })
+  onScopeDispose(() => { disposed = true; invalidate() })
   return { status }
 }

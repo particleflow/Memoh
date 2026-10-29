@@ -33,7 +33,7 @@
 
 <script setup lang="ts">
 import { normalizeAgentID } from '@/utils/external-agent'
-import { computed, nextTick, provide, ref, watch } from 'vue'
+import { computed, nextTick, onScopeDispose, provide, ref, watch } from 'vue'
 import { useTitle } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useRoute, useRouter } from 'vue-router'
@@ -111,6 +111,12 @@ const historyLoading = ref(false)
 const workspaceVisible = computed(() => !historyError.value && !historyLoading.value && !chatStore.contactNavigationPending)
 provide(chatWorkspaceVisibleKey, workspaceVisible)
 let historyRequest = 0
+let historyValidation: AbortController | undefined
+function cancelHistoryValidation() {
+  historyValidation?.abort()
+  historyValidation = undefined
+}
+onScopeDispose(() => { historyRequest++; cancelHistoryValidation() })
 
 // home is now mounted persistently (via main-container, which App.vue keeps
 // alive across chat↔settings) rather than torn down when leaving chat. So these
@@ -188,6 +194,9 @@ async function maybeStartExternalAgentSession() {
 async function syncStoreFromUrl(rawName: string) {
   const urlName = rawName.trim()
   const request = ++historyRequest
+  cancelHistoryValidation()
+  const validation = new AbortController()
+  historyValidation = validation
   const requestedRoute = route.fullPath
   historyError.value = ''
   historyLoading.value = !!route.query.session
@@ -254,7 +263,7 @@ async function syncStoreFromUrl(rawName: string) {
   const historyId = typeof route.query.session === 'string' ? route.query.session.trim() : ''
   if (historyId) {
     try {
-      const taskAnchor = await resolveTaskHistoryAnchor(route.query, resolvedId, historyId)
+      const taskAnchor = await resolveTaskHistoryAnchor(route.query, resolvedId, historyId, validation.signal)
       if (request !== historyRequest || route.fullPath !== requestedRoute) return
       const session = await fetchSession(resolvedId, historyId)
       if (request !== historyRequest || route.query.session !== historyId || route.params.botName !== rawName) return
@@ -297,7 +306,11 @@ watch(
     () => route.query.task_record, () => route.query.run,
   ],
   ([routeName, paramBotName], prev) => {
-    if (!CHAT_ROUTE_NAMES.has(routeName as string)) return
+    if (!CHAT_ROUTE_NAMES.has(routeName as string)) {
+      historyRequest++
+      cancelHistoryValidation()
+      return
+    }
     // Returning to chat from a non-chat route (settings overlay): per-bot config
     // edited there — enabled agents, model, name — won't have reached the store,
     // which loads bots once and isn't wired to the settings query cache. Re-pull
