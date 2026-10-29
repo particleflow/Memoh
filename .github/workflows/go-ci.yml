@@ -328,7 +328,7 @@ jobs:
           : "${TEST_POSTGRES_DSN:?Native profile cutover tests require PostgreSQL}"
           set -o pipefail
           go test -json -race -tags=integration -count=1 -timeout 120s \
-            -run '^Test(NativeAdmissionSnapshotCutoverAndLostResponse|NativeProfileCutoverPersistedHistoryScope|NativeProfilePauseRejectsConcurrentOrdinaryUpdates|PausedNativeProfileCutoverAtomic|NativeProfileCutoverMigrationRoundTrip|PausedNativeProfileOwnerService|PausedNativeProfileCutoverRacesResumeAndRevocation|PausedNativeProfileCutoverRejectsABA|SessionAbortOutcomeMigrationScopeAndIdempotency|Unified177To179PreservesAcceptedWorkAndHistory)$' ./internal/db | tee native-profile-postgres-tests.jsonl
+            -run '^Test(NativeAdmissionSnapshotCutoverAndLostResponse|NativeProfileCutoverPersistedHistoryScope|NativeProfilePauseRejectsConcurrentOrdinaryUpdates|PausedNativeProfileCutoverAtomic|NativeProfileCutoverMigrationRoundTrip|PausedNativeProfileOwnerService|PausedNativeProfileCutoverRacesResumeAndRevocation|PausedNativeProfileCutoverRejectsABA|SessionAbortOutcomeMigrationScopeAndIdempotency|Unified177To180PreservesAcceptedWorkAndHistory)$' ./internal/db | tee native-profile-postgres-tests.jsonl
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -342,7 +342,7 @@ jobs:
               "TestPausedNativeProfileCutoverRacesResumeAndRevocation",
               "TestPausedNativeProfileCutoverRejectsABA",
               "TestSessionAbortOutcomeMigrationScopeAndIdempotency",
-              "TestUnified177To179PreservesAcceptedWorkAndHistory",
+              "TestUnified177To180PreservesAcceptedWorkAndHistory",
           }
           events = [json.loads(line) for line in Path("native-profile-postgres-tests.jsonl").read_text().splitlines()]
           passed = {event.get("Test") for event in events if event.get("Action") == "pass"}

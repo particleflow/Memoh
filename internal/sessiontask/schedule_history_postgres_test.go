@@ -3,18 +3,21 @@ package sessiontask
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"os"
 	"reflect"
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+
+	embeddeddb "github.com/felinics/memoh/db"
 	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/team"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5"
 )
 
 // Only transaction-local TEMP tables are written. No scheduler, actual plan,
@@ -29,12 +32,20 @@ func TestDirectoryPostgresDeletedScheduleKeepsOriginalHistory(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close(context.Background())
+	t.Cleanup(func() {
+		if err := conn.Close(context.Background()); err != nil {
+			t.Errorf("close PostgreSQL connection: %v", err)
+		}
+	})
 	tx, err := conn.Begin(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer tx.Rollback(context.Background())
+	t.Cleanup(func() {
+		if err := tx.Rollback(context.Background()); err != nil && !errors.Is(err, pgx.ErrTxClosed) {
+			t.Errorf("rollback temporary schedule fixture: %v", err)
+		}
+	})
 	exec := func(query string, args ...any) {
 		t.Helper()
 		if _, err := tx.Exec(ctx, query, args...); err != nil {
@@ -63,7 +74,7 @@ func TestDirectoryPostgresDeletedScheduleKeepsOriginalHistory(t *testing.T) {
  VALUES($1,$2,$3,$4,$5,1,'completed','{}','synthetic')`, uuid.NewString(), uuid.NewString(), uuid.NewString(), "schedule:"+plan+":"+legacy, uuid.NewString())
 	migration := func(direction string) {
 		t.Helper()
-		data, err := os.ReadFile("../../db/postgres/migrations/0180_schedule_history_retention." + direction + ".sql")
+		data, err := fs.ReadFile(embeddeddb.MigrationsFS, "postgres/migrations/0180_schedule_history_retention."+direction+".sql")
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -12,11 +12,11 @@ import (
 	memohdb "github.com/felinics/memoh/internal/db"
 )
 
-func TestUnified177To179PreservesAcceptedWorkAndHistory(t *testing.T) {
+func TestUnified177To180PreservesAcceptedWorkAndHistory(t *testing.T) {
 	f := newNativeHerdrFixture(t)
 	// Only this newly created disposable fixture is prepared as schema 177.
 	// This is not a production rollback procedure or an old-data restoration.
-	for _, name := range []string{"0179_session_abort_outcome.down.sql", "0178_native_profile_cutover.down.sql"} {
+	for _, name := range []string{"0180_schedule_history_retention.down.sql", "0179_session_abort_outcome.down.sql", "0178_native_profile_cutover.down.sql"} {
 		raw, err := fs.ReadFile(postgresMigrationsFS(t), name)
 		if err != nil {
 			t.Fatal(err)
@@ -61,7 +61,7 @@ func TestUnified177To179PreservesAcceptedWorkAndHistory(t *testing.T) {
 	}
 	var version int
 	var dirty, unknown bool
-	if err := f.conn.QueryRow(t.Context(), `SELECT version,dirty FROM schema_migrations`).Scan(&version, &dirty); err != nil || version != 179 || dirty {
+	if err := f.conn.QueryRow(t.Context(), `SELECT version,dirty FROM schema_migrations`).Scan(&version, &dirty); err != nil || version != 180 || dirty {
 		t.Fatalf("upgrade status: version=%d dirty=%v err=%v", version, dirty, err)
 	}
 	if !maps.Equal(before, snapshot()) {
