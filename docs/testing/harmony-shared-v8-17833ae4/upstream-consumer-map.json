@@ -1,0 +1,71 @@
+{
+  "unified_source": "17833ae4bb678c7bb21f68c6372825c5d33a279f",
+  "unified_tree": "d84ebeab5c6f42d2a1457b852c9e70a133dad29b",
+  "source_increment": "cc81049e083cb0b539274b9d3093b865a7b6f216",
+  "shared_files": [
+    {
+      "source_path": "apps/web/src/pages/home/index.vue",
+      "kind": "product",
+      "sha256": "9f0b4abcd5f1674727827e2ad0fdbb6f988ec61bb475342746fc02228159a885"
+    },
+    {
+      "source_path": "apps/web/src/pages/main-section/components/mobile-top-bar.vue",
+      "kind": "product",
+      "sha256": "547d5dfaeb9d770acba71e5244f86091549222768584221eeb1487421cb3eb0e"
+    },
+    {
+      "source_path": "apps/web/src/store/chat/bootstrap-contact.test.ts",
+      "kind": "test",
+      "sha256": "48cc961901cac0e9a1f29ef068d89d31be958e8930aedd49df9e3d37cca05ec1"
+    },
+    {
+      "source_path": "apps/web/src/store/chat/bootstrap.ts",
+      "kind": "product",
+      "sha256": "f9481c967b619b677634cab558443e0b4ba84980ba7f3dadb9bd1bb4f5d44d22"
+    },
+    {
+      "source_path": "apps/web/src/store/chat/realtime.test.ts",
+      "kind": "test",
+      "sha256": "97cc0d5fdda678de76268ed079470a0abfe7caa84de4c4da5f016c7bf4112887"
+    },
+    {
+      "source_path": "apps/web/src/store/chat/realtime.ts",
+      "kind": "product",
+      "sha256": "a6576f57b4162e1290a1483ff9c19873b63ada02ce3e4acc27476a76df75df0f"
+    },
+    {
+      "source_path": "apps/web/src/store/workspace-tabs.test.ts",
+      "kind": "test",
+      "sha256": "fd7cd351963e124347a1d6cd50e32c50b022635fd14c03c316d56bed9f05b1f4"
+    },
+    {
+      "source_path": "apps/web/src/store/workspace-tabs.ts",
+      "kind": "product",
+      "sha256": "0b46cea0bb13a4ac95bdaaf116223841a95d1707f80800a262d013a1fe4026ee"
+    },
+    {
+      "source_path": "apps/web/src/pages/home/components/message-item.vue",
+      "kind": "product",
+      "sha256": "b1ad58fc11a51c6441eaae3353109738459e99ac77dc87571765260054444d38"
+    },
+    {
+      "source_path": "apps/web/src/pages/home/components/message-item.test.ts",
+      "kind": "test",
+      "sha256": "fab35f1bb030fb189e96964b8919697066bf09e705a2f3d8d1dfe74865781e65"
+    },
+    {
+      "source_path": "apps/web/src/pages/home/components/fixtures/contact-runtime-stream.json",
+      "kind": "test",
+      "sha256": "ec60410791cde0529da687aaab76819b65d10189cc458a5c6108e449fea12f11"
+    }
+  ],
+  "SDK_change": false,
+  "new_API_contract": false,
+  "contact_title_patch_requires_schema180": false,
+  "integration_contains_schema180_due_to_b117": true,
+  "Harmony_current_aligned_source": "ac7eba92fee9c2824f058b1394a6c55362b787e8 via 013e91f7dd244061a941b7bb63994fb5270e8356",
+  "Harmony_action": "original owner reconciles six shared product files including the final message-item overlay; preserves native Home/mobile topbar/back/cancellation handling; no build yet",
+  "attachment_source": "7e765e3e917747288b4f687dfaac97cbdd01a99d",
+  "attachment_action": "original Harmony owner consumes two native product-file diff and tests/provenance; NAS has no mobile directory and does not import the branch",
+  "text_source_increment": "12d753df21cd508f0b0d962f4b71cfd3b1830a6c"
+}

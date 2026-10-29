@@ -1,0 +1,26 @@
+{
+  "sdkVersion": "26.0.0.105",
+  "generatedSDKChanged": false,
+  "newKitImports": [],
+  "nativeAddedLocalImportOnly": [
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+      "sha256": "59d3b186a69c03fb60b03fb0ac845add389ab7dbcf4d587f6728cbfa90da7f3e",
+      "addedImports": []
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+      "sha256": "bd0929f4703d082ff19a694705e058026863adcee632bfe77bebdf1a2a6f2b50",
+      "addedImports": [
+        "import { ClientDiagnostics } from './ClientDiagnostics';"
+      ]
+    }
+  ],
+  "existingFsBindingsChecked": [
+    "fsyncSync",
+    "renameSync"
+  ],
+  "schema180ConsumerAdded": false,
+  "officialArkTSCompileThisStep": false,
+  "physicalArkWebExecuted": false
+}

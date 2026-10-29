@@ -211,6 +211,7 @@ watch([collapseKey, liveThinking], ([key, thinking]) => {
             ("if (!isChatRoute() || !currentBotId.value || !session || chatStore.isSessionTentative(session.id)) return 'Memoh'",
              'if (!isChatRoute() || !currentBotId.value || !session || chatStore.isSessionTentative(session.id)) return appTitle', 1),
             ('return `Memoh · ${title}`', 'return `${appTitle} · ${title}`', 1),
+            ('return `Memoh · ${workspaceTabs.activeContactTitle}`', 'return `${appTitle} · ${workspaceTabs.activeContactTitle}`', 1),
             ("restoreOnUnmount: () => 'Memoh'", 'restoreOnUnmount: () => appTitle', 1),
         ],
         'apps/web/src/style.css': [

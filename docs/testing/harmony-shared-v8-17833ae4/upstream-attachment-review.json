@@ -1,0 +1,40 @@
+{
+  "source": "7e765e3e917747288b4f687dfaac97cbdd01a99d",
+  "parent": "12faf4c06db01d8fffc29aad3a247b4a85e884e7",
+  "tree": "b40e134e257f73025555745d933c895f9ddd55c1",
+  "files": [
+    "docs/mobile-attachment-stage-recovery.md",
+    "mobile/SOURCE-PROVENANCE.json",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+    "mobile/client/tests/stage2/harmony_resumable.cjs"
+  ],
+  "provenance_verified": [
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+      "old_blob": "a8c0bba054c2f726ed6e07f9d4c71518a72aa604",
+      "new_blob": "6fd6f3f7f4e20ecda5759d1eda34f5e614239090",
+      "sha256": "bd0929f4703d082ff19a694705e058026863adcee632bfe77bebdf1a2a6f2b50"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+      "old_blob": "23151ebf525c454269220e6f9d653fb84e4a1111",
+      "new_blob": "f32655409809faeb413296dd9a3978eb5ab26194",
+      "sha256": "59d3b186a69c03fb60b03fb0ac845add389ab7dbcf4d587f6728cbfa90da7f3e"
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
+      "old_blob": "4fb29ca38e6629b6abc108970936d68532de19e3",
+      "new_blob": "78dee0613ef29aeaec224fe5b0cd57da05c64a3c",
+      "sha256": "774530fc2de1181bf100b0a241659dc1ba1d94b2091a5c538725054eabb270db"
+    }
+  ],
+  "nas_mobile_tree_present": false,
+  "nas_source_files_changed": false,
+  "API_schema_journal_version_changed": false,
+  "admission": "accept isolated staging preservation fix for original Harmony consumer; not merged into NAS",
+  "new_tests_run": 0,
+  "reused_author_tests": 7,
+  "field_first_error_and_actual_installed_version": "unknown",
+  "official_ArkTS_SDK_and_device_acceptance": "not proved"
+}

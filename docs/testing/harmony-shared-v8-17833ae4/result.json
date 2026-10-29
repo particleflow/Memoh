@@ -1,0 +1,20 @@
+{
+  "types": "passed",
+  "mobileSeamCases": 3,
+  "selectedComponentCases": 5,
+  "unchangedTestsSkipped": 113,
+  "lintErrors": 0,
+  "lintWarnings": 2,
+  "baselineLintDiagnosticsEqual": true,
+  "author148ContactAnd77Web16GoReused": true,
+  "native7RealByteCasesReusedNotRerun": true,
+  "SDKGeneratedBytesUnchanged": true,
+  "newKitImports": 0,
+  "officialArkTSCompileThisStep": false,
+  "physicalPhoneAcceptance": false,
+  "schema180AssumedDeployed": false,
+  "HAPBuilds": 0,
+  "signed": false,
+  "deployed": false,
+  "HAP28Retained": true
+}

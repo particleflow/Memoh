@@ -1,0 +1,33 @@
+{
+  "published_web_source": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
+  "workflow_sha": "8e94c985aad5fbd7d3b8f2826caf8f425a3fbb4e",
+  "formal_run": 40842451637,
+  "formal_run_state": "success attempt1, 5/5; only Web amd64/arm64 and Web publish",
+  "web_digest": "sha256:9e59d38dc49805ddd4d7a51a28658783b1c15cc5d4e37cc39d2bfaf26158ca81",
+  "remote_source_head": "8e94c985aad5fbd7d3b8f2826caf8f425a3fbb4e",
+  "local_unpublished_head": "17833ae4bb678c7bb21f68c6372825c5d33a279f",
+  "local_unpublished_tree": "d84ebeab5c6f42d2a1457b852c9e70a133dad29b",
+  "local_schema_candidate": 180,
+  "current_field_schema": 179,
+  "NAS_or_Windows_modified_by_this_agent": false,
+  "HAP_built": false,
+  "contact_source_reviewed_only": false,
+  "contact_review_index_tree": "b534048a305931add8fdd8813e9b04aff4db21e8",
+  "artifact_download": "12882868939 redirected CDN GET returned403; not retried by another route; ZIP not read or hash-verified",
+  "schema180_recovery": "keep schema180 and compatible consumer; down loses tombstones and old normal migrate-up lacks migration180",
+  "prior_SOURCE_json": "historical snapshot retained; CURRENT.json and release/publication.json are authoritative for this version",
+  "recovery_bundle_requires": "public checkpoint 2edfd88dafec2291df6eee9343a7a2bd494da24a and its ancestors",
+  "unreviewed_inputs": [
+    "2b9c8fc24ff55bbaaa88cc112438006d82fe0513"
+  ],
+  "local_parent": "f1b19b75c2c83d1b7676eda4216f239bec20620a",
+  "contact_source_integrated": "cc81049e083cb0b539274b9d3093b865a7b6f216",
+  "attachment_admitted_for_Harmony_only": "7e765e3e917747288b4f687dfaac97cbdd01a99d",
+  "attachment_not_applied_to_NAS": true,
+  "stage_publication_CI_build_deployment": false,
+  "text_source_integrated": "12d753df21cd508f0b0d962f4b71cfd3b1830a6c",
+  "text_handoff": "fa39572ca4a218807a34e8348a9d3b37de71789a",
+  "shared_product_files_for_Harmony": 6,
+  "exact_head_CI": "not started; local-only stage",
+  "schema180_sole_source": "b11774d79703c9411e4221b3c901adc6f4aba71d"
+}

@@ -1,0 +1,86 @@
+{
+  "apps/web/src/pages/home/index.vue": {
+    "kind": "product",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "9f0b4abcd5f1674727827e2ad0fdbb6f988ec61bb475342746fc02228159a885",
+    "adaptedPreNativeSHA256": "9f0b4abcd5f1674727827e2ad0fdbb6f988ec61bb475342746fc02228159a885",
+    "newHunks": 1,
+    "generatedPhoneSHA256": "c42a4c41919ac790688d41cbf471cd7c7a25b5372656c0ab1d872c8b92e9e9f2"
+  },
+  "apps/web/src/pages/main-section/components/mobile-top-bar.vue": {
+    "kind": "product",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "547d5dfaeb9d770acba71e5244f86091549222768584221eeb1487421cb3eb0e",
+    "adaptedPreNativeSHA256": "547d5dfaeb9d770acba71e5244f86091549222768584221eeb1487421cb3eb0e",
+    "newHunks": 1,
+    "generatedPhoneSHA256": "abb83a0ebecddc49678d1d325034ef343b82ae546ecca776b80fed2a005a70ef"
+  },
+  "apps/web/src/store/chat/bootstrap-contact.test.ts": {
+    "kind": "test",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "48cc961901cac0e9a1f29ef068d89d31be958e8930aedd49df9e3d37cca05ec1",
+    "generatedPhoneSHA256": "48cc961901cac0e9a1f29ef068d89d31be958e8930aedd49df9e3d37cca05ec1"
+  },
+  "apps/web/src/store/chat/bootstrap.ts": {
+    "kind": "product",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "f9481c967b619b677634cab558443e0b4ba84980ba7f3dadb9bd1bb4f5d44d22",
+    "adaptedPreNativeSHA256": "f9481c967b619b677634cab558443e0b4ba84980ba7f3dadb9bd1bb4f5d44d22",
+    "newHunks": 1,
+    "generatedPhoneSHA256": "f9481c967b619b677634cab558443e0b4ba84980ba7f3dadb9bd1bb4f5d44d22"
+  },
+  "apps/web/src/store/chat/realtime.test.ts": {
+    "kind": "test",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "97cc0d5fdda678de76268ed079470a0abfe7caa84de4c4da5f016c7bf4112887",
+    "adaptedPreNativeSHA256": "97cc0d5fdda678de76268ed079470a0abfe7caa84de4c4da5f016c7bf4112887",
+    "newHunks": 1,
+    "generatedPhoneSHA256": "97cc0d5fdda678de76268ed079470a0abfe7caa84de4c4da5f016c7bf4112887"
+  },
+  "apps/web/src/store/chat/realtime.ts": {
+    "kind": "product",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "a6576f57b4162e1290a1483ff9c19873b63ada02ce3e4acc27476a76df75df0f",
+    "adaptedPreNativeSHA256": "a6576f57b4162e1290a1483ff9c19873b63ada02ce3e4acc27476a76df75df0f",
+    "newHunks": 4,
+    "generatedPhoneSHA256": "a6576f57b4162e1290a1483ff9c19873b63ada02ce3e4acc27476a76df75df0f"
+  },
+  "apps/web/src/store/workspace-tabs.test.ts": {
+    "kind": "test",
+    "wholeFileSharedIdentical": false,
+    "sharedSHA256": "fd7cd351963e124347a1d6cd50e32c50b022635fd14c03c316d56bed9f05b1f4",
+    "adaptedPreNativeSHA256": "3d17decb92346582f7df5abc1376937c412d4ee153320f3a46a2af9382bfd609",
+    "newHunks": 2,
+    "generatedPhoneSHA256": "3d17decb92346582f7df5abc1376937c412d4ee153320f3a46a2af9382bfd609"
+  },
+  "apps/web/src/store/workspace-tabs.ts": {
+    "kind": "product",
+    "wholeFileSharedIdentical": false,
+    "sharedSHA256": "0b46cea0bb13a4ac95bdaaf116223841a95d1707f80800a262d013a1fe4026ee",
+    "adaptedPreNativeSHA256": "f2926a48f97593963343e7f24b75014060e9353145459cc121f95433bffa4908",
+    "newHunks": 8,
+    "generatedPhoneSHA256": "3c45acf4e9d72dab60e74ceba501f41f1dc0f675e26b3c84602ce54f79615206"
+  },
+  "apps/web/src/pages/home/components/message-item.vue": {
+    "kind": "product",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "b1ad58fc11a51c6441eaae3353109738459e99ac77dc87571765260054444d38",
+    "adaptedPreNativeSHA256": "b1ad58fc11a51c6441eaae3353109738459e99ac77dc87571765260054444d38",
+    "newHunks": 2,
+    "generatedPhoneSHA256": "a416560b7af9ef43adf40f895b36240e8f6dc5347011b87b07e9df2fe4a466fd"
+  },
+  "apps/web/src/pages/home/components/message-item.test.ts": {
+    "kind": "test",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "fab35f1bb030fb189e96964b8919697066bf09e705a2f3d8d1dfe74865781e65",
+    "adaptedPreNativeSHA256": "fab35f1bb030fb189e96964b8919697066bf09e705a2f3d8d1dfe74865781e65",
+    "newHunks": 5,
+    "generatedPhoneSHA256": "fab35f1bb030fb189e96964b8919697066bf09e705a2f3d8d1dfe74865781e65"
+  },
+  "apps/web/src/pages/home/components/fixtures/contact-runtime-stream.json": {
+    "kind": "test",
+    "wholeFileSharedIdentical": true,
+    "sharedSHA256": "ec60410791cde0529da687aaab76819b65d10189cc458a5c6108e449fea12f11",
+    "generatedPhoneSHA256": "ec60410791cde0529da687aaab76819b65d10189cc458a5c6108e449fea12f11"
+  }
+}

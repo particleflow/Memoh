@@ -1,0 +1,29 @@
+{
+  "generatedChanges": [
+    "apps/web/src/pages/home/components/message-item.test.ts",
+    "apps/web/src/pages/home/components/message-item.vue",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/pages/main-section/components/mobile-top-bar.vue",
+    "apps/web/src/store/chat/bootstrap.ts",
+    "apps/web/src/store/chat/realtime.test.ts",
+    "apps/web/src/store/chat/realtime.ts",
+    "apps/web/src/store/workspace-tabs.test.ts",
+    "apps/web/src/store/workspace-tabs.ts",
+    "apps/web/src/store/chat/bootstrap-contact.test.ts",
+    "apps/web/src/pages/home/components/fixtures/contact-runtime-stream.json"
+  ],
+  "unchangedGeneratedEntries": 6975,
+  "newEntries": [
+    "apps/web/src/pages/home/components/fixtures/contact-runtime-stream.json"
+  ],
+  "reviewedAdapters": 47,
+  "adapterHashChanges": [
+    "apps/web/src/pages/home/components/message-item.vue",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/pages/main-section/components/mobile-top-bar.vue",
+    "apps/web/src/store/workspace-tabs.ts"
+  ],
+  "unchangedAdapterHashes": 43,
+  "generatedSDKIdentical": true,
+  "schema180FilesImported": false
+}

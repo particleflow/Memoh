@@ -1,0 +1,67 @@
+{
+  "commit": "cc81049e083cb0b539274b9d3093b865a7b6f216",
+  "parent": "b11774d79703c9411e4221b3c901adc6f4aba71d",
+  "release_baseline": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "baseline_blobs": {
+    "apps/web/src/store/chat/bootstrap.ts": {
+      "published": "9b8a4e1e79e6c8fe1846e7c79c56ad531c9cb143",
+      "before_fix": "9b8a4e1e79e6c8fe1846e7c79c56ad531c9cb143"
+    },
+    "apps/web/src/store/chat/realtime.ts": {
+      "published": "cc770af8ffee81385d341c77ace37c3d72ea56a2",
+      "before_fix": "cc770af8ffee81385d341c77ace37c3d72ea56a2"
+    },
+    "apps/web/src/store/workspace-tabs.ts": {
+      "published": "73b28e51897f6646a1a409b2c7b58509ae1f0e05",
+      "before_fix": "73b28e51897f6646a1a409b2c7b58509ae1f0e05"
+    },
+    "apps/web/src/pages/main-section/components/mobile-top-bar.vue": {
+      "published": "f24a1e0ff5cac86a78d0cb451f0fbef4cf9c6a9a",
+      "before_fix": "f24a1e0ff5cac86a78d0cb451f0fbef4cf9c6a9a"
+    },
+    "internal/channel/route/contact.go": {
+      "published": "c058d46a1fcf1b41c96cff5a98c15335e7ff17b2",
+      "before_fix": "c058d46a1fcf1b41c96cff5a98c15335e7ff17b2"
+    },
+    "internal/channel/route/contact_navigation.go": {
+      "published": "98ad69375e0b7fe8ec4365766da534af7511d773",
+      "before_fix": "98ad69375e0b7fe8ec4365766da534af7511d773"
+    }
+  },
+  "changed_files": [
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/pages/main-section/components/mobile-top-bar.vue",
+    "apps/web/src/store/chat/bootstrap-contact.test.ts",
+    "apps/web/src/store/chat/bootstrap.ts",
+    "apps/web/src/store/chat/realtime.test.ts",
+    "apps/web/src/store/chat/realtime.ts",
+    "apps/web/src/store/workspace-tabs.test.ts",
+    "apps/web/src/store/workspace-tabs.ts"
+  ],
+  "source_changes": [
+    "Use Bot display name for trusted contact projection in desktop tabs, mobile top bar and document title; preserve history titles and all stored titles.",
+    "Reopening the same session retries failed initial history read while retaining subscription; success/in-flight reads remain deduplicated.",
+    "Resolve initial runtime-snapshot readiness even if history already failed before snapshot arrival."
+  ],
+  "validation": {
+    "new_regression_cases": 5,
+    "affected_tests_passed": 148,
+    "typecheck": "passed",
+    "eslint": "passed",
+    "ui_contract": "passed, existing warnings only",
+    "actual_browser": "Chromium, current Vue source via Vite, unchanged backend contact source from retained v6 binary verified against published blobs; 390x844, zh, dark; simulated REST503 red/green plus normal cold open/reopen/history/reload",
+    "db": "contact ID/title/114 messages unchanged; runs61/schedules0",
+    "paid_calls": 0,
+    "production_access": false,
+    "deployment": false,
+    "native_hap_test": false,
+    "human_QA": false
+  },
+  "status": "independent defects fixed and isolated browser verified; screenshot incident and first-binding continuity not accepted as resolved",
+  "remaining": [
+    "Exact HAP1.0.28 entry overlays/lock and installed version unavailable here.",
+    "Need original Bot/account identity and pre-08:17:57 eligible historical sessions plus last successful send session ID before diagnosing first-contact discontinuity.",
+    "Primary-entry first binding currently bypasses historical inspection; this behavior remains unchanged in this commit.",
+    "Existing field contact with post-08:23:47 messages must not be replaced or merged automatically."
+  ]
+}

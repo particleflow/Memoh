@@ -1,0 +1,49 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/shared-v8-20261029/context/checkout
+
+ ❯ apps/web/src/pages/home/components/message-item.test.ts (13 tests | 4 failed | 9 skipped) 1190ms
+     × renders captured direct runtime deltas before the next fragment or terminal event 1179ms
+     × renders captured result runtime deltas before the next fragment or terminal event 5ms
+     × keeps public reasoning, ordinary text and completed Q&A while hiding raw tools (streaming=true) 1ms
+     × keeps public reasoning, ordinary text and completed Q&A while hiding raw tools (streaming=false) 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  apps/web/src/pages/home/components/message-item.test.ts > contact transcript projection > renders captured direct runtime deltas before the next fragment or terminal event
+ FAIL  apps/web/src/pages/home/components/message-item.test.ts > contact transcript projection > renders captured result runtime deltas before the next fragment or terminal event
+ FAIL  apps/web/src/pages/home/components/message-item.test.ts > contact transcript projection > keeps public reasoning, ordinary text and completed Q&A while hiding raw tools (streaming=true)
+ FAIL  apps/web/src/pages/home/components/message-item.test.ts > contact transcript projection > keeps public reasoning, ordinary text and completed Q&A while hiding raw tools (streaming=false)
+Error: [vitest] There was an error when mocking a module. If you are using "vi.mock" factory, make sure there are no top level variables inside, since this call is hoisted to top of the file. Read more: https://vitest.dev/api/vi.html#vi-mock
+ ❯ apps/web/src/pages/home/components/message-item.vue:431:1
+    429| import { Sparkles, Target } from 'lucide-vue-next'
+    430| import { formatRelativeTime, formatDateTime, formatCalendarTime } from…
+    431| import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, S…
+       | ^
+    432| import MarkdownRender, { enableKatex, enableMermaid } from 'markstream…
+    433| import { useLocalStorage } from '@vueuse/core'
+
+Caused by: Error: Failed to resolve import "#/lib/utils" from "../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/packages/ui/src/components/accordion/Accordion.vue". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/packages/ui/src/components/accordion/Accordion.vue:6:19
+  2  |  import { reactiveOmit } from "@vueuse/core";
+  3  |  import { AccordionRoot, useForwardPropsEmits } from "reka-ui";
+  4  |  import { cn } from "#/lib/utils";
+     |                      ^
+  5  |  const _sfc_main = /*@__PURE__*/ _defineComponent({
+  6  |  	__name: "Accordion",
+ ❯ TransformPluginContext._formatLog ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30416:39
+ ❯ TransformPluginContext.error ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30413:14
+ ❯ normalizeUrl ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:27438:18
+ ❯ ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:27506:30
+ ❯ TransformPluginContext.transform ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:27474:4
+ ❯ EnvironmentPluginContainer.transform ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30201:14
+ ❯ loadAndTransform ../../../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:20124:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 1 passed | 113 skipped (118)
+   Start at  09:27:52
+   Duration  6.42s (transform 6.20s, setup 0ms, import 8.32s, tests 1.22s, environment 2.49s)
+
