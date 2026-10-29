@@ -11,7 +11,7 @@ import {
   type MediaUpload,
   type MediaTransferNetworkPolicy,
 } from '@memohai/sdk'
-import { sdkApiBaseUrl, sdkAuthQuery } from './api-client'
+import { sdkApiBaseUrl, sdkAuthQuery, usesPlatformFileRouting } from './api-client'
 import { authSessionGeneration } from './auth-session'
 import { mediaDispatch, mediaEndpoint } from './media-network'
 import {
@@ -75,7 +75,8 @@ export async function mediaIdentity(bot: string, signal: AbortSignal): Promise<M
   const { data } = await getUsersMe({ signal, fetch: guardedFetch, cache: 'no-store', throwOnError: true })
   check()
   if (!data.id) throw new MediaRecoveryError('unknown')
-  route.physicalOrigin = mediaEndpoint(origin, data.network_policy)
+  const physicalOrigin = mediaEndpoint(origin, data.network_policy)
+  if (!usesPlatformFileRouting()) route.physicalOrigin = physicalOrigin
   const networkPolicy = data.network_policy ? Object.freeze({ ...data.network_policy, lan_addresses: [...(data.network_policy.lan_addresses ?? [])], ...(data.network_policy.endpoint ? { endpoint: Object.freeze({ ...data.network_policy.endpoint }) } : {}) }) : undefined
   return { owner: data.id, origin, bot, check, fetch: guardedFetch, networkPolicy }
 }

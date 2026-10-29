@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/fast-transfer-path
+
+
+ Test Files  7 passed (7)
+      Tests  71 passed (71)
+   Start at  15:23:11
+   Duration  8.65s (transform 6.87s, setup 0ms, import 10.44s, tests 1.03s, environment 2.03s)
+

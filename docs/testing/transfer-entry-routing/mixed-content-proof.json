@@ -1,0 +1,16 @@
+{
+  "secureContext": true,
+  "targetOrigin": "http://insecure.fixture.test:18684",
+  "fetchFailure": "TypeError",
+  "imageFailed": true,
+  "httpRequestsSent": 0,
+  "messages": [
+    "Mixed Content: The page at 'https://secure.fixture.test/' was loaded over HTTPS, but requested an insecure resource 'http://insecure.fixture.test:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f?token=synthetic-no-authority'. This request has been blocked; the content must be served over HTTPS.",
+    "http://insecure.fixture.test:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f?token=REDACTED mixed-content",
+    "Mixed Content: The page at 'https://secure.fixture.test/' was loaded over HTTPS, but requested an insecure element 'http://insecure.fixture.test:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f?token=synthetic-no-authority'. This request was automatically upgraded to HTTPS, For more information see https://blog.chromium.org/2019/10/no-more-mixed-messages-about-https.html",
+    "https://insecure.fixture.test:18684/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/5eb802f8c45fdd95c61a40e9aedf8bf6e42964902307bcd7f7c331dfac32b26f?token=REDACTED net::ERR_TUNNEL_CONNECTION_FAILED",
+    "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "fixtureHttpsDocument": true,
+  "securityBypass": false
+}

@@ -123,6 +123,7 @@ import { inject, onScopeDispose, reactive, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from '@felinic/ui'
 import { MediaRecoveryError, saveMediaDownload } from '@/lib/media-transfer'
+import { fileApiFetch } from '@/lib/api-client'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import type { AttachmentBlock, AttachmentItem } from '@/store/chat-list'
 import { useChatStore } from '@/store/chat-list'
@@ -195,7 +196,7 @@ async function ensureLineCount(att: AttachmentItem) {
   }
   lineCounts[key] = 'counting'
   try {
-    const res = await fetch(url)
+    const res = await fileApiFetch(url)
     if (!res.ok) throw new Error(`HTTP ${res.status}`)
     const count = (await res.text()).split('\n').length
     lineCountCache.set(key, count)

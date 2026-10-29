@@ -1,5 +1,9 @@
 # Explicit physical endpoint routing
 
+Follow-up: the shared preview and workspace Files consumers are now covered by
+[the entry-routing increment](../transfer-entry-routing/README.md). The original
+phase evidence and its historical acceptance boundaries are retained below.
+
 This independent increment starts at `b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3`.
 It is source for the existing unified owner to integrate. It has not been
 activated on the NAS, distributed in a HAP, or accepted on a physical phone or
