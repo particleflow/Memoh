@@ -97,12 +97,6 @@
               </FormControl>
             </FieldStack>
           </FormField>
-          <div
-            v-else-if="isManagedOAuthClientType(form.values.client_type)"
-            class="rounded-lg border p-3 text-xs text-muted-foreground"
-          >
-            {{ $t(form.values.client_type === 'github-copilot' ? 'provider.oauth.githubCreateHint' : 'provider.oauth.openaiCreateHint') }}
-          </div>
           <FormField
             v-if="shouldShowBaseUrlField()"
             v-slot="{ componentField }"
@@ -156,9 +150,6 @@
                 <Label class="text-sm">
                   {{ $t('provider.autoImport') }}
                 </Label>
-                <p class="text-[0.8rem] text-muted-foreground">
-                  {{ $t('provider.autoImportHint') }}
-                </p>
               </div>
               <FormControl>
                 <Switch

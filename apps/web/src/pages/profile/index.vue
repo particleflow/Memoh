@@ -46,7 +46,6 @@
 
           <SettingsRow
             :label="$t('settings.titleModel')"
-            :description="$t('settings.titleModelDescription')"
           >
             <div class="w-64">
               <ModelSelect
@@ -231,7 +230,7 @@ async function loadPageData() {
 async function loadMyAccount() {
   const { data } = await getUsersMe({ throwOnError: true })
   account.value = data
-  
+
   const dName = data.display_name || ''
   const aUrl = data.avatar_url || ''
   const tZone = data.timezone || 'UTC'
@@ -242,7 +241,7 @@ async function loadMyAccount() {
   profileForm.avatar_url = aUrl
   profileForm.timezone = tZone
   profileForm.title_model_id = titleModelID
-  
+
   // Set originals
   originalProfile.display_name = dName
   originalProfile.avatar_url = aUrl

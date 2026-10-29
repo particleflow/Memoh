@@ -3,8 +3,7 @@
        open the nav sheet when chat is active, ← to re-activate the chat panel
        when a secondary panel (terminal/browser/…) is on top. The ← never
        closes the secondary panel — 'always' renderers keep it alive behind
-       chat. The right "+" menu mirrors the desktop tab-strip add actions with
-       the same permission gates. -->
+       chat. Secondary panels retain their existing tool actions. -->
   <MobileBar>
     <template #left>
       <MobileBarIconButton
@@ -38,13 +37,6 @@
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuItem
-            v-if="currentBotId"
-            @select="workspaceTabs.openDraftChat({ title: t('chat.newSession'), explicitSelection: false })"
-          >
-            <MessageCircle class="mr-2 size-3.5" />
-            {{ t('sidebar.chat') }}
-          </DropdownMenuItem>
           <DropdownMenuItem
             v-if="canWorkspaceExec"
             @select="workspaceTabs.openTerminal()"
@@ -89,7 +81,7 @@
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import { ChevronLeft, Globe, Menu, MessageCircle, Monitor, Plus, Terminal, X } from 'lucide-vue-next'
+import { ChevronLeft, Globe, Menu, Monitor, Plus, Terminal, X } from 'lucide-vue-next'
 import {
   Button,
   DropdownMenu,
@@ -123,7 +115,7 @@ const currentPermissions = computed(() => currentBot.value?.current_user_permiss
 const canWorkspaceExec = computed(() => hasBotPermission(currentPermissions.value, 'workspace_exec'))
 const canManage = computed(() => hasBotPermission(currentPermissions.value, 'manage'))
 const hasAnyAction = computed(() =>
-  !!currentBotId.value || canWorkspaceExec.value || canManage.value || !activePanelIsChat.value,
+  !!activeId.value && !activePanelIsChat.value,
 )
 
 const leftLabel = computed(() =>

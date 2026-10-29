@@ -177,7 +177,7 @@
       "revoked": "この Agent アカウントは切断されています。再接続するか、別のアカウントを選択してください。",
       "runtime_busy": "現在の応答が完了してから Agent アカウントを切り替えてください。",
       "usage_auth_expired": "アカウントのサインインが期限切れです。次の会話のあとに自動で更新されます。それでも利用上限を表示できない場合は、アカウントを再接続してください。",
-      "usage_unavailable": "利用上限を取得できませんでした。しばらくしてからもう一度お試しください。"
+      "usage_unavailable": "利用上限を取得できませんでした"
     },
     "agent_dependency_missing": "{dep_id} はこの Workspace にインストールされていません。Bot の「依存関係」からインストールするか、実行中のインストールの完了を待ってから、メッセージを再送してください。",
     "app": {
@@ -516,7 +516,7 @@
     },
     "workdir": {
       "git_branch_unavailable": "このローカルブランチは利用できません。更新して既存のブランチを選択してください。",
-      "git_busy": "Agent がこの作業ディレクトリを使用中です。実行が終わってからブランチを切り替えてください。",
+      "git_busy": "Agent がこの作業ディレクトリを使用中です",
       "git_switch_failed": "Git ブランチを切り替えられませんでした。未コミットの変更や、別の Worktree で使用中のブランチでないか確認してください。",
       "git_unavailable": "Git 作業ディレクトリを読み取れません。ワークスペースを確認して再試行してください。",
       "not_found": "この作業ディレクトリは存在しなくなりました。一覧を更新して選び直してください。",
@@ -1026,11 +1026,8 @@
   "chat": {
     "readAloud": {
       "replay": "もう一度読み上げる",
-      "stop": "読み上げを停止",
-      "enable": "読み上げを有効にする",
-      "resume": "読み上げを再開",
       "playing": "この返信を読み上げています",
-      "failed": "読み上げが停止しました。もう一度読み上げて再試行できます。"
+      "failed": "読み上げが停止しました。"
     },
     "delegations": {
       "nativeRun": "専門 Bot のセッション実行",
@@ -1040,14 +1037,14 @@
       "runRecorded": "保存済みのネイティブ実行状態です。現在の接続を保証しません。セッション履歴には他のターンも含まれる場合があります。",
       "runUnavailable": "この委任に対応するネイティブ実行を確認できません。",
       "openHistory": "専門 Bot のセッション履歴を開く",
-      "historyUnavailable": "専門 Bot のセッションを開けません。再読み込みしてアクセス権を確認してください。",
+      "historyUnavailable": "専門 Bot のセッションを開けません",
       "childTasks": "サブ Agent とコンピュータータスク",
       "openTasks": "後続タスクを見る",
       "downstreamTitle": "専門 Bot のタスク",
       "downstreamDescription": "この専門 Bot セッションに記録された実行タスクです。アクセス権限はサーバーで確認されます。ライブログや実行待ちキューではありません。",
       "retryDelivery": "結果の配信を再試行",
       "deliveryResponse": "配信リクエストの応答",
-      "deliveryRequestUnconfirmed": "配信リクエストの結果を確認できませんでした。再読み込みして状態を確認してください。",
+      "deliveryRequestUnconfirmed": "配信リクエストの結果を確認できませんでした",
       "title": "専門 Bot への委任",
       "executionGroup": "実行タスク",
       "description": "この会話で許可された Bot への委任です。実行と結果の配信は別の状態で表示します。",
@@ -1077,7 +1074,7 @@
         "unavailable": "配信不可"
       },
       "downloadResult": "成果をダウンロード {hash}",
-      "downloadFailed": "ダウンロードを準備できません。画面を再読み込みし、アクセス権を確認してください。"
+      "downloadFailed": "ダウンロードを準備できません"
     },
     "tasks": {
       "records": "タスク履歴",
@@ -1106,10 +1103,9 @@
       "unavailable": "最終応答の要約はありません。",
       "truncated": "要約は一部省略されています。",
       "businessUnknown": "業務の完了はまだ確認されていません。",
-      "cancelIntent": "キャンセル要求は記録されていますが、終了の確認ではありません。",
-      "filteredPage": "このページに閲覧可能なタスクはありません。次のページに進めます。",
+      "cancelIntent": "キャンセル要求は記録されていますが、終了の確認ではありません",
+      "filteredPage": "このページに閲覧可能なタスクはありません",
       "empty": "サブエージェントまたはコンピュータータスクの記録はありません。",
-      "newest": "最新に戻る",
       "next": "次のページ",
       "types": {
         "subagent": "サブエージェント",
@@ -1161,7 +1157,7 @@
       "observation": {
         "title": "現在のコンピューター観測",
         "description": "「コンピューター観測を更新」を押すと、このタスクの表示中に接続先を継続確認します。保存済みの概要や添付ファイルの表示だけではコンピューターに接続しません。観測は完了や履歴の復元を証明しません。",
-        "paused": "自動確認を一時停止しました。アクセスやサーバーの対応を復旧した後、更新して同じタスクを再確認できます。",
+        "paused": "自動確認を一時停止しました。",
         "unsupported": "このサーバーはコンピューター観測にまだ対応していません。",
         "loadFailed": "コンピューター観測を取得できませんでした。",
         "agentState": "ネイティブ Agent：{state}",
@@ -1281,9 +1277,9 @@
         "bounded": "直近のサンプルのみ",
         "empty": "端末テキストはありません。",
         "sequence": "ネイティブ完了番号: {sequence}（指示ごとの結果ではありません）",
-        "unavailable": "元の Agent を現在確認できません。古いサンプルを最新として表示しません。",
+        "unavailable": "元の Agent を現在確認できません",
         "refresh": "内容とリクエスト状態を更新",
-        "pending": "指示の結果は未確認です。リクエスト {id} を保持し、新しい指示は送信しません。",
+        "pending": "指示の結果は未確認です",
         "mode": "セッション選択",
         "bound": "観測済み論理セッションとの一致を要求",
         "current": "現在関連付けられた Agent を使用",
@@ -2113,7 +2109,7 @@
       "changeFailed": "プランモードを切り替えられませんでした。もう一度お試しください。"
     },
     "runtimeModeNextTurn": "次の実行開始時に適用されます。",
-    "runtimeModeModelUnavailable": "このモデルは選択した権限モードに対応していません。別のモードまたはモデルを選択してください。",
+    "runtimeModeModelUnavailable": "このモデルは選択した権限モードに対応していません",
     "permissionMode": "権限モード",
     "goal": {
       "label": "目標",
@@ -2136,7 +2132,7 @@
     },
     "botRun": {
       "title": "この会話の最新の Bot 実行",
-      "unavailable": "実行状態が未同期です。会話への再接続後に更新されます。",
+      "unavailable": "実行状態が未同期です。",
       "empty": "現在のスナップショットに Bot 実行の記録はありません。",
       "configuration": "最新の操作は設定変更であり、タスク実行ではありません。",
       "aborting": "キャンセル処理中",
@@ -2305,7 +2301,7 @@
     "reachable": "到達可能",
     "unreachable": "到達不能",
     "testFailed": "テストが失敗しました",
-    "testUnverifiedHint": "接続できましたが、モデル一覧では動作を確認できませんでした。このプロバイダーが一覧に対応していない可能性があります。個別のモデルでテストしてください。",
+    "testUnverifiedHint": "接続できましたが、モデル一覧では動作を確認できませんでした。",
     "autoImport": "モデルを自動インポート",
     "autoImportHint": "作成後にプロバイダーからモデルを自動的に取得してインポートします。",
     "configurationTitle": "構成",
@@ -2351,7 +2347,7 @@
         "authorizedCurrent": "現在のアカウントが接続されています",
         "oauthing": "認証中...",
         "pendingDevice": "デバイスの認証が完了するのを待っています...",
-        "expired": "認証の有効期限が切れました。続行するには再認証してください。",
+        "expired": "認証の有効期限が切れました",
         "missing": "まだ認可されていません。",
         "notConfigured": "このプロバイダーは OAuth 用に設定されていません。"
       },
@@ -2452,7 +2448,7 @@
     "graphEdges": "リンク",
     "semanticEmbeddingModel": "Embedding Model",
     "semanticEmbeddingModelPlaceholder": "Embedding Modelを選択",
-    "graphEmpty": "記憶がまだありません — 追加するとグラフが表示されます。"
+    "graphEmpty": "記憶がまだありません"
   },
   "network": {
     "title": "ネットワーク",
@@ -2476,12 +2472,12 @@
     "speakHint": "返事を声に出して読みます。",
     "listenTitle": "音声入力",
     "listenHint": "音声をテキストに変換します。",
-    "empty": "音声対応のプロバイダーを追加してください。まだバックエンドがありません。"
+    "empty": "まだバックエンドがありません。"
   },
   "video": {
     "title": "動画",
     "providersHint": "OpenRouter、ModelArk、Volcengine で動画を生成します。",
-    "empty": "動画バックエンドがまだありません。プロバイダーを追加すると動画生成を有効にできます。",
+    "empty": "動画バックエンドがまだありません。",
     "models": "動画 Model",
     "importModels": "Model をインポート",
     "importSuccess": "Model をインポートしました: 新規 {created} 件、スキップ {skipped} 件",
@@ -2505,7 +2501,7 @@
     "addModel": "モデルを追加",
     "modelId": "モデル ID",
     "modelIdPlaceholder": "モデル識別子を入力してください（カスタムボイスなど）",
-    "noModels": "モデルが見つかりませんでした。「モデルをインポート」で利用可能なモデルを探すか、「モデルを追加」で手動作成してください。",
+    "noModels": "モデルが見つかりませんでした",
     "noCapabilities": "このモデルで使用できる機能はありません。",
     "saveSuccess": "音声設定が保存されました",
     "synthesis": {
@@ -2539,7 +2535,7 @@
     "emptyTitle": "文字起こしプロバイダーがありません",
     "emptyDescription": "文字起こしプロバイダーを追加して、Bot の音声テキスト変換を有効にします",
     "models": "文字起こしモデル",
-    "noModels": "文字起こしモデルが見つかりません。利用可能なモデルをインポートするか、デフォルトのテンプレートモデルを保持します。",
+    "noModels": "文字起こしモデルが見つかりません",
     "noCapabilities": "このモデルで使用できる機能はありません。",
     "importModels": "モデルをインポート",
     "importSuccess": "文字起こしモデルをインポートしました",
@@ -3349,7 +3345,7 @@
         "browseUnreachable": "このコンピューターに接続できません。接続を確認して再試行してください",
         "path": "ディレクトリパス",
         "remotePathHelp": "下のフォルダを選ぶか、絶対パスを入力してください。すでに存在している必要があります。",
-        "remoteOffline": "{name} は接続されていません。接続するとフォルダを選択できます。",
+        "remoteOffline": "{name} は接続されていません",
         "remotePathPlaceholder": "/Users/you/code/project"
       }
     },
@@ -4058,7 +4054,7 @@
         "description": "スキャンしてくださいQRWeChat でコードを作成してアカウントに接続します。",
         "startScan": "得るQRコード",
         "waitingScan": "WeChatを開いてこれをスキャンしてくださいQRコード",
-        "scanned": "スキャン済み — 携帯電話で確認します",
+        "scanned": "スキャン済み",
         "expired": "QRコードの有効期限が切れました",
         "refresh": "リフレッシュQRコード",
         "success": "WeChat が正常に接続されました。",
@@ -4067,7 +4063,7 @@
         "verifyCodeWrong": "数字が一致しません。もう一度入力してください",
         "verifyCodePlaceholder": "スマートフォンに表示された数字",
         "verifyCodeSubmit": "確認",
-        "verifyCodeBlocked": "入力の誤りが多すぎます。QR コードを更新して、しばらくしてから再試行してください",
+        "verifyCodeBlocked": "入力の誤りが多すぎます",
         "alreadyBound": "この WeChat アカウントはすでにこのボットに接続されています"
       },
       "types": {
@@ -4087,8 +4083,7 @@
         "cli": "CLI",
         "local": "地元"
       },
-      "modelRequiredTitle": "デフォルトのチャットモデルを設定",
-      "modelRequiredDescription": "チャネルを有効にしても、新しい会話に返信するにはデフォルトのモデルが必要です。クリックして設定してください。"
+      "modelRequiredTitle": "デフォルトのチャットモデルを設定"
     },
     "memory": {
       "lastUpdated": "最終更新",
@@ -4122,7 +4117,7 @@
       "deleteSuccess": "deleteSuccess",
       "deleteFailed": "deleteFailed",
       "degradedTitle": "メモリインデックス低下",
-      "degradedDesc": "セマンティックシードインデックスがウィキストアに遅れています。グラフ検索は引き続き機能します。再同期してください。",
+      "degradedDesc": "セマンティックシードインデックスがウィキストアに遅れています。グラフ検索は引き続き機能します。",
       "ingestAction": "ファイルを同期",
       "ingestSuccess": "{n} 件のメモリをファイルから取り込みました",
       "ingestFailed": "ファイルからのメモリ取り込みに失敗しました",
@@ -4558,7 +4553,7 @@
         "selectPlaceholder": "モデルを選択してください",
         "hint": "Bot が応答に使用するモデルを選択します。推奨項目ですが、設定でいつでも変更できます。",
         "loading": "モデルを読み込んでいます...",
-        "loadFailed": "モデル一覧を読み込めませんでした。もう一度お試しください。",
+        "loadFailed": "モデル一覧を読み込めませんでした",
         "retry": "再試行"
       },
       "acp": {
@@ -4575,7 +4570,7 @@
       "action": "Memohを開く",
       "saveFailed": "保存できませんでした。もう一度お試しください。",
       "navigationFailed": "Bot を開けませんでした。もう一度お試しください。",
-      "noModelWarning": "Bot のモデルが選択されていないため、まだ応答できません。後で Bot の設定から構成できます。",
+      "noModelWarning": "Bot のモデルが選択されていないため、まだ応答できません。",
       "examplesHint": "例から始めることもできます"
     }
   },
@@ -4869,9 +4864,9 @@
     "cancel": "キャンセル"
   },
   "computerExec": {
-    "completed": "フォアグラウンドコマンドが完了しました。標準出力とエラーテキストをまとめて表示します。",
-    "uncertain": "コマンドの結果が不明、または拒否されました。待機を停止しても Windows 上の実行は終了しません。再試行前に確認してください。",
-    "retained": "ワークスペース {id} は手動確認のため保持され、自動終了されていません。",
+    "completed": "フォアグラウンドコマンドが完了しました。",
+    "uncertain": "コマンドの結果が不明、または拒否されました。",
+    "retained": "ワークスペース {id} は保持されています。",
     "truncated": "出力は切り詰められました。"
   },
   "workspaceStorage": {

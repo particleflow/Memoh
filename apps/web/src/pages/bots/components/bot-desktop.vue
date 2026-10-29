@@ -9,7 +9,6 @@
       <SettingsSection>
         <SettingsRow
           :label="$t('bots.settings.desktopEnabled')"
-          :description="$t('bots.settings.desktopEnabledDescription')"
         >
           <Switch
             :model-value="settingsForm.display_enabled"

@@ -100,14 +100,6 @@ async function navigate(row: SessiontaskDirectoryTask) {
         </p>
         <div class="flex justify-between gap-2">
           <Button
-            variant="ghost"
-            size="sm"
-            :disabled="reader.loading.value"
-            @click="reader.newest"
-          >
-            {{ t('chat.tasks.newest') }}
-          </Button>
-          <Button
             v-if="reader.nextCursor.value"
             variant="ghost"
             size="sm"

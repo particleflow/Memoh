@@ -5,7 +5,7 @@
   "scripts": {
     "preinstall": "node scripts/ensure-submodules.mjs --check",
     "web:dev": "pnpm --filter @memohai/web dev",
-    "web:build": "pnpm --filter @memohai/web build",
+    "web:build": "node scripts/check-ui-copy-policy.mjs && pnpm --filter @memohai/web build",
     "web:start": "pnpm --filter @memohai/web start",
     "release": "bumpp",
     "release:patch": "bumpp patch --yes",
@@ -13,7 +13,7 @@
     "release:major": "bumpp major --yes",
     "publish:npm": "node scripts/publish-packages.mjs",
     "generate-sdk": "openapi-ts",
-    "lint": "eslint .",
+    "lint": "eslint . && node --test scripts/ui-rejected-controls.test.mjs && node scripts/check-ui-copy-policy.mjs",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
     "prepare": "husky",

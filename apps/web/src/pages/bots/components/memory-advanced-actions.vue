@@ -30,9 +30,6 @@
                 <p class="text-sm font-medium text-foreground">
                   {{ $t('bots.memory.advanced.memoryModel') }}
                 </p>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ $t('bots.memory.advanced.memoryModelDescription') }}
-                </p>
               </div>
               <div class="w-52 shrink-0">
                 <ModelSelect
@@ -51,9 +48,6 @@
               <div class="min-w-0">
                 <p class="text-sm font-medium text-foreground">
                   {{ $t('memory.semanticEmbeddingModel') }}
-                </p>
-                <p class="mt-0.5 text-xs text-muted-foreground">
-                  {{ $t('bots.memory.advanced.embeddingModelDescription') }}
                 </p>
               </div>
               <div class="flex shrink-0 items-center gap-2">

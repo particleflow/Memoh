@@ -1,0 +1,16 @@
+{
+  "nativeBase": "013e91f7dd244061a941b7bb63994fb5270e8356",
+  "sharedBase": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
+  "verifiedFinalSharedOutputs": 101,
+  "controlStringsAbsent": true,
+  "clickAndInputInterruptionsRetained": true,
+  "contextMenuReplayRetained": true,
+  "uploadFailureStateAndNativeCodeRetained": true,
+  "noHAPBuild": true,
+  "noProductionWrite": true,
+  "noPaidModelCall": true,
+  "nativeAttachmentCapabilityRetained": true,
+  "sourceEntries": 176,
+  "originalNativeAdapters": 45,
+  "originalTestAdapters": 2
+}

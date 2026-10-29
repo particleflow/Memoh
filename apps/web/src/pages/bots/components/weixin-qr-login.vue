@@ -5,9 +5,6 @@
         <h4 class="text-xs font-medium">
           {{ $t('bots.channels.weixinQr.title') }}
         </h4>
-        <p class="text-xs text-muted-foreground mt-1">
-          {{ $t('bots.channels.weixinQr.description') }}
-        </p>
       </div>
     </div>
 

@@ -24,7 +24,6 @@
         <SettingsRow
           v-else-if="desktopRuntimeLoadFailed"
           :label="t('runtimes.thisComputer.loadFailed')"
-          :description="t('runtimes.thisComputer.loadFailedDescription')"
         >
           <Button
             variant="outline"
@@ -130,7 +129,6 @@
         <SettingsRow
           v-else-if="runtimesError && runtimes === undefined"
           :label="t('runtimes.loadFailed')"
-          :description="t('runtimes.loadFailedDescription')"
         >
           <Button
             variant="outline"
@@ -147,9 +145,6 @@
         >
           <p class="text-sm font-medium text-foreground">
             {{ desktopRuntimeBridge ? t('runtimes.emptyOtherTitle') : t('runtimes.emptyTitle') }}
-          </p>
-          <p class="mx-auto mt-1 max-w-md text-xs leading-relaxed text-muted-foreground">
-            {{ desktopRuntimeBridge ? t('runtimes.emptyOtherDescription') : t('runtimes.emptyDescription') }}
           </p>
         </div>
 
@@ -242,9 +237,6 @@
       >
         <DialogHeader>
           <DialogTitle>{{ t('runtimes.thisComputer.dialogTitle') }}</DialogTitle>
-          <DialogDescription>
-            {{ t('runtimes.thisComputer.dialogDescription') }}
-          </DialogDescription>
         </DialogHeader>
 
         <FormStack>
@@ -290,9 +282,6 @@
           <DialogTitle class="break-words">
             {{ desktopRuntimeName }}
           </DialogTitle>
-          <DialogDescription>
-            {{ t('computerAccess.subtitleRuntime') }}
-          </DialogDescription>
         </DialogHeader>
 
         <DialogBody>
@@ -340,7 +329,6 @@ import {
   Button,
   Dialog,
   DialogBody,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogPanel,
@@ -505,14 +493,7 @@ const desktopRuntimeLabel = computed(() => (
     : t('runtimes.thisComputer.allow')
 ))
 
-const desktopRuntimeDescription = computed(() => (
-  desktopRuntimeState.value?.error
-  || (!desktopRuntimeState.value?.enabled
-    ? t('runtimes.thisComputer.description')
-    : desktopRuntimeActive.value
-      ? t('runtimes.thisComputer.enabledDescription')
-      : t('runtimes.thisComputer.pausedDescription'))
-))
+const desktopRuntimeDescription = computed(() => desktopRuntimeState.value?.error || '')
 
 const desktopRuntimeStatusLabel = computed(() => {
   switch (desktopRuntimeState.value?.status) {

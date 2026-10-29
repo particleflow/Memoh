@@ -159,9 +159,6 @@ function taskLabel(task: SessiontaskTask) {
         <h3 class="text-label font-medium">
           {{ t('chat.tasks.observation.title') }}
         </h3>
-        <p class="text-body text-muted-foreground">
-          {{ t('chat.tasks.observation.description') }}
-        </p>
         <p
           v-if="observation.error"
           class="text-body"
@@ -190,12 +187,6 @@ function taskLabel(task: SessiontaskTask) {
           {{ t('chat.tasks.observation.refresh') }}
         </Button>
       </section>
-      <p
-        v-if="detail.task_type === 'subagent'"
-        class="text-body text-muted-foreground"
-      >
-        {{ t('chat.tasks.pollingOutput') }}
-      </p>
       <div class="space-y-2">
         <h3 class="text-label font-medium">
           {{ t(detail.task_type === 'subagent' ? 'chat.tasks.visibleOutput' : 'chat.tasks.result') }}
@@ -286,9 +277,6 @@ function taskLabel(task: SessiontaskTask) {
           </Item>
         </template>
       </section>
-      <p class="text-body text-muted-foreground">
-        {{ t('chat.tasks.businessUnknown') }}
-      </p>
     </section>
   </template>
   <template v-else>
@@ -307,26 +295,12 @@ function taskLabel(task: SessiontaskTask) {
       <ItemContent>
         <ItemTitle>{{ taskLabel(item) }}</ItemTitle>
         <ItemDescription>{{ stateLabel(item) }}</ItemDescription>
-        <ItemDescription class="break-all">
-          {{ t('chat.tasks.relationship.session_id') }}: {{ item.session_id || t('chat.tasks.relationship.unavailable') }}
-        </ItemDescription>
-        <ItemDescription class="break-all">
-          {{ t('chat.tasks.relationship.direct_parent_session_id') }}: {{ item.direct_parent_session_id || t('chat.tasks.relationship.unavailable') }}
-        </ItemDescription>
       </ItemContent>
     </Item>
     <div
-      v-if="cursor || nextCursor"
+      v-if="nextCursor"
       class="flex flex-wrap gap-2"
     >
-      <Button
-        v-if="cursor"
-        variant="ghost"
-        :disabled="loading"
-        @click="emit('page')"
-      >
-        {{ t('chat.tasks.newest') }}
-      </Button>
       <Button
         v-if="nextCursor"
         variant="outline"

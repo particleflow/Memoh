@@ -35,7 +35,6 @@
           v-for="r in reminders"
           :key="r.key"
           :label="r.title"
-          :description="r.hint"
         >
           <Button
             variant="outline"
@@ -79,7 +78,6 @@
         <SettingsRow
           v-else-if="configuredChannels.length === 0"
           :label="$t('bots.overview.platformsEmpty')"
-          :description="$t('bots.overview.platformsEmptyHint')"
         >
           <Button
             variant="outline"
@@ -165,13 +163,6 @@
             :value="m.value"
           />
         </div>
-
-        <p
-          v-if="runtimeMetricsNote"
-          class="px-2 text-xs text-muted-foreground"
-        >
-          {{ runtimeMetricsNote }}
-        </p>
       </section>
 
       <!-- Usage: token stat row + daily bar chart — the dashboard's "numbers",
@@ -248,13 +239,6 @@
               :value="m.value"
             />
           </div>
-
-          <p
-            v-if="memoryStatsNote"
-            class="px-2 text-xs text-muted-foreground"
-          >
-            {{ memoryStatsNote }}
-          </p>
         </template>
       </section>
 
@@ -426,13 +410,6 @@ const memoryMetricCards = computed(() => {
   ]
 })
 
-const memoryStatsNote = computed(() => {
-  if (memoryLoading.value) return ''
-  if (!settings.value?.memory_enabled) return ''
-  if (memoryStatus.value) return ''
-  return t('bots.overview.memoryNoStats')
-})
-
 // --- Runtime: live container state + resource metrics. This is only meaningful
 // for container-backed bots. We mirror the detail page's resolution: fetch the
 // container record and resolve the backend from its workspace_backend value,
@@ -538,25 +515,7 @@ const runtimeSampledAt = computed(() => {
   return ts ? formatDateTime(ts) : ''
 })
 
-const cpuMetrics = computed(() => containerMetrics.value?.metrics?.cpu)
-const memoryMetrics = computed(() => containerMetrics.value?.metrics?.memory)
-const storageMetrics = computed(() => containerMetrics.value?.metrics?.storage)
-
-const runtimeHasMetrics = computed(
-  () => !!cpuMetrics.value || !!memoryMetrics.value || !!storageMetrics.value,
-)
-
 const runtimeMetricCards = computed(() => buildRuntimeMetricCards(containerMetrics.value, t))
-
-// Footnote only when the tile grid is present but nothing has been sampled yet.
-const runtimeMetricsNote = computed(() => {
-  if (runtimeHasMetrics.value) return ''
-  if (containerMetrics.value?.supported === false) {
-    return t('bots.container.metricsUnsupported')
-  }
-  if (!containerRunning.value) return t('bots.overview.runtimeStopped')
-  return t('bots.overview.runtimeNoMetrics')
-})
 
 // --- Usage: last 30 days of token usage, drawn as a stat row + a daily bar
 // chart (same data shape + echarts recipe as the dedicated Usage page). ---

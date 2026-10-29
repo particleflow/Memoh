@@ -176,7 +176,6 @@ function finish() {
           v-if="status === 'error' || status === 'unknown'"
           :tone="status === 'error' ? 'destructive' : 'neutral'"
           :title="status === 'unknown' ? t('bots.dependencies.progress.unknownTitle') : t('bots.dependencies.progress.failedTitle')"
-          :description="t(status === 'unknown' ? 'bots.dependencies.progress.unknownHint' : 'bots.dependencies.progress.failedHint')"
         >
           <template
             v-if="status === 'error' && error"

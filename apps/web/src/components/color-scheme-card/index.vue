@@ -73,12 +73,6 @@ const previewSwatches = computed(() => isDark.value ? props.scheme.darkSwatches 
         <p class="text-xs font-medium">
           {{ t(scheme.labelKey) }}
         </p>
-        <p
-          v-if="showDescription"
-          class="mt-0.5 text-[11px] text-muted-foreground"
-        >
-          {{ t(scheme.descriptionKey) }}
-        </p>
       </div>
       <Check
         v-if="selected"

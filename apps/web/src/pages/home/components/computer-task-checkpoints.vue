@@ -87,9 +87,7 @@ const groups = computed(() => {
       <h4 class="text-label font-medium">
         {{ t(`${prefix}.checkpoints.${group.name}`) }}
       </h4>
-      <p class="text-body text-muted-foreground">
-        {{ t(`${prefix}.checkpoints.${group.name}Notice`) }}
-      </p>
+
       <dl class="space-y-1 text-body">
         <div
           v-for="[field, value] in group.rows"
@@ -112,9 +110,7 @@ const groups = computed(() => {
       <h4 class="text-label font-medium">
         {{ t(`${prefix}.checkpoints.collection`) }}
       </h4>
-      <p class="text-body text-muted-foreground">
-        {{ t(`${prefix}.checkpoints.collectionNotice`) }}
-      </p>
+
       <p
         v-if="!data.reconciliation?.files?.length"
         class="text-body"

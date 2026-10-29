@@ -66,9 +66,6 @@ watch([() => props.botId, () => props.sessionId, () => props.visible, () => run.
       >
         {{ resolveApiErrorMessage({ code: run.error_code }, t('chat.botRun.runError')) }}
       </p>
-      <p class="text-body text-muted-foreground">
-        {{ t('chat.botRun.boundary') }}
-      </p>
       <Collapsible v-model:open="expanded">
         <CollapsibleTrigger as-child>
           <Button variant="outline">

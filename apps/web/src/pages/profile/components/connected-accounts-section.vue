@@ -9,7 +9,6 @@
       <SettingsRow
         v-if="!checkingImBot && !hasLinkableImBot"
         :label="$t('settings.connectedAccounts.noImBotTitle')"
-        :description="$t('settings.connectedAccounts.noImBotHint')"
       >
         <Button
           variant="outline"
@@ -88,7 +87,6 @@
         <!-- Link action: empty-state title when none yet, otherwise "link another" -->
         <SettingsRow
           :label="bindings.length === 0 ? $t('settings.connectedAccounts.empty') : $t('settings.connectedAccounts.linkAnother')"
-          :description="$t('settings.connectedAccounts.subtitle')"
         >
           <Button
             variant="outline"
@@ -108,9 +106,6 @@
           class="mx-4 space-y-2.5 border-b border-border py-4 last:border-b-0"
         >
           <div class="flex items-center justify-between gap-2">
-            <p class="text-xs text-muted-foreground">
-              {{ $t('settings.connectedAccounts.codeInstruction') }}
-            </p>
             <span
               class="shrink-0 text-xs tabular-nums"
               :class="expired ? 'text-destructive' : 'text-muted-foreground'"

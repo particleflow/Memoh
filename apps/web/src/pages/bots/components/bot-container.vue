@@ -603,10 +603,6 @@ async function handleApplyResourceLimitsNow() {
     await loadContainerMetrics(false)
   }
 }
-
-const storageHardLimitSupported = computed(() =>
-  resourceLimits.value?.capabilities?.storage?.hard_limit_supported === true,
-)
 const storageSoftLimitExceeded = computed(() =>
   resourceLimits.value?.observed?.storage_over_soft_limit === true,
 )
@@ -958,7 +954,6 @@ watch([activeTab, botId], ([tab]) => {
 <template>
   <PageShell
     :title="$t('bots.container.title')"
-    :description="$t('bots.container.subtitle')"
     variant="tab"
   >
     <!-- No title-row toolbar: usage keeps itself fresh by polling while the tab is
@@ -1000,9 +995,6 @@ watch([activeTab, botId], ([tab]) => {
           <div>
             <p class="text-sm font-medium text-foreground">
               {{ $t('bots.container.refactored.emptyTitle') }}
-            </p>
-            <p class="mt-1 max-w-sm text-xs text-muted-foreground">
-              {{ $t('bots.container.refactored.emptyDescription') }}
             </p>
           </div>
           <Button
@@ -1059,7 +1051,6 @@ watch([activeTab, botId], ([tab]) => {
             v-if="isLegacy"
             tone="warning"
             :title="$t('bots.container.refactored.issueLegacyTitle')"
-            :description="$t('bots.container.refactored.issueLegacyHint')"
           >
             <Button
               variant="outline"
@@ -1265,9 +1256,6 @@ watch([activeTab, botId], ([tab]) => {
               placeholder="debian:bookworm-slim"
               :disabled="containerAction === 'create'"
             />
-            <p class="text-xs text-muted-foreground">
-              {{ $t('bots.container.createImageDescription') }}
-            </p>
           </div>
 
           <!-- More options: restore + GPU, collapsed by default -->
@@ -1296,9 +1284,6 @@ watch([activeTab, botId], ([tab]) => {
                       <p class="text-sm font-medium text-foreground">
                         {{ $t('bots.container.refactored.createRestoreToggle') }}
                       </p>
-                      <p class="mt-0.5 text-xs text-muted-foreground">
-                        {{ $t('bots.container.createRestoreDataDescription') }}
-                      </p>
                     </div>
                     <Switch
                       :model-value="createRestoreData"
@@ -1312,9 +1297,6 @@ watch([activeTab, botId], ([tab]) => {
                     <div class="min-w-0">
                       <p class="text-sm font-medium text-foreground">
                         {{ $t('bots.container.createGpuLabel') }}
-                      </p>
-                      <p class="mt-0.5 text-xs text-muted-foreground">
-                        {{ $t('bots.container.createGpuDescription') }}
                       </p>
                     </div>
                     <Switch
@@ -1337,9 +1319,6 @@ watch([activeTab, botId], ([tab]) => {
                       :disabled="containerAction === 'create'"
                       class="min-h-20 font-mono text-xs"
                     />
-                    <p class="text-xs text-muted-foreground">
-                      {{ $t('bots.container.createGpuDevicesDescription') }}
-                    </p>
                   </div>
                 </div>
               </div>
@@ -1416,12 +1395,6 @@ watch([activeTab, botId], ([tab]) => {
               :placeholder="$t('bots.container.resourceLimits.unlimitedPlaceholder')"
               :disabled="resourceLimitsSaving"
             />
-            <p
-              v-if="!storageHardLimitSupported"
-              class="text-xs text-muted-foreground"
-            >
-              {{ $t('bots.container.resourceLimits.storageHint') }}
-            </p>
           </div>
 
           <DialogFooter class="gap-2">
@@ -1462,9 +1435,6 @@ watch([activeTab, botId], ([tab]) => {
             <div class="min-w-0">
               <p class="text-sm font-medium text-foreground">
                 {{ $t('bots.container.preservedDataAvailable') }}
-              </p>
-              <p class="mt-0.5 text-xs text-muted-foreground">
-                {{ $t('bots.container.dataSubtitle') }}
               </p>
             </div>
             <ConfirmPopover
@@ -1637,13 +1607,6 @@ watch([activeTab, botId], ([tab]) => {
             <span class="text-right text-sm text-foreground">{{ formatDate(containerInfo.updated_at) }}</span>
           </div>
         </div>
-
-        <p
-          v-if="displayedCDIDevices.length > 0"
-          class="text-xs text-muted-foreground"
-        >
-          {{ $t('bots.container.gpuRecreateHint') }}
-        </p>
       </DialogScrollContent>
     </Dialog>
 
@@ -1696,9 +1659,6 @@ watch([activeTab, botId], ([tab]) => {
             <div class="min-w-0">
               <p class="text-sm font-medium text-foreground">
                 {{ $t('bots.container.refactored.deleteKeepLabel') }}
-              </p>
-              <p class="mt-0.5 text-xs text-muted-foreground">
-                {{ $t('bots.container.refactored.deleteKeepDesc') }}
               </p>
             </div>
             <Switch

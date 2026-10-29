@@ -16,7 +16,6 @@
           v-else
           stack="sm"
           :label="t('bots.remoteRuntime.primary')"
-          :description="t('bots.remoteRuntime.primaryDescription')"
         >
           <Select
             :model-value="primaryTargetId"
@@ -51,7 +50,6 @@
         <SettingsRow
           v-else-if="loadFailed"
           :label="t('bots.remoteRuntime.loadFailed')"
-          :description="t('bots.remoteRuntime.loadFailedDescription')"
         >
           <Button
             variant="outline"
@@ -67,7 +65,6 @@
             v-if="showThisComputerSetup"
             stack="sm"
             :label="t('bots.remoteRuntime.thisComputerOff')"
-            :description="t('bots.remoteRuntime.thisComputerOffDescription')"
           >
             <Button
               variant="outline"
@@ -84,7 +81,6 @@
             v-if="nativeTarget"
             stack="sm"
             :label="t('bots.remoteRuntime.nativeWorkspace')"
-            :description="t('bots.remoteRuntime.serverDescription')"
           >
             <div class="flex items-center gap-2">
               <Badge
@@ -149,7 +145,6 @@
         <SettingsRow
           stack="sm"
           :label="t('bots.remoteRuntime.connectManage')"
-          :description="t('bots.remoteRuntime.connectManageDescription')"
         >
           <Button
             variant="outline"

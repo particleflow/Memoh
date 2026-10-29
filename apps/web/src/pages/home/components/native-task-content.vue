@@ -34,9 +34,6 @@ const receiptState = computed(() => {
     <h3 class="text-label font-medium">
       {{ t('chat.tasks.native.title') }}
     </h3>
-    <p class="text-body text-muted-foreground">
-      {{ t('chat.tasks.native.notice') }}
-    </p>
     <Button
       v-if="!view.opened"
       variant="outline"
@@ -51,12 +48,7 @@ const receiptState = computed(() => {
       >
         {{ failed }}
       </p>
-      <p
-        v-if="view.data && !view.data.supported"
-        class="text-body"
-      >
-        {{ t('chat.tasks.native.batch') }}
-      </p>
+
       <template v-else-if="view.data?.observation">
         <p class="text-body text-muted-foreground">
           terminal_snapshot_unverified · {{ view.data.observation.truncated ? t('chat.tasks.native.truncated') : t('chat.tasks.native.bounded') }}
@@ -125,9 +117,6 @@ const receiptState = computed(() => {
             </SelectContent>
           </Select>
         </FieldStack>
-        <p class="text-body text-muted-foreground">
-          {{ t('chat.tasks.native.modeNotice') }}
-        </p>
         <FieldStack :label="t('chat.tasks.native.instruction')">
           <Textarea
             v-model="task"

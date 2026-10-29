@@ -5,7 +5,6 @@ import {
   Button,
   Empty,
   EmptyContent,
-  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
@@ -301,7 +300,6 @@ function openAddProvider(templateId?: string) {
           </EmptyMedia>
         </EmptyHeader>
         <EmptyTitle>{{ t('provider.emptyTitle') }}</EmptyTitle>
-        <EmptyDescription>{{ t('provider.emptyDescription') }}</EmptyDescription>
         <EmptyContent>
           <Button
             variant="outline"

@@ -138,7 +138,6 @@ func (r *Registry) GlobalHelp(t *i18n.Localizer, commandTarget string) string {
 	b.WriteString(MdBold(t.T("cmd.help.availableCommands")) + "\n\n")
 	b.WriteString("- " + CommandText("help", "") + " — " + t.T("cmd.help.top.help") + "\n")
 	b.WriteString("- " + CommandText("start", "") + " — " + t.T("cmd.help.top.start") + "\n")
-	b.WriteString("- " + CommandText("new", "") + " — " + t.T("cmd.help.top.new") + "\n")
 	b.WriteString("- " + CommandText("stop", "") + " — " + t.T("cmd.help.top.stop") + "\n")
 	for _, name := range r.order {
 		group := r.groups[name]

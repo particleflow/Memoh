@@ -2,7 +2,6 @@
   <PageShell
     variant="tab"
     :title="$t('bots.access.title')"
-    :description="$t('bots.access.subtitle')"
   >
     <Tabs
       v-model="activeTab"
@@ -54,7 +53,6 @@
         <SettingsSection>
           <SettingsRow
             :label="$t('bots.access.members.title')"
-            :description="$t('bots.access.members.subtitle')"
           >
             <!-- Inline add-member select, same shape as the model picker in
                  settings: a w-56 select-trigger that opens a search menu. Picking
@@ -202,13 +200,6 @@
                       <Info class="size-3.5 text-muted-foreground" />
                       {{ $t('bots.access.members.platformMember') }}
                     </div>
-                    <p class="text-xs leading-relaxed text-muted-foreground">
-                      {{ member.manageInherited
-                        ? (member.manageHasOverride
-                          ? $t('bots.access.members.overrideActive')
-                          : $t('bots.access.members.inheritedFollowing'))
-                        : $t('bots.access.members.platformMemberHint') }}
-                    </p>
                     <Button
                       v-if="member.manageInherited && member.manageHasOverride"
                       variant="outline"
@@ -460,7 +451,6 @@
                 >
                   <EmptyHeader>
                     <EmptyTitle>{{ $t('bots.access.rulesEmpty') }}</EmptyTitle>
-                    <EmptyDescription>{{ $t('bots.access.rulesEmptyDescription') }}</EmptyDescription>
                   </EmptyHeader>
                   <EmptyContent>
                     <Button

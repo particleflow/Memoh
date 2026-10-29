@@ -276,7 +276,6 @@ watch(() => openStatus.addTranscriptionOpen, (isOpen, wasOpen) => {
         <!-- Speaking (TTS) -->
         <SectionGroup
           :title="t('voice.speakTitle')"
-          :description="t('voice.speakHint')"
         >
           <template #actions>
             <Button
@@ -355,7 +354,6 @@ watch(() => openStatus.addTranscriptionOpen, (isOpen, wasOpen) => {
         <!-- Listening (STT) -->
         <SectionGroup
           :title="t('voice.listenTitle')"
-          :description="t('voice.listenHint')"
         >
           <template #actions>
             <Button

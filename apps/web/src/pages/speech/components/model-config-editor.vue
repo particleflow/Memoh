@@ -9,7 +9,7 @@
         :key="field.key"
         :label="field.title || field.key"
         :for="field.type === 'bool' || field.type === 'enum' ? undefined : `tts-field-${field.key}`"
-        :help="field.description"
+
         :class="isWideField(field) ? 'md:col-span-2' : ''"
       >
         <div
@@ -102,16 +102,13 @@
       >
         <div class="min-h-0">
           <div class="mt-3 space-y-4">
-            <p class="text-xs text-muted-foreground">
-              {{ mode === 'transcription' ? $t('transcription.advanced.description') : $t('speech.advanced.description') }}
-            </p>
             <div class="grid gap-4 md:grid-cols-2">
               <FieldStack
                 v-for="field in advancedFields"
                 :key="field.key"
                 :label="field.title || field.key"
                 :for="field.type === 'bool' || field.type === 'enum' ? undefined : `tts-field-${field.key}`"
-                :help="field.description"
+
                 :class="isWideField(field) ? 'md:col-span-2' : ''"
               >
                 <div

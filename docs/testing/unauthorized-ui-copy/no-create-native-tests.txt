@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/Memoh-harmony/mobile/client/tests/.isolated/ci-web/checkout
+
+
+ Test Files  4 passed (4)
+      Tests  170 passed (170)
+   Start at  09:49:52
+   Duration  3.34s (transform 2.58s, setup 0ms, import 4.48s, tests 584ms, environment 881ms)

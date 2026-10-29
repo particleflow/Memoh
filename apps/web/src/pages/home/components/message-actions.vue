@@ -120,23 +120,6 @@
         </Tooltip>
 
         <template v-if="inlineActions">
-          <Tooltip v-if="onFork">
-            <TooltipTrigger as-child>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-sm"
-                :class="actionIconClass"
-                :aria-label="t('chat.actions.createFork')"
-                @click="onFork"
-              >
-                <ForkSplitIcon class="size-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {{ t('chat.actions.createFork') }}
-            </TooltipContent>
-          </Tooltip>
           <span
             v-if="timeLabel"
             class="ml-1.5 min-w-0 truncate text-xs text-muted-foreground"
@@ -145,38 +128,6 @@
             {{ timeLabel }}
           </span>
         </template>
-        <DropdownMenu v-else>
-          <DropdownMenuTrigger as-child>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              :class="actionIconClass"
-              :aria-label="t('chat.actions.more')"
-            >
-              <DotsIcon class="size-[18px]" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            side="top"
-            align="start"
-            class="min-w-[12rem]"
-          >
-            <DropdownMenuLabel
-              class="text-label font-normal text-muted-foreground"
-              :title="fullTime"
-            >
-              {{ timeLabel }}
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              v-if="onFork"
-              @select="onFork"
-            >
-              <ForkSplitIcon class="size-4" />
-              <span>{{ t('chat.actions.createFork') }}</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
       </template>
     </TooltipProvider>
   </div>
@@ -187,19 +138,12 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { PencilLine, RotateCcw, Volume2 } from 'lucide-vue-next'
 import CopyActionButton from './copy-action-button.vue'
-import ForkSplitIcon from './fork-split-icon.vue'
-import DotsIcon from './dots-icon.vue'
 import {
   Button,
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuItem,
 } from '@felinic/ui'
 
 const props = defineProps<{

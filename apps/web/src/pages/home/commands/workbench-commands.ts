@@ -12,7 +12,6 @@ export function registerWorkbenchCommands(registry: KeyboardCommandRegistry, sto
     if (groupId) store.splitGroup(groupId, direction)
   }
   const actions: Array<[AppKeyboardCommand, () => void]> = [
-    [appKeyboardCommands.newChatSession, () => store.openDraftChat({ groupId: store.api?.activeGroup?.id })],
     [appKeyboardCommands.showSessions, () => sidebar('sessions')],
     [appKeyboardCommands.showFiles, () => sidebar('files')],
     [appKeyboardCommands.showSchedule, () => sidebar('schedule')],

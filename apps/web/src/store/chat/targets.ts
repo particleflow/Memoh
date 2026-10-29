@@ -12,6 +12,7 @@ export function createChatTargets(deps: {
   focusedViewId: Ref<string>
   explicitSessionSelection: Ref<boolean>
   normalizeTarget: (target?: Partial<ChatViewTarget>) => ChatViewTarget
+  contactSessionFor?: (botId: string) => string | undefined
   knownSession: (sessionId: string) => SessionSummary | null | undefined
   pendingExternalAgentState: (target: ChatViewTarget) => {
     input: {
@@ -89,6 +90,7 @@ export function createChatTargets(deps: {
   function readOnlyFor(target: ChatViewTarget) {
     const resolved = deps.normalizeTarget(target)
     const session = targetFor(resolved).session
+    if (deps.contactSessionFor && resolved.sessionId !== deps.contactSessionFor(resolved.botId)) return true
     if (!session) return Boolean(resolved.sessionId)
     const type = session.type ?? 'chat'
     if (type === 'schedule') {
@@ -98,8 +100,8 @@ export function createChatTargets(deps: {
     return Boolean(channelType && channelType !== 'local')
   }
 
-  function canForkFor(target: ChatViewTarget) {
-    return targetFor(target).session?.type === 'chat'
+  function canForkFor(_target: ChatViewTarget) {
+    return false
   }
 
   return {

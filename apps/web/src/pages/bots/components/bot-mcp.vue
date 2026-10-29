@@ -103,7 +103,6 @@
       <SettingsSection v-else>
         <Empty class="py-16">
           <EmptyTitle>{{ $t('mcp.emptyTitle') }}</EmptyTitle>
-          <EmptyDescription>{{ $t('mcp.emptyDescription') }}</EmptyDescription>
           <EmptyContent>
             <Button
               variant="outline"
@@ -256,7 +255,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   AutoHeight, Badge, Button, Dialog, DialogClose, DialogDescription, DialogFooter,
-  DialogHeader, DialogPanel, DialogTitle, Empty, EmptyContent, EmptyDescription, EmptyTitle,
+  DialogHeader, DialogPanel, DialogTitle, Empty, EmptyContent, EmptyTitle,
   InputGroup, InputGroupAddon, InputGroupInput, Skeleton, toast, Tooltip,
   TooltipContent, TooltipProvider, TooltipTrigger,
 } from '@felinic/ui'

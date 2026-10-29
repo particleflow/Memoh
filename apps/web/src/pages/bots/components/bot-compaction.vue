@@ -276,7 +276,6 @@ onBeforeUnmount(() => {
       <SettingsSection>
         <SettingsRow
           :label="$t('bots.settings.compactionEnabled')"
-          :description="$t('bots.settings.compactionDescription')"
         >
           <Switch
             :model-value="form.compaction_enabled"
@@ -293,12 +292,6 @@ onBeforeUnmount(() => {
               >
                 {{ $t('bots.settings.compactionThreshold') }}
               </label>
-              <p
-                id="compaction-threshold-description"
-                class="mt-0.5 text-body text-muted-foreground"
-              >
-                {{ $t('bots.settings.compactionThresholdDescription') }}
-              </p>
             </template>
             <NumberField
               id="compaction-threshold"
@@ -323,12 +316,6 @@ onBeforeUnmount(() => {
               >
                 {{ $t('bots.settings.compactionTargetPercent') }}
               </label>
-              <p
-                id="compaction-target-percent-description"
-                class="mt-0.5 text-body text-muted-foreground"
-              >
-                {{ $t('bots.settings.compactionTargetPercentDescription') }}
-              </p>
             </template>
             <!-- Empty means "use the default" (null → backend clears the
                  override); reka commits undefined for an empty field. -->
@@ -350,7 +337,6 @@ onBeforeUnmount(() => {
           v-if="form.compaction_enabled"
           stack="sm"
           :label="$t('bots.settings.compactionModel')"
-          :description="$t('bots.settings.compactionModelDescription')"
         >
           <ModelSelect
             v-model="form.compaction_model_id"
@@ -419,7 +405,6 @@ onBeforeUnmount(() => {
                 >
                   <EmptyHeader>
                     <EmptyTitle>{{ $t('bots.compaction.logsDisabledTitle') }}</EmptyTitle>
-                    <EmptyDescription>{{ $t('bots.compaction.logsDisabledHint') }}</EmptyDescription>
                   </EmptyHeader>
                 </Empty>
 
@@ -429,7 +414,6 @@ onBeforeUnmount(() => {
                 >
                   <EmptyHeader>
                     <EmptyTitle>{{ $t('bots.compaction.empty') }}</EmptyTitle>
-                    <EmptyDescription>{{ $t('bots.compaction.emptyHint') }}</EmptyDescription>
                   </EmptyHeader>
                 </Empty>
 

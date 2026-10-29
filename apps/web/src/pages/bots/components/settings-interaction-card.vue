@@ -8,7 +8,7 @@
   >
     <SettingsRow
       :label="$t('bots.settings.defaultAgent')"
-      :description="defaultAgentDescription"
+
       stack="sm"
     >
       <Select
@@ -63,7 +63,6 @@
 
     <SettingsRow
       :label="$t('bots.settings.chatModel')"
-      :description="$t('bots.settings.chatModelDescription')"
       stack="sm"
     >
       <div class="w-full sm:w-56">
@@ -81,7 +80,6 @@
 
     <SettingsRow
       :label="$t('bots.settings.showToolCallsInIM')"
-      :description="$t('bots.settings.showToolCallsInIMDescription')"
     >
       <Switch
         :model-value="form.show_tool_calls_in_im"
@@ -141,14 +139,6 @@ const defaultAgentValue = computed(() =>
   defaultBotAgentID.value
     ? agentOptionValue(defaultBotAgentID.value)
     : MEMOH_AGENT_VALUE,
-)
-const selectedAgentUnavailable = computed(() =>
-  !!defaultBotAgentID.value && (!selectedAgent.value || selectedAgent.value.enabled === false || !isAgentConfigured(selectedAgent.value)),
-)
-const defaultAgentDescription = computed(() =>
-  selectedAgentUnavailable.value
-    ? t('bots.settings.defaultAgentUnavailableDescription')
-    : t('bots.settings.defaultAgentDescription'),
 )
 const selectedAgentLabel = computed(() => {
   if (!defaultBotAgentID.value) return t('chat.agentMemoh')

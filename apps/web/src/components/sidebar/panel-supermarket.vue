@@ -51,12 +51,6 @@
             </div>
             <template v-else>
               <p
-                v-if="installedQuery.data.value?.workspace_state !== 'running'"
-                class="text-caption text-muted-foreground"
-              >
-                {{ t('apps.workspaceNotRunningDescription') }}
-              </p>
-              <p
                 v-if="!installed.length"
                 class="text-caption text-muted-foreground"
               >

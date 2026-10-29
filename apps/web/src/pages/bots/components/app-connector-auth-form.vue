@@ -42,7 +42,6 @@
         >
           <FieldStack
             :label="field.label || field.key"
-            :help="field.description"
           >
             <FormControl>
               <Select

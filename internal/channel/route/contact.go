@@ -102,7 +102,10 @@ func (c *ThreadCoordinator) EnsurePrivateChat(ctx context.Context, bot, user str
 			if (lookupErr == nil && (r.ID != previous.ID || r.ActiveSessionID != previous.ActiveSessionID)) || (lookupErr != nil && r.ActiveSessionID.Valid) {
 				return errContactChanged
 			}
-			if r.ActiveSessionID.Valid && !stored.DeletedAt.Valid {
+			if r.ActiveSessionID.Valid {
+				if stored.DeletedAt.Valid {
+					return ErrContactUnavailable
+				}
 				// Runtime/mode are mutable preferences, not contact identity.
 				// The HTTP boundary applies the current descriptor's read permission.
 				var readErr error

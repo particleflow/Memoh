@@ -496,7 +496,7 @@ func (s *UploadStore) entries() ([]os.DirEntry, error) {
 		return nil, err
 	}
 	defer func() { _ = f.Close() }()
-	return f.ReadDir(-1) // bounded by admission: 128 receipts plus payloads/lock stripes
+	return f.ReadDir(-1) // bounded receipts/payloads/lock stripes plus the fixed failure journal
 }
 
 func (s *UploadStore) Sweep(ctx context.Context) error {
@@ -505,7 +505,10 @@ func (s *UploadStore) Sweep(ctx context.Context) error {
 		return err
 	}
 	defer unlock()
-	return s.sweep(ctx)
+	if err := s.sweep(ctx); err != nil {
+		return err
+	}
+	return s.sweepFailures()
 }
 
 func (s *UploadStore) sweep(ctx context.Context) error {

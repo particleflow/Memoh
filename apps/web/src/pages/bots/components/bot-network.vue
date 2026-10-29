@@ -15,7 +15,6 @@
       <SettingsSection v-if="props.botId">
         <SettingsRow
           :label="$t('bots.settings.networkSDWANSectionTitle')"
-          :description="$t('bots.settings.networkSDWANSectionHint')"
         >
           <Switch
             :model-value="form.overlay_enabled"
@@ -123,12 +122,6 @@
                   >
                     {{ field.title || field.key }}
                   </Label>
-                  <p
-                    v-if="field.description"
-                    class="mt-0.5 text-xs text-muted-foreground"
-                  >
-                    {{ field.description }}
-                  </p>
                 </template>
 
                 <div :class="isMultilineField(field) ? 'w-full' : 'w-full sm:w-80'">
@@ -298,7 +291,6 @@
       <DialogPanel>
         <DialogHeader>
           <DialogTitle>{{ $t('common.advanced') }}</DialogTitle>
-          <DialogDescription>{{ $t('common.allOptional') }}</DialogDescription>
         </DialogHeader>
         <DialogBody>
           <div
@@ -321,12 +313,6 @@
                 >
                   {{ field.title || field.key }}
                 </Label>
-                <p
-                  v-if="field.description"
-                  class="mt-0.5 text-xs text-muted-foreground"
-                >
-                  {{ field.description }}
-                </p>
               </template>
 
               <div :class="isMultilineField(field) ? 'w-full' : 'w-full sm:w-80'">
@@ -428,11 +414,8 @@
           <DialogTitle class="text-sm font-semibold">
             {{ $t('mcp.editValue') }}
           </DialogTitle>
-          <DialogDescription class="text-xs leading-snug">
-            {{ $t('mcp.editLongTextHint') }}
-          </DialogDescription>
         </DialogHeader>
-        
+
         <div class="flex min-h-0 flex-1 p-4">
           <MonacoEditor
             v-model="editorDraftRaw"
@@ -560,7 +543,7 @@ import {
   Input,
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
   Textarea,
-  Dialog, DialogBody, DialogContent, DialogHeader, DialogPanel, DialogTitle, DialogDescription, DialogFooter, DialogClose,
+  Dialog, DialogBody, DialogContent, DialogHeader, DialogPanel, DialogTitle, DialogFooter, DialogClose,
 } from '@felinic/ui'
 import { SquarePen, Eye, EyeOff, RefreshCw, SlidersHorizontal } from 'lucide-vue-next'
 import { reactive, computed, watch, nextTick, onBeforeUnmount, ref } from 'vue'
@@ -898,7 +881,7 @@ const nodeListHint = computed(() => {
   if (!isSelectedNetworkPersisted.value) return t('bots.settings.networkNodesPendingSave')
   if (nodeListData.value?.message) return nodeListData.value.message
   if (!exitNodeOptions.value.length) return t('bots.settings.networkNodesEmpty')
-  return t('bots.settings.networkExitNodeDescription')
+  return ''
 })
 const exitNodeValue = computed({
   get: () => String(form.overlay_config.exit_node ?? ''),

@@ -36,9 +36,6 @@ const state = computed(() => ['accepted', 'running', 'waiting_decision', 'finish
       >
         {{ t('chat.delegations.runUpdated') }} · {{ formatDateTimeSeconds(task.target_run_updated_at) }}
       </p>
-      <p class="text-body text-muted-foreground">
-        {{ t('chat.delegations.runRecorded') }}
-      </p>
       <Button
         v-if="historyAction"
         variant="outline"

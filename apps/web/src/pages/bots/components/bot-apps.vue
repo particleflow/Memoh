@@ -83,7 +83,6 @@
           <Empty class="py-12">
             <EmptyHeader>
               <EmptyTitle>{{ t('apps.emptyTitle') }}</EmptyTitle>
-              <EmptyDescription>{{ t('apps.emptyDescription') }}</EmptyDescription>
             </EmptyHeader>
             <EmptyContent>
               <Button
@@ -247,7 +246,6 @@ import {
   DetailPane,
   Empty,
   EmptyContent,
-  EmptyDescription,
   EmptyHeader,
   EmptyTitle,
   PageShell,

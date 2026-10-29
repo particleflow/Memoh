@@ -226,7 +226,6 @@
       />
       <SettingsRow
         :label="t('bots.schedule.form.maxRunMinutes')"
-        :description="t('bots.schedule.form.maxRunMinutesHelp')"
         stack="sm"
       >
         <div class="w-full sm:w-56">

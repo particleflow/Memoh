@@ -8,9 +8,7 @@
       v-if="!currentBotId"
       class="flex-1"
     >
-      <PanePlaceholder :title="$t('chat.selectBot')">
-        {{ $t('chat.selectBotHint') }}
-      </PanePlaceholder>
+      <PanePlaceholder :title="$t('chat.selectBot')" />
     </div>
 
     <template v-else>
@@ -156,7 +154,6 @@
                             :on-retry-message="handleRetryMessage"
                             :can-retry-latest-assistant="isRetryableTurn(msg)"
                             :can-edit-latest-user="isEditableTurn(msg)"
-                            :can-fork-assistant="isForkableTurn(msg)"
                             :inline-actions="isDirectBotAgentRuntime(activeChatTarget.runtimeType)"
                             :goal-runtime="activeChatTarget.runtimeType"
                             :is-scrolling="isScrolling"
@@ -166,19 +163,12 @@
                             @replay-speech="readAloud.replay(msg)"
                             @active="onMessageActive"
                             @edit-message="handleEditMessage"
-                            @fork-message="handleForkMessage"
                           />
                         </div>
                       </ContextMenuTrigger>
                       <ContextMenuContent v-if="readAloud.canReplay(msg)">
                         <ContextMenuItem @select="readAloud.replay(msg)">
                           {{ $t('chat.readAloud.replay') }}
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                          v-if="readAloud.status(msg) !== 'idle'"
-                          @select="readAloud.stop()"
-                        >
-                          {{ $t('chat.readAloud.stop') }}
                         </ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
@@ -225,11 +215,6 @@
           <pre class="max-h-[60vh] overflow-auto whitespace-pre-wrap break-words rounded-lg border border-border bg-surface-composer p-3 text-caption leading-relaxed text-foreground">{{ pastedViewerText }}</pre>
         </DialogContent>
       </Dialog>
-
-      <ChatForkDialog
-        v-model:open="forkDialogOpen"
-        :turn-id="pendingForkTurnId"
-      />
 
       <!-- Asked before a usage example or App "Try it" replaces unsent text. -->
       <ConfirmDeleteDialog
@@ -412,7 +397,6 @@
                         />
                         <span class="min-w-0 flex-1">
                           <span class="block truncate text-control">{{ action.id === 'plan' ? $t('chat.planMode.commandLabel') : action.id === 'goal' ? $t('chat.goal.label') : action.label }}</span>
-                          <span class="block truncate text-caption text-muted-foreground">{{ action.description }}</span>
                         </span>
                       </CommandItem>
                     </CommandGroup>
@@ -1003,23 +987,8 @@
                  mode pills, with the context-pressure ring pinned right.
                  Keep this row's height while recording so the dock stays
                  stable. -->
-              <div
-                v-if="readAloud.state.value.status !== 'idle' && readAloud.state.value.status !== 'error'"
-                class="pointer-events-auto flex items-center gap-2 px-2"
-                role="status"
-              >
-                <TextButton
-                  v-if="readAloud.state.value.status === 'blocked' || readAloud.state.value.status === 'paused'"
-                  @click="readAloud.resume()"
-                >
-                  {{ $t(readAloud.state.value.status === 'blocked' ? 'chat.readAloud.enable' : 'chat.readAloud.resume') }}
-                </TextButton>
-                <TextButton @click="readAloud.stop()">
-                  {{ $t('chat.readAloud.stop') }}
-                </TextButton>
-              </div>
               <p
-                v-else-if="readAloud.state.value.status === 'error'"
+                v-if="readAloud.state.value.status === 'error'"
                 class="px-2 text-caption text-muted-foreground"
                 role="status"
               >
@@ -1357,7 +1326,6 @@ import {
   HelpCircle,
   List,
   Package,
-  SquarePen,
   ShieldCheck,
   Lightbulb,
   Target,
@@ -1400,7 +1368,6 @@ import SessionActivityTrigger from '@/components/sidebar/session-activity-trigge
 import BotTaskDirectory from './bot-task-directory.vue'
 import { runtimeFailureAlreadyVisible, watchVisibleComposerFailure } from './composer-error'
 import ForkSourceDivider from './fork-source-divider.vue'
-import ChatForkDialog from './chat-fork-dialog.vue'
 import ComposerDock from './composer-dock.vue'
 import SessionFollowUpQueue from './session-follow-up-queue.vue'
 import { usePendingApprovals } from '../composables/usePendingApprovals'
@@ -1430,7 +1397,7 @@ import { provideConnectorLogos } from '../composables/useConnectorLogos'
 import { enqueueSteerQueue, enqueueFollowUpQueue, fetchSafeSkillCatalog, fetchSession, type ChatAttachment, type CommandActionListItem, type CommandEventResponse, type RequestedSkillSelection, type UIUserInput } from '@/composables/api/useChat'
 import { parseSessionQueueCommand, SessionQueueSubmissionGate } from './session-queue-submission'
 import { localizeRuntimeControls, localizeRuntimeCommandResult } from '@/utils/runtime-control-presentation'
-import { commandResultPresentation, isCommandResultItemVisible, resolveCommandResultSelection } from './slash-command-result'
+import { commandResultPresentation, isCommandResultItemVisible, isConversationResetCommand, resolveCommandResultSelection } from './slash-command-result'
 import SendMorphIcon from './send-morph-icon.vue'
 import { captureChatPaneSendContext, clearComposerPairDraft, composerRestoreForSendResult, composerHasNoModel as hasNoComposerModel, matchesChatPaneSendContext, pinnedSubagentModelId as resolvePinnedSubagentModelId, shouldRefreshACPComposerConfig, welcomeSendConsumedDraft } from './chat-pane-send'
 import { onAuthSessionCleared } from '@/lib/auth-session'
@@ -1521,8 +1488,6 @@ function setComposerFailure(failure: Pick<SendMessageResult, 'error' | 'errorCod
   composerError.value = failure.error || ''
   composerFailure.value = { ok: false, ...failure }
 }
-const forkDialogOpen = ref(false)
-const pendingForkTurnId = ref('')
 const modelPopoverOpen = ref(false)
 const agentPopoverOpen = ref(false)
 const hoveredAgentChoice = ref('')
@@ -1575,7 +1540,6 @@ const creatingSession = computed(() => chatStore.isChatViewCreatingSession(paneT
 const activeChatTarget = computed(() => chatStore.chatTargetFor(paneTarget.value))
 const activeSession = computed(() => activeChatTarget.value.session)
 const activeChatReadOnly = computed(() => chatStore.chatReadOnlyFor(paneTarget.value))
-const activeChatCanFork = computed(() => chatStore.chatCanForkFor(paneTarget.value))
 // The composer pair lives on the shared ChatViewEntry: same-session tabs share
 // one pair and repointing this pane swaps in the target view's own pair. Every
 // rule that changes it is in useComposerPair (registered below, once its
@@ -1688,29 +1652,6 @@ const pendingUserInput = computed<UIUserInput | null>(() => (
 const { items: pendingApprovals } = usePendingApprovals(messages)
 
 const hasPendingToolApproval = computed(() => pendingApprovals.value.length > 0)
-
-// A direct runtime's turn says itself whether it can anchor a fork
-// (runtimeForkable, below): only turns whose runtime recorded an anchor can.
-const canForkAssistant = computed(() =>
-  !streaming.value
-  && !loadingMessages.value
-  && !activeChatReadOnly.value
-  && activeChatCanFork.value
-  && (activeChatTarget.value.runtimeType === 'model'
-    || isDirectBotAgentRuntime(activeChatTarget.value.runtimeType)),
-)
-
-// A freshly committed turn can arrive before older history rows are refetched.
-// Keep the latest-only policy effective across that live transition as well.
-const latestRuntimeForkTurn = computed(() => messages.value.findLast(message =>
-  message.role === 'assistant' && message.runtimeForkable === true,
-))
-function isForkableTurn(message: ChatMessage): boolean {
-  return canForkAssistant.value && message.role === 'assistant'
-    && (activeChatTarget.value.runtimeType === 'model' || message.runtimeForkable === true)
-    && (!runtimeControls.controls.value?.capabilities?.fork_latest_only
-      || message === latestRuntimeForkTurn.value)
-}
 
 // Retry/edit rewrite persisted history and replay it, which only runtimes
 // whose context Memoh itself assembles can honor.
@@ -2225,12 +2166,6 @@ const slashQuickActions = computed(() => [
         icon: List,
       }]
     : []),
-  {
-    id: 'new',
-    label: '/new',
-    description: t('chat.slash.newDescription'),
-    icon: SquarePen,
-  },
   ...((runtimeModes.value.length > 0 || (activeIsPendingExternalAgent.value && acpModes.value.length > 0))
     ? [{
         id: 'permission',
@@ -2416,7 +2351,9 @@ const runtimeModeScope = computed(() => JSON.stringify([paneTarget.value, active
 const runtimeModeChanging = computed(() => runtimeModeRequestScope.value === runtimeModeScope.value)
 const runtimeModeDisabled = computed(() => activeChatReadOnly.value || streaming.value || creatingSession.value || loadingMessages.value || agentChanging.value || runtimeModeChanging.value)
 const visibleRuntimeAgentCommands = computed(() =>
-  visibleRuntimeCommands(composerRuntimeCommands.value, slashQuery.value).filter(command => command.name !== 'goal' || !goalCommandAvailable.value),
+  visibleRuntimeCommands(composerRuntimeCommands.value, slashQuery.value).filter(command =>
+    !isConversationResetCommand(command.name)
+    && (command.name !== 'goal' || !goalCommandAvailable.value)),
 )
 const slashPanelHasResults = computed(() =>
   visibleSlashQuickActions.value.length > 0
@@ -4154,14 +4091,6 @@ async function handleForkSourceClick() {
   } finally {
     openingForkSource.value = false
   }
-}
-
-function handleForkMessage(turnId: string) {
-  composerError.value = ''
-  const id = turnId.trim()
-  if (!id) return
-  pendingForkTurnId.value = id
-  forkDialogOpen.value = true
 }
 
 // Keyboard bridges into the two composer list surfaces (slash picker, command

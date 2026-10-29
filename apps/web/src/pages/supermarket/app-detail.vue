@@ -90,9 +90,6 @@
             {{ $t('apps.sections.dependencies') }}
             <span class="ml-1.5 font-normal text-muted-foreground">{{ pkg.dependencies.length }}</span>
           </h2>
-          <p class="mb-4 text-xs text-muted-foreground">
-            {{ $t('supermarket.dependenciesHint') }}
-          </p>
           <SettingsSection>
             <template
               v-if="dependenciesQuery.error.value"

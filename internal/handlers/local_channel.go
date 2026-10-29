@@ -64,6 +64,7 @@ type localSpeechModelResolver interface {
 
 // LocalChannelHandler handles local channel routes (WebUI / API) backed by bot history.
 type LocalChannelHandler struct {
+	privateChats        privateChatResolver
 	channelType         channel.ChannelType
 	channelManager      *channel.Manager
 	channelStore        *channel.Store
@@ -325,13 +326,15 @@ type webQuickActionContext struct {
 // executeWebQuickAction runs a Web quick action. A failure is returned with its
 // cause; the caller answers it and its result record carries the cause.
 func (h *LocalChannelHandler) executeWebQuickAction(ctx context.Context, botID, actionID string, skillActivationAllowed bool, control webQuickActionContext) (*CommandActionResult, error) {
+	if resetsConversation(actionID) {
+		return nil, apperror.New(slash.CodePermissionDenied, nil)
+	}
 	switch strings.TrimSpace(actionID) {
 	case "help":
 		items := []CommandActionListItem{
 			{ID: "help", Title: "/help", Description: "Show available quick actions", Kind: "quick_action"},
-			{ID: "new", Title: "/new", Description: "Start a new session", Kind: "quick_action"},
 		}
-		labels := []string{"/help", "/new"}
+		labels := []string{"/help"}
 		text := "Available Web quick actions: %s."
 		// skillActivationAllowed already reflects a native chat
 		// session, which is also the only context where the model picker
@@ -799,6 +802,9 @@ func (h *LocalChannelHandler) PostMessage(c echo.Context) error {
 	if err != nil {
 		return errs.Wrap(err, "resolve channel config")
 	}
+	if _, err := resolveContinuousContact(c.Request().Context(), h.privateChats, botID, channelIdentityID); err != nil {
+		return err
+	}
 	routeKey := botID
 	msg := channel.InboundMessage{
 		Channel:     h.channelType,
@@ -813,7 +819,7 @@ func (h *LocalChannelHandler) PostMessage(c echo.Context) error {
 			},
 		},
 		Conversation: channel.Conversation{
-			ID:   routeKey,
+			ID:   "contact:" + channelIdentityID,
 			Type: channel.ConversationTypePrivate,
 		},
 		ReceivedAt: time.Now().UTC(),
@@ -2087,6 +2093,27 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", apperror.FieldRequired("invocation_id"))
 				continue
 			}
+			if strings.HasPrefix(text, "/") && resetsConversation(text) {
+				h.failWSCommand(streamBaseCtx, writer, botID, msg, apperror.New(slash.CodePermissionDenied, nil))
+				continue
+			}
+			if err := h.authorizeWSChatAccess(streamBaseCtx, channelIdentityID, botID); err != nil {
+				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", err)
+				continue
+			}
+			contact, contactErr := h.resolveWebMessageContact(streamBaseCtx, botID, channelIdentityID, sessionID, msg.WorkdirID)
+			if contactErr != nil {
+				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", contactErr)
+				continue
+			}
+			if sessionID == "" {
+				sessionID = contact.ID
+				msg.SessionID = sessionID
+				ref = ref.withSession(sessionID)
+				createdEvent := ref.event("session_created")
+				createdEvent.WorkdirID = contact.WorkdirID
+				writer.SendJSON(createdEvent)
+			}
 			if sessionID != "" {
 				if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
 					failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.message", err)
@@ -2501,7 +2528,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.retry_message", apperror.FieldRequired("session_id"))
 				continue
 			}
-			if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
+			if err := h.authorizeWSContactWrite(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.retry_message", err)
 				continue
 			}
@@ -2587,7 +2614,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.edit_message", apperror.New(apperror.CodeChatMessageEmpty, nil))
 				continue
 			}
-			if err := h.authorizeWSSession(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
+			if err := h.authorizeWSContactWrite(c.Request().Context(), channelIdentityID, botID, sessionID); err != nil {
 				failWSRequest(streamBaseCtx, h.logger, writer, botID, ref, "ws.edit_message", err)
 				continue
 			}
@@ -2696,41 +2723,7 @@ func userInputResponseAppError(err error) error {
 // (resolveSessionWorkdirBinding) before anything is written, so an invalid
 // binding fails the send without leaving a session behind.
 func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, modelID, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
-	if h == nil || h.sessionService == nil {
-		return sessionpkg.Thread{}, errors.New("session service not configured")
-	}
-	input := sessionpkg.CreateInput{
-		BotID:           strings.TrimSpace(botID),
-		ChannelType:     h.channelType.String(),
-		Type:            sessionpkg.TypeChat,
-		CreatedByUserID: strings.TrimSpace(channelIdentityID),
-	}
-	boundWorkdir, err := resolveSessionWorkdirBinding(ctx, h.workdirs, input.BotID, workdirID, sessionpkg.RuntimeModel)
-	if err != nil {
-		return sessionpkg.Thread{}, err
-	}
-	if boundWorkdir != nil {
-		input.WorkdirID = boundWorkdir.ID
-		input.WorkdirPath = boundWorkdir.Path
-	}
-	// Reconcile a carried pair exactly like the REST first-send (spec §3.3:
-	// every write point reconciles). Without it a stale composer draft naming
-	// a deleted model dies as an FK violation, a slug degrades to a (NULL,
-	// effort) half pair, and an illegal effort lands in the row raw. Messages
-	// that omit the pair (default-sourced) keep both fields empty → NULL
-	// preference, and the session follows the bot default live.
-	if strings.TrimSpace(modelID) != "" || strings.TrimSpace(reasoningEffort) != "" {
-		if h.agentService == nil {
-			return sessionpkg.Thread{}, errors.New("agent service not configured")
-		}
-		prefModelID, prefEffort, err := h.agentService.ReconcileSessionModelPreference(ctx, input.BotID, modelID, reasoningEffort)
-		if err != nil {
-			return sessionpkg.Thread{}, err
-		}
-		input.PreferredChatModelID = prefModelID
-		input.PreferredReasoningEffort = prefEffort
-	}
-	return h.sessionService.Create(ctx, input)
+	return h.resolveWebMessageContact(ctx, botID, channelIdentityID, "", workdirID)
 }
 
 func (h *LocalChannelHandler) wsSessionSupportsRequestedSkills(ctx context.Context, sessionID string) (bool, error) {

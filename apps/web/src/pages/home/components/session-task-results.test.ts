@@ -160,7 +160,8 @@ describe.each(['web', 'native'])('computer observation in %s host', host => {
     await nextTick()
     expect(dialog.textContent).toContain(en.chat.tasks.observation.states.done)
     expect(dialog.textContent).toContain(en.chat.tasks.statuses.submitted)
-    expect(dialog.textContent).toContain(en.chat.tasks.businessUnknown)
+    expect(dialog.textContent).not.toContain(en.chat.tasks.businessUnknown)
+    expect(dialog.textContent).toContain(en.chat.tasks.observation.checkpoints.fields.business_outcome)
     observation.value = { ...observation.value, error: { status: 403 } } // Even stale data must be hidden on access loss.
     await nextTick()
     expect(dialog.textContent).not.toContain('9007199254740993123')

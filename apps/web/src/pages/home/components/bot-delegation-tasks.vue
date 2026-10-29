@@ -75,12 +75,6 @@ function taskLabel(task: BotdelegationView) {
       <p class="text-body">
         {{ t('chat.delegations.returnDelivery') }} · {{ deliveryLabel(detail.delivery_state) }}
       </p>
-      <p
-        v-if="detail.delivery_state === 'accepted' || deliveryAction?.response?.delivery_state === 'accepted'"
-        class="text-body text-muted-foreground"
-      >
-        {{ t('chat.delegations.deliveryAccepted') }}
-      </p>
     </div>
     <BotDelegationRun
       :task="detail"
@@ -147,12 +141,6 @@ function taskLabel(task: BotdelegationView) {
       >
         {{ t('chat.tasks.truncated') }}
       </p>
-      <p
-        v-if="detail.state === 'accepted' || detail.state === 'running'"
-        class="text-body text-muted-foreground"
-      >
-        {{ t('chat.delegations.noLiveContent') }}
-      </p>
       <template v-if="detail.state === 'completed' && detail.attachments.length">
         <div
           v-if="downloadAction"
@@ -174,12 +162,6 @@ function taskLabel(task: BotdelegationView) {
             :description="resolveApiErrorMessage(downloadAction.error, t('chat.delegations.downloadFailed'))"
           />
         </div>
-        <p
-          v-else
-          class="text-body text-muted-foreground"
-        >
-          {{ t('chat.delegations.attachmentsUnavailable', { count: detail.attachments.length }) }}
-        </p>
       </template>
     </div>
   </section>
@@ -202,17 +184,9 @@ function taskLabel(task: BotdelegationView) {
       </ItemContent>
     </Item>
     <div
-      v-if="cursor || nextCursor"
+      v-if="nextCursor"
       class="flex flex-wrap gap-2"
     >
-      <Button
-        v-if="cursor"
-        variant="ghost"
-        :disabled="loading"
-        @click="emit('page')"
-      >
-        {{ t('chat.tasks.newest') }}
-      </Button>
       <Button
         v-if="nextCursor"
         variant="outline"

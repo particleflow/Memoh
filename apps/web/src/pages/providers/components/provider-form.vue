@@ -129,7 +129,6 @@
           <SettingsRow
             stack="sm"
             :label="$t('provider.imagesProtocol.label')"
-            :description="$t('provider.imagesProtocol.description')"
           >
             <FormItem class="w-full sm:w-80">
               <FormControl>
@@ -171,7 +170,6 @@
           <SettingsRow
             stack="sm"
             :label="$t('provider.imageReferences.label')"
-            :description="$t('provider.imageReferences.description')"
           >
             <FormItem>
               <FormControl>
@@ -196,7 +194,6 @@
           <SettingsRow
             stack="sm"
             :label="$t('provider.promptCache.label')"
-            :description="cacheDescription"
           >
             <FormItem>
               <FormControl>
@@ -369,7 +366,7 @@
                "取消"(前端本地收起,服务端的码留给它自然过期);再点"连接"签发新码。 -->
           <SettingsRow
             :label="accountLabel"
-            :description="oauthExpired ? $t('provider.oauth.status.expired') : connectDescription"
+            :description="oauthExpired ? $t('provider.oauth.status.expired') : undefined"
           >
             <Button
               type="button"
@@ -410,10 +407,11 @@
             class="mx-4 border-b border-border py-6 last:border-b-0"
           >
             <DeviceCodePanel
+              hint=""
               :code="oauthStatus?.device?.user_code ?? ''"
               :verification-uri="oauthStatus?.device?.verification_uri ?? ''"
               :expires-at="oauthStatus?.device?.expires_at ?? ''"
-              :hint="$t(form.values.client_type === 'github-copilot' ? 'provider.oauth.githubDeviceHint' : 'provider.oauth.openaiDeviceHint')"
+
               :retry-loading="authorizeLoading"
               :copy-and-open-label="$t('deviceCode.copyAndOpen')"
               :retry-label="$t('deviceCode.retry')"
@@ -552,11 +550,6 @@ const testStatus = computed(() => {
   if (testResult.value) return 'error'
   return 'idle'
 })
-const cacheDescription = computed(() =>
-  form.values.prompt_cache_ttl === 'off'
-    ? t('provider.promptCache.descriptionOff')
-    : t('provider.promptCache.description'),
-)
 
 // A failed probe names its reason only by catalog code. A code this client has
 // no copy for falls back to the generic failure copy.
@@ -847,10 +840,6 @@ const oauthConnected = computed(() => Boolean(oauthStatus.value?.has_token) && !
 // 行标签按账号体系命名(用户的 outcome),而不是"设备授权"这类流程名。
 const accountLabel = computed(() =>
   t(form.values.client_type === 'github-copilot' ? 'provider.oauth.githubAccount' : 'provider.oauth.chatgptAccount'),
-)
-
-const connectDescription = computed(() =>
-  t(form.values.client_type === 'github-copilot' ? 'provider.oauth.githubConnectHint' : 'provider.oauth.openaiConnectHint'),
 )
 
 // 连接后的身份行:优先邮箱/显示名,附 @login;两者皆空时由模板回退到"已连接"。

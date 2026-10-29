@@ -247,7 +247,7 @@ export function createChatSend(deps: ChatSendDeps) {
         return refused(slashCommand.message)
       }
     }
-    if (viewTarget.sessionId && deps.chatReadOnlyFor(viewTarget)) {
+    if (!viewTarget.sessionId || deps.chatReadOnlyFor(viewTarget)) {
       return { ok: false, stage: 'startup' }
     }
     deps.clearCommandEvent(commandScope)

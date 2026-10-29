@@ -201,7 +201,6 @@ function handleFetchMaterialized(provider: FetchprovidersGetResponse) {
         <!-- Search providers -->
         <SectionGroup
           :title="t('webSearch.searchProviders')"
-          :description="t('webSearch.searchHint')"
         >
           <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <BackendCard
@@ -226,7 +225,6 @@ function handleFetchMaterialized(provider: FetchprovidersGetResponse) {
         <!-- Fetch providers -->
         <SectionGroup
           :title="t('webSearch.fetchProviders')"
-          :description="t('webSearch.fetchHint')"
         >
           <div
             v-if="filteredFetchItems.length > 0"

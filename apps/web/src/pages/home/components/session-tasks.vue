@@ -120,7 +120,6 @@ onScopeDispose(onAuthSessionCleared(() => { open.value = false }))
       </DialogViewHeader>
       <DialogBody class="space-y-4">
         <template v-if="specialist">
-          <DialogDescription>{{ t('chat.delegations.downstreamDescription') }}</DialogDescription>
           <BotDelegationRun
             v-if="!specialistSelected && !specialistPaused && delegationDetail"
             :task="delegationDetail"

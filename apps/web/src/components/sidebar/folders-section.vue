@@ -77,13 +77,6 @@
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-            <TextButton
-              :class="rowActionRevealClass"
-              :aria-label="t('chat.folderNewSession', { name: folder.name ?? '' })"
-              @click.stop="startFolderSession(folder.id ?? '')"
-            >
-              <Plus />
-            </TextButton>
           </GroupHeader>
         </div>
         <FolderSessionsList
@@ -281,16 +274,6 @@ function handleOpenNewTab(session: SessionSummary) {
     sessionId: session.id,
     title: (session.title ?? '').trim(),
   })
-}
-
-// Starting a session from a folder makes that workdir the bot's working
-// directory — the draft composer shows the binding and the created session
-// lands in this folder.
-function startFolderSession(workdirId: string) {
-  const botId = (currentBotId.value ?? '').trim()
-  if (!botId || !workdirId) return
-  workdirsStore.setWorkingWorkdir(botId, workdirId)
-  workspaceTabs.openDraftChat({ title: t('chat.newSession'), explicitSelection: false })
 }
 
 const createDialogOpen = ref(false)

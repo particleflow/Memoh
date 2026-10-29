@@ -1,7 +1,6 @@
 <template>
   <SectionGroup
     :title="t('bots.toolApproval.title')"
-    :description="t('bots.toolApproval.intro')"
   >
     <SettingsSection v-if="initialLoading">
       <InlineLoadingRow surface="card-row">
@@ -12,7 +11,6 @@
     <SettingsSection v-else-if="loadFailed">
       <SettingsRow
         :label="t('bots.toolApproval.loadFailed')"
-        :description="t('bots.toolApproval.loadFailedDescription')"
       >
         <Button
           variant="outline"
@@ -49,7 +47,6 @@
             stack="sm"
             :divider="modeFor(target, tool) !== 'ask'"
             :label="t('bots.toolApproval.toolNames.' + tool)"
-            :description="t('bots.toolApproval.tools.' + tool)"
           >
             <SegmentedControl
               :model-value="modeFor(target, tool)"

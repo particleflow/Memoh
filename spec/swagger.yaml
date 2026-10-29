@@ -6812,6 +6812,55 @@ definitions:
     - size_bytes
     - state
     type: object
+  media.UploadFailure:
+    properties:
+      at:
+        type: integer
+      code:
+        type: string
+      expires_at:
+        type: string
+      handle:
+        type: string
+      operation:
+        type: string
+      phase:
+        type: string
+      received_at:
+        type: string
+      sdk_code:
+        type: integer
+      version:
+        type: integer
+    required:
+    - at
+    - code
+    - expires_at
+    - operation
+    - phase
+    - received_at
+    - version
+    type: object
+  media.UploadFailureInput:
+    properties:
+      at:
+        type: integer
+      code:
+        type: string
+      handle:
+        type: string
+      phase:
+        type: string
+      sdk_code:
+        type: integer
+      version:
+        type: integer
+    required:
+    - at
+    - code
+    - phase
+    - version
+    type: object
   media.UploadInput:
     properties:
       mime:
@@ -13594,6 +13643,169 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Get the attachment upload limit
+      tags:
+      - messages
+  /bots/{bot_id}/media/upload-failures:
+    get:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/media.UploadFailure'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read scoped attachment failure reports
+      tags:
+      - messages
+  /bots/{bot_id}/media/upload-failures/{operation}:
+    get:
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Existing client operation ID
+        in: path
+        name: operation
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/media.UploadFailure'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Read one scoped attachment failure report
+      tags:
+      - messages
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Existing client operation ID
+        in: path
+        name: operation
+        required: true
+        type: string
+      - description: Whitelisted failure metadata
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media.UploadFailureInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/media.UploadFailure'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "413":
+          description: Request Entity Too Large
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Record a scoped attachment failure
       tags:
       - messages
   /bots/{bot_id}/media/uploads:

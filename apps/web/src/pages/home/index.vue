@@ -18,15 +18,11 @@
       <PanePlaceholder
         v-if="missingBotName"
         :title="t('bots.notFound')"
-      >
-        {{ t('bots.notFoundDescription') }}
-      </PanePlaceholder>
+      />
       <PanePlaceholder
         v-else
         :title="t('chat.selectBot')"
-      >
-        {{ t('chat.selectBotHint') }}
-      </PanePlaceholder>
+      />
     </div>
   </div>
 </template>

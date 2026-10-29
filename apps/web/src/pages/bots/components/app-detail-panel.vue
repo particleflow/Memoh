@@ -248,7 +248,6 @@ function dependencyName(dep: AppDependencyItem): string {
       <CalloutBanner
         :tone="item.status === 'failed' ? 'destructive' : 'warning'"
         :title="t(item.status === 'failed' ? 'apps.diagnostics.failed' : 'apps.diagnostics.partial')"
-        :description="t(item.status === 'failed' ? 'apps.progress.recoveryHint' : 'apps.diagnostics.partialHint')"
       />
       <SettingsSection v-if="lastError">
         <ExpandableSettingsRow

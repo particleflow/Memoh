@@ -577,7 +577,7 @@ func (p *ChannelInboundProcessor) HandleInbound(ctx context.Context, cfg channel
 		return p.handleStartCommand(ctx, msg, sender, identity)
 	}
 	if isNewCommand && invocation != nil && (isDirectedAtBot(msg) || slashDirected) {
-		return p.handleNewSessionCommand(ctx, cfg, msg, sender, identity, *invocation)
+		return p.sendSlashError(ctx, sender, msg, apperror.New(slash.CodePermissionDenied, nil))
 	}
 	if isStopCommand && (isDirectedAtBot(msg) || slashDirected) {
 		return p.handleStopCommand(ctx, cfg, msg, sender, identity)

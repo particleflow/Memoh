@@ -70,14 +70,6 @@
         <span class="text-foreground tabular-nums">{{ formatTokenCount(group.tokens) }}</span>
       </span>
     </div>
-
-    <p
-      v-if="nearlyFull"
-      class="text-body"
-      :class="toneClass"
-    >
-      {{ t('chat.infoNearlyFull') }}
-    </p>
   </div>
 </template>
 
@@ -101,7 +93,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-const { composition, contextWindow, contextTokens, contextPercent, autoCompactTokens, sessionId } = useSessionInfo({
+const { composition, contextWindow, contextTokens, contextPercent, sessionId } = useSessionInfo({
   visible: toRef(props, 'visible'),
   overrideModelId: computed(() => props.overrideModelId ?? ''),
   fallbackContextWindow: computed(() => props.fallbackContextWindow ?? null),
@@ -109,7 +101,6 @@ const { composition, contextWindow, contextTokens, contextPercent, autoCompactTo
 
 const percent = computed(() => Math.round(contextPercent.value))
 const toneClass = computed(() => contextPercent.value >= 70 ? contextPressureToneClass(contextPercent.value, 'text') : '')
-const nearlyFull = computed(() => contextWindow.value != null && contextPercent.value >= 70 && autoCompactTokens.value != null)
 
 const tokensLabel = computed(() => {
   const used = formatTokenCount(contextTokens.value)

@@ -10,7 +10,6 @@
     <DialogContent class="flex max-h-[80dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
       <DialogHeader class="border-b border-border px-6 py-4 text-left">
         <DialogTitle>{{ $t('bots.checks.diagnosticTitle') }}</DialogTitle>
-        <DialogDescription>{{ $t('bots.checks.diagnosticSubtitle') }}</DialogDescription>
       </DialogHeader>
 
       <div
@@ -144,7 +143,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   Empty,
   EmptyTitle,
   Skeleton,

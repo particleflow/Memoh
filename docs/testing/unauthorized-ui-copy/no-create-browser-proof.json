@@ -1,0 +1,23 @@
+{
+  "environment": "Current Web source against real Go server and existing isolated PostgreSQL fixture; no response interception",
+  "checks": [
+    "desktop: no top plus on main chat",
+    "desktop: slash suggestions omit /new",
+    "desktop: historical record remains selectable; search and folder creation remain; no new-chat button",
+    "mobile: no top plus on main chat",
+    "mobile: slash suggestions omit /new"
+  ],
+  "errors": [],
+  "mutations": [
+    {
+      "method": "POST",
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact"
+    }
+  ],
+  "modelCalls": 0,
+  "deviceCalls": 0
+}

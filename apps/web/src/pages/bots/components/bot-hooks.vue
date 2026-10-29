@@ -1,7 +1,5 @@
 <template>
-  <SectionGroup
-    :description="$t('bots.hooks.subtitle')"
-  >
+  <SectionGroup>
     <template #actions>
       <span
         v-if="hasChanges"
@@ -57,7 +55,6 @@
         </SettingsRow>
         <SettingsRow
           :label="$t('bots.hooks.rules')"
-          :description="$t('bots.hooks.rulesDescription')"
         >
           <div class="flex items-center gap-3 text-sm tabular-nums">
             <span class="text-foreground">{{ enabledHooksCount }}</span>
@@ -67,7 +64,6 @@
         </SettingsRow>
         <SettingsRow
           :label="$t('bots.hooks.actions')"
-          :description="$t('bots.hooks.actionsDescription')"
         >
           <span class="text-sm tabular-nums text-foreground">{{ actionsCount }}</span>
         </SettingsRow>
@@ -108,12 +104,6 @@
               <div class="text-sm font-medium text-foreground">
                 {{ $t('bots.hooks.jsonConfig') }}
               </div>
-              <p
-                class="mt-0.5 text-xs"
-                :class="parseError ? 'text-destructive' : 'text-muted-foreground'"
-              >
-                {{ editorHint }}
-              </p>
             </div>
             <Button
               variant="ghost"
@@ -137,7 +127,6 @@
       <SettingsSection :title="$t('bots.hooks.testSection')">
         <SettingsRow
           :label="$t('bots.hooks.testEvent')"
-          :description="$t('bots.hooks.testEventDescription')"
         >
           <Select v-model="testEvent">
             <SelectTrigger
@@ -370,11 +359,6 @@ const statusDescription = computed(() => {
   if (!configExists.value) return t('bots.hooks.missingDescription')
   if (!configEnabled.value) return t('bots.hooks.disabledDescription')
   return t('bots.hooks.enabledDescription')
-})
-
-const editorHint = computed(() => {
-  if (parseError.value) return parseError.value
-  return t('bots.hooks.editorHint')
 })
 
 const testPayloadError = computed(() => {

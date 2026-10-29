@@ -63,21 +63,12 @@ async function handleComplete(example?: ChatExample) {
     >
       {{ t('onboarding.complete.title') }}
     </h2>
-    <p
-      class="text-base text-muted-foreground mb-12 transition-all duration-[350ms] ease-out delay-[80ms]"
-      :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'"
-    >
-      {{ t('onboarding.complete.subtitle') }}
-    </p>
 
     <div
       v-if="starters?.length"
       class="mx-auto mb-12 max-w-md space-y-2 text-left transition-all duration-[350ms] ease-out delay-[160ms]"
       :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'"
     >
-      <p class="px-1 text-caption font-medium text-muted-foreground">
-        {{ t('onboarding.complete.examplesHint') }}
-      </p>
       <ChatExampleCard
         v-for="entry in starters"
         :key="entry.example.id"

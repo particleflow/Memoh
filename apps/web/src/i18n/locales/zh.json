@@ -180,7 +180,7 @@
       "revoked": "这个 Agent 账号已断开，请重新连接或选择其他账号。",
       "runtime_busy": "请等待当前回复结束后再切换 Agent 账号。",
       "usage_auth_expired": "账户登录已过期，下次对话后会自动续期；如果仍无法查看额度，请重新连接账户。",
-      "usage_unavailable": "暂时无法获取额度，请稍后再试。"
+      "usage_unavailable": "暂时无法获取额度"
     },
     "agent_dependency_missing": "{dep_id} 尚未安装在此工作区。请在 Bot 的「依赖」中安装，或等待正在进行的安装完成，然后重新发送消息。",
     "app": {
@@ -519,7 +519,7 @@
     },
     "workdir": {
       "git_branch_unavailable": "该本地分支已不可用，请刷新后选择已有分支。",
-      "git_busy": "有 Agent 正在使用此工作目录，请等待执行结束后再切换分支。",
+      "git_busy": "有 Agent 正在使用此工作目录",
       "git_switch_failed": "Git 无法切换分支，请检查未提交的修改，以及目标分支是否被其他 Worktree 使用。",
       "git_unavailable": "无法读取 Git 工作目录，请检查工作区后重试。",
       "not_found": "这个工作目录已不存在，请刷新列表后重新选择。",
@@ -1029,11 +1029,8 @@
   "chat": {
     "readAloud": {
       "replay": "重播朗读",
-      "stop": "停止朗读",
-      "enable": "点击启用朗读",
-      "resume": "继续朗读",
       "playing": "正在朗读此回复",
-      "failed": "朗读已停止，可选择重播朗读重试。"
+      "failed": "朗读已停止"
     },
     "delegations": {
       "nativeRun": "专家会话运行",
@@ -1043,14 +1040,14 @@
       "runRecorded": "原生运行的持久化状态，不代表实时连接。会话记录可能包含其他轮次。",
       "runUnavailable": "此委派暂无可核实的原生运行记录。",
       "openHistory": "打开专家会话记录",
-      "historyUnavailable": "无法打开专家会话，请刷新并检查访问权限。",
+      "historyUnavailable": "无法打开专家会话",
       "childTasks": "子 Agent 与电脑任务",
       "openTasks": "查看下游任务",
       "downstreamTitle": "专业 Bot 的任务",
       "downstreamDescription": "此专业 Bot 会话记录的执行任务。访问权限由服务端校验；此视图不提供实时日志或可调度队列。",
       "retryDelivery": "重试结果投递",
       "deliveryResponse": "投递请求响应",
-      "deliveryRequestUnconfirmed": "尚未确认此次投递请求的结果，请重新读取状态。",
+      "deliveryRequestUnconfirmed": "尚未确认此次投递请求的结果",
       "title": "专业 Bot 委派",
       "executionGroup": "执行任务",
       "description": "当前会话已授权的 Bot 委派记录。执行与结果投递分别记录状态。",
@@ -1080,7 +1077,7 @@
         "unavailable": "无法投递"
       },
       "downloadResult": "下载成果 {hash}",
-      "downloadFailed": "无法准备下载，请刷新视图并检查访问权限。"
+      "downloadFailed": "无法准备下载"
     },
     "tasks": {
       "records": "任务记录",
@@ -1109,10 +1106,9 @@
       "unavailable": "暂无可用的最终回复摘要。",
       "truncated": "摘要已截断。",
       "businessUnknown": "业务是否完成仍需核实。",
-      "cancelIntent": "已请求取消，但尚不能据此确认进程终止。",
-      "filteredPage": "本页没有可查看的任务，可继续下一页。",
+      "cancelIntent": "已请求取消",
+      "filteredPage": "本页没有可查看的任务",
       "empty": "暂无子 Agent 或电脑任务记录。",
-      "newest": "返回最新",
       "next": "下一页",
       "types": {
         "subagent": "子 Agent",
@@ -1164,7 +1160,7 @@
       "observation": {
         "title": "当前电脑观察",
         "description": "点击“刷新电脑观察”后，才会在此任务可见时持续检查电脑。查看已保存摘要或附件不会访问电脑。观察结果不代表任务完成或历史已恢复。",
-        "paused": "自动检查已暂停。恢复访问或服务支持后，可点击刷新重新检查同一任务。",
+        "paused": "自动检查已暂停。",
         "unsupported": "此服务器尚不支持电脑观察。",
         "loadFailed": "无法读取电脑观察。",
         "agentState": "原生 Agent：{state}",
@@ -1284,9 +1280,9 @@
         "bounded": "仅近期样本",
         "empty": "尚无终端文本。",
         "sequence": "原生完成序号：{sequence}（不是逐指令结果）",
-        "unavailable": "原 Agent 当前不可用；不会把旧样本显示为当前内容。",
+        "unavailable": "原 Agent 当前不可用",
         "refresh": "刷新内容与请求状态",
-        "pending": "指令结果尚未确认。保留请求 {id}，不会发送新指令。",
+        "pending": "指令结果尚未确认",
         "mode": "会话选择",
         "bound": "要求匹配已观测的逻辑会话",
         "current": "使用当前关联的 Agent",
@@ -2145,7 +2141,7 @@
       "changeFailed": "无法切换计划模式，请重试。"
     },
     "runtimeModeNextTurn": "在下次运行开始时生效。",
-    "runtimeModeModelUnavailable": "当前模型不支持此权限模式，请选择其他模式或模型。",
+    "runtimeModeModelUnavailable": "当前模型不支持此权限模式",
     "permissionMode": "权限模式",
     "goal": {
       "label": "目标",
@@ -2168,7 +2164,7 @@
     },
     "botRun": {
       "title": "本会话最近一次 Bot 运行",
-      "unavailable": "运行状态尚未同步，会话重新连接后会更新。",
+      "unavailable": "运行状态尚未同步",
       "empty": "当前快照没有已记录的 Bot 运行。",
       "configuration": "最近活动是配置变更，不是任务运行。",
       "aborting": "正在取消",
@@ -2348,7 +2344,7 @@
     "reachable": "可连接",
     "unreachable": "不可连接",
     "testFailed": "测试失败",
-    "testUnverifiedHint": "已连通，但无法通过模型列表确认可用——该服务商可能不支持此接口。可改为测试具体模型。",
+    "testUnverifiedHint": "已连通，但无法通过模型列表确认可用",
     "autoImport": "自动导入模型",
     "autoImportHint": "创建后自动从服务商获取并导入模型",
     "configurationTitle": "配置",
@@ -2394,7 +2390,7 @@
         "authorizedCurrent": "当前账号已连接",
         "oauthing": "授权中...",
         "pendingDevice": "正在等待设备授权完成...",
-        "expired": "授权已过期，请重新授权。",
+        "expired": "授权已过期",
         "missing": "尚未授权。",
         "notConfigured": "当前提供商未正确配置 OAuth。"
       },
@@ -2495,7 +2491,7 @@
     "graphEdges": "关联",
     "semanticEmbeddingModel": "Embedding 模型",
     "semanticEmbeddingModelPlaceholder": "选择 Embedding 模型",
-    "graphEmpty": "还没有记忆——添加一些以查看图谱。"
+    "graphEmpty": "还没有记忆"
   },
   "network": {
     "title": "网络",
@@ -2519,12 +2515,12 @@
     "speakHint": "把回复读成语音。",
     "listenTitle": "聆听",
     "listenHint": "把语音转成文字。",
-    "empty": "暂无可用后端，添加具备语音能力的服务商即可。"
+    "empty": "暂无可用后端"
   },
   "video": {
     "title": "视频",
     "providersHint": "通过 OpenRouter、ModelArk 或 Volcengine 生成视频。",
-    "empty": "暂无视频后端，添加服务商后即可启用视频生成。",
+    "empty": "暂无视频后端",
     "models": "视频模型",
     "importModels": "导入模型",
     "importSuccess": "模型导入完成：新增 {created} 个，跳过 {skipped} 个",
@@ -2548,7 +2544,7 @@
     "addModel": "新建模型",
     "modelId": "模型 ID",
     "modelIdPlaceholder": "输入模型标识符（如 custom-voice）",
-    "noModels": "暂无模型，点击\"导入模型\"发现可用模型，或点击\"新建模型\"手动创建。",
+    "noModels": "暂无模型",
     "noCapabilities": "该模型暂无可用能力信息。",
     "saveSuccess": "语音配置已保存",
     "synthesis": {
@@ -2582,7 +2578,7 @@
     "emptyTitle": "暂无转写提供方",
     "emptyDescription": "添加转写提供方以为 Bot 启用语音转文字功能",
     "models": "语音识别模型",
-    "noModels": "暂无语音识别模型，可导入可用模型，或保留默认模板模型。",
+    "noModels": "暂无语音识别模型",
     "importModels": "导入模型",
     "importSuccess": "识别模型导入成功",
     "importFailed": "识别模型导入失败",
@@ -3363,7 +3359,7 @@
         "browseUnreachable": "无法连接这台电脑，请确认已连接后重试",
         "path": "目录路径",
         "remotePathHelp": "在下方选择文件夹，或输入绝对路径。目录必须已经存在。",
-        "remoteOffline": "{name}未连接。连接后才能在这台电脑上选择文件夹。",
+        "remoteOffline": "{name}未连接",
         "remotePathPlaceholder": "/Users/you/code/project"
       }
     },
@@ -4071,7 +4067,7 @@
         "description": "使用微信扫描二维码以连接微信账号。",
         "startScan": "获取二维码",
         "waitingScan": "打开微信扫描此二维码",
-        "scanned": "已扫码 — 请在手机上确认",
+        "scanned": "已扫码",
         "expired": "二维码已过期",
         "refresh": "刷新二维码",
         "success": "微信连接成功！",
@@ -4080,7 +4076,7 @@
         "verifyCodeWrong": "数字不匹配，请重新输入",
         "verifyCodePlaceholder": "手机上显示的数字",
         "verifyCodeSubmit": "确认",
-        "verifyCodeBlocked": "多次输入错误，请刷新二维码稍后再试",
+        "verifyCodeBlocked": "多次输入错误",
         "alreadyBound": "该微信已连接到此 Bot"
       },
       "types": {
@@ -4100,8 +4096,7 @@
         "cli": "本地 CLI",
         "local": "本地"
       },
-      "modelRequiredTitle": "设置默认对话模型",
-      "modelRequiredDescription": "渠道可以启用，但新对话还需要默认模型才能回复。点击前往设置。"
+      "modelRequiredTitle": "设置默认对话模型"
     },
     "memory": {
       "title": "记忆",
@@ -4135,7 +4130,7 @@
       "searchResults": "搜索结果",
       "searchFailed": "搜索失败",
       "degradedTitle": "记忆索引降级",
-      "degradedDesc": "语义种子索引落后于知识库存储,图谱召回仍可用。重新同步文件以恢复。",
+      "degradedDesc": "语义种子索引落后于知识库存储,图谱召回仍可用。",
       "ingestAction": "同步文件",
       "ingestSuccess": "已从文件导入 {n} 条记忆",
       "ingestFailed": "从文件导入记忆失败",
@@ -4576,7 +4571,7 @@
         "selectPlaceholder": "选择模型",
         "hint": "选择 Bot 回复时使用的模型。建议现在选择，之后也可随时在设置中更改。",
         "loading": "正在加载模型...",
-        "loadFailed": "模型列表加载失败，请重试。",
+        "loadFailed": "模型列表加载失败",
         "retry": "重试"
       },
       "acp": {
@@ -4593,7 +4588,7 @@
       "action": "打开 Memoh",
       "saveFailed": "保存失败，请重试",
       "navigationFailed": "无法打开 Bot，请重试。",
-      "noModelWarning": "尚未为 Bot 选择模型，Bot 将无法回复消息。你可以稍后在 Bot 设置中配置。",
+      "noModelWarning": "尚未为 Bot 选择模型，Bot 将无法回复消息。",
       "examplesHint": "也可以从一个示例开始"
     }
   },
@@ -4887,9 +4882,9 @@
     "cancel": "取消"
   },
   "computerExec": {
-    "completed": "前台命令已完成，输出合并了标准输出和错误文本。",
-    "uncertain": "命令结果未确定或被拒绝。停止等待不会终止 Windows 执行，请先检查再决定是否重试。",
-    "retained": "工作区 {id} 已保留以供人工检查，未自动关闭。",
+    "completed": "前台命令已完成",
+    "uncertain": "命令结果未确定或被拒绝",
+    "retained": "工作区 {id} 已保留",
     "truncated": "输出已截断。"
   },
   "workspaceStorage": {

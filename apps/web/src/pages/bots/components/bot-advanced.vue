@@ -55,7 +55,6 @@ watch(() => [route.query.tab, route.query.section, props.botId, hasContainer.val
         <SettingsSection>
           <SettingsRow
             :label="$t('bots.hooks.title')"
-            :description="$t('bots.hooks.subtitle')"
           >
             <Button
               variant="outline"

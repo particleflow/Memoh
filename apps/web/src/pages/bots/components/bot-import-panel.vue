@@ -246,9 +246,6 @@ async function handleImport() {
         <p class="text-xs font-medium">
           {{ t('bots.backup.dropzoneTitle') }}
         </p>
-        <p class="text-[11px] text-muted-foreground">
-          {{ t('bots.backup.dropzoneHint') }}
-        </p>
       </button>
 
       <!-- Selected file -->
@@ -314,9 +311,7 @@ async function handleImport() {
             <Lock class="size-3.5 text-muted-foreground" />
             {{ t('bots.backup.encryptedTitle') }}
           </div>
-          <p class="text-[11px] text-muted-foreground">
-            {{ t('bots.backup.encryptedHint') }}
-          </p>
+
           <div class="flex items-center gap-2">
             <Input
               v-model="passphrase"

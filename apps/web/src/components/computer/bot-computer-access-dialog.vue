@@ -8,9 +8,6 @@
         <DialogTitle class="break-words">
           {{ subjectName }}
         </DialogTitle>
-        <DialogDescription>
-          {{ subject === 'runtime' ? t('computerAccess.subtitleRuntime') : t('computerAccess.subtitleBot') }}
-        </DialogDescription>
       </DialogHeader>
 
       <DialogBody>
@@ -51,7 +48,6 @@ import {
   Dialog,
   DialogPanel,
   DialogBody,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,

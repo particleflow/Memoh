@@ -232,9 +232,7 @@
               v-if="botMissing"
               class="absolute inset-0"
               :title="$t('bots.notFound')"
-            >
-              {{ $t('bots.notFoundDescription') }}
-            </PanePlaceholder>
+            />
             <!-- scrollbar-gutter: stable reserves the scrollbar track on every tab,
                  scrolling or not. Without it a long tab (e.g. General) shows a
                  scrollbar that narrows the pane, so PageShell's mx-auto column

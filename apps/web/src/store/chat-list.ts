@@ -365,6 +365,7 @@ export const useChatStore = defineStore('chat', () => {
     explicitSessionSelection,
     normalizeTarget: normalizedChatViewTarget,
     knownSession: knownSessionSummary,
+    contactSessionFor: botId => contactSessionIds.value[botId],
     pendingExternalAgentState: pendingExternalAgentStateFor,
   })
 
@@ -405,13 +406,12 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   const {
-    loadingChats, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
+    loadingChats, contactSessionIds, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
     openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     initialize,
     selectBot,
     selectSession,
-    createNewSession,
-    selectDraft,
+    createNewSession, selectDraft,
     reset: resetBootstrap,
   } = createChatBootstrap({
     hasHistoryEntry: () => !!router?.currentRoute.value.query.session,

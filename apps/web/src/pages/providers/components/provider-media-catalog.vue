@@ -16,7 +16,6 @@
     >
       <DialogHeader>
         <DialogTitle>{{ $t('provider.mediaCatalog.title') }}</DialogTitle>
-        <DialogDescription>{{ $t('provider.mediaCatalog.hint') }}</DialogDescription>
       </DialogHeader>
       <DialogBody>
         <SettingsSection :title="$t('provider.mediaCatalog.protocol')">
@@ -32,7 +31,6 @@
             />
             <SettingsRow
               :label="$t('provider.mediaCatalog.transcription')"
-              :description="$t('provider.mediaCatalog.unverified')"
             />
             <SettingsRow
               v-if="catalog.models.length === 0"
@@ -76,7 +74,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Button, Dialog, DialogBody, DialogClose, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle, DialogTrigger, SettingsRow, SettingsSection } from '@felinic/ui'
+import { Button, Dialog, DialogBody, DialogClose, DialogFooter, DialogHeader, DialogPanel, DialogTitle, DialogTrigger, SettingsRow, SettingsSection } from '@felinic/ui'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { readMediaCatalog, type MediaCatalog, type MediaCatalogModel } from '../media-catalog-api'
 

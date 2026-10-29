@@ -67,9 +67,6 @@
         :title="$t('bots.channels.webhookCallback')"
       >
         <div class="mx-4 space-y-3 py-4">
-          <p class="text-xs text-muted-foreground">
-            {{ $t(webhookCallbackHintKey) }}
-          </p>
           <p
             v-if="lineWebhookBaseWarningKey"
             class="text-xs text-warning"
@@ -111,12 +108,6 @@
           >
             {{ $t(webhookCallbackPendingKey) }}
           </p>
-          <p
-            v-if="isLineWebhook"
-            class="text-xs text-muted-foreground"
-          >
-            {{ $t('bots.channels.linePublicMediaLimit') }}
-          </p>
         </div>
       </SettingsSection>
 
@@ -125,13 +116,6 @@
         v-if="requiredFields.length > 0 || optionalFields.length > 0"
         :title="$t('bots.channels.credentials')"
       >
-        <p
-          v-if="isFeishuWebhook"
-          class="mx-4 border-b border-border py-3 text-xs text-warning"
-        >
-          {{ $t('bots.channels.feishuWebhookSecurityHint') }}
-        </p>
-
         <ChannelField
           v-for="[key, field] in requiredFields"
           :key="key"
@@ -297,11 +281,6 @@ const isWechatOA = computed(() => platformType.value === 'wechatoa')
 const isLineWebhook = computed(() => platformType.value === 'line')
 const { publicBase: lineWebhookPublicBase, warningKey: lineWebhookBaseWarningKey } = useLineWebhookPublicBase(isLineWebhook)
 const showWebhookCallback = computed(() => isFeishuWebhook.value || isWechatOA.value || isLineWebhook.value)
-const webhookCallbackHintKey = computed(() => {
-  if (isLineWebhook.value) return 'bots.channels.lineWebhookCallbackHint'
-  if (isWechatOA.value) return 'bots.channels.wechatOAWebhookCallbackHint'
-  return 'bots.channels.webhookCallbackHint'
-})
 const webhookConfigId = computed(() => String(props.channelItem.config?.id || lastSavedConfigId.value || '').trim())
 const webhookCallbackPendingKey = computed(() => {
   if (isLineWebhook.value && webhookConfigId.value && !lineWebhookPublicBase.value.url) {

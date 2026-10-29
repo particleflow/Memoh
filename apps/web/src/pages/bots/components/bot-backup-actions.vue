@@ -232,7 +232,6 @@ function handleImported(botId: string) {
       <DialogContent class="sm:max-w-lg flex max-h-[85vh] flex-col">
         <DialogHeader>
           <DialogTitle>{{ t('bots.backup.importTitle') }}</DialogTitle>
-          <DialogDescription>{{ t('bots.backup.importDescription') }}</DialogDescription>
         </DialogHeader>
 
         <BotImportPanel

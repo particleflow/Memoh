@@ -174,6 +174,16 @@ The `Human QA` section contains only one status checkbox, `- [ ] Human QA passed
 
 ### Frontend Development
 
+For NAS Assistant, do not add explanatory small print, subtitles, helper paragraphs,
+empty-state instructions, reassurance/disclaimer copy, or additional recovery/playback
+controls without an explicit user request. Preserve original user/catalog body, control
+names, actual state/error, accessibility labels, and consequential action confirmations.
+Do not replace rejected copy with synonyms or hide it with CSS. Run
+`node scripts/check-ui-copy-policy.mjs`; only update its reviewed baseline after checking
+the exact user-authorized change. This user-specific rule takes precedence over generic
+UI guidance suggesting additional explanations or defensive controls.
+
+
 - Use Vue 3 Composition API with `<script setup>` style.
 - Shared components belong in `packages/ui/`; API calls use `@memohai/sdk`; state uses Pinia + Pinia Colada; i18n via vue-i18n.
 - See `apps/web/AGENTS.md` for detailed frontend conventions.

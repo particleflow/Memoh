@@ -180,7 +180,7 @@
       "revoked": "This Agent account has been disconnected. Connect it again or choose another account.",
       "runtime_busy": "Wait for the current response to finish before switching Agent accounts.",
       "usage_auth_expired": "The account sign-in has expired. It renews after the next conversation; if usage still can't load, connect the account again.",
-      "usage_unavailable": "Couldn't load usage limits right now. Try again later."
+      "usage_unavailable": "Couldn't load usage limits right now"
     },
     "agent_dependency_missing": "{dep_id} is not installed in this workspace. Install it from the bot's dependencies, or wait for the running installation to finish, then send the message again.",
     "app": {
@@ -519,7 +519,7 @@
     },
     "workdir": {
       "git_branch_unavailable": "This local branch is unavailable. Refresh and select an existing branch.",
-      "git_busy": "An agent is using this working directory. Wait for it to finish before switching branches.",
+      "git_busy": "An agent is using this working directory",
       "git_switch_failed": "Git could not switch branches. Check uncommitted changes and whether the branch is used by another worktree.",
       "git_unavailable": "The Git working directory could not be read. Check the workspace and try again.",
       "not_found": "This working directory no longer exists. Refresh the list and choose another one.",
@@ -1029,11 +1029,8 @@
   "chat": {
     "readAloud": {
       "replay": "Read aloud again",
-      "stop": "Stop reading",
-      "enable": "Enable reading aloud",
-      "resume": "Resume reading",
       "playing": "Reading this reply aloud",
-      "failed": "Reading stopped. Use Read aloud again to retry."
+      "failed": "Reading stopped."
     },
     "delegations": {
       "nativeRun": "Specialist session run",
@@ -1043,14 +1040,14 @@
       "runRecorded": "Persisted native run state; this does not confirm a live connection. The session history may include other turns.",
       "runUnavailable": "No verified native run is available for this handoff.",
       "openHistory": "Open specialist session history",
-      "historyUnavailable": "Could not open the specialist session. Reload and check access.",
+      "historyUnavailable": "Could not open the specialist session",
       "childTasks": "Subagents and computer tasks",
       "openTasks": "View downstream tasks",
       "downstreamTitle": "Specialist Bot tasks",
       "downstreamDescription": "Execution tasks recorded under this specialist session. Access is checked by the server; this view does not provide live logs or a runnable queue.",
       "retryDelivery": "Retry result delivery",
       "deliveryResponse": "Delivery request response",
-      "deliveryRequestUnconfirmed": "The delivery request could not be confirmed. Reload to check its state.",
+      "deliveryRequestUnconfirmed": "The delivery request could not be confirmed",
       "title": "Specialist Bot handoffs",
       "executionGroup": "Execution tasks",
       "description": "Authorized Bot handoffs from this conversation. Execution and return delivery have separate states.",
@@ -1080,7 +1077,7 @@
         "unavailable": "Unavailable"
       },
       "downloadResult": "Download result {hash}",
-      "downloadFailed": "Could not prepare the download. Reload the view and check access."
+      "downloadFailed": "Could not prepare the download"
     },
     "tasks": {
       "records": "Task records",
@@ -1109,10 +1106,9 @@
       "unavailable": "No final summary is available.",
       "truncated": "This summary is truncated.",
       "businessUnknown": "Business completion remains unverified.",
-      "cancelIntent": "Cancellation was requested; this does not confirm termination.",
-      "filteredPage": "No accessible tasks on this page. Continue to the next page.",
+      "cancelIntent": "Cancellation was requested",
+      "filteredPage": "No accessible tasks on this page",
       "empty": "No subagent or computer tasks are recorded.",
-      "newest": "Back to newest",
       "next": "Next page",
       "types": {
         "subagent": "Subagent",
@@ -1164,7 +1160,7 @@
       "observation": {
         "title": "Current computer observation",
         "description": "Refresh computer starts live checks while this task is visible. Viewing the saved summary or attachments does not contact the computer. Observations do not confirm completion or restored history.",
-        "paused": "Automatic checks are paused. After restoring access or server support, use Refresh to check this same task again.",
+        "paused": "Automatic checks are paused.",
         "unsupported": "This server does not support computer observation yet.",
         "loadFailed": "Computer observation could not be loaded.",
         "agentState": "Native Agent: {state}",
@@ -1284,9 +1280,9 @@
         "bounded": "Recent sample only",
         "empty": "No terminal text returned.",
         "sequence": "Native completion sequence: {sequence} (not a per-instruction result)",
-        "unavailable": "The original Agent is currently unavailable; no old sample is presented as current.",
+        "unavailable": "The original Agent is currently unavailable",
         "refresh": "Refresh content and request status",
-        "pending": "Instruction outcome remains unresolved. Request {id} is retained; no new instruction will be sent.",
+        "pending": "Instruction outcome remains unresolved",
         "mode": "Session selection",
         "bound": "Require the observed logical session",
         "current": "Use the currently associated Agent",
@@ -2145,7 +2141,7 @@
       "changeFailed": "Could not change plan mode. Please try again."
     },
     "runtimeModeNextTurn": "Applies when the next run starts.",
-    "runtimeModeModelUnavailable": "This model does not support this permission mode. Choose another mode or model.",
+    "runtimeModeModelUnavailable": "This model does not support this permission mode",
     "permissionMode": "Permission mode",
     "goal": {
       "label": "Goal",
@@ -2168,7 +2164,7 @@
     },
     "botRun": {
       "title": "Latest Bot run in this conversation",
-      "unavailable": "Run state is not synchronized. It will update when the conversation reconnects.",
+      "unavailable": "Run state is not synchronized.",
       "empty": "No Bot run is recorded in the current snapshot.",
       "configuration": "The latest activity is a configuration change, not a task run.",
       "aborting": "Cancellation in progress",
@@ -2348,7 +2344,7 @@
     "reachable": "Reachable",
     "unreachable": "Unreachable",
     "testFailed": "Test failed",
-    "testUnverifiedHint": "Connected, but the model list could not confirm availability — this provider may not support it. Test a specific model instead.",
+    "testUnverifiedHint": "Connected, but the model list could not confirm availability",
     "autoImport": "Auto Import Models",
     "autoImportHint": "Automatically fetch and import models from the provider after creation",
     "configurationTitle": "Configuration",
@@ -2394,7 +2390,7 @@
         "authorizedCurrent": "Current account connected",
         "oauthing": "OAuthing...",
         "pendingDevice": "Waiting for device authorization to complete...",
-        "expired": "Authorization expired. Re-authorize to continue.",
+        "expired": "Authorization expired",
         "missing": "Not authorized yet.",
         "notConfigured": "This provider is not configured for OAuth."
       },
@@ -2495,7 +2491,7 @@
     "graphEdges": "Links",
     "semanticEmbeddingModel": "Embedding Model",
     "semanticEmbeddingModelPlaceholder": "Select embedding model",
-    "graphEmpty": "No memories yet — add some to see the graph."
+    "graphEmpty": "No memories yet"
   },
   "network": {
     "title": "Network",
@@ -2519,12 +2515,12 @@
     "speakHint": "Read replies aloud.",
     "listenTitle": "Listening",
     "listenHint": "Turn speech into text.",
-    "empty": "No backends yet — add a provider with voice support."
+    "empty": "No backends yet"
   },
   "video": {
     "title": "Video",
     "providersHint": "Generate videos through OpenRouter, ModelArk, or Volcengine.",
-    "empty": "No video backends yet. Add a provider to enable video generation.",
+    "empty": "No video backends yet.",
     "models": "Video Models",
     "importModels": "Import Models",
     "importSuccess": "Models imported: {created} new, {skipped} skipped",
@@ -2548,7 +2544,7 @@
     "addModel": "Add Model",
     "modelId": "Model ID",
     "modelIdPlaceholder": "Enter model identifier (e.g. custom-voice)",
-    "noModels": "No models found. Click \"Import Models\" to discover available models or \"Add Model\" to create one manually.",
+    "noModels": "No models found",
     "noCapabilities": "No capabilities available for this model.",
     "saveSuccess": "Speech configuration saved",
     "synthesis": {
@@ -2582,7 +2578,7 @@
     "emptyTitle": "No Transcription Providers",
     "emptyDescription": "Add a transcription provider to enable speech-to-text for your bots",
     "models": "Transcription Models",
-    "noModels": "No transcription models found. Import available models or keep the default template model.",
+    "noModels": "No transcription models found",
     "noCapabilities": "No capabilities available for this model.",
     "importModels": "Import Models",
     "importSuccess": "Transcription models imported successfully",
@@ -3363,7 +3359,7 @@
         "browseUnreachable": "Couldn’t reach this computer. Check that it’s connected, then retry",
         "path": "Directory path",
         "remotePathHelp": "Pick a folder below or type an absolute path. It must already exist.",
-        "remoteOffline": "{name} isn’t connected. Connect it to choose a folder there.",
+        "remoteOffline": "{name} isn’t connected",
         "remotePathPlaceholder": "/Users/you/code/project"
       }
     },
@@ -4071,7 +4067,7 @@
         "description": "Scan the QR code with WeChat to connect your account.",
         "startScan": "Get QR Code",
         "waitingScan": "Open WeChat and scan this QR code",
-        "scanned": "Scanned — confirm on your phone",
+        "scanned": "Scanned",
         "expired": "QR code expired",
         "refresh": "Refresh QR Code",
         "success": "WeChat connected successfully!",
@@ -4080,7 +4076,7 @@
         "verifyCodeWrong": "The number didn't match. Try again.",
         "verifyCodePlaceholder": "Number shown on your phone",
         "verifyCodeSubmit": "Confirm",
-        "verifyCodeBlocked": "Too many wrong attempts. Refresh the QR code and try again later.",
+        "verifyCodeBlocked": "Too many wrong attempts",
         "alreadyBound": "This WeChat account is already connected to this bot"
       },
       "types": {
@@ -4100,8 +4096,7 @@
         "cli": "CLI",
         "local": "Local"
       },
-      "modelRequiredTitle": "Choose a default chat model",
-      "modelRequiredDescription": "Channel connections can be enabled without a model. Set a default model so the bot can reply in new conversations."
+      "modelRequiredTitle": "Choose a default chat model"
     },
     "memory": {
       "title": "Memories",
@@ -4135,7 +4130,7 @@
       "searchResults": "Search results",
       "searchFailed": "Search failed",
       "degradedTitle": "Memory index degraded",
-      "degradedDesc": "The semantic seed index is behind the wiki store; graph recall still works. Re-ingest files to resync.",
+      "degradedDesc": "The semantic seed index is behind the wiki store; graph recall still works.",
       "ingestAction": "Sync files",
       "ingestSuccess": "Ingested {n} memories from files",
       "ingestFailed": "Failed to ingest memories from files",
@@ -4576,7 +4571,7 @@
         "selectPlaceholder": "Select a model",
         "hint": "Pick the model your bot replies with. Recommended, but you can change it anytime in settings.",
         "loading": "Loading models...",
-        "loadFailed": "Failed to load the model list. Try again.",
+        "loadFailed": "Failed to load the model list",
         "retry": "Retry"
       },
       "acp": {
@@ -4593,7 +4588,7 @@
       "action": "Open Memoh",
       "saveFailed": "Failed to save, please try again",
       "navigationFailed": "Couldn't open your bot. Please try again.",
-      "noModelWarning": "No model is selected for this bot, so it cannot reply yet. You can configure one later in Bot Settings.",
+      "noModelWarning": "No model is selected for this bot, so it cannot reply yet.",
       "examplesHint": "Or start with one of these"
     }
   },
@@ -4887,9 +4882,9 @@
     "cancel": "Cancel"
   },
   "computerExec": {
-    "completed": "Foreground command completed. Output combines stdout and error text.",
-    "uncertain": "Command outcome is unknown or rejected. Stopping the wait does not stop Windows execution. Inspect it before retrying.",
-    "retained": "Workspace {id} is retained for manual inspection; it was not closed automatically.",
+    "completed": "Foreground command completed.",
+    "uncertain": "Command outcome is unknown or rejected.",
+    "retained": "Workspace {id} is retained.",
     "truncated": "Output was truncated."
   },
   "workspaceStorage": {

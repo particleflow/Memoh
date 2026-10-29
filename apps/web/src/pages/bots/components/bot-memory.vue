@@ -239,7 +239,6 @@
       <Empty class="py-12">
         <EmptyHeader>
           <EmptyTitle>{{ $t('bots.memory.emptyTitle') }}</EmptyTitle>
-          <EmptyDescription>{{ $t('bots.memory.empty') }}</EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <Button

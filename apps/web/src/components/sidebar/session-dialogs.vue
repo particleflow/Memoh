@@ -13,7 +13,6 @@
     <DialogContent class="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>{{ t('chat.renameSession') }}</DialogTitle>
-        <DialogDescription>{{ t('chat.renameSessionDescription') }}</DialogDescription>
       </DialogHeader>
       <form
         class="space-y-4"
@@ -58,7 +57,6 @@ import {
   ConfirmDeleteDialog,
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,

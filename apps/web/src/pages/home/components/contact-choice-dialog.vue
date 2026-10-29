@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Button, CalloutBanner, Dialog, DialogBody, DialogDescription, DialogFooter, DialogHeader, DialogPanel, DialogTitle, Label, RadioGroup, RadioGroupItem } from '@felinic/ui'
+import { Button, CalloutBanner, Dialog, DialogBody, DialogFooter, DialogHeader, DialogPanel, DialogTitle, Label, RadioGroup, RadioGroupItem } from '@felinic/ui'
 import { useChatStore } from '@/store/chat-list'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 
@@ -12,7 +12,7 @@ const error = ref('')
 watch(() => chat.contactChoice?.botId, () => { selected.value = ''; error.value = '' })
 async function confirm() {
   error.value = ''
-  try { await chat.confirmContact(selected.value === 'new' ? null : selected.value) }
+  try { await chat.confirmContact(selected.value) }
   catch (cause) { error.value = resolveApiErrorMessage(cause, t('chat.contact.failed')) }
 }
 async function more() {
@@ -32,7 +32,6 @@ async function more() {
     >
       <DialogHeader>
         <DialogTitle>{{ t('chat.contact.chooseTitle') }}</DialogTitle>
-        <DialogDescription>{{ t('chat.contact.chooseDescription') }}</DialogDescription>
       </DialogHeader>
       <DialogBody class="space-y-4">
         <CalloutBanner
@@ -52,9 +51,6 @@ async function more() {
           >
             <RadioGroupItem :value="session.id" />
             <span class="min-w-0 break-words">{{ session.title || t('chat.untitledSession') }} · {{ session.id.slice(0, 8) }}{{ session.id === chat.sessionId ? ` · ${t('chat.contact.current')}` : '' }}</span>
-          </Label>
-          <Label class="flex items-center gap-2 text-label">
-            <RadioGroupItem value="new" />{{ t('chat.contact.startNew') }}
           </Label>
         </RadioGroup>
         <Button

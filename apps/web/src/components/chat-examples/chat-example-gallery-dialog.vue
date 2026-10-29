@@ -4,7 +4,6 @@ import {
   Button,
   Dialog,
   DialogBody,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogPanel,
@@ -73,7 +72,6 @@ function onCloseAutoFocus(event: Event) {
     >
       <DialogHeader class="pr-8">
         <DialogTitle>{{ t('chatExamples.galleryTitle') }}</DialogTitle>
-        <DialogDescription>{{ t('chatExamples.galleryDescription') }}</DialogDescription>
       </DialogHeader>
       <DialogBody>
         <div class="@container">
@@ -89,9 +87,6 @@ function onCloseAutoFocus(event: Event) {
         </div>
       </DialogBody>
       <DialogFooter class="sm:items-center sm:justify-between">
-        <p class="text-body text-muted-foreground">
-          {{ t('chatExamples.share.prompt') }}
-        </p>
         <Button
           as="a"
           :href="SHARE_ON_X_URL"

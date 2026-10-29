@@ -154,12 +154,6 @@ onMounted(() => {
       :body-class="['pt-16 transition-all duration-[175ms] ease-out', listVisible ? 'scale-100 opacity-100' : 'scale-[0.96] opacity-0']"
     >
       <div>
-        <p
-          class="text-sm text-muted-foreground leading-relaxed mb-6 transition-all duration-[350ms] ease-out delay-[60ms]"
-          :class="visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'"
-        >
-          {{ t('onboarding.provider.description') }}
-        </p>
         <div
           class="grid grid-cols-3 gap-3 transition-all duration-[350ms] ease-out delay-[140ms]"
           :class="gridVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-3'"
@@ -339,13 +333,7 @@ onMounted(() => {
               : errorState === 'noModels'
                 ? t('onboarding.provider.form.errorNoModelsTitle')
                 : t('onboarding.provider.form.errorHttpTitle')"
-          :description="(errorState === 'unreachable'
-            ? t('onboarding.provider.form.errorUnreachableDescription')
-            : errorState === 'authError'
-              ? t('onboarding.provider.form.errorAuthDescription')
-              : errorState === 'noModels'
-                ? t('onboarding.provider.form.errorNoModelsDescription')
-                : t('onboarding.provider.form.errorHttpDescription')) + (errorDetail ? `\n${errorDetail}` : '')"
+          :description="errorDetail || undefined"
         >
           <Button
             type="button"

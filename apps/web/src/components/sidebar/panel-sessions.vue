@@ -52,15 +52,7 @@
             class="size-[18px]"
           />{{ t('chat.contact.contacts') }}
         </SidebarNavButton>
-        <SidebarNavButton
-          :disabled="!currentBotId"
-          @click="handleNewSession"
-        >
-          <SquarePen
-            :stroke-width="1.75"
-            class="size-[18px]"
-          />{{ t('chat.newSession') }}
-        </SidebarNavButton>
+
         <SidebarNavButton
           :disabled="!currentBotId"
           @click="handleBotSettings"
@@ -89,7 +81,7 @@ import { computed, onMounted, provide, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { SquarePen, Settings2, Bot, History, ArrowLeft } from 'lucide-vue-next'
+import { Settings2, Bot, History, ArrowLeft } from 'lucide-vue-next'
 import { ScrollArea, toast } from '@felinic/ui'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useChatStore } from '@/store/chat-list'
@@ -143,17 +135,6 @@ async function openBot(id: string, name?: string) {
     await router.push({ name: 'bot', params: { botName: name || id } })
     workspaceTabs.closeMobileNav()
   } catch (error) { toast.error(resolveApiErrorMessage(error, t('chat.contact.failed'))) }
-}
-
-function handleNewSession() {
-  if (!currentBotId.value) return
-  // Opens (or focuses) the single draft tab; its activation resets the view to a
-  // fresh draft (selectDraft), so no separate createNewSession is needed.
-  workspaceTabs.openDraftChat({ title: t('chat.newSession'), explicitSelection: false })
-  // Select-to-dismiss for the mobile nav sheet: when the draft is ALREADY the
-  // active panel, openDraftChat short-circuits and no session/route/active-id
-  // change fires the sheet's watchers — close it explicitly. No-op on desktop.
-  workspaceTabs.closeMobileNav()
 }
 
 // Navigate to the current bot's settings overview.
