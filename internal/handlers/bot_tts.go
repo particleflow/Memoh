@@ -152,6 +152,8 @@ func (h *BotAudioHandler) SetPlaybackAccess(botService *bots.Service, accountSer
 // @Failure 500 {object} server.Problem
 // @Router /bots/{bot_id}/tts/playback [post].
 func (h *BotAudioHandler) Playback(c echo.Context) error {
+	timing := newPlaybackTiming(c, h.logger)
+	timing.mark("handler_start")
 	// Playback uses configured Bot credentials and requires an account JWT.
 	// Chat-route JWTs skip account session validation in the JWT middleware;
 	// reject them before Bot ownership or grants can authorize synthesis.
@@ -192,6 +194,7 @@ func (h *BotAudioHandler) Playback(c echo.Context) error {
 	}
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel() // Close the upstream body on client cancellation or write failure.
+	timing.mark("adapter_request")
 	stream, err := h.audioService.StreamPlayback(ctx, botSettings.TtsModelID, text)
 	if err != nil {
 		return errs.Wrap(err, "synthesize bot playback")
@@ -203,9 +206,11 @@ func (h *BotAudioHandler) Playback(c echo.Context) error {
 	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
 	c.Response().Header().Set(echo.HeaderContentType, stream.ContentType)
 	c.Response().Header().Set("X-Accel-Buffering", "no")
+	firstAudio := true
 	for {
 		select {
 		case <-ctx.Done():
+			timing.mark("canceled")
 			return ctx.Err()
 		case chunk, ok := <-stream.Stream:
 			if !ok {
@@ -220,15 +225,23 @@ func (h *BotAudioHandler) Playback(c echo.Context) error {
 				if !c.Response().Committed {
 					return echo.NewHTTPError(http.StatusBadGateway, "empty playback stream")
 				}
+				timing.mark("upstream_eof")
 				return nil
 			}
 			if len(chunk) == 0 {
 				continue
 			}
+			if firstAudio {
+				timing.firstAudio(c)
+			}
 			if _, err := c.Response().Write(chunk); err != nil {
 				return err
 			}
 			c.Response().Flush()
+			if firstAudio {
+				timing.mark("http_first_flush")
+				firstAudio = false
+			}
 		}
 	}
 }
