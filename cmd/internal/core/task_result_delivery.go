@@ -41,6 +41,12 @@ type resultTask struct {
 }
 
 func (h *delegationHost) wakeResults(context.Context) {
+	h.signalResultDelivery()
+}
+
+// The callback only signals the existing worker; scans belong to its lifecycle,
+// so a completed request must not cancel delivery and shutdown still cancels it.
+func (h *delegationHost) signalResultDelivery() {
 	w := h.resultWake
 	if w == nil {
 		return
