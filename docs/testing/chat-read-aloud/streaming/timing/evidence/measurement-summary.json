@@ -1,0 +1,136 @@
+{
+  "legacy": [
+    {
+      "mode": "manual",
+      "oldFixtureTriggerToSynthesizeMS": 40.8,
+      "oldFixtureTriggerToBytesMS": 81,
+      "oldFixtureTriggerToPlayingMS": 82.4,
+      "oldFixtureTriggerToGraphMS": 110.2,
+      "synthesizeToGraphMS": 69.4,
+      "firstAppendMS": null,
+      "eofMS": null,
+      "physicalAcoustic500": "UNMEASURED"
+    },
+    {
+      "mode": "automatic",
+      "oldFixtureTriggerToSynthesizeMS": 14.8,
+      "oldFixtureTriggerToBytesMS": 55,
+      "oldFixtureTriggerToPlayingMS": 55.6,
+      "oldFixtureTriggerToGraphMS": 80.1,
+      "synthesizeToGraphMS": 65.3,
+      "firstAppendMS": null,
+      "eofMS": null,
+      "physicalAcoustic500": "UNMEASURED"
+    }
+  ],
+  "current": [
+    {
+      "profile": "fast",
+      "browserClockRelativeToRequestMS": {
+        "clientFirstBytesMS": 78.7,
+        "firstAppendStartMS": 78.8,
+        "firstAppendDoneMS": 79.3,
+        "nativePlayingMS": 80.0,
+        "firstNonzeroGraphMS": 98.6,
+        "eofMS": 456.8
+      },
+      "operationStartToGraphMS": 110.1,
+      "buttonToOperationStartMS": 0.2,
+      "serverOwnClockToAdapterFirstAudioMS": 70.681,
+      "firstTextObservedMS": 11.1,
+      "firstTextChunkMS": 11.4,
+      "firstTextToChunkMS": 0.3,
+      "firstBytesToPlayingMS": 1.3,
+      "firstBytesToEOFMS": 378.1,
+      "graphDeltaFrom500MS": -401.4,
+      "softwareGraphComparedTo500": "UNDER_500",
+      "physicalAcoustic500": "UNMEASURED",
+      "branch": "mse"
+    },
+    {
+      "profile": "slow",
+      "browserClockRelativeToRequestMS": {
+        "clientFirstBytesMS": 626.7,
+        "firstAppendStartMS": 626.7,
+        "firstAppendDoneMS": 626.8,
+        "nativePlayingMS": 628.3,
+        "firstNonzeroGraphMS": 644.0,
+        "eofMS": 905.0
+      },
+      "operationStartToGraphMS": 644.7,
+      "buttonToOperationStartMS": 0,
+      "serverOwnClockToAdapterFirstAudioMS": 621.33,
+      "firstTextObservedMS": 0.6,
+      "firstTextChunkMS": 0.7,
+      "firstTextToChunkMS": 0.1,
+      "firstBytesToPlayingMS": 1.6,
+      "firstBytesToEOFMS": 278.3,
+      "graphDeltaFrom500MS": 144,
+      "softwareGraphComparedTo500": "OVER_500",
+      "physicalAcoustic500": "UNMEASURED",
+      "branch": "mse"
+    },
+    {
+      "profile": "wav",
+      "browserClockRelativeToRequestMS": {
+        "clientFirstBytesMS": 43.6,
+        "firstAppendStartMS": null,
+        "firstAppendDoneMS": null,
+        "nativePlayingMS": 788.7,
+        "firstNonzeroGraphMS": 811.4,
+        "eofMS": 783.6
+      },
+      "operationStartToGraphMS": 812.1,
+      "buttonToOperationStartMS": 0.1,
+      "serverOwnClockToAdapterFirstAudioMS": 40.5,
+      "firstTextObservedMS": 0.5,
+      "firstTextChunkMS": 0.7,
+      "firstTextToChunkMS": 0.2,
+      "firstBytesToPlayingMS": 745.1,
+      "firstBytesToEOFMS": 740.0,
+      "graphDeltaFrom500MS": 311.4,
+      "softwareGraphComparedTo500": "OVER_500",
+      "physicalAcoustic500": "UNMEASURED",
+      "branch": "blob"
+    },
+    {
+      "profile": "auto",
+      "browserClockRelativeToRequestMS": {
+        "clientFirstBytesMS": 73.8,
+        "firstAppendStartMS": 73.8,
+        "firstAppendDoneMS": 74.0,
+        "nativePlayingMS": 74.4,
+        "firstNonzeroGraphMS": 80.6,
+        "eofMS": 453.4
+      },
+      "operationStartToGraphMS": 161.7,
+      "buttonToOperationStartMS": 1.2,
+      "serverOwnClockToAdapterFirstAudioMS": 70.569,
+      "firstTextObservedMS": 49.6,
+      "firstTextChunkMS": 81.1,
+      "firstTextToChunkMS": 31.5,
+      "firstBytesToPlayingMS": 0.6,
+      "firstBytesToEOFMS": 379.6,
+      "graphDeltaFrom500MS": -419.4,
+      "softwareGraphComparedTo500": "UNDER_500",
+      "physicalAcoustic500": "UNMEASURED",
+      "branch": "mse"
+    }
+  ],
+  "f523": {
+    "beforeEOFBytes": 8403,
+    "timingsMS": null,
+    "reason": "Ordering/byte/state evidence only; no millisecond samples captured"
+  },
+  "historicalField200": {
+    "totalServerRequestMS": 8460,
+    "firstByteMS": null,
+    "acousticMS": null,
+    "provenance": "Parent-provided existing field log; total duration cannot be substituted for onset"
+  },
+  "realPhoneRequestToAcoustic": {
+    "status": "UNMEASURED",
+    "deltaFrom500MS": null
+  },
+  "singleRunNoP95OrGuarantee": true
+}

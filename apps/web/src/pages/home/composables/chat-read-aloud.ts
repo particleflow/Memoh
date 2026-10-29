@@ -1,10 +1,11 @@
 import type { ChatMessage } from '@/store/chat/types'
 import { visibleSpeechText } from './speech-visible-text'
 import { prepareSpeechSource, type SpeechAudioStream } from './speech-audio-stream'
+import { beginSpeechTiming, type SpeechTiming } from './speech-timing'
 
 export type SpeechStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'blocked' | 'error'
 export interface SpeechState { key: string, status: SpeechStatus, error?: unknown }
-export interface SpeechEntry { key: string, text: string }
+export interface SpeechEntry { key: string, text: string, timing?: SpeechTiming }
 export interface SpeechPlayer {
   src: string
   play(): Promise<void>
@@ -14,7 +15,7 @@ export interface SpeechPlayer {
   removeEventListener(type: string, listener: EventListener): void
 }
 export interface SpeechDependencies {
-  synthesize(text: string, signal: AbortSignal): Promise<Blob | SpeechAudioStream>
+  synthesize(text: string, signal: AbortSignal, timing?: SpeechTiming): Promise<Blob | SpeechAudioStream>
   createPlayer(): SpeechPlayer
   createURL(blob: Blob | MediaSource): string
   revokeURL(url: string): void
@@ -133,6 +134,7 @@ export class ChatReadAloud {
   private url = ''
   private detach?: () => void
   private disposeStream?: () => void
+  private timing?: SpeechTiming
   private state: SpeechState = { key: '', status: 'idle' }
   private deps: SpeechDependencies
   constructor(deps: SpeechDependencies) { this.deps = deps }
@@ -148,6 +150,7 @@ export class ChatReadAloud {
     if (this.url) { this.deps.revokeURL(this.url); this.url = '' }
   }
   stop() {
+    this.timing?.mark('interrupted'); this.timing = undefined
     ++this.generation
     this.queue = []
     this.abort?.abort(); this.abort = undefined
@@ -157,7 +160,8 @@ export class ChatReadAloud {
   enqueue(entry: SpeechEntry) {
     // Bound the first manual request too; do not send a 500-character paragraph
     // before its opening phrase can start synthesizing.
-    this.queue.push(...speechChunks(entry.text, 80).map(text => ({ key: entry.key, text })))
+    const operation = entry.timing ?? beginSpeechTiming('direct')
+    this.queue.push(...speechChunks(entry.text, 80).map(text => { const timing = operation?.fork(); timing?.mark('text_chunk_ready'); return { key: entry.key, text, timing } }))
     if (this.state.status === 'idle' || this.state.status === 'error') void this.next()
   }
   replay(entry: SpeechEntry) { this.stop(); this.enqueue(entry) }
@@ -170,6 +174,7 @@ export class ChatReadAloud {
   }
   private fail(token: number, error: unknown) {
     if (token !== this.generation) return
+    this.timing?.mark('error')
     ++this.generation
     this.queue = []
     this.abort?.abort(); this.abort = undefined
@@ -178,9 +183,11 @@ export class ChatReadAloud {
   }
   private tryPlay(token: number) {
     try {
+      this.timing?.mark('native_play_call')
       void this.player!.play().catch(error => {
         if (token !== this.generation) return
         if (error && typeof error === 'object' && error.name === 'NotAllowedError') {
+          this.timing?.mark('blocked')
           this.publish(this.state.key, 'blocked')
         } else this.fail(token, error)
       })
@@ -188,13 +195,15 @@ export class ChatReadAloud {
   }
   private async next() {
     const entry = this.queue.shift()
-    if (!entry) { this.publish('', 'idle'); return }
+    if (!entry) { this.timing = undefined; this.publish('', 'idle'); return }
     const token = ++this.generation
+    this.timing = entry.timing
     this.abort = new AbortController()
     this.publish(entry.key, 'loading')
     try {
       const signal = this.abort.signal
-      const audio = await this.deps.synthesize(entry.text, signal)
+      entry.timing?.mark('request_start')
+      const audio = await (entry.timing ? this.deps.synthesize(entry.text, signal, entry.timing) : this.deps.synthesize(entry.text, signal))
       if (token !== this.generation) {
         if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {})
         return
@@ -203,7 +212,7 @@ export class ChatReadAloud {
       this.player ??= this.deps.createPlayer()
       if (audio instanceof Blob) this.url = this.deps.createURL(audio)
       else {
-        const stream = await prepareSpeechSource(audio, signal, source => this.deps.createURL(source))
+        const stream = await prepareSpeechSource(audio, signal, source => this.deps.createURL(source), entry.timing)
         if (token !== this.generation) {
           stream.dispose(); this.deps.revokeURL(stream.url)
           void stream.done.catch(() => {})
@@ -215,11 +224,12 @@ export class ChatReadAloud {
       }
       this.player.src = this.url
       const handlers: Record<string, EventListener> = {
-        playing: () => { if (token === this.generation) this.publish(entry.key, 'playing') },
+        playing: () => { if (token === this.generation) { entry.timing?.mark('native_playing'); this.publish(entry.key, 'playing') } },
         pause: () => { if (token === this.generation) this.publish(entry.key, 'paused') },
         waiting: () => { if (token === this.generation) this.publish(entry.key, 'loading') },
         ended: () => {
           if (token !== this.generation) return
+          entry.timing?.mark('native_ended')
           this.abort?.abort(); this.abort = undefined
           this.release()
           void this.next()

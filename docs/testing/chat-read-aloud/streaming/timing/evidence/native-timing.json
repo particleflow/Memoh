@@ -1,0 +1,444 @@
+{
+  "measuredSourceHashes": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+    "apps/web/src/pages/home/composables/speech-timing.ts": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664"
+  },
+  "fixedDeviceSamplingScriptsChecked": true,
+  "results": [
+    {
+      "profile": "fast",
+      "traceId": "42dd041f-ee1f-49b5-b02b-fc174f411dae",
+      "operationId": "e4948879-563d-462c-841f-5db4060f2c4c",
+      "triggerToOperationMS": 0.19999999925494194,
+      "firstTextObservedMS": 11.099999997764826,
+      "firstTextChunkMS": 11.399999998509884,
+      "requestStartMS": 11.5,
+      "serverAdapterFirstAudioMS": 70.681,
+      "clientFirstBytesMS": 90.19999999925494,
+      "firstAppendStartMS": 90.30000000074506,
+      "firstAppendDoneMS": 90.80000000074506,
+      "nativePlayingMS": 91.5,
+      "firstNonzeroGraphMS": 110.09999999776483,
+      "previousZeroGraphMS": 93.69999999925494,
+      "eofMS": 468.30000000074506,
+      "requestToPlayingMS": 80,
+      "requestToNonzeroGraphMS": 98.59999999776483,
+      "nonAcousticGraphMarginTo500MS": 401.4000000022352,
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32,
+      "maxObservedRAFPollGapMS": 56.600000001490116,
+      "branch": "mse",
+      "record": {
+        "id": "42dd041f-ee1f-49b5-b02b-fc174f411dae",
+        "operationId": "e4948879-563d-462c-841f-5db4060f2c4c",
+        "trigger": "manual",
+        "clock": "browser-performance",
+        "startMS": 370.69999999925494,
+        "events": [
+          {
+            "event": "text_chunk_ready",
+            "ms": 11.399999998509884
+          },
+          {
+            "event": "request_start",
+            "ms": 11.5
+          },
+          {
+            "event": "response_headers",
+            "ms": 87.59999999776483,
+            "serverFirstAudioMS": 70.681
+          },
+          {
+            "event": "source_branch",
+            "ms": 88,
+            "branch": "mse",
+            "mime": "mp3"
+          },
+          {
+            "event": "native_play_call",
+            "ms": 88.59999999776483
+          },
+          {
+            "event": "client_first_bytes",
+            "ms": 90.19999999925494,
+            "bytes": 8403
+          },
+          {
+            "event": "audio_signature",
+            "ms": 90.19999999925494,
+            "signature": "id3_prefix"
+          },
+          {
+            "event": "decoder_append_start",
+            "ms": 90.30000000074506
+          },
+          {
+            "event": "decoder_append_done",
+            "ms": 90.80000000074506
+          },
+          {
+            "event": "native_playing",
+            "ms": 91.5
+          },
+          {
+            "event": "body_eof",
+            "ms": 468.30000000074506
+          },
+          {
+            "event": "native_ended",
+            "ms": 2527.199999999255
+          }
+        ]
+      },
+      "operation": {
+        "id": "e4948879-563d-462c-841f-5db4060f2c4c",
+        "operationId": "e4948879-563d-462c-841f-5db4060f2c4c",
+        "trigger": "manual",
+        "clock": "browser-performance",
+        "startMS": 370.69999999925494,
+        "events": [
+          {
+            "event": "operation_start",
+            "ms": 0
+          },
+          {
+            "event": "text_observed",
+            "ms": 11.099999997764826
+          }
+        ]
+      }
+    },
+    {
+      "profile": "slow",
+      "traceId": "c47b7104-b005-41f6-8d38-970f892d3b24",
+      "operationId": "70a06d91-425f-4580-b08d-dfc70f9e0b4c",
+      "triggerToOperationMS": 0,
+      "firstTextObservedMS": 0.5999999977648258,
+      "firstTextChunkMS": 0.6999999992549419,
+      "requestStartMS": 0.6999999992549419,
+      "serverAdapterFirstAudioMS": 621.33,
+      "clientFirstBytesMS": 627.3999999985099,
+      "firstAppendStartMS": 627.3999999985099,
+      "firstAppendDoneMS": 627.5,
+      "nativePlayingMS": 629,
+      "firstNonzeroGraphMS": 644.6999999992549,
+      "previousZeroGraphMS": 628.6999999992549,
+      "eofMS": 905.6999999992549,
+      "requestToPlayingMS": 628.3000000007451,
+      "requestToNonzeroGraphMS": 644,
+      "nonAcousticGraphMarginTo500MS": -144,
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32,
+      "maxObservedRAFPollGapMS": 56.600000001490116,
+      "branch": "mse",
+      "record": {
+        "id": "c47b7104-b005-41f6-8d38-970f892d3b24",
+        "operationId": "70a06d91-425f-4580-b08d-dfc70f9e0b4c",
+        "trigger": "manual",
+        "clock": "browser-performance",
+        "startMS": 2952.699999999255,
+        "events": [
+          {
+            "event": "text_chunk_ready",
+            "ms": 0.6999999992549419
+          },
+          {
+            "event": "request_start",
+            "ms": 0.6999999992549419
+          },
+          {
+            "event": "response_headers",
+            "ms": 626.1999999992549,
+            "serverFirstAudioMS": 621.33
+          },
+          {
+            "event": "source_branch",
+            "ms": 626.3000000007451,
+            "branch": "mse",
+            "mime": "mp3"
+          },
+          {
+            "event": "native_play_call",
+            "ms": 626.5
+          },
+          {
+            "event": "client_first_bytes",
+            "ms": 627.3999999985099,
+            "bytes": 8403
+          },
+          {
+            "event": "audio_signature",
+            "ms": 627.3999999985099,
+            "signature": "id3_prefix"
+          },
+          {
+            "event": "decoder_append_start",
+            "ms": 627.3999999985099
+          },
+          {
+            "event": "decoder_append_done",
+            "ms": 627.5
+          },
+          {
+            "event": "native_playing",
+            "ms": 629
+          },
+          {
+            "event": "body_eof",
+            "ms": 905.6999999992549
+          },
+          {
+            "event": "native_ended",
+            "ms": 3064.89999999851
+          }
+        ]
+      },
+      "operation": {
+        "id": "70a06d91-425f-4580-b08d-dfc70f9e0b4c",
+        "operationId": "70a06d91-425f-4580-b08d-dfc70f9e0b4c",
+        "trigger": "manual",
+        "clock": "browser-performance",
+        "startMS": 2952.699999999255,
+        "events": [
+          {
+            "event": "operation_start",
+            "ms": 0
+          },
+          {
+            "event": "text_observed",
+            "ms": 0.5999999977648258
+          }
+        ]
+      }
+    },
+    {
+      "profile": "wav",
+      "traceId": "2e4bb149-971e-4c24-adc3-1fb1b01360c9",
+      "operationId": "2ad9c440-578c-4b8a-8ff9-012b436359d7",
+      "triggerToOperationMS": 0.10000000149011612,
+      "firstTextObservedMS": 0.5,
+      "firstTextChunkMS": 0.6999999992549419,
+      "requestStartMS": 0.6999999992549419,
+      "serverAdapterFirstAudioMS": 40.5,
+      "clientFirstBytesMS": 44.30000000074506,
+      "firstAppendStartMS": null,
+      "firstAppendDoneMS": null,
+      "nativePlayingMS": 789.3999999985099,
+      "firstNonzeroGraphMS": 812.1000000014901,
+      "previousZeroGraphMS": 795.5,
+      "eofMS": 784.3000000007451,
+      "requestToPlayingMS": 788.6999999992549,
+      "requestToNonzeroGraphMS": 811.4000000022352,
+      "nonAcousticGraphMarginTo500MS": -311.4000000022352,
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32,
+      "maxObservedRAFPollGapMS": 56.600000001490116,
+      "branch": "blob",
+      "record": {
+        "id": "2e4bb149-971e-4c24-adc3-1fb1b01360c9",
+        "operationId": "2ad9c440-578c-4b8a-8ff9-012b436359d7",
+        "trigger": "manual",
+        "clock": "browser-performance",
+        "startMS": 6068.39999999851,
+        "events": [
+          {
+            "event": "text_chunk_ready",
+            "ms": 0.6999999992549419
+          },
+          {
+            "event": "request_start",
+            "ms": 0.6999999992549419
+          },
+          {
+            "event": "response_headers",
+            "ms": 43.899999998509884,
+            "serverFirstAudioMS": 40.5
+          },
+          {
+            "event": "source_branch",
+            "ms": 44.100000001490116,
+            "branch": "blob",
+            "mime": "wav"
+          },
+          {
+            "event": "client_first_bytes",
+            "ms": 44.30000000074506,
+            "bytes": 8403
+          },
+          {
+            "event": "audio_signature",
+            "ms": 44.399999998509884,
+            "signature": "riff_wave_prefix"
+          },
+          {
+            "event": "body_eof",
+            "ms": 784.3000000007451
+          },
+          {
+            "event": "blob_ready",
+            "ms": 785.1000000014901
+          },
+          {
+            "event": "native_play_call",
+            "ms": 785.1999999992549
+          },
+          {
+            "event": "native_playing",
+            "ms": 789.3999999985099
+          },
+          {
+            "event": "native_ended",
+            "ms": 1799.1000000014901
+          }
+        ]
+      },
+      "operation": {
+        "id": "2ad9c440-578c-4b8a-8ff9-012b436359d7",
+        "operationId": "2ad9c440-578c-4b8a-8ff9-012b436359d7",
+        "trigger": "manual",
+        "clock": "browser-performance",
+        "startMS": 6068.39999999851,
+        "events": [
+          {
+            "event": "operation_start",
+            "ms": 0
+          },
+          {
+            "event": "text_observed",
+            "ms": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "profile": "auto",
+      "traceId": "d4f3a357-4729-48e5-ba4a-fc461fa1225f",
+      "operationId": "897b6935-2103-42c1-bc56-1381128ad90e",
+      "triggerToOperationMS": 1.199999999254942,
+      "firstTextObservedMS": 49.600000001490116,
+      "firstTextChunkMS": 81.10000000149012,
+      "requestStartMS": 81.10000000149012,
+      "serverAdapterFirstAudioMS": 70.569,
+      "clientFirstBytesMS": 154.90000000223517,
+      "firstAppendStartMS": 154.90000000223517,
+      "firstAppendDoneMS": 155.10000000149012,
+      "nativePlayingMS": 155.5,
+      "firstNonzeroGraphMS": 161.70000000298023,
+      "previousZeroGraphMS": 145.10000000149012,
+      "eofMS": 534.5,
+      "requestToPlayingMS": 74.39999999850988,
+      "requestToNonzeroGraphMS": 80.60000000149012,
+      "nonAcousticGraphMarginTo500MS": 419.3999999985099,
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32,
+      "maxObservedRAFPollGapMS": 18.400000002235174,
+      "branch": "mse",
+      "record": {
+        "id": "d4f3a357-4729-48e5-ba4a-fc461fa1225f",
+        "operationId": "897b6935-2103-42c1-bc56-1381128ad90e",
+        "trigger": "automatic",
+        "clock": "browser-performance",
+        "startMS": 7918.79999999702,
+        "events": [
+          {
+            "event": "text_chunk_ready",
+            "ms": 81.10000000149012
+          },
+          {
+            "event": "request_start",
+            "ms": 81.10000000149012
+          },
+          {
+            "event": "response_headers",
+            "ms": 154.10000000149012,
+            "serverFirstAudioMS": 70.569
+          },
+          {
+            "event": "source_branch",
+            "ms": 154.10000000149012,
+            "branch": "mse",
+            "mime": "mp3"
+          },
+          {
+            "event": "native_play_call",
+            "ms": 154.20000000298023
+          },
+          {
+            "event": "client_first_bytes",
+            "ms": 154.90000000223517,
+            "bytes": 8403
+          },
+          {
+            "event": "audio_signature",
+            "ms": 154.90000000223517,
+            "signature": "id3_prefix"
+          },
+          {
+            "event": "decoder_append_start",
+            "ms": 154.90000000223517
+          },
+          {
+            "event": "decoder_append_done",
+            "ms": 155.10000000149012
+          },
+          {
+            "event": "native_playing",
+            "ms": 155.5
+          },
+          {
+            "event": "body_eof",
+            "ms": 534.5
+          },
+          {
+            "event": "native_ended",
+            "ms": 2588.800000000745
+          }
+        ]
+      },
+      "operation": {
+        "id": "897b6935-2103-42c1-bc56-1381128ad90e",
+        "operationId": "897b6935-2103-42c1-bc56-1381128ad90e",
+        "trigger": "automatic",
+        "clock": "browser-performance",
+        "startMS": 7918.79999999702,
+        "events": [
+          {
+            "event": "operation_start",
+            "ms": 0.10000000149011612
+          },
+          {
+            "event": "text_observed",
+            "ms": 49.600000001490116
+          }
+        ]
+      }
+    }
+  ],
+  "browser": "154.0.8037.57",
+  "source": "Controlled provider-channel first-byte/EOF delays + actual HTTP handler/generated SDK/composable/controller/MSE or Blob/native Audio",
+  "plannedFixtureDelays": {
+    "fast": {
+      "firstMS": 70,
+      "eofMS": 450
+    },
+    "slow": {
+      "firstMS": 620,
+      "eofMS": 900
+    },
+    "wav": {
+      "firstMS": 40,
+      "eofMS": 780
+    },
+    "auto": {
+      "firstMS": 70,
+      "eofMS": 450
+    }
+  },
+  "providerCalls": 0,
+  "autoplayPolicyOverride": false,
+  "physicalAudibleMeasurement": false,
+  "acoustic500msStatus": "UNMEASURED",
+  "notice": "Playing and nonzero WebAudio graph are software observations, not speaker output. Server durations are on an independent monotonic clock; IDs correlate them, epochs are never subtracted."
+}
