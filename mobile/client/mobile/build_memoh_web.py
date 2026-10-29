@@ -1163,7 +1163,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         changes['apps/web/index.html'].append(('/src/main.ts', '/src/lib/harmony-entry.ts', 1))
         changes['apps/web/src/main.ts'].extend([
             ("import { setupApiClient }", "import { readServiceConfig } from './lib/harmony-service-config'\nimport { setupApiClient }", 1),
-            ('setupApiClient({', "const service = readServiceConfig()\nif (!service || service.resetPending) throw new Error('SERVICE_CONFIG_REQUIRED')\n// Native file dispatch remains below the logical identity guard. Older shared clients ignore this option.\nconst platformFileRouting = { fileRouting: 'platform' as const }\nsetupApiClient({\n  ...platformFileRouting,\n  baseUrl: service.apiOrigin,", 1),
+            ('setupApiClient({', "const service = readServiceConfig()\nif (!service || service.resetPending) throw new Error('SERVICE_CONFIG_REQUIRED')\n// Native file dispatch remains below the logical identity guard. Older shared clients ignore this option.\nconst platformFileRouting = { fileRouting: 'platform' as const }\nsetupApiClient({\n  ...platformFileRouting,\n  fetch: globalThis.fetch.bind(globalThis),\n  baseUrl: service.apiOrigin,", 1),
         ])
     with tarfile.open(ROOT / lock['archive'], 'r:gz') as source, tarfile.open(context, 'w') as target:
         for member in source:

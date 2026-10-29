@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "0fe7ce29ad585d60e38d6d53b75b4edfd3ae903635022097835dd1578fe3e563"
+      "sha256": "557a648de80eddefe963abdcb9d6bad73c3a3e4eedcdffa53d2f30825306e222"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -477,18 +477,19 @@
       "hap28ContainsDelta": false
     },
     "paired959": {
-      "commit": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
-      "tree": "26e57e9e38870563d2f5a198b44a882ca3eb5ac5",
-      "mappedFiles": 143,
+      "commit": "7a5f2bb2f7eda2a00c3af6ef6f64281c0b45475f",
+      "tree": "3be3719bdd9d355dbb0ffd0b13705c97eade9fad",
+      "mappedFiles": 154,
       "officialSDKOperations": 382,
-      "schema180AssumedDeployed": false,
+      "schema180AssumedDeployed": true,
       "HAP28ContainsDelta": false,
-      "requiredUnchangedDependencies": 2,
+      "requiredUnchangedDependencies": 1,
       "requiredDependencyMetadata": 2,
       "sharedDeletions": 4,
       "streamingAdmitted": true,
-      "compatibleBackendCommit": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
-      "admissionP1MappedFiles": 6
+      "compatibleBackendCommit": "7a5f2bb2f7eda2a00c3af6ef6f64281c0b45475f",
+      "admissionP1MappedFiles": 6,
+      "fileRouteAndTimingMappedFiles": 14
     }
   }
 }
