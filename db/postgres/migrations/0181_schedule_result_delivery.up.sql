@@ -15,3 +15,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_logs_occurrence
 -- Distinguish limit exhaustion from an explicit pause before refunding a
 -- definitively unadmitted busy fire. Legacy disabled plans stay disabled.
 ALTER TABLE schedule ADD COLUMN IF NOT EXISTS limit_disabled BOOLEAN NOT NULL DEFAULT false;
+
+-- A resumed plan must not authorize callbacks captured before its pause.
+-- This fences new claims only; committed fires retain their original grant.
+ALTER TABLE schedule ADD COLUMN IF NOT EXISTS registration_generation BIGINT NOT NULL DEFAULT 0;

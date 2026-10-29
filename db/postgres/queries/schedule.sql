@@ -42,6 +42,8 @@ SET name = $2,
     description = $3,
     pattern = $4,
     max_calls = $5,
+    registration_generation = CASE WHEN sqlc.arg(enabled_explicit)::boolean
+      OR enabled IS DISTINCT FROM $6::boolean THEN registration_generation + 1 ELSE registration_generation END,
     limit_disabled = CASE WHEN sqlc.arg(enabled_explicit)::boolean OR $6::boolean
       OR enabled IS DISTINCT FROM $6::boolean THEN false ELSE limit_disabled END,
     enabled = $6,
@@ -69,6 +71,7 @@ WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NUL
 -- name: DisableSchedule :one
 UPDATE schedule
 SET enabled = false,
+    registration_generation = registration_generation + 1,
     limit_disabled = false,
     updated_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL

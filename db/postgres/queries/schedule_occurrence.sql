@@ -2,12 +2,14 @@
 -- One durable fire per exact due instant, across callbacks and processes.
 -- Counting is in the same statement and only the winning insert may count.
 -- Serialize this authorization with pause/delete/update on the same row.
--- Under READ COMMITTED, a waiter rechecks enabled after the updater commits.
+-- Under READ COMMITTED, a waiter rechecks enabled and the captured registration
+-- generation after the updater commits, including a pause followed by resume.
 -- A committed claim is the admission grant: pausing does not cancel it.
 WITH eligible AS MATERIALIZED (
  SELECT s.* FROM schedule s
  WHERE s.team_id=public.memoh_current_team_id() AND s.id=sqlc.arg(schedule_id)::uuid
  AND s.deleted_at IS NULL AND s.enabled AND s.result_origin->>'version'='1'
+ AND s.registration_generation=sqlc.arg(registration_generation)::bigint
  FOR UPDATE
 ), claimed AS (
  INSERT INTO schedule_logs (schedule_id,bot_id,result_origin,scheduled_for,claim_deadline,claim_state)

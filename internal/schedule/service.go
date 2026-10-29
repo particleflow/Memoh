@@ -873,15 +873,16 @@ func (s *Service) removeJob(id string) {
 
 func toSchedule(row sqlc.Schedule) Schedule {
 	item := Schedule{
-		ID:              row.ID.String(),
-		Name:            row.Name,
-		Description:     row.Description,
-		Pattern:         row.Pattern,
-		CurrentCalls:    int(row.CurrentCalls),
-		Enabled:         row.Enabled,
-		Command:         row.Command,
-		BotID:           row.BotID.String(),
-		ExecutionConfig: executionFromRow(row),
+		registrationGeneration: row.RegistrationGeneration,
+		ID:                     row.ID.String(),
+		Name:                   row.Name,
+		Description:            row.Description,
+		Pattern:                row.Pattern,
+		CurrentCalls:           int(row.CurrentCalls),
+		Enabled:                row.Enabled,
+		Command:                row.Command,
+		BotID:                  row.BotID.String(),
+		ExecutionConfig:        executionFromRow(row),
 	}
 	if row.MaxCalls.Valid {
 		maxCalls := int(row.MaxCalls.Int32)
