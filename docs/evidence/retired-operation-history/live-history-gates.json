@@ -1,0 +1,40 @@
+{
+  "source_commit": "7808bcd0722655844cc0c62fd61686b1c627da17",
+  "source_tree": "602f43941ec0deb7bfa555c5d724237c1326e2f6",
+  "original_46_ci": {
+    "run": 40879756552,
+    "unit_job": 123467812618,
+    "postgres_job": 123467812645,
+    "history_assertion": "Old PG test expected retired historical get to fail; now verifies identical archived JSON, current permission/team refusal and all live calls rejected after revoke/delete.",
+    "live_boundary": "Observe and Resume reused historical Get for current registration checks. Explicit GetLive restores the original owner/PC/live registration/snapshot/native instance/legacy fingerprint checks at common ComputerBinding, before and after callbacks."
+  },
+  "final_validation": {
+    "complete_package_race": {
+      "handlers_seconds": 15.76,
+      "sessiontask_seconds": 1.127,
+      "result": "PASS"
+    },
+    "postgres_archive_test": {
+      "test": "TestNativeProfileCutoverPersistedHistoryScope",
+      "race": true,
+      "seconds": 3.956,
+      "result": "PASS"
+    },
+    "changed_line_lint": "PASS handlers and sessiontask",
+    "complete_sessiontask_lint": "PASS",
+    "integration_changed_line_lint": "PASS internal/db",
+    "baseline_handlers_lint_note": "Full local handlers lint reports existing local_channel.go modelID unused parameter; blob 240c43485926fbd435876bdedf96d3d58b474e68 is identical to 78d6092c and 46. No unrelated source was modified."
+  },
+  "retained_live_assertions": [
+    "late binding revocation => 404, no observation leak",
+    "same mount InstanceID replaced during callback => 404; subsequent request does not reach observer",
+    "original ctx PC mismatch => refusal before ResolveTarget",
+    "owner/Bot/session/current permission mismatch => refusal",
+    "metadata get/delivery history => no GetMount, transport or ledger mutation"
+  ],
+  "limits": [
+    "Current UI screenshot proves directory visibility; exact detail and deleted-binding observation are real HTTP checks in verification-summary.json.",
+    "No production revocation, binding deletion, real OAuth, credential access or business task.",
+    "Natural source CI remains authoritative; this report does not assert a CI result before its completion."
+  ]
+}

@@ -1,0 +1,238 @@
+{
+  "verified_at_utc": "2026-10-29T13:43:39.608977+00:00",
+  "base_head": "7808bcd0722655844cc0c62fd61686b1c627da17",
+  "production_source_sha256": "e21f61467566c3dcf811855feb87a8cf05de71bda9921a0758a12f9c61d9a2d8",
+  "binary_sha256": "79b0ed57b2f0514e5cff5ec1a9d01770ead1f75e10ac90c7491c78238314331f",
+  "sessiontask_service_sha256": "160809f2bd189fc3db9fc8fb85dac09447655858ff163e9bf6101a020ed3147d",
+  "frontend_source_sha256": "22f9e83048c70dae2622054c77e89b3f652b4e09caba5e7b18762edf0a0bcd11",
+  "frontend_files_verified_equal": 1317,
+  "ui_submodule": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "environment": {
+    "api": "http://127.0.0.1:58080",
+    "web": "http://127.0.0.1:58083",
+    "postgres": "Dedicated synthetic memoh-herdr-ui-pg; migrations 176 to 180",
+    "startup": "Current Go ./cmd/agent plus current frontend source mirror and frozen-lockfile pnpm 10.34.8 Vite; mise unavailable. Existing dedicated PG/pgvector containers restored, other dev containers untouched.",
+    "health_head_status": 200
+  },
+  "fixture": {
+    "added_historical_operations": 3,
+    "original_operations_preserved": 3,
+    "total_operations": 6,
+    "historical_operation_states": [
+      "completed",
+      "completed",
+      "unknown"
+    ],
+    "historical_messages": 3,
+    "legacy_shape": "No target_snapshot; synthetic retained fingerprint; no execution run/turn exists. No business call was performed.",
+    "contact_setup": "Added one independent empty synthetic Contact session and its route to resolve current baseline ambiguity (HTTP 409) among multiple unbound history candidates. No original session, operation or message was rewritten."
+  },
+  "http": {
+    "scope": "Current fixed 7808 source only. Reuses existing six operation rows and the already-revoked runtime/deleted binding. Earlier retirement phases were not repeated.",
+    "detail_scope_assertions": 7,
+    "checks": [
+      {
+        "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000021",
+        "status": 200,
+        "task_id": "70000000-0000-4000-8000-000000000021",
+        "state": "process_exited",
+        "business_state": "unknown"
+      },
+      {
+        "check": "foreign principal rejected",
+        "task_id": "70000000-0000-4000-8000-000000000021",
+        "status": 403
+      },
+      {
+        "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000022",
+        "status": 200,
+        "task_id": "70000000-0000-4000-8000-000000000022",
+        "state": "process_exited",
+        "business_state": "unknown"
+      },
+      {
+        "check": "foreign principal rejected",
+        "task_id": "70000000-0000-4000-8000-000000000022",
+        "status": 403
+      },
+      {
+        "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000023",
+        "status": 200,
+        "task_id": "70000000-0000-4000-8000-000000000023",
+        "state": "unknown",
+        "business_state": "unknown"
+      },
+      {
+        "check": "foreign principal rejected",
+        "task_id": "70000000-0000-4000-8000-000000000023",
+        "status": 403
+      },
+      {
+        "check": "wrong original session rejected",
+        "status": 404
+      }
+    ],
+    "list_status": 200,
+    "deleted_binding_observation": {
+      "method": "GET",
+      "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000023/observation",
+      "status": 404,
+      "code": "session.not_found",
+      "actual_synthetic_mcp_requests": 0
+    },
+    "same_ids_and_states": true,
+    "completed_projection": "process_exited; business_state remains unknown",
+    "unknown_projection": "unknown; business_state remains unknown",
+    "live_callback_and_delivery_tests": "Separate parent-owned tests; this verification does not POST resume or execute a business task."
+  },
+  "invariants": {
+    "original_three_operations_unchanged": true,
+    "all_six_operation_rows_unchanged": true,
+    "original_and_fixture_history_sessions_unchanged": true,
+    "all_three_messages_unchanged": true,
+    "scoped_rows_sha256_before": "8b29edf4b0a6d6d4856a6a82c90272ed09c6186a9ccbe67fe3c70c498fd8f81a",
+    "scoped_rows_sha256_after": "8b29edf4b0a6d6d4856a6a82c90272ed09c6186a9ccbe67fe3c70c498fd8f81a",
+    "new_operation_writes_during_reads": 0,
+    "oauth_token_rows": 0,
+    "actual_synthetic_mcp_requests": 0
+  },
+  "browser": {
+    "flow": "Fixed 7808 Go server and unchanged current frontend: Contact -> Tasks -> close -> reopen. Same six historical operations, no new fixture.",
+    "retired_rows": [
+      {
+        "task_type": "computer_operation",
+        "task_id": "70000000-0000-4000-8000-000000000023",
+        "record_id": "70000000-0000-4000-8000-000000000023",
+        "name": "Synthetic retired Agenvo history",
+        "state": "unknown",
+        "created_at": "2026-10-29T12:49:40.682062Z"
+      },
+      {
+        "task_type": "computer_operation",
+        "task_id": "70000000-0000-4000-8000-000000000022",
+        "record_id": "70000000-0000-4000-8000-000000000022",
+        "name": "Synthetic retired Agenvo history",
+        "state": "process_exited",
+        "created_at": "2026-10-29T12:49:40.682062Z"
+      },
+      {
+        "task_type": "computer_operation",
+        "task_id": "70000000-0000-4000-8000-000000000021",
+        "record_id": "70000000-0000-4000-8000-000000000021",
+        "name": "Synthetic retired Agenvo history",
+        "state": "process_exited",
+        "created_at": "2026-10-29T12:49:40.682062Z"
+      }
+    ],
+    "page_errors": [],
+    "task_write_requests": [],
+    "oauth_requests": [],
+    "contact_resolver_posts": 1,
+    "actual_remote_observation_or_execution": 0,
+    "screenshot": "retired-tasks-current.png",
+    "screenshot_inspected": true,
+    "screenshot_sha256": "ca737090a58acb64c51554a72fe58d6fb50bf66f3ab7fd191220312f3142484e"
+  },
+  "limits": [
+    "Current UI mounts BotTaskDirectory; the old session-tasks detail component has no production import. This screenshot proves directory visibility, not a clicked per-operation detail view. Scoped detail reads are verified through the real HTTP API.",
+    "Directory navigation is disabled for these hand-seeded historical receipts because there is no real execution run/turn destination; none was fabricated.",
+    "The three historical message rows are preserved byte-for-byte. They were not seeded as visible execution turns, so their rendered message content is not claimed verified.",
+    "All data and credentials are isolated synthetic fixtures. No real token read, OAuth authorization/refresh, Windows enrollment/call, model request, task dispatch, production deployment or user acceptance is claimed.",
+    "Agent browser verification is not human QA."
+  ],
+  "source_state": "Fixed 7808bcd0722655844cc0c62fd61686b1c627da17, including live authorization restored at ComputerBinding while historical Get remains read-only.",
+  "delivery_postgres_sha256": "ecd16c65faadb49f6a4011963c7c4ccb78b8f16600ea1175f42d79147735e22d",
+  "prior_639_verification": {
+    "verified_at_utc": "2026-10-29T13:01:02.144943+00:00",
+    "published_source_commit": "6391829c2b348938822d2a8a5f2ecaedeeddbfb8",
+    "production_source_sha256": "cc9d17aa19d7ec95ae14606c0f4f2806019f57f4f53ee794ae1276c8c58608a2",
+    "binary_sha256": "de9ad399ce1e32a8f61e8ded8308e55a3e12702a114c33d815734fe75e44b780",
+    "http": {
+      "phases": [
+        "binding retained, runtime not revoked, OAuth connection inactive",
+        "runtime revoked, binding retained",
+        "binding deleted"
+      ],
+      "assertions_per_phase": 7,
+      "phase_assertions_total": 21,
+      "additional_after_ui_assertions": 7,
+      "list_status_each_phase": 200,
+      "detail_status_each_phase": [
+        200,
+        200,
+        200
+      ],
+      "foreign_user_status_each_phase": [
+        403,
+        403,
+        403
+      ],
+      "wrong_original_session_status_each_phase": 404,
+      "same_ids_and_states_each_phase": true,
+      "completed_projection": "process_exited; business_state remains unknown",
+      "unknown_projection": "unknown; business_state remains unknown"
+    }
+  },
+  "published_source_commit": "7808bcd0722655844cc0c62fd61686b1c627da17",
+  "published_source_tree": "0b770f85b719ad9c7fbca1791aea8475c349242e",
+  "prior_delivery_denial_patch_verification": {
+    "verified_at_utc": "2026-10-29T13:11:30.823166+00:00",
+    "base_head": "8d0c8f7ad8352a99be8b0f1707e94120bf2b4ba1",
+    "production_source_sha256": "fbb1950981860ae6844be68a9360c2faed3b60e809991c61b8d8b42aed09ea34",
+    "binary_sha256": "dd6d36514b9ef4547c8819fda1e13f40b1293acb76d88dcb69a59a7cb16c910c",
+    "http": {
+      "scope": "Current error-normalization patch only; reuses existing revoked runtime and deleted binding. The earlier three retirement phases are recorded under prior_639_verification and were not repeated on this patch.",
+      "checks": [
+        {
+          "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000021",
+          "status": 200,
+          "task_id": "70000000-0000-4000-8000-000000000021",
+          "state": "process_exited",
+          "business_state": "unknown"
+        },
+        {
+          "check": "foreign principal rejected",
+          "task_id": "70000000-0000-4000-8000-000000000021",
+          "status": 403
+        },
+        {
+          "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000022",
+          "status": 200,
+          "task_id": "70000000-0000-4000-8000-000000000022",
+          "state": "process_exited",
+          "business_state": "unknown"
+        },
+        {
+          "check": "foreign principal rejected",
+          "task_id": "70000000-0000-4000-8000-000000000022",
+          "status": 403
+        },
+        {
+          "path": "/bots/20000000-0000-4000-8000-000000000001/sessions/60000000-0000-4000-8000-000000000021/tasks/computer_operation/70000000-0000-4000-8000-000000000023",
+          "status": 200,
+          "task_id": "70000000-0000-4000-8000-000000000023",
+          "state": "unknown",
+          "business_state": "unknown"
+        },
+        {
+          "check": "foreign principal rejected",
+          "task_id": "70000000-0000-4000-8000-000000000023",
+          "status": 403
+        },
+        {
+          "check": "wrong original session rejected",
+          "status": 404
+        }
+      ],
+      "assertions": 7,
+      "list_status": 200,
+      "same_ids_and_states": true,
+      "completed_projection": "process_exited; business_state remains unknown",
+      "unknown_projection": "unknown; business_state remains unknown",
+      "postgres_delivery_error_normalization_cases": "Run separately by parent; not claimed by this UI/API verification."
+    },
+    "source_state": "6391829c2b348938822d2a8a5f2ecaedeeddbfb8 plus delivery_postgres.go live-authorization error normalization; source hash recorded from the built worktree.",
+    "published_source_commit": "46c6264abc54cc520ebccd4f432a0f06319eaffe"
+  },
+  "sessiontask_deliveries_sha256": "a8d90d730593f699847e5abd7bd77ba14aa84260e973645619d9b45f51f67160"
+}
