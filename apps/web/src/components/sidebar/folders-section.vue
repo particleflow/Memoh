@@ -84,8 +84,6 @@
           :workdir-id="folder.id ?? ''"
           @select="handleSelect"
           @open-new-tab="handleOpenNewTab"
-          @rename="sessionDialogs?.openRename($event)"
-          @delete="sessionDialogs?.openDelete($event)"
         />
       </template>
     </div>
@@ -139,8 +137,6 @@
         </form>
       </DialogContent>
     </Dialog>
-
-    <SessionDialogs ref="sessionDialogs" />
   </div>
 </template>
 
@@ -172,7 +168,6 @@ import { useWorkspaceTabsStore } from '@/store/workspace-tabs'
 import { archiveWorkdir, renameWorkdir, type BotWorkdir } from '@/composables/api/useWorkdirs'
 import type { SessionSummary } from '@/composables/api/useChat'
 import { resolveApiErrorMessage } from '@/utils/api-error'
-import SessionDialogs from './session-dialogs.vue'
 import FolderSessionsList from './folder-sessions-list.vue'
 import FolderCreateDialog from './folder-create-dialog.vue'
 import GroupHeader from './group-header.vue'
@@ -198,7 +193,6 @@ const folderRowLabelClass = 'text-control text-foreground'
 // 自己的 data-[state=open] 保持显现(见 group-header.vue 头注释)。
 const rowActionRevealClass = 'can-hover:opacity-0 can-hover:pointer-events-none group-hover/group-header:pointer-events-auto group-hover/group-header:opacity-100 focus-visible:pointer-events-auto focus-visible:opacity-100 data-[state=open]:pointer-events-auto data-[state=open]:opacity-100'
 
-const sessionDialogs = ref<InstanceType<typeof SessionDialogs> | null>(null)
 
 watch(currentBotId, (botId) => {
   if (botId) void workdirsStore.ensureWorkdirs(botId)

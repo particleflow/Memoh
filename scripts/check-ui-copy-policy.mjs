@@ -24,7 +24,7 @@ function scan(file) {
   }
   const template = descriptor.template
   if (!template) return
-  const rejected = rejectedControls(template.content)
+  const rejected = rejectedControls(template.content, file)
   if (rejected.length) throw new Error(`${path.relative(root, file)} restores rejected controls: ${rejected.join(', ')}`)
   function walk(node, inaccessible = false) {
     if (node.type !== 1) { node.children?.forEach(child => walk(child, inaccessible)); return }

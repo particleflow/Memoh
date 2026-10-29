@@ -293,6 +293,16 @@ func (s *Service) StreamToFile(ctx context.Context, modelID string, text string,
 	return streamResult.ContentType, nil
 }
 
+// StreamPlayback exposes provider bytes immediately without buffering a file or
+// overriding the configured model, voice or output format.
+func (s *Service) StreamPlayback(ctx context.Context, modelID string, text string) (*sdk.SpeechStreamResult, error) {
+	params, err := s.resolveSpeechParams(ctx, modelID, text, nil)
+	if err != nil {
+		return nil, err
+	}
+	return sdk.StreamSpeech(ctx, sdk.WithSpeechModel(params.model), sdk.WithText(text), sdk.WithSpeechConfig(params.config))
+}
+
 func (s *Service) GetModelCapabilities(ctx context.Context, modelID string) (*ModelCapabilities, error) {
 	pgID, err := db.ParseUUID(modelID)
 	if err != nil {

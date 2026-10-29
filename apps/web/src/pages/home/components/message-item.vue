@@ -243,6 +243,8 @@
                  edge trims are the only exceptions. -->
               <div
                 v-if="node.block.type === 'text' && node.block.content"
+                data-speech-body
+                :data-speech-block-id="node.block.id"
                 :lang="contentLang(node.block.content)"
                 class="prose prose-sm dark:prose-invert max-w-none [&_li]:my-0.5! [&>*:first-child]:mt-0! [&>*:last-child]:mb-0!"
               >

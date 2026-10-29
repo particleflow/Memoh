@@ -37,8 +37,6 @@
           :streaming="chatStore.isSessionStreaming(currentBotId, session.id)"
           @select="handleSelect"
           @open-new-tab="handleOpenNewTab"
-          @rename="sessionDialogs?.openRename($event)"
-          @delete="sessionDialogs?.openDelete($event)"
         />
       </div>
 
@@ -84,13 +82,11 @@
         </div>
       </template>
     </div>
-
-    <SessionDialogs ref="sessionDialogs" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, toRef, watch, type ComponentPublicInstance } from 'vue'
+import { computed, nextTick, toRef, watch, type ComponentPublicInstance } from 'vue'
 import { useLocalStorage } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
@@ -102,7 +98,6 @@ import type { SessionSummary } from '@/composables/api/useChat'
 import { useSidebarInfiniteScroll } from './use-sidebar-infinite-scroll'
 import { Skeleton } from '@felinic/ui'
 import SessionItem from './session-item.vue'
-import SessionDialogs from './session-dialogs.vue'
 import GroupHeader from './group-header.vue'
 
 // The sessions panel owns the scrollport shared with Folders; Recents pages
@@ -125,7 +120,6 @@ const {
   sessionsCursor,
 } = storeToRefs(chatStore)
 
-const sessionDialogs = ref<InstanceType<typeof SessionDialogs> | null>(null)
 
 const SIDEBAR_SESSION_MODES = new Set(['chat', 'discuss', 'schedule'])
 

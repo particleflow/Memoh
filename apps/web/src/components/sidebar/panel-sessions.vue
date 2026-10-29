@@ -63,7 +63,6 @@
           />{{ t('chat.botSettings') }}
         </SidebarNavButton>
       </div>
-      <SessionSelectionBar />
       <ScrollArea
         ref="scrollAreaRef"
         class="sidebar-scroll min-h-0 flex-1"
@@ -77,7 +76,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, provide, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -90,8 +89,6 @@ import SidebarPanelHeader from './panel-header.vue'
 import SidebarNavButton from './nav-button.vue'
 import FoldersSection from './folders-section.vue'
 import Recents from './recents.vue'
-import SessionSelectionBar from './session-selection-bar.vue'
-import { createSessionSelection, SessionSelectionKey } from './session-selection'
 import '@/styles/sidebar-scroll.css'
 
 const { t } = useI18n()
@@ -116,17 +113,6 @@ const { currentBotId, bots } = storeToRefs(chatStore)
 const currentBot = computed(() =>
   bots.value.find(bot => bot.id === currentBotId.value) ?? null,
 )
-
-// One selection for both Folders and Recents, so a batch can span them.
-const selection = createSessionSelection()
-provide(SessionSelectionKey, selection)
-// Session ids are scoped to a bot; a selection never carries across.
-watch(currentBotId, () => selection.clear())
-// A session deleted any other way (its own menu, a failed send's cleanup)
-// must not linger as a checked id with no row.
-watch(() => chatStore.deletedSession, (deleted) => {
-  if (deleted) selection.remove(deleted.id)
-})
 
 async function openBot(id: string, name?: string) {
   if (!id) return

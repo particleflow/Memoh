@@ -15,3 +15,14 @@ test('icon-only replacement controls remain rejected', () => {
 test('original interruption, replay gestures, historical navigation and actual errors remain allowed', () => {
   assert.deepEqual(rejectedControls('<div @click.capture="readAloud.stop()"><MessageItem @replay-speech="readAloud.replay(msg)" /></div><textarea @input="readAloud.stop()" /><ForkSourceDivider @navigate="openExisting" /><CalloutBanner>{{ error }}</CalloutBanner>'), [])
 })
+
+test('historical rename and deletion controls stay absent without disabling file operations', () => {
+  for (const key of ['chat.renameSession', 'chat.deleteSession', 'chat.deleteSessions', 'chat.selectSessions', 'chat.selectedSessions']) {
+    assert.deepEqual(rejectedControls(`<Button>{{ t('${key}') }}</Button>`), [key])
+  }
+  for (const key of ['common.rename', 'common.delete']) {
+    const source = `<DropdownMenuItem>{{ t('${key}') }}</DropdownMenuItem>`
+    assert.ok(rejectedControls(source, '/src/components/sidebar/session-item.vue').length)
+    assert.deepEqual(rejectedControls(source, '/src/components/sidebar/files-pane.vue'), [])
+  }
+})

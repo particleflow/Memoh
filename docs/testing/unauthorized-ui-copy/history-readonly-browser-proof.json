@@ -1,0 +1,24 @@
+{
+  "baseReviewTree": "1ef52303e55e9711ffcf508bc1177f71174a3818",
+  "environment": "Reconstructed unified c4/fab/cleanup composition plus this UI delta, real compiled Go API and PostgreSQL fixture clone; no network interception",
+  "checks": [
+    "desktop: historical context menu contains only Open; no action button, rename, delete or batch selection",
+    "desktop: historical record still opens for reading",
+    "mobile: historical context menu contains only Open; no action button, rename, delete or batch selection",
+    "mobile: historical record still opens for reading"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact"
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/b4321c5a-04af-4cb6-ae58-6e614825f4ba/sessions/contact"
+    }
+  ],
+  "apiErrors": [],
+  "modelCalls": 0,
+  "deviceCalls": 0
+}

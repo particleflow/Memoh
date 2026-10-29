@@ -3992,6 +3992,8 @@ const readAloud = useChatReadAloud({
   loading: computed(() => loadingMessages.value || loadingChats.value),
   draft: inputText,
   messages,
+  messageElement: findMessageElement,
+  bodyRoot: () => scrollEl.value,
 })
 
 useQueueTurnAnchors(messages, pinAfterSteer, pinAfterFollowUp)
