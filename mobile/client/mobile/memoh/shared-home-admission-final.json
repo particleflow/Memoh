@@ -1,0 +1,539 @@
+{
+  "commit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "tree": "3ca90fd7838979049f5889516836d55654a87811",
+  "sharedBase": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+  "consumerBase": "3eaf394d1c1bd09a90bf63b5d701e2a06c11d52d",
+  "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
+  "existingFiles": {
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "baseSHA256": "0ec07aa891c58c38e41dd3d323b6cd861cbaa0bfece538de1610b12a70196bf1",
+      "sharedSHA256": "c18cf65802db07e591f9ac4b90a4173976d4c84024dcbb367d25686372d50da8",
+      "upstreamBaseSHA256": "023436adf7e8ff5eab823ec70829f52c9555d5a1d426700cdca1b44b290ecdc3",
+      "upstreamSHA256": "435cd9b06a189cf8c3734856c5b9546ba8d52e8898e0a73ba2a257aaa68eeea3",
+      "replacements": [
+        [
+          "  onActivatedRestoreScroll(loadingMessages)\n",
+          "  if (props.taskAnchor) {\n    // The authorized execution anchor owns restoration in a task pane.\n    // A remembered arbitrary position must not override its async scroll.\n    lockScroll.value = false\n    markEscaped()\n  } else {\n    onActivatedRestoreScroll(loadingMessages)\n  }\n",
+          1
+        ],
+        [
+          "  sessionId: computed(() => paneTarget.value.sessionId ?? `draft:${paneTarget.value.viewId}`),\n",
+          "  sessionId: computed(() => paneTarget.value.sessionId ?? `draft:${paneTarget.value.viewId}`),\n})\n\nconst taskRunAnchor = useTaskRunAnchor({\n  anchor: () => props.taskAnchor,\n  session: () => props.sessionId,\n  visible: () => isVisible.value,\n  messages: () => messages.value,\n  loading: () => loadingMessages.value,\n  loadingOlder: () => loadingOlder.value,\n  hasMore: () => hasMoreOlder.value,\n  validate: anchor => revalidateTaskHistoryAnchor(anchor, currentBotId.value ?? '', props.sessionId ?? ''),\n  loadOlder: () => chatStore.loadOlderMessages(paneTarget.value),\n  scroll: scrollToMessage,\n})\n\nconst readAloud = useChatReadAloud({\n  botId: currentBotId,\n  scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),\n  enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value\n    && !chatStore.contactNavigationPending\n    && (!props.taskAnchor || taskRunAnchor.status.value === 'located')\n    && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),\n  loading: computed(() => loadingMessages.value || loadingChats.value),\n  draft: inputText,\n  messages,\n",
+          1
+        ],
+        [
+          "  showJumpToBottom: showJumpToBottomFromScroll,\n",
+          "  lockScroll,\n  showJumpToBottom: showJumpToBottomFromScroll,\n",
+          1
+        ],
+        [
+          "const readAloud = useChatReadAloud({\n  botId: currentBotId,\n  scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),\n  enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value\n    && (router.currentRoute.value.name === 'home' || router.currentRoute.value.name === 'bot')),\n  loading: computed(() => loadingMessages.value || loadingChats.value),\n  draft: inputText,\n  messages,\n})\n",
+          "",
+          1
+        ],
+        [
+          "  visible: true,\n",
+          "  contactView: false,\n  taskAnchor: undefined,\n  visible: true,\n",
+          1
+        ],
+        [
+          "  visible?: boolean\n",
+          "  // Presentation intent from the resolved contact entry, scoped to this pane.\n  // Task/history panes keep the unabridged transcript for the same session.\n  contactView?: boolean\n  taskAnchor?: TaskHistoryAnchor\n  visible?: boolean\n",
+          1
+        ],
+        [
+          "import { findLatestPendingChatDecision } from './chat-pending-decision'\n",
+          "import { findLatestPendingChatDecision } from './chat-pending-decision'\nimport { useTaskRunAnchor } from '../composables/useTaskRunAnchor'\nimport type { TaskHistoryAnchor } from '@/utils/task-history-link'\nimport { revalidateTaskHistoryAnchor } from '@/utils/task-history-link'\n",
+          1
+        ],
+        [
+          "                            :bot-id=\"currentBotId\"\n",
+          "                            :hide-process-activity=\"contactView && activeChatTarget.runtimeType === 'model'\"\n                            :bot-id=\"currentBotId\"\n",
+          1
+        ],
+        [
+          "            ref=\"scrollContainer\"\n",
+          "            v-show=\"!taskAnchor || taskRunAnchor.status.value === 'located'\"\n            ref=\"scrollContainer\"\n",
+          1
+        ],
+        [
+          "          <ScrollArea\n",
+          "          <PanePlaceholder\n            v-if=\"taskAnchor && taskRunAnchor.status.value !== 'located'\"\n            :title=\"taskRunAnchor.status.value === 'unavailable' ? $t('chat.taskDirectory.historyUnavailable') : $t('common.loading')\"\n          />\n          <ScrollArea\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/chat-workspace.vue": {
+      "baseSHA256": "00673ec48f6c568902d9aafcc6586e83fea4f1cf1c0e604a362d96a50a5e6acf",
+      "sharedSHA256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "upstreamBaseSHA256": "00673ec48f6c568902d9aafcc6586e83fea4f1cf1c0e604a362d96a50a5e6acf",
+      "upstreamSHA256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "replacements": [
+        [
+          "provide(DesktopWindowKey, desktopWindow)\n",
+          "provide(DesktopWindowKey, desktopWindow)\n// Forward the reactive Home mask through Dockview's manual mount boundary too.\nprovide(chatWorkspaceVisibleKey, inject(chatWorkspaceVisibleKey, ref(true)))\n",
+          1
+        ],
+        [
+          "import { DesktopShellKey, DesktopWindowKey } from '@/lib/desktop-shell'\n",
+          "import { chatWorkspaceVisibleKey } from '../composables/chat-workspace-visibility'\nimport { DesktopShellKey, DesktopWindowKey } from '@/lib/desktop-shell'\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/dockview/panel-chat.vue": {
+      "baseSHA256": "f9b3755d41103946f37be77ee63787c38ac76cf07033a50d7b1ca7bf744efb24",
+      "sharedSHA256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+      "upstreamBaseSHA256": "f9b3755d41103946f37be77ee63787c38ac76cf07033a50d7b1ca7bf744efb24",
+      "upstreamSHA256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+      "replacements": [
+        [
+          "    params: { sessionId?: string | null }\n",
+          "    params: { sessionId?: string | null, contactView?: boolean, taskAnchor?: TaskHistoryAnchor | null }\n",
+          1
+        ],
+        [
+          "import ChatPane from '../chat-pane.vue'\n",
+          "import type { TaskHistoryAnchor } from '@/utils/task-history-link'\nimport ChatPane from '../chat-pane.vue'\n",
+          1
+        ],
+        [
+          "        :visible=\"visible\"\n",
+          "        :contact-view=\"params.params.contactView === true\"\n        :task-anchor=\"params.params.taskAnchor ?? undefined\"\n        :visible=\"visible\"\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/message-item.test.ts": {
+      "baseSHA256": "b533576f7c26bf0a980a32195a8989ed00bf292311241255e6d5e55d3d80693b",
+      "sharedSHA256": "830185ce90271ad541c7e6ff5eeabfc5a7f6754da976a192e795af67e4a7fccd",
+      "upstreamBaseSHA256": "b533576f7c26bf0a980a32195a8989ed00bf292311241255e6d5e55d3d80693b",
+      "upstreamSHA256": "830185ce90271ad541c7e6ff5eeabfc5a7f6754da976a192e795af67e4a7fccd",
+      "replacements": [
+        [
+          "      expect(root.querySelector('[role=\"status\"]')).toBeNull()\n    }\n  })\n})\n",
+          "      expect(root.querySelector('[role=\"status\"]')).toBeNull()\n    }\n  })\n})\n\ndescribe('contact transcript projection', () => {\n  it.each([true, false])('keeps ordinary text and completed Q&A while hiding structured process (streaming=%s)', async streaming => {\n    const MessageItem = (await import('./message-item.vue')).default\n    const hide = ref(true)\n    const text = 'Spawn agent in background; execution state: unknown'\n    const tool = { id: 1, type: 'tool' as const, name: 'exec', input: {}, tool_call_id: 'call', toolCallId: 'call', toolName: 'exec', result: 'raw result', done: true, running: false }\n    const message = { id: 'projection', role: 'assistant' as const, timestamp: '', streaming, messages: [\n      tool,\n      { id: 2, type: 'reasoning' as const, content: 'private process' },\n      { id: 3, type: 'text' as const, content: text },\n      { ...tool, id: 4, toolName: 'ask_user', result: { answers: [] } },\n    ] }\n    root = document.createElement('div'); document.body.append(root)\n    app = createApp(defineComponent({ setup: () => () => h(MessageItem, { message, hideProcessActivity: hide.value, isScrolling: false }) }))\n    app.config.globalProperties.$t = (key: string) => key; app.mount(root); await nextTick()\n    expect(root.textContent).toContain(text)\n    expect(root.querySelectorAll('[data-process-test=\"tool-call-group\"]')).toHaveLength(0)\n    expect(root.querySelectorAll('[data-process-test=\"chat-answers-card\"]')).toHaveLength(1)\n    expect(message.messages[0]).toBe(tool)\n    expect(tool.result).toBe('raw result')\n    hide.value = false; await nextTick()\n    expect(root.querySelectorAll('[data-process-test=\"tool-call-group\"]')).toHaveLength(1)\n    expect(root.textContent).toContain(text)\n  })\n\n  it.each(['tool-only', 'background', 'user'] as const)('projects %s by structured role and kind, never by wording', async kind => {\n    const MessageItem = (await import('./message-item.vue')).default\n    const hide = ref(true)\n    const text = 'Spawn agent in background; execution state: unknown'\n    const message = kind === 'user'\n      ? { id: 'user', role: 'user', text, attachments: [], messages: [], timestamp: '' }\n      : kind === 'background'\n        ? { id: 'background', role: 'system', kind: 'background_task', backgroundTask: {}, timestamp: '' }\n        : { id: 'tool-only', role: 'assistant', timestamp: '', streaming: false, messages: [{ id: 1, type: 'tool', toolName: 'exec', done: true }] }\n    root = document.createElement('div'); document.body.append(root)\n    app = createApp(defineComponent({ setup: () => () => h(MessageItem, { message: message as never, hideProcessActivity: hide.value, isScrolling: false }) }))\n    app.config.globalProperties.$t = (key: string) => key; app.mount(root); await nextTick()\n    if (kind === 'user') expect(root.textContent).toContain(text)\n    else expect(root.children).toHaveLength(0)\n    hide.value = false; await nextTick()\n    expect(root.children.length).toBeGreaterThan(0)\n  })\n})\n",
+          1
+        ],
+        [
+          "      botId: 'bot', sessionId: 'session', recoveryEnabled: true, recoveryVisible: true, isScrolling: false, onRetryMessage: retry,\n",
+          "      botId: 'bot', sessionId: 'session', recoveryEnabled: true, recoveryVisible: true, hideProcessActivity: true, isScrolling: false, onRetryMessage: retry,\n",
+          1
+        ],
+        [
+          "  vi.doMock(`./${child}.vue`, () => ({ default: Stub }))\n",
+          "  vi.doMock(`./${child}.vue`, () => ({ default: Stub }))\n}\nfor (const child of ['tool-call-group', 'chat-answers-card', 'background-task-block']) {\n  vi.doMock(`./${child}.vue`, () => ({ default: defineComponent({ setup: () => () => h('div', { 'data-process-test': child }) }) }))\n",
+          1
+        ],
+        [
+          "for (const child of ['chat-code-block', 'tool-call-group', 'chat-answers-card', 'attachment-block', 'background-task-block', 'dependency-missing-block']) {\n",
+          "for (const child of ['chat-code-block', 'attachment-block', 'dependency-missing-block']) {\n",
+          1
+        ],
+        [
+          "vi.mock('markstream-vue', () => ({ default: Stub, setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))\n",
+          "vi.mock('markstream-vue', () => ({ default: defineComponent({ props: { content: { type: String, default: '' } }, setup: props => () => h('p', props.content) }), setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+      "sharedSHA256": "37eaca3e160bda2bfb4f251ba0ad763bc4e6018143223998d689988ad682f296",
+      "upstreamBaseSHA256": "5378810ebfc6449769b1926e162be72e5d38e161574505588aa2cb8cc262d6b9",
+      "upstreamSHA256": "37eaca3e160bda2bfb4f251ba0ad763bc4e6018143223998d689988ad682f296",
+      "replacements": [
+        [
+          "  if (block.type === 'tool') return true\n",
+          "  // Project only trusted structured process blocks; ordinary text (including\n  // quoted tool output) and interactive Q&A remain conversation content. This\n  // is render-only: approvals and task/debug panes read the intact transcript.\n  if (props.hideProcessActivity) {\n    if (block.type === 'reasoning') return false\n    if (block.type === 'tool') return isCompletedAskUser(block)\n  }\n  if (block.type === 'tool') return true\n",
+          1
+        ],
+        [
+          "const shouldRenderMessage = computed(() =>\n  props.message.role !== 'assistant' || hasVisibleAssistantBlocks.value || props.message.streaming,\n)\n",
+          "const shouldRenderMessage = computed(() => {\n  if (props.hideProcessActivity && props.message.role === 'system' && props.message.kind === 'background_task') return false\n  return props.message.role !== 'assistant' || hasVisibleAssistantBlocks.value || props.message.streaming\n})\n",
+          1
+        ],
+        [
+          "  if (props.message.role !== 'assistant' || !props.message.streaming) return ''\n",
+          "  if (props.hideProcessActivity) return ''\n  if (props.message.role !== 'assistant' || !props.message.streaming) return ''\n",
+          1
+        ],
+        [
+          "  botId?: string\n",
+          "  hideProcessActivity?: boolean\n  botId?: string\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/pages/home/index.vue": {
+      "baseSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "sharedSHA256": "0f941261521adb08d42bca472bb817b641614d2a72683e9e6bcf41f2ab4caa37",
+      "upstreamBaseSHA256": "5e63cfca6e9e3ec3ab43cbc388d4dd3887319009ea63b792ff3b6923025b239f",
+      "upstreamSHA256": "0f941261521adb08d42bca472bb817b641614d2a72683e9e6bcf41f2ab4caa37",
+      "replacements": [
+        [
+          "    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false })\n",
+          "    workspaceTabs.openSessionChatPinned({ sessionId: request.sessionId, explicitSelection: false, contactView: true })\n",
+          1
+        ],
+        [
+          "  () => [route.name, route.params.botName, route.query.session] as const,\n",
+          "  [\n    () => route.name, () => route.params.botName, () => route.query.session,\n    () => route.query.task_bot, () => route.query.task_type, () => route.query.task_id,\n    () => route.query.task_record, () => route.query.run,\n  ],\n",
+          1
+        ],
+        [
+          "        workspaceTabs.openSessionChatPinned({ sessionId: session.id, title: session.title })\n",
+          "        workspaceTabs.openSessionChatPinned({ sessionId: session.id, title: session.title, taskAnchor })\n",
+          1
+        ],
+        [
+          "      if (route.query.session === historyId && currentBotId.value === resolvedId) {\n",
+          "      if (request === historyRequest && route.fullPath === requestedRoute && route.query.session === historyId && currentBotId.value === resolvedId) {\n",
+          1
+        ],
+        [
+          "      const session = await fetchSession(resolvedId, historyId)\n",
+          "      const taskAnchor = await resolveTaskHistoryAnchor(route.query, resolvedId, historyId)\n      if (request !== historyRequest || route.fullPath !== requestedRoute) return\n      const session = await fetchSession(resolvedId, historyId)\n",
+          1
+        ],
+        [
+          "  if (route.query.session !== undefined && (typeof route.query.session !== 'string' || !route.query.session.trim())) {\n",
+          "  if (hasTaskHistoryQuery(route.query) && !route.query.session) {\n    historyLoading.value = false\n    historyError.value = t('chat.contact.historyFailed')\n    return\n  }\n  if (route.query.session !== undefined && (typeof route.query.session !== 'string' || !route.query.session.trim())) {\n",
+          1
+        ],
+        [
+          "let historyRequest = 0\n",
+          "const workspaceVisible = computed(() => !historyError.value && !historyLoading.value && !chatStore.contactNavigationPending)\nprovide(chatWorkspaceVisibleKey, workspaceVisible)\nlet historyRequest = 0\n",
+          1
+        ],
+        [
+          "import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'\n",
+          "import { useComposerPrefillResolver } from './composables/useComposerPrefillResolver'\nimport { chatWorkspaceVisibleKey } from './composables/chat-workspace-visibility'\n",
+          1
+        ],
+        [
+          "import ChatWorkspace from './components/chat-workspace.vue'\n",
+          "import { hasTaskHistoryQuery, resolveTaskHistoryAnchor } from '@/utils/task-history-link'\nimport ChatWorkspace from './components/chat-workspace.vue'\n",
+          1
+        ],
+        [
+          "import { nextTick, ref, watch } from 'vue'\n",
+          "import { computed, nextTick, provide, ref, watch } from 'vue'\n",
+          1
+        ],
+        [
+          "      v-if=\"historyError || historyLoading || chatStore.contactNavigationPending\"\n",
+          "      v-if=\"!workspaceVisible\"\n      class=\"absolute inset-0\"\n",
+          1
+        ],
+        [
+          "      v-show=\"!historyError && !historyLoading && !chatStore.contactNavigationPending\"\n",
+          "      :class=\"{ invisible: !workspaceVisible }\"\n",
+          1
+        ],
+        [
+          "  <div class=\"flex h-full overflow-hidden\">\n",
+          "  <div class=\"relative flex h-full overflow-hidden\">\n    <!-- Preserve Dockview dimensions while a history link is being authorized. -->\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/workspace-tabs.test.ts": {
+      "baseSHA256": "bd56a075727a6ad7ed4003b52e4bf165fc4c2954c47319a0f062b00712ecdaf1",
+      "sharedSHA256": "a2d0569b1f853359ba336ac510e9ce85c1751c10a7c4814f4f003e82f0fbc6ce",
+      "upstreamBaseSHA256": "e81ce38425dcbf7658fdabf4b2cb647e7b9150b388d274579abe9a942c8508eb",
+      "upstreamSHA256": "0645d53eff41db5a6e52026c8e9a6aed0fd5e0d27776fd8e48893bf188443a5d",
+      "replacements": [
+        [
+          "    expect(dock.activePanel?.params.sessionId).toBe('contact')\n  })\n",
+          "    expect(dock.activePanel?.params.sessionId).toBe('contact')\n  })\n\n  it('keeps contact and history projections separate even for the same session', async () => {\n    chatStoreMock.contactNavigationPending = true\n    const store = useWorkspaceTabsStore()\n    const dock = createFakeDock()\n    store.registerApi(dock as never)\n    await nextTick()\n    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false, contactView: true })\n    const contactId = dock.activePanel!.id\n    expect(dock.activePanel?.params.contactView).toBe(true)\n    store.openSessionChatPinned({ sessionId: 'contact' })\n    const historyId = dock.activePanel!.id\n    expect(historyId).not.toBe(contactId)\n    expect(dock.activePanel?.params.contactView).toBe(false)\n    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false, contactView: true })\n    expect(dock.activePanel?.id).toBe(contactId)\n    store.openSessionChat({ sessionId: 'contact' })\n    expect(dock.activePanel?.id).toBe(historyId)\n    store.openSubagentSession({ sessionId: 'contact' })\n    expect(dock.activePanel?.id).toBe(historyId)\n    expect(dock.getPanel(contactId)?.params.contactView).toBe(true)\n    expect(dock.panels).toHaveLength(2)\n  })\n\n  it('replaces exact run anchors in one session and clears them on ordinary history navigation', async () => {\n    chatStoreMock.contactNavigationPending = true\n    const store = useWorkspaceTabsStore(), dock = createFakeDock()\n    store.registerApi(dock as never)\n    await nextTick()\n    const taskAnchor = { directoryBotId: 'bot-1', taskType: 'native_agent', taskId: 'old', recordId: 'old-record', runId: 'old-run', turnId: 'old-turn' }\n    store.openSessionChatPinned({ sessionId: 'task-session', taskAnchor })\n    const id = dock.activePanel!.id\n    expect(dock.activePanel?.params.taskAnchor).toEqual(taskAnchor)\n    const newer = { ...taskAnchor, taskId: 'new', recordId: 'new-record', runId: 'new-run', turnId: 'new-turn' }\n    store.openSessionChatPinned({ sessionId: 'task-session', taskAnchor: newer })\n    expect(dock.activePanel?.id).toBe(id)\n    expect(dock.activePanel?.params.taskAnchor).toEqual(newer)\n    store.openSessionChat({ sessionId: 'task-session' })\n    expect(dock.activePanel?.params.taskAnchor).toBeNull()\n    store.openSessionChatPinned({ sessionId: 'task-session', taskAnchor })\n    store.openSessionChatPinned({ sessionId: 'task-session' })\n    expect(dock.activePanel?.params.taskAnchor).toBeNull()\n  })\n",
+          1
+        ]
+      ]
+    },
+    "apps/web/src/store/workspace-tabs.ts": {
+      "baseSHA256": "1357ad873f38a0c01084380c8a0ad6e2d583da12f75a6e38ef50691cdca3c4b5",
+      "sharedSHA256": "fc461998b83049dc4435aa79a4989a2b07a2ec02390104a38d56591b346bdb59",
+      "upstreamBaseSHA256": "188d4d156fe9930b7ff7390867a500c020ecb3a2615d0274e9828801bbc046db",
+      "upstreamSHA256": "42300dd572cf97fad15e088541d4ab3f0a9ce70d36899505deb479e0ac84791d",
+      "replacements": [
+        [
+          "    const title = opts.title?.trim() || chatTitleFallbackFor(sid)\n\n    const existing = chatPanelForSession(sid)\n",
+          "    const title = opts.title?.trim() || chatTitleFallbackFor(sid)\n\n    const existing = chatPanelForSession(sid, false)\n",
+          1
+        ],
+        [
+          "      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false },\n",
+          "      params: { sessionId: sid, explicitSelection: opts.explicitSelection !== false, contactView: opts.contactView === true, taskAnchor: opts.taskAnchor ?? null },\n",
+          1
+        ],
+        [
+          "      existing.api.updateParameters({ explicitSelection: opts.explicitSelection !== false })\n",
+          "      existing.api.updateParameters({ explicitSelection: opts.explicitSelection !== false, taskAnchor: opts.taskAnchor ?? null })\n",
+          1
+        ],
+        [
+          "    const existing = chatPanelForSession(sid)\n",
+          "    // Only the server-resolved contact entry requests this projection. History\n    // and task links retain a separate full transcript, even for this session.\n    const existing = chatPanelForSession(sid, opts.contactView === true)\n",
+          1
+        ],
+        [
+          "  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean }) {\n",
+          "  function openSessionChatPinned(opts: { sessionId: string, title?: string, groupId?: string, explicitSelection?: boolean, contactView?: boolean, taskAnchor?: import('@/utils/task-history-link').TaskHistoryAnchor }) {\n",
+          1
+        ],
+        [
+          "      reusable.api.updateParameters({ sessionId: sid, explicitSelection })\n",
+          "      reusable.api.updateParameters({ sessionId: sid, explicitSelection, contactView: false, taskAnchor: null })\n",
+          1
+        ],
+        [
+          "      existing.api.updateParameters({ explicitSelection })\n",
+          "      existing.api.updateParameters({ explicitSelection, taskAnchor: null })\n",
+          1
+        ],
+        [
+          "      : chatPanelForSession(sid)\n",
+          "      : chatPanelForSession(sid, false)\n",
+          1
+        ],
+        [
+          "          panel => panelComponentOf(panel.id) === 'chat' && panelSessionId(panel) === sid,\n",
+          "          panel => panelComponentOf(panel.id) === 'chat' && panelSessionId(panel) === sid && panel.params?.contactView !== true,\n",
+          1
+        ],
+        [
+          "    panel.api.updateParameters({ sessionId: null, explicitSelection })\n",
+          "    panel.api.updateParameters({ sessionId: null, explicitSelection, contactView: false, taskAnchor: null })\n",
+          1
+        ],
+        [
+          "      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === sid,\n",
+          "      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === sid\n        && (contactView === undefined || (p.params?.contactView === true) === contactView),\n",
+          1
+        ],
+        [
+          "  function chatPanelForSession(sid: string) {\n",
+          "  function chatPanelForSession(sid: string, contactView?: boolean) {\n",
+          1
+        ]
+      ]
+    }
+  },
+  "addedFiles": {
+    "apps/web/src/pages/home/components/bot-task-directory.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, nextTick } from 'vue'\nimport { createI18n } from 'vue-i18n'\nimport { afterEach, beforeEach, expect, it, vi } from 'vitest'\nimport en from '@/i18n/locales/en.json'\nimport { notifyAuthSessionCleared } from '@/lib/auth-session'\nimport Directory from './bot-task-directory.vue'\nconst api = vi.hoisted(() => ({ list: vi.fn(), detail: vi.fn(), session: vi.fn(), push: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasks: api.list, getBotsByBotIdTasksByTaskTypeByRecordId: api.detail, getBotsByBotIdSessionsBySessionId: api.session }))\nvi.mock('vue-router', () => ({ useRouter: () => ({ push: api.push }) }))\nconst row = (id: string, state = 'failed') => ({ task_type: 'native_agent', task_id: 'bg_original', record_id: id, name: 'Same task', state, created_at: '2026-01-01', destination: { bot_id: 'bot', session_id: 'execution', run_id: id, turn_id: 'turn-'+id } })\nlet app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement\nasync function settle() { await nextTick(); for (let i = 0; i < 80; i++) await Promise.resolve(); await nextTick() }\nasync function mount() {\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(Directory, { botId: 'bot' }); app.use(createI18n({ legacy: false, locale: 'en', messages: { en } })); app.mount(root); await settle()\n  root.querySelector('button')!.click(); await settle()\n}\nbeforeEach(() => {\n  vi.stubGlobal('ResizeObserver', class { observe() {} unobserve() {} disconnect() {} })\n  localStorage.clear(); localStorage.setItem('token', 'fixture-account')\n  api.list.mockReset().mockResolvedValue({ data: { items: [row('run-1'), row('run-2', 'unknown')] } })\n  api.detail.mockReset().mockImplementation(({ path }) => Promise.resolve({ data: row(path.record_id) }))\n  api.session.mockReset().mockResolvedValue({ data: { id: 'execution', bot_id: 'bot', title: 'Original execution' } })\n  api.push.mockReset().mockResolvedValue(undefined)\n})\nafterEach(() => { app?.unmount(); root?.remove(); document.body.innerHTML = ''; vi.unstubAllGlobals() })\nit('lists real same-name historical tasks and rechecks the clicked occurrence before opening execution', async () => {\n  await mount(); const dialog = document.querySelector('[role=\"dialog\"]')!\n  const rows = dialog.querySelectorAll<HTMLButtonElement>('li > button')\n  expect(rows).toHaveLength(2)\n  expect(rows[0]!.textContent).toContain(en.chat.tasks.statuses.failed)\n  expect(rows[1]!.textContent).toContain(en.chat.tasks.statuses.unknown)\n  expect(dialog.textContent).not.toContain('bg_original'); expect(dialog.textContent).not.toContain('run-2')\n  rows[1]!.click(); await settle()\n  expect(api.detail.mock.calls[0]![0].path).toEqual({ bot_id: 'bot', task_type: 'native_agent', record_id: 'run-2' })\n  expect(api.push).toHaveBeenCalledExactlyOnceWith({ name: 'bot', params: { botName: 'bot' }, query: { session: 'execution', task_bot: 'bot', task_type: 'native_agent', task_id: 'bg_original', task_record: 'run-2', run: 'run-2' } })\n})\nit('keeps failed tasks without an execution destination visible and disabled', async () => {\n  api.list.mockResolvedValue({ data: { items: [{ ...row('fire'), task_type: 'schedule_fire', destination: undefined }] } })\n  await mount(); const button = document.querySelector<HTMLButtonElement>('[role=\"dialog\"] li > button')!\n  expect(button.disabled).toBe(true); expect(button.textContent).toContain(en.chat.tasks.statuses.failed)\n  expect(api.session).not.toHaveBeenCalled()\n})\nit('does not navigate after task permissions are revoked', async () => {\n  api.detail.mockRejectedValue({ status: 403 }); await mount()\n  document.querySelector<HTMLButtonElement>('[role=\"dialog\"] li > button')!.click(); await settle()\n  expect(api.session).not.toHaveBeenCalled(); expect(api.push).not.toHaveBeenCalled()\n})\nit('does not navigate after logout while execution history authorization is pending', async () => {\n  let finish!: (value: unknown) => void\n  api.session.mockImplementation(() => new Promise(resolve => { finish = resolve }))\n  await mount()\n  document.querySelector<HTMLButtonElement>('[role=\"dialog\"] li > button')!.click(); await settle()\n  expect(api.session).toHaveBeenCalledOnce()\n  notifyAuthSessionCleared('logout'); finish({ data: { id: 'execution', bot_id: 'bot' } }); await settle()\n  expect(api.push).not.toHaveBeenCalled()\n})\n",
+      "sha256": "38c9ab8883d316b6d1428c70c5bf71536dabb67bd64716c97745b8f62a1015ab",
+      "upstreamSHA256": "38c9ab8883d316b6d1428c70c5bf71536dabb67bd64716c97745b8f62a1015ab"
+    },
+    "apps/web/src/pages/home/components/bot-task-directory.vue": {
+      "source": "<script setup lang=\"ts\">\nimport { computed, onScopeDispose, ref, watch } from 'vue'\nimport { useLocalStorage } from '@vueuse/core'\nimport { useI18n } from 'vue-i18n'\nimport { useRouter } from 'vue-router'\nimport { ListTree } from 'lucide-vue-next'\nimport { Button, Dialog, DialogTrigger, DialogPanel, DialogViewHeader, DialogBody, Spinner, CalloutBanner, toast } from '@felinic/ui'\nimport { getBotsByBotIdTasksByTaskTypeByRecordId, getBotsByBotIdSessionsBySessionId, type SessiontaskDirectoryTask } from '@memohai/sdk'\nimport { onAuthSessionCleared } from '@/lib/auth-session'\nimport { resolveApiErrorMessage } from '@/utils/api-error'\nimport { taskHistoryQuery } from '@/utils/task-history-link'\nimport { useBotTaskDirectory } from '../composables/useBotTaskDirectory'\n\nconst props = withDefaults(defineProps<{ botId: string, visible?: boolean }>(), { visible: true })\nconst { t, te } = useI18n(), router = useRouter()\nconst token = useLocalStorage('token', ''), open = ref(false), navigating = ref(false)\nconst bot = computed(() => props.botId), visible = computed(() => open.value && props.visible)\nconst reader = useBotTaskDirectory(bot, token, visible)\nconst name = (row: SessiontaskDirectoryTask) => row.name || t(`chat.taskDirectory.types.${row.task_type}`)\nconst state = (row: SessiontaskDirectoryTask) => t(`chat.tasks.statuses.${te(`chat.tasks.statuses.${row.state}`) ? row.state : 'unknown'}`)\nlet epoch = 0, controller: AbortController | undefined\nfunction invalidate() { epoch++; controller?.abort(); navigating.value = false }\nwatch([bot, token, visible], invalidate, { flush: 'sync' })\nconst off = onAuthSessionCleared(() => { open.value = false; invalidate() })\nonScopeDispose(() => { off(); invalidate() })\n\nasync function navigate(row: SessiontaskDirectoryTask) {\n  if (!row.destination || !visible.value || navigating.value) return\n  const sourceBot = bot.value, identity = token.value, generation = epoch, control = new AbortController()\n  controller = control; navigating.value = true\n  const timeout = setTimeout(() => control.abort(), 15000)\n  const current = () => generation === epoch && token.value === identity && reader.items.value.some(item => item.record_id === row.record_id && item.task_type === row.task_type && item.task_id === row.task_id)\n  try {\n    const { data: task } = await getBotsByBotIdTasksByTaskTypeByRecordId({ path: { bot_id: sourceBot, task_type: row.task_type, record_id: row.record_id }, cache: 'no-store', signal: control.signal, throwOnError: true })\n    if (!current()) return\n    const destination = task.destination\n    if (task.task_id !== row.task_id || task.record_id !== row.record_id || task.task_type !== row.task_type || !destination\n      || destination.bot_id !== row.destination.bot_id || destination.session_id !== row.destination.session_id\n      || destination.run_id !== row.destination.run_id) throw new Error('Task destination changed')\n    const { data: session } = await getBotsByBotIdSessionsBySessionId({ path: { bot_id: destination.bot_id, session_id: destination.session_id }, cache: 'no-store', signal: control.signal, throwOnError: true })\n    if (!current()) return\n    if (session.id !== destination.session_id || session.bot_id !== destination.bot_id) throw new Error('Execution context changed')\n    // The explicit route owns selection and the pinned execution tab. Updating\n    // global Bot selection first lets the old primary URL restore its contact.\n    await router.push({ name: 'bot', params: { botName: destination.bot_id }, query: { session: session.id, ...taskHistoryQuery(sourceBot, task) } })\n    open.value = false\n  } catch (cause) {\n    if (generation === epoch && !control.signal.aborted) toast.error(resolveApiErrorMessage(cause, t('chat.delegations.historyUnavailable')))\n  } finally {\n    clearTimeout(timeout)\n    if (generation === epoch) navigating.value = false\n    if (controller === control) controller = undefined\n  }\n}\n</script>\n\n<template>\n  <Dialog v-model:open=\"open\">\n    <DialogTrigger as-child>\n      <Button\n        variant=\"ghost\"\n        size=\"sm\"\n        :disabled=\"!botId || !token\"\n      >\n        <ListTree />{{ t('chat.tasks.title') }}\n      </Button>\n    </DialogTrigger>\n    <DialogPanel :show-close-button=\"false\">\n      <DialogViewHeader>{{ t('chat.tasks.title') }}</DialogViewHeader>\n      <DialogBody>\n        <Spinner v-if=\"reader.loading.value && !reader.items.value.length\" />\n        <CalloutBanner\n          v-if=\"reader.error.value\"\n          tone=\"destructive\"\n          size=\"sm\"\n          :description=\"t('chat.tasks.loadFailed')\"\n        />\n        <ul v-if=\"reader.items.value.length\">\n          <li\n            v-for=\"row in reader.items.value\"\n            :key=\"`${row.task_type}:${row.record_id}`\"\n          >\n            <Button\n              variant=\"ghost\"\n              size=\"sm\"\n              class=\"w-full justify-between\"\n              :disabled=\"navigating || !row.destination\"\n              @click=\"navigate(row)\"\n            >\n              <span class=\"min-w-0 truncate\">{{ name(row) }}</span>\n              <span class=\"shrink-0 text-caption text-muted-foreground\">{{ state(row) }}</span>\n            </Button>\n          </li>\n        </ul>\n        <p\n          v-else-if=\"!reader.error.value && !reader.loading.value\"\n          class=\"text-label text-muted-foreground\"\n        >\n          {{ t(reader.nextCursor.value ? 'chat.tasks.filteredPage' : 'chat.taskDirectory.empty') }}\n        </p>\n        <div class=\"flex justify-between gap-2\">\n          <Button\n            variant=\"ghost\"\n            size=\"sm\"\n            :disabled=\"reader.loading.value\"\n            @click=\"reader.newest\"\n          >\n            {{ t('chat.tasks.newest') }}\n          </Button>\n          <Button\n            v-if=\"reader.nextCursor.value\"\n            variant=\"ghost\"\n            size=\"sm\"\n            :disabled=\"reader.loading.value\"\n            @click=\"reader.next\"\n          >\n            {{ t('chat.tasks.next') }}\n          </Button>\n        </div>\n      </DialogBody>\n    </DialogPanel>\n  </Dialog>\n</template>\n",
+      "sha256": "014896234a0bcdac81a646a67a8cf26942e49e07cea684ecfaa472cc932549d1",
+      "upstreamSHA256": "014896234a0bcdac81a646a67a8cf26942e49e07cea684ecfaa472cc932549d1"
+    },
+    "apps/web/src/pages/home/composables/chat-workspace-visibility.ts": {
+      "source": "import type { InjectionKey, Ref } from 'vue'\n\n// Home can mask a mounted workspace before its panes receive a new task anchor.\nexport const chatWorkspaceVisibleKey: InjectionKey<Readonly<Ref<boolean>>> = Symbol('chat-workspace-visible')\n",
+      "sha256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7"
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.task-anchor.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, computed, defineComponent, h, nextTick, reactive, ref, type App } from 'vue'\nimport { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\nimport paneSource from '../components/chat-pane.vue?raw'\nimport type { ChatMessage } from '@/store/chat/types'\nimport type { TaskHistoryAnchor } from '@/utils/task-history-link'\nimport { useChatReadAloud } from './useChatReadAloud'\nimport { useTaskRunAnchor } from './useTaskRunAnchor'\n\nconst api = vi.hoisted(() => ({ playback: vi.fn() }))\nvi.mock('@memohai/sdk', () => ({ postBotsByBotIdTtsPlayback: api.playback }))\nclass Player extends EventTarget {\n  src = ''\n  play = vi.fn(async () => {})\n  pause = vi.fn()\n  load = vi.fn()\n}\nconst players: Player[] = []\nconst settle = async () => { await nextTick(); for (let i = 0; i < 12; i++) await Promise.resolve(); await nextTick() }\nconst reply = (id: string, streaming = false): ChatMessage => ({ id, turnId: `turn-${id}`, runtimeRunId: `run-${id}`, role: 'assistant', timestamp: '', streaming, messages: [{ id: 0, type: 'text', content: `Reply ${id}` }] })\nconst anchor = (id: string): TaskHistoryAnchor => ({ directoryBotId: 'bot', taskType: 'native_agent', taskId: `task-${id}`, recordId: `record-${id}`, runId: `run-${id}`, turnId: `turn-${id}` })\nlet app: App | undefined, root: HTMLDivElement | undefined\nbeforeEach(() => {\n  api.playback.mockReset().mockResolvedValue({ data: new Blob(['synthetic'], { type: 'audio/wav' }) })\n  players.length = 0\n  vi.stubGlobal('Audio', class extends Player { constructor() { super(); players.push(this) } })\n  vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:synthetic'), revokeObjectURL: vi.fn() })\n})\nafterEach(() => { app?.unmount(); app = undefined; root?.remove(); vi.unstubAllGlobals() })\n\nfunction mount(taskAnchor: TaskHistoryAnchor | null = anchor('old')) {\n  const props = reactive({ taskAnchor: taskAnchor ?? undefined, sessionId: 'same-session' })\n  const messages = ref<ChatMessage[]>([reply('old'), reply('new')])\n  const validate = vi.fn(async (_anchor: TaskHistoryAnchor) => {})\n  const scope = ref('bot:same-session')\n  let speech!: ReturnType<typeof useChatReadAloud>, locator!: ReturnType<typeof useTaskRunAnchor>\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(defineComponent({ setup() {\n    locator = useTaskRunAnchor({ anchor: () => props.taskAnchor, session: () => props.sessionId, visible: () => true, messages: () => messages.value, loading: () => false, loadingOlder: () => false, hasMore: () => false, validate, loadOlder: async () => 0, scroll: async () => true })\n    // Execute the actual pane enable expression so a missing consumer gate\n    // cannot be hidden by duplicating the intended expression in this fixture.\n    const expression = paneSource.slice(paneSource.indexOf('const readAloud = useChatReadAloud({')).match(/enabled: (computed\\([\\s\\S]*?\\)),\\n\\s*loading:/)?.[1]\n    if (!expression) throw new Error('Missing pane speech enable expression')\n    const enabled = new Function('computed', 'botSettings', 'isActive', 'isVisible', 'chatStore', 'router', 'props', 'taskRunAnchor', `return (${expression})`)(computed, ref({ tts_model_id: 'configured-tts' }), ref(true), ref(true), reactive({ contactNavigationPending: false }), { currentRoute: ref({ name: 'bot' }) }, props, locator)\n    speech = useChatReadAloud({ botId: ref('bot'), scope, enabled, loading: ref(false), draft: ref(''), messages })\n    return () => h('div', messages.value.map(message => h('div', { 'data-speech-state': speech.status(message) }, message.id)))\n  } }))\n  app.mount(root)\n  return { props, messages, validate, scope, get speech() { return speech }, get locator() { return locator } }\n}\nasync function start(f: ReturnType<typeof mount>) {\n  await settle(); f.speech.replay(f.messages.value[0]!); await settle()\n  players[0]!.dispatchEvent(new Event('playing'))\n  expect(f.speech.state.value.status).toBe('playing')\n}\n\ndescribe('read aloud at exact historical run boundaries', () => {\n  it('stops the old player and queue during same-session authorization; locating the new run never restores them', async () => {\n    const f = mount(); await start(f)\n    f.messages.value.push(reply('queued', true)); await settle()\n    f.messages.value[2] = reply('queued'); await settle()\n    let release!: () => void\n    f.validate.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve }))\n    f.props.taskAnchor = anchor('new'); await settle()\n    expect(f.scope.value).toBe('bot:same-session')\n    expect(f.locator.status.value).toBe('pending')\n    expect(f.speech.state.value.status).toBe('idle')\n    expect(players[0]!.src).toBe(''); expect(players[0]!.pause).toHaveBeenCalled()\n    expect(f.speech.enabled.value).toBe(false)\n    expect(root!.querySelectorAll('[data-speech-state=playing]')).toHaveLength(0)\n    release(); await settle()\n    expect(f.locator.status.value).toBe('located'); expect(f.speech.enabled.value).toBe(true)\n    players[0]!.dispatchEvent(new Event('ended')); await settle()\n    expect(api.playback).toHaveBeenCalledOnce(); expect(f.speech.state.value.status).toBe('idle')\n    f.speech.replay(f.messages.value[1]!); await settle()\n    expect(api.playback).toHaveBeenCalledTimes(2)\n    expect(api.playback.mock.calls[1]![0].body.text).toBe('Reply new')\n  })\n\n  it('keeps unavailable history silent and disables replay while later live projection changes arrive', async () => {\n    const f = mount(); await start(f)\n    f.validate.mockRejectedValueOnce(new Error('unavailable'))\n    f.props.taskAnchor = anchor('missing'); await settle()\n    expect(f.locator.status.value).toBe('unavailable')\n    expect(f.speech.state.value.status).toBe('idle'); expect(f.speech.enabled.value).toBe(false)\n    expect(f.speech.canReplay(f.messages.value[0]!)).toBe(false)\n    f.speech.replay(f.messages.value[0]!)\n    f.messages.value.push(reply('late', true)); await settle()\n    f.messages.value[2] = reply('late'); await settle()\n    expect(api.playback).toHaveBeenCalledOnce()\n    expect(root!.querySelectorAll('[data-speech-state=playing]')).toHaveLength(0)\n  })\n\n  it('aborts in-flight synthesis at the pending boundary and discards its late result after locating another run', async () => {\n    const f = mount(); await settle()\n    let complete!: (result: { data: Blob }) => void, release!: () => void\n    api.playback.mockImplementationOnce(() => new Promise(resolve => { complete = resolve }))\n    f.speech.replay(f.messages.value[0]!); await settle()\n    const signal = api.playback.mock.calls[0]![0].signal as AbortSignal\n    f.validate.mockImplementationOnce(() => new Promise<void>(resolve => { release = resolve }))\n    f.props.taskAnchor = anchor('new'); await settle()\n    expect(signal.aborted).toBe(true); expect(f.speech.state.value.status).toBe('idle')\n    release(); await settle(); complete({ data: new Blob(['late'], { type: 'audio/wav' }) }); await settle()\n    expect(players).toHaveLength(0); expect(api.playback).toHaveBeenCalledOnce()\n    expect(f.speech.state.value.status).toBe('idle')\n  })\n\n  it('does not stop ordinary primary chat when no history anchor is selected', async () => {\n    const f = mount(null)\n    f.props.taskAnchor = undefined\n    await settle()\n    expect(f.locator.status.value).toBe('pending')\n    f.messages.value.push(reply('primary', true)); await settle()\n    f.messages.value[2] = reply('primary'); await settle()\n    expect(api.playback).toHaveBeenCalledOnce()\n    players[0]!.dispatchEvent(new Event('playing'))\n    f.locator.status.value = 'unavailable'; await settle()\n    expect(f.speech.enabled.value).toBe(true); expect(f.speech.state.value.status).toBe('playing')\n    expect(players[0]!.pause).not.toHaveBeenCalled()\n  })\n})\n",
+      "sha256": "84ffb08389270b156a63e9d460f1cda26e9981b89a905b1bfc2e73cc41e20c54"
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+      "source": "import { computed, inject, onBeforeUnmount, onDeactivated, shallowRef, watch, type Ref } from 'vue'\nimport { postBotsByBotIdTtsPlayback } from '@memohai/sdk'\nimport type { ChatMessage } from '@/store/chat/types'\nimport { ChatReadAloud, LiveSpeechReplies, speechKey, speechText, type SpeechState } from './chat-read-aloud'\nimport { chatWorkspaceVisibleKey } from './chat-workspace-visibility'\n\nexport function useChatReadAloud(options: {\n  botId: Ref<string | null | undefined>\n  scope: Ref<string>\n  enabled: Ref<boolean>\n  loading: Ref<boolean>\n  draft: Ref<string>\n  messages: Ref<ChatMessage[]>\n}) {\n  const workspaceVisible = inject(chatWorkspaceVisibleKey, shallowRef(true))\n  const enabled = computed(() => options.enabled.value && workspaceVisible.value)\n  const state = shallowRef<SpeechState>({ key: '', status: 'idle' })\n  const replies = new LiveSpeechReplies()\n  const controller = new ChatReadAloud({\n    async synthesize(text, signal) {\n      const { data } = await postBotsByBotIdTtsPlayback({\n        path: { bot_id: options.botId.value! }, body: { text }, signal,\n        parseAs: 'blob', throwOnError: true,\n      })\n      if (!(data instanceof Blob) || !data.size || !data.type.startsWith('audio/')) throw new Error('Invalid playback response')\n      return data\n    },\n    createPlayer: () => new Audio(),\n    createURL: blob => URL.createObjectURL(blob),\n    revokeURL: url => URL.revokeObjectURL(url),\n    onState: value => { state.value = value },\n  })\n  function stop() {\n    replies.interrupt(options.messages.value)\n    controller.stop()\n  }\n  watch(options.scope, () => { stop(); replies.reset() }, { flush: 'sync' })\n  watch(enabled, value => { if (!value) stop() }, { flush: 'sync' })\n  // flush:sync stops the player in the input event, before any pending media task.\n  watch(options.draft, stop, { flush: 'sync' })\n  watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value }), value => {\n    for (const reply of replies.update(value.messages, value.enabled && !options.draft.value, value.loading)) controller.enqueue(reply)\n  }, { deep: true, immediate: true })\n  function canReplay(message: ChatMessage) { return enabled.value && !message.streaming && !!speechText(message) }\n  function replay(message: ChatMessage) {\n    if (!enabled.value || message.streaming) return\n    const text = speechText(message)\n    if (!text) return\n    stop()\n    controller.replay({ key: speechKey(message), text })\n  }\n  function status(message: ChatMessage) {\n    const active = options.messages.value.find(item => item.role === 'assistant' && state.value.key === speechKey(item))\n    return message.role === 'assistant' && message.id === active?.id ? state.value.status : 'idle'\n  }\n  onDeactivated(stop)\n  onBeforeUnmount(stop)\n  return { state, status, stop, replay, canReplay, resume: () => { if (enabled.value) controller.resume() }, enabled }\n}\n",
+      "sha256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f",
+      "upstreamSHA256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f"
+    },
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.lifecycle.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, defineComponent, h, KeepAlive, nextTick, ref } from 'vue'\nimport { expect, it, vi } from 'vitest'\nimport type { ChatMessage } from '@/store/chat-list'\nimport { useTaskRunAnchor } from './useTaskRunAnchor'\n\nit('reauthorizes an actual cached pane even when visible props never changed', async () => {\n  const shown = ref(true), validate = vi.fn(async () => {}), scroll = vi.fn(async () => true)\n  let state!: ReturnType<typeof useTaskRunAnchor>\n  const pane = defineComponent({ setup() {\n    state=useTaskRunAnchor({\n      anchor: () => ({ directoryBotId: 'bot', taskType: 'native_agent', taskId: 'task', recordId: 'record', runId: 'run', turnId: 'turn' }),\n      session: () => 'session', visible: () => true,\n      messages: () => [{ id: 'message', turnId: 'turn', role: 'user' } as ChatMessage],\n      loading: () => false, loadingOlder: () => false, hasMore: () => false,\n      validate, scroll, loadOlder: async () => 0,\n    })\n    return () => h('div', state.status.value)\n  } })\n  const root=document.createElement('div');document.body.append(root)\n  const app=createApp({ render: () => h(KeepAlive, () => shown.value ? h(pane) : null) });app.mount(root)\n  async function settle() { for(let i=0;i<20;i++) { await nextTick(); await Promise.resolve() } }\n  try {\n    await settle(); expect(state.status.value).toBe('located')\n    shown.value=false; await settle(); const scrolls=scroll.mock.calls.length\n    validate.mockRejectedValue({ status: 403 }); shown.value=true; await settle()\n    expect(state.status.value).toBe('unavailable');expect(scroll).toHaveBeenCalledTimes(scrolls)\n  } finally { app.unmount();root.remove() }\n})\n",
+      "sha256": "4a59442155bb878b480c62f80040525d3f206361ba081774551b3d9f1f9bb4f9"
+    },
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.test.ts": {
+      "source": "import { effectScope, nextTick, ref } from 'vue'\nimport { afterEach, expect, it, vi } from 'vitest'\nimport type { ChatMessage } from '@/store/chat-list'\nimport type { TaskHistoryAnchor } from '@/utils/task-history-link'\nimport { useTaskRunAnchor } from './useTaskRunAnchor'\nconst scopes: ReturnType<typeof effectScope>[] = []\nafterEach(() => { scopes.splice(0).forEach(s => s.stop()) })\nconst message = (turn: string): ChatMessage => ({ id: turn+'-message', turnId: turn, role: 'assistant', messages: [], timestamp: '', streaming: false })\nconst anchor = (turn: string): TaskHistoryAnchor => ({ directoryBotId: 'source', taskType: 'native_agent', taskId: turn, recordId: turn+'-occurrence', runId: turn+'-run', turnId: turn })\nasync function settle() { for (let i=0;i<20;i++) { await nextTick(); await Promise.resolve() } }\nfunction fixture() {\n  const selected = ref(anchor('old')), messages = ref<ChatMessage[]>([message('new')]), visible = ref(true), more = ref(true)\n  const load = vi.fn(async () => { more.value=false; messages.value.unshift(message('old')); return 1 })\n  const validate = vi.fn(async () => {}), scroll = vi.fn(async () => true)\n  const scope=effectScope(); scopes.push(scope)\n  const state=scope.run(() => useTaskRunAnchor({ anchor: () => selected.value, session: () => 'session', visible: () => visible.value, messages: () => messages.value, loading: () => false, loadingOlder: () => false, hasMore: () => more.value, loadOlder: load, validate, scroll }))!\n  return { selected, messages, visible, more, load, validate, scroll, state }\n}\nit('pages to the old run, stays there during new live messages, and switches runs in the same session', async () => {\n  const f=fixture(); await settle()\n  expect(f.state.status.value).toBe('located'); expect(f.scroll).toHaveBeenLastCalledWith('old-message')\n  f.messages.value.push(message('latest')); await settle(); expect(f.scroll).toHaveBeenCalledTimes(1)\n  f.selected.value=anchor('new'); await settle(); expect(f.scroll).toHaveBeenLastCalledWith('new-message')\n})\nit('shows unavailable for missing history instead of scrolling to latest, then accepts the exact live turn', async () => {\n  const f=fixture(); f.load.mockImplementation(async () => { f.more.value=false; return 0 }); await settle()\n  expect(f.state.status.value).toBe('unavailable'); expect(f.scroll).not.toHaveBeenCalled()\n  f.messages.value.push(message('old')); await settle(); expect(f.scroll).toHaveBeenLastCalledWith('old-message')\n})\nit('rechecks restored panels before showing them', async () => {\n  const f=fixture(); await settle(); f.visible.value=false; await settle()\n  f.validate.mockRejectedValue({ status: 403 }); f.visible.value=true; await settle()\n  expect(f.state.status.value).toBe('unavailable'); expect(f.scroll).toHaveBeenCalledTimes(1)\n})\n\nit('ignores a stale authorization completion when another run was selected', async () => {\n  const f=fixture(); await settle(); f.visible.value=false; await settle()\n  let release!: () => void\n  f.validate.mockImplementationOnce(() => new Promise<void>(resolve => { release=resolve }))\n  f.visible.value=true; await settle()\n  f.selected.value=anchor('new'); await settle()\n  release(); await settle()\n  expect(f.scroll).toHaveBeenCalledTimes(2)\n  expect(f.scroll).toHaveBeenLastCalledWith('new-message')\n  expect(f.state.status.value).toBe('located')\n})\n",
+      "sha256": "199769a61bbb51a856e98cea0e4206c84534118e8a1efa43e5a1cdd15e854c48"
+    },
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.ts": {
+      "source": "import { getCurrentInstance, onActivated, onDeactivated, onScopeDispose, ref, watch } from 'vue'\nimport type { ChatMessage } from '@/store/chat-list'\nimport type { TaskHistoryAnchor } from '@/utils/task-history-link'\n\nexport function useTaskRunAnchor(options: {\n  anchor: () => TaskHistoryAnchor | undefined\n  session: () => string | null | undefined\n  visible: () => boolean\n  messages: () => ChatMessage[]\n  loading: () => boolean\n  loadingOlder: () => boolean\n  hasMore: () => boolean\n  validate: (anchor: TaskHistoryAnchor) => Promise<void>\n  loadOlder: () => Promise<number>\n  scroll: (id: string) => Promise<boolean>\n}) {\n  const status = ref<'pending' | 'located' | 'unavailable'>('pending')\n  let generation = 0, busy = false, disposed = false, deactivated = false\n  async function locate() {\n    const anchor = options.anchor()\n    if (!anchor || !options.visible() || options.loading() || options.loadingOlder() || busy || status.value === 'located' || disposed || deactivated) return\n    const version = generation\n    const current = () => !disposed && !deactivated && generation === version && options.visible()\n    busy = true\n    try {\n      await options.validate(anchor)\n      while (current()) {\n        const target = options.messages().find(message => (message.role === 'user' || message.role === 'assistant') && message.turnId === anchor.turnId)\n        if (target) {\n          // Reveal before scrolling; scrollToMessage waits for the DOM update.\n          status.value = 'located'\n          if (!await options.scroll(target.id) && current()) status.value = 'unavailable'\n          return\n        }\n        if (!options.hasMore() || await options.loadOlder() === 0) {\n          if (current()) status.value = 'unavailable'\n          return\n        }\n      }\n    } catch {\n      if (current()) status.value = 'unavailable'\n    } finally {\n      busy = false\n      if (!disposed && version !== generation) void locate()\n    }\n  }\n  watch([options.anchor, options.session], () => {\n    generation++\n    status.value = 'pending'\n    void locate()\n  }, { immediate: true })\n  watch(options.visible, visible => { generation++; if (visible) { status.value = 'pending'; void locate() } })\n  // A live run may acquire its first history turn after the route was opened.\n  watch(() => [options.loading(), options.loadingOlder(), options.messages().length], () => { void locate() }, { flush: 'post' })\n  // Dockview's KeepAlive can deactivate a pane without delivering visible=false.\n  // Treat reactivation as a fresh admission even when its props are unchanged.\n  if (getCurrentInstance()) {\n    onDeactivated(() => { deactivated = true; generation++; status.value = 'pending' })\n    onActivated(() => { deactivated = false; generation++; status.value = 'pending'; void locate() })\n  }\n  onScopeDispose(() => { disposed = true; generation++ })\n  return { status }\n}\n",
+      "sha256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c"
+    },
+    "apps/web/src/pages/home/index.navigation.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, nextTick } from 'vue'\nimport { createPinia, defineStore } from 'pinia'\nimport { createI18n } from 'vue-i18n'\nimport { createMemoryHistory, createRouter } from 'vue-router'\nimport { afterEach, beforeEach, expect, it, vi } from 'vitest'\nimport Home from './index.vue'\n\nconst api = vi.hoisted(() => ({ bot: vi.fn(), session: vi.fn(), lookup: vi.fn(), open: vi.fn(), select: vi.fn(), task: vi.fn() }))\nvi.mock('@/composables/api/useBot', () => ({ fetchBot: api.bot }))\nvi.mock('@/composables/api/useChat', () => ({ fetchSession: api.session }))\nvi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasksByTaskTypeByRecordId: api.task, getBotsById: api.lookup, getBotsByBotIdAgents: vi.fn() }))\nvi.mock('@felinic/ui', () => ({ PanePlaceholder: { template: '<div><slot /></div>' }, toast: { error: vi.fn() } }))\nvi.mock('./components/chat-workspace.vue', () => ({ default: { template: '<div data-chat />' } }))\nvi.mock('./components/contact-choice-dialog.vue', () => ({ default: { render: () => null } }))\nvi.mock('./composables/useComposerPrefillResolver', () => ({ useComposerPrefillResolver: vi.fn() }))\nvi.mock('@/store/composer-prefill', () => ({ useComposerPrefillStore: () => ({ pending: null }) }))\nvi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: {}, openSessionChatPinned: api.open }) }))\nconst useChat = defineStore('navigation-fixture', {\n  state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false }),\n  actions: {\n    async selectBot(botId: string, options?: { sessionId?: string }) { this.currentBotId = botId; await api.select(botId, options) },\n    cancelContactChoice() {}, isSessionTentative() { return false },\n  },\n})\nvi.mock('@/store/chat-list', () => ({ useChatStore: () => useChat() }))\nlet app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement\nasync function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }\nasync function mount(path: string) {\n  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/bot/:botName', name: 'bot', component: Home }] })\n  await router.push(path)\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(Home); app.use(createPinia()); app.use(router)\n  app.use(createI18n({ legacy: false, locale: 'en', messages: { en: {} }, missingWarn: false, fallbackWarn: false }))\n  app.mount(root)\n  return router\n}\nbeforeEach(() => {\n  api.bot.mockReset(); api.session.mockReset().mockImplementation(async (bot, session) => ({ id: session, bot_id: bot, title: session }))\n  api.lookup.mockReset().mockImplementation(async ({ path }) => ({ data: { name: path.id } }))\n  api.open.mockReset(); api.select.mockReset(); api.task.mockReset()\n})\nafterEach(() => { app?.unmount(); root?.remove(); app = undefined })\n\nit('does not combine a late source Bot lookup with the new expert session', async () => {\n  let resolve!: (bot: { id: string }) => void\n  api.bot.mockImplementationOnce(() => new Promise(done => { resolve = done }))\n  const router = await mount('/bot/source-alias?session=source-history')\n  await settle(); expect(api.bot).toHaveBeenCalledWith('source-alias')\n  await router.push('/bot/expert?session=expert-history'); await settle()\n  resolve({ id: 'source' }); await settle()\n  expect(api.session).not.toHaveBeenCalledWith('source', 'expert-history')\n  expect(api.session).toHaveBeenCalledWith('expert', 'expert-history')\n  expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')\n  expect(api.open).toHaveBeenCalledExactlyOnceWith({ sessionId: 'expert-history', title: 'expert-history', taskAnchor: undefined })\n})\n\nit('does not replace a newer expert route after an earlier Bot-name lookup completes', async () => {\n  let resolve!: (value: { data: { name: string } }) => void\n  const router = await mount('/bot/source?session=source-history'); await settle()\n  const chat = useChat(); chat.bots = []\n  api.lookup.mockImplementationOnce(() => new Promise(done => { resolve = done }))\n  chat.currentBotId = 'source-uncached'; await settle()\n  chat.bots = [{ id: 'expert', name: 'expert' }]\n  await router.push('/bot/expert?session=expert-history'); await settle()\n  resolve({ data: { name: 'source-uncached' } }); await settle()\n  expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')\n})\n\nit.each([401, 403, 404])('preserves a denied historical route without selecting a different session (HTTP %s)', async status => {\n  api.session.mockRejectedValue({ status })\n  const router = await mount('/bot/expert?session=expert-history'); await settle()\n  expect(api.session).toHaveBeenCalledExactlyOnceWith('expert', 'expert-history')\n  expect(api.select).not.toHaveBeenCalled()\n  expect(api.open).not.toHaveBeenCalled()\n  expect(router.currentRoute.value.fullPath).toBe('/bot/expert?session=expert-history')\n})\n\nit('returns to the contact when the same Bot URL loses its task deep link', async () => {\n  const router = await mount('/bot/source?session=task-history'); await settle()\n  api.select.mockClear(); api.open.mockClear()\n  await router.push('/bot/source'); await settle()\n  expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefined)\n  expect(api.open).not.toHaveBeenCalled()\n})\n\nit('resolves a same-Bot cold entrance even when the stored Bot already matches', async () => {\n  await mount('/bot/source'); await settle()\n  expect(api.select).toHaveBeenCalledExactlyOnceWith('source', undefined)\n})\n\nit.each(['?session=', '?session=first&session=second'])('rejects malformed task links without opening contact (%s)', async query => {\n  await mount('/bot/source' + query); await settle()\n  expect(api.select).not.toHaveBeenCalled()\n  expect(api.open).not.toHaveBeenCalled()\n  expect(api.session).not.toHaveBeenCalled()\n})\n\nconst runQuery = (id: string) => `?session=history&task_bot=source&task_type=native_agent&task_id=${id}&task_record=${id}&run=${id}`\nfunction taskResponse(id: string) {\n  return { data: { task_type: 'native_agent', task_id: id, record_id: id, destination: { bot_id: 'source', session_id: 'history', run_id: id, turn_id: id+'-turn' } } }\n}\nit('changes runs within one session without letting a late selection restore the old anchor', async () => {\n  api.task.mockImplementation(async ({ path }) => taskResponse(path.record_id))\n  let release!: () => void\n  api.select.mockImplementationOnce(() => new Promise<void>(resolve => { release=resolve }))\n  const router=await mount('/bot/source'+runQuery('old')); await settle()\n  await router.push('/bot/source'+runQuery('new')); await settle()\n  release(); await settle()\n  expect(api.open).toHaveBeenCalledTimes(1)\n  expect(api.open.mock.calls[0]?.[0].taskAnchor).toMatchObject({ runId: 'new', turnId: 'new-turn' })\n  expect(router.currentRoute.value.query.run).toBe('new')\n})\nit.each(['wrong-run', 'denied', 'missing-session'])('rejects an untrusted task link before selecting history (%s)', async kind => {\n  api.task.mockResolvedValue(taskResponse('old'))\n  if (kind==='denied') api.task.mockRejectedValue({ status: 403 })\n  const path=kind==='missing-session' ? '/bot/source?run=old' : '/bot/source'+runQuery(kind==='wrong-run' ? 'new' : 'old')\n  await mount(path); await settle()\n  expect(api.open).not.toHaveBeenCalled(); expect(api.select).not.toHaveBeenCalled(); expect(api.session).not.toHaveBeenCalled()\n})\n\nit('does not reopen contact for unrelated URL query changes', async () => {\n  const router=await mount('/bot/source'); await settle(); api.select.mockClear()\n  await router.replace('/bot/source?view=unchanged'); await settle()\n  expect(api.select).not.toHaveBeenCalled()\n})\n",
+      "sha256": "2429adbc46ed55250c38582d11221a6054cd3421307b709f2d68afd6955efb0c",
+      "upstreamSHA256": "2429adbc46ed55250c38582d11221a6054cd3421307b709f2d68afd6955efb0c"
+    },
+    "apps/web/src/pages/home/index.read-aloud-admission.test.ts": {
+      "source": "// @vitest-environment jsdom\nimport { createApp, nextTick, type Ref } from 'vue'\nimport { createPinia, defineStore } from 'pinia'\nimport { createI18n } from 'vue-i18n'\nimport { createMemoryHistory, createRouter } from 'vue-router'\nimport { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'\nimport paneSource from './components/chat-pane.vue?raw'\nimport type { ChatMessage } from '@/store/chat/types'\nimport type { TaskHistoryAnchor } from '@/utils/task-history-link'\nimport type { useChatReadAloud } from './composables/useChatReadAloud'\nimport Home from './index.vue'\n\nclass Player extends EventTarget { src = ''; play = vi.fn(async () => {}); pause = vi.fn(); load = vi.fn() }\nconst api = vi.hoisted(() => ({\n  bot: vi.fn(), session: vi.fn(), lookup: vi.fn(), open: vi.fn(), select: vi.fn(), task: vi.fn(), playback: vi.fn(),\n  speech: undefined as ReturnType<typeof useChatReadAloud> | undefined,\n  messages: undefined as Ref<ChatMessage[]> | undefined,\n  pane: undefined as { taskAnchor?: TaskHistoryAnchor } | undefined,\n  player: undefined as Player | undefined,\n}))\nvi.mock('@/composables/api/useBot', () => ({ fetchBot: api.bot }))\nvi.mock('@/composables/api/useChat', () => ({ fetchSession: api.session }))\nvi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasksByTaskTypeByRecordId: api.task, getBotsById: api.lookup, getBotsByBotIdAgents: vi.fn(), postBotsByBotIdTtsPlayback: api.playback }))\nvi.mock('@felinic/ui', () => ({ PanePlaceholder: { template: '<div><slot /></div>' }, toast: { error: vi.fn() } }))\nvi.mock('./components/chat-workspace.vue', async () => {\n  const { computed, defineComponent, h, reactive, ref } = await import('vue')\n  const { useRouter } = await import('vue-router')\n  const { useChatReadAloud } = await import('./composables/useChatReadAloud')\n  return { default: defineComponent({ setup() {\n    const messages = ref<ChatMessage[]>([reply('old')])\n    const props = reactive<{ taskAnchor?: TaskHistoryAnchor }>({ taskAnchor: oldAnchor() })\n    const expression = paneSource.slice(paneSource.indexOf('const readAloud = useChatReadAloud({')).match(/enabled: (computed\\([\\s\\S]*?\\)),\\n\\s*loading:/)?.[1]\n    if (!expression) throw new Error('Missing pane speech enable expression')\n    const gate = new Function('computed', 'botSettings', 'isActive', 'isVisible', 'chatStore', 'router', 'props', 'taskRunAnchor', `return (${expression})`)\n    const store = useChat()\n    const enabled = gate(computed, ref({ tts_model_id: 'synthetic' }), ref(true), ref(true), store, useRouter(), props, { status: ref('located') }) as Ref<boolean>\n    api.pane = props\n    api.messages = messages\n    api.speech = useChatReadAloud({ botId: computed(() => store.currentBotId), scope: computed(() => `${store.currentBotId}:history`), enabled, loading: ref(false), draft: ref(''), messages })\n    return () => h('div', { 'data-chat': '' }, messages.value.map(message => h('div', { 'data-speech-state': api.speech!.status(message) }, message.id)))\n  } }) }\n})\nvi.mock('./components/contact-choice-dialog.vue', () => ({ default: { render: () => null } }))\nvi.mock('./composables/useComposerPrefillResolver', () => ({ useComposerPrefillResolver: vi.fn() }))\nvi.mock('@/store/composer-prefill', () => ({ useComposerPrefillStore: () => ({ pending: null }) }))\nvi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: {}, openSessionChatPinned: api.open }) }))\nconst useChat = defineStore('read-aloud-home-admission', {\n  state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false, contactNavigationPending: false, contactOpenRequested: null as { botId: string, sessionId: string } | null }),\n  actions: {\n    async selectBot(botId: string, options?: { sessionId?: string }) {\n      this.currentBotId = botId\n      if (!options?.sessionId) this.contactNavigationPending = true\n      await api.select(botId, options)\n      if (!options?.sessionId) this.contactOpenRequested = { botId, sessionId: 'main' }\n    },\n    completeContactOpen(request: { botId: string, sessionId: string }) { if (this.contactOpenRequested === request) { this.contactOpenRequested = null; this.contactNavigationPending = false } },\n    cancelContactChoice() {}, isSessionTentative() { return false },\n  },\n})\nvi.mock('@/store/chat-list', () => ({ useChatStore: () => useChat() }))\nfunction oldAnchor(): TaskHistoryAnchor { return { directoryBotId: 'source', taskType: 'native_agent', taskId: 'old', recordId: 'old', runId: 'old', turnId: 'old-turn' } }\nfunction reply(id: string, streaming = false): ChatMessage { return { id, role: 'assistant', turnId: `${id}-turn`, runtimeRunId: id, timestamp: '', streaming, messages: [{ id: 0, type: 'text', content: `Reply ${id}` }] } }\nfunction task(id: string, bot = 'source', session = 'history') { return { data: { task_type: 'native_agent', task_id: id, record_id: id, destination: { bot_id: bot, session_id: session, run_id: id, turn_id: `${id}-turn` } } } }\nfunction url(id: string, bot = 'source', session = 'history') { return `/bot/${bot}?session=${session}&task_bot=source&task_type=native_agent&task_id=${id}&task_record=${id}&run=${id}` }\nfunction deferred<T>() { let resolve!: (value: T) => void, reject!: (reason: unknown) => void; const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail }); return { promise, resolve, reject } }\nlet app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement\nasync function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }\nasync function mount() {\n  const router = createRouter({ history: createMemoryHistory(), routes: [{ path: '/', name: 'home', component: Home }, { path: '/bot/:botName', name: 'bot', component: Home }] })\n  await router.push(url('old'))\n  root = document.createElement('div'); document.body.append(root)\n  app = createApp(Home); app.use(createPinia()); app.use(router)\n  app.use(createI18n({ legacy: false, locale: 'en', messages: { en: {} }, missingWarn: false, fallbackWarn: false }))\n  app.mount(root); await settle()\n  expect(masked()).toBe(false)\n  api.speech!.replay(api.messages!.value[0]!); await settle()\n  api.player!.dispatchEvent(new Event('playing'))\n  expect(api.speech!.state.value.status).toBe('playing')\n  api.messages!.value.push(reply('queued', true)); await settle()\n  api.messages!.value[1] = reply('queued'); await settle()\n  return router\n}\nfunction masked() { return root.querySelector('[data-chat]')!.classList.contains('invisible') }\nfunction stoppedBeforeNewAnchor() {\n  expect(masked()).toBe(true)\n  expect(api.open).toHaveBeenCalledTimes(1)\n  expect(api.pane!.taskAnchor?.runId).toBe('old')\n  expect(api.speech!.state.value.status).toBe('idle')\n  expect(api.speech!.enabled.value).toBe(false)\n  expect(api.player!.src).toBe(''); expect(api.player!.pause).toHaveBeenCalled()\n  expect(root.querySelectorAll('[data-speech-state=playing]')).toHaveLength(0)\n  expect(api.playback).toHaveBeenCalledOnce()\n}\nasync function normalNewReply() {\n  expect(masked()).toBe(false); expect(api.speech!.enabled.value).toBe(true)\n  api.player!.dispatchEvent(new Event('ended')); await settle()\n  expect(api.speech!.state.value.status).toBe('idle'); expect(api.playback).toHaveBeenCalledOnce()\n  api.messages!.value.push(reply('primary-new', true)); await settle()\n  api.messages!.value[api.messages!.value.length - 1] = reply('primary-new'); await settle()\n  expect(api.playback).toHaveBeenCalledTimes(2)\n  expect(api.playback.mock.calls[1]![0].body.text).toBe('Reply primary-new')\n}\nbeforeEach(() => {\n  api.bot.mockReset(); api.session.mockReset().mockImplementation(async (bot, session) => ({ id: session, bot_id: bot, title: session }))\n  api.lookup.mockReset().mockImplementation(async ({ path }) => ({ data: { name: path.id } }))\n  api.open.mockReset().mockImplementation((options: { taskAnchor?: TaskHistoryAnchor }) => { if (api.pane) api.pane.taskAnchor = options.taskAnchor })\n  api.select.mockReset(); api.task.mockReset().mockResolvedValue(task('old'))\n  api.playback.mockReset().mockResolvedValue({ data: new Blob(['synthetic'], { type: 'audio/wav' }) })\n  api.pane = undefined\n  vi.stubGlobal('Audio', class extends Player { constructor() { super(); api.player = this } })\n  vi.stubGlobal('URL', { createObjectURL: () => 'blob:synthetic', revokeObjectURL: vi.fn() })\n})\nafterEach(() => { app?.unmount(); root?.remove(); app = undefined; vi.unstubAllGlobals() })\n\ndescribe('actual Home URL admission stops speech before pane anchor delivery', () => {\n  it.each([['same Bot/session, different run', 'source', 'history'], ['cross Bot/session', 'expert', 'other-history']])('%s: stops during authorization and never restores the old queue after admission', async (_label, bot, session) => {\n    const router = await mount(), admission = deferred<ReturnType<typeof task>>()\n    api.task.mockImplementationOnce(() => admission.promise)\n    await router.push(url('new', bot, session)); await settle()\n    stoppedBeforeNewAnchor()\n    admission.resolve(task('new', bot, session)); await settle()\n    expect(masked()).toBe(false); expect(api.pane!.taskAnchor?.runId).toBe('new')\n    expect(api.speech!.state.value.status).toBe('idle'); expect(api.playback).toHaveBeenCalledOnce()\n    await normalNewReply()\n  })\n\n  it.each(['denied', 'expired', 'wrong-run'] as const)('%s: stays silent under the error mask, then returns to the actual primary contact path', async reason => {\n    const router = await mount(), admission = deferred<ReturnType<typeof task>>()\n    api.task.mockImplementationOnce(() => admission.promise)\n    await router.push(url('new')); await settle(); stoppedBeforeNewAnchor()\n    if (reason === 'wrong-run') admission.resolve(task('another-run'))\n    else admission.reject({ status: reason === 'denied' ? 403 : 404, code: reason === 'denied' ? 'http.forbidden' : 'http.not_found' })\n    await settle(); stoppedBeforeNewAnchor()\n    expect(api.speech!.canReplay(api.messages!.value[0]!)).toBe(false)\n    const contact = deferred<void>(); api.select.mockImplementationOnce(() => contact.promise)\n    await router.push('/bot/source'); await settle(); stoppedBeforeNewAnchor()\n    contact.resolve(); await settle()\n    expect(api.open).toHaveBeenLastCalledWith({ sessionId: 'main', explicitSelection: false, contactView: true })\n    await normalNewReply()\n  })\n\n  it('ignores a late task admission after returning to the primary contact without restoring old audio', async () => {\n    const router = await mount(), admission = deferred<ReturnType<typeof task>>()\n    api.task.mockImplementationOnce(() => admission.promise)\n    await router.push(url('new')); await settle(); stoppedBeforeNewAnchor()\n    await router.push('/bot/source'); await settle()\n    const opens = api.open.mock.calls.length\n    admission.resolve(task('new')); await settle()\n    expect(api.open).toHaveBeenCalledTimes(opens)\n    expect(api.open).toHaveBeenLastCalledWith({ sessionId: 'main', explicitSelection: false, contactView: true })\n    await normalNewReply()\n  })\n\n  it('cancels pending synthesis before anchor delivery and discards the response after returning to contact', async () => {\n    const router = await mount(), synthesis = deferred<{ data: Blob }>(), admission = deferred<ReturnType<typeof task>>()\n    api.playback.mockImplementationOnce(() => synthesis.promise)\n    api.speech!.replay(api.messages!.value[0]!); await settle()\n    const signal = api.playback.mock.calls[1]![0].signal as AbortSignal\n    api.task.mockImplementationOnce(() => admission.promise)\n    await router.push(url('new')); await settle()\n    expect(api.pane!.taskAnchor?.runId).toBe('old'); expect(masked()).toBe(true)\n    expect(signal.aborted).toBe(true); expect(api.speech!.state.value.status).toBe('idle')\n    await router.push('/bot/source'); await settle()\n    synthesis.resolve({ data: new Blob(['late'], { type: 'audio/wav' }) }); admission.resolve(task('new')); await settle()\n    expect(api.player!.src).toBe(''); expect(api.speech!.state.value.status).toBe('idle')\n    expect(api.playback).toHaveBeenCalledTimes(2)\n  })\n\n  it('stops the old pane when an invalid history URL is rejected before a task request starts', async () => {\n    const router = await mount()\n    await router.push('/bot/source?run=incomplete'); await settle()\n    stoppedBeforeNewAnchor()\n    expect(api.task).toHaveBeenCalledOnce()\n    await router.push('/bot/source'); await settle()\n    await normalNewReply()\n  })\n})\n",
+      "sha256": "a00206a20163c0c4bba2d15f303413bf016b89224327c5bc002b31d890ab0a73"
+    },
+    "apps/web/src/utils/task-history-link.test.ts": {
+      "source": "import { beforeEach, expect, it, vi } from 'vitest'\nimport { resolveTaskHistoryAnchor, revalidateTaskHistoryAnchor, taskHistoryQuery } from './task-history-link'\nconst read = vi.hoisted(() => vi.fn())\nvi.mock('@memohai/sdk', () => ({ getBotsByBotIdTasksByTaskTypeByRecordId: read }))\nconst task = { task_type: 'native_agent' as const, task_id: 'bg-original', record_id: 'original-occurrence', name: 'work', state: 'completed', created_at: new Date().toISOString(), destination: { bot_id: 'target', session_id: 'history', run_id: 'original-run', turn_id: 'original-turn' } }\nconst query = { task_bot: 'source', task_type: task.task_type, task_id: task.task_id, task_record: task.record_id, run: 'original-run' }\nbeforeEach(() => { read.mockReset().mockResolvedValue({ data: task }) })\nit('rechecks the exact typed occurrence and target on refresh and restored-panel activation', async () => {\n  expect(taskHistoryQuery('source', task)).toEqual(query)\n  const anchor = await resolveTaskHistoryAnchor(query, 'target', 'history')\n  expect(anchor?.turnId).toBe('original-turn')\n  expect(read.mock.calls[0]![0].path).toEqual({ bot_id: 'source', task_type: 'native_agent', record_id: 'original-occurrence' })\n  read.mockRejectedValue({ status: 403 })\n  await expect(revalidateTaskHistoryAnchor(anchor!, 'target', 'history')).rejects.toMatchObject({ status: 403 })\n})\nit.each(['bot', 'session', 'run', 'task', 'type', 'occurrence', 'missing-run'] as const)('rejects a mismatched %s without falling back to the session', async mismatch => {\n  const current = structuredClone(task)\n  if (mismatch === 'bot') current.destination.bot_id = 'wrong'\n  if (mismatch === 'session') current.destination.session_id = 'wrong'\n  if (mismatch === 'run') current.destination.run_id = 'latest-run'\n  if (mismatch === 'task') current.task_id = 'wrong'\n  if (mismatch === 'type') current.task_type = 'schedule_fire' as never\n  if (mismatch === 'occurrence') current.record_id = 'wrong'\n  if (mismatch === 'missing-run') current.destination.turn_id = ''\n  read.mockResolvedValue({ data: current })\n  await expect(resolveTaskHistoryAnchor(query, 'target', 'history')).rejects.toThrow()\n})\nit('allows ordinary history and rejects partial or array-valued task links', async () => {\n  expect(await resolveTaskHistoryAnchor({}, 'bot', 'session')).toBeUndefined()\n  await expect(resolveTaskHistoryAnchor({ run: 'some-run' }, 'bot', 'session')).rejects.toThrow()\n  await expect(resolveTaskHistoryAnchor({ ...query, run: ['one', 'two'] }, 'target', 'history')).rejects.toThrow()\n  expect(read).not.toHaveBeenCalled()\n})\n",
+      "sha256": "56ed424fb995baec3b8e01d84ed57c501df346c1b0f7679d6a5053cedfc72d0d"
+    },
+    "apps/web/src/utils/task-history-link.ts": {
+      "source": "import type { LocationQuery, LocationQueryRaw } from 'vue-router'\nimport { getBotsByBotIdTasksByTaskTypeByRecordId, type SessiontaskDirectoryTask } from '@memohai/sdk'\n\nexport interface TaskHistoryAnchor {\n  directoryBotId: string\n  taskType: string\n  taskId: string\n  recordId: string\n  runId: string\n  turnId: string\n}\n\nfunction isTaskType(value: string): value is SessiontaskDirectoryTask['task_type'] {\n  return ['native_agent', 'computer_operation', 'bot_delegation', 'schedule_fire'].includes(value)\n}\n\nconst keys = ['task_bot', 'task_type', 'task_id', 'task_record', 'run'] as const\n\nexport function taskHistoryQuery(bot: string, task: SessiontaskDirectoryTask): LocationQueryRaw {\n  if (!task.destination?.run_id || !task.destination.turn_id) throw new Error('Task execution history is unavailable')\n  return { task_bot: bot, task_type: task.task_type, task_id: task.task_id, task_record: task.record_id, run: task.destination.run_id }\n}\n\nexport function hasTaskHistoryQuery(query: LocationQuery): boolean {\n  return keys.some(key => query[key] !== undefined)\n}\n\nexport async function revalidateTaskHistoryAnchor(anchor: TaskHistoryAnchor, bot: string, session: string): Promise<void> {\n  const current = await resolveTaskHistoryAnchor({ task_bot: anchor.directoryBotId, task_type: anchor.taskType, task_id: anchor.taskId, task_record: anchor.recordId, run: anchor.runId }, bot, session)\n  if (current?.turnId !== anchor.turnId) throw new Error('Task execution history changed')\n}\n\n// Re-read the original typed task on every route entrance, including refresh.\n// URL values and restored panel params never establish execution ownership.\nexport async function resolveTaskHistoryAnchor(query: LocationQuery, bot: string, session: string): Promise<TaskHistoryAnchor | undefined> {\n  if (!hasTaskHistoryQuery(query)) return undefined\n  const values = keys.map(key => query[key])\n  if (values.some(value => typeof value !== 'string' || !value.trim())) throw new Error('Invalid task history link')\n  const [directoryBotId, taskType, taskId, recordId, runId] = values as string[]\n  if (!taskType || !isTaskType(taskType)) throw new Error('Invalid task type')\n  const { data: task } = await getBotsByBotIdTasksByTaskTypeByRecordId({\n    path: { bot_id: directoryBotId!, task_type: taskType, record_id: recordId! }, cache: 'no-store', throwOnError: true,\n  })\n  const destination = task?.destination\n  if (!task || task.task_type !== taskType || task.task_id !== taskId || task.record_id !== recordId\n    || !destination || destination.bot_id !== bot || destination.session_id !== session || destination.run_id !== runId || !destination.turn_id) {\n    throw new Error('Task execution history is unavailable')\n  }\n  return { directoryBotId: directoryBotId!, taskType: taskType!, taskId: taskId!, recordId: recordId!, runId: runId!, turnId: destination.turn_id }\n}\n",
+      "sha256": "4b08e633b29f8462c532fed091cf2906e78d3f185489f0ce772a4c75f9b151db"
+    }
+  },
+  "locales": {
+    "en": {
+      "before": {
+        "empty": "No tasks are recorded for this Bot.",
+        "types": {
+          "native_agent": "Agent task",
+          "computer_operation": "Computer task",
+          "bot_delegation": "Delegated task",
+          "schedule_fire": "Scheduled task"
+        }
+      },
+      "after": {
+        "historyUnavailable": "The original execution could not be located in this history.",
+        "empty": "No tasks are recorded for this Bot.",
+        "types": {
+          "native_agent": "Agent task",
+          "computer_operation": "Computer task",
+          "bot_delegation": "Delegated task",
+          "schedule_fire": "Scheduled task"
+        }
+      }
+    },
+    "ja": {
+      "before": {
+        "empty": "この Bot のタスク記録はありません。",
+        "types": {
+          "native_agent": "Agent タスク",
+          "computer_operation": "コンピュータータスク",
+          "bot_delegation": "委任タスク",
+          "schedule_fire": "スケジュールタスク"
+        }
+      },
+      "after": {
+        "historyUnavailable": "この履歴で元の実行を確認できませんでした。",
+        "empty": "この Bot のタスク記録はありません。",
+        "types": {
+          "native_agent": "Agent タスク",
+          "computer_operation": "コンピュータータスク",
+          "bot_delegation": "委任タスク",
+          "schedule_fire": "スケジュールタスク"
+        }
+      }
+    },
+    "zh": {
+      "before": {
+        "empty": "这个 Bot 暂无任务记录。",
+        "types": {
+          "native_agent": "Agent 任务",
+          "computer_operation": "电脑任务",
+          "bot_delegation": "委派任务",
+          "schedule_fire": "计划任务"
+        }
+      },
+      "after": {
+        "historyUnavailable": "无法在这段历史中定位原始执行。",
+        "empty": "这个 Bot 暂无任务记录。",
+        "types": {
+          "native_agent": "Agent 任务",
+          "computer_operation": "电脑任务",
+          "bot_delegation": "委派任务",
+          "schedule_fire": "计划任务"
+        }
+      }
+    }
+  },
+  "sdkOverlays": {},
+  "equivalentFiles": {},
+  "consumerMap": {
+    "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+    "product_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+    "files": [
+      {
+        "path": "apps/web/src/i18n/locales/en.json",
+        "sha256": "7075819f166127ae4f5e953435ea63986db4cd47d49ec919bfde6760adf8fda9",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/ja.json",
+        "sha256": "e17c7300b5016a8aee4392ce8b1cf660bb766d9488eae4c3634ce4ac60aef64a",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/i18n/locales/zh.json",
+        "sha256": "db7ec92cc952e9e121035374e61560e0c21735b4b461acee8af102184d696287",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/bot-task-directory.vue",
+        "sha256": "014896234a0bcdac81a646a67a8cf26942e49e07cea684ecfaa472cc932549d1",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/chat-pane.vue",
+        "sha256": "435cd9b06a189cf8c3734856c5b9546ba8d52e8898e0a73ba2a257aaa68eeea3",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/chat-workspace.vue",
+        "sha256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/dockview/panel-chat.vue",
+        "sha256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/components/message-item.vue",
+        "sha256": "37eaca3e160bda2bfb4f251ba0ad763bc4e6018143223998d689988ad682f296",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/chat-workspace-visibility.ts",
+        "sha256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+        "sha256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+        "sha256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/pages/home/index.vue",
+        "sha256": "0f941261521adb08d42bca472bb817b641614d2a72683e9e6bcf41f2ab4caa37",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/store/workspace-tabs.ts",
+        "sha256": "42300dd572cf97fad15e088541d4ab3f0a9ce70d36899505deb479e0ac84791d",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "apps/web/src/utils/task-history-link.ts",
+        "sha256": "4b08e633b29f8462c532fed091cf2906e78d3f185489f0ce772a4c75f9b151db",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      },
+      {
+        "path": "packages/sdk/src/types.gen.ts",
+        "sha256": "a9fb08689adf1e78b548fdb3e4128960d0a6d1a226f7f54d98199c9538f2e1c5",
+        "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756"
+      }
+    ],
+    "HAP27_contains_these_deltas": false,
+    "candidate_parent": "4d2f4bc33329ef40c2b42167f25147ffb2d0da05",
+    "speech_product_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+    "speech_evidence": "028fb5c717d431d22c70ce493d474965fbc14243",
+    "schema": 179,
+    "independent_Home_red": "28ac: actual Home route masks old workspace but old audio remains playing",
+    "independent_Home_green": "one original case passes after 19015a54",
+    "required_together": [
+      "apps/web/src/pages/home/index.vue",
+      "apps/web/src/pages/home/components/chat-workspace.vue",
+      "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "apps/web/src/pages/home/composables/chat-workspace-visibility.ts"
+    ],
+    "field_accepted": false
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "synthetic": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [],
+  "writes": [
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/sessions/contact",
+      "method": "POST"
+    }
+  ],
+  "pageErrors": [],
+  "directoryReads": [
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks",
+      "authenticated": true
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks",
+      "authenticated": true
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks/computer_operation/40000000-0000-4000-8000-000000000004",
+      "authenticated": true
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks/computer_operation/40000000-0000-4000-8000-000000000004",
+      "authenticated": true
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks/computer_operation/40000000-0000-4000-8000-000000000004",
+      "authenticated": true
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks/computer_operation/40000000-0000-4000-8000-000000000004",
+      "authenticated": true
+    },
+    {
+      "path": "/bots/10000000-0000-4000-8000-000000000001/tasks/computer_operation/40000000-0000-4000-8000-000000000004",
+      "authenticated": true
+    }
+  ],
+  "checks": [
+    "modal consumes back before explicit task route",
+    "one route-owned contact return, original task tab and login retained; actual contact root unhandled",
+    "original explicit task deep link reopens its retained draft without rebinding",
+    "original run/turn/record anchor survives route-to-Dockview and its exact task history is visible",
+    "new directory SDK list/detail use original record identity and account auth; displayed row is only name/state; click reopens original task"
+  ],
+  "directoryVisibleRows": "Synthetic original task\n执行中",
+  "exactTaskAnchor": {
+    "directoryBotId": "10000000-0000-4000-8000-000000000001",
+    "taskType": "computer_operation",
+    "taskId": "opaque-task:windows:original",
+    "recordId": "40000000-0000-4000-8000-000000000004",
+    "runId": "run:20000000-0000-4000-8000-000000000001",
+    "turnId": "turn:20000000-0000-4000-8000-000000000001"
+  },
+  "navigation": [
+    {
+      "owner": "route",
+      "to": {
+        "name": "bot",
+        "params": {
+          "botName": "primary-bot"
+        }
+      }
+    },
+    {
+      "owner": "shared-contact",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "panels": [
+    {
+      "id": "chat:1",
+      "session": "20000000-0000-4000-8000-000000000001"
+    },
+    {
+      "id": "chat:2",
+      "session": "30000000-0000-4000-8000-000000000003"
+    }
+  ]
+}

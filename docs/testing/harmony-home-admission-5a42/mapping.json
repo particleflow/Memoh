@@ -1,0 +1,143 @@
+{
+  "sourceParent": "3eaf394d1c1bd09a90bf63b5d701e2a06c11d52d",
+  "sharedCommit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "sharedTree": "3ca90fd7838979049f5889516836d55654a87811",
+  "map": [
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "sha256": "7075819f166127ae4f5e953435ea63986db4cd47d49ec919bfde6760adf8fda9",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "5f38cb9978a1afc3dd3ea165c9ab4832621064caba2329283b441d648cc26b84",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "sha256": "e17c7300b5016a8aee4392ce8b1cf660bb766d9488eae4c3634ce4ac60aef64a",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "7f0651eae339bb0a5b3757a492647642b3692bb27248172be2599b25b9a276fc",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "sha256": "db7ec92cc952e9e121035374e61560e0c21735b4b461acee8af102184d696287",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "9c9077e0e9f8f48a5631f4e3e7e8e682515916392d8a521b7cd53df39fdceb6b",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/pages/home/components/bot-task-directory.vue",
+      "sha256": "014896234a0bcdac81a646a67a8cf26942e49e07cea684ecfaa472cc932549d1",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "014896234a0bcdac81a646a67a8cf26942e49e07cea684ecfaa472cc932549d1",
+      "wholeFileExact": true
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "sha256": "435cd9b06a189cf8c3734856c5b9546ba8d52e8898e0a73ba2a257aaa68eeea3",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "65bb489e9b244c369eab3a6cc46becaa8814efb9a06c08a3581c385a77d6c486",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-workspace.vue",
+      "sha256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "wholeFileExact": true
+    },
+    {
+      "path": "apps/web/src/pages/home/components/dockview/panel-chat.vue",
+      "sha256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+      "wholeFileExact": true
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "sha256": "37eaca3e160bda2bfb4f251ba0ad763bc4e6018143223998d689988ad682f296",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "28a962383b61dbd3930ea3db357e139c0fedf95ffd373d194ea9ab456daa5385",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-workspace-visibility.ts",
+      "sha256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7",
+      "wholeFileExact": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "sha256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f",
+      "wholeFileExact": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+      "sha256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+      "wholeFileExact": true
+    },
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "sha256": "0f941261521adb08d42bca472bb817b641614d2a72683e9e6bcf41f2ab4caa37",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "bee8cd80bd656cc8519cc4b5b9b0d53c16466217b6b1844511671e966ff105e0",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/store/workspace-tabs.ts",
+      "sha256": "42300dd572cf97fad15e088541d4ab3f0a9ce70d36899505deb479e0ac84791d",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "3f12862289590ec61c2e96fed8fd16d03295ef353a9ad0ab3a1ae3519be958bd",
+      "wholeFileExact": false
+    },
+    {
+      "path": "apps/web/src/utils/task-history-link.ts",
+      "sha256": "4b08e633b29f8462c532fed091cf2906e78d3f185489f0ce772a4c75f9b151db",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "4b08e633b29f8462c532fed091cf2906e78d3f185489f0ce772a4c75f9b151db",
+      "wholeFileExact": true
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "sha256": "a9fb08689adf1e78b548fdb3e4128960d0a6d1a226f7f54d98199c9538f2e1c5",
+      "exact_source": "19015a545a38f3fd6ca2c3b17d71280556101756",
+      "generatedPhoneSHA256": "52ae7f2de48e05d59dc496904075f6591d8cabb5b2c1480110bd76d8b02da4d0",
+      "wholeFileExact": false
+    }
+  ],
+  "retainedInputs": {
+    "mobile/client/mobile/harmony/app/AppScope/app.json5": "2e3c9ae7d243b77a7ad3628030f16b63bc8f666b7ecfd4b51d2bdd4f3eb79bbb",
+    "mobile/client/mobile/harmony/app/entry/src/main/module.json5": "cb4b3594d1cc7323f8eba2d904d63c18ae349c361ccb5bbb700d955c46eeaa5f",
+    "mobile/client/config/memoh_client.json": "92d2fc85d947461b414201a10ce543d3009572feec5d2dfebc642741308067e1",
+    "mobile/client/mobile/memoh/harmony-back.ts": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+    "mobile/client/mobile/memoh/harmony-service-config.ts": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+    "mobile/client/mobile/memoh/harmony-files.ts": "f6beece8e9fdeb5d3f1aacfc69b0df88fd5932cc50229f1a822942951a8cce35",
+    "mobile/client/mobile/memoh/harmony-resumable.ts": "e55acc09fd3925cf6f7480acae6474ecfcc7e32909cdefc23f71af8312621ae5",
+    "mobile/client/mobile/memoh/harmony-download.ts": "6990c567e495a20c5a089f37b656bde8ec93cd9a723bc5a4ab4597fc7cccbdb0",
+    "mobile/client/mobile/memoh/harmony-service.css": "f927eb9df225b323734ab60b7a3f3e2cb3ac37718fbf4eaf238930501f355c9b"
+  },
+  "priorHAPs": {
+    "1.0.26": {
+      "bytes": 35669916,
+      "sha256": "52cdb3038d74e38f5308910ecbebec5c5f5d97c6520254f050edc96af11570ac",
+      "unchanged": true
+    },
+    "1.0.27": {
+      "bytes": 37655842,
+      "sha256": "a509b37b3a09c040ff8d2f6d461439168a7173803653a72fbc80521e097db2eb",
+      "unchanged": true
+    }
+  },
+  "HAPBuilt": false,
+  "versionChanged": false,
+  "artifactUploaded": false,
+  "signedOrDeployed": false,
+  "sourceChangesSHA256": "3d57f81db79c87bb94f78d60bd2b9f6586b96fc191c10c9263b3cd41976eba2a",
+  "SDKDelta": "Only optional SessiontaskTaskDestination.turn_id; existing endpoints/auth unchanged.",
+  "validation": "Source-only controlled fixtures; not HAP or phone acceptance."
+}

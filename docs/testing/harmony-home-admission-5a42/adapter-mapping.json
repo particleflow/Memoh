@@ -1,0 +1,15 @@
+{
+  "changedHashes": [
+    "apps/web/src/i18n/locales/en.json",
+    "apps/web/src/i18n/locales/ja.json",
+    "apps/web/src/i18n/locales/zh.json",
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/components/message-item.vue",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/store/workspace-tabs.ts"
+  ],
+  "reviewedAdaptations": 45,
+  "unchangedHashes": 38,
+  "testAdaptations": 2,
+  "guardRelaxed": false
+}

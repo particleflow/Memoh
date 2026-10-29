@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+> vitest --run --maxWorkers=1 --testTimeout=15000 apps/web/src/pages/home/index.read-aloud-admission.test.ts apps/web/src/pages/home/composables/useChatReadAloud.task-anchor.test.ts apps/web/src/pages/home/composables/useTaskRunAnchor.test.ts apps/web/src/pages/home/composables/useTaskRunAnchor.lifecycle.test.ts apps/web/src/utils/task-history-link.test.ts apps/web/src/pages/home/components/bot-task-directory.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/contact-navigation-20261027/context/checkout
+
+
+ Test Files  6 passed (6)
+      Tests  30 passed (30)
+   Start at  00:47:15
+   Duration  23.38s (transform 13.24s, setup 0ms, import 17.59s, tests 911ms, environment 3.42s)

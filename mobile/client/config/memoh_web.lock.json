@@ -433,7 +433,7 @@
     "sharedBase": "a0a821a4cdaa32121a945d04e80c76bba4b6f2b4",
     "sourceChanges": {
       "local": "shared-fixed-contact-task-directory.json",
-      "sha256": "93a171264e57a495ae470f8d0ba8c87191abe601445338fdf4b1ebf032e44308"
+      "sha256": "9962faff9b281b90c55a454927c90119b4721e82fef272673c525c3ca314420a"
     },
     "scope": "Only final shared fixed-contact/task-directory delta; preserve existing phone-specific source divergences, native media journals, approved send button, image timing, Back and artwork. No backend code or unknown follow-up.",
     "serverCompatibilityRequired": true,
@@ -448,5 +448,17 @@
     "hapBuilt": false,
     "compatibleReleaseBackend": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "releaseWebSDKEquivalentTo": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2"
+  },
+  "sharedHomeAdmissionFinal": {
+    "commit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+    "tree": "3ca90fd7838979049f5889516836d55654a87811",
+    "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
+    "sourceChanges": {
+      "local": "shared-home-admission-final.json",
+      "sha256": "3d57f81db79c87bb94f78d60bd2b9f6586b96fc191c10c9263b3cd41976eba2a"
+    },
+    "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
+    "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
+    "HAP27ContainsDelta": false
   }
 }
