@@ -1,0 +1,12 @@
+{"Time":"2026-10-29T15:35:33.070732941Z","Action":"start","Package":"github.com/felinics/memoh/internal/channel"}
+{"Time":"2026-10-29T15:35:33.078737215Z","Action":"run","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload"}
+{"Time":"2026-10-29T15:35:33.078801603Z","Action":"output","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload","Output":"=== RUN   TestPrepareOutboundMessage_HTTPAttachmentDownload\n"}
+{"Time":"2026-10-29T15:35:33.079699764Z","Action":"output","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload","Output":"=== PAUSE TestPrepareOutboundMessage_HTTPAttachmentDownload\n"}
+{"Time":"2026-10-29T15:35:33.079708538Z","Action":"pause","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload"}
+{"Time":"2026-10-29T15:35:33.079712874Z","Action":"cont","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload"}
+{"Time":"2026-10-29T15:35:33.079715088Z","Action":"output","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload","Output":"=== CONT  TestPrepareOutboundMessage_HTTPAttachmentDownload\n"}
+{"Time":"2026-10-29T15:35:33.080185696Z","Action":"output","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload","Output":"--- PASS: TestPrepareOutboundMessage_HTTPAttachmentDownload (0.00s)\n"}
+{"Time":"2026-10-29T15:35:33.08024069Z","Action":"pass","Package":"github.com/felinics/memoh/internal/channel","Test":"TestPrepareOutboundMessage_HTTPAttachmentDownload","Elapsed":0}
+{"Time":"2026-10-29T15:35:33.080253901Z","Action":"output","Package":"github.com/felinics/memoh/internal/channel","Output":"PASS\n"}
+{"Time":"2026-10-29T15:35:33.080480656Z","Action":"output","Package":"github.com/felinics/memoh/internal/channel","Output":"ok  \tgithub.com/felinics/memoh/internal/channel\t0.009s\n"}
+{"Time":"2026-10-29T15:35:33.08050309Z","Action":"pass","Package":"github.com/felinics/memoh/internal/channel","Elapsed":0.01}

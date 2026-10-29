@@ -7,6 +7,10 @@ Files operations. It does not declare the full phone/Windows/NAS/cloud chain
 switched or accepted. No production endpoint/configuration/credential, Agent
 core, file protocol, queue, signing process or phone SDK was changed.
 
+Later [HTTP page and native-policy diagnosis](../transfer-http-entry/README.md)
+checks ordinary HTTP without changing logical identity and records its Web Locks,
+OPFS and origin-storage limits. That follow-up does not claim full browser recovery.
+
 ## Original paths and connection-only changes
 
 The source check confirmed that `useMediaGallery.ts` produced raw SDK media
