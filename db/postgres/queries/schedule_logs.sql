@@ -1,6 +1,6 @@
 -- name: CreateScheduleLog :one
-INSERT INTO schedule_logs (schedule_id, bot_id, session_id, started_at)
-VALUES ($1, $2, sqlc.narg(session_id)::uuid, now())
+INSERT INTO schedule_logs (schedule_id, bot_id, session_id, started_at, result_origin)
+VALUES ($1, $2, sqlc.narg(session_id)::uuid, now(), COALESCE(sqlc.narg(result_origin)::jsonb, '{}'::jsonb))
 RETURNING id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, started_at, completed_at;
 
 -- name: CompleteScheduleLog :one
@@ -13,7 +13,7 @@ SET status = $2,
     model_id = $6,
     completed_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1
-RETURNING id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id;
+RETURNING *;
 
 -- name: ListScheduleLogsByBot :many
 SELECT id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, started_at, completed_at
