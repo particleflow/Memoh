@@ -829,6 +829,7 @@ type ProviderOauthToken struct {
 }
 
 type Schedule struct {
+	ResultOrigin    []byte             `json:"result_origin"`
 	MaxRunSeconds   int32              `json:"max_run_seconds"`
 	ID              pgtype.UUID        `json:"id"`
 	Name            string             `json:"name"`
@@ -855,19 +856,21 @@ type Schedule struct {
 }
 
 type ScheduleLog struct {
-	ID           pgtype.UUID        `json:"id"`
-	ScheduleID   pgtype.UUID        `json:"schedule_id"`
-	BotID        pgtype.UUID        `json:"bot_id"`
-	SessionID    pgtype.UUID        `json:"session_id"`
-	Status       string             `json:"status"`
-	ResultText   string             `json:"result_text"`
-	ErrorMessage string             `json:"error_message"`
-	ErrorCode    string             `json:"error_code"`
-	Usage        []byte             `json:"usage"`
-	ModelID      pgtype.UUID        `json:"model_id"`
-	StartedAt    pgtype.Timestamptz `json:"started_at"`
-	CompletedAt  pgtype.Timestamptz `json:"completed_at"`
-	TeamID       pgtype.UUID        `json:"team_id"`
+	ResultOrigin   []byte             `json:"result_origin"`
+	ResultDelivery []byte             `json:"result_delivery"`
+	ID             pgtype.UUID        `json:"id"`
+	ScheduleID     pgtype.UUID        `json:"schedule_id"`
+	BotID          pgtype.UUID        `json:"bot_id"`
+	SessionID      pgtype.UUID        `json:"session_id"`
+	Status         string             `json:"status"`
+	ResultText     string             `json:"result_text"`
+	ErrorMessage   string             `json:"error_message"`
+	ErrorCode      string             `json:"error_code"`
+	Usage          []byte             `json:"usage"`
+	ModelID        pgtype.UUID        `json:"model_id"`
+	StartedAt      pgtype.Timestamptz `json:"started_at"`
+	CompletedAt    pgtype.Timestamptz `json:"completed_at"`
+	TeamID         pgtype.UUID        `json:"team_id"`
 }
 
 type SearchProvider struct {

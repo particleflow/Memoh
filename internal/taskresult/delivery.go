@@ -24,7 +24,7 @@ func (r Reference) String() string {
 }
 func Parse(s string) (Reference, error) {
 	p := strings.Split(s, ":")
-	if len(p) != 4 || (p[0] != "native_task" && p[0] != "bot_delegation") || p[1] == "" || len(p[2]) != 64 {
+	if len(p) != 4 || (p[0] != "native_task" && p[0] != "bot_delegation" && p[0] != "schedule_fire") || p[1] == "" || len(p[2]) != 64 {
 		return Reference{}, fmt.Errorf("invalid task result reference")
 	}
 	n, e := strconv.Atoi(p[3])
