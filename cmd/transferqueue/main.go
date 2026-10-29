@@ -29,7 +29,7 @@ func run() int {
 func runCommand(args []string, input io.Reader, output, stderr io.Writer, env func(string) string, transport *http.Client, now func() time.Time) int {
 	flags := flag.NewFlagSet("transferqueue", flag.ContinueOnError)
 	flags.SetOutput(stderr)
-	kind := flags.String("action", "probe", "lifecycle-summary, migrate-budget, migrate-history, migrate-publications, probe, recover-result, enqueue-result, enqueue-results, collect-result, advance-results, advance-snapshots, advance-snapshot, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
+	kind := flags.String("action", "probe", "lifecycle-summary, receipt-binding, migrate-budget, migrate-history, migrate-publications, probe, recover-result, enqueue-result, enqueue-results, collect-result, advance-results, advance-snapshots, advance-snapshot, enqueue-upload, enqueue-download, advance, advance-next, reconcile, inspect, cancel, retire")
 	id := flags.String("delivery", "", "logical delivery ID")
 	if flags.Parse(args) != nil {
 		return 2
@@ -39,7 +39,7 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 		return 2
 	}
 	switch *kind {
-	case "recover-result", "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "advance-snapshots", "advance-snapshot", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
+	case "recover-result", "migrate-budget", "migrate-publications", "migrate-history", "lifecycle-summary", "receipt-binding", "enqueue-result", "enqueue-results", "collect-result", "advance-results", "advance-snapshots", "advance-snapshot", "probe", "enqueue-upload", "enqueue-download", "advance", "advance-next", "reconcile", "inspect", "cancel", "retire":
 	default:
 		_, _ = fmt.Fprintln(stderr, "unsupported action")
 		return 2
@@ -57,6 +57,17 @@ func runCommand(args []string, input io.Reader, output, stderr io.Writer, env fu
 	// Reserve a bounded tail of the same invocation for advisory persistence.
 	workCtx, stopWork := context.WithTimeout(ctx, 115*time.Second)
 	defer stopWork()
+	if *kind == "receipt-binding" {
+		binding, err := transferclient.ReadReceiptBinding(workCtx, getenv, "native-profile-v1", limits, *id)
+		if err != nil {
+			_ = json.NewEncoder(output).Encode(map[string]string{"state": "receipt_binding_unavailable", "error_class": transferclient.LifecycleFailure(err).ErrorClass})
+			return 1
+		}
+		if json.NewEncoder(output).Encode(binding) != nil {
+			return 1
+		}
+		return 0
+	}
 	if *kind == "advance-snapshots" || *kind == "advance-snapshot" {
 		if *kind == "advance-snapshots" && *id != "" || *kind == "advance-snapshot" && *id == "" {
 			return 2
