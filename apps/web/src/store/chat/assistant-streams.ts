@@ -6,6 +6,8 @@ export interface AssistantStream {
   readonly invocationId: string
   readonly runId: string
   readonly assistantTurn: ChatAssistantTurn
+  readonly projectionObserved: boolean
+  readonly disconnectedBeforeAcceptance: boolean
   // A retry or edit, which replaces a turn the history already has.
   readonly replacesTurn: boolean
   readonly botId: string
@@ -29,6 +31,8 @@ export interface AcceptedRun {
 interface PendingAssistantStream extends AssistantStream {
   sessionId: string
   runId: string
+  projectionObserved: boolean
+  disconnectedBeforeAcceptance: boolean
   appendMessages: boolean
   messageIds: Map<number, number>
   onModelPreferenceSettled?: () => void
@@ -109,6 +113,22 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
     return activeUnboundInvocationIds(botId, composerScope).length > 0
   }
 
+  function observeProjection(invocationId: string, botId: string, sessionId: string, runId: string) {
+    const stream = streams.get(invocationId)
+    if (!stream || stream.botId !== botId || stream.sessionId !== sessionId) return
+    if (stream.runId && stream.runId !== runId) return
+    stream.projectionObserved = true
+    stream.disconnectedBeforeAcceptance = false
+  }
+
+  function markDisconnected(botId: string) {
+    for (const stream of streams.values()) {
+      if (stream.botId === botId && !stream.runId && !stream.projectionObserved) {
+        stream.disconnectedBeforeAcceptance = true
+      }
+    }
+  }
+
   // Resolves an event to the local key for its turn. A run id is authoritative
   // once it exists; before that only the invocation names the turn.
   function invocationIdForEvent(event: StreamIdentity): string {
@@ -140,6 +160,8 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
       streams.set(id, {
         invocationId: id,
         runId: '',
+        projectionObserved: false,
+        disconnectedBeforeAcceptance: false,
         assistantTurn: input.assistantTurn,
         replacesTurn: input.replacesTurn ?? false,
         botId: input.botId,
@@ -170,6 +192,7 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
     const stream = streams.get(invocation)
     if (stream) {
       if (!stream.runId) stream.runId = run
+      stream.disconnectedBeforeAcceptance = false
       stream.assistantTurn.turnId = turn
       stream.assistantTurn.runtimeRunId = run
       invocationIdsByRunId.set(run, invocation)
@@ -314,6 +337,8 @@ export function createAssistantStreamRegistry({ finishAssistantTurn }: Assistant
   }
 
   return {
+    observeProjection,
+    markDisconnected,
     activeUnboundInvocationIds,
     assistantStreamsForSession,
     isUnboundComposerStreaming,

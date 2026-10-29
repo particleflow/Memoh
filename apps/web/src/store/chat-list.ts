@@ -92,7 +92,7 @@ export const useChatStore = defineStore('chat', () => {
     refreshCurrentSession, resyncRuntimeTranscript, loadInitialMessages, fetchSessionWindow,
     loadOlderMessages, findMessageIdByExternalId, locateMessageByExternalId,
     isSessionStreaming, streamingSessionId, streamingSessionIds, streaming, isChatViewStreaming,
-    workspaceTargetSelectionFor, setWorkspaceTargetSelection,
+    isChatViewAwaitingProjection, workspaceTargetSelectionFor, setWorkspaceTargetSelection,
     initializeWorkspaceTargetSelection, resetWorkspaceTargetSelection,
     releaseHiddenSessionView, bindChatView, setChatViewVisible, unbindChatView,
     focusChatView, promoteDraftChatView,
@@ -608,7 +608,7 @@ export const useChatStore = defineStore('chat', () => {
     _hasLoadedOlder: hasLoadedOlder,
 
     startupSendFailure, startupSendFailureFor,
-    firstSendFor: firstSend.entryFor, isSessionTentative: firstSend.isSessionTentative,
+    isChatViewAwaitingProjection, firstSendFor: firstSend.entryFor, isSessionTentative: firstSend.isSessionTentative,
     commandEvent, commandEventForScope, rememberCommandEvent, beginCommandEvent, showCommandError,
     fsChangedAt, markFsChanged, affectsPath, fsEventForPath,
     backgroundTaskFor,

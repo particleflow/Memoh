@@ -123,7 +123,10 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
   // whether the first attempt's run was taken. Only a confirmation or the
   // timeout settles that; until then the send keeps its session.
   function refusalOf(invocationId: string, refusal: StreamFailureError): StreamFailureError {
-    return deps.firstSend.isResent(invocationId) ? sendOutcomeUnknownError() : refusal
+    return deps.firstSend.isResent(invocationId)
+      || deps.assistantStreams.getAssistantStream(invocationId)?.disconnectedBeforeAcceptance
+      ? sendOutcomeUnknownError()
+      : refusal
   }
 
   function handleSessionCreated(
@@ -446,6 +449,7 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     const currentPending = currentInvocationId
       ? deps.assistantStreams.getAssistantStream(currentInvocationId)
       : undefined
+    if (currentPending && currentRun) deps.assistantStreams.observeProjection(currentInvocationId, botId, sessionId, currentRun.run_id)
     const needsHistoryResync = Boolean(
       view && !view.transcript.applyRuntimeTranscript(change.current.transcript),
     )
@@ -630,6 +634,7 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
   // the queued resend is dropped.
   function handleWebSocketClosed(botId: string) {
     const bid = botId.trim()
+    deps.assistantStreams.markDisconnected(bid)
     for (const invocationId of deps.firstSend.awaitingConfirmationIds()) {
       const pending = deps.assistantStreams.getAssistantStream(invocationId)
       if (!pending || pending.botId.trim() !== bid) continue
@@ -645,15 +650,14 @@ export function createRuntimeIntegration(deps: RuntimeIntegrationDeps) {
     }
   }
 
-  // Ends a held first send the server has not confirmed in time, with its
+  // Ends any local send the server has not confirmed in time, with its
   // outcome unknown. Missing confirmation does not authorize stopping a run
   // the server may already be executing. Returns the cancel for the send to
   // call once it settles.
   function watchFirstSendConfirmation(invocationId: string): () => void {
     const timer = setTimeout(() => {
-      if (!deps.firstSend.isAwaitingConfirmation(invocationId)) return
       const pending = deps.assistantStreams.getAssistantStream(invocationId)
-      if (!pending) return
+      if (!pending || pending.runId || pending.projectionObserved) return
       deps.realtime.forgetWebSocketRequest(pending.botId, invocationId)
       deps.assistantStreams.rejectAssistantStream(
         invocationId,

@@ -296,7 +296,7 @@ export function createChatSend(deps: ChatSendDeps) {
       const modelId = options.modelId?.trim() || undefined
       const reasoningEffort = options.reasoningEffort?.trim()
         || undefined
-      if (!inband) {
+      if (!inband && !viewTarget.sessionId) {
         viewTarget = await deps.ensureChatViewSession(viewTarget, wasDraft ? trimmed : undefined)
       }
 
@@ -372,7 +372,7 @@ export function createChatSend(deps: ChatSendDeps) {
         reasoning_effort: reasoningEffort,
         workspace_target_id: options.workspaceTargetId?.trim() || undefined,
       })) throw new StreamFailureError('WebSocket is not connected', 'startup')
-      if (inband) stopConfirmationWatch = deps.watchFirstSendConfirmation(sendInvocationId)
+      stopConfirmationWatch = deps.watchFirstSendConfirmation(sendInvocationId)
       await completion
       if (firstSendStarted) deps.firstSend.finish(sendInvocationId)
       const createdSessionId = deps.createdSessionIdForInvocation(sendInvocationId)
