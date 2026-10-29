@@ -20,15 +20,18 @@ func (s *Service) finishBusyOccurrence(ctx context.Context, sched Schedule, clai
 	_, err := s.queries.RefundBusyScheduleOccurrence(persist, sqlc.RefundBusyScheduleOccurrenceParams{
 		ScheduleID: claim.ScheduleID, BotID: claim.BotID, FireID: claim.ID,
 	})
-	if errors.Is(err, pgx.ErrNoRows) {
-		// Already settled, unknown, or the original invocation exists. Do
-		// not overwrite its evidence or infer that execution can be repeated.
-		return busy
-	}
 	if err != nil {
-		// The write outcome may be unknown. Existing recovery reads the original
-		// invocation/budget; do not finish a second log or retry the execution.
-		return fmt.Errorf("persist unadmitted busy occurrence: %w", err)
+		// A committed refund can lose its acknowledgement. Read that exact
+		// fire; never retry the write or the original execution to find out.
+		saved, readErr := s.queries.ReadScheduleResultFire(persist, sqlc.ReadScheduleResultFireParams{BotID: claim.BotID, FireID: claim.ID})
+		settled := readErr == nil && saved.ScheduleID == claim.ScheduleID && saved.ClaimState == "busy" && saved.CompletedAt.Valid && saved.ErrorCode == "session_runtime.session_busy"
+		if !settled {
+			if errors.Is(err, pgx.ErrNoRows) && (readErr == nil || errors.Is(readErr, pgx.ErrNoRows)) {
+				// Already unknown, or the original invocation exists. Preserve it.
+				return busy
+			}
+			return fmt.Errorf("persist unadmitted busy occurrence: %w", errors.Join(err, readErr))
+		}
 	}
 	s.publishChanged(sched.BotID, sched.ID)
 	if s.resultHooks != nil {
