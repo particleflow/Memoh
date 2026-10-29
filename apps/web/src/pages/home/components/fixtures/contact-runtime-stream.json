@@ -1,0 +1,346 @@
+{
+  "direct": [
+    {
+      "type": "runtime_snapshot",
+      "bot_id": "",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "seq": 2,
+      "snapshot": {
+        "bot_id": "stream-bot",
+        "session_id": "stream-session-direct",
+        "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+        "seq": 2,
+        "current_run_view": {
+          "run_id": "stream-run-direct",
+          "turn_id": "stream-run-direct",
+          "turn_position": 1,
+          "generation": "ac946d93-7590-48de-bdfa-c9d124e0f1c2",
+          "status": "running",
+          "started_at": "2026-10-29T08:42:48.125758781Z",
+          "updated_at": "2026-10-29T08:42:48.12585976Z",
+          "messages": [],
+          "user_turns": [
+            {
+              "runtime_forkable": false,
+              "turn_id": "stream-run-direct",
+              "turn_position": 1,
+              "role": "user",
+              "text": "Show progress",
+              "timestamp": "2026-10-29T08:42:48.12584632Z",
+              "platform": "web"
+            }
+          ],
+          "request_user_turn": {
+            "runtime_forkable": false,
+            "turn_id": "stream-run-direct",
+            "turn_position": 1,
+            "role": "user",
+            "text": "Show progress",
+            "timestamp": "2026-10-29T08:42:48.12584632Z",
+            "platform": "web"
+          }
+        },
+        "updated_at": "2026-10-29T08:42:48.12585976Z"
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 3,
+      "updated_at": "2026-10-29T08:42:48.125976933Z",
+      "delta": {
+        "message_upserts": [
+          {
+            "id": 0,
+            "type": "status",
+            "name": "compacting"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 4,
+      "updated_at": "2026-10-29T08:42:48.126023682Z",
+      "delta": {
+        "message_appends": [
+          {
+            "id": 1,
+            "type": "reasoning",
+            "content": "Provider reasoning summary"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 5,
+      "updated_at": "2026-10-29T08:42:48.126064141Z",
+      "delta": {
+        "message_appends": [
+          {
+            "id": 2,
+            "type": "text",
+            "content": "First streamed fragment"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 6,
+      "updated_at": "2026-10-29T08:42:48.126106524Z",
+      "delta": {
+        "message_appends": [
+          {
+            "id": 2,
+            "type": "text",
+            "content": "; second fragment"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 7,
+      "updated_at": "2026-10-29T08:42:48.126158691Z",
+      "delta": {
+        "message_upserts": [
+          {
+            "id": 0,
+            "type": "status"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 8,
+      "updated_at": "2026-10-29T08:42:48.126248803Z",
+      "delta": {
+        "run": {
+          "run_id": "stream-run-direct",
+          "status": "finishing",
+          "error_code": "",
+          "updated_at": "2026-10-29T08:42:48.126248803Z",
+          "clear_retry": true
+        },
+        "message_upserts": [
+          {
+            "id": 2,
+            "type": "text",
+            "content": "First streamed fragment; second fragment"
+          },
+          {
+            "id": 0,
+            "type": "status"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-direct",
+      "epoch": "6be91802-b43a-48ac-ba87-53280a25db4a",
+      "run_id": "stream-run-direct",
+      "seq": 9,
+      "updated_at": "2026-10-29T08:42:48.126309683Z",
+      "delta": {
+        "run": {
+          "run_id": "stream-run-direct",
+          "status": "completed",
+          "error_code": "",
+          "updated_at": "2026-10-29T08:42:48.126309683Z",
+          "clear_retry": true
+        }
+      }
+    }
+  ],
+  "result": [
+    {
+      "type": "runtime_snapshot",
+      "bot_id": "",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "seq": 2,
+      "snapshot": {
+        "bot_id": "stream-bot",
+        "session_id": "stream-session-result",
+        "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+        "seq": 2,
+        "current_run_view": {
+          "run_id": "stream-run-result",
+          "turn_id": "stream-run-result",
+          "turn_position": 1,
+          "generation": "ffdbcf0a-7243-4ba2-849f-cc93390f0094",
+          "status": "running",
+          "started_at": "2026-10-29T08:42:48.126555235Z",
+          "updated_at": "2026-10-29T08:42:48.126594913Z",
+          "messages": []
+        },
+        "updated_at": "2026-10-29T08:42:48.126594913Z"
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 3,
+      "updated_at": "2026-10-29T08:42:48.126647661Z",
+      "delta": {
+        "message_upserts": [
+          {
+            "id": 0,
+            "type": "status",
+            "name": "compacting"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 4,
+      "updated_at": "2026-10-29T08:42:48.126681151Z",
+      "delta": {
+        "message_appends": [
+          {
+            "id": 1,
+            "type": "reasoning",
+            "content": "Provider reasoning summary"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 5,
+      "updated_at": "2026-10-29T08:42:48.126711946Z",
+      "delta": {
+        "message_appends": [
+          {
+            "id": 2,
+            "type": "text",
+            "content": "First streamed fragment"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 6,
+      "updated_at": "2026-10-29T08:42:48.12674178Z",
+      "delta": {
+        "message_appends": [
+          {
+            "id": 2,
+            "type": "text",
+            "content": "; second fragment"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 7,
+      "updated_at": "2026-10-29T08:42:48.126771664Z",
+      "delta": {
+        "message_upserts": [
+          {
+            "id": 0,
+            "type": "status"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 8,
+      "updated_at": "2026-10-29T08:42:48.126842038Z",
+      "delta": {
+        "run": {
+          "run_id": "stream-run-result",
+          "status": "finishing",
+          "error_code": "",
+          "updated_at": "2026-10-29T08:42:48.126842038Z",
+          "clear_retry": true
+        },
+        "message_upserts": [
+          {
+            "id": 2,
+            "type": "text",
+            "content": "First streamed fragment; second fragment"
+          },
+          {
+            "id": 0,
+            "type": "status"
+          }
+        ]
+      }
+    },
+    {
+      "type": "runtime_delta",
+      "bot_id": "stream-bot",
+      "session_id": "stream-session-result",
+      "epoch": "d0e360f0-d08e-46ac-bee5-8e06b33b70f0",
+      "run_id": "stream-run-result",
+      "seq": 9,
+      "updated_at": "2026-10-29T08:42:48.126887254Z",
+      "delta": {
+        "run": {
+          "run_id": "stream-run-result",
+          "status": "completed",
+          "error_code": "",
+          "updated_at": "2026-10-29T08:42:48.126887254Z",
+          "clear_retry": true
+        }
+      }
+    }
+  ]
+}
