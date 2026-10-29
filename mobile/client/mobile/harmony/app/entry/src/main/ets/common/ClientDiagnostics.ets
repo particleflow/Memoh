@@ -13,7 +13,7 @@ export class ClientDiagnostics {
   static failure(area: string, component: string, phase: string, error: Error, detail: string = ''): void {
     const code = (error as BusinessError).code;
     // SDK messages can contain source URIs, private paths or credentials. Retain only codes and our enums.
-    const reason = /^(ASSET|NATIVE|MEDIA|VOICE_TEXT)_[A-Z0-9_]+$/.test(error.message) ? error.message : 'SDK_ERROR';
+    const reason = /^(ASSET|NATIVE|MEDIA|VOICE_TEXT|UPLOAD|IMAGE|NETWORK_POLICY)_[A-Z0-9_]+$/.test(error.message) ? error.message : 'SDK_ERROR';
     ClientDiagnostics.event(area, component, phase, detail + '/code=' + (Number.isInteger(code) ? code : 0) + '/reason=' + reason);
   }
   static event(area: string, component: string, phase: string, detail: string): void {

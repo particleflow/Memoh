@@ -8,6 +8,7 @@ import { MEMOH_ORIGIN, MEMOH_NETWORK_POLICY } from './MemohClientConfig';
 import { NativeTransferNetwork } from './NativeTransferNetwork';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { NativePhotoSelection } from './NativePhotoSelection';
+import { ClientDiagnostics } from './ClientDiagnostics';
 
 export interface UploadScope { operation: string; botId: string; scope: string; authorization: string; handle?: string; photos?: boolean; recoverDrafts?: boolean; }
 export interface UploadLocal { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; scope: string; }
@@ -26,6 +27,7 @@ class Journal {
 }
 class Running {
   apiOrigin: string = MEMOH_ORIGIN; epoch: number = 0; cancelled: boolean = false; staged: Journal[] = []; input: UploadScope; session: rcp.Session; journal?: Journal;
+  phase: string = 'prepare';
   copying: boolean = false; copyBusy: boolean = false; copyCommitted: boolean = false; copyOffset: number = 0; copyFile?: fs.File; ended: boolean = false;
   network: NativeTransferNetwork;
   constructor(input: UploadScope, epoch: number) { this.input = input; this.epoch = epoch; this.network = new NativeTransferNetwork(this.apiOrigin, MEMOH_NETWORK_POLICY); this.session = rcp.createSession(); }
@@ -75,7 +77,7 @@ export class NativeResumableUpload {
     if (!/^[a-f0-9]{32}$/.test(handle)) { throw new Error('UPLOAD_IDENTITY'); }
     return this.root + '/' + handle + suffix;
   }
-  private save(j: Journal): void {
+  private save(j: Journal, published?: () => void): void {
     const target = this.path(j.handle, '.json'), temporary = target + '.tmp';
     const file = fs.openSync(temporary, fs.OpenMode.CREATE | fs.OpenMode.TRUNC | fs.OpenMode.WRITE_ONLY | fs.OpenMode.NOFOLLOW);
     try {
@@ -86,6 +88,9 @@ export class NativeResumableUpload {
       fs.fsyncSync(file.fd);
     } finally { fs.closeSync(file); }
     fs.renameSync(temporary, target);
+    // Rename publishes a recoverable journal. A later directory sync failure
+    // still fails the command, but must not reclaim its verified source.
+    if (published) { published(); }
     const dir = fs.openSync(this.root, fs.OpenMode.READ_ONLY);
     try { fs.fsyncSync(dir.fd); } finally { fs.closeSync(dir); }
   }
@@ -127,12 +132,14 @@ export class NativeResumableUpload {
     if (reply.status !== expected) { throw new Error('UPLOAD_HTTP_' + reply.status); }
   }
   private async owner(run: Running): Promise<string> {
+    run.phase = 'owner-read';
     const reply = await this.call(run, '/users/me'); this.status(reply);
     const id = (JSON.parse(reply.body) as Identity).id;
     if (typeof id !== 'string' || !id || id.length > 128) { throw new Error('UPLOAD_IDENTITY'); }
     return this.hash(new util.TextEncoder().encodeInto(run.apiOrigin + '\n' + id));
   }
   private async limits(run: Running): Promise<Limits> {
+    run.phase = 'limits-read';
     const reply = await this.call(run, this.base(run) + '/limits');
     // Very old service: keep the old finite 200 MiB client ceiling, explicitly
     // single-request only. A lower server limit still rejects with 413.
@@ -152,6 +159,7 @@ export class NativeResumableUpload {
     try { await verifyMediaFd(file.fd, j.size, j.hash, () => this.check(run)); } finally { fs.closeSync(file); }
   }
   private async stagePath(run: Running, owner: string, limits: Limits, uri: string, name: string, mime: string): Promise<UploadLocal> {
+    run.phase = 'source-open';
     const input = fs.openSync(uri, fs.OpenMode.READ_ONLY), j = new Journal();
     j.handle = util.generateRandomUUID(true); j.owner = owner; j.bot = run.input.botId; j.scope = run.input.scope;
     j.name = name.replace(/[\\/\x00-\x1f]/g, '_').slice(0, 160) || 'file'; j.type = mime;
@@ -159,11 +167,14 @@ export class NativeResumableUpload {
     let output: fs.File | undefined;
     let committed: boolean = false;
     try {
+      run.phase = 'snapshot-create';
       j.size = fs.statSync(input.fd).size;
       if (!Number.isSafeInteger(j.size) || j.size <= 0 || j.size > limits.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
       if (fs.accessSync(this.path(j.handle, '.original'))) { throw new Error('UPLOAD_IDENTITY'); }
       output = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE | fs.OpenMode.NOFOLLOW);
+      run.phase = 'snapshot-copy';
       await copyMediaBytes(input.fd, output.fd, j.size, () => this.check(run));
+      run.phase = 'snapshot-hash';
       const md = cryptoFramework.createMd('SHA256'), buffer = new ArrayBuffer(262144); let at = 0;
       while (at < j.size) {
         this.check(run); fs.lseek(output.fd, at, fs.WhenceType.SEEK_SET);
@@ -174,8 +185,10 @@ export class NativeResumableUpload {
       j.hash = Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join('');
       // Re-read the granted source; mutation during snapshot copy cannot silently
       // substitute a mixed original even when its size did not change.
+      run.phase = 'source-verify';
       await verifyMediaFd(input.fd, j.size, j.hash, () => this.check(run)); this.check(run);
-      this.save(j); committed = true; run.staged.push(j); this.check(run);
+      run.phase = 'journal-publish';
+      this.save(j, () => { committed = true; run.staged.push(j); run.phase = 'journal-dir-sync'; }); this.check(run);
       this.visible.set(j.handle, j); return this.info(j);
     } catch (error) { if (!committed || run.cancelled) { this.remove(j); } throw error as Error; }
     finally { fs.closeSync(input); if (output) { fs.closeSync(output); } }
@@ -191,6 +204,7 @@ export class NativeResumableUpload {
     const run = this.start(input); run.copying = true; run.copyBusy = true;
     try {
       const owner = await this.owner(run), limits = await this.limits(run); this.check(run);
+      run.phase = 'snapshot-create';
       if (!Number.isSafeInteger(size) || size <= 0 || size > limits.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
       if (name.length > 1024 || mime.length > 256 || /[\x00-\x1f\x7f]/.test(mime)) { throw new Error('UPLOAD_REQUEST'); }
       const j = new Journal(); j.handle = util.generateRandomUUID(true); j.owner = owner; j.bot = input.botId; j.scope = input.scope;
@@ -199,7 +213,7 @@ export class NativeResumableUpload {
       if (fs.accessSync(this.path(j.handle, '.original'))) { throw new Error('UPLOAD_IDENTITY'); }
       run.copyFile = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE | fs.OpenMode.NOFOLLOW);
       return { handle: j.handle };
-    } catch (error) { this.end(run); throw error as Error; }
+    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); this.end(run); throw error as Error; }
     finally { run.copyBusy = false; }
   }
   private copying(operation: string, authorization: string): Running {
@@ -216,6 +230,7 @@ export class NativeResumableUpload {
   async stageAppend(operation: string, authorization: string, offset: number, data: string): Promise<UploadStagingOffset> {
     const run = this.copying(operation, authorization);
     try {
+      run.phase = 'snapshot-copy';
       if (!Number.isSafeInteger(offset) || offset !== run.copyOffset || !data || data.length > 87384 ||
         !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(data)) { throw new Error('UPLOAD_REQUEST'); }
       const bytes = new util.Base64Helper().decodeSync(data), j = run.journal as Journal, file = run.copyFile as fs.File;
@@ -229,12 +244,13 @@ export class NativeResumableUpload {
         written += n;
       }
       run.copyOffset += written; return { offset: run.copyOffset };
-    } catch (error) { this.end(run); throw error as Error; }
+    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); this.end(run); throw error as Error; }
     finally { run.copyBusy = false; }
   }
   async stageFinish(operation: string, authorization: string): Promise<UploadLocal> {
     const run = this.copying(operation, authorization);
     try {
+      run.phase = 'snapshot-hash';
       const j = run.journal as Journal, file = run.copyFile as fs.File;
       if (run.copyOffset !== j.size || fs.statSync(file.fd).size !== j.size) { throw new Error('UPLOAD_SHORT_READ'); }
       fs.fsyncSync(file.fd);
@@ -246,9 +262,11 @@ export class NativeResumableUpload {
         await md.update({ data: new Uint8Array(buffer, 0, n) }); at += n;
       }
       j.hash = Array.from((await md.digest()).data).map((b: number) => b.toString(16).padStart(2, '0')).join(''); this.check(run);
-      this.save(j); run.copyCommitted = true; run.staged.push(j); this.check(run);
+      run.phase = 'journal-publish';
+      this.save(j, () => { run.copyCommitted = true; run.staged.push(j); run.phase = 'journal-dir-sync'; }); this.check(run);
       this.visible.set(j.handle, j); return this.info(j);
-    } finally { run.copyBusy = false; this.end(run); }
+    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); throw error as Error; }
+    finally { run.copyBusy = false; this.end(run); }
   }
   async select(input: UploadScope, recordingPath?: string): Promise<UploadLocal[]> {
     const run = this.start(input);
@@ -256,9 +274,11 @@ export class NativeResumableUpload {
       const owner = await this.owner(run), limits = await this.limits(run); this.check(run);
       if (recordingPath) { return [await this.stagePath(run, owner, limits, recordingPath, '录音-' + input.handle + '.wav', 'audio/wav')]; }
       // Bound each picker invocation, not the user's total retained backlog.
+      run.phase = 'picker';
       const uris = await new NativePhotoSelection(this.context).select(4, input.photos === true); this.check(run);
       const results: UploadLocal[] = [];
       for (const uri of uris) {
+      run.phase = 'source-metadata';
       const name = new fileUri.FileUri(uri).name || 'file';
       const extension = name.includes('.') ? '.' + name.split('.').pop()?.toLowerCase() : '';
       const type = extension ? uniformTypeDescriptor.getUniformDataTypeByFilenameExtension(extension) : '';
@@ -266,7 +286,8 @@ export class NativeResumableUpload {
       results.push(await this.stagePath(run, owner, limits, uri, name, mime || 'application/octet-stream'));
       }
       return results;
-    } finally { this.end(run); }
+    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); throw error as Error; }
+    finally { this.end(run); }
   }
   async list(input: UploadScope): Promise<UploadLocal[]> {
     const run = this.start(input);
