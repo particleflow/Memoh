@@ -1,0 +1,30 @@
+{
+  "baseCommit": "c46c663ad4761f4a3dc34bc9a5a333ee473b60bf",
+  "scope": "One product line; original thrown object is asserted as Error, no new Error construction.",
+  "reviewLibraryFile": "libfile_e3b03485f9548191990ea1eb59bd0a11",
+  "reviewOfficialCompilePassed": false,
+  "reviewRemainingDiagnostic": 10605087,
+  "reviewNotificationSlotDiagnosticResolved": true,
+  "productFile": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferBackground.ets",
+  "beforeSHA256": "3483f3b0da91f4a9539ada467d5f9c0c6c5c3b4ae726963218b31955451cdf33",
+  "sha256": "fdb9fa347ff97e134199cf5368ad776a424836bcde93140e035b5bc0b200f8cd",
+  "other187SourcesUnchanged": true,
+  "checks": {
+    "oneLineDiffExact": true,
+    "emittedJavaScriptByteIdenticalToC46": true,
+    "realSystemStopAdapterOriginalErrorIdentityCodeCause": true,
+    "realSystemStopAdapter1600007OnlyIgnored": true,
+    "source188Inventory": true,
+    "gitDiffCheck": true
+  },
+  "logs": {
+    "api26-error-type-inventory.log.txt": "f4606981a3bd6c64bc7ca85c231a1134364b6e0d4e81b17587f912b14f9394a2",
+    "api26-error-type-adapter.log.txt": "c3bf6ba3892dbe2d18e5af2abd6dc6350aa4f732087c8fb14ca22eb58dbfce9d"
+  },
+  "fullSuitesRerun": false,
+  "prior15ControllerAnd5DeclarationCases": "reused; not rerun",
+  "correctedOfficialAPI26Compile": "pending original SDK owner",
+  "SDKDownloaded": false,
+  "newHAP": false,
+  "deviceAction": false
+}

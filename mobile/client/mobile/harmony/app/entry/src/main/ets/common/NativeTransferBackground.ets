@@ -54,7 +54,7 @@ class SystemTransferBackground implements TransferBackgroundPlatform {
     // Serialize this after any in-flight publish. A late publish after an OS
     // cancellation cannot leave an orphan notification behind.
     try { await notificationManager.cancel(lease.notificationId); }
-    catch (error) { if ((error as BusinessError).code !== 1600007) { throw error as BusinessError; } }
+    catch (error) { if ((error as BusinessError).code !== 1600007) { throw error as Error; } }
   }
   onCancel(callback: (info: backgroundTaskManager.ContinuousTaskCancelInfo) => void): void {
     backgroundTaskManager.on('continuousTaskCancel', callback);
