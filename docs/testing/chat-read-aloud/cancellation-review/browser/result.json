@@ -1,0 +1,1023 @@
+{
+  "source": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
+  "syntheticServerAndWav": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "Home 边界合成回复第2段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "text": "Home 边界合成回复第3段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "text": "Home 边界合成回复第5段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [
+    "real 15-second deadline aborts the identity GET; old audio/frame and queue stay stopped; a late success cannot disturb fresh primary speech",
+    "leaving chat aborts the old native identity GET; returning contact does not catch up; late denial does not interrupt its fresh reply/frame"
+  ],
+  "observations": [
+    {
+      "label": "deadline-pending",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "hidden",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "deadline-error-before-contact",
+      "requestCount": 1,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "hidden",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "deadline-return-contact",
+      "requestCount": 1,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "visible",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "late-success-after-deadline-new-reply",
+      "requestCount": 2,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "visibility": "visible",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "60.0084deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        },
+        {
+          "paused": false,
+          "time": 0.451824,
+          "src": "blob:http://127.0.0.1:18486/b66e5e68-36df-423b-8cc1-d2f2051a614c",
+          "duration": 10
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 1,
+          "src": "blob:http://127.0.0.1:18486/b66e5e68-36df-423b-8cc1-d2f2051a614c",
+          "active": false,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        }
+      ]
+    },
+    {
+      "label": "cancel-off-route-pending",
+      "requestCount": 2,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "hidden",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        },
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 1,
+          "src": "blob:http://127.0.0.1:18486/b66e5e68-36df-423b-8cc1-d2f2051a614c",
+          "active": false,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "canceled-off-route",
+      "requestCount": 2,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "hidden",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        },
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 1,
+          "src": "blob:http://127.0.0.1:18486/b66e5e68-36df-423b-8cc1-d2f2051a614c",
+          "active": false,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "cancel-return-contact",
+      "requestCount": 2,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "visible",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        },
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 1,
+          "src": "blob:http://127.0.0.1:18486/b66e5e68-36df-423b-8cc1-d2f2051a614c",
+          "active": false,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "late-denial-after-cancel-new-reply",
+      "requestCount": 3,
+      "active": false,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "visibility": "visible",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "46.0075deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        },
+        {
+          "paused": false,
+          "time": 0.352461,
+          "src": "blob:http://127.0.0.1:18486/f9430a19-1a33-461b-a90e-d43636a264a5",
+          "duration": 10
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18486/4f8615ea-efff-4d77-8092-eb534a9a4db3",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 1,
+          "src": "blob:http://127.0.0.1:18486/b66e5e68-36df-423b-8cc1-d2f2051a614c",
+          "active": false,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 1,
+          "src": "blob:http://127.0.0.1:18486/f9430a19-1a33-461b-a90e-d43636a264a5",
+          "active": false,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        }
+      ]
+    }
+  ],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ],
+  "failedRequests": [
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/tasks/native_agent/30000000-0000-4000-8000-000000000002",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/tasks/native_agent/30000000-0000-4000-8000-000000000004",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "navigation": [
+    {
+      "label": "deadline",
+      "before": {
+        "url": "/bot/read-aloud-synthetic?session=20000000-0000-4000-8000-000000000002&task_bot=10000000-0000-4000-8000-000000000001&task_type=native_agent&task_id=bg_original&task_record=30000000-0000-4000-8000-000000000001&run=result-run-1",
+        "bot": "10000000-0000-4000-8000-000000000001",
+        "session": "20000000-0000-4000-8000-000000000002",
+        "panel": "chat:1",
+        "anchor": "result-run-1",
+        "workspaceMasked": false,
+        "visibleBubbles": 1,
+        "body": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n合成专家 Bot\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n仅合成音频 · 无模型调用\n正在朗读此回复\n\nHome 边界合成回复第2段。\n\nSynthetic\n停止朗读\n云端电脑\nMemoh\n任务\nBots"
+      },
+      "pending": {
+        "url": "/bot/read-aloud-synthetic?session=20000000-0000-4000-8000-000000000002&task_bot=10000000-0000-4000-8000-000000000001&task_type=native_agent&task_id=bg_original&task_record=30000000-0000-4000-8000-000000000002&run=result-run-2",
+        "bot": "10000000-0000-4000-8000-000000000001",
+        "session": "20000000-0000-4000-8000-000000000002",
+        "panel": "chat:1",
+        "anchor": "result-run-1",
+        "workspaceMasked": true,
+        "visibleBubbles": 0,
+        "body": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n合成专家 Bot\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n仅合成音频 · 无模型调用\nSynthetic\n云端电脑\n任务\nBots\n\n加载中..."
+      }
+    },
+    {
+      "label": "cancel-off-route",
+      "before": {
+        "url": "/bot/read-aloud-synthetic",
+        "bot": "10000000-0000-4000-8000-000000000001",
+        "session": "20000000-0000-4000-8000-000000000001",
+        "panel": "chat:2",
+        "contactView": true,
+        "workspaceMasked": false,
+        "visibleBubbles": 1,
+        "body": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n合成专家 Bot\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n仅合成音频 · 无模型调用\n仅合成音频 · 无模型调用\n正在朗读此回复\n\nHome 边界合成回复第3段。\n\nSynthetic\n停止朗读\n云端电脑\nMemoh\n任务\nBots"
+      },
+      "pending": {
+        "url": "/bot/read-aloud-synthetic?session=20000000-0000-4000-8000-000000000002&task_bot=10000000-0000-4000-8000-000000000001&task_type=native_agent&task_id=bg_original&task_record=30000000-0000-4000-8000-000000000004&run=result-run-4",
+        "bot": "10000000-0000-4000-8000-000000000001",
+        "session": "20000000-0000-4000-8000-000000000001",
+        "panel": "chat:2",
+        "contactView": true,
+        "workspaceMasked": true,
+        "visibleBubbles": 0,
+        "body": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n合成专家 Bot\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n仅合成音频 · 无模型调用\n仅合成音频 · 无模型调用\nSynthetic\n云端电脑\n任务\nBots\n\n加载中..."
+      }
+    }
+  ],
+  "realDeadlineElapsedMS": 15020
+}

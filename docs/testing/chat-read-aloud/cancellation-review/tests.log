@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/memoh-readaloud-cancel-review
+
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  08:11:59
+   Duration  2.63s (transform 1.34s, setup 0ms, import 1.85s, tests 135ms, environment 1.53s)

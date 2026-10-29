@@ -1,0 +1,42 @@
+{
+  "reviewedCommit": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
+  "tree": "23e1e57250261333a6437a6c01b4497a3d7d1e6a",
+  "base": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "sourceIncrement": "76471e0ef3ab9470dcf17c1d85ddb27cece14109",
+  "libraryInput": {
+    "id": "libfile_598d489937848191912dd0bed9de5159",
+    "version": 5,
+    "zipSHA256": "ee7b726306537475a0a0b38bbfd30734e5426254d5b3fcfdf1dcc316d11f3cdb",
+    "verifiedManifestEntries": 28
+  },
+  "outcome": "No confirmed speech regression; no product patch. Evidence and new targeted fixtures only.",
+  "newUnitCasesPassed": 6,
+  "newNativeBrowserCasesPassed": 2,
+  "nativeBrowserDeadlineMS": 15020,
+  "nativeTaskRequestAborts": [
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/tasks/native_agent/30000000-0000-4000-8000-000000000002",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/tasks/native_agent/30000000-0000-4000-8000-000000000004",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "nativePageErrors": [],
+  "syntheticPlaybackRequests": 3,
+  "realProviderCalls": 0,
+  "old12Plus6Rerun": false,
+  "author36Rerun": false,
+  "previewURL": "http://127.0.0.1:18486",
+  "previewClosed": true,
+  "buildSignDeploy": false,
+  "ArkWebPhysicalVerification": false,
+  "artifactSHA256": {
+    "docs/testing/chat-read-aloud/cancellation-review/source-audit.json": "a5c8d6c9229d597ecd2c913e460d523659fac2beee2f21d8a817610164527ddb",
+    "docs/testing/chat-read-aloud/cancellation-review/browser/result.json": "c1e7dcf9336052cd69af577f88c96619fa7b294bc19ef94f1ee6766f1adc1706",
+    "docs/testing/chat-read-aloud/cancellation-review/fixtures/index.read-aloud-cancellation.test.ts": "7564d6a4512e0dc2ca31a941be7ebd10be68c11d3035748d48d81dd0859f0751",
+    "docs/testing/chat-read-aloud/cancellation-review/fixtures/useChatReadAloud.cancellation.test.ts": "2bc4efb47a1f62cbc39f432f64ad5142d0851dff98734c2c620d254cfd7e41eb",
+    "docs/testing/chat-read-aloud/browser-cancellation-review.mjs": "2f921458b5e61a0edc576fc8c45b143b3408586ffc2790d0fd101f71d426d7e8"
+  }
+}
