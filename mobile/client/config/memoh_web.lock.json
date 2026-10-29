@@ -459,6 +459,8 @@
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
-    "HAP27ContainsDelta": false
+    "HAP27ContainsDelta": false,
+    "releaseBuildAuthorized": true,
+    "compatibleReleaseBackend": "5a42d013e801cb6229ee029113e3a63782bc3e13"
   }
 }
