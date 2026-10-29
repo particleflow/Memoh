@@ -1,0 +1,6 @@
+=== RUN   TestPlaybackAlibabaWSSNativePlayerSeam
+    bot_tts_wss_seam_test.go:299: {"firstClientBodyBeforeUpstreamEOF":true,"nonzeroDecodedGraphBeforeUpstreamEOF":true,"completeByteHashMatches":true,"handlerCanceled":true,"noPlaybackAfterLateFrames":true,"requests":2,"realProviderCalls":0,"physicalAudible500msPassed":false}
+
+--- PASS: TestPlaybackAlibabaWSSNativePlayerSeam (3.92s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	4.967s

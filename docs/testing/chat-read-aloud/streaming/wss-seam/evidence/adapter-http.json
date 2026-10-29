@@ -1,0 +1,36 @@
+{
+  "authBoundary": "synthetic testAuthContext; existing auth tests reused, not revalidated",
+  "cancel": {
+    "failure": "",
+    "framesSent": 67,
+    "handlerCanceled": true,
+    "lateFramesAttempted": 28,
+    "released": true,
+    "started": true,
+    "upstreamFinished": false
+  },
+  "collect": {
+    "failure": "",
+    "framesSent": 94,
+    "handlerCanceled": false,
+    "lateFramesAttempted": 54,
+    "released": true,
+    "started": true,
+    "upstreamFinished": true
+  },
+  "complete": {
+    "failure": "",
+    "framesSent": 94,
+    "handlerCanceled": false,
+    "lateFramesAttempted": 54,
+    "released": true,
+    "started": true,
+    "upstreamFinished": true
+  },
+  "modelConfigUnchanged": true,
+  "mp3SHA256": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+  "mpegFrames": 94,
+  "originalCollectorHeldBeforeEOF": true,
+  "physicalAudible500msPassed": false,
+  "realCloudCalls": 0
+}

@@ -1,0 +1,32 @@
+{
+  "executedProductionParent": "fab04e2c5ab8da6f36daf23549962b0277dab8a8",
+  "productionFilesChanged": false,
+  "files": {
+    "internal/audio/service.go": "bd38265a1563b893a314470fc8fefe80eb914f324d66c36283615fa16f51835d",
+    "internal/audio/registry.go": "79bc36dcfe19a6641827a603c8b816fb7dfe1bb26457c5d611d017a495fe22f3",
+    "internal/handlers/bot_tts.go": "7f4eb2e7370f605cdbd42b50ec8fed87e27d3ff968d63bf3c5583320c13cd831",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": "8018120399d8cf6bfcdf52ad8b1e4993fd10fa17f9db5535d16b3630fec2bf73",
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "60d910b81aacc6e80d2d0722cd04fee7999c63a244bc8ef715e238962cea79ab",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": "2a19f22e5bb96ddab8dda5032ab48b03bd349c733582ea311b158f9057aa4dbc",
+    "packages/sdk/src/sdk.gen.ts": "d3743b48439afa053db3926d68ea9e89bc51bec56963911c072ac2e4afce4aae",
+    "packages/sdk/src/client.gen.ts": "b325822184abc7aed91c42bb1ea0697bb8ae178833c3fca97f6ec498398c1377",
+    "internal/handlers/bot_tts_wss_seam_test.go": "3355b20974338bf336962ad05af23e61209932063b2cb88c981dbda52df85ce8",
+    "docs/testing/chat-read-aloud/streaming/wss-seam/native-player.mjs": "ff5f0816af0253b61f11e92b415ae01d503b9eb23476c7d79c05683bd3363ddf",
+    "internal/handlers/testdata/read-aloud-wss-seam.mp3": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4"
+  },
+  "transportUnchangedSince2b9": {
+    "internal/audio/service.go": true,
+    "internal/handlers/bot_tts.go": true,
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": true
+  },
+  "passed": "One targeted -race integration test, three controlled cases; no old suites rerun",
+  "cloudCalls": 0,
+  "physicalAudible500msPassed": false,
+  "unifiedBuildVersion": "unknown; no execution/admission claim",
+  "checks": [
+    "gofmt",
+    "node --check",
+    "git diff --check"
+  ],
+  "remainingFieldObservation": "Exact public-route server/Web/HAP version plus actual Aliyun bytes/encoding, ArkWeb decode/output and first audible sound on one correlated user-trigger timeline; no USB/LAN requirement"
+}

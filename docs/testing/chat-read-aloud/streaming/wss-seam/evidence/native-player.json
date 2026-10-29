@@ -1,0 +1,172 @@
+{
+  "completeBeforeEOF": {
+    "requests": [
+      {
+        "firstBody": true,
+        "eof": false,
+        "bytes": 8403,
+        "sha256": null,
+        "error": null
+      }
+    ],
+    "playCalls": 1,
+    "playingEvents": 1,
+    "rejections": [],
+    "nonzero": true,
+    "state": {
+      "key": "complete",
+      "status": "playing"
+    },
+    "paused": false,
+    "src": "blob:http://127.0.0.1:36603/bdc7af1d-27e0-4eda-8093-b281bc206672"
+  },
+  "upstreamBeforeEOF": {
+    "failure": "",
+    "framesSent": 40,
+    "handlerCanceled": false,
+    "lateFramesAttempted": 0,
+    "released": false,
+    "started": true,
+    "upstreamFinished": false
+  },
+  "completed": {
+    "requests": [
+      {
+        "firstBody": true,
+        "eof": true,
+        "bytes": 19688,
+        "sha256": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+        "error": null
+      }
+    ],
+    "playCalls": 1,
+    "playingEvents": 1,
+    "rejections": [],
+    "nonzero": true,
+    "state": {
+      "key": "",
+      "status": "idle"
+    },
+    "paused": true,
+    "src": ""
+  },
+  "cancelBeforeEOF": {
+    "requests": [
+      {
+        "firstBody": true,
+        "eof": true,
+        "bytes": 19688,
+        "sha256": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+        "error": null
+      },
+      {
+        "firstBody": true,
+        "eof": false,
+        "bytes": 8403,
+        "sha256": null,
+        "error": null
+      }
+    ],
+    "playCalls": 2,
+    "playingEvents": 2,
+    "rejections": [],
+    "nonzero": true,
+    "state": {
+      "key": "cancel",
+      "status": "playing"
+    },
+    "paused": false,
+    "src": "blob:http://127.0.0.1:36603/31a67ed8-e843-4e19-9bfc-a36e169efbd1"
+  },
+  "cancelUpstreamBeforeEOF": {
+    "failure": "",
+    "framesSent": 40,
+    "handlerCanceled": false,
+    "lateFramesAttempted": 0,
+    "released": false,
+    "started": true,
+    "upstreamFinished": false
+  },
+  "interrupted": {
+    "requests": [
+      {
+        "firstBody": true,
+        "eof": true,
+        "bytes": 19688,
+        "sha256": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+        "error": null
+      },
+      {
+        "firstBody": true,
+        "eof": true,
+        "bytes": 8403,
+        "sha256": "9538df8d08c733b14f0cb853a63d23715fca5a161738a8c86e9b364494df76e5",
+        "error": "TypeError"
+      }
+    ],
+    "playCalls": 2,
+    "playingEvents": 2,
+    "rejections": [],
+    "nonzero": true,
+    "state": {
+      "key": "",
+      "status": "idle"
+    },
+    "paused": true,
+    "src": ""
+  },
+  "canceledStatus": {
+    "failure": "",
+    "framesSent": 40,
+    "handlerCanceled": true,
+    "lateFramesAttempted": 0,
+    "released": false,
+    "started": true,
+    "upstreamFinished": false
+  },
+  "afterLateFrames": {
+    "requests": [
+      {
+        "firstBody": true,
+        "eof": true,
+        "bytes": 19688,
+        "sha256": "c4049fb766786931c7a056487f691c54d9a76ddaca755ceed904c1f06c49c1f4",
+        "error": null
+      },
+      {
+        "firstBody": true,
+        "eof": true,
+        "bytes": 8403,
+        "sha256": "9538df8d08c733b14f0cb853a63d23715fca5a161738a8c86e9b364494df76e5",
+        "error": "TypeError"
+      }
+    ],
+    "playCalls": 2,
+    "playingEvents": 2,
+    "rejections": [],
+    "nonzero": true,
+    "state": {
+      "key": "",
+      "status": "idle"
+    },
+    "paused": true,
+    "src": ""
+  },
+  "lateStatus": {
+    "failure": "",
+    "framesSent": 67,
+    "handlerCanceled": true,
+    "lateFramesAttempted": 28,
+    "released": true,
+    "started": true,
+    "upstreamFinished": false
+  },
+  "browser": "154.0.8037.57",
+  "sdkStubbed": false,
+  "providerCalls": 0,
+  "autoplayPolicyOverride": false,
+  "physicalAudible500msPassed": false,
+  "decodedGraphIsNotAcousticEvidence": true,
+  "transportAudit": "fetch forwards each chunk immediately; copies retained only for completion SHA256, never prebuffered before the player",
+  "scope": "Loopback TLS WSS + real Alibaba SDK/service/handler + generated client + existing composable/controller/native MSE. Synthetic identity/settings/voice/audio. Not ArkWeb or public deployment."
+}
