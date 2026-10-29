@@ -123,6 +123,7 @@ describe('Bot contact entry', () => {
     api.resolvePrivateChat.mockImplementationOnce(() => new Promise(done => { complete = done }))
     const { deps, bootstrap } = fixture()
     const previous = bootstrap.openContact()
+    await vi.waitFor(() => expect(api.resolvePrivateChat).toHaveBeenCalledOnce())
     expect(bootstrap.contactBusy.value).toBe(true)
     await bootstrap.selectBot('other-bot', { sessionId: 'explicit-history' })
     complete(conversation('stale')); await previous
@@ -139,19 +140,79 @@ describe('Bot contact entry', () => {
     deps.draftIntent.value = restored === 'persisted-draft'
     await bootstrap.initialize()
     expect(deps.sessionId.value).toBe('server-owned-contact')
-    expect(api.inspectPrivateChat).not.toHaveBeenCalled()
+    expect(api.inspectPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', undefined, undefined)
     expect(api.bindPrivateChat).not.toHaveBeenCalled()
     expect(bootstrap.contactNavigationPending.value).toBe(true)
     bootstrap.completeContactOpen(bootstrap.contactOpenRequested.value!)
     expect(bootstrap.contactNavigationPending.value).toBe(false)
   })
 
-  it('never adopts even a unique historical candidate on a primary Bot entry', async () => {
+  it.each(['cold', 'seeded'])('inspects old history before first contact creation on a %s primary entry', async entry => {
     api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('only-history')], nextCursor: null })
+    api.bindPrivateChat.mockResolvedValue(conversation('only-history'))
+    const { bootstrap } = fixture(true)
+    if (entry === 'cold') await bootstrap.initialize()
+    else await bootstrap.selectBot('bot')
+    expect(api.inspectPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', undefined, undefined)
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+    expect(api.bindPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', 'only-history')
+    expect(bootstrap.contactOpenRequested.value?.sessionId).toBe('only-history')
+  })
+
+  it('preserves an already bound new contact despite older history on primary entry', async () => {
+    api.inspectPrivateChat.mockResolvedValue({ session: conversation('new-with-messages'), candidates: [conversation('old-75')], nextCursor: null })
     const { deps, bootstrap } = fixture(true)
     await bootstrap.initialize()
-    expect(deps.sessionId.value).toBe('server-owned-contact')
+    expect(deps.sessionId.value).toBe('new-with-messages')
     expect(api.bindPrivateChat).not.toHaveBeenCalled()
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+  })
+
+  it('holds primary navigation while ambiguous history awaits a choice, without subscribing to restored tasks', async () => {
+    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('old-a'), conversation('old-b')], nextCursor: null })
+    const { deps, bootstrap } = fixture(true)
+    deps.sessionId.value = 'restored-task'
+    deps.explicitSessionSelection.value = true
+    await bootstrap.initialize()
+    expect(api.inspectPrivateChat).toHaveBeenCalledExactlyOnceWith('bot', undefined, undefined)
+    expect(api.bindPrivateChat).not.toHaveBeenCalled()
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+    expect(deps.startSessionRuntime).not.toHaveBeenCalled()
+    expect(bootstrap.contactChoice.value?.candidates).toHaveLength(2)
+    expect(bootstrap.contactNavigationPending.value).toBe(true)
+    bootstrap.cancelContactChoice()
+    expect(bootstrap.contactNavigationPending.value).toBe(false)
+  })
+
+  it.each([401, 403, 503])('does not create an empty contact after inspection fails with HTTP %s', async status => {
+    api.inspectPrivateChat.mockRejectedValue({ status })
+    const { bootstrap } = fixture(true)
+    await expect(bootstrap.openContact()).rejects.toEqual({ status })
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
+    expect(api.bindPrivateChat).not.toHaveBeenCalled()
+  })
+
+  it('keeps the same-Bot choice pending until explicit task navigation cancels it', async () => {
+    api.inspectPrivateChat.mockResolvedValue({ candidates: [conversation('one-on-page')], nextCursor: 'more' })
+    const { bootstrap } = fixture(true)
+    await bootstrap.openContact()
+    expect(api.bindPrivateChat).not.toHaveBeenCalled()
+    expect(bootstrap.contactNavigationPending.value).toBe(true)
+    expect(bootstrap.contactChoice.value).not.toBeNull()
+    await bootstrap.selectSession('task')
+    expect(bootstrap.contactChoice.value).toBeNull()
+    expect(bootstrap.contactNavigationPending.value).toBe(false)
+  })
+
+  it('ignores an old inspection after the user opens a task, without binding or creating', async () => {
+    let finish!: (entry: { candidates: SessionSummary[], nextCursor: null }) => void
+    api.inspectPrivateChat.mockImplementationOnce(() => new Promise(done => { finish = done }))
+    const { bootstrap } = fixture(true)
+    const pending = bootstrap.openContact()
+    await bootstrap.selectSession('task')
+    finish({ candidates: [conversation('old')], nextCursor: null }); await pending
+    expect(api.bindPrivateChat).not.toHaveBeenCalled()
+    expect(api.resolvePrivateChat).not.toHaveBeenCalled()
     expect(bootstrap.contactChoice.value).toBeNull()
   })
 
@@ -160,6 +221,7 @@ describe('Bot contact entry', () => {
     api.resolvePrivateChat.mockImplementationOnce(() => new Promise(done => { finish = done }))
     const { deps, bootstrap } = fixture()
     const pending = bootstrap.openContact()
+    await vi.waitFor(() => expect(api.resolvePrivateChat).toHaveBeenCalledOnce())
     await bootstrap.selectSession('newer-task')
     finish(conversation('late-contact')); await pending
     expect(deps.sessionId.value).toBe('newer-task')

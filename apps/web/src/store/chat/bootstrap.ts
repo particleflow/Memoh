@@ -64,8 +64,8 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   const contactNavigationPending = ref(deps.hasContactEntry?.() === true)
   let contactRequest = 0
 
-  async function resolveContact(botId: string, valid: () => boolean): Promise<SessionSummary | undefined> {
-    const entry = await inspectPrivateChat(botId, undefined, deps.explicitSessionSelection.value ? deps.sessionId.value ?? undefined : undefined)
+  async function resolveContact(botId: string, valid: () => boolean, primaryEntry = false): Promise<SessionSummary | undefined> {
+    const entry = await inspectPrivateChat(botId, undefined, !primaryEntry && deps.explicitSessionSelection.value ? deps.sessionId.value ?? undefined : undefined)
     if (!valid()) return undefined
     if (entry.session) return entry.session
     if (entry.candidates.length === 1 && !entry.nextCursor) {
@@ -90,9 +90,9 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     contactBusy.value = true
     contactNavigationPending.value = true
     try {
-      // The primary entrance resolves the server-owned identity directly. It
-      // must not adopt a historical session because it happened to be focused.
-      const session = await resolvePrivateChat(botId)
+      // Inspect before first creation; restored focus is not a candidate hint.
+      // An existing server binding always wins over eligible older history.
+      const session = await resolveContact(botId, () => request === contactRequest && selectionRequest === deps.currentSelectSessionRequest() && generation === deps.userScopeGeneration() && deps.currentBotId.value === botId, true)
       if (request !== contactRequest || selectionRequest !== deps.currentSelectSessionRequest() || generation !== deps.userScopeGeneration() || deps.currentBotId.value !== botId) return
       if (session) {
         contactChoice.value = null
@@ -101,7 +101,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     } finally {
       if (request === contactRequest) {
         contactBusy.value = false
-        if (!contactOpenRequested.value) contactNavigationPending.value = false
+        if (!contactOpenRequested.value && !contactChoice.value) contactNavigationPending.value = false
       }
     }
   }
@@ -117,6 +117,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     contactBusy.value = false
     contactNavigationPending.value = false
     contactOpenRequested.value = null
+    contactChoice.value = null
   }
 
   async function loadContactCandidates() {
@@ -156,7 +157,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   }
 
   function cancelContactChoice() {
-    if (!contactBusy.value) contactChoice.value = null
+    if (!contactBusy.value) cancelContactNavigation()
   }
 
   async function initialize() {
@@ -245,9 +246,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
           if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !restoredExplicitSession && (preferContact || !deps.draftIntent.value) && !deps.hasHistoryEntry?.()) {
             const request = deps.currentSelectSessionRequest()
             try {
-              contact = preferContact
-                ? await resolvePrivateChat(botId)
-                : await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.())
+              contact = await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.(), preferContact)
             } catch (error) {
               // Old servers retain their original navigation. Auth, storage and
               // uncertain outcomes must never fall back to a different chat.
@@ -303,7 +302,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
           }
 
           deps.startWebSocket(botId)
-          if (deps.sessionId.value) {
+          if (deps.sessionId.value && !contactChoice.value) {
             deps.startSessionRuntime(botId, deps.sessionId.value)
           }
         } while (rerunRequested)
