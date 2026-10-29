@@ -1,0 +1,1 @@
+{"exactHandleReauthorization":true,"ownerBotSessionIsolation":true,"realDisk":true,"size":1048576,"nativeDevice":false}

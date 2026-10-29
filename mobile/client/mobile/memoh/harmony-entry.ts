@@ -53,6 +53,7 @@ async function boot(config: ServiceConfig) {
   started = true
   try {
     if (config.resetPending) {
+      await nativeCommand('client.configuration')
       // Reuse the official auth cleanup; do not invent another cache/draft list.
       const { clearPersistedUserScopedState } = await import('./auth-session')
       clearPersistedUserScopedState()
@@ -116,12 +117,17 @@ function form(current: ServiceConfig | null, message = '') {
 
 async function start() {
   try {
-    await nativeCommand('client.configuration') // Close transfers before any config UI or app imports.
     packagedConfig = await readDeploymentConfig()
     const value = await applyDeploymentConfig(packagedConfig)
-    if (!value || sessionStorage.getItem(EDIT_SERVICE_KEY) === '1') form(value)
+    if (!value || sessionStorage.getItem(EDIT_SERVICE_KEY) === '1') {
+      await nativeCommand('client.configuration')
+      form(value)
+    }
     else await boot(value)
-  } catch { form(null, '安装包配置或本地存储未能通过核对，已停止连接。请检查 Windows 配置与签名步骤；原登录和本地数据未更改。') }
+  } catch {
+    await nativeCommand('client.configuration').catch(() => {})
+    form(null, '安装包配置或本地存储未能通过核对，已停止连接。请检查 Windows 配置与签名步骤；原登录和本地数据未更改。')
+  }
 }
 
 // A second document changing shared configuration invalidates this app, too.

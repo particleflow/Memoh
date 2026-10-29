@@ -3,9 +3,11 @@ import { window } from '@kit.ArkUI';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { ClientDiagnostics } from '../common/ClientDiagnostics';
 import { ImageTimingDump } from '../common/ImageTimingDump';
+import { nativeTransferOwner } from '../common/NativeTransferOwner';
 
 export default class EntryAbility extends UIAbility {
   onCreate(_want: Want): void {
+    nativeTransferOwner(this.context).bindAbility(this.context);
     ClientDiagnostics.bind(this.context);
     ClientDiagnostics.event('SYSTEM', 'lifecycle', 'ability-create', '');
   }
@@ -15,6 +17,7 @@ export default class EntryAbility extends UIAbility {
     const action = want.parameters?.garnetImageTiming;
     if (typeof action === 'string') { ImageTimingDump.command(action); }
   }
+  onDestroy(): void { nativeTransferOwner(this.context).destroyAbility(); }
   onDump(_params: string[]): string[] { return ImageTimingDump.dump(); }
   onWindowStageCreate(stage: window.WindowStage): void {
     stage.loadContent('pages/SharedChat', (error: BusinessError) => {

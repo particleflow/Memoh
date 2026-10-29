@@ -1,3 +1,4 @@
+import { nativeViewDetached } from './harmony-transfer-lifetime'
 import { getBotsByBotIdMediaByContentHash } from '@memohai/sdk'
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'
@@ -29,7 +30,12 @@ export async function saveNativeOriginal(botId: string, hash: string, size: numb
   const scopedPath = delegationUrl === undefined ? undefined : normalizeDelegationPath(delegationUrl, hash)
   const controller = new AbortController(), operation = crypto.randomUUID().replaceAll('-', '')
   const fields = { operation, botId }, generation = authSessionGeneration(), token = sdkAuthQuery().token
-  const abort = () => { controller.abort(); void command('download.abort', fields).catch(() => {}) }
+  let detached = false
+  const abort = () => {
+    detached = nativeViewDetached(signal)
+    controller.abort()
+    void command(detached ? 'download.observe.detach' : 'download.abort', fields).catch(() => {})
+  }
   const pause = () => { controller.abort(); void command('download.release', fields).catch(() => {}) }
   const offAuth = onAuthSessionCleared(pause)
   const check = () => {
@@ -78,6 +84,6 @@ export async function saveNativeOriginal(botId: string, hash: string, size: numb
     offAuth(); signal?.removeEventListener('abort', abort); toast.dismiss(notice)
     // Release the foreground lease; interrupted bytes remain privately resumable.
     // Explicit user cancellation above still discards this operation.
-    await command('download.release', fields).catch(() => {})
+    if (!detached) await command('download.release', fields).catch(() => {})
   }
 }

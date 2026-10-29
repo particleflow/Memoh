@@ -1,5 +1,6 @@
 import router from '../router'
 import uiTheme from './harmony-theme.json'
+import { sdkAuthQuery } from '@/lib/api-client'
 
 // Login, sessions and theme preferences stay in the official router/store.
 const host = window as Window & {
@@ -11,7 +12,9 @@ export function publishTheme(mode: 'light' | 'dark' | 'warm') {
 }
 function publish() {
   const state = router.currentRoute.value.name === 'Login' ? 'login-page' : 'ready'
-  void host.begoniaNative?.request(JSON.stringify({ version: 1, command: 'client.state', state })).catch(() => {})
+  const token = sdkAuthQuery().token
+  void host.begoniaNative?.request(JSON.stringify({ version: 1, command: 'client.state', state,
+    authorization: state === 'ready' && token ? 'Bearer ' + token : undefined })).catch(() => {})
 }
 router.afterEach(publish)
 void router.isReady().then(publish)

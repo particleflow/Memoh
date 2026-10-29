@@ -15,8 +15,9 @@
 <script setup lang="ts">
 import { ref, watch, onBeforeUnmount, onMounted } from 'vue'
 import { Button } from '@felinic/ui'
-import { nativeAttachmentCommand, nativeAttachmentsAvailable, closeNativeAttachments, validateNativeAttachments, nativeUploadFailure, type NativeAttachment, type NativeUploadFailure } from './harmony-resumable'
+import { nativeAttachmentCommand, nativeAttachmentsAvailable, releaseNativeAttachmentView, validateNativeAttachments, nativeUploadFailure, type NativeAttachment, type NativeUploadFailure } from './harmony-resumable'
 import { restoreNativeUploadFailures } from './harmony-upload-failures'
+import { NATIVE_VIEW_DETACHED } from './harmony-transfer-lifetime'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 const props = defineProps<{ botId: string; scope: string; disabled: boolean; active?: boolean; modelValue: NativeAttachment[] }>()
 const emit = defineEmits<{ 'update:modelValue': [NativeAttachment[]] }>()
@@ -24,12 +25,12 @@ const busy = ref(false), error = ref<{ message: string; failure?: NativeUploadFa
 const showPreviews = ref(true)
 let controller: AbortController | undefined
 function cancel() { controller?.abort(); controller = undefined; busy.value = false; if (!error.value?.failure) error.value = undefined }
-function suspend() { cancel(); showPreviews.value = false; void closeNativeAttachments().catch(() => {}) }
+function suspend() { controller?.abort(NATIVE_VIEW_DETACHED); controller = undefined; busy.value = false; showPreviews.value = false; void releaseNativeAttachmentView().catch(() => {}) }
 function reset() { suspend(); error.value = undefined; emit('update:modelValue', []) }
 watch(() => [props.botId, props.scope], reset, { flush: 'sync' })
 watch(() => props.active, active => { if (active === false) suspend(); else void reopenPreviews() }, { flush: 'sync' })
 const off = onAuthSessionCleared(reset)
-onBeforeUnmount(() => { controller?.abort(); void closeNativeAttachments().catch(() => {}); off() })
+onBeforeUnmount(() => { suspend(); off() })
 onMounted(() => { void restoreNativeUploadFailures(props.botId).catch(() => {}) })
 async function action(kind: string, fields: { handle?: string; photos?: boolean; recoverDrafts?: boolean } = {}, scope = props.scope) {
   if (busy.value || props.disabled || !props.botId) return

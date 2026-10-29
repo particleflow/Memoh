@@ -1,3 +1,4 @@
+import { nativeViewDetached } from './harmony-transfer-lifetime'
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'
 import { rememberNativeUploadFailure, forgetNativeUploadFailures } from './harmony-upload-failures'
@@ -31,7 +32,8 @@ async function bridge(command: string, fields: object) {
   if (!host.begoniaNative) throw new Error('当前设备不支持原生文件传输')
   return JSON.parse(await host.begoniaNative.request(JSON.stringify({ version: 1, command, ...fields })))
 }
-export function closeNativeAttachments() { return bridge('upload.close', {}).then(() => undefined) }
+export function closeNativeAttachments(authorization?: string) { return bridge('upload.close', { authorization }).then(() => undefined) }
+export function releaseNativeAttachmentView() { return bridge('upload.view.release', {}).then(() => undefined) }
 
 export function validateNativeAttachments(value: unknown, scope: string, recoverDrafts = false): NativeAttachment[] {
   if (!Array.isArray(value) || value.length > 16) throw new Error('原件列表不完整')
@@ -55,12 +57,15 @@ export async function nativeAttachmentCommand<T>(command: string, botId: string,
   fields: { handle?: string; photos?: boolean; recoverDrafts?: boolean; name?: string; type?: string; size?: number; offset?: number; data?: string } = {}, signal?: AbortSignal,
   operation = crypto.randomUUID().replaceAll('-', '')): Promise<T> {
   const generation = authSessionGeneration(), token = sdkAuthQuery().token
-  const abort = () => { void bridge('upload.pause', { operation }).catch(() => {}) }
-  const off = onAuthSessionCleared(() => { void bridge('upload.close', {}).catch(() => {}) })
+  const abort = () => {
+    const action = command === 'upload.run' && nativeViewDetached(signal) ? 'upload.observe.detach' : 'upload.pause'
+    void bridge(action, { operation }).catch(() => {})
+  }
+  const off = onAuthSessionCleared(() => { void closeNativeAttachments('Bearer ' + token).catch(() => {}) })
   const check = () => {
     signal?.throwIfAborted()
     if (!token || generation !== authSessionGeneration() || token !== sdkAuthQuery().token) {
-      void closeNativeAttachments().catch(() => {})
+      void closeNativeAttachments('Bearer ' + token).catch(() => {})
       throw new DOMException('账号已变化', 'AbortError')
     }
   }

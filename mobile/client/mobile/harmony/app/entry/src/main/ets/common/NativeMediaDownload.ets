@@ -17,9 +17,10 @@ class DownloadState {
   size: number = 0; epoch: number = 0; received: number = 0;
   cancelled: boolean = false; ready: boolean = false; saving: boolean = false; running: boolean = true;
   session?: rcp.Session;
+  network?: NativeTransferNetwork;
 }
 
-// Foreground transfer with an account/authority/scope-bound durable checkpoint.
+// Native transfer with an account/authority/scope-bound durable checkpoint.
 // No credential or endpoint is persisted; each reopen revalidates current access.
 // Only a fully hash-verified original reaches DocumentViewPicker.
 export class NativeMediaDownload {
@@ -29,6 +30,7 @@ export class NativeMediaDownload {
   private context: common.UIAbilityContext;
   private authorized: () => boolean;
   constructor(context: common.UIAbilityContext, authorized: () => boolean) { this.context = context; this.authorized = authorized; }
+  bindContext(context: common.UIAbilityContext): void { this.context = context; }
   private check(state: DownloadState): void {
     if (!this.authorized() || state.cancelled || state.epoch !== this.epoch) { throw new Error('MEDIA_DOWNLOAD_CANCELLED'); }
   }
@@ -142,7 +144,7 @@ export class NativeMediaDownload {
     this.states.set(input.operation, state);
     let file: fs.File | undefined;
     try {
-      const network = new NativeTransferNetwork(origin, MEMOH_NETWORK_POLICY);
+      const network = new NativeTransferNetwork(origin, MEMOH_NETWORK_POLICY); state.network = network;
       await this.bind(state, input, origin, endpoint, network);
       state.retain = true;
       file = this.reopen(state);
@@ -225,16 +227,35 @@ export class NativeMediaDownload {
       }
     }
   }
-  async save(operation: string, bot: string): Promise<boolean> {
+  async revalidate(input: MediaDownloadInput): Promise<void> {
+    const state = this.owned(input.operation, input.botId);
+    if (!state.ready || state.hash !== input.hash || state.size !== input.size) { throw new Error('MEDIA_DOWNLOAD_NOT_READY'); }
+    // Reopen through the original authenticated path. A cached ready object is
+    // not authority to save after the observing document has been replaced.
+    const session = rcp.createSession(); state.session = session;
+    try {
+      const network = state.network;
+      if (!network) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+      const request = new rcp.Request(input.url, 'HEAD', { authorization: input.authorization, 'accept-encoding': 'identity' });
+      request.configuration = { transfer: { autoRedirect: false } }; request.destination = (): void => {};
+      const response = await network.fetch(session, input.url, 'HEAD', (): rcp.Request => request); this.check(state);
+      if (response.statusCode !== 200) { throw new Error('MEDIA_DOWNLOAD_HTTP_' + response.statusCode); }
+      if (this.header(response.headers, 'content-length') !== String(state.size) ||
+        this.header(response.headers, 'etag') !== '"' + state.hash + '"') { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+    } finally { state.session = undefined; session.close(); }
+  }
+  async save(operation: string, bot: string, visible: () => boolean = (): boolean => true): Promise<boolean> {
     const state = this.owned(operation, bot);
+    if (!visible()) { this.release(operation, bot); throw new Error('NATIVE_VIEW_DETACHED'); }
     if (!state.ready || state.saving) { throw new Error('MEDIA_DOWNLOAD_NOT_READY'); }
     state.saving = true; state.running = true;
     let source: fs.File | undefined, destination: fs.File | undefined;
-    let complete = false;
+    let complete = false, preserveOnDetach = false;
     try {
       const options = new picker.DocumentSaveOptions(); options.newFileNames = [state.name];
       const uris = await new picker.DocumentViewPicker(this.context).save(options);
       this.check(state);
+      if (!visible()) { preserveOnDetach = true; throw new Error('NATIVE_VIEW_DETACHED'); }
       if (!uris[0]) { return false; }
       // Preserve the system URI and its grant, never derive a public pathname.
       source = fs.openSync(state.path, fs.OpenMode.READ_ONLY);
@@ -252,7 +273,7 @@ export class NativeMediaDownload {
         }
       } finally {
         try { if (source) { fs.closeSync(source); } }
-        finally { state.running = false; this.remove(state); }
+        finally { state.running = false; if (preserveOnDetach) { this.states.delete(state.operation); } else { this.remove(state); } }
       }
     }
   }

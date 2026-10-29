@@ -46,6 +46,7 @@ async function worker(){
   }
   else if(action.startsWith('bridge-')){
    modules['./NativeResumableUpload']={NativeResumableUpload};modules['./NativeVoice']={NativeVoice:class{close(){}prepare(){}}};modules['./NativeMediaDownload']={NativeMediaDownload:class{close(){}}}
+   modules['./NativeTransferOwner']=load('NativeTransferOwner');
    const {NativeClient}=load('NativeClient'),frame='begonia-client://app/index.html',client=new NativeClient({registerJavaScriptProxy(){},getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=>frame},()=>{},async()=>{},{filesDir:dir})
    client.register();assert.equal(JSON.parse(await client.request(JSON.stringify({version:1,command:'client.state',state:'ready'}))).ok,true)
    result=JSON.parse(await client.request(JSON.stringify({version:1,command:'upload.select',...input})))

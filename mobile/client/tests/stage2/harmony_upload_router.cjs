@@ -1,8 +1,8 @@
 // Actual native command dispatch and SharedChat's resource handler. Kit/ArkWeb
 // boundaries are controlled here; disk/HTTP lives in harmony_resumable.cjs.
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),assert=require('node:assert/strict')
-const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
-function load(code,imports={},globals={}){const m={exports:{}};vm.runInNewContext(ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>{assert.ok(n in imports,n);return imports[n]},JSON,Error,ArrayBuffer,...globals});return m.exports}
+const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_TYPESCRIPT||path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
+function load(code,imports={},globals={}){const m={exports:{}};vm.runInNewContext(ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>{if(n==='./NativeTransferOwner')return load(file('common/NativeTransferOwner.ets'),imports);assert.ok(n in imports,n);return imports[n]},JSON,Error,ArrayBuffer,...globals});return m.exports}
 const file=name=>fs.readFileSync(path.join(root,'mobile/harmony/app/entry/src/main/ets/'+name),'utf8')
 const calls=[]
 class Uploads {
@@ -15,6 +15,7 @@ class Uploads {
  async upload(q){assert.ok(this.auth());calls.push(['run',q]);return{content_hash:'b'.repeat(64),size_bytes:8,mime:'image/png'}}
  async consume(q){assert.ok(this.auth());calls.push(['consume',q])}
  async discard(q){assert.ok(this.auth());calls.push(['discard',q])}
+ detachView(){} releasePreviews(){}
  pause(op){calls.push(['pause',op])} abort(op){calls.push(['abort',op])} close(){calls.push(['close'])}
  preview(handle){assert.ok(this.auth());assert.equal(handle,'a'.repeat(32));return{fd:42,mime:'image/png'}}
 }

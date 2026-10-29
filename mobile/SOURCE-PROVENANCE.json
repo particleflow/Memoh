@@ -2421,5 +2421,15 @@
     "noLibraryTransfer": true,
     "noRegeneration": true,
     "hapBuilt": false
+  },
+  "nativeTransferLifetimeStage1": {
+    "baseCommit": "a158c56488ed193ec3e9f2d57480ad4f16a58068",
+    "branch": "fix/harmony-transfer-lifetime",
+    "scope": "Existing native engines owned independently of their document observers; no transfer wire/journal, network policy, permission, notification or Windows change.",
+    "evidence": "docs/testing/harmony-transfer-lifetime/result.json",
+    "officialAPI26Compile": false,
+    "nativeDevice": false,
+    "newHAP": false,
+    "deployed": false
   }
 }

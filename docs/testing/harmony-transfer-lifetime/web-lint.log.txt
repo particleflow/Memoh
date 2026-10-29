@@ -1,0 +1,61 @@
+
+/workspace/harmony-transfer-lifetime/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/lib/HarmonyAttachments.vue
+   2:42   warning  'class' should be on a new line                                                   vue/max-attributes-per-line
+   2:75   warning  'aria-label' should be on a new line                                              vue/max-attributes-per-line
+   3:23   warning  'role' should be on a new line                                                    vue/max-attributes-per-line
+   4:25   warning  'variant' should be on a new line                                                 vue/max-attributes-per-line
+   4:41   warning  '@click' should be on a new line                                                  vue/max-attributes-per-line
+   4:57   warning  Expected 1 line break after opening tag (`<Button>`), but no line breaks found    vue/singleline-html-element-content-newline
+   4:61   warning  Expected 1 line break before closing tag (`</Button>`), but no line breaks found  vue/singleline-html-element-content-newline
+   5:21   warning  'role' should be on a new line                                                    vue/max-attributes-per-line
+   5:34   warning  Expected 1 line break after opening tag (`<p>`), but no line breaks found         vue/singleline-html-element-content-newline
+   5:53   warning  Expected 1 line break before closing tag (`</p>`), but no line breaks found       vue/singleline-html-element-content-newline
+   6:37   warning  ':key' should be on a new line                                                    vue/max-attributes-per-line
+   6:56   warning  'class' should be on a new line                                                   vue/max-attributes-per-line
+   7:66   warning  ':src' should be on a new line                                                    vue/max-attributes-per-line
+   7:87   warning  ':alt' should be on a new line                                                    vue/max-attributes-per-line
+   7:104  warning  'class' should be on a new line                                                   vue/max-attributes-per-line
+   8:73   warning  ':src' should be on a new line                                                    vue/max-attributes-per-line
+   8:94   warning  'controls' should be on a new line                                                vue/max-attributes-per-line
+   8:103  warning  'preload' should be on a new line                                                 vue/max-attributes-per-line
+   8:118  warning  'class' should be on a new line                                                   vue/max-attributes-per-line
+   9:73   warning  ':src' should be on a new line                                                    vue/max-attributes-per-line
+   9:94   warning  'controls' should be on a new line                                                vue/max-attributes-per-line
+   9:103  warning  'preload' should be on a new line                                                 vue/max-attributes-per-line
+   9:118  warning  'class' should be on a new line                                                   vue/max-attributes-per-line
+  11:31   warning  ':disabled' should be on a new line                                               vue/max-attributes-per-line
+  11:60   warning  '@click' should be on a new line                                                  vue/max-attributes-per-line
+  11:82   warning  Expected 1 line break after opening tag (`<Button>`), but no line breaks found    vue/singleline-html-element-content-newline
+  11:84   warning  Expected 1 line break before closing tag (`</Button>`), but no line breaks found  vue/singleline-html-element-content-newline
+
+/workspace/harmony-transfer-lifetime/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/home/components/chat-pane.vue
+  372:44   warning  'type' should be on a new line                         vue/max-attributes-per-line
+  372:56   warning  'accept' should be on a new line                       vue/max-attributes-per-line
+  372:73   warning  'multiple' should be on a new line                     vue/max-attributes-per-line
+  372:82   warning  'class' should be on a new line                        vue/max-attributes-per-line
+  372:97   warning  '@change' should be on a new line                      vue/max-attributes-per-line
+  561:70   warning  ':key' should be on a new line                         vue/max-attributes-per-line
+  562:1    warning  Expected indentation of 26 spaces but found 24 spaces  vue/html-indent
+  562:91   warning  ':file' should be on a new line                        vue/max-attributes-per-line
+  562:112  warning  'removable' should be on a new line                    vue/max-attributes-per-line
+  562:122  warning  '@remove' should be on a new line                      vue/max-attributes-per-line
+  563:1    warning  Expected indentation of 26 spaces but found 24 spaces  vue/html-indent
+  564:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  565:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  566:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  567:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  568:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  569:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  570:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  571:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  572:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  573:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  574:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  575:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  576:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  577:1    warning  Expected indentation of 28 spaces but found 26 spaces  vue/html-indent
+  578:1    warning  Expected indentation of 26 spaces but found 24 spaces  vue/html-indent
+
+✖ 53 problems (0 errors, 53 warnings)
+  0 errors and 35 warnings potentially fixable with the `--fix` option.
+

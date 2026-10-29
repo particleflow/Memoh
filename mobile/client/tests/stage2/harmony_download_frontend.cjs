@@ -1,7 +1,7 @@
 // Production Web adapter and native command router with controlled SDK/OS seams.
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),crypto=require('node:crypto')
-const root=path.resolve(__dirname,'../..'),ts=require(path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
-function load(file,imports,globals={}){const m={exports:{}},code=ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;vm.runInNewContext(code,{exports:m.exports,require:n=>{assert.ok(n in imports,n);return imports[n]},ArrayBuffer,Uint8Array,Map,Promise,Error,Request,Response,AbortController,DOMException,crypto:crypto.webcrypto,...globals});return m.exports}
+const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_TYPESCRIPT||path.join(root,'mobile/.build/memoh-web/checkout/node_modules/typescript'))
+function load(file,imports,globals={}){const m={exports:{}},code=ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;vm.runInNewContext(code,{exports:m.exports,require:n=>{if(n==='./NativeTransferOwner')return load('mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets',imports);if(n==='./harmony-transfer-lifetime')return load('mobile/memoh/harmony-transfer-lifetime.ts',{});assert.ok(n in imports,n);return imports[n]},ArrayBuffer,Uint8Array,Map,Promise,Error,Request,Response,AbortController,DOMException,crypto:crypto.webcrypto,...globals});return m.exports}
 let generation=0,token='synthetic-test-only',listeners=new Set(),commands=[],nativeMode='normal',releaseReady,onFetch,action,pickerSaves=0,authResponses=[]
 const bot='bot-a',hash='a'.repeat(64),size=209715200,origin='https://api.example.test/api'
 const host={begoniaNative:{request:async raw=>{
@@ -13,7 +13,7 @@ const host={begoniaNative:{request:async raw=>{
   return JSON.stringify({ok:true,data:{operation:q.operation,hash:nativeMode==='wrong'?'b'.repeat(64):hash,size}})
  }
  if(q.command==='download.save'){pickerSaves++;return JSON.stringify({ok:true,data:true})}
- assert.ok(['download.abort','download.release'].includes(q.command));return'{"ok":true}'
+ assert.ok(['download.abort','download.release','download.observe.detach'].includes(q.command));return'{"ok":true}'
 }}}
 const imports={
  './harmony-service-url':load('mobile/memoh/harmony-service-url.ts',{}, {URL}),
@@ -31,10 +31,11 @@ const {saveNativeOriginal}=load('mobile/memoh/harmony-download.ts',imports,{wind
  reset();nativeMode='unauthorized';await assert.rejects(saveNativeOriginal(bot,hash,size,'x'));assert.equal(authResponses.at(-1),401);assert.equal(pickerSaves,0)
  reset();nativeMode='hold';let started;const seen=new Promise(r=>started=r);onFetch=started;const cancelled=saveNativeOriginal(bot,hash,size,'x');await seen;action();releaseReady();await assert.rejects(cancelled);assert.equal(pickerSaves,0);assert.ok(commands.some(q=>q.command==='download.abort'))
  reset();nativeMode='hold';const authSeen=new Promise(r=>onFetch=r),stale=saveNativeOriginal(bot,hash,size,'x');await authSeen;generation++;token='different-account';for(const f of listeners)f();releaseReady();await assert.rejects(stale);assert.equal(pickerSaves,0);assert.equal(listeners.size,0);assert.ok(commands.some(q=>q.command==='download.release'));assert.ok(!commands.some(q=>q.command==='download.abort'))
+ token='synthetic-test-only';reset();nativeMode='hold';const detachedSignal=new AbortController(),detachedSeen=new Promise(r=>onFetch=r),detached=saveNativeOriginal(bot,hash,size,'x',detachedSignal.signal);await detachedSeen;detachedSignal.abort('harmony-view-detached');releaseReady();await assert.rejects(detached);assert.equal(pickerSaves,0);assert.ok(commands.some(q=>q.command==='download.observe.detach'));assert.ok(!commands.some(q=>q.command==='download.abort'||q.command==='download.release'))
  token='synthetic-test-only';reset();nativeMode='hold';const changeSeen=new Promise(r=>onFetch=r),changed=saveNativeOriginal(bot,hash,size,'x');await changeSeen;token='silent-token-change';releaseReady();await assert.rejects(changed);assert.equal(pickerSaves,0)
  // Execute the actual native bridge dispatch, not just an isolated fetch mock.
  let fetched,aborted,closed=0;class Voice{prepare(){}close(){}}class VoiceTransfer{close(){}}
- class Downloads{constructor(_context,auth){this.auth=auth}async fetch(q){assert.ok(this.auth());fetched=q;return{operation:q.operation,hash:q.hash,size:q.size}}async save(op,owner){assert.equal(op,fetched.operation);assert.equal(owner,fetched.botId);return true}abort(op,owner){aborted={op,owner}}release(op,owner){aborted={op,owner}}close(){closed++}}
+ class Downloads{constructor(_context,auth){this.auth=auth}async fetch(q){assert.ok(this.auth());fetched=q;return{operation:q.operation,hash:q.hash,size:q.size}}async revalidate(){}async save(op,owner){assert.equal(op,fetched.operation);assert.equal(owner,fetched.botId);return true}abort(op,owner){aborted={op,owner}}release(op,owner){aborted={op,owner}}close(){closed++}}
  const service=load('mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets',{'@kit.ArkTS':{url:{URL:{parseURL:value=>new URL(value)}}}})
  const config=load('mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets',{'./ServiceUrl':service})
  const {NativeClient}=load('mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets',{'./MemohClientConfig':config,'./NativeResumableUpload':{NativeResumableUpload:class{close(){}}},'./NativeVoice':{NativeVoice:Voice},'./NativeVoiceTransfer':{NativeVoiceTransfer:VoiceTransfer},'./NativeMediaDownload':{NativeMediaDownload:Downloads}})

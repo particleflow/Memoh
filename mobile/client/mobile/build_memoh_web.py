@@ -49,7 +49,7 @@ def inputs():
         'mobile/memoh/voiceFan.svg', 'mobile/memoh/voiceFan.css', 'contracts/ui_theme.json',
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
-        'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts',
+        'mobile/memoh/harmony-download.ts', 'mobile/memoh/harmony-service-url.ts', 'mobile/memoh/harmony-transfer-lifetime.ts',
         'mobile/memoh/harmony-entry.ts', 'mobile/memoh/harmony-back.ts', 'mobile/memoh/harmony-service-config.ts', 'mobile/memoh/harmony-service.css',
         'tests/stage2/harmony_task_attachments.vitest.ts', 'tests/stage2/harmony_task_list_attachment.vitest.ts')]
     files.extend(ROOT / 'mobile/memoh' / name for name in ('shared-session-activity.vue', 'shared-session-activity.test.ts', 'shared-useSessionActivity.ts'))
@@ -131,6 +131,42 @@ def apply_paired_context(context, paired, patches):
             target.addfile(entry, io.BytesIO(data))
             seen.add(name)
     assert seen == files.keys() and deleted == removed.keys(), 'Paired source coverage drift'
+    temporary.replace(context)
+
+
+def apply_transfer_lifetime_context(context, paired, patches):
+    """Adapt the final pinned composer, after the shared snapshot replacement."""
+    name = 'apps/web/src/pages/home/components/chat-pane.vue'
+    original = paired['files'][name]
+    temporary = context.with_suffix('.lifetime.tar')
+    changed = False
+    with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
+        for member in source:
+            data = source.extractfile(member).read() if member.isfile() else None
+            entry = copy.copy(member)
+            if member.name == name:
+                assert not changed and data is not None
+                assert hashlib.sha256(data).hexdigest() == original['sha256'], 'Final composer baseline drift'
+                text = data.decode()
+                replacements = [
+                    ("import { prepareSubmission } from '@/lib/harmony-files'",
+                     "import { prepareSubmission } from '@/lib/harmony-files'\nimport { NATIVE_VIEW_DETACHED } from '@/lib/harmony-transfer-lifetime'\n// Register before composables can clear pending files during unmount.\nonBeforeUnmount(() => detachAttachmentUpload())"),
+                    ('  if (controller) { attachmentPreparationCancelled = true; controller.abort() }',
+                     '  if (controller) {\n    attachmentPreparationCancelled = true\n    controller.abort(preparingView !== paneView.value ? NATIVE_VIEW_DETACHED : undefined)\n  }'),
+                    ('onBeforeUnmount(cancelAttachmentUpload)',
+                     'function detachAttachmentUpload() {\n  const controller = preparingView?.attachmentPreparation.value\n  if (controller) { attachmentPreparationCancelled = true; controller.abort(NATIVE_VIEW_DETACHED) }\n}'),
+                    ('onDeactivated(() => {\n  cancelAttachmentUpload()', 'onDeactivated(() => {\n  detachAttachmentUpload()'),
+                ]
+                for before, after in replacements:
+                    assert text.count(before) == 1, 'Composer lifetime seam drift'
+                    text = text.replace(before, after)
+                data = text.encode()
+                entry.size = len(data)
+                patches[name] = {'upstreamSHA256': original['upstreamSHA256'],
+                                 'adaptedSHA256': hashlib.sha256(data).hexdigest()}
+                changed = True
+            target.addfile(entry, io.BytesIO(data) if data is not None else None)
+    assert changed, 'Composer lifetime source missing'
     temporary.replace(context)
 
 
@@ -1364,7 +1400,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             'harmony.ts', 'harmony-files.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-image-timing-node.test.ts', 'harmony-attachment-preparation.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
             'HarmonyAttachments.vue', 'harmony-resumable.ts', 'harmony-upload-failures.ts',
-            'harmony-download.ts', 'harmony-service-url.ts')}
+            'harmony-download.ts', 'harmony-service-url.ts', 'harmony-transfer-lifetime.ts')}
         if platform == 'harmony':
             for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css'):
                 host_sources[name] = ROOT / 'mobile/memoh' / name
@@ -1406,6 +1442,8 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             target.addfile(entry, io.BytesIO(data))
     if 'paired959' in home_admission_sources:
         apply_paired_context(context, home_admission_sources['paired959'], patches)
+        if platform == 'harmony':
+            apply_transfer_lifetime_context(context, home_admission_sources['paired959'], patches)
     return context, patches
 
 

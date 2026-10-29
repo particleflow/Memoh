@@ -1,0 +1,1 @@
+{"actualBootstrap":true,"normalReloadRetainsTransfers":true,"configurationEditStillRevokes":true,"resetBeforeAuthCleanup":true,"invalidConfigurationFailsClosed":true,"actualComponentUnmountDetaches":true,"noLateComponentEmit":true,"currentSessionReadyEnvelope":true,"renderedUI":false,"nativeDevice":false}
