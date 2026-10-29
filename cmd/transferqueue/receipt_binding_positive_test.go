@@ -34,7 +34,7 @@ func TestReceiptBindingCommandChild(_ *testing.T) {
 	os.Exit(run())
 }
 
-func TestReceiptBindingCommandPositiveChildReadOnly(t *testing.T) {
+func TestCLIPathReceiptBindingPositiveChildReadOnly(t *testing.T) {
 	root := cliPrivateRoot(t)
 	config, state, source := filepath.Join(root, "config"), filepath.Join(root, "state"), filepath.Join(root, "source")
 	for _, dir := range []string{config, state, source} {
