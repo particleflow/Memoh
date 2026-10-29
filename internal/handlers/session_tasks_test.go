@@ -46,6 +46,7 @@ type taskHTTPFixture struct {
 	dbstore.AgenvoRuntimeStore
 	chat, exec, source, grant bool
 	reads, relayCalls         int
+	mountReads                int
 	registration              agenvo.Target
 	op                        dbstore.ComputerOperationRecord
 	pcScope                   bool
@@ -104,6 +105,7 @@ func (f *taskHTTPFixture) ReadComputerOperation(context.Context, dbstore.Compute
 }
 
 func (f *taskHTTPFixture) GetMount(_ context.Context, bot, id string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
+	f.mountReads++
 	if !f.grant || !f.source || bot != taskBot || id != taskTarget {
 		return dbstore.BotRemoteRuntimeBindingRecord{}, errors.New("SECRET")
 	}
@@ -184,23 +186,32 @@ func TestSessionTaskHTTPAuthorizationRevocationAndNoDispatch(t *testing.T) {
 	call("POST", base, taskUser, 405)
 	for _, scope := range []bool{false, true} {
 		f.pcScope = scope
-		for _, revoke := range []*bool{&f.exec, &f.source, &f.grant} {
+		// Removing a live registration cannot erase the original owned history.
+		for _, revoke := range []*bool{&f.source, &f.grant} {
 			*revoke = false
-			call("GET", detail, taskUser, 404)
-			if scope {
-				call("GET", base, taskUser, 404)
-			} else if body := call("GET", base, taskUser, 200); strings.Contains(body, taskOp) {
-				t.Fatal("revoked task listed")
+			for _, path := range []string{base, detail} {
+				body := call("GET", path, taskUser, 200)
+				if !strings.Contains(body, taskOp) || !strings.Contains(body, "Synthetic final answer") {
+					t.Fatal("retired task history lost")
+				}
 			}
 			*revoke = true
 		}
+		f.exec = false
+		call("GET", detail, taskUser, 404)
+		if scope {
+			call("GET", base, taskUser, 404)
+		} else if body := call("GET", base, taskUser, 200); strings.Contains(body, taskOp) {
+			t.Fatal("permission-revoked task listed")
+		}
+		f.exec = true
 	}
 	f.chat = false
 	for _, path := range []string{base, detail} {
 		call("GET", path, taskUser, 403)
 	}
-	if f.relayCalls != 0 || f.op.Revision != 0 {
-		t.Fatal("GET caused an external call or mutation")
+	if f.mountReads != 0 || f.relayCalls != 0 || f.op.Revision != 0 {
+		t.Fatal("historical GET resolved a live registration, dispatched or mutated")
 	}
 	after, _ := json.Marshal(f.op)
 	if string(before) != string(after) {
@@ -394,7 +405,15 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 	for _, cursor := range []string{"-1", "01", "9223372036854775808", "other"} {
 		call(path+"?after="+cursor, taskUser, 400)
 	}
-	for _, flag := range []*bool{&f.exec, &f.source, &f.grant, &f.chat} {
+	for _, flag := range []*bool{&f.source, &f.grant} {
+		*flag = false
+		page := call(path+"?after="+first.NextAfter, taskUser, 200)
+		if len(page.Files) != 16 || page.Files[0].Reference == nil || page.Revision != "42" {
+			t.Fatal("retired delivery history lost")
+		}
+		*flag = true
+	}
+	for _, flag := range []*bool{&f.exec, &f.chat} {
 		before := f.pageReads
 		*flag = false
 		code := 404
@@ -407,8 +426,8 @@ func TestSessionTaskDeliveryPagesAuthorizeEveryRequest(t *testing.T) {
 		}
 		*flag = true
 	}
-	if f.relayCalls != 0 || f.op.Revision != 42 {
-		t.Fatal("read dispatched or mutated")
+	if f.mountReads != 0 || f.relayCalls != 0 || f.op.Revision != 42 {
+		t.Fatal("history read resolved a live registration, dispatched or mutated")
 	}
 }
 

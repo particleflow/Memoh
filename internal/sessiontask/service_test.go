@@ -31,6 +31,7 @@ type fixture struct {
 	runs                        map[string]dbstore.SubagentRun
 	historyDenied               bool
 	primaryReads                int
+	liveReads                   int
 }
 
 func (f *fixture) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
@@ -67,6 +68,18 @@ func (f *fixture) AuthorizeOperationHistory(ctx context.Context, s agenvo.Scope)
 		return err
 	}
 	return toolcontext.CheckComputerTarget(ctx, s.TargetID)
+}
+
+func (f *fixture) ResolveTarget(ctx context.Context, s agenvo.Scope) (agenvo.Target, error) {
+	f.liveReads++
+	if err := f.AuthorizeOperationHistory(ctx, s); err != nil {
+		return agenvo.Target{}, err
+	}
+	target, ok := f.targets[s.TargetID]
+	if !ok {
+		return agenvo.Target{}, ErrUnavailable
+	}
+	return target, nil
 }
 
 func (f *fixture) ReadComputerOperation(_ context.Context, r dbstore.ComputerOperationRecord) (dbstore.ComputerOperationRecord, error) {

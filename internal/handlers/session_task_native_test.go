@@ -44,6 +44,7 @@ func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
 	})
 	calls := 0
 	late := false
+	lateGrant := false
 	check := func(b toolcontext.ComputerBinding, id string) {
 		t.Helper()
 		if b.UserID != taskUser || b.SessionID != taskChild || b.TargetID != taskTarget || id != taskOp {
@@ -52,6 +53,9 @@ func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
 		calls++
 		if late {
 			f.chat = false
+		}
+		if lateGrant {
+			f.grant = false
 		}
 	}
 	native := nativeHTTPFixture{
@@ -115,10 +119,20 @@ func TestSessionTaskNativeHTTPAuthorityAndStrictInput(t *testing.T) {
 	}
 	late = false
 	f.chat = true
-	f.grant = false
+	lateGrant = true
+	body = call(http.MethodGet, "/content", "", true, 404)
+	if strings.Contains(body, "synthetic terminal") {
+		t.Fatal("late binding revocation leaked output")
+	}
+	lateGrant = false
 	before = calls
+	call(http.MethodGet, "/content", "", true, 404)
+	call(http.MethodPost, "/followup", in, true, 404)
+	f.grant = true
+	f.source = false
+	call(http.MethodGet, "/content", "", true, 404)
 	call(http.MethodPost, "/followup", in, true, 404)
 	if calls != before {
-		t.Fatal("revoked target submitted")
+		t.Fatal("revoked target reached native content or followup")
 	}
 }

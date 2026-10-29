@@ -44,6 +44,7 @@ type Workdirs interface {
 }
 type Targets interface {
 	AuthorizeOperationHistory(context.Context, agenvo.Scope) error
+	ResolveTarget(context.Context, agenvo.Scope) (agenvo.Target, error)
 }
 
 type Service struct {
@@ -403,4 +404,35 @@ func (s *Service) Get(ctx context.Context, bot, user, parent, kind, id string) (
 		return Task{}, ErrUnavailable
 	}
 	return s.project(ctx, bot, user, parent, rows[0])
+}
+
+// GetLive checks the original owned history before requiring a current device
+// registration. Live task actions must not treat historical visibility as a
+// grant to observe or interact with a retired or unbound device.
+func (s *Service) GetLive(ctx context.Context, bot, user, parent, kind, id string) (Task, error) {
+	item, err := s.Get(ctx, bot, user, parent, kind, id)
+	if err != nil {
+		return Task{}, err
+	}
+	if item.TaskType != ComputerOperation {
+		return Task{}, ErrUnavailable
+	}
+	if err := toolcontext.CheckComputerTarget(ctx, item.TargetID); err != nil {
+		return Task{}, ErrUnavailable
+	}
+	r, err := s.store.ReadComputerOperation(ctx, dbstore.ComputerOperationRecord{ID: id, BotID: bot, UserID: user, SessionID: item.SessionID})
+	if err != nil || r.ID != id || r.BotID != bot || r.UserID != user || r.SessionID != item.SessionID || r.TargetID != item.TargetID {
+		return Task{}, ErrUnavailable
+	}
+	var facts struct {
+		TargetSnapshot *agenvo.Target `json:"target_snapshot"`
+	}
+	if len(r.Details) > 2*1024*1024 || json.Unmarshal(r.Details, &facts) != nil {
+		return Task{}, ErrUnavailable
+	}
+	current, err := s.targets.ResolveTarget(toolcontext.WithComputerScope(ctx, item.TargetID), agenvo.Scope{BotID: bot, UserID: user, TargetID: item.TargetID})
+	if err != nil || !agenvo.HistoricalTargetMatches(current, facts.TargetSnapshot, r.TargetFingerprint) {
+		return Task{}, ErrUnavailable
+	}
+	return item, nil
 }

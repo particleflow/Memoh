@@ -148,7 +148,42 @@ func TestNativeProfileCutoverPersistedHistoryScope(t *testing.T) {
 		t.Fatal("history changed operation or invoked native transport")
 	}
 	f.exec(t, `UPDATE user_runtimes SET revoked_at=now() WHERE id=$1`, f.runtime)
+	checkRetiredHistory := func() {
+		t.Helper()
+		for _, input := range []map[string]any{args, historyArgs} {
+			got, readErr := source.CallTool(ctx, session, "computer_task_get", input)
+			if readErr != nil {
+				t.Fatal(readErr)
+			}
+			gotBytes, _ := json.Marshal(got)
+			expected := a
+			if _, page := input["history_offset"]; page {
+				expected = receiptBeforeBytes
+			}
+			if string(gotBytes) != string(expected) {
+				t.Fatal("retirement changed saved history")
+			}
+		}
+		for _, tool := range []string{"computer_task_result", "computer_task_cancel", "computer_task_logs", "computer_task_artifact"} {
+			if _, readErr := source.CallTool(ctx, session, tool, args); readErr == nil {
+				t.Fatalf("retired live path accepted: %s", tool)
+			}
+		}
+		saved, readErr := f.store.ReadComputerOperation(ctx, op)
+		savedBytes, _ := json.Marshal(saved)
+		if readErr != nil || string(before) != string(savedBytes) || calls != 0 {
+			t.Fatal("retirement changed ledger or invoked transport")
+		}
+	}
+	checkRetiredHistory()
+	f.exec(t, `DELETE FROM bot_remote_runtime_bindings WHERE id=$1`, f.mount)
+	checkRetiredHistory()
+	permission.denied = true
 	if _, err = source.CallTool(ctx, session, "computer_task_get", args); err == nil {
-		t.Fatal("revoked Runtime read")
+		t.Fatal("retired history bypassed Bot permission")
+	}
+	permission.denied = false
+	if _, err = foreignSource.CallTool(ctx, session, "computer_task_get", args); err == nil {
+		t.Fatal("retired history crossed team")
 	}
 }
