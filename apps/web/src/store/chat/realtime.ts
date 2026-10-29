@@ -21,6 +21,8 @@ interface RetryingStream {
 }
 
 interface SessionRuntimeConnection {
+  historyFailed: boolean
+  retryHistory: (() => void) | null
   prepared: boolean
   pending: RuntimeProjectionChange[]
   initialSnapshotReady: Promise<void>
@@ -88,12 +90,14 @@ export function createChatRealtimeController(
         ? sessionRuntimeConnections.get(sessionRuntimeKey(botId, sessionId))
         : undefined
       if (!botId || !connection) return
+      // A failed history read may settle before the first snapshot. Record
+      // readiness independently so reopening can commit the retried history.
+      if (change.event.type === 'runtime_snapshot') {
+        connection.resolveInitialSnapshot?.()
+        connection.resolveInitialSnapshot = null
+      }
       if (!connection.prepared) {
         connection.pending.push(change)
-        if (change.event.type === 'runtime_snapshot') {
-          connection.resolveInitialSnapshot?.()
-          connection.resolveInitialSnapshot = null
-        }
         return
       }
       callbacks.onRuntimeProjection(botId, sessionId, change)
@@ -224,12 +228,20 @@ export function createChatRealtimeController(
     const sid = sessionId.trim()
     if (!bid || !sid) return
     const key = sessionRuntimeKey(bid, sid)
-    if (sessionRuntimeConnections.has(key)) return
+    const existing = sessionRuntimeConnections.get(key)
+    if (existing) {
+      // A failed REST read is not a prepared history. Explicitly reopening the
+      // same session retries that read without replacing its live subscription.
+      if (existing.historyFailed) existing.retryHistory?.()
+      return
+    }
     let resolveInitialSnapshot!: () => void
     const initialSnapshotReady = new Promise<void>((resolve) => {
       resolveInitialSnapshot = resolve
     })
     const connection: SessionRuntimeConnection = {
+      historyFailed: false,
+      retryHistory: null,
       prepared: false,
       pending: [],
       initialSnapshotReady,
@@ -253,13 +265,22 @@ export function createChatRealtimeController(
       applyHistory()
       applyBufferedProjections()
     }
-    void callbacks.prepareSessionRuntime(bid, sid, commitInitialHistory)
-      .catch(error => console.error('Failed to load session messages:', error))
-      .finally(() => {
-        if (sessionRuntimeConnections.get(key) !== connection) return
-        connection.prepared = true
-        applyBufferedProjections()
-      })
+    connection.retryHistory = () => {
+      connection.historyFailed = false
+      connection.prepared = false
+      void callbacks.prepareSessionRuntime(bid, sid, commitInitialHistory)
+        .catch(error => {
+          if (sessionRuntimeConnections.get(key) !== connection) return
+          connection.historyFailed = true
+          console.error('Failed to load session messages:', error)
+        })
+        .finally(() => {
+          if (sessionRuntimeConnections.get(key) !== connection) return
+          connection.prepared = true
+          applyBufferedProjections()
+        })
+    }
+    connection.retryHistory()
   }
 
   function stopBotSessionsActivityStream() {

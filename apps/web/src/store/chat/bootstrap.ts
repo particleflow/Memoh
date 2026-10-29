@@ -381,6 +381,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     deps.draftIntent.value = false
     deps.explicitSessionSelection.value = options.explicitSelection !== false
     if (!sameSession) switchActiveSession(sessionId, previousSessionId)
+    else deps.startSessionRuntime(botId, sessionId)
     await deps.ensureSessionSummary(botId, sessionId, requestId)
   }
 

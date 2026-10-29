@@ -132,6 +132,7 @@ const isChatRoute = () => CHAT_ROUTE_NAMES.has(route.name as string)
 // A first send's session is titled like the draft it came from until the
 // server confirms the send (see isSessionTentative).
 useTitle(() => {
+  if (isChatRoute() && currentBotId.value && workspaceTabs.activeContactTitle) return `Memoh · ${workspaceTabs.activeContactTitle}`
   const session = activeSession.value
   if (!isChatRoute() || !currentBotId.value || !session || chatStore.isSessionTentative(session.id)) return 'Memoh'
   const title = (session.title ?? '').trim() || routeConversationLabel(session) || t('chat.untitledSession')

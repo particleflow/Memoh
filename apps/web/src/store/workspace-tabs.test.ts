@@ -234,6 +234,7 @@ vi.mock('@/store/chat-list', () => ({
     bots: [
       {
         id: 'bot-1',
+        display_name: 'Primary Bot',
         current_user_permissions: ['manage', 'workspace_exec', 'workspace_read'],
       },
       {
@@ -1482,6 +1483,40 @@ describe('workspace layout store', () => {
     store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false })
     expect(dock.panels).toHaveLength(1)
     expect(dock.activePanel?.params.sessionId).toBe('contact')
+  })
+
+  it.each(['', 'An old conversation title'])('labels the contact with its Bot while preserving history title %j', async title => {
+    chatStoreMock.contactNavigationPending = true
+    chatStoreMock.knownSessions.push({ id: 'contact', title })
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    await nextTick()
+    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false, contactView: true })
+    const contactId = dock.activePanel!.id
+    expect(dock.activePanel?.api.title).toBe('Primary Bot')
+    expect(store.activeContactTitle).toBe('Primary Bot')
+    store.openSessionChatPinned({ sessionId: 'contact', title: 'Original history' })
+    expect(dock.activePanel?.api.title).toBe('Original history')
+    expect(store.activeContactTitle).toBe('')
+    expect(dock.getPanel(contactId)?.api.title).toBe('Primary Bot')
+    store.openSessionChatPinned({ sessionId: 'contact', explicitSelection: false, contactView: true })
+    expect(dock.activePanel?.id).toBe(contactId)
+    expect(chatStoreMock.knownSessions[0]?.title).toBe(title)
+  })
+
+  it('repairs a persisted unnamed contact title without changing its session identity', async () => {
+    localStorage.setItem('workspace-layout', JSON.stringify({
+      'bot-1': { layout: persistedLayoutWithPanel('chat:bot-1:1', 'chat', { sessionId: 'original-contact', contactView: true, explicitSelection: false }, 'Untitled Session'), ephemeralIds: [] },
+    }))
+    chatStoreMock.contactNavigationPending = true
+    const store = useWorkspaceTabsStore()
+    const dock = createFakeDock()
+    store.registerApi(dock as never)
+    await nextTick()
+    expect(dock.getPanel('chat:bot-1:1')?.api.title).toBe('Primary Bot')
+    expect(dock.getPanel('chat:bot-1:1')?.params.sessionId).toBe('original-contact')
+    expect(chatStoreMock.createNewSession).not.toHaveBeenCalled()
   })
 
   it('keeps contact and history projections separate even for the same session', async () => {
