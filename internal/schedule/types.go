@@ -57,17 +57,20 @@ type ExecutionConfig struct {
 }
 
 type Schedule struct {
-	ID           string    `json:"id"`
-	Name         string    `json:"name"`
-	Description  string    `json:"description"`
-	Pattern      string    `json:"pattern"`
-	MaxCalls     *int      `json:"max_calls,omitempty"`
-	CurrentCalls int       `json:"current_calls"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
-	Enabled      bool      `json:"enabled"`
-	Command      string    `json:"command"`
-	BotID        string    `json:"bot_id"`
+	// Host-owned registration credential, never accepted from API/tool input.
+	// It authorizes a new occurrence claim, not continuation of a claimed fire.
+	registrationGeneration int64
+	ID                     string    `json:"id"`
+	Name                   string    `json:"name"`
+	Description            string    `json:"description"`
+	Pattern                string    `json:"pattern"`
+	MaxCalls               *int      `json:"max_calls,omitempty"`
+	CurrentCalls           int       `json:"current_calls"`
+	CreatedAt              time.Time `json:"created_at"`
+	UpdatedAt              time.Time `json:"updated_at"`
+	Enabled                bool      `json:"enabled"`
+	Command                string    `json:"command"`
+	BotID                  string    `json:"bot_id"`
 	ExecutionConfig
 }
 

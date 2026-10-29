@@ -93,10 +93,15 @@ func (s *Service) runScheduleOccurrence(ctx context.Context, sched Schedule, due
 	if due.IsZero() {
 		return errors.New("schedule occurrence time missing")
 	}
-	claimed, err := s.queries.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{ScheduleID: toUUID(sched.ID), ScheduledFor: pgtype.Timestamptz{Time: due.UTC(), Valid: true}})
+	// Use the credential captured by this registration, never reload the latest
+	// generation here: doing so would reauthorize a pre-pause callback on resume.
+	claimed, err := s.queries.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{
+		ScheduleID: toUUID(sched.ID), ScheduledFor: pgtype.Timestamptz{Time: due.UTC(), Valid: true},
+		RegistrationGeneration: sched.registrationGeneration,
+	})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil
-	} // paused/deleted, or another callback already owns this occurrence
+	} // paused/deleted/replaced registration, or another callback owns this occurrence
 	if err != nil {
 		return err
 	} // uncertain write: never create a second fire

@@ -55,13 +55,14 @@ func (q *Queries) BindScheduleOccurrenceSession(ctx context.Context, arg BindSch
 
 const claimScheduleOccurrence = `-- name: ClaimScheduleOccurrence :one
 WITH eligible AS MATERIALIZED (
- SELECT s.limit_disabled, s.result_origin, s.max_run_seconds, s.id, s.name, s.description, s.pattern, s.max_calls, s.current_calls, s.created_at, s.updated_at, s.deleted_at, s.enabled, s.command, s.bot_id, s.run_target, s.target_session_id, s.runtime_type, s.bot_agent_id, s.acp_agent_id, s.model_id, s.acp_model_id, s.reasoning_effort, s.workdir_id, s.team_id FROM schedule s
+ SELECT s.limit_disabled, s.registration_generation, s.result_origin, s.max_run_seconds, s.id, s.name, s.description, s.pattern, s.max_calls, s.current_calls, s.created_at, s.updated_at, s.deleted_at, s.enabled, s.command, s.bot_id, s.run_target, s.target_session_id, s.runtime_type, s.bot_agent_id, s.acp_agent_id, s.model_id, s.acp_model_id, s.reasoning_effort, s.workdir_id, s.team_id FROM schedule s
  WHERE s.team_id=public.memoh_current_team_id() AND s.id=$1::uuid
  AND s.deleted_at IS NULL AND s.enabled AND s.result_origin->>'version'='1'
+ AND s.registration_generation=$2::bigint
  FOR UPDATE
 ), claimed AS (
  INSERT INTO schedule_logs (schedule_id,bot_id,result_origin,scheduled_for,claim_deadline,claim_state)
- SELECT s.id,s.bot_id,s.result_origin,$2::timestamptz,
+ SELECT s.id,s.bot_id,s.result_origin,$3::timestamptz,
    clock_timestamp()+make_interval(secs => s.max_run_seconds), 'claimed'
  FROM eligible s
  ON CONFLICT (team_id,schedule_id,scheduled_for) WHERE scheduled_for IS NOT NULL DO NOTHING
@@ -78,8 +79,9 @@ SELECT c.scheduled_for, c.claim_deadline, c.claim_state, c.result_origin, c.resu
 `
 
 type ClaimScheduleOccurrenceParams struct {
-	ScheduleID   pgtype.UUID        `json:"schedule_id"`
-	ScheduledFor pgtype.Timestamptz `json:"scheduled_for"`
+	ScheduleID             pgtype.UUID        `json:"schedule_id"`
+	RegistrationGeneration int64              `json:"registration_generation"`
+	ScheduledFor           pgtype.Timestamptz `json:"scheduled_for"`
 }
 
 type ClaimScheduleOccurrenceRow struct {
@@ -106,10 +108,11 @@ type ClaimScheduleOccurrenceRow struct {
 // One durable fire per exact due instant, across callbacks and processes.
 // Counting is in the same statement and only the winning insert may count.
 // Serialize this authorization with pause/delete/update on the same row.
-// Under READ COMMITTED, a waiter rechecks enabled after the updater commits.
+// Under READ COMMITTED, a waiter rechecks enabled and the captured registration
+// generation after the updater commits, including a pause followed by resume.
 // A committed claim is the admission grant: pausing does not cancel it.
 func (q *Queries) ClaimScheduleOccurrence(ctx context.Context, arg ClaimScheduleOccurrenceParams) (ClaimScheduleOccurrenceRow, error) {
-	row := q.db.QueryRow(ctx, claimScheduleOccurrence, arg.ScheduleID, arg.ScheduledFor)
+	row := q.db.QueryRow(ctx, claimScheduleOccurrence, arg.ScheduleID, arg.RegistrationGeneration, arg.ScheduledFor)
 	var i ClaimScheduleOccurrenceRow
 	err := row.Scan(
 		&i.ScheduledFor,

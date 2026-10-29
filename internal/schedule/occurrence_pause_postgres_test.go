@@ -88,6 +88,10 @@ func TestScheduleOccurrencePausePostgres(t *testing.T) {
 	// Pause has the row lock but is not committed. Other connection callbacks
 	// must wait; after commit they must recheck enabled, not their old snapshot.
 	exec(`UPDATE schedule SET enabled=true WHERE id=$1`, plan)
+	row, e = q.GetScheduleByID(ctx, toUUID(plan))
+	if e != nil {
+		t.Fatal(e)
+	}
 	tx, e := pool.Begin(ctx)
 	if e != nil {
 		t.Fatal(e)
@@ -142,6 +146,10 @@ func TestScheduleOccurrencePausePostgres(t *testing.T) {
 	// Opposite ordering: durable claim wins before pause. Preserve that grant,
 	// exact fire/result origin/deadline, and let its original execution finish.
 	exec(`UPDATE schedule SET enabled=true WHERE id=$1`, plan)
+	row, e = q.GetScheduleByID(ctx, toUUID(plan))
+	if e != nil {
+		t.Fatal(e)
+	}
 	creator.entered = make(chan struct{}, 1)
 	creator.release = make(chan struct{})
 	var release sync.Once
@@ -199,8 +207,12 @@ func TestScheduleOccurrencePausePostgres(t *testing.T) {
 
 	// A previously uncertain occurrence is never reopened by resume/replay.
 	exec(`UPDATE schedule SET enabled=true WHERE id=$1`, plan)
+	row, e = q.GetScheduleByID(ctx, toUUID(plan))
+	if e != nil {
+		t.Fatal(e)
+	}
 	unknownDue := due.Add(30 * time.Minute)
-	unknown, e := q.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{ScheduleID: toUUID(plan), ScheduledFor: pgtype.Timestamptz{Time: unknownDue, Valid: true}})
+	unknown, e := q.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{ScheduleID: toUUID(plan), RegistrationGeneration: row.RegistrationGeneration, ScheduledFor: pgtype.Timestamptz{Time: unknownDue, Valid: true}})
 	if e != nil {
 		t.Fatal(e)
 	}
@@ -209,13 +221,17 @@ func TestScheduleOccurrencePausePostgres(t *testing.T) {
 		t.Fatal(e)
 	}
 	exec(`UPDATE schedule SET enabled=true WHERE id=$1`, plan)
+	row, e = q.GetScheduleByID(ctx, toUUID(plan))
+	if e != nil {
+		t.Fatal(e)
+	}
 	if e = b.runScheduleOccurrence(ctx, toSchedule(row), unknownDue); e != nil {
 		t.Fatal(e)
 	}
 	if creator.calls.Load() != 1 || trigger.calls.Load() != 1 {
 		t.Fatal("unknown replayed after pause/resume")
 	}
-	if _, e = q.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{ScheduleID: toUUID(plan), ScheduledFor: pgtype.Timestamptz{Time: unknownDue, Valid: true}}); !errors.Is(e, pgx.ErrNoRows) {
+	if _, e = q.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{ScheduleID: toUUID(plan), RegistrationGeneration: row.RegistrationGeneration, ScheduledFor: pgtype.Timestamptz{Time: unknownDue, Valid: true}}); !errors.Is(e, pgx.ErrNoRows) {
 		t.Fatal(e)
 	}
 	t.Log("captured paused callback: zero fire/count/execution; 8 callbacks/2 services launched against uncommitted pause, database lock waiter observed, all denied; prior claim retains exact native run/result/origin/7200s budget; unknown not replayed; no cron started or model called")
