@@ -1,0 +1,35 @@
+{
+  "shared": "69452d9d5a0338be0be704c2107bb914a75b5ab2",
+  "tree": "c829b59168abf8615a86346298b47999b0ecda39",
+  "mappedFiles": 143,
+  "sharedDeletions": 4,
+  "presentByteIdentical": 122,
+  "nativeAdapted": 17,
+  "retainedAdapterCount": 47,
+  "changedV13AdapterRecords": [
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/components/message-item.vue"
+  ],
+  "SDK4Unchanged": true,
+  "nativeETSUnchangedSincePassedAPI26": true,
+  "newHAP": false,
+  "newVersion": false,
+  "schema180AssumedDeployed": false,
+  "phoneAccepted": false,
+  "completeGeneratedWebTypes": "passed",
+  "focusedSeams": {
+    "testFiles": 4,
+    "passed": 16
+  },
+  "twoAdaptedTestFilesESLint": "passed",
+  "sourceInventory": "179 text,7 approvedPNG,195files passed",
+  "oldV12ChecksReused": true,
+  "officialAPI26CompatibilityReceiptReused": true,
+  "newAPI26NativeCompile": false,
+  "publicSourceOnly": true,
+  "HAP28Rebuilt": false,
+  "sourceArchiveSHA256": "d9724fc0035937823dc0e55666bf88100a3db2e59394c519252cdf999942e19b",
+  "sourceArchiveBytes": 3145672,
+  "sourceManifestEntries": 296,
+  "currentContextFilesCompared": 6995
+}

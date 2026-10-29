@@ -1,0 +1,995 @@
+[
+  {
+    "path": "apps/web/src/components/add-provider/index.vue",
+    "state": "present",
+    "sha256": "a6fa5a08899d62a8c79caacf079c6b858ed9c1f80d63fbf12d2cc9cb4312b854",
+    "phoneSHA256": "a6fa5a08899d62a8c79caacf079c6b858ed9c1f80d63fbf12d2cc9cb4312b854",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/chat-examples/chat-example-gallery-dialog.vue",
+    "state": "present",
+    "sha256": "c623ba7697774dc34f5b72879a0afbdeab7c43cfaa0f9532cacc22d5e090b56a",
+    "phoneSHA256": "c623ba7697774dc34f5b72879a0afbdeab7c43cfaa0f9532cacc22d5e090b56a",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/color-scheme-card/index.vue",
+    "state": "present",
+    "sha256": "69bd3367b37cee6cc8da6c0ad014fe35e7eba8aacadc13a0cf5a120f611b02f1",
+    "phoneSHA256": "69bd3367b37cee6cc8da6c0ad014fe35e7eba8aacadc13a0cf5a120f611b02f1",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/computer/bot-computer-access-dialog.vue",
+    "state": "present",
+    "sha256": "4c7b4eda1562e636b452ffbc44a52c506726688b5b06f60e163931c8f6af5b26",
+    "phoneSHA256": "4c7b4eda1562e636b452ffbc44a52c506726688b5b06f60e163931c8f6af5b26",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/computer/connect-computer-dialog.vue",
+    "state": "present",
+    "sha256": "8c7445d7dffca89c88e9498fceb3832703698c2bab36df14f0d2aec872c2a479",
+    "phoneSHA256": "8c7445d7dffca89c88e9498fceb3832703698c2bab36df14f0d2aec872c2a479",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/folder-create-dialog.vue",
+    "state": "present",
+    "sha256": "074a4d61c450015abd4057e829916ff452abdb4505dd692eda5f8781e7cbb6a6",
+    "phoneSHA256": "074a4d61c450015abd4057e829916ff452abdb4505dd692eda5f8781e7cbb6a6",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/folders-section.vue",
+    "state": "present",
+    "sha256": "74837707cadd430d8e23d639a8288816d44fc807d69b652a5bf22f441ca50419",
+    "phoneSHA256": "74837707cadd430d8e23d639a8288816d44fc807d69b652a5bf22f441ca50419",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/panel-sessions.vue",
+    "state": "present",
+    "sha256": "cf1b45f15ed7108721107dd504b20ce22cba365765661483d2751f22ab964c6f",
+    "phoneSHA256": "cf1b45f15ed7108721107dd504b20ce22cba365765661483d2751f22ab964c6f",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/panel-supermarket.vue",
+    "state": "present",
+    "sha256": "ac2f55cb0edccc3b4ed9691d910e6e32b9e0eadfa5f8016876d97f399a206687",
+    "phoneSHA256": "ac2f55cb0edccc3b4ed9691d910e6e32b9e0eadfa5f8016876d97f399a206687",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/recents.vue",
+    "state": "present",
+    "sha256": "85011cc3e32c0736c1816754454d1519befceb76744db2d968b7bd1b925fe2e8",
+    "phoneSHA256": "85011cc3e32c0736c1816754454d1519befceb76744db2d968b7bd1b925fe2e8",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/session-dialogs.vue",
+    "state": "deleted",
+    "sha256": null
+  },
+  {
+    "path": "apps/web/src/components/sidebar/session-item.readonly.test.ts",
+    "state": "present",
+    "sha256": "2b644a404a47d08937fd145bcc933c1fcedab98af018acf2ee8d2ab6f83397e6",
+    "phoneSHA256": "2b644a404a47d08937fd145bcc933c1fcedab98af018acf2ee8d2ab6f83397e6",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/session-item.vue",
+    "state": "present",
+    "sha256": "a6882503e422a39e8409796e0adca9602037dee324b7fbd201b47f12a1feb527",
+    "phoneSHA256": "a6882503e422a39e8409796e0adca9602037dee324b7fbd201b47f12a1feb527",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/components/sidebar/session-selection-bar.vue",
+    "state": "deleted",
+    "sha256": null
+  },
+  {
+    "path": "apps/web/src/components/sidebar/session-selection.test.ts",
+    "state": "deleted",
+    "sha256": null
+  },
+  {
+    "path": "apps/web/src/components/sidebar/session-selection.ts",
+    "state": "deleted",
+    "sha256": null
+  },
+  {
+    "path": "apps/web/src/composables/api/useChat.chat-api.ts",
+    "state": "present",
+    "sha256": "5b8d3d449d0c9cd5565667881ddadb991abcaeb1e4eed73fe393a47e5b92c34d",
+    "phoneSHA256": "5b8d3d449d0c9cd5565667881ddadb991abcaeb1e4eed73fe393a47e5b92c34d",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/i18n/locales/en.json",
+    "state": "present",
+    "sha256": "d356367501241d68f4905da5a2114832b486b514416f9e402e385cc149b504da",
+    "phoneSHA256": "d63184dfe7b85a4daf45eaddcc46950d86d4b6fb17ab2bbf159020bde0d9e97e",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/i18n/locales/ja.json",
+    "state": "present",
+    "sha256": "c340ff2bc53ca094bc1ea0741b23ebb7e67d2c6411cfec0a2e9fa7222530249b",
+    "phoneSHA256": "49e427b31e05fcc31ebabd5d9abc9a2293fb5d5404e0d5622150767c61d77212",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/i18n/locales/zh.json",
+    "state": "present",
+    "sha256": "f0146349c4277ed08326808878ff8d065b2a3c37f4ac2c64465fcc565cbb5f29",
+    "phoneSHA256": "13bc6bed2b83ffe10321b3b976a39d5eb0bd7b3f187f959ca3e5a8ce40098bc7",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/lib/keyboard-bindings.ts",
+    "state": "present",
+    "sha256": "73c33b3cfe1fe484d854554af76a34e218af5a9dc407374882a5af4dff275dcc",
+    "phoneSHA256": "73c33b3cfe1fe484d854554af76a34e218af5a9dc407374882a5af4dff275dcc",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/about/index.vue",
+    "state": "present",
+    "sha256": "f34a00172f23b7d0c7765184539593edc95d22b82028661d2b6b87f1fdf06b4a",
+    "phoneSHA256": "f34a00172f23b7d0c7765184539593edc95d22b82028661d2b6b87f1fdf06b4a",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/appearance/index.vue",
+    "state": "present",
+    "sha256": "ff8a66e04247d2c236e9b78299523090fd89ad453718dac68329906e1f159c4b",
+    "phoneSHA256": "5d3f8d1177d2f8338dffe2547afa4ceff596b473520c7f7abc91016227e36b2b",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/acp-managed-fields.vue",
+    "state": "present",
+    "sha256": "37be63cde6624816eb941a9b2101d9c3229b94c5906c0db695a7fdb8e0a29e06",
+    "phoneSHA256": "37be63cde6624816eb941a9b2101d9c3229b94c5906c0db695a7fdb8e0a29e06",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/acp-setup-panel.vue",
+    "state": "present",
+    "sha256": "8e1554c1d1eec9a9b315e055206005a59d99d53c3bb8ea2aa6915dd3f4c70bb3",
+    "phoneSHA256": "8e1554c1d1eec9a9b315e055206005a59d99d53c3bb8ea2aa6915dd3f4c70bb3",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/agent-authorization.vue",
+    "state": "present",
+    "sha256": "25623c397911dd01c9e73edb68007b42ede4ce57d2c60f13040055d1f33316cb",
+    "phoneSHA256": "25623c397911dd01c9e73edb68007b42ede4ce57d2c60f13040055d1f33316cb",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/app-connector-auth-form.vue",
+    "state": "present",
+    "sha256": "f0f814f5e36bb84f704418e8388604bca474d81eba71ad68e9831249e134e87d",
+    "phoneSHA256": "f0f814f5e36bb84f704418e8388604bca474d81eba71ad68e9831249e134e87d",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/app-detail-panel.vue",
+    "state": "present",
+    "sha256": "f227817b0cca7d02fdf37eb776ed017d5a9397f7632fa432fb40455b8c44a5ae",
+    "phoneSHA256": "f227817b0cca7d02fdf37eb776ed017d5a9397f7632fa432fb40455b8c44a5ae",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/app-progress-dialog.vue",
+    "state": "present",
+    "sha256": "0a0ab934e289fcea92708ac3a58738c4d0c4ac211edc58f287a8aaaaa0a1c044",
+    "phoneSHA256": "0a0ab934e289fcea92708ac3a58738c4d0c4ac211edc58f287a8aaaaa0a1c044",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/backup-section-cards.vue",
+    "state": "present",
+    "sha256": "6925292928651b3d5390b0057f1d5213be0b38204087dc8f43e401e21ba1026c",
+    "phoneSHA256": "6925292928651b3d5390b0057f1d5213be0b38204087dc8f43e401e21ba1026c",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-access.vue",
+    "state": "present",
+    "sha256": "0923051156e206154b9d62b835d160b2849767e1544eaef80791b177ebab1843",
+    "phoneSHA256": "0923051156e206154b9d62b835d160b2849767e1544eaef80791b177ebab1843",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-advanced.vue",
+    "state": "present",
+    "sha256": "c86421de57b4d54487c1a43d0a1fe3ee1b73f46413b3c3ae6b3f3a2edae2f30d",
+    "phoneSHA256": "c86421de57b4d54487c1a43d0a1fe3ee1b73f46413b3c3ae6b3f3a2edae2f30d",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-agents.vue",
+    "state": "present",
+    "sha256": "0bec22e459111041c70b8b3cb983b1e3490e73843adb6f07ba928b8b2ac3e98c",
+    "phoneSHA256": "0bec22e459111041c70b8b3cb983b1e3490e73843adb6f07ba928b8b2ac3e98c",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-apps.vue",
+    "state": "present",
+    "sha256": "724eceb22ac5d7338382efb69fa15c8e449b7105ecd3d67d65ebddde1d23c728",
+    "phoneSHA256": "724eceb22ac5d7338382efb69fa15c8e449b7105ecd3d67d65ebddde1d23c728",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-backup-actions.vue",
+    "state": "present",
+    "sha256": "7137a3865ceb08d1dbde021067b337c24a2a44c0f68f4f7b1c2db66d8bf355e1",
+    "phoneSHA256": "7137a3865ceb08d1dbde021067b337c24a2a44c0f68f4f7b1c2db66d8bf355e1",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-channels.vue",
+    "state": "present",
+    "sha256": "299c3c5093163f3ebdccc0eb50f7ae7836c0c3954043957d006b228ed67e3988",
+    "phoneSHA256": "299c3c5093163f3ebdccc0eb50f7ae7836c0c3954043957d006b228ed67e3988",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-checks-panel.vue",
+    "state": "present",
+    "sha256": "cb2695f26cd5c0090b89cc923a2a1f7a846d320043a4335d9623016af82f5ff8",
+    "phoneSHA256": "cb2695f26cd5c0090b89cc923a2a1f7a846d320043a4335d9623016af82f5ff8",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-compaction.vue",
+    "state": "present",
+    "sha256": "ca5c5691d4fced1c25eb0d0ba6751c043ff8ef8dcd37869baad7043c850027da",
+    "phoneSHA256": "ca5c5691d4fced1c25eb0d0ba6751c043ff8ef8dcd37869baad7043c850027da",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-container.vue",
+    "state": "present",
+    "sha256": "a10c22877f90f4bd12a0de6a01afa07a06360a05660710e815173ddcc233fc59",
+    "phoneSHA256": "a10c22877f90f4bd12a0de6a01afa07a06360a05660710e815173ddcc233fc59",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-desktop.vue",
+    "state": "present",
+    "sha256": "b45bbc962b054b44730ad1b52e4a49f3fa700e89cbf1f78b837ddd61cea51b39",
+    "phoneSHA256": "b45bbc962b054b44730ad1b52e4a49f3fa700e89cbf1f78b837ddd61cea51b39",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-hooks.vue",
+    "state": "present",
+    "sha256": "f7c644b8983c71630ab78ed1dfa778f064e997349582bd982b217f0c5edcac8a",
+    "phoneSHA256": "f7c644b8983c71630ab78ed1dfa778f064e997349582bd982b217f0c5edcac8a",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-import-panel.vue",
+    "state": "present",
+    "sha256": "c368561fb15a01c6f27f22aebc717e9c2a6ad253ef9411ae796a7a5aa16f5de5",
+    "phoneSHA256": "c368561fb15a01c6f27f22aebc717e9c2a6ad253ef9411ae796a7a5aa16f5de5",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-mcp.vue",
+    "state": "present",
+    "sha256": "7923352d92b0f6054fc050ead4dce37ce7d9d613ab49ff30db148623b7cab3a8",
+    "phoneSHA256": "7923352d92b0f6054fc050ead4dce37ce7d9d613ab49ff30db148623b7cab3a8",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-memory.vue",
+    "state": "present",
+    "sha256": "4f585c7c3b2558af44b3466635b6b6ac65627e97e25d640a56bdf028229c0b5f",
+    "phoneSHA256": "4f585c7c3b2558af44b3466635b6b6ac65627e97e25d640a56bdf028229c0b5f",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-network.vue",
+    "state": "present",
+    "sha256": "02f393e0486712b7d54634b70a6df55802e08af65051617f1cd67556f0853744",
+    "phoneSHA256": "02f393e0486712b7d54634b70a6df55802e08af65051617f1cd67556f0853744",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-overview.vue",
+    "state": "present",
+    "sha256": "4450ed6a6f35af2101c39d4275464096ca62ec3995a9203fd27d95e484cd30eb",
+    "phoneSHA256": "4450ed6a6f35af2101c39d4275464096ca62ec3995a9203fd27d95e484cd30eb",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-remote-runtime.vue",
+    "state": "present",
+    "sha256": "cb80e21df1c2c1dc7c42ac20bb487924e288865f7e780f98336ecffd3615f3b9",
+    "phoneSHA256": "cb80e21df1c2c1dc7c42ac20bb487924e288865f7e780f98336ecffd3615f3b9",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-schedule.vue",
+    "state": "present",
+    "sha256": "8e977636b6b24e03cd320f924918640b9bea8e2dddf2b2702eaa681b9e456a81",
+    "phoneSHA256": "8e977636b6b24e03cd320f924918640b9bea8e2dddf2b2702eaa681b9e456a81",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-settings.vue",
+    "state": "present",
+    "sha256": "fd3f4117af8dfe44004ef717961ab25175b0243265270c267c80d49514638773",
+    "phoneSHA256": "fd3f4117af8dfe44004ef717961ab25175b0243265270c267c80d49514638773",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-tool-approval.vue",
+    "state": "present",
+    "sha256": "6d6e0627a4f65d3850296c23530df0362e8d3a4163bee7740bda9a05a1c8cae3",
+    "phoneSHA256": "6d6e0627a4f65d3850296c23530df0362e8d3a4163bee7740bda9a05a1c8cae3",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/bot-user-access.vue",
+    "state": "present",
+    "sha256": "b72ddbc08257ddedf4cc787380dc4902086559145124fd01baf610810eab2b6b",
+    "phoneSHA256": "b72ddbc08257ddedf4cc787380dc4902086559145124fd01baf610810eab2b6b",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/channel-field.vue",
+    "state": "present",
+    "sha256": "2cab18a9cbbc6ca3ef985716fb40a528ccdc8d647d45ac3de390145d48b46616",
+    "phoneSHA256": "2cab18a9cbbc6ca3ef985716fb40a528ccdc8d647d45ac3de390145d48b46616",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/channel-settings-panel.vue",
+    "state": "present",
+    "sha256": "9df28ddb36fd4e5ce7542a249341821341600c00f076d5469b13dbff8a55145e",
+    "phoneSHA256": "9df28ddb36fd4e5ce7542a249341821341600c00f076d5469b13dbff8a55145e",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/dependency-confirm-dialog.vue",
+    "state": "present",
+    "sha256": "f12c705ff5fc4e0a0040ebba8ace80e3cb0a834135d2faa0099ad64acf6f8e37",
+    "phoneSHA256": "f12c705ff5fc4e0a0040ebba8ace80e3cb0a834135d2faa0099ad64acf6f8e37",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/dependency-progress-dialog.vue",
+    "state": "present",
+    "sha256": "fee77e2cba3b1117c33f3de6a40bf8f3c5be9b9002afb2d57a6fbb8dbe03df47",
+    "phoneSHA256": "fee77e2cba3b1117c33f3de6a40bf8f3c5be9b9002afb2d57a6fbb8dbe03df47",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/dependency-row.vue",
+    "state": "present",
+    "sha256": "aae1602d713ba033f233f373f9ac83ad191a006a0bd4dc80759c21a5286bf98d",
+    "phoneSHA256": "aae1602d713ba033f233f373f9ac83ad191a006a0bd4dc80759c21a5286bf98d",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/device-login-panel.vue",
+    "state": "present",
+    "sha256": "82c63018a857faf95d6c7df3796622ad7978260e5a14d207d0aac3f22ea32bd5",
+    "phoneSHA256": "82c63018a857faf95d6c7df3796622ad7978260e5a14d207d0aac3f22ea32bd5",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/mcp-server-detail.vue",
+    "state": "present",
+    "sha256": "54f0b1f26a8f993430335059057ca5199e9a315af104da3fde604ce2757f7f60",
+    "phoneSHA256": "54f0b1f26a8f993430335059057ca5199e9a315af104da3fde604ce2757f7f60",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/memory-advanced-actions.vue",
+    "state": "present",
+    "sha256": "34884102d6b806c1339d2867ad1cf15bf936126f1f8b9a4a8f4775da5f2da21c",
+    "phoneSHA256": "34884102d6b806c1339d2867ad1cf15bf936126f1f8b9a4a8f4775da5f2da21c",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/schedule-editor.vue",
+    "state": "present",
+    "sha256": "65f57c78261a37b30d91b0ed5e323d279424a39abde50299ff78b237444a78e2",
+    "phoneSHA256": "65f57c78261a37b30d91b0ed5e323d279424a39abde50299ff78b237444a78e2",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/schedule-execution-fields.vue",
+    "state": "present",
+    "sha256": "e11fc4e2d9ab29869dfd9fbd72b7eef15babfeba04d837ed0ddd7603ed51a453",
+    "phoneSHA256": "e11fc4e2d9ab29869dfd9fbd72b7eef15babfeba04d837ed0ddd7603ed51a453",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/settings-acp-detail.vue",
+    "state": "present",
+    "sha256": "2f012108ea07472b449a830e687e176c3e1d26afe91e88295b05f438446e6924",
+    "phoneSHA256": "2f012108ea07472b449a830e687e176c3e1d26afe91e88295b05f438446e6924",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/settings-context-card.vue",
+    "state": "present",
+    "sha256": "5edf4fefad8b05eb02bf9bad877f58279e14edc68d73dca99a61e3c4f918000f",
+    "phoneSHA256": "5edf4fefad8b05eb02bf9bad877f58279e14edc68d73dca99a61e3c4f918000f",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/settings-direct-agent-detail.vue",
+    "state": "present",
+    "sha256": "639c7a592bdf1edda85c4a16feca6d93a90467fa386fdc6a2d30f9cc7593f064",
+    "phoneSHA256": "639c7a592bdf1edda85c4a16feca6d93a90467fa386fdc6a2d30f9cc7593f064",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/settings-interaction-card.vue",
+    "state": "present",
+    "sha256": "b241393d423cadcdf5a06d49bbb8e9decb86f4548c4e96c2dd7a4da269858452",
+    "phoneSHA256": "b241393d423cadcdf5a06d49bbb8e9decb86f4548c4e96c2dd7a4da269858452",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/components/weixin-qr-login.vue",
+    "state": "present",
+    "sha256": "99ed38c3741fb9638f950368842ea68446e56fe60eeee2b969cf7160f57dade5",
+    "phoneSHA256": "99ed38c3741fb9638f950368842ea68446e56fe60eeee2b969cf7160f57dade5",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/detail.vue",
+    "state": "present",
+    "sha256": "32a50e4aa2bafdd2cdb9e0f9987203ddd468a1cf673d4fa32e8b5a8cfbac4968",
+    "phoneSHA256": "32a50e4aa2bafdd2cdb9e0f9987203ddd468a1cf673d4fa32e8b5a8cfbac4968",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/index.vue",
+    "state": "present",
+    "sha256": "af9e2ff08cc2cd66db1a1de0a0a68482acabb14f4836114bc260b699b19f9bb3",
+    "phoneSHA256": "af9e2ff08cc2cd66db1a1de0a0a68482acabb14f4836114bc260b699b19f9bb3",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/bots/new.vue",
+    "state": "present",
+    "sha256": "9b89776c3780b631788930cf5442ad7ebbb1f080f17a78c9f8ce5aac84fc032e",
+    "phoneSHA256": "9b89776c3780b631788930cf5442ad7ebbb1f080f17a78c9f8ce5aac84fc032e",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/commands/workbench-commands.ts",
+    "state": "present",
+    "sha256": "24df4cbe92fc62402d3b8f3b4348b3bb4f6df84be6b0ffc9f64a4504a00c7f51",
+    "phoneSHA256": "24df4cbe92fc62402d3b8f3b4348b3bb4f6df84be6b0ffc9f64a4504a00c7f51",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/bot-delegation-run.vue",
+    "state": "present",
+    "sha256": "036c02b7597f0d58c79459b0d5852ee063cc5baac1a2fe1e6b29a69e7a6ca707",
+    "phoneSHA256": "036c02b7597f0d58c79459b0d5852ee063cc5baac1a2fe1e6b29a69e7a6ca707",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/bot-delegation-tasks.vue",
+    "state": "present",
+    "sha256": "0fc1c305895a79ddae527a5d7df9125f24b50b9a74ca88e05b162a8d3de66a53",
+    "phoneSHA256": "0fc1c305895a79ddae527a5d7df9125f24b50b9a74ca88e05b162a8d3de66a53",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/bot-task-directory.vue",
+    "state": "present",
+    "sha256": "a92e9ce1afd1b519704ee25fa821f813c84b5ff9bc624916b8bde5aa7ac820ba",
+    "phoneSHA256": "a92e9ce1afd1b519704ee25fa821f813c84b5ff9bc624916b8bde5aa7ac820ba",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/chat-fork-dialog.vue",
+    "state": "present",
+    "sha256": "c768f8385971cf110eb6f5e39d39b7d9b42a716c0948923d03f88ff570866ade",
+    "phoneSHA256": "c768f8385971cf110eb6f5e39d39b7d9b42a716c0948923d03f88ff570866ade",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/chat-pane.vue",
+    "state": "present",
+    "sha256": "f2fb6d851957bc897239ddf4f3d9166b68c100ec3fa1f88eddbf584f1931ee4f",
+    "phoneSHA256": "7eeedfc48f1833a308ba389f2f7ed70a0ee343836bd2cdafeae6e50ebb7f0117",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/components/composer-folder-menu.vue",
+    "state": "present",
+    "sha256": "d3f2df20ed79fd07bd7bd4f32b017fbb10e3d3476837b6b68f59dd1fa39d2b92",
+    "phoneSHA256": "d3f2df20ed79fd07bd7bd4f32b017fbb10e3d3476837b6b68f59dd1fa39d2b92",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/computer-task-checkpoints.vue",
+    "state": "present",
+    "sha256": "b02167e13cf2843a44f392e4b48d4c49ad04b99bcda82eb5a8693c5b58e5f73e",
+    "phoneSHA256": "b02167e13cf2843a44f392e4b48d4c49ad04b99bcda82eb5a8693c5b58e5f73e",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/contact-choice-dialog.vue",
+    "state": "present",
+    "sha256": "d1516b1d7b8deb910413e919c12401009c1a9f6c9aff0662c79895efa6e0db41",
+    "phoneSHA256": "d1516b1d7b8deb910413e919c12401009c1a9f6c9aff0662c79895efa6e0db41",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/dockview/header-add-actions.vue",
+    "state": "present",
+    "sha256": "15e4b7d583845c46e15ef50f4b4e297ee81533427d17435bc8a5ad30df49467c",
+    "phoneSHA256": "15e4b7d583845c46e15ef50f4b4e297ee81533427d17435bc8a5ad30df49467c",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/dockview/workspace-watermark.vue",
+    "state": "present",
+    "sha256": "b569fd9f3f6d0d2bd0e9bc3fc9622b2149740f45e0bd470aa7a0b7b4d1cc8718",
+    "phoneSHA256": "b569fd9f3f6d0d2bd0e9bc3fc9622b2149740f45e0bd470aa7a0b7b4d1cc8718",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/message-actions.vue",
+    "state": "present",
+    "sha256": "ae28bcfd3f6cd6997218a5f05e6e595cda1801d751138192fdbf225c7b34c6d1",
+    "phoneSHA256": "ae28bcfd3f6cd6997218a5f05e6e595cda1801d751138192fdbf225c7b34c6d1",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/message-item.vue",
+    "state": "present",
+    "sha256": "9c0edb48f698141952b3c6e3d45f2910b574632c217684a1bbd01cdac0a4156d",
+    "phoneSHA256": "e4a6754a05012b8ac8c435e78dac6553e4f8211379d88e034ae329f0dbf8e8bb",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/components/native-task-content.vue",
+    "state": "present",
+    "sha256": "f28d04b71e6f4ede564b989a7998eedd0b2e9b69302920d31f2fec4c06d85c9a",
+    "phoneSHA256": "f28d04b71e6f4ede564b989a7998eedd0b2e9b69302920d31f2fec4c06d85c9a",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/session-bot-run.vue",
+    "state": "present",
+    "sha256": "9eb7020ccac1492085092e421fefce4facb92f01664b75ddbd119a8563045305",
+    "phoneSHA256": "9eb7020ccac1492085092e421fefce4facb92f01664b75ddbd119a8563045305",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/session-info-panel.vue",
+    "state": "present",
+    "sha256": "d5237df17043c5d5f08cc5a678b5e91d559461cc6a744ec0adf2ef3c247d1e2c",
+    "phoneSHA256": "d5237df17043c5d5f08cc5a678b5e91d559461cc6a744ec0adf2ef3c247d1e2c",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/session-task-results.test.ts",
+    "state": "present",
+    "sha256": "d6b670523e71a21e0214240cb6a19ad9337b9d3179571ce9cb5e141b46dc18f0",
+    "phoneSHA256": "a4d85d49263a812909726e77e73fa1e57cae01cad610bcbb121e40271e973975",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/components/session-task-results.vue",
+    "state": "present",
+    "sha256": "c84d0d6f16703043cda12baa2cc576bdfd7d90c64bf1c7812c905d49fb55cc00",
+    "phoneSHA256": "ca89820dde579d9de7eafe7be8f45d81f1e00adf9aa9b90f679e60237ad330a8",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/components/session-tasks.test.ts",
+    "state": "present",
+    "sha256": "986a104ab78e120cd43021cfb99e7be645a39d77f6a992bc3120d7d3a6e83484",
+    "phoneSHA256": "f4f34825d134427ac0f73ac2329fe83ba64a3de438793acea785edbe54dac963",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/components/session-tasks.vue",
+    "state": "present",
+    "sha256": "128220e4971d78c4f08483bbd4572cc422697d6161f8e848b1b9fdb164b404d1",
+    "phoneSHA256": "1c6406ccbaf40d71fde4863be6554bbaf2ea8406e5f0665aea674fd2ea4a72e2",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/components/slash-command-result.test.ts",
+    "state": "present",
+    "sha256": "6680eb5ec6381fa7147d5ec1c25efee4635e1184d754ce41f98fb1a24de5f252",
+    "phoneSHA256": "6680eb5ec6381fa7147d5ec1c25efee4635e1184d754ce41f98fb1a24de5f252",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/components/slash-command-result.ts",
+    "state": "present",
+    "sha256": "4d5b860f3a1ca78545c0cf7dfe07056b5164bc9bb57f7d0abf13b6e1f1ad3f92",
+    "phoneSHA256": "4d5b860f3a1ca78545c0cf7dfe07056b5164bc9bb57f7d0abf13b6e1f1ad3f92",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/chat-read-aloud.streaming.test.ts",
+    "state": "present",
+    "sha256": "f33f90ac24c678557265a5f5d42494de2f25910b14db1443fe9d5c44ebd89c5d",
+    "phoneSHA256": "f33f90ac24c678557265a5f5d42494de2f25910b14db1443fe9d5c44ebd89c5d",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+    "state": "present",
+    "sha256": "a53fe9f50fcdd21a4f2401fcc497e44e5cfdad65e7a2c9ee7639a75d5d308b8f",
+    "phoneSHA256": "a53fe9f50fcdd21a4f2401fcc497e44e5cfdad65e7a2c9ee7639a75d5d308b8f",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/speech-audio-stream.ts",
+    "state": "present",
+    "sha256": "7645c2c804cbe8f357ef2735fab8db3ee278025c89c414eaecf58a724ef4a199",
+    "phoneSHA256": "7645c2c804cbe8f357ef2735fab8db3ee278025c89c414eaecf58a724ef4a199",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/speech-rendered-text.ts",
+    "state": "present",
+    "sha256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+    "phoneSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/speech-visible-delta.test.ts",
+    "state": "present",
+    "sha256": "6f084eb380cf4df64944467f4005dbc01bd49f88931c3da54d8b002117806a67",
+    "phoneSHA256": "6f084eb380cf4df64944467f4005dbc01bd49f88931c3da54d8b002117806a67",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/speech-visible-text.ts",
+    "state": "present",
+    "sha256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+    "phoneSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/speech-wav-compat.test.ts",
+    "state": "present",
+    "sha256": "98ef72ea6362de0b3c4144b0f66ca2802b1f4d68ef8ba43de1186bde025bbde0",
+    "phoneSHA256": "98ef72ea6362de0b3c4144b0f66ca2802b1f4d68ef8ba43de1186bde025bbde0",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useChatReadAloud.dom.test.ts",
+    "state": "present",
+    "sha256": "38b6c210170325d4600358572e50c7661422bb12dca07833e5fef73681270955",
+    "phoneSHA256": "38b6c210170325d4600358572e50c7661422bb12dca07833e5fef73681270955",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts",
+    "state": "present",
+    "sha256": "036a4a8f4b11f754213e21ff498d920ed88e615574bbf9bf5eb654fa8540ee2b",
+    "phoneSHA256": "e8f2b4293d204808fbfd3de18d2f8a4f69a7d5f8db0c274673f5ddf8efd67ebf",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useChatReadAloud.streaming.test.ts",
+    "state": "present",
+    "sha256": "b60b03890631a9bd50c126a9938d410cf6261403402b221ae5d0c860b0f6d0ae",
+    "phoneSHA256": "1174d47343b6dfb66ce1938a52152d43850bdf887e8b243d9cc20712a215c01f",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+    "state": "present",
+    "sha256": "8018120399d8cf6bfcdf52ad8b1e4993fd10fa17f9db5535d16b3630fec2bf73",
+    "phoneSHA256": "8018120399d8cf6bfcdf52ad8b1e4993fd10fa17f9db5535d16b3630fec2bf73",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/home/index.vue",
+    "state": "present",
+    "sha256": "2396809c9f4e989961c9bde4e7ad89b510cd67654d3bf1524cd274a10360b84b",
+    "phoneSHA256": "3ddb3ef756dc58732f8f79afafdd829e0640b3e26f29f3d696cca971b6a90868",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/keyboard-shortcuts/components/ShortcutRow.vue",
+    "state": "present",
+    "sha256": "ce1ae3f4cf234be1e6995f1b025284c3d6d6d24466875ab8bc3f91a744f7deca",
+    "phoneSHA256": "ce1ae3f4cf234be1e6995f1b025284c3d6d6d24466875ab8bc3f91a744f7deca",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/keyboard-shortcuts/index.vue",
+    "state": "present",
+    "sha256": "511c9e659a7f7617947103e6d67d48a6629c20439ed647436937a6bb14411039",
+    "phoneSHA256": "511c9e659a7f7617947103e6d67d48a6629c20439ed647436937a6bb14411039",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/login/index.vue",
+    "state": "present",
+    "sha256": "7130723d11bf183c951f28011dd12d3293c474de84ccd0bcfa182a4f4ddcac59",
+    "phoneSHA256": "0b6ed5071f2b621e3a0f4f1151c647f08a5e4820ca6af190b63b55cbe48c2abe",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/main-section/components/mobile-top-bar.vue",
+    "state": "present",
+    "sha256": "b5c6d38fee7b57cadf360c100eadd303190f62477c45b058386500aa2e7c58fc",
+    "phoneSHA256": "bafeed37207420cd850baa75c6a4af2c3408a09dad19ef406751216551338982",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/pages/onboarding/steps/Step1Intro.vue",
+    "state": "present",
+    "sha256": "d947fa4e4b64cde13ccf29e6977a10b11aecc64b9d9a57a4b8617fa84d17ce49",
+    "phoneSHA256": "d947fa4e4b64cde13ccf29e6977a10b11aecc64b9d9a57a4b8617fa84d17ce49",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/onboarding/steps/Step3Provider.vue",
+    "state": "present",
+    "sha256": "10e1a73b83543553e72604e607305149fd3495772eb871b0e50af2270b41a563",
+    "phoneSHA256": "10e1a73b83543553e72604e607305149fd3495772eb871b0e50af2270b41a563",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/onboarding/steps/Step4Bot.vue",
+    "state": "present",
+    "sha256": "08d8c6fe638927dcd55b894f929b39765b0193ce12f5042e1697d94770825dfa",
+    "phoneSHA256": "08d8c6fe638927dcd55b894f929b39765b0193ce12f5042e1697d94770825dfa",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/onboarding/steps/Step5Complete.vue",
+    "state": "present",
+    "sha256": "abbdaa37efdc7ad9a0eb6159994389f012f7f62ac1b7cdba6743ead0b6e3deb9",
+    "phoneSHA256": "abbdaa37efdc7ad9a0eb6159994389f012f7f62ac1b7cdba6743ead0b6e3deb9",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/people/index.vue",
+    "state": "present",
+    "sha256": "0c16594c6b62d123b87e4900d9d198575285ab9a36bc891fe551559d0cc4fa66",
+    "phoneSHA256": "0c16594c6b62d123b87e4900d9d198575285ab9a36bc891fe551559d0cc4fa66",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/profile/components/connected-accounts-section.vue",
+    "state": "present",
+    "sha256": "7245767d91ce41ca4ca3f9a2f352fc3fb0de3f1b2109fa5a892703b7a21aa94f",
+    "phoneSHA256": "7245767d91ce41ca4ca3f9a2f352fc3fb0de3f1b2109fa5a892703b7a21aa94f",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/profile/index.vue",
+    "state": "present",
+    "sha256": "7d7177ea1bb0e93557ec7c527de27a4a728740a2cac7c4236fe40abb2d117160",
+    "phoneSHA256": "7d7177ea1bb0e93557ec7c527de27a4a728740a2cac7c4236fe40abb2d117160",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/providers/components/model-list.vue",
+    "state": "present",
+    "sha256": "e830e0e2e6c22ace09cb4094166bdd84022a256748197603de2450d8b8a3c408",
+    "phoneSHA256": "e830e0e2e6c22ace09cb4094166bdd84022a256748197603de2450d8b8a3c408",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/providers/components/provider-form.vue",
+    "state": "present",
+    "sha256": "26a61bf5c78004d10cb36a57421fc9e200c63d0133090c775e20a525f1b47d8f",
+    "phoneSHA256": "26a61bf5c78004d10cb36a57421fc9e200c63d0133090c775e20a525f1b47d8f",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/providers/components/provider-media-catalog.vue",
+    "state": "present",
+    "sha256": "d2396902b1ba6ad6cdbcd2174a4a67030e73920efd060a61da60593a49db4ac8",
+    "phoneSHA256": "d2396902b1ba6ad6cdbcd2174a4a67030e73920efd060a61da60593a49db4ac8",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/providers/models-panel.vue",
+    "state": "present",
+    "sha256": "1c5f86f2f6edff86a88e5c0f84b7c819649e40146a72b5af96a9e8a67cd2b391",
+    "phoneSHA256": "1c5f86f2f6edff86a88e5c0f84b7c819649e40146a72b5af96a9e8a67cd2b391",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/runtimes/index.vue",
+    "state": "present",
+    "sha256": "d42f30418ac5b3c2da2660cfefda0b895d1f4374a9bf87c757015d160e219d46",
+    "phoneSHA256": "d42f30418ac5b3c2da2660cfefda0b895d1f4374a9bf87c757015d160e219d46",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/speech/components/model-config-editor.vue",
+    "state": "present",
+    "sha256": "16708c84ede220cbc780530acba3706ecaaf6c47827db62238c5a4d13636cae8",
+    "phoneSHA256": "16708c84ede220cbc780530acba3706ecaaf6c47827db62238c5a4d13636cae8",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/speech/components/provider-setting.vue",
+    "state": "present",
+    "sha256": "a80c40e50a61f92cffb3529e838babe3213919a8a8b06ff316febbf1faf8c1f1",
+    "phoneSHA256": "a80c40e50a61f92cffb3529e838babe3213919a8a8b06ff316febbf1faf8c1f1",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/supermarket/app-detail.vue",
+    "state": "present",
+    "sha256": "2d9afea0a9d9e4a5b7d9746b9f628f2a2dc198cb2908bc13f36cd4919be70c17",
+    "phoneSHA256": "2d9afea0a9d9e4a5b7d9746b9f628f2a2dc198cb2908bc13f36cd4919be70c17",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/transcription/provider-setting.vue",
+    "state": "present",
+    "sha256": "91bb9dab697131f098b3299c2dd03699b912fab6a845fa1a7fc1fa8a8cc1145a",
+    "phoneSHA256": "91bb9dab697131f098b3299c2dd03699b912fab6a845fa1a7fc1fa8a8cc1145a",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/video/provider-setting.vue",
+    "state": "present",
+    "sha256": "b4c3f715155f4ea4abcca90f69f871fbf6cb53f9ca526b1d0fea1c88a258f576",
+    "phoneSHA256": "b4c3f715155f4ea4abcca90f69f871fbf6cb53f9ca526b1d0fea1c88a258f576",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/voice/index.vue",
+    "state": "present",
+    "sha256": "93b6ac33dc16853e0d78e887cbf9ec97e0a4e78b73fe5ab9985f66b674311648",
+    "phoneSHA256": "93b6ac33dc16853e0d78e887cbf9ec97e0a4e78b73fe5ab9985f66b674311648",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/web-search/components/add-fetch-provider.vue",
+    "state": "present",
+    "sha256": "627116db6a6fa11475caaa3a6989a492efdee9526e81e1c8ce4bd1c50566d234",
+    "phoneSHA256": "627116db6a6fa11475caaa3a6989a492efdee9526e81e1c8ce4bd1c50566d234",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/web-search/components/add-search-provider.vue",
+    "state": "present",
+    "sha256": "720b7f3f140a2cd9844f6d8b8d97984e794d6edb8e1e712b151b913b3d460227",
+    "phoneSHA256": "720b7f3f140a2cd9844f6d8b8d97984e794d6edb8e1e712b151b913b3d460227",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/web-search/components/fetch-provider-setting.vue",
+    "state": "present",
+    "sha256": "61a40379dbb5b5d71b27f0d2ca0bd4ab4b71b3677779ddb6e8dea631170ce26d",
+    "phoneSHA256": "61a40379dbb5b5d71b27f0d2ca0bd4ab4b71b3677779ddb6e8dea631170ce26d",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/pages/web-search/index.vue",
+    "state": "present",
+    "sha256": "60c045eb4f9e54c8a7b16272ad93d33024149a93409c66685ad9fee037bff600",
+    "phoneSHA256": "60c045eb4f9e54c8a7b16272ad93d33024149a93409c66685ad9fee037bff600",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat-list.ts",
+    "state": "present",
+    "sha256": "7d4c6864168e9d32901dd61aa0c854bbc93d57c1a475307ba5d5945430313027",
+    "phoneSHA256": "7d4c6864168e9d32901dd61aa0c854bbc93d57c1a475307ba5d5945430313027",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/bootstrap-contact.test.ts",
+    "state": "present",
+    "sha256": "8f8d20cc913342fa05de1c7053a56636ec8f93a6ba31445b23ccd5181fb39a64",
+    "phoneSHA256": "8f8d20cc913342fa05de1c7053a56636ec8f93a6ba31445b23ccd5181fb39a64",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/bootstrap.ts",
+    "state": "present",
+    "sha256": "68f308e1b09fdd4f4177c7470fb2ef2edaac48173dd3dd8f4b33f2945e6b9a47",
+    "phoneSHA256": "68f308e1b09fdd4f4177c7470fb2ef2edaac48173dd3dd8f4b33f2945e6b9a47",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/commands.ts",
+    "state": "present",
+    "sha256": "b393de01ead7c8f602fd94617afb412047e32aa8ebc543a58a52eac3a8f1bc0b",
+    "phoneSHA256": "b393de01ead7c8f602fd94617afb412047e32aa8ebc543a58a52eac3a8f1bc0b",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/fixed-contact.test.ts",
+    "state": "present",
+    "sha256": "13422bcdde23eb34b639741ca87b62b6edb80617eebde5cb73b2f79116a77963",
+    "phoneSHA256": "13422bcdde23eb34b639741ca87b62b6edb80617eebde5cb73b2f79116a77963",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/send.ts",
+    "state": "present",
+    "sha256": "4d9d7337f9679faff64988018a5cafdbf81ac7b71996c223d25ba82c2c77e850",
+    "phoneSHA256": "4eb44261269a1e41c495f54d008b07f291c301274073a0b7ceca938cde22714e",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/store/chat/targets.ts",
+    "state": "present",
+    "sha256": "77f7a6a2a1403939f91ee103e0a19108de2202bf7e2d4088c7cab2c0ea512d19",
+    "phoneSHA256": "77f7a6a2a1403939f91ee103e0a19108de2202bf7e2d4088c7cab2c0ea512d19",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/keyboard-shortcuts.test.ts",
+    "state": "present",
+    "sha256": "92b2962e0f762ba3f88b450021a99d9a79260bffc0f6943ceb58e71d9dad7cc8",
+    "phoneSHA256": "92b2962e0f762ba3f88b450021a99d9a79260bffc0f6943ceb58e71d9dad7cc8",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/workspace-tabs.test.ts",
+    "state": "present",
+    "sha256": "b436968ccdad1d4ac3ad1770ce79dff5a0c0333fc43d5ef56fa3d4bea7c0fdc0",
+    "phoneSHA256": "b436968ccdad1d4ac3ad1770ce79dff5a0c0333fc43d5ef56fa3d4bea7c0fdc0",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/workspace-tabs.ts",
+    "state": "present",
+    "sha256": "7f237661dbb1052f1dcf85dcee493d9489767ca795a9568e2c8ef71cb9edec81",
+    "phoneSHA256": "ccd6dbb0c379d5e4d59d49706bee288cf79864c2d316c86e89b3eac51ebc6164",
+    "phoneAdapted": true
+  },
+  {
+    "path": "packages/sdk/src/@pinia/colada.gen.ts",
+    "state": "present",
+    "sha256": "5cc9bf82fc94364af4e0373762784b9643eae1b29e1d76915add9c7bb0a34e85",
+    "phoneSHA256": "5cc9bf82fc94364af4e0373762784b9643eae1b29e1d76915add9c7bb0a34e85",
+    "phoneAdapted": false
+  },
+  {
+    "path": "packages/sdk/src/index.ts",
+    "state": "present",
+    "sha256": "500914ccfa373c030391a0f3612ddfa6f70a2e633ce4d9ec54452d9fef59a8b1",
+    "phoneSHA256": "500914ccfa373c030391a0f3612ddfa6f70a2e633ce4d9ec54452d9fef59a8b1",
+    "phoneAdapted": false
+  },
+  {
+    "path": "packages/sdk/src/sdk.gen.ts",
+    "state": "present",
+    "sha256": "3908be01bda0ed27062835b49e23486158d9573dd359674776ce69841e43b891",
+    "phoneSHA256": "3908be01bda0ed27062835b49e23486158d9573dd359674776ce69841e43b891",
+    "phoneAdapted": false
+  },
+  {
+    "path": "packages/sdk/src/types.gen.ts",
+    "state": "present",
+    "sha256": "2448dacc6410937721757bdd7a5ef15e7bdeee2aeb5ce63665aade01b39f4b66",
+    "phoneSHA256": "2448dacc6410937721757bdd7a5ef15e7bdeee2aeb5ce63665aade01b39f4b66",
+    "phoneAdapted": false
+  }
+]

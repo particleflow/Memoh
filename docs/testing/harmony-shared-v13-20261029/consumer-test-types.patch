@@ -1,0 +1,80 @@
+--- a/apps/web/src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts
++++ b/apps/web/src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts
+@@ -3,10 +3,21 @@
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+ import { ContextMenu, ContextMenuTrigger, ContextMenuContent, ContextMenuItem } from '@felinic/ui'
+ import type { ChatMessage } from '@/store/chat/types'
+-import contract from '../../../../../../docs/testing/chat-read-aloud/streaming/resume-gesture/candidate-contract.json'
++import paneSource from '../components/chat-pane.vue?raw'
++// Read the real composed phone template instead of an external review fixture.
++function templateExpression(pattern: RegExp): string {
++ const match = paneSource.match(pattern)
++ if (!match?.[1]) throw new Error('Existing replay template contract is missing')
++ return match[1]
++}
++const contract = { expressions: {
++ menuSelect: templateExpression(/<ContextMenuItem\s+@select="([^"]+)"/u),
++ disabled: templateExpression(/:disabled="(!readAloud\.canReplay\(msg\))"/u),
++ messageClick: templateExpression(/@click\.capture="(readAloud\.stop\(\))"/u),
++} }
+ const api = vi.hoisted(() => ({ playback: vi.fn() }))
+ vi.mock('@memohai/sdk', () => ({ postBotsByBotIdTtsPlayback: api.playback }))
+-import { useChatReadAloud } from '@autoplay-reviewed-composable'
++import { useChatReadAloud } from './useChatReadAloud'
+ 
+ let trustedGesture = false
+ const players: Player[] = []
+@@ -19,13 +30,13 @@
+ class MediaFixture extends EventTarget {
+  static isTypeSupported() { return true }
+  readyState = 'open'
+- addSourceBuffer() { return Object.assign(new EventTarget(), { appendBuffer() { queueMicrotask(() => this.dispatchEvent(new Event('updateend'))) } }) }
++ addSourceBuffer() { const buffer = new EventTarget(); return Object.assign(buffer, { appendBuffer() { queueMicrotask(() => buffer.dispatchEvent(new Event('updateend'))) } }) }
+  endOfStream() {}
+ }
+ let app: App | undefined, root: HTMLElement
+ const urls: string[] = [], revoke = vi.fn(), cancels: ReturnType<typeof vi.fn>[] = []
+ const settle = async () => { for (let i = 0; i < 20; i++) { await Promise.resolve(); await nextTick() } }
+-const message = (id = 'm', streaming = false): ChatMessage => ({ id, turnId: `turn-${id}`, runtimeRunId: `run-${id}`, role: 'assistant', timestamp: '', streaming, messages: [{ id: 0, type: 'text', content: `正文 ${id}。` }] })
++const message = (id = 'm', streaming = false): Extract<ChatMessage, { role: 'assistant' }> => ({ id, turnId: `turn-${id}`, runtimeRunId: `run-${id}`, role: 'assistant', timestamp: '', streaming, messages: [{ id: 0, type: 'text', content: `正文 ${id}。` }] })
+ beforeEach(() => {
+  trustedGesture = false; players.length = 0; urls.length = 0; cancels.length = 0; revoke.mockClear()
+  vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+@@ -63,7 +74,7 @@
+  expect(f.speech.state.value.status).toBe('blocked'); expect(api.playback).toHaveBeenCalledOnce()
+  return players[0]!
+ }
+-async function open(f: ReturnType<typeof mount>, mode: 'mouse' | 'touch') {
++async function open(mode: 'mouse' | 'touch') {
+  const bubble = root.querySelector('[data-bubble]')!
+  if (mode === 'mouse') bubble.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, button: 2, clientX: 10, clientY: 10 }))
+  else {
+@@ -79,7 +90,7 @@
+ describe('exact cleanup replay entry restores autoplay-blocked loaded audio', () => {
+  it.each(['mouse', 'touch'] as const)('%s select calls play in the same gesture without another synthesis or URL', async mode => {
+   const f = mount(), player = await blocked(f), sameURL = player.src
+-  const item = await open(f, mode), calls = player.play.mock.calls.length
++  const item = await open(mode), calls = player.play.mock.calls.length
+   trustedGesture = true
+   item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }))
+   expect(player.play).toHaveBeenCalledTimes(calls + 1) // Before the event handler yields.
+@@ -89,7 +100,7 @@
+  })
+  it('makes the original menu reachable for the same blocked audio while reply text is still streaming', async () => {
+   const f = mount(true), player = await blocked(f)
+-  const item = await open(f, 'mouse')
++  const item = await open('mouse')
+   trustedGesture = true; item.dispatchEvent(new MouseEvent('click', { bubbles: true })); trustedGesture = false
+   expect(player.play).toHaveBeenCalledTimes(2); expect(api.playback).toHaveBeenCalledOnce()
+  })
+--- a/apps/web/src/pages/home/composables/useChatReadAloud.streaming.test.ts
++++ b/apps/web/src/pages/home/composables/useChatReadAloud.streaming.test.ts
+@@ -9,7 +9,7 @@
+ class MediaFixture extends EventTarget {
+   static isTypeSupported() { return true }
+   readyState = 'open'
+-  addSourceBuffer() { return Object.assign(new EventTarget(), { appendBuffer() { queueMicrotask(() => this.dispatchEvent(new Event('updateend'))) } }) }
++  addSourceBuffer() { const buffer = new EventTarget(); return Object.assign(buffer, { appendBuffer() { queueMicrotask(() => buffer.dispatchEvent(new Event('updateend'))) } }) }
+   endOfStream() {}
+ }
+ const settle = async () => { await nextTick(); for (let i = 0; i < 20; i++) await Promise.resolve(); await nextTick() }

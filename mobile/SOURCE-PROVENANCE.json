@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "bd6e3db49c2c5abe1da4852645afdce799534b1145109f9fc234a8b5bff80611",
+      "sha256": "31ac59c866cb64fc98d001657d2d32d45ec3921bfaf880b71e9349eaca2f45dd",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -1816,7 +1816,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "4a51456e894368134804a27bd4e095c7adb664626632a4aefab12aea14fb9d94",
+      "sha256": "8f42545a212aef05c9ccf5ca5299bc3458b22a19c39d22f20473e4d2c5efb3b0",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [

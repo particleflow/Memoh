@@ -1,0 +1,77 @@
+[
+  {
+    "file": "result.json",
+    "bytes": 1142,
+    "sha256": "7ceef34e257d196fa129e30155978e0a6af0898e70d6ed2796ad902977aa25ea"
+  },
+  {
+    "file": "new-source-delta.json",
+    "bytes": 5965,
+    "sha256": "323bdb445ff47c6632e9c5d4fa00bf191b5effaa93a4b6f65614353d47508375"
+  },
+  {
+    "file": "final-source-map.json",
+    "bytes": 41600,
+    "sha256": "5628ca0739eeb44b73916f30a5e93d6931e837ecb77a7947d6051e0899dc1547"
+  },
+  {
+    "file": "consumer-test-type-fix.json",
+    "bytes": 610,
+    "sha256": "e2fc1636e0e4d7d3823ff08615db04495db38d51515e029d9de412f0a007ea77"
+  },
+  {
+    "file": "consumer-test-types.patch",
+    "bytes": 5230,
+    "sha256": "aff4b8744a838e74d6ad3203b6b8c358ba41ad521273848b2740683e6a723784"
+  },
+  {
+    "file": "final-context-equality.json",
+    "bytes": 124,
+    "sha256": "867b0eb1661f957dc6e18eccb2b9f9e88eac12779de9fa1d9d93c2a97a45990e"
+  },
+  {
+    "file": "phone-combined-seams.test.ts",
+    "bytes": 5144,
+    "sha256": "6c406da574400061e48c752a4064962a5be08f68d5b29f27c0ed68906978a565"
+  },
+  {
+    "file": "vitest.phone.config.ts",
+    "bytes": 1125,
+    "sha256": "8756a9302ca978980004d861875593316459567cafc9d4ff6ba36f706570982d"
+  },
+  {
+    "file": "types-initial.log.txt",
+    "bytes": 2429,
+    "sha256": "e59438f65c554953215be85d62c98bf8c0e21715681428bb24fd43078df46e0a"
+  },
+  {
+    "file": "types-final.log.txt",
+    "bytes": 166,
+    "sha256": "843a84fe7e8a9cb65bfc843cccfd2f275a37c8432363791513f0a2c31241c74c"
+  },
+  {
+    "file": "phone-seams-initial-command.log.txt",
+    "bytes": 76,
+    "sha256": "08c3e8b7b9b05f57a6e8be1e661b7fbd11c115fec70856d070a485c1f7487e04"
+  },
+  {
+    "file": "phone-seams-first-five.log.txt",
+    "bytes": 254,
+    "sha256": "cbbecc9466be46097898f5e9b15f92be53c78da9de414cdcf1ac29932ccbcb03"
+  },
+  {
+    "file": "phone-seams-final.log.txt",
+    "bytes": 257,
+    "sha256": "702efc7123e47d6bc90b840b34146c349d4b8f0bb86831e16b7a845e5e2034ee"
+  },
+  {
+    "file": "test-types-lint.log.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "file": "source-final.log.txt",
+    "bytes": 196,
+    "sha256": "93929a73339376d69684b426f5d79bde1965027621233a2a1c405ab1962a8c2c"
+  }
+]

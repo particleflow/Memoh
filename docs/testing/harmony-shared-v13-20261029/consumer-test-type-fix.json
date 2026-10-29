@@ -1,0 +1,14 @@
+[
+  {
+    "path": "apps/web/src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts",
+    "upstreamSHA256": "036a4a8f4b11f754213e21ff498d920ed88e615574bbf9bf5eb654fa8540ee2b",
+    "adaptedSHA256": "e8f2b4293d204808fbfd3de18d2f8a4f69a7d5f8db0c274673f5ddf8efd67ebf",
+    "assertionsRemoved": 0
+  },
+  {
+    "path": "apps/web/src/pages/home/composables/useChatReadAloud.streaming.test.ts",
+    "upstreamSHA256": "b60b03890631a9bd50c126a9938d410cf6261403402b221ae5d0c860b0f6d0ae",
+    "adaptedSHA256": "1174d47343b6dfb66ce1938a52152d43850bdf887e8b243d9cc20712a215c01f",
+    "assertionsRemoved": 0
+  }
+]

@@ -1,0 +1,14 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/shared-v13-20261029/context/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts(6,22): error TS2307: Cannot find module '../../../../../../docs/testing/chat-read-aloud/streaming/resume-gesture/candidate-contract.json' or its corresponding type declarations.
+src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts(9,34): error TS2307: Cannot find module '@autoplay-reviewed-composable' or its corresponding type declarations.
+src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts(22,107): error TS2339: Property 'dispatchEvent' does not exist on type '{ appendBuffer(): void; }'.
+src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts(66,21): error TS6133: 'f' is declared but its value is never read.
+src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts(103,50): error TS2322: Type '{ messages: { id: number; type: "text"; content: string; }[]; id: string; serverId?: string | undefined; role: "user"; text: string; userMessageKind?: string | undefined; skillActivation?: UISkillActivation | undefined; ... 18 more ...; __optimistic?: boolean | undefined; } | { ...; } | { ...; }' is not assignable to type '{ id: string; serverId?: string | undefined; role: "user"; text: string; userMessageKind?: string | undefined; skillActivation?: { skills?: { name: string; display_name?: string | undefined; description?: string | undefined; source_kind?: string | undefined; state?: string | undefined; }[] | undefined; prompt?: stri...'.
+  Object literal may only specify known properties, and 'messages' does not exist in type '{ id: string; serverId?: string | undefined; role: "user"; text: string; userMessageKind?: string | undefined; skillActivation?: { skills?: { name: string; display_name?: string | undefined; description?: string | undefined; source_kind?: string | undefined; state?: string | undefined; }[] | undefined; prompt?: stri...'.
+src/pages/home/composables/useChatReadAloud.streaming.test.ts(12,108): error TS2339: Property 'dispatchEvent' does not exist on type '{ appendBuffer(): void; }'.
+/workspace/harmony-recovery-20261023/evidence/shared-v13-20261029/context/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2
