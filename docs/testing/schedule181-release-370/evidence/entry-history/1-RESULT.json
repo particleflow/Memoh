@@ -1,0 +1,22 @@
+{
+  "commit": "14355dd1f7049cca42d49e67391f5486368ff6ee",
+  "parent": "cc81049e083cb0b539274b9d3093b865a7b6f216",
+  "product_files": [
+    "apps/web/src/store/chat/bootstrap.ts"
+  ],
+  "test_files": [
+    "apps/web/src/store/chat/bootstrap-contact.test.ts",
+    "internal/db/contact_first_entry_integration_test.go"
+  ],
+  "tests": {
+    "vitest": 32,
+    "postgres_subcases": 2,
+    "typecheck": "pass",
+    "eslint": "pass",
+    "ui_contract": "pass; 3 existing warnings"
+  },
+  "field_acceptance": false,
+  "existing_bound_contact_rebound": false,
+  "deployment": false,
+  "paid_calls": 0
+}

@@ -1,0 +1,73 @@
+{
+  "base": "89200ec17ac28974362010ecb5a3118974863fd4",
+  "head": "1a776f9af634f45f660c811414807da4c192c64f",
+  "commits": [
+    "7a40b3ec209fd7c51131c685cebc290c977020f6",
+    "1a776f9af634f45f660c811414807da4c192c64f"
+  ],
+  "branch": "fix/schedule-busy-accounting",
+  "remote_readback": "1a776f9af634f45f660c811414807da4c192c64f\trefs/heads/fix/schedule-busy-accounting",
+  "changed_files": [
+    "db/postgres/migrations/0001_init.up.sql",
+    "db/postgres/migrations/0181_schedule_result_delivery.up.sql",
+    "db/postgres/queries/schedule.sql",
+    "db/postgres/queries/schedule_occurrence.sql",
+    "internal/db/postgres/sqlc/models.go",
+    "internal/db/postgres/sqlc/schedule.sql.go",
+    "internal/db/postgres/sqlc/schedule_occurrence.sql.go",
+    "internal/db/store/queries.go",
+    "internal/schedule/occurrence_busy.go",
+    "internal/schedule/occurrence_busy_postgres_test.go",
+    "internal/schedule/service.go"
+  ],
+  "new_field": "schedule.limit_disabled BOOLEAN NOT NULL DEFAULT false in unpublished 181 + snapshot",
+  "behavior": "retain claim-time reservation; atomically refund only definitive pre-admission busy with no original invocation; keep failed fire; no retry/catch-up of that occurrence",
+  "pause_boundary": "prior durable fire grant unchanged; explicit pause never auto-reenabled",
+  "new_pg_scenarios_passed": 10,
+  "affected_prior_pg_tests_passed": 2,
+  "skipped_selected_tests": 0,
+  "ack_loss": "real refund commit then injected lost acknowledgement; exact readback, one refund call, next timer restored",
+  "lint": "pass",
+  "build": "pass -buildvcs=false",
+  "binary_sha256": "5eaec0a2c1f2a030560aabf64f555a597cbf4ed619c00deb1ed54c9c6d67989e",
+  "ui": {
+    "actual_candidate_server": true,
+    "url": "http://127.0.0.1:28107/bot/local-dialog",
+    "isolated_database": "memoh_schedule_occurrence_20261029",
+    "busy_fire_history_present": true,
+    "failed_busy_no_run_no_false_jump": true,
+    "page_errors": [],
+    "schedule_task_mutations": [],
+    "enabled_schedules": 0,
+    "record": {
+      "task_type": "schedule_fire",
+      "task_id": "2c0315b0-df8b-4d80-af16-0217b0b3d2b7",
+      "record_id": "2c0315b0-df8b-4d80-af16-0217b0b3d2b7",
+      "name": "Busy occurrence history",
+      "state": "failed",
+      "created_at": "2026-10-29T17:03:22.923063Z"
+    },
+    "scope": "actual current application directory smoke with synthetic busy/failed record; PG test covers execution admission race; no model or production claim"
+  },
+  "migration": {
+    "isolated_down_up_preserved_records": true,
+    "busy_and_unknown_samples": 2,
+    "limit_disabled_true_and_false_retained": true,
+    "messages_before_after": 335,
+    "enabled_schedules": 0,
+    "scope": "isolated additive DDL only, not production migration"
+  },
+  "cleanup": {
+    "own_backend_stopped": 383771,
+    "synthetic_ui_fixture_removed": true,
+    "enabled_schedules": 0,
+    "remaining_busy_fixture_users": 0,
+    "messages_retained": 335
+  },
+  "remaining": [
+    "explicit-resume stale-registration policy next",
+    "legacy/non-opt-in/manual trigger paths unchanged",
+    "real summary-model and production/HAP schedule acceptance not claimed",
+    "if refund write and exact readback are both unavailable, keep uncertain and do not re-execute; no new retry worker"
+  ]
+}

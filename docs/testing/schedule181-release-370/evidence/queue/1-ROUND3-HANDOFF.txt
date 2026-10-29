@@ -1,0 +1,62 @@
+Round 3: native queue identity and directory permission-read failure
+Status: TWO LOCAL PRODUCT COMMITS; WHOLE BOT-CONVERSATION GOAL STILL INCOMPLETE.
+Baseline for this delta: e5a1aa75cf79267b659b63b24bc0ee60cd46b7e7.
+P2: 271f2b97451e572e6fe89eaccd0b3c9443a71794
+Native queue: 4768679adf01047bff66c148ded37f215c9994be
+
+Integration
+- bot-dialog-round3.bundle contains the two commits, requiring e5a1aa75c.
+- Separate mail patches: directory-permission-P2.patch and native-queue-identity.patch.
+- Review/cherry-pick the two commits in order. Do not blindly merge the entire branch; cumulative earlier f5 remains subject to the parent's independent review.
+- No migration, new table, scheduler/service, official native Agent/runtime algorithm change, deployment, push, HAP signing, or paid model call. Tool submission/background ports and host wiring do change.
+
+Implemented
+- A native spawn/send request gains a persistent receipt in the original source session_runs.input_json.native_task_queue before entering the existing in-process queue. Its original identity is derived from source run + tool call, distinct from later execution run IDs.
+- Raw call fingerprint rejects conflicting replay before another child session is created. Stable receipt ID/task ID survive restart. Child ownership, full source ancestry, live account/Bot grants and workspace selection are rechecked. Runtime/session tokens are excluded from persisted parent context.
+- Claim CAS is serialized by the existing Bot claim lock. Permission is checked again after the lock wait/commit, immediately before handing execution to the native provider. A committed but uncertain/denied claim is not executed or automatically reclaimed.
+- Startup restores only never-claimed requests into the original serial queue. Original terminal executions are observed to reconcile claims before restoring successors. A claimed receipt without proven execution remains unknown in the directory; it is not rerun.
+- Completion uses the original subagent invocation and actual runtime state, not model narration. Duplicate completion callbacks are idempotent; unproven completion becomes unknown and does not expose a success report. Queued cancellation is persisted before the in-memory cancellation succeeds.
+- The Bot directory includes queue admissions, then joins the actual child execution without a duplicate row. Legacy native runs remain visible. Added queued status translations only; no new UI surface.
+- P2 permission callback now carries an error separately from denial. Both directory and individual-task reads fail on storage errors instead of returning a false empty page/missing task.
+
+Verification completed (only focused/new checks; unchanged 285 tests not rerun)
+- 13 focused native tool/background tests passed, including 3 new queue tests and 1 persisted cancellation/unknown event test.
+- 6 directory/HTTP tests passed. Controlled old swallowing behavior fails the new HTTP counterexample with 200 {"items":[]}; restored implementation passes. See directory-permission-red.log and directory-permission-green-final.log.
+- Actual isolated PostgreSQL schema179: fresh pool/host restart retains two pre-execution receipts/order, 8 concurrent claims have one winner, 8 duplicate results retain one execution, completed-before-callback recovery unblocks successor, unknown is not redispatched, failed/canceled records remain, inactive account is denied, revocation during a controlled lock wait prevents execution, directory does not duplicate receipt/run, source input fingerprint preserved and token excluded. native-queue-postgres-final.log.
+- Real Server/Web/Docker runtime at http://127.0.0.1:28082/bot/local-dialog, loopback scripted models only. Controlled A barrier leaves B queued; a NEW primary-chat reply arrives in 0.531896s while A remains running and B queued. After release A/B each run once, retain original task/record/session IDs and acquire different real run IDs. queue-ui-evidence.json.
+- Real process crash/restart: a FOR NO KEY UPDATE test lock prevents the native claim after persistent queue admission. Before SIGKILL of the isolated server the receipt is queued, has no execution run, and child provider calls=0. Restart restores the SAME task/record/session IDs; actual run e8f135df-b351-4e30-98a2-1527058fd2c9 completes, child provider calls=1. queue-process-restart-evidence.json.
+- The final permission-after-wait source was rebuilt and exercised again via the actual UI/native execution. Task bg_c415a5ca4529527fb6f5a29740674518 completed once. queue-final-source-runtime.json. The process-crash experiment preceded this final defensive permission check; its behavior is also covered by the final PostgreSQL test.
+- Actual browser task directory, execution history, contact reopening, 390px browser, restart history and a synthetic transport 500 error surface verified. Synthetic 500 is UI-only fault injection; the handler test injects the actual permission reader error. No browser errors.
+- 4 task-directory component tests passed with NODE_OPTIONS=--no-experimental-webstorage (Node25's global storage conflict was a harness failure, not a product change). Web and SDK typechecks pass, sqlc/Swagger/SDK regenerated, build passes, UI contract passes with 3 existing warnings. JSON locale lint is ignored by the current ESLint config, so it is not claimed as a lint pass; locales were exercised in the actual UI and typecheck.
+
+Screenshot evidence (local, visually inspected; not included in Library ZIP)
+/workspace/bot-dialog-handoff/queue-running-and-queued.png
+/workspace/bot-dialog-handoff/queue-contact-chat.png
+/workspace/bot-dialog-handoff/queue-original-execution.png
+/workspace/bot-dialog-handoff/queue-before-process-restart.png
+/workspace/bot-dialog-handoff/queue-after-process-restart.png
+/workspace/bot-dialog-handoff/queue-recovered-execution.png
+/workspace/bot-dialog-handoff/queue-restart-narrow.png
+/workspace/bot-dialog-handoff/queue-directory-read-error.png
+/workspace/bot-dialog-handoff/queue-final-source-execution.png
+
+Limits / remaining work
+- Native tool activity summaries still appear in primary chat (observed in screenshots). This round does not satisfy the user's final request to hide execution activity there.
+- Task navigation currently opens the original execution SESSION, not an exact historical run/turn anchor. destination.run_id is retained but the component does not navigate to a run anchor.
+- Already-claimed/unknown records survive and are never auto-rerun, but durable main-Bot unknown notification / result-summary delivery across restart remains incomplete. Receipt completion idempotence is not proof of user-summary publication deduplication. C/D collision/revision cases were not expanded into this round.
+- Remote-computer recovery without the original process-local trusted binding fails closed and retains queued records; no capability is fabricated. Safe live host reauthorization/rebinding remains future work.
+- Native exec/video/dependency background kinds outside managed subagent spawn/send are not added by this slice.
+- If another process owns an unresolved claim, the successor remains conservatively blocked. No new distributed scheduler or retry service was introduced.
+- Schema does not change. A code rollback must preserve receipts and stop/drain queued work first; older binaries do not implement these queue receipts' recovery. Do not claim seamless active-task rollback.
+- Production/NAS, real paid models/media/devices, native-mobile/HAP and human QA remain unverified. HAP back navigation belongs to the separate HAP owner.
+
+Truthful test-harness failures retained
+- Initial local models lacked tool-call compatibility. Emitted fixture calls were rejected; no task was created. Read-back verified this before subsequent tests. One partial model-config PUT was rejected 400; corrected full local model updates succeeded.
+- One scripted-provider version misrouted a coordinator request as worker A and returned a misleading fixture response; its original native task completed after explicit barrier release, but that experiment is excluded from acceptance. Later fixtures branch by model and count only the intended child calls.
+- The v2 chat-latency script matched an existing reply. v3 waits for the newly added reply and confirms A/B remain running/queued before barrier release; only v3 latency is reported.
+- First restart lock used FOR UPDATE and blocked the child-session foreign key before queue admission. It was released; that task completed normally, with no crash test claim. The successful restart experiment uses FOR NO KEY UPDATE and verifies receipt queued + no run + zero child calls before killing the isolated server.
+- All experimental conversation/task history remains in the isolated database.
+
+Cleanup
+- Original local model configurations restored, both synthetic Bot workspaces stopped, exact Server/Vite/provider helpers signalled and checked. Database/history retained: 30 runs, 3 delegations, 0 nonterminal runs. round3-cleanup.json.
+- No denied or uncertain external action remains. No further user approval is needed for this local handoff. Whole-product incompleteness above is not a tool blocker.

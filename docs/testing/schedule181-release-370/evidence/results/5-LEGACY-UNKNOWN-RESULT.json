@@ -1,0 +1,29 @@
+{
+  "head": "453a1178c25213772dbead9f428f1dca83e2a027",
+  "delta_base": "87b76482e8173907305f6b9303c061a00d9b0d09",
+  "status": "legacy unknown opt-in boundary corrected and locally verified",
+  "product_files": 2,
+  "test_files": 4,
+  "documentation_files": 1,
+  "focused_test_functions": 6,
+  "red": "legacy unknown unexpectedly delivered once",
+  "green": "legacy execute/retry/enqueue/admission blocked; opted-in notification preserved",
+  "runtime": {
+    "fixture": "synthetic legacy unknown row with omitted result_delivery_version; actual PG, server startup, authorized API and Chromium",
+    "delegation_id": "73e31b91-db28-4c22-a657-401e53843472",
+    "detail_state": "unknown",
+    "retry_http_status": 409,
+    "record_unchanged": true,
+    "counts_unchanged": {
+      "runs": 58,
+      "messages": 149
+    },
+    "restart_no_new_delivery": true,
+    "directory_unknown_visible": true,
+    "no_machine_contact_bubble": true,
+    "page_errors": [],
+    "paid_calls": 0
+  },
+  "paid_calls": 0,
+  "deployed": false
+}

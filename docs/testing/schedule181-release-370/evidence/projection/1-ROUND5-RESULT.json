@@ -1,0 +1,40 @@
+{
+  "round": 5,
+  "head": "87b76482e8173907305f6b9303c061a00d9b0d09",
+  "delta_base": "b2d6e1c2058e3bddef1c8b3e9ef4c48468282422",
+  "status": "shared native contact projection locally verified; no HAP device/production acceptance",
+  "product_files": 5,
+  "test_files": 2,
+  "documentation_files": 1,
+  "tests_passed": 119,
+  "paid_calls": 0,
+  "projection": "server-resolved per-panel contact intent + structured role/block types; no keyword filter",
+  "live_dom_process_leaks": 0,
+  "continued_chat_seconds": 0.5508518690003257,
+  "history_preserved": true,
+  "same_contact_debug_preserved": true,
+  "task_directory_link_live_and_reload": true,
+  "zh_dark_narrow": true,
+  "page_errors": [],
+  "typecheck": "passed",
+  "eslint": "passed, three pre-existing test-stub warnings",
+  "ui_contract": "passed, three pre-existing unrelated warnings",
+  "limitations": [
+    "Exact run/turn anchoring remains next work",
+    "HAP source integration only; no device/build/signing/deploy",
+    "External-agent projection unchanged",
+    "Human QA unverified"
+  ],
+  "cleanup": {
+    "restored_models": [
+      "20000000-0000-4000-8000-000000000001",
+      "20000000-0000-4000-8000-000000000002"
+    ],
+    "server_provider_workspaces_stopped": true,
+    "database": {
+      "runs": 58,
+      "nonterminal": 0
+    },
+    "history_retained": true
+  }
+}

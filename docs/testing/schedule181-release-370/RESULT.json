@@ -1,0 +1,45 @@
+{
+  "base": "370922014a2435b83d4a2c33cd0b0611bc85de11",
+  "head": "37e3e8cf7cec162669701d572032c3d2639b9751",
+  "tree": "2844e708fd3b1030e15518e80cd384e76aec6ef1",
+  "branch": "integrate/schedule181-after-370",
+  "state": "independent subsequent release candidate; not deployed",
+  "source_files_changed": 34,
+  "prior_schedule_files_exact": 31,
+  "shared_seams_preserve_370": 2,
+  "test_only_alignment_commits": 1,
+  "standalone_git_bundle": true,
+  "ui_submodule_bundle": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "source_map": "SOURCE-MAP.json",
+  "evidence_matrix": "EVIDENCE-MATRIX.md",
+  "runbook": "FORWARD-AND-RECOVERY.md",
+  "new_checks": {
+    "package_compile": 4,
+    "specific_schedule_unknown_dispatch_pg": 1,
+    "modified_upgrade_guard_pg": 1,
+    "actual_schema180_forward_upgrade": true,
+    "real_browser_history_smoke": true,
+    "sqlc_regeneration_clean": true
+  },
+  "old_suites_rerun": false,
+  "model_calls": 0,
+  "production_writes": 0,
+  "production_schema_reported_by_parent": 180,
+  "actual_isolated_version": "181 clean",
+  "messages_preserved": 335,
+  "limitations": [
+    "No production/HAP or real-model schedule end-to-end acceptance",
+    "No latest unified fast-path/HAP head included; independent subsequent batch based exactly on370",
+    "370 cannot safely resume opt-in181 schedules after binary rollback; retain latest181 DB and stop scheduler writers pending compatible repair",
+    "Historical multi-root ambiguity and original external runtime/channel/long-range cancellation-revision coverage remain explicit; no new UI acceptance gate"
+  ],
+  "cleanup": {
+    "own_backend_stop_requested": true,
+    "production_touched": false,
+    "schema": "181|f",
+    "messages": 335,
+    "enabled_plans": 0,
+    "paid_model_calls": 0,
+    "binary_sha256": "40dcce9618ee4a114cf4d8b50601da6c6517e413f0f7f8f80efd3cf21e575238"
+  }
+}

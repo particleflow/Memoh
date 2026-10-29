@@ -1,0 +1,9 @@
+{
+  "own_backend_stop_requested": true,
+  "production_touched": false,
+  "schema": "181|f",
+  "messages": 335,
+  "enabled_plans": 0,
+  "paid_model_calls": 0,
+  "binary_sha256": "40dcce9618ee4a114cf4d8b50601da6c6517e413f0f7f8f80efd3cf21e575238"
+}

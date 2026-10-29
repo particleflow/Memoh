@@ -1,0 +1,219 @@
+{
+  "base": "370922014a2435b83d4a2c33cd0b0611bc85de11",
+  "base_tree": "916311fc228447ae941dbecaf3fdd492f4bc61ff",
+  "head": "37e3e8cf7cec162669701d572032c3d2639b9751",
+  "tree": "2844e708fd3b1030e15518e80cd384e76aec6ef1",
+  "original_candidate": "cd8c7dbbcb7e2c4e4d5d05f3058edda343d640f6",
+  "commits": [
+    {
+      "combined": "66e948f3ffec7e9f8fd3548d12e26664cd9de44b",
+      "original": "1e909d33f99a3a793dc4102ad720d4b7abdb230c",
+      "subject": "fix(schedule): persist trusted contact result delivery"
+    },
+    {
+      "combined": "44f47d885b7947e129b9985f302557aae3b1e427",
+      "original": "55955839d9ff9debc7fd7776d83ae4abecccb959",
+      "subject": "fix(schedule): claim due occurrences before runtime admission"
+    },
+    {
+      "combined": "0422b217587ed4140e2091a9757c316d143b4103",
+      "original": "89200ec17ac28974362010ecb5a3118974863fd4",
+      "subject": "fix(schedule): serialize occurrence admission with pause"
+    },
+    {
+      "combined": "00b7a9b1f9a6d4d4440a70bb8756384bc67ed79e",
+      "original": "7a40b3ec209fd7c51131c685cebc290c977020f6",
+      "subject": "fix(schedule): refund definitively unadmitted busy occurrences"
+    },
+    {
+      "combined": "2dbf68572080bc5d699d5b19a5c3bd1c83c45034",
+      "original": "1a776f9af634f45f660c811414807da4c192c64f",
+      "subject": "fix(schedule): reconcile busy refunds after lost acknowledgement"
+    },
+    {
+      "combined": "c45cbcaa80b2817f6415d33a5003201204471ab4",
+      "original": "cd8c7dbbcb7e2c4e4d5d05f3058edda343d640f6",
+      "subject": "fix(schedule): fence stale callbacks across explicit resume"
+    },
+    {
+      "combined": "37e3e8cf7cec162669701d572032c3d2639b9751",
+      "original": null,
+      "subject": "test(db): align combined upgrade guard with schedule schema 181"
+    }
+  ],
+  "protected_trees_byte_identical_to_370": {
+    "apps/web": {
+      "base": "8e803c1d1fd811226eabb94a1ffb744d9409b02b",
+      "candidate": "8e803c1d1fd811226eabb94a1ffb744d9409b02b"
+    },
+    "packages/sdk": {
+      "base": "3877c7b0cdbed6f02ecbe41bc21fd69a8265f3b5",
+      "candidate": "3877c7b0cdbed6f02ecbe41bc21fd69a8265f3b5"
+    },
+    "internal/agent": {
+      "base": "0d3e6e4f7c5c9bf6c1f6adb7fd7a2a31a96f3a75",
+      "candidate": "0d3e6e4f7c5c9bf6c1f6adb7fd7a2a31a96f3a75"
+    },
+    "internal/channel": {
+      "base": "8aed3a484a089cf74f9855451d338a8ab2017641",
+      "candidate": "8aed3a484a089cf74f9855451d338a8ab2017641"
+    },
+    "internal/handlers": {
+      "base": "310b45f012f4f065b4264630b5822fad5a1223df",
+      "candidate": "310b45f012f4f065b4264630b5822fad5a1223df"
+    },
+    "internal/sessiontask": {
+      "base": "c76436fcb1df666bb4a4f6072b87a75354e807d5",
+      "candidate": "c76436fcb1df666bb4a4f6072b87a75354e807d5"
+    },
+    "internal/computertask": {
+      "base": "7c58af031601caa9ef376d5bdad58da7304e34f4",
+      "candidate": "7c58af031601caa9ef376d5bdad58da7304e34f4"
+    },
+    "internal/agenvo": {
+      "base": "7ba43dcf5627c1880aeb7ce6c104d92ab7e47629",
+      "candidate": "7ba43dcf5627c1880aeb7ce6c104d92ab7e47629"
+    }
+  },
+  "original_schedule_candidate_files": {
+    "cmd/internal/core/bot_delegation.go": {
+      "original": "dc3f30afda57fe1866703d8882033d055cc030a8",
+      "candidate": "dc3f30afda57fe1866703d8882033d055cc030a8"
+    },
+    "cmd/internal/core/providers.go": {
+      "original": "86e1200f00f8cb684cd6fbae664a89910552f091",
+      "candidate": "86e1200f00f8cb684cd6fbae664a89910552f091"
+    },
+    "cmd/internal/core/schedule_occurrence_recovery_test.go": {
+      "original": "29d8fa1585b09323cf13632d704526cd0b1242c7",
+      "candidate": "29d8fa1585b09323cf13632d704526cd0b1242c7"
+    },
+    "cmd/internal/core/schedule_result_delivery.go": {
+      "original": "79cd5946adf71d669c941c0f8af34c0e1462d8c0",
+      "candidate": "79cd5946adf71d669c941c0f8af34c0e1462d8c0"
+    },
+    "cmd/internal/core/schedule_result_delivery_test.go": {
+      "original": "553edb63ec6d84edd6fae81d3c5a32865e62d19c",
+      "candidate": "553edb63ec6d84edd6fae81d3c5a32865e62d19c"
+    },
+    "cmd/internal/core/task_result_delivery.go": {
+      "original": "a9530a8ac99a81ca08e0e9e65b6f8989b80fe54f",
+      "candidate": "9a180c01c2da1c0d6fe1cfe483c90edd0d012c7c"
+    },
+    "db/postgres/migrations/0001_init.up.sql": {
+      "original": "20630c1f03951f9fe6fa91ab494ad92c4a3ed2bc",
+      "candidate": "20630c1f03951f9fe6fa91ab494ad92c4a3ed2bc"
+    },
+    "db/postgres/migrations/0181_schedule_result_delivery.down.sql": {
+      "original": "ecfaee1062511adb214f3d23fda4c15111ceac6c",
+      "candidate": "ecfaee1062511adb214f3d23fda4c15111ceac6c"
+    },
+    "db/postgres/migrations/0181_schedule_result_delivery.up.sql": {
+      "original": "c9a0e2493bd07323bfe320f4587a2822b7b94304",
+      "candidate": "c9a0e2493bd07323bfe320f4587a2822b7b94304"
+    },
+    "db/postgres/queries/bot_task_directory.sql": {
+      "original": "f3dc3b3b49a60f77a552ab0cc2e8f949362165b6",
+      "candidate": "f3dc3b3b49a60f77a552ab0cc2e8f949362165b6"
+    },
+    "db/postgres/queries/schedule.sql": {
+      "original": "908156ae8d19e3f94945f1d08b5934cccb6abc31",
+      "candidate": "908156ae8d19e3f94945f1d08b5934cccb6abc31"
+    },
+    "db/postgres/queries/schedule_logs.sql": {
+      "original": "2febeeab908ecc24ffe7a86673911d034cc374e8",
+      "candidate": "2febeeab908ecc24ffe7a86673911d034cc374e8"
+    },
+    "db/postgres/queries/schedule_occurrence.sql": {
+      "original": "3d4b85244af26583552f35bff0a4e572398956a1",
+      "candidate": "3d4b85244af26583552f35bff0a4e572398956a1"
+    },
+    "db/postgres/queries/schedule_result_delivery.sql": {
+      "original": "82e75a90ea6c0f1548ce861191cf112928298002",
+      "candidate": "82e75a90ea6c0f1548ce861191cf112928298002"
+    },
+    "internal/db/postgres/sqlc/bot_task_directory.sql.go": {
+      "original": "207cada96ec2e41b67976050af71367ef9cd0704",
+      "candidate": "207cada96ec2e41b67976050af71367ef9cd0704"
+    },
+    "internal/db/postgres/sqlc/models.go": {
+      "original": "dececf911a55d281994471ba2d8667adc6a803c0",
+      "candidate": "dececf911a55d281994471ba2d8667adc6a803c0"
+    },
+    "internal/db/postgres/sqlc/schedule.sql.go": {
+      "original": "2ab1bb6f535a511a9380066cd1175748f08251ed",
+      "candidate": "2ab1bb6f535a511a9380066cd1175748f08251ed"
+    },
+    "internal/db/postgres/sqlc/schedule_logs.sql.go": {
+      "original": "039789ab80b0baa2d8e977039f7b2ac1c28c38bc",
+      "candidate": "039789ab80b0baa2d8e977039f7b2ac1c28c38bc"
+    },
+    "internal/db/postgres/sqlc/schedule_occurrence.sql.go": {
+      "original": "9c3b42e80fe5b6f05ad07c65c01f0a34a696ed8f",
+      "candidate": "9c3b42e80fe5b6f05ad07c65c01f0a34a696ed8f"
+    },
+    "internal/db/postgres/sqlc/schedule_result_delivery.sql.go": {
+      "original": "6db837eba198ac6adbf17334e4be03405882fd80",
+      "candidate": "6db837eba198ac6adbf17334e4be03405882fd80"
+    },
+    "internal/db/store/queries.go": {
+      "original": "df9196828a3402de72568e34b6aa83aa49a2cf2c",
+      "candidate": "df9196828a3402de72568e34b6aa83aa49a2cf2c"
+    },
+    "internal/schedule/occurrence.go": {
+      "original": "39bda73236164490645e6553b92e511835ec0f55",
+      "candidate": "39bda73236164490645e6553b92e511835ec0f55"
+    },
+    "internal/schedule/occurrence_busy.go": {
+      "original": "8472f7215b89297c7d30cd9d92c7367dc9bce860",
+      "candidate": "8472f7215b89297c7d30cd9d92c7367dc9bce860"
+    },
+    "internal/schedule/occurrence_busy_postgres_test.go": {
+      "original": "decad352750da22f3e3adc13d724243036747237",
+      "candidate": "decad352750da22f3e3adc13d724243036747237"
+    },
+    "internal/schedule/occurrence_pause_postgres_test.go": {
+      "original": "f0a0e102f106b2b370922ca0c4ec128952c3035e",
+      "candidate": "f0a0e102f106b2b370922ca0c4ec128952c3035e"
+    },
+    "internal/schedule/occurrence_postgres_test.go": {
+      "original": "12b7c85c3a4442e8c223118f39b516c18bf09e37",
+      "candidate": "12b7c85c3a4442e8c223118f39b516c18bf09e37"
+    },
+    "internal/schedule/occurrence_resume_postgres_test.go": {
+      "original": "7cb3a64aecad86df3b8c055423055b0ee378f0a2",
+      "candidate": "7cb3a64aecad86df3b8c055423055b0ee378f0a2"
+    },
+    "internal/schedule/occurrence_test.go": {
+      "original": "288b94653e14073e492c5dd02d19da480812adc3",
+      "candidate": "288b94653e14073e492c5dd02d19da480812adc3"
+    },
+    "internal/schedule/result_origin.go": {
+      "original": "a0b16f7de38dfde9ffdda1b34ee7aece53f5b833",
+      "candidate": "a0b16f7de38dfde9ffdda1b34ee7aece53f5b833"
+    },
+    "internal/schedule/result_origin_test.go": {
+      "original": "257d081b344f36e66e323cdef1fb85d5cb4fb591",
+      "candidate": "257d081b344f36e66e323cdef1fb85d5cb4fb591"
+    },
+    "internal/schedule/service.go": {
+      "original": "e0247cbbea2fc1bd2810b6cf5b2f8c0a16a7c669",
+      "candidate": "e0247cbbea2fc1bd2810b6cf5b2f8c0a16a7c669"
+    },
+    "internal/schedule/types.go": {
+      "original": "a097854fbfaf07ff863ed983e55cdbbfb02374af",
+      "candidate": "a097854fbfaf07ff863ed983e55cdbbfb02374af"
+    },
+    "internal/taskresult/delivery.go": {
+      "original": "5fb4d617c8793d6e54a0db2c96fb139691484cfa",
+      "candidate": "718eec1ee2a9c3ee509f0e5aa099045ea7c8562e"
+    }
+  },
+  "original_candidate_exact_matches": 31,
+  "only_shared_differences": [
+    "cmd/internal/core/task_result_delivery.go",
+    "internal/taskresult/delivery.go"
+  ],
+  "historical_incremental_migrations_unchanged": true,
+  "ui_submodule": "f69402a55dd87a59c10722fe11507ad8fd7048f5"
+}

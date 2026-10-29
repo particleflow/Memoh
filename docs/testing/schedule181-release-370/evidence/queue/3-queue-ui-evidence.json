@@ -1,0 +1,67 @@
+{
+  "actual_server": true,
+  "loopback_scripted_model": true,
+  "paid_calls": 0,
+  "queued": [
+    {
+      "task_type": "native_agent",
+      "task_id": "bg_c3f8af6b573a5ef799065cf616148cde",
+      "record_id": "c3f8af6b-573a-5ef7-9906-5cf616148cde",
+      "name": "queue_fixture_v3: NATIVE_CHILD_B_20261028_v3",
+      "state": "queued",
+      "created_at": "2026-10-28T20:57:05.095107Z",
+      "destination": {
+        "bot_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "a5dd1e7a-3464-4e58-a41a-6988defc90d1"
+      }
+    },
+    {
+      "task_type": "native_agent",
+      "task_id": "bg_1a295cab61065220bcf47211b8a251a4",
+      "record_id": "1a295cab-6106-5220-bcf4-7211b8a251a4",
+      "name": "queue_fixture_v3: NATIVE_CHILD_A_20261028_v3",
+      "state": "running",
+      "created_at": "2026-10-28T20:57:04.929261Z",
+      "destination": {
+        "bot_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "a5dd1e7a-3464-4e58-a41a-6988defc90d1",
+        "run_id": "16b2060c-8290-493a-819c-d20f5546b7aa"
+      }
+    }
+  ],
+  "completed": [
+    {
+      "task_type": "native_agent",
+      "task_id": "bg_c3f8af6b573a5ef799065cf616148cde",
+      "record_id": "c3f8af6b-573a-5ef7-9906-5cf616148cde",
+      "name": "queue_fixture_v3: NATIVE_CHILD_B_20261028_v3",
+      "state": "completed",
+      "created_at": "2026-10-28T20:57:05.095107Z",
+      "destination": {
+        "bot_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "a5dd1e7a-3464-4e58-a41a-6988defc90d1",
+        "run_id": "65373d62-08c7-46f3-88d8-845c5b9c89d2"
+      }
+    },
+    {
+      "task_type": "native_agent",
+      "task_id": "bg_1a295cab61065220bcf47211b8a251a4",
+      "record_id": "1a295cab-6106-5220-bcf4-7211b8a251a4",
+      "name": "queue_fixture_v3: NATIVE_CHILD_A_20261028_v3",
+      "state": "completed",
+      "created_at": "2026-10-28T20:57:04.929261Z",
+      "destination": {
+        "bot_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "a5dd1e7a-3464-4e58-a41a-6988defc90d1",
+        "run_id": "16b2060c-8290-493a-819c-d20f5546b7aa"
+      }
+    }
+  ],
+  "child_model_calls": {
+    "child_a": 1,
+    "child_b": 1
+  },
+  "contact_reply_seconds": 0.5318959470005211,
+  "page_errors": [],
+  "navigation": "original session only; no precise run anchor"
+}

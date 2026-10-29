@@ -1,0 +1,51 @@
+{
+  "commit": "c4f4cd945df686901a5b85dca49a975cafca94d6",
+  "parent": "14355dd1f7049cca42d49e67391f5486368ff6ee",
+  "changed_files": [
+    "apps/web/src/composables/api/useChat.chat-api.ts",
+    "apps/web/src/store/chat-list.ts",
+    "apps/web/src/store/chat/bootstrap-contact.test.ts",
+    "apps/web/src/store/chat/bootstrap.ts",
+    "apps/web/src/store/chat/commands.ts",
+    "apps/web/src/store/chat/fixed-contact.test.ts",
+    "apps/web/src/store/chat/send.ts",
+    "apps/web/src/store/chat/targets.ts",
+    "apps/web/src/store/workspace-tabs.test.ts",
+    "apps/web/src/store/workspace-tabs.ts",
+    "cmd/agent/http_providers.go",
+    "internal/channel/inbound/channel.go",
+    "internal/channel/route/contact.go",
+    "internal/command/menu.go",
+    "internal/command/registry.go",
+    "internal/handlers/fixed_contact.go",
+    "internal/handlers/fixed_contact_test.go",
+    "internal/handlers/local_channel.go",
+    "internal/handlers/message.go",
+    "internal/handlers/runtime_controls.go",
+    "internal/handlers/session.go",
+    "internal/handlers/session_contact.go",
+    "internal/handlers/session_queue.go"
+  ],
+  "tests": {
+    "go_new_root_cases": 6,
+    "vitest_contact": 22,
+    "vitest_workspace": 107,
+    "typecheck": "pass",
+    "eslint": "pass",
+    "ui_contract": "pass; 3 existing warnings"
+  },
+  "cloud_actual_browser_postgres": true,
+  "process_restart": true,
+  "parallel_workers_and_summaries_each": 1,
+  "main_reply_seconds_while_held": 1.0774846479998814,
+  "production_touched": false,
+  "deployment": false,
+  "paid_calls": 0,
+  "existing_contact_rebound": false,
+  "new_schema": false,
+  "remaining": [
+    "UI owner visual cleanup",
+    "HAP shared-source sync and real-device acceptance",
+    "ambiguous never-bound roots require explicit administrative migration decision"
+  ]
+}

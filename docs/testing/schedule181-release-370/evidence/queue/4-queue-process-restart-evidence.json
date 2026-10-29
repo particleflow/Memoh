@@ -1,0 +1,43 @@
+{
+  "before": {
+    "task_type": "native_agent",
+    "task_id": "bg_d6a97d0901e452aa9c8a4fb1496199be",
+    "record_id": "d6a97d09-01e4-52aa-9c8a-4fb1496199be",
+    "name": "queue_restart2: RESTART2_ORIGINAL_TASK_20261028",
+    "state": "queued",
+    "created_at": "2026-10-28T21:00:35.979161Z",
+    "destination": {
+      "bot_id": "30000000-0000-4000-8000-000000000001",
+      "session_id": "1adcf34b-3ad4-4cd7-b4c7-83fb8029029c"
+    }
+  },
+  "after": {
+    "task_type": "native_agent",
+    "task_id": "bg_d6a97d0901e452aa9c8a4fb1496199be",
+    "record_id": "d6a97d09-01e4-52aa-9c8a-4fb1496199be",
+    "name": "queue_restart2: RESTART2_ORIGINAL_TASK_20261028",
+    "state": "completed",
+    "created_at": "2026-10-28T21:00:35.979161Z",
+    "destination": {
+      "bot_id": "30000000-0000-4000-8000-000000000001",
+      "session_id": "1adcf34b-3ad4-4cd7-b4c7-83fb8029029c",
+      "run_id": "e8f135df-b351-4e30-98a2-1527058fd2c9"
+    }
+  },
+  "provider_before": {
+    "child_calls": 0
+  },
+  "provider_after": {
+    "phase": 2,
+    "child_calls": 1
+  },
+  "actual_process_crash_restart": true,
+  "same_task_and_record_id": true,
+  "browser": {
+    "actual_server_after_restart": true,
+    "restored_original_execution_visible": true,
+    "narrow_browser": true,
+    "read_error_ui": "synthetic 500 at browser transport; separate handler test injects actual permission reader error",
+    "page_errors": []
+  }
+}

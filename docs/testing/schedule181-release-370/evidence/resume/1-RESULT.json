@@ -1,0 +1,75 @@
+{
+  "base": "1a776f9af634f45f660c811414807da4c192c64f",
+  "head": "cd8c7dbbcb7e2c4e4d5d05f3058edda343d640f6",
+  "branch": "fix/schedule-resume-registration",
+  "remote_readback": "cd8c7dbbcb7e2c4e4d5d05f3058edda343d640f6\trefs/heads/fix/schedule-resume-registration",
+  "changed_files": [
+    "db/postgres/migrations/0001_init.up.sql",
+    "db/postgres/migrations/0181_schedule_result_delivery.up.sql",
+    "db/postgres/queries/schedule.sql",
+    "db/postgres/queries/schedule_occurrence.sql",
+    "internal/db/postgres/sqlc/models.go",
+    "internal/db/postgres/sqlc/schedule.sql.go",
+    "internal/db/postgres/sqlc/schedule_occurrence.sql.go",
+    "internal/schedule/occurrence.go",
+    "internal/schedule/occurrence_pause_postgres_test.go",
+    "internal/schedule/occurrence_resume_postgres_test.go",
+    "internal/schedule/service.go",
+    "internal/schedule/types.go"
+  ],
+  "new_field": "schedule.registration_generation BIGINT NOT NULL DEFAULT 0 in unpublished181 and snapshot",
+  "new_pg_cases": 5,
+  "prior_pg_guards_rechecked": {
+    "pause_suite": 1,
+    "busy_subcases": 6
+  },
+  "callback_unit_guard": 1,
+  "selected_skips": 0,
+  "red": "two original-base cases fail: stale callback after explicit resume; stale lock waiter after pause/resume commit",
+  "lint": "pass",
+  "build": "pass -buildvcs=false",
+  "binary_sha256": "ee949f173b19359c9da1666795e0d9ce08167a385b5d2fed709ec91379b96a89",
+  "ui": {
+    "actual_candidate_server": true,
+    "url": "http://127.0.0.1:28108/bot/local-dialog",
+    "isolated_database": "memoh_schedule_occurrence_20261029",
+    "busy_fire_history_present": true,
+    "failed_busy_no_run_no_false_jump": true,
+    "page_errors": [],
+    "schedule_task_mutations": [],
+    "enabled_schedules": 0,
+    "record": {
+      "task_type": "schedule_fire",
+      "task_id": "4bddf624-6c03-466d-9033-9dfa14065e2d",
+      "record_id": "4bddf624-6c03-466d-9033-9dfa14065e2d",
+      "name": "Resumed schedule history",
+      "state": "failed",
+      "created_at": "2026-10-29T17:18:14.487864Z"
+    },
+    "scope": "actual current application directory smoke with synthetic busy/failed record; PG test covers execution admission race; no model or production claim"
+  },
+  "migration": {
+    "isolated_down_up_preserved_records": true,
+    "busy_and_unknown_samples": 2,
+    "limit_disabled_true_and_false_retained": true,
+    "registration_generations_2_and_7_retained": true,
+    "messages_before_after": 335,
+    "enabled_schedules": 0,
+    "scope": "isolated additive DDL only, not production migration"
+  },
+  "cleanup": {
+    "own_backend_stop_requested": true,
+    "own_synthetic_plan_removed": true,
+    "enabled_plans": 0,
+    "busy_fixture_users": 0,
+    "messages": 335
+  },
+  "production_schema": 180,
+  "production_migration_or_model_calls": false,
+  "remaining": [
+    "production/HAP and real-model summary acceptance not performed",
+    "unpublished181 must be combined and applied before this binary; no production down/up",
+    "old scheduler binaries lack this generation check; mixed old/new scheduler writers are not protected",
+    "this is an enabled-registration fence, not a new general execution-configuration revision or catch-up policy"
+  ]
+}

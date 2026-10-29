@@ -1,0 +1,59 @@
+{
+  "fixed-contact": [
+    "fixed-contact-c4f4cd945/RESULT.json",
+    "fixed-contact-browser.json",
+    "fixed-contact-restart.json",
+    "fixed-contact-protocol.json"
+  ],
+  "entry-history": [
+    "contact-first-entry-14355dd1f/RESULT.json",
+    "contact-reopen-cc81049e0/RESULT.json"
+  ],
+  "queue": [
+    "ROUND3-HANDOFF.txt",
+    "native-queue-postgres-final.log",
+    "queue-ui-evidence.json",
+    "queue-process-restart-evidence.json"
+  ],
+  "results": [
+    "ROUND4-HANDOFF.txt",
+    "result-delivery-postgres-final.log",
+    "results-C2-runtime.json",
+    "results-final-ui.json",
+    "LEGACY-UNKNOWN-RESULT.json"
+  ],
+  "projection": [
+    "ROUND5-RESULT.json",
+    "projection-live.json"
+  ],
+  "directory": [
+    "RESULT-v6.json",
+    "run-anchor-postgres.log",
+    "directory-permission-green-final.log",
+    "schedule-history-b11774d79/RESULT.json",
+    "schedule-history-green.log",
+    "detail-cancel-RESULT.json"
+  ],
+  "admission": [
+    "contact-admission-02d3d7f4a/RESULT.json"
+  ],
+  "schedule-result": [
+    "schedule-fire-1e909d33f/HANDOFF.md",
+    "schedule-fire-pg.log"
+  ],
+  "occurrence": [
+    "schedule-occurrence-55955839d/RESULT.json",
+    "schedule-occurrence-pg.log"
+  ],
+  "busy": [
+    "schedule-busy-1a776f9af/RESULT.json",
+    "schedule-busy/final-busy.log"
+  ],
+  "resume": [
+    "schedule-resume-cd8c7dbbc/RESULT.json",
+    "schedule-resume/red.log",
+    "schedule-resume/green.log",
+    "schedule-resume/busy-guards.log",
+    "schedule-resume/migration-result.json"
+  ]
+}

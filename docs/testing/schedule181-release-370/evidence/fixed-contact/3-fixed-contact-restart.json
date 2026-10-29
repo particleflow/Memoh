@@ -1,0 +1,68 @@
+{
+  "before_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+  "after_restart_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+  "tasks": [
+    {
+      "task_type": "native_agent",
+      "task_id": "bg_a1d14c7b09595dc082e6a043bd2061f7",
+      "record_id": "a1d14c7b-0959-5dc0-82e6-a043bd2061f7",
+      "name": "fixed_contract_v2_b: FIXED2_CHILD_B_20261029",
+      "state": "completed",
+      "created_at": "2026-10-29T09:58:38.283959Z",
+      "destination": {
+        "bot_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "36266304-6985-4f2d-9a74-543379429652",
+        "run_id": "c52b2f0b-58ce-4413-8a5a-fd3756fc358b",
+        "turn_id": "7c36c3c3-31df-41cf-bfd9-5ce19863ca7d"
+      }
+    },
+    {
+      "task_type": "native_agent",
+      "task_id": "bg_51e40b28c43c5315b75374ddb91e5a6f",
+      "record_id": "51e40b28-c43c-5315-b753-74ddb91e5a6f",
+      "name": "fixed_contract_v2_a: FIXED2_CHILD_A_20261029",
+      "state": "completed",
+      "created_at": "2026-10-29T09:58:38.091794Z",
+      "destination": {
+        "bot_id": "30000000-0000-4000-8000-000000000001",
+        "session_id": "c3c8bfed-a2a8-4981-a5d6-73485bd02909",
+        "run_id": "55a54e3c-ee66-4d57-8459-97c2c3ea03dd",
+        "turn_id": "0dbc5f4f-9abd-48c1-9fa6-b60270daf809"
+      }
+    }
+  ],
+  "provider_counts": {
+    "worker_A": 1,
+    "worker_B": 1,
+    "summary_A": 1,
+    "summary_B": 1
+  },
+  "history_75_retained": true,
+  "original_database_contact_messages": 114,
+  "patch_contract": [
+    {
+      "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+      "keys": [
+        "runtime_type"
+      ],
+      "status": 403
+    },
+    {
+      "session_id": "4d2c7236-2711-4cb9-bcc9-af9dc28ef64f",
+      "keys": [
+        "title"
+      ],
+      "status": 403
+    },
+    {
+      "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+      "keys": [
+        "preferred_chat_model_id",
+        "preferred_reasoning_effort",
+        "expected_model_preference_revision"
+      ],
+      "status": 200
+    }
+  ],
+  "production_touched": false
+}

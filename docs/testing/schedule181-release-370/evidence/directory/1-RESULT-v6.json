@@ -1,0 +1,61 @@
+{
+  "round": 6,
+  "base": "453a1178c25213772dbead9f428f1dca83e2a027",
+  "head": "8d48dfe7c7e84849c7986608f89a114b7bf85d75",
+  "status": "original historical execution navigation locally verified; integration and device/production acceptance remain",
+  "bundle": "round6/bot-dialog-exact-run.bundle",
+  "patch": "round6/task-exact-run-navigation.patch",
+  "changed_files": 29,
+  "web_tests_unique": 139,
+  "go_top_level_tests": 9,
+  "postgres_transactions": 2,
+  "browser": {
+    "baseline_red": true,
+    "exact_original_run_and_refresh": true,
+    "same_session_different_runs": true,
+    "repeat_selection": true,
+    "cross_history_session": true,
+    "wrong_run_rejected": true,
+    "fixed_contact_return_and_back": true,
+    "narrow_refresh": true,
+    "live_new_run_keeps_original_position": true,
+    "cached_panel_reauthorization": "actual KeepAlive lifecycle test; route/panel reads also exercised by browser navigation",
+    "page_errors": []
+  },
+  "authorization": "existing Bot/session ancestry/task-specific checks; exact team-scoped Bot/session/run and typed invocation association; no latest fallback",
+  "models": "loopback script only; two live checks with one request each",
+  "paid_calls": 0,
+  "deployed": false,
+  "migrations": false,
+  "history_deleted": false,
+  "subagents_spawned": 0,
+  "typecheck_exit": 0,
+  "lint": {
+    "eslint_exit": 0,
+    "ui_contract_exit": 0,
+    "warnings": "two Vue one-component-per-file warnings in lifecycle test fixture; three unrelated UI contract warnings"
+  },
+  "cleanup": {
+    "runtime_ports_closed": [
+      28080,
+      28081,
+      28082,
+      28083,
+      28100
+    ],
+    "isolated_workspace_containers_stopped": true,
+    "database": {
+      "runs": 61,
+      "nonterminal": 0
+    },
+    "history_retained": true,
+    "models_and_config_unchanged": true,
+    "paid_calls": 0
+  },
+  "remaining": [
+    "Unified integration and independent review",
+    "HAP packaged-device/back-button acceptance by HAP owner",
+    "Production and human QA; semantic model acceptance unchanged"
+  ],
+  "blocking_tool_denials": []
+}

@@ -1,0 +1,14 @@
+{
+  "operation": "create Library artifact via official prepared upload helper",
+  "target": "Memoh-schedule181-release-37e3e8cf7.zip",
+  "bytes": 106402027,
+  "sha256": "19e763979b90eac8892617ece165f76aa32d7fcf57875b3a9b3992640c1915fa",
+  "status": "blocked before upload preparation",
+  "reason": "hosted apps tools/list request failed with HTTP status 401",
+  "attempts": 1,
+  "library_file_id": null,
+  "retry_or_direct_upload_fallback": false,
+  "source_candidate": "37e3e8cf7cec162669701d572032c3d2639b9751",
+  "source_branch": "integrate/schedule181-after-370",
+  "local_archive": "/workspace/bot-dialog-handoff/Memoh-schedule181-release-37e3e8cf7.zip"
+}

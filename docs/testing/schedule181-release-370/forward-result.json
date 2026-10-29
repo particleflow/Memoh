@@ -1,0 +1,26 @@
+{
+  "database": "memoh_schedule_release_181_20261029",
+  "source_clone": "isolated memoh_fixed_contact_20261029, not production",
+  "before_version": "180 clean",
+  "before_new_columns_absent": true,
+  "after_version": "181 clean",
+  "legacy_rows_preserved": true,
+  "table_hashes_before_after": {
+    "users": "05a5f90b8cb8a1a63660fc59e857adf55b0958cc581353957f3cc6cb48c0e166",
+    "team_members": "4c94ac45cab8abce087a966bf9cbdf05b96aa23267789a40415c474bb92505aa",
+    "bots": "22b33dda7cc7ac47905315518eb2c8973c2883bfd71ab19d104231fc66ca78a9",
+    "bot_sessions": "ea4fde1a154cada4ada3782dbf76e0cae844a3cf87ed76edd102836f5acdeea3",
+    "bot_channel_routes": "90b33bf95ebe95e73a53d4dfdeb605129f5dd05fdb16986646cc7d3bd2cd041b",
+    "session_runs": "64dc7c9288214c69f919cea24eb7c81f51b49a7b10553054f2a19875480be2db",
+    "bot_history_messages": "f71b51ffcbd11319cc83fe92b01e5f0151e58fea110ad18d2e77ff94ca50be47",
+    "schedule": "4cfd6407178b6b77188effe834810fbab853d7550c9e15a07363570b0fdde4e9",
+    "schedule_logs": "ea713651f9fda3428d77ec06b88acd8f7b1039ad43fb962cafe01b515db9e2a0"
+  },
+  "messages_before_after": 335,
+  "old_plans_not_opted_in": true,
+  "legacy_disabled_remains_disabled": true,
+  "no_down_no_force": true,
+  "no_scheduler_or_model_started": true,
+  "plan": "911ec855-3ed4-4277-a445-fdd9b96b7eb7",
+  "fire": "74ca4410-ebfc-480b-b6f3-3f996a8bae09"
+}

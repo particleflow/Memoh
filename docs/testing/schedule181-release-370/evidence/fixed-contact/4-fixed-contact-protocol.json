@@ -1,0 +1,73 @@
+{
+  "cases": [
+    {
+      "name": "old-message",
+      "events": [
+        {
+          "type": "error",
+          "session_id": "4d2c7236-2711-4cb9-bcc9-af9dc28ef64f",
+          "code": "http.forbidden",
+          "error_code": null
+        }
+      ],
+      "invocation_id": "efcc95fe-7adb-4ad9-a99a-fa5444860cc2"
+    },
+    {
+      "name": "old-retry",
+      "events": [
+        {
+          "type": "error",
+          "session_id": "4d2c7236-2711-4cb9-bcc9-af9dc28ef64f",
+          "code": "http.forbidden",
+          "error_code": null
+        }
+      ],
+      "invocation_id": "75ec3c19-afb7-4532-8369-b7246700417d"
+    },
+    {
+      "name": "old-edit",
+      "events": [
+        {
+          "type": "error",
+          "session_id": "4d2c7236-2711-4cb9-bcc9-af9dc28ef64f",
+          "code": "http.forbidden",
+          "error_code": null
+        }
+      ],
+      "invocation_id": "c6d6e115-6d6e-4640-8ace-b2e1988b6f7b"
+    },
+    {
+      "name": "slash-reset",
+      "events": [
+        {
+          "type": "command_error",
+          "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+          "code": "slash.permission_denied",
+          "error_code": null
+        }
+      ],
+      "invocation_id": "81103336-f45a-4dee-84ef-355e9f06cacf"
+    },
+    {
+      "name": "no-session",
+      "events": [
+        {
+          "type": "session_created",
+          "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+          "code": null,
+          "error_code": null
+        },
+        {
+          "type": "run_accepted",
+          "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+          "code": null,
+          "error_code": null
+        }
+      ],
+      "invocation_id": "cbbb673a-bc27-44c9-956d-4cfec93df28b"
+    }
+  ],
+  "sessions_before": 20,
+  "sessions_after": 20,
+  "old_messages": 75
+}

@@ -1,0 +1,89 @@
+{
+  "task": {
+    "id": "37743234-529a-54de-b638-cc096c7c22c3",
+    "state": "completed",
+    "bot_id": "30000000-0000-4000-8000-000000000001",
+    "run_id": "57d589e3-87f2-49f0-ad56-338b7f9b35bc",
+    "call_id": "result-C2-v5",
+    "message": "TASK_RESULT_C2_V5",
+    "task_id": "bg_37743234529a54deb638cc096c7c22c3",
+    "user_id": "d72dd4a8-394a-4f4b-b722-005671adc8d0",
+    "version": 1,
+    "agent_id": "result_c2_v5",
+    "created_at": "2026-10-28T21:47:10.145269+00:00",
+    "session_id": "ce66fd8e-a434-47b0-8e72-f98df0d14616",
+    "claim_token": "94fcc47a-821b-49e1-837f-19c49a4f0989",
+    "description": "result_c2_v5: TASK_RESULT_C2_V5",
+    "fingerprint": "c553270d75863cbf4433d8102886fad6e49a1f59a1e4adc0f1b195f19f41a93b",
+    "return_route": {
+      "channel": "web",
+      "chat_id": "30000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "route_id": "684d25a6-257f-4751-b175-a30d6a3fd485",
+      "reply_target": "30000000-0000-4000-8000-000000000001",
+      "conversation_type": "private"
+    },
+    "source_run_id": "762ccacd-7db4-40fb-8c3f-9951f7c49349",
+    "result_delivery": {
+      "1b6c35f66dd062398340163ffa88baf32e96e3fb5eb9b5dcce49be3390143ea2": {
+        "text": "Background task result_c2_v5: TASK_RESULT_C2_V5 execution state: completed.\n\nRESULT_C2_SAVED: original task completed exactly once.",
+        "state": "completed",
+        "run_id": "57d589e3-87f2-49f0-ad56-338b7f9b35bc",
+        "attempt": 3,
+        "message_id": "c03a2fe9-e33a-4ae5-aaf0-b6a4b35c03c1",
+        "report_state": "reported",
+        "summary_run_id": "3a92c0b8-2d28-413d-a6f6-f45eea309b1c"
+      }
+    },
+    "call_fingerprint": "43e474712b18fa824aa76cd7aa4920407bc4baaca004b333c446be89aea7b392",
+    "parent_session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "result_delivery_version": 1
+  },
+  "summary_runs": [
+    {
+      "state": "completed",
+      "run_id": "106bcabb-b839-4d5d-beec-e2240506bfb0",
+      "receipt": "native_task:bg_37743234529a54deb638cc096c7c22c3:1b6c35f66dd062398340163ffa88baf32e96e3fb5eb9b5dcce49be3390143ea2:1",
+      "messages": [
+        {
+          "id": "69029fd9-b74f-4c8b-99c5-b17f9f506e4b",
+          "role": "assistant",
+          "truncated": [
+            {
+              "code": "output_truncated",
+              "content": "The reply reached the model's output limit and was cut off. Ask it to continue, or split the request into smaller parts."
+            }
+          ],
+          "final_receipt": null
+        }
+      ]
+    },
+    {
+      "state": "completed",
+      "run_id": "c272f8c3-9468-49a0-9cfb-6f8fed5d37a5",
+      "receipt": "native_task:bg_37743234529a54deb638cc096c7c22c3:1b6c35f66dd062398340163ffa88baf32e96e3fb5eb9b5dcce49be3390143ea2:2",
+      "messages": []
+    },
+    {
+      "state": "completed",
+      "run_id": "3a92c0b8-2d28-413d-a6f6-f45eea309b1c",
+      "receipt": "native_task:bg_37743234529a54deb638cc096c7c22c3:1b6c35f66dd062398340163ffa88baf32e96e3fb5eb9b5dcce49be3390143ea2:3",
+      "messages": [
+        {
+          "id": "c03a2fe9-e33a-4ae5-aaf0-b6a4b35c03c1",
+          "role": "assistant",
+          "truncated": null,
+          "final_receipt": "native_task:bg_37743234529a54deb638cc096c7c22c3:1b6c35f66dd062398340163ffa88baf32e96e3fb5eb9b5dcce49be3390143ea2:3"
+        }
+      ]
+    }
+  ],
+  "provider_counts": {
+    "workerC1": 1,
+    "summaryC1": 2,
+    "workerC2": 1,
+    "summaryC2": 3,
+    "workerC3": 1,
+    "summaryC3": 1
+  }
+}

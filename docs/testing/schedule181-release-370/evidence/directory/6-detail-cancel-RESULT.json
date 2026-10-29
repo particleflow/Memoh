@@ -1,0 +1,60 @@
+{
+  "commit": "76471e0ef3ab9470dcf17c1d85ddb27cece14109",
+  "base": "8d48dfe7c7e84849c7986608f89a114b7bf85d75",
+  "published_reference": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "scope": "Cancelable 15-second task identity validation; superseded reads cannot own the new selection",
+  "changes": [
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.test.ts",
+    "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+    "apps/web/src/pages/home/index.navigation.test.ts",
+    "apps/web/src/pages/home/index.vue",
+    "apps/web/src/utils/task-history-link.test.ts",
+    "apps/web/src/utils/task-history-link.ts"
+  ],
+  "validation": {
+    "red": "6 failures before implementation; targeted cancellation/timeout assertions",
+    "green_unique_tests": 36,
+    "green_files": 4,
+    "eslint": "changed files passed",
+    "ui_contract": "passed; 3 existing warnings",
+    "browser": {
+      "source": "modified original branch; unchanged existing v6 backend and isolated PostgreSQL",
+      "old_pending_new_task_seconds": 1.55980168699989,
+      "new_task_visible_before_old_response": true,
+      "old_request_aborted": true,
+      "late_response_cannot_restore_old_task": true,
+      "timeout_preserves_task_url": true,
+      "page_errors": [],
+      "new_model_calls": 0
+    },
+    "narrow": {
+      "narrow_zh_dark": true,
+      "refresh_locates_same_run": true,
+      "composer_accepts_unsent_input": true,
+      "page_errors": []
+    },
+    "database_counts_after": {
+      "schedules": 0,
+      "runs": 61,
+      "unknown": 2
+    }
+  },
+  "integration": {
+    "release_three_way": "six files clean; one import-line conflict in apps/web/src/pages/home/index.vue",
+    "resolution": "import { computed, nextTick, onScopeDispose, provide, ref, watch } from 'vue'",
+    "keep_release_behavior": "Preserve release read-aloud and chatWorkspaceVisibleKey masking; merge only the cancellation changes",
+    "not_a_merge_commit": true
+  },
+  "limits": [
+    "No causal evidence linking this independent defect to the original NAS loading report",
+    "Actual UI uses existing v6 backend and modified original branch with browser-held GET responses; no production acceptance",
+    "Only identity checks are bounded here, not general session/message/network initialization",
+    "No build, deployment, paid model call, new schedule, history deletion or Agent core change",
+    "UI screenshots remain local inspection evidence and are excluded from Library package"
+  ],
+  "cleanup": {
+    "owned_server_and_vite_stopped": true,
+    "database_history_preserved": true
+  }
+}

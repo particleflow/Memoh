@@ -1,0 +1,145 @@
+diff --git a/cmd/internal/core/task_result_delivery.go b/cmd/internal/core/task_result_delivery.go
+index a9530a8ac..9a180c01c 100644
+--- a/cmd/internal/core/task_result_delivery.go
++++ b/cmd/internal/core/task_result_delivery.go
+@@ -4,11 +4,12 @@ import (
+ 	"context"
+ 	"encoding/json"
+ 	"errors"
+-	"fmt"
+ 	"log/slog"
+ 	"sync"
+ 	"time"
+ 
++	"github.com/jackc/pgx/v5"
++
+ 	"github.com/felinics/memoh/internal/agent/application"
+ 	historyfrag "github.com/felinics/memoh/internal/agent/context/history"
+ 	"github.com/felinics/memoh/internal/agent/turn"
+@@ -16,7 +17,6 @@ import (
+ 	"github.com/felinics/memoh/internal/chat/thread"
+ 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+ 	"github.com/felinics/memoh/internal/taskresult"
+-	"github.com/jackc/pgx/v5"
+ )
+ 
+ var errResultNotReady = errors.New("task result is not ready")
+@@ -41,6 +41,12 @@ type resultTask struct {
+ }
+ 
+ func (h *delegationHost) wakeResults(context.Context) {
++	h.signalResultDelivery()
++}
++
++// The callback only signals the existing worker; scans belong to its lifecycle,
++// so a completed request must not cancel delivery and shutdown still cancels it.
++func (h *delegationHost) signalResultDelivery() {
+ 	w := h.resultWake
+ 	if w == nil {
+ 		return
+@@ -56,7 +62,7 @@ func (h *delegationHost) wakeResults(context.Context) {
+ 	}
+ 	w.running = true
+ 	w.wg.Add(1)
+-	go func() {
++	go func(lifecycleCtx context.Context) {
+ 		defer w.wg.Done()
+ 		for {
+ 			w.mu.Lock()
+@@ -67,14 +73,14 @@ func (h *delegationHost) wakeResults(context.Context) {
+ 			}
+ 			w.dirty = false
+ 			w.mu.Unlock()
+-			ctx, cancel := context.WithTimeout(w.ctx, 30*time.Second)
++			ctx, cancel := context.WithTimeout(lifecycleCtx, 30*time.Second)
+ 			err := h.scanResults(ctx)
+ 			cancel()
+ 			if err != nil && w.log != nil {
+ 				w.log.Warn("task result delivery remains pending", slog.Any("error", err))
+ 			}
+ 		}
+-	}()
++	}(w.ctx)
+ }
+ 
+ func (h *delegationHost) scanResults(ctx context.Context) error {
+@@ -224,7 +230,8 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
+ 			return t, errResultNotReady
+ 		}
+ 		run, e := h.store.GetSessionRunByInvocation(ctx, sqlc.GetSessionRunByInvocationParams{SessionID: nativeTaskUUID(r.SessionID), InvocationID: "subagent:" + r.TaskID})
+-		if e == nil {
++		switch {
++		case e == nil:
+ 			if run.BotID.String() != bot || run.TeamID.String() != b.TeamID {
+ 				return t, botdelegation.ErrDenied
+ 			}
+@@ -235,9 +242,9 @@ func (h *delegationHost) loadResultTask(ctx context.Context, kind, id, bot, user
+ 			if t.state == "lost" {
+ 				t.state = "unknown"
+ 			}
+-		} else if !errors.Is(e, pgx.ErrNoRows) {
++		case !errors.Is(e, pgx.ErrNoRows):
+ 			return t, e
+-		} else if r.State == "claimed" {
++		case r.State == "claimed":
+ 			return t, errResultNotReady
+ 		}
+ 		t.text = "Background task " + r.Description + " execution state: " + t.state + "."
+@@ -416,7 +423,7 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
+ 		}
+ 		return h.resultSubmit(ctx, ref.String(), t.cmd)
+ 	}
+-	return fmt.Errorf("task result changed during delivery; retained for reconciliation")
++	return errors.New("task result changed during delivery; retained for reconciliation")
+ }
+ 
+ func (h *delegationHost) prepareResult(ctx context.Context, req application.ChatRequest) (context.Context, application.ChatRequest, error) {
+diff --git a/internal/taskresult/delivery.go b/internal/taskresult/delivery.go
+index 5fb4d617c..718eec1ee 100644
+--- a/internal/taskresult/delivery.go
++++ b/internal/taskresult/delivery.go
+@@ -6,13 +6,16 @@ import (
+ 	"crypto/sha256"
+ 	"encoding/hex"
+ 	"encoding/json"
++	"errors"
+ 	"fmt"
+ 	"strconv"
+ 	"strings"
+ )
+ 
+-const MetadataKey = "task_result_receipt"
+-const MaxAttempts = 3
++const (
++	MetadataKey = "task_result_receipt"
++	MaxAttempts = 3
++)
+ 
+ type Reference struct {
+ 	Kind, TaskID, EventID string
+@@ -22,14 +25,15 @@ type Reference struct {
+ func (r Reference) String() string {
+ 	return fmt.Sprintf("%s:%s:%s:%d", r.Kind, r.TaskID, r.EventID, r.Attempt)
+ }
++
+ func Parse(s string) (Reference, error) {
+ 	p := strings.Split(s, ":")
+ 	if len(p) != 4 || (p[0] != "native_task" && p[0] != "bot_delegation" && p[0] != "schedule_fire") || p[1] == "" || len(p[2]) != 64 {
+-		return Reference{}, fmt.Errorf("invalid task result reference")
++		return Reference{}, errors.New("invalid task result reference")
+ 	}
+ 	n, e := strconv.Atoi(p[3])
+ 	if e != nil || n < 1 || n > MaxAttempts {
+-		return Reference{}, fmt.Errorf("invalid summary attempt")
++		return Reference{}, errors.New("invalid summary attempt")
+ 	}
+ 	if _, e = hex.DecodeString(p[2]); e != nil {
+ 		return Reference{}, e
+@@ -55,6 +59,7 @@ func EventID(state, run, text string) string {
+ 	h := sha256.Sum256(b)
+ 	return hex.EncodeToString(h[:])
+ }
++
+ func Terminal(state string) bool {
+ 	return state == "completed" || state == "failed" || state == "aborted" || state == "lost"
+ }

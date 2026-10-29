@@ -1,0 +1,12 @@
+{
+  "actual_server": true,
+  "url": "http://127.0.0.1:28082/bot/local-dialog",
+  "paid_calls": 0,
+  "model": "loopback scripted provider",
+  "natural_unknown_visible_once": true,
+  "c3_final_visible_once": true,
+  "machine_result_input_absent": true,
+  "directory_status": "Execution lost; result unknown",
+  "page_errors": [],
+  "remaining": "ordinary native tool activity is still visible; task links open original session, not a run anchor"
+}

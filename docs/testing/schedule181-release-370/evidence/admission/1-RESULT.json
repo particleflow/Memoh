@@ -1,0 +1,50 @@
+{
+  "base": "78d6092c50b79a283429df4d359f6e84e206f787",
+  "commit": "02d3d7f4ab24066c48badc98a551f5131a5df18b",
+  "tree": "3b78943687fa5f7beb742ebaa65709ffca4e0389",
+  "branch": "fix/contact-admission-p1",
+  "push": "success",
+  "product_files": [
+    "apps/web/src/pages/home/components/chat-pane.vue",
+    "apps/web/src/store/chat-list.ts",
+    "apps/web/src/store/chat/assistant-streams.ts",
+    "apps/web/src/store/chat/runtime-integration.ts",
+    "apps/web/src/store/chat/send.ts",
+    "apps/web/src/store/chat/views.ts"
+  ],
+  "tests": {
+    "original_two_red": 2,
+    "original_two_green": 2,
+    "final_contact_cases_passed": 12,
+    "related_registry_runtime_passed": 19,
+    "skipped": 0,
+    "original_integration_nine": "not supplied; parent must run its retained suite"
+  },
+  "eslint": "pass",
+  "ui_contract": "pass; existing 3 warnings",
+  "ui_copy": "pass",
+  "typecheck": "6 errors in two unchanged read-aloud test fixtures; no changed-file diagnostics; not passed",
+  "browser": {
+    "url": "http://127.0.0.1:28086/bot/local-dialog",
+    "scope": "Actual current Vite application with controlled WS frames; isolated existing backend provides read-only contact/history. No backend admission/execution or phone claim.",
+    "base": "78d6092c50b79a283429df4d359f6e84e206f787",
+    "backend_fixture": "55955839d prior isolated binary",
+    "model_calls": 0,
+    "admitted_without_projection_blocks_second_send": true,
+    "unknown_elapsed_seconds": 29.76,
+    "errors": [],
+    "message_transmissions": 3,
+    "unique_invocations": 2,
+    "same_contact": true,
+    "abort_frames": 0,
+    "unknown_visible": true,
+    "real_protocol_reconnect_reuses_original_invocation": true
+  },
+  "schedule_checkpoint": "55955839d9ff9debc7fd7776d83ae4abecccb959 independent unchanged",
+  "remaining": [
+    "original integration nine cross-guards",
+    "read-aloud fixture typecheck errors",
+    "HAP new-source build",
+    "matching-version field acceptance"
+  ]
+}

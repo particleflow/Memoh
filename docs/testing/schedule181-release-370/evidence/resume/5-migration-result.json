@@ -1,0 +1,9 @@
+{
+  "isolated_down_up_preserved_records": true,
+  "busy_and_unknown_samples": 2,
+  "limit_disabled_true_and_false_retained": true,
+  "registration_generations_2_and_7_retained": true,
+  "messages_before_after": 335,
+  "enabled_schedules": 0,
+  "scope": "isolated additive DDL only, not production migration"
+}

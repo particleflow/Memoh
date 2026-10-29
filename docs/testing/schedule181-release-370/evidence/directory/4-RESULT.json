@@ -1,0 +1,60 @@
+{
+  "task": "Retain trustworthy scheduled execution history after plan deletion",
+  "commit": "b11774d79703c9411e4221b3c901adc6f4aba71d",
+  "parent": "76471e0ef3ab9470dcf17c1d85ddb27cece14109",
+  "published_baseline": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "baseline_blobs": {
+    "db/postgres/queries/schedule.sql": {
+      "published": "4e03ffb14925efc0bbd1001d344011abb6e50f9d",
+      "parent": "4e03ffb14925efc0bbd1001d344011abb6e50f9d"
+    },
+    "db/postgres/queries/bot_task_directory.sql": {
+      "published": "f732c168704722507769aa6be2a3d2e443b71382",
+      "parent": "f732c168704722507769aa6be2a3d2e443b71382"
+    },
+    "internal/schedule/service.go": {
+      "published": "43d5d1909e15c8cc2522b1324bfa670587ec9e55",
+      "parent": "43d5d1909e15c8cc2522b1324bfa670587ec9e55"
+    }
+  },
+  "status": "source fix and narrow real PostgreSQL verification complete; application UI/production acceptance outstanding",
+  "changed_files": [
+    "db/postgres/migrations/0001_init.up.sql",
+    "db/postgres/migrations/0180_schedule_history_retention.down.sql",
+    "db/postgres/migrations/0180_schedule_history_retention.up.sql",
+    "db/postgres/queries/schedule.sql",
+    "db/postgres/queries/sessions.sql",
+    "internal/db/postgres/sqlc/models.go",
+    "internal/db/postgres/sqlc/schedule.sql.go",
+    "internal/db/postgres/sqlc/sessions.sql.go",
+    "internal/sessiontask/schedule_history_postgres_test.go"
+  ],
+  "test": {
+    "command": "go test ./internal/sessiontask -run ^TestDirectoryPostgresDeletedScheduleKeepsOriginalHistory$ -count=1 -v",
+    "environment": "isolated memoh_bot_dialog_test_20261028; all writes transaction-local TEMP tables; no scheduler instantiated",
+    "red": "FAIL deleted history changed: []",
+    "green": "PASS 0.173s; one new regression case with multiple assertions",
+    "migration": "0180 up/up/down/down/up on TEMP schedule; no public migration applied"
+  },
+  "sqlc": {
+    "pinned_command": "go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate",
+    "result": "success",
+    "wrapper_limitation": "mise run sqlc-generate tried unrelated rust@1.90 install and failed to create ~/.rustup on read-only filesystem; exact configured generator invoked directly"
+  },
+  "not_done": [
+    "product build",
+    "development application/browser verification of changed source",
+    "deployment",
+    "production acceptance",
+    "live migration",
+    "paid model call",
+    "creation of an actual scheduled job"
+  ],
+  "limits": [
+    "Previously cascade-deleted log identities cannot be reconstructed reliably.",
+    "Legacy logs without an exact canonical invocation remain visible without an invented run link.",
+    "Explicit log purge and Bot deletion remain existing operations outside this plan-deletion slice.",
+    "Rollback makes archived configurations visible again but disabled; reverting to old code restores physical-delete behavior.",
+    "0180 is next available at 5a42/76471; unified owner must check number collisions before combining."
+  ]
+}
