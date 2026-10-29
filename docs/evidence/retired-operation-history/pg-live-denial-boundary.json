@@ -1,0 +1,45 @@
+{
+  "source_commit": "46c6264abc54cc520ebccd4f432a0f06319eaffe",
+  "original_failure": {
+    "source": "6391829c2b348938822d2a8a5f2ecaedeeddbfb8",
+    "workflow_run": 40877854197,
+    "job": 123461223634,
+    "cases": [
+      "owner-inactive",
+      "runtime-revoked"
+    ],
+    "assertion": "errors.Is(err, computertask.ErrDenied)",
+    "actual_error": "agenvo.ErrForbidden; computer target access denied"
+  },
+  "isolated_postgres_comparison": {
+    "baseline": "78d6092c50b79a283429df4d359f6e84e206f787",
+    "baseline_independent_cases": [
+      "PASS 3.44s",
+      "PASS 3.16s"
+    ],
+    "unfixed_639_independent_cases": [
+      "FAIL 3.64s",
+      "FAIL 3.17s"
+    ],
+    "scope": "Each case used its own process and disposable database. No live data, OAuth, Windows or business task."
+  },
+  "cause": "Historical tasks.Get correctly survives runtime retirement. Delivery still separately calls live ResolveTarget, whose denial must retain the existing delivery ErrDenied identity. Previously the earlier history resolver hid this boundary.",
+  "minimal_fix": "Retain live ResolveTarget; map its failure to existing computertask.ErrDenied. No changed authorization condition or assertion.",
+  "verification": {
+    "command": "go test -race -tags=integration -count=1 -timeout=90s -run '^TestComputerDeliveryPostgresAuthorizationCASAndPreservation$/^(owner-inactive|runtime-revoked)$' ./internal/db",
+    "database": "Dedicated synthetic PostgreSQL management endpoint; test creates and drops its own database. UI database untouched.",
+    "exit_code": 0,
+    "elapsed_seconds": 3.984,
+    "scoped_lint": "PASS"
+  },
+  "prior_639_native_ci": {
+    "run": 40877854088,
+    "job": 123461221030,
+    "conclusion": "success",
+    "scope": "First natural pull_request run, attempt1, repository synthetic fixtures only. Preserved without cancel or dispatch."
+  },
+  "limits": [
+    "This report is not current-head full CI acceptance.",
+    "No production runtime revocation, binding deletion, private relay read or deployment was performed."
+  ]
+}
