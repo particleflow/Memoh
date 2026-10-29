@@ -1,0 +1,23 @@
+{
+  "oldOperationNames": 383,
+  "newOperationNames": 382,
+  "removedHistoricalPhoneNames": [
+    "getUsersMeRuntimesByIdAgenvoEndpoint",
+    "postUsersMeRuntimesAgenvoDiscover",
+    "putUsersMeRuntimesByIdAgenvoAgent",
+    "putUsersMeRuntimesByIdAgenvoEndpoint"
+  ],
+  "newNames": [
+    "getBotsByBotIdMediaUploadFailures",
+    "getBotsByBotIdMediaUploadFailuresByOperation",
+    "putBotsByBotIdMediaUploadFailuresByOperation"
+  ],
+  "consumerReferencesAfter127Map": {
+    "postUsersMeRuntimesAgenvoDiscover": [
+      "apps/web/src/components/computer/connect-agenvo-dialog.vue"
+    ],
+    "putUsersMeRuntimesByIdAgenvoEndpoint": [],
+    "putUsersMeRuntimesByIdAgenvoAgent": [],
+    "getUsersMeRuntimesByIdAgenvoEndpoint": []
+  }
+}

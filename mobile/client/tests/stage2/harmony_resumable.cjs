@@ -10,8 +10,8 @@ if(process.argv[2]==='worker') worker().catch(e=>{console.log(JSON.stringify({er
 async function worker(){
  const [dir,origin,action,handle='',token='alice',bot='bot-a',scope='session-a']=process.argv.slice(3),positions=new Map();let maxRead=0,maxWrite=0,maxBody=0,samples=0,networkHints=[],onPatch,onJournalSave,onWrite,onRead,sourceMutated=false
  const io={OpenMode:{READ_ONLY:fs.constants.O_RDONLY,WRITE_ONLY:fs.constants.O_WRONLY,READ_WRITE:fs.constants.O_RDWR,CREATE:fs.constants.O_CREAT,EXCL:fs.constants.O_EXCL,TRUNC:fs.constants.O_TRUNC,NOFOLLOW:fs.constants.O_NOFOLLOW},WhenceType:{SEEK_SET:0},
-  accessSync:p=>fs.existsSync(p),mkdirSync:p=>fs.mkdirSync(p),openSync:(p,m)=>{if(action==='stage-source-open-fail'&&p===path.join(dir,'source.bin'))throw Object.assign(Error('synthetic denied SECRET_URI'),{code:13900012});return{fd:fs.openSync(p,m)}},closeSync:f=>{let fd=typeof f==='number'?f:f.fd;positions.delete(fd);fs.closeSync(fd)},
-  statSync:p=>typeof p==='number'?fs.fstatSync(p):fs.statSync(p),lseek:(fd,at)=>{if(action==='stage-source-verify-fail'&&!sourceMutated){const source=fs.openSync(path.join(dir,'source.bin'),'r+');try{fs.writeSync(source,Buffer.from([0x4f]),0,1,0)}finally{fs.closeSync(source)}sourceMutated=true}positions.set(fd,at)},readTextSync:p=>fs.readFileSync(p,'utf8'),listFileSync:p=>fs.readdirSync(p),renameSync:(a,b)=>{if(action.endsWith('-rename-fail'))throw Object.assign(Error('synthetic journal rename failure'),{code:13900020});fs.renameSync(a,b);const hook=onJournalSave;onJournalSave=undefined;hook?.(b)},unlinkSync:p=>fs.unlinkSync(p),fsyncSync:fd=>{if(action.endsWith('-dir-sync-fail')&&fs.fstatSync(fd).isDirectory())throw Object.assign(Error('synthetic directory sync failure'),{code:13900020});fs.fsyncSync(fd)},
+  accessSync:p=>fs.existsSync(p),mkdirSync:p=>fs.mkdirSync(p),openSync:(p,m)=>{if(action.endsWith('-source-open-fail')&&p===path.join(dir,'source.bin'))throw Object.assign(Error('synthetic denied SECRET_URI'),{code:13900012});return{fd:fs.openSync(p,m)}},closeSync:f=>{let fd=typeof f==='number'?f:f.fd;positions.delete(fd);fs.closeSync(fd)},
+  statSync:p=>typeof p==='number'?fs.fstatSync(p):fs.statSync(p),lseek:(fd,at)=>{if(action.endsWith('-source-verify-fail')&&!sourceMutated){const source=fs.openSync(path.join(dir,'source.bin'),'r+');try{fs.writeSync(source,Buffer.from([0x4f]),0,1,0)}finally{fs.closeSync(source)}sourceMutated=true}positions.set(fd,at)},readTextSync:p=>fs.readFileSync(p,'utf8'),listFileSync:p=>fs.readdirSync(p),renameSync:(a,b)=>{if(action.endsWith('-rename-fail'))throw Object.assign(Error('synthetic journal rename failure'),{code:13900020});fs.renameSync(a,b);const hook=onJournalSave;onJournalSave=undefined;hook?.(b)},unlinkSync:p=>{if(action==='bridge-cleanup-source-verify-fail'&&p.endsWith('.original'))throw Object.assign(Error('synthetic cleanup SECRET_PATH'),{code:13900020});fs.unlinkSync(p)},fsyncSync:fd=>{if(action.endsWith('-dir-sync-fail')&&fs.fstatSync(fd).isDirectory())throw Object.assign(Error('synthetic directory sync failure'),{code:13900020});fs.fsyncSync(fd)},
   read:async(fd,b,o={})=>{const hook=onRead;onRead=undefined;hook?.();maxRead=Math.max(maxRead,b.byteLength);const at=o.offset??positions.get(fd)??0;let n=await new Promise((res,rej)=>fs.read(fd,new Uint8Array(b),0,o.length??b.byteLength,at,(e,n)=>e?rej(e):res(n)));positions.set(fd,at+n);return n},
   write:async(fd,b,o={})=>{const hook=onWrite;onWrite=undefined;hook?.();maxWrite=Math.max(maxWrite,b.byteLength);const at=o.offset??positions.get(fd)??0;let n=fs.writeSync(fd,new Uint8Array(b),0,o.length??b.byteLength,at);positions.set(fd,at+n);return n},
   writeSync:(fd,b)=>fs.writeSync(fd,new Uint8Array(b))}
@@ -20,7 +20,7 @@ async function worker(){
  class MultipartForm{constructor(fields){this.fields=fields}}
  const rcp={Request,MultipartForm,createSession:()=>{let active,stream;return{cancel:()=>active?.destroy(Error('cancel')),close:()=>{active?.destroy();stream?.destroy()},fetch:r=>new Promise((resolve,reject)=>{
   assert.equal(r.configuration.transfer.autoRedirect,false)
-  if(action==='stage-network-fail'&&r.url.endsWith('/limits'))return reject(Object.assign(Error('synthetic failed SECRET_ADDRESS'),{code:1007900007}))
+  if(action.endsWith('-network-fail')&&r.url.endsWith('/limits'))return reject(Object.assign(Error('synthetic failed SECRET_ADDRESS'),{code:1007900007}))
   let content=r.content,headers={...r.headers},tail
   let wireURL=r.url;
   if(networkPolicyTest){const u=new URL(r.url),ip=r.configuration.dns?.dnsRules[0]?.ipAddresses[0];assert.equal(u.protocol,'https:');assert.equal(u.hostname,'nas.example');assert.equal(r.configuration.security.remoteValidation,'system');assert.equal(r.configuration.dns.dnsRules[0].host,u.hostname);assert.equal(r.configuration.dns.dnsRules[0].port,Number(u.port));networkHints.push([r.method,ip]);if(r.method==='GET'&&u.pathname==='/api/users/me'&&ip!=='2001:db8::20'){if(ip==='192.0.2.10'){const stale=Buffer.from('stale partial metadata');r.destination(stale.buffer.slice(stale.byteOffset,stale.byteOffset+stale.length))}return reject(Object.assign(Error('synthetic metadata path loss'),{code:ip==='192.0.2.10'?1007900056:1007900007}))}assert.equal(ip,'2001:db8::20');wireURL='http://127.0.0.1:'+u.port+u.pathname;headers.host=u.host}
@@ -30,7 +30,7 @@ async function worker(){
   active=http.request(wireURL,{method:r.method,headers},res=>{res.on('data',b=>{try{r.destination(b.buffer.slice(b.byteOffset,b.byteOffset+b.length))}catch(e){active.destroy(e)}});res.on('error',reject);res.on('end',()=>resolve({statusCode:res.statusCode,headers:res.headers}))});active.on('error',reject)
   if(stream){active.write(content);stream.pipe(active,{end:false});stream.on('end',()=>active.end(tail));stream.on('error',reject)}else active.end(content)
  })}}}
- const modules={'@kit.CoreFileKit':{fileIo:io,fileUri:{FileUri:class{constructor(uri){this.name=path.basename(uri)}}}},'@kit.CryptoArchitectureKit':kitCrypto,'@kit.ArkTS':{url:{URL:{parseURL:value=>new URL(value)}},util:{TextEncoder:class{encodeInto(s){return new TextEncoder().encode(s)}},TextDecoder:class{decodeToString(b){return new TextDecoder().decode(b)}},Base64Helper:class{decodeSync(s){return new Uint8Array(Buffer.from(s,'base64'))}},generateRandomUUID:()=>crypto.randomUUID().replaceAll('-','')}},'@kit.RemoteCommunicationKit':{rcp},'@kit.ArkData':{uniformTypeDescriptor:{}},'./MemohClientConfig':{MEMOH_ORIGIN:origin,MEMOH_NETWORK_POLICY:networkPolicyTest?networkPolicy:undefined},'./NativePhotoSelection':{NativePhotoSelection:class{}}}
+ const modules={'@kit.CoreFileKit':{fileIo:io,fileUri:{FileUri:class{constructor(uri){this.name=path.basename(uri)}}}},'@kit.CryptoArchitectureKit':kitCrypto,'@kit.ArkTS':{url:{URL:{parseURL:value=>new URL(value)}},util:{TextEncoder:class{encodeInto(s){return new TextEncoder().encode(s)}},TextDecoder:class{decodeToString(b){return new TextDecoder().decode(b)}},Base64Helper:class{decodeSync(s){return new Uint8Array(Buffer.from(s,'base64'))}},generateRandomUUID:()=>crypto.randomUUID().replaceAll('-','')}},'@kit.RemoteCommunicationKit':{rcp},'@kit.ArkData':{uniformTypeDescriptor:{getUniformDataTypeByFilenameExtension:()=>''}},'./MemohClientConfig':{MEMOH_ORIGIN:origin,MEMOH_NETWORK_POLICY:networkPolicyTest?networkPolicy:undefined},'./NativePhotoSelection':{NativePhotoSelection:class{async select(){return[path.join(dir,'source.bin')]}}}}
  function load(name){const module={exports:{}},code=fs.readFileSync(path.join(root,'mobile/harmony/app/entry/src/main/ets/common/'+name+'.ets'),'utf8');vm.runInNewContext(ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText,{module,exports:module.exports,require:n=>{assert.ok(n in modules,n);return modules[n]},ArrayBuffer,Uint8Array,Map,Set,Promise,Error,Date,JSON,Math,Number,String,URL,setTimeout});return module.exports}
  modules['@kit.PerformanceAnalysisKit']={hilog:{info(){},error(){}}};const diagnosticModule=load('ClientDiagnostics');diagnosticModule.ClientDiagnostics.event=(area,component,phase,detail)=>diagnostics.push({area,component,phase,detail});modules['./ClientDiagnostics']=diagnosticModule;
  modules['@kit.NetworkKit']={connection:{getDefaultHttpProxy:async()=>{assert(networkPolicyTest);return{host:''}},getDefaultNet:async()=>{assert(networkPolicyTest);return{getAddressesByName:async host=>{assert.equal(host,'nas.example');return[{family:2,address:'2001:db8::20'}]}}}}};
@@ -40,7 +40,17 @@ async function worker(){
  const input={operation:'a'.repeat(32),botId:bot,scope,authorization:'Bearer '+token,handle}
  global.gc?.();const baseline=process.memoryUsage(),peak={...baseline},timer=setInterval(()=>{samples++;let m=process.memoryUsage();for(let k in peak)peak[k]=Math.max(peak[k],m[k])},10)
  try{let result
-  if(['stage','stage-dir-sync-fail','stage-rename-fail','stage-source-open-fail','stage-source-verify-fail','stage-network-fail'].includes(action))result=await native.select(input,path.join(dir,'source.bin'))
+  if(action==='expired-scope-source-open-fail'){
+   let failure;try{await native.select(input,path.join(dir,'source.bin'))}catch(error){failure=error}
+   assert.equal(failure.uploadFailure.phase,'source-open');native.close();assert.equal(failure.uploadFailure,undefined);result={expiredFailureHidden:true}
+  }
+  else if(action.startsWith('bridge-')){
+   modules['./NativeResumableUpload']={NativeResumableUpload};modules['./NativeVoice']={NativeVoice:class{close(){}prepare(){}}};modules['./NativeMediaDownload']={NativeMediaDownload:class{close(){}}}
+   const {NativeClient}=load('NativeClient'),frame='begonia-client://app/index.html',client=new NativeClient({registerJavaScriptProxy(){},getLastJavascriptProxyCallingFrameUrl:()=>frame,getUrl:()=>frame},()=>{},async()=>{},{filesDir:dir})
+   client.register();assert.equal(JSON.parse(await client.request(JSON.stringify({version:1,command:'client.state',state:'ready'}))).ok,true)
+   result=JSON.parse(await client.request(JSON.stringify({version:1,command:'upload.select',...input})))
+  }
+  else if(['stage','stage-dir-sync-fail','stage-rename-fail','stage-source-open-fail','stage-source-verify-fail','stage-network-fail'].includes(action))result=await native.select(input,path.join(dir,'source.bin'))
   else if(['copy-dir-sync-fail','copy-rename-fail'].includes(action)){
    const bytes=fs.readFileSync(path.join(dir,'source.bin'));await native.stageBegin(input,'synthetic.bin','application/octet-stream',bytes.length)
    for(let at=0;at<bytes.length;at+=65536)await native.stageAppend(input.operation,input.authorization,at,bytes.subarray(at,at+65536).toString('base64'))
@@ -161,6 +171,17 @@ async function main(){
  async function stage(){let s=await child('stage');assert.ok(s.result,s.error);measurements.push({phase:'stage',...s.metrics});return s.result[0].handle}
  async function discard(handle){const r=await child('discard',handle);assert.equal(r.error,undefined);return r}
  try{
+  if(process.env.HARMONY_UPLOAD_FAILURE_ENVELOPE_ONLY==='1'){
+   const reports=[]
+   for(const [action,phase,sdkCode,code]of [['bridge-source-open-fail','source-open',13900012,'VOICE_UNAVAILABLE'],['bridge-source-verify-fail','source-verify',0,'MEDIA_SHA_MISMATCH'],['bridge-network-fail','limits-read',1007900007,'VOICE_UNAVAILABLE'],['bridge-cleanup-source-verify-fail','source-verify',0,'MEDIA_SHA_MISMATCH']]){
+    const before=Date.now(),reply=(await child(action)).result;assert.ok(reply);assert.equal(reply.ok,false);assert.equal(reply.error,code);assert.equal(reply.failure.version,1);assert.equal(reply.failure.phase,phase);assert.equal(reply.failure.sdkCode,sdkCode);assert.ok(reply.failure.at>=before&&reply.failure.at<=Date.now())
+    assert.deepEqual(Object.keys(reply.failure).sort(),['at','phase','sdkCode','version']);assert.ok(!JSON.stringify(reply).includes('SECRET'));assert.ok(!JSON.stringify(reply).includes('Bearer'));reports.push({phase,sdkCode,code})
+    if(action.endsWith('-source-verify-fail')){const original=fs.openSync(source,'r+');try{fs.writeSync(original,block,0,1,0)}finally{fs.closeSync(original)}}
+   }
+   assert.equal((await child('expired-scope-source-open-fail')).result.expiredFailureHidden,true)
+   assert.equal(createPosts,0);assert.equal(completePosts,0);assert.equal(patches,0);assert.equal(legacyPosts,0)
+   console.log(JSON.stringify({actualNativeRouter:true,actualNativeUploader:true,realDisk:true,syntheticKitFailures:true,size,reports,expiredScopeFailureHidden:true,createPosts,completePosts,patches,newEndpoint:false,nativeDevice:false}));return
+  }
   if(process.env.HARMONY_UPLOAD_STAGING_FAILURE_ONLY==='1'){
    const prior=await stage(),journalDir=path.join(dir,'memoh-upload-journal-v1'),priorJournal=fs.readFileSync(path.join(journalDir,prior+'.json')),priorSnapshot=fs.readFileSync(path.join(journalDir,prior+'.original'))
    for(const entry of ['stage','copy'])for(const failure of ['rename-fail','dir-sync-fail']){

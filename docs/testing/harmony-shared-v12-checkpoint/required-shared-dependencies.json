@@ -1,0 +1,12 @@
+[
+  {
+    "path": "apps/web/src/lib/media-transfer.ts",
+    "sha256": "e1a6d1bff2ec9c36ef8e2bca255077e139eb1e50b3b70a963a1546f8c25ccdef",
+    "reason": "Existing upstream dependency of restoreMediaUploadScopes; absent in historical phone source base, no new implementation."
+  },
+  {
+    "path": "apps/web/src/lib/media-transfer-storage.ts",
+    "sha256": "2bd22b1d515059b51ff813ccf5f0fa73de9e1a1e40cc76af7e1d372eb8a5a57b",
+    "reason": "Existing upstream dependency of restoreMediaUploadScopes; absent in historical phone source base, no new implementation."
+  }
+]

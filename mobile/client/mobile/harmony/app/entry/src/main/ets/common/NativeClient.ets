@@ -2,7 +2,7 @@ import { webview } from '@kit.ArkWeb';
 import { common } from '@kit.AbilityKit';
 import { NativeVoice } from './NativeVoice';
 import { NativeMediaDownload } from './NativeMediaDownload';
-import { NativeResumableUpload, UploadPreview, UploadScope } from './NativeResumableUpload';
+import { NativeResumableUpload, UploadPreview, UploadScope, UploadStageFailure, UploadFailure } from './NativeResumableUpload';
 import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
 import { TransferNetworkPolicy } from './ServiceUrl';
 
@@ -130,7 +130,18 @@ export class NativeClient {
       return '{"version":1,"ok":true}';
     } catch (error) {
       const message = (error as Error).message;
-      return JSON.stringify({ version: 1, ok: false, error: /^[A-Z0-9_]+$/.test(message) ? message : 'VOICE_UNAVAILABLE' });
+      const failure = (error as UploadStageFailure).uploadFailure;
+      // Optional metadata on the existing error response, not a log/export command.
+      // Reconstruct only fixed enums/numbers; never serialize the Error or cause.
+      const phases = ['owner-read', 'limits-read', 'picker', 'source-metadata', 'source-open', 'snapshot-create',
+        'snapshot-copy', 'snapshot-hash', 'source-verify', 'journal-publish', 'journal-dir-sync'];
+      const allowed = this.active && this.ready && failure?.version === 1 && phases.includes(failure.phase) &&
+        Number.isSafeInteger(failure.sdkCode) && failure.sdkCode >= 0 && failure.sdkCode <= 2147483647 &&
+        Number.isSafeInteger(failure.at) && failure.at > 0;
+      const metadata: UploadFailure | undefined = allowed && failure
+        ? { version: 1, phase: failure.phase, sdkCode: failure.sdkCode, at: failure.at } : undefined;
+      return JSON.stringify({ version: 1, ok: false, error: /^[A-Z0-9_]+$/.test(message) ? message : 'VOICE_UNAVAILABLE',
+        failure: metadata });
     }
   }
 }

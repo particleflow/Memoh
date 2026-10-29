@@ -1,0 +1,10 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/store/workspace-tabs.test.ts(753,5): error TS2304: Cannot find name 'mediaRecovery'.
+src/store/workspace-tabs.test.ts(766,5): error TS2304: Cannot find name 'mediaRecovery'.
+src/store/workspace-tabs.test.ts(771,35): error TS2304: Cannot find name 'mediaRecovery'.
+/workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

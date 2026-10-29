@@ -1,0 +1,87 @@
+[
+  {
+    "file": "result.json",
+    "sha256": "f55863a3adb4610b39e75552066f9628f26283e5288a3801d81e30fb4932279c",
+    "size": 1676
+  },
+  {
+    "file": "API26-exact-reuse.json",
+    "sha256": "e83e9a98c231e351dac1787b9fe66afa7c099fb063c17c16b32736dd0e1a73f0",
+    "size": 624
+  },
+  {
+    "file": "final-source-map.json",
+    "sha256": "45041de8967f4bceed57094f02efcb772309824c3d404deead1f260e34dba69f",
+    "size": 35159
+  },
+  {
+    "file": "phone-sdk-operation-coverage.json",
+    "sha256": "20b63e470d14b63901f164c5383391aa20cf2fa94ffbac203ef9061acade9258",
+    "size": 1064
+  },
+  {
+    "file": "required-shared-dependencies.json",
+    "sha256": "1cd7167e00c13a977fd9fe553d17627b6d46bba1ba900e05be5f826b83d7b92e",
+    "size": 567
+  },
+  {
+    "file": "required-dependency-metadata.json",
+    "sha256": "a85dbf0224d6cd9a1e10642efe509f57e56c7fb8cd2adf2df2ac6471ec51984a",
+    "size": 476
+  },
+  {
+    "file": "legacy-alias-review.json",
+    "sha256": "f3adfbeaa7f64b45bff0571a143680af7382eebc11498b6e91b3c549f5f321c8",
+    "size": 732
+  },
+  {
+    "file": "paired-sdk-outbox.cjs",
+    "sha256": "11449b3b1d4a97b14db4e6ac98bedb72b0180e137a72c5f09af1176b15560e9f",
+    "size": 23582
+  },
+  {
+    "file": "vitest.workspace.config.ts",
+    "sha256": "803b7ad7ba8d1c3f3b2a75d8581f8700a75e0522e363217ab63d20c9741afe68",
+    "size": 621
+  },
+  {
+    "file": "types.log.txt",
+    "sha256": "644d39c0445b94771e775719a4806481669adb890db02ffcfcfbf2d84e529cad",
+    "size": 652
+  },
+  {
+    "file": "types-corrected.log.txt",
+    "sha256": "ba3a471b2dc1f22278339adbfbe5eb41e93cc307d9b2bbb358a8dbed968eb8ca",
+    "size": 665
+  },
+  {
+    "file": "types-final.log.txt",
+    "sha256": "9b93febd49604a80eec98f124a2f02738214dca017bf6427c25c8aafbaf3a5b8",
+    "size": 172
+  },
+  {
+    "file": "outbox-recovery.log.txt",
+    "sha256": "0c87684318c81a96503efd747a035f9eae5664f7ade2c8c9514f3f1ad6cf8c4c",
+    "size": 458
+  },
+  {
+    "file": "paired-sdk-original-harness-import-failure.log.txt",
+    "sha256": "f7ce7d1303f408c17795473c1f27b2eee2bbaae2967b89cab697c2dd4edc62ec",
+    "size": 852
+  },
+  {
+    "file": "paired-sdk-outbox.log.txt",
+    "sha256": "32a059077305a70924bb62f012c9421bb3b1898b7ee28503b79e64adcdc94db7",
+    "size": 227
+  },
+  {
+    "file": "workspace-scope.log.txt",
+    "sha256": "14ec178d3ba5ac71d99fc7857fafeedec4359079de0b11df7a9fdda9794914db",
+    "size": 295
+  },
+  {
+    "file": "source-final.log.txt",
+    "sha256": "93929a73339376d69684b426f5d79bde1965027621233a2a1c405ab1962a8c2c",
+    "size": 196
+  }
+]

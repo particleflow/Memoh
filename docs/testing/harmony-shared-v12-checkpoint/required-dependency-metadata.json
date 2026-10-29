@@ -1,0 +1,10 @@
+[
+  {
+    "path": "apps/web/package.json",
+    "reason": "Declare already cached canonical@noble/hashes2.2.0 directly for the imported existing media-transfer dependency; preserve all other phone dependencies and native wavesurfer pin."
+  },
+  {
+    "path": "pnpm-lock.yaml",
+    "reason": "Declare already cached canonical@noble/hashes2.2.0 directly for the imported existing media-transfer dependency; preserve all other phone dependencies and native wavesurfer pin."
+  }
+]

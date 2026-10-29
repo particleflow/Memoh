@@ -45,7 +45,7 @@ def inputs():
         'mobile/memoh/harmony-image-timing.ts', 'mobile/memoh/harmony-image-timing.test.ts', 'mobile/memoh/harmony-image-timing-node.test.ts', 'mobile/memoh/harmony-attachment-preparation.test.ts',
         'mobile/memoh/harmony-voice.ts', 'mobile/memoh/harmony-voice-geometry.ts',
         'mobile/memoh/HarmonyVoiceInput.vue', 'mobile/memoh/HarmonyVoiceFan.vue', 'mobile/memoh/HarmonyVoicePlayer.vue',
-        'mobile/memoh/HarmonyAttachments.vue', 'mobile/memoh/harmony-resumable.ts',
+        'mobile/memoh/HarmonyAttachments.vue', 'mobile/memoh/harmony-resumable.ts', 'mobile/memoh/harmony-upload-failures.ts',
         'mobile/memoh/voiceFan.svg', 'mobile/memoh/voiceFan.css', 'contracts/ui_theme.json',
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
@@ -92,6 +92,46 @@ def verify_modules(modules):
     lock = json.loads(PIN.read_text())
     assert modules == {lock['archive']: lock['archiveSHA256']}, 'Use the complete official release source'
     assert all(sha(ROOT / name) == digest for name, digest in modules.items()), 'Upstream archive drift'
+
+
+def apply_paired_context(context, paired, patches):
+    """Apply one pinned shared snapshot after existing reviewed phone seams."""
+    files = paired['files']
+    removed = {item['path']: item for item in paired['removedFiles']}
+    temporary = context.with_suffix('.paired.tar')
+    seen, deleted = set(), set()
+    with tarfile.open(context) as source, tarfile.open(temporary, 'w') as target:
+        last = {item.name: item for item in source.getmembers()}
+        for member in source.getmembers():
+            name = member.name
+            data = source.extractfile(member).read() if member.isfile() else None
+            if name in removed:
+                assert data is not None and hashlib.sha256(data).hexdigest() == removed[name]['baseSHA256'], 'Retired phone source drift'
+                deleted.add(name)
+                continue
+            entry = copy.copy(member)
+            if name in files and member is last[name]:
+                item = files[name]
+                assert data is not None and hashlib.sha256(data).hexdigest() == item['baseSHA256'], 'Paired shared baseline drift'
+                data = item['source'].encode()
+                assert hashlib.sha256(data).hexdigest() == item['sha256'], 'Paired shared output drift'
+                entry.size = len(data)
+                seen.add(name)
+                if name in patches:
+                    patches[name] = {'upstreamSHA256': item['upstreamSHA256'], 'adaptedSHA256': item['sha256']}
+            target.addfile(entry, io.BytesIO(data) if data is not None else None)
+        for name, item in files.items():
+            if name in seen:
+                continue
+            assert item['baseSHA256'] is None and name not in last, 'Paired source unexpectedly missing'
+            data = item['source'].encode()
+            assert hashlib.sha256(data).hexdigest() == item['sha256'], 'New paired source drift'
+            entry = tarfile.TarInfo(name)
+            entry.size, entry.mode = len(data), 0o644
+            target.addfile(entry, io.BytesIO(data))
+            seen.add(name)
+    assert seen == files.keys() and deleted == removed.keys(), 'Paired source coverage drift'
+    temporary.replace(context)
 
 
 def context_archive(lock, base=BASE, platform='harmony'):
@@ -1323,7 +1363,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         host_sources = {name: ROOT / 'mobile/memoh' / name for name in (
             'harmony.ts', 'harmony-files.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-image-timing-node.test.ts', 'harmony-attachment-preparation.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
-            'HarmonyAttachments.vue', 'harmony-resumable.ts',
+            'HarmonyAttachments.vue', 'harmony-resumable.ts', 'harmony-upload-failures.ts',
             'harmony-download.ts', 'harmony-service-url.ts')}
         if platform == 'harmony':
             for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css'):
@@ -1364,6 +1404,8 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
             entry.size = len(data)
             entry.mode = 0o644
             target.addfile(entry, io.BytesIO(data))
+    if 'paired959' in home_admission_sources:
+        apply_paired_context(context, home_admission_sources['paired959'], patches)
     return context, patches
 
 

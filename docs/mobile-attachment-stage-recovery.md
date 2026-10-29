@@ -57,14 +57,41 @@ This protects recovery after a local staging failure. It is **not** evidence
 that directory fsync caused the reported phone incident, or that this phone can
 now upload successfully.
 
-## Minimal first-error readback for the sole field writer
+## Audited 12faf4/7e765/6a476 baseline: no remote user entry
+
+The phone is remote, outside the LAN. USB, HDC, a connected PC, and a private
+sandbox dump are not prerequisites or instructions for this investigation.
+
+That baseline has no user-facing diagnostic menu, share/export operation,
+remote diagnostic endpoint, or bridge command that reads
+`client-diagnostics.jsonl`. `ClientDiagnostics.event` only writes the app-private
+file and HiLog. `EntryAbility.onDump` returns image timing data through the
+system dump mechanism; it neither exports attachment failures nor establishes a
+phone-user diagnostic entry. Voice worker diagnostics stay inside the worker
+and native process. These are not supported public-network readback channels.
+
+The existing backend `AccessLog` records method, sanitized URI, route, HTTP
+status, latency and result attributes; it does not consume attachment-stage
+request headers. The existing limits handler has no client-failure input.
+`nativeAttachmentCommand` uses `createApiFetch` with a bridge-backed fetch
+function: its `/users/me` argument is not an automatic HTTP error report. The
+earlier successful limits request cannot carry a later local failure stage.
+There was no existing event or authenticated request-metadata path that returned
+that local first error to the server. The 6a476 bridge-only step added no
+reporting request or endpoint. The explicitly authorized follow-up now adds the
+scoped file-module metadata resource described in
+[the reporting contract](mobile-attachment-failure-reporting.md), without a
+public log, new service, file retransmission or permission expansion.
+
+### Read-only evidence boundary for the sole field writer
 
 Do not select or upload the user's attachment again to collect evidence.
 
 1. Read the actual installed app version/source identity, if an existing
    authorized app diagnostic channel exposes it. The source candidate version
    alone is insufficient.
-2. Through that same supported channel, read only timestamped records from
+2. Only if an already authorized supported diagnostic channel actually exists
+   on the installation, read timestamped records from
    `context.filesDir/client-diagnostics.jsonl` and its `.previous` rotation
    matching `component=photo-selection` or, after this patch is integrated,
    `component=attachment-stage`. `context.filesDir` is the installed app's own
@@ -99,9 +126,94 @@ the original journal. It does not reopen the old picker URI. Failure of a
 temporary grant before publication and loss/change of an owned snapshot after
 publication are different boundaries; neither permits guessing a replacement.
 
+## Original 6a476 candidate: preserve metadata on the existing bridge
+
+An optional `failure` member now carries a staged-operation error through the
+existing version-1 `upload.*` error response. No command or network protocol is
+added. The existing `error` value, `ok=false`, upload identity and all success
+responses keep their semantics. Old consumers ignore the optional member; new
+consumers accept old responses without it.
+
+```json
+{
+  "version": 1,
+  "ok": false,
+  "error": "VOICE_UNAVAILABLE",
+  "failure": {
+    "version": 1,
+    "phase": "source-open",
+    "sdkCode": 13900012,
+    "at": 1793261904000
+  }
+}
+```
+
+This example is synthetic. Only the fixed phase whitelist, SDK integer in
+0..2147483647, and positive integer timestamp are returned. SDK messages, paths,
+URIs, filename, original bytes, hash, credential, Bot/scope/owner identifiers,
+upload ID, stack and cause are excluded. The native bridge and Web consumer
+both reconstruct the whitelist, dropping extra properties. Unknown or malformed
+metadata is ignored without turning failure into success. The first staged
+error is retained if later cleanup fails; secondary cleanup is logged locally.
+The native error getter stops exposing its metadata after its lifecycle epoch
+changes or authorization closes. Existing frame and ready gates still apply.
+
+The Web helper `nativeUploadFailure(error)` in `harmony-resumable.ts` returns
+the validated metadata plus an allowlisted machine code derived from the
+existing `error` enum. Other codes become `UNCLASSIFIED`; a plain legacy error
+returns `undefined`. Current 401/403 handling remains the shared auth handler,
+before metadata attachment. The original generation/token check runs before
+consuming a reply. A late reply from another login is rejected without exposing
+its metadata. That bridge-only step did not read or upload an original, create a
+new receipt, retry an operation, publish an event, persist error metadata in Web
+Storage, or contact a diagnostic server. The follow-up preserves these file-byte
+boundaries while adding an authenticated metadata outbox.
+
+### Original presentation loss, now consumed by the follow-up
+
+The 6a476 `HarmonyAttachments.vue` caught the selection error in `action` and
+immediately assigned `cause.message` to a string. The follow-up now stores
+`{message, failure: nativeUploadFailure(cause)}` in its existing error state and
+exposes it through the existing component. `reopenPreviews` does the same. The existing send failure catch in
+`apps/web/src/store/chat/send.ts` similarly receives the original `Error` before
+message conversion. The common bridge now queues metadata before callers can
+convert errors to strings. No additional text, menu or button was added; the
+existing error rendering still uses its original message.
+
+Image picker/URI/format decoding belongs to the separate image owner. No image
+implementation was changed. The current common contract exposes its existing
+`picker` boundary, not a fabricated decoder substage; any finer enum must be
+agreed across native producer, bridge and frontend validators before integration.
+
+That first candidate made future first errors available to the current authorized
+Web document through its existing request response. It was not server-side
+telemetry, a public log channel, or a remote historical-error retrieval feature.
+It cannot recover the already discarded error from the reported incident, and
+did not survive a phone process restart as an exported failure record. The
+follow-up adds a scoped persistent metadata outbox and authenticated NAS readback.
+The private diagnostic journal remains private. Both candidates are **not deployed**;
+official HAP build and installed-phone acceptance remain unverified. The user's remote location is not a reason to stop cloud development
+or to request that they retransmit their attachment.
+
+### New envelope checks only
+
+Use the existing TypeScript dependency and set
+`HARMONY_UPLOAD_FAILURE_ENVELOPE_ONLY=1` for the existing
+`harmony_resumable.cjs` and `harmony_resumable_frontend.cjs` fixtures. The native
+subset runs the actual router and uploader with real disk/local HTTP and
+synthetic Kit faults. It checks source-open SDK denial, source verification hash
+failure, metadata network failure, preservation of the first hash error across
+a cleanup failure, and expiry of failure visibility after native close. The
+frontend subset checks three stage/code combinations, legacy replies, malformed
+versions/phases/numbers, dropping extra private fields, shared 403 handling and
+late-account rejection. There are no diagnostic network requests. Counts of
+upload Create/PATCH/Complete are zero. These are isolated results, not evidence
+of the actual phone's installed version or its historical first error.
+
 ## Narrow verification
 
-Only the new failure subset was run. No old upload matrix, full build, HAP
+For the original preservation fix, only its new failure subset was run. Those
+seven cases were not rerun for the envelope follow-up. No old upload matrix, full build, HAP
 build, model call, deployment, or real user transfer was run.
 
 ```sh

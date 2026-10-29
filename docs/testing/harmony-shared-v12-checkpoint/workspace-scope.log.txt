@@ -1,0 +1,9 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context-corrected/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 105 skipped (107)
+   Start at  11:29:30
+   Duration  4.83s (transform 2.30s, setup 0ms, import 2.96s, tests 127ms, environment 1.54s)
+

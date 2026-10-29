@@ -1,0 +1,14 @@
+{
+  "SDKVersion": "26.0.0.105/API26",
+  "officialCompileReused": true,
+  "priorReceiptSource": "5f674c8a3e72681bfc6bfd34574b53cd21410446",
+  "exactCompatibleNativeHashes": {
+    "NativeClient.ets": "10c9d36da12c7c72071a325093e982eef30ab3f64a9d50e0fd5fd3192b03bc81",
+    "NativeResumableUpload.ets": "d2c3702ef597fcf8340660f841176af2793665ecc7e0e40dc11b671288fcd6dc",
+    "NativePhotoSelection.ets": "e91c114591bae1a017a8b15d32b31da41d04009d531351a079ccd228438f1d33"
+  },
+  "otherNativeETSSourceChangedSincePriorCompatibility": false,
+  "newSDKBuild": false,
+  "HAPBuilt": false,
+  "nativeMetadataEnvelopeMatchesV12": true
+}

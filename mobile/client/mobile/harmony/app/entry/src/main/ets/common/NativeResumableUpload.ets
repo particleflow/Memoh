@@ -17,7 +17,18 @@ interface Identity { id: string; }
 interface Receipt { id: string; state: string; offset: number; size_bytes: number; expires_at: string; mime: string; content_hash?: string; }
 interface MediaReply { content_hash: string; size_bytes: number; mime: string; }
 interface Reply { status: number; body: string; headers: rcp.ResponseHeaders; }
+interface UploadSDKError extends Error { code: number; }
 export interface UploadPreview { fd: number; mime: string; }
+export interface UploadFailure { version: number; phase: string; sdkCode: number; at: number; }
+export interface UploadStageFailure extends Error { uploadFailure?: UploadFailure; }
+class StageError extends Error implements UploadStageFailure {
+  private value?: UploadFailure;
+  private allowed: () => boolean;
+  constructor(error: Error, failure: UploadFailure | undefined, allowed: () => boolean) {
+    super(error.message); this.value = failure; this.allowed = allowed;
+  }
+  get uploadFailure(): UploadFailure | undefined { return this.allowed() ? this.value : undefined; }
+}
 interface UploadStagingHandle { handle: string; }
 interface UploadStagingOffset { offset: number; }
 class Journal {
@@ -28,6 +39,7 @@ class Journal {
 class Running {
   apiOrigin: string = MEMOH_ORIGIN; epoch: number = 0; cancelled: boolean = false; staged: Journal[] = []; input: UploadScope; session: rcp.Session; journal?: Journal;
   phase: string = 'prepare';
+  failure?: StageError;
   copying: boolean = false; copyBusy: boolean = false; copyCommitted: boolean = false; copyOffset: number = 0; copyFile?: fs.File; ended: boolean = false;
   network: NativeTransferNetwork;
   constructor(input: UploadScope, epoch: number) { this.input = input; this.epoch = epoch; this.network = new NativeTransferNetwork(this.apiOrigin, MEMOH_NETWORK_POLICY); this.session = rcp.createSession(); }
@@ -48,6 +60,22 @@ export class NativeResumableUpload {
   }
   private check(run: Running): void {
     if (!this.authorized() || run.epoch !== this.epoch || run.cancelled) { throw new Error('UPLOAD_CANCELLED'); }
+  }
+  private failed(run: Running, error: Error): Error {
+    // Preserve the first staged failure when it crosses the outer select catch.
+    if (run.failure) {
+      if (error !== run.failure) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', 'cleanup', error); }
+      return run.failure;
+    }
+    ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error);
+    const code = (error as UploadSDKError).code;
+    const failure: UploadFailure | undefined = this.authorized() && run.epoch === this.epoch ? {
+      version: 1, phase: run.phase, sdkCode: Number.isSafeInteger(code) && code >= 0 && code <= 2147483647 ? code : 0,
+      at: Date.now()
+    } : undefined;
+    const epoch = run.epoch;
+    const result = new StageError(error, failure, () => this.authorized() && epoch === this.epoch);
+    run.failure = result; return result;
   }
   private start(input: UploadScope): Running {
     if (!this.authorized() || !/^[a-f0-9]{32}$/.test(input.operation) || !/^[A-Za-z0-9_-]{1,128}$/.test(input.botId) ||
@@ -190,7 +218,7 @@ export class NativeResumableUpload {
       run.phase = 'journal-publish';
       this.save(j, () => { committed = true; run.staged.push(j); run.phase = 'journal-dir-sync'; }); this.check(run);
       this.visible.set(j.handle, j); return this.info(j);
-    } catch (error) { if (!committed || run.cancelled) { this.remove(j); } throw error as Error; }
+    } catch (error) { const failure = this.failed(run, error as Error); if (!committed || run.cancelled) { this.remove(j); } throw failure; }
     finally { fs.closeSync(input); if (output) { fs.closeSync(output); } }
   }
   private remove(j: Journal): void {
@@ -213,7 +241,7 @@ export class NativeResumableUpload {
       if (fs.accessSync(this.path(j.handle, '.original'))) { throw new Error('UPLOAD_IDENTITY'); }
       run.copyFile = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.CREATE | fs.OpenMode.READ_WRITE | fs.OpenMode.NOFOLLOW);
       return { handle: j.handle };
-    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); this.end(run); throw error as Error; }
+    } catch (error) { const failure = this.failed(run, error as Error); this.end(run); throw failure; }
     finally { run.copyBusy = false; }
   }
   private copying(operation: string, authorization: string): Running {
@@ -244,7 +272,7 @@ export class NativeResumableUpload {
         written += n;
       }
       run.copyOffset += written; return { offset: run.copyOffset };
-    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); this.end(run); throw error as Error; }
+    } catch (error) { const failure = this.failed(run, error as Error); this.end(run); throw failure; }
     finally { run.copyBusy = false; }
   }
   async stageFinish(operation: string, authorization: string): Promise<UploadLocal> {
@@ -265,7 +293,7 @@ export class NativeResumableUpload {
       run.phase = 'journal-publish';
       this.save(j, () => { run.copyCommitted = true; run.staged.push(j); run.phase = 'journal-dir-sync'; }); this.check(run);
       this.visible.set(j.handle, j); return this.info(j);
-    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); throw error as Error; }
+    } catch (error) { throw this.failed(run, error as Error); }
     finally { run.copyBusy = false; this.end(run); }
   }
   async select(input: UploadScope, recordingPath?: string): Promise<UploadLocal[]> {
@@ -288,7 +316,7 @@ export class NativeResumableUpload {
       results.push(await this.stagePath(run, owner, limits, uri, name, mime || 'application/octet-stream'));
       }
       return results;
-    } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); throw error as Error; }
+    } catch (error) { throw this.failed(run, error as Error); }
     finally { if (photoSelection) { photoSelection.close(); } this.end(run); }
   }
   async list(input: UploadScope): Promise<UploadLocal[]> {

@@ -1,0 +1,1 @@
+{"tests":2,"actualGeneratedSDKFunctions":3,"oldServer404KeepsPending":true,"restartUsesSameOperation":true,"noNativeFileRetry":true,"reportBodyMatchesGeneratedSDK":true,"metadataOnly":true,"liveHTTP":false,"nativePhone":false}

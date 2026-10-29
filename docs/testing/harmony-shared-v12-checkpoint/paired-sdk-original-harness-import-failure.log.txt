@@ -1,0 +1,25 @@
+node:assert:152
+  throw new AssertionError(obj);
+  ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ './client'
+- './client.gen'
+           ^
+
+    at require (/workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/paired-sdk-outbox.cjs:98:188)
+    at evalmachine.<anonymous>:12:18
+    at Script.runInContext (node:vm:149:12)
+    at Script.runInNewContext (node:vm:154:17)
+    at Object.runInNewContext (node:vm:310:38)
+    at failureReportFlow (/workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/paired-sdk-outbox.cjs:98:6)
+    at async /workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/paired-sdk-outbox.cjs:9:111 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: './client',
+  expected: './client.gen',
+  operator: 'strictEqual',
+  diff: 'simple'
+}

@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "719d29541400d9b6b8daccbb9b7a33aa0ed5ebf32bd10858cf7f6bb2f9d8dbff"
+      "sha256": "4a51456e894368134804a27bd4e095c7adb664626632a4aefab12aea14fb9d94"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -475,6 +475,16 @@
       "APIChanged": false,
       "schema180AssumedDeployed": false,
       "hap28ContainsDelta": false
+    },
+    "paired959": {
+      "commit": "959efb3aab3f7165b1dd0e9e7f00dac27526688e",
+      "tree": "369e6da77391a139f33ad557f5616a30e4409fc0",
+      "mappedFiles": 127,
+      "officialSDKOperations": 382,
+      "schema180AssumedDeployed": false,
+      "HAP28ContainsDelta": false,
+      "requiredUnchangedDependencies": 2,
+      "requiredDependencyMetadata": 2
     }
   }
 }

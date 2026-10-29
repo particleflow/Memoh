@@ -12,7 +12,9 @@ REPO = HERE.parent
 manifest = json.loads((HERE / 'SOURCE-PROVENANCE.json').read_text())
 entries = manifest['entries']
 # Two admitted photo regression inputs extend the previous176 text sources.
-assert len(entries) == 178
+# One admitted failure-outbox source extends the prior178 inputs.
+assert len(entries) == 179
+assert 'mobile/client/mobile/memoh/harmony-upload-failures.ts' in {item['path'] for item in entries}
 assert {
     'mobile/client/tests/stage2/harmony_photo_dual_mode.cjs',
     'mobile/client/tests/stage2/harmony_photo_fixtures.py',

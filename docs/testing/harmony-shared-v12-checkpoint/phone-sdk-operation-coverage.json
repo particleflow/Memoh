@@ -1,0 +1,24 @@
+{
+  "oldPhoneOperationNames": 383,
+  "newCanonicalOperations": 382,
+  "preservedCanonicalOldOperations": 379,
+  "newFailureOperations": [
+    "getBotsByBotIdMediaUploadFailures",
+    "getBotsByBotIdMediaUploadFailuresByOperation",
+    "putBotsByBotIdMediaUploadFailuresByOperation"
+  ],
+  "removedHistoricalPhoneAliases": [
+    "getUsersMeRuntimesByIdAgenvoEndpoint",
+    "postUsersMeRuntimesAgenvoDiscover",
+    "putUsersMeRuntimesByIdAgenvoAgent",
+    "putUsersMeRuntimesByIdAgenvoEndpoint"
+  ],
+  "reason": "Canonical959 user_runtime_endpoint_test.go explicitly verifies these retired routes return404 without config/transport access. Old phone-only discovery UI is removed to match canonical runtimes page, not replaced by an invented endpoint.",
+  "legacyDeletion": {
+    "path": "apps/web/src/components/computer/connect-agenvo-dialog.vue",
+    "baseSHA256": "1a628ed7e4eb7bba9b33d3c05bb6e5dfa7eb50e1337a1fbcb8ffb7a6467c8e46",
+    "upstreamAbsentAt178And959": true
+  },
+  "runtimesPageNowExactShared": true,
+  "noStoredIdentityBindingOrQueueChanged": true
+}

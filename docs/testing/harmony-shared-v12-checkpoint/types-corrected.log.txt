@@ -1,0 +1,9 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context-corrected/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/lib/media-transfer.ts(1,24): error TS2307: Cannot find module '@noble/hashes/sha2.js' or its corresponding type declarations.
+src/lib/media-transfer.ts(2,28): error TS2307: Cannot find module '@noble/hashes/utils.js' or its corresponding type declarations.
+/workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context-corrected/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

@@ -1,0 +1,3 @@
+import {defineConfig} from 'vitest/config'
+import vue from '@vitejs/plugin-vue'
+export default defineConfig({plugins:[vue()],resolve:{dedupe:['vue'],alias:{'@':"/workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context-corrected/checkout/apps/web/src",'#':"/workspace/harmony-recovery-20261023/evidence/shared-v12-20261029/context-corrected/checkout/packages/ui/src",vue:"/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/node_modules/vue"}},test:{environment:'jsdom',include:['apps/web/src/store/workspace-tabs.test.ts'],testTimeout:10000}})
