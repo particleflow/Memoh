@@ -1,0 +1,78 @@
+{
+  "before": {
+    "calls": 1,
+    "playCalls": [
+      {
+        "active": false
+      }
+    ],
+    "rejections": [
+      "NotAllowedError"
+    ],
+    "urls": [
+      "blob:null/827579c0-7ff6-45bd-8516-5ac8869c1d7d"
+    ],
+    "state": {
+      "key": "turn",
+      "status": "blocked"
+    },
+    "src": "blob:null/827579c0-7ff6-45bd-8516-5ac8869c1d7d",
+    "paused": true,
+    "activation": false
+  },
+  "resumed": {
+    "calls": 1,
+    "playCalls": [
+      {
+        "active": false
+      },
+      {
+        "active": true
+      }
+    ],
+    "rejections": [
+      "NotAllowedError"
+    ],
+    "urls": [
+      "blob:null/827579c0-7ff6-45bd-8516-5ac8869c1d7d"
+    ],
+    "state": {
+      "key": "turn",
+      "status": "playing"
+    },
+    "src": "blob:null/827579c0-7ff6-45bd-8516-5ac8869c1d7d",
+    "paused": false,
+    "activation": true
+  },
+  "interrupted": {
+    "calls": 1,
+    "playCalls": [
+      {
+        "active": false
+      },
+      {
+        "active": true
+      }
+    ],
+    "rejections": [
+      "NotAllowedError"
+    ],
+    "urls": [
+      "blob:null/827579c0-7ff6-45bd-8516-5ac8869c1d7d"
+    ],
+    "state": {
+      "key": "",
+      "status": "idle"
+    },
+    "src": "",
+    "paused": true,
+    "activation": true
+  },
+  "networkRequests": 0,
+  "providerCalls": 0,
+  "browser": "154.0.8037.57",
+  "nativePlayPromiseUnchanged": true,
+  "autoplayPolicyOverride": false,
+  "physicalAudible500msPassed": false,
+  "scope": "Isolated trusted native mouse gesture plus real composable/controller/MSE; actual library menu timing covered separately by controlled regression cases. Not app/HAP or ArkWeb evidence."
+}

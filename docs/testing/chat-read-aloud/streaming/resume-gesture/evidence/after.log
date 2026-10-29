@@ -1,0 +1,8 @@
+
+ RUN  v4.1.10 /workspace/nas-speech/apps/web
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  10:10:37
+   Duration  5.46s (transform 3.54s, setup 0ms, import 4.66s, tests 340ms, environment 346ms)

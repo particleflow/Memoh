@@ -1,0 +1,71 @@
+{
+  "sourceParent": "65d5d4ad128317b65f394bd27cb4b674a4f6bbae",
+  "onlyProductFileChanged": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+  "productSHA256": "8018120399d8cf6bfcdf52ad8b1e4993fd10fa17f9db5535d16b3630fec2bf73",
+  "controlledBefore": {
+    "failed": 4,
+    "passed": 3,
+    "expectedNegative": true
+  },
+  "controlledAfter": {
+    "passed": 7,
+    "failed": 0
+  },
+  "nativeChromium": {
+    "NotAllowedErrorBeforeAnyActivation": true,
+    "sameLoadedURLAndPlayer": true,
+    "syntheticSDKCalls": 1,
+    "nativePlayCalls": 2,
+    "resumeCallHadActualUserActivation": true,
+    "ordinaryClickStops": true,
+    "networkRequests": 0,
+    "realProviderCalls": 0,
+    "autoplayPolicyOverride": false,
+    "nativePlayPromiseChanged": false
+  },
+  "targetedESLintExitCode": 0,
+  "scopedVueTscExitCode": 0,
+  "old14plus3and19Rerun": false,
+  "oldNativeMP3ProbeRerun": false,
+  "fullBuildRerun": false,
+  "applicationServicesStarted": 0,
+  "cloneOrPaidAudition": false,
+  "HAPBuildSignDeploy": false,
+  "currentFieldBindingOrigin": "Trusted parent relay of read-only target-category.json/OUTCOME.json; actual Windows files not independently read here.",
+  "codecOrDevice500ms": "NOT_PASSED_UNVERIFIED",
+  "independentUnifiedCleanupHAPReview": "PENDING",
+  "unchanged": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+      "byteEqual": true,
+      "sha256": "60d910b81aacc6e80d2d0722cd04fee7999c63a244bc8ef715e238962cea79ab"
+    },
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": {
+      "byteEqual": true,
+      "sha256": "2a19f22e5bb96ddab8dda5032ab48b03bd349c733582ea311b158f9057aa4dbc"
+    },
+    "apps/web/src/pages/home/composables/speech-rendered-text.ts": {
+      "byteEqual": true,
+      "sha256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca"
+    },
+    "apps/web/src/pages/home/composables/speech-visible-text.ts": {
+      "byteEqual": true,
+      "sha256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886"
+    },
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "byteEqual": true,
+      "sha256": "868c54bce2c2622f8d1c35ef48484da6da577850fb77c4482d530db1704e3c01"
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "byteEqual": true,
+      "sha256": "5f2b94deddbca58e921413679bf53ecd5f0c4e5ca9d18528cfc09685dcf7744e"
+    },
+    "internal/handlers/bot_tts.go": {
+      "byteEqual": true,
+      "sha256": "7f4eb2e7370f605cdbd42b50ec8fed87e27d3ff968d63bf3c5583320c13cd831"
+    },
+    "internal/audio/service.go": {
+      "byteEqual": true,
+      "sha256": "bd38265a1563b893a314470fc8fefe80eb914f324d66c36283615fa16f51835d"
+    }
+  }
+}

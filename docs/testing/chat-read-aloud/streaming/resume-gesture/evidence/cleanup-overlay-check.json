@@ -1,0 +1,10 @@
+{
+  "cleanupCommit": "9690095b4a6575af9f63915b05e713de38c55bf6",
+  "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+  "beforeSHA256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f",
+  "afterSHA256": "62a2adb617b5204ac945185d14827b33e8d7af74e346361b94bad38a3e87d444",
+  "patchSHA256": "106b872762b233c0d7c897fa9ab81982c5df8e9702aae383a39f21678e2bac5c",
+  "gitApplyCheck": true,
+  "appliedBytesMatchExpected": true,
+  "scope": "Same guard on exact cleanup legacy composable; no streaming/DOM-source dependency."
+}

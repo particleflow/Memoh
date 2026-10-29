@@ -1,0 +1,69 @@
+
+ RUN  v4.1.10 /workspace/nas-speech/apps/web
+
+ ❯ src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts (7 tests | 4 failed) 318ms
+     × mouse select calls play in the same gesture without another synthesis or URL 222ms
+     × touch select calls play in the same gesture without another synthesis or URL 60ms
+     × makes the original menu reachable for the same blocked audio while reply text is still streaming 6ms
+     × retains the same source after a second rejection rather than retrying synthesis 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts > exact cleanup replay entry restores autoplay-blocked loaded audio > mouse select calls play in the same gesture without another synthesis or URL
+AssertionError: expected "vi.fn()" to be called 2 times, but got 1 times
+ ❯ src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts:85:23
+     83|   trustedGesture = true
+     84|   item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelab…
+     85|   expect(player.play).toHaveBeenCalledTimes(calls + 1) // Before the e…
+       |                       ^
+     86|   expect(api.playback).toHaveBeenCalledOnce(); expect(player.src).toBe…
+     87|   trustedGesture = false; await settle()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts > exact cleanup replay entry restores autoplay-blocked loaded audio > touch select calls play in the same gesture without another synthesis or URL
+AssertionError: expected "vi.fn()" to be called 2 times, but got 1 times
+ ❯ src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts:85:23
+     83|   trustedGesture = true
+     84|   item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelab…
+     85|   expect(player.play).toHaveBeenCalledTimes(calls + 1) // Before the e…
+       |                       ^
+     86|   expect(api.playback).toHaveBeenCalledOnce(); expect(player.src).toBe…
+     87|   trustedGesture = false; await settle()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts > exact cleanup replay entry restores autoplay-blocked loaded audio > makes the original menu reachable for the same blocked audio while reply text is still streaming
+AssertionError: mouse existing menu remains reachable: expected null not to be null
+ ❯ open src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts:76:62
+     74|  await settle()
+     75|  const item = document.querySelector('[data-existing-replay]')
+     76|  expect(item, `${mode} existing menu remains reachable`).not.toBeNull()
+       |                                                              ^
+     77|  return item!
+     78| }
+ ❯ src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts:92:16
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts > exact cleanup replay entry restores autoplay-blocked loaded audio > retains the same source after a second rejection rather than retrying synthesis
+AssertionError: expected 'blob:same-loaded-1' to be 'blob:same-loaded-0' // Object.is equality
+
+Expected: "blob:same-loaded-0"
+Received: "blob:same-loaded-1"
+
+ ❯ src/pages/home/composables/useChatReadAloud.resume-gesture.test.ts:99:75
+     97|   const f = mount(), player = await blocked(f), source = player.src
+     98|   f.speech.replay(f.messages.value[0]!); await settle()
+     99|   expect(f.speech.state.value.status).toBe('blocked'); expect(player.s…
+       |                                                                           ^
+    100|  })
+    101|  it.each(['click', 'typing'] as const)('%s consumes the interrupted st…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  10:05:34
+   Duration  5.41s (transform 3.56s, setup 0ms, import 4.63s, tests 318ms, environment 355ms)

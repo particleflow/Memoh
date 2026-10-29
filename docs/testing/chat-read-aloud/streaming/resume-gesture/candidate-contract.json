@@ -1,0 +1,15 @@
+{
+  "webCleanupCommit": "9690095b4a6575af9f63915b05e713de38c55bf6",
+  "harmonyCleanupCommit": "afa60196940d1e21bbf514d401c763a79f90f9d0",
+  "libraryInput": "libfile_97dcc3f4da1c8191b7e7baef58acc478",
+  "archiveSHA256": "1ca31cc254436e2181c0492ac4a0bf19143219e6f10438d730b43de7f7c140cf",
+  "manifestEntriesVerified": 10,
+  "paneSHA256": "fa90c0b80641e2c2df4b569506a534168fb683db3256e42f377f5c1b1b359a84",
+  "expressions": {
+    "menuSelect": "readAloud.replay(msg)",
+    "disabled": "!readAloud.canReplay(msg)",
+    "messageClick": "readAloud.stop()"
+  },
+  "extraResumeControlsPresent": false,
+  "composableChangedByCleanup": false
+}

@@ -1,0 +1,81 @@
+{
+  "fieldEvidenceOrigin": "Trusted parent delegation relaying read-only OUTCOME.json and target-category.json; Windows files were not independently opened in this environment.",
+  "currentBinding": {
+    "clientType": "alibabacloud-speech",
+    "displayProvider": "Alibaba Cloud Speech",
+    "modelID": "qwen-audio-3.1-tts-flash",
+    "targetScheme": "WSS",
+    "targetHostCategory": "*.aliyuncs.com",
+    "configuredMagpieAddress": false,
+    "explicitFormatCodecSampleRateStream": false
+  },
+  "historicalRequests": {
+    "reportedStatusesAndTotalSeconds": [
+      {
+        "status": 499,
+        "totalSeconds": 2.603,
+        "classification": "canceled"
+      },
+      {
+        "status": 200,
+        "totalSeconds": 8.46
+      }
+    ],
+    "modelRecorded": false,
+    "upstreamFirstByteRecorded": false,
+    "binaryChunkTimesRecorded": false,
+    "actualAudioEncodingRecorded": false,
+    "audioCacheRecovered": false,
+    "attribution": "Cannot infer the model/provider of each historical request from current configuration."
+  },
+  "inspectedSource": {
+    "deployedSourceAnchorProvided": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+    "sdkPin": "v0.7.2-0.20261002230120-f6d0ce1a0e8c",
+    "factory": "internal/audio/registry.go -> alibabacloud/speech.New using saved API key/base URL",
+    "protocol": "run-task -> task-started -> continue-task + finish-task -> binary frames -> task-finished",
+    "DoSynthesize": "audioOut append of all binary frames, returns at task-finished",
+    "DoStream": "Each nonempty WebSocket binary message is forwarded on the SDK channel before task-finished",
+    "defaultRequestedFormat": "mp3",
+    "defaultRequestedSampleRate": 22050,
+    "MIMEOrigin": "Static contentTypeForFormat(cfg.Format), not an audio frame receipt",
+    "originalPlaybackRoute": "Service.Synthesize -> SDK DoSynthesize -> c.Blob complete audio",
+    "streamCandidate": "2b9c8fc Service.StreamPlayback -> SDK DoStream -> handler per-chunk flush; no Bytes/whole-utterance collector in playback"
+  },
+  "officialContracts": {
+    "clientEvents": "https://help.aliyun.com/en/model-studio/qwen-audio-tts-client-events",
+    "serverEvents": "https://help.aliyun.com/en/model-studio/qwen-audio-tts-server-events",
+    "supportedFormats": [
+      "pcm",
+      "wav",
+      "mp3",
+      "opus"
+    ],
+    "documentedDefaults": {
+      "format": "mp3",
+      "sampleRate": 22050
+    },
+    "audioDelivery": "binary WebSocket audio frames after sentence-synthesis metadata; task-finished ends task",
+    "scope": "Official schema support, not proof of received field audio or 500ms performance."
+  },
+  "sdkSHA256": {
+    "speech.go": "c409f0f1e9ef29b22e7b40ab3e1fc8cc9be258bbb6464186e25712bf6599f37a",
+    "config.go": "d42ba16a566d2008da8b8976e9bbd11f2a48096f6944e06f9f5b14e644952491",
+    "ws.go": "f0846be785e60e5f0dc63a961d94a7b65e6b216943b5771fc1cabf110e42c042"
+  },
+  "actions": {
+    "providerChanged": false,
+    "voiceChanged": false,
+    "credentialsChanged": false,
+    "WAVorPCMDecoderAdded": false,
+    "realSynthesisRequests": 0,
+    "paidAuditions": 0,
+    "servicesStarted": 0,
+    "HAPBuildOrDeployment": false
+  },
+  "acceptance": {
+    "actualEncodedAudio": "UNVERIFIED",
+    "currentArkWebDecodeAndActivation": "UNVERIFIED",
+    "physicalAudible500ms": "NOT_PASSED",
+    "MagpieOnlyPreferenceVersusAliyunBinding": "Parent-owned clarification; no routing/config change performed."
+  }
+}

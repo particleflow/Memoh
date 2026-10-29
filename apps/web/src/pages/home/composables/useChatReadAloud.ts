@@ -81,9 +81,18 @@ export function useChatReadAloud(options: {
       scheduleFlush()
     }
   }, { deep: true, immediate: true, flush: 'post' })
-  function canReplay(message: ChatMessage) { return enabled.value && !message.streaming && !!speechText(message) }
+  function canResume(message: ChatMessage) {
+    if (message.role !== 'assistant' || speechKey(message) !== state.value.key) return false
+    const playback = status(message)
+    return playback === 'blocked' || playback === 'paused'
+  }
+  function canReplay(message: ChatMessage) { return enabled.value && (canResume(message) || (!message.streaming && !!speechText(message))) }
   function replay(message: ChatMessage) {
-    if (!enabled.value || message.streaming) return
+    if (!enabled.value) return
+    // The existing menu selection is the supported user activation. Resume the
+    // same loaded source synchronously, before stop(), DOM work or any request.
+    if (canResume(message)) { controller.resume(); return }
+    if (message.streaming) return
     const text = rendered ? rendered(message) : speechText(message)
     if (!text) return
     stop()
