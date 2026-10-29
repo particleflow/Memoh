@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/felinics/twilight/sdk"
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/apperror"
@@ -49,6 +50,20 @@ func (a *playbackAudio) Synthesize(ctx context.Context, model, text string, conf
 	return []byte("synthetic-audio"), "audio/wav", a.err
 }
 
+func (a *playbackAudio) StreamPlayback(ctx context.Context, model, text string) (*sdk.SpeechStreamResult, error) {
+	a.calls++
+	a.model = model
+	a.text = text
+	a.signal = ctx
+	if a.err != nil {
+		return nil, a.err
+	}
+	ch := make(chan []byte, 1)
+	ch <- []byte("synthetic-audio")
+	close(ch)
+	return sdk.NewSpeechStreamResult(ch, "audio/wav", nil), nil
+}
+
 func TestBotPlaybackUsesConfiguredModelAndEphemeralAudio(t *testing.T) {
 	t.Parallel()
 	config := &playbackSettings{model: "existing-configured-model"}
@@ -67,7 +82,7 @@ func TestBotPlaybackUsesConfiguredModelAndEphemeralAudio(t *testing.T) {
 	if rec.Code != 200 || rec.Body.String() != "synthetic-audio" || rec.Header().Get("Content-Type") != "audio/wav" || rec.Header().Get("Cache-Control") != "private, no-store" {
 		t.Fatalf("response: %d %v %q", rec.Code, rec.Header(), rec.Body.String())
 	}
-	if audio.calls != 1 || audio.model != config.model || audio.text != "你好🙂" || audio.config != nil || audio.signal != c.Request().Context() {
+	if audio.calls != 1 || audio.model != config.model || audio.text != "你好🙂" || audio.config != nil || audio.signal == nil || !errors.Is(audio.signal.Err(), context.Canceled) {
 		t.Fatalf("synthesis contract changed: %+v", audio)
 	}
 }

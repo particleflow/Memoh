@@ -1,0 +1,29 @@
+{
+  "observed": [
+    {
+      "kind": "firstNonzeroDecodedSamples",
+      "ms": 110.19999999995343,
+      "beforeEOF": true,
+      "mode": "manual",
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32
+    },
+    {
+      "kind": "firstNonzeroDecodedSamples",
+      "ms": 80.0999999998603,
+      "beforeEOF": true,
+      "mode": "automatic",
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32
+    }
+  ],
+  "acceptance": {
+    "providerCalls": 0,
+    "applicationServiceStarted": false,
+    "nativeDecoderBeforeEOF": true,
+    "physicalAudibleMeasurement": false,
+    "realMagpie500msPassed": false,
+    "note": "Analyser samples prove decoder/output-graph activity only, not physical speaker onset. Fixture timing is not provider timing."
+  },
+  "out": "/tmp/nas-speech-native"
+}

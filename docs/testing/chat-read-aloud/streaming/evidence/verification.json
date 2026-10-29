@@ -1,0 +1,31 @@
+{
+  "base": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "hapSource": "12faf4c06db01d8fffc29aad3a247b4a85e884e7",
+  "oldGateEvidenceReused": "c96c0ef29454ee7b2412f1c69ae79915c3644c07",
+  "integrationOwner": "01a15840-f35b-757a-a2a0-e20479062007",
+  "frontEndTargetedCases": 14,
+  "newBackendRaceCases": 3,
+  "targetedESLintExitCode": 0,
+  "targetedVueTscExitCode": 0,
+  "realProviderCalls": 0,
+  "paidCalls": 0,
+  "applicationServicesStarted": 0,
+  "deployed": false,
+  "signed": false,
+  "physicalAudible500ms": "NOT_PASSED_UNVERIFIED",
+  "nativeDecoderBeforeEOF": true,
+  "realAppUI": "NOT_PERFORMED_USER_PROHIBITS_SERVICE_STARTUP",
+  "knownLimitations": [
+    "Saved output format must have a native MSE decoder; WAV/PCM unsupported by this candidate.",
+    "No real Magpie streaming or physical ArkWeb output evidence.",
+    "Projection uses renderer parser semantics; custom-renderer final DOM fidelity unverified."
+  ],
+  "sha256": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "5ca2671794fa51ecf0984ef5fb8a1518a993ea0345dbb001785f930cded6eedc",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": "ccf1dd53749d8b6d078212b64cf7b21f7058807b3b7075e7a952bc343b92c948",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": "2a19f22e5bb96ddab8dda5032ab48b03bd349c733582ea311b158f9057aa4dbc",
+    "apps/web/src/pages/home/composables/speech-visible-text.ts": "274338d88980a141888b33135e86b976e89ef2fe60c53485cdc218c69efb0510",
+    "internal/audio/service.go": "bd38265a1563b893a314470fc8fefe80eb914f324d66c36283615fa16f51835d",
+    "internal/handlers/bot_tts.go": "7f4eb2e7370f605cdbd42b50ec8fed87e27d3ff968d63bf3c5583320c13cd831"
+  }
+}

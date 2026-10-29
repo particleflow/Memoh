@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/felinics/twilight/sdk"
 	"github.com/labstack/echo/v4"
 
 	"github.com/felinics/memoh/internal/accounts"
@@ -23,6 +24,7 @@ import (
 type botSpeechService interface {
 	StreamToFile(context.Context, string, string, io.Writer) (string, error)
 	Synthesize(context.Context, string, string, map[string]any) ([]byte, string, error)
+	StreamPlayback(context.Context, string, string) (*sdk.SpeechStreamResult, error)
 }
 type botSpeechSettings interface {
 	GetBot(context.Context, string) (settings.Settings, error)
@@ -188,11 +190,45 @@ func (h *BotAudioHandler) Playback(c echo.Context) error {
 	if botSettings.TtsModelID == "" {
 		return apperror.New(apperror.CodeTTSModelNotConfigured, nil)
 	}
-	audio, contentType, err := h.audioService.Synthesize(c.Request().Context(), botSettings.TtsModelID, text, nil)
+	ctx, cancel := context.WithCancel(c.Request().Context())
+	defer cancel() // Close the upstream body on client cancellation or write failure.
+	stream, err := h.audioService.StreamPlayback(ctx, botSettings.TtsModelID, text)
 	if err != nil {
 		return errs.Wrap(err, "synthesize bot playback")
 	}
+	if !strings.HasPrefix(stream.ContentType, "audio/") {
+		return echo.NewHTTPError(http.StatusBadGateway, "invalid playback content type")
+	}
 	c.Response().Header().Set(echo.HeaderCacheControl, "private, no-store")
 	c.Response().Header().Set(echo.HeaderXContentTypeOptions, "nosniff")
-	return c.Blob(http.StatusOK, contentType, audio)
+	c.Response().Header().Set(echo.HeaderContentType, stream.ContentType)
+	c.Response().Header().Set("X-Accel-Buffering", "no")
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case chunk, ok := <-stream.Stream:
+			if !ok {
+				if err := stream.Err(); err != nil {
+					if c.Response().Committed {
+						// A clean HTTP EOF would falsely accept a truncated utterance.
+						// The server recovery middleware preserves ErrAbortHandler.
+						panic(http.ErrAbortHandler)
+					}
+					return errs.Wrap(err, "stream bot playback")
+				}
+				if !c.Response().Committed {
+					return echo.NewHTTPError(http.StatusBadGateway, "empty playback stream")
+				}
+				return nil
+			}
+			if len(chunk) == 0 {
+				continue
+			}
+			if _, err := c.Response().Write(chunk); err != nil {
+				return err
+			}
+			c.Response().Flush()
+		}
+	}
 }

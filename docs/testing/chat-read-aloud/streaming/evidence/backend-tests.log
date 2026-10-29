@@ -1,0 +1,10 @@
+Commands executed against this candidate, without HTTP listeners or real providers:
+
+go test ./internal/handlers -run '^TestBotPlayback' -count=1
+ok  github.com/felinics/memoh/internal/handlers  0.020s
+
+go test ./internal/handlers -run '^TestBotPlaybackStreaming' -race -count=1
+ok  github.com/felinics/memoh/internal/handlers  1.048s
+
+go test ./internal/audio -run '^TestPlaybackStream' -race -count=1
+ok  github.com/felinics/memoh/internal/audio  1.016s

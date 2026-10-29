@@ -16,21 +16,33 @@ export function useChatReadAloud(options: {
   const enabled = computed(() => options.enabled.value && workspaceVisible.value)
   const state = shallowRef<SpeechState>({ key: '', status: 'idle' })
   const replies = new LiveSpeechReplies()
+  let flushTimer: ReturnType<typeof setTimeout> | undefined
   const controller = new ChatReadAloud({
     async synthesize(text, signal) {
-      const { data } = await postBotsByBotIdTtsPlayback({
+      const { data, response } = await postBotsByBotIdTtsPlayback({
         path: { bot_id: options.botId.value! }, body: { text }, signal,
-        parseAs: 'blob', throwOnError: true,
+        parseAs: 'stream', throwOnError: true,
       })
-      if (!(data instanceof Blob) || !data.size || !data.type.startsWith('audio/')) throw new Error('Invalid playback response')
-      return data
+      const contentType = response.headers.get('Content-Type') ?? ''
+      if (!(data instanceof ReadableStream) || !contentType.startsWith('audio/')) {
+        if (data instanceof ReadableStream) await data.cancel()
+        throw new Error('Invalid playback stream')
+      }
+      return { stream: data as ReadableStream<Uint8Array>, contentType }
     },
     createPlayer: () => new Audio(),
     createURL: blob => URL.createObjectURL(blob),
     revokeURL: url => URL.revokeObjectURL(url),
-    onState: value => { state.value = value },
+    onState: value => {
+      state.value = value
+      if (value.status === 'error') {
+        clearTimeout(flushTimer); flushTimer = undefined
+        replies.interrupt(options.messages.value)
+      }
+    },
   })
   function stop() {
+    clearTimeout(flushTimer); flushTimer = undefined
     replies.interrupt(options.messages.value)
     controller.stop()
   }
@@ -38,8 +50,17 @@ export function useChatReadAloud(options: {
   watch(enabled, value => { if (!value) stop() }, { flush: 'sync' })
   // flush:sync stops the player in the input event, before any pending media task.
   watch(options.draft, stop, { flush: 'sync' })
+  function collect(flush = false) {
+    for (const reply of replies.update(options.messages.value, enabled.value && !options.draft.value, options.loading.value, flush)) controller.enqueue(reply)
+  }
   watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value }), value => {
-    for (const reply of replies.update(value.messages, value.enabled && !options.draft.value, value.loading)) controller.enqueue(reply)
+    if (value.messages.some(message => message.role === 'assistant' && speechKey(message) === state.value.key && message.messages.some(block => block.type === 'error'))) { stop(); return }
+    collect()
+    // A short opening phrase without punctuation must not wait for completion.
+    // Do not reset on every delta: a continuous token stream cannot starve it.
+    if (!flushTimer && value.enabled && !value.loading && !options.draft.value && value.messages.some(message => message.role === 'assistant' && message.streaming)) {
+      flushTimer = setTimeout(() => { flushTimer = undefined; collect(true) }, 80)
+    }
   }, { deep: true, immediate: true })
   function canReplay(message: ChatMessage) { return enabled.value && !message.streaming && !!speechText(message) }
   function replay(message: ChatMessage) {

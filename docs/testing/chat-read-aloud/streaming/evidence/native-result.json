@@ -1,0 +1,127 @@
+{
+  "states": [
+    {
+      "key": "",
+      "status": "idle",
+      "ms": null
+    },
+    {
+      "key": "",
+      "status": "idle",
+      "ms": 40.300000000046566,
+      "mode": "manual"
+    },
+    {
+      "key": "manual",
+      "status": "loading",
+      "ms": 40.5,
+      "mode": "manual"
+    },
+    {
+      "key": "manual",
+      "status": "loading",
+      "ms": 46.5,
+      "mode": "manual"
+    },
+    {
+      "key": "manual",
+      "status": "playing",
+      "ms": 82.39999999990687,
+      "mode": "manual"
+    },
+    {
+      "key": "",
+      "status": "idle",
+      "ms": 112.89999999990687,
+      "mode": "manual"
+    },
+    {
+      "key": "",
+      "status": "idle",
+      "ms": 296.80000000004657,
+      "mode": "manual"
+    },
+    {
+      "key": "turn",
+      "status": "loading",
+      "ms": 14.699999999953434,
+      "mode": "automatic"
+    },
+    {
+      "key": "turn",
+      "status": "loading",
+      "ms": 16,
+      "mode": "automatic"
+    },
+    {
+      "key": "turn",
+      "status": "playing",
+      "ms": 55.5999999998603,
+      "mode": "automatic"
+    },
+    {
+      "key": "",
+      "status": "idle",
+      "ms": 82.19999999995343,
+      "mode": "automatic"
+    }
+  ],
+  "calls": [
+    {
+      "text": "手动朗读显示正文。",
+      "ms": 40.800000000046566,
+      "mode": "manual"
+    },
+    {
+      "text": "自动第一句。",
+      "ms": 14.800000000046566,
+      "mode": "automatic"
+    }
+  ],
+  "metrics": [
+    {
+      "kind": "firstFixtureBytes",
+      "ms": 81,
+      "mode": "manual"
+    },
+    {
+      "kind": "firstNonzeroDecodedSamples",
+      "ms": 110.19999999995343,
+      "beforeEOF": true,
+      "mode": "manual",
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32
+    },
+    {
+      "kind": "streamCanceled",
+      "mode": "manual"
+    },
+    {
+      "kind": "firstFixtureBytes",
+      "ms": 55,
+      "mode": "automatic"
+    },
+    {
+      "kind": "firstNonzeroDecodedSamples",
+      "ms": 80.0999999998603,
+      "beforeEOF": true,
+      "mode": "automatic",
+      "contextBaseLatencyMS": 10,
+      "contextOutputLatencyMS": 32
+    },
+    {
+      "kind": "streamCanceled",
+      "mode": "automatic"
+    }
+  ],
+  "eof": false,
+  "nonzero": true,
+  "acceptance": {
+    "providerCalls": 0,
+    "applicationServiceStarted": false,
+    "nativeDecoderBeforeEOF": true,
+    "physicalAudibleMeasurement": false,
+    "realMagpie500msPassed": false,
+    "note": "Analyser samples prove decoder/output-graph activity only, not physical speaker onset. Fixture timing is not provider timing."
+  }
+}

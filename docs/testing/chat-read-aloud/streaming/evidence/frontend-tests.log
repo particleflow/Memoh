@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/nas-speech
+
+
+ Test Files  2 passed (2)
+      Tests  14 passed (14)
+   Start at  08:55:14
+   Duration  720ms (transform 107ms, setup 0ms, import 309ms, tests 114ms, environment 749ms)
+
