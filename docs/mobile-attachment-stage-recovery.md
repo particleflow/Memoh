@@ -57,12 +57,12 @@ This protects recovery after a local staging failure. It is **not** evidence
 that directory fsync caused the reported phone incident, or that this phone can
 now upload successfully.
 
-## Existing readback capability: no remote user entry
+## Audited 12faf4/7e765/6a476 baseline: no remote user entry
 
 The phone is remote, outside the LAN. USB, HDC, a connected PC, and a private
 sandbox dump are not prerequisites or instructions for this investigation.
 
-The fixed source has no user-facing diagnostic menu, share/export operation,
+That baseline has no user-facing diagnostic menu, share/export operation,
 remote diagnostic endpoint, or bridge command that reads
 `client-diagnostics.jsonl`. `ClientDiagnostics.event` only writes the app-private
 file and HiLog. `EntryAbility.onDump` returns image timing data through the
@@ -76,9 +76,12 @@ request headers. The existing limits handler has no client-failure input.
 `nativeAttachmentCommand` uses `createApiFetch` with a bridge-backed fetch
 function: its `/users/me` argument is not an automatic HTTP error report. The
 earlier successful limits request cannot carry a later local failure stage.
-There is no existing event or authenticated request-metadata path that returns
-that local first error to the server. No reporting headers, query parameters,
-extra requests, new endpoint or publicly readable log have been added.
+There was no existing event or authenticated request-metadata path that returned
+that local first error to the server. The 6a476 bridge-only step added no
+reporting request or endpoint. The explicitly authorized follow-up now adds the
+scoped file-module metadata resource described in
+[the reporting contract](mobile-attachment-failure-reporting.md), without a
+public log, new service, file retransmission or permission expansion.
 
 ### Read-only evidence boundary for the sole field writer
 
@@ -123,7 +126,7 @@ the original journal. It does not reopen the old picker URI. Failure of a
 temporary grant before publication and loss/change of an owned snapshot after
 publication are different boundaries; neither permits guessing a replacement.
 
-## Undeployed candidate: preserve failure metadata on the existing bridge
+## Original 6a476 candidate: preserve metadata on the existing bridge
 
 An optional `failure` member now carries a staged-operation error through the
 existing version-1 `upload.*` error response. No command or network protocol is
@@ -161,34 +164,35 @@ existing `error` enum. Other codes become `UNCLASSIFIED`; a plain legacy error
 returns `undefined`. Current 401/403 handling remains the shared auth handler,
 before metadata attachment. The original generation/token check runs before
 consuming a reply. A late reply from another login is rejected without exposing
-its metadata. None of this reads or uploads an original, creates a new receipt,
-retries an operation, publishes an event, persists error metadata in Web Storage,
-or contacts a diagnostic server.
+its metadata. That bridge-only step did not read or upload an original, create a
+new receipt, retry an operation, publish an event, persist error metadata in Web
+Storage, or contact a diagnostic server. The follow-up preserves these file-byte
+boundaries while adding an authenticated metadata outbox.
 
-### Exact handoff to the existing presentation owner
+### Original presentation loss, now consumed by the follow-up
 
-`HarmonyAttachments.vue` currently catches the selection error in `action` and
-immediately assigns `cause.message` to a string. `reopenPreviews` also reduces
-the error to its message. Those are the attachment-presenter consumption seams:
-call `nativeUploadFailure(cause)` before string conversion, and let the existing
-error surface localize the fixed stage/code. The existing send failure catch in
+The 6a476 `HarmonyAttachments.vue` caught the selection error in `action` and
+immediately assigned `cause.message` to a string. The follow-up now stores
+`{message, failure: nativeUploadFailure(cause)}` in its existing error state and
+exposes it through the existing component. `reopenPreviews` does the same. The existing send failure catch in
 `apps/web/src/store/chat/send.ts` similarly receives the original `Error` before
-message conversion. This patch changes no UI file, user-facing copy, menu or
-button. It does not claim that these presenters already consume the metadata.
+message conversion. The common bridge now queues metadata before callers can
+convert errors to strings. No additional text, menu or button was added; the
+existing error rendering still uses its original message.
 
 Image picker/URI/format decoding belongs to the separate image owner. No image
 implementation was changed. The current common contract exposes its existing
 `picker` boundary, not a fabricated decoder substage; any finer enum must be
 agreed across native producer, bridge and frontend validators before integration.
 
-This candidate makes future first errors available to the current authorized
-Web document through its existing request response. It is not server-side
+That first candidate made future first errors available to the current authorized
+Web document through its existing request response. It was not server-side
 telemetry, a public log channel, or a remote historical-error retrieval feature.
 It cannot recover the already discarded error from the reported incident, and
-does not survive a phone process restart as an exported failure record. The
-existing private diagnostic journal remains private. It is **not deployed**;
-official HAP build, presenter consumption and installed-phone acceptance remain
-unverified. The user's remote location is not a reason to stop cloud development
+did not survive a phone process restart as an exported failure record. The
+follow-up adds a scoped persistent metadata outbox and authenticated NAS readback.
+The private diagnostic journal remains private. Both candidates are **not deployed**;
+official HAP build and installed-phone acceptance remain unverified. The user's remote location is not a reason to stop cloud development
 or to request that they retransmit their attachment.
 
 ### New envelope checks only

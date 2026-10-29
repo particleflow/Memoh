@@ -3501,6 +3501,27 @@ export type MediaUpload = {
     state: 'uploading' | 'ready' | 'canceled';
 };
 
+export type MediaUploadFailure = {
+    at: number;
+    code: string;
+    expires_at: string;
+    handle?: string;
+    operation: string;
+    phase: string;
+    received_at: string;
+    sdk_code?: number;
+    version: number;
+};
+
+export type MediaUploadFailureInput = {
+    at: number;
+    code: string;
+    handle?: string;
+    phase: string;
+    sdk_code?: number;
+    version: number;
+};
+
 export type MediaUploadInput = {
     mime: string;
     sha256: string;
@@ -10232,6 +10253,183 @@ export type GetBotsByBotIdMediaLimitsResponses = {
 };
 
 export type GetBotsByBotIdMediaLimitsResponse = GetBotsByBotIdMediaLimitsResponses[keyof GetBotsByBotIdMediaLimitsResponses];
+
+export type GetBotsByBotIdMediaUploadFailuresData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/upload-failures';
+};
+
+export type GetBotsByBotIdMediaUploadFailuresErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresError = GetBotsByBotIdMediaUploadFailuresErrors[keyof GetBotsByBotIdMediaUploadFailuresErrors];
+
+export type GetBotsByBotIdMediaUploadFailuresResponses = {
+    /**
+     * OK
+     */
+    200: Array<MediaUploadFailure>;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresResponse = GetBotsByBotIdMediaUploadFailuresResponses[keyof GetBotsByBotIdMediaUploadFailuresResponses];
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Existing client operation ID
+         */
+        operation: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/upload-failures/{operation}';
+};
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationError = GetBotsByBotIdMediaUploadFailuresByOperationErrors[keyof GetBotsByBotIdMediaUploadFailuresByOperationErrors];
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationResponses = {
+    /**
+     * OK
+     */
+    200: Array<MediaUploadFailure>;
+};
+
+export type GetBotsByBotIdMediaUploadFailuresByOperationResponse = GetBotsByBotIdMediaUploadFailuresByOperationResponses[keyof GetBotsByBotIdMediaUploadFailuresByOperationResponses];
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationData = {
+    /**
+     * Whitelisted failure metadata
+     */
+    body: MediaUploadFailureInput;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+        /**
+         * Existing client operation ID
+         */
+        operation: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/media/upload-failures/{operation}';
+};
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Request Entity Too Large
+     */
+    413: ServerProblem;
+    /**
+     * Too Many Requests
+     */
+    429: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+    /**
+     * Service Unavailable
+     */
+    503: ServerProblem;
+};
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationError = PutBotsByBotIdMediaUploadFailuresByOperationErrors[keyof PutBotsByBotIdMediaUploadFailuresByOperationErrors];
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationResponses = {
+    /**
+     * OK
+     */
+    200: MediaUploadFailure;
+};
+
+export type PutBotsByBotIdMediaUploadFailuresByOperationResponse = PutBotsByBotIdMediaUploadFailuresByOperationResponses[keyof PutBotsByBotIdMediaUploadFailuresByOperationResponses];
 
 export type PostBotsByBotIdMediaUploadsData = {
     /**

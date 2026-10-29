@@ -1,8 +1,9 @@
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { authSessionGeneration, onAuthSessionCleared } from '@/lib/auth-session'
+import { rememberNativeUploadFailure, forgetNativeUploadFailures } from './harmony-upload-failures'
 export interface NativeAttachment { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; scope: string }
 export interface NativeUploadReceipt { content_hash: string; size_bytes: number; mime: string }
-export interface NativeUploadFailure { version: 1; phase: string; sdkCode: number; at: number; code: string }
+export interface NativeUploadFailure { version: 1; phase: string; sdkCode: number; at: number; code: string; operation?: string }
 const failurePhases = ['owner-read', 'limits-read', 'picker', 'source-metadata', 'source-open', 'snapshot-create',
   'snapshot-copy', 'snapshot-hash', 'source-verify', 'journal-publish', 'journal-dir-sync']
 const failureCodes = ['MEDIA_SHA_MISMATCH', 'MEDIA_SIZE_MISMATCH', 'MEDIA_SHORT_READ', 'MEDIA_SHORT_WRITE',
@@ -14,6 +15,7 @@ function normalizeUploadFailure(value: unknown, code: unknown): NativeUploadFail
   if (failure.version !== 1 || !failurePhases.includes(failure.phase) || !Number.isSafeInteger(failure.sdkCode)
     || failure.sdkCode < 0 || failure.sdkCode > 2147483647 || !Number.isSafeInteger(failure.at) || failure.at <= 0) return
   return { version: 1, phase: failure.phase, sdkCode: failure.sdkCode, at: failure.at,
+    ...(typeof failure.operation === 'string' && /^[a-f0-9]{32}$/.test(failure.operation) ? { operation: failure.operation } : {}),
     code: typeof code === 'string' && failureCodes.includes(code) ? code : 'UNCLASSIFIED' }
 }
 // An existing error presenter can consume this without displaying raw SDK messages.
@@ -81,9 +83,14 @@ export async function nativeAttachmentCommand<T>(command: string, botId: string,
           : reply.error === 'UPLOAD_HTTP_413' ? '附件为空或超过服务端限制'
           : '附件未完成：原件校验、授权或网络未通过；可从恢复入口重试')
         const failure = normalizeUploadFailure(reply.failure, reply.error)
-        if (failure) Object.assign(error, { nativeFailure: failure })
+        if (failure) {
+          failure.operation = operation
+          Object.assign(error, { nativeFailure: failure })
+          void rememberNativeUploadFailure(botId, operation, failure, fields.handle).catch(() => {})
+        }
         throw error
       }
+      if (fields.handle && (command === 'upload.consume' || command === 'upload.discard')) forgetNativeUploadFailures(botId, fields.handle)
       return new Response(JSON.stringify(reply.data ?? null), { status: 200 })
     })(sdkApiUrl({ url: '/users/me' }), { headers: { authorization: 'Bearer ' + token } })
     check()

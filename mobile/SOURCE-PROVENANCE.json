@@ -118,12 +118,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/HarmonyAttachments.vue",
-      "sha256": "e147d871f7700d3e4d7a16e8e0397b8e4173af1e8ebd29d280bbff7f4f1c89ad",
+      "sha256": "2ce45f65150a20f0da8ad0ae6ccdd2d1f71871a71469d02b1239d1c86dc28670",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
-        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot."
+        "1.0.14: remove unsolicited attachment recovery UI; reuse fixed shared sidebar Bot/Agent name, state and ordinary session navigation only. Keep native transfer, login and empty private-injection slot.",
+        "Undeployed scoped NAS failure-reporting follow-up: preserve structured attachment error state, persist same-identity metadata, and report/read it through the existing file module and auth boundary; new differential tests only, no user file retransmission or added UI copy/buttons."
       ]
     },
     {
@@ -163,13 +164,14 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
-      "sha256": "a92cdbcabf3c38a45609e919462b949b732b14f08845bdebbfa44ea8d51b78d8",
+      "sha256": "def20a3f5af857e992df75be92cb112574375d2b8336a483dd00a122c1596c0b",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
-        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated.",
+        "Undeployed scoped NAS failure-reporting follow-up: preserve structured attachment error state, persist same-identity metadata, and report/read it through the existing file module and auth boundary; new differential tests only, no user file retransmission or added UI copy/buttons."
       ]
     },
     {
@@ -349,13 +351,14 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable_frontend.cjs",
-      "sha256": "d8c74f83e811a61a38ffa58843f08577e196b1a690d7e158de6fcde0f9e0130c",
+      "sha256": "d6a3a01b615d32ff049c455b0ee470bd1c1954734f16c1d32368e0acf1d4b891",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
-        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated."
+        "Undeployed attachment failure-envelope candidate: retain fixed stage and numeric SDK code on the existing scoped error reply; no diagnostic endpoint, automatic network request, user data export, image implementation or UI copy change. New envelope-only isolated checks; original seven staging cases not repeated.",
+        "Undeployed scoped NAS failure-reporting follow-up: preserve structured attachment error state, persist same-identity metadata, and report/read it through the existing file module and auth boundary; new differential tests only, no user file retransmission or added UI copy/buttons."
       ]
     },
     {
@@ -490,7 +493,7 @@
     },
     {
       "path": "mobile/client/mobile/build_memoh_web.py",
-      "sha256": "6e24660663d90ffee0b526b9e1dd0a4810812ecbfe85ed46627fab856b50bebe",
+      "sha256": "1f3d428cf4e1fd809812ef772f7a78a574273a4d1e062c6eec28d49679e47548",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "5f3255f614b83e1ca7d630e12b133554f9adf8541806c255aa29d1519547798d",
@@ -520,7 +523,8 @@
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
         "Reuse fixed shared owned-computer NAS storage page, directory picker, route/locales and three generated SDK methods; retain phone adapters, auth and empty configuration. Source-only; no execution-root cutover or HAP.",
         "Reuse the final scoped relation dialog and identified run/turn error deduplication; retire global-sidebar footer trigger. Keep phone transfer/auth/TLS and default-off timings. Guard non-browser timing imports and adapt one test to a real hash-verified NAS reference without weakening assertions. No recovery adapter/HAP/signing/deployment.",
-        "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol."
+        "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol.",
+        "Undeployed scoped NAS failure-reporting follow-up: preserve structured attachment error state, persist same-identity metadata, and report/read it through the existing file module and auth boundary; new differential tests only, no user file retransmission or added UI copy/buttons."
       ],
       "nativeIntegrationBaseSHA256": "b3442afdd294a8b3f2f2161ebd6f82486f2656590f6ba45a20dcec2fb2bf8bc3",
       "observationAuditBaseSHA256": "2acb8ccfb493120f829b9589828d6a5de45b062e17a0ef677bd6f4ffd7e7d6ff",
@@ -1831,6 +1835,15 @@
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Source-only Home/Dockview speech admission and exact task run/turn consumption, preserving existing phone seams. No version/package/build/publication action."
+      ]
+    },
+    {
+      "path": "mobile/client/mobile/memoh/harmony-upload-failures.ts",
+      "sha256": "dd6281cb39cbbd078934d40c8cfe4ae35f2faae54096bb5cbad6ff6ac719d50e",
+      "origin": "Project attachment failure-reporting adaptation developed during cloud alignment",
+      "licenseReview": "Contribution under the existing repository terms; no third-party implementation, private source or binary imported.",
+      "preparationChanges": [
+        "Undeployed authenticated metadata outbox for the existing file module. Same owner/API binding, immutable existing operation IDs, whitelisted error metadata only; no original-file retransmission, model call, image implementation or new UI controls."
       ]
     }
   ],

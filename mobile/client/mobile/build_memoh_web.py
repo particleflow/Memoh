@@ -45,7 +45,7 @@ def inputs():
         'mobile/memoh/harmony-image-timing.ts', 'mobile/memoh/harmony-image-timing.test.ts', 'mobile/memoh/harmony-image-timing-node.test.ts', 'mobile/memoh/harmony-attachment-preparation.test.ts',
         'mobile/memoh/harmony-voice.ts', 'mobile/memoh/harmony-voice-geometry.ts',
         'mobile/memoh/HarmonyVoiceInput.vue', 'mobile/memoh/HarmonyVoiceFan.vue', 'mobile/memoh/HarmonyVoicePlayer.vue',
-        'mobile/memoh/HarmonyAttachments.vue', 'mobile/memoh/harmony-resumable.ts',
+        'mobile/memoh/HarmonyAttachments.vue', 'mobile/memoh/harmony-resumable.ts', 'mobile/memoh/harmony-upload-failures.ts',
         'mobile/memoh/voiceFan.svg', 'mobile/memoh/voiceFan.css', 'contracts/ui_theme.json',
         'config/memoh_web.lock.json', 'config/memoh_client.json',
         'mobile/client_config.py', 'mobile/prepare_memoh_source.py',
@@ -1322,7 +1322,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         host_sources = {name: ROOT / 'mobile/memoh' / name for name in (
             'harmony.ts', 'harmony-files.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-image-timing-node.test.ts', 'harmony-attachment-preparation.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
-            'HarmonyAttachments.vue', 'harmony-resumable.ts',
+            'HarmonyAttachments.vue', 'harmony-resumable.ts', 'harmony-upload-failures.ts',
             'harmony-download.ts', 'harmony-service-url.ts')}
         if platform == 'harmony':
             for name in ('harmony-entry.ts', 'harmony-back.ts', 'harmony-service-config.ts', 'harmony-service.css'):
