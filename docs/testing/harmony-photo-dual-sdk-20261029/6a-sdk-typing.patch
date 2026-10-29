@@ -1,0 +1,23 @@
+--- a/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets
++++ b/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets
+@@ -2,7 +2,7 @@
+ import { common } from '@kit.AbilityKit';
+ import { NativeVoice } from './NativeVoice';
+ import { NativeMediaDownload } from './NativeMediaDownload';
+-import { NativeResumableUpload, UploadPreview, UploadScope, UploadStageFailure } from './NativeResumableUpload';
++import { NativeResumableUpload, UploadPreview, UploadScope, UploadStageFailure, UploadFailure } from './NativeResumableUpload';
+ import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
+ import { TransferNetworkPolicy } from './ServiceUrl';
+ 
+@@ -138,8 +138,10 @@
+       const allowed = this.active && this.ready && failure?.version === 1 && phases.includes(failure.phase) &&
+         Number.isSafeInteger(failure.sdkCode) && failure.sdkCode >= 0 && failure.sdkCode <= 2147483647 &&
+         Number.isSafeInteger(failure.at) && failure.at > 0;
++      const metadata: UploadFailure | undefined = allowed && failure
++        ? { version: 1, phase: failure.phase, sdkCode: failure.sdkCode, at: failure.at } : undefined;
+       return JSON.stringify({ version: 1, ok: false, error: /^[A-Z0-9_]+$/.test(message) ? message : 'VOICE_UNAVAILABLE',
+-        failure: allowed ? { version: 1, phase: failure?.phase, sdkCode: failure?.sdkCode, at: failure?.at } : undefined });
++        failure: metadata });
+     }
+   }
+ }

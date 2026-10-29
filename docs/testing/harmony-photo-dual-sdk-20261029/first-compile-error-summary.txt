@@ -1,0 +1,37 @@
+> hvigor ERROR: Failed :entry:default@CompileArkTS...
+> hvigor ERROR: 00305015 Rollup Error
+Error Message: Could not resolve "../common/WebResourceManifest" from "entry/src/main/ets/pages/SharedChat.ets". At file: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets
+1 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets:8:9
+2 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets:9:9
+3 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:69:13
+4 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:81:11
+5 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:90:11
+6 ERROR: 10605099 ArkTS Compiler Error
+Error Message: It is possible to spread only arrays or classes derived from arrays into the rest parameter or array literals (arkts-no-spread) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:90:32
+7 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:92:13
+8 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:93:18
+9 ERROR: 10605008 ArkTS Compiler Error
+Error Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/RawImage.ets:7:9
+10 ERROR: 10605038 ArkTS Compiler Error
+Error Message: Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets:142:28
+11 ERROR: 10505001 ArkTS Compiler Error
+Error Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets:1:92
+12 ERROR: 10505001 ArkTS Compiler Error
+Error Message: Cannot find module './WebResourceManifest' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets:3:31
+13 ERROR: 10505001 ArkTS Compiler Error
+Error Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:4:96
+14 ERROR: 10505001 ArkTS Compiler Error
+Error Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:9:41
+15 ERROR: 10505001 ArkTS Compiler Error
+Error Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets:7:39
+16 ERROR: 10505001 ArkTS Compiler Error
+Error Message: Cannot find module '../common/WebResourceManifest' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:7:31
+COMPILE RESULT:FAIL {ERROR:17 WARN:163}
+> hvigor ERROR: BUILD FAILED in 14 s 267 ms

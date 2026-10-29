@@ -1,0 +1,598 @@
+> hvigor [32mFinished :entry:clean... after 4 ms [39m
+> hvigor [32mFinished :entry:default@PreBuild... after 374 ms [39m
+> hvigor [32mFinished :entry:default@CreateModuleInfo... after 2 ms [39m
+> hvigor [32mFinished :entry:default@ConfigureCmake... after 38 ms [39m
+> hvigor [32mFinished :entry:default@MergeProfile... after 47 ms [39m
+> hvigor [32mFinished :entry:default@CreateBuildProfile... after 3 ms [39m
+> hvigor [32mFinished :entry:default@BuildNativeWithCmake... after 855 ms [39m
+> hvigor [32mFinished :entry:default@GeneratePkgContextInfo... after 28 ms [39m
+> hvigor [32mFinished :entry:default@ProcessProfile... after 295 ms [39m
+> hvigor [32mFinished :entry:default@ProcessRouterMap... after 2 ms [39m
+> hvigor [32mFinished :entry:default@ProcessShareConfig... after 10 ms [39m
+> hvigor [32mFinished :entry:default@ProcessStartupConfig... after 3 ms [39m
+> hvigor [32mFinished :entry:default@ProcessResource... after 4 ms [39m
+> hvigor [32mFinished :entry:default@GenerateLoaderJson... after 6 ms [39m
+> hvigor [33mWARN: Warning: 'app_name' conflict, first declared.
+at /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/AppScope/resources/base/element/string.json
+but declared again.
+at /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/resources/base/element/string.json
+[39m
+> hvigor [32mFinished :entry:default@CompileResource... after 290 ms [39m
+> hvigor [91mERROR: Failed :entry:default@CompileArkTS... [39m
+> hvigor [33mWARN: 
+[33m1 WARN: [33m[33mArkTS:WARN: For details about ArkTS syntax errors, see FAQs[39m[39m
+[33m2 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets:79:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m3 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/VoiceText.ets:96:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m4 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:64:29
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m5 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:64:85
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m6 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:65:19
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m7 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:65:63
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m8 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:66:23
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m9 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:66:92
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m10 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:76:33
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m11 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:89:24
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m12 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:167:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m13 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:169:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m14 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:171:44
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m15 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:173:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m16 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:177:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m17 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:189:36
+ The system capacity of this api 'audio' is not supported on all devices
+[39m[39m
+[33m18 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:190:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m19 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:190:52
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m20 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:192:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m21 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:193:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m22 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeVoice.ets:193:79
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m23 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:64:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m24 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:65:37
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m25 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:76:40
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m26 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:78:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m27 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:80:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m28 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:86:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m29 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:9:71
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m30 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:14:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m31 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:19:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m32 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:28:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m33 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:29:6
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m34 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:35:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m35 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:35:88
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m36 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:40:32
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33m37 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:40:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m38 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:43:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m39 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:45:16
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33m40 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:45:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m41 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:47:38
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33m42 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:47:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m43 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:54:30
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33m44 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:54:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m45 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:55:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m46 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:59:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m47 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:61:14
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33m48 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:61:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m49 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:63:36
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33m50 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:63:36
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m51 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaFile.ets:65:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m52 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:41:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m53 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:41:66
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m54 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:46:32
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33m55 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:46:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m56 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:47:14
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33m57 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:47:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m58 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:48:33
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33m59 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:48:33
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m60 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:51:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m61 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:74:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m62 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:76:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m63 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:79:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m64 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:80:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m65 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:81:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m66 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:82:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m67 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:83:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m68 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:84:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m69 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:84:48
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m70 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:88:13
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m71 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:88:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m72 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:90:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m73 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:93:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m74 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:94:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m75 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:99:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m76 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:105:26
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m77 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:150:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m78 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:167:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m79 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:214:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m80 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:219:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m81 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:237:19
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m82 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:238:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m83 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:247:37
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m84 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:247:73
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m85 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:248:24
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m86 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:251:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m87 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/RawImage.ets:2:17
+ Currently module for 'libbegoniaraw.so' is not verified. If you're importing napi, its verification will be enabled in later SDK version. Please make sure the corresponding .d.ts file is provided and the napis are correctly declared.
+[39m[39m
+[33m88 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:22:70
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m89 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:61:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m90 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:90:34
+ 'packing' has been deprecated.
+[39m[39m
+[33m91 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:94:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m92 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:98:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m93 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:102:36
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m94 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:106:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m95 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:107:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m96 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:108:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m97 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:115:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m98 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:121:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m99 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:121:35
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m100 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets:122:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m101 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:84:13
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m102 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:84:41
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m103 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:87:27
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m104 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:89:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m105 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:89:101
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m106 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:96:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m107 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:100:111
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m108 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:100:134
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m109 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:110:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m110 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:114:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m111 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:116:10
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m112 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:117:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m113 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:118:8
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m114 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:122:20
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m115 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:123:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m116 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:123:48
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m117 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:127:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m118 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:128:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m119 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:32
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33m120 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:32
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m121 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:61
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33m122 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:136:61
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m123 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:137:33
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33m124 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:137:33
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m125 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:186:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m126 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:187:95
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m127 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:191:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m128 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:206:34
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33m129 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:211:18
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33m130 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:213:37
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33m131 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:222:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m132 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:222:53
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m133 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:225:68
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m134 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:228:56
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m135 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:228:79
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m136 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:285:34
+ The system capacity of this api 'createMd' is not supported on all devices
+[39m[39m
+[33m137 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:290:18
+ The system capacity of this api 'update' is not supported on all devices
+[39m[39m
+[33m138 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:292:37
+ The system capacity of this api 'digest' is not supported on all devices
+[39m[39m
+[33m139 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:326:66
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m140 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:414:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m141 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:419:14
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m142 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:420:30
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m143 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:439:22
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m144 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:478:38
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m145 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:488:25
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m146 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:503:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m147 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:504:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m148 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:19:46
+ 'getContext' has been deprecated.
+[39m[39m
+[33m149 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:60:12
+ This API is unavailable to phone.
+[39m[39m
+[33m150 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:82:31
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m151 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:84:23
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m152 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:85:29
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m153 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:86:25
+ 'px2vp' has been deprecated.
+[39m[39m
+[33m154 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:87:34
+ 'px2vp' has been deprecated.
+[39m[39m
+[33m155 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:88:16
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m156 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:196:36
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m157 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:199:18
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m158 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:200:12
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m159 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:201:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m160 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:203:28
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m161 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:248:21
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m162 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:9:117
+ Function may throw exceptions. Special handling is required.
+[39m[39m
+[33m163 WARN: [33m[33mArkTS:WARN File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/workers/VoiceRecognition.ets:68:39
+ Function may throw exceptions. Special handling is required.
+[39m[39m[39m
+> hvigor [91mERROR: 00305015 Rollup Error
+Error Message: Could not resolve "../common/WebResourceManifest" from "entry/src/main/ets/pages/SharedChat.ets". At file: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets
+[31m1 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets:8:9
+[31m[39m
+[39m
+[31m2 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets:9:9
+[31m[39m
+[39m
+[31m3 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:69:13
+[31m[39m
+[39m
+[31m4 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:81:11
+[31m[39m
+[39m
+[31m5 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:90:11
+[31m[39m
+[39m
+[31m6 ERROR: [31m10605099 ArkTS Compiler Error
+[31mError Message: It is possible to spread only arrays or classes derived from arrays into the rest parameter or array literals (arkts-no-spread) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:90:32
+[31m[39m
+[39m
+[31m7 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:92:13
+[31m[39m
+[39m
+[31m8 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:93:18
+[31m[39m
+[39m
+[31m9 ERROR: [31m10605008 ArkTS Compiler Error
+[31mError Message: Use explicit types instead of "any", "unknown" (arkts-no-any-unknown) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/RawImage.ets:7:9
+[31m[39m
+[39m
+[31m10 ERROR: [31m10605038 ArkTS Compiler Error
+[31mError Message: Object literal must correspond to some explicitly declared class or interface (arkts-no-untyped-obj-literals) At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets:142:28
+[31m[39m
+[39m
+[31m11 ERROR: [31m10505001 ArkTS Compiler Error
+[31mError Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets:1:92
+[31m[39m
+[39m
+[31m12 ERROR: [31m10505001 ArkTS Compiler Error
+[31mError Message: Cannot find module './WebResourceManifest' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets:3:31
+[31m[39m
+[39m
+[31m13 ERROR: [31m10505001 ArkTS Compiler Error
+[31mError Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets:4:96
+[31m[39m
+[39m
+[31m14 ERROR: [31m10505001 ArkTS Compiler Error
+[31mError Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:9:41
+[31m[39m
+[39m
+[31m15 ERROR: [31m10505001 ArkTS Compiler Error
+[31mError Message: Cannot find module './ServiceUrl' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets:7:39
+[31m[39m
+[39m
+[31m16 ERROR: [31m10505001 ArkTS Compiler Error
+[31mError Message: Cannot find module '../common/WebResourceManifest' or its corresponding type declarations. At File: /workspace/harmony-recovery-20261023/evidence/photo-dual-mode-sdk-review/source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets:7:31
+[31m[39m
+[39m
+[31mCOMPILE RESULT:FAIL {ERROR:17 WARN:163}[39m
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+[39m
+[31m
+FAILURE: Build completed with 1 failure.[31m[39m
+[31m
+1: Task failed with an exception.
+-----------
+* What went wrong:
+Execution failed for task 'default@CompileArkTS'.
+  > Compilation error. See log for more details
+
+[31m* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --debug option to get more log output.
+[31m[39m
+[31m================================================================================[31m[39m
+> hvigor [91mERROR: BUILD FAILED in 14 s 267 ms [39m
+
+15 tasks in total: 15 executed, 0 up-to-date

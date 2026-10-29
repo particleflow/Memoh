@@ -1,0 +1,16 @@
+--------------------------------------------------------------------------
+All tasks from hvigor node 'entry'
+--------------------------------------------------------------------------
+Help tasks
+-------------
+tasks - Displays the tasks of the HvigorCoreNode.
+taskTree - Displays the task dag tree of the HvigorCoreNode.
+
+Sync tasks
+-------------
+init - Sync and refresh project
+
+> hvigor [32mFinished :entry:tasks... after 2 ms [39m
+> hvigor [32mBUILD SUCCESSFUL in 2 s 427 ms [39m
+
+1 tasks in total: 1 executed, 0 up-to-date

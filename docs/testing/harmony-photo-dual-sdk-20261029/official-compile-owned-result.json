@@ -1,0 +1,31 @@
+{
+  "command": [
+    "/workspace/harmony-recovery-20261023/toolchains/commandline-tools/command-line-tools/bin/hvigorw",
+    "default@CompileArkTS",
+    "--mode",
+    "module",
+    "-p",
+    "product=default",
+    "-p",
+    "module=entry@default",
+    "-p",
+    "buildMode=release",
+    "--no-daemon"
+  ],
+  "exitCode": 0,
+  "sourceVariant": "exact owned7e+75,6a not imported",
+  "HAPGenerated": false,
+  "ABCFiles": [
+    {
+      "path": "entry/build/default/intermediates/loader_out/default/ets/modules.abc",
+      "bytes": 264548,
+      "sha256": "01c070b64b511e16b10129e6c0dce76e8ef21c54f811f56950d2e62bb906d3e2"
+    }
+  ],
+  "ownedSourceHashes": {
+    "NativePhotoSelection.ets": "e91c114591bae1a017a8b15d32b31da41d04009d531351a079ccd228438f1d33",
+    "NativeResumableUpload.ets": "b89c4acc9ee03c2a1f0d39ac8844bd342c57dee4c161d1dbd6ae8bb2135afa22",
+    "NativeClient.ets": "dbe4568cd9a686b81b5c9d463353e509ef774477dc0d4690b302e98cc3981566"
+  },
+  "logSHA256": "d7a3ee23692d8b68f1a0b321a68670fbe2ea1012838e4527a66e2ecb4ec52a87"
+}

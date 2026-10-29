@@ -11,7 +11,12 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parent
 manifest = json.loads((HERE / 'SOURCE-PROVENANCE.json').read_text())
 entries = manifest['entries']
-assert len(entries) == 176
+# Two admitted photo regression inputs extend the previous176 text sources.
+assert len(entries) == 178
+assert {
+    'mobile/client/tests/stage2/harmony_photo_dual_mode.cjs',
+    'mobile/client/tests/stage2/harmony_photo_fixtures.py',
+} <= {item['path'] for item in entries}
 assert len({item['path'] for item in entries}) == len(entries)
 for item in entries:
     relative = Path(item['path'])

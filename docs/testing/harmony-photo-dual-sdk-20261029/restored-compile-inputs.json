@@ -1,0 +1,10 @@
+[
+  {
+    "path": "mobile/harmony/app/entry/src/main/ets/common/ServiceUrl.ets",
+    "sha256": "e8ae7b9ffd393349e81cecc71c8f4654722783570707deaa610db78595d98608"
+  },
+  {
+    "path": "mobile/harmony/app/entry/src/main/ets/common/WebResourceManifest.ets",
+    "sha256": "904c23bb5f1ad5683801769d5e84680d4e313eea21a6ad894941361c3c21276a"
+  }
+]

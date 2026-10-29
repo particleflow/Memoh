@@ -1,0 +1,131 @@
+{
+  "successfulBranches": 15,
+  "originalBranches": 5,
+  "compressedBranches": 10,
+  "allOutputBytesAndPoliciesPreserved": true,
+  "baselineUnreleasedConversionDirectories": 10,
+  "correctedUnreleasedConversionDirectories": 0,
+  "faultCases": 8,
+  "comparisons": [
+    {
+      "name": "animated.gif",
+      "photos": true,
+      "isOriginal": true,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 0,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "animated.gif",
+      "photos": true,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "animated.gif",
+      "photos": false,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "lossless.webp",
+      "photos": true,
+      "isOriginal": true,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 0,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "lossless.webp",
+      "photos": true,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "lossless.webp",
+      "photos": false,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "oriented.jpg",
+      "photos": true,
+      "isOriginal": true,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 0,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "oriented.jpg",
+      "photos": true,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "oriented.jpg",
+      "photos": false,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "tagged.tiff",
+      "photos": true,
+      "isOriginal": true,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 0,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "tagged.tiff",
+      "photos": true,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "tagged.tiff",
+      "photos": false,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "transparent.png",
+      "photos": true,
+      "isOriginal": true,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 0,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "transparent.png",
+      "photos": true,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    },
+    {
+      "name": "transparent.png",
+      "photos": false,
+      "isOriginal": false,
+      "snapshotBytesHashMimeSizeMetadataIdenticalToBaseline": true,
+      "baselineCacheDirectories": 1,
+      "correctedCacheDirectories": 0
+    }
+  ]
+}

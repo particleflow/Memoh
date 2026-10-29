@@ -270,12 +270,14 @@ export class NativeResumableUpload {
   }
   async select(input: UploadScope, recordingPath?: string): Promise<UploadLocal[]> {
     const run = this.start(input);
+    let photoSelection: NativePhotoSelection | undefined;
     try {
       const owner = await this.owner(run), limits = await this.limits(run); this.check(run);
       if (recordingPath) { return [await this.stagePath(run, owner, limits, recordingPath, '录音-' + input.handle + '.wav', 'audio/wav')]; }
       // Bound each picker invocation, not the user's total retained backlog.
       run.phase = 'picker';
-      const uris = await new NativePhotoSelection(this.context).select(4, input.photos === true); this.check(run);
+      photoSelection = new NativePhotoSelection(this.context);
+      const uris = await photoSelection.select(4, input.photos === true); this.check(run);
       const results: UploadLocal[] = [];
       for (const uri of uris) {
       run.phase = 'source-metadata';
@@ -287,7 +289,7 @@ export class NativeResumableUpload {
       }
       return results;
     } catch (error) { ClientDiagnostics.failure('SYSTEM', 'attachment-stage', run.phase, error as Error); throw error as Error; }
-    finally { this.end(run); }
+    finally { if (photoSelection) { photoSelection.close(); } this.end(run); }
   }
   async list(input: UploadScope): Promise<UploadLocal[]> {
     const run = this.start(input);

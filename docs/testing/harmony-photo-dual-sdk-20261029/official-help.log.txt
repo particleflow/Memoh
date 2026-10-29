@@ -1,0 +1,52 @@
+Usage:  hvigorw [taskNames...] <options...> 
+
+Options: 
+  -v, --version                      Shows the version of Hvigor.
+  -e, --error                        Sets the log level to error.
+  -w, --warn                         Sets the log level to warn.
+  -i, --info                         Sets the log level to info.
+  -d, --debug                        Sets the log level to debug.
+  -c, --config <config>              Sets properties in the hvigor-config.json5 file. The settings will overwrite those in the file.
+  -p, --prop <value>                 Defines extra properties. (default: [])
+  -m, --mode <string>                Sets the mode in which the command is executed.
+  -s, --sync                         Syncs the information in plugin for other platforms.
+  --node-home, <string>              Sets the Node.js location.
+  --stop-daemon                      Stops the current project's daemon process.
+  --stop-daemon-all                  Stops all projects' daemon process.
+  --status-daemon                    Shows the daemon process status of the current project.
+  --verbose-analyze                  Enables detailed mode for build analysis.
+  --watch                            Enables watch mode.
+  --hot-compile                      HotReload watch mode to compile.
+  --hot-reload-build                 HotReload build
+  --max-old-space-size <integer>     Sets the maximum memory size of V8's old memory section.
+  --max-semi-space-size <integer>    Sets the maximum memory size of V8's new space memory section.
+  --Xmx <integer>                    Sets the maximum JVM heap size, in MB.
+  --optimization-strategy <string>   Sets the optimization strategy: memory, performance.
+  --enable-build-script-type-check   ['--enable-build-script-type-check' deprecated: use 'type-check' instead] Enables the build script hvigorfile.ts type check. This option is deprecated. Use 'type-check' instead.
+  --stacktrace                       Enables the printing of stack traces for all exceptions.
+  --no-stacktrace                    Disables the printing of stack traces for all exceptions.
+  --type-check                       Enables the build script hvigorfile.ts type check.
+  --no-type-check                    Disables the build script hvigorfile.ts type check.
+  --parallel                         Enables parallel building mode.
+  --no-parallel                      Disables parallel building mode.
+  --incremental                      Enables incremental building mode.
+  --no-incremental                   Disables incremental building mode.
+  --daemon                           Enables building with daemon process.
+  --no-daemon                        Disables building with daemon process.
+  --generate-build-profile           Enables the generation of BuildProfile.ets files.
+  --no-generate-build-profile        Disables the generation of BuildProfile.ets files.
+  --analyze                          Enables build analysis.
+  --no-analyze                       Disables build analysis.
+  --analyze=<analysisMode>           Sets the build analysis mode: normal (default), advanced, false and ultrafine.
+  -h, --help                         Displays help information. 
+  
+Commands: 
+  version                            Shows the version of Hvigor.
+  tasks                              Shows all available tasks of specific modules.
+  taskTree                           Shows all available task trees of specific modules.
+  prune                              Cleans up Hvigor cache files and removes unreferenced packages from store.
+  collectCoverage                    Generates coverage statistics reports based on instrumentation test data.
+
+Examples:
+  hvigorw assembleApp  Do assembleApp task
+

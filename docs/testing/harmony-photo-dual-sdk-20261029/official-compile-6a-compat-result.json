@@ -1,0 +1,25 @@
+{
+  "command": [
+    "/workspace/harmony-recovery-20261023/toolchains/commandline-tools/command-line-tools/bin/hvigorw",
+    "default@CompileArkTS",
+    "--mode",
+    "module",
+    "-p",
+    "product=default",
+    "-p",
+    "module=entry@default",
+    "-p",
+    "buildMode=release",
+    "--no-daemon"
+  ],
+  "exitCode": 0,
+  "HAPGenerated": false,
+  "ABCFiles": [
+    {
+      "path": "entry/build/default/intermediates/loader_out/default/ets/modules.abc",
+      "bytes": 265896,
+      "sha256": "ebc48957f0437193dcad883a3c03b0bad8f4d1fbce7924e4f4ed7505b3653b03"
+    }
+  ],
+  "logSHA256": "eb0b7b92d8bc6a832d46ac02d5f2a9f9721a081f2ee95d236b608df0d9472aed"
+}

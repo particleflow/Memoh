@@ -1,0 +1,13 @@
+{
+  "consumerBase": "f586f582dcb622bcde5090f48843318e320c631a",
+  "photoSource": "75a5fe1b54c3b7526350a406f901e496ef1b05c6",
+  "compatibilityLayerOnly": "6a476bb843c607517bd2bcca48af863c321e08bd",
+  "publicationGuard": "7e765e3e917747288b4f687dfaac97cbdd01a99d",
+  "officialTaskFromTree": "default@CompileArkTS",
+  "oldFailedNamespaceNotReused": true,
+  "candidatePhotoSHA256": "e91c114591bae1a017a8b15d32b31da41d04009d531351a079ccd228438f1d33",
+  "combinedUploadSHA256": "d2c3702ef597fcf8340660f841176af2793665ecc7e0e40dc11b671288fcd6dc",
+  "noNewHAP": true,
+  "schemaVersionUnchanged": true,
+  "rawDependencyReusedAndVerified": true
+}

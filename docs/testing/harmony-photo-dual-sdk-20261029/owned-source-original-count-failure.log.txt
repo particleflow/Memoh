@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/harmony-recovery-20261023/image-probe-source/mobile/check_source_subset.py", line 14, in <module>
+    assert len(entries) == 176
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError

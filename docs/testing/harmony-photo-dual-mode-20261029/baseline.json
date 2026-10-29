@@ -1,0 +1,548 @@
+{
+  "mode": "baseline",
+  "sourceHashes": {
+    "NativePhotoSelection": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+    "NativeMediaFile": "a9fb2d24cdbf9c8d80cd8912778de55c5f1328e06afd0d3e8f84bf71eb190aab",
+    "NativeResumableUpload": "ca2be644dc5a8ab212deb465757000f1051b1e45a03b51286d8d88323bbc7a68"
+  },
+  "boundary": "Real .ets/file IO/snapshot/SHA256; host SDK and Pillow codec adapters; no phone grant or ImageKit compatibility claim",
+  "results": [
+    {
+      "name": "animated.gif",
+      "photos": true,
+      "isOriginal": true,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/gif",
+        "frames": 2,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 121,
+        "sha256": "883f73dc4e2333f2d8838bae01519a76f4dce6a2e89ba5e20cf0abe49f32d4e9"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/gif",
+        "frames": 2,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 121,
+        "sha256": "883f73dc4e2333f2d8838bae01519a76f4dce6a2e89ba5e20cf0abe49f32d4e9",
+        "name": "animated.gif"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 0,
+      "journalRetained": true
+    },
+    {
+      "name": "animated.gif",
+      "photos": true,
+      "isOriginal": false,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/gif",
+        "frames": 2,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 121,
+        "sha256": "883f73dc4e2333f2d8838bae01519a76f4dce6a2e89ba5e20cf0abe49f32d4e9"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 634,
+        "sha256": "94b62d6fcc677917fc504777ef2bd5eb9b511f21f07aef99d17b0250a5d3ce02",
+        "name": "animated.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "animated.gif",
+      "photos": false,
+      "isOriginal": false,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/gif",
+        "frames": 2,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 121,
+        "sha256": "883f73dc4e2333f2d8838bae01519a76f4dce6a2e89ba5e20cf0abe49f32d4e9"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 634,
+        "sha256": "94b62d6fcc677917fc504777ef2bd5eb9b511f21f07aef99d17b0250a5d3ce02",
+        "name": "animated.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "lossless.webp",
+      "photos": true,
+      "isOriginal": true,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/webp",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 128,
+        "sha256": "386cb7f2d4a9591cf9ece1abc6aafa5b2fa1cf72a3a5e7bed0a51ce42b235b22"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/webp",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 128,
+        "sha256": "386cb7f2d4a9591cf9ece1abc6aafa5b2fa1cf72a3a5e7bed0a51ce42b235b22",
+        "name": "lossless.webp"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 0,
+      "journalRetained": true
+    },
+    {
+      "name": "lossless.webp",
+      "photos": true,
+      "isOriginal": false,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/webp",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 128,
+        "sha256": "386cb7f2d4a9591cf9ece1abc6aafa5b2fa1cf72a3a5e7bed0a51ce42b235b22"
+      },
+      "snapshot": {
+        "width": 4,
+        "height": 6,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 634,
+        "sha256": "ff33740fa6fa383af9b0123334c98f0979508b83b774f916b861f6095d5a4fcf",
+        "name": "lossless.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "lossless.webp",
+      "photos": false,
+      "isOriginal": false,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/webp",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 128,
+        "sha256": "386cb7f2d4a9591cf9ece1abc6aafa5b2fa1cf72a3a5e7bed0a51ce42b235b22"
+      },
+      "snapshot": {
+        "width": 4,
+        "height": 6,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 634,
+        "sha256": "ff33740fa6fa383af9b0123334c98f0979508b83b774f916b861f6095d5a4fcf",
+        "name": "lossless.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "oriented.jpg",
+      "photos": true,
+      "isOriginal": true,
+      "input": {
+        "width": 4096,
+        "height": 32,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 2753,
+        "sha256": "97f3df9c94b29d99ea1b53172aa1cc61845d604643fd9eab6904e39b7626858e"
+      },
+      "snapshot": {
+        "width": 4096,
+        "height": 32,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 2753,
+        "sha256": "97f3df9c94b29d99ea1b53172aa1cc61845d604643fd9eab6904e39b7626858e",
+        "name": "oriented.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 0,
+      "journalRetained": true
+    },
+    {
+      "name": "oriented.jpg",
+      "photos": true,
+      "isOriginal": false,
+      "input": {
+        "width": 4096,
+        "height": 32,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 2753,
+        "sha256": "97f3df9c94b29d99ea1b53172aa1cc61845d604643fd9eab6904e39b7626858e"
+      },
+      "snapshot": {
+        "width": 16,
+        "height": 2048,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 1142,
+        "sha256": "0afe2b3b30dc98220974a308d1462696630747158a12b88ae48e652b38dcb870",
+        "name": "oriented.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "oriented.jpg",
+      "photos": false,
+      "isOriginal": false,
+      "input": {
+        "width": 4096,
+        "height": 32,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 2753,
+        "sha256": "97f3df9c94b29d99ea1b53172aa1cc61845d604643fd9eab6904e39b7626858e"
+      },
+      "snapshot": {
+        "width": 16,
+        "height": 2048,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 1142,
+        "sha256": "0afe2b3b30dc98220974a308d1462696630747158a12b88ae48e652b38dcb870",
+        "name": "oriented.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "tagged.tiff",
+      "photos": true,
+      "isOriginal": true,
+      "input": {
+        "width": 4,
+        "height": 6,
+        "mime": "image/tiff",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 264,
+        "sha256": "9e1189d271b0ed1c3e339c8c2fdc9b4141a61f25c777ec7ef49b6f210910dd20"
+      },
+      "snapshot": {
+        "width": 4,
+        "height": 6,
+        "mime": "image/tiff",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 264,
+        "sha256": "9e1189d271b0ed1c3e339c8c2fdc9b4141a61f25c777ec7ef49b6f210910dd20",
+        "name": "tagged.tiff"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 0,
+      "journalRetained": true
+    },
+    {
+      "name": "tagged.tiff",
+      "photos": true,
+      "isOriginal": false,
+      "input": {
+        "width": 4,
+        "height": 6,
+        "mime": "image/tiff",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 264,
+        "sha256": "9e1189d271b0ed1c3e339c8c2fdc9b4141a61f25c777ec7ef49b6f210910dd20"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 634,
+        "sha256": "5f9927959abbcfcda44277a09076e23b5d812dd58ebe645ac9cfb5ad2b83889e",
+        "name": "tagged.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "tagged.tiff",
+      "photos": false,
+      "isOriginal": false,
+      "input": {
+        "width": 4,
+        "height": 6,
+        "mime": "image/tiff",
+        "frames": 1,
+        "orientation": 6,
+        "artist": "Synthetic original metadata",
+        "text": null,
+        "alpha": false,
+        "size": 264,
+        "sha256": "9e1189d271b0ed1c3e339c8c2fdc9b4141a61f25c777ec7ef49b6f210910dd20"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/jpeg",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": false,
+        "size": 634,
+        "sha256": "5f9927959abbcfcda44277a09076e23b5d812dd58ebe645ac9cfb5ad2b83889e",
+        "name": "tagged.jpg"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "transparent.png",
+      "photos": true,
+      "isOriginal": true,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/png",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": "Synthetic original metadata",
+        "alpha": true,
+        "size": 125,
+        "sha256": "e5fdda67e6902e1e2722e61324b4a81d8dc54789304ce5c5f3f1daeacbf802d1"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/png",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": "Synthetic original metadata",
+        "alpha": true,
+        "size": 125,
+        "sha256": "e5fdda67e6902e1e2722e61324b4a81d8dc54789304ce5c5f3f1daeacbf802d1",
+        "name": "transparent.png"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 0,
+      "journalRetained": true
+    },
+    {
+      "name": "transparent.png",
+      "photos": true,
+      "isOriginal": false,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/png",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": "Synthetic original metadata",
+        "alpha": true,
+        "size": 125,
+        "sha256": "e5fdda67e6902e1e2722e61324b4a81d8dc54789304ce5c5f3f1daeacbf802d1"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/png",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": true,
+        "size": 78,
+        "sha256": "d10a876739f55ce750bfcf43ca92309dec3a0a0dc4449bced73ec3908d227411",
+        "name": "transparent.png"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    },
+    {
+      "name": "transparent.png",
+      "photos": false,
+      "isOriginal": false,
+      "input": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/png",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": "Synthetic original metadata",
+        "alpha": true,
+        "size": 125,
+        "sha256": "e5fdda67e6902e1e2722e61324b4a81d8dc54789304ce5c5f3f1daeacbf802d1"
+      },
+      "snapshot": {
+        "width": 6,
+        "height": 4,
+        "mime": "image/png",
+        "frames": 1,
+        "orientation": 1,
+        "artist": null,
+        "text": null,
+        "alpha": true,
+        "size": 78,
+        "sha256": "d10a876739f55ce750bfcf43ca92309dec3a0a0dc4449bced73ec3908d227411",
+        "name": "transparent.png"
+      },
+      "conversionCacheDirectoriesAfterSnapshot": 1,
+      "journalRetained": true
+    }
+  ],
+  "batchChecks": [
+    {
+      "count": 2,
+      "snapshotsVerifiedAfterHandoff": true,
+      "conversionCacheDirectories": 2
+    },
+    {
+      "compressedFullGrantUriUsed": true,
+      "snapshotVerified": true
+    }
+  ],
+  "faults": [
+    {
+      "fault": "decode",
+      "rejectedWith": "TEST_DECODE_FAILED",
+      "leftoverCacheDirectories": 0,
+      "explicitOriginalRetrySucceeded": true
+    },
+    {
+      "fault": "encode",
+      "rejectedWith": "TEST_ENCODE_FAILED",
+      "leftoverCacheDirectories": 0,
+      "explicitOriginalRetrySucceeded": true
+    },
+    {
+      "fault": "empty",
+      "rejectedWith": "IMAGE_ENCODING_EMPTY",
+      "leftoverCacheDirectories": 0,
+      "explicitOriginalRetrySucceeded": true
+    },
+    {
+      "fault": "output-open",
+      "rejectedWith": "TEST_OUTPUT_ENOSPC",
+      "leftoverCacheDirectories": 1,
+      "explicitOriginalRetrySucceeded": true
+    },
+    {
+      "fault": "output-write",
+      "rejectedWith": "TEST_OUTPUT_EIO",
+      "leftoverCacheDirectories": 0,
+      "explicitOriginalRetrySucceeded": true
+    },
+    {
+      "fault": "cache unlink busy once",
+      "retainedForCleanupRetry": false
+    },
+    {
+      "fault": "second decode plus cleanup failure",
+      "rejectedWith": "TEST_CACHE_BUSY",
+      "primaryConversionErrorPreserved": false
+    },
+    {
+      "fault": "expired grant adapter at snapshot open",
+      "noSuccessReceipt": true,
+      "fullUriUsed": true
+    }
+  ]
+}

@@ -98,7 +98,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "bd0929f4703d082ff19a694705e058026863adcee632bfe77bebdf1a2a6f2b50",
+      "sha256": "b89c4acc9ee03c2a1f0d39ac8844bd342c57dee4c161d1dbd6ae8bb2135afa22",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -748,7 +748,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativePhotoSelection.ets",
-      "sha256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
+      "sha256": "e91c114591bae1a017a8b15d32b31da41d04009d531351a079ccd228438f1d33",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "7de4bca9669a9217e9aa5f48bfe88b3322f256529f9f6eacbe3c26fb0f6415f0",
@@ -1822,6 +1822,18 @@
       "preparationChanges": [
         "Source-only Home/Dockview speech admission and exact task run/turn consumption, preserving existing phone seams. No version/package/build/publication action."
       ]
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_photo_dual_mode.cjs",
+      "sha256": "cef3410233c3eedc49f855647d081ce6a278c5a60db167796573e297b382da72",
+      "origin": "Approved photo dual-mode source75a5fe1b54c3b7526350a406f901e496ef1b05c6",
+      "licenseReview": "Project regression source; no proprietary SDK or actual user image included."
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_photo_fixtures.py",
+      "sha256": "f09bb63f01311fd08f8a8776c69bf81fe3c1951ec98ac1d66d5854aad370a70f",
+      "origin": "Approved photo dual-mode source75a5fe1b54c3b7526350a406f901e496ef1b05c6",
+      "licenseReview": "Project regression source; no proprietary SDK or actual user image included."
     }
   ],
   "excludedSourcePaths": [],

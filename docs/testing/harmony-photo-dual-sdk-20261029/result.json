@@ -1,0 +1,16 @@
+{
+  "original28HAPAndZIPUnchanged": true,
+  "sharedBase": "f586f582dcb622bcde5090f48843318e320c631a",
+  "photoOwner": "75a5fe1b54c3b7526350a406f901e496ef1b05c6",
+  "ownedSDKCompilePassed": true,
+  "compatibility6aSDKCompilePassedWithTypingPatch": true,
+  "compatibility6aNotImportedToOwnedBranch": true,
+  "twoCombinationOnlyHostCasesPassed": true,
+  "originalFiveFormatSuiteRerun": false,
+  "officialSDKEntriesUnchanged": true,
+  "HAPGenerated": false,
+  "signed": false,
+  "deployed": false,
+  "physicalPhoneURIAndUIVerified": false,
+  "causeOfFieldFirstErrorKnown": false
+}
