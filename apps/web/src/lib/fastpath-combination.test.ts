@@ -43,6 +43,7 @@ it('file policy leaves timing playback on its original authenticated cancellable
   expect(spoken.headers.get('X-Request-ID')).toBe('speech-timing-synthetic')
   expect(await spoken.json()).toEqual({ text: 'controlled text' })
   expect(serverFirstAudioMS(playback.response.headers.get('Server-Timing'))).toBe(18.5)
+  if (!(playback.data instanceof ReadableStream)) throw new Error('Expected playback stream')
   expect(new Uint8Array(await new Response(playback.data).arrayBuffer())).toEqual(audio)
   controller.abort()
   expect(spoken.signal.aborted).toBe(true)
@@ -52,7 +53,7 @@ it('file policy leaves timing playback on its original authenticated cancellable
 it('mapped Files failure does not replay a write or reroute PR93 history and denied control reads', async () => {
   const requests: Request[] = []
   let denied = false
-  const original = { task_id: operation, task_type: 'computer', status: 'unknown', session_id: session }
+  const original = { task_id: operation, task_type: 'computer_operation', status: 'unknown', session_id: session }
   vi.stubGlobal('localStorage', { getItem: () => token })
   client.interceptors.request.clear()
   setupApiClient({ baseUrl: base, fetch: async input => {
@@ -64,14 +65,14 @@ it('mapped Files failure does not replay a write or reroute PR93 history and den
   } })
   await getUsersMe({ throwOnError: true })
   await expect(postBotsByBotIdContainerFsUpload({ path: { bot_id: bot }, body: { path: '/data/original.bin', file: new File(['unchanged'], 'original.bin') } as never, throwOnError: true })).rejects.toThrow('controlled transport loss')
-  const path = { bot_id: bot, session_id: session, task_type: 'computer', task_id: operation }
+  const path = { bot_id: bot, session_id: session, task_type: 'computer_operation' as const, task_id: operation }
   const result = await getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId({ path, throwOnError: true })
   expect(result.data).toEqual(original)
   denied = true
   const refused = await getBotsByBotIdSessionsBySessionIdTasksByTaskTypeByTaskId({ path })
-  expect(refused.response.status).toBe(403)
+  expect(refused.response?.status).toBe(403)
   expect(refused.error).toEqual({ error: 'denied' })
-  expect(requests.slice(2).map(request => request.url)).toEqual(Array(2).fill(base + `/bots/${bot}/sessions/${session}/tasks/computer/${operation}`))
+  expect(requests.slice(2).map(request => request.url)).toEqual(Array(2).fill(base + `/bots/${bot}/sessions/${session}/tasks/computer_operation/${operation}`))
   expect(requests.every(request => request.headers.get('Authorization') === 'Bearer ' + token)).toBe(true)
   expect(requests.filter(request => request.method === 'POST')).toHaveLength(1)
   expect(requests).toHaveLength(4)

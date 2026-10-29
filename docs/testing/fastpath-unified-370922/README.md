@@ -19,6 +19,8 @@ The actual merge had no conflicts. All 15 production paths equal the final sourc
 
 Direct Vitest: 2/2 passed; ESLint on the new test: exit 0. A source guard compared the final product blobs, prior integration paths, original storage implementation and untouched migration/configuration/workflow paths. Its first draft used a nonexistent journal filename and failed before producing a report; the corrected guard checks the actual `media-transfer-storage.ts` and passes. This was an audit-script path error, not a product failure.
 
+The first natural CI on merge `f56eb147f74446a0c5dd986369e40a48308b30ce` found four Web type diagnostics in the newly added integration test (run `40908553498`, job `123569904874`). The follow-up retains every assertion, narrows the playback response to an actual stream, uses the SDK's `computer_operation` task type, and checks the optional response status. Only this test and this evidence note change; all production blobs and native consumers remain unchanged. The original failure is retained; it is not rerun on the same commit.
+
 Reuse the original author's endpoint validation, original receipt/byte/hash recovery, eight focused routing checks, 71 affected Web checks, types/lint, actual application/browser evidence, and upstream-import tests. Do not describe those as rerun on this merge. No new full build, full test matrix, CI, application browser session or phone test ran here. The two new tests exercise the combined SDK wrapper; they do not re-prove PR93's server authorization, which is byte-identical and has its own prior evidence.
 
 ## Preserved execution and recovery boundaries
