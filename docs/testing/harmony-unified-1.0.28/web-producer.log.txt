@@ -1,0 +1,1 @@
+{"officialVueBuild": true, "builder": "native-pnpm", "platform": "harmony", "resources": 802, "nativeRuntime": "NOT_EXECUTED"}

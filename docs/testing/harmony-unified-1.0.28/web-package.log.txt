@@ -1,0 +1,1 @@
+{"resources": 802, "directMemoh": true, "nativeRuntime": "NOT_EXECUTED"}

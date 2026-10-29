@@ -1,0 +1,23 @@
+{
+  "filename": "garnet-assistant-1.0.28-unified-unsigned-handoff.zip",
+  "size": 15982206,
+  "sha256": "2bcea9473b8f133b4a3d4b9f0c6e5f2b149e0ab6a82078147eff4cd3f3f98301",
+  "hapName": "garnet-assistant-1.0.28-1000028-api26-release-unsigned.hap",
+  "hapBytes": 37660218,
+  "hapSHA256": "67164ea48d41c766f58fe38f6f7b84dc5e37c87b05fdfe28c0578ef879bb79db",
+  "sourceCommit": "12faf4c06db01d8fffc29aad3a247b4a85e884e7",
+  "unifiedCommit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "compatibleBackendCommit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "publicConfigurationEmpty": true,
+  "signed": false,
+  "zipCRCAndInnerHash": true,
+  "members": [
+    "HANDOFF.txt",
+    "SHA256SUMS",
+    "client_config.py",
+    "garnet-assistant-1.0.28-1000028-api26-release-unsigned.hap",
+    "image_timing_readback.py",
+    "source-lock.json",
+    "verification.json"
+  ]
+}

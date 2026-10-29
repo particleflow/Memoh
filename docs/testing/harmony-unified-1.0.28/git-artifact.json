@@ -1,0 +1,37 @@
+{
+  "filename": "garnet-assistant-1.0.28-unified-unsigned-handoff.zip",
+  "size": 15982206,
+  "sha256": "2bcea9473b8f133b4a3d4b9f0c6e5f2b149e0ab6a82078147eff4cd3f3f98301",
+  "hapName": "garnet-assistant-1.0.28-1000028-api26-release-unsigned.hap",
+  "hapBytes": 37660218,
+  "hapSHA256": "67164ea48d41c766f58fe38f6f7b84dc5e37c87b05fdfe28c0578ef879bb79db",
+  "sourceCommit": "12faf4c06db01d8fffc29aad3a247b4a85e884e7",
+  "unifiedCommit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "compatibleBackendCommit": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "publicConfigurationEmpty": true,
+  "signed": false,
+  "zipCRCAndInnerHash": true,
+  "members": [
+    "HANDOFF.txt",
+    "SHA256SUMS",
+    "client_config.py",
+    "garnet-assistant-1.0.28-1000028-api26-release-unsigned.hap",
+    "image_timing_readback.py",
+    "source-lock.json",
+    "verification.json"
+  ],
+  "branch": "artifacts/harmony-1.0.28-unsigned",
+  "artifactCommit": "032059618955aa29f10da9c53007c53a0bba0c79",
+  "blobs": {
+    "garnet-assistant-1.0.28-unified-unsigned-handoff.zip": "8255be0b3750ff556344f566bf6608da3e3824b3",
+    "SHA256SUMS": "c50903c036c21abd9221635fc9d5fd2e01944ad9",
+    "README.md": "013c101976868f25b53278a73d0f8934a7601f55"
+  },
+  "pushExecuted": true,
+  "remoteRefsVerified": true,
+  "publicURL": "https://raw.githubusercontent.com/particleflow/Memoh/032059618955aa29f10da9c53007c53a0bba0c79/garnet-assistant-1.0.28-unified-unsigned-handoff.zip",
+  "anonymousHTTPStatus": 200,
+  "anonymousBytes": 15982206,
+  "anonymousSHA256": "2bcea9473b8f133b4a3d4b9f0c6e5f2b149e0ab6a82078147eff4cd3f3f98301",
+  "anonymousCRCAndInnerHAPVerified": true
+}
