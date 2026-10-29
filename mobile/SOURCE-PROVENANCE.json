@@ -86,7 +86,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
-      "sha256": "53cc53a40c65ac8800c6c9cd682d2b0efbc4a591dced7065a1e2fdfc6964b843",
+      "sha256": "06bba7cb592f9f2fb8e6bce2b11deb15f0a816fb2d3f84259f3d89b738d5563d",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -98,7 +98,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "d2c3702ef597fcf8340660f841176af2793665ecc7e0e40dc11b671288fcd6dc",
+      "sha256": "e8833abe6bdd1c9815cd19154a559f040cbc5ce6cc591ebde56a267390675d59",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -1328,7 +1328,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
-      "sha256": "61ce1f31d061e86bf853d6b51d879ff622cd221563e549e6f27482cd76b92a6d",
+      "sha256": "d7df2f8b2227a3e46eb9ae029be51ecc51063f07db70f932ad96b53cd160c311",
       "origin": "Independent native network consumer handoff verified against base 7c96d6d2 and full review tree 37ecf303d139fc0615f7b5a3951150f22c228c2c",
       "licenseReview": "Project contribution under the existing repository terms; no official SDK binary or private configuration included.",
       "preparationChanges": [
@@ -1840,6 +1840,12 @@
       "sha256": "dd6281cb39cbbd078934d40c8cfe4ae35f2faae54096bb5cbad6ff6ac719d50e",
       "origin": "Admitted scoped failure outbox b1173115834fef1143bc8d3b3ae2e6dec8d064ff",
       "licenseReview": "Project TypeScript source, no SDK binaries/private configuration."
+    },
+    {
+      "path": "mobile/client/tests/stage2/harmony_endpoint_routing.cjs",
+      "sha256": "787cf193e5ae70ab8980cab3f007f7bc7825beec2c84ff21ab9b9a82a1c6efb1",
+      "origin": "Native RCP endpoint v2 consumer regression for fixed808cf801 contract; real controlled HTTP/files/processes, synthetic-only identity.",
+      "licenseReview": "Project regression source; no SDK binaries/private config."
     }
   ],
   "excludedSourcePaths": [],

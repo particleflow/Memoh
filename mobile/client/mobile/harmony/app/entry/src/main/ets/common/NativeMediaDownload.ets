@@ -4,13 +4,14 @@ import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 import { util } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
 import { MEMOH_ORIGIN, MEMOH_NETWORK_POLICY } from './MemohClientConfig';
-import { NativeTransferNetwork } from './NativeTransferNetwork';
+import { NativeTransferNetwork, NativeTransferPolicy } from './NativeTransferNetwork';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { normalizeDelegationPath } from './ServiceUrl';
 
 export interface MediaDownloadInput { operation: string; botId: string; hash: string; size: number; name: string; url: string; authorization: string; }
 export interface MediaDownloadReady { operation: string; hash: string; size: number; }
 interface DownloadJournal { version: number; key: string; hash: string; size: number; received: number; }
+interface DownloadIdentity { id: string; network_policy?: NativeTransferPolicy; }
 class DownloadState {
   key: string = ''; retain: boolean = false; operation: string = ''; bot: string = ''; hash: string = ''; name: string = ''; path: string = '';
   size: number = 0; epoch: number = 0; received: number = 0;
@@ -64,8 +65,10 @@ export class NativeMediaDownload {
       }); this.check(state);
       if (response.statusCode === 401 || response.statusCode === 403) { throw new Error('MEDIA_DOWNLOAD_HTTP_' + response.statusCode); }
       if (response.statusCode !== 200) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
-      const owner = (JSON.parse(new util.TextDecoder().decodeToString(bytes.subarray(0, count))) as Record<string, string>).id;
+      const identity = JSON.parse(new util.TextDecoder().decodeToString(bytes.subarray(0, count))) as DownloadIdentity;
+      const owner = identity.id;
       if (typeof owner !== 'string' || !owner || owner.length > 128) { throw new Error('MEDIA_DOWNLOAD_IDENTITY'); }
+      this.check(state); if (identity.network_policy !== undefined && identity.network_policy !== null) { network.adopt(identity.network_policy); }
       state.key = await this.digest(JSON.stringify([origin, owner, input.botId, endpoint, input.hash, input.size]));
       this.check(state);
     } finally { state.session = undefined; session.close(); }

@@ -5,7 +5,7 @@ import { uniformTypeDescriptor } from '@kit.ArkData';
 import { util } from '@kit.ArkTS';
 import { rcp } from '@kit.RemoteCommunicationKit';
 import { MEMOH_ORIGIN, MEMOH_NETWORK_POLICY } from './MemohClientConfig';
-import { NativeTransferNetwork } from './NativeTransferNetwork';
+import { NativeTransferNetwork, NativeTransferPolicy } from './NativeTransferNetwork';
 import { copyMediaBytes, verifyMediaFd } from './NativeMediaFile';
 import { NativePhotoSelection } from './NativePhotoSelection';
 import { ClientDiagnostics } from './ClientDiagnostics';
@@ -13,7 +13,7 @@ import { ClientDiagnostics } from './ClientDiagnostics';
 export interface UploadScope { operation: string; botId: string; scope: string; authorization: string; handle?: string; photos?: boolean; recoverDrafts?: boolean; }
 export interface UploadLocal { handle: string; name: string; type: string; size: number; hash: string; resumable: boolean; scope: string; }
 interface Limits { max_upload_bytes: number; resumable_enabled?: boolean; chunk_max_bytes?: number; }
-interface Identity { id: string; }
+interface Identity { id: string; network_policy?: NativeTransferPolicy; }
 interface Receipt { id: string; state: string; offset: number; size_bytes: number; expires_at: string; mime: string; content_hash?: string; }
 interface MediaReply { content_hash: string; size_bytes: number; mime: string; }
 interface Reply { status: number; body: string; headers: rcp.ResponseHeaders; }
@@ -162,8 +162,10 @@ export class NativeResumableUpload {
   private async owner(run: Running): Promise<string> {
     run.phase = 'owner-read';
     const reply = await this.call(run, '/users/me'); this.status(reply);
-    const id = (JSON.parse(reply.body) as Identity).id;
+    const identity = JSON.parse(reply.body) as Identity;
+    const id = identity.id;
     if (typeof id !== 'string' || !id || id.length > 128) { throw new Error('UPLOAD_IDENTITY'); }
+    this.check(run); if (identity.network_policy !== undefined && identity.network_policy !== null) { run.network.adopt(identity.network_policy); }
     return this.hash(new util.TextEncoder().encodeInto(run.apiOrigin + '\n' + id));
   }
   private async limits(run: Running): Promise<Limits> {

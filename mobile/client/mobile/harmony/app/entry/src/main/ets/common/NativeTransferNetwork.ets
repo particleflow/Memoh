@@ -4,6 +4,9 @@ import { url } from '@kit.ArkTS';
 import { normalizeNetworkAddress, normalizeTransferNetworkPolicy, TransferNetworkPolicy } from './ServiceUrl';
 
 interface NetworkFailure extends Error { code: number; }
+// Exact authenticated /users/me v2 contract; no second settings document.
+export interface NativeTransferEndpoint { logical_origin: string; physical_origin: string; }
+export interface NativeTransferPolicy { version: number; lan_addresses?: string[]; endpoint?: NativeTransferEndpoint; }
 
 // One instance per existing foreground transfer. No credentials, journal,
 // timer, WebView cache, extra probe or cross-operation route store lives here.
@@ -16,6 +19,7 @@ export class NativeTransferNetwork {
   private ipv6?: string[];
   private proxyChecked: boolean = false;
   private platform: boolean = false;
+  private physicalOrigin?: string;
 
   constructor(base: string, policy?: TransferNetworkPolicy) {
     this.base = base.replace(/\/+$/, '');
@@ -25,8 +29,55 @@ export class NativeTransferNetwork {
     if (parsed.protocol !== 'https:' || parsed.username || parsed.password || parsed.search || parsed.hash) { throw new Error('NETWORK_POLICY_HTTPS'); }
     // Static DNS mapping for literal authorities is unproven. Preserve normal
     // platform routing rather than blocking files or inventing another URL.
+    this.authority(this.base);
+  }
+
+  private authority(value: string): void {
+    const parsed = url.URL.parseURL(value);
     this.platform = parsed.hostname.startsWith('[') || /^[0-9.]+$/.test(parsed.hostname);
-    this.host = parsed.hostname; this.port = Number(parsed.port || 443);
+    this.host = parsed.hostname; this.port = Number(parsed.port || (parsed.protocol === 'http:' ? 80 : 443));
+    this.selected = undefined; this.ipv6 = undefined; this.proxyChecked = false;
+  }
+
+  // Called only after the original logical identity GET has passed HTTP and
+  // owner checks. Route changes never enter owner/receipt/journal identity.
+  adopt(value?: NativeTransferPolicy): void {
+    if (value === undefined || value === null) { return; }
+    if (Array.isArray(value) || Object.keys(value).some((key: string): boolean => !['version', 'lan_addresses', 'endpoint'].includes(key))) { throw new Error('NETWORK_POLICY_INVALID'); }
+    if (value.version === 1 && value.endpoint === undefined) {
+      const old: TransferNetworkPolicy = { version: 1, lan_addresses: value.lan_addresses ?? [] };
+      this.policy = normalizeTransferNetworkPolicy(old); this.physicalOrigin = undefined; this.authority(this.base); return;
+    }
+    const endpoint = value.endpoint;
+    if (value.version !== 2 || !endpoint || Array.isArray(endpoint) || Object.keys(endpoint).sort().join(',') !== 'logical_origin,physical_origin') { throw new Error('NETWORK_POLICY_ENDPOINT'); }
+    for (const origin of [endpoint.logical_origin, endpoint.physical_origin]) {
+      if (typeof origin !== 'string' || !origin || origin.length > 2048 || /[?#%\\\s]/.test(origin)) { throw new Error('NETWORK_POLICY_ENDPOINT'); }
+      const parsed = url.URL.parseURL(origin);
+      if (!['https:', 'http:'].includes(parsed.protocol) || parsed.origin !== origin || parsed.username || parsed.password || parsed.pathname !== '/' ||
+        (parsed.port !== '' && Number(parsed.port) < 1)) { throw new Error('NETWORK_POLICY_ENDPOINT'); }
+    }
+    if (endpoint.logical_origin !== url.URL.parseURL(this.base).origin) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
+    let policy: TransferNetworkPolicy | undefined;
+    if (value.lan_addresses !== undefined && !Array.isArray(value.lan_addresses)) { throw new Error('NETWORK_POLICY_INVALID'); }
+    if (value.lan_addresses !== undefined && value.lan_addresses.length) {
+      const hints: TransferNetworkPolicy = { version: 1, lan_addresses: value.lan_addresses };
+      policy = normalizeTransferNetworkPolicy(hints);
+    }
+    this.policy = policy; this.physicalOrigin = endpoint.physical_origin; this.authority(endpoint.physical_origin);
+  }
+
+  private dispatch(factory: () => rcp.Request, target: string, method: rcp.HttpMethod): rcp.Request {
+    const request = factory();
+    if (!this.physicalOrigin) { return request; }
+    if (request.url.toString() !== target || request.method !== method) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
+    const logical = url.URL.parseURL(this.base).origin;
+    request.url = url.URL.parseURL(this.physicalOrigin + target.slice(logical.length));
+    const configuration: rcp.Configuration = request.configuration ?? {};
+    configuration.security = { remoteValidation: 'system' };
+    if (!configuration.transfer) { configuration.transfer = {}; }
+    configuration.transfer.autoRedirect = false;
+    request.configuration = configuration;
+    return request; // Same request ID, content/chunk source, headers and callbacks.
   }
 
   private async checkProxy(): Promise<void> {
@@ -73,17 +124,18 @@ export class NativeTransferNetwork {
   }
 
   async fetch(session: rcp.Session, target: string, method: rcp.HttpMethod, factory: () => rcp.Request): Promise<rcp.Response> {
-    if (!this.policy) { return session.fetch(factory()); }
+    if (!this.policy && !this.physicalOrigin) { return session.fetch(factory()); }
     if (!target.startsWith(this.base + '/') || target.includes('?') || target.includes('#')) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
-    if (this.platform) { return session.fetch(factory()); }
+    const build = (): rcp.Request => this.dispatch(factory, target, method);
+    if (!this.policy || this.platform) { return session.fetch(build()); }
     await this.checkProxy();
-    if (this.platform) { return session.fetch(factory()); }
+    if (this.platform) { return session.fetch(build()); }
     const first = this.selected ?? this.policy.lan_addresses[0];
     if (!first) { throw new Error('NETWORK_POLICY_INVALID'); }
     if (!this.safeRead(target, method)) {
       // Initial selection is allowed; any write/stream outcome is returned
       // unchanged. Its original receipt reconciler owns further progress.
-      return session.fetch(this.request(factory, first));
+      return session.fetch(this.request(build, first));
     }
     const tried: string[] = [];
     let failure: Error = new Error('NETWORK_POLICY_UNAVAILABLE');
@@ -94,7 +146,7 @@ export class NativeTransferNetwork {
         if (tried.includes(address)) { continue; }
         tried.push(address);
         try {
-          const response = await session.fetch(this.request(factory, address));
+          const response = await session.fetch(this.request(build, address));
           if (response.statusCode >= 200 && response.statusCode < 300) { this.selected = address; }
           return response; // Includes 401/403/404/503; no HTTP-driven failover.
         } catch (error) {

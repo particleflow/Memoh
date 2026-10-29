@@ -1,0 +1,48 @@
+{
+  "contractProductCommit": "808cf8010a50b5f7d291221249591d000e7d85aa",
+  "contractHandoffCommit": "d1f2c0b943423c5899b18e28b3fd5d9bb56143a1",
+  "sourceParent": "61355f0da2cf78b7b687132136983e5d2a6b11e2",
+  "sourceHashes": {
+    "NativeTransferNetwork.ets": "d7df2f8b2227a3e46eb9ae029be51ecc51063f07db70f932ad96b53cd160c311",
+    "NativeResumableUpload.ets": "e8833abe6bdd1c9815cd19154a559f040cbc5ce6cc591ebde56a267390675d59",
+    "NativeMediaDownload.ets": "06bba7cb592f9f2fb8e6bce2b11deb15f0a816fb2d3f84259f3d89b738d5563d"
+  },
+  "sdkVersion": "26.0.0.105/API26",
+  "officialNarrowCompile": "passed",
+  "SDKDefinitionSHA256": "c233285101fb1b47c7d9c6eb8941acc79d7c395db9f72b083151e0ff62bae670",
+  "SDKBasis": [
+    "Request.url is writable URL atline2677; Request.id readonly",
+    "rcp.URL aliases ohos.url.URL atline31",
+    "Existing request content, destination and tracing are retained; system TLS and no redirects"
+  ],
+  "v1RegressionCases": 61,
+  "endpointNewEvidence": {
+    "unitCases": 28,
+    "bytes": 8388641,
+    "uploadReceipt": "12345678-1234-4234-8234-123456789abc",
+    "uploadProcessDeath": true,
+    "downloadProcessDeath": true,
+    "physicalPortChangedBothDirections": true,
+    "uploadFirstUncertainOffset": 262144,
+    "downloadResumedOffset": 357081,
+    "confirmedUploadBytesNotRepeated": true,
+    "create": 1,
+    "complete": 1,
+    "sameLogicalOwnerAndScope": true,
+    "fullSavedHashVerified": true,
+    "differentOwnerDenied": true,
+    "revokedIdentityDeniedBeforePhysicalWrite": true,
+    "identityGETs": 7,
+    "scope": "Actual native source, Node Kit adapters and controlled real HTTP/process/disk; not device engine or TLS qualification",
+    "syntheticBearerOnly": true,
+    "newHAP": false
+  },
+  "newHAP": false,
+  "versionChanged": false,
+  "SDKDownloaded": false,
+  "WebOrServerChanged": false,
+  "privateInjectorSchemaChanged": false,
+  "actualTokenHTTPAuthorizedOrSent": false,
+  "phoneAcceptance": false,
+  "RCPWireEngineTLSQualification": false
+}

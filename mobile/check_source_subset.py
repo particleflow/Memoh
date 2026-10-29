@@ -13,7 +13,8 @@ manifest = json.loads((HERE / 'SOURCE-PROVENANCE.json').read_text())
 entries = manifest['entries']
 # Two admitted photo regression inputs extend the previous176 text sources.
 # One admitted failure-outbox source extends the prior178 inputs.
-assert len(entries) == 179
+# One scoped RCP endpoint regression extends the prior179 inputs.
+assert len(entries) == 180
 assert 'mobile/client/mobile/memoh/harmony-upload-failures.ts' in {item['path'] for item in entries}
 assert {
     'mobile/client/tests/stage2/harmony_photo_dual_mode.cjs',
