@@ -66,8 +66,8 @@ func (s *Service) registerContactOccurrenceLocked(row sqlc.Schedule, parsed cron
 	entry = s.cron.Schedule(&dueOnce{due: due}, cron.FuncJob(func() {
 		once.Do(func() {
 			// Re-arm only this registration, before doing long work. Replacement/removal
-			// must not be overwritten by a late callback. Fencing paused callbacks from
-			// execution itself remains a separate follow-up.
+			// must not be overwritten by a late callback. The durable claim query
+			// separately serializes execution authorization with pause.
 			s.mu.Lock()
 			if s.jobs[id] == entry {
 				s.cron.Remove(entry)
@@ -96,7 +96,7 @@ func (s *Service) runScheduleOccurrence(ctx context.Context, sched Schedule, due
 	claimed, err := s.queries.ClaimScheduleOccurrence(ctx, sqlc.ClaimScheduleOccurrenceParams{ScheduleID: toUUID(sched.ID), ScheduledFor: pgtype.Timestamptz{Time: due.UTC(), Valid: true}})
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil
-	} // another callback already owns this occurrence
+	} // paused/deleted, or another callback already owns this occurrence
 	if err != nil {
 		return err
 	} // uncertain write: never create a second fire
