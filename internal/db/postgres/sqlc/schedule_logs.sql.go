@@ -21,7 +21,7 @@ SET status = $2,
     model_id = $6,
     completed_at = now()
 WHERE team_id = public.memoh_current_team_id() AND id = $1
-RETURNING result_origin, result_delivery, id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id
+RETURNING scheduled_for, claim_deadline, claim_state, result_origin, result_delivery, id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id
 `
 
 type CompleteScheduleLogParams struct {
@@ -44,6 +44,9 @@ func (q *Queries) CompleteScheduleLog(ctx context.Context, arg CompleteScheduleL
 	)
 	var i ScheduleLog
 	err := row.Scan(
+		&i.ScheduledFor,
+		&i.ClaimDeadline,
+		&i.ClaimState,
 		&i.ResultOrigin,
 		&i.ResultDelivery,
 		&i.ID,

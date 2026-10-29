@@ -856,6 +856,9 @@ type Schedule struct {
 }
 
 type ScheduleLog struct {
+	ScheduledFor   pgtype.Timestamptz `json:"scheduled_for"`
+	ClaimDeadline  pgtype.Timestamptz `json:"claim_deadline"`
+	ClaimState     string             `json:"claim_state"`
 	ResultOrigin   []byte             `json:"result_origin"`
 	ResultDelivery []byte             `json:"result_delivery"`
 	ID             pgtype.UUID        `json:"id"`

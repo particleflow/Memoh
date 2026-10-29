@@ -66,7 +66,7 @@ func (q *Queries) ReadScheduleResultContact(ctx context.Context, arg ReadSchedul
 }
 
 const readScheduleResultFire = `-- name: ReadScheduleResultFire :one
-SELECT result_origin, result_delivery, id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id FROM schedule_logs
+SELECT scheduled_for, claim_deadline, claim_state, result_origin, result_delivery, id, schedule_id, bot_id, session_id, status, result_text, error_message, error_code, usage, model_id, started_at, completed_at, team_id FROM schedule_logs
 WHERE team_id=public.memoh_current_team_id() AND bot_id=$1::uuid AND id=$2::uuid
 AND result_origin->>'version'='1'
 `
@@ -80,6 +80,9 @@ func (q *Queries) ReadScheduleResultFire(ctx context.Context, arg ReadScheduleRe
 	row := q.db.QueryRow(ctx, readScheduleResultFire, arg.BotID, arg.FireID)
 	var i ScheduleLog
 	err := row.Scan(
+		&i.ScheduledFor,
+		&i.ClaimDeadline,
+		&i.ClaimState,
 		&i.ResultOrigin,
 		&i.ResultDelivery,
 		&i.ID,

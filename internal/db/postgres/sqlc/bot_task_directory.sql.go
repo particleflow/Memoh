@@ -69,7 +69,8 @@ WITH candidates AS (
   UNION ALL
   SELECT 'schedule_fire', l.id::text, l.id, l.session_id, l.started_at,
     COALESCE(l.completed_at,l.started_at),
-    CASE WHEN l.completed_at IS NULL THEN COALESCE(r.state,'unknown')
+    CASE WHEN l.claim_state='unknown' THEN COALESCE(r.state,'unknown')
+      WHEN l.completed_at IS NULL THEN COALESCE(r.state,'unknown')
       WHEN l.status='error' THEN 'failed' WHEN l.status='ok' THEN 'completed' ELSE 'unknown' END,
     scheduled.name::text, COALESCE(r.run_id::text,''), l.bot_id,
     l.session_id, l.schedule_id, NULL::uuid, false
