@@ -1,0 +1,582 @@
+[
+  {
+    "method": "HEAD",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 0,
+    "status": 200,
+    "ttfb_ms": 22.958723999977337,
+    "duration_ms": 23.092735999966862,
+    "range": null
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.625220999992962,
+    "duration_ms": 4.030880999948749,
+    "range": "bytes=0-1048575"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 6.911213000080352,
+    "duration_ms": 7.518326000081288,
+    "range": "bytes=1048576-2097151"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 17.388568000001214,
+    "duration_ms": 20.39690200001587,
+    "range": "bytes=2097152-3145727"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 4.0580620000127965,
+    "duration_ms": 4.5540680000613065,
+    "range": "bytes=3145728-4194303"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 9.084740999924179,
+    "duration_ms": 9.733967999977722,
+    "range": "bytes=4194304-5242879"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 4.3083379999870886,
+    "duration_ms": 6.906666000077166,
+    "range": "bytes=5242880-6291455"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 6.80406200001471,
+    "duration_ms": 7.374980000008691,
+    "range": "bytes=6291456-7340031"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.849910000099044,
+    "duration_ms": 4.52575600002092,
+    "range": "bytes=7340032-8388607"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.5155819999772575,
+    "duration_ms": 4.409475999977985,
+    "range": "bytes=8388608-9437183"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 7.091865000006692,
+    "duration_ms": 7.741051000039079,
+    "range": "bytes=9437184-10485759"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.3787910000455668,
+    "duration_ms": 4.21421700002611,
+    "range": "bytes=10485760-11534335"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.626052999948115,
+    "duration_ms": 4.328629999918121,
+    "range": "bytes=11534336-12582911"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 37,
+    "status": 206,
+    "ttfb_ms": 2.7695450000919664,
+    "duration_ms": 2.9200810000702404,
+    "range": "bytes=12582912-12582948"
+  },
+  {
+    "method": "HEAD",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 0,
+    "status": 200,
+    "ttfb_ms": 4.604714000038257,
+    "duration_ms": 4.729101000066294,
+    "range": null
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.433964000009837,
+    "duration_ms": 4.225383999937549,
+    "range": "bytes=0-1048575"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 5.422434000024623,
+    "duration_ms": 5.98623200005477,
+    "range": "bytes=1048576-2097151"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.376678000108768,
+    "duration_ms": 4.096390000086103,
+    "range": "bytes=2097152-3145727"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.9225589999887234,
+    "duration_ms": 4.472925999948529,
+    "range": "bytes=3145728-4194303"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.990591999922799,
+    "duration_ms": 4.60859099996469,
+    "range": "bytes=4194304-5242879"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 4.187596999940979,
+    "duration_ms": 4.974429999947461,
+    "range": "bytes=5242880-6291455"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.4114500000441694,
+    "duration_ms": 4.149579999989328,
+    "range": "bytes=6291456-7340031"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 5.819962000032319,
+    "duration_ms": 7.132766000040647,
+    "range": "bytes=7340032-8388607"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.4058310000091296,
+    "duration_ms": 4.068587999995543,
+    "range": "bytes=8388608-9437183"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.277628999967419,
+    "duration_ms": 3.834475999951792,
+    "range": "bytes=9437184-10485759"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 5.832179999970322,
+    "duration_ms": 6.505151999931513,
+    "range": "bytes=10485760-11534335"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 7.118004000062683,
+    "duration_ms": 7.849674999988565,
+    "range": "bytes=11534336-12582911"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 37,
+    "status": 206,
+    "ttfb_ms": 6.472082000072987,
+    "duration_ms": 6.596199000000524,
+    "range": "bytes=12582912-12582948"
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 9.585332000028757,
+    "duration_ms": 9.753233999958866,
+    "range": null
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 0,
+    "response_bytes": 335,
+    "status": 200,
+    "ttfb_ms": 4.7360910000406875,
+    "duration_ms": 4.89105400004064,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 18.688248999978896,
+    "duration_ms": 18.813846999933048,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 14.096191000021463,
+    "duration_ms": 14.248578999968231,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 32.0118030000458,
+    "duration_ms": 32.24558399995203,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 13.502356999993026,
+    "duration_ms": 13.69620799994209,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 13.051300000029187,
+    "duration_ms": 13.306063000072754,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 9.249769999996715,
+    "duration_ms": 9.446916000001693,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 21.847073000003547,
+    "duration_ms": 22.082065999939005,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 185,
+    "status": 200,
+    "ttfb_ms": 10.126851999984865,
+    "duration_ms": 10.85834100001648,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 186,
+    "status": 200,
+    "ttfb_ms": 15.326275999996142,
+    "duration_ms": 15.515429999936714,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 186,
+    "status": 200,
+    "ttfb_ms": 16.852868999990278,
+    "duration_ms": 17.054712000003747,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 1048576,
+    "response_bytes": 186,
+    "status": 200,
+    "ttfb_ms": 24.547490000031758,
+    "duration_ms": 25.309870000000956,
+    "range": null
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd",
+    "request_bytes": 37,
+    "response_bytes": 186,
+    "status": 200,
+    "ttfb_ms": 15.26191999994353,
+    "duration_ms": 15.396962999943753,
+    "range": null
+  },
+  {
+    "method": "POST",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/uploads/44de950b-2310-4825-9183-5f1a57d531dd/complete",
+    "request_bytes": 0,
+    "response_bytes": 264,
+    "status": 200,
+    "ttfb_ms": 34.56424099999822,
+    "duration_ms": 34.71203300000525,
+    "range": null
+  },
+  {
+    "method": "HEAD",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 0,
+    "status": 200,
+    "ttfb_ms": 4.125861000034092,
+    "duration_ms": 4.23970199994983,
+    "range": null
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 5.188642999996773,
+    "duration_ms": 6.007151999938287,
+    "range": "bytes=0-1048575"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 8.148647999973946,
+    "duration_ms": 8.929480999995576,
+    "range": "bytes=1048576-2097151"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 4.344499000012547,
+    "duration_ms": 4.9267530000634,
+    "range": "bytes=2097152-3145727"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 4.411871000002066,
+    "duration_ms": 5.105011999944509,
+    "range": "bytes=3145728-4194303"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.850432000035653,
+    "duration_ms": 4.402531000096133,
+    "range": "bytes=4194304-5242879"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 6.137996999996176,
+    "duration_ms": 6.943616999933511,
+    "range": "bytes=5242880-6291455"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.5481490000393023,
+    "duration_ms": 4.443544000082511,
+    "range": "bytes=6291456-7340031"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.1358499999214473,
+    "duration_ms": 4.12712799993642,
+    "range": "bytes=7340032-8388607"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 4.912927999953354,
+    "duration_ms": 5.773199999907774,
+    "range": "bytes=8388608-9437183"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.9820189999772992,
+    "duration_ms": 4.747117999954753,
+    "range": "bytes=9437184-10485759"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 2.9547380000849444,
+    "duration_ms": 3.76876000007087,
+    "range": "bytes=10485760-11534335"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 1048576,
+    "status": 206,
+    "ttfb_ms": 3.7780139999767925,
+    "duration_ms": 4.757165000000896,
+    "range": "bytes=11534336-12582911"
+  },
+  {
+    "method": "GET",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 37,
+    "status": 206,
+    "ttfb_ms": 7.945902999949794,
+    "duration_ms": 8.092382999961956,
+    "range": "bytes=12582912-12582948"
+  },
+  {
+    "method": "HEAD",
+    "path": "/api/bots/863598e5-1459-4d6d-ae44-527d5617a5b6/media/45acb94535abd613b98e13ebf371e652819650ea09808fcd8da81c8a53e5f02f",
+    "request_bytes": 0,
+    "response_bytes": 0,
+    "status": 200,
+    "ttfb_ms": 2.531481000005442,
+    "duration_ms": 2.629347999913989,
+    "range": null
+  }
+]

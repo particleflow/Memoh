@@ -1,0 +1,240 @@
+{
+  "task": "Fast connection routing only; final combination handoff",
+  "shared_base": "b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3",
+  "deployed_status": "Parent-confirmed NAS b5 baseline. Shared fast-routing commits and native a158 input are source candidates, not activated here.",
+  "shared_dependency_order": [
+    {
+      "commit": "808cf8010a50b5f7d291221249591d000e7d85aa",
+      "evidence_only": false,
+      "product_files": [
+        "apps/web/src/lib/media-network.ts",
+        "apps/web/src/lib/media-transfer.ts",
+        "internal/media/transfer_network.go",
+        "internal/transferclient/host_network.go",
+        "packages/sdk/src/index.ts",
+        "packages/sdk/src/types.gen.ts",
+        "spec/docs.go",
+        "spec/swagger.json",
+        "spec/swagger.yaml"
+      ],
+      "all_changed_files": [
+        "apps/web/src/lib/media-network.test.ts",
+        "apps/web/src/lib/media-network.ts",
+        "apps/web/src/lib/media-transfer.test.ts",
+        "apps/web/src/lib/media-transfer.ts",
+        "docs/testing/transfer-endpoint-routing/README.md",
+        "docs/testing/transfer-endpoint-routing/actual-app-after-process-recovery.png",
+        "docs/testing/transfer-endpoint-routing/actual-app-after-server-restart.png",
+        "docs/testing/transfer-endpoint-routing/actual-app-selected-file.png",
+        "docs/testing/transfer-endpoint-routing/browser-proof.json",
+        "docs/testing/transfer-endpoint-routing/browser-restart-readback.mjs",
+        "docs/testing/transfer-endpoint-routing/browser.mjs",
+        "docs/testing/transfer-endpoint-routing/connection-coverage.json",
+        "docs/testing/transfer-endpoint-routing/endpoint-final-validation.jsonl",
+        "docs/testing/transfer-endpoint-routing/endpoint-large-process.jsonl",
+        "docs/testing/transfer-endpoint-routing/endpoint-race.jsonl",
+        "docs/testing/transfer-endpoint-routing/physical-proxy.py",
+        "docs/testing/transfer-endpoint-routing/physical-requests.json",
+        "docs/testing/transfer-endpoint-routing/server-restart-browser-proof.json",
+        "docs/testing/transfer-endpoint-routing/summary.json",
+        "internal/config/transfer_endpoint_test.go",
+        "internal/media/transfer_endpoint_test.go",
+        "internal/media/transfer_network.go",
+        "internal/transferclient/endpoint_network_test.go",
+        "internal/transferclient/host_network.go",
+        "packages/sdk/src/index.ts",
+        "packages/sdk/src/types.gen.ts",
+        "spec/docs.go",
+        "spec/swagger.json",
+        "spec/swagger.yaml"
+      ]
+    },
+    {
+      "commit": "9e968f8cd0e21bea78339f206585a66a3ca281ef",
+      "evidence_only": true,
+      "product_files": [],
+      "all_changed_files": [
+        "docs/testing/transfer-endpoint-routing/README.md",
+        "docs/testing/transfer-endpoint-routing/affected-go-packages.txt",
+        "docs/testing/transfer-endpoint-routing/copy-policy.txt",
+        "docs/testing/transfer-endpoint-routing/eslint.txt",
+        "docs/testing/transfer-endpoint-routing/go-lint-final.txt",
+        "docs/testing/transfer-endpoint-routing/go-lint-initial.txt",
+        "docs/testing/transfer-endpoint-routing/sdk-types.txt",
+        "docs/testing/transfer-endpoint-routing/ui-contract.txt",
+        "docs/testing/transfer-endpoint-routing/web-final-tests.txt",
+        "docs/testing/transfer-endpoint-routing/web-types.txt",
+        "docs/testing/transfer-endpoint-routing/windows-compile.txt"
+      ]
+    },
+    {
+      "commit": "d1f2c0b943423c5899b18e28b3fd5d9bb56143a1",
+      "evidence_only": true,
+      "product_files": [],
+      "all_changed_files": [
+        "docs/testing/transfer-endpoint-routing/sdk-types.txt",
+        "docs/testing/transfer-endpoint-routing/web-final-tests.txt",
+        "docs/testing/transfer-endpoint-routing/web-types.txt"
+      ]
+    },
+    {
+      "commit": "68c01296981f2d0c173226c5a3590ca4ad59e0fa",
+      "evidence_only": false,
+      "product_files": [
+        "apps/web/src/components/file-manager/file-viewer.vue",
+        "apps/web/src/components/sidebar/files-pane.vue",
+        "apps/web/src/lib/api-client.ts",
+        "apps/web/src/lib/file-network.ts",
+        "apps/web/src/lib/media-transfer.ts",
+        "apps/web/src/pages/home/components/attachment-block.vue",
+        "apps/web/src/pages/home/composables/useMediaGallery.ts"
+      ],
+      "all_changed_files": [
+        "apps/web/src/components/file-manager/file-viewer.save.test.ts",
+        "apps/web/src/components/file-manager/file-viewer.vue",
+        "apps/web/src/components/sidebar/files-pane.vue",
+        "apps/web/src/lib/api-client.ts",
+        "apps/web/src/lib/file-network.test.ts",
+        "apps/web/src/lib/file-network.ts",
+        "apps/web/src/lib/media-transfer.ts",
+        "apps/web/src/pages/home/components/attachment-block.vue",
+        "apps/web/src/pages/home/composables/useMediaGallery.delegation.test.ts",
+        "apps/web/src/pages/home/composables/useMediaGallery.ts",
+        "docs/testing/transfer-endpoint-routing/README.md",
+        "docs/testing/transfer-entry-routing/README.md",
+        "docs/testing/transfer-entry-routing/actual-file-viewer-download.png",
+        "docs/testing/transfer-entry-routing/actual-files-multi-upload.png",
+        "docs/testing/transfer-entry-routing/actual-preview-physical-endpoint.png",
+        "docs/testing/transfer-entry-routing/archive-proof.json",
+        "docs/testing/transfer-entry-routing/browser-proof.json",
+        "docs/testing/transfer-entry-routing/browser.mjs",
+        "docs/testing/transfer-entry-routing/connection-coverage.json",
+        "docs/testing/transfer-entry-routing/copy-policy.txt",
+        "docs/testing/transfer-entry-routing/eslint-current.txt",
+        "docs/testing/transfer-entry-routing/file-viewer-browser.mjs",
+        "docs/testing/transfer-entry-routing/file-viewer-proof.json",
+        "docs/testing/transfer-entry-routing/final-entry-tests.txt",
+        "docs/testing/transfer-entry-routing/final-platform-tests.txt",
+        "docs/testing/transfer-entry-routing/foreign-requests.json",
+        "docs/testing/transfer-entry-routing/mixed-content-browser-constraint.png",
+        "docs/testing/transfer-entry-routing/mixed-content-proof.json",
+        "docs/testing/transfer-entry-routing/physical-requests.json",
+        "docs/testing/transfer-entry-routing/proxy.py",
+        "docs/testing/transfer-entry-routing/types.txt",
+        "docs/testing/transfer-entry-routing/ui-contract.txt",
+        "docs/testing/transfer-entry-routing/verification-commands.txt"
+      ]
+    },
+    {
+      "commit": "abb2f6970d78cd433e5f055719ad866efcd45fba",
+      "evidence_only": true,
+      "product_files": [],
+      "all_changed_files": [
+        "docs/testing/transfer-entry-routing/README.md",
+        "docs/testing/transfer-http-entry/README.md",
+        "docs/testing/transfer-http-entry/actual-http-files.png",
+        "docs/testing/transfer-http-entry/actual-http-preview-and-files.png",
+        "docs/testing/transfer-http-entry/browser-final.txt",
+        "docs/testing/transfer-http-entry/browser-initial-sanitized.txt",
+        "docs/testing/transfer-http-entry/browser.mjs",
+        "docs/testing/transfer-http-entry/combination-manifest.json",
+        "docs/testing/transfer-http-entry/native-guard-proof.json",
+        "docs/testing/transfer-http-entry/native-guard-source.json",
+        "docs/testing/transfer-http-entry/native-guard-test.mjs",
+        "docs/testing/transfer-http-entry/physical-requests.json",
+        "docs/testing/transfer-http-entry/proof.json",
+        "docs/testing/transfer-http-entry/upstream-outbound-test.jsonl",
+        "docs/testing/transfer-http-entry/upstream-provider-final.jsonl",
+        "docs/testing/transfer-http-entry/upstream-provider-initial.jsonl",
+        "docs/testing/transfer-http-entry/verification.txt"
+      ]
+    }
+  ],
+  "native_owner_input": {
+    "commit": "a158c56488ed193ec3e9f2d57480ad4f16a58068",
+    "product_patch": "docs/testing/harmony-rcp-endpoint-20261029/native-product.patch",
+    "patch_git_blob": "b4047c9befaec39516519f384ddbb3e122473795",
+    "owner_source_parent": "61355f0da2cf78b7b687132136983e5d2a6b11e2",
+    "files": [
+      "NativeMediaDownload.ets",
+      "NativeResumableUpload.ets",
+      "NativeTransferNetwork.ets"
+    ],
+    "before_blob_prefixes": [
+      "244e5c6ba",
+      "52e7a7fce",
+      "da8fb8476"
+    ],
+    "after_blob_prefixes": [
+      "479cd7b95",
+      "30ed5399e",
+      "2c149090b"
+    ],
+    "combination": "Use the owner packet or existing reviewed native branch with all prerequisites. a158c alone is the final v1-adoption correction, not the complete three-file implementation; do not reset mobile to the Web base or transplant unrelated diagnostic WIP.",
+    "packaged": false,
+    "product_paths": [
+      "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets",
+      "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+      "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets"
+    ],
+    "owner": "01a167f1-9f75-7455-807f-25826443b0ca",
+    "combiner": "01a15840-f35b-757a-a2a0-e20479062007"
+  },
+  "route_matrix": [
+    {
+      "route": "Configured Windows/cloud producer <-> NAS original task/media/receipt/association endpoints",
+      "connection_point": "internal/transferclient/host_network.go",
+      "product_commit": "808cf8010a50b5f7d291221249591d000e7d85aa",
+      "configuration": "Keep transfer.json origin/binding unchanged. Existing private transfer-network.json v2 or original authenticated NAS policy supplies explicit logical_origin -> physical_origin.",
+      "verified_scope": "Controlled production client/disk queue, three-file 100663395B process recovery; original receipt/HostBinding/hash retained. Not installed Windows or public path.",
+      "remaining": "Current consumer/package must include this source; parent verifies existing HTTP original API and real-credential activation. Configured proxy conflict remains explicit, never bypassed."
+    },
+    {
+      "route": "Harmony native original upload and hash/delegated download <-> NAS",
+      "connection_point": "NativeResumableUpload / NativeMediaDownload -> NativeTransferNetwork.adopt/fetch",
+      "product_packet": "a158c564 owner native-product.patch",
+      "configuration": "Retain MEMOH_ORIGIN and the original packaged application origin. Existing authenticated logical /users/me supplies the same v2 policy.",
+      "verified_scope": "Owner API26/61 compatibility/29 endpoint/8388641B bidirectional restart evidence, reused. No HAP or public device acceptance here.",
+      "remaining": "Original owner composes packet with current native source and generic bridge, then its single package workflow; parent/single writer owns NAS endpoint activation."
+    },
+    {
+      "route": "Shared Web persistent media upload/hash/Range/delegation download <-> NAS",
+      "connection_point": "mediaIdentity.fetch -> mediaDispatch; original journal origin unchanged",
+      "product_commits": [
+        "808cf8010a50b5f7d291221249591d000e7d85aa",
+        "68c01296981f2d0c173226c5a3590ca4ad59e0fa"
+      ],
+      "configuration": "Keep canonical SDK API base and document storage origin. Use the explicit authenticated v2 endpoint snapshot.",
+      "verified_scope": "12582949B actual browser/server restart recovery in prior fixture; current ordinary HTTP-origin experiment retained identical logical key but lacked required browser capabilities.",
+      "remaining": "Ordinary HTTPS browser -> public HTTP is blocked; changing document to ordinary HTTP loses original Web Locks/OPFS and isolates origin storage. That is not a complete route-only replacement. Native platform mode requires both existing fetch and resource adapters to own mapping; a pure browser still needs a browser-permitted fast endpoint."
+    },
+    {
+      "route": "Stored raw image/video/audio preview, workspace Files SDK/direct archive/extract/anchors, viewer download",
+      "connection_point": "file-network.ts / api-client.ts / useMediaGallery.ts / files-pane.vue / file-viewer.vue / attachment-block.vue",
+      "product_commit": "68c01296981f2d0c173226c5a3590ca4ad59e0fa",
+      "configuration": "Original authenticated /users/me snapshot, same logical base/token/generation; map only protected original file paths.",
+      "verified_scope": "Actual app three-file multipart/reverse/archive hashes, preview and viewer controls; ordinary HTTP page -> same-origin original HTTP APIs passed.",
+      "remaining": "Harmony generic fetch/resource guard mapping is the original owner current work. Do not enable fileRouting=platform merely because RCP exists. Normal browser HTTPS/mixed-content constraint remains distinct."
+    },
+    {
+      "route": "External provider/CDN -> NAS attachment import",
+      "connection_point": "openInboundAttachmentURL / openPreparedAttachmentURL / fetchGeneratedImageURL",
+      "product_change": "none",
+      "verified_scope": "abb2f source audit and three original controlled import/provider-result tests. URLs are actual supplied sources, not an automatic NAS public-origin loop.",
+      "remaining": "No blanket HTTP rewrite. If a concrete source URL/redirect itself points at NAS logical HTTPS, that generic caller is outside this client map and requires its exact destination established. Live cloud deployment/egress/throughput unmeasured."
+    }
+  ],
+  "activation_conditions_for_parent_single_writer": [
+    "Existing HTTP destination must expose the original authenticated business API at exactly the same API path prefix, with original backend/storage/receipt identity. Static HAP/package speed alone is insufficient.",
+    "Origin mapping changes only scheme/host/port. Confirm logical identity exactly matches current service; no service change, transfer.json rewrite, queue reset, new operation ID or receipt recreation.",
+    "Native/Go HTTP clients do not use browser CORS. For a browser-permitted cross-origin path, preserve required original methods/headers and expose ETag/Content-Range/Content-Length; actual NAS CORS is not qualified by isolated adapter results.",
+    "Central /users/me policy is consumed by shared browser clients too. Do not treat native RCP success as proof that a global HTTP endpoint policy is usable by an existing HTTPS Web page; consumer context/bridge coverage must be resolved before global activation.",
+    "Keep original browser and packaged native storage origins. The HTTP test page only proved ordinary Files/preview dispatch; it does not qualify persistent transfer.",
+    "Real credential transmission and current API/site/CORS/port configuration are separately held by the parent/single writer and were not attempted here. No service, credential, public exposure, TLS verification or browser security change is included.",
+    "Authentication/bootstrap, general control API and chat WS/SSE remain their existing paths; this is a file connection map, not all-traffic acceleration.",
+    "Package adoption/public phone and Windows throughput remain unmeasured. Preserve all existing protocols, queues, identities, unknown records, checkpoints, hashes and original sources when composing."
+  ],
+  "no_retests_in_this_finalization": true,
+  "new_product_code_in_this_finalization": false,
+  "architecture_investigation": "Withdrawn by parent; collected reads preserved only in task-private scratch for the independent reviewer, no further investigation or architecture change here."
+}

@@ -6775,8 +6775,17 @@ definitions:
       url:
         type: string
     type: object
+  media.TransferEndpoint:
+    properties:
+      logical_origin:
+        type: string
+      physical_origin:
+        type: string
+    type: object
   media.TransferNetworkPolicy:
     properties:
+      endpoint:
+        $ref: '#/definitions/media.TransferEndpoint'
       lan_addresses:
         items:
           type: string

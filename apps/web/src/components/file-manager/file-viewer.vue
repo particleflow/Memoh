@@ -27,7 +27,7 @@ import type { HandlersFsFileInfo } from '@memohai/sdk'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import MonacoEditor from '@/components/monaco-editor/index.vue'
 import MonacoDiff from '@/components/monaco-editor/diff.vue'
-import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { sdkFileApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { formatRelativeTime } from '@/utils/date-time'
 import { isTextFile, isImageFile } from './utils'
 import { useChatStore } from '@/store/chat-list'
@@ -559,7 +559,7 @@ function forceSave() {
 defineExpose({ save: () => handleSave(false) })
 
 function handleDownload() {
-  const url = sdkApiUrl({
+  const url = sdkFileApiUrl({
     url: '/bots/{bot_id}/container/fs/download',
     path: { bot_id: props.botId },
     query: { path: filePath.value, ...sdkAuthQuery() },

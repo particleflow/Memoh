@@ -1,0 +1,4 @@
+ok  	github.com/felinics/memoh/internal/media	3.451s
+ok  	github.com/felinics/memoh/internal/config	0.009s
+ok  	github.com/felinics/memoh/internal/transferclient	9.723s
+ok  	github.com/felinics/memoh/internal/handlers	4.444s

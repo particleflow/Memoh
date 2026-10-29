@@ -1,0 +1,47 @@
+{
+  "base": "d1f2c0b943423c5899b18e28b3fd5d9bb56143a1",
+  "implemented_in_this_increment": [
+    "Raw stored media preview URL: image/video/audio/hash and delegation URL generation; source attachment identity unchanged",
+    "Workspace Files: existing SDK fs requests (same multipart File values/JSON/conditional headers), direct archive/extract fetches, pane download anchor",
+    "Workspace file viewer: existing SDK reads/writes/downloads plus its explicit download button",
+    "Authenticated existing current-user metadata supplies one ephemeral per-tab mapping; no new login, policy endpoint, durable state or transfer algorithm",
+    "Explicit approved platform-owner routing seam preserves logical URLs and policy for mapping below existing native fetch/resource identity guards; browser remains default"
+  ],
+  "verified": [
+    "8 new routing/identity/platform-owner tests plus 63 existing affected entry tests passed (71 total)",
+    "Actual app PNG preview via physical origin, decoded width=8",
+    "Three original Files multipart uploads and reverse byte/hash checks; actual pane anchor and viewer button download",
+    "Original archive API tar.gz contains all three identical file hashes",
+    "Mapped SDK redirect refused, old query identity and pending SDK account switch refused",
+    "Chromium secure document mixed-content enforcement: active HTTP fetch blocked, HTTP image upgraded/failed, zero HTTP requests to physical server; no security bypass"
+  ],
+  "not_completed": [
+    "Unified adoption of completed RCP source input and generic native authenticated-fetch/resource bridge coverage below logical identity guards; not current HAP/public-path coverage",
+    "Actual NAS existing HTTP authenticated API/CORS endpoint activation with real credentials; parent/single writer owns it",
+    "Physical Windows/Harmony package adoption and public phone/Windows/NAS throughput acceptance",
+    "Direct third-party/cloud-to-NAS upstream downloads are outside the NAS client endpoint map and remain unmodified/unbenchmarked"
+  ],
+  "reused_evidence": "Prior three-file 100663395B recovery and Web12582949B browser/server restart evidence retained; no full large-file matrix rerun here",
+  "source_unchanged": [
+    "Original file chunk/worker/backlog/queue/receipt/hash/restart algorithms",
+    "Canonical API origin and persistent HostBinding/journal/result identity",
+    "NAS deployment/configuration/production credentials",
+    "Official Agent core and SDK/HAP build/sign/install"
+  ],
+  "adopted_native_input": {
+    "commit": "a158c56488ed193ec3e9f2d57480ad4f16a58068",
+    "evidence": "docs/testing/harmony-rcp-endpoint-20261029",
+    "source_contract_confirmed": true,
+    "owner_reported": {
+      "API26_narrow_compile": "passed",
+      "compatibility_cases": 61,
+      "endpoint_cases": 29,
+      "bidirectional_process_recovery_bytes": 8388641,
+      "hashes_match": true,
+      "create": 1,
+      "complete": 1
+    },
+    "rerun_here": false,
+    "packaged_or_deployed_here": false
+  }
+}

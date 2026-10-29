@@ -37,6 +37,8 @@ let owner: string
 let offset: number
 let ready: boolean
 let fault: string
+let mapped: boolean
+let requestOrigins: string[]
 let requests: { method: string, path: string, range: string | null, offset: string | null }[]
 const signal = () => new AbortController().signal
 const upload = async (draft = 'original-draft') => uploadMedia(await mediaIdentity(bot, signal()), file, draft, 1024 * 1024, signal())
@@ -45,9 +47,10 @@ function receipt() { return { id: uploadId, offset, size_bytes: file.size, mime:
 function json(data: unknown, status = 200) { return new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } }) }
 async function server(input: RequestInfo | URL) {
   const req = input as Request
+  requestOrigins.push(new URL(req.url).origin)
   const path = new URL(req.url).pathname.replace(/^\/api/, '')
   requests.push({ method: req.method, path, range: req.headers.get('Range'), offset: req.headers.get('Upload-Offset') })
-  if (path === '/users/me') return json({ id: owner, ...(fault === 'network-policy' ? { network_policy: { version: 1, lan_addresses: ['192.0.2.1', '2001:db8::1'] } } : {}) })
+  if (path === '/users/me') return json({ id: owner, ...(mapped ? { network_policy: { version: 2, endpoint: { logical_origin: 'https://nas.example.invalid', physical_origin: 'http://127.0.0.1:18068' } } } : fault === 'network-policy' ? { network_policy: { version: 1, lan_addresses: ['192.0.2.1', '2001:db8::1'] } } : {}) })
   if (path.endsWith('/media/limits')) return json({ max_upload_bytes: 200 * 1024 * 1024, resumable_enabled: true, chunk_max_bytes: 8 * 1024 * 1024 })
   if (path.endsWith('/uploads') && req.method === 'POST') {
     expect(journal().phase).toBe('create-unknown')
@@ -95,13 +98,39 @@ async function server(input: RequestInfo | URL) {
 const count = (method: string, suffix: string) => requests.filter(r => r.method === method && r.path.endsWith(suffix)).length
 beforeEach(() => {
   disk.journals.clear(); disk.files.clear(); disk.locks.clear(); disk.failSource = false; disk.failJournal = false; disk.generation = 0
-  token = 'original-token'; owner = 'original-account'; offset = 0; ready = false; fault = ''; requests = []
+  token = 'original-token'; owner = 'original-account'; offset = 0; ready = false; fault = ''; requests = []; mapped = false; requestOrigins = []
   vi.stubGlobal('window', { location: { origin: 'https://nas.example.invalid' } })
   vi.stubGlobal('localStorage', { getItem: () => token, removeItem: () => { token = '' } })
   setupApiClient({ baseUrl: 'https://nas.example.invalid/api', fetch: server as typeof fetch })
 })
 
 describe('persistent browser media safety (SDK HTTP seam, synthetic storage)', () => {
+  it('maps HTTPS identity to HTTP dispatch without changing the persisted origin or original chunks', async () => {
+    mapped = true
+    const result = await upload()
+    expect(result.hash).toBe(hash)
+    expect(journal().origin).toBe('https://nas.example.invalid/api')
+    expect(requestOrigins[0]).toBe('https://nas.example.invalid')
+    expect(requestOrigins.slice(1).every(origin => origin === 'http://127.0.0.1:18068')).toBe(true)
+    expect(count('POST', '/uploads')).toBe(1)
+    expect(count('PATCH', `/uploads/${uploadId}`)).toBe(4)
+  })
+
+  it('rechecks identity after preparing mapped request bytes and before any write dispatch', async () => {
+    mapped = true
+    const original = Request.prototype.blob
+    const spy = vi.spyOn(Request.prototype, 'blob').mockImplementationOnce(async function (this: Request) {
+      const body = await original.call(this)
+      token = 'other-account'
+      return body
+    })
+    try {
+      await expect(upload()).rejects.toMatchObject({ name: 'AbortError' })
+      expect(count('POST', '/uploads')).toBe(0)
+      expect(journal().phase).toBe('create-unknown')
+    } finally { spy.mockRestore() }
+  })
+
   it('reads the central policy with the original identity GET and leaves browser routing with the platform', async () => {
     fault = 'network-policy'
     const identity = await mediaIdentity(bot, signal())

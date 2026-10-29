@@ -1,0 +1,13 @@
+Current source: 68c01296981f2d0c173226c5a3590ca4ad59e0fa (no product changes in this increment).
+node /workspace/scratch/fast-transfer-path/http-origin/browser.mjs
+Final exit 0. Real non-loopback HTTP origin and same-origin HTTP file APIs, original logical HTTPS identity.
+Expected incompatibility assertions passed: undefined Web Locks/OPFS; original uploader refuses before Create; old secure-origin journal/source remain intact but inaccessible at new HTTP origin.
+node docs/testing/transfer-http-entry/native-guard-test.mjs
+Exit 0; five exact-source predicate cases, Kit URL adapter only, not native engine.
+go test -p=2 -count=1 -run '^TestPrepareOutboundMessage_HTTPAttachmentDownload$' -json ./internal/channel
+Exit 0; one original controlled HTTP-import test.
+NO_PROXY=198.51.100.10 go test -p=2 -count=1 -run '^(TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage|TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL)$' -json ./internal/agent/tool
+Exit 0; two original provider-result download tests with existing synthetic SDK/dialer fixture. First environmental proxy rejection retained separately; production guard unchanged.
+pnpm exec eslint docs/testing/transfer-http-entry/browser.mjs docs/testing/transfer-http-entry/native-guard-test.mjs
+Exit 0; no diagnostics.
+Previous 71 affected Web tests/final 8 focused tests, types/lint, original large-file recovery and owner's RCP evidence are reused, not rerun.

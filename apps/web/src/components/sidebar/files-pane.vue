@@ -369,7 +369,7 @@ import {
 } from '@memohai/sdk'
 import type { HandlersFsFileInfo } from '@memohai/sdk'
 import { isApiErrorCode, resolveApiErrorMessage } from '@/utils/api-error'
-import { sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { fileApiFetch, sdkApiUrl, sdkFileApiUrl, sdkAuthQuery } from '@/lib/api-client'
 import { joinPath, parentPath } from '@/components/file-manager/utils'
 import FileTree from '@/components/file-manager/file-tree.vue'
 import SidebarPanelHeader from './panel-header.vue'
@@ -1067,7 +1067,7 @@ async function handleBatchDownload() {
   if (paths.length === 0 || batchArchiveLoading.value) return
   batchArchiveLoading.value = true
   try {
-    const response = await fetch(sdkApiUrl({
+    const response = await fileApiFetch(sdkApiUrl({
       url: '/bots/{bot_id}/container/fs/archive',
       path: { bot_id: props.botId },
     }), {
@@ -1131,7 +1131,7 @@ async function handleExtract(entry: HandlersFsFileInfo) {
   if (!entry.path || extractLoading.value) return
   extractLoading.value = true
   try {
-    const response = await fetch(sdkApiUrl({
+    const response = await fileApiFetch(sdkApiUrl({
       url: '/bots/{bot_id}/container/fs/extract',
       path: { bot_id: props.botId },
     }), {
@@ -1155,7 +1155,7 @@ async function handleExtract(entry: HandlersFsFileInfo) {
 }
 
 function handleDownload(entry: HandlersFsFileInfo) {
-  const url = sdkApiUrl({
+  const url = sdkFileApiUrl({
     url: '/bots/{bot_id}/container/fs/download',
     path: { bot_id: props.botId },
     query: { path: entry.path ?? '', ...sdkAuthQuery() },

@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/fast-transfer-path
+
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  15:26:43
+   Duration  597ms (transform 266ms, setup 0ms, import 413ms, tests 41ms, environment 1ms)
+

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/felinics/memoh/internal/media"
@@ -19,8 +20,9 @@ import (
 // transfer.json remains the sole identity/source configuration: changing route
 // hints must not change its byte binding or require a queue migration.
 type hostNetworkPolicy struct {
-	Version      int      `json:"version"`
-	LANAddresses []string `json:"lan_addresses"`
+	Version      int                     `json:"version"`
+	LANAddresses []string                `json:"lan_addresses"`
+	Endpoint     *media.TransferEndpoint `json:"endpoint,omitempty"`
 }
 
 func (p *hostNetworkPolicy) UnmarshalJSON(raw []byte) error {
@@ -36,11 +38,11 @@ func (p *hostNetworkPolicy) UnmarshalJSON(raw []byte) error {
 }
 
 func (p *hostNetworkPolicy) normalized() (*hostNetworkPolicy, error) {
-	value, err := (&media.TransferNetworkPolicy{Version: p.Version, LANAddresses: p.LANAddresses}).Normalized()
+	value, err := (&media.TransferNetworkPolicy{Version: p.Version, LANAddresses: p.LANAddresses, Endpoint: p.Endpoint}).Normalized()
 	if err != nil {
 		return nil, ErrInvalid
 	}
-	return &hostNetworkPolicy{Version: value.Version, LANAddresses: value.LANAddresses}, nil
+	return &hostNetworkPolicy{Version: value.Version, LANAddresses: value.LANAddresses, Endpoint: value.Endpoint}, nil
 }
 
 func (h *HostConfig) readNetworkPolicy() (*hostNetworkPolicy, error) {
@@ -56,7 +58,7 @@ func (h *HostConfig) readNetworkPolicy() (*hostNetworkPolicy, error) {
 	var p hostNetworkPolicy
 	d := json.NewDecoder(bytes.NewReader(raw))
 	d.DisallowUnknownFields()
-	if d.Decode(&p) != nil || d.Decode(new(any)) != io.EOF || p.Version != 1 || len(p.LANAddresses) == 0 {
+	if d.Decode(&p) != nil || d.Decode(new(any)) != io.EOF {
 		return nil, ErrInvalid
 	}
 	return p.normalized()
@@ -90,12 +92,17 @@ func (c *Client) adoptNetworkPolicy(policy *hostNetworkPolicy) error {
 	return nil
 }
 
-// TCP selection only: net/http still owns TLS (including the original ServerName)
-// and HTTP. Once TCP succeeds, a certificate/authorization/HTTP failure never
-// causes this selector to try a different address. No credential is used here.
+// Routing only: v1 selects TCP addresses; v2 explicitly maps a physical origin.
+// net/http still verifies TLS for an HTTPS destination. Certificate, auth and
+// HTTP failures never select another endpoint or replay a business request.
 func (c *Client) useNetworkPolicy(p *hostNetworkPolicy) error {
 	if p == nil {
 		return nil
+	}
+	var err error
+	p, err = p.normalized()
+	if err != nil {
+		return err
 	}
 	// Rebuild from the validated original transport; never stack a NAS policy
 	// on the old local dialer or keep its bootstrap connection pooled.
@@ -103,6 +110,25 @@ func (c *Client) useNetworkPolicy(p *hostNetworkPolicy) error {
 	u, err := url.Parse(c.base)
 	if err != nil {
 		return ErrInvalid
+	}
+	logical := *u
+	if p.Endpoint != nil {
+		host := strings.ToLower(u.Host)
+		if u.Scheme == "https" && u.Port() == "443" || u.Scheme == "http" && u.Port() == "80" {
+			host = strings.ToLower(u.Hostname())
+			if strings.Contains(host, ":") {
+				host = "[" + host + "]"
+			}
+		}
+		if p.Endpoint.LogicalOrigin != u.Scheme+"://"+host {
+			return ErrBinding
+		}
+		physical, err := url.Parse(p.Endpoint.PhysicalOrigin)
+		if err != nil {
+			return ErrInvalid
+		}
+		u.Scheme, u.Host = physical.Scheme, physical.Host
+		t.TLSClientConfig.ServerName = physical.Hostname()
 	}
 	proxy := t.Proxy
 	// A proxy owns routing itself. Do not silently bypass one to implement a
@@ -123,43 +149,68 @@ func (c *Client) useNetworkPolicy(p *hostNetworkPolicy) error {
 		}
 		return nil, nil
 	}
-	dial := t.DialContext
-	if dial == nil {
-		dial = (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}).DialContext
-	}
-	addresses := append([]string(nil), p.LANAddresses...)
-	t.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
-		if network != "tcp" {
-			return nil, ErrTransport
+	if len(p.LANAddresses) > 0 {
+		dial := t.DialContext
+		if dial == nil {
+			dial = (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}).DialContext
 		}
-		_, port, err := net.SplitHostPort(address)
-		if err != nil {
-			return nil, ErrTransport
-		}
-		// Reuse DefaultTransport's 30-second TCP bound for the entire LAN
-		// phase, not per address; share remaining time across configured hints.
-		lan, cancel := context.WithTimeout(ctx, 30*time.Second)
-		defer cancel()
-		deadline, _ := lan.Deadline()
-		for i, ip := range addresses {
-			if lan.Err() != nil {
-				break
+		addresses := append([]string(nil), p.LANAddresses...)
+		t.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+			if network != "tcp" {
+				return nil, ErrTransport
 			}
-			attempt, done := context.WithTimeout(lan, time.Until(deadline)/time.Duration(len(addresses)-i))
-			conn, err := dial(attempt, "tcp", net.JoinHostPort(ip, port))
-			done()
-			if err == nil {
-				return conn, nil
+			_, port, err := net.SplitHostPort(address)
+			if err != nil {
+				return nil, ErrTransport
 			}
+			// Reuse DefaultTransport's 30-second TCP bound for the entire LAN
+			// phase, not per address; share remaining time across configured hints.
+			lan, cancel := context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
+			deadline, _ := lan.Deadline()
+			for i, ip := range addresses {
+				if lan.Err() != nil {
+					break
+				}
+				attempt, done := context.WithTimeout(lan, time.Until(deadline)/time.Duration(len(addresses)-i))
+				conn, err := dial(attempt, "tcp", net.JoinHostPort(ip, port))
+				done()
+				if err == nil {
+					return conn, nil
+				}
+			}
+			if ctx.Err() != nil {
+				return nil, ctx.Err()
+			}
+			// Resolve only the original authority's IPv6 addresses. It may be an
+			// on-link address too; IP family is never used to classify LAN vs WAN.
+			return dial(ctx, "tcp6", address)
 		}
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-		// Resolve only the original authority's IPv6 addresses. It may be an
-		// on-link address too; IP family is never used to classify LAN vs WAN.
-		return dial(ctx, "tcp6", address)
 	}
 	c.http.CloseIdleConnections()
-	c.http.Transport = t
+	if p.Endpoint != nil {
+		c.http.Transport = &endpointTransport{logical: logical, physical: *u, next: t}
+	} else {
+		c.http.Transport = t
+	}
 	return nil
 }
+
+// endpointTransport leaves the original request/identity intact and changes
+// only the dispatch destination. net/http's existing redirect refusal applies.
+type endpointTransport struct {
+	logical, physical url.URL
+	next              *http.Transport
+}
+
+func (t *endpointTransport) RoundTrip(request *http.Request) (*http.Response, error) {
+	if request.URL.Scheme != t.logical.Scheme || request.URL.Host != t.logical.Host {
+		return nil, ErrBinding
+	}
+	next := request.Clone(request.Context())
+	next.URL.Scheme, next.URL.Host = t.physical.Scheme, t.physical.Host
+	next.Host = ""
+	return t.next.RoundTrip(next)
+}
+
+func (t *endpointTransport) CloseIdleConnections() { t.next.CloseIdleConnections() }

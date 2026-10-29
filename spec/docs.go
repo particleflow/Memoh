@@ -30640,9 +30640,23 @@ const docTemplate = `{
                 }
             }
         },
+        "media.TransferEndpoint": {
+            "type": "object",
+            "properties": {
+                "logical_origin": {
+                    "type": "string"
+                },
+                "physical_origin": {
+                    "type": "string"
+                }
+            }
+        },
         "media.TransferNetworkPolicy": {
             "type": "object",
             "properties": {
+                "endpoint": {
+                    "$ref": "#/definitions/media.TransferEndpoint"
+                },
                 "lan_addresses": {
                     "type": "array",
                     "items": {

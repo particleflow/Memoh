@@ -1,0 +1,12 @@
+{"Time":"2026-10-29T15:39:17.887673617Z","Action":"start","Package":"github.com/felinics/memoh/internal/agent/tool"}
+{"Time":"2026-10-29T15:39:17.901253427Z","Action":"run","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage"}
+{"Time":"2026-10-29T15:39:17.901313718Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage","Output":"=== RUN   TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage\n"}
+{"Time":"2026-10-29T15:39:17.904479741Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage","Output":"--- PASS: TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage (0.00s)\n"}
+{"Time":"2026-10-29T15:39:17.904515505Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateDashScopeImageUsesAsyncSDKProviderAndDownloadsImage","Elapsed":0}
+{"Time":"2026-10-29T15:39:17.904532361Z","Action":"run","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL"}
+{"Time":"2026-10-29T15:39:17.904535966Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL","Output":"=== RUN   TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL\n"}
+{"Time":"2026-10-29T15:39:17.906245636Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL","Output":"--- PASS: TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL (0.00s)\n"}
+{"Time":"2026-10-29T15:39:17.906261721Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agent/tool","Test":"TestGenerateOpenAIImagesImageUsesImagesEndpointAndDownloadsURL","Elapsed":0}
+{"Time":"2026-10-29T15:39:17.906508513Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Output":"PASS\n"}
+{"Time":"2026-10-29T15:39:17.906829858Z","Action":"output","Package":"github.com/felinics/memoh/internal/agent/tool","Output":"ok  \tgithub.com/felinics/memoh/internal/agent/tool\t0.019s\n"}
+{"Time":"2026-10-29T15:39:17.906848727Z","Action":"pass","Package":"github.com/felinics/memoh/internal/agent/tool","Elapsed":0.019}

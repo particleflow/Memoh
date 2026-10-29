@@ -11,8 +11,9 @@ import {
   type MediaUpload,
   type MediaTransferNetworkPolicy,
 } from '@memohai/sdk'
-import { sdkApiBaseUrl, sdkAuthQuery } from './api-client'
+import { sdkApiBaseUrl, sdkAuthQuery, usesPlatformFileRouting } from './api-client'
 import { authSessionGeneration } from './auth-session'
+import { mediaDispatch, mediaEndpoint } from './media-network'
 import {
   listJournals, readJournal, writeJournal, removeJournal, localFile, writeLocalFile, mediaLock,
   type MediaJournal,
@@ -35,8 +36,8 @@ export interface MediaIdentity {
   owner: string
   origin: string
   bot: string
-  // Same NAS policy snapshot as native consumers. Fetch leaves TCP resolution
-  // with the platform; these hints never rewrite an origin or replay a write.
+  // Same NAS policy snapshot as native consumers. V1 leaves TCP selection with
+  // the platform; V2 maps dispatch only, retaining this logical journal origin.
   networkPolicy?: Readonly<MediaTransferNetworkPolicy>
   // These are request-lifetime guards only and are never persisted.
   check: () => void
@@ -47,6 +48,7 @@ export async function mediaIdentity(bot: string, signal: AbortSignal): Promise<M
   const origin = sdkApiBaseUrl()
   const generation = authSessionGeneration()
   const token = sdkAuthQuery().token
+  const route: { physicalOrigin?: string } = {}
   function check() {
     signal.throwIfAborted()
     if (!token || generation !== authSessionGeneration() || token !== sdkAuthQuery().token || origin !== sdkApiBaseUrl()) {
@@ -59,18 +61,23 @@ export async function mediaIdentity(bot: string, signal: AbortSignal): Promise<M
     // change while the SDK prepares a Request must not send the new account's
     // credential or bytes to the old journal's route.
     check()
-    const request = input instanceof Request ? input : new Request(input, init)
+    const request = input instanceof Request && !init ? input : new Request(input, init)
     const base = new URL(origin)
     const url = new URL(request.url)
     if (request.headers.get('Authorization') !== `Bearer ${token}` || url.origin !== base.origin
       || !url.pathname.startsWith(`${base.pathname.replace(/\/$/, '')}/`)) throw new DOMException('Attachment identity changed', 'AbortError')
-    return await transport(input, { ...init, redirect: 'error' })
+    if (!route.physicalOrigin) return await transport(input, { ...init, redirect: 'error' })
+    const dispatched = await mediaDispatch(request, route.physicalOrigin)
+    check()
+    return await transport(dispatched, { redirect: 'error' })
   }
   check()
   const { data } = await getUsersMe({ signal, fetch: guardedFetch, cache: 'no-store', throwOnError: true })
   check()
   if (!data.id) throw new MediaRecoveryError('unknown')
-  const networkPolicy = data.network_policy ? Object.freeze({ ...data.network_policy, lan_addresses: [...(data.network_policy.lan_addresses ?? [])] }) : undefined
+  const physicalOrigin = mediaEndpoint(origin, data.network_policy)
+  if (!usesPlatformFileRouting()) route.physicalOrigin = physicalOrigin
+  const networkPolicy = data.network_policy ? Object.freeze({ ...data.network_policy, lan_addresses: [...(data.network_policy.lan_addresses ?? [])], ...(data.network_policy.endpoint ? { endpoint: Object.freeze({ ...data.network_policy.endpoint }) } : {}) }) : undefined
   return { owner: data.id, origin, bot, check, fetch: guardedFetch, networkPolicy }
 }
 
