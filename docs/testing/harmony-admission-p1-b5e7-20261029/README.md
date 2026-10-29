@@ -1,0 +1,11 @@
+# Harmony contact-admission P1 alignment
+
+Fixed shared source b5e7aff6040d1efce36ee51a0c5d3f8915dbddf3, tree26e57e9e38870563d2f5a198b44a882ca3eb5ac5. Official Library v16 ZIP4408728bytes SHA2568662a6266722a73b41f63985cfa6c38b3ad7cfb9ed17e49e7d7121dc401a476d, CRC and403 current-manifest entries verified; local bundle matches supplied head/tree. Six admitted product paths are mapped in phone-six-source-map.json. Three outputs equal upstream exactly; three preserve existing phone adaptations through conflict-free three-way composition. SDK and nativeETS are unchanged from the previous unsigned29 candidate.
+
+The exact generated phone context passes fullWebtypecheck and nine original admission guards;140other cases are skipped locally, not reported as passes. The upstream six natural CI runs and149store cases are separately recorded in the source owner handoff. The original fixture assertions are unchanged; only imports and dependency aliases relocate the fixture to this cloud review directory. The initial missingvue-router fixture setup failure remains retained.
+
+The existing30second confirmation guard covers bound main-contact invocations, blocks a second pending send, preserves unknown invocation identity across reconnect and does not cancel or blindly resend it. Matching trusted Bot/session/run projection clears the pending main-contact gate without waiting for unrelated background tasks. Current composer uses the same predicate without new controls/copy.
+
+Automatic diagnostics remains WIP2648fad921c45eb20d50ed5656fbbadca712e950 on its independent branch and is expressly excluded. No diagnostic module/proxy methods or API lease is included in this package. Native identity, permissions, login migration, transfers, approved artwork and existing measurement remain. Version30 is a new package for real product differences; oldunsigned29 and signed28 are preserved.
+
+No models, live NAS/Windows deployment, signing or physicalphone acceptance is performed by this source alignment. Server candidate still includes the earlier schedule180 migration; this cloud task does not deploy or migrate it. OfficialSDK/new package evidence follows separately and must not be confused with device acceptance.

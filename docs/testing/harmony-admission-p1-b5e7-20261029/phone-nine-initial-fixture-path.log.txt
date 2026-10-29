@@ -1,0 +1,33 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/shared-p1-v16-20261029
+
+ ❯ phone-contact-admission.test.ts (0 test)
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  phone-contact-admission.test.ts [ phone-contact-admission.test.ts ]
+Error: Failed to resolve import "vue-router" from "phone-contact-admission.test.ts". Does the file exist?
+  Plugin: vite:import-analysis
+  File: /workspace/harmony-recovery-20261023/evidence/shared-p1-v16-20261029/phone-contact-admission.test.ts:2:0
+  52 |  });
+  53 |  const __vi_import_0__ = await import("vue");
+  54 |  const __vi_import_1__ = await import("vue-router");
+     |                                       ^
+  55 |  const __vi_import_2__ = await import("@/i18n/locales/en.json");
+  56 |  const __vi_import_3__ = await import("pinia");
+ ❯ TransformPluginContext._formatLog ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30416:39
+ ❯ TransformPluginContext.error ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30413:14
+ ❯ normalizeUrl ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:27438:18
+ ❯ ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:27506:30
+ ❯ TransformPluginContext.transform ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:27474:4
+ ❯ EnvironmentPluginContainer.transform ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:30201:14
+ ❯ loadAndTransform ../../image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/chunks/node.js:20124:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  no tests
+   Start at  14:10:44
+   Duration  2.52s (transform 0ms, setup 0ms, import 0ms, tests 0ms, environment 1.38s)
+

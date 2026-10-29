@@ -1,0 +1,38 @@
+[
+  {
+    "path": "apps/web/src/pages/home/components/chat-pane.vue",
+    "upstreamSHA256": "99e27d3358555af304b4509dba4753d1c9f0ea8777f32cd60a876c5c9aa41188",
+    "phoneSHA256": "a73d2008e52c0e76003351c3fc6734d88f3f0f79d2b596e4e962fb09fcfd4082",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/store/chat/assistant-streams.ts",
+    "upstreamSHA256": "2b79086f9e2615bbe33f265ce52915a34086eda30229b9d9b44142fa96cf8990",
+    "phoneSHA256": "2b79086f9e2615bbe33f265ce52915a34086eda30229b9d9b44142fa96cf8990",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/runtime-integration.ts",
+    "upstreamSHA256": "041dec18af89f8b1f80b67c6375b9e86c6cb1a4ffd69c7b0d66b1a1932798460",
+    "phoneSHA256": "041dec18af89f8b1f80b67c6375b9e86c6cb1a4ffd69c7b0d66b1a1932798460",
+    "phoneAdapted": false
+  },
+  {
+    "path": "apps/web/src/store/chat/send.ts",
+    "upstreamSHA256": "51094cd18ccb3b7158812354cc4d620914e47bbd746af00dda8a7e54f19de019",
+    "phoneSHA256": "1a67a7e82b8a2c81762645cf30de636fe3648c4dd3b9f3fd11261dc198fd3d23",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/store/chat/views.ts",
+    "upstreamSHA256": "76f8e6def087138414f6e6ebab06efed25c32df25d72c84a2f230f9853348b40",
+    "phoneSHA256": "2930b4240c2e66e3b714373d6f3a17b013ae2a4e6328f5e397cf68746c2f8707",
+    "phoneAdapted": true
+  },
+  {
+    "path": "apps/web/src/store/chat-list.ts",
+    "upstreamSHA256": "b56c603a230471247ed1c87d4ea313cca209f3caeff2ccbe91dc50c8a44251cf",
+    "phoneSHA256": "b56c603a230471247ed1c87d4ea313cca209f3caeff2ccbe91dc50c8a44251cf",
+    "phoneAdapted": false
+  }
+]
