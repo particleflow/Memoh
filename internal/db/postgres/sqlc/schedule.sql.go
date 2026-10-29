@@ -29,7 +29,7 @@ VALUES (
   $16::uuid,
  COALESCE(NULLIF($17::integer, 0), 3600)
 )
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 type CreateScheduleParams struct {
@@ -83,6 +83,7 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 		&i.CurrentCalls,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 		&i.Enabled,
 		&i.Command,
 		&i.BotID,
@@ -101,10 +102,12 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 }
 
 const deleteSchedule = `-- name: DeleteSchedule :exec
-DELETE FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND id = $1
+UPDATE schedule
+SET deleted_at = now(), enabled = false, updated_at = now()
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 `
 
+// Keep the original plan as the trusted parent of its execution logs.
 func (q *Queries) DeleteSchedule(ctx context.Context, id pgtype.UUID) error {
 	_, err := q.db.Exec(ctx, deleteSchedule, id)
 	return err
@@ -114,8 +117,8 @@ const disableSchedule = `-- name: DisableSchedule :one
 UPDATE schedule
 SET enabled = false,
     updated_at = now()
-WHERE team_id = public.memoh_current_team_id() AND id = $1
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
+RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 func (q *Queries) DisableSchedule(ctx context.Context, id pgtype.UUID) (Schedule, error) {
@@ -131,6 +134,7 @@ func (q *Queries) DisableSchedule(ctx context.Context, id pgtype.UUID) (Schedule
 		&i.CurrentCalls,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 		&i.Enabled,
 		&i.Command,
 		&i.BotID,
@@ -149,9 +153,9 @@ func (q *Queries) DisableSchedule(ctx context.Context, id pgtype.UUID) (Schedule
 }
 
 const getScheduleByID = `-- name: GetScheduleByID :one
-SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND id = $1
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
 `
 
 func (q *Queries) GetScheduleByID(ctx context.Context, id pgtype.UUID) (Schedule, error) {
@@ -167,6 +171,7 @@ func (q *Queries) GetScheduleByID(ctx context.Context, id pgtype.UUID) (Schedule
 		&i.CurrentCalls,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 		&i.Enabled,
 		&i.Command,
 		&i.BotID,
@@ -192,8 +197,8 @@ SET current_calls = current_calls + 1,
       ELSE enabled
     END,
     updated_at = now()
-WHERE team_id = public.memoh_current_team_id() AND id = $1
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
+RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 func (q *Queries) IncrementScheduleCalls(ctx context.Context, id pgtype.UUID) (Schedule, error) {
@@ -209,6 +214,7 @@ func (q *Queries) IncrementScheduleCalls(ctx context.Context, id pgtype.UUID) (S
 		&i.CurrentCalls,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 		&i.Enabled,
 		&i.Command,
 		&i.BotID,
@@ -227,9 +233,9 @@ func (q *Queries) IncrementScheduleCalls(ctx context.Context, id pgtype.UUID) (S
 }
 
 const listEnabledSchedules = `-- name: ListEnabledSchedules :many
-SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND enabled = true
+WHERE team_id = public.memoh_current_team_id() AND enabled = true AND deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
@@ -252,6 +258,7 @@ func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) 
 			&i.CurrentCalls,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeletedAt,
 			&i.Enabled,
 			&i.Command,
 			&i.BotID,
@@ -277,9 +284,9 @@ func (q *Queries) ListEnabledSchedules(ctx context.Context) ([]Schedule, error) 
 }
 
 const listSchedulesByBot = `-- name: ListSchedulesByBot :many
-SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+SELECT max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 FROM schedule
-WHERE team_id = public.memoh_current_team_id() AND bot_id = $1
+WHERE team_id = public.memoh_current_team_id() AND bot_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC
 `
 
@@ -302,6 +309,7 @@ func (q *Queries) ListSchedulesByBot(ctx context.Context, botID pgtype.UUID) ([]
 			&i.CurrentCalls,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.DeletedAt,
 			&i.Enabled,
 			&i.Command,
 			&i.BotID,
@@ -345,8 +353,8 @@ SET name = $2,
     workdir_id = $16::uuid,
     max_run_seconds = COALESCE(NULLIF($17::integer, 0), 3600),
     updated_at = now()
-WHERE team_id = public.memoh_current_team_id() AND id = $1
-RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
+WHERE team_id = public.memoh_current_team_id() AND id = $1 AND deleted_at IS NULL
+RETURNING max_run_seconds, id, name, description, pattern, max_calls, current_calls, created_at, updated_at, deleted_at, enabled, command, bot_id, run_target, target_session_id, runtime_type, bot_agent_id, acp_agent_id, model_id, acp_model_id, reasoning_effort, workdir_id, team_id
 `
 
 type UpdateScheduleParams struct {
@@ -400,6 +408,7 @@ func (q *Queries) UpdateSchedule(ctx context.Context, arg UpdateScheduleParams) 
 		&i.CurrentCalls,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.DeletedAt,
 		&i.Enabled,
 		&i.Command,
 		&i.BotID,
