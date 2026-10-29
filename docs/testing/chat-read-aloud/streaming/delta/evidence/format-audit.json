@@ -1,0 +1,73 @@
+{
+  "exactHAPSource": "12faf4c06db01d8fffc29aad3a247b4a85e884e7",
+  "files": {
+    "mobile/client/config/memoh_client.json": {
+      "sha256": "92d2fc85d947461b414201a10ce543d3009572feec5d2dfebc642741308067e1",
+      "savedTTSFormatFieldFound": false,
+      "topLevelKeysOnly": [
+        "apiOrigin",
+        "hapDownloadUrl",
+        "productName"
+      ]
+    },
+    "mobile/client/config/memoh_web.lock.json": {
+      "sha256": "ad9ea0fae6c64d405ef9b68cb5b1409f814d1231bf16c98a21184936cfa50679",
+      "savedTTSFormatFieldFound": false,
+      "sharedReadAloud": {
+        "commit": "9c361d60371703c157d344dcebfd439acc6d78de",
+        "parent": "565c0b4b3386d87d057234efe6828479d35fcee0",
+        "sourceChanges": {
+          "local": "shared-read-aloud-changes.json",
+          "sha256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2"
+        },
+        "scope": "Final a0a821a4 source mapping for current read-aloud UI and generated playback SDK; original phone adapters preserved. No synthesize fallback. Deployment/device readiness is not inferred from source checks.",
+        "backendPlaybackReadyForRelease": false,
+        "navigationCommit": "2b3ffb40fe615426a01bff8720111eef22e6e0e3",
+        "unifiedCompatibleCommit": "6a1fdcc1d61427c5cb02e0184a2b48a92645dac2",
+        "localFollowup": "Detached status invalidation consumes rejected completion while preserving cache errors; native voice uses existing Spinner/muted-soft tokens. No new UI or retry.",
+        "backendReleaseReadinessNote": "The final upstream includes the reviewed account-JWT playback auth correction. This source-only task does not independently verify the deployed endpoint or device playback."
+      }
+    },
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": {
+      "sha256": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+      "savedTTSFormatFieldFound": false
+    },
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets": {
+      "sha256": "db7f752d2685741f23eda9cc99e24508997b18c095ac4dc25f488c9747baf945",
+      "savedTTSFormatFieldFound": false
+    },
+    "mobile/client/mobile/memoh/HarmonyVoicePlayer.vue": {
+      "sha256": "728336ea288c3544210073133d1b69def90fd49f9c9fb7ac31629390f0401493",
+      "savedTTSFormatFieldFound": false
+    }
+  },
+  "fieldTTSFormat": "UNCONFIRMED_NO_SAVED_PROVIDER_MODEL_CONFIGURATION_OR_RESPONSE_CAPTURE_AVAILABLE",
+  "sdkProtocol": {
+    "version": "v0.7.2-0.20261002230120-f6d0ce1a0e8c",
+    "formatSelection": "provider config merged with model config; no override supplied",
+    "defaultFormat": "mp3 (SDK default only, not field evidence)",
+    "advertisedFormats": [
+      "mp3",
+      "opus",
+      "wav",
+      "pcm"
+    ],
+    "MIMEOrigin": "contentTypeForFormat(cfg.ResponseFormat), not upstream response Content-Type",
+    "pcmMetadata": "No verified field sample rate, endianness, bit depth, channel count or framing",
+    "decoderChangePermittedByEvidence": false
+  },
+  "ArkWebEvidence": {
+    "mediaSourceCodecProbeAvailable": false,
+    "engineVersionProbeAvailable": false,
+    "existingVoicePlayer": "attachment-only WaveSurfer load/loadBlob; not proof of read-aloud streaming",
+    "webPolicy": "Existing packaged Web and authenticated API policy; not codec or autoplay acceptance"
+  },
+  "providerCalls": 0,
+  "newServices": 0,
+  "personalContextLookup": "Unavailable for this conversation; no evidence recovered",
+  "minimumMissingEvidence": [
+    "Existing saved model/provider response_format (no secrets/voice rewrite)",
+    "Existing upstream response MIME and first encoded bytes/framing; SDK-declared MIME alone insufficient",
+    "Current ArkWeb engine and native MSE isTypeSupported/actual decode/output evidence for that format"
+  ]
+}

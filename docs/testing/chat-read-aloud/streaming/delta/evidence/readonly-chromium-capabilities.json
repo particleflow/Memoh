@@ -1,0 +1,32 @@
+{
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36",
+  "MediaSource": true,
+  "AudioContext": true,
+  "formats": [
+    {
+      "mime": "audio/mpeg",
+      "mse": true,
+      "ordinaryMediaElement": "probably"
+    },
+    {
+      "mime": "audio/wav",
+      "mse": false,
+      "ordinaryMediaElement": "maybe"
+    },
+    {
+      "mime": "audio/pcm",
+      "mse": false,
+      "ordinaryMediaElement": ""
+    },
+    {
+      "mime": "audio/opus",
+      "mse": false,
+      "ordinaryMediaElement": ""
+    }
+  ],
+  "browserVersion": "154.0.8037.57",
+  "networkRequests": 0,
+  "audioPlaybackAttempted": false,
+  "ArkWeb": false,
+  "providerCalls": 0
+}

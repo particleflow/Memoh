@@ -1,0 +1,66 @@
+{
+  "parent": "2b9c8fc24ff55bbaaa88cc112438006d82fe0513",
+  "candidateState": "SOURCE_ONLY_NOT_ADMITTED",
+  "newTargetedTestsPassed": 19,
+  "old14plus3Rerun": false,
+  "oldNativeAudioFixtureRerun": false,
+  "oldBuildRerun": false,
+  "audioControllerClassByteEqual": true,
+  "unchangedReuse": {
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": {
+      "byteEqual": true,
+      "sha256": "2a19f22e5bb96ddab8dda5032ab48b03bd349c733582ea311b158f9057aa4dbc"
+    },
+    "internal/audio/service.go": {
+      "byteEqual": true,
+      "sha256": "bd38265a1563b893a314470fc8fefe80eb914f324d66c36283615fa16f51835d"
+    },
+    "internal/handlers/bot_tts.go": {
+      "byteEqual": true,
+      "sha256": "7f4eb2e7370f605cdbd42b50ec8fed87e27d3ff968d63bf3c5583320c13cd831"
+    },
+    "internal/audio/playback_stream_test.go": {
+      "byteEqual": true,
+      "sha256": "b62ab01fa05b90fb6346a2f8f0d2844c359f150f64429761fa66ffb9a616165d"
+    },
+    "internal/handlers/bot_tts_streaming_test.go": {
+      "byteEqual": true,
+      "sha256": "caa1c41b3f396a48ce53cb272f7bc240b4cd28d9814b8e151439c078f13730a2"
+    },
+    "apps/web/src/pages/home/composables/chat-read-aloud.streaming.test.ts": {
+      "byteEqual": true,
+      "sha256": "f33f90ac24c678557265a5f5d42494de2f25910b14db1443fe9d5c44ebd89c5d"
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.streaming.test.ts": {
+      "byteEqual": true,
+      "sha256": "b60b03890631a9bd50c126a9938d410cf6261403402b221ae5d0c860b0f6d0ae"
+    }
+  },
+  "actualUIComponentPin": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "markstreamVersion": "2.0.0",
+  "targetedESLintExitCode": 0,
+  "targetedVueTscExitCode": 0,
+  "modelProviderCalls": 0,
+  "paidCalls": 0,
+  "applicationServicesStarted": 0,
+  "HAPBuildSignDeploy": false,
+  "decoderAdded": false,
+  "voiceConfigChanged": false,
+  "actualMagpieEncoding": "PENDING_NO_FIELD_RECORD",
+  "actualArkWebCodecSupport": "PENDING_NO_DEVICE_PROBE",
+  "physicalAudible500ms": "NOT_PASSED_UNVERIFIED",
+  "testLimits": [
+    "Actual product Markdown/custom components run in jsdom, not app/HAP UI.",
+    "Mermaid pending/preview are DOM-contract fixtures, not a real layout/device pass.",
+    "Four DOM/composable scheduling cases use the unchanged controller as a spy.",
+    "jsdom missing canvas getContext warning retained."
+  ],
+  "sourceSHA256": {
+    "apps/web/src/pages/home/components/chat-pane.vue": "868c54bce2c2622f8d1c35ef48484da6da577850fb77c4482d530db1704e3c01",
+    "apps/web/src/pages/home/components/message-item.vue": "5f2b94deddbca58e921413679bf53ecd5f0c4e5ca9d18528cfc09685dcf7744e",
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": "60d910b81aacc6e80d2d0722cd04fee7999c63a244bc8ef715e238962cea79ab",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": "e4fa47c746a38031c6c84e45e24ef8c138335fd2fcd6cb128a224938497b8a37",
+    "apps/web/src/pages/home/composables/speech-visible-text.ts": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+    "apps/web/src/pages/home/composables/speech-rendered-text.ts": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca"
+  }
+}

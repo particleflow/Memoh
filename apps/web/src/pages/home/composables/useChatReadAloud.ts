@@ -1,8 +1,9 @@
-import { computed, inject, onBeforeUnmount, onDeactivated, shallowRef, watch, type Ref } from 'vue'
+import { computed, inject, onBeforeUnmount, onDeactivated, onMounted, shallowRef, watch, type Ref } from 'vue'
 import { postBotsByBotIdTtsPlayback } from '@memohai/sdk'
 import type { ChatMessage } from '@/store/chat/types'
 import { ChatReadAloud, LiveSpeechReplies, speechKey, speechText, type SpeechState } from './chat-read-aloud'
 import { chatWorkspaceVisibleKey } from './chat-workspace-visibility'
+import { renderedSpeechText } from './speech-rendered-text'
 
 export function useChatReadAloud(options: {
   botId: Ref<string | null | undefined>
@@ -11,12 +12,17 @@ export function useChatReadAloud(options: {
   loading: Ref<boolean>
   draft: Ref<string>
   messages: Ref<ChatMessage[]>
+  messageElement?: (id: string) => Element | null
+  bodyRoot?: () => Element | null
 }) {
   const workspaceVisible = inject(chatWorkspaceVisibleKey, shallowRef(true))
   const enabled = computed(() => options.enabled.value && workspaceVisible.value)
   const state = shallowRef<SpeechState>({ key: '', status: 'idle' })
   const replies = new LiveSpeechReplies()
   let flushTimer: ReturnType<typeof setTimeout> | undefined
+  let observer: MutationObserver | undefined
+  let observedRoot: Element | null = null
+  const rendered = options.messageElement ? (message: ChatMessage) => renderedSpeechText(message, options.messageElement!(message.id)) : undefined
   const controller = new ChatReadAloud({
     async synthesize(text, signal) {
       const { data, response } = await postBotsByBotIdTtsPlayback({
@@ -51,21 +57,34 @@ export function useChatReadAloud(options: {
   // flush:sync stops the player in the input event, before any pending media task.
   watch(options.draft, stop, { flush: 'sync' })
   function collect(flush = false) {
-    for (const reply of replies.update(options.messages.value, enabled.value && !options.draft.value, options.loading.value, flush)) controller.enqueue(reply)
+    for (const reply of replies.update(options.messages.value, enabled.value && !options.draft.value, options.loading.value, flush, rendered)) controller.enqueue(reply)
+  }
+  function scheduleFlush() {
+    if (!flushTimer && enabled.value && !options.loading.value && !options.draft.value) {
+      flushTimer = setTimeout(() => { flushTimer = undefined; collect(true) }, 80)
+    }
+  }
+  function observeBody() {
+    const root = options.bodyRoot?.() ?? null
+    if (observedRoot === root) return
+    observer?.disconnect(); observedRoot = root
+    if (!root) return
+    observer ??= new MutationObserver(() => { collect(); scheduleFlush() })
+    observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'style', 'hidden', 'data-markstream-mode', 'data-markstream-pending'] })
   }
   watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value }), value => {
     if (value.messages.some(message => message.role === 'assistant' && speechKey(message) === state.value.key && message.messages.some(block => block.type === 'error'))) { stop(); return }
-    collect()
+    observeBody(); collect()
     // A short opening phrase without punctuation must not wait for completion.
     // Do not reset on every delta: a continuous token stream cannot starve it.
     if (!flushTimer && value.enabled && !value.loading && !options.draft.value && value.messages.some(message => message.role === 'assistant' && message.streaming)) {
-      flushTimer = setTimeout(() => { flushTimer = undefined; collect(true) }, 80)
+      scheduleFlush()
     }
-  }, { deep: true, immediate: true })
+  }, { deep: true, immediate: true, flush: 'post' })
   function canReplay(message: ChatMessage) { return enabled.value && !message.streaming && !!speechText(message) }
   function replay(message: ChatMessage) {
     if (!enabled.value || message.streaming) return
-    const text = speechText(message)
+    const text = rendered ? rendered(message) : speechText(message)
     if (!text) return
     stop()
     controller.replay({ key: speechKey(message), text })
@@ -75,6 +94,7 @@ export function useChatReadAloud(options: {
     return message.role === 'assistant' && message.id === active?.id ? state.value.status : 'idle'
   }
   onDeactivated(stop)
-  onBeforeUnmount(stop)
+  onMounted(() => { observeBody(); collect() })
+  onBeforeUnmount(() => { observer?.disconnect(); stop() })
   return { state, status, stop, replay, canReplay, resume: () => { if (enabled.value) controller.resume() }, enabled }
 }

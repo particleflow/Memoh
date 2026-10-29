@@ -73,7 +73,7 @@ export class LiveSpeechReplies {
     this.live.clear()
     this.spoken.clear()
   }
-  update(messages: ChatMessage[], enabled: boolean, loading: boolean, flush = false): SpeechEntry[] {
+  update(messages: ChatMessage[], enabled: boolean, loading: boolean, flush = false, rendered?: (message: ChatMessage) => string): SpeechEntry[] {
     if (!enabled || loading) { this.interrupt(messages); return [] }
     const result: SpeechEntry[] = []
     for (const message of messages) {
@@ -92,7 +92,7 @@ export class LiveSpeechReplies {
         continue
       }
       if (message.streaming) this.live.set(key, revision)
-      const text = speechText(message)
+      const text = rendered ? rendered(message) : speechText(message)
       if (message.messages.some(block => block.type === 'error')) { this.consumed.add(revision); continue }
       if (message.streaming || (observed && (!message.runtimeRunId || observed === revision))) {
         const prior = this.spoken.get(observed && !message.runtimeRunId ? observed : revision) ?? ''
@@ -108,7 +108,10 @@ export class LiveSpeechReplies {
           if (delta.trim()) { result.push({ key, text: delta }); this.spoken.set(revision, prior + delta) }
         }
       }
-      if (message.streaming) continue
+      // A final message can precede typewriter, math and diagram DOM updates.
+      // Retain only already-observed live replies so those later visible tails
+      // can be collected. Stop/scope/permission changes still consume the run.
+      if (message.streaming || rendered) continue
       this.live.delete(key)
       this.consumed.add(revision)
       if (observed) this.consumed.add(observed)

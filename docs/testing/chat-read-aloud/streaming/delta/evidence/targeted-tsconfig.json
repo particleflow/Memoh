@@ -1,0 +1,26 @@
+{
+  "extends": "/workspace/nas-speech/apps/web/tsconfig.app.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "/workspace/nas-speech",
+    "types": [],
+    "paths": {
+      "@/*": [
+        "/workspace/nas-speech/apps/web/src/*"
+      ],
+      "@memohai/sdk": [
+        "/workspace/nas-speech/packages/sdk/src/index.ts"
+      ],
+      "@memohai/sdk/*": [
+        "/workspace/nas-speech/packages/sdk/src/*"
+      ]
+    }
+  },
+  "include": [
+    "/workspace/nas-speech/apps/web/src/pages/home/composables/chat-read-aloud.ts",
+    "/workspace/nas-speech/apps/web/src/pages/home/composables/useChatReadAloud.ts",
+    "/workspace/nas-speech/apps/web/src/pages/home/composables/speech-visible-text.ts",
+    "/workspace/nas-speech/apps/web/src/pages/home/composables/speech-audio-stream.ts",
+    "/workspace/nas-speech/apps/web/src/pages/home/composables/speech-rendered-text.ts"
+  ]
+}
