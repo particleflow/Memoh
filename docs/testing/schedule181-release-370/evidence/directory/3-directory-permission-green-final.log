@@ -1,0 +1,19 @@
+=== RUN   TestBotTaskDirectoryHTTPAccountRevocationAndNoStore
+--- PASS: TestBotTaskDirectoryHTTPAccountRevocationAndNoStore (0.00s)
+=== RUN   TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess
+--- PASS: TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.028s
+=== RUN   TestDirectoryPostgresAllOriginalSourcesAndHistory
+    directory_postgres_test.go:23: TEST_POSTGRES_DSN is not set
+--- SKIP: TestDirectoryPostgresAllOriginalSourcesAndHistory (0.00s)
+=== RUN   TestDirectoryPreservesOriginalOccurrencesAndCursorScope
+--- PASS: TestDirectoryPreservesOriginalOccurrencesAndCursorScope (0.00s)
+=== RUN   TestDirectoryContinuesAfterAnEmptyFilteredScan
+--- PASS: TestDirectoryContinuesAfterAnEmptyFilteredScan (0.00s)
+=== RUN   TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination
+--- PASS: TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination (0.00s)
+=== RUN   TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant
+--- PASS: TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/sessiontask	0.014s

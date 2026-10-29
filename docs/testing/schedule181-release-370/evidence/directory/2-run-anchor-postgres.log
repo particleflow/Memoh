@@ -1,0 +1,38 @@
+=== RUN   TestDirectoryPostgresAllOriginalSourcesAndHistory
+    directory_postgres_test.go:130: all 9 original task occurrences retained; ordinary/prefix-only runs excluded; incoming delegation and opaque computer run checked
+--- PASS: TestDirectoryPostgresAllOriginalSourcesAndHistory (0.24s)
+=== RUN   TestDirectoryPostgresExactRunReferences
+    directory_postgres_test.go:226: exact old/new/cross-session references survive fence changes; schedule occurrence, bidirectional delegation and computer TEXT IDs retain original identity; wrong bot/session/run and reset run rejected; rollback only
+--- PASS: TestDirectoryPostgresExactRunReferences (0.15s)
+=== RUN   TestDirectoryPreservesOriginalOccurrencesAndCursorScope
+--- PASS: TestDirectoryPreservesOriginalOccurrencesAndCursorScope (0.00s)
+=== RUN   TestDirectoryContinuesAfterAnEmptyFilteredScan
+--- PASS: TestDirectoryContinuesAfterAnEmptyFilteredScan (0.00s)
+=== RUN   TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination
+--- PASS: TestDirectoryHandoffsBothDirectionsAndMissingScheduleDestination (0.00s)
+=== RUN   TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant
+--- PASS: TestDirectoryComputerUsesOriginalReceiptAndLiveTargetGrant (0.00s)
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/missing
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/bot
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/session
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/run
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/invocation
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/turn
+=== RUN   TestDirectoryExactRunBindingNeverFallsBackToLatest/read-error
+--- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/missing (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/bot (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/session (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/run (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/invocation (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/turn (0.00s)
+    --- PASS: TestDirectoryExactRunBindingNeverFallsBackToLatest/read-error (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/sessiontask	0.415s
+=== RUN   TestBotTaskDirectoryHTTPAccountRevocationAndNoStore
+--- PASS: TestBotTaskDirectoryHTTPAccountRevocationAndNoStore (0.00s)
+=== RUN   TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess
+--- PASS: TestBotTaskDirectoryPermissionReadFailureIsNotEmptySuccess (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.079s

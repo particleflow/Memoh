@@ -1,0 +1,5 @@
+=== RUN   TestNativeTaskQueuePostgresRestartAndDuplicateClaims
+    native_task_queue_test.go:273: actual PostgreSQL: pre-admission identity, fresh-host restart, 8 concurrent claims/1 winner, 8 duplicate callbacks/1 execution, terminal recovery, unknown/no replay, failure/cancel/revocation including lock wait, directory dedupe, credential exclusion
+--- PASS: TestNativeTaskQueuePostgresRestartAndDuplicateClaims (0.63s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.654s

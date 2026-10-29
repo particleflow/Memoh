@@ -1,0 +1,18 @@
+Isolated occurrence database; additive 181 extension applied; no timer/model.
+=== RUN   TestScheduleOccurrencePostgresClaimAndRecovery
+    occurrence_postgres_test.go:286: 16 callbacks / 2 service instances: 1 fire, 1 count, 1 native ledger admission; reopen repeats 0; separate claimant process SIGKILL before binding; no-run expiry: 8 recovery calls, 1 unknown; live claims and original admission retained; 0 models/timers
+--- PASS: TestScheduleOccurrencePostgresClaimAndRecovery (0.47s)
+=== RUN   TestScheduleOccurrenceClaimProcess
+    occurrence_postgres_test.go:293: child-only crash fixture
+--- SKIP: TestScheduleOccurrenceClaimProcess (0.00s)
+=== RUN   TestScheduleOccurrenceCallbackKeepsDueIdentity
+--- PASS: TestScheduleOccurrenceCallbackKeepsDueIdentity (0.00s)
+=== RUN   TestScheduleOccurrenceIntervalUsesPersistedAnchor
+--- PASS: TestScheduleOccurrenceIntervalUsesPersistedAnchor (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/schedule	0.492s
+=== RUN   TestScheduleOccurrenceUnknownReturnsOriginalContact
+    schedule_occurrence_recovery_test.go:133: expired no-run fire returned unknown to original contact after host/pool reconstruction; active claim stayed pending; revoked user blocked; zero execution admissions
+--- PASS: TestScheduleOccurrenceUnknownReturnsOriginalContact (0.20s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.222s

@@ -1,0 +1,4 @@
+ok  	github.com/felinics/memoh/cmd/internal/core	0.029s [no tests to run]
+ok  	github.com/felinics/memoh/internal/schedule	0.017s [no tests to run]
+ok  	github.com/felinics/memoh/internal/sessiontask	0.014s [no tests to run]
+?   	github.com/felinics/memoh/internal/taskresult	[no test files]

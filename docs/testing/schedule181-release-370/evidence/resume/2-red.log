@@ -1,0 +1,20 @@
+=== RUN   TestScheduleOccurrenceResumePostgres
+=== RUN   TestScheduleOccurrenceResumePostgres/captured_callback_after_resume
+    occurrence_resume_postgres_test.go:87: captured_callback_after_resume: creators=2 triggers=2 count=2 fires=2, want 0
+=== RUN   TestScheduleOccurrenceResumePostgres/resume_commit_rechecks_waiter
+    occurrence_resume_postgres_test.go:137: resume_commit_rechecks_waiter: creators=1 triggers=1 count=1 fires=1, want 0
+=== RUN   TestScheduleOccurrenceResumePostgres/admitted_fire_continues
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+=== RUN   TestScheduleOccurrenceResumePostgres/unknown_due_stays_unique
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+=== RUN   TestScheduleOccurrenceResumePostgres/rename_keeps_registration
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+--- FAIL: TestScheduleOccurrenceResumePostgres (0.33s)
+    --- FAIL: TestScheduleOccurrenceResumePostgres/captured_callback_after_resume (0.14s)
+    --- FAIL: TestScheduleOccurrenceResumePostgres/resume_commit_rechecks_waiter (0.10s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/admitted_fire_continues (0.04s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/unknown_due_stays_unique (0.02s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/rename_keeps_registration (0.03s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/schedule	0.351s
+FAIL

@@ -1,0 +1,34 @@
+=== RUN   TestScheduleOccurrenceBusyPostgres
+=== RUN   TestScheduleOccurrenceBusyPostgres/busy_does_not_spend_max_calls_or_disappear
+    occurrence_busy_postgres_test.go:147: real competing native admission -> busy, no own run; quota refunded, automatic max_calls stop released; original fire persists as known non-execution; same due never retried; next due executes once and limit remains enforced
+=== RUN   TestScheduleOccurrenceBusyPostgres/explicit_pause_before_refund
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; explicit_pause_before_refund
+=== RUN   TestScheduleOccurrenceBusyPostgres/explicit_pause_after_refund
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; explicit_pause_after_refund
+=== RUN   TestScheduleOccurrenceBusyPostgres/pause_commit_while_refund_waits
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; pause_commit_while_refund_waits
+=== RUN   TestScheduleOccurrenceBusyPostgres/pause_waits_for_refund_commit
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; pause_waits_for_refund_commit
+=== RUN   TestScheduleOccurrenceBusyPostgres/budget_expired_before_busy_receipt
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; budget_expired_before_busy_receipt
+=== RUN   TestScheduleOccurrenceBusyPostgres/unknown_wins
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; unknown_wins
+=== RUN   TestScheduleOccurrenceBusyPostgres/original_run_exists
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; original_run_exists
+=== RUN   TestScheduleOccurrenceBusyPostgres/concurrent_refund
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; concurrent_refund
+=== RUN   TestScheduleOccurrenceBusyPostgres/refund_ack_lost
+    occurrence_busy_postgres_test.go:320: retained exact fire/session/origin/deadline; no repeated admission; refund_ack_lost
+--- PASS: TestScheduleOccurrenceBusyPostgres (0.49s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/busy_does_not_spend_max_calls_or_disappear (0.13s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/explicit_pause_before_refund (0.03s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/explicit_pause_after_refund (0.02s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/pause_commit_while_refund_waits (0.10s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/pause_waits_for_refund_commit (0.04s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/budget_expired_before_busy_receipt (0.02s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/unknown_wins (0.02s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/original_run_exists (0.02s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/concurrent_refund (0.09s)
+    --- PASS: TestScheduleOccurrenceBusyPostgres/refund_ack_lost (0.03s)
+PASS
+ok  	github.com/felinics/memoh/internal/schedule	0.502s

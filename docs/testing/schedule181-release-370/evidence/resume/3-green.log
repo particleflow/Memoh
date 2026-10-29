@@ -1,0 +1,22 @@
+=== RUN   TestScheduleOccurrencePausePostgres
+    occurrence_pause_postgres_test.go:237: captured paused callback: zero fire/count/execution; 8 callbacks/2 services launched against uncommitted pause, database lock waiter observed, all denied; prior claim retains exact native run/result/origin/7200s budget; unknown not replayed; no cron started or model called
+--- PASS: TestScheduleOccurrencePausePostgres (0.16s)
+=== RUN   TestScheduleOccurrenceResumePostgres
+=== RUN   TestScheduleOccurrenceResumePostgres/captured_callback_after_resume
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+=== RUN   TestScheduleOccurrenceResumePostgres/resume_commit_rechecks_waiter
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+=== RUN   TestScheduleOccurrenceResumePostgres/admitted_fire_continues
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+=== RUN   TestScheduleOccurrenceResumePostgres/unknown_due_stays_unique
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+=== RUN   TestScheduleOccurrenceResumePostgres/rename_keeps_registration
+    occurrence_resume_postgres_test.go:195: real PostgreSQL; manually released cron callbacks; no cron started or model called
+--- PASS: TestScheduleOccurrenceResumePostgres (0.27s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/captured_callback_after_resume (0.10s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/resume_commit_rechecks_waiter (0.09s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/admitted_fire_continues (0.03s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/unknown_due_stays_unique (0.02s)
+    --- PASS: TestScheduleOccurrenceResumePostgres/rename_keeps_registration (0.02s)
+PASS
+ok  	github.com/felinics/memoh/internal/schedule	0.442s

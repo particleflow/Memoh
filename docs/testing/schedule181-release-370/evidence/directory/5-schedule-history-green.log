@@ -1,0 +1,5 @@
+=== RUN   TestDirectoryPostgresDeletedScheduleKeepsOriginalHistory
+    schedule_history_postgres_test.go:198: four original fires survive disable/delete/replay/up/down/up; exact historical run retained; unknown/failed/unbound history preserved; no latest/foreign fallback; deleted config cannot be read/reenabled/claimed/bootstrap-registered; Bot/team scope intact; late completion retained; session lists exclude archived target; TEMP transaction rolled back
+--- PASS: TestDirectoryPostgresDeletedScheduleKeepsOriginalHistory (0.16s)
+PASS
+ok  	github.com/felinics/memoh/internal/sessiontask	0.173s

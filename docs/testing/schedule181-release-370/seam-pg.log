@@ -1,0 +1,5 @@
+=== RUN   TestScheduleOccurrenceUnknownReturnsOriginalContact
+    schedule_occurrence_recovery_test.go:138: expired no-run fire returned unknown to original contact after host/pool reconstruction; active claim stayed pending; revoked user blocked; zero execution admissions
+--- PASS: TestScheduleOccurrenceUnknownReturnsOriginalContact (0.21s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.230s

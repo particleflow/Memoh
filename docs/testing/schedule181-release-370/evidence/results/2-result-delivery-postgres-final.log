@@ -1,0 +1,5 @@
+=== RUN   TestTaskResultPostgresCrashWindows
+    task_result_delivery_test.go:260: C1 stable invocation; C2 progress/empty output not consumed; C3 8 concurrent recoveries reused committed message; original action count=1; unknown never reclaimed; revocation denied
+--- PASS: TestTaskResultPostgresCrashWindows (0.44s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.468s

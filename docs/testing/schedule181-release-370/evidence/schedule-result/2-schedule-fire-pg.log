@@ -1,0 +1,6 @@
+Isolated database ready; additive migration 181 applied. No scheduler started.
+=== RUN   TestScheduleResultPostgresCrashWindows
+    schedule_result_delivery_test.go:312: schedule-specific C1/C2/C3 passed; 8 concurrent publication recoveries; failed/unknown/legacy preserved; deleted plan retained; exact fire/run; contact change and revocation refused; zero model/external actions
+--- PASS: TestScheduleResultPostgresCrashWindows (0.40s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.429s
