@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 /workspace/fast-transfer-path
+
+
+ Test Files  2 passed (2)
+      Tests  25 passed (25)
+   Start at  14:43:57
+   Duration  2.32s (transform 310ms, setup 0ms, import 457ms, tests 1.83s, environment 1ms)
+

@@ -116,7 +116,7 @@ modified or benchmarked by this increment.
   reverse download resumed at 1,048,576, took 125.446 ms including verification,
   and recorded a file-request TTFB of 28.781 ms. A revoked complete cache was
   refused. These are loopback/disk fixture numbers, not network guarantees.
-- `web-final-tests.log`: 25 shared-Web tests passed, including HTTPS logical
+- `web-final-tests.txt`: 25 shared-Web tests passed, including HTTPS logical
   identity to HTTP dispatch, unchanged chunk bytes, no duplicate Create,
   interrupted recovery and an account change while preparing a mapped body.
 - Full Web/SDK type checks, targeted ESLint, changed-package Go lint, UI copy policy and UI contract
@@ -178,3 +178,6 @@ The expanded handler lint reported the existing unused `modelID` parameter at
 pinned base. That unrelated handler was not edited. Changed media/config/client
 package lint passed after fixing the new fixture lint findings. All four affected
 Go package test commands passed; they are not counted as new routing test cases.
+
+Fixed validation logs are retained as `.txt` because repository-wide `*.log`
+files are ignored. The exit statuses and scope are recorded in `summary.json`.

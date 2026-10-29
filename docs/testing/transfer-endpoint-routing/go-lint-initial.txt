@@ -1,0 +1,27 @@
+internal/transferclient/endpoint_network_test.go:93:41: response body must be closed (bodyclose)
+	if _, err := c.http.Transport.RoundTrip(request); !errors.Is(err, ErrBinding) {
+	                                       ^
+internal/transferclient/endpoint_network_test.go:126:13: unlambda: replace `func(k string) string { return os.Getenv(k) }` with `os.Getenv` (gocritic)
+		getenv := func(k string) string { return os.Getenv(k) }
+		          ^
+internal/transferclient/endpoint_network_test.go:234:11: G204: Subprocess launched with a potential tainted input or cmd arguments (gosec)
+	child := exec.Command(os.Args[0], "-test.run=^TestEndpointMappedMultiFileProcessRecovery$")
+	         ^
+internal/transferclient/endpoint_network_test.go:92:31: net/http.NewRequest must not be called. use net/http.NewRequestWithContext (noctx)
+	request, _ := http.NewRequest(http.MethodGet, other.URL, nil)
+	                             ^
+internal/handlers/local_channel.go:2717:98: unused-parameter: parameter 'modelID' seems to be unused, consider removing or renaming it as _ (revive)
+func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, modelID, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
+                                                                                                 ^
+internal/transferclient/endpoint_network_test.go:46:79: unused-parameter: parameter 'r' seems to be unused, consider removing or renaming it as _ (revive)
+		physical := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		                                                                            ^
+internal/transferclient/endpoint_network_test.go:159:18: "403" can be replaced by http.StatusForbidden (usestdlibvars)
+			w.WriteHeader(403)
+			              ^
+internal/transferclient/endpoint_network_test.go:164:18: "401" can be replaced by http.StatusUnauthorized (usestdlibvars)
+			w.WriteHeader(401)
+			              ^
+internal/transferclient/endpoint_network_test.go:170:18: "404" can be replaced by http.StatusNotFound (usestdlibvars)
+			w.WriteHeader(404)
+			              ^
