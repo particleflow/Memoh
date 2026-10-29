@@ -72,8 +72,10 @@ func provideAuthHandler(log *slog.Logger, accountService *accounts.Service, rc *
 	return handlers.NewAuthHandler(log, accountService, rc.JwtSecret, rc.JwtExpiresIn)
 }
 
-func provideSessionQueueHandler(queries dbstore.Queries, agentService *application.Service, botService *bots.Service, accountService *accounts.Service) *handlers.SessionQueueHandler {
-	return handlers.NewSessionQueueHandler(queries, agentService, botService, accountService)
+func provideSessionQueueHandler(queries dbstore.Queries, agentService *application.Service, botService *bots.Service, accountService *accounts.Service, routeService *route.DBService, sessionService *sessionpkg.Service) *handlers.SessionQueueHandler {
+	h := handlers.NewSessionQueueHandler(queries, agentService, botService, accountService)
+	h.SetPrivateChatResolver(route.NewThreadCoordinator(nil, routeService, sessionService))
+	return h
 }
 
 func provideMessageHandler(log *slog.Logger, msgService *message.DBService, sessionService *sessionpkg.Service, mediaService *media.Service, botService *bots.Service, accountService *accounts.Service, hub *event.Hub, toolApproval *toolapproval.Service, userInput *userinput.Service, bgManager *background.Manager, acpPool *acpagent.SessionPool, pipeline *timeline.Pipeline, compactionService *compaction.Service, cfg config.Config) *handlers.MessageHandler {
@@ -154,8 +156,9 @@ func provideProviderOAuthHandler(providersService *providers.Service) *handlers.
 	return handlers.NewProviderOAuthHandler(providersService)
 }
 
-func provideWebHandler(channelManager *channel.Manager, channelStore *channel.Store, hub *local.RouteHub, botService *bots.Service, accountService *accounts.Service, sessionService *sessionpkg.Service, resolver *application.Service, sessionRuntime *sessionruntime.Manager, mediaService *media.Service, audioService *audiopkg.Service, settingsService *settings.Service, rc *boot.RuntimeConfig, commandHandler *command.Handler, containerdHandler *handlers.ContainerdHandler, workdirService *workdir.Service, queries dbstore.Queries) *handlers.LocalChannelHandler {
+func provideWebHandler(channelManager *channel.Manager, channelStore *channel.Store, hub *local.RouteHub, botService *bots.Service, accountService *accounts.Service, sessionService *sessionpkg.Service, resolver *application.Service, sessionRuntime *sessionruntime.Manager, mediaService *media.Service, audioService *audiopkg.Service, settingsService *settings.Service, rc *boot.RuntimeConfig, commandHandler *command.Handler, containerdHandler *handlers.ContainerdHandler, workdirService *workdir.Service, queries dbstore.Queries, routeService *route.DBService) *handlers.LocalChannelHandler {
 	h := handlers.NewLocalChannelHandler(local.WebType, channelManager, channelStore, hub, botService, accountService, sessionService)
+	h.SetPrivateChatResolver(route.NewThreadCoordinator(nil, routeService, sessionService))
 	h.SetAgentService(resolver)
 	h.SetSessionRuntime(sessionRuntime)
 	h.SetAbortObservationStore(queries)

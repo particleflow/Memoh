@@ -991,37 +991,9 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     })
   }
 
-  /** Open or focus a draft chat tab (no session yet). An explicit group owns its
-   * own draft; callers without a group retain the legacy global-first behavior. */
-  function openDraftChat(opts?: { title?: string, groupId?: string, explicitSelection?: boolean }) {
-    const dock = api.value
-    if (!dock) return
-    const bid = (currentBotId.value ?? '').trim()
-    if (!bid) return
-    const draftCandidates = opts?.groupId
-      ? dock.getGroup(opts.groupId)?.panels ?? []
-      : dock.panels
-    const existingDraft = draftCandidates.find(
-      p => panelComponentOf(p.id) === 'chat' && panelSessionId(p) === null,
-    )
-    if (existingDraft) {
-      const explicitSelection = opts?.explicitSelection === true
-      if (dock.activePanel?.id !== existingDraft.id) {
-        setNextChatActivationExplicit(existingDraft.id, explicitSelection)
-        focusPanel(existingDraft)
-      }
-      chatStore.selectDraft({ explicitSelection })
-      return
-    }
-    const id = nextChatPanelId(bid)
-    setNextChatActivationExplicit(id, opts?.explicitSelection === true)
-    openEphemeral({
-      id,
-      component: 'chat',
-      title: opts?.title?.trim() || defaultChatTitle(),
-      params: { sessionId: null, explicitSelection: opts?.explicitSelection === true },
-      groupId: opts?.groupId,
-    })
+  /** Compatibility for old controls: resolve the fixed Bot contact. */
+  function openDraftChat(_opts?: { title?: string, groupId?: string, explicitSelection?: boolean }) {
+    void chatStore.openContact()
   }
 
   // Activating a chat tab focuses its panel-scoped state and mirrors its session
@@ -1192,7 +1164,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     }
   }
 
-  // Refill an EMPTY dock with the persistent "New Session" page. Guarded to the
+  // Refill an EMPTY dock by resolving the persistent Bot contact. Guarded to the
   // empty dock (not merely "no chat tab"): the respawn opens into the group's
   // ephemeral slot, so firing while a file/preview tab is open would evict it.
   function ensureDraftChatPanel() {

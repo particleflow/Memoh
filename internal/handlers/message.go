@@ -135,7 +135,7 @@ func (h *MessageHandler) Register(e *echo.Echo) {
 	botGroup := e.Group("/bots/:bot_id")
 	botGroup.GET("/messages", h.ListMessages)
 	botGroup.GET("/messages/locate", h.LocateMessage)
-	botGroup.DELETE("/messages", h.DeleteMessages)
+	botGroup.DELETE("/messages", rejectParallelChat)
 	botGroup.GET("/media/:content_hash", h.ServeMedia)
 	botGroup.HEAD("/media/:content_hash", h.ServeMedia)
 	botGroup.GET("/media/limits", h.MediaUploadLimits)

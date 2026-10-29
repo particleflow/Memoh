@@ -26,6 +26,7 @@ import (
 // authorization and request/response mapping only; transactions and queue
 // semantics live in the application service.
 type SessionQueueHandler struct {
+	privateChats   privateChatResolver
 	queries        dbstore.Queries
 	agentService   *application.Service
 	botService     *bots.Service
@@ -144,6 +145,11 @@ func (h *SessionQueueHandler) authorize(c echo.Context) (queueScope, error) {
 	// without runtime check summaries instead of through two full authorizations.
 	if err := h.authorizeQueueAccess(c.Request().Context(), identityID, botID, sess.CreatedByUserID.Valid && sess.CreatedByUserID.String() == identityID); err != nil {
 		return queueScope{}, err
+	}
+	if c.Request().Method != http.MethodGet {
+		if err := requireExistingContact(c.Request().Context(), h.privateChats, botID, identityID, sessionID); err != nil {
+			return queueScope{}, err
+		}
 	}
 	teamID := ""
 	if sess.TeamID.Valid {

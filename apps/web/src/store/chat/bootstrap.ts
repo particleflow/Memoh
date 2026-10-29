@@ -1,6 +1,5 @@
 import { ref, type Ref } from 'vue'
-import { fetchSessions, resolvePrivateChat, inspectPrivateChat, bindPrivateChat, type SessionSummary, type PrivateChatEntry } from '@/composables/api/useChat'
-import { apiErrorStatus, isApiErrorCode } from '@/utils/api-error'
+import { fetchSessions, resolvePrivateChat, type SessionSummary, type PrivateChatEntry } from '@/composables/api/useChat'
 import type { WSAbortReason } from '@/composables/api/useChat.ws'
 import type { ChatViewTarget, ExternalAgentSessionInput } from './types'
 
@@ -56,6 +55,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   let initializingBotId: string | null = null
   let initializePromise: Promise<void> | null = null
 
+  const contactSessionIds = ref<Record<string, string>>({})
   const contactChoice = ref<(PrivateChatEntry & { botId: string }) | null>(null)
   const contactBusy = ref(false)
   const contactOpenRequested = ref<{ botId: string, sessionId: string } | null>(null)
@@ -64,20 +64,11 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   const contactNavigationPending = ref(deps.hasContactEntry?.() === true)
   let contactRequest = 0
 
-  async function resolveContact(botId: string, valid: () => boolean, primaryEntry = false): Promise<SessionSummary | undefined> {
-    const entry = await inspectPrivateChat(botId, undefined, !primaryEntry && deps.explicitSessionSelection.value ? deps.sessionId.value ?? undefined : undefined)
+  async function resolveContact(botId: string, valid: () => boolean): Promise<SessionSummary | undefined> {
+    const session = await resolvePrivateChat(botId)
     if (!valid()) return undefined
-    if (entry.session) return entry.session
-    if (entry.candidates.length === 1 && !entry.nextCursor) {
-      // A unique, server-verified ordinary history needs no extra user gate.
-      // The bind still checks ownership and first-writer semantics atomically.
-      return bindPrivateChat(botId, entry.candidates[0]!.id)
-    }
-    if (entry.candidates.length) {
-      contactChoice.value = { ...entry, botId }
-      return undefined
-    }
-    return resolvePrivateChat(botId)
+    contactSessionIds.value[botId] = session.id
+    return session
   }
 
   async function openContact() {
@@ -92,7 +83,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     try {
       // Inspect before first creation; restored focus is not a candidate hint.
       // An existing server binding always wins over eligible older history.
-      const session = await resolveContact(botId, () => request === contactRequest && selectionRequest === deps.currentSelectSessionRequest() && generation === deps.userScopeGeneration() && deps.currentBotId.value === botId, true)
+      const session = await resolveContact(botId, () => request === contactRequest && selectionRequest === deps.currentSelectSessionRequest() && generation === deps.userScopeGeneration() && deps.currentBotId.value === botId)
       if (request !== contactRequest || selectionRequest !== deps.currentSelectSessionRequest() || generation !== deps.userScopeGeneration() || deps.currentBotId.value !== botId) return
       if (session) {
         contactChoice.value = null
@@ -120,41 +111,9 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     contactChoice.value = null
   }
 
-  async function loadContactCandidates() {
-    const choice = contactChoice.value
-    if (!choice?.nextCursor || contactBusy.value) return
-    const generation = deps.userScopeGeneration()
-    const request = ++contactRequest
-    contactBusy.value = true
-    try {
-      const page = await inspectPrivateChat(choice.botId, choice.nextCursor)
-      if (request !== contactRequest || contactChoice.value !== choice || generation !== deps.userScopeGeneration()) return
-      if (page.session) {
-        contactChoice.value = null
-        contactOpenRequested.value = { botId: choice.botId, sessionId: page.session.id }
-      } else contactChoice.value = { ...choice, candidates: [...new Map([...choice.candidates, ...page.candidates].map(s => [s.id, s])).values()], nextCursor: page.nextCursor }
-    } finally { if (request === contactRequest && generation === deps.userScopeGeneration()) contactBusy.value = false }
-  }
-
-  async function confirmContact(sessionId: string | null) {
-    const choice = contactChoice.value
-    if (!choice || contactBusy.value) return
-    const generation = deps.userScopeGeneration()
-    const request = ++contactRequest
-    contactBusy.value = true
-    try {
-      // Inspect first after failures too. This reconciles unknown commits and
-      // another device's first binding without replaying a different choice.
-      const current = await inspectPrivateChat(choice.botId)
-      if (request !== contactRequest || contactChoice.value !== choice || generation !== deps.userScopeGeneration() || deps.currentBotId.value !== choice.botId) return
-      const session = current.session ?? (sessionId
-        ? await bindPrivateChat(choice.botId, sessionId)
-        : await resolvePrivateChat(choice.botId))
-      if (request !== contactRequest || contactChoice.value !== choice || generation !== deps.userScopeGeneration() || deps.currentBotId.value !== choice.botId) return
-      contactChoice.value = null
-      contactOpenRequested.value = { botId: choice.botId, sessionId: session.id }
-    } finally { if (request === contactRequest && generation === deps.userScopeGeneration()) contactBusy.value = false }
-  }
+  // Compatibility for old mounted dialogs; contact selection is system-owned.
+  async function loadContactCandidates() {}
+  async function confirmContact(_sessionId: string | null) {}
 
   function cancelContactChoice() {
     if (!contactBusy.value) cancelContactNavigation()
@@ -228,7 +187,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
           deps.startBotSessionsActivityStream(botId)
 
           const restoredSessionId = (deps.sessionId.value ?? '').trim()
-          const preferContact = contactNavigationPending.value && !deps.hasHistoryEntry?.()
+          const preferContact = !deps.hasHistoryEntry?.()
           const restoredExplicitSession = !preferContact && restoredSessionId
             && deps.explicitSessionSelection.value
             ? await deps.ensureSessionSummary(botId, restoredSessionId)
@@ -245,17 +204,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
           let contact: SessionSummary | undefined
           if (!preservePendingExternalAgentStage && !preserveExplicitEmptyComposer && !restoredExplicitSession && (preferContact || !deps.draftIntent.value) && !deps.hasHistoryEntry?.()) {
             const request = deps.currentSelectSessionRequest()
-            try {
-              contact = await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.(), preferContact)
-            } catch (error) {
-              // Old servers retain their original navigation. Auth, storage and
-              // uncertain outcomes must never fall back to a different chat.
-              const status = apiErrorStatus(error)
-              const unsupported = (status === 404 && isApiErrorCode(error, 'http.not_found'))
-                || (status === 405 && isApiErrorCode(error, 'http.method_not_allowed'))
-              if (!unsupported) throw error
-              contactNavigationPending.value = false
-            }
+            contact = await resolveContact(botId, () => generation === deps.userScopeGeneration() && request === deps.currentSelectSessionRequest() && deps.currentBotId.value === botId && !deps.hasHistoryEntry?.())
             if (generation !== deps.userScopeGeneration()) return
             if (request !== deps.currentSelectSessionRequest()) return
             if ((!preferContact && deps.draftIntent.value) || deps.hasHistoryEntry?.()) contact = undefined
@@ -384,30 +333,16 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
     await deps.ensureSessionSummary(botId, sessionId, requestId)
   }
 
-  async function createNewSession(options: { explicitSelection?: boolean } = {}) {
-    cancelContactNavigation()
-    const botId = await deps.ensureBot()
-    if (!botId) return
-    deps.resetToEmptyComposer({
-      explicitSelection: options.explicitSelection === true,
-      draftIntent: true,
-    })
+  async function createNewSession(_options: { explicitSelection?: boolean } = {}) {
+    await openContact()
   }
 
-  function selectDraft(options: { explicitSelection?: boolean } = {}) {
-    cancelContactNavigation()
-    const explicitSelection = options.explicitSelection === true
-    deps.resetToEmptyComposer({
-      clearPendingExternalAgent: false,
-      explicitSelection,
-      draftIntent: true,
-    })
-    if (!explicitSelection) {
-      void deps.stageDefaultExternalAgentFromSettings(deps.currentSelectSessionRequest())
-    }
+  function selectDraft(_options: { explicitSelection?: boolean } = {}) {
+    void openContact()
   }
 
   function reset() {
+    contactSessionIds.value = {}
     contactRequest++
     contactChoice.value = null
     contactBusy.value = false
@@ -421,7 +356,7 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
   }
 
   return {
-    loadingChats, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
+    loadingChats, contactSessionIds, contactChoice, contactBusy, contactOpenRequested, contactNavigationPending, completeContactOpen,
     openContact, confirmContact, loadContactCandidates, cancelContactChoice,
     initialize,
     selectBot,

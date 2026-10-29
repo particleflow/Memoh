@@ -56,7 +56,7 @@ func (h *SessionHandler) ResolvePrivateChat(c echo.Context) error {
 	if h.privateChats == nil {
 		return apperror.New(apperror.CodeHTTPServiceUnavailable, nil)
 	}
-	session, err := h.privateChats.EnsurePrivateChat(c.Request().Context(), bot, user)
+	session, err := resolveContinuousContact(c.Request().Context(), h.privateChats, bot, user)
 	if errors.Is(err, route.ErrContactUnavailable) {
 		return apperror.New(apperror.CodeHTTPServiceUnavailable, nil)
 	}
@@ -151,6 +151,8 @@ func (h *SessionHandler) InspectPrivateChat(c echo.Context) error {
 		}
 		entry.Session = &s
 	}
+	entry.Candidates = []thread.Thread{}
+	entry.NextCursor = ""
 	return c.JSON(http.StatusOK, entry)
 }
 

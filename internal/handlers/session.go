@@ -147,10 +147,10 @@ func (h *SessionHandler) SetProjectionCache(cache sessionProjectionCache) {
 // Register registers session routes.
 func (h *SessionHandler) Register(e *echo.Echo) {
 	g := e.Group("/bots/:bot_id/sessions")
-	g.POST("", h.CreateSession)
+	g.POST("", rejectParallelChat)
 	g.POST("/contact", h.ResolvePrivateChat)
 	g.GET("/contact", h.InspectPrivateChat)
-	g.POST("/contact/bind", h.BindPrivateChat)
+	g.POST("/contact/bind", rejectParallelChat)
 	g.GET("", h.ListSessions)
 	g.GET("/model-preference-seed", h.ModelPreferenceSeed)
 	g.GET("/:session_id", h.GetSession)
@@ -161,9 +161,9 @@ func (h *SessionHandler) Register(e *echo.Echo) {
 	g.GET("/:session_id/runtime-controls/goal", h.GetRuntimeGoal)
 	g.POST("/:session_id/runtime-controls/goal", h.ControlRuntimeGoal)
 	g.POST("/:session_id/runtime-controls/commands", h.ExecuteRuntimeCommand)
-	g.POST("/:session_id/fork", h.ForkSession)
-	g.PATCH("/:session_id", h.UpdateSession)
-	g.DELETE("/:session_id", h.DeleteSession)
+	g.POST("/:session_id/fork", rejectParallelChat)
+	g.PATCH("/:session_id", h.UpdateSession, h.fixedContactPreferences)
+	g.DELETE("/:session_id", rejectParallelChat)
 }
 
 type createSessionRequest struct {
