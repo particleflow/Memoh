@@ -1,0 +1,109 @@
+{
+  "verified_at_utc": "2026-10-29T13:01:02.144943+00:00",
+  "base_head": "6391829c2b348938822d2a8a5f2ecaedeeddbfb8",
+  "production_source_sha256": "cc9d17aa19d7ec95ae14606c0f4f2806019f57f4f53ee794ae1276c8c58608a2",
+  "binary_sha256": "de9ad399ce1e32a8f61e8ded8308e55a3e12702a114c33d815734fe75e44b780",
+  "sessiontask_service_sha256": "084cedc82a514f726f3945dd8aa5770ccd1e6339e59d391b4754052549e89172",
+  "frontend_source_sha256": "22f9e83048c70dae2622054c77e89b3f652b4e09caba5e7b18762edf0a0bcd11",
+  "frontend_files_verified_equal": 1317,
+  "ui_submodule": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "environment": {
+    "api": "http://127.0.0.1:58080",
+    "web": "http://127.0.0.1:58083",
+    "postgres": "Dedicated synthetic memoh-herdr-ui-pg; migrations 176 to 180",
+    "startup": "Current Go ./cmd/agent plus current frontend source mirror and frozen-lockfile pnpm 10.34.8 Vite; mise unavailable. Existing dedicated PG/pgvector containers restored, other dev containers untouched."
+  },
+  "fixture": {
+    "added_historical_operations": 3,
+    "original_operations_preserved": 3,
+    "total_operations": 6,
+    "historical_operation_states": [
+      "completed",
+      "completed",
+      "unknown"
+    ],
+    "historical_messages": 3,
+    "legacy_shape": "No target_snapshot; synthetic retained fingerprint; no execution run/turn exists. No business call was performed.",
+    "contact_setup": "Added one independent empty synthetic Contact session and its route to resolve current baseline ambiguity (HTTP 409) among multiple unbound history candidates. No original session, operation or message was rewritten."
+  },
+  "http": {
+    "phases": [
+      "binding retained, runtime not revoked, OAuth connection inactive",
+      "runtime revoked, binding retained",
+      "binding deleted"
+    ],
+    "assertions_per_phase": 7,
+    "phase_assertions_total": 21,
+    "additional_after_ui_assertions": 7,
+    "list_status_each_phase": 200,
+    "detail_status_each_phase": [
+      200,
+      200,
+      200
+    ],
+    "foreign_user_status_each_phase": [
+      403,
+      403,
+      403
+    ],
+    "wrong_original_session_status_each_phase": 404,
+    "same_ids_and_states_each_phase": true,
+    "completed_projection": "process_exited; business_state remains unknown",
+    "unknown_projection": "unknown; business_state remains unknown"
+  },
+  "invariants": {
+    "original_three_operations_unchanged": true,
+    "all_six_operation_rows_unchanged": true,
+    "original_and_fixture_history_sessions_unchanged": true,
+    "all_three_messages_unchanged": true,
+    "scoped_rows_sha256_before": "8b29edf4b0a6d6d4856a6a82c90272ed09c6186a9ccbe67fe3c70c498fd8f81a",
+    "scoped_rows_sha256_after": "8b29edf4b0a6d6d4856a6a82c90272ed09c6186a9ccbe67fe3c70c498fd8f81a",
+    "new_operation_writes_during_reads": 0,
+    "oauth_token_rows": 0,
+    "actual_synthetic_mcp_requests": 0
+  },
+  "browser": {
+    "flow": "Open current Contact, open Tasks, close and reopen Tasks after runtime revocation and binding deletion.",
+    "retired_rows": [
+      {
+        "task_type": "computer_operation",
+        "task_id": "70000000-0000-4000-8000-000000000023",
+        "record_id": "70000000-0000-4000-8000-000000000023",
+        "name": "Synthetic retired Agenvo history",
+        "state": "unknown",
+        "created_at": "2026-10-29T12:49:40.682062Z"
+      },
+      {
+        "task_type": "computer_operation",
+        "task_id": "70000000-0000-4000-8000-000000000022",
+        "record_id": "70000000-0000-4000-8000-000000000022",
+        "name": "Synthetic retired Agenvo history",
+        "state": "process_exited",
+        "created_at": "2026-10-29T12:49:40.682062Z"
+      },
+      {
+        "task_type": "computer_operation",
+        "task_id": "70000000-0000-4000-8000-000000000021",
+        "record_id": "70000000-0000-4000-8000-000000000021",
+        "name": "Synthetic retired Agenvo history",
+        "state": "process_exited",
+        "created_at": "2026-10-29T12:49:40.682062Z"
+      }
+    ],
+    "page_errors": [],
+    "task_write_requests": [],
+    "oauth_requests": [],
+    "contact_resolver_posts": 1,
+    "actual_remote_observation_or_execution": 0,
+    "screenshot": "retired-tasks-current.png",
+    "screenshot_inspected": true
+  },
+  "limits": [
+    "Current UI mounts BotTaskDirectory; the old session-tasks detail component has no production import. This screenshot proves directory visibility, not a clicked per-operation detail view. Scoped detail reads are verified through the real HTTP API.",
+    "Directory navigation is disabled for these hand-seeded historical receipts because there is no real execution run/turn destination; none was fabricated.",
+    "The three historical message rows are preserved byte-for-byte. They were not seeded as visible execution turns, so their rendered message content is not claimed verified.",
+    "All data and credentials are isolated synthetic fixtures. No real token read, OAuth authorization/refresh, Windows enrollment/call, model request, task dispatch, production deployment or user acceptance is claimed.",
+    "Agent browser verification is not human QA."
+  ],
+  "published_source_commit": "6391829c2b348938822d2a8a5f2ecaedeeddbfb8"
+}
