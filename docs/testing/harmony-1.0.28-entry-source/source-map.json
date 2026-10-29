@@ -1,0 +1,481 @@
+{
+  "purpose": "HAP1.0.28 exact existing entry/contact/title source handoff only",
+  "buildSourceCommit": "12faf4c06db01d8fffc29aad3a247b4a85e884e7",
+  "sharedSource": "5a42d013e801cb6229ee029113e3a63782bc3e13",
+  "later013e91NotUsed": true,
+  "version": "1.0.28",
+  "versionCode": 1000028,
+  "hapBytes": 37660218,
+  "hapSHA256": "67164ea48d41c766f58fe38f6f7b84dc5e37c87b05fdfe28c0578ef879bb79db",
+  "sourceIdentitySHA256": "22ee42f6a8240def076e91efeba722a1c9fdccda85cf7ecd3eb9dd0f36d7e8f0",
+  "recordedBuildJSONSHA256": "f4a628b7782148d4388c66f3ce3d6638ba764d056c6b211779c62687e463609a",
+  "recordedInputsVerifiedAgainstFixedGit": 78,
+  "savedContextSHA256": "e3b63947fefaeafcb4e4d630cb537f24674b5efd443f2d92872061a0bbf784e0",
+  "scope": "Selected relevant source subset, not a standalone build checkout; TypeScript is build input, not claimed to be embedded as source in HAP. Existing producer outputs/source snapshot remain the artifact binding evidence. No build or business fix performed.",
+  "files": [
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/ClientAbilityStage.ets",
+      "bytes": 537,
+      "sha256": "d452dd925c9f99ed91b6ed1d1481bb175e0297f6382b85d8a777dac01f894f9f",
+      "gitBlob": "735183bc727a6dfff85141d6d3574fdb265520a5",
+      "source": "original native source at HAP28 commit",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/ClientAbilityStage.ets",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
+      "bytes": 1525,
+      "sha256": "a0bb0c5afa7058e0ad30fe7f6e9e97247bb5a646232265c958fb53db4a5e27e3",
+      "gitBlob": "9b67b92ccf09f9931c26558d2c7d3b16b34be6e3",
+      "source": "original native source at HAP28 commit",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
+      "bytes": 25072,
+      "sha256": "25a73013c2b7927e611ad8f2b41f1a463a18b9dfffc1846c0bf16ecbdaa58871",
+      "gitBlob": "11a8808b821ba088287e8ffb381d2efa1df38cb9",
+      "source": "original native source at HAP28 commit",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
+      "bytes": 4861,
+      "sha256": "db7f752d2685741f23eda9cc99e24508997b18c095ac4dc25f488c9747baf945",
+      "gitBlob": "8cf45ba09d9392f4c019ce072832ab3b029c47fc",
+      "source": "original native source at HAP28 commit",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "bytes": 9348,
+      "sha256": "dbe4568cd9a686b81b5c9d463353e509ef774477dc0d4690b302e98cc3981566",
+      "gitBlob": "6577e967725dd1bf77036b5c7946091318f52fd4",
+      "source": "original native source at HAP28 commit",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
+      "bytes": 978,
+      "sha256": "985768e472b8d4be46b53ff539db1173e958bd4e481da20a988030053c7852e0",
+      "gitBlob": "fa0564d49d21cdf9048f1b0461c3f239e7e98d3a",
+      "source": "original native source at HAP28 commit",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/harmony/app/entry/src/main/ets/common/MemohClientConfig.ets",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/build_memoh_web.py",
+      "bytes": 132442,
+      "sha256": "6e24660663d90ffee0b526b9e1dd0a4810812ecbfe85ed46627fab856b50bebe",
+      "gitBlob": "120d80ea6a27971ab46b474284ee3f6382b403bb",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/build_memoh_web.py",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/config/memoh_web.lock.json",
+      "bytes": 26661,
+      "sha256": "ad9ea0fae6c64d405ef9b68cb5b1409f814d1231bf16c98a21184936cfa50679",
+      "gitBlob": "9d02169131c05a5f7e7ad3d66434468899eade78",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/config/memoh_web.lock.json",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/memoh/shared-home-admission-final.json",
+      "bytes": 90471,
+      "sha256": "3d57f81db79c87bb94f78d60bd2b9f6586b96fc191c10c9263b3cd41976eba2a",
+      "gitBlob": "3187460cc1a4a57904c63d289132df38743d8740",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/memoh/shared-home-admission-final.json",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/memoh/shared-fixed-contact-task-directory.json",
+      "bytes": 62461,
+      "sha256": "9962faff9b281b90c55a454927c90119b4721e82fef272673c525c3ca314420a",
+      "gitBlob": "ddcd5338a656bcfa80f956798962ca88acf26ba6",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/memoh/shared-fixed-contact-task-directory.json",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/memoh/harmony-entry.ts",
+      "bytes": 7601,
+      "sha256": "1a7678f6352b53fe553d244760832bb96f87d843d05a49706c2317c9d82cb6fd",
+      "gitBlob": "6eb7b6f069e0d0a1f60beea23230aea52ae67c53",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/memoh/harmony-entry.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/memoh/harmony-service-config.ts",
+      "bytes": 10650,
+      "sha256": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+      "gitBlob": "773bbefa51bc5481a7f56ef3ca261d23e9ed07b5",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/memoh/harmony-service-config.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "fixed-source/mobile/client/mobile/memoh/harmony-back.ts",
+      "bytes": 3625,
+      "sha256": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+      "gitBlob": "447790c9dc9f654e0b5755b32d9ad4271cafe159",
+      "source": "fixed HAP28 generator/adaptation input",
+      "fixedGitReference": "12faf4c06db01d8fffc29aad3a247b4a85e884e7:mobile/client/mobile/memoh/harmony-back.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/index.html",
+      "bytes": 1780,
+      "sha256": "280d87306ae34a1ab92a33e5bc03438143894c9c3e4798f82a51cd91772fdfff",
+      "gitBlob": "405505256b749f747dcce2da58adb4004b4bedf1",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/main.ts",
+      "bytes": 4432,
+      "sha256": "28edb395679195238accdee6c058f455b20f6bc131246572d21b381979de968d",
+      "gitBlob": "d42db6760dc60ab5098ce305fb614e0470702469",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/router.ts",
+      "bytes": 2520,
+      "sha256": "8170ce81502d42e0d27a718538b4bddfe01953d1d8d0547b860fd4ccdef1dfa9",
+      "gitBlob": "6f07ae1143c6f6b70558bd22f7b0e11207bd9eda",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/routes.ts",
+      "bytes": 12531,
+      "sha256": "eee23fc9b22a274b0bfd25c6649c46f2b55f3793cca61cd7e71035b83ce4680b",
+      "gitBlob": "0f86871ba0a9a9d04abd190653bd988ff25737d3",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/routes.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/App.vue",
+      "bytes": 4653,
+      "sha256": "8f23fd1b02e898dc17e9ce80667c85574b9e23ade9a2bb7ec31eed0dda352709",
+      "gitBlob": "901476b59577529ead018fe0139ad37234a41e19",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/harmony-entry.ts",
+      "bytes": 7601,
+      "sha256": "1a7678f6352b53fe553d244760832bb96f87d843d05a49706c2317c9d82cb6fd",
+      "gitBlob": "6eb7b6f069e0d0a1f60beea23230aea52ae67c53",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/harmony-service-config.ts",
+      "bytes": 10650,
+      "sha256": "9e386e3ed5bb30619c922bf61bd6a0135d9f69f148e94f7627e728b02ab19e11",
+      "gitBlob": "773bbefa51bc5481a7f56ef3ca261d23e9ed07b5",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/harmony-service-url.ts",
+      "bytes": 6690,
+      "sha256": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db",
+      "gitBlob": "0e7de9c6018b92bfa6ea8c5a4d6b577e7207cc75",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/harmony-back.ts",
+      "bytes": 3625,
+      "sha256": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+      "gitBlob": "447790c9dc9f654e0b5755b32d9ad4271cafe159",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/auth-session.ts",
+      "bytes": 2670,
+      "sha256": "a6defa712cf87269bb20310afb13bfa279996abd30ec5be878f482dc9f51113d",
+      "gitBlob": "888ce887cb1e6a4cfe774975d5dc5215340c4cd2",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/lib/auth-session.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/api-client.ts",
+      "bytes": 5196,
+      "sha256": "b6bbf0e23264abb9ac333f35d34cf51f1a7412f58268ead4cebcbf779dd44bce",
+      "gitBlob": "b29a434e67df9c4302eaf01d8c297342525f0f95",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/lib/bot-breadcrumb.ts",
+      "bytes": 965,
+      "sha256": "d812a6f7611765006ee3ba05c25537dddc29d23cd80977fa6894f8224c232bfa",
+      "gitBlob": "6ed768dce0ec4039b0f97c133dcf41423852ea3c",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/lib/bot-breadcrumb.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/router-guards/onboarding.ts",
+      "bytes": 1305,
+      "sha256": "57792b5f830259eec443c7b757280e2ec1659e01019ba75fddb1c51a9c56d178",
+      "gitBlob": "ad83eb8ca5758f93b4576774babad19d60e2e92a",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/router-guards/onboarding.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/user.ts",
+      "bytes": 5427,
+      "sha256": "611d5021304242fdf02e7f9d44d0511688c84dec987b72489a49060e52b97cba",
+      "gitBlob": "1091c15b64f0b865d2be9bc6951f190828f7ee3c",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/user.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat-selection.ts",
+      "bytes": 2766,
+      "sha256": "bafafc26f6ac2b800f4ecedb8c20c77d66e0cb238e75fd5d9658f8fe38e0169c",
+      "gitBlob": "06dcea6f60c502d3da7e76fe20d2c359750cdd4f",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat-selection.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/utils/tab-scoped-storage.ts",
+      "bytes": 3793,
+      "sha256": "d798c430a49848c7c119466d6c39850088cfa17c280c57f2c6cdd1c0a6d10d62",
+      "gitBlob": "2de466044888c013ea018c19f849577ab953f046",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/utils/tab-scoped-storage.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat-list.ts",
+      "bytes": 24835,
+      "sha256": "4128ad0100205df5ac4c9b9cc000d2f19657e29f1454441487caf8cdf2b0afa0",
+      "gitBlob": "7305350241569c89b711eb7754a2913edbba25aa",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat-list.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat/bots.ts",
+      "bytes": 3150,
+      "sha256": "122e3481ad200616fe1b90c3faf883cb6d2e24d52918dc31fa638eceaf146da6",
+      "gitBlob": "af1903be438b498f797789f9183141948c577aaf",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat/bots.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat/bootstrap.ts",
+      "bytes": 18639,
+      "sha256": "429921445bbc2e8505d1cd8ebc2ef43e0a0a19612ce7fef916d5fb02bd6c48b7",
+      "gitBlob": "9b8a4e1e79e6c8fe1846e7c79c56ad531c9cb143",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat/bootstrap.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat/session-list-init-recovery.ts",
+      "bytes": 3433,
+      "sha256": "40fe1f8b4f934b11460b789f9e307fda2a81614d5efb52f1a010300d4c840c7b",
+      "gitBlob": "f0d7ddf48baccc5847a93a99d7c9f3451dc05fb4",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat/session-list-init-recovery.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat/session-list.ts",
+      "bytes": 14398,
+      "sha256": "64566be07975aaf170f6d89e8c293910ba35dd5a495bc0fc1d2696bbc20cdee3",
+      "gitBlob": "5ac08e0edc1105ff6ee6b14680f7b966dc3af1a6",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat/session-list.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/chat/session-actions.ts",
+      "bytes": 8628,
+      "sha256": "66da41e7632e17bb0aa44c8f513f3067230346bd54cb37dcc49735733ee845e8",
+      "gitBlob": "1bc29f74c45d2d4c68fc02b216ffcf095ee8e33e",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/store/chat/session-actions.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/store/workspace-tabs.ts",
+      "bytes": 88157,
+      "sha256": "3f12862289590ec61c2e96fed8fd16d03295ef353a9ad0ab3a1ae3519be958bd",
+      "gitBlob": "e8956d3976a705c719f620182d90733819978c13",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/composables/api/useChat.ts",
+      "bytes": 134,
+      "sha256": "3888ca98d92b238e47a2401652b3365d41d600bd31a7823105f8c9dd73aa72ce",
+      "gitBlob": "5b9c66bcf3e3249dc45bb51e010704a2d8cd080b",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/composables/api/useChat.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/composables/api/useChat.types.ts",
+      "bytes": 15807,
+      "sha256": "6c872f7eff59ae17ff86fd140b5d187144cc92fad94171569e947d30a32aed64",
+      "gitBlob": "75e2e93b1757f1af6e82d37f5351b7adeb361331",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/composables/api/useChat.types.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/composables/api/useChat.chat-api.ts",
+      "bytes": 18584,
+      "sha256": "d8f5ca7b6076aac08d15af075157377ed168a402bf327f4907702a953d0084de",
+      "gitBlob": "8ddcd31f5989b493b9a24dcb9d1b7f07ae3a9250",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/composables/api/useChat.chat-api.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/composables/api/useBot.ts",
+      "bytes": 1063,
+      "sha256": "c1d9308f48cb1fd83a92776af7ceb998d2c1f443242b44e98b939b4eb406f354",
+      "gitBlob": "584849f741b3da99b2291c3c96b139924450a2d1",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/composables/api/useBot.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/components/main-container/index.vue",
+      "bytes": 1048,
+      "sha256": "0e11d9eee8682a459987071e880c54591ac0aac862cbe6ea962b21685deedabb",
+      "gitBlob": "95a25207011221967e3fa5edb5f19afb270becb7",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/components/main-container/index.vue",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/components/sidebar/index.vue",
+      "bytes": 14273,
+      "sha256": "1427d99d104db26ca3bb3e0ef084f49be98d547c87761f5cc06df247a93662b8",
+      "gitBlob": "4023118cb2400be5e31ed64a6d9e9e6238746ebf",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/components/sidebar/index.vue",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/components/sidebar/bot-switcher.vue",
+      "bytes": 19155,
+      "sha256": "5379998d2a36dbecb2c430c60cd423d3bd8de62d4f51908c156168e11b3cde54",
+      "gitBlob": "3dd300e51320df598d7735adb3eb1a5d61677df9",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/components/sidebar/bot-switcher.vue",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/pages/home/index.vue",
+      "bytes": 15246,
+      "sha256": "bee8cd80bd656cc8519cc4b5b9b0d53c16466217b6b1844511671e966ff105e0",
+      "gitBlob": "03e0f39a5ac93db5cdc14befd8cd9f85e2f5f8b5",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/pages/home/components/chat-workspace.vue",
+      "bytes": 9119,
+      "sha256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "gitBlob": "57e2ce9bdd03bbb8188198211e9d708ec040a703",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/pages/home/components/chat-workspace.vue",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/pages/home/components/dockview/panel-chat.vue",
+      "bytes": 2544,
+      "sha256": "0c67d662516ce666790537561e58cfdf22776d2e7db797233924f0558f613943",
+      "gitBlob": "eee2a405e256559177e637a1625897e06a9e97d1",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/pages/home/components/dockview/panel-chat.vue",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/pages/home/components/chat-pane.vue",
+      "bytes": 212124,
+      "sha256": "65bb489e9b244c369eab3a6cc46becaa8814efb9a06c08a3581c385a77d6c486",
+      "gitBlob": "758b8a5803c3aaf7e360aea8abbd3ef6310401cc",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/pages/home/components/contact-choice-dialog.vue",
+      "bytes": 2945,
+      "sha256": "77477df86b694601cda1555f6a41ff33145bbb933cd076493cc0408ef61763e8",
+      "gitBlob": "fa40d2f2e37f1c5909d0b287ab87f7d9473d17dc",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/pages/home/components/contact-choice-dialog.vue",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+      "bytes": 2877,
+      "sha256": "ead8ffde4879e8662d7baeb56af9e790c207b0fe6b24171b91a57486bc31c67c",
+      "gitBlob": "ad8fb23b5be644f61e46c694819fde61b990b4b7",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "generated-source/apps/web/src/utils/task-history-link.ts",
+      "bytes": 2863,
+      "sha256": "4b08e633b29f8462c532fed091cf2906e78d3f185489f0ce772a4c75f9b151db",
+      "gitBlob": "2c6721947c63e20cea8a82e19c8d81b1e24b5b15",
+      "source": "retained HAP28 Web producer context, not top-level repo Web or later013e91",
+      "fixedGitReference": "5a42d013e801cb6229ee029113e3a63782bc3e13:apps/web/src/utils/task-history-link.ts",
+      "gitBlobMeaning": "exact Git blob in referenced source tree"
+    },
+    {
+      "archivePath": "licenses/LICENSE",
+      "bytes": 34523,
+      "sha256": "8486a10c4393cee1c25392769ddd3b2d6c242d6ec7928e1414efff7dfb2f07ef",
+      "gitBlob": "0ad25db4bd1d86c452db3f9602ccdbe172438f52",
+      "source": "original source license retained",
+      "fixedGitReference": null,
+      "gitBlobMeaning": "computed Git blob identity of supplied generated bytes; read via this ZIP"
+    }
+  ],
+  "scan": {
+    "explicitPatternsNoMatches": true,
+    "exhaustiveClaim": false
+  },
+  "phone28Installed": "unknown"
+}
