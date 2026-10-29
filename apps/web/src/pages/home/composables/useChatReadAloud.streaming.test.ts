@@ -9,7 +9,7 @@ class Player extends EventTarget { src = ''; play = vi.fn(async () => {}); pause
 class MediaFixture extends EventTarget {
   static isTypeSupported() { return true }
   readyState = 'open'
-  addSourceBuffer() { return Object.assign(new EventTarget(), { appendBuffer() { queueMicrotask(() => this.dispatchEvent(new Event('updateend'))) } }) }
+  addSourceBuffer() { const buffer = new EventTarget(); return Object.assign(buffer, { appendBuffer() { queueMicrotask(() => buffer.dispatchEvent(new Event('updateend'))) } }) }
   endOfStream() {}
 }
 const settle = async () => { await nextTick(); for (let i = 0; i < 20; i++) await Promise.resolve(); await nextTick() }
