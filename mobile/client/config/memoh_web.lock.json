@@ -486,7 +486,8 @@
       "requiredUnchangedDependencies": 2,
       "requiredDependencyMetadata": 2,
       "sharedDeletions": 4,
-      "streamingAdmitted": true
+      "streamingAdmitted": true,
+      "compatibleBackendCommit": "78d6092c50b79a283429df4d359f6e84e206f787"
     }
   }
 }
