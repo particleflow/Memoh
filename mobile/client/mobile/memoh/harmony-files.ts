@@ -11,6 +11,7 @@ import { shallowReactive, toRaw } from 'vue'
 import { client } from '@memohai/sdk/client'
 import { imageTimingHandle, imageTimingFetch, imageTimingMark, imageTimingResource, imageTimingBlob } from './harmony-image-timing'
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
+import { diagnosticTransfer } from './harmony-diagnostics'
 import { normalizeDelegationPath } from './harmony-service-url'
 import { saveNativeOriginal } from './harmony-download'
 import { nativeAttachmentCommand, stageNativeFile, forgetNativeFile, type NativeAttachment, type NativeUploadReceipt } from './harmony-resumable'
@@ -124,6 +125,21 @@ function uploadFetch(progress: ((value: UploadProgress) => void) | undefined, at
 }
 
 export async function originalBlob(attachment: UIAttachment, signal?: AbortSignal): Promise<Blob> {
+  const trace = diagnosticTransfer(referenceBot(attachment))
+  trace('send')
+  try {
+    const blob = await readOriginalBlob(attachment, signal, trace)
+    trace('validation', undefined, blob.size)
+    trace('load', undefined, blob.size)
+    return blob
+  } catch (error) {
+    trace(signal?.aborted ? 'abort' : 'error')
+    throw error
+  } finally { trace('loadend') }
+}
+
+async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | undefined,
+  trace: ReturnType<typeof diagnosticTransfer>): Promise<Blob> {
   signal?.throwIfAborted()
   const timing = imageTimingHandle(attachment)
   const hash = String(attachment.content_hash ?? '')
@@ -141,6 +157,7 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
     response = await imageTimingFetch(timing, createApiFetch())(sdkApiUrl({ url: path }), {
       method: 'GET', signal, redirect: 'error', headers: { authorization: 'Bearer ' + token },
     })
+    trace('headers', response.status)
     if (response.status !== 200) throw new Error('委派原件访问失败')
     bytes = await response.arrayBuffer()
   } else {
@@ -149,6 +166,7 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
       ...(timing ? { fetch: imageTimingFetch(timing, client.getConfig().fetch ?? globalThis.fetch) } : {}) })
     bytes = result.data
     response = result.response
+    trace('headers', response.status)
   }
   if (response.status !== 200) throw new Error('原件响应不完整')
   imageTimingMark(timing, 'body', bytes instanceof ArrayBuffer ? bytes.byteLength : undefined)

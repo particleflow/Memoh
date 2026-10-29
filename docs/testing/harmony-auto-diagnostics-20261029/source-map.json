@@ -1,0 +1,9 @@
+{
+  "sourceWIP": "2648fad921c45eb20d50ed5656fbbadca712e950",
+  "handoffSHA256": "2c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
+  "baseAPIPhoneSHA256": "dfb0608ae8a3e453d4df06f8421026b973ae6231f45d863f6277bc52ebc021ba",
+  "APIPhoneSHA256": "4933be51e4a346a5d70ef5097c583461a6da4ee82e5ebdfd13db3844dd7545c8",
+  "nativeJournal": "existing current/previous files, atomic PUT+through, verified ACK",
+  "publicPageBridge": false,
+  "newHAPBuilt": false
+}

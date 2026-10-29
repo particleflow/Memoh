@@ -1,0 +1,11 @@
+{
+  "paths": {
+    "apps/web/src/lib/api-client.ts": "4933be51e4a346a5d70ef5097c583461a6da4ee82e5ebdfd13db3844dd7545c8",
+    "apps/web/src/lib/harmony-diagnostics.ts": "bafe71293bdfd5cf34ea208edf4243d575bbae4760e463e935825987cd1ab074",
+    "apps/web/src/lib/harmony-diagnostics-api.test.ts": "6a2a1151aa7ffa20d8219da8ff8e5c969f868d81e713a31be1722e4c1b03919e",
+    "apps/web/src/lib/harmony.ts": "e5646f683ca50d5602fb6edb010f18ebcf0c96e2f56c0637ac4a64d6b935f849",
+    "apps/web/src/lib/harmony-files.ts": "3bd1482fcd353da7e2b3c5136139d4b19b04af2486d3758d1e7991a704440cda"
+  },
+  "newHAPBuilt": false,
+  "contextSHA256": "95cc0b12479029f7128954e786b982aec019c07eaff902ed586be590e6d06bbd"
+}

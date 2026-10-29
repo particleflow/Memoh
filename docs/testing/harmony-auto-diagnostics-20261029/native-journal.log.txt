@@ -1,0 +1,1 @@
+{"actualNativeJournal":true,"realUTF8Files":true,"tornPutDoesNotAdvanceCursor":true,"strictFsyncFailure":true,"restartSameJournal":true,"tornAckRetainsPending":true,"ackHashAndSizeRequired":true,"otherScopeCannotAck":true,"rotationAcrossOriginalTwoFiles":true,"retainedAckSuppressesOldPut":true,"noRawJournalExport":true,"actualReadyAndFrameGuard":true,"device":false}

@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "c0d04c971bf5ec0b325ff02e39809c1a708bd15adcc76c9e9ed0ec5232c1e331"
+      "sha256": "da0915743d418f05dad3c0c257265e04644f9d8e9f32a18bc1a7bcc351486ff0"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -500,6 +500,15 @@
         "phoneSHA256": "25756fa89096db1bb14ce6aaf3fb434ecd5098ce12da0f2f06b9191dd78e298b",
         "patchSHA256": "87daad7e6a99432ba8e54ae42ed0a62d8ea1e45cff74121cb32f13e176c8e0cf",
         "sdkOrNativeChanges": false
+      },
+      "automaticDiagnostics": {
+        "sourceWIP": "2648fad921c45eb20d50ed5656fbbadca712e950",
+        "handoffSHA256": "2c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
+        "baseAPIPhoneSHA256": "dfb0608ae8a3e453d4df06f8421026b973ae6231f45d863f6277bc52ebc021ba",
+        "APIPhoneSHA256": "4933be51e4a346a5d70ef5097c583461a6da4ee82e5ebdfd13db3844dd7545c8",
+        "nativeJournal": "existing current/previous files, atomic PUT+through, verified ACK",
+        "publicPageBridge": false,
+        "newHAPBuilt": false
       }
     }
   }

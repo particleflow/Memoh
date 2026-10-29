@@ -5,11 +5,13 @@ import { NativeResumableUpload, UploadPreview, UploadScope, UploadStageFailure, 
 import { MEMOH_ORIGIN, configureMemohOrigin, resetMemohOrigin } from './MemohClientConfig';
 import { TransferNetworkPolicy } from './ServiceUrl';
 import { NativeTransferOwner, nativeTransferOwner } from './NativeTransferOwner';
+import { ClientDiagnostics, DiagnosticBatch } from './ClientDiagnostics';
 
 interface ClientRequest {
   version: number; command: string; state?: string; themeId?: string; handle?: string; offset?: number;
   apiOrigin?: string; networkPolicy?: TransferNetworkPolicy; operation?: string; botId?: string; hash?: string; size?: number;
   name?: string; type?: string; data?: string; url?: string; authorization?: string; scope?: string; photos?: boolean; recoverDrafts?: boolean;
+  document?: string; batch?: DiagnosticBatch; verifiedHash?: string; verifiedSize?: number;
 }
 const PERMISSION: string = '{"javascriptProxyPermission":{"urlPermissionList":[{"scheme":"begonia-client","host":"app","port":"","path":"/index.html"}]}}';
 
@@ -38,12 +40,17 @@ export class NativeClient {
     try {
       this.controller.registerJavaScriptProxy(this, 'begoniaNative', ['request'], [], PERMISSION);
       this.view = this.owner.attach(); this.active = true;
+      ClientDiagnostics.onForeground((): void => {
+        if (!this.active || !this.ready || !this.owner.current(this.view) || this.controller.getUrl().split('#')[0] !== 'begonia-client://app/index.html') { return; }
+        void this.controller.runJavaScript("window.dispatchEvent(new Event('garnet:diagnostic-resume'))").catch(() => {});
+      });
       return true;
     } catch { return false; }
   }
 
   close(): void {
     this.active = false;
+    ClientDiagnostics.onForeground(undefined);
     this.ready = false; this.resetNetwork(); this.voice.close(); this.owner.detach(this.view);
     try { this.controller.deleteJavaScriptRegister('begoniaNative'); } catch { /* Already detached. */ }
   }
@@ -91,6 +98,23 @@ export class NativeClient {
         else if (value.state === 'login-page') { this.stopTransfers(); }
         else { this.resetNetwork(); this.voice.close(); }
         this.stateChanged(value.state);
+      }
+      else if (this.ready && value.command.startsWith('diagnostic.')) {
+        const epoch = this.owner.generation();
+        if (Object.keys(value).some((key: string): boolean => !['version', 'command', 'scope', 'document', 'batch', 'hash', 'verifiedHash', 'verifiedSize'].includes(key)) ||
+          typeof value.scope !== 'string' || !/^[a-f0-9]{64}$/.test(value.scope)) { throw new Error('NATIVE_REQUEST_INVALID'); }
+        if (value.command === 'diagnostic.pending') { return JSON.stringify({ ok: true, data: ClientDiagnostics.pending(value.scope) }); }
+        if (value.command === 'diagnostic.cursor' && typeof value.document === 'string') {
+          return JSON.stringify({ ok: true, data: ClientDiagnostics.capturedThrough(value.scope, value.document) });
+        }
+        if (value.command === 'diagnostic.put' && value.batch &&
+          Object.keys(value.batch).length === 4 && Object.keys(value.batch).every((key: string): boolean => ['id', 'document', 'through', 'body'].includes(key)) &&
+          typeof value.batch.id === 'string' && typeof value.batch.document === 'string' && typeof value.batch.body === 'string' && typeof value.batch.through === 'number') {
+          await ClientDiagnostics.put(value.scope, value.batch);
+          this.checkView(); this.owner.check(epoch);
+        } else if (value.command === 'diagnostic.ack' && typeof value.hash === 'string' && typeof value.verifiedHash === 'string' && typeof value.verifiedSize === 'number') {
+          ClientDiagnostics.ack(value.scope, value.hash, value.verifiedHash, value.verifiedSize);
+        } else { throw new Error('NATIVE_REQUEST_INVALID'); }
       }
       else if (value.command === 'client.theme' && typeof value.themeId === 'string') {
         await this.themeChanged(value.themeId);

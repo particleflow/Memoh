@@ -15,7 +15,8 @@ entries = manifest['entries']
 # One admitted failure-outbox source extends the prior178 inputs.
 # One scoped RCP endpoint regression extends the prior179 inputs.
 # Four ownership, four background and two general routing sources extend180.
-assert len(entries) == 190
+# Three scoped diagnostic journal/SDK test sources extend the prior190.
+assert len(entries) == 193
 assert {
     'mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets',
     'mobile/client/tests/stage2/harmony_web_endpoint.cjs',
