@@ -12,7 +12,7 @@ import (
 	memohdb "github.com/felinics/memoh/internal/db"
 )
 
-func TestUnified177To180PreservesAcceptedWorkAndHistory(t *testing.T) {
+func TestUnified177To181PreservesAcceptedWorkAndHistory(t *testing.T) {
 	f := newNativeHerdrFixture(t)
 	// Only this newly created disposable fixture is prepared as schema 177.
 	// This is not a production rollback procedure or an old-data restoration.
@@ -61,7 +61,7 @@ func TestUnified177To180PreservesAcceptedWorkAndHistory(t *testing.T) {
 	}
 	var version int
 	var dirty, unknown bool
-	if err := f.conn.QueryRow(t.Context(), `SELECT version,dirty FROM schema_migrations`).Scan(&version, &dirty); err != nil || version != 180 || dirty {
+	if err := f.conn.QueryRow(t.Context(), `SELECT version,dirty FROM schema_migrations`).Scan(&version, &dirty); err != nil || version != 181 || dirty {
 		t.Fatalf("upgrade status: version=%d dirty=%v err=%v", version, dirty, err)
 	}
 	if !maps.Equal(before, snapshot()) {
