@@ -1,0 +1,48 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/automatic-diagnostics-20261029
+
+ ❯ context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts (6 tests | 2 failed) 1341ms
+   × reconciles a stored diagnostic after reply loss without a second write, then ACKs exact bytes 59ms
+   × persists later capture while the diagnostic network is stalled, then resumes the original queue automatically 1176ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > reconciles a stored diagnostic after reply loss without a second write, then ACKs exact bytes
+AssertionError: The expression evaluated to a falsy value:
+
+  assert(typeof value === "string" && webidl.is.USVString(value) || webidl.is.File(value))
+
+
+- Expected
++ Received
+
+- true
++ false
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > persists later capture while the diagnostic network is stalled, then resumes the original queue automatically
+AssertionError: expected [ { …(4) }, { …(4) }, { …(4) } ] to have a length of +0 but got 3
+
+- Expected
++ Received
+
+- 0
++ 3
+
+ ❯ context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts:102:60
+    100|   await vi.waitFor(() => expect(sends.filter(request => request.signal…
+    101|   window.dispatchEvent(new Event('garnet:diagnostic-resume'))
+    102|   await vi.waitFor(() => expect([...rows.values()].flat()).toHaveLengt…
+       |                                                            ^
+    103|   expect(acks).toBe(3)
+    104|   const uploaded = [...objects.values()].map(bytes => new TextDecoder(…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 4 passed (6)
+   Start at  14:05:40
+   Duration  4.02s (transform 568ms, setup 0ms, import 836ms, tests 1.34s, environment 1.47s)
+

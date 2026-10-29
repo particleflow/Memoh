@@ -1,0 +1,9 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/evidence/automatic-diagnostics-20261029/context/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/lib/harmony-diagnostics.ts(33,7): error TS18048: 'result.response' is possibly 'undefined'.
+src/lib/harmony-diagnostics.ts(38,7): error TS18048: 'result.response' is possibly 'undefined'.
+/workspace/harmony-recovery-20261023/evidence/automatic-diagnostics-20261029/context/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

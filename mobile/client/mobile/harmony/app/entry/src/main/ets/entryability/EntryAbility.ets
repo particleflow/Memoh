@@ -23,6 +23,6 @@ export default class EntryAbility extends UIAbility {
     });
   }
   onWindowStageDestroy(): void { ClientDiagnostics.event('SYSTEM', 'lifecycle', 'window-stage-destroyed', ''); }
-  onForeground(): void { ClientDiagnostics.event('SYSTEM', 'lifecycle', 'foreground', ''); }
+  onForeground(): void { ClientDiagnostics.event('SYSTEM', 'lifecycle', 'foreground', ''); ClientDiagnostics.foreground(); }
   onBackground(): void { ImageTimingDump.command('clear'); ClientDiagnostics.event('SYSTEM', 'lifecycle', 'background', ''); }
 }

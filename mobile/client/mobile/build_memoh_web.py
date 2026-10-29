@@ -41,7 +41,7 @@ def sha(path):
 
 def inputs():
     files = [ROOT / name for name in (
-        'mobile/build_memoh_web.py', 'mobile/memoh/harmony.ts', 'mobile/memoh/harmony-files.ts',
+        'mobile/build_memoh_web.py', 'mobile/memoh/harmony.ts', 'mobile/memoh/harmony-files.ts', 'mobile/memoh/harmony-diagnostics.ts', 'mobile/memoh/harmony-diagnostics-api.test.ts',
         'mobile/memoh/harmony-image-timing.ts', 'mobile/memoh/harmony-image-timing.test.ts', 'mobile/memoh/harmony-image-timing-node.test.ts', 'mobile/memoh/harmony-attachment-preparation.test.ts',
         'mobile/memoh/harmony-voice.ts', 'mobile/memoh/harmony-voice-geometry.ts',
         'mobile/memoh/HarmonyVoiceInput.vue', 'mobile/memoh/HarmonyVoiceFan.vue', 'mobile/memoh/HarmonyVoicePlayer.vue',
@@ -1361,7 +1361,7 @@ const mediaItems = computed<MediaGalleryItem[]>''', 1),
         assert patches.keys() == changes.keys() | {'apps/web/package.json', 'pnpm-lock.yaml'}, 'Upstream host seam missing'
         assert 'apps/web/src/pages/home/components/session-task-results.test.ts' in patches, 'Phone attachment test seam missing'
         host_sources = {name: ROOT / 'mobile/memoh' / name for name in (
-            'harmony.ts', 'harmony-files.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-image-timing-node.test.ts', 'harmony-attachment-preparation.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
+            'harmony.ts', 'harmony-files.ts', 'harmony-diagnostics.ts', 'harmony-diagnostics-api.test.ts', 'harmony-image-timing.ts', 'harmony-image-timing.test.ts', 'harmony-image-timing-node.test.ts', 'harmony-attachment-preparation.test.ts', 'harmony-voice.ts', 'harmony-voice-geometry.ts',
             'HarmonyVoiceInput.vue', 'HarmonyVoiceFan.vue', 'HarmonyVoicePlayer.vue', 'voiceFan.svg', 'voiceFan.css',
             'HarmonyAttachments.vue', 'harmony-resumable.ts', 'harmony-upload-failures.ts',
             'harmony-download.ts', 'harmony-service-url.ts')}

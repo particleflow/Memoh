@@ -1,0 +1,31 @@
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/evidence/automatic-diagnostics-20261029
+
+ ❯ context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts (6 tests | 6 failed) 19ms
+   × blocks identity changes between the actual SDK auth interceptor and baseFetch 10ms
+   × rejects an assembled wrong bearer, a changed SDK base and another Bot before bytes dispatch 2ms
+   × retiring a lease aborts in-flight work and prevents a stale response ACK 2ms
+   × reconciles a stored diagnostic after reply loss without a second write, then ACKs exact bytes 1ms
+   × persists later capture while the diagnostic network is stalled, then resumes the original queue automatically 1ms
+   × does not start anything on an uncredentialed public page without the native bridge 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > blocks identity changes between the actual SDK auth interceptor and baseFetch
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > rejects an assembled wrong bearer, a changed SDK base and another Bot before bytes dispatch
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > retiring a lease aborts in-flight work and prevents a stale response ACK
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > reconciles a stored diagnostic after reply loss without a second write, then ACKs exact bytes
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > persists later capture while the diagnostic network is stalled, then resumes the original queue automatically
+ FAIL  context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts > does not start anything on an uncredentialed public page without the native bridge
+TypeError: Cannot read properties of undefined (reading 'interceptors')
+ ❯ context/checkout/apps/web/src/lib/harmony-diagnostics-api.test.ts:35:78
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed (6)
+   Start at  14:00:45
+   Duration  6.20s (transform 927ms, setup 0ms, import 1.37s, tests 19ms, environment 4.04s)
+

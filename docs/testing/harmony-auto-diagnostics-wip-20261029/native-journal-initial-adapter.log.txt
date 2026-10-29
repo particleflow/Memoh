@@ -1,0 +1,8 @@
+TypeError: The "fd" argument must be of type number. Received an instance of Object
+    at Object.closeSync (node:fs:579:11)
+    at Object.closeSync (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_diagnostics_journal.cjs:8:59)
+    at ClientDiagnostics.append (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets:179:39)
+    at ClientDiagnostics.put (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets:124:27)
+    at async main (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_diagnostics_journal.cjs:23:2) {
+  code: 'ERR_INVALID_ARG_TYPE'
+}
