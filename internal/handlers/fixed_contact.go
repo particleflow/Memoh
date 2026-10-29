@@ -8,10 +8,11 @@ import (
 	"io"
 	"strings"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/channel/route"
 	"github.com/felinics/memoh/internal/chat/thread"
-	"github.com/labstack/echo/v4"
 )
 
 // These legacy public mutations create parallel chats or destroy continuity.
@@ -72,6 +73,7 @@ func resolveContinuousContact(ctx context.Context, resolver privateChatResolver,
 func (h *LocalChannelHandler) SetPrivateChatResolver(resolver privateChatResolver) {
 	h.privateChats = resolver
 }
+
 func (h *LocalChannelHandler) resolveWebMessageContact(ctx context.Context, bot, user, requested, workdir string) (thread.Thread, error) {
 	contact, err := resolveContinuousContact(ctx, h.privateChats, bot, user)
 	if err != nil {
@@ -139,12 +141,14 @@ func requireExistingContact(ctx context.Context, resolver privateChatResolver, b
 	}
 	return nil
 }
+
 func (h *LocalChannelHandler) authorizeWSContactWrite(ctx context.Context, user, bot, sessionID string) error {
 	if err := h.authorizeWSSession(ctx, user, bot, sessionID); err != nil {
 		return err
 	}
 	return requireExistingContact(ctx, h.privateChats, bot, user, sessionID)
 }
+
 func (h *SessionQueueHandler) SetPrivateChatResolver(resolver privateChatResolver) {
 	h.privateChats = resolver
 }

@@ -10,11 +10,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
+
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/models"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type playbackStreamQueries struct {
@@ -26,6 +27,7 @@ type playbackStreamQueries struct {
 func (q *playbackStreamQueries) GetProviderByID(context.Context, pgtype.UUID) (sqlc.Provider, error) {
 	return q.provider, nil
 }
+
 func (q *playbackStreamQueries) GetSpeechModelWithProvider(context.Context, pgtype.UUID) (sqlc.GetSpeechModelWithProviderRow, error) {
 	return q.model, nil
 }
@@ -39,8 +41,8 @@ func TestPlaybackStreamPreservesConfiguredVoiceAndForwardsShortReadBeforeEOF(t *
 		model:    sqlc.GetSpeechModelWithProviderRow{ID: id, ProviderID: providerID, ModelID: "existing-clone-model", Enable: true, Config: []byte(`{"voice":"existing-cloned-voice","response_format":"mp3","speed":1.2}`)},
 	}
 	reader, writer := io.Pipe()
-	defer reader.Close()
-	defer writer.Close()
+	defer func() { _ = reader.Close() }()
+	defer func() { _ = writer.Close() }()
 	calls := 0
 	asrInstallTransport(t, func(r *http.Request) (*http.Response, error) {
 		calls++
@@ -54,9 +56,9 @@ func TestPlaybackStreamPreservesConfiguredVoiceAndForwardsShortReadBeforeEOF(t *
 		if body["model"] != "existing-clone-model" || body["voice"] != "existing-cloned-voice" || body["response_format"] != "mp3" || body["speed"] != 1.2 || body["input"] != "visible label" {
 			t.Fatalf("configured synthesis changed: %v", body)
 		}
-		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": []string{"audio/mpeg"}}, Body: reader, Request: r}, nil
+		return &http.Response{StatusCode: http.StatusOK, Header: http.Header{"Content-Type": []string{"audio/mpeg"}}, Body: reader, Request: r}, nil
 	})
-	service := NewService(slog.New(slog.NewTextHandler(io.Discard, nil)), q, NewRegistry())
+	service := NewService(slog.New(slog.DiscardHandler), q, NewRegistry())
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	stream, err := service.StreamPlayback(ctx, modelID, "visible label")

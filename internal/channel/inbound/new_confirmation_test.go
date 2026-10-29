@@ -296,7 +296,7 @@ func TestClassifyMatrixLocalpartMentionUsesAdapterAliases(t *testing.T) {
 	}
 }
 
-func TestHandleInboundNewCommandIgnoresCurrentBotMentionArguments(t *testing.T) {
+func TestHandleInboundNewCommandWithCurrentBotMentionCannotResetContact(t *testing.T) {
 	for _, text := range []string{"/new @memoh1bot", "/new discuss @memoh1bot", "/new discuss@memoh1bot"} {
 		t.Run(text, func(t *testing.T) {
 			channelIdentitySvc := &fakeChannelIdentityService{channelIdentity: identities.ChannelIdentity{ID: "channel-identity-1"}}
@@ -329,8 +329,8 @@ func TestHandleInboundNewCommandIgnoresCurrentBotMentionArguments(t *testing.T) 
 			if err := processor.HandleInbound(context.Background(), cfg, msg, sender); err != nil {
 				t.Fatalf("HandleInbound() error = %v", err)
 			}
-			if ensurer.lastSpec.Mode != sessionpkg.TypeDiscuss || ensurer.lastSpec.Runtime != sessionpkg.RuntimeModel || acpNewSessionAgentID(ensurer.lastSpec) != "" {
-				t.Fatalf("created spec = %#v, want native discuss session", ensurer.lastSpec)
+			if ensurer.lastSpec.Mode != "" || ensurer.lastSpec.Runtime != "" || len(sender.sent) != 1 {
+				t.Fatalf("spec = %#v, replies = %d, want one refusal and no session creation", ensurer.lastSpec, len(sender.sent))
 			}
 		})
 	}

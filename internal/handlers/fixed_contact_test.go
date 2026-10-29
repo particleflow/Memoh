@@ -8,11 +8,12 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/channel/route"
 	"github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/db"
-	"github.com/labstack/echo/v4"
 )
 
 type fixedContactStub struct {
@@ -27,6 +28,7 @@ func (s *fixedContactStub) InspectPrivateChat(context.Context, string, string, s
 	defer s.mu.Unlock()
 	return s.entry, s.inspectErr
 }
+
 func (s *fixedContactStub) EnsurePrivateChat(context.Context, string, string) (thread.Thread, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -36,6 +38,7 @@ func (s *fixedContactStub) EnsurePrivateChat(context.Context, string, string) (t
 	}
 	return *s.entry.Session, nil
 }
+
 func (s *fixedContactStub) BindPrivateChat(_ context.Context, _, _, id string) (thread.Thread, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -65,6 +68,7 @@ func TestFixedContactPublicMutationRoutesClosed(t *testing.T) {
 		})
 	}
 }
+
 func TestFixedContactSystemFirstBinding(t *testing.T) {
 	for _, n := range []int{0, 1, 2} {
 		t.Run(string(rune('0'+n)), func(t *testing.T) {
@@ -89,6 +93,7 @@ func TestFixedContactSystemFirstBinding(t *testing.T) {
 		})
 	}
 }
+
 func TestFixedContactFailureNeverCreatesReplacement(t *testing.T) {
 	for _, cause := range []error{errors.New("read unavailable"), route.ErrContactUnavailable} {
 		s := &fixedContactStub{inspectErr: cause}
@@ -101,6 +106,7 @@ func TestFixedContactFailureNeverCreatesReplacement(t *testing.T) {
 		t.Fatal("replayed unknown", err)
 	}
 }
+
 func TestFixedContactLegacyHistoryReadOnlyAndWorkdirUnchanged(t *testing.T) {
 	s := &fixedContactStub{entry: route.PrivateChatEntry{Session: &thread.Thread{ID: "new-with-8", BotID: "bot", WorkdirID: "bound"}, Candidates: []thread.Thread{{ID: "old-75"}}}}
 	h := &LocalChannelHandler{privateChats: s}
@@ -120,6 +126,7 @@ func TestFixedContactLegacyHistoryReadOnlyAndWorkdirUnchanged(t *testing.T) {
 		t.Fatal("rebound existing contact")
 	}
 }
+
 func TestFixedContactConcurrentOpensDoNotWaitForBackgroundTasks(t *testing.T) {
 	s := &fixedContactStub{entry: route.PrivateChatEntry{Session: &thread.Thread{ID: "fixed", BotID: "bot"}}}
 	// This is an identity/admission boundary test, not a model or delivery test.
@@ -147,6 +154,7 @@ func TestFixedContactConcurrentOpensDoNotWaitForBackgroundTasks(t *testing.T) {
 	<-done
 	<-done
 }
+
 func TestFixedContactQuickActionsDoNotAdvertiseOrRunNew(t *testing.T) {
 	h := &LocalChannelHandler{}
 	result, err := h.executeWebQuickAction(t.Context(), "bot", "help", false, webQuickActionContext{})

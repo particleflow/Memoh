@@ -97,7 +97,9 @@ describe('specialist handoff content and states', () => {
   it('never turns an accepted delivery response into confirmation that the supervisor processed it', () => {
     const root = mount({ selected: task.delegation_id, detail: { ...task, delivery_state: 'unknown' }, deliveryAction: { pending: false, disabled: true, response: task, retry: vi.fn() } })
     expect(root.textContent).toContain('Delivery request response · Accepted')
-    expect(root.textContent).toContain(en.chat.delegations.deliveryAccepted)
+    expect(root.textContent).toContain('Return delivery · Delivery unknown')
+    expect(root.textContent).not.toContain('Return delivery · Accepted')
+    expect(root.textContent).not.toContain(en.chat.delegations.deliveryAccepted)
     expect(root.querySelector('button')?.disabled).toBe(true)
   })
 
@@ -105,10 +107,10 @@ describe('specialist handoff content and states', () => {
     const root = mount({ selected: task.delegation_id, detail: task })
     expect(root.textContent).toContain('Execution completed')
     expect(root.textContent).toContain('Return delivery · Accepted')
-    expect(root.textContent).toContain('does not confirm that the supervisor has processed')
+    expect(root.textContent).not.toContain(en.chat.delegations.deliveryAccepted)
     expect(root.textContent).toContain(task.summary!.text)
     expect(root.textContent).toContain(en.chat.tasks.truncated)
-    expect(root.textContent).toContain('Downloads are not available')
+    expect(root.textContent).not.toContain('Downloads are not available')
     expect(root.querySelectorAll('a,img,iframe,video,script,audio')).toHaveLength(0)
     expect(root.textContent).not.toContain('synthetic-hash')
     expect(root.textContent).not.toContain('/bots/other')
@@ -121,7 +123,9 @@ describe('specialist handoff content and states', () => {
     expect(root.textContent).toContain('No final visible reply is available.')
     expect(root.textContent).not.toContain('Execution completed')
     expect(root.textContent).not.toContain('returned reference')
-    if (state === 'accepted' || state === 'running') expect(root.textContent).toContain('Live work and tool logs are not available')
+    expect(root.textContent).toContain(`Execution · ${en.chat.delegations.states[state]}`)
+    expect(root.textContent).toContain('Return delivery · Pending')
+    expect(root.textContent).not.toContain(en.chat.delegations.noLiveContent)
   })
 
   it('distinguishes a successful empty list from unsupported and inaccessible APIs', () => {

@@ -24,6 +24,7 @@ func TestUploadFailureQueueDurableScopedAndIndependent(t *testing.T) {
 		t.Fatal(err)
 	}
 	original := createUpload(ctx, t, s, []byte("unchanged queued original"))
+	//nolint:gosec // G304: task-owned t.TempDir fixture and server-issued receipt ID; no user path.
 	before, err := os.ReadFile(filepath.Join(root, ".uploads", original.ID+".json"))
 	if err != nil {
 		t.Fatal(err)
@@ -34,6 +35,7 @@ func TestUploadFailureQueueDurableScopedAndIndependent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	//nolint:gosec // G304: task-owned t.TempDir fixture and server-issued receipt ID; no user path.
 	disk, err := os.ReadFile(filepath.Join(root, ".uploads", failureJournal))
 	if err != nil {
 		t.Fatal(err)
@@ -56,10 +58,12 @@ func TestUploadFailureQueueDurableScopedAndIndependent(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+	//nolint:gosec // G304: task-owned t.TempDir fixture and server-issued receipt ID; no user path.
 	after, _ := os.ReadFile(filepath.Join(root, ".uploads", original.ID+".json"))
 	if !bytes.Equal(before, after) {
 		t.Fatal("upload receipt changed")
 	}
+	//nolint:gosec // G304: task-owned t.TempDir fixture and server-issued receipt ID; no user path.
 	after, _ = os.ReadFile(filepath.Join(root, ".uploads", failureJournal))
 	if !bytes.Equal(disk, after) {
 		t.Fatal("read/repeat/conflict modified first report")
@@ -81,7 +85,7 @@ func TestUploadFailureQueueDurableScopedAndIndependent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer reader.Close()
+	defer func() { _ = reader.Close() }()
 	data, err := io.ReadAll(reader)
 	if err != nil || string(data) != originalBytes || digest(data) != asset.ContentHash {
 		t.Fatal("failure GC changed committed original", err)
@@ -118,7 +122,7 @@ func TestUploadFailureUnknownAckAndSymlinkBoundary(t *testing.T) {
 		t.Fatal(same, err)
 	}
 	external := filepath.Join(t.TempDir(), "external")
-	if err := os.WriteFile(external, []byte("unchanged external"), 0600); err != nil {
+	if err := os.WriteFile(external, []byte("unchanged external"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if err := os.Remove(filepath.Join(root, ".uploads", failureJournal)); err != nil {
@@ -130,6 +134,7 @@ func TestUploadFailureUnknownAckAndSymlinkBoundary(t *testing.T) {
 	if _, err := restarted.ReportFailure(ctx, "owner", "bot", operation, input); err == nil {
 		t.Fatal("followed linked journal")
 	}
+	//nolint:gosec // G304: task-owned t.TempDir fixture and server-issued receipt ID; no user path.
 	data, _ := os.ReadFile(external)
 	if string(data) != "unchanged external" {
 		t.Fatal("external changed")

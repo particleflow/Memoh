@@ -177,10 +177,11 @@ func TestPrivateChatNavigationHTTPAccountAndInputBoundary(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			method, path, body, want := http.MethodPost, "/bots/"+invocationTestBotID+"/sessions/contact/bind", `{"session_id":"`+invocationTestSessionA+`"}`, http.StatusOK
+			method, path, body, want := http.MethodPost, "/bots/"+invocationTestBotID+"/sessions/contact/bind", `{"session_id":"`+invocationTestSessionA+`"}`, http.StatusForbidden
 			switch scenario {
 			case "inspect":
 				method, path, body = http.MethodGet, "/bots/"+invocationTestBotID+"/sessions/contact", ""
+				want = http.StatusOK
 			case "anonymous":
 				token = ""
 				want = http.StatusUnauthorized
@@ -192,16 +193,16 @@ func TestPrivateChatNavigationHTTPAccountAndInputBoundary(t *testing.T) {
 				want = http.StatusForbidden
 			case "injected_identity":
 				body = `{"session_id":"` + invocationTestSessionA + `","user_id":"` + invocationTestOtherUser + `"}`
-				want = http.StatusBadRequest
+				want = http.StatusForbidden
 			case "invalid_session":
 				body = `{"session_id":"not-a-uuid"}`
-				want = http.StatusBadRequest
+				want = http.StatusForbidden
 			case "extra_body":
 				body += `{}`
-				want = http.StatusBadRequest
+				want = http.StatusForbidden
 			case "conflict":
 				navigator.err = route.ErrContactConflict
-				want = http.StatusConflict
+				want = http.StatusForbidden
 			case "revoked_bot":
 				q.permissions = []byte(`[]`)
 				want = http.StatusForbidden
@@ -216,7 +217,7 @@ func TestPrivateChatNavigationHTTPAccountAndInputBoundary(t *testing.T) {
 			if rec.Code != want {
 				t.Fatalf("status %d want %d body %s", rec.Code, want, rec.Body.String())
 			}
-			if want == http.StatusOK || scenario == "conflict" {
+			if scenario == "inspect" {
 				if navigator.navigationCalls != 1 || navigator.bot != invocationTestBotID || navigator.user != invocationTestOwnerID {
 					t.Fatal("wrong authoritative scope")
 				}

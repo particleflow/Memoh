@@ -5,9 +5,10 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/labstack/echo/v4"
+
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/media"
-	"github.com/labstack/echo/v4"
 )
 
 // ReportMediaUploadFailure stores client-reported failure metadata without

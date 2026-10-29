@@ -311,40 +311,29 @@ func TestPostgresPrivateChatLifecycle(t *testing.T) {
 		}
 	})
 
-	t.Run("owned_tombstone_rebuilds_once_foreign_tombstone_does_not", func(t *testing.T) {
+	t.Run("owned_and_foreign_tombstones_never_replace_contact", func(t *testing.T) {
 		f := newContactLifecycleFixture(t, pool)
 		original := f.resolve(t)
 		if err := f.sessions.SoftDelete(t.Context(), original.ID); err != nil {
 			t.Fatal(err)
 		}
 		var wg sync.WaitGroup
-		results := make(chan thread.Thread, 8)
 		errs := make(chan error, 8)
 		for range 8 {
 			wg.Go(func() {
-				s, err := f.coordinator(f.q).EnsurePrivateChat(t.Context(), f.bot, f.user)
-				if err != nil {
-					errs <- err
-				} else {
-					results <- s
-				}
+				_, err := f.coordinator(f.q).EnsurePrivateChat(t.Context(), f.bot, f.user)
+				errs <- err
 			})
 		}
 		wg.Wait()
-		close(results)
 		close(errs)
 		for err := range errs {
-			t.Fatal(err)
-		}
-		canonical := ""
-		for s := range results {
-			if s.ID == original.ID || (canonical != "" && canonical != s.ID) {
-				t.Fatal("tombstone replacement split contacts")
+			if !errors.Is(err, route.ErrContactUnavailable) {
+				t.Fatalf("tombstone must remain unavailable, got %v", err)
 			}
-			canonical = s.ID
 		}
-		if canonical == "" || f.count(t, "bot_sessions", "bot_id=$1 AND deleted_at IS NULL", f.bot) != 1 || f.hook.calls.Load() != 2 {
-			t.Fatal("replacement was missing or duplicated")
+		if f.count(t, "bot_sessions", "bot_id=$1", f.bot) != 1 || f.count(t, "bot_sessions", "bot_id=$1 AND deleted_at IS NULL", f.bot) != 0 || f.hook.calls.Load() != 1 {
+			t.Fatal("tombstone was replaced or triggered another creation hook")
 		}
 		foreign := newContactLifecycleFixture(t, pool)
 		other, err := f.sessions.Create(t.Context(), thread.CreateInput{BotID: f.bot, CreatedByUserID: foreign.user, ChannelType: "web", RouteID: original.RouteID})
@@ -360,7 +349,7 @@ func TestPostgresPrivateChatLifecycle(t *testing.T) {
 		if _, err := f.coordinator(f.q).EnsurePrivateChat(t.Context(), f.bot, f.user); !errors.Is(err, route.ErrContactUnavailable) {
 			t.Fatalf("foreign tombstone accepted: %v", err)
 		}
-		if f.count(t, "bot_sessions", "bot_id=$1", f.bot) != 3 {
+		if f.count(t, "bot_sessions", "bot_id=$1", f.bot) != 2 {
 			t.Fatal("foreign tombstone caused creation")
 		}
 	})

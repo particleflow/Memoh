@@ -28,11 +28,11 @@ func TestReplacementLookupsRunAfterSessionAuthorization(t *testing.T) {
 		if clause == nil {
 			t.Fatalf("no %q case clause found", kind)
 		}
-		authorize := firstCallPos(clause, "authorizeWSSession")
+		authorize := firstCallPos(clause, "authorizeWSContactWrite")
 		resolve := firstCallPos(clause, "resolveWSTargetTurnID")
 		switch {
 		case !authorize.IsValid():
-			t.Fatalf("%s: no authorizeWSSession call", kind)
+			t.Fatalf("%s: no authorizeWSContactWrite call", kind)
 		case !resolve.IsValid():
 			t.Fatalf("%s: no resolveWSTargetTurnID call", kind)
 		case resolve < authorize:
@@ -42,6 +42,31 @@ func TestReplacementLookupsRunAfterSessionAuthorization(t *testing.T) {
 				kind, fset.Position(resolve), fset.Position(authorize),
 			)
 		}
+	}
+	contactFile, err := parser.ParseFile(fset, "fixed_contact.go", nil, 0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wrapper *ast.FuncDecl
+	for _, decl := range contactFile.Decls {
+		if fn, ok := decl.(*ast.FuncDecl); ok && fn.Name.Name == "authorizeWSContactWrite" {
+			wrapper = fn
+		}
+	}
+	if wrapper == nil {
+		t.Fatal("missing contact authorization wrapper")
+	}
+	// The wrapper must fail closed on session authorization before checking the
+	// canonical contact. Keeping both checks prevents an existence oracle.
+	guard, ok := wrapper.Body.List[0].(*ast.IfStmt)
+	if !ok || !firstCallPos(guard.Init, "authorizeWSSession").IsValid() {
+		t.Fatal("contact wrapper must authorize the session first")
+	}
+	if len(guard.Body.List) != 1 {
+		t.Fatal("session authorization failure must return immediately")
+	}
+	if _, ok := guard.Body.List[0].(*ast.ReturnStmt); !ok || !firstCallPos(wrapper, "requireExistingContact").IsValid() {
+		t.Fatal("contact wrapper lost its fail-closed session/contact boundary")
 	}
 }
 

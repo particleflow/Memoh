@@ -29,8 +29,9 @@ func TestUploadFailureClientToAuthenticatedHandler(t *testing.T) {
 		t.Fatal(err)
 	}
 	baseEnv := append(os.Environ(), "HARMONY_UPLOAD_FAILURE_HTTP_ONLY=1", "HARMONY_UPLOAD_FAILURE_SERVER_URL="+f.server.URL, "HARMONY_UPLOAD_FAILURE_TOKEN="+f.token, "HARMONY_UPLOAD_FAILURE_OWNER="+invocationTestOtherUser, "HARMONY_UPLOAD_FAILURE_BOT_ID="+invocationTestBotID, "HARMONY_UPLOAD_FAILURE_OUTBOX_PATH="+filepath.Join(t.TempDir(), "outbox.json"))
+	//nolint:gosec // G204: fixed repository fixture; no client-controlled command or path.
 	command := exec.CommandContext(t.Context(), "node", filepath.Join(repo, "mobile/client/tests/stage2/harmony_resumable_frontend.cjs"))
-	command.Env = append(baseEnv, "HARMONY_UPLOAD_FAILURE_UNKNOWN_ACK=1", "HARMONY_UPLOAD_FAILURE_RESTORE_ONLY=0")
+	command.Env = append(append([]string(nil), baseEnv...), "HARMONY_UPLOAD_FAILURE_UNKNOWN_ACK=1", "HARMONY_UPLOAD_FAILURE_RESTORE_ONLY=0")
 	output, err := command.CombinedOutput()
 	if err != nil {
 		t.Fatalf("client fixture: %v\n%s", err, output)
@@ -50,8 +51,9 @@ func TestUploadFailureClientToAuthenticatedHandler(t *testing.T) {
 		t.Fatal(records, err)
 	}
 	t.Log(string(bytes.TrimSpace(output)))
+	//nolint:gosec // G204: same fixed repository fixture in an independent test process.
 	second := exec.CommandContext(t.Context(), "node", filepath.Join(repo, "mobile/client/tests/stage2/harmony_resumable_frontend.cjs"))
-	second.Env = append(baseEnv, "HARMONY_UPLOAD_FAILURE_UNKNOWN_ACK=0", "HARMONY_UPLOAD_FAILURE_RESTORE_ONLY=1")
+	second.Env = append(append([]string(nil), baseEnv...), "HARMONY_UPLOAD_FAILURE_UNKNOWN_ACK=0", "HARMONY_UPLOAD_FAILURE_RESTORE_ONLY=1")
 	resumed, err := second.CombinedOutput()
 	if err != nil {
 		t.Fatalf("restore process: %v\n%s", err, resumed)
@@ -90,11 +92,12 @@ func TestUploadFailureAuthenticatedHTTPMetadataOnly(t *testing.T) {
 		if token != "" {
 			req.Header.Set("Authorization", "Bearer "+token)
 		}
+		//nolint:gosec // G704: URL is the owned httptest server and fixed metadata API paths.
 		res, err := f.server.Client().Do(req)
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 		got, err := io.ReadAll(res.Body)
 		if err != nil || res.StatusCode != want {
 			t.Fatalf("status %d want %d: %s %v", res.StatusCode, want, got, err)

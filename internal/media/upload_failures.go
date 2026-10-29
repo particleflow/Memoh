@@ -55,7 +55,7 @@ func validUploadFailure(in UploadFailureInput) bool {
 	}
 }
 
-func (s *UploadStore) readFailures() ([]uploadFailureRecord, error) {
+func (s *UploadStore) readFailures() (_ []uploadFailureRecord, retErr error) {
 	f, err := openUploadFile(s.root, failureJournal, os.O_RDONLY, 0)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
@@ -63,7 +63,11 @@ func (s *UploadStore) readFailures() ([]uploadFailureRecord, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); retErr == nil {
+			retErr = err
+		}
+	}()
 	// Reuse the existing receipt-count ceiling, without reserving file bytes or
 	// consuming active-upload slots. No new transfer byte budget is introduced.
 	data, err := io.ReadAll(io.LimitReader(f, int64(maxUploadSessions*2048+1)))
@@ -111,7 +115,7 @@ func (s *UploadStore) saveFailures(records []uploadFailureRecord) error {
 	if err := s.remove(temporary); err != nil {
 		return err
 	}
-	f, err := openUploadFile(s.root, temporary, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	f, err := openUploadFile(s.root, temporary, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 	if err != nil {
 		return err
 	}

@@ -80,6 +80,7 @@ func TestBotPlaybackStreamingFirstChunkBeforeEOFAndCancellation(t *testing.T) {
 		t.Fatal("cancellation did not release handler")
 	}
 }
+
 func TestBotPlaybackStreamingFailureAfterBytesAbortsHTTP(t *testing.T) {
 	chunks, failures := make(chan []byte, 1), make(chan error, 1)
 	chunks <- []byte("partial")
@@ -90,7 +91,9 @@ func TestBotPlaybackStreamingFailureAfterBytesAbortsHTTP(t *testing.T) {
 	h := &BotAudioHandler{audioService: service, settingsService: &playbackSettings{model: "configured"}, playbackAccess: func(context.Context, string, string) error { return nil }}
 	c := fieldErrorContext(http.MethodPost, `{"text":"visible"}`, "11111111-1111-1111-1111-111111111111", map[string]string{"bot_id": "bot"})
 	defer func() {
-		if value := recover(); value != http.ErrAbortHandler {
+		value := recover()
+		err, ok := value.(error)
+		if !ok || !errors.Is(err, http.ErrAbortHandler) {
 			t.Fatalf("truncation must abort committed HTTP, got %v", value)
 		}
 	}()

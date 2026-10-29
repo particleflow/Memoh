@@ -2712,16 +2712,8 @@ func userInputResponseAppError(err error) error {
 	}
 }
 
-// createWSChatSession creates the web session for a first message. The
-// request's (model, effort) pair is written into the INSERT (issue #879,
-// spec §3.3-D) so the session is born with the pair: the session_created
-// broadcast that follows can never be observed with empty preference.
-// Channel-side creation (inbound) calls thread.Create without these fields,
-// so channel sessions are born with NULL preference.
-//
-// A requested workdir is validated by the same rule as the REST create
-// (resolveSessionWorkdirBinding) before anything is written, so an invalid
-// binding fails the send without leaving a session behind.
+// createWSChatSession resolves the system-owned continuous contact. It never
+// creates a parallel Web session, resets preferences, or rebinds its workdir.
 func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, modelID, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
 	return h.resolveWebMessageContact(ctx, botID, channelIdentityID, "", workdirID)
 }
