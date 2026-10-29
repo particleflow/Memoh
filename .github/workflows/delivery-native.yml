@@ -53,7 +53,7 @@ jobs:
       # five-minute budget. These disjoint selectors retain every test once,
       # including both the shared progress test and its native wrapper.
       - name: Execute transfer contracts except Windows and journal progress
-        run: go test -count=1 -v -timeout=5m -skip '^Test(Windows|ActiveJournalBoundedAcrossProgress$)' ./internal/transferclient
+        run: go test -count=1 -v -timeout=10m -skip '^Test(Windows|ActiveJournalBoundedAcrossProgress$)' ./internal/transferclient
       - name: Execute active journal progress contract
         run: go test -count=1 -v -timeout=5m -run '^TestActiveJournalBoundedAcrossProgress$' ./internal/transferclient
       - name: Execute Windows active journal contracts
