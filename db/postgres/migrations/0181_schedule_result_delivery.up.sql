@@ -3,3 +3,11 @@
 ALTER TABLE schedule ADD COLUMN IF NOT EXISTS result_origin JSONB NOT NULL DEFAULT '{}';
 ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS result_origin JSONB NOT NULL DEFAULT '{}';
 ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS result_delivery JSONB NOT NULL DEFAULT '{}';
+
+-- Persist the due identity before execution-context creation. The deadline is
+-- the existing execution budget; expiry cannot grant permission to replay.
+ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS scheduled_for TIMESTAMPTZ;
+ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS claim_deadline TIMESTAMPTZ;
+ALTER TABLE schedule_logs ADD COLUMN IF NOT EXISTS claim_state TEXT NOT NULL DEFAULT '';
+CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_logs_occurrence
+ ON schedule_logs(team_id,schedule_id,scheduled_for) WHERE scheduled_for IS NOT NULL;

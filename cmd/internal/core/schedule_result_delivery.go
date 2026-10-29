@@ -127,6 +127,11 @@ func (h *delegationHost) scheduleOrigin(ctx context.Context, bot string, raw []b
 }
 func (h *delegationHost) WakeScheduleResults(ctx context.Context) { h.wakeResults(ctx) }
 func (h *delegationHost) scanScheduleResults(ctx context.Context) error {
+	// Uses the original admission credential and execution deadline; this only
+	// records uncertainty and cannot grant another execution attempt.
+	if _, err := h.store.RecoverUnadmittedScheduleOccurrences(ctx); err != nil {
+		return err
+	}
 	rows, err := h.store.ListScheduleResultFires(ctx)
 	if err != nil {
 		return err
@@ -185,13 +190,13 @@ func (h *delegationHost) loadScheduleResult(ctx context.Context, id, bot, user, 
 			}
 		case !errors.Is(e, pgx.ErrNoRows):
 			return t, e
-		case !row.CompletedAt.Valid:
+		case !row.CompletedAt.Valid && row.ClaimState != "unknown":
 			return t, errResultNotReady
 		}
-	} else if !row.CompletedAt.Valid {
+	} else if !row.CompletedAt.Valid && row.ClaimState != "unknown" {
 		return t, errResultNotReady
 	}
-	if t.run == "" && row.CompletedAt.Valid && row.Status == "error" {
+	if t.run == "" && row.ClaimState != "unknown" && row.CompletedAt.Valid && row.Status == "error" {
 		t.state = "failed"
 		t.text = "Recorded failure code: " + row.ErrorCode
 	}

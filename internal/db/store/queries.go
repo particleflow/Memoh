@@ -26,6 +26,10 @@ type HistoryTurn struct {
 // Queries is the transitional database interface implemented by sqlc-backed stores.
 // Domain-specific stores should replace this broad interface module by module.
 type Queries interface {
+	ClaimScheduleOccurrence(context.Context, dbsqlc.ClaimScheduleOccurrenceParams) (dbsqlc.ClaimScheduleOccurrenceRow, error)
+	BindScheduleOccurrenceSession(context.Context, dbsqlc.BindScheduleOccurrenceSessionParams) (dbsqlc.ScheduleLog, error)
+	RecoverUnadmittedScheduleOccurrences(context.Context) ([]pgtype.UUID, error)
+
 	GetContactCandidate(context.Context, dbsqlc.GetContactCandidateParams) (dbsqlc.BotSession, error)
 	InsertContactBindingRoute(context.Context, dbsqlc.InsertContactBindingRouteParams) (pgtype.UUID, error)
 	ReadContactSession(context.Context, dbsqlc.ReadContactSessionParams) (dbsqlc.BotSession, error)
