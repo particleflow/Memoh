@@ -211,6 +211,36 @@ describe('chat realtime controller', () => {
     )
   })
 
+  it('retries failed history on reopen without replacing the runtime subscription', async () => {
+    const { controller, callbacks, sockets } = makeController()
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      callbacks.prepareSessionRuntime = vi.fn().mockRejectedValueOnce(new Error('history read failed'))
+      controller.startWebSocket('bot-1')
+      controller.startSessionRuntime('bot-1', 'session-1')
+      await flushPromises()
+      // REST may fail before the first runtime snapshot arrives. A later
+      // reopen must still be able to commit history against that snapshot.
+      sockets[0]!.handler({ type: 'runtime_snapshot', session_id: 'session-1', epoch: 'epoch-1', seq: 1,
+        snapshot: { bot_id: 'bot-1', session_id: 'session-1', epoch: 'epoch-1', seq: 1, updated_at: '2026-10-29T00:00:00Z' } })
+      let finish!: () => void
+      let applied = false
+      vi.mocked(callbacks.prepareSessionRuntime).mockImplementationOnce(async (_bot, _session, commit) => {
+        await new Promise<void>(resolve => { finish = resolve })
+        await commit(() => { applied = true })
+      })
+      controller.startSessionRuntime('bot-1', 'session-1')
+      controller.startSessionRuntime('bot-1', 'session-1')
+      expect(callbacks.prepareSessionRuntime).toHaveBeenCalledTimes(2)
+      expect(sockets[0]!.socket.send.mock.calls.filter(([message]) => message.type === 'runtime_subscribe')).toHaveLength(1)
+      expect(sockets[0]!.socket.send.mock.calls.some(([message]) => message.type === 'runtime_unsubscribe')).toBe(false)
+      finish(); await flushPromises()
+      expect(applied).toBe(true)
+      controller.startSessionRuntime('bot-1', 'session-1')
+      expect(callbacks.prepareSessionRuntime).toHaveBeenCalledTimes(2)
+    } finally { consoleError.mockRestore() }
+  })
+
   it('hydrates once, then subscribes to the session runtime on the websocket', async () => {
     const { controller, callbacks, sockets } = makeController()
     controller.startWebSocket('bot-1')

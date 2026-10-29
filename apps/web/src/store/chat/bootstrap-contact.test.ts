@@ -178,4 +178,14 @@ describe('Bot contact entry', () => {
     expect(bootstrap.contactOpenRequested.value).toBeNull()
     expect(bootstrap.contactNavigationPending.value).toBe(true)
   })
+  it('reopens the same contact runtime so a failed history read can recover', async () => {
+    const { deps, bootstrap } = fixture(true)
+    deps.sessionId.value = 'bound-contact'
+    await bootstrap.selectSession('bound-contact', { explicitSelection: false })
+    expect(deps.startSessionRuntime).toHaveBeenCalledExactlyOnceWith('bot', 'bound-contact')
+    expect(deps.releasePreviousSession).not.toHaveBeenCalled()
+    expect(deps.sessionId.value).toBe('bound-contact')
+    expect(deps.clearHistoryView).not.toHaveBeenCalled()
+  })
+
 })

@@ -313,6 +313,11 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     return i18n.global.t('chat.tabs.schedule').trim() || 'Schedule'
   }
 
+  function contactTitle(): string {
+    const bot = currentBot.value
+    return bot?.display_name?.trim() || bot?.name?.trim() || currentBotId.value?.trim() || ''
+  }
+
   // Per-session chat title fallback (syncChatTitles overlays the server title
   // once known). Draft tabs (no session) are system-titled, and so is a first
   // send's tab until the server confirms the send (see isSessionTentative).
@@ -326,7 +331,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     const params = panel.params ?? {}
     switch (panelComponentOf(panel.id)) {
       case 'chat':
-        return chatTitleFallbackFor(panelSessionId(panel))
+        return params.contactView === true ? contactTitle() : chatTitleFallbackFor(panelSessionId(panel))
       case 'file':
         return fileBaseName(panel.id.slice('file:'.length))
       case 'preview':
@@ -379,6 +384,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     // Draft chat and unsaved schedule tabs never carry user content, so their
     // titles are always re-derived — this is what migrates a draft persisted
     // under another locale.
+    if (component === 'chat' && panel.params?.contactView === true) return contactTitle()
     if (component === 'chat' && panelSessionId(panel) === null) return defaultChatTitle()
     if (component === 'schedule' && panel.id.startsWith('schedule:new:')) return scheduleTabTitle()
     if (!title) return panelTitleFallback(panel)
@@ -650,6 +656,14 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     return !id || panelComponentOf(id) === 'chat'
   })
 
+  const activeContactTitle = computed(() => {
+    const id = activePanelId.value
+    const panel = id ? api.value?.getPanel(id) : null
+    return panel && panelComponentOf(panel.id) === 'chat' && panel.params?.contactView === true
+      ? contactTitle()
+      : ''
+  })
+
   function hasCurrentPermission(permission: BotPermission): boolean {
     return hasBotPermission(currentBot.value?.current_user_permissions, permission)
   }
@@ -909,7 +923,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     // Same guard as openSessionChat: a row mid-deletion can still be visible in
     // the sidebar, so refuse to (re)open a session being deleted for this bot.
     if (isDeletedSessionForCurrentBot(sid)) return
-    const title = opts.title?.trim() || chatTitleFallbackFor(sid)
+    const title = opts.contactView === true ? contactTitle() : opts.title?.trim() || chatTitleFallbackFor(sid)
     // Only the server-resolved contact entry requests this projection. History
     // and task links retain a separate full transcript, even for this session.
     const existing = chatPanelForSession(sid, opts.contactView === true)
@@ -1134,6 +1148,11 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
       if (panelComponentOf(panel.id) !== 'chat') continue
       const sid = panelSessionId(panel)
       if (!sid) continue
+      if (panel.params?.contactView === true) {
+        const title = contactTitle()
+        if (panel.api.title !== title) panel.api.setTitle(title)
+        continue
+      }
       const session = chatStore.knownSessionSummary(sid)
       // Unknown session (not yet in the loaded list): leave the tab alone —
       // deriving from nothing would overwrite a correct title with a fallback.
@@ -2146,6 +2165,8 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     () => syncChatTitles(),
   )
 
+  watch(contactTitle, () => syncChatTitles())
+
   watch(() => chatStore.deletedSession, (deleted) => {
     if (!deleted) return
     const deletedIds = deletedSessionIdsByBot.get(deleted.botId) ?? new Set<string>()
@@ -2175,6 +2196,7 @@ export const useWorkspaceTabsStore = defineStore('workspace-tabs', () => {
     focusAdjacentTab,
     isMobile,
     activePanelIsChat,
+    activeContactTitle,
     mobileNavOpen,
     panelDragging,
     fileDirty,
