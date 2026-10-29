@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/memoh-readaloud-home-review
+
+
+ Test Files  2 passed (2)
+      Tests  12 passed (12)
+   Start at  00:01:31
+   Duration  3.42s (transform 2.03s, setup 0ms, import 2.72s, tests 251ms, environment 1.43s)
+

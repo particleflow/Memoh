@@ -1,0 +1,17 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Home admission mask must immediately stop old native audio
+    at silent (file:///tmp/readaloud-home-review/browser-home-review.mjs:144:30)
+    at pending (file:///tmp/readaloud-home-review/browser-home-review.mjs:165:37)
+    at async file:///tmp/readaloud-home-review/browser-home-review.mjs:172:14 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

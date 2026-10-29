@@ -1,0 +1,64 @@
+{
+  "base": "28ac9393c7e20db34b804ad3ece63680eecded8c",
+  "baseTree": "886fa9f0d693e0952f27619a3ea17b678a120d90",
+  "sourceFix": "19015a545a38f3fd6ca2c3b17d71280556101756",
+  "sourceTree": "ab796c590e8d571852da9ff75550d6325aa49fe6",
+  "libraryInput": {
+    "library_file_id": "libfile_598d489937848191912dd0bed9de5159",
+    "version": 1,
+    "SHA256": "cd0102b8443dc6e0bfcdd9aa81ea8ae1a252c3c10e9dc6dc68634e2252978e59",
+    "manifestEntriesVerified": 14
+  },
+  "checks": {
+    "homeRed": {
+      "exitCode": 1,
+      "failed": 6,
+      "reason": "old pane still located, actual Home mask invisible, expected idle/received playing"
+    },
+    "sourceGreen": {
+      "exitCode": 0,
+      "newHomeCases": 8,
+      "existingInnerAnchorCases": 4,
+      "totalPassed": 12
+    },
+    "nativeBrowserRed": {
+      "exitCode": 1,
+      "assertion": "Home admission mask must immediately stop old native audio"
+    },
+    "nativeBrowserGreen": {
+      "exitCode": 0,
+      "groups": 6,
+      "pendingVisibleBubbleCounts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "pageErrors": [],
+      "requests": 7
+    },
+    "changedFileESLint": {
+      "exitCode": 0
+    },
+    "candidateUIContract": {
+      "exitCode": 0,
+      "existingWarnings": 3
+    }
+  },
+  "preview": {
+    "URL": "http://127.0.0.1:18485",
+    "closed": true
+  },
+  "paidProviderCalls": 0,
+  "buildSignDeploy": false,
+  "artifactSHA256": {
+    "docs/testing/chat-read-aloud/home-admission-review/red/failure.json": "eb0117e4d7d10b2b8651c3c7696ba4bd64302469d57d03fd2d957944fcea12d7",
+    "docs/testing/chat-read-aloud/home-admission-review/green/result.json": "3ae104267d4067707abe6d75c47e146f88acddeb5566321b8436a4ba813956b8",
+    "docs/testing/chat-read-aloud/home-admission-review/home-admission-read-aloud.patch": "4d0e914d75f47c846b0302def4178f151f44acf37da48ff6f072dcb68b3891da",
+    "docs/testing/chat-read-aloud/home-admission-review/source-map.json": "34bb3be191a9fc272e399e22afbdd340b27d531c34eadf6f55ab44b0b0e83cda",
+    "docs/testing/chat-read-aloud/home-admission-review/shared-consumer-delta.json": "35d50b02a36acbaada5a4fc4834c1d3f4316959e439b2e29fa17621a3657cd6c",
+    "docs/testing/chat-read-aloud/browser-home-review.mjs": "22f3726aba02fc2ff5314032b48faeb0ed197069e321067ca252fcbb45f4716a"
+  }
+}

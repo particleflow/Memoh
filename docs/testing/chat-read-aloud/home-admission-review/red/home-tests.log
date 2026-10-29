@@ -1,0 +1,74 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-readaloud-home-review
+
+ ❯ |web| src/pages/home/index.read-aloud-admission.test.ts (6 tests | 6 failed) 112ms
+     × same Bot/session, different run: stops during authorization and never restores the old queue after admission 62ms
+     × cross Bot/session: stops during authorization and never restores the old queue after admission 13ms
+     × denied: stays silent under the error mask, then returns to the actual primary contact path 10ms
+     × expired: stays silent under the error mask, then returns to the actual primary contact path 7ms
+     × wrong-run: stays silent under the error mask, then returns to the actual primary contact path 9ms
+     × ignores a late task admission after returning to the primary contact without restoring old audio 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > same Bot/session, different run: stops during authorization and never restores the old queue after admission
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cross Bot/session: stops during authorization and never restores the old queue after admission
+AssertionError: expected 'playing' to be 'idle' // Object.is equality
+
+Expected: "idle"
+Received: "playing"
+
+ ❯ stoppedBeforeNewAnchor src/pages/home/index.read-aloud-admission.test.ts:88:42
+     86|   expect(api.open).toHaveBeenCalledTimes(1)
+     87|   expect(api.pane!.taskAnchor?.runId).toBe('old')
+     88|   expect(api.speech!.state.value.status).toBe('idle')
+       |                                          ^
+     89|   expect(api.speech!.enabled.value).toBe(false)
+     90|   expect(api.player!.src).toBe(''); expect(api.player!.pause).toHaveBe…
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:120:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > denied: stays silent under the error mask, then returns to the actual primary contact path
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > expired: stays silent under the error mask, then returns to the actual primary contact path
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > wrong-run: stays silent under the error mask, then returns to the actual primary contact path
+AssertionError: expected 'playing' to be 'idle' // Object.is equality
+
+Expected: "idle"
+Received: "playing"
+
+ ❯ stoppedBeforeNewAnchor src/pages/home/index.read-aloud-admission.test.ts:88:42
+     86|   expect(api.open).toHaveBeenCalledTimes(1)
+     87|   expect(api.pane!.taskAnchor?.runId).toBe('old')
+     88|   expect(api.speech!.state.value.status).toBe('idle')
+       |                                          ^
+     89|   expect(api.speech!.enabled.value).toBe(false)
+     90|   expect(api.player!.src).toBe(''); expect(api.player!.pause).toHaveBe…
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:130:52
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > ignores a late task admission after returning to the primary contact without restoring old audio
+AssertionError: expected 'playing' to be 'idle' // Object.is equality
+
+Expected: "idle"
+Received: "playing"
+
+ ❯ stoppedBeforeNewAnchor src/pages/home/index.read-aloud-admission.test.ts:88:42
+     86|   expect(api.open).toHaveBeenCalledTimes(1)
+     87|   expect(api.pane!.taskAnchor?.runId).toBe('old')
+     88|   expect(api.speech!.state.value.status).toBe('idle')
+       |                                          ^
+     89|   expect(api.speech!.enabled.value).toBe(false)
+     90|   expect(api.player!.src).toBe(''); expect(api.player!.pause).toHaveBe…
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:145:52
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed (6)
+   Start at  23:55:10
+   Duration  3.18s (transform 1.61s, setup 0ms, import 2.15s, tests 112ms, environment 710ms)
+

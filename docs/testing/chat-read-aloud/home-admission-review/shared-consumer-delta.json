@@ -1,0 +1,29 @@
+{
+  "base": "28ac9393c7e20db34b804ad3ece63680eecded8c",
+  "sourceFix": "19015a545a38f3fd6ca2c3b17d71280556101756",
+  "files": [
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "baseSHA256": "386eb377661b29b86719eb77da93da11d0c6ef87770268bf3838b62c78020381",
+      "sha256": "0f941261521adb08d42bca472bb817b641614d2a72683e9e6bcf41f2ab4caa37"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-workspace.vue",
+      "baseSHA256": "00673ec48f6c568902d9aafcc6586e83fea4f1cf1c0e604a362d96a50a5e6acf",
+      "sha256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "baseSHA256": "79572a85eff97cdaafa4e8110495d70c2a2f42d1c6f763cc5e46bc56cd7bdbdd",
+      "sha256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-workspace-visibility.ts",
+      "baseSHA256": null,
+      "sha256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7"
+    }
+  ],
+  "requiredTogether": true,
+  "SDKStylesLocalesChanged": false,
+  "harmony27ContainsFix": false
+}
