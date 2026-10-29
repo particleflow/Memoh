@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/robfig/cron/v3"
 
@@ -20,6 +21,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
+	dbstore "github.com/felinics/memoh/internal/db/store"
 )
 
 type busyOccurrenceCreator struct {
@@ -51,6 +53,20 @@ func (c *busyOccurrenceTrigger) TriggerSchedule(ctx context.Context, bot string,
 		return TriggerResult{}, fmt.Errorf("%w: %w", ErrSessionBusy, err)
 	}
 	return result, err
+}
+
+type busyRefundLostAck struct {
+	dbstore.Queries
+	calls atomic.Int32
+}
+
+func (q *busyRefundLostAck) RefundBusyScheduleOccurrence(ctx context.Context, p sqlc.RefundBusyScheduleOccurrenceParams) (pgtype.UUID, error) {
+	q.calls.Add(1)
+	id, err := q.Queries.RefundBusyScheduleOccurrence(ctx, p)
+	if err == nil {
+		return pgtype.UUID{}, context.DeadlineExceeded
+	}
+	return id, err
 }
 
 func TestScheduleOccurrenceBusyPostgres(t *testing.T) {
@@ -130,13 +146,18 @@ func TestScheduleOccurrenceBusyPostgres(t *testing.T) {
 		}
 		t.Log("real competing native admission -> busy, no own run; quota refunded, automatic max_calls stop released; original fire persists as known non-execution; same due never retried; next due executes once and limit remains enforced")
 	})
-	for _, scenario := range []string{"explicit_pause_before_refund", "explicit_pause_after_refund", "pause_commit_while_refund_waits", "pause_waits_for_refund_commit", "budget_expired_before_busy_receipt", "unknown_wins", "original_run_exists", "concurrent_refund"} {
+	for _, scenario := range []string{"explicit_pause_before_refund", "explicit_pause_after_refund", "pause_commit_while_refund_waits", "pause_waits_for_refund_commit", "budget_expired_before_busy_receipt", "unknown_wins", "original_run_exists", "concurrent_refund", "refund_ack_lost"} {
 		t.Run(scenario, func(t *testing.T) {
 			q, user, bot, plan := busyOccurrenceFixture(t, ctx, pool)
 			creator := &busyOccurrenceCreator{occurrenceCreator: &occurrenceCreator{pool: pool}}
 			creator.occupy.Store(true)
 			trigger := &busyOccurrenceTrigger{occurrenceTrigger: &occurrenceTrigger{pool: pool}}
 			s := &Service{queries: postgresstore.NewQueriesWithPool(pool, q), triggerer: trigger, sessionCreator: creator, resultHooks: &resultHooksFixture{user: user}, logger: slog.New(slog.DiscardHandler), jwtSecret: "isolated-fixture", cron: cron.New(), jobs: map[string]cron.EntryID{}}
+			var lostAck *busyRefundLostAck
+			if scenario == "refund_ack_lost" {
+				lostAck = &busyRefundLostAck{Queries: s.queries}
+				s.queries = lostAck
+			}
 			row, e := q.GetScheduleByID(ctx, toUUID(plan))
 			if e != nil {
 				t.Fatal(e)
@@ -259,6 +280,9 @@ func TestScheduleOccurrenceBusyPostgres(t *testing.T) {
 			if e = <-done; !errors.Is(e, ErrSessionBusy) {
 				t.Fatal(e)
 			}
+			if lostAck != nil && (lostAck.calls.Load() != 1 || len(s.jobs) != 1) {
+				t.Fatal("lost acknowledgement retried settlement or lost next timer")
+			}
 			if scenario == "explicit_pause_after_refund" {
 				pause()
 			}
@@ -283,7 +307,7 @@ func TestScheduleOccurrenceBusyPostgres(t *testing.T) {
 				if after.CurrentCalls != 0 || state != "busy" {
 					t.Fatal("known busy count not refunded", after.CurrentCalls, state)
 				}
-				if scenario != "concurrent_refund" && scenario != "budget_expired_before_busy_receipt" && (after.Enabled || after.LimitDisabled) {
+				if scenario != "concurrent_refund" && scenario != "budget_expired_before_busy_receipt" && scenario != "refund_ack_lost" && (after.Enabled || after.LimitDisabled) {
 					t.Fatal("refund overrode explicit pause")
 				}
 			}
