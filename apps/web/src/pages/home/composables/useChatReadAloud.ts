@@ -26,8 +26,6 @@ export function useChatReadAloud(options: {
   const enabled = computed(() => options.enabled.value && workspaceVisible.value)
   const state = shallowRef<SpeechState>({ key: '', status: 'idle' })
   const notice = shallowRef('')
-  const cacheVersion = shallowRef(0)
-  const replayUnavailable = shallowRef(new Set<string>())
   const generatedRuns = new Map<string, string>()
   const authToken = useLocalStorage('token', '')
   const activePrincipal = shallowRef(authToken.value)
@@ -95,7 +93,6 @@ export function useChatReadAloud(options: {
     createPlayer: () => new Audio(),
     createURL: blob => URL.createObjectURL(blob),
     revokeURL: url => URL.revokeObjectURL(url),
-    onCacheChange: () => { cacheVersion.value++ },
     onState: value => {
       state.value = value
       notice.value = value.status === 'error' ? 'chat.readAloud.failed' : ''
@@ -113,7 +110,7 @@ export function useChatReadAloud(options: {
   }
   watch(options.scope, () => { stop(); replies.reset() }, { flush: 'sync' })
   if (options.modelId) watch(options.modelId, stop, { flush: 'sync' })
-  watch(authToken, () => { stop(); controller.clearCache(); generatedRuns.clear(); replayUnavailable.value = new Set() }, { flush: 'sync' })
+  watch(authToken, () => { stop(); controller.clearCache(); generatedRuns.clear() }, { flush: 'sync' })
   watch(enabled, value => { if (!value) stop() }, { flush: 'sync' })
   // flush:sync stops the player in the input event, before any pending media task.
   watch(options.draft, stop, { flush: 'sync' })
@@ -154,9 +151,6 @@ export function useChatReadAloud(options: {
   watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value, scope: options.scope.value }), value => {
     if (value.messages.some(message => message.role === 'assistant' && (state.value.messageId ? message.id === state.value.messageId : speechKey(message) === state.value.key) && message.messages.some(block => block.type === 'error'))) { stop(); return }
     observeBody(); collect()
-    // Refresh after DOM admission/mount, not on every observer mutation caused
-    // by controls rerendering. Cached history must become available on return.
-    cacheVersion.value++
   }, { deep: true, immediate: true, flush: 'post' })
   function canResume(message: ChatMessage) {
     if ((localStorage.getItem('token') ?? authToken.value) !== activePrincipal.value) return false
@@ -178,47 +172,49 @@ export function useChatReadAloud(options: {
   }
   function entry(message: ChatMessage) { return { key: speechKey(message), messageId: message.id, cacheKey: cacheKey(message), text: rendered ? rendered(message) : speechText(message) } }
   function menuAvailable(message: ChatMessage) { return enabled.value && message.role === 'assistant' && (canResume(message) || !!speechText(message)) }
-  function canReplay(message: ChatMessage) {
-    void cacheVersion.value
-    return enabled.value && (canResume(message) || (!message.streaming && !replayUnavailable.value.has(cacheKey(message)) && controller.replayAvailability(entry(message)) === 'ready'))
-  }
-  function replayLabel(message: ChatMessage) { return canResume(message) ? 'chat.readAloud.continue' : canReplay(message) ? 'chat.readAloud.replay' : message.streaming || controller.replayAvailability(entry(message)) === 'incomplete' ? 'chat.readAloud.incomplete' : 'chat.readAloud.unavailable' }
+  function canReplay(message: ChatMessage) { return enabled.value && (canResume(message) || (!message.streaming && !!speechText(message))) }
+  function replayLabel(message: ChatMessage) { return canResume(message) ? 'chat.readAloud.continue' : 'chat.readAloud.replay' }
   async function replay(message: ChatMessage) {
     if (!enabled.value) return
     // The existing menu selection is the supported user activation. Resume the
     // same loaded source synchronously, before stop(), DOM work or any request.
     if (canResume(message)) { controller.resume(); return }
-    if (!canReplay(message)) { stop(); notice.value = 'chat.readAloud.unavailable'; return }
+    if (message.streaming) return
     const timing = beginSpeechTiming('manual')
     const cachedEntry = entry(message)
     if (!cachedEntry.text) return
     timing?.mark('text_observed')
+    // Cached audio is never a precondition for reading aloud. Ready bytes replay
+    // only after the read-only identity check; every other case synthesizes
+    // through the same live path as an automatic reply.
+    if (controller.replayAvailability(cachedEntry) !== 'ready') {
+      stop()
+      controller.enqueue({ ...cachedEntry, ...(timing ? { timing } : {}) })
+      return
+    }
     stop()
     const token = replayGeneration, scope = options.scope.value
     replayRequest = new AbortController()
+    let replayed = false
     try {
       // Read-only current permission/config validation, never a TTS request.
       const { data } = await getBotsByBotIdTtsPlaybackConfig({ path: { bot_id: options.botId.value! }, signal: replayRequest.signal, throwOnError: true })
       if (token !== replayGeneration || scope !== options.scope.value || cachedEntry.cacheKey !== cacheKey(message) || cachedEntry.text !== entry(message).text || !enabled.value || options.draft.value) return
       activePrincipal.value = localStorage.getItem('token') ?? authToken.value
-      if (!data?.identity || !controller.replay({ ...cachedEntry, ...(timing ? { timing } : {}) }, data.identity)) {
-        replayUnavailable.value = new Set([...replayUnavailable.value, cachedEntry.cacheKey])
-        notice.value = 'chat.readAloud.configurationChanged'
-      }
+      replayed = !!data?.identity && controller.replay({ ...cachedEntry, ...(timing ? { timing } : {}) }, data.identity)
     } catch {
-      if (token === replayGeneration) {
-        replayUnavailable.value = new Set([...replayUnavailable.value, cachedEntry.cacheKey])
-        notice.value = 'chat.readAloud.unavailable'
-      }
+      if (token !== replayGeneration) return
     } finally { if (token === replayGeneration) replayRequest = undefined }
+    // Voice settings or text changed, or validation failed: re-synthesize now.
+    if (token === replayGeneration && scope === options.scope.value && !replayed && enabled.value && !options.draft.value) controller.enqueue({ ...cachedEntry, ...(timing ? { timing } : {}) })
   }
   function status(message: ChatMessage) {
     const active = options.messages.value.find(item => item.role === 'assistant' && (state.value.messageId ? state.value.messageId === item.id : state.value.key === speechKey(item)))
     return message.role === 'assistant' && message.id === active?.id ? state.value.status : 'idle'
   }
   onDeactivated(stop)
-  onMounted(() => { observeBody(); collect(); cacheVersion.value++ })
-  onActivated(() => { void nextTick(() => { observeBody(); cacheVersion.value++ }) })
+  onMounted(() => { observeBody(); collect() })
+  onActivated(() => { void nextTick(() => { observeBody() }) })
   onBeforeUnmount(() => { observer?.disconnect(); stop(); controller.clearCache() })
   return { state, notice, status, stop, replay, canReplay, menuAvailable, replayLabel, resume: () => { if (enabled.value) controller.resume() }, enabled }
 }

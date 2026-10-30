@@ -2,16 +2,16 @@
 import { createApp, h, nextTick, ref, type App } from 'vue'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { ChatMessage } from '@/store/chat/types'
-const control = vi.hoisted(() => ({ enqueue: vi.fn(), replay: vi.fn(), stop: vi.fn() }))
+const control = vi.hoisted(() => ({ enqueue: vi.fn(), replay: vi.fn(), stop: vi.fn(), replayAvailability: vi.fn() }))
 // Test only new DOM/composable scheduling; the unchanged audio/controller chain
 // retains its 2b9c8fc evidence and is not exercised again here.
 vi.mock('./chat-read-aloud', async original => ({
  ...await original<typeof import('./chat-read-aloud')>(),
- ChatReadAloud: class { enqueue = control.enqueue; replay = control.replay; stop = control.stop; resume() {} },
+ ChatReadAloud: class { enqueue = control.enqueue; replay = control.replay; stop = control.stop; replayAvailability = control.replayAvailability; setLive() {} clearCache() {} resume() {} },
 }))
 import { useChatReadAloud } from './useChatReadAloud'
 let app: App | undefined, root: HTMLElement, host: HTMLElement
-beforeEach(() => { vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] }); control.enqueue.mockReset(); control.replay.mockReset(); control.stop.mockReset() })
+beforeEach(() => { vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] }); control.enqueue.mockReset(); control.replay.mockReset(); control.stop.mockReset(); control.replayAvailability.mockReset().mockReturnValue('missing') })
 afterEach(() => { app?.unmount(); app = undefined; root?.remove(); host?.remove(); vi.useRealTimers() })
 const settle = async () => { for (let i = 0; i < 15; i++) { await Promise.resolve(); await nextTick() } }
 function message(text: string, streaming = true): ChatMessage { return { id: 'm', turnId: 't', runtimeRunId: 'r', role: 'assistant', timestamp: '', streaming, messages: [{ id: 0, type: 'text', content: text }] } }
@@ -20,7 +20,7 @@ function mount() {
  host = document.createElement('div'); document.body.append(host)
  const messages = ref<ChatMessage[]>([]), enabled = ref(true), draft = ref('')
  let speech!: ReturnType<typeof useChatReadAloud>
- app = createApp({ setup() { speech = useChatReadAloud({ botId: ref('bot'), scope: ref('scope'), enabled, loading: ref(false), draft, messages, bodyRoot: () => root, messageElement: () => root }); return () => h('div') } })
+ app = createApp({ setup() { speech = useChatReadAloud({ botId: ref('bot'), scope: ref('scope'), enabled, loading: ref(false), messages, draft, bodyRoot: () => root, messageElement: () => root }); return () => h('div') } })
  app.mount(host)
  return { messages, enabled, draft, get speech() { return speech } }
 }
@@ -31,8 +31,9 @@ describe('new DOM projection lifecycle through actual composable', () => {
   body('<p><a href="https://hidden.test" title="hidden title">文档</a></p><pre>code</pre><button>复制</button>')
   f.messages.value.push(m); await settle()
   expect(control.enqueue).not.toHaveBeenCalled()
-  f.speech.replay(m)
-  expect(control.replay).toHaveBeenCalledWith({ key: 't', text: '文档 code' })
+  await f.speech.replay(m)
+  expect(control.enqueue).toHaveBeenCalledWith(expect.objectContaining({ key: 't', text: '文档 code' }))
+  expect(control.replay).not.toHaveBeenCalled()
  })
  it('collects the delayed visible suffix after final source without another message mutation', async () => {
   const f = mount(); body('<p>开头。</p>')
