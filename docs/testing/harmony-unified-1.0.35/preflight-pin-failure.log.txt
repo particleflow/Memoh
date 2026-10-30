@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/build_memoh_web.py", line 1583, in <module>
+    main()
+  File "/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/build_memoh_web.py", line 1520, in main
+    context, patches = context_archive(lock, base, args.platform)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/build_memoh_web.py", line 1028, in context_archive
+    assert sha(ROOT / 'mobile/memoh' / home_admission['local']) == home_admission['sha256'], 'Home admission source drift'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Home admission source drift

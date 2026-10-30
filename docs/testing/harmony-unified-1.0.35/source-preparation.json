@@ -1,0 +1,14 @@
+{
+  "version": "1.0.35/1000035",
+  "sourceBase": "9533ca002621f15250989978bd157833f2c98e7d",
+  "compatibleUnified": "9270da0252128a296d9a641235cdfd32ab44cfda",
+  "readonlyProduct": "3da802de31f9aede3dbe1124319942d9015abdac",
+  "navigationHandoff": "ca91c0788c01f953c31723980d4bc9760a996087",
+  "finalComposerSHA256": "94e78e28a276d1443242ceb3eb3878ac320077d35be651a2fd89656f77222939",
+  "hostPatchNamesUnchanged": true,
+  "hostPatchCount": 47,
+  "twoNewNavigationCases": true,
+  "reusedHC03HC05AndRequestTag": true,
+  "newHAPBuilt": false,
+  "phoneAcceptance": false
+}

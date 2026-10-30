@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "33f4c5eee706f319267f535d03fbc91a9fce45ddd7f3688590deb49a25df3a3d",
+      "sha256": "4a32327a957bd00756991bc2ef53e53cab2eaaf24169a68a0ecd6ab86fb9d615",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -546,7 +546,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "6bba4cc0937d879bfbc390f836b09babca4db56110059652cd2625593297ce8a",
+      "sha256": "10e9d39c259f0242c930c980227ac09d88863ccb0567ed7fbec307eb7c26710b",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -564,7 +564,8 @@
         "Advance to 1.0.15 for the confirmed monitor/management entry regression; preserve application identity, permissions and stored configuration.",
         "Advance to 1.0.16 for the approved minimal unified activity UI and hidden-panel mount change; no image probe, permissions, identity or private-config change.",
         "Release 1.0.17/1000017; bind compatible unified 9020c93 with unchanged shared Web/SDK from fixed 56b38d39. No endpoint, auth, permissions or execution-root cutover.",
-        "Release1.0.31/1000031 from qualified e256f9f5; application identity and all product implementation unchanged."
+        "Release1.0.31/1000031 from qualified e256f9f5; application identity and all product implementation unchanged.",
+        "Prepare 1.0.35 from retained 9533 source with exact ten-line readonly task-directory shared increment3da802/ca91, compatible with unified9270; retain identity, requestTag, upload cooldowns and configured API roots. No private deployment values."
       ],
       "preUpgradeVersionSHA256": "aa1898a28b9055cc6f5fa0f4db4c0f383cbceaa952c478de6504c9c68fa367c4",
       "windowsInjectionBaseSHA256": "0beb46e1ddb59e3f75cb5de4f45a143eb445e96a646064122d4be515436f7a1c"
@@ -1849,12 +1850,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "43b817c0d313ebf2259d38f7ba7a2d4065ae6dc72b2523907c73282efaa1bda5",
+      "sha256": "d02e2ae4a7413994bb98cdec871aa98ceb49c9765ba4ec77a2e0eafb6bd1fe72",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
         "Source-only Home/Dockview speech admission and exact task run/turn consumption, preserving existing phone seams. No version/package/build/publication action.",
-        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change."
+        "HC-03/HC-05 follow-up: recover by original receipt progress, persisted Retry-After/backoff and expiry without cumulative fault budget; honor configured API root or safe prefix across JS, native routing and private injection. No endpoint, credential, version or permission change.",
+        "Prepare 1.0.35 from retained 9533 source with exact ten-line readonly task-directory shared increment3da802/ca91, compatible with unified9270; retain identity, requestTag, upload cooldowns and configured API roots. No private deployment values."
       ]
     },
     {

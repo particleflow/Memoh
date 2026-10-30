@@ -1,0 +1,12 @@
+{
+  "existingOperations": 382,
+  "unifiedOperations": 383,
+  "addedUnusedOperations": [
+    "postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecover"
+  ],
+  "removed": [],
+  "changedExistingBodies": [],
+  "consumerSDKNotRepinned": true,
+  "reason": "Only added delivery recovery endpoint, unused by the readonly directory; retain current generated SDK and native integrations.",
+  "unifiedCommit": "9270da0252128a296d9a641235cdfd32ab44cfda"
+}

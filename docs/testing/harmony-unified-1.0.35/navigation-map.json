@@ -1,0 +1,22 @@
+{
+  "sourceBase": "9533ca002621f15250989978bd157833f2c98e7d",
+  "navigation": {
+    "productCommit": "3da802de31f9aede3dbe1124319942d9015abdac",
+    "handoffCommit": "ca91c0788c01f953c31723980d4bc9760a996087",
+    "compatibleUnifiedCommit": "9270da0252128a296d9a641235cdfd32ab44cfda",
+    "path": "apps/web/src/pages/home/components/chat-pane.vue",
+    "sharedSHA256": "654d8c3c869386d19cca10f3b019edc111b85259a81c9983fba8581bd5d6ee72",
+    "beforePairedPhoneSHA256": "a73d2008e52c0e76003351c3fc6734d88f3f0f79d2b596e4e962fb09fcfd4082",
+    "pairedPhoneSHA256": "a9f261fb41e6d041e6640d32d53684f765678d787ff902d9313075a3b5e05621",
+    "beforeFinalPhoneSHA256": "694baf4e9a60793424c804108caa16c83cd23d246a31c4e572ae555282c5e682",
+    "finalPhoneSHA256": "94e78e28a276d1443242ceb3eb3878ac320077d35be651a2fd89656f77222939",
+    "APIChanges": false,
+    "nativeLifetimeRetained": true
+  },
+  "SDKCompatibility": "382 existing operation bodies unchanged; one unused new recover endpoint not consumed",
+  "fileRouteAndTimingMapCount": 14,
+  "apiPhoneSHA256": "1a90c5259d3a0e4fb367e01110467d72517d6c032cbe19e2ff0c275107c6d04b",
+  "newVersion": "1.0.35/1000035",
+  "newTestPath": "apps/web/src/pages/home/components/chat-pane-task-directory.test.ts",
+  "mappedSharedFiles": 156
+}
