@@ -1,0 +1,69 @@
+{
+  "task": "Harmony 1.0.38 / 1000038 phone source freeze: PR#97 read-aloud ungating ported into paired959",
+  "reviewBase": "37b76c84b40f (review/harmony-image-timing-20261026 with PR#95/#96)",
+  "sharedUpstream": {
+    "head": "635fe1722db70613d196a1004e28cc7e3e1ff0ac",
+    "tree": "fd155768cdab2181d900d65ca070df5a99164b08",
+    "mergeOf97": "09564fa3162cccfe4bd570753a811fb9832db97f"
+  },
+  "overlayBeforeSHA256": "5a67099326608bbc6fd1a7ec0f7665a573e971f481fd59490ff2054884f021aa",
+  "overlayAfterSHA256": "a06fcea72a38b3b79a0f6a824b0e51170e666b4b8087aafe837b8b91cd542c56",
+  "appJson5": {
+    "versionName": "1.0.38",
+    "versionCode": 1000038,
+    "sha256": "83b1661904d30b06b3e269174884fac61d47c13717e7fec4cc7cbd55e8963e02"
+  },
+  "pairedFilesChanged": [
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "beforeSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48",
+      "afterSHA256": "19ec6238848bc7967caaf4c4dce6f1dd7e079d2af582b39bdd26b1a99d218389",
+      "upstreamSHA256": "19ec6238848bc7967caaf4c4dce6f1dd7e079d2af582b39bdd26b1a99d218389",
+      "kind": "verbatim post-#97 upstream"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.cache.test.ts",
+      "beforeSHA256": "cc3eed8182e75b92df28905b39c6f30d98e088925ab8d71564a71a29d1191e3e",
+      "afterSHA256": "7fa818737ef1bc2cc36cbb751effcdbf51165c09a11f8a575d8c234e887c28ad",
+      "upstreamSHA256": "7fa818737ef1bc2cc36cbb751effcdbf51165c09a11f8a575d8c234e887c28ad",
+      "kind": "verbatim post-#97 upstream"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.dom.test.ts",
+      "beforeSHA256": "38b6c210170325d4600358572e50c7661422bb12dca07833e5fef73681270955",
+      "afterSHA256": "ffa9d515dcb792f98fa76b1d6c1db339c219863230ea31731c25665ec3304d6c",
+      "upstreamSHA256": "ffa9d515dcb792f98fa76b1d6c1db339c219863230ea31731c25665ec3304d6c",
+      "kind": "verbatim post-#97 upstream"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "beforeSHA256": "a9dba2ae4832e708c81f9731cd0434ba31aa46c664b25af1f6bf3a88639ffab5",
+      "afterSHA256": "068e587d6c2c0d3f6a57718267df1e26086be04fd74e3256d0ad83947b584cdf",
+      "upstreamSHA256": "27108becb8200d856e1d704d9e4dcb7af10dab0e6c4df8dce05c4fd0951d0f13",
+      "kind": "phone-adapted locale, gated keys removed"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "beforeSHA256": "05ae62096f5349401481fd0e37ab560babc11b3225e4e98a348e6d31e6ebd58c",
+      "afterSHA256": "d1f0892f56ee71f174052750361cf8f32631fbcebc1de09ec4f4ad45669dbcea",
+      "upstreamSHA256": "ad53b1b7eb1660ba870461359b766111a23df1f33aef9a9529661c873855c96d",
+      "kind": "phone-adapted locale, gated keys removed"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "beforeSHA256": "1a281b476802b69792f954d055dd47a56fb6f50e623030db18624cf0ce2f3123",
+      "afterSHA256": "c35363e8a1021b765e83b572d89913dfb20d8d57a8b9dc840878cffd5cd7e41b",
+      "upstreamSHA256": "e7911203ea57fc8f42882219f249eb07eaa3e3899d2e8317ceb8e2a43245ddb9",
+      "kind": "phone-adapted locale, gated keys removed"
+    }
+  ],
+  "pairedFilesTotal": 181,
+  "ciOnMerge97": [
+    "Go CI",
+    "ESLint",
+    "Native delivery fixtures",
+    "Native large-byte recovery",
+    "Docker PR",
+    "Contribution policy CI"
+  ]
+}
