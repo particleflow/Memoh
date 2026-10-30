@@ -379,6 +379,9 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
 		if e.MessageID != "" {
 			return nil
 		}
+		if !e.AuthorizedAttempt() {
+			return botdelegation.ErrDenied
+		}
 		ref := taskresult.Reference{Kind: kind, TaskID: id, EventID: key, Attempt: e.Attempt}
 		t.cmd.TaskResultReceipt = ref.String()
 		invocation := application.HostFollowUpInvocation(bot, session, ref.String())
@@ -436,7 +439,7 @@ func (h *delegationHost) prepareResult(ctx context.Context, req application.Chat
 		return ctx, req, err
 	}
 	e, ok := t.delivery[ref.EventID]
-	if !ok || e.Attempt != ref.Attempt || e.MessageID != "" || taskresult.EventID(t.state, t.run, t.text) != ref.EventID || req.DelegationResultID != t.cmd.DelegationResultID || !delegationRequestMatchesRoute(req, botdelegation.ReturnRoute{Channel: t.cmd.CurrentChannel, ChatID: t.cmd.ChatID, RouteID: t.cmd.RouteID, ReplyTarget: t.cmd.ReplyTarget, ConversationType: t.cmd.ConversationType}) {
+	if !ok || !e.AuthorizedAttempt() || e.Attempt != ref.Attempt || e.MessageID != "" || taskresult.EventID(t.state, t.run, t.text) != ref.EventID || req.DelegationResultID != t.cmd.DelegationResultID || !delegationRequestMatchesRoute(req, botdelegation.ReturnRoute{Channel: t.cmd.CurrentChannel, ChatID: t.cmd.ChatID, RouteID: t.cmd.RouteID, ReplyTarget: t.cmd.ReplyTarget, ConversationType: t.cmd.ConversationType}) {
 		return ctx, req, botdelegation.ErrDenied
 	}
 	req.Query = t.text

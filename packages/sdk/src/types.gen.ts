@@ -828,6 +828,16 @@ export type BotdelegationPage = {
     next_cursor?: string;
 };
 
+export type BotdelegationRecoveryInput = {
+    event_id: string;
+    expected_attempt: number;
+};
+
+export type BotdelegationRecoveryView = {
+    event?: TaskresultEvent;
+    event_id?: string;
+};
+
 export type BotdelegationSummary = {
     source?: string;
     text?: string;
@@ -4776,6 +4786,26 @@ export type SkillsSafeCatalogItem = {
     name?: string;
     source_kind?: string;
     state?: string;
+};
+
+export type TaskresultEvent = {
+    attempt?: number;
+    message_id?: string;
+    recoveries?: Array<TaskresultRecovery>;
+    report_state?: string;
+    run_id?: string;
+    state?: string;
+    summary_run_id?: string;
+    text?: string;
+};
+
+export type TaskresultRecovery = {
+    attempt?: number;
+    from_attempt?: number;
+    previous_run_id?: string;
+    previous_run_state?: string;
+    requested_at?: string;
+    requested_by?: string;
 };
 
 export type TurnRuntimeCommand = {
@@ -13813,6 +13843,67 @@ export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryR
 };
 
 export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponse = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryResponses];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverData = {
+    /**
+     * Exact saved event and expected attempt
+     */
+    body: BotdelegationRecoveryInput;
+    path: {
+        /**
+         * Supervisor Bot ID
+         */
+        bot_id: string;
+        /**
+         * Owned source session
+         */
+        session_id: string;
+        /**
+         * Delegation ID
+         */
+        delegation_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover';
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+    /**
+     * Internal Server Error
+     */
+    500: ServerProblem;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverError = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverErrors[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverErrors];
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponses = {
+    /**
+     * Accepted
+     */
+    202: BotdelegationRecoveryView;
+};
+
+export type PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponse = PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponses[keyof PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponses];
 
 export type GetBotsByBotIdSessionsBySessionIdFollowUpQueueData = {
     body?: never;

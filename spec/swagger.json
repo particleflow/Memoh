@@ -11168,6 +11168,97 @@
                 }
             }
         },
+        "/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover": {
+            "post": {
+                "description": "Requires a completed native Web result, original event and exhausted expected attempt (at least 3). New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sessions"
+                ],
+                "summary": "Authorize one summary attempt for a saved completed result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Supervisor Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owned source session",
+                        "name": "session_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Delegation ID",
+                        "name": "delegation_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Exact saved event and expected attempt",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/botdelegation.RecoveryInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "$ref": "#/definitions/botdelegation.RecoveryView"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/sessions/{session_id}/follow-up-queue": {
             "get": {
                 "tags": [
@@ -22937,6 +23028,32 @@
                 }
             }
         },
+        "botdelegation.RecoveryInput": {
+            "type": "object",
+            "required": [
+                "event_id",
+                "expected_attempt"
+            ],
+            "properties": {
+                "event_id": {
+                    "type": "string"
+                },
+                "expected_attempt": {
+                    "type": "integer"
+                }
+            }
+        },
+        "botdelegation.RecoveryView": {
+            "type": "object",
+            "properties": {
+                "event": {
+                    "$ref": "#/definitions/taskresult.Event"
+                },
+                "event_id": {
+                    "type": "string"
+                }
+            }
+        },
         "botdelegation.Summary": {
             "type": "object",
             "properties": {
@@ -32678,6 +32795,61 @@
                     "type": "string"
                 },
                 "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "taskresult.Event": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "integer"
+                },
+                "message_id": {
+                    "type": "string"
+                },
+                "recoveries": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/taskresult.Recovery"
+                    }
+                },
+                "report_state": {
+                    "type": "string"
+                },
+                "run_id": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "summary_run_id": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
+                }
+            }
+        },
+        "taskresult.Recovery": {
+            "type": "object",
+            "properties": {
+                "attempt": {
+                    "type": "integer"
+                },
+                "from_attempt": {
+                    "type": "integer"
+                },
+                "previous_run_id": {
+                    "type": "string"
+                },
+                "previous_run_state": {
+                    "type": "string"
+                },
+                "requested_at": {
+                    "type": "string"
+                },
+                "requested_by": {
                     "type": "string"
                 }
             }
