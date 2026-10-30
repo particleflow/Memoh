@@ -61,6 +61,7 @@ field deployment and product acceptance remain separate evidence classes.
 | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
 | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
 | C12 | Task-local Go build cache: no space left on device | Disposable task cache cleaned; scoped lint recovered |
+| C13 | Research environment `go test`: `Go: Unknown option: test` | PATH `go` is a board-game executable; Go tests not run |
 
 ## C01 — Windows helper calls unavailable os.setxattr
 
@@ -312,6 +313,31 @@ field deployment and product acceptance remain separate evidence classes.
   the cache's exact task ownership/disposability and sufficient recovered space.
   Retry only the affected check. Do not delete shared/unknown data or repeat
   unrelated builds, tests or paid calls.
+
+## C13 — PATH go names a board game, not the Go toolchain
+
+- **Platform / signature:** Conversation-presence research environment on
+  2026-10-30, fixed source `cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f`:
+  `go test ./internal/reasoning -run 'TestResolveConfigAgreesWithOffReachability|TestResolveConfigHonorsProjectedOffDeclarations|TestAlwaysOnModelIsSupportedWithoutAControl' -count=1 -v`
+  returned exit 1, `Go: Unknown option: test`.
+- **Cause:** `type -a go` resolved `/usr/bin/go` and `/bin/go`; `go --help`
+  identified a local two-player Go board-game application. This is an executable
+  name collision, not a Go test failure or a model/permission denial. The
+  repository declares Go 1.25.7; no compiler execution was established.
+- **Validated handling:** Stopped the unchanged test path, inspected executable
+  help and checked the ordinary `/usr/local/go/bin/go` and `/opt/go/bin/go`
+  locations (absent). No PATH replacement, installation or elevated action was
+  attempted. Independent source/document and JSON fixture checks continued.
+- **Result / unresolved boundary:** The three named existing Go tests did not
+  run; no product behavior is certified. Research documents and acceptance
+  inputs are delivered separately, without claiming this test passed.
+- **Original evidence:** [Research report](conversation-presence-20261030/README.md)
+  and its `STATIC-CHECK.json` retain the attempted command and outcome. No
+  inference, TTS or production request was sent.
+- **New condition before another attempt:** An identified, authorized Go
+  compiler satisfying the repository toolchain requirement. Invoke its exact
+  path or verified project toolchain; do not retry the board-game executable or
+  install tooling solely to disguise this documentation-only task's boundary.
 
 ## Applying these lessons to the existing handoffs
 
