@@ -86,7 +86,7 @@ export async function nativeAttachmentCommand<T>(command: string, botId: string,
           : reply.error === 'UPLOAD_COMPLETE_UNCERTAIN' ? '完成结果未确认；仅核对原回执，不会重复提交'
           : reply.error === 'UPLOAD_BUSY' ? '正在处理另一份原件，请稍后重试'
           : reply.error === 'UPLOAD_HTTP_413' ? '附件为空或超过服务端限制'
-          : '附件未完成：原件校验、授权或网络未通过；可从恢复入口重试')
+          : '')
         const failure = normalizeUploadFailure(reply.failure, reply.error)
         if (failure) {
           failure.operation = operation
