@@ -26,5 +26,16 @@
   "business_writes": 0,
   "cleanup": "Parent reports space67 cleaned, none in flight",
   "phone_acceptance": false,
-  "other_three_rows": "not supplied in parent summary; do not infer their types or identities"
+  "other_three_rows": "Confirmed not retained: directory-page-01.json saved itemCount4 and df60 only, no full items array",
+  "saved_file_extraction": {
+    "status": "completed",
+    "provenance": "Parent reports original writer local read-only terminal; cloud did not read local file",
+    "result": "other_row_metadata_not_retained",
+    "api_requests": 0,
+    "database_operations": 0,
+    "model_calls": 0,
+    "new_samples": 0,
+    "in_flight": false,
+    "repeat_extraction_requested": false
+  }
 }

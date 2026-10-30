@@ -77,14 +77,46 @@ No newly demonstrated product defect follows from this PASS. Keep the distinctio
 
 The full cef deployment SHA is still not supplied with the latest Web pass, and the incoming read's exact version was not reported. Existing outcomes remain valid observations with those version limits; collector SHA is never substituted for deployed product SHA. Restart/crash C1–C3 remain isolated evidence plus the earlier specific real recovery result, not a new all-events crash guarantee. Cold/hot response, automatic read-aloud and pending navigation candidates1f021/6e04 retain their existing independent owners; this update creates no work competing with them.
 
-## One minimal next action: inspect already-saved incoming-list metadata
+## Saved-file extraction completed: other rows were not retained
 
-The only new action proposed now is **one local read-only extraction**, not another browser/API sample. The receiving list already returned4 entries. In the original writer's existing `incoming-df60-directory-20261030` evidence, extract the three non-df60 rows **only if their original response/metadata was retained**:
+Parent reports the original writer's local read-only extraction is terminal. `incoming-df60-directory-20261030/directory-page-01.json` contains only itemCount4 and the matching df60 row, not the full items array. The other three task types/IDs/states/destinations are **not retained**. No API/DB/model/write/new sample was performed; none remains in flight. The cloud owner did not read that local file.
 
-- task_type, task_id, record_id, reported state;
-- whether destination exists, and its original bot_id/session_id/run_id/turn_id when already recorded;
-- whether the saved list proves all4 rows and no next_cursor, and its recorded product version if present.
+Record this as `other_row_metadata_not_retained`, not as proof that the other rows are completed, missing or ineligible. Do not request another extraction from the same file. The previous restriction against an API request applied to that one artifact-extraction step; it was not a permanent prohibition on the original user's authorized directory GET.
 
-Return only those identifiers/metadata and a provenance pointer; no name/body content, token, private address, new GET, DB read or permission check. If OUTCOME saved only df60 or counts, report `other_row_metadata_not_retained` once. Do not rediscover the list or rebuild the sample to fill the artifact gap.
+## One next action: a single authorized directory metadata GET
 
-This determines whether a genuine failed/schedule/native-admission/no-destination candidate already exists in the captured evidence. A matching candidate permits this owner to specify a later exact read-only check; the extraction itself does not pass that branch. If all three are ordinary completed linked delegations, record `no_matching_existing_sample_in_saved_list` and retain the exact missing prerequisites above. No new task, paid sample, restricted account, device or UI is to be manufactured, and no inactive owner is cleared merely because the remaining evidence is unavailable.
+This read is useful because the saved artifact cannot distinguish existing failed/schedule/native/no-destination records from completed linked delegations. It retrieves existing state; it does not create a test sample or repeat df60's passed list/detail comparison. The parent may assign it to the original unique writer under the existing account authorization, without a new approval request. No cold/hot, read-aloud, navigation UI or product-development work is included.
+
+**Request contract**
+
+- Exactly one GET `/bots/791af2c4-2d89-4c57-b863-5d5ff53ff9f7/tasks?limit=100` through the same supported authenticated API workflow and the same originally authorized user. Retain the original API origin locally; do not print credentials, Authorization or a private address. Do not navigate/reload the contact page to accomplish this read.
+- No detail GET, cursor follow-up, df60 comparison, task click, message submission, recovery POST, SQL, permission/account change, task creation or model request in this step. Do not copy the historical observation guard that treated all natural application POSTs as timer failures; no application navigation is needed here.
+- On HTTP200 require a real items array. Preserve **every item in this response**, including df60, using only the fields below. Do not repeat the earlier filtering mistake by saving only the already-matched record. Names, prompts, summaries, attachments, headers and raw private URLs are unnecessary and must not be included.
+
+```text
+observed_at_host_utc
+http_status
+scope_bot_id = 791af2c4-2d89-4c57-b863-5d5ff53ff9f7
+items_array_valid
+item_count = actual response items length
+next_cursor_present = whether a nonempty next_cursor was returned
+items[]:
+  task_type
+  task_id
+  record_id
+  state
+  destination_field_present
+  destination_shape = absent | null | object | invalid
+  destination (only if object): bot_id, session_id, run_id, turn_id
+```
+
+Keep identifier types and values exactly as returned. An absent field is not an empty string, and an absent destination is not a permission-denied conclusion. If any identity/state is missing or has an unexpected shape, preserve that fact rather than coercing the response into a valid task. The task type/ID fields are evidence; do not infer them from the display name, chat session or latest run. Do not include name/body text in the handoff.
+
+**Outcome and limits**
+
+- If the catalog still has4 rows and no cursor, this one response preserves all4 current metadata rows. The old count4 is not an assertion: concurrent legitimate work may have changed it. Preserve the actual count and timestamp without deleting, freezing or retrying the directory to get the old number.
+- If next_cursor is present, record `current_page_only`; do not fetch another page in this one-read step or call the current catalog complete. If items is absent/invalid, record a shape error; do not turn it into an empty catalog. On401/403/404 or other transport/status failure, retain the exact outcome and stop without changing the user/account or automatically retrying.
+- Exclude df60 **only when identifying a new candidate after all row metadata has been saved**. A genuine failed record, schedule_fire, native_agent or absent-destination record can supply an exact original identity for a focused later check. The list alone does not prove deleted-plan preservation, admission/run deduplication or the reason for a missing destination. Return the candidate identity and the particular gap it could resolve; do not execute extra checks in the same step.
+- If no such candidate appears, report `no_matching_existing_sample_in_current_page`, distinguishing a complete page from one with a next cursor. No new task/account/grant or paid work is to be manufactured. The exact true-device and restricted-principal prerequisites remain in the table above; a normal positive directory read cannot satisfy them.
+
+Source/permission basis: the existing Directory handler revalidates the account's current Bot permission and per-session access, then reads the real-task directory; the known authorized receiver and endpoint are unchanged from the passed incoming check. No broader authorization, schema access or permission mutation follows from this request. The cloud owner has prepared this contract only and has not performed the GET.

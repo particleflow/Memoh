@@ -52,5 +52,11 @@
     "provenance": "parent reports writer01a18cd9; cloud did not read F: file",
     "version": "not supplied",
     "scope": "one existing incoming delegation, original user, GET only; not restricted-account or phone evidence"
+  },
+  "incoming_metadata_gap": {
+    "result": "other_row_metadata_not_retained",
+    "provenance": "parent-reported original writer local-file extraction; no cloud read of F: file",
+    "next_step": "one original-authorized receiver directory GET, metadata for every returned row, no detail or repeat of df60 test",
+    "field_execution": "not performed by cloud"
   }
 }

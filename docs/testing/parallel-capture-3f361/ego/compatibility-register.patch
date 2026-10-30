@@ -8,7 +8,7 @@
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,90 @@
+@@ -279,6 +280,94 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -84,8 +84,12 @@
 +  once/completed; detail200 and original session20942…/run d822…/turn02c69… agree.
 +  Pure GET, zero model/DB/write; space67 cleaned. This is not phone or restricted
 +  account acceptance. Full transcription and exact remaining prerequisites are in
-+  the acceptance ledger. Only one saved-artifact metadata extraction is proposed
-+  next; do not manufacture tasks/accounts or repeat the completed field sample.
++  the acceptance ledger. The saved-file extraction subsequently confirmed that
++  only itemCount4 and df60 were retained; do not request it again. The ledger now
++  defines one original-account GET of the same receiver directory, preserving all
++  returned type/ID/state/destination metadata, with no detail request or retry.
++  This is existing-state discovery, not a repeated df60 acceptance or new sample.
++  Do not manufacture tasks/accounts or broaden permissions to fill coverage.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
 +  Field evidence is parent-transcribed from writer-local probe-result.json,
