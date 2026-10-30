@@ -1,0 +1,20 @@
+Local only: node --test docs/testing/readonly-task-directory/capture-ego-navigation.test.mjs
+✔ DOM witnesses distinguish an outer mask, hidden anchor scroll area and message skeleton without Vue state or message text (201.334725ms)
+✔ only demonstrated CDP return shapes are accepted; raw message/snapshot content is excluded (1.859401ms)
+✔ self-checks the consuming event/result interface, reads each drained batch serially and calls only the supplied single click (6.863923ms)
+✔ an unknown event wrapper or a write stops before clicking and never fabricates empty successful coverage (51.888044ms)
+✔ a denied CDP body read has no fetch, convenience-evaluate or retry fallback (1.018689ms)
+✔ HTTP200 without a terminal event remains pending and cannot pass consumer preflight (50.793325ms)
+✔ a click transport failure is uncertain, recorded separately from return, and never invokes a second click (0.47656ms)
+✔ a journal rejection is not retried and permits no event drain or click (0.428983ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 772.263551
+
+Targeted ESLint: exit 0 (no diagnostics).
+No Ego field execution, live network capture or product acceptance is claimed.

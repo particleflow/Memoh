@@ -138,6 +138,9 @@ snapshot for every subscription, even with a cursor. Do not infer that a cached
 cursor legitimately suppresses the first snapshot, remove the atomic wait,
 replace an original run with latest, or call refresh success a fix.
 
+The historical single-extract request below is fulfilled by the parent excerpt
+in the next section. Do not repeat that unchanged file-read request.
+
 Request one read of the already saved `ui-row-click.json`, `ui-final.json` and,
 if necessary, `OUTCOME.json`: preserve pre-refresh timestamps/elapsed time, URL,
 the exact visible loading node/text/selector, existing HTTP completion/pending/
@@ -154,3 +157,30 @@ Any new long-running fixture must retain its real executable tool session for
 normal cleanup. The previous denied `/proc/29353/cwd` read and unverified cleanup
 state remain separate; this investigation does not authorize another route to
 that data or signalling those old processes.
+
+### Incident extract received; one instrumented read-only capture proposed
+
+The parent has now supplied the original writer's one-time extraction from
+`navigation-incident-extract.json` (the raw file is not independently read here):
+
+| Recorded UTC point | Established fact | Limit |
+| --- | --- | --- |
+| 09:13:59.119Z | Original-message selector timed out after15 seconds; `renderedMessages=[]`; snapshot showed loading | Original component request start/completion/pending/abort/error, gate state and WS timing were not recorded |
+| Following that timeout | Manual read-only task-detail/session/messages probes returned200 | They are not the original component's completed requests |
+| 09:14:50.062Z, after manual deep-link refresh | Captured related UI requests returned200; no pending request was saved | Not evidence of the first entrance's network lifecycle |
+| 09:15:40.441Z | Both original messages were in the viewport and loading was false | Recovery after refresh; not first-click success or a measured first-load latency |
+
+The saved exception came from the extension's `toggleTranslatePage`. It does not
+establish a product cause. The receiving Bot/session/task/run identity matches;
+the unresolved question is the initial loading lifecycle. No new reproduction or
+product correction has occurred from this extract alone.
+
+See [the single-capture handoff](capture-plan.md) and
+[the Ego CDP observer](capture-ego-navigation.mjs). This is newly authorized,
+instrumented observation of the same original record, not an unchanged repeated
+click, another model workload or a reason to cancel snapshot consistency. The
+observer is provisional: existing Ego help must first confirm raw CDP event
+wrapping and the normal click helper’s event-buffer behavior. Those help fields
+are unavailable here and remain an interface blocker. Runtime preflight is a
+second check before the single existing row-click callback. Local contract/DOM
+tests do not establish field SDK compatibility or successful reproduction.
