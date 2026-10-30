@@ -99,13 +99,13 @@ describe('incremental native decoder input', () => {
     await tick(); expect(cancel).toHaveBeenCalledOnce()
   })
   it('manual replay uses bounded requests and cancels a pending streaming request synchronously', async () => {
-    expect(speechChunks('中'.repeat(1100), 80).map(chunk => Array.from(chunk).length)).toEqual([80, 500, 500, 20])
+    expect(speechChunks('中'.repeat(1100)).map(chunk => Array.from(chunk).length)).toEqual([500, 500, 100])
     let resolve!: (value: Blob) => void
     const synthesize = vi.fn((_text: string, _signal: AbortSignal) => new Promise<Blob>(done => { resolve = done }))
     const player = Object.assign(new EventTarget(), { src: '', play: vi.fn(async () => {}), pause: vi.fn(), load: vi.fn() })
     const speech = new ChatReadAloud({ synthesize, createPlayer: () => player, createURL: () => 'blob:test', revokeURL: vi.fn(), onState: vi.fn() })
     speech.replay({ key: 'manual', text: '正文'.repeat(300) })
-    expect(Array.from(synthesize.mock.calls[0]![0]).length).toBeLessThanOrEqual(80)
+    expect(Array.from(synthesize.mock.calls[0]![0]).length).toBeLessThanOrEqual(500)
     speech.stop(); expect(synthesize.mock.calls[0]![1].aborted).toBe(true)
     resolve(new Blob(['late'], { type: 'audio/mpeg' })); await tick()
     expect(player.play).not.toHaveBeenCalled(); expect(synthesize).toHaveBeenCalledOnce()

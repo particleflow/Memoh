@@ -21,7 +21,6 @@ export function useChatReadAloud(options: {
   const state = shallowRef<SpeechState>({ key: '', status: 'idle' })
   const replies = new LiveSpeechReplies()
   const timingOperations = new Map<string, SpeechTiming>()
-  let flushTimer: ReturnType<typeof setTimeout> | undefined
   let observer: MutationObserver | undefined
   let observedRoot: Element | null = null
   const rendered = options.messageElement ? (message: ChatMessage) => renderedSpeechText(message, options.messageElement!(message.id)) : undefined
@@ -46,13 +45,11 @@ export function useChatReadAloud(options: {
     onState: value => {
       state.value = value
       if (value.status === 'error') {
-        clearTimeout(flushTimer); flushTimer = undefined
         replies.interrupt(options.messages.value)
       }
     },
   })
   function stop() {
-    clearTimeout(flushTimer); flushTimer = undefined
     replies.interrupt(options.messages.value)
     controller.stop()
     timingOperations.clear()
@@ -61,6 +58,9 @@ export function useChatReadAloud(options: {
   watch(enabled, value => { if (!value) stop() }, { flush: 'sync' })
   // flush:sync stops the player in the input event, before any pending media task.
   watch(options.draft, stop, { flush: 'sync' })
+  watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value, draft: options.draft.value }), value => {
+    replies.observe(value.messages, value.enabled && !value.draft, value.loading)
+  }, { deep: true, immediate: true, flush: 'sync' })
   function collect(flush = false) {
     if (enabled.value && !options.loading.value && !options.draft.value) {
       for (const message of options.messages.value) {
@@ -72,28 +72,19 @@ export function useChatReadAloud(options: {
       }
     }
     for (const reply of replies.update(options.messages.value, enabled.value && !options.draft.value, options.loading.value, flush, rendered)) { const timing = timingOperations.get(reply.key); controller.enqueue(timing ? { ...reply, timing } : reply) }
-  }
-  function scheduleFlush() {
-    if (!flushTimer && enabled.value && !options.loading.value && !options.draft.value) {
-      flushTimer = setTimeout(() => { flushTimer = undefined; collect(true) }, 80)
-    }
+    controller.setLive(enabled.value && !options.draft.value && !options.loading.value ? options.messages.value.filter(message => message.role === 'assistant' && message.streaming).map(speechKey) : [])
   }
   function observeBody() {
     const root = options.bodyRoot?.() ?? null
     if (observedRoot === root) return
     observer?.disconnect(); observedRoot = root
     if (!root) return
-    observer ??= new MutationObserver(() => { collect(); scheduleFlush() })
+    observer ??= new MutationObserver(() => collect())
     observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'style', 'hidden', 'data-markstream-mode', 'data-markstream-pending'] })
   }
   watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value }), value => {
     if (value.messages.some(message => message.role === 'assistant' && speechKey(message) === state.value.key && message.messages.some(block => block.type === 'error'))) { stop(); return }
     observeBody(); collect()
-    // A short opening phrase without punctuation must not wait for completion.
-    // Do not reset on every delta: a continuous token stream cannot starve it.
-    if (!flushTimer && value.enabled && !value.loading && !options.draft.value && value.messages.some(message => message.role === 'assistant' && message.streaming)) {
-      scheduleFlush()
-    }
   }, { deep: true, immediate: true, flush: 'post' })
   function canResume(message: ChatMessage) {
     if (message.role !== 'assistant' || speechKey(message) !== state.value.key) return false
