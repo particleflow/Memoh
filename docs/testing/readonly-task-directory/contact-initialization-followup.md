@@ -1,5 +1,12 @@
 # Account contact initialization during the history observation
 
+**Follow-up received:** the parent now relays the two existing request IDs, Bot
+labels, resolver route family and completed200 timing. See [cefdf0 source and
+scope alignment](cefdf0-source-alignment.md). Do not repeat the old excerpt
+request below. Literal UUID paths/API origins were not forwarded in this thread;
+the writer can use its already-saved actual values for the exact manifest.
+Old body/initiator/binding effects remain unknown, without another probe.
+
 ## a766 field result: truncated observation, not an authorization failure
 
 The parent relays `F:/NAS-Assistant/tmp/initial-history-a766/{OUTCOME.json,journal.jsonl}`:

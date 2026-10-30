@@ -2,8 +2,10 @@
 
 **a766 update:** The first field run stopped too early on naturally initiated
 contact POSTs. Read [the exact route/authorization and guard follow-up](contact-initialization-followup.md)
-before using this observer again. Its two actual paths still need a minimal
-existing-file excerpt; no field retry is performed or scheduled by this update.
+and [cefdf0 alignment](cefdf0-source-alignment.md) before using this observer
+again. The parent has now relayed the existing-file resolver family/timing;
+the writer fills literal UUID/origin scope from its saved rows. No field retry
+is performed or scheduled by this update.
 
 This is the next action for the sole writer. It supersedes the requirement in
 the earlier row-click plan that the history must already be rendered. Do not

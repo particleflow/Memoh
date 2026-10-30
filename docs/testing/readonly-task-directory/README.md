@@ -273,3 +273,34 @@ terminal (initiator only if already present). No new page/API/DB is needed. Use
 that excerpt to configure exact initialization scope; do not claim these two
 actual requests match the resolver until their paths are known. The sole writer
 remains free for distribution/HTTP work; this update does not take over the field.
+
+### cefdf0 alignment: old resolver families established; effects still unknown
+
+The parent relays the writer's existing-only publication observation:
+`181448.409` (红玉) and `181448.417` (文本校验Bot), both POST
+`.../sessions/contact`, completed200/loadingFinished in18.706/17.660ms.
+Initiator/body were not captured; no new page/API/DB was used. The old excerpt
+request is not renewed. This establishes normal resolver route family, not its
+old binding effect. Literal UUID paths/origins were not forwarded here; names
+cannot fill the exact manifest. The writer already has the actual saved rows.
+
+Production Server is now reported at `cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f`,
+schema181. The [source alignment and next single capture](cefdf0-source-alignment.md)
+compares9270/cefdf0: route/contact authority, ordinary REST fetch, initial
+snapshot wait and pane/anchor DOM are unchanged. Typed input-source propagation,
+runtime projection/normalization and Web labels do change in that commit. Do
+not infer loaded Web artifacts from the Server revision or call all Web source
+unchanged. These deltas do not establish a hydration fix or cause.
+
+544's collection contract remains usable. The only executable change this round
+separates reviewed source, caller-reported Server/Web revisions (`null` when
+unknown) and loaded static resource observations; it does not widen the guard
+or change collection/permissions. Default reviewed source iscefdf0 rather than
+mislabeling the next record9270. Exact scope is recipient T plus the two Bot
+UUIDs from saved request paths, and existing verified API origins. Natural
+resolver effects stay unknown; no history retargeting or new API is included.
+
+Only source comparison and metadata lint/syntax/diff checks ran; old8/4/3 tests,
+builds and field samples were not repeated. No field ownership/deployment/model/
+DB action or product root-cause claim follows. The parent alone schedules the
+next actual observation when its distribution/HTTP priority permits.

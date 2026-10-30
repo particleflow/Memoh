@@ -37,6 +37,9 @@ export async function captureInitialHistory(page, options) {
   const captureMs = options.captureMs ?? 45000, sampleMs = options.sampleMs ?? 500, commandMs = options.commandMs ?? 3000
   const initializationContactBotIds = options.initializationContactBotIds ?? [RECORD.bot], knownContacts = options.knownContacts ?? []
   const initializationApiOrigins = options.initializationApiOrigins ?? [url.origin]
+  const revisions = { reviewedSource: options.reviewedSourceRevision ?? 'cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f',
+    server: options.serverRevision ?? null, web: options.webRevision ?? null }
+  if (!Object.values(revisions).every(value => value === null || (typeof value === 'string' && /^[0-9a-f]{40}$/.test(value)))) throw problem('Use exact saved revision SHA or null; do not infer an asset version')
   if (typeof append !== 'function' || messageIds?.length !== 2 || !messageIds.every(id => typeof id === 'string' && id)) throw problem('Supply the existing journal sink and original two UI IDs')
   if (![captureMs, sampleMs, commandMs].every(ms => Number.isFinite(ms) && ms > 0)) throw problem('Invalid observation window')
   if (!validContactConfiguration(initializationContactBotIds, knownContacts)) throw problem('Invalid saved initialization scope/baseline; do not discover identities with new requests')
@@ -153,7 +156,8 @@ export async function captureInitialHistory(page, options) {
   try {
     const blank = await cdp('Runtime.evaluate', { expression: 'location.href', returnByValue: true })
     if (blank.exceptionDetails || blank.result?.value !== 'about:blank') throw problem('Explicitly navigate the newly owned page to about:blank before arming; no application navigation performed')
-    await emit({ kind: 'capture-contract', source: '9270da0252128a296d9a641235cdfd32ab44cfda', record: RECORD, messageIds,
+    await emit({ kind: 'capture-contract', source: revisions.reviewedSource, revisions,
+      sourceMeaning: 'Reviewed repository source. Server/Web revisions are separately caller-reported from existing receipts; null is unverified. This is not loaded-asset attestation.', record: RECORD, messageIds,
       path: url.pathname, captureMs, sampleMs, commandMs, initializationContactBotIds, initializationApiOrigins, knownContacts,
       boundary: 'Page.navigate interval may be incomplete; positive events only. No assumed WS coverage or already-rendered history prerequisite.' })
     await cdp('Network.enable'); await cdp('Runtime.enable'); await cdp('Page.enable')
@@ -193,7 +197,7 @@ export async function captureInitialHistory(page, options) {
     failure.captureState = { navigateAttempted, navigateReturned, interrupted, requests: [...requests.values()], targetSocketIds: [...sockets.keys()] }
     throw failure
   }
-  const report = { navigateAttempted, navigateReturned, interrupted, domContentEventObserved: domReady, requests: [...requests.values()],
+  const report = { revisions, navigateAttempted, navigateReturned, interrupted, domContentEventObserved: domReady, requests: [...requests.values()],
     observedPendingFiniteRequestIds: [...requests.values()].filter(r => !r.terminal && !r.expectedStream).map(r => r.requestId),
     expectedOpenStreamIds: [...requests.values()].filter(r => !r.terminal && r.expectedStream).map(r => r.requestId),
     targetSocketIds: [...sockets.keys()], coverage: 'Navigation/WS event completeness unknown. A completed component response or received snapshot does not prove client commit. No refresh, task click or manual API request.' }

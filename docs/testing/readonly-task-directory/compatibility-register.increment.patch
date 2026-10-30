@@ -1,6 +1,6 @@
 --- a/docs/testing/compatibility-incident-register.md
 +++ b/docs/testing/compatibility-incident-register.md
-@@ -279,6 +279,74 @@
+@@ -279,6 +279,100 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
 
@@ -71,6 +71,32 @@
 +  undocumented interface, normal initialization, actual denial and unknown
 +  mutation outcome must remain distinct; do not ask generic approval for the
 +  already-authorized passive diagnosis or call unknown effects unchanged.
++
++### C11 cefdf0 alignment — resolver family is known, binding effects are not
++
++- Parent relays the existing-file read of `observations-existing-only.json`:
++  request181448.409 (红玉) and181448.417 (文本校验Bot) are resolver-family
++  `.../sessions/contact` POSTs, both200/loadingFinished in18.706/17.660ms.
++  No new page/API/DB was used. Body and initiator were not captured; binding/
++  creation/adoption/hook effects remain unknown. No repeated excerpt is needed.
++  The literal UUID paths/API origins were not forwarded to this owner; use the
++  writer's already-saved actual values, never display-name guessing.
++- Server is reported upgraded tocefdf0/schema181. Git comparison confirms the
++  contact authorization/route, history REST/selection, snapshot-commit wait and
++  pane/anchor seams unchanged from9270. The commit does contain Web input-source
++  label, projection and normalization changes as well as shared/backend changes;
++  a Server revision does not prove the browser's Web artifact version. No
++  hydration cause/fix is established by either statement.
++- 544's passive observation is still applicable with recipient T plus the two
++  saved-path Bot UUIDs and verified API origin manifest. Reviewed source and
++  caller-reported Server/Web versions are now separate journal metadata, with
++  null for unknown artifact receipt. This is no asset or field attestation.
++  Natural resolver effects stay unknown; abnormal scope/body/identity/read
++  errors still stop without replay, rebinding or fallback.
++- See [cefdf0 alignment](readonly-task-directory/cefdf0-source-alignment.md).
++  Only source/metadata syntax/lint/diff checks ran; old8/4/3 tests, builds and
++  field runs were not repeated. Parent schedules any next actual observation;
++  this source owner does not take over distribution/HTTP work or the field.
 +
  ## Applying these lessons to the existing handoffs
 
