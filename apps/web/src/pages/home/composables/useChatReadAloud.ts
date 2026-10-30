@@ -1,5 +1,6 @@
-import { computed, inject, onBeforeUnmount, onDeactivated, onMounted, shallowRef, watch, type Ref } from 'vue'
-import { postBotsByBotIdTtsPlayback } from '@memohai/sdk'
+import { computed, inject, nextTick, onActivated, onBeforeUnmount, onDeactivated, onMounted, shallowRef, watch, type Ref } from 'vue'
+import { getBotsByBotIdTtsPlaybackConfig, postBotsByBotIdTtsPlayback } from '@memohai/sdk'
+import { useLocalStorage } from '@vueuse/core'
 import type { ChatMessage } from '@/store/chat/types'
 import { ChatReadAloud, LiveSpeechReplies, speechKey, speechText, type SpeechState } from './chat-read-aloud'
 import { chatWorkspaceVisibleKey } from './chat-workspace-visibility'
@@ -10,6 +11,8 @@ export function useChatReadAloud(options: {
   botId: Ref<string | null | undefined>
   scope: Ref<string>
   enabled: Ref<boolean>
+  modelId?: Ref<string | undefined>
+  runIdentity?: (message: ChatMessage) => string | undefined
   loading: Ref<boolean>
   draft: Ref<string>
   messages: Ref<ChatMessage[]>
@@ -19,14 +22,27 @@ export function useChatReadAloud(options: {
   const workspaceVisible = inject(chatWorkspaceVisibleKey, shallowRef(true))
   const enabled = computed(() => options.enabled.value && workspaceVisible.value)
   const state = shallowRef<SpeechState>({ key: '', status: 'idle' })
+  const notice = shallowRef('')
+  const cacheVersion = shallowRef(0)
+  const replayUnavailable = shallowRef(new Set<string>())
+  const generatedRuns = new Map<string, string>()
+  const authToken = useLocalStorage('token', '')
+  const activePrincipal = shallowRef(authToken.value)
+  let replayRequest: AbortController | undefined
+  let replayGeneration = 0
   const replies = new LiveSpeechReplies()
   const timingOperations = new Map<string, SpeechTiming>()
-  let flushTimer: ReturnType<typeof setTimeout> | undefined
   let observer: MutationObserver | undefined
   let observedRoot: Element | null = null
   const rendered = options.messageElement ? (message: ChatMessage) => renderedSpeechText(message, options.messageElement!(message.id)) : undefined
   const controller = new ChatReadAloud({
-    async synthesize(text, signal, timing) {
+    async synthesize(text, signal, timing, entry) {
+      const principal = localStorage.getItem('token') ?? authToken.value
+      if (entry?.cacheKey) {
+        const owner = JSON.parse(entry.cacheKey) as unknown[]
+        if (owner[0] !== principal || owner[1] !== options.botId.value || owner[2] !== options.scope.value) throw new Error('Playback owner changed')
+      }
+      activePrincipal.value = principal
       const { data, response } = await postBotsByBotIdTtsPlayback({
         path: { bot_id: options.botId.value! }, body: { text }, signal,
         parseAs: 'stream', throwOnError: true,
@@ -38,88 +54,131 @@ export function useChatReadAloud(options: {
         if (data instanceof ReadableStream) await data.cancel()
         throw new Error('Invalid playback stream')
       }
-      return { stream: data as ReadableStream<Uint8Array>, contentType }
+      return { stream: data as ReadableStream<Uint8Array>, contentType, identity: response.headers.get('X-Speech-Playback-Identity') ?? '' }
     },
     createPlayer: () => new Audio(),
     createURL: blob => URL.createObjectURL(blob),
     revokeURL: url => URL.revokeObjectURL(url),
+    onCacheChange: () => { cacheVersion.value++ },
     onState: value => {
       state.value = value
+      notice.value = value.status === 'error' ? 'chat.readAloud.failed' : ''
       if (value.status === 'error') {
-        clearTimeout(flushTimer); flushTimer = undefined
         replies.interrupt(options.messages.value)
       }
     },
   })
   function stop() {
-    clearTimeout(flushTimer); flushTimer = undefined
+    ++replayGeneration
+    replayRequest?.abort(); replayRequest = undefined
     replies.interrupt(options.messages.value)
     controller.stop()
     timingOperations.clear()
   }
   watch(options.scope, () => { stop(); replies.reset() }, { flush: 'sync' })
+  if (options.modelId) watch(options.modelId, stop, { flush: 'sync' })
+  watch(authToken, () => { stop(); controller.clearCache(); generatedRuns.clear(); replayUnavailable.value = new Set() }, { flush: 'sync' })
   watch(enabled, value => { if (!value) stop() }, { flush: 'sync' })
   // flush:sync stops the player in the input event, before any pending media task.
   watch(options.draft, stop, { flush: 'sync' })
+  watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value, draft: options.draft.value }), value => {
+    for (const message of value.messages) if (message.role === 'assistant' && (message.runtimeRunId || options.runIdentity?.(message))) cacheKey(message, true)
+    replies.observe(value.messages, value.enabled && !value.draft, value.loading)
+  }, { deep: true, immediate: true, flush: 'sync' })
   function collect(flush = false) {
     if (enabled.value && !options.loading.value && !options.draft.value) {
       for (const message of options.messages.value) {
         if (message.role !== 'assistant' || !message.streaming) continue
-        const key = speechKey(message)
+        const key = message.id
         let operation = timingOperations.get(key)
         if (!operation) { operation = beginSpeechTiming('automatic'); if (operation) { if (timingOperations.size >= 32) timingOperations.delete(timingOperations.keys().next().value!); timingOperations.set(key, operation) } }
         if (message.messages.some(block => block.type === 'text' && block.content.length)) operation?.mark('text_observed')
       }
     }
-    for (const reply of replies.update(options.messages.value, enabled.value && !options.draft.value, options.loading.value, flush, rendered)) { const timing = timingOperations.get(reply.key); controller.enqueue(timing ? { ...reply, timing } : reply) }
-  }
-  function scheduleFlush() {
-    if (!flushTimer && enabled.value && !options.loading.value && !options.draft.value) {
-      flushTimer = setTimeout(() => { flushTimer = undefined; collect(true) }, 80)
+    for (const reply of replies.update(options.messages.value, enabled.value && !options.draft.value, options.loading.value, flush, rendered)) {
+      const message = options.messages.value.find(message => message.role === 'assistant' && (reply.messageId ? message.id === reply.messageId : speechKey(message) === reply.key))
+      if (!message) continue
+      const timing = timingOperations.get(reply.messageId ?? reply.key)
+      controller.enqueue({ ...reply, cacheKey: cacheKey(message, true), ...(timing ? { timing } : {}) })
     }
+    controller.setLive(enabled.value && !options.draft.value && !options.loading.value ? options.messages.value.filter(message => message.role === 'assistant' && message.streaming).map(message => message.id) : [])
   }
   function observeBody() {
     const root = options.bodyRoot?.() ?? null
     if (observedRoot === root) return
     observer?.disconnect(); observedRoot = root
     if (!root) return
-    observer ??= new MutationObserver(() => { collect(); scheduleFlush() })
+    observer ??= new MutationObserver(() => collect())
     observer.observe(root, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['class', 'style', 'hidden', 'data-markstream-mode', 'data-markstream-pending'] })
   }
-  watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value }), value => {
-    if (value.messages.some(message => message.role === 'assistant' && speechKey(message) === state.value.key && message.messages.some(block => block.type === 'error'))) { stop(); return }
+  watch(() => ({ messages: options.messages.value, enabled: enabled.value, loading: options.loading.value, scope: options.scope.value }), value => {
+    if (value.messages.some(message => message.role === 'assistant' && (state.value.messageId ? message.id === state.value.messageId : speechKey(message) === state.value.key) && message.messages.some(block => block.type === 'error'))) { stop(); return }
     observeBody(); collect()
-    // A short opening phrase without punctuation must not wait for completion.
-    // Do not reset on every delta: a continuous token stream cannot starve it.
-    if (!flushTimer && value.enabled && !value.loading && !options.draft.value && value.messages.some(message => message.role === 'assistant' && message.streaming)) {
-      scheduleFlush()
-    }
+    // Refresh after DOM admission/mount, not on every observer mutation caused
+    // by controls rerendering. Cached history must become available on return.
+    cacheVersion.value++
   }, { deep: true, immediate: true, flush: 'post' })
   function canResume(message: ChatMessage) {
+    if ((localStorage.getItem('token') ?? authToken.value) !== activePrincipal.value) return false
     if (message.role !== 'assistant' || speechKey(message) !== state.value.key) return false
     const playback = status(message)
     return playback === 'blocked' || playback === 'paused'
   }
-  function canReplay(message: ChatMessage) { return enabled.value && (canResume(message) || (!message.streaming && !!speechText(message))) }
-  function replay(message: ChatMessage) {
+  function cacheKey(message: ChatMessage, generated = false) {
+    // Read at use time as well as watching the shared auth ref: native hosts
+    // can replace localStorage directly without a same-window storage event.
+    const principal = localStorage.getItem('token') ?? authToken.value
+    const slot = [principal, options.botId.value, options.scope.value, speechKey(message), message.id]
+    const run = message.role === 'assistant' ? message.runtimeRunId || options.runIdentity?.(message) : undefined
+    // Transcript reconciliation preserves the render id but omits runtimeRunId.
+    // Bind the locally observed run to that exact row; sibling rows and known
+    // later runs cannot inherit its audio. Text and server config also match.
+    if (generated && run) generatedRuns.set(JSON.stringify(slot), run)
+    return JSON.stringify([principal, options.botId.value, options.scope.value, options.modelId?.value, speechKey(message), message.id, run || generatedRuns.get(JSON.stringify(slot)) || ''])
+  }
+  function entry(message: ChatMessage) { return { key: speechKey(message), messageId: message.id, cacheKey: cacheKey(message), text: rendered ? rendered(message) : speechText(message) } }
+  function menuAvailable(message: ChatMessage) { return enabled.value && message.role === 'assistant' && (canResume(message) || !!speechText(message)) }
+  function canReplay(message: ChatMessage) {
+    void cacheVersion.value
+    return enabled.value && (canResume(message) || (!message.streaming && !replayUnavailable.value.has(cacheKey(message)) && controller.replayAvailability(entry(message)) === 'ready'))
+  }
+  function replayLabel(message: ChatMessage) { return canResume(message) ? 'chat.readAloud.continue' : canReplay(message) ? 'chat.readAloud.replay' : message.streaming || controller.replayAvailability(entry(message)) === 'incomplete' ? 'chat.readAloud.incomplete' : 'chat.readAloud.unavailable' }
+  async function replay(message: ChatMessage) {
     if (!enabled.value) return
     // The existing menu selection is the supported user activation. Resume the
     // same loaded source synchronously, before stop(), DOM work or any request.
     if (canResume(message)) { controller.resume(); return }
-    if (message.streaming) return
+    if (!canReplay(message)) { stop(); notice.value = 'chat.readAloud.unavailable'; return }
     const timing = beginSpeechTiming('manual')
-    const text = rendered ? rendered(message) : speechText(message)
-    if (!text) return
+    const cachedEntry = entry(message)
+    if (!cachedEntry.text) return
     timing?.mark('text_observed')
     stop()
-    controller.replay({ key: speechKey(message), text, ...(timing ? { timing } : {}) })
+    const token = replayGeneration, scope = options.scope.value
+    replayRequest = new AbortController()
+    try {
+      // Read-only current permission/config validation, never a TTS request.
+      const { data } = await getBotsByBotIdTtsPlaybackConfig({ path: { bot_id: options.botId.value! }, signal: replayRequest.signal, throwOnError: true })
+      if (token !== replayGeneration || scope !== options.scope.value || cachedEntry.cacheKey !== cacheKey(message) || cachedEntry.text !== entry(message).text || !enabled.value || options.draft.value) return
+      activePrincipal.value = localStorage.getItem('token') ?? authToken.value
+      if (!data?.identity || !controller.replay({ ...cachedEntry, ...(timing ? { timing } : {}) }, data.identity)) {
+        replayUnavailable.value = new Set([...replayUnavailable.value, cachedEntry.cacheKey])
+        notice.value = 'chat.readAloud.configurationChanged'
+      }
+    } catch {
+      if (token === replayGeneration) {
+        replayUnavailable.value = new Set([...replayUnavailable.value, cachedEntry.cacheKey])
+        notice.value = 'chat.readAloud.unavailable'
+      }
+    } finally { if (token === replayGeneration) replayRequest = undefined }
   }
   function status(message: ChatMessage) {
-    const active = options.messages.value.find(item => item.role === 'assistant' && state.value.key === speechKey(item))
+    const active = options.messages.value.find(item => item.role === 'assistant' && (state.value.messageId ? state.value.messageId === item.id : state.value.key === speechKey(item)))
     return message.role === 'assistant' && message.id === active?.id ? state.value.status : 'idle'
   }
   onDeactivated(stop)
-  onMounted(() => { observeBody(); collect() })
-  onBeforeUnmount(() => { observer?.disconnect(); stop() })
-  return { state, status, stop, replay, canReplay, resume: () => { if (enabled.value) controller.resume() }, enabled }
+  onMounted(() => { observeBody(); collect(); cacheVersion.value++ })
+  onActivated(() => { void nextTick(() => { observeBody(); cacheVersion.value++ }) })
+  onBeforeUnmount(() => { observer?.disconnect(); stop(); controller.clearCache() })
+  return { state, notice, status, stop, replay, canReplay, menuAvailable, replayLabel, resume: () => { if (enabled.value) controller.resume() }, enabled }
 }

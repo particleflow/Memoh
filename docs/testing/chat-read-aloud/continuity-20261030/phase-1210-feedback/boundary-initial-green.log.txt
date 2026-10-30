@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+
+ Test Files  2 passed (2)
+      Tests  17 passed (17)
+   Start at  12:16:50
+   Duration  1.12s (transform 203ms, setup 0ms, import 486ms, tests 261ms, environment 507ms)

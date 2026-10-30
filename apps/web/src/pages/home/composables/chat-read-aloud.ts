@@ -2,12 +2,17 @@ import type { ChatMessage } from '@/store/chat/types'
 import { visibleSpeechText } from './speech-visible-text'
 import { prepareSpeechSource, type SpeechAudioStream } from './speech-audio-stream'
 import { beginSpeechTiming, type SpeechTiming } from './speech-timing'
+import { completedSpeechPrefix } from './speech-sentence-boundary'
+import { SpeechReplayCache } from './speech-replay-cache'
 
 export type SpeechStatus = 'idle' | 'loading' | 'playing' | 'paused' | 'blocked' | 'error'
-export interface SpeechState { key: string, status: SpeechStatus, error?: unknown }
-export interface SpeechEntry { key: string, text: string, timing?: SpeechTiming }
+export interface SpeechState { key: string, messageId?: string, status: SpeechStatus, error?: unknown }
+export interface SpeechEntry { key: string, messageId?: string, text: string, timing?: SpeechTiming, cacheKey?: string }
+interface SpeechJob extends SpeechEntry { sourceText?: string, audio?: Blob | SpeechAudioStream }
 export interface SpeechPlayer {
   src: string
+  readonly currentTime?: number
+  readonly buffered?: TimeRanges
   play(): Promise<void>
   pause(): void
   load(): void
@@ -15,19 +20,20 @@ export interface SpeechPlayer {
   removeEventListener(type: string, listener: EventListener): void
 }
 export interface SpeechDependencies {
-  synthesize(text: string, signal: AbortSignal, timing?: SpeechTiming): Promise<Blob | SpeechAudioStream>
+  synthesize(text: string, signal: AbortSignal, timing?: SpeechTiming, entry?: SpeechEntry): Promise<Blob | SpeechAudioStream>
   createPlayer(): SpeechPlayer
   createURL(blob: Blob | MediaSource): string
   revokeURL(url: string): void
   onState(state: SpeechState): void
+  onCacheChange?(): void
 }
 
 // Match the server's rune limit, including emoji, without splitting a surrogate pair.
-export function speechChunks(text: string, firstLimit = 500): string[] {
+export function speechChunks(text: string): string[] {
   const points = Array.from(text.trim())
   const chunks: string[] = []
   while (points.length) {
-    let end = Math.min(chunks.length ? 500 : firstLimit, points.length)
+    let end = Math.min(500, points.length)
     if (end < points.length) {
       for (let i = end - 1; i >= end / 2; i--) {
         if (/[。！？.!?\n\s]/u.test(points[i]!)) { end = i + 1; break }
@@ -62,9 +68,19 @@ export class LiveSpeechReplies {
   private interruptedRuns = new Set<string>()
   private interruptedInvocations = new Set<string>()
   reset() { this.live.clear(); this.spoken.clear(); this.consumed.clear(); this.interruptedRuns.clear(); this.interruptedInvocations.clear() }
+  // Capture eligibility in the reactive update, before Vue batches a fast turn
+  // into its final render. Reading visible text still waits for the DOM watcher.
+  observe(messages: ChatMessage[], enabled: boolean, loading: boolean) {
+    if (!enabled || loading) return
+    for (const message of messages) {
+      if (message.role !== 'assistant' || !message.streaming) continue
+      const key = message.id, revision = message.runtimeRunId ? `${key}:${message.runtimeRunId}` : key
+      if (!this.consumed.has(revision) && !this.interruptedRuns.has(message.runtimeRunId ?? '') && !this.interruptedInvocations.has(message.invocationId ?? '')) this.live.set(key, revision)
+    }
+  }
   interrupt(messages: ChatMessage[]) {
     for (const message of messages) {
-      const key = speechKey(message)
+      const key = message.id
       this.consumed.add(message.role === 'assistant' && message.runtimeRunId ? `${key}:${message.runtimeRunId}` : key)
       if (message.role === 'assistant' && message.streaming) {
         if (message.runtimeRunId) this.interruptedRuns.add(message.runtimeRunId)
@@ -79,7 +95,7 @@ export class LiveSpeechReplies {
     const result: SpeechEntry[] = []
     for (const message of messages) {
       if (message.role !== 'assistant') continue
-      const key = speechKey(message)
+      const key = message.id
       const revision = message.runtimeRunId ? `${key}:${message.runtimeRunId}` : key
       if (this.consumed.has(revision)
         || (message.runtimeRunId && this.interruptedRuns.has(message.runtimeRunId))
@@ -96,17 +112,22 @@ export class LiveSpeechReplies {
       const text = rendered ? rendered(message) : speechText(message)
       if (message.messages.some(block => block.type === 'error')) { this.consumed.add(revision); continue }
       if (message.streaming || (observed && (!message.runtimeRunId || observed === revision))) {
-        const prior = this.spoken.get(observed && !message.runtimeRunId ? observed : revision) ?? ''
+        // Settled history omits runtimeRunId; retain the observed run for both
+        // cursor reads and commits. An explicit new run keeps its own revision.
+        const cursorRevision = observed && !message.runtimeRunId ? observed : revision
+        const prior = this.spoken.get(cursorRevision) ?? ''
         // A replacement is not an append. Never replay previously spoken text.
         if (text.startsWith(prior)) {
           const tail = text.slice(prior.length)
           let end = tail.length
           if (message.streaming && !flush) {
-            const boundary = /[。！？\n]|[.!?](?:\s|$)|[，,；;：:]\s*/u.exec(tail)
-            end = boundary ? boundary.index + boundary[0].length : Array.from(tail).length >= 32 ? Array.from(tail).slice(0, 32).join('').length : 0
+            end = completedSpeechPrefix(tail)
+            // The API's 500-rune limit is the only forced split; it is not a
+            // latency timer or a first-phrase character threshold.
+            if (!end && Array.from(tail).length >= 500) end = speechChunks(tail)[0]!.length
           }
           const delta = tail.slice(0, end)
-          if (delta.trim()) { result.push({ key, text: delta }); this.spoken.set(revision, prior + delta) }
+          if (delta.trim()) { result.push({ key: speechKey(message), messageId: message.id, text: delta }); this.spoken.set(cursorRevision, prior + delta) }
         }
       }
       // A final message can precede typewriter, math and diagram DOM updates.
@@ -124,23 +145,27 @@ export class LiveSpeechReplies {
   }
 }
 
-/** One player, one synthesis request, one generation. No automatic retry of a
+/** One player, one in-flight synthesis request, one generation. No retry of a
  * failed/uncertain synthesis. Late promises and media events cannot restart it. */
 export class ChatReadAloud {
   private generation = 0
-  private queue: SpeechEntry[] = []
+  private queue: SpeechJob[] = []
+  private cache: SpeechReplayCache
   private abort?: AbortController
   private player?: SpeechPlayer
   private url = ''
   private detach?: () => void
   private disposeStream?: () => void
   private timing?: SpeechTiming
+  private liveKeys = new Set<string>()
+  private wake?: () => void
+  private currentMessageId?: string
   private state: SpeechState = { key: '', status: 'idle' }
   private deps: SpeechDependencies
-  constructor(deps: SpeechDependencies) { this.deps = deps }
+  constructor(deps: SpeechDependencies) { this.deps = deps; this.cache = new SpeechReplayCache(deps.onCacheChange) }
 
   private publish(key: string, status: SpeechStatus, error?: unknown) {
-    this.state = { key, status, error }
+    this.state = { key, status, error, ...(this.currentMessageId ? { messageId: this.currentMessageId } : {}) }
     this.deps.onState(this.state)
   }
   private release() {
@@ -154,17 +179,51 @@ export class ChatReadAloud {
     ++this.generation
     this.queue = []
     this.abort?.abort(); this.abort = undefined
+    this.liveKeys.clear(); this.wake?.(); this.wake = undefined
     this.release()
+    this.currentMessageId = undefined
     this.publish('', 'idle')
   }
   enqueue(entry: SpeechEntry) {
-    // Bound the first manual request too; do not send a 500-character paragraph
-    // before its opening phrase can start synthesizing.
     const operation = entry.timing ?? beginSpeechTiming('direct')
-    this.queue.push(...speechChunks(entry.text, 80).map(text => { const timing = operation?.fork(); timing?.mark('text_chunk_ready'); return { key: entry.key, text, timing } }))
+    let cursor = 0
+    const chunks = speechChunks(entry.text)
+    this.queue.push(...chunks.map((text, index) => {
+      const end = index === chunks.length - 1 ? entry.text.length : entry.text.indexOf(text, cursor) + text.length
+      const sourceText = entry.text.slice(cursor, end); cursor = end
+      const timing = operation?.fork(); timing?.mark('text_chunk_ready')
+      return { key: entry.key, messageId: entry.messageId, cacheKey: entry.cacheKey, text, sourceText, timing }
+    }))
+    this.wake?.()
     if (this.state.status === 'idle' || this.state.status === 'error') void this.next()
   }
-  replay(entry: SpeechEntry) { this.stop(); this.enqueue(entry) }
+  setLive(keys: Iterable<string>) { this.liveKeys = new Set(keys); this.wake?.() }
+  clearCache() { this.cache.clear() }
+  replayAvailability(entry: SpeechEntry) { return this.cache.status(entry.cacheKey ?? entry.key, entry.text) }
+  replay(entry: SpeechEntry, identity: string): boolean {
+    const parts = this.cache.read(entry.cacheKey ?? entry.key, entry.text, identity)
+    if (!parts) return false
+    this.stop()
+    // MSE can replay the same encoded MP3 bytes on its one native clock. Other
+    // formats retain separate, already-generated native files; no re-encoding.
+    if (/^audio\/(?:mpeg|mp3)(?:;|$)/u.test(parts[0]!.type) && typeof MediaSource !== 'undefined' && MediaSource.isTypeSupported(parts[0]!.type)) {
+      const buffers = parts.map(part => part.stream())
+      let reader = buffers.shift()!.getReader()
+      let canceled = false
+      const stream = new ReadableStream<Uint8Array>({ async pull(output) {
+        for (;;) {
+          const next = await reader.read()
+          if (canceled) return
+          if (!next.done) { output.enqueue(next.value); return }
+          reader.releaseLock(); const nextStream = buffers.shift()
+          if (!nextStream) { output.close(); return }
+          reader = nextStream.getReader()
+        }
+      }, cancel(reason) { canceled = true; buffers.length = 0; void reader.cancel(reason).catch(() => {}); reader.releaseLock() } }, { highWaterMark: 0 })
+      this.queue.push({ ...entry, audio: { stream, contentType: parts[0]!.type, sequential: true } })
+    } else this.queue.push(...parts.map(audio => ({ ...entry, audio })))
+    void this.next(); return true
+  }
   resume() {
     // Called directly by the user's button gesture. Reuse the already loaded
     // audio; do not await a network request before calling play().
@@ -178,6 +237,7 @@ export class ChatReadAloud {
     ++this.generation
     this.queue = []
     this.abort?.abort(); this.abort = undefined
+    this.wake?.(); this.wake = undefined
     this.release()
     this.publish(this.state.key, 'error', error)
   }
@@ -193,17 +253,77 @@ export class ChatReadAloud {
       })
     } catch (error) { this.fail(token, error) }
   }
+  /** One native decoder/clock for consecutive MP3 responses of the same reply.
+   * Fetch while prior audio plays; keep at most one complete response ahead.
+   * Other MIME types retain the established native compatibility path. */
+  private async request(entry: SpeechJob, signal: AbortSignal) {
+    const audio = await this.deps.synthesize(entry.text, signal, entry.timing, entry)
+    if (signal.aborted) { if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {}); return audio }
+    return audio instanceof Blob ? audio : this.cache.capture(entry.cacheKey ?? entry.key, entry.sourceText ?? entry.text, audio, signal)
+  }
+  private continuous(first: SpeechAudioStream, entry: SpeechJob, signal: AbortSignal): SpeechAudioStream {
+    let reader = first.stream.getReader(), timing = entry.timing, previousStart = 0, closed = false
+    const mime = (type: string) => type.trim().replace(/^audio\/mp3(?=;|$)/u, 'audio/mpeg')
+    const cancel = () => { void reader.cancel(signal.reason).catch(() => {}); this.wake?.() }
+    signal.addEventListener('abort', cancel, { once: true })
+    const finish = () => { closed = true; signal.removeEventListener('abort', cancel); reader.releaseLock() }
+    const wait = (ready: () => boolean) => new Promise<void>((resolve, reject) => {
+      const check = () => {
+        if (!signal.aborted && !ready()) return
+        this.player?.removeEventListener('timeupdate', check)
+        signal.removeEventListener('abort', check)
+        this.wake = undefined
+        if (signal.aborted) reject(signal.reason); else resolve()
+      }
+      this.wake = check
+      this.player?.addEventListener('timeupdate', check)
+      signal.addEventListener('abort', check, { once: true }); check()
+    })
+    const stream = new ReadableStream<Uint8Array>({
+      pull: async output => {
+        try {
+          for (;;) {
+            if (signal.aborted) throw signal.reason
+            const chunk = await reader.read()
+            if (signal.aborted) throw signal.reason
+            if (!chunk.done) { output.enqueue(chunk.value); return }
+            timing?.mark('body_eof')
+            await wait(() => this.queue.length > 0 || !this.liveKeys.has(entry.messageId ?? entry.key))
+            if (this.queue[0]?.key !== entry.key || this.queue[0]?.messageId !== entry.messageId) { finish(); output.close(); return }
+            await wait(() => (this.player?.currentTime ?? previousStart) >= previousStart)
+            const ranges = this.player?.buffered
+            previousStart = ranges?.length ? ranges.end(ranges.length - 1) : 0
+            const next = this.queue.shift()!
+            timing = next.timing; timing?.mark('request_start')
+            const audio = await this.request(next, signal)
+            if (signal.aborted) { if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {}); throw signal.reason }
+            if (audio instanceof Blob || mime(audio.contentType) !== mime(first.contentType) || (first.identity && audio.identity && first.identity !== audio.identity)) {
+              if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {})
+              throw new Error('Playback configuration changed within a reply')
+            }
+            reader.releaseLock(); reader = audio.stream.getReader()
+          }
+        } catch (error) {
+          void reader.cancel(error).catch(() => {})
+          finish(); output.error(error)
+        }
+      },
+      cancel: async reason => { if (closed) return; await reader.cancel(reason).catch(() => {}); finish() },
+    }, { highWaterMark: 0 })
+    return { contentType: first.contentType, stream, sequential: true }
+  }
   private async next() {
     const entry = this.queue.shift()
-    if (!entry) { this.timing = undefined; this.publish('', 'idle'); return }
+    if (!entry) { this.timing = undefined; this.currentMessageId = undefined; this.publish('', 'idle'); return }
     const token = ++this.generation
     this.timing = entry.timing
+    this.currentMessageId = entry.messageId
     this.abort = new AbortController()
     this.publish(entry.key, 'loading')
     try {
       const signal = this.abort.signal
-      entry.timing?.mark('request_start')
-      const audio = await (entry.timing ? this.deps.synthesize(entry.text, signal, entry.timing) : this.deps.synthesize(entry.text, signal))
+      if (!entry.audio) entry.timing?.mark('request_start')
+      const audio = entry.audio ?? await this.request(entry, signal)
       if (token !== this.generation) {
         if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {})
         return
@@ -212,7 +332,8 @@ export class ChatReadAloud {
       this.player ??= this.deps.createPlayer()
       if (audio instanceof Blob) this.url = this.deps.createURL(audio)
       else {
-        const stream = await prepareSpeechSource(audio, signal, source => this.deps.createURL(source), entry.timing)
+        const continuous = /^audio\/(?:mpeg|mp3)(?:;|$)/u.test(audio.contentType.trim()) && typeof MediaSource !== 'undefined' && MediaSource.isTypeSupported(audio.contentType.replace(/^audio\/mp3(?=;|$)/u, 'audio/mpeg'))
+        const stream = await prepareSpeechSource(continuous && !entry.audio ? this.continuous(audio, entry, signal) : audio, signal, source => this.deps.createURL(source), entry.timing)
         if (token !== this.generation) {
           stream.dispose(); this.deps.revokeURL(stream.url)
           void stream.done.catch(() => {})

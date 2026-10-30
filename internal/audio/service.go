@@ -2,6 +2,8 @@ package audio
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -296,11 +298,28 @@ func (s *Service) StreamToFile(ctx context.Context, modelID string, text string,
 // StreamPlayback exposes provider bytes immediately without buffering a file or
 // overriding the configured model, voice or output format.
 func (s *Service) StreamPlayback(ctx context.Context, modelID string, text string) (*sdk.SpeechStreamResult, error) {
+	stream, _, err := s.StreamPlaybackWithIdentity(ctx, modelID, text)
+	return stream, err
+}
+
+// PlaybackIdentity performs configuration reads only. It never synthesizes.
+func (s *Service) PlaybackIdentity(ctx context.Context, modelID string) (string, error) {
+	params, err := s.resolveSpeechParams(ctx, modelID, "", nil)
+	if err != nil {
+		return "", err
+	}
+	return params.identity, nil
+}
+
+// StreamPlaybackWithIdentity binds replay bytes to the exact resolved settings
+// used for this request, including model, voice, format and provider identity.
+func (s *Service) StreamPlaybackWithIdentity(ctx context.Context, modelID string, text string) (*sdk.SpeechStreamResult, string, error) {
 	params, err := s.resolveSpeechParams(ctx, modelID, text, nil)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
-	return sdk.StreamSpeech(ctx, sdk.WithSpeechModel(params.model), sdk.WithText(text), sdk.WithSpeechConfig(params.config))
+	stream, err := sdk.StreamSpeech(ctx, sdk.WithSpeechModel(params.model), sdk.WithText(text), sdk.WithSpeechConfig(params.config))
+	return stream, params.identity, err
 }
 
 func (s *Service) GetModelCapabilities(ctx context.Context, modelID string) (*ModelCapabilities, error) {
@@ -450,8 +469,9 @@ func (s *Service) Transcribe(ctx context.Context, modelID string, audio []byte, 
 }
 
 type resolvedSpeechParams struct {
-	model  *sdk.SpeechModel
-	config map[string]any
+	model    *sdk.SpeechModel
+	config   map[string]any
+	identity string
 }
 
 type resolvedTranscriptionParams struct {
@@ -488,9 +508,17 @@ func (s *Service) resolveSpeechParams(ctx context.Context, modelID string, text 
 	}
 
 	cfg := mergeConfig(parseConfig(providerRow.Config), parseConfig(modelRow.Config), overrideCfg)
+	// Marshal sorts map keys. Only the opaque digest crosses the client boundary;
+	// configuration values and provider credentials are never returned or logged.
+	identityInput, err := json.Marshal([]any{modelRow.ID, providerRow.ID, providerRow.ClientType, providerRow.Enable, modelRow.ModelID, cfg})
+	if err != nil {
+		return nil, fmt.Errorf("encode speech configuration identity: %w", err)
+	}
+	digest := sha256.Sum256(identityInput)
 	return &resolvedSpeechParams{
-		model:  &sdk.SpeechModel{ID: modelRow.ModelID, Provider: provider},
-		config: cfg,
+		model:    &sdk.SpeechModel{ID: modelRow.ModelID, Provider: provider},
+		config:   cfg,
+		identity: hex.EncodeToString(digest[:]),
 	}, nil
 }
 

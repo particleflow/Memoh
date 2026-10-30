@@ -1046,6 +1046,10 @@
     },
     "readAloud": {
       "replay": "Read aloud again",
+      "configurationChanged": "Replay unavailable: saved audio does not match the current voice settings or text.",
+      "unavailable": "Replay unavailable: audio is not cached",
+      "incomplete": "Replay unavailable: audio is incomplete",
+      "continue": "Continue reading",
       "playing": "Reading this reply aloud",
       "failed": "Reading stopped."
     },

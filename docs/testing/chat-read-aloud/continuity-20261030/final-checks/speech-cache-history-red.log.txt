@@ -1,0 +1,34 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/useChatReadAloud.cache.test.ts (3 tests | 1 failed | 2 skipped) 57ms
+   × keeps the generated run identity when the real settled-history normalizer replaces its runtime view 56ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > keeps the generated run identity when the real settled-history normalizer replaces its runtime view
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/pages/home/composables/useChatReadAloud.cache.test.ts:76:52
+     74|   await tick()
+     75|   expect(f.messages.value[1]!.role).toBe('assistant')
+     76|   expect(f.speech.canReplay(f.messages.value[1]!)).toBe(true)
+       |                                                    ^
+     77|   await f.speech.replay(f.messages.value[1]!); await tick()
+     78|   expect(api.synthesize).toHaveBeenCalledOnce(); expect(api.config).to…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 skipped (3)
+   Start at  12:56:39
+   Duration  8.14s (transform 5.81s, setup 0ms, import 7.46s, tests 57ms, environment 462ms)
+

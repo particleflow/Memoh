@@ -1,0 +1,96 @@
+{
+  "source": "28ac9393c7e20db34b804ad3ece63680eecded8c + Home visibility candidate",
+  "syntheticServerAndWav": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "Home 边界合成回复第2段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "writes": [],
+  "pageErrors": [],
+  "checks": [
+    "Configured Bot primary chat automatic runtime reply without manual replay"
+  ],
+  "observations": [
+    {
+      "label": "automatic-normal",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "visibility": "visible",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "36.0072deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": false,
+          "time": 0.248935,
+          "src": "blob:http://127.0.0.1:18595/aeb5011c-bafe-4a50-ae26-3e49fb743c25",
+          "duration": 10
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18595/aeb5011c-bafe-4a50-ae26-3e49fb743c25",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.001606,
+          "paused": false
+        }
+      ]
+    }
+  ],
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ]
+}

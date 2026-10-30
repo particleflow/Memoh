@@ -21,7 +21,7 @@ function fixture() {
 
 it('preserves WAV type and bytes through one response; creates no Blob URL before EOF', async () => {
   const f = fixture()
-  f.speech.replay({ key: 'wav', text: 'visible' })
+  f.speech.enqueue({ key: 'wav', text: 'visible' })
   f.feed.enqueue(new Uint8Array([1, 2])); await tick()
   expect(f.createURL).not.toHaveBeenCalled(); expect(f.player.play).not.toHaveBeenCalled()
   f.feed.enqueue(new Uint8Array([3, 4])); f.feed.close(); await tick()
@@ -36,7 +36,7 @@ it('preserves WAV type and bytes through one response; creates no Blob URL befor
 
 it('typing/stop cancels a pending WAV read and discards the old queue without creating an audio source', async () => {
   const f = fixture()
-  f.speech.replay({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
+  f.speech.enqueue({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
   f.feed.enqueue(new Uint8Array([1])); await tick(); f.speech.stop(); await tick()
   expect(f.synthesize.mock.calls[0]![1].aborted).toBe(true); expect(f.cancel).toHaveBeenCalledOnce()
   expect(f.stream.locked).toBe(false); expect(f.createURL).not.toHaveBeenCalled(); expect(f.player.play).not.toHaveBeenCalled()
@@ -61,7 +61,7 @@ it('abort settles with its original reason even when upstream cancellation never
 
 it('the first response read error clears the queue without playing partial WAV or retrying synthesis', async () => {
   const f = fixture(), reason = new Error('first body failure')
-  f.speech.replay({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
+  f.speech.enqueue({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
   f.feed.enqueue(new Uint8Array([1])); await tick(); f.feed.error(reason); await tick()
   expect(f.states.at(-1)).toMatchObject({ key: 'wav', status: 'error', error: reason })
   expect(f.stream.locked).toBe(false); expect(f.createURL).not.toHaveBeenCalled(); expect(f.player.play).not.toHaveBeenCalled()
@@ -71,7 +71,7 @@ it('the first response read error clears the queue without playing partial WAV o
 it('a Blob URL allocation error stays the first error and does not retry or start queued audio', async () => {
   const f = fixture(), reason = new Error('first URL failure')
   f.createURL.mockImplementation(() => { throw reason })
-  f.speech.replay({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
+  f.speech.enqueue({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
   f.feed.close(); await tick()
   expect(f.states.at(-1)?.error).toBe(reason); expect(f.states.at(-1)?.status).toBe('error')
   expect(f.player.play).not.toHaveBeenCalled(); expect(f.synthesize).toHaveBeenCalledOnce(); expect(f.stream.locked).toBe(false)
@@ -79,7 +79,7 @@ it('a Blob URL allocation error stays the first error and does not retry or star
 
 it('native decode failure after Blob preparation clears the URL and old queue without resynthesis', async () => {
   const f = fixture()
-  f.speech.replay({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
+  f.speech.enqueue({ key: 'wav', text: 'visible' }); f.speech.enqueue({ key: 'later', text: 'old queue' })
   f.feed.close(); await tick(); f.player.dispatchEvent(new Event('error')); await tick()
   expect(f.states.at(-1)?.status).toBe('error'); expect(f.player.src).toBe(''); expect(f.revokeURL).toHaveBeenCalledExactlyOnceWith('blob:wav')
   expect(f.synthesize).toHaveBeenCalledOnce(); expect(f.player.play).toHaveBeenCalledOnce()
@@ -87,8 +87,11 @@ it('native decode failure after Blob preparation clears the URL and old queue wi
 
 it('stop between fallback completion and controller continuation revokes the late URL without playback', async () => {
   const f = fixture()
-  f.speech.replay({ key: 'wav', text: 'visible' }); await tick()
-  f.feed.close(); await Promise.resolve(); f.speech.stop(); await tick()
+  f.speech.enqueue({ key: 'wav', text: 'visible' }); await tick()
+  // Stop at the actual allocation/continuation seam, independent of stream-tap
+  // microtask depth. This still requires creation and revocation of the URL.
+  f.createURL.mockImplementationOnce(() => { queueMicrotask(() => f.speech.stop()); return 'blob:wav' })
+  f.feed.close(); await tick()
   expect(f.createURL).toHaveBeenCalledOnce(); expect(f.revokeURL).toHaveBeenCalledExactlyOnceWith('blob:wav')
   expect(f.player.play).not.toHaveBeenCalled(); expect(f.states.at(-1)?.status).toBe('idle')
 })

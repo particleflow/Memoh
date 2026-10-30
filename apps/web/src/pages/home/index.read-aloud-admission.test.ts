@@ -69,8 +69,12 @@ function deferred<T>() { let resolve!: (value: T) => void, reject!: (reason: unk
 function playbackResponse(text = 'synthetic') {
   return {
     data: new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new TextEncoder().encode(text)); controller.close() } }),
-    response: new Response(null, { headers: { 'Content-Type': 'audio/wav' } }),
+    response: new Response(null, { headers: { 'Content-Type': 'audio/wav', 'X-Speech-Playback-Identity': 'synthetic-admission-config' } }),
   }
+}
+async function freshReply(id: string) {
+  api.messages!.value.push(reply(id, true)); await settle()
+  api.messages!.value[api.messages!.value.length - 1] = reply(id); await settle()
 }
 let app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement
 async function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }
@@ -82,7 +86,10 @@ async function mount() {
   app.use(createI18n({ legacy: false, locale: 'en', messages: { en: {} }, missingWarn: false, fallbackWarn: false }))
   app.mount(root); await settle()
   expect(masked()).toBe(false)
-  api.speech!.replay(api.messages!.value[0]!); await settle()
+  // Replay must not regenerate a historical row without cache. Establish the
+  // existing admission precondition with an actual fresh streamed reply.
+  api.messages!.value = []
+  await freshReply('old-playing')
   api.player!.dispatchEvent(new Event('playing'))
   expect(api.speech!.state.value.status).toBe('playing')
   api.messages!.value.push(reply('queued', true)); await settle()
@@ -115,7 +122,7 @@ beforeEach(() => {
   api.open.mockReset().mockImplementation((options: { taskAnchor?: TaskHistoryAnchor }) => { if (api.pane) api.pane.taskAnchor = options.taskAnchor })
   api.select.mockReset(); api.task.mockReset().mockResolvedValue(task('old'))
   api.playback.mockReset().mockImplementation(async () => playbackResponse())
-  api.pane = undefined
+  api.pane = undefined; api.player = undefined; api.speech = undefined; api.messages = undefined
   vi.stubGlobal('Audio', class extends Player { constructor() { super(); api.player = this } })
   vi.stubGlobal('URL', { createObjectURL: () => 'blob:synthetic', revokeObjectURL: vi.fn() })
 })
@@ -163,7 +170,8 @@ describe('actual Home URL admission stops speech before pane anchor delivery', (
   it('cancels pending synthesis before anchor delivery and discards the response after returning to contact', async () => {
     const router = await mount(), synthesis = deferred<ReturnType<typeof playbackResponse>>(), admission = deferred<ReturnType<typeof task>>()
     api.playback.mockImplementationOnce(() => synthesis.promise)
-    api.speech!.replay(api.messages!.value[0]!); await settle()
+    api.speech!.stop()
+    await freshReply('pending-new')
     const signal = api.playback.mock.calls[1]![0].signal as AbortSignal
     api.task.mockImplementationOnce(() => admission.promise)
     await router.push(url('new')); await settle()

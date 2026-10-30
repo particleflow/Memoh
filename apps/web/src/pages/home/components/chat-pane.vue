@@ -127,7 +127,7 @@
                     <ContextMenu>
                       <ContextMenuTrigger
                         as-child
-                        :disabled="!readAloud.canReplay(msg)"
+                        :disabled="!readAloud.menuAvailable(msg)"
                       >
                         <div
                           :data-message-id="msg.id"
@@ -160,15 +160,19 @@
                             :is-last-message="msg.id === lastMessageId"
                             :speech-enabled="readAloud.enabled.value"
                             :speech-status="readAloud.status(msg)"
+                            :speech-can-replay="readAloud.canReplay(msg)"
                             @replay-speech="readAloud.replay(msg)"
                             @active="onMessageActive"
                             @edit-message="handleEditMessage"
                           />
                         </div>
                       </ContextMenuTrigger>
-                      <ContextMenuContent v-if="readAloud.canReplay(msg)">
-                        <ContextMenuItem @select="readAloud.replay(msg)">
-                          {{ $t('chat.readAloud.replay') }}
+                      <ContextMenuContent v-if="readAloud.menuAvailable(msg)">
+                        <ContextMenuItem
+                          :disabled="!readAloud.canReplay(msg)"
+                          @select="readAloud.replay(msg)"
+                        >
+                          {{ $t(readAloud.replayLabel(msg)) }}
                         </ContextMenuItem>
                       </ContextMenuContent>
                     </ContextMenu>
@@ -998,11 +1002,11 @@
                  Keep this row's height while recording so the dock stays
                  stable. -->
               <p
-                v-if="readAloud.state.value.status === 'error'"
+                v-if="readAloud.notice.value"
                 class="px-2 text-caption text-muted-foreground"
                 role="status"
               >
-                {{ $t('chat.readAloud.failed') }}
+                {{ $t(readAloud.notice.value) }}
               </p>
               <div
                 data-composer-context-row
@@ -3996,6 +4000,15 @@ const taskRunAnchor = useTaskRunAnchor({
 
 const readAloud = useChatReadAloud({
   botId: currentBotId,
+  modelId: computed(() => botSettings.value?.tts_model_id),
+  runIdentity: message => {
+    if (message.role !== 'assistant') return
+    if (message.runtimeRunId) return message.runtimeRunId
+    const anchor = props.taskAnchor
+    if (anchor && taskRunAnchor.status.value === 'located' && anchor.turnId === message.turnId) return anchor.runId
+    const observation = chatStore.runtimeObservationFor(currentBotId.value || '', activeSessionId.value || '')
+    return observation.synchronized && message.turnId && observation.run?.turn_id === message.turnId ? observation.run.run_id : undefined
+  },
   scope: computed(() => `${currentBotId.value}:${paneTarget.value.sessionId ?? paneTarget.value.viewId}`),
   enabled: computed(() => !!botSettings.value?.tts_model_id && isActive.value && isVisible.value
     && !chatStore.contactNavigationPending

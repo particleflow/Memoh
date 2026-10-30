@@ -1,0 +1,90 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+(node:228110) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+stderr | src/pages/home/composables/speech-continuity.test.ts > automatically reads a live reply which settles before the post-render watcher runs, without reading baseline history
+TypeError: storage.getItem is not a function
+    at read (/workspace/Memoh/node_modules/.pnpm/@vueuse+core@14.1.0_vue@3.5.40_typescript@6.0.3_/node_modules/@vueuse/core/dist/index.js:1990:53)
+    at update (/workspace/Memoh/node_modules/.pnpm/@vueuse+core@14.1.0_vue@3.5.40_typescript@6.0.3_/node_modules/@vueuse/core/dist/index.js:2015:124)
+    at useStorage (/workspace/Memoh/node_modules/.pnpm/@vueuse+core@14.1.0_vue@3.5.40_typescript@6.0.3_/node_modules/@vueuse/core/dist/index.js:1960:7)
+    at useLocalStorage (/workspace/Memoh/node_modules/.pnpm/@vueuse+core@14.1.0_vue@3.5.40_typescript@6.0.3_/node_modules/@vueuse/core/dist/index.js:4660:9)
+    at Module.useChatReadAloud (/workspace/memoh-speech-continuity/apps/web/src/pages/home/composables/useChatReadAloud.ts:29:21)
+    at setup (/workspace/memoh-speech-continuity/apps/web/src/pages/home/composables/speech-continuity.test.ts:21:5)
+    at callWithErrorHandling (/workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19)
+    at setupStatefulComponent (/workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:8151:25)
+    at setupComponent (/workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:8113:36)
+    at mountComponent (/workspace/Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:6023:7)
+[Vue warn]: Unhandled error during execution of watcher callback 
+  at <App>
+[Vue warn]: Unhandled error during execution of setup function 
+  at <App>
+
+(node:228109) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ |web| src/pages/home/composables/speech-continuity.test.ts (5 tests | 1 failed) 123ms
+   × automatically reads a live reply which settles before the post-render watcher runs, without reading baseline history 45ms
+ ❯ |web| src/pages/home/composables/useChatReadAloud.cache.test.ts (5 tests | 5 failed) 9ms
+   × replays full saved bytes after stop, only validates access/config, and never submits another generation request 5ms
+   × input/scope cancellation fences a late replay validation and a new account cannot inherit cached audio 1ms
+   × keeps the generated run identity through the real settled-history reconciliation 1ms
+   × a native direct token replacement cannot reuse another account cache even without a storage event 1ms
+   × keeps sibling rows in one turn/run distinct for synthesis, cache and the single active bubble 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-continuity.test.ts > automatically reads a live reply which settles before the post-render watcher runs, without reading baseline history
+TypeError: localStorage.getItem is not a function
+ ❯ cacheKey src/pages/home/composables/useChatReadAloud.ts:130:36
+    128|     // Read at use time as well as watching the shared auth ref: nativ…
+    129|     // can replace localStorage directly without a same-window storage…
+    130|     const principal = localStorage.getItem('token') ?? authToken.value
+       |                                    ^
+    131|     const slot = [principal, options.botId.value, options.scope.value,…
+    132|     const run = message.role === 'assistant' ? message.runtimeRunId ||…
+ ❯ deep src/pages/home/composables/useChatReadAloud.ts:85:137
+ ❯ callWithErrorHandling ../../../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:200:19
+ ❯ callWithAsyncErrorHandling ../../../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:207:17
+ ❯ baseWatchOptions.call ../../../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:886:47
+ ❯ job ../../../Memoh/node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1928:18
+ ❯ Object.watch ../../../Memoh/node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.cjs.js:1963:7
+ ❯ doWatch ../../../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:914:34
+ ❯ watch ../../../Memoh/node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:847:10
+ ❯ Module.useChatReadAloud src/pages/home/composables/useChatReadAloud.ts:84:3
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/11]⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > replays full saved bytes after stop, only validates access/config, and never submits another generation request
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > input/scope cancellation fences a late replay validation and a new account cannot inherit cached audio
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > keeps the generated run identity through the real settled-history reconciliation
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > a native direct token replacement cannot reuse another account cache even without a storage event
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > keeps sibling rows in one turn/run distinct for synthesis, cache and the single active bubble
+TypeError: localStorage.setItem is not a function
+ ❯ src/pages/home/composables/useChatReadAloud.cache.test.ts:16:16
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/11]⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > replays full saved bytes after stop, only validates access/config, and never submits another generation request
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > input/scope cancellation fences a late replay validation and a new account cannot inherit cached audio
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > keeps the generated run identity through the real settled-history reconciliation
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > a native direct token replacement cannot reuse another account cache even without a storage event
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.cache.test.ts > keeps sibling rows in one turn/run distinct for synthesis, cache and the single active bubble
+TypeError: localStorage.clear is not a function
+ ❯ src/pages/home/composables/useChatReadAloud.cache.test.ts:22:104
+     20|   vi.stubGlobal('URL', { createObjectURL: vi.fn(() => 'blob:cached-aud…
+     21| })
+     22| afterEach(() => { app?.unmount(); app = undefined; root?.remove(); vi.…
+       |                                                                                                        ^
+     23| function mount() {
+     24|   const messages = ref<ChatMessage[]>([message('history', 'History.', …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/11]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  6 failed | 25 passed (31)
+   Start at  13:46:05
+   Duration  8.58s (transform 6.28s, setup 0ms, import 8.57s, tests 347ms, environment 1.41s)
+

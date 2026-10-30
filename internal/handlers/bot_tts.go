@@ -51,6 +51,51 @@ func NewBotAudioHandler(log *slog.Logger, audioService *audiopkg.Service, settin
 func (h *BotAudioHandler) Register(e *echo.Echo) {
 	e.POST("/bots/:bot_id/tts/synthesize", h.Synthesize)
 	e.POST("/bots/:bot_id/tts/playback", h.Playback)
+	e.GET("/bots/:bot_id/tts/playback/config", h.PlaybackConfig)
+}
+
+type playbackIdentityService interface {
+	PlaybackIdentity(context.Context, string) (string, error)
+	StreamPlaybackWithIdentity(context.Context, string, string) (*sdk.SpeechStreamResult, string, error)
+}
+
+type playbackConfigResponse struct {
+	Identity string `json:"identity"`
+}
+
+// PlaybackConfig godoc
+// @Summary Validate access and current voice configuration for cached playback
+// @Description Returns an opaque effective configuration identity. Never synthesizes audio. Requires the same account JWT and Bot chat permission as Playback.
+// @Tags bots
+// @Produce json
+// @Param bot_id path string true "Bot ID"
+// @Success 200 {object} playbackConfigResponse
+// @Failure 401 {object} server.Problem
+// @Failure 403 {object} server.Problem
+// @Failure 409 {object} server.Problem
+// @Router /bots/{bot_id}/tts/playback/config [get].
+func (h *BotAudioHandler) PlaybackConfig(c echo.Context) error {
+	botID, err := h.authorizePlayback(c)
+	if err != nil {
+		return err
+	}
+	botSettings, err := h.settingsService.GetBot(c.Request().Context(), botID)
+	if err != nil {
+		return errs.Wrap(err, "load bot playback settings")
+	}
+	if botSettings.TtsModelID == "" {
+		return apperror.New(apperror.CodeTTSModelNotConfigured, nil)
+	}
+	service, ok := h.audioService.(playbackIdentityService)
+	if !ok {
+		return echo.NewHTTPError(http.StatusServiceUnavailable)
+	}
+	identity, err := service.PlaybackIdentity(c.Request().Context(), botSettings.TtsModelID)
+	if err != nil {
+		return errs.Wrap(err, "read playback configuration identity")
+	}
+	c.Response().Header().Set(echo.HeaderCacheControl, "private, no-store")
+	return c.JSON(http.StatusOK, playbackConfigResponse{Identity: identity})
 }
 
 type synthesizeRequest struct {
@@ -154,26 +199,38 @@ func (h *BotAudioHandler) SetPlaybackAccess(botService *bots.Service, accountSer
 func (h *BotAudioHandler) Playback(c echo.Context) error {
 	timing := newPlaybackTiming(c, h.logger)
 	timing.mark("handler_start")
+	botID, err := h.authorizePlayback(c)
+	if err != nil {
+		return err
+	}
+	return h.streamPlayback(c, botID, timing)
+}
+
+func (h *BotAudioHandler) authorizePlayback(c echo.Context) (string, error) {
 	// Playback uses configured Bot credentials and requires an account JWT.
 	// Chat-route JWTs skip account session validation in the JWT middleware;
 	// reject them before Bot ownership or grants can authorize synthesis.
 	if _, err := auth.ChatTokenFromContext(c); err == nil {
-		return apperror.New(apperror.CodeHTTPForbidden, nil)
+		return "", apperror.New(apperror.CodeHTTPForbidden, nil)
 	}
 	botID, err := httpx.RequiredParam(c, "bot_id")
 	if err != nil {
-		return err
+		return "", err
 	}
 	actorID, err := RequireChannelIdentityID(c)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if h.playbackAccess == nil {
-		return echo.NewHTTPError(http.StatusForbidden)
+		return "", echo.NewHTTPError(http.StatusForbidden)
 	}
 	if err := h.playbackAccess(c.Request().Context(), actorID, botID); err != nil {
-		return err
+		return "", err
 	}
+	return botID, nil
+}
+
+func (h *BotAudioHandler) streamPlayback(c echo.Context, botID string, timing *playbackTiming) error {
 	var req synthesizeRequest
 	if err := c.Bind(&req); err != nil {
 		return err
@@ -195,7 +252,16 @@ func (h *BotAudioHandler) Playback(c echo.Context) error {
 	ctx, cancel := context.WithCancel(c.Request().Context())
 	defer cancel() // Close the upstream body on client cancellation or write failure.
 	timing.mark("adapter_request")
-	stream, err := h.audioService.StreamPlayback(ctx, botSettings.TtsModelID, text)
+	var stream *sdk.SpeechStreamResult
+	if service, ok := h.audioService.(playbackIdentityService); ok {
+		var identity string
+		stream, identity, err = service.StreamPlaybackWithIdentity(ctx, botSettings.TtsModelID, text)
+		if err == nil {
+			c.Response().Header().Set("X-Speech-Playback-Identity", identity)
+		}
+	} else {
+		stream, err = h.audioService.StreamPlayback(ctx, botSettings.TtsModelID, text)
+	}
 	if err != nil {
 		return errs.Wrap(err, "synthesize bot playback")
 	}

@@ -52,11 +52,11 @@ describe('chat read aloud media lifecycle', () => {
     expect(f.createURL).not.toHaveBeenCalled()
   })
 
-  it('ignores old play promise rejection after interruption and a new replay', async () => {
+  it('ignores old play promise rejection after interruption and a new generated reply', async () => {
     const f = fixture(); let rejectOld!: (value: Error) => void
     f.player.play.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectOld = reject }))
     f.speech.enqueue({ key: 'old', text: 'old' }); await tick()
-    f.speech.stop(); f.speech.replay({ key: 'new', text: 'new' }); await tick()
+    f.speech.stop(); f.speech.enqueue({ key: 'new', text: 'new' }); await tick()
     f.player.emit('playing'); rejectOld(new Error('late')); await tick()
     expect(f.latest()).toMatchObject({ key: 'new', status: 'playing' })
     f.speech.stop(); f.player.emit('playing'); f.player.emit('ended'); f.player.emit('error')
@@ -83,7 +83,7 @@ describe('chat read aloud media lifecycle', () => {
     f.player.emit('error'); await tick()
     expect(f.latest()?.status).toBe('error'); expect(f.synthesize).toHaveBeenCalledOnce()
     expect(f.player.src).toBe(''); expect(f.revokeURL).toHaveBeenCalledOnce()
-    f.speech.replay({ key: 'a', text: 'text' }); await tick()
+    f.speech.enqueue({ key: 'a', text: 'text' }); await tick()
     expect(f.synthesize).toHaveBeenCalledTimes(2)
     f.speech.stop()
     const failed = fixture(vi.fn(async () => { throw new Error('lost response') }))
@@ -105,8 +105,8 @@ describe('live reply eligibility', () => {
     const replies = new LiveSpeechReplies()
     expect(replies.update([reply('history')], true, false)).toEqual([])
     expect(replies.update([{ ...reply('live', true), runtimeRunId: 'live-run' }], true, false)).toEqual([])
-    const final = { ...reply('live'), id: 'persisted-render-id' }
-    expect(replies.update([final], true, false)).toEqual([{ key: speechKey(final), text: '你好' }])
+    const final = { ...reply('live'), serverId: 'persisted-render-id' }
+    expect(replies.update([final], true, false)).toEqual([{ key: speechKey(final), messageId: final.id, text: '你好' }])
     expect(replies.update([final], true, false)).toEqual([])
   })
   it('consumes interrupted streams, disabled/hidden panes and history refreshes', () => {

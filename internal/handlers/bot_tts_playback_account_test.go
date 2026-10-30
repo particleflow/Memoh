@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/felinics/twilight/sdk"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
@@ -51,6 +52,30 @@ func (s *playbackBoundarySettings) GetBot(context.Context, string) (settings.Set
 }
 
 func TestBotPlaybackAccountBoundary(t *testing.T) {
+	testBotPlaybackAccountBoundary(t, false)
+}
+
+type playbackIdentityAudio struct {
+	*playbackAudio
+	identityCalls int
+}
+
+func (a *playbackIdentityAudio) PlaybackIdentity(context.Context, string) (string, error) {
+	a.identityCalls++
+	return "opaque-test-identity", nil
+}
+
+func (a *playbackIdentityAudio) StreamPlaybackWithIdentity(ctx context.Context, model, text string) (*sdk.SpeechStreamResult, string, error) {
+	stream, err := a.StreamPlayback(ctx, model, text)
+	return stream, "opaque-test-identity", err
+}
+
+func TestBotPlaybackConfigAccountBoundary(t *testing.T) {
+	testBotPlaybackAccountBoundary(t, true)
+}
+
+func testBotPlaybackAccountBoundary(t *testing.T, metadata bool) {
+	t.Helper()
 	const secret = "synthetic-playback-account-boundary-secret"
 	const otherBot = "44444444-4444-4444-8444-444444444444"
 	for _, tc := range []struct {
@@ -93,8 +118,13 @@ func TestBotPlaybackAccountBoundary(t *testing.T) {
 				accountStore := &playbackBoundaryAccounts{active: !tc.inactive}
 				accountService := accounts.NewService(nil, accountStore)
 				audio := &playbackAudio{}
+				identityAudio := &playbackIdentityAudio{playbackAudio: audio}
+				var service botSpeechService = audio
+				if metadata {
+					service = identityAudio
+				}
 				config := &playbackBoundarySettings{}
-				h := &BotAudioHandler{audioService: audio, settingsService: config}
+				h := &BotAudioHandler{audioService: service, settingsService: config}
 				h.SetPlaybackAccess(bots.NewService(nil, q), accountService)
 				srv := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, accountService.ValidateSession, h)
 				token, _, err := auth.GenerateToken(invocationTestOwnerID, secret, time.Minute)
@@ -110,26 +140,39 @@ func TestBotPlaybackAccountBoundary(t *testing.T) {
 					t.Fatal(err)
 				}
 				path := "/bots/" + target + "/tts/playback"
+				method := http.MethodPost
+				if metadata {
+					path += "/config"
+					method = http.MethodGet
+				}
 				if query && token != "" {
 					path += "?token=" + url.QueryEscape(token)
 				}
-				req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(`{"text":"synthetic playback text"}`))
+				req := httptest.NewRequest(method, path, strings.NewReader(`{"text":"synthetic playback text"}`))
 				req.Header.Set("Content-Type", "application/json")
+				req.Header.Set("Origin", "https://phone-fixture.invalid")
 				if !query && token != "" {
 					req.Header.Set("Authorization", "Bearer "+token)
 				}
 				rec := httptest.NewRecorder()
 				srv.ServeHTTP(rec, req)
+				if !strings.Contains(rec.Header().Get("Access-Control-Expose-Headers"), "X-Speech-Playback-Identity") {
+					t.Fatal("cross-origin shared client cannot read the cache identity")
+				}
 				t.Logf("status=%d account_reads=%d bot_reads=%d settings_reads=%d synthesis_calls=%d", rec.Code, accountStore.reads, q.reads, config.calls, audio.calls)
 				if rec.Code != tc.status {
 					t.Fatalf("status=%d want=%d body=%s", rec.Code, tc.status, rec.Body.String())
 				}
 				if tc.status == http.StatusOK {
-					if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 1 || audio.model != "existing-configured-model" || audio.text != "synthetic playback text" || rec.Body.String() != "synthetic-audio" {
+					if metadata {
+						if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 0 || identityAudio.identityCalls != 1 || !strings.Contains(rec.Body.String(), "opaque-test-identity") {
+							t.Fatal("cached replay validation generated audio or skipped account/Bot checks")
+						}
+					} else if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 1 || audio.model != "existing-configured-model" || audio.text != "synthetic playback text" || rec.Body.String() != "synthetic-audio" {
 						t.Fatal("validated account playback path changed")
 					}
 				} else {
-					if config.calls != 0 || audio.calls != 0 {
+					if config.calls != 0 || audio.calls != 0 || identityAudio.identityCalls != 0 {
 						t.Fatal("rejected request reached settings or synthesis")
 					}
 					if tc.kind == "chat" && (accountStore.reads != 0 || q.reads != 0) {

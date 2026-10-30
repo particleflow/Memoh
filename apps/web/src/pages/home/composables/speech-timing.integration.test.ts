@@ -24,7 +24,7 @@ it('timing opt-in preserves cancellation of a late response without creating or 
   const createURL = vi.fn(() => { throw new Error('late response must not create a URL') })
   const cancel = vi.fn()
   const controller = new ChatReadAloud({ synthesize, createPlayer, createURL, revokeURL: vi.fn(), onState: vi.fn() })
-  controller.replay({ key: 'private-turn-id', text: 'private spoken text', timing })
+  controller.enqueue({ key: 'private-turn-id', text: 'private spoken text', timing })
   await settle()
   controller.stop()
   expect(signal?.aborted).toBe(true)
@@ -39,7 +39,7 @@ it('timing opt-in preserves cancellation of a late response without creating or 
   expect(JSON.stringify(snapshot)).not.toMatch(/private-turn-id|private spoken text/u)
 })
 
-it('timing opt-in keeps blocked replay on the same loaded source and never restarts a stopped queue', async () => {
+it('timing opt-in keeps blocked playback on the same loaded source and never restarts a stopped queue', async () => {
   sessionStorage.setItem('memoh.speechTiming', '1')
   const target = new EventTarget()
   const player = Object.assign(target, {
@@ -51,7 +51,7 @@ it('timing opt-in keeps blocked replay on the same loaded source and never resta
   const synthesize = vi.fn(async () => new Blob(['controlled local bytes']))
   const changed = vi.fn()
   const controller = new ChatReadAloud({ synthesize, createPlayer: () => player, createURL: () => 'blob:private-fixture', revokeURL: vi.fn(), onState: changed })
-  controller.replay({ key: 'private-turn-id', text: 'private spoken text', timing: beginSpeechTiming('manual') })
+  controller.enqueue({ key: 'private-turn-id', text: 'private spoken text', timing: beginSpeechTiming('manual') })
   await settle()
   expect(changed).toHaveBeenLastCalledWith(expect.objectContaining({ status: 'blocked' }))
   const sameSource = player.src

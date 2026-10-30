@@ -1,6 +1,6 @@
 import { audioTimingObserver, speechMimeClass, type SpeechTiming } from './speech-timing'
 
-export interface SpeechAudioStream { stream: ReadableStream<Uint8Array>, contentType: string }
+export interface SpeechAudioStream { stream: ReadableStream<Uint8Array>, contentType: string, sequential?: boolean, identity?: string }
 export interface SpeechStreamSource { url: string, done: Promise<void>, dispose(): void }
 
 /** Preserve native Audio compatibility when this browser cannot stream the
@@ -68,6 +68,7 @@ export function openSpeechStream(audio: SpeechAudioStream, signal: AbortSignal, 
       await opened
       if (signal.aborted) throw signal.reason
       const buffer = media.addSourceBuffer(mime)
+      if (audio.sequential) buffer.mode = 'sequence'
       for (;;) {
         const chunk = await reader.read()
         if (signal.aborted) throw signal.reason
