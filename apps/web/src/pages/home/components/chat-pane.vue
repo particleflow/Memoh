@@ -4414,7 +4414,7 @@ async function handleSend() {
     if (error instanceof DOMException && error.name === 'AbortError') return
     composerError.value = error instanceof AttachmentUploadLimitError
       ? t('chat.attachmentUploadTooLarge', { name: error.fileName, limit: error.maxBytes.toLocaleString() })
-      : error instanceof MediaRecoveryError
+      : error instanceof MediaRecoveryError && error.reason !== 'unsupported'
         ? t(`chat.mediaRecovery.${error.reason}`)
         : resolveApiErrorMessage(error, t('chat.sendFailed'))
     return
