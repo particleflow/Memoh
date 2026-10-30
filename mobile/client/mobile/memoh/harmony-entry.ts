@@ -92,7 +92,7 @@ function form(current: ServiceConfig | null, message = '') {
   try { unbound = inspectServiceSetup().kind === 'unbound' } catch { unbound = true }
   document.getElementById('service-migration')!.textContent = current
     ? '保持 API 地址不变会保留登录；切换服务将退出当前账号。'
-    : unbound ? '检测到旧登录或本地数据。请使用已在 Windows 配置并签名的安装包完成迁移；原数据未更改，不会发送到其他地址。' : '本安装包尚未提供服务配置；Windows 配置并签名后的版本会自动读取。也可在此设置新服务。'
+    : unbound ? '检测到旧登录或本地数据。请使用已在 Windows 配置并签名的安装包完成迁移；原数据未更改。' : '本安装包尚未提供服务配置；Windows 配置并签名后的版本会自动读取。也可在此设置新服务。'
   const submit = root.querySelector('button[type=submit]') as HTMLButtonElement
   submit.disabled = unbound
   const cancel = document.getElementById('service-cancel') as HTMLButtonElement

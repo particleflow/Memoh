@@ -25,7 +25,7 @@ type UploadProgress = { phase: string; loaded?: number; total?: number }
 
 export class UnknownWrite extends Error {
   constructor() {
-    super('附件写入结果尚未确认；再次发送只会核验原件，不会自动重传')
+    super('附件写入结果尚未确认；再次发送只会核验原件')
     this.name = 'UnknownWrite'
   }
 }

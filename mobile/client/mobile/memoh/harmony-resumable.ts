@@ -78,12 +78,12 @@ export async function nativeAttachmentCommand<T>(command: string, botId: string,
       if (!reply.ok) {
         const status = /^UPLOAD_HTTP_(401|403)$/.exec(reply.error ?? '')
         if (status) return new Response(null, { status: Number(status[1]) })
-        const error = new Error(reply.error === 'UPLOAD_RESUME_UNAVAILABLE' ? '服务器暂不支持恢复；原件仍保留，请稍后重试'
-          : reply.error === 'UPLOAD_LEGACY_UNCERTAIN' ? '旧服务不支持续传，写入结果未确认，请先核对原件'
-          : reply.error === 'UPLOAD_CREATE_UNCERTAIN' ? '创建回执未确认；原件已保留，需先核对，不能重复创建'
+        const error = new Error(reply.error === 'UPLOAD_RESUME_UNAVAILABLE' ? '原件仍保留，请稍后重试'
+          : reply.error === 'UPLOAD_LEGACY_UNCERTAIN' ? '写入结果未确认，请先核对原件'
+          : reply.error === 'UPLOAD_CREATE_UNCERTAIN' ? '创建回执未确认；原件已保留，需先核对'
           : reply.error === 'UPLOAD_RECEIPT_UNAVAILABLE' ? '原上传回执不可用；原件和原回执身份已保留，需先核对'
           : reply.error === 'UPLOAD_ORIGINAL_UNAVAILABLE' ? '服务器原件暂不可读取；本机原件已保留，请核对服务端'
-          : reply.error === 'UPLOAD_COMPLETE_UNCERTAIN' ? '完成结果未确认；仅核对原回执，不会重复提交'
+          : reply.error === 'UPLOAD_COMPLETE_UNCERTAIN' ? '完成结果未确认；仅核对原回执'
           : reply.error === 'UPLOAD_BUSY' ? '正在处理另一份原件，请稍后重试'
           : reply.error === 'UPLOAD_HTTP_413' ? '附件为空或超过服务端限制'
           : '')
