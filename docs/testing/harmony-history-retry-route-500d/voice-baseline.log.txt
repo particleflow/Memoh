@@ -1,0 +1,95 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/pages/home/index.read-aloud-admission.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/pages/home/index.read-aloud-admission.test.ts (8 tests | 8 failed) 125ms
+     × same Bot/session, different run: stops during authorization and never restores the old queue after admission 75ms
+     × cross Bot/session: stops during authorization and never restores the old queue after admission 11ms
+     × denied: stays silent under the error mask, then returns to the actual primary contact path 8ms
+     × expired: stays silent under the error mask, then returns to the actual primary contact path 7ms
+     × wrong-run: stays silent under the error mask, then returns to the actual primary contact path 8ms
+     × ignores a late task admission after returning to the primary contact without restoring old audio 4ms
+     × cancels pending synthesis before anchor delivery and discards the response after returning to contact 5ms
+     × stops the old pane when an invalid history URL is rejected before a task request starts 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > same Bot/session, different run: stops during authorization and never restores the old queue after admission
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cross Bot/session: stops during authorization and never restores the old queue after admission
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:77:15
+     75|   expect(masked()).toBe(false)
+     76|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     77|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     78|   expect(api.speech!.state.value.status).toBe('playing')
+     79|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:117:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > denied: stays silent under the error mask, then returns to the actual primary contact path
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > expired: stays silent under the error mask, then returns to the actual primary contact path
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > wrong-run: stays silent under the error mask, then returns to the actual primary contact path
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:77:15
+     75|   expect(masked()).toBe(false)
+     76|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     77|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     78|   expect(api.speech!.state.value.status).toBe('playing')
+     79|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:128:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > ignores a late task admission after returning to the primary contact without restoring old audio
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:77:15
+     75|   expect(masked()).toBe(false)
+     76|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     77|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     78|   expect(api.speech!.state.value.status).toBe('playing')
+     79|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:143:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cancels pending synthesis before anchor delivery and discards the response after returning to contact
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:77:15
+     75|   expect(masked()).toBe(false)
+     76|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     77|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     78|   expect(api.speech!.state.value.status).toBe('playing')
+     79|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:155:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > stops the old pane when an invalid history URL is rejected before a task request starts
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:77:15
+     75|   expect(masked()).toBe(false)
+     76|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     77|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     78|   expect(api.speech!.state.value.status).toBe('playing')
+     79|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:170:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  8 failed (8)
+   Start at  15:23:36
+   Duration  3.65s (transform 1.78s, setup 0ms, import 2.45s, tests 125ms, environment 828ms)
+
+ ELIFECYCLE  Test failed. See above for more details.

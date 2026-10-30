@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "cf7548d56636a83d1eaf1c4260ea01a3cb70bef2adee20cc5cfc196a96733405"
+      "sha256": "538b35a45e2c12ef8c0942bfea8a04582298d73ddd092fc11d839d81357b39a3"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -539,6 +539,18 @@
       "sdkBackendSchemaAgentChanges": false,
       "fieldSkeletonRootCauseProven": false,
       "laterInitializerHistoryPreservationProven": false,
+      "newHapBuilt": false
+    },
+    "historyRetryRouteContext": {
+      "sourceBase": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+      "productCandidate": "500d86f52ae97ba92ac8245bbafbe66ba21543db",
+      "evidenceCommit": "a7e69c4d63d528bf578939b45b4c8198878ccbaa",
+      "reviewState": "candidate under unified review; not final release",
+      "livePerStoreRouter": true,
+      "persistedRouterContext": false,
+      "oldEnsureWebSocketFixRetained": true,
+      "fieldElevenSkeletonCauseReproduced": false,
+      "readAloudFixtureFailuresResolved": false,
       "newHapBuilt": false
     }
   }

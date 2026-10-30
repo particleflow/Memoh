@@ -1,0 +1,18 @@
+{
+  "candidate": "500d86f52ae97ba92ac8245bbafbe66ba21543db",
+  "productionFiles": 3,
+  "fixtures": 4,
+  "pairedEntries": 167,
+  "hostPatchNamesRetained": 47,
+  "phoneHomeOnlyChange": "bind actual Router; original appTitle source byte-identical after removing new call",
+  "sourceIdentity12HashesRetained": true,
+  "coldHistoryEnsureWebSocketRetained": true,
+  "readonlyDirectoryAndLifetimeHashRetained": true,
+  "unchangedClientFiles": 199,
+  "contextGeneration": "original generator into isolated path only",
+  "contextSHA256": "b5fa8034f84f7973e8701902bf94c3b84040a6fe001dd0f2b0d0b24a9bea8329",
+  "sdkNativeVersionPermissionOrPrivateConfigurationChanged": false,
+  "newHapBuilt": false,
+  "physicalArkWeb": false,
+  "fieldElevenSkeletonRootCauseProven": false
+}

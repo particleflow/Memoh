@@ -1,0 +1,77 @@
+{
+  "sourceBase": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+  "productCandidate": "500d86f52ae97ba92ac8245bbafbe66ba21543db",
+  "evidenceCommit": "a7e69c4d63d528bf578939b45b4c8198878ccbaa",
+  "reviewState": "candidate under unified review; not final release",
+  "mapping": [
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "beforePhoneSHA256": "25756fa89096db1bb14ce6aaf3fb434ecd5098ce12da0f2f06b9191dd78e298b",
+      "phoneSHA256": "bed697e297d69c339bd1712ea2cc346257d113694742042cde3fb9e85a3eeb88",
+      "upstreamSHA256": "f63335a9e25c5335412ad3d05ad100bea9beb2bbdce91547a29bd5c0df495fc1",
+      "gitBlob": "2b6be8a0f30cb909a26205f510308fbec98f7b9c",
+      "adaptation": "Only insert real Router binding into current phone Home; retain existing Garnet Assistant title adaptation",
+      "scope": "production"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "beforePhoneSHA256": "1a9ba6bc2ce53945a61dd2e3f99203546cbb931ac526beaf9da4273076da65fd",
+      "phoneSHA256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5",
+      "upstreamSHA256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5",
+      "gitBlob": "b87dfcad7ca096dbb76c5373d99ccf3b3dcc7a11",
+      "adaptation": "exact incoming bytes",
+      "scope": "production"
+    },
+    {
+      "path": "apps/web/src/store/chat/route-context.ts",
+      "beforePhoneSHA256": null,
+      "phoneSHA256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78",
+      "upstreamSHA256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78",
+      "gitBlob": "093ee18f4e83672bf582f32d03ef8dd3f29aa16e",
+      "adaptation": "exact incoming bytes",
+      "scope": "production"
+    },
+    {
+      "path": "apps/web/src/store/chat/route-context.test.ts",
+      "beforePhoneSHA256": null,
+      "phoneSHA256": "51b36ee700064411de954b6648f48753f774b6c32d564accb86358bcf71ca682",
+      "upstreamSHA256": "51b36ee700064411de954b6648f48753f774b6c32d564accb86358bcf71ca682",
+      "gitBlob": "4ed4549a1849a4c810b052bd821a7b0c772a7181",
+      "adaptation": "exact incoming bytes",
+      "scope": "test"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.navigation.test.ts",
+      "beforePhoneSHA256": "4e5089e272594d917315a55974318fa092923603ca76845763f2793013ba0b29",
+      "phoneSHA256": "8a4c667be82dbf7531bdbced04bcfb3000595d45e52cfd8986d47d728998ca7e",
+      "upstreamSHA256": "64bdab0376ca08d782b27eef1f9a377d6b44d816ed08458d0fcd75652701003b",
+      "gitBlob": "838957a0e800667a52258d372c1c9857a8aa1720",
+      "adaptation": "Only add admitted no-op store action to current fixture; preserve all other phone test content/expectations",
+      "scope": "test"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.not-found.test.ts",
+      "beforePhoneSHA256": "4f3d8b07e16d573c1cbc24e4b883424c26159e68d3763f1fdabc9bd95c5d68d7",
+      "phoneSHA256": "1292bf0f1de0e6270bcb97bbcde9375c072dc513e125022458d4fa6bd8410d5b",
+      "upstreamSHA256": "1292bf0f1de0e6270bcb97bbcde9375c072dc513e125022458d4fa6bd8410d5b",
+      "gitBlob": "a70c6343f361fadc408c5baf33b206d605069e2a",
+      "adaptation": "Only expose new action in existing mock; preserve other expectations",
+      "scope": "test"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.read-aloud-admission.test.ts",
+      "beforePhoneSHA256": "a00206a20163c0c4bba2d15f303413bf016b89224327c5bc002b31d890ab0a73",
+      "phoneSHA256": "0f2ed4cb9ecf21bc67ac9647e879b7805e479110ed60b9b14c23d05b3ec31c91",
+      "upstreamSHA256": "0f2ed4cb9ecf21bc67ac9647e879b7805e479110ed60b9b14c23d05b3ec31c91",
+      "gitBlob": "90c260833832e7dc512acc3672896ffe34def6c9",
+      "adaptation": "Only add admitted no-op store action to current fixture; preserve all other phone test content/expectations",
+      "scope": "test"
+    }
+  ],
+  "livePerStoreRouter": true,
+  "persistedRouterContext": false,
+  "oldEnsureWebSocketFixRetained": true,
+  "fieldElevenSkeletonCauseReproduced": false,
+  "readAloudFixtureFailuresResolved": false,
+  "newHapBuilt": false
+}
