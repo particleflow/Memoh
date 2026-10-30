@@ -1045,7 +1045,7 @@
       "run": "Task run"
     },
     "readAloud": {
-      "replay": "Read aloud again",
+      "replay": "Read aloud",
       "continue": "Continue reading",
       "playing": "Reading this reply aloud",
       "failed": "Reading stopped."
@@ -1105,7 +1105,7 @@
         "sending": "Requesting continuation of the original batch…",
         "submitted": "The original instruction was acknowledged. Task success is still unknown. Check this task’s current status and native terminal.",
         "unchanged": "The original operation was left unchanged. Check this task’s current status and native terminal; task success is still unknown.",
-        "unknown": "The continuation outcome is unknown. This request will not be repeated. Check this task’s current status and native terminal.",
+        "unknown": "The continuation outcome is unknown. Check this task’s current status and native terminal.",
         "unavailable": "Continuation is unavailable. The complete original arguments and an eligible native operation receipt are required; a disconnected Runtime must reconnect before continuation.",
         "blocked": "Continuation was blocked. Review access, target and task status before explicitly checking again.",
         "unsupported": "This server or task does not support native batch continuation.",
@@ -1327,12 +1327,11 @@
     },
     "mediaRecovery": {
       "pause": "Pause",
-      "unknown": "The upload outcome is unknown. The original record is kept; it will not be submitted again.",
+      "unknown": "The upload outcome is unknown. The original record is kept.",
       "receiptMissing": "The original upload is unavailable or expired. Its ID and progress are kept; no replacement upload was created.",
       "sourceMissing": "The local file is unavailable. Select the original file again to resume.",
       "integrity": "File size or checksum verification failed. No attachment was accepted.",
       "storage": "Local recovery storage is unavailable. Keep this tab open and try again.",
-      "unsupported": "Resumable attachments are unavailable on this server.",
       "reselect": "Select the original files again to resume: {names}"
     },
     "attachmentUnavailable": "Attachment inaccessible",
