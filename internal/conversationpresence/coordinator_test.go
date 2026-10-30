@@ -12,21 +12,30 @@ import (
 // fixtureClaims is deliberately test-only; production must use the original
 // durable admission/event owner, not this in-memory reference behavior.
 type fixtureClaims struct {
-	mu sync.Mutex
-	claimed map[Ticket]bool
-	closed map[Ticket]bool
-	episodes map[struct{ Scope Scope; ID string }]bool
+	mu       sync.Mutex
+	claimed  map[Ticket]bool
+	closed   map[Ticket]bool
+	episodes map[struct {
+		Scope Scope
+		ID    string
+	}]bool
 	pieces []Piece
 }
 
 func newFixtureClaims() *fixtureClaims {
-	return &fixtureClaims{claimed: make(map[Ticket]bool), closed: make(map[Ticket]bool), episodes: make(map[struct{ Scope Scope; ID string }]bool)}
+	return &fixtureClaims{claimed: make(map[Ticket]bool), closed: make(map[Ticket]bool), episodes: make(map[struct {
+		Scope Scope
+		ID    string
+	}]bool)}
 }
 
 func (s *fixtureClaims) Claim(_ context.Context, ticket Ticket) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	key := struct{ Scope Scope; ID string }{ticket.Scope, ticket.EpisodeID}
+	key := struct {
+		Scope Scope
+		ID    string
+	}{ticket.Scope, ticket.EpisodeID}
 	if s.closed[ticket] || s.claimed[ticket] || s.episodes[key] {
 		return false, nil
 	}
@@ -52,24 +61,32 @@ func (s *fixtureClaims) Publish(ctx context.Context, ticket Ticket, piece Piece)
 	return true, nil
 }
 
-type fixtureCapacity struct{ calls atomic.Int32; releases atomic.Int32; deny bool }
+type fixtureCapacity struct {
+	calls    atomic.Int32
+	releases atomic.Int32
+	deny     bool
+}
 
 func (c *fixtureCapacity) TryAcquire(context.Context, Identity) (func(), bool) {
-	if c.deny { return nil, false }
+	if c.deny {
+		return nil, false
+	}
 	c.calls.Add(1)
-	return func(){ c.releases.Add(1) }, true
+	return func() { c.releases.Add(1) }, true
 }
 
 type fixtureGenerator func(context.Context, Input, Limits) (Result, error)
 
-func (f fixtureGenerator) Generate(ctx context.Context, in Input, limits Limits) (Result, error) { return f(ctx, in, limits) }
+func (f fixtureGenerator) Generate(ctx context.Context, in Input, limits Limits) (Result, error) {
+	return f(ctx, in, limits)
+}
 
 func fixtureInput() Input {
 	return Input{
 		Ticket: Ticket{Scope: Scope{ActorID: "actor", BotID: "bot", SessionID: "thread"}, InvocationID: "invocation", EpisodeID: "episode", Generation: "generation", Fence: 1},
 		Source: directSource(), Facts: Facts{Admitted: true, FirstDirectInput: true}, Phase: Accepted,
 		Identity: Identity{ModelUUID: "selected", ModelID: "catalog-model", ProviderID: "provider", ClientType: "openai-completions"},
-		Choice: ThinkingChoice{Usable: true}, Text: "Please examine this problem.",
+		Choice:   ThinkingChoice{Usable: true}, Text: "Please examine this problem.",
 	}
 }
 
@@ -80,8 +97,11 @@ func fixtureCoordinator(claims *fixtureClaims, capacity *fixtureCapacity, genera
 func awaitOutcome(t *testing.T, h *Handle) Outcome {
 	t.Helper()
 	select {
-	case out := <-h.Done: return out
-	case <-time.After(3 * time.Second): t.Fatal("sidecar did not terminate"); return Outcome{}
+	case out := <-h.Done:
+		return out
+	case <-time.After(3 * time.Second):
+		t.Fatal("sidecar did not terminate")
+		return Outcome{}
 	}
 }
 
@@ -100,12 +120,16 @@ func TestAcknowledgementIsNaturalAndTypedNotAFixedFallback(t *testing.T) {
 		return Result{Text: "收到，我来梳理这个问题。", Phase: in.Phase, Usage: Usage{Known: true, OutputTokens: 9}}, nil
 	})
 	h, err := c.Start(context.Background(), fixtureInput())
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	out := awaitOutcome(t, h)
 	if out.Status != "published" || len(s.pieces) != 1 || s.pieces[0].Kind != "conversation_ack" || s.pieces[0].InputSource != directSource() {
 		t.Fatalf("typed model feedback lost: %+v %+v", out, s.pieces)
 	}
-	if capacity.calls.Load() != 1 || capacity.releases.Load() != 1 || !out.Usage.Known { t.Fatal("capacity/usage lost") }
+	if capacity.calls.Load() != 1 || capacity.releases.Load() != 1 || !out.Usage.Known {
+		t.Fatal("capacity/usage lost")
+	}
 }
 
 func TestFormalFirstAndCancelRejectProviderThatIgnoresCancellation(t *testing.T) {
@@ -117,17 +141,29 @@ func TestFormalFirstAndCancelRejectProviderThatIgnoresCancellation(t *testing.T)
 		return Result{Text: "A delayed acknowledgement.", Phase: in.Phase}, nil
 	})
 	h, err := c.Start(context.Background(), fixtureInput())
-	if err != nil { t.Fatal(err) }
+	if err != nil {
+		t.Fatal(err)
+	}
 	awaitSignal(t, entered)
-	if err := h.Close(context.Background(), "formal_text"); err != nil { t.Fatal(err) }
+	if err := h.Close(context.Background(), "formal_text"); err != nil {
+		t.Fatal(err)
+	}
 	// Main rendering is independent: it can finish before the provider does.
 	mainRendered := make(chan struct{})
 	close(mainRendered)
-	select { case <-mainRendered: default: t.Fatal("main blocked on sidecar") }
-	if capacity.releases.Load() != 0 { t.Fatal("capacity released before actual provider completion") }
+	select {
+	case <-mainRendered:
+	default:
+		t.Fatal("main blocked on sidecar")
+	}
+	if capacity.releases.Load() != 0 {
+		t.Fatal("capacity released before actual provider completion")
+	}
 	close(unblock)
 	out := awaitOutcome(t, h)
-	if out.Status != "canceled" || len(s.pieces) != 0 { t.Fatalf("late ack leaked: %+v %+v", out, s.pieces) }
+	if out.Status != "canceled" || len(s.pieces) != 0 {
+		t.Fatalf("late ack leaked: %+v %+v", out, s.pieces)
+	}
 }
 
 type blockedClaim struct {
@@ -198,24 +234,44 @@ func TestFormalBeforeClaimAndEpisodeReplayDoNotGenerate(t *testing.T) {
 		return Result{Text: "I will consider that.", Phase: in.Phase}, nil
 	})
 	in := fixtureInput()
-	if err := s.Close(context.Background(), in.Ticket, "formal_text"); err != nil { t.Fatal(err) }
+	if err := s.Close(context.Background(), in.Ticket, "formal_text"); err != nil {
+		t.Fatal(err)
+	}
 	h, err := c.Start(context.Background(), in)
-	if err != nil { t.Fatal(err) }
-	if got := awaitOutcome(t, h); got.Status != "not_claimed" { t.Fatal(got) }
-	if generated.Load() != 0 { t.Fatal("generation started after close") }
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := awaitOutcome(t, h); got.Status != "not_claimed" {
+		t.Fatal(got)
+	}
+	if generated.Load() != 0 {
+		t.Fatal("generation started after close")
+	}
 	// A different invocation in a single episode is still one natural ack.
 	in.Ticket.EpisodeID = "another-episode"
 	for i := range 2 {
-		if i == 1 { in.Ticket.InvocationID = "followup" }
+		if i == 1 {
+			in.Ticket.InvocationID = "followup"
+		}
 		h, err := c.Start(context.Background(), in)
-		if err != nil { t.Fatal(err) }
+		if err != nil {
+			t.Fatal(err)
+		}
 		awaitOutcome(t, h)
 	}
-	if generated.Load() != 1 || len(s.pieces) != 1 { t.Fatal("episode produced redundant acknowledgements") }
+	if generated.Load() != 1 || len(s.pieces) != 1 {
+		t.Fatal("episode produced redundant acknowledgements")
+	}
 }
 
 func TestFailureCapacityAndWrongPhaseNeverPublishOrRetry(t *testing.T) {
-	for _, tc := range []struct{ name string; deny bool; result Result; err error; want string }{
+	for _, tc := range []struct {
+		name   string
+		deny   bool
+		result Result
+		err    error
+		want   string
+	}{
 		{"provider", false, Result{}, errors.New("synthetic provider failure"), "generation_failed"},
 		{"capacity", true, Result{}, nil, "capacity_unavailable"},
 		{"phase", false, Result{Text: "Already executing.", Phase: Thinking}, nil, "invalid_output"},
@@ -226,9 +282,15 @@ func TestFailureCapacityAndWrongPhaseNeverPublishOrRetry(t *testing.T) {
 			var calls atomic.Int32
 			c := fixtureCoordinator(s, capacity, func(context.Context, Input, Limits) (Result, error) { calls.Add(1); return tc.result, tc.err })
 			h, err := c.Start(context.Background(), fixtureInput())
-			if err != nil { t.Fatal(err) }
-			if got := awaitOutcome(t, h); got.Status != tc.want { t.Fatalf("got %+v", got) }
-			if len(s.pieces) != 0 || calls.Load() > 1 { t.Fatal("invalid publication or automatic retry") }
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := awaitOutcome(t, h); got.Status != tc.want {
+				t.Fatalf("got %+v", got)
+			}
+			if len(s.pieces) != 0 || calls.Load() > 1 {
+				t.Fatal("invalid publication or automatic retry")
+			}
 		})
 	}
 }

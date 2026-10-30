@@ -27,6 +27,7 @@ type Scope struct {
 // track edits, newer inputs and ownership loss, independently of cancellation.
 type Ticket struct {
 	Scope        Scope
+	RunID        string
 	InvocationID string
 	EpisodeID    string
 	Generation   string
@@ -108,6 +109,7 @@ type Generator interface {
 //   - Close records invalidation even if generation/Claim has not started yet.
 //   - Publish atomically rechecks those conditions and formal/terminal state,
 //     and records typed progress plus its deduplication receipt at most once.
+//
 // Formal output must invalidate in that same host-owned serialization domain.
 // A browser map or an in-memory implementation is insufficient for production.
 type Claims interface {
@@ -138,6 +140,7 @@ type Outcome struct {
 	Decision Decision
 	Status   string
 	Usage    Usage
+	Piece    *Piece
 	Err      error
 }
 
@@ -243,6 +246,7 @@ func (c Coordinator) run(ctx context.Context, in Input) Outcome {
 		return out
 	}
 	out.Status = "published"
+	out.Piece = &piece
 	return out
 }
 

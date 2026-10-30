@@ -16,9 +16,9 @@ func TestContinuityUsesStateInsteadOfAClockAlone(t *testing.T) {
 	now := time.Unix(20000, 0)
 	policy := ContinuityPolicy{IdleAfter: 3 * time.Second, IdleStartsEpisode: true}
 	for _, tc := range []struct {
-		name string
+		name  string
 		facts Facts
-		want Temperature
+		want  Temperature
 	}{
 		{"first", Facts{Admitted: true, FirstDirectInput: true}, Cold},
 		{"reply across idle", Facts{Admitted: true, PendingUserInput: true, Now: now, LastDirectInput: now.Add(-time.Hour)}, Hot},
@@ -62,13 +62,13 @@ func TestOnlyTrustedDirectSourceIsEligible(t *testing.T) {
 
 func TestThinkingPrefersOffThenLowWithoutModelNames(t *testing.T) {
 	for _, tc := range []struct {
-		name string
-		mode string
-		levels []string
-		off string
+		name     string
+		mode     string
+		levels   []string
+		off      string
 		verified bool
-		want string
-		usable bool
+		want     string
+		usable   bool
 	}{
 		{"off before low", reasoning.ModeToggle, []string{reasoning.EffortDisable, "low", "high"}, reasoning.OffSupportAccepted, true, reasoning.EffortDisable, true},
 		{"low before other tiers", reasoning.ModeToggle, []string{"minimal", "low", "high"}, reasoning.OffSupportRejected, true, "low", true},

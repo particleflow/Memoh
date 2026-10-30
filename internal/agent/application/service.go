@@ -108,6 +108,7 @@ type compactionRunner interface {
 
 // Service orchestrates chat with the internal agent.
 type Service struct {
+	conversationPresence    *conversationPresenceRuntime
 	activeTurns             activeTurnTracker
 	resumeSecret            string
 	resumeScopes            SessionResumeScopeProvider
@@ -410,6 +411,7 @@ func (s *Service) InlineImageAttachments(ctx context.Context, botID string, refs
 }
 
 type resolvedContext struct {
+	presence                    *presenceResolvedModel
 	runConfig                   native.RunConfig
 	model                       models.GetResponse
 	provider                    sqlc.Provider
@@ -499,7 +501,10 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	}
 	req = s.applySubagentThreadDefaults(ctx, req, sessionPrefModelID != "")
 
+	var presenceModel *presenceResolvedModel
+	modelHook := s.presenceModelHook(req, &presenceModel)
 	runCfg, chatModel, provider, err := s.buildBaseRunConfig(ctx, baseRunConfigParams{
+		ModelConfigHook:    modelHook,
 		BotID:              req.BotID,
 		ChatID:             req.ChatID,
 		SessionID:          req.ThreadID,
@@ -787,6 +792,7 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	}
 
 	return resolvedContext{
+		presence:                    presenceModel,
 		runConfig:                   runCfg,
 		model:                       chatModel,
 		provider:                    provider,
@@ -904,6 +910,7 @@ func (s *Service) Chat(ctx context.Context, req ChatRequest) (ChatResponse, erro
 // baseRunConfigParams holds parameters for buildBaseRunConfig that differ
 // between chat and discuss callers.
 type baseRunConfigParams struct {
+	ModelConfigHook   func(models.GetResponse, sqlc.Provider, models.SDKModelConfig) models.SDKModelConfig
 	BotID             string
 	ChatID            string
 	SessionID         string
@@ -971,7 +978,7 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 	if modelHTTPClient == nil {
 		modelHTTPClient = s.streamHTTPClient
 	}
-	sdkModel := models.NewSDKChatModel(models.SDKModelConfig{
+	sdkConfig := models.SDKModelConfig{
 		ModelID:               chatModel.ModelID,
 		ClientType:            provider.ClientType,
 		APIKey:                creds.APIKey,
@@ -987,7 +994,11 @@ func (s *Service) buildBaseRunConfig(ctx context.Context, p baseRunConfigParams)
 		ThinkingBudgetMax:     chatModel.Config.ThinkingBudgetMax,
 		ContextWindow:         contextBudgetFromChatModel(chatModel),
 		MaxOutputTokens:       chatModel.Config.MaxOutputTokensLimit(),
-	})
+	}
+	if p.ModelConfigHook != nil {
+		sdkConfig = p.ModelConfigHook(chatModel, provider, sdkConfig)
+	}
+	sdkModel := models.NewSDKChatModel(sdkConfig)
 
 	var agentSkills []native.SkillEntry
 	if s.skillLoader != nil {

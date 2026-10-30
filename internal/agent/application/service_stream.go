@@ -741,6 +741,7 @@ func (s *Service) streamChatWSResultWithHooks(
 	cfg = pauseIdleDuringBudgetRecovery(cfg, idleCancel)
 
 	agentEventCh := s.agent.Stream(idleCtx, cfg)
+	agentEventCh = s.withConversationPresence(idleCtx, req, rc, agentEventCh)
 	modelID := rc.model.ID
 	stored := false
 	clientGone := false
@@ -756,7 +757,9 @@ func (s *Service) streamChatWSResultWithHooks(
 	failureRecorded := false
 	for event := range agentEventCh {
 		event = publicRuntimeNotice(event)
-		idleCancel.Observe(event)
+		if !isConversationPresenceEvent(event) {
+			idleCancel.Observe(event)
+		}
 
 		// Track tool calls for adaptive idle timeout
 		if event.Type == native.EventToolCallStart {
