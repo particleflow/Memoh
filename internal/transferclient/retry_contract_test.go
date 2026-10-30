@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -21,7 +22,7 @@ func TestRetryContractServerDeadline(t *testing.T) {
 	for _, header := range []string{"3600", time.Now().UTC().Add(time.Hour).Format(http.TimeFormat), "Wed, 01 Jan 3000 00:00:00 GMT"} {
 		t.Run(header, func(t *testing.T) {
 			now := time.Now().UTC()
-			resp := &http.Response{StatusCode: 429, Header: http.Header{"Retry-After": {header}}}
+			resp := &http.Response{StatusCode: http.StatusTooManyRequests, Header: http.Header{"Retry-After": {header}}}
 			j := newJob([]byte("original"))
 			err := statusError(resp)
 			if e := fail(&j, err, now, func(Job) error { return nil }); e != nil {
@@ -40,7 +41,11 @@ func TestRetryContractServerDeadline(t *testing.T) {
 
 func retryChildInspect(t *testing.T, path string) QueueStatus {
 	t.Helper()
-	cmd := exec.Command(os.Args[0], "-test.run=^TestRetryContractInspectChild$")
+	self, err := os.Executable()
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(self, "-test.run=^TestRetryContractInspectChild$")
 	cmd.Env = append(os.Environ(), "MEMOH_RETRY_INSPECT_QUEUE="+path)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -52,6 +57,7 @@ func retryChildInspect(t *testing.T, path string) QueueStatus {
 	}
 	return r
 }
+
 func TestRetryContractInspectChild(t *testing.T) {
 	path := os.Getenv("MEMOH_RETRY_INSPECT_QUEUE")
 	if path == "" {
@@ -112,7 +118,7 @@ func TestRetryContractAssociationUnknownSurvivesFailuresAndRestart(t *testing.T)
 	commits, resolves := 0, 0
 	binding := &AssociationBinding{Commit: func(context.Context, string, Reference, io.Reader) error {
 		commits++
-		return statusError(&http.Response{StatusCode: 429, Header: http.Header{"Retry-After": {"3600"}}})
+		return statusError(&http.Response{StatusCode: http.StatusTooManyRequests, Header: http.Header{"Retry-After": {"3600"}}})
 	}, Resolve: func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
 		resolves++
 		return "", &HTTPError{Status: 503, RetryAfter: time.Hour}
@@ -283,7 +289,7 @@ func TestRetryContractHTTPDeadlinePersists(t *testing.T) {
 func TestRetryContractCounterAndHeaderRepresentation(t *testing.T) {
 	now := time.Date(2026, 10, 30, 0, 0, 0, 0, time.UTC)
 	for _, raw := range []string{"18446744073709551616", "9999999999999999999999999999999999999", "9223372036854775807"} {
-		resp := &http.Response{StatusCode: 503, Header: http.Header{"Retry-After": {raw}}}
+		resp := &http.Response{StatusCode: http.StatusServiceUnavailable, Header: http.Header{"Retry-After": {raw}}}
 		err := statusErrorAt(resp, now)
 		if !errors.Is(err, ErrProtocol) {
 			t.Fatal("unrepresentable deadline accepted", raw, err)
@@ -295,7 +301,7 @@ func TestRetryContractCounterAndHeaderRepresentation(t *testing.T) {
 		if j.Phase != "blocked" || j.ErrorCode != "protocol" || !j.NextAttempt.IsZero() {
 			t.Fatal("invalid header permits earlier retry")
 		}
-		resp.StatusCode = 403
+		resp.StatusCode = http.StatusForbidden
 		if transientAssociation(statusErrorAt(resp, now)) {
 			t.Fatal("invalid deadline hid permission refusal")
 		}
@@ -307,10 +313,22 @@ func TestRetryContractCounterAndHeaderRepresentation(t *testing.T) {
 		}
 	}
 	for _, raw := range []string{"", "invalid", "-1", "0", "Fri, 30 Oct 2026 00:00:00 GMT"} {
-		h, ok := statusErrorAt(&http.Response{StatusCode: 503, Header: http.Header{"Retry-After": {raw}}}, now).(*HTTPError)
-		if !ok || h.RetryAfter != 0 {
+		var h *HTTPError
+		err := statusErrorAt(&http.Response{StatusCode: http.StatusServiceUnavailable, Header: http.Header{"Retry-After": {raw}}}, now)
+		if !errors.As(err, &h) || h.RetryAfter != 0 {
 			t.Fatal("absent/past/invalid header cannot add a deadline", raw)
 		}
+	}
+	last := time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC)
+	seconds := last.Unix() - now.Unix()
+	var latest *HTTPError
+	err := statusErrorAt(&http.Response{StatusCode: http.StatusTooManyRequests, Header: http.Header{"Retry-After": {strconv.FormatInt(seconds, 10)}}}, now)
+	if !errors.As(err, &latest) || !latest.RetryAt.Equal(last) {
+		t.Fatal("representable deadline was shortened or refused", err)
+	}
+	err = statusErrorAt(&http.Response{StatusCode: http.StatusTooManyRequests, Header: http.Header{"Retry-After": {strconv.FormatInt(seconds+1, 10)}}}, now)
+	if !errors.Is(err, ErrProtocol) {
+		t.Fatal("deadline beyond journal representation accepted", err)
 	}
 	n := int(^uint(0) >> 1)
 	if incrementAttempts(n) != n || incrementAttempts(n-1) != n {
@@ -341,7 +359,7 @@ func TestRetryContractDownloadCounterAndAssociationClock(t *testing.T) {
 		}
 		if failures {
 			w.Header().Set("Retry-After", "3600")
-			w.WriteHeader(503)
+			w.WriteHeader(http.StatusServiceUnavailable)
 			return
 		}
 		w.Header().Set("ETag", `"`+digest(data)+`"`)

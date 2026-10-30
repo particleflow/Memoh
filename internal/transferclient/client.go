@@ -228,14 +228,14 @@ func statusErrorAt(resp *http.Response, now time.Time) error {
 		}
 	}
 	if numeric {
-		seconds, err := strconv.ParseUint(raw, 10, 64)
+		seconds, err := strconv.ParseInt(raw, 10, 64)
 		// Queue timestamps use JSON time.Time (years 1..9999). An unrepresentable
 		// server deadline is a protocol refusal, never permission to retry earlier.
 		last := time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC).Unix()
-		if err != nil || now.Unix() > last || seconds > uint64(last-now.Unix()) {
+		if err != nil || now.Unix() > last || seconds > last-now.Unix() {
 			return ErrProtocol
 		}
-		h.RetryAt = time.Unix(now.Unix()+int64(seconds), int64(now.Nanosecond())).UTC()
+		h.RetryAt = time.Unix(now.Unix()+seconds, int64(now.Nanosecond())).UTC()
 	} else if date, err := http.ParseTime(raw); err == nil {
 		h.RetryAt = date.UTC()
 	}
