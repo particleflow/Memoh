@@ -45,7 +45,7 @@ func retryChildInspect(t *testing.T, path string) QueueStatus {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command(self, "-test.run=^TestRetryContractInspectChild$") //nolint:gosec // G204: OS-resolved current test executable, fixed child selector, no shell or caller-controlled program/arguments.
+	cmd := exec.CommandContext(t.Context(), self, "-test.run=^TestRetryContractInspectChild$") //nolint:gosec // G204: OS-resolved current test executable, fixed child selector, no shell or caller-controlled program/arguments.
 	cmd.Env = append(os.Environ(), "MEMOH_RETRY_INSPECT_QUEUE="+path)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
