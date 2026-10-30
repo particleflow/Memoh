@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/labstack/echo/v4"
@@ -81,6 +82,15 @@ func (h *SessionHandler) GetSessionInvocation(c echo.Context) error {
 	invocationID, err := httpx.RequiredParam(c, "invocation_id")
 	if err != nil {
 		return err
+	}
+	// Echo routes RawPath when present; otherwise Param already comes from the
+	// decoded URL.Path. Decode only the former, exactly once, so literal percent
+	// sequences and plus signs remain part of the opaque invocation identity.
+	if c.Request().URL.RawPath != "" {
+		invocationID, err = url.PathUnescape(invocationID)
+		if err != nil {
+			return apperror.FieldInvalid("invocation_id", err)
+		}
 	}
 	// Same gate as reading the session itself, so a caller who cannot read
 	// the session learns nothing more here than from GetSession.
