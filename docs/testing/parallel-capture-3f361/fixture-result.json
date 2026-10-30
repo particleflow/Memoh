@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "paid_calls": 0,
+  "production_requests": 0,
+  "observer_business_posts": 0,
+  "fixture_browser": "Chromium",
+  "fixture_explicit_post_calls": 3,
+  "fixture_server_post_receipts": 4,
+  "cases": [
+    "pre-A WebSocket identity",
+    "tool frame without invocation retained",
+    "old unrelated turn excluded",
+    "delayed split 202 versus earlier unrelated 409",
+    "exact queue-to-run/turn mapping",
+    "persisted B then worker-running causal chain",
+    "changed worker identity rejected",
+    "worker completed produces no overlap",
+    "403 blocks affected GET",
+    "transport failure retained unknown",
+    "stop drains partial response",
+    "credential and address redaction",
+    "lost queue response remains unknown without resend"
+  ],
+  "event_count": 108
+}
