@@ -1,0 +1,30 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/memoh-readonly-task-directory
+
+stderr | src/pages/home/components/chat-pane-task-directory.test.ts > opens the recipient directory from a read-only task without mounting an input or resolving contact
+[Vue warn]: Component "BotTaskDirectory" has already been registered in target app.
+
+ ❯ |web| src/pages/home/components/chat-pane-task-directory.test.ts (2 tests | 1 failed) 41ms
+   × opens the recipient directory from a read-only task without mounting an input or resolving contact 36ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/components/chat-pane-task-directory.test.ts > opens the recipient directory from a read-only task without mounting an input or resolving contact
+AssertionError: the given combination of arguments (undefined and string) is invalid for this assertion. You can use an array, a map, an object, a set, a string, or a weakset instead of a string
+ ❯ src/pages/home/components/chat-pane-task-directory.test.ts:51:32
+     49|   expect(api.list).not.toHaveBeenCalled()
+     50|   const trigger = root.querySelector<HTMLButtonElement>('button')!
+     51|   expect(trigger?.textContent).toContain(en.chat.tasks.title)
+       |                                ^
+     52|   trigger.click(); await settle()
+     53|   expect(api.list.mock.calls[0]![0].path).toEqual({ bot_id: 'recipient…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 1 passed (2)
+   Start at  07:56:59
+   Duration  8.77s (transform 6.11s, setup 0ms, import 7.95s, tests 41ms, environment 625ms)
+

@@ -1,0 +1,15 @@
+{
+  "harmony_source": "fcc39b31b1db11e7a9d7396e34c94d5b3301a778",
+  "web_base": "2c0e277c2cb49b5a4a99b89a5e568ef9f413ab8a",
+  "path": "apps/web/src/pages/home/components/chat-pane.vue",
+  "official_lifetime_applied": true,
+  "before_sha256": "694baf4e9a60793424c804108caa16c83cd23d246a31c4e572ae555282c5e682",
+  "after_sha256": "94e78e28a276d1443242ceb3eb3878ac320077d35be651a2fd89656f77222939",
+  "web_after_sha256": "654d8c3c869386d19cca10f3b019edc111b85259a81c9983fba8581bd5d6ee72",
+  "inserted_lines": 10,
+  "API_changes": false,
+  "HAP_built": false,
+  "phone_accepted": false,
+  "product_commit": "3da802de31f9aede3dbe1124319942d9015abdac",
+  "native_integration": "Apply the incremental patch to the final HAP34 composer after official lifetime adaptation; update the original owner mapping/lock to these hashes. Preserve other native adaptations. No package was built."
+}

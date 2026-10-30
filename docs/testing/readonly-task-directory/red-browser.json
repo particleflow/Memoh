@@ -1,0 +1,256 @@
+{
+  "mode": "red",
+  "initial_url": "http://127.0.0.1:49955/bot/nav-fixture-recipient?session=19297d6f-2e53-41d5-83d1-911db3ca5b00",
+  "visible_task_triggers": 0,
+  "visible_inputs": 0,
+  "api_calls": [
+    {
+      "method": "GET",
+      "path": "/api/users/me",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/19297d6f-2e53-41d5-83d1-911db3ca5b00",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/me",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/workdirs",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/container",
+      "query": "",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/settings",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/media/limits",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions",
+      "query": "types=chat%2Cdiscuss%2Cacp_agent%2Cschedule&hide_schedule_runs=true&limit=50",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/events",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/contact",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/messages",
+      "query": "session_id=faa9d84e-ff10-4f47-903a-dfcef5ac50c0&limit=30",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/ping",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/users/me",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/acp/profiles",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/19297d6f-2e53-41d5-83d1-911db3ca5b00",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/agents",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/settings",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/skills/catalog",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/models",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/messages",
+      "query": "session_id=19297d6f-2e53-41d5-83d1-911db3ca5b00&limit=30",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/workspace-targets",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/providers",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/19297d6f-2e53-41d5-83d1-911db3ca5b00/status",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/19297d6f-2e53-41d5-83d1-911db3ca5b00",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/media/limits",
+      "query": "",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/messages",
+      "query": "session_id=19297d6f-2e53-41d5-83d1-911db3ca5b00&limit=30",
+      "status": 200
+    }
+  ],
+  "blocked_write_attempts": [],
+  "startup_existing_contact_admissions": [
+    {
+      "method": "POST",
+      "url": "http://127.0.0.1:49955/api/bots/a0fe0a8b-5d49-40c9-affe-50f3d1e51f70/sessions/contact"
+    }
+  ],
+  "page_errors": [],
+  "startup_before": {
+    "bots": {
+      "count": 2,
+      "hash": "1897524fd69907e2f9a29657140a84c2"
+    },
+    "bot_sessions": {
+      "count": 3,
+      "hash": "7f9f056e0748d682f360f32056975c5e"
+    },
+    "session_runs": {
+      "count": 1,
+      "hash": "62ea1741fd8e16cc91f0449538bb83b2"
+    },
+    "bot_history_messages": {
+      "count": 2,
+      "hash": "faf23bc1bfa41cbd6d735d768a99cbe5"
+    },
+    "bot_delegations": {
+      "count": 1,
+      "hash": "21dc2a892091ec5853c55fe113b63480"
+    }
+  },
+  "before": {
+    "bots": {
+      "count": 2,
+      "hash": "1897524fd69907e2f9a29657140a84c2"
+    },
+    "bot_sessions": {
+      "count": 3,
+      "hash": "7f9f056e0748d682f360f32056975c5e"
+    },
+    "session_runs": {
+      "count": 1,
+      "hash": "62ea1741fd8e16cc91f0449538bb83b2"
+    },
+    "bot_history_messages": {
+      "count": 2,
+      "hash": "faf23bc1bfa41cbd6d735d768a99cbe5"
+    },
+    "bot_delegations": {
+      "count": 1,
+      "hash": "21dc2a892091ec5853c55fe113b63480"
+    }
+  },
+  "after": {
+    "bots": {
+      "count": 2,
+      "hash": "1897524fd69907e2f9a29657140a84c2"
+    },
+    "bot_sessions": {
+      "count": 3,
+      "hash": "7f9f056e0748d682f360f32056975c5e"
+    },
+    "session_runs": {
+      "count": 1,
+      "hash": "62ea1741fd8e16cc91f0449538bb83b2"
+    },
+    "bot_history_messages": {
+      "count": 2,
+      "hash": "faf23bc1bfa41cbd6d735d768a99cbe5"
+    },
+    "bot_delegations": {
+      "count": 1,
+      "hash": "21dc2a892091ec5853c55fe113b63480"
+    }
+  }
+}

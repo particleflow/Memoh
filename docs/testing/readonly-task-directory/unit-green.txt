@@ -1,0 +1,10 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/memoh-readonly-task-directory
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed (2)
+   Start at  08:08:00
+   Duration  10.88s (transform 7.37s, setup 0ms, import 9.81s, tests 396ms, environment 463ms)
+
