@@ -138,6 +138,7 @@ type Receipt struct {
 type HTTPError struct {
 	Status     int
 	RetryAfter time.Duration
+	RetryAt    time.Time // Exact server deadline, including dates beyond a Duration.
 }
 
 // Memoh's error catalog and HTTP boundary use 499 for caller cancellation.
@@ -209,19 +210,39 @@ func (c *Client) request(ctx context.Context, method, path string, body []byte, 
 }
 
 func statusError(resp *http.Response) error {
-	retry := time.Duration(0)
-	if seconds, err := strconv.Atoi(resp.Header.Get("Retry-After")); err == nil && seconds > 0 {
-		retry = time.Duration(min(seconds, 300)) * time.Second
-	} else if date, err := http.ParseTime(resp.Header.Get("Retry-After")); err == nil {
-		retry = time.Until(date)
+	return statusErrorAt(resp, time.Now())
+}
+
+func statusErrorAt(resp *http.Response, now time.Time) error {
+	h := &HTTPError{Status: resp.StatusCode}
+	// Permission refusals take precedence even over an invalid retry header.
+	if h.Status == http.StatusUnauthorized || h.Status == http.StatusForbidden {
+		return h
 	}
-	if retry < 0 {
-		retry = 0
+	raw := strings.TrimSpace(resp.Header.Get("Retry-After"))
+	numeric := raw != ""
+	for _, c := range raw {
+		if c < '0' || c > '9' {
+			numeric = false
+			break
+		}
 	}
-	if retry > 5*time.Minute {
-		retry = 5 * time.Minute
+	if numeric {
+		seconds, err := strconv.ParseUint(raw, 10, 64)
+		// Queue timestamps use JSON time.Time (years 1..9999). An unrepresentable
+		// server deadline is a protocol refusal, never permission to retry earlier.
+		last := time.Date(9999, 12, 31, 23, 59, 59, 0, time.UTC).Unix()
+		if err != nil || now.Unix() > last || seconds > uint64(last-now.Unix()) {
+			return ErrProtocol
+		}
+		h.RetryAt = time.Unix(now.Unix()+int64(seconds), int64(now.Nanosecond())).UTC()
+	} else if date, err := http.ParseTime(raw); err == nil {
+		h.RetryAt = date.UTC()
 	}
-	return &HTTPError{Status: resp.StatusCode, RetryAfter: retry}
+	if h.RetryAt.After(now) {
+		h.RetryAfter = h.RetryAt.Sub(now)
+	}
+	return h
 }
 
 func (c *Client) json(ctx context.Context, method, path string, body []byte, headers http.Header, want int, out any) error {

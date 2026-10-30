@@ -1,0 +1,57 @@
+{
+  "base_commit": "212ae2445fe7a5fbe95479a4f2024069bf83332b",
+  "audit_v1_sha256": "6bf9e33515720f5b0f01aecd6ad67ab83e929dbd7c6aec36462a8b5a0dfd20c8",
+  "source_sha256": {
+    "internal/transferclient/client.go": "accf74bb4fb931e4e65414d7ca3e26e117792eb662794bf70728d0a61033b60f",
+    "internal/transferclient/association.go": "943f0347186a2e67dee331d90fed0cc40811438a64338a71eb3a27bc453a0dac",
+    "internal/transferclient/retry_contract_test.go": "025fcb8612e575fab7006152d8393d8e0b8a2824bf7f89ffd26c4ff024aa0c85",
+    "internal/transferclient/queue.go": "05fb7ac363c4579d0a22e6574c88b3f73e03f12b87bba7009ef4316f24edc0c3",
+    "internal/transferclient/durable.go": "c79b64cddc0799a6a7af8685f8044f0e1c0540acbabbc27ba4467e1c1444b401",
+    "internal/transferclient/retry.go": "9b5ffb005d09d2a63ee24c0c1131548042cb8a4456c4b314c021b08f14feaa42",
+    "internal/transferclient/host_queue.go": "54f2b498a6e25f057e97517a1d2f2a215c7f5ce25c02c4b42292f613ed3223f3"
+  },
+  "evidence_sha256": {
+    "red-test-source.go.txt": "6a9882433e8bea6189b6679273686779a69b2fef4c511d3b73e9f58ac5fcb3d1",
+    "red.txt": "df15a8ea0df26f97b2f492a6ac5940100101e68d1c4f03be8e95638ca17c2fda",
+    "green-incremental.txt": "76aa55fa314072fed96d5b1cd8542c5f5b96a0e8995d1e8c95d842722e99088e",
+    "green-targeted.txt": "325ee0e672d97dc390590e27a1a95e642f820890874f65c52c40807b02dbf9e2",
+    "green-legacy.txt": "c0e5e9a4e88b43ab1facf481202c988ff2ba23ee76dc268b03a25cf29138b5c0"
+  },
+  "environment": "Linux isolated local TLS and durable filesystem; cached Go1.25.7, offline modules",
+  "results": {
+    "baseline_red_exit": 1,
+    "green_targeted_exit": 0,
+    "green_incremental_exit": 0,
+    "green_legacy_exit": 0,
+    "upload_bytes": 32,
+    "upload_sha256": "16231252a03f3d5df8678c98e1fab3356124a9128b24165f669e33f4c091713d",
+    "upload_create": 1,
+    "upload_consecutive_failures": 15,
+    "download_bytes": 43,
+    "download_sha256": "28c70ab1474324df940bba2399cbb475c01735f4c97f68ff7dc681f4dc150e8a",
+    "association_commit": 1,
+    "association_resolve_including_success": 16,
+    "delta_retry_after_seconds": 3600,
+    "absolute_http_date": "3000-01-01T00:00:00Z",
+    "independent_journal_child_readback": true,
+    "child_executed_transfer": false
+  },
+  "limitations": [
+    "synthetic injected association binding, no new PG ledger run",
+    "no Windows/NTFS/UNC/phone/NAS field run",
+    "no real UI/screenshot or production build/deploy/pin change",
+    "old readers reject >12 counters; records must not be rewritten or deleted"
+  ],
+  "commands": {
+    "red": "go test -v -mod=readonly ./internal/transferclient -run '^TestRetryContract' -count=1 -timeout=90s",
+    "green_targeted": "go test -v -mod=readonly ./internal/transferclient -run '^TestRetryContract|^TestRetryAuthorizationExpiryAndSourceChange/quota$|^TestCreateQuotaRejectionCanRetryButUnknownCannot$|^TestHTTP499RetryIsScheduledAndAuthorizationStaysBlocked$|^TestHTTP499AssociationReopenCancelAndAuthorization$|^TestAssociationReviewTransientFailuresRemainReconcilable$|^TestDiskQueueCancelUnknownAndRevokedAssociation/budget$' -count=1 -timeout=90s",
+    "green_incremental": "go test -v -mod=readonly ./internal/transferclient -run '^TestRetryContractAssociationUnknownSurvivesFailuresAndRestart$|^TestRetryContractDownloadCounterAndAssociationClock$' -count=1 -timeout=90s",
+    "green_legacy": "go test -v -mod=readonly ./internal/transferclient -run '^TestRetryContractLegacyAssociationPauseIsExplicit$' -count=1 -timeout=30s"
+  },
+  "offline_env": {
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "GOTOOLCHAIN": "local",
+    "GOTELEMETRY": "off"
+  }
+}

@@ -144,7 +144,7 @@ func TestAssociationReviewAbsentQueryDoesNotErasePendingCommit(t *testing.T) {
 	}
 }
 
-func TestAssociationReviewRetryPauseCanBeReconciled(t *testing.T) {
+func TestAssociationReviewTransientFailuresRemainReconcilable(t *testing.T) {
 	q, c := readyAssociationQueue(t, t.TempDir())
 	calls := 0
 	binding := &AssociationBinding{Commit: func(context.Context, string, Reference, io.Reader) error { calls++; return context.DeadlineExceeded }, Resolve: func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
@@ -155,8 +155,8 @@ func TestAssociationReviewRetryPauseCanBeReconciled(t *testing.T) {
 		runQueue(t, q, c, binding)
 	}
 	r := inspectQueue(t, q, "delivery-1")
-	if calls != 12 || !r.AssociationBlocked || r.AssociationState != AssociationUnknown {
-		t.Fatal("retry budget discarded unknown outcome", calls)
+	if calls != 14 || r.AssociationBlocked || r.AssociationState != AssociationUnknown {
+		t.Fatal("transient failures discarded unknown outcome", calls)
 	}
 	binding.Resolve = func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
 		return OutcomeCommitted, nil

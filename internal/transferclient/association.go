@@ -69,9 +69,9 @@ func (q *DiskQueue) waitAssociation(f *os.File, r QueueStatus, err error, now ti
 		r.AssociationDue = now.Add(maxRetryDelay)
 		return q.save(f, r)
 	}
-	r.AssociationBlocked = !transientAssociation(err) || r.AssociationAttempts >= 12
+	r.AssociationBlocked = !transientAssociation(err)
 	if !r.AssociationBlocked {
-		r.AssociationDue = now.Add(min(time.Second*time.Duration(1<<r.AssociationAttempts), maxRetryDelay))
+		r.AssociationDue = retryDue(now, r.AssociationAttempts, err)
 	}
 	return q.save(f, r)
 }
@@ -96,12 +96,11 @@ func (q *DiskQueue) finishAssociation(f *os.File, r QueueStatus, outcome Associa
 }
 
 func (q *DiskQueue) resolveAssociation(ctx context.Context, f *os.File, r QueueStatus, binding *AssociationBinding, now time.Time) error {
-	if r.AssociationAttempts >= 12 {
-		r.AssociationBlocked = true
-		return q.save(f, r)
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	r.AssociationState = AssociationUnknown
-	r.AssociationAttempts++
+	r.AssociationAttempts = incrementAttempts(r.AssociationAttempts)
 	if err := q.save(f, r); err != nil {
 		return err
 	}
@@ -125,12 +124,11 @@ func (q *DiskQueue) resolveAssociation(ctx context.Context, f *os.File, r QueueS
 }
 
 func (q *DiskQueue) commitAssociation(ctx context.Context, f *os.File, r QueueStatus, binding *AssociationBinding, content io.Reader, now time.Time) error {
-	if r.AssociationAttempts >= 12 {
-		r.AssociationBlocked = true
-		return q.save(f, r)
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	r.AssociationState = AssociationInFlight
-	r.AssociationAttempts++
+	r.AssociationAttempts = incrementAttempts(r.AssociationAttempts)
 	if err := q.save(f, r); err != nil {
 		return err
 	}
@@ -141,8 +139,9 @@ func (q *DiskQueue) commitAssociation(ctx context.Context, f *os.File, r QueueSt
 	return q.finishAssociation(f, r, OutcomeCommitted)
 }
 
-// ResumeAssociation starts one new bounded reconciliation budget explicitly.
+// ResumeAssociation explicitly resumes a paused association.
 // It does not erase unknown outcomes or cancel intent, or confer authorization.
+// An existing server retry deadline remains a lower bound.
 func (q *DiskQueue) ResumeAssociation(id string) error {
 	if !validID(id) || id == "admission" {
 		return ErrInvalid
@@ -165,6 +164,5 @@ func (q *DiskQueue) ResumeAssociation(id string) error {
 	}
 	r.AssociationAttempts = 0
 	r.AssociationBlocked = false
-	r.AssociationDue = time.Time{}
 	return q.save(f, r)
 }

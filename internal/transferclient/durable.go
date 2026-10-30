@@ -468,7 +468,7 @@ func (q *DiskQueue) validRecord(r QueueStatus, id string) bool {
 			return false
 		}
 	}
-	return r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && r.AssociationAttempts <= 12 && associationStateValid(r.AssociationState)
+	return r.Job.valid() && r.Job.DeliveryID == id && r.Job.SnapshotID == id && r.Job.LocatorRevision == q.revision && (r.Direction == "upload" || r.Direction == "download") && (!r.Associated || r.Job.Phase == "ready") && r.AssociationAttempts >= 0 && associationStateValid(r.AssociationState)
 }
 
 func (q *DiskQueue) save(f *os.File, r QueueStatus) error {

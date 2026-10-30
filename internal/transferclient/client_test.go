@@ -306,8 +306,8 @@ func TestRetryAuthorizationExpiryAndSourceChange(t *testing.T) {
 				for range 12 {
 					advance(t, c, s, src)
 				}
-				if s.load().ErrorCode != "retry_budget" {
-					t.Fatal("unbounded retries")
+				if s.load().Phase != "uploading" || s.load().Attempts != 13 || s.load().NextAttempt.IsZero() {
+					t.Fatal("transient failure stopped recoverable transfer")
 				}
 			}
 			if f.count("PATCH /bots/bot-1/media/uploads/receipt-1") != 0 || f.count("POST /bots/bot-1/media/uploads") != 1 {

@@ -1,0 +1,227 @@
+//go:build linux || darwin
+
+package transferclient
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"io"
+	"net/http"
+	"os"
+	"os/exec"
+	"reflect"
+	"testing"
+	"time"
+)
+
+func TestRetryContractServerDeadline(t *testing.T) {
+	for _, header := range []string{"3600", time.Now().UTC().Add(time.Hour).Format(http.TimeFormat), "Wed, 01 Jan 3000 00:00:00 GMT"} {
+		t.Run(header, func(t *testing.T) {
+			now := time.Now().UTC()
+			resp := &http.Response{StatusCode: 429, Header: http.Header{"Retry-After": {header}}}
+			j := newJob([]byte("original"))
+			err := statusError(resp)
+			if e := fail(&j, err, now, func(Job) error { return nil }); e != nil {
+				t.Fatal(e)
+			}
+			want := now.Add(time.Hour - time.Second)
+			if header[0] == 'W' {
+				want = time.Date(3000, 1, 1, 0, 0, 0, 0, time.UTC)
+			}
+			if j.NextAttempt.Before(want) {
+				t.Fatalf("server deadline shortened: header=%s due=%s want>=%s", header, j.NextAttempt, want)
+			}
+		})
+	}
+}
+
+func retryChildInspect(t *testing.T, path string) QueueStatus {
+	t.Helper()
+	cmd := exec.Command(os.Args[0], "-test.run=^TestRetryContractInspectChild$")
+	cmd.Env = append(os.Environ(), "MEMOH_RETRY_INSPECT_QUEUE="+path)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("inspect child: %v %s", err, out)
+	}
+	var r QueueStatus
+	if err := json.Unmarshal(out, &r); err != nil {
+		t.Fatalf("child output: %v %s", err, out)
+	}
+	return r
+}
+func TestRetryContractInspectChild(t *testing.T) {
+	path := os.Getenv("MEMOH_RETRY_INSPECT_QUEUE")
+	if path == "" {
+		t.Skip("subprocess only")
+	}
+	q := openQueue(t, path, queueLimits())
+	r := inspectQueue(t, q, "delivery-1")
+	if err := json.NewEncoder(os.Stdout).Encode(r); err != nil {
+		t.Fatal(err)
+	}
+	_ = q.Close()
+	os.Exit(0)
+}
+
+func TestRetryContractTransferSurvivesFailuresAndRestart(t *testing.T) {
+	path := t.TempDir()
+	q := openQueue(t, path, queueLimits())
+	original, _ := admitSource(t, q, []byte("actual bytes under original hash"))
+	f, c := newFixture(t)
+	r := runQueue(t, q, c, nil)
+	receipt := r.Job.ReceiptID
+	f.setStatus(503)
+	for range 15 {
+		r = runQueue(t, q, c, nil)
+	}
+	if r.Job.Phase != "uploading" || r.Job.Attempts != 15 || !r.Job.NextAttempt.After(time.Now()) {
+		t.Fatalf("recoverable transfer terminated: %+v", r.Job)
+	}
+	if err := q.Close(); err != nil {
+		t.Fatal(err)
+	}
+	restored := retryChildInspect(t, path)
+	if !reflect.DeepEqual(r, restored) {
+		t.Fatal("child lost persisted retry/identity")
+	}
+	q = openQueue(t, path, queueLimits())
+	if err := q.RunOne(t.Context(), "delivery-1", c, nil, r.Job.NextAttempt.Add(-time.Nanosecond)); err != nil {
+		t.Fatal(err)
+	}
+	if f.count("GET /bots/bot-1/media/uploads/"+receipt) != 15 {
+		t.Fatal("early retry")
+	}
+	f.setStatus(0)
+	for n := 0; n < 20 && r.Job.Phase != "ready"; n++ {
+		r = runQueue(t, q, c, nil)
+	}
+	_, data := f.current()
+	if r.Job.Phase != "ready" || r.Job.ReceiptID != receipt || r.Job.DeliveryID != original.DeliveryID || r.Job.Spec != original.Spec || digest(data) != original.Spec.SHA256 || f.count("POST /bots/bot-1/media/uploads") != 1 {
+		t.Fatal("recovery changed receipt, identity, hash or Create count")
+	}
+	t.Logf("failures=15 child_inspection=true create=1 bytes=%d hash=%s", len(data), digest(data))
+}
+
+func TestRetryContractAssociationUnknownSurvivesFailuresAndRestart(t *testing.T) {
+	path := t.TempDir()
+	q, c := readyAssociationQueue(t, path)
+	original := inspectQueue(t, q, "delivery-1")
+	commits, resolves := 0, 0
+	binding := &AssociationBinding{Commit: func(context.Context, string, Reference, io.Reader) error { commits++; return ErrTransport }, Resolve: func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
+		resolves++
+		return "", &HTTPError{Status: 503, RetryAfter: time.Hour}
+	}}
+	r := runQueue(t, q, c, binding)
+	for range 15 {
+		r = runQueue(t, q, c, binding)
+	}
+	if r.AssociationBlocked || r.AssociationState != AssociationUnknown || r.AssociationAttempts != 16 || commits != 1 || resolves != 15 {
+		t.Fatalf("unknown stopped or recommitted: %+v commits=%d resolves=%d", r, commits, resolves)
+	}
+	if !r.AssociationDue.After(r.LastRun.Add(time.Hour - time.Second)) {
+		t.Fatal("association Retry-After shortened")
+	}
+	_ = q.Close()
+	restored := retryChildInspect(t, path)
+	if !reflect.DeepEqual(r, restored) {
+		t.Fatal("association journal changed on restart")
+	}
+	q = openQueue(t, path, queueLimits())
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	if err := q.RunOne(ctx, "delivery-1", c, binding, r.AssociationDue); !errors.Is(err, context.Canceled) {
+		t.Fatal("canceled action continued", err)
+	}
+	if after := inspectQueue(t, q, "delivery-1"); !reflect.DeepEqual(r, after) {
+		t.Fatal("canceled action altered journal")
+	}
+	if err := q.RequestCancel("delivery-1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := q.ResumeAssociation("delivery-1"); err != nil {
+		t.Fatal(err)
+	}
+	canceled := inspectQueue(t, q, "delivery-1")
+	if !canceled.AssociationDue.Equal(r.AssociationDue) {
+		t.Fatal("cancel/resume shortened server deadline")
+	}
+	if err := q.RunOne(t.Context(), "delivery-1", c, binding, r.AssociationDue.Add(-time.Nanosecond)); err != nil {
+		t.Fatal(err)
+	}
+	if resolves != 15 {
+		t.Fatal("early resolve after cancel/resume")
+	}
+	binding.Resolve = func(_ context.Context, _ string, ref Reference, cancel bool) (AssociationOutcome, error) {
+		resolves++
+		if !cancel || ref != *original.Job.Ready {
+			t.Fatal("immutable reference/cancel lost")
+		}
+		return OutcomeCommitted, nil
+	}
+	r = runQueue(t, q, c, binding)
+	if !r.Associated || r.AssociationState != AssociationCommitted || commits != 1 || resolves != 16 || r.Job.Spec != original.Job.Spec {
+		t.Fatal("existing result not reconciled")
+	}
+	t.Log("commit=1 resolve=16 failures=16 child_inspection=true cancel=true same_reference=true")
+}
+
+func TestRetryContractAssociationCommitAndAuthorization(t *testing.T) {
+	q, c := readyAssociationQueue(t, t.TempDir())
+	commits, resolves := 0, 0
+	binding := &AssociationBinding{Commit: func(context.Context, string, Reference, io.Reader) error { commits++; return ErrTransport }, Resolve: func(context.Context, string, Reference, bool) (AssociationOutcome, error) {
+		resolves++
+		return OutcomeAbsent, nil
+	}}
+	var r QueueStatus
+	for range 30 {
+		r = runQueue(t, q, c, binding)
+	}
+	if r.AssociationBlocked || commits != 15 || resolves != 15 || r.AssociationState != AssociationRetryCommit {
+		t.Fatalf("retry_commit was count-terminated: %+v %d/%d", r, commits, resolves)
+	}
+	denied := 0
+	binding.Commit = func(context.Context, string, Reference, io.Reader) error {
+		denied++
+		return &HTTPError{Status: 403, RetryAfter: time.Hour}
+	}
+	r = runQueue(t, q, c, binding)
+	if !r.AssociationBlocked || r.AssociationState != AssociationUnknown || r.Associated {
+		t.Fatal("authorization refusal lost unknown or retried")
+	}
+	for range 2 {
+		runQueue(t, q, c, binding)
+	}
+	if denied != 1 || commits != 15 || resolves != 15 {
+		t.Fatal("refusal retried")
+	}
+}
+
+func TestRetryContractLegacyBlockedUnknownAndCancel(t *testing.T) {
+	src := frozen("unchanged")
+	f, c := newFixture(t)
+	s := storeJob(t, newJob(src))
+	advance(t, c, s, src)
+	for _, phase := range []string{"blocked", "create_unknown"} {
+		j := s.load()
+		j.Phase = phase
+		j.ErrorCode = "retry_budget"
+		j.Attempts = 11
+		if phase == "create_unknown" {
+			j.ReceiptID = ""
+		}
+		calls := f.count("POST /bots/bot-1/media/uploads")
+		if err := c.Advance(t.Context(), j, func(Job) error { t.Fatal("legacy record auto resumed"); return nil }, src, time.Now().Add(time.Hour)); err != nil {
+			t.Fatal(err)
+		}
+		if f.count("POST /bots/bot-1/media/uploads") != calls {
+			t.Fatal("unknown create replayed")
+		}
+	}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	j := s.load()
+	if err := c.Advance(ctx, j, func(Job) error { t.Fatal("canceled advance persisted"); return nil }, src, time.Now()); !errors.Is(err, context.Canceled) {
+		t.Fatal(err)
+	}
+}

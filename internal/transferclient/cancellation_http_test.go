@@ -124,7 +124,7 @@ func TestHTTP499DownloadRetainsRangeAndHash(t *testing.T) {
 	}
 }
 
-func TestHTTP499RetryIsBoundedAndAuthorizationStaysBlocked(t *testing.T) {
+func TestHTTP499RetryIsScheduledAndAuthorizationStaysBlocked(t *testing.T) {
 	for _, status := range []int{499, http.StatusUnauthorized, http.StatusForbidden} {
 		f, client := newFixture(t)
 		source := frozen("abcd")
@@ -138,13 +138,17 @@ func TestHTTP499RetryIsBoundedAndAuthorizationStaysBlocked(t *testing.T) {
 		}
 		want, calls := "authorization", 1
 		if status == 499 {
-			want, calls = "retry_budget", 12
+			want, calls = "connection", 14
 		}
-		if final.Phase != "blocked" || final.ErrorCode != want || final.DeliveryID != initial.DeliveryID || final.OperationID != initial.OperationID || final.ReceiptID != "receipt-1" {
+		phase := "blocked"
+		if status == 499 {
+			phase = "uploading"
+		}
+		if final.Phase != phase || final.ErrorCode != want || final.DeliveryID != initial.DeliveryID || final.OperationID != initial.OperationID || final.ReceiptID != "receipt-1" {
 			t.Fatalf("status %d classification: %+v", status, final)
 		}
 		if f.count("GET /bots/bot-1/media/uploads/receipt-1") != calls || f.count("POST /bots/bot-1/media/uploads") != 1 {
-			t.Fatal("failure changed the request budget or re-admitted work", status)
+			t.Fatal("failure changed the request schedule or re-admitted work", status)
 		}
 	}
 	for _, err := range []error{errors.Join(ErrAuthorization, context.DeadlineExceeded), errors.Join(&HTTPError{Status: 403}, context.Canceled)} {
