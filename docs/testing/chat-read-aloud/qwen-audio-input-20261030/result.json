@@ -1,0 +1,27 @@
+{
+  "base": "2918613d4770f826c6a39e967127b012a2c29754",
+  "nativeSource": "09acf7b00d560bac3f312522756e3749d7ddd0a3",
+  "independentCursorP1": "7a1784ce9a11ff31b76537431fb829debd25e87f",
+  "branch": "fix/chat-qwen-audio-input-20261030",
+  "adapterBodyAfterPackageSHA256": "f9adb6f9b379ec71a7425bd217fe5de5217dd653d16abeaa3ab5c015a73ad4ba",
+  "unchangedPaths": [
+    "apps/web",
+    "packages/sdk",
+    "internal/handlers",
+    "internal/audio/input",
+    "internal/audio/registry.go",
+    "internal/audio/service.go",
+    "go.mod",
+    "go.sum"
+  ],
+  "newTestCases": 2,
+  "providerCalls": 0,
+  "testTransport": "owned loopback WebSocket; sentinel bytes, not speech",
+  "fieldConfigurationRead": false,
+  "paidTTSASRClone": false,
+  "builtSignedDeployedInstalled": false,
+  "humanListeningOrArkWeb": false,
+  "oldWhitelistProvenance": "parent-reported; not independently read current configuration",
+  "runtimeMime": "unknown",
+  "productReportsResolved": false
+}

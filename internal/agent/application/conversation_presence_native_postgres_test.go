@@ -38,7 +38,11 @@ func TestPresenceFixtureRejectsNonlocalRequestsBeforeNetwork(t *testing.T) {
 	transport := &presenceLocalOnlyTransport{host: "127.0.0.1:12345"}
 	for _, target := range []string{"https://127.0.0.1:12345/test", "http://outside.invalid/test", "http://user@127.0.0.1:12345/test"} {
 		req := httptest.NewRequest(http.MethodGet, target, nil)
-		if _, err := transport.RoundTrip(req); err == nil {
+		response, err := transport.RoundTrip(req)
+		if response != nil && response.Body != nil {
+			_ = response.Body.Close()
+		}
+		if err == nil {
 			t.Fatal("unapproved fixture request reached the network transport")
 		}
 	}

@@ -1,3 +1,23 @@
+# Native protocol follow-up — not a model-name gate
+
+After286, the sole writer had not executed SAFE_FIELDS because authorized team
+context was not established; actual endpoint/MIME remains unknown. A temporary
+local withdrawal was prepared but not committed/pushed. Subsequent original-owner
+review of the official Qwen WebSocket contract establishes run-task → multiple
+continue-task → finish-task/binary audio for the exact named model as well.
+A CosyVoice label is therefore not evidence of protocol incompatibility. The
+source was restored exactly to286 without any model-name branch, configuration,
+voice or key change. No unavailable endpoint/readback is claimed as verified.
+
+The original owner is supplying the strict protocol fixture for metadata, tail
+finish and cancellation. Review that evidence before final native admission;
+physical audio/ArkWeb, current endpoint/MIME and500ms remain field gaps. The
+standalone P1/cache commit275da2a1 is preserved and does not depend on this pending
+native proof. No new image, deployment or package build followed these updates.
+
+Original provisional286 review follows; its source review is not a claim of
+current-Bot applicability or complete listening acceptance.
+
 # Current speech source admission follow-up
 
 The frozen e57→ba44 source plus7a1784ce was actually merged at275da2a1;

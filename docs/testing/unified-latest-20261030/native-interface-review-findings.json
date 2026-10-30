@@ -1,0 +1,17 @@
+{
+  "source": "09acf7b00d560bac3f312522756e3749d7ddd0a3",
+  "combined_head": "286b4ae0ff04d8e7cfe341874e2cb61095cff5b9",
+  "Go_run": 41087769748,
+  "job": 124173338989,
+  "errors": [
+    "2026-10-30T16:17:58.0194728Z === RUN   TestBadRequestsCarryNoUserText",
+    "2026-10-30T16:17:58.0247132Z ##[error]    field_guard_test.go:296: ../../internal/handlers/bot_tts_input.go:44:19: echo.NewHTTPError(StatusBadRequest, ...) carries text the user never sees; use a field or catalog error, or WithInternal",
+    "2026-10-30T16:17:58.0262705Z ##[error]    field_guard_test.go:296: ../../internal/handlers/bot_tts_input.go:48:19: echo.NewHTTPError(StatusBadRequest, ...) carries text the user never sees; use a field or catalog error, or WithInternal",
+    "2026-10-30T16:17:58.0267513Z ##[error]    field_guard_test.go:296: ../../internal/handlers/bot_tts_input.go:85:10: echo.NewHTTPError(StatusBadRequest, ...) carries text the user never sees; use a field or catalog error, or WithInternal",
+    "2026-10-30T16:17:58.0269887Z --- FAIL: TestBadRequestsCarryNoUserText (5.97s)"
+  ],
+  "owner_action": "Original speech owner: use existing field/catalog error or WithInternal for these three400 responses; preserve validation and actual HTTP contract. No guard suppression.",
+  "protocol_reference": "https://help.aliyun.com/en/model-studio/qwen-audio-tts-websocket-api",
+  "protocol_review": "Official page independently read; exact named model uses run-task/multiple continue-task/finish-task and binary audio. No name-based rejection. Original owner strict metadata/finish/cancel fixture pending.",
+  "field": "actual endpoint/MIME unknown; authorized tenant context not established so SAFE_FIELDS not executed. No paid test, config/key/voice change or deployment."
+}

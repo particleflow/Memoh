@@ -41,11 +41,11 @@ func inputRequest(c echo.Context) (playbackInputRequest, error) {
 	}
 	id, err := uuid.Parse(request.ID)
 	if err != nil || id == uuid.Nil {
-		return request, echo.NewHTTPError(http.StatusBadRequest, "invalid playback input ID")
+		return request, echo.NewHTTPError(http.StatusBadRequest).WithInternal(errors.New("invalid playback input ID"))
 	}
 	request.ID = id.String()
 	if !utf8.ValidString(request.Text) || utf8.RuneCountInString(request.Text) > 20000 || (strings.TrimSpace(request.Text) == "" && !request.Final) {
-		return request, echo.NewHTTPError(http.StatusBadRequest, "invalid playback input text")
+		return request, echo.NewHTTPError(http.StatusBadRequest).WithInternal(errors.New("invalid playback input text"))
 	}
 	return request, nil
 }
@@ -82,7 +82,7 @@ func (h *BotAudioHandler) StartPlaybackInput(c echo.Context) error {
 		return err
 	}
 	if strings.TrimSpace(request.Text) == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "initial speech text is required")
+		return echo.NewHTTPError(http.StatusBadRequest).WithInternal(errors.New("initial speech text is required"))
 	}
 	if request.Sequence != 0 || request.Offset != 0 {
 		return echo.NewHTTPError(http.StatusConflict, "playback input must start at zero")

@@ -99,5 +99,9 @@
     "physical phone/listening/500ms/Windows control disconnect TLS acceptance"
   ],
   "not_deployed": true,
-  "paid_calls": 0
+  "paid_calls": 0,
+  "reviewed_native_protocol_evidence": "1764c882642ef43256ccd8001b97c145c593af54",
+  "shared_production_and_SDK_equal_to": "286b4ae0ff04d8e7cfe341874e2cb61095cff5b9",
+  "Harmony_build_can_proceed_on_this_mapping": true,
+  "no_wait_for_performance_or_certificate_renewal": true
 }
