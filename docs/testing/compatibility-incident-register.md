@@ -61,6 +61,7 @@ field deployment and product acceptance remain separate evidence classes.
 | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
 | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
 | C12 | Task-local Go build cache: no space left on device | Disposable task cache cleaned; scoped lint recovered |
+| C18 | Mutated pgx Database with stale ConnString | Cloud development schema advanced; explicit DSN/target preflight fixes fixture isolation |
 
 ## C01 — Windows helper calls unavailable os.setxattr
 
@@ -510,3 +511,13 @@ down a migration or restore an old dump over new data to make a rollback pass.
 Windows producer/consumer, Harmony package and Server/Web evidence stay separate.
 See also [queue retention](../delivery-queue-retention.md) and the
 [producer handoff](../delivery-producer-handoff.md).
+
+
+## C18 — pgx ConnString retains the original parsed database target
+
+- **Platform / signature:** On2026-10-30, the queue183 integration fixture changed `ConnConfig.Database` and passed `ConnString()` to the migration library. Its queue pool used the new empty database, but the migration DSN still targeted the prepared cloud development database. The fixture then reported missing schema_migrations in the new database.
+- **Cause:** pgx returns its retained original connection string, not a reconstruction of subsequently changed fields. A preceding single-file baseline attempt also lacked the canonical schema's168 bootstrap migration source; that separate setup error is retained.
+- **Validated handling:** Stop the fixture, preserve errors and inspect the actual target without reverting data. Build the target DSN explicitly from fields; connect and assert current_database matches the newly-owned database and that it is empty before any migration. Use the complete old through182 migration source and exact old canonical snapshot before normal up183.
+- **Result / unresolved boundary:** The failed attempt advanced the cloud development schema168→182clean; the later read showed users1 and bots/sessions/history/runs/unknown operations0. No before-row-hash baseline exists; unchanged data is not claimed. NAS/production were not targeted. No down, force or old dump was used to conceal the mistake. The corrected independent new-database182→183 fixture passed with retained claims/receipts/history/unknown. The development schema remains advanced, not restored.
+- **Original evidence:** [Queue183 fixture and retained failure logs](queue183-after4425/README.md); wrong-target log timestamps17:11:00 UTC, corrected forward run17:12:41 UTC. Owned temporary databases were closed/dropped, not production or other task databases.
+- **New condition before another attempt:** A constructed exact target DSN plus successful actual database/empty-target preflight; changing only an in-memory Database field is insufficient. Preserve current data and use compatible forward recovery.
