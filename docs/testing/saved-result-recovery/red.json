@@ -1,0 +1,16 @@
+{
+  "baseline": "766a99b1c5a331f595e864554be82d90e2d270ea",
+  "recovery_endpoint_status": 404,
+  "existing_delivery_status": 200,
+  "delivery_unchanged": {
+    "c8af1fa537d37e6125264709259e8a9fcd031f018e5d4c26d49263ef149eb95e": {
+      "text": "Delegation 1430f9b1-899a-4b72-9679-beddf77c692f (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nCONTINUATION_WORKER_RESULT: original specialist completed once",
+      "state": "completed",
+      "run_id": "df6532c9-e49c-49b1-87b3-21c74c88c97f",
+      "attempt": 3,
+      "report_state": "attention"
+    }
+  },
+  "page_errors": [],
+  "paid_calls": 0
+}

@@ -1,0 +1,58 @@
+{
+  "paid_calls": 0,
+  "concurrent_statuses": [
+    202,
+    202,
+    202,
+    202
+  ],
+  "inflight": {
+    "text": "Delegation 1430f9b1-899a-4b72-9679-beddf77c692f (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nCONTINUATION_WORKER_RESULT: original specialist completed once",
+    "state": "completed",
+    "run_id": "df6532c9-e49c-49b1-87b3-21c74c88c97f",
+    "attempt": 4,
+    "recoveries": [
+      {
+        "attempt": 4,
+        "from_attempt": 3,
+        "requested_at": "2026-10-30T04:47:02.877998361Z",
+        "requested_by": "d72dd4a8-394a-4f4b-b722-005671adc8d0",
+        "previous_run_id": "bd2bece5-2a56-4180-af4a-c3c9d7f06ffc",
+        "previous_run_state": "failed"
+      }
+    ],
+    "report_state": "pending"
+  },
+  "inflight_new_attempt_status": 409,
+  "published_duplicate_status": 409,
+  "published": {
+    "text": "Delegation 1430f9b1-899a-4b72-9679-beddf77c692f (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nCONTINUATION_WORKER_RESULT: original specialist completed once",
+    "state": "completed",
+    "run_id": "df6532c9-e49c-49b1-87b3-21c74c88c97f",
+    "attempt": 4,
+    "message_id": "3517df74-6358-4053-91f8-5fb40eee157f",
+    "recoveries": [
+      {
+        "attempt": 4,
+        "from_attempt": 3,
+        "requested_at": "2026-10-30T04:47:02.877998361Z",
+        "requested_by": "d72dd4a8-394a-4f4b-b722-005671adc8d0",
+        "previous_run_id": "bd2bece5-2a56-4180-af4a-c3c9d7f06ffc",
+        "previous_run_state": "failed"
+      }
+    ],
+    "report_state": "reported",
+    "summary_run_id": "4d96db69-409f-4f8f-bf34-a551b58a996d"
+  },
+  "counts": {
+    "summary_calls": 1,
+    "unexpected_calls": 0,
+    "tools_offered": [
+      0
+    ]
+  },
+  "original_execution_and_failed_history_unchanged": true,
+  "assistant_receipts": "1",
+  "restart_same_publication_no_calls": true,
+  "page_errors": []
+}
