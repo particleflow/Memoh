@@ -26,18 +26,25 @@ uses no `.on()` listener. CDP method/parameter references:
 [Runtime](https://chromedevtools.github.io/devtools-protocol/tot/Runtime/),
 [Network](https://chromedevtools.github.io/devtools-protocol/tot/Network/).
 
-The observer is a provisional adapter for raw CDP remote-object and
-`method`/`params` event envelopes. These forms have only been simulated locally;
-they are not evidence of Ego’s actual envelope. Before running it, the writer must
-confirm from existing Ego help that `events()` delivers those CDP events and
-that the click helper does not consume them. Missing help is an interface blocker.
-At runtime, the observer checks the envelopes again before allowing a click. It requires an existing component directory poll to
+The parent now relays `navigation603-preflight/OUTCOME.json`: the writer checked
+direct `{method, params, sessionId}` events, direct CDP/evaluation results and a
+completed GET body, without a production row click. This replaces the earlier
+unknown-envelope diagnosis; this owner has not read the raw receipt. Do not
+repeat that shape/body preflight or ask for a new read-only authorization.
+Official help does not promise click-buffer retention. First execute the
+[one disposable-page buffer experiment](capture-buffer-contract.md), then
+return that receipt to the parent. No production DOM or new service is involved.
+The experiment cannot establish permanent retention. During the original-record
+capture, always mark the click interval as potentially incomplete and treat
+missing events as unknown, even if the experiment retained its synthetic events.
+
+At runtime, the observer checks the envelopes before allowing a click. It requires an existing component directory poll to
 produce request, response200 and `loadingFinished`; a response200 alone is not
 completion. A different envelope or missing event delivery stops with no click.
 Do not guess a wrapper, silently accept empty events or switch to another
-browser/event interface. The existing writer can supply the exact SDK help
-schema if this check fails; that is new interface evidence, not a navigation
-retry grant. Unknown envelopes after the click make coverage explicitly partial.
+browser/event interface. A newly different schema is a changed condition to
+report, not a navigation retry grant. Unknown envelopes after the click make
+coverage explicitly partial.
 
 ## Sole writer preconditions
 
@@ -87,7 +94,8 @@ const result = await captureRecipientNavigation(page, {
   messageIds: [originalUserUiId, originalAssistantUiId],
   // Exactly one normal visible-row click. No wait for messages/URL, no repeat,
   // no navigation, refresh or events() read inside this callback.
-  // Reuse the verified Ego API; check that it does not implicitly drain events.
+  // Use page.click with the previously verified selector and supported options.
+  // No separate events() reader; retention across the click stays unknown.
   clickOnce: originalVerifiedRowClick,
   // Persist every sanitized JSON record before another events() drain.
   // Use the writer's existing supported local file operation; no download or
@@ -105,9 +113,16 @@ proof of failure at30 seconds. The writer may choose a suitable single window
 before starting and records it. Do not rerun a failed self-check unchanged.
 The foreground script must return through its real original exec session;
 retain that session if the executor yields. No detached fixture is required.
-Only this observer may read `page.events()` during the window. If the normal
-click helper's event-buffer behavior is unknown, confirm it from the existing
-Ego2.1 help first; do not assert full capture coverage from an unverified helper.
+Only this observer may explicitly read `page.events()` during the window. Use
+the direct documented `page.click(selector, {timeout: ...})`, without an added
+helper that explicitly reads events. There is no invented retention option or
+official promise to wait for. The disposable experiment supplies bounded
+evidence; `page.click`'s production boundary remains an event-coverage gap.
+Before starting, append the experiment receipt reference and
+`productionClickEventCoverage: "potentially-incomplete"` using the same journal
+sink. If it fails, do not start the collector. This is evidence metadata, not a
+new UI field. Retain positive events and DOM witnesses; never infer an absent
+snapshot/request or completed initial component load across that boundary.
 
 Before arming, the first drained batch is labelled `pre-arm` and retained as
 sanitized metadata, then excluded from the new action's request inventory. Each

@@ -179,8 +179,29 @@ See [the single-capture handoff](capture-plan.md) and
 [the Ego CDP observer](capture-ego-navigation.mjs). This is newly authorized,
 instrumented observation of the same original record, not an unchanged repeated
 click, another model workload or a reason to cancel snapshot consistency. The
-observer is provisional: existing Ego help must first confirm raw CDP event
-wrapping and the normal click helper’s event-buffer behavior. Those help fields
-are unavailable here and remain an interface blocker. Runtime preflight is a
-second check before the single existing row-click callback. Local contract/DOM
-tests do not establish field SDK compatibility or successful reproduction.
+observer remains diagnostic: local contract/DOM tests do not establish field
+SDK compatibility or successful reproduction. The preflight update below
+supersedes the initial missing-envelope/help condition.
+
+### 60377 field preflight: envelope checked, click retention undocumented
+
+The parent relays `navigation603-preflight/OUTCOME.json`: the sole writer checked
+direct `{method, params, sessionId}` events, direct CDP/evaluation returns and
+completed GET body retrieval. No production row was clicked. This owner did not
+read that raw receipt. Official `page.click(selector, options)` help does not
+promise event-buffer retention; it is not an actual tool rejection or a reason
+to request new user authorization. Do not repeat those checks or the eight
+already passed local tests.
+
+The next bounded action is the [isolated click-buffer experiment](capture-buffer-contract.md)
+in a newly owned disposable blank Ego page. One synthetic button click produces
+only local Console/data-fetch markers and a local DOM count. Save the no-click
+control and before/after batches, then close that owned page normally. No
+production page, service, model, API or DB is involved. No fixture/server process
+is launched. This experiment is prepared, not field executed.
+
+The original-record capture must label its click boundary potentially incomplete
+even if the experiment retains both marker classes. DOM gates and retained
+positive events remain useful; absent events cannot prove the root cause. The
+first-load product cause and actual field capture remain unresolved. Old C05
+process cleanup/read denials remain untouched.
