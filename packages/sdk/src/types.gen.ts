@@ -1774,6 +1774,7 @@ export type ConversationUiTurn = {
     external_message_id?: string;
     forward?: ConversationUiForwardRef;
     id?: string;
+    input_source?: InputsourceSource;
     kind?: string;
     messages?: Array<ConversationUiMessage>;
     platform?: string;
@@ -3787,6 +3788,22 @@ export type HooksToolPayload = {
     input?: unknown;
     name?: string;
     result?: unknown;
+};
+
+export type InputsourceSource = {
+    bot_id?: string;
+    channel?: string;
+    channel_identity_id?: string;
+    kind?: string;
+    occurrence_id?: string;
+    origin_bot_id?: string;
+    origin_run_id?: string;
+    origin_session_id?: string;
+    session_id?: string;
+    task_id?: string;
+    task_kind?: string;
+    task_run_id?: string;
+    user_id?: string;
 };
 
 export type McpAuthorizeResult = {

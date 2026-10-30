@@ -25621,6 +25621,9 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "input_source": {
+                    "$ref": "#/definitions/inputsource.Source"
+                },
                 "kind": {
                     "type": "string"
                 },
@@ -30548,6 +30551,50 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "result": {}
+            }
+        },
+        "inputsource.Source": {
+            "type": "object",
+            "properties": {
+                "bot_id": {
+                    "type": "string"
+                },
+                "channel": {
+                    "type": "string"
+                },
+                "channel_identity_id": {
+                    "type": "string"
+                },
+                "kind": {
+                    "type": "string"
+                },
+                "occurrence_id": {
+                    "type": "string"
+                },
+                "origin_bot_id": {
+                    "type": "string"
+                },
+                "origin_run_id": {
+                    "type": "string"
+                },
+                "origin_session_id": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                },
+                "task_kind": {
+                    "type": "string"
+                },
+                "task_run_id": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
             }
         },
         "mcp.AuthorizeResult": {

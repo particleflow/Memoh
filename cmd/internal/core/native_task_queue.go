@@ -21,6 +21,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/oauthctx"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/toolcontext"
@@ -204,7 +205,8 @@ func (q *nativeTaskQueueHost) RestoreSession(ctx context.Context, r dbstore.Nati
 		return ctx, s, err
 	}
 	s = tools.SessionContext{BotID: r.BotID, ChatID: r.BotID, SessionID: r.ParentSessionID, UserID: r.UserID, SessionType: p.SessionType, CurrentPlatform: p.CurrentPlatform, ReplyTarget: p.ReplyTarget, ConversationType: p.ConversationType, CurrentModelUUID: p.CurrentModelUUID, CurrentModelID: p.CurrentModelID, CurrentModelProvider: p.CurrentModelProvider, CurrentModelProviderID: p.CurrentModelProviderID, ReasoningStoredEffort: p.ReasoningStoredEffort, ReasoningRequestedEffort: p.ReasoningRequestedEffort, WorkspaceTargetID: p.WorkspaceTargetID, WorkspaceTargetKind: p.WorkspaceTargetKind, WorkdirPath: p.WorkdirPath, Skills: p.Skills}
-	return ctx, s, nil
+	origin := inputsource.Source{Kind: inputsource.NativeTask, BotID: r.BotID, SessionID: r.SessionID, TaskKind: "native_task", TaskID: r.TaskID, OriginBotID: r.BotID, OriginSessionID: r.ParentSessionID, OriginRunID: r.SourceRunID}
+	return inputsource.WithContext(ctx, origin), s, nil
 }
 
 func (q *nativeTaskQueueHost) Claim(ctx context.Context, r dbstore.NativeTaskReceipt) (dbstore.NativeTaskReceipt, bool, error) {

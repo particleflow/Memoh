@@ -382,7 +382,7 @@ func (s *Service) StreamChat(ctx context.Context, req ChatRequest) (<-chan Strea
 		if stepCommitter != nil {
 			stepCommitter.bindContinuation(&cfg)
 		}
-		cfg = s.prepareRunConfig(streamCtx, cfg)
+		cfg = s.prepareRunConfig(streamCtx, cfg, streamReq)
 		terminal := s.contextLifecycleTerminal(streamCtx, cfg)
 		outcome := newOutcomeRecorder(streamCtx)
 		defer outcome.finishLifecycle(terminal)
@@ -724,7 +724,7 @@ func (s *Service) streamChatWSResultWithHooks(
 	if stepCommitter != nil {
 		stepCommitter.bindContinuation(&cfg)
 	}
-	cfg = s.prepareRunConfig(streamCtx, cfg)
+	cfg = s.prepareRunConfig(streamCtx, cfg, req)
 	terminal := s.contextLifecycleTerminal(streamCtx, cfg)
 	outcome := newOutcomeRecorder(streamCtx)
 	lifecycle = outcome

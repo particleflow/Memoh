@@ -1,0 +1,66 @@
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/user
+    input_source_test.go:81: captured provider wire: {"kind":"user","bot_id":"821d3ee8-5114-4681-8bed-f2fb8d604663","session_id":"acf4bd8f-ca05-4bf0-af4f-0e6d7ad31c58","user_id":"1f9cb8d1-fdd7-4f60-904f-42cd35e29d0d","channel":"web"}; body retained in user role
+    input_source_test.go:81: captured provider wire: {"kind":"user","bot_id":"71eeea53-1272-4c72-be7e-754ca05effe9","session_id":"d5794509-78c4-47af-aff1-1120fb60c173","user_id":"9c18e208-7318-4368-a579-cdf5493e6ba2","channel":"web"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/schedule
+    input_source_test.go:81: captured provider wire: {"kind":"schedule","bot_id":"f238e248-b3d1-465e-89e6-f94c942a9501","session_id":"0162e6f1-a2cb-4211-a084-986613e073cf","task_kind":"schedule","task_id":"5a517986-627e-45a8-9179-ab6d7f2d73e6","origin_bot_id":"4e0480aa-227e-4fe0-878a-a4914e3d5a54","origin_session_id":"7ae794fd-2f8e-46b6-ab6f-8e09ecafb75e"}; body retained in user role
+    input_source_test.go:81: captured provider wire: {"kind":"schedule","bot_id":"7d9cb17a-d0d6-4f37-bad8-3a8c50bc670c","session_id":"56497b1c-31d9-4baa-ac52-3840561c1865","task_kind":"schedule","task_id":"f6c0523d-cf09-4805-9b4b-44ffe974381d","origin_bot_id":"c7b56c00-0852-4fe4-8bde-ceed22e65946","origin_session_id":"9244f327-70ee-4e87-892c-76405bce5b51"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/bot_delegation
+    input_source_test.go:81: captured provider wire: {"kind":"bot_delegation","bot_id":"4a9db38a-4743-48a7-ad27-7e8a7308f66f","session_id":"831de2c6-09e6-4f1b-bf40-6a2a1e131086","task_kind":"bot_delegation","task_id":"e572dd85-3e60-48eb-8103-3ced4a3907e4","origin_bot_id":"ac9c74cb-2850-416a-a6c1-2585109b9eeb","origin_session_id":"226f7a3e-1991-48de-863d-83991770cac0"}; body retained in user role
+    input_source_test.go:81: captured provider wire: {"kind":"bot_delegation","bot_id":"9e6c4b2e-d59c-451a-8f34-051cc946d09c","session_id":"6837683d-f658-432e-927a-970861c7b9ea","task_kind":"bot_delegation","task_id":"e914fe4e-aa91-4be5-b9a6-0e2c558817dd","origin_bot_id":"89d49f48-0019-4279-a29d-8aab7b519c04","origin_session_id":"377e191b-9896-46eb-ad94-b529f9d71b44"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/task_result
+    input_source_test.go:81: captured provider wire: {"kind":"task_result","bot_id":"d216cd9b-d3cf-48a7-bc72-cb56e4c771b9","session_id":"55c9aa42-2569-4f1a-8d6a-9ee9d72f6d66","task_kind":"task_result","task_id":"ae31ce18-ee4a-4f9c-bc6a-80233d6271c0","origin_bot_id":"6c139dbe-0225-4d64-81f6-fcb39717463a","origin_session_id":"72f02351-3e0e-439b-b2e2-3b155b89e073"}; body retained in user role
+    input_source_test.go:81: captured provider wire: {"kind":"task_result","bot_id":"352a4544-6677-4e74-a0c9-a02ef7289acc","session_id":"9120fe7e-8efe-4e58-9336-84857bbe45b5","task_kind":"task_result","task_id":"1a335bbc-3cf8-42af-8b6e-fa00540f12ee","origin_bot_id":"77ac0e1b-a78f-46d6-8ed2-0cfdffb408ee","origin_session_id":"368c095d-ad80-4ae1-a97d-0ca115dac474"}; body retained in user role
+--- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots (0.06s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/user (0.02s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/schedule (0.02s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/bot_delegation (0.01s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/task_result (0.01s)
+=== RUN   TestInputSourceScheduleTriggerAndRestart
+    input_source_test.go:123: captured provider wire: {"kind":"schedule","bot_id":"22222222-2222-4222-8222-222222222222","session_id":"33333333-3333-4333-8333-333333333333","task_kind":"schedule","task_id":"ffde0c68-f4ed-44bd-bf48-d5466dc29a97","task_run_id":"11111111-1111-4111-8111-111111111111","occurrence_id":"fe8df7a5-4a86-44b0-bd33-caa28b5aa336"}; body retained in user role
+--- PASS: TestInputSourceScheduleTriggerAndRestart (0.01s)
+=== RUN   TestInputSourceUnknownHistoryAndRetryNeverGuess
+--- PASS: TestInputSourceUnknownHistoryAndRetryNeverGuess (0.00s)
+=== RUN   TestInputSourceCancellationKeepsOriginalActor
+    input_source_test.go:197: captured provider wire: {"kind":"user","bot_id":"442a2ea2-d05d-4efc-a12f-1ad71decf989","session_id":"f8420ba3-984a-4804-b399-97584ad5dc38","user_id":"6cfe4ffa-2028-4c6b-8ade-dc2aacad1746","channel":"web"}; body retained in user role
+--- PASS: TestInputSourceCancellationKeepsOriginalActor (0.01s)
+=== RUN   TestResumeHistoryFallbackDoesNotUseBotIDAsChatID
+=== PAUSE TestResumeHistoryFallbackDoesNotUseBotIDAsChatID
+=== RUN   TestResumeScopeBindingFailsClosed
+--- PASS: TestResumeScopeBindingFailsClosed (0.00s)
+=== RUN   TestResumeContextPreservesDeadlineAndScopesWithoutCredentials
+--- PASS: TestResumeContextPreservesDeadlineAndScopesWithoutCredentials (0.00s)
+=== RUN   TestResumeRejectsInvalidCredentialAndForeignBotScope
+--- PASS: TestResumeRejectsInvalidCredentialAndForeignBotScope (0.00s)
+=== RUN   TestResumeReentersSavedSessionOnceAndKeepsDeadline
+2026/10/30 09:17:55 INFO interrupted session resumed previous_run_id=82a21750-1b86-4839-924e-024a535d7d72 run_id=run-1 session_id=f05c6831-13c7-46ee-9a0a-004516b465d6
+--- PASS: TestResumeReentersSavedSessionOnceAndKeepsDeadline (0.00s)
+=== RUN   TestResumeWaitsForWorkspaceBeforeAdmission
+--- PASS: TestResumeWaitsForWorkspaceBeforeAdmission (0.00s)
+=== RUN   TestResumeScanRetiresIntentsThatCannotContinue
+2026/10/30 09:17:55 INFO interrupted session will not resume run_id=713b4a94-fec6-4db6-ad75-bc150b474341 reason="interrupted session cannot resume: execution budget expired"
+2026/10/30 09:17:55 INFO interrupted session will not resume run_id=3891e20d-a43e-4c68-84cc-d50cec4d9b99 reason="interrupted session cannot resume: unsupported resume context"
+2026/10/30 09:17:55 WARN resume interrupted session deferred run_id=9b495242-0179-4431-aa20-c86b8dbcc7b7 error="bridge not ready"
+2026/10/30 09:17:55 INFO interrupted session resumed previous_run_id=4c72c95b-6412-412c-9623-4d4c8a8c81c5 run_id=run-1 session_id=78ae8c5d-dfec-4ae1-bc6f-d2981c68ed7b
+--- PASS: TestResumeScanRetiresIntentsThatCannotContinue (0.00s)
+=== CONT  TestResumeHistoryFallbackDoesNotUseBotIDAsChatID
+--- PASS: TestResumeHistoryFallbackDoesNotUseBotIDAsChatID (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	1.143s
+=== RUN   TestInputSourceDelegationRebuiltFromAuthorizedLedger
+--- PASS: TestInputSourceDelegationRebuiltFromAuthorizedLedger (0.00s)
+=== RUN   TestInputSourceNativeTaskHostPortsAndProviderWire
+    input_source_test.go:120: native provider and persisted source match: {"kind":"native_task","bot_id":"03ca0b34-3ee1-43a1-8551-307e1cdec7ec","session_id":"50801007-a403-4844-b29d-c82dd3218e91","task_kind":"native_task","task_id":"a2c8a378-cc2b-488f-95d8-0b852561ccd5","task_run_id":"f3061a04-a985-4651-a58e-8eec7a543ffc","origin_bot_id":"aca6f8c6-ba7c-40f8-bdfb-d3a90d197c10","origin_session_id":"d0ffedb5-8fbc-4b74-860c-335332c1495e"}
+    input_source_test.go:120: native provider and persisted source match: {"kind":"native_task","bot_id":"0d36379d-49a1-4a8f-95c7-6db0cfc87a80","session_id":"574e5def-b686-41e0-b1b8-cc59a5c08ddf","task_kind":"native_task","task_id":"14f97898-a6c7-4163-bde5-8545393b4cd5","task_run_id":"c5b62320-de88-4133-b7be-965a1dafeeeb","origin_bot_id":"8a19afdd-69e7-43a7-b73f-015671a13eed","origin_session_id":"b838d4d2-8fa8-454a-a16e-c86712acd35c"}
+--- PASS: TestInputSourceNativeTaskHostPortsAndProviderWire (0.00s)
+=== RUN   TestNativeTaskQueuePostgresRestartAndDuplicateClaims
+    native_task_queue_test.go:293: actual PostgreSQL: pre-admission identity, fresh-host restart, 8 concurrent claims/1 winner, 8 duplicate callbacks/1 execution, terminal recovery, unknown/no replay, failure/cancel/revocation including lock wait, directory dedupe, credential exclusion
+--- PASS: TestNativeTaskQueuePostgresRestartAndDuplicateClaims (0.49s)
+=== RUN   TestScheduleResultPostgresCrashWindows
+    schedule_result_delivery_test.go:319: schedule-specific C1/C2/C3 passed; 8 concurrent publication recoveries; failed/unknown/legacy preserved; deleted plan retained; exact fire/run; contact change and revocation refused; zero model/external actions
+--- PASS: TestScheduleResultPostgresCrashWindows (0.38s)
+=== RUN   TestTaskResultPostgresCrashWindows
+    task_result_delivery_test.go:269: C1 stable invocation; C2 progress/empty output not consumed; C3 8 concurrent recoveries reused committed message; original action count=1; unknown never reclaimed; revocation denied
+--- PASS: TestTaskResultPostgresCrashWindows (0.36s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	2.307s

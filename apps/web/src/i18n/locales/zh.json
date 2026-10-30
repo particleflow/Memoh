@@ -1027,6 +1027,23 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "inputSources": {
+      "channelIdentity": "渠道身份",
+      "occurrence": "触发批次",
+      "originRun": "来源运行",
+      "native_task": "后台任务",
+      "unknown": "来源未知",
+      "user": "用户输入",
+      "schedule": "自动任务",
+      "bot_delegation": "Bot 委派",
+      "task_result": "任务回流",
+      "bot": "Bot",
+      "session": "会话",
+      "originBot": "来源 Bot",
+      "originSession": "来源会话",
+      "task": "任务",
+      "run": "任务运行"
+    },
     "readAloud": {
       "replay": "重播朗读",
       "playing": "正在朗读此回复",

@@ -11,6 +11,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/event"
 	"github.com/felinics/memoh/internal/agent/turn"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/messageconv"
 	"github.com/felinics/memoh/internal/runtimekind"
 	"github.com/felinics/memoh/internal/textutil"
@@ -24,6 +25,7 @@ var (
 	uiMessageCollapsedNewlinesRe = regexp.MustCompile(`\n{3,}`)
 	uiTaskNotificationRe         = regexp.MustCompile(`(?s)<task-notification>\s*(.*?)\s*</task-notification>`)
 	uiMetadataParseKeys          = [][]byte{
+		[]byte(`"input_source"`),
 		[]byte(`"runtime_notices"`),
 		[]byte(`"agent_turn_id"`),
 		[]byte(`"message_source"`),
@@ -305,6 +307,7 @@ func ConvertMessagesToUITurns(messages []messagepkg.Message) []UITurn {
 			flushPending()
 
 			turn := UITurn{
+				InputSource:       persistedInputSource(raw),
 				TurnID:            strings.TrimSpace(raw.TurnID),
 				TurnPosition:      raw.TurnPosition,
 				Role:              "user",
@@ -440,6 +443,7 @@ func ConvertMessagesToUITurns(messages []messagepkg.Message) []UITurn {
 func newPendingAssistantTurn(raw messagepkg.Message) *uiPendingAssistantTurn {
 	return &uiPendingAssistantTurn{
 		Turn: UITurn{
+			InputSource:       persistedInputSource(raw),
 			TurnID:            strings.TrimSpace(raw.TurnID),
 			TurnPosition:      raw.TurnPosition,
 			Role:              "assistant",
@@ -449,6 +453,11 @@ func newPendingAssistantTurn(raw messagepkg.Message) *uiPendingAssistantTurn {
 			ID:                strings.TrimSpace(raw.ID),
 		},
 	}
+}
+
+func persistedInputSource(raw messagepkg.Message) *inputsource.Source {
+	source := inputsource.FromMetadata(raw.Metadata, raw.BotID, raw.SessionID)
+	return &source
 }
 
 func appendPendingAssistantMessage(pending *uiPendingAssistantTurn, message UIMessage) {

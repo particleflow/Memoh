@@ -1024,6 +1024,23 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "inputSources": {
+      "channelIdentity": "チャネルの識別子",
+      "occurrence": "発火",
+      "originRun": "送信元の実行",
+      "native_task": "バックグラウンドタスク",
+      "unknown": "入力元不明",
+      "user": "ユーザー入力",
+      "schedule": "自動タスク",
+      "bot_delegation": "Bot 委任",
+      "task_result": "タスク結果",
+      "bot": "Bot",
+      "session": "会話",
+      "originBot": "送信元 Bot",
+      "originSession": "送信元の会話",
+      "task": "タスク",
+      "run": "タスク実行"
+    },
     "readAloud": {
       "replay": "もう一度読み上げる",
       "playing": "この返信を読み上げています",

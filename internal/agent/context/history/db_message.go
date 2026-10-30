@@ -9,8 +9,11 @@ import (
 	"sort"
 	"strings"
 
+	sdk "github.com/felinics/twilight/sdk"
+
 	contextfrag "github.com/felinics/memoh/internal/agent/context/fragment"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 const namespaceDBHistoryMessage = "bot_history_message"
@@ -38,6 +41,18 @@ func FromDBMessageWithLogger(log *slog.Logger, msg messagepkg.Message, fallback 
 	// Compaction coverage persisted hashes over the full row metadata, so the
 	// hash still covers lifecycle audits the record itself does not keep.
 	metadata := dbMessageMetadata(msg)
+	// Replay the recorded origin as user-role context, preserving every rich
+	// part and the stored row/hash. Never infer a historical source from prose.
+	if modelMessage.Role == "user" {
+		source := inputsource.FromMetadata(metadata, msg.BotID, msg.SessionID)
+		if source.Kind != inputsource.Unknown {
+			converted := StoredModelMessageToSDKMessage(modelMessage)
+			converted.Content = append([]sdk.MessagePart{sdk.TextPart{Text: "[Recorded input source]\n" + source.JSON()}}, converted.Content...)
+			if stored := ToStoredModelMessages([]sdk.Message{converted}); len(stored) == 1 {
+				modelMessage = stored[0]
+			}
+		}
+	}
 	ref.HashAlgo = contextfrag.HashAlgoSHA256
 	ref.HashScope = contextfrag.HashScopeSourcePayload
 	ref.ContentHash = dbMessageSourceHash(msg, metadata).Value

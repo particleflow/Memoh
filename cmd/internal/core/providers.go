@@ -581,14 +581,14 @@ func injectToolProviders(lc fx.Lifecycle, a *native.Agent, msgService *message.D
 			// The parent model reads a spawned run's failure by the code the
 			// run itself failed with.
 			adapter.SetFailureTranslator(agentService.SubagentFailure)
-			sp.SetAgent(adapter)
-			sp.SetMessageService(msgService)
+			sp.SetAgent(sourceSpawnAgent{adapter})
+			sp.SetMessageService(sourceSpawnMessages{msgService})
 			sp.SetSystemPromptFunc(native.SpawnSystemPrompt)
 			sp.SetHookService(hookService)
 			// A spawned turn takes its thread's single run slot like any other,
 			// so without admission this provider starts nothing.
-			sp.SetSubagentAdmitter(agentService)
 			queue := &nativeTaskQueueHost{host: delegations.Host.(*delegationHost)}
+			sp.SetSubagentAdmitter(sourceSubagentAdmitter{agentService, queue})
 			sp.SetNativeTaskQueue(queue)
 			bgManager.SetBeforeAgentCancel(queue.Cancel)
 			lc.Append(fx.Hook{OnStart: func(ctx context.Context) error {

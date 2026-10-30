@@ -1,0 +1,6 @@
+ok  	github.com/felinics/memoh/internal/agent/application	0.448s
+ok  	github.com/felinics/memoh/internal/agent/view	0.028s
+ok  	github.com/felinics/memoh/internal/agent/context/history	0.009s [no tests to run]
+ok  	github.com/felinics/memoh/internal/channel/inbound	30.014s
+ok  	github.com/felinics/memoh/internal/handlers	0.020s
+ok  	github.com/felinics/memoh/cmd/internal/core	0.044s

@@ -101,6 +101,8 @@ func (s *Service) buildRuntimeContextSections(ctx context.Context, req ChatReque
 		SystemFilesMaxBytes:       limits.SystemFilesMaxBytes,
 		PlatformIdentitiesSection: platformIdentitiesSection,
 	})
+	source := requestInputSource(req)
+	sections = append(sections, contextview.RuntimeSection{ID: "runtime.input_source", Kind: contextfrag.KindRuntimeContext, Priority: 15, CacheClass: contextfrag.CacheNever, Budget: contextfrag.BudgetPolicy{Overflow: contextfrag.OverflowKeep}, Text: source.Prompt()})
 	return sections, memoryContext.Trace
 }
 

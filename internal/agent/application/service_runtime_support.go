@@ -513,7 +513,7 @@ func (s *Service) persistRuntimeLeadingUserMessage(ctx context.Context, req Chat
 		SourceReplyToMessageID:  req.SourceReplyToMessageID,
 		Role:                    "user",
 		Content:                 content,
-		Metadata:                mergeMetadata(buildRouteMetadata(req), buildInteractionMetadata(req)),
+		Metadata:                mergeMetadata(mergeMetadata(buildRouteMetadata(req), buildInteractionMetadata(req)), map[string]any{"input_source": requestInputSource(req)}),
 		Assets:                  chatAttachmentsToAssetRefs(req.Attachments),
 		EventID:                 req.EventID,
 		DisplayText:             displayText,
@@ -572,6 +572,7 @@ func (s *Service) persistRuntimeDecisionProjection(ctx context.Context, req Chat
 			return nil
 		}
 		metadata := cloneMetadataMap(buildRouteMetadata(req))
+		metadata = mergeMetadata(metadata, map[string]any{"input_source": requestInputSource(req)})
 		metadata["agent_decision_projection"] = true
 		metadata["agent_decision_tool_call_id"] = strings.TrimSpace(ev.ToolCallID)
 		persisted, err := s.messageService.Persist(ctx, messagepkg.PersistInput{

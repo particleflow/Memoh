@@ -1027,6 +1027,23 @@
     "license": "AGPLv3 · © 2026 MemohAI"
   },
   "chat": {
+    "inputSources": {
+      "channelIdentity": "Channel identity",
+      "occurrence": "Occurrence",
+      "originRun": "Source run",
+      "native_task": "Background task",
+      "unknown": "Unknown source",
+      "user": "User input",
+      "schedule": "Scheduled task",
+      "bot_delegation": "Bot delegation",
+      "task_result": "Task result",
+      "bot": "Bot",
+      "session": "Conversation",
+      "originBot": "Source Bot",
+      "originSession": "Source conversation",
+      "task": "Task",
+      "run": "Task run"
+    },
     "readAloud": {
       "replay": "Read aloud again",
       "playing": "Reading this reply aloud",

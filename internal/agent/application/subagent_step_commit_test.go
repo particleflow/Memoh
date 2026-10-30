@@ -12,6 +12,7 @@ import (
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/step"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -71,6 +72,8 @@ func TestSubagentStepCommitPersistsStepsInOrder(t *testing.T) {
 	store := &recordingStepPersister{recordingMessageService: &recordingMessageService{}}
 	service := &Service{messageService: store}
 	ctx := subagentRunContext(botID, sessionID, 9)
+	source := inputsource.Source{Kind: inputsource.NativeTask, BotID: botID, SessionID: sessionID, TaskID: uuid.NewString(), OriginSessionID: uuid.NewString()}
+	ctx = inputsource.WithContext(ctx, source)
 	holder := contextfrag.NewLifecycleHolder()
 	holder.SetManifest(contextfrag.Manifest{
 		View:   contextfrag.ViewRunConfigPreProvider,
@@ -88,7 +91,8 @@ func TestSubagentStepCommitPersistsStepsInOrder(t *testing.T) {
 	}}); err != nil {
 		t.Fatalf("commit step 0: %v", err)
 	}
-	if err := commit(ctx, 1, &step.Record{Messages: []sdk.Message{sdk.AssistantMessage("step two")}}); err != nil {
+	foreign := inputsource.WithContext(ctx, inputsource.Source{Kind: inputsource.User, BotID: botID, SessionID: sessionID, UserID: "foreign-callback-actor"})
+	if err := commit(foreign, 1, &step.Record{Messages: []sdk.Message{sdk.AssistantMessage("step two")}}); err != nil {
 		t.Fatalf("commit step 1: %v", err)
 	}
 	if err := commit(ctx, 3, &step.Record{Messages: []sdk.Message{sdk.AssistantMessage("skipped ahead")}}); err == nil {
@@ -144,6 +148,13 @@ func TestSubagentStepCommitPersistsStepsInOrder(t *testing.T) {
 	}
 	if len(store.steps) != 3 || !store.steps[2].Interrupted {
 		t.Fatalf("interrupted step = %#v, want durable interrupted checkpoint", store.steps)
+	}
+	for _, saved := range store.steps {
+		for _, row := range saved.Messages {
+			if inputsource.FromMetadata(row.Metadata, botID, sessionID) != source {
+				t.Fatal("step or interrupted checkpoint lost admitted source or borrowed callback identity")
+			}
+		}
 	}
 	if got := store.steps[2].Messages[0].Metadata[messagepkg.AgentStepInterruptedMetadataKey]; got != true {
 		t.Fatalf("interrupted metadata = %#v, want marker", store.steps[2].Messages[0].Metadata)

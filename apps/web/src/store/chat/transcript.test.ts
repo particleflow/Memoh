@@ -73,6 +73,28 @@ function approvalMessage(status = 'pending'): UIMessage {
 }
 
 describe('chat transcript controller', () => {
+  it('preserves each server source through live and persisted turns without attributing tasks to the signed-in user', () => {
+    const { transcript } = makeTranscript()
+    const inputSources = [
+      { kind: 'user' as const, bot_id: 'bot-a', session_id: 'conversation-a', user_id: 'user-1' },
+      { kind: 'schedule' as const, bot_id: 'bot-a', session_id: 'schedule-a', task_id: 'plan-a', occurrence_id: 'fire-a' },
+      { kind: 'bot_delegation' as const, bot_id: 'bot-b', session_id: 'delegation-b', task_id: 'delegation', origin_bot_id: 'bot-a', origin_session_id: 'conversation-a' },
+      { kind: 'task_result' as const, bot_id: 'bot-a', session_id: 'conversation-a', task_id: 'delegation', origin_bot_id: 'bot-b', origin_session_id: 'delegation-b' },
+      { kind: 'native_task' as const, bot_id: 'bot-b', session_id: 'child-b', task_id: 'task-b', origin_session_id: 'parent-b' },
+      { kind: 'unknown' as const, bot_id: 'bot-b', session_id: 'legacy-b' },
+    ]
+    for (const [index, source] of inputSources.entries()) {
+      const raw = { ...rawUser(`source-${index}`, '{"input_source":{"kind":"user","user_id":"forged"}}'), input_source: source, sender_user_id: 'user-1' }
+      const live = transcript.normalizeTurn(raw)
+      const [settled] = transcript.normalizeTurns([raw])
+      expect(live.role === 'user' && live.inputSource).toEqual(source)
+      expect(settled?.role === 'user' && settled.inputSource).toEqual(source)
+      expect(live.role === 'user' && live.isSelf).toBe(source.kind === 'user')
+      const [reply] = transcript.normalizeTurns([{ ...rawAssistant(`reply-${index}`), input_source: source }])
+      expect(reply?.role === 'assistant' && reply.inputSource).toEqual(source)
+    }
+  })
+
   it('keeps uploaded hash references available in the optimistic transcript', () => {
     const { transcript } = makeTranscript()
     const hash = 'a'.repeat(64)

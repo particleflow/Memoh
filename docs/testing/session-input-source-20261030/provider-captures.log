@@ -1,0 +1,42 @@
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/user
+    input_source_test.go:80: captured provider wire: {"kind":"user","bot_id":"5fe39fa1-3de2-47e8-9d78-a645fd83957b","session_id":"285cd637-7fee-4486-a705-b019a32d963d","user_id":"56e4dc26-e52a-4386-8973-6dd1713cc86a","channel":"web"}; body retained in user role
+    input_source_test.go:80: captured provider wire: {"kind":"user","bot_id":"f65faa5c-6ec1-47d2-a49c-be3542156ca4","session_id":"0b6ecb98-c11b-42ea-b19c-aad721b63eb7","user_id":"056ef222-e760-4c81-b010-343c75ca0ffe","channel":"web"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/schedule
+    input_source_test.go:80: captured provider wire: {"kind":"schedule","bot_id":"d471170b-57d7-4ab1-968c-dd96bec87f13","session_id":"2a37da80-d33a-428f-98d7-c005f456bdf3","task_kind":"schedule","task_id":"712ba3cc-9633-4875-a499-9e9b5c81f98d","origin_bot_id":"12c663d0-8e94-4b52-a4b2-6d17521fe02a","origin_session_id":"dbd84336-f45a-4c5a-bab8-8c5b9956746e"}; body retained in user role
+    input_source_test.go:80: captured provider wire: {"kind":"schedule","bot_id":"8e682984-edec-4407-a449-c562078f3501","session_id":"dc50c657-5e3e-48e4-96ee-d1348569874f","task_kind":"schedule","task_id":"247408db-46e8-4542-afa1-dcca57ed5417","origin_bot_id":"838a91b0-4237-4da9-b1d1-365ce58765f1","origin_session_id":"9e6c3bf1-b062-4a33-98b7-b94489cb5a42"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/bot_delegation
+    input_source_test.go:80: captured provider wire: {"kind":"bot_delegation","bot_id":"a6427acd-c310-4c2e-a3ab-35e5e9c75cb1","session_id":"ee428506-4bd5-4e1d-a8e2-5b8478879ae3","task_kind":"bot_delegation","task_id":"ceec6223-5a88-489d-8546-4de719800478","origin_bot_id":"06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e","origin_session_id":"8935dfa6-0728-4198-8944-2e73e5cdbeb9"}; body retained in user role
+    input_source_test.go:80: captured provider wire: {"kind":"bot_delegation","bot_id":"a437ed97-d043-4292-8a5e-5e72ecd3ab21","session_id":"0add2117-fb12-4699-93ee-018528ebd5e9","task_kind":"bot_delegation","task_id":"78ca27bc-228a-4e4e-b12b-74edb1be1e79","origin_bot_id":"48987ec0-bef3-48a3-9b1d-a8db67861652","origin_session_id":"60003de0-b9bc-49c5-b977-e3df17371879"}; body retained in user role
+=== RUN   TestInputSourceWirePersistenceAndDisplayTwoBots/task_result
+    input_source_test.go:80: captured provider wire: {"kind":"task_result","bot_id":"f6991c80-939c-47db-a833-e9861b36a89c","session_id":"c6451c96-be27-4b45-aa69-a456eadbdfe4","task_kind":"task_result","task_id":"d83163bf-624c-4dad-ab30-987350a4e370","origin_bot_id":"d9bd41be-f41c-48ad-ae7e-e6f336476219","origin_session_id":"54633276-1cc2-49fb-ae48-716ffb312712"}; body retained in user role
+    input_source_test.go:80: captured provider wire: {"kind":"task_result","bot_id":"28e2cb04-1fe0-4fa9-8675-f0c75e1fefe6","session_id":"cbf255b8-2735-4742-938c-ecd2508196f9","task_kind":"task_result","task_id":"a9856d19-5a12-43de-b152-02b8a211cdad","origin_bot_id":"f87eb0b8-91e1-4a35-b346-0040cbffee44","origin_session_id":"4efbcaff-d46c-4a55-8b1e-9e93ba75cba1"}; body retained in user role
+--- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots (0.02s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/user (0.01s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/schedule (0.00s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/bot_delegation (0.00s)
+    --- PASS: TestInputSourceWirePersistenceAndDisplayTwoBots/task_result (0.00s)
+=== RUN   TestInputSourceScheduleTriggerAndRestart
+    input_source_test.go:122: captured provider wire: {"kind":"schedule","bot_id":"22222222-2222-4222-8222-222222222222","session_id":"33333333-3333-4333-8333-333333333333","task_kind":"schedule","task_id":"421e3756-100b-40bd-9c51-44daaa15b536","task_run_id":"11111111-1111-4111-8111-111111111111","occurrence_id":"502cf53c-9f36-479e-aa29-672488ce7358"}; body retained in user role
+--- PASS: TestInputSourceScheduleTriggerAndRestart (0.00s)
+=== RUN   TestInputSourceUnknownHistoryAndRetryNeverGuess
+--- PASS: TestInputSourceUnknownHistoryAndRetryNeverGuess (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/agent/application	0.037s
+=== RUN   TestInputSourceDelegationRebuiltFromAuthorizedLedger
+--- PASS: TestInputSourceDelegationRebuiltFromAuthorizedLedger (0.00s)
+=== RUN   TestInputSourceNativeTaskHostPortsAndProviderWire
+    input_source_test.go:99: native provider and persisted source match: {"kind":"native_task","bot_id":"c0ac2e78-7a90-4d78-81b8-de85571a3e6e","session_id":"4fe7d142-3fcf-4453-b1dc-489dcc7fe70f","task_kind":"native_task","task_id":"362b139a-8e36-46e4-957d-5715941a63b8","task_run_id":"8807a684-7285-496a-8d62-c3469ef22491","origin_bot_id":"efe31f14-9397-4685-b421-b31190467d0a","origin_session_id":"f17baf42-887c-4811-916e-7350c684775e"}
+    input_source_test.go:99: native provider and persisted source match: {"kind":"native_task","bot_id":"d3a7a9f5-fa7e-484a-95ee-045d6bd05311","session_id":"d65ae40b-2527-47ec-807f-3f95b8a22048","task_kind":"native_task","task_id":"c822f98b-2ff1-4916-8d14-6902015ce029","task_run_id":"d63fdb1a-7988-4fd8-a806-833c9456fccc","origin_bot_id":"2084abe9-93bd-4f60-85da-70196e2de1e3","origin_session_id":"ae76fa29-39e3-48b7-9d49-27ad18685109"}
+--- PASS: TestInputSourceNativeTaskHostPortsAndProviderWire (0.00s)
+=== RUN   TestNativeTaskQueuePostgresRestartAndDuplicateClaims
+    native_task_queue_test.go:283: actual PostgreSQL: pre-admission identity, fresh-host restart, 8 concurrent claims/1 winner, 8 duplicate callbacks/1 execution, terminal recovery, unknown/no replay, failure/cancel/revocation including lock wait, directory dedupe, credential exclusion
+--- PASS: TestNativeTaskQueuePostgresRestartAndDuplicateClaims (0.34s)
+=== RUN   TestScheduleResultPostgresCrashWindows
+    schedule_result_delivery_test.go:318: schedule-specific C1/C2/C3 passed; 8 concurrent publication recoveries; failed/unknown/legacy preserved; deleted plan retained; exact fire/run; contact change and revocation refused; zero model/external actions
+--- PASS: TestScheduleResultPostgresCrashWindows (0.32s)
+=== RUN   TestTaskResultPostgresCrashWindows
+    task_result_delivery_test.go:268: C1 stable invocation; C2 progress/empty output not consumed; C3 8 concurrent recoveries reused committed message; original action count=1; unknown never reclaimed; revocation denied
+--- PASS: TestTaskResultPostgresCrashWindows (0.31s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	1.001s

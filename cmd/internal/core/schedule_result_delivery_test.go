@@ -25,6 +25,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/schedule"
 	"github.com/felinics/memoh/internal/taskresult"
@@ -291,6 +292,10 @@ func TestScheduleResultPostgresCrashWindows(t *testing.T) {
 	// Permission/contact changes block both execution authorization and publication preparation.
 	cmd := received[len(received)-1]
 	req := application.ChatRequest{TaskResultReceipt: cmd.TaskResultReceipt, BotID: bot, ThreadID: parent, UserID: user, CurrentChannel: cmd.CurrentChannel, ChatID: cmd.ChatID, RouteID: cmd.RouteID, ReplyTarget: cmd.ReplyTarget, ConversationType: cmd.ConversationType}
+	_, preparedSource, sourceErr := h.prepareResult(ctx, req)
+	if sourceErr != nil || preparedSource.InputSource == nil || preparedSource.InputSource.Kind != inputsource.Result || preparedSource.InputSource.TaskID != plan || preparedSource.InputSource.OriginBotID != bot || preparedSource.InputSource.UserID != "" {
+		t.Fatalf("schedule result source: %+v %v", preparedSource.InputSource, sourceErr)
+	}
 	if _, _, e = h.prepareResult(ctx, req); e != nil {
 		t.Fatal("valid schedule result rejected", e)
 	}

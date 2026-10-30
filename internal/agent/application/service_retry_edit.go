@@ -13,6 +13,7 @@ import (
 	"github.com/felinics/memoh/internal/apperror"
 	messageevent "github.com/felinics/memoh/internal/chat/event"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 type RetryLatestMessageInput struct {
@@ -119,6 +120,8 @@ func (s *Service) RetryLatestMessageWS(ctx context.Context, input RetryLatestMes
 		RequiredHistoryMessageID:     requestMessage.ID,
 		OnModelPreferenceSettled:     input.OnModelPreferenceSettled,
 	}
+	source := inputsource.FromMetadata(requestMessage.Metadata, req.BotID, req.ThreadID)
+	req.InputSource = &source
 	return s.streamReplacementWS(ctx, req, turn.ID, requestMessage.ID, "retry", eventCh, abortCh)
 }
 
