@@ -40,6 +40,7 @@ func (s *Service) TriggerSchedule(ctx context.Context, botID string, payload sch
 	if strings.TrimSpace(payload.Command) == "" {
 		return schedule.TriggerResult{}, errors.New("schedule command is required")
 	}
+	source := scheduleInputSource(botID, payload)
 
 	submission, err := json.Marshal(scheduleSubmission{
 		Kind:       "schedule",
@@ -56,12 +57,15 @@ func (s *Service) TriggerSchedule(ctx context.Context, botID string, payload sch
 	// payload.Command), otherwise the bubble's content would visibly change
 	// when the runtime projection hands over to the database at run end.
 	viewFn := func(handle sessionruntime.RunHandle) *sessionruntime.RunAdmissionView {
+		liveSource := source
+		liveSource.TaskRunID = handle.RunID
 		return &sessionruntime.RunAdmissionView{
 			RequestUserTurn: &chatview.UITurn{
-				TurnID:    handle.TurnID,
-				Role:      "user",
-				Text:      payload.Command,
-				Timestamp: time.Now(),
+				TurnID:      handle.TurnID,
+				Role:        "user",
+				Text:        payload.Command,
+				Timestamp:   time.Now(),
+				InputSource: &liveSource,
 			},
 		}
 	}
@@ -81,6 +85,7 @@ func (s *Service) TriggerSchedule(ctx context.Context, botID string, payload sch
 		err = errs.Recorded(err)
 	}()
 	ctx = runCtx
+	source.TaskRunID = admission.RunID
 
 	// Runtime sessions (ACP, codex, claude-code) must never silently degrade
 	// to the built-in model: resolve the driver and run the scheduled turn
@@ -94,6 +99,7 @@ func (s *Service) TriggerSchedule(ctx context.Context, botID string, payload sch
 	}
 
 	req := ChatRequest{
+		InputSource:     &source,
 		BotID:           botID,
 		ChatID:          botID,
 		ThreadID:        payload.SessionID,
@@ -137,7 +143,7 @@ func (s *Service) TriggerSchedule(ctx context.Context, botID string, payload sch
 		Command:     payload.Command,
 	})
 	cfg = attachCurrentTurnPrompt(cfg, schedulePrompt)
-	cfg = s.prepareRunConfig(ctx, cfg)
+	cfg = s.prepareRunConfig(ctx, cfg, req)
 	terminal := s.contextLifecycleTerminal(ctx, cfg)
 	var lifecycleCause error
 	defer func() { terminal(lifecycleCause) }()

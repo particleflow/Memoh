@@ -13,6 +13,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/runtime/native"
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/db"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 type continuationTurnRequestMessageResolver interface {
@@ -113,5 +114,12 @@ func (s *Service) prepareContinuationRunConfigWithRequiredInput(
 	base.Query = ""
 	base.LiveToolStream = eventCh != nil
 	base.CanRequestUserInput = s.canDeliverUserInputWS(eventCh)
-	return s.prepareRunConfig(ctx, base), nil
+	source := inputsource.Unattributed(summaryScope.BotID, summaryScope.SessionID)
+	for _, record := range retained {
+		if requestMessageID != "" && record.DBMessageID == requestMessageID {
+			source = inputsource.FromMetadata(record.Metadata, summaryScope.BotID, summaryScope.SessionID)
+			break
+		}
+	}
+	return s.prepareRunConfig(ctx, base, ChatRequest{BotID: summaryScope.BotID, ThreadID: summaryScope.SessionID, InputSource: &source}), nil
 }

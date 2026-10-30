@@ -1,0 +1,45 @@
+{
+  "tested_source": "0ec25b7e0b0de46349cc1555ba86248062d9c1ea",
+  "tested_tree": "3e86e7d10cf2822793083490aa0b3484d9a8ae6e",
+  "unchanged_original_reproducer_exit": 0,
+  "unchanged_original_reproducer_stdout": {
+    "candidate": "65649801a58946993d2824f3963255750661eb2a",
+    "path": "reduceRuntimeProjection(runtime_snapshot)",
+    "userSource": {
+      "kind": "schedule",
+      "bot_id": "bot-review",
+      "session_id": "schedule-review",
+      "task_id": "plan-review",
+      "task_run_id": "run-review",
+      "occurrence_id": "fire-review"
+    },
+    "assistantSource": {
+      "kind": "schedule",
+      "bot_id": "bot-review",
+      "session_id": "schedule-review",
+      "task_id": "plan-review",
+      "task_run_id": "run-review",
+      "occurrence_id": "fire-review"
+    },
+    "expectedAssistantSource": {
+      "kind": "schedule",
+      "bot_id": "bot-review",
+      "session_id": "schedule-review",
+      "task_id": "plan-review",
+      "task_run_id": "run-review",
+      "occurrence_id": "fire-review"
+    },
+    "passed": true
+  },
+  "note": "The original script retains its 65649801 fixture label; tested_source names the actual checkout. No assertion was changed.",
+  "composed_projection_checks": {
+    "reviewedSource": "0ec25b7e0b0de46349cc1555ba86248062d9c1ea",
+    "checks": {
+      "exactSegmentAndForeignActor": "PASS",
+      "missingUpsertAndPriorFrame": "PASS",
+      "receivingScopeChange": "PASS"
+    },
+    "passed": true
+  },
+  "composed_projection_exit": 0
+}

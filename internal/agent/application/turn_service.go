@@ -14,6 +14,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/turn"
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/errs"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 var _ turn.Service = (*Service)(nil)
@@ -48,6 +49,7 @@ func (s *Service) StartTurn(ctx context.Context, cmd turn.StartTurnCommand) (tur
 	if cmd.Mode == turn.ModeDiscuss && !s.discussRuntimeConfigured() {
 		return nil, errors.New("turn: discuss runtime not configured")
 	}
+	ctx = inputsource.WithContext(ctx, requestInputSource(req))
 
 	// The run context is cancellable by cause so a lost owner lease can stop
 	// execution with a reason, instead of a superseded owner racing the fence it

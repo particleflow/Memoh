@@ -80,6 +80,7 @@ export function createTranscriptHistory(deps: {
         turnId: turn.turn_id,
         turnPosition: turn.turn_position ?? undefined,
         role: 'user',
+        inputSource: turn.input_source,
         text: turn.skill_activation
           ? skillActivationTextFromRaw(turn.text ?? '', turn.skill_activation)
           : turn.text ?? '',
@@ -119,6 +120,7 @@ export function createTranscriptHistory(deps: {
       turnId: turn.turn_id,
       turnPosition: turn.turn_position ?? undefined,
       role: 'assistant',
+      inputSource: turn.input_source,
       ...(turn.runtime_forkable !== undefined ? { runtimeForkable: turn.runtime_forkable } : {}),
       messages: (turn.messages ?? []).map(normalizeUIMessage),
       timestamp: normalizeTimestamp(turn.timestamp),

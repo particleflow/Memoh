@@ -1,0 +1,117 @@
+{
+  "baseUrl": "http://127.0.0.1:28083",
+  "syntheticOnly": true,
+  "noModelOrActionCommands": true,
+  "evidence": [
+    {
+      "bot_id": "d471170b-57d7-4ab1-968c-dd96bec87f13",
+      "session_id": "2a37da80-d33a-428f-98d7-c005f456bdf3",
+      "initial": {
+        "marker": "PROJECTION_REPLY",
+        "source": {
+          "kind": "schedule",
+          "bot_id": "d471170b-57d7-4ab1-968c-dd96bec87f13",
+          "session_id": "2a37da80-d33a-428f-98d7-c005f456bdf3",
+          "task_kind": "schedule",
+          "task_id": "712ba3cc-9633-4875-a499-9e9b5c81f98d",
+          "origin_bot_id": "12c663d0-8e94-4b52-a4b2-6d17521fe02a",
+          "origin_session_id": "dbd84336-f45a-4c5a-bab8-8c5b9956746e"
+        },
+        "label": "source-capture-1 · 自动任务 · 712ba3cc-9633-4875-a499-9e9b5c81f98d",
+        "tooltip": "Bot: d471170b-57d7-4ab1-968c-dd96bec87f13\n会话: 2a37da80-d33a-428f-98d7-c005f456bdf3\n来源 Bot: 12c663d0-8e94-4b52-a4b2-6d17521fe02a\n来源会话: dbd84336-f45a-4c5a-bab8-8c5b9956746e\n任务: 712ba3cc-9633-4875-a499-9e9b5c81f98d\nBot: d471170b-57d7-4ab1-968c-dd96bec87f13 会话: 2a37da80-d33a-428f-98d7-c005f456bdf3 来源 Bot: 12c663d0-8e94-4b52-a4b2-6d17521fe02a 来源会话: dbd84336-f45a-4c5a-bab8-8c5b9956746e 任务: 712ba3cc-9633-4875-a499-9e9b5c81f98d"
+      },
+      "appended": {
+        "marker": "PROJECTION_REPLY_DELTA",
+        "source": {
+          "kind": "schedule",
+          "bot_id": "d471170b-57d7-4ab1-968c-dd96bec87f13",
+          "session_id": "2a37da80-d33a-428f-98d7-c005f456bdf3",
+          "task_kind": "schedule",
+          "task_id": "712ba3cc-9633-4875-a499-9e9b5c81f98d",
+          "origin_bot_id": "12c663d0-8e94-4b52-a4b2-6d17521fe02a",
+          "origin_session_id": "dbd84336-f45a-4c5a-bab8-8c5b9956746e"
+        },
+        "label": "source-capture-1 · 自动任务 · 712ba3cc-9633-4875-a499-9e9b5c81f98d",
+        "tooltip": "Bot: d471170b-57d7-4ab1-968c-dd96bec87f13\n会话: 2a37da80-d33a-428f-98d7-c005f456bdf3\n来源 Bot: 12c663d0-8e94-4b52-a4b2-6d17521fe02a\n来源会话: dbd84336-f45a-4c5a-bab8-8c5b9956746e\n任务: 712ba3cc-9633-4875-a499-9e9b5c81f98d\nBot: d471170b-57d7-4ab1-968c-dd96bec87f13 会话: 2a37da80-d33a-428f-98d7-c005f456bdf3 来源 Bot: 12c663d0-8e94-4b52-a4b2-6d17521fe02a 来源会话: dbd84336-f45a-4c5a-bab8-8c5b9956746e 任务: 712ba3cc-9633-4875-a499-9e9b5c81f98d"
+      },
+      "known": {
+        "marker": "PROJECTION_KNOWN_REPLY",
+        "source": {
+          "kind": "user",
+          "bot_id": "d471170b-57d7-4ab1-968c-dd96bec87f13",
+          "session_id": "2a37da80-d33a-428f-98d7-c005f456bdf3",
+          "user_id": "projection-other-actor"
+        },
+        "label": "source-capture-1 · 用户输入 · projection-other-actor",
+        "tooltip": "Bot: d471170b-57d7-4ab1-968c-dd96bec87f13\n会话: 2a37da80-d33a-428f-98d7-c005f456bdf3\n用户输入: projection-other-actor\nBot: d471170b-57d7-4ab1-968c-dd96bec87f13 会话: 2a37da80-d33a-428f-98d7-c005f456bdf3 用户输入: projection-other-actor"
+      },
+      "unknown": {
+        "marker": "PROJECTION_UNKNOWN_REPLY",
+        "source": {
+          "kind": "unknown",
+          "bot_id": "d471170b-57d7-4ab1-968c-dd96bec87f13",
+          "session_id": "2a37da80-d33a-428f-98d7-c005f456bdf3"
+        },
+        "label": "source-capture-1 · 来源未知",
+        "tooltip": "Bot: d471170b-57d7-4ab1-968c-dd96bec87f13\n会话: 2a37da80-d33a-428f-98d7-c005f456bdf3\nBot: d471170b-57d7-4ab1-968c-dd96bec87f13 会话: 2a37da80-d33a-428f-98d7-c005f456bdf3"
+      },
+      "pageErrors": [],
+      "transport": "controlled WebSocket server frames; actual application runtime client/projection/transcript/message component"
+    },
+    {
+      "bot_id": "a6427acd-c310-4c2e-a3ab-35e5e9c75cb1",
+      "session_id": "ee428506-4bd5-4e1d-a8e2-5b8478879ae3",
+      "initial": {
+        "marker": "PROJECTION_REPLY",
+        "source": {
+          "kind": "bot_delegation",
+          "bot_id": "a6427acd-c310-4c2e-a3ab-35e5e9c75cb1",
+          "session_id": "ee428506-4bd5-4e1d-a8e2-5b8478879ae3",
+          "task_kind": "bot_delegation",
+          "task_id": "ceec6223-5a88-489d-8546-4de719800478",
+          "origin_bot_id": "06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e",
+          "origin_session_id": "8935dfa6-0728-4198-8944-2e73e5cdbeb9"
+        },
+        "label": "source-capture-3 · Bot 委派 · ceec6223-5a88-489d-8546-4de719800478",
+        "tooltip": "Bot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1\n会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3\n来源 Bot: 06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e\n来源会话: 8935dfa6-0728-4198-8944-2e73e5cdbeb9\n任务: ceec6223-5a88-489d-8546-4de719800478\nBot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1 会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3 来源 Bot: 06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e 来源会话: 8935dfa6-0728-4198-8944-2e73e5cdbeb9 任务: ceec6223-5a88-489d-8546-4de719800478"
+      },
+      "appended": {
+        "marker": "PROJECTION_REPLY_DELTA",
+        "source": {
+          "kind": "bot_delegation",
+          "bot_id": "a6427acd-c310-4c2e-a3ab-35e5e9c75cb1",
+          "session_id": "ee428506-4bd5-4e1d-a8e2-5b8478879ae3",
+          "task_kind": "bot_delegation",
+          "task_id": "ceec6223-5a88-489d-8546-4de719800478",
+          "origin_bot_id": "06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e",
+          "origin_session_id": "8935dfa6-0728-4198-8944-2e73e5cdbeb9"
+        },
+        "label": "source-capture-3 · Bot 委派 · ceec6223-5a88-489d-8546-4de719800478",
+        "tooltip": "Bot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1\n会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3\n来源 Bot: 06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e\n来源会话: 8935dfa6-0728-4198-8944-2e73e5cdbeb9\n任务: ceec6223-5a88-489d-8546-4de719800478\nBot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1 会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3 来源 Bot: 06efdd73-bd1c-4e42-8b0d-6bd80a7fa62e 来源会话: 8935dfa6-0728-4198-8944-2e73e5cdbeb9 任务: ceec6223-5a88-489d-8546-4de719800478"
+      },
+      "known": {
+        "marker": "PROJECTION_KNOWN_REPLY",
+        "source": {
+          "kind": "user",
+          "bot_id": "a6427acd-c310-4c2e-a3ab-35e5e9c75cb1",
+          "session_id": "ee428506-4bd5-4e1d-a8e2-5b8478879ae3",
+          "user_id": "projection-other-actor"
+        },
+        "label": "source-capture-3 · 用户输入 · projection-other-actor",
+        "tooltip": "Bot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1\n会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3\n用户输入: projection-other-actor\nBot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1 会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3 用户输入: projection-other-actor"
+      },
+      "unknown": {
+        "marker": "PROJECTION_UNKNOWN_REPLY",
+        "source": {
+          "kind": "unknown",
+          "bot_id": "a6427acd-c310-4c2e-a3ab-35e5e9c75cb1",
+          "session_id": "ee428506-4bd5-4e1d-a8e2-5b8478879ae3"
+        },
+        "label": "source-capture-3 · 来源未知",
+        "tooltip": "Bot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1\n会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3\nBot: a6427acd-c310-4c2e-a3ab-35e5e9c75cb1 会话: ee428506-4bd5-4e1d-a8e2-5b8478879ae3"
+      },
+      "pageErrors": [],
+      "transport": "controlled WebSocket server frames; actual application runtime client/projection/transcript/message component"
+    }
+  ]
+}

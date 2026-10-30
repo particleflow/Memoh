@@ -16,6 +16,7 @@ import type {
   UIToolApproval,
   UIToolMessage,
   UIUserInput,
+  UIInputSource,
 } from '@/composables/api/useChat.types'
 import type { BotAgentRuntime, DirectBotAgentRuntime } from '@/utils/bot-agent'
 
@@ -106,6 +107,7 @@ export type ActiveChatTarget =
     }
 
 export interface ChatUserTurn {
+  inputSource?: UIInputSource
   id: string
   serverId?: string
   role: 'user'
@@ -147,6 +149,7 @@ export interface ChatUserTurn {
 }
 
 export interface ChatAssistantTurn {
+  inputSource?: UIInputSource
   runtimeForkable?: boolean
   id: string
   serverId?: string

@@ -6,6 +6,7 @@ import (
 
 	"github.com/felinics/memoh/internal/agent/turn"
 	attachmentpkg "github.com/felinics/memoh/internal/attachment"
+	"github.com/felinics/memoh/internal/inputsource"
 )
 
 // UIAttachmentsFromTurnAttachments converts turn attachments into the
@@ -79,6 +80,8 @@ func NewRequestUserTurn(cmd turn.StartTurnCommand, turnID string) *UITurn {
 		Platform:          platform,
 		ExternalMessageID: strings.TrimSpace(cmd.ExternalMessageID),
 	}
+	source := (inputsource.Source{Kind: inputsource.User, BotID: cmd.BotID, SessionID: cmd.ThreadID, UserID: cmd.UserID, ChannelIdentityID: cmd.SourceChannelIdentityID, Channel: cmd.CurrentChannel}).Scoped(cmd.BotID, cmd.ThreadID)
+	request.InputSource = &source
 	if platform != "" {
 		request.SenderDisplayName = strings.TrimSpace(cmd.DisplayName)
 		request.SenderUserID = strings.TrimSpace(cmd.SourceChannelIdentityID)

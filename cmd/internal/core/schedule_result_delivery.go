@@ -164,9 +164,11 @@ func (h *delegationHost) loadScheduleResult(ctx context.Context, id, bot, user, 
 	if b.UserID != user || b.SourceSessionID != session || b.TeamID != row.TeamID.String() {
 		return t, botdelegation.ErrDenied
 	}
+	t.sourceTaskID, t.occurrence = row.ScheduleID.String(), row.ID.String()
 	t.state = "unknown"
 	// A run is resolved only by this exact persisted fire, never by latest run.
 	if row.SessionID.Valid {
+		t.originBot, t.originSession = bot, row.SessionID.String()
 		child, e := h.sessions.Get(ctx, row.SessionID.String())
 		if e != nil {
 			return t, e

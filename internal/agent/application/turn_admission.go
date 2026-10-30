@@ -20,6 +20,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/turn"
 	chatview "github.com/felinics/memoh/internal/agent/view"
 	"github.com/felinics/memoh/internal/apperror"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/toolcontext"
 )
@@ -152,8 +153,12 @@ func (s *Service) admitTurnRun(
 			// persist no user message (discuss-shaped, attachment-only), and
 			// those runs stay contentless in the projection.
 			Admission: func(_ context.Context, handle sessionruntime.RunHandle) (sessionruntime.RunAdmissionView, error) {
+				request := chatview.NewRequestUserTurn(cmd, handle.TurnID)
+				if source, ok := inputsource.FromContext(ctx, cmd.BotID, cmd.ThreadID); ok && request != nil {
+					request.InputSource = &source
+				}
 				return sessionruntime.RunAdmissionView{
-					RequestUserTurn: chatview.NewRequestUserTurn(cmd, handle.TurnID),
+					RequestUserTurn: request,
 				}, nil
 			},
 			Cancel: cancel,

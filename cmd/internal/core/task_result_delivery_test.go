@@ -25,6 +25,7 @@ import (
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/taskresult"
 )
@@ -121,6 +122,10 @@ func TestTaskResultPostgresCrashWindows(t *testing.T) {
 		t.Fatal("lost wake changed original invocation")
 	}
 	first := received[0]
+	_, preparedSource, sourceErr := h.prepareResult(ctx, application.ChatRequest{TaskResultReceipt: first.TaskResultReceipt, BotID: bot, ThreadID: parent, UserID: user, CurrentChannel: first.CurrentChannel, ChatID: first.ChatID, RouteID: first.RouteID, ReplyTarget: first.ReplyTarget, ConversationType: first.ConversationType})
+	if sourceErr != nil || preparedSource.InputSource == nil || preparedSource.InputSource.Kind != inputsource.Result || preparedSource.InputSource.OriginBotID != bot || preparedSource.InputSource.OriginSessionID != child || preparedSource.InputSource.TaskID != r.TaskID || preparedSource.InputSource.UserID != "" {
+		t.Fatalf("restored result source: %+v %v", preparedSource.InputSource, sourceErr)
+	}
 	ref, _ := taskresult.Parse(first.TaskResultReceipt)
 	if ref.Attempt != 1 {
 		t.Fatal(ref)

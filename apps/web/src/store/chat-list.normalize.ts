@@ -34,6 +34,7 @@ export function normalizeTimestamp(value?: string): string {
 }
 
 export function resolveIsSelf(turn: UIUserTurn): boolean {
+  if (turn.input_source && turn.input_source.kind !== 'user') return false
   const platform = (turn.platform ?? '').trim().toLowerCase()
   if (!platform || platform === 'local') return true
   const senderUserId = (turn.sender_user_id ?? '').trim()

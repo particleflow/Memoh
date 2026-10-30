@@ -19,6 +19,7 @@ import (
 	"github.com/felinics/memoh/internal/agent/step"
 	tools "github.com/felinics/memoh/internal/agent/tool"
 	messagepkg "github.com/felinics/memoh/internal/chat/message"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -69,7 +70,9 @@ func (s *Service) SubagentStepCommit(
 	if strings.TrimSpace(turnRequestMessageID) == "" {
 		return nil, nil
 	}
+	source, _ := inputsource.FromContext(ctx, botID, sessionID)
 	committer := &subagentStepCommitter{
+		inputSource:          source,
 		persister:            persister,
 		ownerContext:         ctx,
 		runID:                handle.RunID,
@@ -88,6 +91,7 @@ func (s *Service) SubagentStepCommit(
 // carries no ChatRequest: the subagent path has no resolved chat context, and
 // its user message is persisted by the spawn provider before execution starts.
 type subagentStepCommitter struct {
+	inputSource  inputsource.Source
 	ownerContext context.Context
 	persister    messagepkg.AgentStepPersister
 	runID        string
@@ -141,14 +145,11 @@ func (c *subagentStepCommitter) persist(ctx context.Context, stepIndex int, reco
 		if msg.Usage != nil {
 			usage, _ = json.Marshal(msg.Usage)
 		}
-		var metadata map[string]any
+		metadata := map[string]any{inputsource.MetadataKey: c.inputSource.Scoped(c.botID, c.sessionID)}
 		if interrupted && msg.Role == sdk.MessageRoleAssistant {
-			metadata = map[string]any{messagepkg.AgentStepInterruptedMetadataKey: true}
+			metadata[messagepkg.AgentStepInterruptedMetadataKey] = true
 		}
 		if len(toolCallDiffs) > 0 {
-			if metadata == nil {
-				metadata = make(map[string]any, 1)
-			}
 			metadata[messagepkg.ToolCallDiffsMetadataKey] = toolCallDiffs
 		}
 		inputs = append(inputs, messagepkg.PersistInput{

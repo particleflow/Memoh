@@ -639,7 +639,10 @@ func (s *Service) triggerScheduleRuntime(ctx context.Context, botID string, payl
 		return schedule.TriggerResult{}, err
 	}
 
+	source := scheduleInputSource(botID, payload)
+	source.TaskRunID = runID
 	req := ChatRequest{
+		InputSource:     &source,
 		BotID:           botID,
 		ChatID:          botID,
 		ThreadID:        payload.SessionID,

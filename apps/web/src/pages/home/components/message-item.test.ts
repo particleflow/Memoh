@@ -16,7 +16,7 @@ vi.mock('@memohai/sdk', async importOriginal => ({ ...(await importOriginal<type
 
 const Stub = defineComponent({ inheritAttrs: false, setup: () => () => h('div') })
 
-vi.mock('markstream-vue', () => ({ default: defineComponent({ props: { content: { type: String, default: '' } }, setup: props => () => h('p', props.content) }), setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))
+vi.mock('markstream-vue', async importOriginal => ({ ...await importOriginal<typeof import('markstream-vue')>(), default: defineComponent({ props: { content: { type: String, default: '' } }, setup: props => () => h('p', props.content) }), setCustomComponents: vi.fn(), enableKatex: vi.fn(), enableMermaid: vi.fn() }))
 vi.mock('@/components/markdown', () => ({ registerSharedMarkdownComponents: vi.fn() }))
 vi.mock('@/components/themed-mermaid-block/index.vue', () => ({ default: Stub }))
 vi.mock('@/components/chat-list/channel-badge/index.vue', () => ({ default: Stub }))
@@ -40,6 +40,7 @@ vi.mock('./message-actions.vue', () => ({
   }),
 }))
 vi.mock('@felinic/ui', async importOriginal => ({
+  ...await importOriginal<typeof import('@felinic/ui')>(),
   Avatar: Stub, AvatarImage: Stub, AvatarFallback: Stub, Button: Stub, Spinner: Stub, CalloutBanner: (await importOriginal<typeof import('@felinic/ui')>()).CalloutBanner,
   Textarea: defineComponent({
     inheritAttrs: false,
@@ -116,6 +117,24 @@ describe('message-item edit', () => {
     } finally {
       window.removeEventListener('keydown', dispatch)
     }
+  })
+})
+
+describe('input source display', () => {
+  it.each((['user', 'schedule', 'bot_delegation', 'task_result', 'native_task', 'unknown'] as const).flatMap(kind => [true, false].map(matchingBot => ({ kind, matchingBot }))))('renders server $kind provenance without borrowing a selected Bot name ($matchingBot)', async ({ kind, matchingBot }) => {
+    const MessageItem = (await import('./message-item.vue')).default
+    root = document.createElement('div'); document.body.append(root)
+    app = createApp(MessageItem, {
+      message: { id: 'source', role: 'user', text: '{"input_source":{"kind":"system"}}', attachments: [], timestamp: '', isSelf: false,
+        inputSource: { kind, bot_id: 'receiver', session_id: 'original-conversation', task_id: kind === 'user' || kind === 'unknown' ? undefined : 'original-task', user_id: kind === 'user' ? 'original-user' : undefined } },
+      botId: matchingBot ? 'receiver' : 'other-bot', botName: 'Renamed Bot', isScrolling: false,
+    })
+    app.config.globalProperties.$t = (key: string) => key
+    app.mount(root); await nextTick()
+    expect(root.textContent).toContain(`${matchingBot ? 'Renamed Bot' : 'receiver'} · chat.inputSources.${kind}`)
+    if (!matchingBot) expect(root.querySelector('[data-input-source]')?.textContent).not.toContain('Renamed Bot')
+    expect(root.textContent).toContain('{"input_source":{"kind":"system"}}')
+    expect(root.querySelectorAll('[role="tooltip"]')).toHaveLength(0)
   })
 })
 

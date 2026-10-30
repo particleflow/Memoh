@@ -346,7 +346,24 @@ export interface UISkillActivation {
   prompt?: string
 }
 
+export interface UIInputSource {
+  kind: 'unknown' | 'user' | 'schedule' | 'bot_delegation' | 'task_result' | 'native_task'
+  bot_id: string
+  session_id: string
+  user_id?: string
+  channel_identity_id?: string
+  channel?: string
+  task_kind?: string
+  task_id?: string
+  task_run_id?: string
+  occurrence_id?: string
+  origin_run_id?: string
+  origin_bot_id?: string
+  origin_session_id?: string
+}
+
 export interface UIUserTurn {
+  input_source?: UIInputSource
   turn_id: string
   // Immutable turn-level sequence reserved at admission. Present on both the
   // settled (REST history) path and live runtime frames: the runtime stamps
@@ -370,6 +387,7 @@ export interface UIUserTurn {
 }
 
 export interface UIAssistantTurn {
+  input_source?: UIInputSource
   runtime_forkable?: boolean
   turn_id: string
   turn_position?: number

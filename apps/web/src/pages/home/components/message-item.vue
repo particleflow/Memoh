@@ -36,10 +36,25 @@
       <!-- Sender name (channel threads only): names every participant so the
            group conversation is legible without relying on bubble side. -->
       <p
-        v-if="showSenderName && avatarName"
+        v-if="sourceLabel || (showSenderName && avatarName)"
         class="text-xs font-medium text-muted-foreground mb-1 px-0.5"
       >
-        {{ avatarName }}
+        <TooltipProvider v-if="sourceLabel">
+          <Tooltip>
+            <TooltipTrigger as-child>
+              <span
+                data-input-source
+                tabindex="0"
+              >{{ sourceLabel }}</span>
+            </TooltipTrigger>
+            <TooltipContent class="whitespace-pre-wrap break-all">
+              {{ sourceDetails }}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <template v-else>
+          {{ avatarName }}
+        </template>
       </p>
 
       <!-- Background task status -->
@@ -430,7 +445,7 @@ if (typeof document !== 'undefined') {
 import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue'
 import { Sparkles, Target } from 'lucide-vue-next'
 import { formatRelativeTime, formatDateTime, formatCalendarTime } from '@/utils/date-time'
-import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Spinner, Textarea } from '@felinic/ui'
+import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Spinner, Textarea, Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@felinic/ui'
 import MarkdownRender, { enableKatex, enableMermaid } from 'markstream-vue'
 import { useLocalStorage } from '@vueuse/core'
 import { useAcceptedUserInputRecovery } from '../composables/useAcceptedUserInputRecovery'
@@ -799,6 +814,40 @@ const avatarName = computed(() => {
       : (props.message.senderDisplayName ?? '')
   }
   return ''
+})
+
+const sourceLabel = computed(() => {
+  if (props.message.role === 'system') return ''
+  const source = props.message.inputSource
+  if (!source) return ''
+  const known = new Set(['user', 'schedule', 'bot_delegation', 'task_result', 'native_task'])
+  const kind = known.has(source.kind) ? source.kind : 'unknown'
+  const ownIdentity = source.user_id && source.user_id === userStore.userInfo.id
+  const actor = kind === 'user'
+    ? (props.message.role === 'user' ? props.message.senderDisplayName : '')
+      || (ownIdentity ? userStore.userInfo.displayName || userStore.userInfo.username : '')
+      || source.user_id || source.channel_identity_id
+    : source.task_id
+  const bot = props.botId === source.bot_id ? props.botName || source.bot_id : source.bot_id
+  return [bot, t(`chat.inputSources.${kind}`), source.channel, actor].filter(Boolean).join(' · ')
+})
+
+const sourceDetails = computed(() => {
+  if (props.message.role === 'system') return ''
+  const source = props.message.inputSource
+  if (!source) return ''
+  return [
+    [t('chat.inputSources.bot'), source.bot_id],
+    [t('chat.inputSources.session'), source.session_id],
+    [t('chat.inputSources.user'), source.user_id],
+    [t('chat.inputSources.channelIdentity'), source.channel_identity_id],
+    [t('chat.inputSources.originBot'), source.origin_bot_id],
+    [t('chat.inputSources.originSession'), source.origin_session_id],
+    [t('chat.inputSources.task'), source.task_id],
+    [t('chat.inputSources.run'), source.task_run_id],
+    [t('chat.inputSources.occurrence'), source.occurrence_id],
+    [t('chat.inputSources.originRun'), source.origin_run_id],
+  ].filter(([, value]) => value).map(([label, value]) => `${label}: ${value}`).join('\n')
 })
 
 const avatarFallback = computed(() => (avatarName.value || '?').slice(0, 2).toUpperCase())

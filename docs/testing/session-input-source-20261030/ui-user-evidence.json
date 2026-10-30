@@ -1,0 +1,48 @@
+{
+  "baseUrl": "http://127.0.0.1:28083",
+  "verification": "Actual Server + PostgreSQL + Vite; controlled provider-test captures rehydrated into synthetic conversations; no production data",
+  "evidence": [
+    {
+      "kind": "user",
+      "bot": "71a9ea55-995d-42a3-bea2-1e7273a5a2b6",
+      "session": "2c2300d1-91b6-48fa-95a2-7000f6098d6a",
+      "source": {
+        "kind": "user",
+        "bot_id": "71a9ea55-995d-42a3-bea2-1e7273a5a2b6",
+        "session_id": "2c2300d1-91b6-48fa-95a2-7000f6098d6a",
+        "user_id": "66f69c2e-4d5f-4cd5-ac27-72dbfe8561d7",
+        "channel": "web"
+      },
+      "apiSourceMatches": true,
+      "refreshMatches": false,
+      "refreshStatus": "unverified: history panel may be empty after reload",
+      "coldOpen": true,
+      "tooltip": "Bot: 71a9ea55-995d-42a3-bea2-1e7273a5a2b6\n会话: 2c2300d1-91b6-48fa-95a2-7000f6098d6a\n用户输入: 66f69c2e-4d5f-4cd5-ac27-72dbfe8561d7\nBot: 71a9ea55-995d-42a3-bea2-1e7273a5a2b6 会话: 2c2300d1-91b6-48fa-95a2-7000f6098d6a 用户输入: 66f69c2e-4d5f-4cd5-ac27-72dbfe8561d7",
+      "errors": []
+    },
+    {
+      "kind": "user",
+      "bot": "56e952bd-a36f-4d20-a75b-e6a6b9d44b4b",
+      "session": "9cf74d04-73dc-4129-bbcd-8d00c29bb3c6",
+      "source": {
+        "kind": "user",
+        "bot_id": "56e952bd-a36f-4d20-a75b-e6a6b9d44b4b",
+        "session_id": "9cf74d04-73dc-4129-bbcd-8d00c29bb3c6",
+        "user_id": "9ecda08d-5291-4fd6-830c-898dbfe82840",
+        "channel": "web"
+      },
+      "apiSourceMatches": true,
+      "refreshMatches": false,
+      "refreshStatus": "unverified: history panel may be empty after reload",
+      "coldOpen": true,
+      "tooltip": "Bot: 56e952bd-a36f-4d20-a75b-e6a6b9d44b4b\n会话: 9cf74d04-73dc-4129-bbcd-8d00c29bb3c6\n用户输入: 9ecda08d-5291-4fd6-830c-898dbfe82840\nBot: 56e952bd-a36f-4d20-a75b-e6a6b9d44b4b 会话: 9cf74d04-73dc-4129-bbcd-8d00c29bb3c6 用户输入: 9ecda08d-5291-4fd6-830c-898dbfe82840",
+      "errors": []
+    },
+    {
+      "kind": "keyboard-narrow-dark",
+      "tooltipKeyboardVisible": true,
+      "viewportWidth": 390,
+      "documentOverflow": false
+    }
+  ]
+}

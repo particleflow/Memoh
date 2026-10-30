@@ -698,6 +698,9 @@ func (s *Service) resolveWithHTTPClient(ctx context.Context, req ChatRequest, mo
 	runCfg.ContextTrimmableMessages = min(trimmableMessages, len(messages))
 
 	displayName := s.resolveDisplayName(ctx, req)
+	if source := requestInputSource(req); source.Kind != "user" {
+		displayName = source.Kind
+	}
 	mergedAttachments := s.routeAndMergeAttachments(ctx, chatModel, req)
 
 	tz := runCfg.Identity.TimezoneLocation
@@ -848,7 +851,7 @@ func (s *Service) Chat(ctx context.Context, req ChatRequest) (ChatResponse, erro
 		cfg.OnStepCommitted = stepCommitter.commit
 		stepCommitter.bindContinuation(&cfg)
 	}
-	cfg = s.prepareRunConfig(ctx, cfg)
+	cfg = s.prepareRunConfig(ctx, cfg, req)
 	terminal := s.contextLifecycleTerminal(ctx, cfg)
 	var lifecycleCause error
 	defer func() { terminal(lifecycleCause) }()
@@ -1446,7 +1449,7 @@ func (s *Service) ResolveRunConfig(ctx context.Context, botID, sessionID, channe
 }
 
 // prepareRunConfig generates the system prompt and appends the user message.
-func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig) native.RunConfig {
+func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig, requests ...ChatRequest) native.RunConfig {
 	cfg.ContextHookText = ""
 	beforePromptResult := s.runPromptHook(ctx, agentRunConfigView{
 		BotID:        cfg.Identity.BotID,
@@ -1574,6 +1577,19 @@ func (s *Service) prepareRunConfig(ctx context.Context, cfg native.RunConfig) na
 		native.GenerateSystemSections(systemParams),
 		hookBuild.Frags,
 	)
+	// Keep host provenance separate from user/task bodies. It participates in
+	// provider budget admission as required context and survives mode changes.
+	source := requestInputSource(ChatRequest{BotID: cfg.Identity.BotID, ThreadID: cfg.Identity.SessionID})
+	if len(requests) > 0 {
+		source = requestInputSource(requests[0])
+	}
+	section := sourceSystemSection(source)
+	cfg.System += "\n\n" + section.Text
+	sourceFrags := native.SystemSectionFrags([]native.SystemSection{section}, cfg.ContextScope)
+	for i := range sourceFrags {
+		sourceFrags[i].CacheClass = contextfrag.CacheNever
+	}
+	cfg.ContextSourceFrags = append(cfg.ContextSourceFrags, sourceFrags...)
 	cfg.ContextSourceWarnings = hookBuild.Warnings
 	return cfg.RefreshContextFrag()
 }

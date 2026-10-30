@@ -21,6 +21,7 @@ import (
 	dbsqlc "github.com/felinics/memoh/internal/db/postgres/sqlc"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -97,6 +98,23 @@ func TestNativeTaskQueuePostgresRestartAndDuplicateClaims(t *testing.T) {
 	pool.Close()
 	pool = open()
 	q = host() // Fresh connections and host, with no in-memory task map.
+	restoredContext, _, sourceErr := q.RestoreSession(ctx, first)
+	if sourceErr != nil {
+		t.Fatal(sourceErr)
+	}
+	restoredSource, ok := inputsource.FromContext(restoredContext, bot, child)
+	if !ok || restoredSource.Kind != inputsource.NativeTask || restoredSource.TaskID != first.TaskID || restoredSource.OriginSessionID != parent || restoredSource.OriginRunID != source || restoredSource.UserID != "" {
+		t.Fatalf("restart lost native origin: %+v", restoredSource)
+	}
+	capturedAdmission := &sourceAdmissionCapture{runID: uuid.NewString()}
+	decorated := sourceSubagentAdmitter{capturedAdmission, q}
+	childContext, _, _, sourceErr := decorated.AdmitSubagentRun(ctx, bot, child, "subagent:"+first.TaskID, nil)
+	if sourceErr != nil || capturedAdmission.saved.TaskID != first.TaskID {
+		t.Fatalf("fresh task admission origin lost: %v %+v", sourceErr, capturedAdmission.saved)
+	}
+	if sourceErr = decorated.RecordSubagentResume(childContext, tools.SessionContext{BotID: bot}, child, "synthetic query", "synthetic model"); sourceErr != nil || !capturedAdmission.recorded || capturedAdmission.saved.TaskRunID != capturedAdmission.runID || capturedAdmission.saved.OriginRunID != source {
+		t.Fatalf("optional resume port/source lost: %v %+v", sourceErr, capturedAdmission)
+	}
 	pending, err := q.Pending(ctx)
 	if err != nil {
 		t.Fatal(err)

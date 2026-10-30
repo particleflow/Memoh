@@ -1,5 +1,13 @@
 # Independent input-source admission review
 
+Update, 2026-10-30: the original P2 below is closed by independent recheck of
+`0ec25b7e0b0de46349cc1555ba86248062d9c1ea`, parent `65649801`. Its unchanged
+original counterexample now exits 0. The new exact-segment/foreign/missing-source
+checks are in [projection-combination-check.mjs](projection-combination-check.mjs).
+The original red result and initial admission decision below are retained as
+history. See [combination and delivery handoff](COMBINATION.md) for the current
+source/client/recovery boundary; source admission is not deployment acceptance.
+
 Reviewed on 2026-10-30 UTC. Candidate
 [`65649801a58946993d2824f3963255750661eb2a`](https://github.com/particleflow/Memoh/commit/65649801a58946993d2824f3963255750661eb2a),
 parent `9270da0252128a296d9a641235cdfd32ab44cfda`, tree

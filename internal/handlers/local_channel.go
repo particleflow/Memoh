@@ -44,6 +44,7 @@ import (
 	"github.com/felinics/memoh/internal/errlog"
 	"github.com/felinics/memoh/internal/errs"
 	"github.com/felinics/memoh/internal/httpx"
+	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/media"
 	"github.com/felinics/memoh/internal/runtimefence"
 	"github.com/felinics/memoh/internal/server"
@@ -2437,6 +2438,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 				handler: h,
 				botID:   botID,
 				request: chatview.UITurn{
+					InputSource:       &inputsource.Source{Kind: inputsource.User, BotID: botID, SessionID: sessionID, UserID: channelIdentityID, ChannelIdentityID: channelIdentityID, Channel: h.channelType.String()},
 					Role:              "user",
 					Text:              userVisibleText,
 					UserMessageKind:   userMessageKind,
@@ -2662,6 +2664,7 @@ func (h *LocalChannelHandler) HandleWebSocket(c echo.Context) error {
 					return h.agentService.PrepareEditLatestTurnOperation(ctx, sessionID, targetTurnID)
 				},
 				replacementUserTurn: &chatview.UITurn{
+					InputSource:  &inputsource.Source{Kind: inputsource.User, BotID: botID, SessionID: sessionID, UserID: channelIdentityID, ChannelIdentityID: channelIdentityID, Channel: h.channelType.String()},
 					Role:         "user",
 					Text:         text,
 					Timestamp:    time.Now().UTC(),
