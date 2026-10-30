@@ -34,7 +34,7 @@ vi.mock('@/store/chat-list', () => ({
       currentBotId.value = id
     }
     return {
-      currentBotId, bots, activeSession, selectBot,
+      currentBotId, bots, activeSession, selectBot, bindRouteContext: vi.fn(),
       refreshBots: chat.refreshBots,
       initializeWithRecovery: chat.initializeWithRecovery,
     }

@@ -47,6 +47,7 @@ vi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: 
 const useChat = defineStore('read-aloud-home-admission', {
   state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false, contactNavigationPending: false, contactOpenRequested: null as { botId: string, sessionId: string } | null }),
   actions: {
+    bindRouteContext() {},
     async selectBot(botId: string, options?: { sessionId?: string }) {
       this.currentBotId = botId
       if (!options?.sessionId) this.contactNavigationPending = true
