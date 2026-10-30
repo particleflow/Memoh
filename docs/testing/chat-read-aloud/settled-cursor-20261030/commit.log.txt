@@ -1,0 +1,20 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (f7ddc70ba)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 2 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 5.12s
+[hooks] Go: no packages selected for this build context
+[hooks] Total: 5.12s
+[fix/chat-speech-settled-cursor-20261030 7a1784ce9] fix(chat): commit settled speech cursor to its observed run
+ 2 files changed, 53 insertions(+), 2 deletions(-)
+ create mode 100644 apps/web/src/pages/home/composables/speech-settled-cursor.test.ts

@@ -1,0 +1,79 @@
+diff --git a/apps/web/src/pages/home/composables/chat-read-aloud.ts b/apps/web/src/pages/home/composables/chat-read-aloud.ts
+index 12994aab8..f02f2989d 100644
+--- a/apps/web/src/pages/home/composables/chat-read-aloud.ts
++++ b/apps/web/src/pages/home/composables/chat-read-aloud.ts
+@@ -112,7 +112,10 @@ export class LiveSpeechReplies {
+       const text = rendered ? rendered(message) : speechText(message)
+       if (message.messages.some(block => block.type === 'error')) { this.consumed.add(revision); continue }
+       if (message.streaming || (observed && (!message.runtimeRunId || observed === revision))) {
+-        const prior = this.spoken.get(observed && !message.runtimeRunId ? observed : revision) ?? ''
++        // Settled history omits runtimeRunId; retain the observed run for both
++        // cursor reads and commits. An explicit new run keeps its own revision.
++        const cursorRevision = observed && !message.runtimeRunId ? observed : revision
++        const prior = this.spoken.get(cursorRevision) ?? ''
+         // A replacement is not an append. Never replay previously spoken text.
+         if (text.startsWith(prior)) {
+           const tail = text.slice(prior.length)
+@@ -124,7 +127,7 @@ export class LiveSpeechReplies {
+             if (!end && Array.from(tail).length >= 500) end = speechChunks(tail)[0]!.length
+           }
+           const delta = tail.slice(0, end)
+-          if (delta.trim()) { result.push({ key: speechKey(message), messageId: message.id, text: delta }); this.spoken.set(revision, prior + delta) }
++          if (delta.trim()) { result.push({ key: speechKey(message), messageId: message.id, text: delta }); this.spoken.set(cursorRevision, prior + delta) }
+         }
+       }
+       // A final message can precede typewriter, math and diagram DOM updates.
+diff --git a/apps/web/src/pages/home/composables/speech-settled-cursor.test.ts b/apps/web/src/pages/home/composables/speech-settled-cursor.test.ts
+new file mode 100644
+index 000000000..0dac6a7cf
+--- /dev/null
++++ b/apps/web/src/pages/home/composables/speech-settled-cursor.test.ts
+@@ -0,0 +1,48 @@
++import { expect, it } from 'vitest'
++import type { ChatAssistantTurn } from '@/store/chat/types'
++import { LiveSpeechReplies } from './chat-read-aloud'
++import { SpeechReplayCache } from './speech-replay-cache'
++
++const message = (text: string, streaming: boolean, run?: string): ChatAssistantTurn => ({ id: 'same-render-row', turnId: 'original-turn', ...(run ? { runtimeRunId: run } : {}), role: 'assistant', streaming, timestamp: '', messages: [{ id: 0, type: 'text', content: text }] })
++const visible = (m: ChatAssistantTurn) => m.messages.flatMap(block => block.type === 'text' ? [block.content] : []).join('')
++const collect = (live: LiveSpeechReplies, m: ChatAssistantTurn) => live.update([m], true, false, false, item => visible(item as ChatAssistantTurn)).map(part => part.text)
++function started() {
++  const live = new LiveSpeechReplies()
++  expect(collect(live, message('Original sentence. Waiting', true, 'original-run'))).toEqual(['Original sentence. '])
++  return live
++}
++it.each([['retained', 'original-run'], ['omitted', undefined]])('commits a delayed final tail exactly once when runtimeRunId is %s', (_name, run) => {
++  const live = started(), final = message('Original sentence. Delayed tail.', false, run)
++  expect(collect(live, final)).toEqual(['Delayed tail.'])
++  expect(collect(live, final)).toEqual([])
++  expect(collect(live, final)).toEqual([])
++})
++it('keeps actual EOF-completed cache coverage ready after repeated final DOM collection without a runtime run id', async () => {
++  const live = new LiveSpeechReplies(), cache = new SpeechReplayCache(), signal = new AbortController().signal
++  const rows = [message('Original sentence. Waiting', true, 'original-run'), message('Original sentence. Delayed tail.', false), message('Original sentence. Delayed tail.', false)]
++  let count = 0
++  for (const row of rows) for (const text of collect(live, row)) {
++    count++
++    const audio = cache.capture('account/bot/scope/original-run/same-render-row', text, { identity: 'same-effective-voice-model-format', contentType: 'audio/wav', stream: new ReadableStream({ start(c) { c.enqueue(new Uint8Array([count])); c.close() } }) }, signal)
++    const reader = audio.stream.getReader(); while (!(await reader.read()).done) {}; reader.releaseLock()
++  }
++  expect(cache.status('account/bot/scope/original-run/same-render-row', 'Original sentence. Delayed tail.')).toBe('ready')
++  expect(count).toBe(2)
++})
++it('keeps an explicitly identified new run on its own cursor after an omitted-run final tail', () => {
++  const live = started()
++  expect(collect(live, message('Original sentence. Delayed tail.', false))).toEqual(['Delayed tail.'])
++  expect(collect(live, message('New sentence. Waiting', true, 'new-run'))).toEqual(['New sentence. '])
++  expect(collect(live, message('New sentence. New tail.', false))).toEqual(['New tail.'])
++  expect(collect(live, message('New sentence. New tail.', false))).toEqual([])
++})
++it('retains interruption fences and establishes a silent history baseline after scope reset', () => {
++  const live = started()
++  live.interrupt([message('Original sentence. Waiting', true, 'original-run')])
++  expect(collect(live, message('Original sentence. Delayed tail.', false))).toEqual([])
++  expect(collect(live, message('Original sentence. Late frame.', true, 'original-run'))).toEqual([])
++  expect(collect(live, message('New sentence. Waiting', true, 'new-run'))).toEqual(['New sentence. '])
++  live.reset()
++  expect(collect(live, message('History in next scope.', false))).toEqual([])
++  expect(collect(live, message('Fresh scope sentence. Waiting', true, 'scope-run'))).toEqual(['Fresh scope sentence. '])
++})

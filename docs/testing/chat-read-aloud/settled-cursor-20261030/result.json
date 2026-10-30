@@ -1,0 +1,23 @@
+{
+  "sourceCommit": "7a1784ce9a11ff31b76537431fb829debd25e87f",
+  "sourceTree": "e0a6eb2d4c7e9da3c4d388ddab61b5e8417718f4",
+  "base": "d90f0536e52ad782f0436abccb26994ad4d1bb3a",
+  "red": {
+    "failed": 3,
+    "passedControls": 2,
+    "cache": "expected ready / actual changed",
+    "repeat": "expected [] / actual Delayed tail."
+  },
+  "green": {
+    "passed": 5,
+    "failed": 0
+  },
+  "normalCommitHook": "ESLint passed, no Go packages selected",
+  "prior32And20SuitesRerun": false,
+  "realProviderCalls": 0,
+  "browserOrArkWebValidation": false,
+  "builtSignedDeployed": false,
+  "originalReviewRead": "d68c3dcfb3715bfb438a3360567d859633e4a760 fetch returned not our ref; parent-provided exact counterexample rebuilt locally",
+  "combinedWithNativeInput": false,
+  "patchSHA256": "52c994102e305a1b1446b42b5a21bdcaf0b423fbdde029d3d9551d2e27720941"
+}

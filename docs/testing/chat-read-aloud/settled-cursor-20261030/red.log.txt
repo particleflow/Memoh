@@ -1,0 +1,75 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-settled-cursor
+
+ ❯ |web| src/pages/home/composables/speech-settled-cursor.test.ts (5 tests | 3 failed) 32ms
+   × commits a delayed final tail exactly once when runtimeRunId is omitted 7ms
+   × keeps actual EOF-completed cache coverage ready after repeated final DOM collection without a runtime run id 8ms
+   × keeps an explicitly identified new run on its own cursor after an omitted-run final tail 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-settled-cursor.test.ts > commits a delayed final tail exactly once when runtimeRunId is omitted
+AssertionError: expected [ 'Delayed tail.' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "Delayed tail.",
++ ]
+
+ ❯ src/pages/home/composables/speech-settled-cursor.test.ts:17:32
+     15|   const live = started(), final = message('Original sentence. Delayed …
+     16|   expect(collect(live, final)).toEqual(['Delayed tail.'])
+     17|   expect(collect(live, final)).toEqual([])
+       |                                ^
+     18|   expect(collect(live, final)).toEqual([])
+     19| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-settled-cursor.test.ts > keeps actual EOF-completed cache coverage ready after repeated final DOM collection without a runtime run id
+AssertionError: expected 'changed' to be 'ready' // Object.is equality
+
+Expected: "ready"
+Received: "changed"
+
+ ❯ src/pages/home/composables/speech-settled-cursor.test.ts:29:110
+     27|     const reader = audio.stream.getReader(); while (!(await reader.rea…
+     28|   }
+     29|   expect(cache.status('account/bot/scope/original-run/same-render-row'…
+       |                                                                                                              ^
+     30|   expect(count).toBe(2)
+     31| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  |web| src/pages/home/composables/speech-settled-cursor.test.ts > keeps an explicitly identified new run on its own cursor after an omitted-run final tail
+AssertionError: expected [ 'New tail.' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "New tail.",
++ ]
+
+ ❯ src/pages/home/composables/speech-settled-cursor.test.ts:37:68
+     35|   expect(collect(live, message('New sentence. Waiting', true, 'new-run…
+     36|   expect(collect(live, message('New sentence. New tail.', false))).toE…
+     37|   expect(collect(live, message('New sentence. New tail.', false))).toE…
+       |                                                                    ^
+     38| })
+     39| it('retains interruption fences and establishes a silent history basel…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 2 passed (5)
+   Start at  14:30:50
+   Duration  453ms (transform 112ms, setup 0ms, import 249ms, tests 32ms, environment 0ms)
+
