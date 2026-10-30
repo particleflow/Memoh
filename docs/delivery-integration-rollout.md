@@ -1,5 +1,10 @@
 # Generic delivery integration candidate
 
+For handoff/tool failures, first consult the maintained
+[compatibility incident register](testing/compatibility-incident-register.md).
+The candidate and schema sequence below are historical; use the current
+version-specific handoff for deployment, not these older schema numbers.
+
 This candidate combines the reviewed delivery ancestry through
 `ddb09be456002ea81466fb1560d1f6b6850b99dd` with cleaned main
 `851e8da4284c1f01e7e95f9547b16e7250bf553b` using an ordinary merge.

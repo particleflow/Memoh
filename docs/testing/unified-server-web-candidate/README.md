@@ -1,5 +1,11 @@
 # Unified server/Web candidate: fixed source and bounded verification
 
+For current delivery/tool recovery, read the maintained
+[compatibility incident register](../compatibility-incident-register.md) first.
+The source, tests and recovery observations below describe this historical
+checkpoint; they do not establish the latest deployed version or resolve later
+file-materialization and access-scope failures.
+
 This is a source candidate, not a release or proof that every client is on the
 same version. It makes no production, provider, credential or Agent-core change.
 The only code diff from the reviewed PR68 base is two Go HTTP test files.

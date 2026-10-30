@@ -77,6 +77,8 @@ Top-level layout — see `docs/codebase-map.md` for the full annotated tree, con
 
 Before making changes to a directory, check whether that directory (or its nearest parent application/package directory) contains an `AGENTS.md`. If it does, read it first. Local files contain domain-specific conventions that override or extend this root guide.
 
+Before delivery, handoff or environment-recovery work, read the applicable entries in the [delivery compatibility incident register](docs/testing/compatibility-incident-register.md). Reuse the verified path and preserve unresolved boundaries; a text handoff, downloaded file, recovered executor and deployed product require separate evidence. The original owner updates the matching entry and handoff after a newly verified cause or recovery. Do not repeat an unchanged failed probe or bypass an access denial.
+
 Key local developer guides:
 - `apps/web/AGENTS.md` — web frontend architecture, routing, page conventions, and i18n rules.
 - `apps/desktop/AGENTS.md` — Electron shell, hosted-server bootstrap, tray/menu/preload rules.
