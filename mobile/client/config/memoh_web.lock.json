@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "538b35a45e2c12ef8c0942bfea8a04582298d73ddd092fc11d839d81357b39a3"
+      "sha256": "926f2d77b9411ec6b6d6cbec425dcf3a4048183b5263888c9195811aa4123d2d"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -552,6 +552,24 @@
       "fieldElevenSkeletonCauseReproduced": false,
       "readAloudFixtureFailuresResolved": false,
       "newHapBuilt": false
+    },
+    "speechConvergence": {
+      "parentHarmony": "d30421e0c2f713cc0b338dc86fd8a20b46baf506",
+      "commonSharedBase": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+      "frozenDependencyCommits": [
+        "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+        "ba44c06261fb3be30557160840bc25e339cab650"
+      ],
+      "settledCursorP1": "7a1784ce9a11ff31b76537431fb829debd25e87f",
+      "nativeInput": "09acf7b00d560bac3f312522756e3749d7ddd0a3",
+      "fixtureOnly": "d2cc9bd60e220f8f191ccbf8474704dad3d9b14c",
+      "protocolSupplement": "1764c882642ef43256ccd8001b97c145c593af54",
+      "existingSDKOperationsUnchanged": 382,
+      "newSDKOperations": 3,
+      "pendingExactUnifiedHead": true,
+      "newHapBuilt": false,
+      "nativeProviderMimeReadbackProven": false,
+      "actualArkWebAcceptance": false
     }
   }
 }

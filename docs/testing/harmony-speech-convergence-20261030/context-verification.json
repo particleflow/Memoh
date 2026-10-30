@@ -1,0 +1,130 @@
+{
+  "contextSHA256": "2f1d74c5e781ce23bbe7d470f6e2eb959624def786b61b956930ef415d12fed3",
+  "mappedFiles": 29,
+  "pairedEntries": 180,
+  "hostPatchNamesRetained": 47,
+  "finalGeneratedFiles": [
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "generatedSHA256": "8880db42632984fa726d0b6f024a0f02189e9316223545e1808f089214b324f6"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "generatedSHA256": "01f9ea058fa9454aad45f2c10b813071778cfa7e22ede32a78b3832a53999b48"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "generatedSHA256": "8a2d3dfeed09fd03db1d98c9983a928802c6361c9a8ba105a3cf32b4ed53e5a6"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "generatedSHA256": "a9dba2ae4832e708c81f9731cd0434ba31aa46c664b25af1f6bf3a88639ffab5"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "generatedSHA256": "05ae62096f5349401481fd0e37ab560babc11b3225e4e98a348e6d31e6ebd58c"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "generatedSHA256": "1a281b476802b69792f954d055dd47a56fb6f50e623030db18624cf0ce2f3123"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.streaming.test.ts",
+      "generatedSHA256": "b495e0ce031eab8f8853a627174949bca9de242899471ac2693a922d1c403b7a"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.test.ts",
+      "generatedSHA256": "f0e31d757b1c40e8b10c89080bfeb1066e033529202d79a2376b48dfe937f221"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+      "generatedSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-audio-stream.ts",
+      "generatedSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-continuity.test.ts",
+      "generatedSHA256": "9da3a540808a2614d3e4d2e13c669dd1c5c4696ef853a721414045a85063992c"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-native-input.test.ts",
+      "generatedSHA256": "36a4e1e95e0d1e7429241cd409b4b391ba5c75e389fe2a59a9cee766916634d5"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-render-completion.test.ts",
+      "generatedSHA256": "2c60e894f3b6685e9dc78a7817bef2cf990b105b30ff135f2b93864b6bc67617"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-render-completion.ts",
+      "generatedSHA256": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-replay-cache.test.ts",
+      "generatedSHA256": "7ed94d4a949e8d5f7869ebc9b609e5f92ed4b9f039d2e88904a836a2e31df1c3"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-replay-cache.ts",
+      "generatedSHA256": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-sentence-boundary.test.ts",
+      "generatedSHA256": "fbabab7a75ae6f3dc574fb69186439c4b617d58f6bee3eb15c7cd28375955ae7"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-sentence-boundary.ts",
+      "generatedSHA256": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-settled-cursor.test.ts",
+      "generatedSHA256": "5769a8ea0fec9073939a94324f3cc3eb0cbdb5d6cb5e05af718e056b48042c9e"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-timing.integration.test.ts",
+      "generatedSHA256": "58d5b16ba26ae690b44099468f29d22fcbeb91c4bfbfa5a90f51b6fe0e823d55"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-visible-delta.test.ts",
+      "generatedSHA256": "5e905973a896baea8d968f589d7101a425495afd7b74115d2848061568c299e8"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-wav-compat.test.ts",
+      "generatedSHA256": "8726c014e28ea33315bcc844db16bec23a00063b6f6ef491cfe112a41fbe9c87"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.cache.test.ts",
+      "generatedSHA256": "cc3eed8182e75b92df28905b39c6f30d98e088925ab8d71564a71a29d1191e3e"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.native.test.ts",
+      "generatedSHA256": "b67a4712950c373e9e4c018eb72a949a6a333c5ecd2a450bf9bf3e5ad15a6367"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "generatedSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "generatedSHA256": "94cffa8bd7d7a0620b5fad42a33737fbe63e4a2c78abd82e5356853928bcbd59"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "generatedSHA256": "312f4dcfb2d47e8c43d37bbc3c61d9d6f224f373a9f299072f2a2da66c3f349c"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "generatedSHA256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.read-aloud-admission.test.ts",
+      "generatedSHA256": "149f25ffb08c1e11a22aa9ff1a2f05f7478acebcf24a087b3950a0192b311f4a"
+    }
+  ],
+  "homeLiveRouterAndEnsureWebSocketRetained": true,
+  "readonlyComposerLifetimeAndNativePreparationRetained": true,
+  "sourceProjectionFilesOutsideSpeechMapRetained": true,
+  "priorFixtureHashSupersededOnlyByExplicitD2ccMerge": true,
+  "fullNativeBuild": false,
+  "newHap": false
+}

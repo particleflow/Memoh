@@ -1,0 +1,26 @@
+{
+  "rows": [
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "existingInitializersUnchanged": 382,
+      "added": [
+        "getBotsByBotIdTtsPlaybackConfig",
+        "postBotsByBotIdTtsPlaybackInput",
+        "putBotsByBotIdTtsPlaybackInput"
+      ]
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "existingInitializersUnchanged": 539,
+      "added": [
+        "getBotsByBotIdTtsPlaybackConfigQueryKey",
+        "getBotsByBotIdTtsPlaybackConfigQuery",
+        "postBotsByBotIdTtsPlaybackInputMutation",
+        "putBotsByBotIdTtsPlaybackInputMutation"
+      ]
+    }
+  ],
+  "existing382Unchanged": true,
+  "newOperations": 3,
+  "modelNameDispatchAdded": false
+}

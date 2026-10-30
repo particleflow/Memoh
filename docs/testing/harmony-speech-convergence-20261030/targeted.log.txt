@@ -1,0 +1,13 @@
+
+> @memohai/monorepo@0.22.0 test /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+> vitest --run --testTimeout=15000 apps/web/src/pages/home/composables/speech-settled-cursor.test.ts apps/web/src/pages/home/composables/speech-native-input.test.ts apps/web/src/pages/home/composables/speech-render-completion.test.ts apps/web/src/pages/home/composables/useChatReadAloud.native.test.ts apps/web/src/pages/home/composables/speech-replay-cache.test.ts apps/web/src/pages/home/composables/useChatReadAloud.cache.test.ts apps/web/src/pages/home/composables/speech-sentence-boundary.test.ts apps/web/src/pages/home/index.read-aloud-admission.test.ts apps/web/src/pages/home/index.navigation.test.ts apps/web/src/pages/home/index.not-found.test.ts apps/web/src/store/chat/route-context.test.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  11 passed (11)
+      Tests  78 passed (78)
+   Start at  16:40:21
+   Duration  19.46s (transform 22.50s, setup 0ms, import 31.54s, tests 1.42s, environment 6.96s)

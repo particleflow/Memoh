@@ -1,0 +1,57 @@
+{
+  "parentSource": "d30421e0c2f713cc0b338dc86fd8a20b46baf506",
+  "mappedFiles": 29,
+  "productionFiles": 15,
+  "testFiles": 14,
+  "targetedTests": 78,
+  "targetedFiles": 11,
+  "targetedExitCode": 0,
+  "typecheckExitCode": 0,
+  "lintExitCode": 0,
+  "lintWarnings": 26,
+  "sameBaselineWarnings": true,
+  "earlierEightAdmissionFixtureFailuresNowPass": true,
+  "fixtureCorrectionSource": "d2cc9bd60e220f8f191ccbf8474704dad3d9b14c",
+  "voiceProductFixNotInferredFromFixtureOnlyChange": true,
+  "unchangedClientFiles": 199,
+  "sdk": {
+    "rows": [
+      {
+        "path": "packages/sdk/src/sdk.gen.ts",
+        "existingInitializersUnchanged": 382,
+        "added": [
+          "getBotsByBotIdTtsPlaybackConfig",
+          "postBotsByBotIdTtsPlaybackInput",
+          "putBotsByBotIdTtsPlaybackInput"
+        ]
+      },
+      {
+        "path": "packages/sdk/src/@pinia/colada.gen.ts",
+        "existingInitializersUnchanged": 539,
+        "added": [
+          "getBotsByBotIdTtsPlaybackConfigQueryKey",
+          "getBotsByBotIdTtsPlaybackConfigQuery",
+          "postBotsByBotIdTtsPlaybackInputMutation",
+          "putBotsByBotIdTtsPlaybackInputMutation"
+        ]
+      }
+    ],
+    "existing382Unchanged": true,
+    "newOperations": 3,
+    "modelNameDispatchAdded": false
+  },
+  "hostPatchesRetained": 47,
+  "pairedEntries": 180,
+  "requiredUUIDSHA256": "cb4a9e594864678898975850786fb30ba695164f18eaa06ac45735488fbdc719",
+  "actualInstalledRenderer": "markstream-vue2.0.0",
+  "nativeNetworkScope": "TTS does not match NativeWebNetwork file/profile capture; retains ordinary approved ArkWeb fetch/stream",
+  "modelNameBranchAdded": false,
+  "API26RecompileRequiredForNativeSource": false,
+  "newVersionAssigned": false,
+  "newHapBuilt": false,
+  "SDKToolchainDownloaded": false,
+  "privateConfigOrPermissionsChanged": false,
+  "fieldOrPhoneOrModelOrPaidCall": false,
+  "physicalArkWebOrVoiceOrThroughputAccepted": false,
+  "pendingBuildCondition": "Exact final unified source/API and source consumer hash lock, then one new official release build. Device/provider acceptance does not block generic source/build preparation."
+}

@@ -1,0 +1,86 @@
+{
+  "base": "7a1784ce9a11ff31b76537431fb829debd25e87f",
+  "HAP36Source": "6d728c0b06cb2b9d37773e1b860938980cb4d6e7",
+  "generatedBuiltSignedInstalled": false,
+  "files": {
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts": {
+      "baseSHA256": "985fa7b2a3406b2c52afdf2c54f46fd395dc1992dac333fdd239a655a708e7df",
+      "candidateSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893",
+      "HAP36PairedSourceSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+      "action": "map modified helper"
+    },
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts": {
+      "baseSHA256": "ffb6911465f94687dba18df3a923c42f43e9bbeb4fb51c708326eb8598cec6c5",
+      "candidateSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48",
+      "HAP36PairedSourceSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+      "action": "map modified helper"
+    },
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts": {
+      "baseSHA256": "ae5d84ccbb1a833bef1c34bbb7c91dae16af507fc99977ec6c5f16237bf984ad",
+      "candidateSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8",
+      "HAP36PairedSourceSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+      "action": "map modified helper"
+    },
+    "apps/web/src/pages/home/composables/speech-replay-cache.ts": {
+      "baseSHA256": "430b1f79de64e3fce00440a0a5cdd952c06ce09fb09af9b562446c6a6aa42ad9",
+      "candidateSHA256": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21",
+      "HAP36PairedSourceSHA256": null,
+      "action": "map modified helper"
+    },
+    "apps/web/src/pages/home/composables/speech-render-completion.ts": {
+      "baseSHA256": null,
+      "candidateSHA256": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85",
+      "HAP36PairedSourceSHA256": null,
+      "action": "map new helper"
+    },
+    "apps/web/src/pages/home/components/chat-pane.vue": {
+      "baseSHA256": "aaba146167dc7f8a488620f3c1174bd3f4faa2fe61526e0bcfe9112ace78b8f0",
+      "candidateSHA256": "4d52b3b9bf7acdaf82a7e8b454d61b15539cc1f1be9805eec2bec4366a0e7697",
+      "HAP36PairedSourceSHA256": "a9f261fb41e6d041e6640d32d53684f765678d787ff902d9313075a3b5e05621",
+      "action": "apply source delta through existing consumer map; preserve native adaptations"
+    },
+    "apps/web/src/pages/home/components/message-item.vue": {
+      "baseSHA256": "517de2226c8d340e30555d4be72e967cf807394fd69383028babcf51ac538853",
+      "candidateSHA256": "a19be30bb1b73331a5cf68148f17236966d84d7cfcb36f9d08ba8cda32c40c75",
+      "HAP36PairedSourceSHA256": "1d4bc597ea202882a978cb7c07bfa4c8603a30c3427e165f4c4c902aba5db4fb",
+      "action": "apply source delta through existing consumer map; preserve native adaptations"
+    }
+  },
+  "requiredUUIDHelper": {
+    "path": "apps/web/src/utils/uuid.ts",
+    "HAP36RootSourceSHA256": "cb4a9e594864678898975850786fb30ba695164f18eaa06ac45735488fbdc719",
+    "candidateSHA256": "cb4a9e594864678898975850786fb30ba695164f18eaa06ac45735488fbdc719",
+    "rootBytesEqual": true,
+    "generatedConsumerPresenceNotAssumed": true
+  },
+  "requiredRenderer": {
+    "package": "markstream-vue",
+    "webInstalled": "2.0.0",
+    "HAP36RootDeclared": "2.0.0",
+    "publicMethods": [
+      "getVirtualMetrics",
+      "settle"
+    ],
+    "noVirtualizationEnable": true,
+    "generatedBundleAndDeviceUnverified": true
+  },
+  "SDKOverlay": {
+    "preserveNativeChanges": true,
+    "newOperations": [
+      "postBotsByBotIdTtsPlaybackInput",
+      "putBotsByBotIdTtsPlaybackInput"
+    ],
+    "extendConfigResponse": [
+      "input_content_type"
+    ],
+    "baseRequiredGET": "getBotsByBotIdTtsPlaybackConfig from frozen ba44",
+    "existingOperationInitializersUnchanged": 384
+  },
+  "localesAndStyles": "No new delta; reuse frozen ba44 en/zh/ja notice/menu keys and existing reduced-motion single-bubble styles",
+  "backendRequired": [
+    "native start POST/append PUT on existing authenticated Bot audio handler",
+    "read-only optional native MIME in config GET",
+    "same X-Speech-Playback-Identity/CORS exposure from frozen ba44",
+    "actual explicit CosyVoice protocol and MP3/MSE must be verified; no model-name dispatch"
+  ]
+}
