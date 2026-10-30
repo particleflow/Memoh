@@ -1,0 +1,16 @@
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection/missing_admission
+    durable_followup_test.go:94: single-connection recovery failed: ledger(postgres): get run by invocation: ERROR: memoh.team_id is not set (SQLSTATE 42501)
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection/claim_changed_after_lookup
+    durable_followup_test.go:94: single-connection recovery failed: ledger(postgres): get run by invocation: ERROR: memoh.team_id is not set (SQLSTATE 42501)
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection/lookup_failed
+    durable_followup_test.go:91: ledger error not preserved: ledger(postgres): get run by invocation: ERROR: memoh.team_id is not set (SQLSTATE 42501)
+--- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection (0.04s)
+    --- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection/missing_admission (0.03s)
+    --- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection/claim_changed_after_lookup (0.00s)
+    --- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection/lookup_failed (0.00s)
+=== RUN   TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun
+--- PASS: TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun (0.02s)
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.084s
+FAIL

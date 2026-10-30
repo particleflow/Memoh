@@ -1,0 +1,50 @@
+{
+  "product_commit": "f13f0ea09374788ea028c02168f7d99874c43570",
+  "base_commit": "11e9b8a4d99dcdf2f7a85c4df505709a8da1e324",
+  "red_product_commit": "efac3b837b6c5291c09a714dddb4b73251367361",
+  "database": "isolated recovered fixture, unchanged schema",
+  "pool_max_conns": 1,
+  "production_team_hook": "db.SetDefaultTeamOnConnect",
+  "queue_and_ledger_share_pool": true,
+  "red_exit": 1,
+  "red_new_subcases_failed": 3,
+  "green_exit": 0,
+  "green_new_subcases_passed": 3,
+  "affected_existing_test_passed": 1,
+  "skipped": 0,
+  "lint_exit": 0,
+  "model_calls": 0,
+  "new_credentials": 0,
+  "migration_operations": 0,
+  "production_operations": 0,
+  "original_quarantined_database_or_dump_changed": false,
+  "command": "go test ./cmd/internal/core -run ^TestDurableFollowUpRecovery(SinglePostgresConnection|KeepsUnknownAndOriginalLostRun)$ -count=1 -v",
+  "lint_command": "golangci-lint run --new-from-rev=11e9b8a4d99dcdf2f7a85c4df505709a8da1e324 ./cmd/internal/core/...",
+  "remaining": [
+    "independent integration review",
+    "integration migration renumbering",
+    "later deployed-version acceptance"
+  ],
+  "files": [
+    {
+      "path": "fixture-team-binding-error.txt",
+      "sha256": "34d08f0206e5a902683b2316c8ab09d23cd85260fbfa806cc7e0f7f4a54dc59a",
+      "bytes": 1335
+    },
+    {
+      "path": "green.txt",
+      "sha256": "4e017c90914865a14fb10d430bf41c26cc5a7a8f8b2d120b3a8efd9bcad286d2",
+      "bytes": 863
+    },
+    {
+      "path": "lint.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "red.txt",
+      "sha256": "82e6f7c996fdff57971d22b269265ca5eadcd77539c1b907361d48368b86137f",
+      "bytes": 1266
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection/missing_admission
+    durable_followup_test.go:96: single-connection recovery failed: ledger(postgres): get run by invocation: context deadline exceeded
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection/claim_changed_after_lookup
+    durable_followup_test.go:96: single-connection recovery failed: ledger(postgres): get run by invocation: context deadline exceeded
+=== RUN   TestDurableFollowUpRecoverySinglePostgresConnection/lookup_failed
+    durable_followup_test.go:93: ledger error not preserved: ledger(postgres): get run by invocation: context deadline exceeded
+--- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection (6.01s)
+    --- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection/missing_admission (2.00s)
+    --- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection/claim_changed_after_lookup (2.00s)
+    --- FAIL: TestDurableFollowUpRecoverySinglePostgresConnection/lookup_failed (2.00s)
+=== RUN   TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun
+--- PASS: TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun (0.02s)
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	6.051s
+FAIL
