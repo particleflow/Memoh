@@ -112,7 +112,10 @@ export class LiveSpeechReplies {
       const text = rendered ? rendered(message) : speechText(message)
       if (message.messages.some(block => block.type === 'error')) { this.consumed.add(revision); continue }
       if (message.streaming || (observed && (!message.runtimeRunId || observed === revision))) {
-        const prior = this.spoken.get(observed && !message.runtimeRunId ? observed : revision) ?? ''
+        // Settled history omits runtimeRunId; retain the observed run for both
+        // cursor reads and commits. An explicit new run keeps its own revision.
+        const cursorRevision = observed && !message.runtimeRunId ? observed : revision
+        const prior = this.spoken.get(cursorRevision) ?? ''
         // A replacement is not an append. Never replay previously spoken text.
         if (text.startsWith(prior)) {
           const tail = text.slice(prior.length)
@@ -124,7 +127,7 @@ export class LiveSpeechReplies {
             if (!end && Array.from(tail).length >= 500) end = speechChunks(tail)[0]!.length
           }
           const delta = tail.slice(0, end)
-          if (delta.trim()) { result.push({ key: speechKey(message), messageId: message.id, text: delta }); this.spoken.set(revision, prior + delta) }
+          if (delta.trim()) { result.push({ key: speechKey(message), messageId: message.id, text: delta }); this.spoken.set(cursorRevision, prior + delta) }
         }
       }
       // A final message can precede typewriter, math and diagram DOM updates.
