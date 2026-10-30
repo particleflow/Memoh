@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "scope": "seven new host/page timer seam checks only",
+  "results": [
+    {
+      "case": "same unavailable Page: old pacing fails, host pacing progresses",
+      "oldPageEvaluations": 1,
+      "newPageEvaluations": 0,
+      "fixtureOnly": true
+    },
+    {
+      "case": "concurrent drain callers retain serialized minimum interval"
+    },
+    {
+      "case": "final drain captures delayed body using host timer; repeated stop idempotent"
+    },
+    {
+      "case": "stop during host wait preserves pending response unknown without business cancellation"
+    },
+    {
+      "case": "missing host timer rejects before Network enable; no Page fallback"
+    },
+    {
+      "case": "host timer failure remains unknown and does not fall back or spin"
+    },
+    {
+      "case": "actual Page data GET failure remains explicit; host wait fix does not fake business success"
+    }
+  ],
+  "oldSuitesRerun": false,
+  "liveRequests": 0,
+  "paidCalls": 0,
+  "sourcePattern": "a7665a65d1244ab4a41497e2b2b48bd8ec37dc6b capture-initial-history.mjs host setTimeout",
+  "fieldEvidence": "parent reports a766 host wait executed without Page timer timeout; modified collector not field-executed"
+}

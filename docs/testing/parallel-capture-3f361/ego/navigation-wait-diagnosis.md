@@ -1,5 +1,7 @@
 #890 preflight: page-owned pacing failure, no business submission
 
+**Resolved contract update:** The parent supplied original890 log details and actual field-used a766 Node-host wait. See [host-wait-handoff.md](host-wait-handoff.md) for the implemented correction. The historical excerpt request and missing-contract status below are superseded; do not repeat them. Exact navigation context destruction remains unproven.
+
 Status: source defect localized; actual timing/root trigger and a supported Ego host-wait binding require one read-only consumer excerpt. No replacement timer API is invented or field-ready patch claimed. Do not rerun890, repeat the free self-check, send A/B, enlarge timeouts, remove pacing or move to another browser.
 
 ## What is known

@@ -1,11 +1,10 @@
-/* HISTORICAL PAGE-WAIT IMPLEMENTATION:890 preflight failed before A/B.
- * Do not rerun until a documented navigation-independent host wait is bound.
- * See navigation-wait-diagnosis.md. No guessed replacement API is implemented.
- * No imports, external endpoint or browser.
- * Direct Ego2.1.0 shapes were field-observed; WS/POST paths remain unverified.
+/* Run in the existing Ego Node host execution with its supplied Page.
+ * Host timer pattern: a7665a65d capture-initial-history.mjs, field-used by writer.
+ * No page-owned pacing, imports, external endpoints or new browser.
  * page.events() has a single owner and is read/clear, never an EventEmitter.
  */
 async function createEgoCapture(page, cfg) {
+  if (typeof setTimeout !== 'function') throw new Error('Ego Node host timer required; no Page timer fallback');
   const c = cfg.contract;
   if (!c?.evidence || !['methodPath', 'paramsPath', 'cdpResultPath', 'evaluateResultPath'].every(k => Array.isArray(c[k])))
     throw new Error('Actual consumer contract paths and evidence are required before capture');
@@ -141,10 +140,10 @@ async function createEgoCapture(page, cfg) {
   async function pauseRead(delayMs) {
     if (delayMs <= 0) return;
     metrics.waits++;
-    // Browser timer only; JSON argument, no Node closure or unverified Ego wait API.
-    const raw = await page.evaluate(({delayMs}) => new Promise(resolve =>
-      setTimeout(() => resolve({waited: true}), delayMs)), {delayMs});
-    if (at(raw, c.evaluateResultPath)?.waited !== true) throw new Error('OBSERVER_WAIT_CONTRACT_MISMATCH');
+    // Await in the Node host, as in the field-used a766 initial-history observer.
+    // Page reload/context replacement cannot destroy this timer. This does not
+    // promise survival of host termination or cancel any in-flight Page command.
+    await new Promise(resolve => setTimeout(resolve, delayMs));
   }
   async function drainOne(deadline = Infinity) {
     if (stopped || fault) return false;
@@ -254,7 +253,7 @@ async function createEgoCapture(page, cfg) {
     if (!stopRequested) { stopRequested = true; stopReason = reason; emit('observer_stop_requested', {reason}); }
   }
   function summary() {
-    return {consumer: cfg.consumer, contractEvidence: c.evidence, ...metrics, stopped, fault,
+    return {consumer: cfg.consumer, contractEvidence: c.evidence, pacingRealm: 'node-host', ...metrics, stopped, fault,
       stopReason, readIntervalMs: cfg.pollIntervalMs, scopedGetObserved: readyHTTP, sourceSocketCreated: readyWS, pendingResponses: [...requests.values()].filter(r => !r.done).length,
       bufferContinuity: 'UNVERIFIED', businessCancellationSent: false, networkDisableAttempted: false};
   }

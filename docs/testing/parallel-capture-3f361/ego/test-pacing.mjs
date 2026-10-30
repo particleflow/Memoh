@@ -11,7 +11,9 @@ const base={apiRoot:'https://fixture.invalid/edge',bot:'source',contact:'contact
   timeoutMs:1000,stopDrainMs:300,pollIntervalMs:100};
 function harness(script=source) {
   const clock={now:0};class ClockDate extends Date {static now(){return clock.now;}}
-  const realm=vm.createContext({URL,Date:ClockDate,Map,Set,Object,JSON,Error,Uint8Array,TextDecoder,encodeURIComponent,atob,AbortController,setTimeout,clearTimeout});
+  const hostTimer=(done,ms)=>{if(page.waitHook){const h=page.waitHook;page.waitHook=null;h();}
+    if(page.badWait)throw new Error('fixture host timer failed');clock.now+=ms;queueMicrotask(done);};
+  const realm=vm.createContext({URL,Date:ClockDate,Map,Set,Object,JSON,Error,Uint8Array,TextDecoder,encodeURIComponent,atob,AbortController,setTimeout:hostTimer,clearTimeout});
   vm.runInContext(script,realm);
   const page={reads:[],active:0,commands:[],queue:[],bodies:new Map(),GETs:[],waitHook:null,badWait:false,bodyGate:null,getGate:null,
     async cdp(method,params,options) {
@@ -89,7 +91,7 @@ results.push({case:'probe empty-read red/green',oldReads:redReads,newReads:green
 {
   const h=harness();const r=await h.realm.createEgoCapture(h.page,base);h.page.badWait=true;await r.drain();await r.stop();
   assert(r.summary().fault);assert(r.records().some(x=>x.kind==='observer_wait_unknown'));assert.equal(h.page.reads.length,1);
-  results.push({case:'wait return mismatch fails closed without rapid-read fallback'});
+  results.push({case:'host timer failure fails closed without rapid-read fallback'});
 }
 {
   for(const interval of [undefined,0,-1,NaN,Infinity]) {

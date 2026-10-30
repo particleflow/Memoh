@@ -91,7 +91,20 @@
     "modelCalls": 0,
     "unknownScope": "only the evaluate in the subsequently closed owned Page; no business submission",
     "cleanup": "parent reports owned space61 closed,4 temporary scripts removed, none in flight",
-    "hostWaitContract": "not supplied; one read-only help/journal excerpt requested",
-    "navigationContextDestroyed": "not established"
+    "hostWaitContract": "Resolved: parent reports actual a766 Node-host timer execution; cloud fetched and read exact source",
+    "navigationContextDestroyed": "not established",
+    "reloadReturned": true,
+    "delayMs": "not saved; positive <=250ms from branch",
+    "pageLifecycle": "not recorded"
+  },
+  "hostWaitRepair": {
+    "sourceCommit": "a7665a65d1244ab4a41497e2b2b48bd8ec37dc6b",
+    "sourcePath": "docs/testing/readonly-task-directory/capture-initial-history.mjs",
+    "sourceLine": 6,
+    "pattern": "ms => new Promise(resolve => setTimeout(resolve, ms))",
+    "realm": "Node host outside page.evaluate",
+    "actualExecutionEvidence": "Parent reports writer used a766 host wait without Page timer timeout; stopped on separate natural-contact-POST guard; GET200 in27.572ms",
+    "collectorFieldRun": "not performed",
+    "seamChecks": "seven passed; old suites not rerun"
   }
 }

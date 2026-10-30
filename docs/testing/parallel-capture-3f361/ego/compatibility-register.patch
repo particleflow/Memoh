@@ -4,11 +4,11 @@
  | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
  | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
  | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
-+| C12 | External recorder and unpaced Ego reads | 4120 self-check passed;890 page-wait timeout, host lifecycle unresolved |
++| C12 | External recorder and unpaced Ego reads | 890 page-wait dependency fixed using field-used a766 host timer; collector field check pending |
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,63 @@
+@@ -279,6 +280,73 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -53,12 +53,22 @@
 +  The4120/890 collector blobs are identical. The page-owned evaluate timer is a
 +  source-confirmed lifecycle dependency, but actual context destruction and the
 +  two wrapper call-order differences are not established. Preserve4120's success.
-+- **Required repair boundary:** [Exact diagnosis and one read-only excerpt request](parallel-capture-3f361/ego/navigation-wait-diagnosis.md). Read original journal
-+  order plus installed host-wait/outer-execution help, without new live operations.
-+  Bind only a documented host-side delay; no larger timeout, unpaced fallback,
-+  guessed sleep API or new framework. Two injected error diagnostics pass but do
-+  not prove real Ego navigation handling. No field-ready host-wait fix is claimed;
-+  the prior real-sample plan is held before A until this contract is resolved.
++- **Resolved host-wait evidence and repair:** Parent supplied the original890
++  excerpt: reload returned, delay not saved (positive <=250ms), no lifecycle events;
++  evaluate failed at15000ms. Actual context destruction remains unproven. Parent
++  also reports the writer read/ran a7665a65d1244ab4a41497e2b2b48bd8ec37dc6b's
++  capture-initial-history.mjs with a Node-host setTimeout Promise and no Page timer
++  timeout; it stopped on its unrelated natural-contact-POST guard. The cloud owner
++  fetched/read that exact source and reused only the host wait, not its IDs/guard.
++  Collector pacing now runs outside page.evaluate; absent host timer rejects before
++  Network.enable with no Page fallback. Serial interval, stop/drain and unknown
++  behavior remain. Seven new seam checks pass; old suites were not rerun. The
++  updated collector has not run in the field. No product/deployment/model action.
++- **Current handoff:** [Host-wait repair and executable continuation](parallel-capture-3f361/ego/host-wait-handoff.md).
++  The old generic timer-contract request is resolved; do not repeat the Page timer
++  experiment, enlarge timeouts or remove pacing. Parent resumes the one-sample
++  plan only through the unique writer after HAP priority work. Page data-RPC and
++  host-termination limits remain; this repair does not claim business acceptance.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
 +  Field evidence is parent-transcribed from writer-local probe-result.json,

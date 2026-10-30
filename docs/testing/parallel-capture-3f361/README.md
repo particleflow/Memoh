@@ -1,6 +1,6 @@
 # Pre-send parallel acceptance recorder
 
-**Current hold:**890 preflight failed in page-evaluate pacing before any A/B. Read [the diagnostic and exact missing host-wait contract](ego/navigation-wait-diagnosis.md); do not run the historical scripts below.
+**Current repair:**890's pre-business Page-timer failure is corrected with the field-used a766 Node-host wait. Use the [host-wait handoff](ego/host-wait-handoff.md) and current Ego capture.js; the historical Playwright scripts below remain unsuitable for Ego.
 
 **Consumer correction (2026-10-30):** The Python/Playwright recorder below is historical cloud evidence and must not be run in Ego2.1.0, whose supported workflow prohibits importing Playwright or launching another browser. Use the [Ego Page adapter and paced collector self-check](ego/README.md). The unique writer observed direct Ego event/result envelopes and one completed GET body; the paced collector self-check also passed per parent readback. Business WS/POST mapping and retention/overflow guarantees remain unverified. See the [next single text-sample plan](ego/next-live-plan.md). Do not repeat the completed shape probe. Parent now reports Server/Web9270 healthy. No new paid field test was run for this adaptation.
 

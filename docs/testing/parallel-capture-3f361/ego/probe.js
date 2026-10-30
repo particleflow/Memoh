@@ -1,8 +1,9 @@
-/* One no-fee shape observation, on the existing idle fixed-contact Page only.
+/* Historical completed shape probe; do not rerun for this repair.
  * No imports/endpoints/subscriptions. This does not declare any discovered shape
  * to be a stable Ego contract. Only method/key/type metadata leaves the function.
  */
 async function probeEgoNetworkShape(page, cfg) {
+  if (typeof setTimeout !== 'function') throw new Error('Ego Node host timer required; no Page timer fallback');
   if (![cfg.timeoutMs, cfg.durationMs, cfg.pollIntervalMs].every(x => Number.isFinite(x) && x > 0) || cfg.reloadExistingPage !== true)
     throw new Error('Supply explicit observation budgets and existing-page reload scope');
   const report = {consumer: 'Ego 2.1.0 (parent-reported)', paidCalls: 0, reloads: 0,
@@ -43,7 +44,7 @@ async function probeEgoNetworkShape(page, cfg) {
     do {
       const delay=lastReadEnded===null?0:Math.min(cfg.pollIntervalMs,Math.max(0,lastReadEnded+cfg.pollIntervalMs-Date.now()));
       if(Date.now()+delay>deadline) break;
-      if(delay>0) await page.evaluate(({delayMs})=>new Promise(resolve=>setTimeout(()=>resolve({waited:true}),delayMs)),{delayMs:delay});
+      if(delay>0) await new Promise(resolve=>setTimeout(resolve,delay));
       if(Date.now()>deadline) break;
       const events=await page.events(); // destructive; sole consumer, no separate .events debug calls
       lastReadEnded=Date.now();

@@ -1,6 +1,6 @@
 # Ego 2.1.0 collector: observed envelopes and bounded reads
 
-**890 preflight hold:** No A/B was sent. Page-owned evaluate pacing timed out before readiness; do not execute this older plan or repeat its self-check. See [the scoped diagnosis and one read-only consumer excerpt request](navigation-wait-diagnosis.md).4120 success remains historical evidence; a documented host wait/lifecycle binding is still needed.
+**Current repair:** The parent supplied the actual field-used a766 Node-host wait; capture.js now uses that pattern for pacing, with seven new seam checks passed. No further generic timer contract is missing. Read [the executable host-wait handoff](host-wait-handoff.md) before continuing the one-sample plan. The corrected collector itself is not yet field-tested; HAP work retains writer priority.
 
 **Current handoff:** The parent has reported the4120 paced collector self-check passed:20 reads/20 waits, minimum253ms,10 completed scoped GETs, stopped=true/fault=false/unknown0/pending0, natural WS sent/received one each. No A/B/model/DB/configuration calls. Do not repeat that self-check. See [the release9270 source review and single text-sample plan](next-live-plan.md) for the next step. POST/business identity mapping, base64 and cross-round lifetime remain unverified. The following self-check recipe is retained as the procedure already consumed, not a new request.
 
@@ -22,7 +22,7 @@ The previously read Ego help/skill permits `page.cdp(method, params?, {timeout?}
 
 ## What changed
 
-All destructive buffer reads, including concurrent callers and final draining, now pass through one serialized reader with an explicit minimum interval after the previous read completed. The interval and finite observation/drain budgets are caller configuration, not task rules. The wait uses a browser timer through `page.evaluate` with a JSON argument. A wait/result mismatch records unknown and stops collection; there is no fast-loop fallback.
+All destructive buffer reads, including concurrent callers and final draining, now pass through one serialized reader with an explicit minimum interval after the previous read completed. The interval and finite observation/drain budgets are caller configuration, not task rules. The wait uses the Node-host setTimeout Promise from the actual field-used a766 observer, outside `page.evaluate`. A host timer error records unknown and stops collection; there is no Page-timer or fast-loop fallback.
 
 `collectFor(durationMs)` only collects existing events and then stops. It does not send messages or query additional APIs. `requestStop(reason)` prevents new samples/arming; `stop()` waits for already-issued samples/body commands, performs paced additional draining, preserves unfinished requests as unknown and is idempotent. Its drain budget bounds additional reads, not cancellation of an in-flight Ego RPC. A stuck Ego call cannot be forcibly cancelled through an undocumented API. The collector never cancels a business run; only its own optional read-only fetches use their existing observer timeout.
 
