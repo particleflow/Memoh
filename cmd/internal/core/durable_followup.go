@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
+	"reflect"
 	"time"
 
 	"go.uber.org/fx"
@@ -249,29 +250,56 @@ func markFollowUpUnknown(ctx context.Context, b *followupqueue.Backend, key runt
 }
 
 func reconcileFollowUpClaims(ctx context.Context, b *followupqueue.Backend, key runtime.Key, runs ledger.Store) error {
+	before, err := b.Store.Read(ctx, key)
+	if err != nil {
+		return err
+	}
+	type resolution struct {
+		original runtime.FollowUpItem
+		admitted bool
+	}
+	resolved := map[runtime.FollowUpItemID]resolution{}
+	unconfirmedPromotion := func(state *followupqueue.State, id runtime.FollowUpItemID) bool {
+		promotion, ok := state.Promotions[string(id)]
+		return ok && promotion.Steer.Status != runtime.QueueApplied && promotion.Steer.Status != runtime.QueueRejected && promotion.Steer.Status != runtime.QueueCanceled
+	}
+	// The ledger may share the queue's pool. Finish its reads before acquiring
+	// the queue transaction; a single connection must suffice for recovery.
+	for _, item := range before.Items {
+		if item.Status != runtime.QueueClaimed || unconfirmedPromotion(&before, item.ID) {
+			continue
+		}
+		run, lookupErr := runs.GetByInvocation(ctx, key.SessionID, "follow-up:"+string(item.ID))
+		if lookupErr != nil && !errors.Is(lookupErr, ledger.ErrRunNotFound) {
+			return lookupErr
+		}
+		if lookupErr == nil && run.RunID == "" {
+			return errors.New("durable follow-up ledger returned an empty admission")
+		}
+		resolved[item.ID] = resolution{original: item, admitted: lookupErr == nil}
+	}
 	return b.Store.Change(ctx, key, func(state *followupqueue.State) error {
 		// A promoted steer belongs to the dead live generation. Its saved
 		// acceptance is not proof of consumption; preserve the original
 		// destination but never return it as a fresh successful promotion.
 		for i := range state.Items {
 			item := &state.Items[i]
-			if promotion, ok := state.Promotions[string(item.ID)]; ok && promotion.Steer.Status != runtime.QueueApplied && promotion.Steer.Status != runtime.QueueRejected && promotion.Steer.Status != runtime.QueueCanceled {
+			if unconfirmedPromotion(state, item.ID) {
 				item.Status = "unknown"
 				item.ErrorCode = "queue_promotion_unconfirmed"
 			}
 		}
 		for i := range state.Items {
 			item := &state.Items[i]
-			if item.Status != runtime.QueueClaimed {
+			result, ok := resolved[item.ID]
+			// A release/reclaim or another recovery may have changed the item
+			// while the ledger was read. Never overwrite that newer receipt.
+			if !ok || !reflect.DeepEqual(*item, result.original) {
 				continue
 			}
-			run, err := runs.GetByInvocation(ctx, key.SessionID, "follow-up:"+string(item.ID))
-			if err == nil && run.RunID != "" {
+			if result.admitted {
 				item.Status = runtime.QueueApplied
 				continue
-			}
-			if !errors.Is(err, ledger.ErrRunNotFound) {
-				return err
 			}
 			item.Status = "unknown"
 			item.ErrorCode = "queue_admission_unconfirmed"
