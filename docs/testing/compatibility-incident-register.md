@@ -373,6 +373,26 @@ field deployment and product acceptance remain separate evidence classes.
   actual mounted router identity and the recorded request path first. Reuse
   these passing checks; do not repeat the faulty fixture or infer missing data.
 
+## C14 — Package-manager setup failed before a narrow test started
+
+- **Platform / signature:** Unified Node24 review, `pnpm exec vitest`, ENOENT
+  creating `/home/agent/.local/share/pnpm` during automatic package-manager
+  setup. No Vitest case ran; this was not an approval/scope denial or a product
+  assertion failure.
+- **Verified handling:** Reused the already installed official Node24 executable
+  and repository `node_modules/vitest/vitest.mjs` directly, with the documented
+  `--no-experimental-webstorage` test flag. No tool download, system/user path
+  change, permission change or dependency installation.
+- **Result / boundary:** Narrow controller and real-cache counterexamples then
+  executed, each with one control pass and one product failure, exit1. Tool
+  execution recovered; product admission did not.
+- **Evidence:** [Review commands and source identities](speech-continuity-review-ba44/README.md),
+  [setup-only error](speech-continuity-review-ba44/runner-compatibility-error.log.txt),
+  [actual test failure](speech-continuity-review-ba44/final-reconciliation-red.log.txt).
+- **Before another attempt:** Check the installed toolchain/actual test start
+  first. Reuse that working executable; do not repeat unchanged automatic setup
+  or infer a passing/failed product test from a pre-test tool failure.
+
 ## Applying these lessons to the existing handoffs
 
 Use the version-specific handoff for actual commands, images and compatibility
