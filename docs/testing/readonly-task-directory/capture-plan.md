@@ -1,5 +1,11 @@
 # One instrumented recipient task entrance
 
+**Next-action update:** d74's production precheck found ordinary history itself
+unrendered (eleven skeleton nodes, zero rows, no anchor placeholder). Use
+[initial-load observation](capture-initial-history.md) next. Do not require
+healthy loaded history or open/click the task directory in that round. The
+earlier row-click procedure below is retained as history, not the current step.
+
 Read the applicable C05/C11 entries in the
 [compatibility incident register](https://github.com/particleflow/Memoh/blob/3a2e5d97e7f26fdcd47195f0f89bbb5c852b01a5/docs/testing/compatibility-incident-register.md)
 first. This follows the parent's new

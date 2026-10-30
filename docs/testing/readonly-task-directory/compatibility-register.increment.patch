@@ -1,0 +1,45 @@
+--- a/docs/testing/compatibility-incident-register.md
++++ b/docs/testing/compatibility-incident-register.md
+@@ -279,6 +279,42 @@
+   failures and unknowns; no message fabrication, history reset, expert replay or
+   unchanged release rebuild is required to document this issue.
+
++### C11 follow-up — initial history and Ego page preparation (2026-10-30)
++
++- **New field evidence, relayed by parent:** `navigation603-preflight/OUTCOME.json`
++  established direct Ego `{method,params,sessionId}` events/direct CDP results and
++  completed GET body reads, without a production row click. The d74 disposable
++  page then retained baseline/before/click/after Console/local data-fetch markers
++  with DOM count1. It establishes only that synthetic invocation, not WS or a
++  permanent click/navigation retention contract. Lack of a documented retention
++  promise is not a tool denial or new user-approval requirement.
++- **Validated setup lesson:** A newly created Ego page was not implicitly blank.
++  Explicit official `page.goto('about:blank')` on the owned disposable page fixed
++  this precondition. Do not diagnose that initial nonblank result as permission
++  failure or silently navigate a production page to a fixture. Use the existing
++  owner close flow and retain its actual page/space receipt.
++- **Narrower product witness:** `navigation-d74-live/OUTCOME.json` showed the
++  original ordinary history route/no task query, Home unmasked, read-only/no
++  input, scroll block, eleven skeleton nodes, zero message rows, absent original
++  UI IDs and no anchor placeholder. This supports unrendered initial history,
++  not existing messages hidden by the task anchor. No task dialog/row click,
++  refresh, manual API or model followed; spaces58/59 closed/no in-flight writer.
++  This owner has not independently read those Windows JSON files.
++- **Revised next condition:** The prior C11 requirement to await root-cause
++  evidence before product verification remains; it does not require healthy
++  history before read-only diagnosis. The newly authorized single initial-load
++  observer arms before ordinary history navigation, preserves component GET
++  terminals/bodies and real target WS metadata plus DOM witnesses, and has no
++  loaded-history prerequisite. No manual API200 stands in for component commit;
++  absent events remain unknown. No automatic refresh, business command, DB,
++  service, snapshot-wait removal, old protected process read or unchanged field
++  retry is authorized by this document. Observer preparation/local contract
++  tests are not a field run, product correction or NAS/Harmony acceptance.
++- **Handoff:** [Initial-load plan](readonly-task-directory/capture-initial-history.md)
++  and [observer](readonly-task-directory/capture-initial-history.mjs). The sole
++  writer executes the bounded observation and returns its receipt; source
++  hypotheses do not settle REST/runtime/SDK/view ownership as the cause.
++
+ ## Applying these lessons to the existing handoffs
+
+ Use the version-specific handoff for actual commands, images and compatibility

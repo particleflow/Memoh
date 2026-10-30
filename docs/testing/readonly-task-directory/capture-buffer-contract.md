@@ -160,5 +160,10 @@ the need for a promise that Ego does not provide.
 
 Return the bounded experiment receipt to the parent before the separately
 authorized original-record capture. The experiment itself is not production
-navigation or NAS acceptance. This protocol has only been syntax-checked here;
-the sole writer has not executed it as of this revision.
+navigation or NAS acceptance. At d74 preparation time this protocol had only
+been syntax-checked here. The parent now reports its sole-writer execution:
+after explicit official `page.goto('about:blank')`, the no-click/before/click/
+after markers were retained and DOM count was1. The initial fresh page had not
+defaulted to blank; that setup correction was not a permission failure. The
+sample remains synthetic/non-WS only. See the [new initial-history handoff](capture-initial-history.md)
+for the next action; do not repeat this experiment.

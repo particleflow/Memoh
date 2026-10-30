@@ -205,3 +205,41 @@ even if the experiment retains both marker classes. DOM gates and retained
 positive events remain useful; absent events cannot prove the root cause. The
 first-load product cause and actual field capture remain unresolved. Old C05
 process cleanup/read denials remain untouched.
+
+### d74 live precheck: observe unrendered ordinary history first
+
+The parent relays `F:/NAS-Assistant/tmp/navigation-d74-live/OUTCOME.json`:
+ordinary original session URL/no task query; Home unmasked; read-only/no input;
+scroll `block`; eleven skeleton nodes, zero rows, neither original UI ID and
+no anchor placeholder. No Tasks dialog/row click, refresh, manual API or model
+followed. Spaces58/59 were cleaned with no in-flight writer. Raw JSON was not
+independently read here. This supports historical hydration pending, not rows
+already rendered and hidden by the task anchor. REST versus runtime remains
+unknown. The prerequisite of already healthy history is superseded.
+
+The same parent update confirms d74's isolated baseline/before/click/after markers
+and DOM count1. Explicit official `page.goto('about:blank')` corrected the fresh
+page assumption; the earlier nonblank start was not a permission rejection.
+This sample covers its synthetic non-WS events only, not permanent retention or
+the next navigation's WS delivery. Do not rerun it or the earlier eight tests.
+
+The sole writer's next action is [one initial-load capture](capture-initial-history.md),
+using [the observer](capture-initial-history.mjs). It enables observation on an
+explicitly blank owned page before the one ordinary-history navigation; it
+requires no rendered message, Home admission, DCL event or task button to sample
+DOM. It does not refresh, submit work, query DB, send manual API/WS, create a
+service or remove snapshot atomicity. Unexpected writes are observed outcomes,
+not claimed prevented/undone.
+
+Four new local contract tests pass, including unrendered history without DCL,
+SSE versus finite pending reads, original completed-response metadata and denial
+without fallback/re-navigation; targeted ESLint/syntax/diff checks pass. Old
+product suites/contract experiments were not rerun. No field run/product fix or
+incident red-green is claimed. Any product change waits for a distinguishable
+actual transition; keep original failure/recovery/history and C05 cleanup intact.
+
+`compatibility-register.increment.patch` is a C11-only documentation increment
+against register source3a2e5d97, for the unified owner to apply to its current
+register after checking context. It retains prior cases/history, avoids assigning
+a possibly used new case ID and records both the blank-page lesson and revised
+hydration investigation. It does not replace a newer whole register.

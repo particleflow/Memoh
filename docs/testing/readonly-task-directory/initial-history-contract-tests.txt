@@ -1,0 +1,16 @@
+Local only: node --test docs/testing/readonly-task-directory/capture-initial-history.test.mjs
+✔ accepts only the original ordinary history association and projects schema/IDs without contents (1.707753ms)
+✔ arms before the one navigation and samples an unrendered history without requiring DCL, a click or healthy prior messages (29.368587ms)
+✔ 200 without the original request completion stays pending; no manual fetch substitutes for it (25.449219ms)
+✔ a component-body denial retains the original failure, with no fallback read or second navigation (2.569983ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 127.912239
+
+Targeted ESLint, syntax and diff checks passed.
+No initial-load Ego field run, product red/green or model execution is claimed.
