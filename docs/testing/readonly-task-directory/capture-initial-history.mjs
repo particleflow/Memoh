@@ -1,6 +1,7 @@
 // Initial-load observer for the original read-only history. No row click,
 // manual API probe, store inspection, app mutation, reload or synthetic WS.
 import { RECORD, sampleDOM, evaluationValue, decodeEvent, responseMetadata, runtimeMetadata } from './capture-ego-navigation.mjs'
+import { initializationContactRequest, contactResolutionMetadata, contactIdentityObservation, validContactConfiguration } from './initialization-contact-policy.mjs'
 
 const problem = message => Object.assign(Error(message), { observerReason: message })
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
@@ -34,9 +35,15 @@ export function initialMessagesMetadata(body, messageIds) {
 export async function captureInitialHistory(page, options) {
   const { append, messageIds } = options, url = historyURL(options.historyUrl)
   const captureMs = options.captureMs ?? 45000, sampleMs = options.sampleMs ?? 500, commandMs = options.commandMs ?? 3000
+  const initializationContactBotIds = options.initializationContactBotIds ?? [RECORD.bot], knownContacts = options.knownContacts ?? []
+  const initializationApiOrigins = options.initializationApiOrigins ?? [url.origin]
   if (typeof append !== 'function' || messageIds?.length !== 2 || !messageIds.every(id => typeof id === 'string' && id)) throw problem('Supply the existing journal sink and original two UI IDs')
   if (![captureMs, sampleMs, commandMs].every(ms => Number.isFinite(ms) && ms > 0)) throw problem('Invalid observation window')
-  const requests = new Map(), sockets = new Map(), unknown = new Set()
+  if (!validContactConfiguration(initializationContactBotIds, knownContacts)) throw problem('Invalid saved initialization scope/baseline; do not discover identities with new requests')
+  if (!Array.isArray(initializationApiOrigins) || !initializationApiOrigins.every(origin => {
+    try { const value = new URL(origin); return ['http:', 'https:'].includes(value.protocol) && value.origin === origin } catch { return false }
+  })) throw problem('Invalid saved API origin manifest')
+  const requests = new Map(), sockets = new Map(), unknown = new Set(), observedContacts = new Map()
   let phase = 'arm', navigateAttempted = false, navigateReturned = false, domReady = false, interrupted = null, journalFailure = null, lastCDPMethod = null
   const cdp = (method, params = {}) => { lastCDPMethod = method; return page.cdp(method, params, { timeout: commandMs }) }
   const emit = async record => {
@@ -62,8 +69,17 @@ export async function captureInitialHistory(page, options) {
         const request = { requestId: p.requestId, cdpSessionId: raw.sessionId, path: requestURL.pathname, query,
           method: p.request.method, resourceType: p.type, started: p.timestamp, wallTime: p.wallTime, terminal: null,
           redirectedFromStatus: p.redirectResponse?.status }
+        const initializationContact = initializationContactRequest(requestURL, p.request, initializationContactBotIds, initializationApiOrigins)
+        if (initializationContact) {
+          request.initializationContact = initializationContact
+          request.initiator = { type: p.initiator?.type,
+            stackRecorded: Array.isArray(p.initiator?.stack?.callFrames),
+            frames: (p.initiator?.stack?.callFrames || []).slice(0, 12).map(frame => ({
+              functionName: frame.functionName, path: pathOf(frame.url), line: frame.lineNumber, column: frame.columnNumber,
+            })) }
+        }
         requests.set(p.requestId, request); records.push({ ...base, ...request })
-        if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method)) stop = 'Non-read request observed; outcome unconfirmed, no repeat'
+        if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method) && !initializationContact?.allowedObservation) stop = 'Unclassified or out-of-scope mutation observed; preserve its unknown effect, no repeat'
       } else if (method === 'Network.responseReceived' && requests.has(p.requestId)) {
         const request = requests.get(p.requestId)
         Object.assign(request, { status: p.response?.status, mimeType: p.response?.mimeType,
@@ -73,12 +89,17 @@ export async function captureInitialHistory(page, options) {
           fromDiskCache: request.fromDiskCache, fromServiceWorker: request.fromServiceWorker, expectedStream: request.expectedStream })
         const originalRead = request.path === sessionPath || (request.path === messagePath && request.query.session_id?.[0] === RECORD.session)
         if (originalRead && [401, 403, 404].includes(request.status)) stop = 'Target history read unavailable; no manual probe or retry'
+        if (request.initializationContact?.allowedObservation && request.status !== 200) stop = 'Normal contact resolution did not return200; do not recover/rebind/replay'
       } else if (['Network.loadingFinished', 'Network.loadingFailed'].includes(method) && requests.has(p.requestId)) {
         const request = requests.get(p.requestId)
         Object.assign(request, { terminal: method, finished: p.timestamp, canceled: p.canceled, blockedReason: p.blockedReason })
         records.push({ ...base, requestId: p.requestId, canceled: p.canceled, blockedReason: p.blockedReason, hasErrorText: !!p.errorText })
         if (method === 'Network.loadingFinished' && request.method === 'GET' && request.status === 200
           && (request.path === sessionPath || (request.path === messagePath && request.query.session_id?.[0] === RECORD.session))) bodies.push(request)
+        if (request.initializationContact?.allowedObservation) {
+          if (method === 'Network.loadingFailed') stop = 'Normal contact resolution failed; binding effect remains unknown, no repeat'
+          else if (request.status === 200) bodies.push(request)
+        }
       } else if (method === 'Network.webSocketCreated') {
         const path = pathOf(p.url)
         if (path === wsPath) { sockets.set(p.requestId, path); records.push({ ...base, requestId: p.requestId, path }) }
@@ -117,6 +138,13 @@ export async function captureInitialHistory(page, options) {
     for (const request of bodies) {
       const result = await cdp('Network.getResponseBody', { requestId: request.requestId })
       if (typeof result?.body !== 'string' || result.base64Encoded) throw problem('Unknown completed response body; no fetch fallback')
+      if (request.initializationContact?.allowedObservation) {
+        const metadata = contactResolutionMetadata(result.body)
+        const identity = contactIdentityObservation(metadata, request.initializationContact.botId, knownContacts, observedContacts)
+        await emit({ kind: 'initialization-contact-response', requestId: request.requestId, path: request.path, metadata, identity })
+        if (!metadata.validIdentity || identity.identityChanged) throw problem('Normal contact returned invalid/changed account or binding identity; no route correction or replay')
+        continue
+      }
       const metadata = request.path === messagePath ? initialMessagesMetadata(result.body, messageIds) : responseMetadata(request.path, result.body)
       await emit({ kind: 'original-component-response', requestId: request.requestId, path: request.path, metadata })
       if (metadata?.kind === 'session' && (metadata.id !== RECORD.session || metadata.bot_id !== RECORD.bot)) throw problem('Original execution session identity changed')
@@ -126,7 +154,7 @@ export async function captureInitialHistory(page, options) {
     const blank = await cdp('Runtime.evaluate', { expression: 'location.href', returnByValue: true })
     if (blank.exceptionDetails || blank.result?.value !== 'about:blank') throw problem('Explicitly navigate the newly owned page to about:blank before arming; no application navigation performed')
     await emit({ kind: 'capture-contract', source: '9270da0252128a296d9a641235cdfd32ab44cfda', record: RECORD, messageIds,
-      path: url.pathname, captureMs, sampleMs, commandMs,
+      path: url.pathname, captureMs, sampleMs, commandMs, initializationContactBotIds, initializationApiOrigins, knownContacts,
       boundary: 'Page.navigate interval may be incomplete; positive events only. No assumed WS coverage or already-rendered history prerequisite.' })
     await cdp('Network.enable'); await cdp('Runtime.enable'); await cdp('Page.enable')
     await drain(true)

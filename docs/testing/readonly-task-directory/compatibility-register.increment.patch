@@ -1,6 +1,6 @@
 --- a/docs/testing/compatibility-incident-register.md
 +++ b/docs/testing/compatibility-incident-register.md
-@@ -279,6 +279,42 @@
+@@ -279,6 +279,74 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
 
@@ -39,6 +39,38 @@
 +  and [observer](readonly-task-directory/capture-initial-history.mjs). The sole
 +  writer executes the bounded observation and returns its receipt; source
 +  hypotheses do not settle REST/runtime/SDK/view ownership as the cause.
++
++### C11 a766 follow-up — native contact resolution is not a generic unsafe POST
++
++- Parent relays `initial-history-a766/{OUTCOME.json,journal.jsonl}`: two natural
++  contact POSTs completed200/loadingFinished, original component messages GET
++  completed200 in27.572ms, only early interactive/no-dock DOM captured before
++  the method-only observer guard stopped. Space62 closed/no in-flight writer.
++  This owner has not read raw Windows files. Body/before-state were unrecorded;
++  binding/hook side effects and the exact caller remain unknown. Fast HTTP is
++  not visible-history commit, and missing early WS is not proof of no snapshot.
++- Exact9270 registration exposes bodyless account+Bot `sessions/contact` POST
++  under existing Chat permission, rejecting chat-route tokens/client identity.
++  It reuses existing identity, can system-bind one eligible legacy candidate,
++  or create/commit a contact with SessionStart hook notification. These branches
++  are not interchangeable read-only outcomes. Public `/contact/bind` is closed
++  by the actual route despite an old handler/godoc remaining in source. No new
++  role/access grant is implied by normal account initialization.
++- Observer correction continues only for exact origin/Bot-manifest resolver
++  requests with no query/body; completed response IDs/account/route are recorded,
++  not new HTTP calls. Saved-authority mismatch, unknown scope/body/mutation,
++  error/denial or changed identity still stops with no replay or rebinding.
++  Binding effects remain unknown without trustworthy before/after evidence.
++- Only the new collector guard's three targeted tests ran, with old-guard failure
++  then corrected pass. Old8/4 tests/builds were not repeated. No field retry,
++  product fix, paid model, DB, deployment or hydration root-cause claim follows.
++  Pending minimal evidence is the two actual saved paths/request IDs/method/
++  status/terminal (existing initiator if present), not another browser/API read.
++- See [contact follow-up](readonly-task-directory/contact-initialization-followup.md).
++  Keep the sole writer free for the user's distribution/HTTP priority. An
++  undocumented interface, normal initialization, actual denial and unknown
++  mutation outcome must remain distinct; do not ask generic approval for the
++  already-authorized passive diagnosis or call unknown effects unchanged.
 +
  ## Applying these lessons to the existing handoffs
 

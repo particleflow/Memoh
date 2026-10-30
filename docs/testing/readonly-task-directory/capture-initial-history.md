@@ -1,5 +1,10 @@
 # Observe the original history from its initial document load
 
+**a766 update:** The first field run stopped too early on naturally initiated
+contact POSTs. Read [the exact route/authorization and guard follow-up](contact-initialization-followup.md)
+before using this observer again. Its two actual paths still need a minimal
+existing-file excerpt; no field retry is performed or scheduled by this update.
+
 This is the next action for the sole writer. It supersedes the requirement in
 the earlier row-click plan that the history must already be rendered. Do not
 open Tasks or click the delegation in this round. Do not rerun the passed Ego
@@ -38,7 +43,9 @@ Source9270 (the relevant files are unchanged from this branch's product patch):
   `/api/bots/T/messages?session_id=S`; after decoding it serializes timestamp
   Dates. The observer records only IDs and timestamp type/parseability, not text.
 - `store/chat/bootstrap.ts:282` and `pages/home/index.vue:260` select the explicit
-  historical session. The history-route guard skips contact resolution; do not
+  historical session. The history-route guard skips its own bootstrap contact
+  resolution while history intent is visible; empty-dock recovery is another
+  caller, so this does not prove all startup contact resolution is absent. Do not
   open the plain Bot/contact route as setup. Source does not by itself prove a
   cold boot is write-free. Observe unexpected commands without claiming to block
   or undo them.
@@ -147,6 +154,11 @@ non-observation outbound WS causes observation to stop after preserving metadata
 this cannot undo traffic already sent by the application. Original history
 permission/availability failures stop without fallback. It does not alter TLS,
 permissions, network, DOM, consistency semantics, storage or product behavior.
+The revised guard distinguishes exact, manifested normal contact resolution
+from other non-read HTTP: see the follow-up's Bot/origin/body rules and optional
+saved-authority baseline. Normal initialization is observable, with binding
+effects retained as unknown. All other mutation/identity/permission failures
+still stop; the exception grants no server permissions or new requests.
 
 ## Narrow decision after this single run
 
@@ -159,8 +171,10 @@ permissions, network, DOM, consistency semantics, storage or product behavior.
 | Home masks before the pane exists | Admission/explicit-session selection; preserve it as a different gate |
 | Original messages appear without refresh | This initial-load sample converged; original field failure remains unproved/unfixed |
 
-No field execution of this new observer has occurred here. Its four new narrow
-contract tests and targeted ESLint/syntax/diff checks passed locally; the old
-eight tests and passed contract experiment were not rerun. No full app/runtime,
-new product fix, field red-green or Harmony/ArkWeb acceptance is claimed. The
-next writer result, not a source-only hypothesis, selects any product isolation.
+At a766 preparation its four narrow contract tests passed locally. The parent
+has since relayed one field run and its premature contact-POST stop; see the
+follow-up. The contact-guard correction has three new targeted local tests,
+including its own red/green; old8/4 tests and unchanged builds were not rerun.
+The corrected observer has not run on the field here. No full app/runtime,
+new product fix, hydration red-green or Harmony/ArkWeb acceptance is claimed.
+Actual evidence, not a source-only hypothesis, must select any product isolation.

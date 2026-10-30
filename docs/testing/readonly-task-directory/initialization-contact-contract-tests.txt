@@ -1,0 +1,49 @@
+Collector-only targeted test: capture-initialization-contact.test.mjs
+
+RED against unchanged a766 collector (one expected failure):
+✖ continues through exactly manifested normal initialization contacts, recording scope/effect instead of losing history and WS evidence (7.55329ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 94.709361
+
+✖ failing tests:
+
+test at docs/testing/readonly-task-directory/capture-initialization-contact.test.mjs:53:1
+✖ continues through exactly manifested normal initialization contacts, recording scope/effect instead of losing history and WS evidence (7.55329ms)
+  Error: Initial-history observation stopped; no repeat
+      at captureInitialHistory (file:///workspace/memoh-readonly-task-directory/docs/testing/readonly-task-directory/capture-initial-history.mjs:164:21)
+      at async TestContext.<anonymous> (file:///workspace/memoh-readonly-task-directory/docs/testing/readonly-task-directory/capture-initialization-contact.test.mjs:54:33)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    captureState: { navigateAttempted: true, navigateReturned: true, interrupted: { name: 'Error', lastCDPMethod: 'Page.navigate', reason: 'Non-read request observed; outcome unconfirmed, no repeat' }, requests: [ [Object], [Object], [Object] ], targetSocketIds: [] },
+    [cause]: Error: Non-read request observed; outcome unconfirmed, no repeat
+        at problem (file:///workspace/memoh-readonly-task-directory/docs/testing/readonly-task-directory/capture-initial-history.mjs:5:42)
+        at drain (file:///workspace/memoh-readonly-task-directory/docs/testing/readonly-task-directory/capture-initial-history.mjs:115:21)
+        at async captureInitialHistory (file:///workspace/memoh-readonly-task-directory/docs/testing/readonly-task-directory/capture-initial-history.mjs:144:7)
+        at async TestContext.<anonymous> (file:///workspace/memoh-readonly-task-directory/docs/testing/readonly-task-directory/capture-initialization-contact.test.mjs:54:33)
+        at async Test.run (node:internal/test_runner/test:1389:7)
+        at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+      observerReason: 'Non-read request observed; outcome unconfirmed, no repeat'
+    }
+  }
+
+GREEN after exact resolver scope policy:
+✔ continues through exactly manifested normal initialization contacts, recording scope/effect instead of losing history and WS evidence (27.575386ms)
+✔ bind, unmanifested Bot, nonempty/identity body and foreign origin still stop with unknown effects and no re-navigation (6.908561ms)
+✔ a contact differing from the saved authority is recorded then stops without rebinding or changing the ordinary history URL (1.810256ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.789181
+
+Targeted ESLint/syntax/diff checks pass.
+Old 8/4 tests and unchanged builds not rerun. Not product hydration red/green or field acceptance.

@@ -243,3 +243,33 @@ against register source3a2e5d97, for the unified owner to apply to its current
 register after checking context. It retains prior cases/history, avoids assigning
 a possibly used new case ID and records both the blank-page lesson and revised
 hydration investigation. It does not replace a newer whole register.
+
+### a766 premature stop: distinguish native contact initialization
+
+Parent relays `initial-history-a766/{OUTCOME.json,journal.jsonl}`: two naturally
+initiated contact POSTs completed200; original component message GET completed
+in27.572ms. Only early interactive/no-dock DOM was sampled before the observer's
+HTTP-method guard stopped. No target runtime/socket had been recorded. Space62
+closed/no in-flight writer. Raw files not read here; contact bodies/before-state
+were not captured, so binding effects and actual caller remain unknown.
+
+The [contact initialization follow-up](contact-initialization-followup.md) traces
+9270's real registered account/Chat-permission resolver and its distinct existing,
+first-adoption and creation branches. Creation can run SessionStart hooks;
+HTTP200 does not prove a no-op. Public `/contact/bind` is actually closed403.
+Normal bodyless contact admission is not a privilege expansion; method-name-only
+stopping was too broad and lost useful history/runtime observation.
+
+The collector now observes only exact manifested Bot/origin normal resolver
+POSTs without query/body, saves completed response scope/identity metadata and
+retains binding effects as unknown. Other mutation, invalid/changed scope,
+non200/failure and actual read-denial conditions still stop without fallback,
+rebinding or re-navigation. Its three new targeted tests pass; one first failed
+on a766's old guard, so this is collector red/green only. Old8/4 tests and unchanged
+builds were not rerun. No product/root-cause correction or field retry is claimed.
+
+Minimal pending evidence is the two saved POST paths/request IDs/method/status/
+terminal (initiator only if already present). No new page/API/DB is needed. Use
+that excerpt to configure exact initialization scope; do not claim these two
+actual requests match the resolver until their paths are known. The sole writer
+remains free for distribution/HTTP work; this update does not take over the field.
