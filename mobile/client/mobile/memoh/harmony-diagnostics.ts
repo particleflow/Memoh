@@ -4,7 +4,7 @@ import { onAuthSessionCleared } from '@/lib/auth-session'
 
 type Kind = 'send' | 'headers' | 'load' | 'error' | 'abort' | 'loadend' | 'validation'
 interface TraceEvent { seq: number, t: number, kind: Kind, g: number, request: number | null, status?: number, loaded?: number, check?: 'body', ok?: boolean }
-interface Batch { id: string, document: string, through: number, body: string }
+interface Batch { id: string, document: string, through: number, body: string, writeAttempted?: boolean }
 function validateBatch(batch: Batch): void {
   const body = JSON.parse(batch.body) as { schema: number, document: string, timeUnit: string, events: Array<Record<string, unknown>> }
   const number = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0
@@ -45,16 +45,24 @@ async function journal<T>(command: string, lease: DiagnosticLease, values: objec
 export async function reconcileDiagnosticBatch(batch: Batch, lease: DiagnosticLease): Promise<void> {
   validateBatch(batch)
   const pending = await journal<Batch[]>('diagnostic.pending', lease)
-  if (!pending.some(item => item.id === batch.id && item.body === batch.body && item.document === batch.document && item.through === batch.through)) throw new Error('DIAGNOSTIC_NOT_PENDING')
+  const retained = pending.find(item => item.id === batch.id && item.body === batch.body && item.document === batch.document && item.through === batch.through)
+  if (!retained) throw new Error('DIAGNOSTIC_NOT_PENDING')
   const bytes = new TextEncoder().encode(batch.body)
   if (!/^[a-f0-9]{64}$/.test(batch.id) || await hash(bytes) !== batch.id) throw new Error('DIAGNOSTIC_DIGEST')
   lease.assertCurrent()
   const path = '/data/.memoh/media/' + batch.id.slice(0, 2) + '/' + batch.id + '.json'
   const read = () => getBotsByBotIdContainerFsDownload({ ...lease.sdkOptions(), path: { bot_id: lease.botId },
     query: { path }, parseAs: 'arrayBuffer', throwOnError: false })
-  // An unknown write is always reconciled at its original object before PUT.
+  // A missing object permits only a first attempt. After any admitted attempt,
+  // 404 cannot establish that a previous unknown write did not happen.
   let result = await read(); lease.assertCurrent()
   if (result.response?.status === 404) {
+    if (retained.writeAttempted) throw new Error('DIAGNOSTIC_WRITE_UNCONFIRMED')
+    // Reuse the original PUT row/command: persist the sticky attempt phase
+    // before SDK dispatch. Its atomic claim also excludes concurrent POSTs.
+    const claimed = await journal<boolean>('diagnostic.put', lease, { batch: { ...retained, writeAttempted: true } })
+    if (claimed !== true) throw new Error('DIAGNOSTIC_WRITE_UNCONFIRMED')
+    lease.assertCurrent()
     await postBotsByBotIdContainerFsUpload({ ...lease.sdkOptions(), path: { bot_id: lease.botId },
       body: { path, file: new Blob([new Uint8Array(bytes).buffer], { type: 'application/json' }) }, throwOnError: true })
     lease.assertCurrent(); result = await read(); lease.assertCurrent()

@@ -6,6 +6,8 @@ import { getBotsByBotIdContainerFsDownload } from '@memohai/sdk'
 import { openDiagnosticLease, setupApiClient } from '@/lib/api-client'
 import { notifyAuthSessionCleared } from '@/lib/auth-session'
 import { diagnosticTransfer, reconcileDiagnosticBatch, resumeDiagnostics, suspendDiagnostics } from './harmony-diagnostics'
+import * as diagnostics from './harmony-diagnostics'
+import { originalBlob } from './harmony-files'
 
 // Keep Request/Response/Blob/FormData/AbortSignal in one real platform realm.
 // Only the DOM lifecycle/storage boundary is adapted; the generated SDK is real.
@@ -14,18 +16,21 @@ const { host, storage } = vi.hoisted(() => {
   const storage = { getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => values.set(key, value), removeItem: (key: string) => values.delete(key), clear: () => values.clear(), key: (index: number) => [...values.keys()][index] ?? null, get length() { return values.size } }
   const host = Object.assign(new EventTarget(), { location: { origin: 'https://example.test', host: 'example.test', protocol: 'https:' } })
   vi.stubGlobal('window', host); vi.stubGlobal('localStorage', storage)
+  vi.stubGlobal('sessionStorage', { getItem: () => null, setItem: () => {}, removeItem: () => {} })
   return { host, storage }
 })
 
 const bot = '11111111-2222-4333-8444-555555555555', other = '66666666-7777-4888-8999-aaaaaaaaaaaa'
 let principal = 'user-a', sends: Request[], objects: Map<string, ArrayBuffer>, writes: number, acks: number, loseReply: boolean
+let failAttemptJournal = false
 let blockRead: boolean, readReject: ((error: Error) => void) | undefined
-const rows = new Map<string, Array<{ id: string, document: string, through: number, body: string }>>()
+const rows = new Map<string, Array<{ id: string, document: string, through: number, body: string, writeAttempted?: boolean }>>()
 const cursors = new Map<string, number>()
 const digest = async (body: string) => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(body))), b => b.toString(16).padStart(2, '0')).join('')
 const fetcher: typeof fetch = async (input, init) => {
   const request = new Request(input, init), url = new URL(request.url); sends.push(request)
   if (url.pathname.endsWith('/users/me')) return Response.json({ id: principal })
+  if (/\/media\/[a-f0-9]{64}$/.test(url.pathname)) return new Response(new TextEncoder().encode('payload'))
   if (url.pathname.endsWith('/download')) {
     if (blockRead) return new Promise((_resolve, reject) => { readReject = reject; request.signal.addEventListener('abort', () => reject(new Error('retired')), { once: true }) })
     const data = objects.get(url.searchParams.get('path')!)
@@ -42,19 +47,27 @@ const fetcher: typeof fetch = async (input, init) => {
 }
 beforeEach(() => {
   vi.stubGlobal('window', host); vi.stubGlobal('localStorage', storage)
-  vi.stubGlobal('crypto', webcrypto); sends = []; objects = new Map(); writes = 0; acks = 0; loseReply = false; blockRead = false; readReject = undefined; principal = 'user-a'; rows.clear(); cursors.clear()
+  vi.stubGlobal('sessionStorage', { getItem: () => null, setItem: () => {}, removeItem: () => {} })
+  vi.stubGlobal('crypto', webcrypto); sends = []; objects = new Map(); writes = 0; acks = 0; loseReply = false; failAttemptJournal = false; blockRead = false; readReject = undefined; principal = 'user-a'; rows.clear(); cursors.clear()
   localStorage.clear(); localStorage.setItem('token', 'synthetic-a'); client.interceptors.request.clear()
   setupApiClient({ baseUrl: 'https://example.test/api', fetch: fetcher })
   Object.assign(window, { begoniaNative: { async request(raw: string) {
     const value = JSON.parse(raw), key = value.scope + ':' + value.document
     if (value.command === 'diagnostic.pending') return JSON.stringify({ ok: true, data: rows.get(value.scope) ?? [] })
     if (value.command === 'diagnostic.cursor') return JSON.stringify({ ok: true, data: cursors.get(key) ?? 0 })
-    if (value.command === 'diagnostic.put') { rows.set(value.scope, [...(rows.get(value.scope) ?? []), value.batch]); cursors.set(value.scope + ':' + value.batch.document, value.batch.through) }
-    if (value.command === 'diagnostic.ack') { acks++; rows.set(value.scope, (rows.get(value.scope) ?? []).filter(item => item.id !== value.hash)) }
+    if (value.command === 'diagnostic.put') {
+      if (value.batch.writeAttempted && failAttemptJournal) return JSON.stringify({ ok: false })
+      const pending = rows.get(value.scope) ?? [], previous = pending.find(item => item.id === value.batch.id)
+      if (previous && (!value.batch.writeAttempted || previous.writeAttempted)) return JSON.stringify({ ok: true, data: false })
+      rows.set(value.scope, [...pending.filter(item => item.id !== value.batch.id), { ...value.batch, ...(previous?.writeAttempted ? { writeAttempted: true } : {}) }])
+      cursors.set(value.scope + ':' + value.batch.document, value.batch.through)
+      return JSON.stringify({ ok: true, data: true })
+    }
+    if (value.command === 'diagnostic.ack') { const pending = rows.get(value.scope) ?? []; if (pending.some(item => item.id === value.hash)) acks++; rows.set(value.scope, pending.filter(item => item.id !== value.hash)) }
     return JSON.stringify({ ok: true })
   } } })
 })
-afterEach(() => { suspendDiagnostics(); readReject?.(new Error('test cleanup')); delete (window as Window & { begoniaNative?: unknown }).begoniaNative; vi.unstubAllGlobals() })
+afterEach(() => { suspendDiagnostics(); readReject?.(new Error('test cleanup')); delete (window as Window & { begoniaNative?: unknown }).begoniaNative; vi.restoreAllMocks(); vi.unstubAllGlobals() })
 
 it('blocks identity changes between the actual SDK auth interceptor and baseFetch', async () => {
   const lease = await openDiagnosticLease(bot)
@@ -155,4 +168,69 @@ it('checks identity at dispatch even when no lifecycle notification was emitted'
   })
   await expect(getBotsByBotIdContainerFsDownload({ ...lease.sdkOptions(), path: { bot_id: bot }, query: { path: 'x' }, throwOnError: true })).rejects.toThrow('DIAGNOSTIC_IDENTITY_CHANGED')
   expect(sends.filter(request => request.url.includes('/download'))).toHaveLength(0)
+})
+
+
+it('review P1: failed diagnostic initialization cannot block a valid seven-byte original', async () => {
+  const hash = await digest('payload'), warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.spyOn(crypto, 'randomUUID').mockImplementation(() => { throw new Error('synthetic private initialization detail') })
+  const blob = await originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7 })
+  expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('payload')
+  expect(sends.filter(request => /\/media\/[a-f0-9]{64}$/.test(new URL(request.url).pathname))).toHaveLength(1)
+  expect(warn.mock.calls).toEqual([['GARNET_DIAGNOSTIC_INIT_FAILED']])
+})
+
+it('review P1: failed diagnostic event reporting cannot change successful body/hash validation', async () => {
+  const hash = await digest('payload'), warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue(() => { throw new Error('synthetic private event detail') })
+  const blob = await originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7 })
+  expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('payload')
+  expect(sends.filter(request => /\/media\/[a-f0-9]{64}$/.test(new URL(request.url).pathname))).toHaveLength(1)
+  expect(warn.mock.calls).toEqual([['GARNET_DIAGNOSTIC_EVENT_FAILED']])
+})
+
+it('review P2: after an unknown write, later404 is read-only until the same object verifies', async () => {
+  const lease = await openDiagnosticLease(bot)
+  const body = JSON.stringify({ schema: 1, document: 'f'.repeat(32), timeUnit: 'relative_monotonic_ms', events: [{ seq: 1, t: 5, kind: 'load', g: 1, request: 1 }] })
+  const item = { id: await digest(body), body, document: 'f'.repeat(32), through: 1 }
+  rows.set(lease.scope, [item]); loseReply = true
+  await expect(reconcileDiagnosticBatch(item, lease)).rejects.toThrow()
+  const path = '/data/.memoh/media/' + item.id.slice(0, 2) + '/' + item.id + '.json', accepted = objects.get(path)!
+  expect(writes).toBe(1); expect(acks).toBe(0)
+  objects.delete(path); lease.retire(); suspendDiagnostics()
+  const restored = await openDiagnosticLease(bot); loseReply = true
+  const error: unknown = await reconcileDiagnosticBatch(item, restored).catch(error => error)
+  expect({ writes, acks }).toEqual({ writes: 1, acks: 0 })
+  expect(error).toMatchObject({ message: 'DIAGNOSTIC_WRITE_UNCONFIRMED' })
+  expect(rows.get(restored.scope)).toHaveLength(1)
+  objects.set(path, accepted); loseReply = false
+  await reconcileDiagnosticBatch(item, restored)
+  expect({ writes, acks }).toEqual({ writes: 1, acks: 1 })
+})
+
+it('review P2: a failed durable attempt marker prevents POST dispatch', async () => {
+  const lease = await openDiagnosticLease(bot)
+  const body = JSON.stringify({ schema: 1, document: 'a'.repeat(32), timeUnit: 'relative_monotonic_ms', events: [{ seq: 1, t: 6, kind: 'loadend', g: 1, request: 1 }] })
+  const item = { id: await digest(body), body, document: 'a'.repeat(32), through: 1 }
+  rows.set(lease.scope, [item]); failAttemptJournal = true
+  const error: unknown = await reconcileDiagnosticBatch(item, lease).catch(error => error)
+  expect({ writes, acks }).toEqual({ writes: 0, acks: 0 })
+  expect(error).toMatchObject({ message: 'DIAGNOSTIC_JOURNAL_FAILED' })
+})
+
+
+it('review P2: concurrent reconciliations claim only one first POST', async () => {
+  const lease = await openDiagnosticLease(bot)
+  const body = JSON.stringify({ schema: 1, document: 'b'.repeat(32), timeUnit: 'relative_monotonic_ms', events: [{ seq: 1, t: 7, kind: 'load', g: 1, request: 1 }] })
+  const item = { id: await digest(body), body, document: 'b'.repeat(32), through: 1 }
+  rows.set(lease.scope, [item])
+  await Promise.allSettled([reconcileDiagnosticBatch(item, lease), reconcileDiagnosticBatch(item, lease)])
+  expect(writes).toBe(1); expect(acks).toBe(1)
+})
+
+it('review P1: diagnostic errors do not hide a real body/hash failure', async () => {
+  vi.spyOn(console, 'warn').mockImplementation(() => {})
+  vi.spyOn(crypto, 'randomUUID').mockImplementation(() => { throw new Error('controlled diagnostic failure') })
+  await expect(originalBlob({ bot_id: bot, content_hash: 'a'.repeat(64), type: 'file', size: 7 })).rejects.toThrow()
+  expect(sends.filter(request => /\/media\/[a-f0-9]{64}$/.test(new URL(request.url).pathname))).toHaveLength(1)
 })

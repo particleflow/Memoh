@@ -1,5 +1,7 @@
 # Formal-client automatic diagnostic source integration
 
+**Review correction2026-10-30:**113bf was not admitted: diagnostic faults could interrupt an original read, and an unknown diagnostic write followed by404 could POST again. The original logs below do not cover those failures. See [the source-only correction](../harmony-auto-diagnostics-review-fix-20261030/README.md), still pending independent admission; published32 does not include this feature.
+
 This source-only change resumes WIP2648fad921c45eb20d50ed5656fbbadca712e950 on the exact1.0.32 source c83b1d5e2f7b5aaf20a52237389789b26bd34c7f. The original22910-byte source-owner handoff was already locally readable and reverified as SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1. No Library re-download or field action was needed. The shipped1.0.32 deliberately excludes this uploader; its preserved unsigned HAP still hashes f16df3de1d59e6c4008fad622d971ec7fdb1c84505c4bb9532e33f471f41845a. No new version/package is produced here.
 
 ## Existing seams completed

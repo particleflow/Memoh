@@ -8,8 +8,8 @@ import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 interface DiagnosticEvent { at: number; area: string; component: string; phase: string; detail: string; }
 interface TraceEvent { seq: number; t: number; kind: string; g: number; request: number | null; method?: string; status?: number; loaded?: number; total?: number; lengthComputable?: boolean; check?: string; ok?: boolean; reason?: string; }
 interface TraceBody { schema: number; document: string; timeUnit: string; events: TraceEvent[]; }
-export interface DiagnosticBatch { id: string; document: string; through: number; body: string; }
-interface QueueRecord { kind: string; at: number; scope: string; id: string; document?: string; through?: number; body?: string; }
+export interface DiagnosticBatch { id: string; document: string; through: number; body: string; writeAttempted?: boolean; }
+interface QueueRecord { kind: string; at: number; scope: string; id: string; document?: string; through?: number; body?: string; writeAttempted?: boolean; }
 interface QueueState { pending: Map<string, DiagnosticBatch>; acked: Set<string>; cursors: Map<string, number>; }
 
 // Engineering state only: callers never pass messages, credentials or media content.
@@ -69,7 +69,11 @@ export class ClientDiagnostics {
         if (record.body === undefined || record.document === undefined || record.through === undefined) { throw new Error('DIAGNOSTIC_JOURNAL_CORRUPT'); }
         ClientDiagnostics.validateBody(record.body, record.document, record.through);
         state.cursors.set(record.document, Math.max(state.cursors.get(record.document) ?? 0, record.through));
-        if (!state.acked.has(record.id)) { state.pending.set(record.id, { id: record.id, document: record.document, through: record.through, body: record.body }); }
+        if (record.writeAttempted !== undefined && typeof record.writeAttempted !== 'boolean') { throw new Error('DIAGNOSTIC_JOURNAL_CORRUPT'); }
+        if (!state.acked.has(record.id)) {
+          const attempted = record.writeAttempted === true || state.pending.get(record.id)?.writeAttempted === true;
+          state.pending.set(record.id, { id: record.id, document: record.document, through: record.through, body: record.body, writeAttempted: attempted });
+        }
       }
     }
     return state;
@@ -79,17 +83,22 @@ export class ClientDiagnostics {
     return ClientDiagnostics.fold(scope).cursors.get(document) ?? 0;
   }
   static pending(scope: string): DiagnosticBatch[] { return Array.from(ClientDiagnostics.fold(scope).pending.values()); }
-  static async put(scope: string, batch: DiagnosticBatch): Promise<void> {
+  static async put(scope: string, batch: DiagnosticBatch): Promise<boolean> {
     ClientDiagnostics.scope(scope); ClientDiagnostics.validateBody(batch.body, batch.document, batch.through);
     const bytes = new util.TextEncoder().encodeInto(batch.body);
     const hash = cryptoFramework.createMd('SHA256'); await hash.update({ data: bytes });
     const id = Array.from((await hash.digest()).data).map((b: number): string => b.toString(16).padStart(2, '0')).join('');
     if (id !== batch.id) { throw new Error('DIAGNOSTIC_DIGEST'); }
     const state = ClientDiagnostics.fold(scope);
-    if (state.acked.has(id) || state.pending.has(id)) { return; }
-    if (batch.through <= (state.cursors.get(batch.document) ?? 0)) { throw new Error('DIAGNOSTIC_CURSOR'); }
-    const record: QueueRecord = { kind: 'diagnostic-put-v1', at: Date.now(), scope, id, document: batch.document, through: batch.through, body: batch.body };
+    if (state.acked.has(id)) { return false; }
+    const pending = state.pending.get(id);
+    if (pending) {
+      if (batch.writeAttempted !== true || pending.writeAttempted) { return false; }
+    } else if (batch.writeAttempted === true) { throw new Error('DIAGNOSTIC_NOT_PENDING'); }
+    else if (batch.through <= (state.cursors.get(batch.document) ?? 0)) { throw new Error('DIAGNOSTIC_CURSOR'); }
+    const record: QueueRecord = { kind: 'diagnostic-put-v1', at: Date.now(), scope, id, document: batch.document, through: batch.through, body: batch.body, writeAttempted: batch.writeAttempted === true };
     ClientDiagnostics.append(JSON.stringify(record));
+    return true;
   }
   static ack(scope: string, id: string, verifiedHash: string, verifiedSize: number): void {
     if (id !== verifiedHash || !/^[a-f0-9]{64}$/.test(id)) { throw new Error('DIAGNOSTIC_ACK'); }

@@ -108,10 +108,12 @@ export class NativeClient {
           return JSON.stringify({ ok: true, data: ClientDiagnostics.capturedThrough(value.scope, value.document) });
         }
         if (value.command === 'diagnostic.put' && value.batch &&
-          Object.keys(value.batch).length === 4 && Object.keys(value.batch).every((key: string): boolean => ['id', 'document', 'through', 'body'].includes(key)) &&
-          typeof value.batch.id === 'string' && typeof value.batch.document === 'string' && typeof value.batch.body === 'string' && typeof value.batch.through === 'number') {
-          await ClientDiagnostics.put(value.scope, value.batch);
+          [4, 5].includes(Object.keys(value.batch).length) && Object.keys(value.batch).every((key: string): boolean => ['id', 'document', 'through', 'body', 'writeAttempted'].includes(key)) &&
+          typeof value.batch.id === 'string' && typeof value.batch.document === 'string' && typeof value.batch.body === 'string' && typeof value.batch.through === 'number' &&
+          (value.batch.writeAttempted === undefined || typeof value.batch.writeAttempted === 'boolean')) {
+          const claimed = await ClientDiagnostics.put(value.scope, value.batch);
           this.checkView(); this.owner.check(epoch);
+          return JSON.stringify({ version: 1, ok: true, data: claimed });
         } else if (value.command === 'diagnostic.ack' && typeof value.hash === 'string' && typeof value.verifiedHash === 'string' && typeof value.verifiedSize === 'number') {
           ClientDiagnostics.ack(value.scope, value.hash, value.verifiedHash, value.verifiedSize);
         } else { throw new Error('NATIVE_REQUEST_INVALID'); }

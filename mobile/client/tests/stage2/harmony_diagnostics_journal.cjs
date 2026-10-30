@@ -33,6 +33,17 @@ async function main(){
  const two=batch(2);D.ack(scope,two.id,two.id,Buffer.byteLength(two.body));assert.equal(D.pending(scope).length,0)
  D=load('ClientDiagnostics').ClientDiagnostics;D.bind({filesDir:dir});assert.equal(D.pending(scope).length,0);assert.equal(D.capturedThrough(scope,document),2)
  const bad=batch(3);bad.body=JSON.stringify({...JSON.parse(bad.body),filename:'must never persist'});bad.id=crypto.createHash('sha256').update(bad.body).digest('hex');await assert.rejects(D.put(scope,bad))
+ const fresh=batch(3);assert.equal(await D.put(scope,fresh),true)
+ short=15;await assert.rejects(D.put(scope,{...fresh,writeAttempted:true}));failed=false
+ D=load('ClientDiagnostics').ClientDiagnostics;D.bind({filesDir:dir});assert.equal(D.capturedThrough(scope,document),3);assert.equal(D.pending(scope)[0].writeAttempted,false)
+ assert.deepEqual(await Promise.all([D.put(scope,{...fresh,writeAttempted:true}),D.put(scope,{...fresh,writeAttempted:true})]),[true,false])
+ D=load('ClientDiagnostics').ClientDiagnostics;D.bind({filesDir:dir});assert.equal(D.pending(scope)[0].writeAttempted,true)
+ assert.equal(await D.put(scope,fresh),false);assert.equal(D.pending(scope)[0].writeAttempted,true)
+ await assert.rejects(D.put(other,{...fresh,writeAttempted:true}))
+ D.ack(scope,fresh.id,fresh.id,Buffer.byteLength(fresh.body));assert.equal(D.pending(scope).length,0)
+ const next=batch(4);await D.put(scope,next);failSync=true;await assert.rejects(D.put(scope,{...next,writeAttempted:true}))
+ D=load('ClientDiagnostics').ClientDiagnostics;D.bind({filesDir:dir});assert.equal(D.pending(scope)[0].writeAttempted,true);assert.equal(await D.put(scope,{...next,writeAttempted:true}),false)
+ D.ack(scope,next.id,next.id,Buffer.byteLength(next.body))
  let frame='begonia-client://app/index.html'
  class Stub{close(){}prepare(){}}
  const owner={uploads:{releasePreviews(){}},attach:()=>1,current:()=>true,detach(){},generation:()=>0,check(){},async ready(){},revoke(){}}
@@ -43,7 +54,13 @@ async function main(){
  assert.equal((await call({command:'diagnostic.pending',scope})).ok,false)
  await call({command:'client.state',state:'ready'});assert.deepEqual((await call({command:'diagnostic.pending',scope})).data,[])
  assert.equal((await call({command:'diagnostic.pending',scope,filename:'forbidden'})).ok,false)
+ const five=batch(5)
+ assert.equal((await call({command:'diagnostic.put',scope,batch:five})).data,true)
+ assert.equal((await call({command:'diagnostic.put',scope,batch:{...five,writeAttempted:true}})).data,true)
+ assert.equal((await call({command:'diagnostic.put',scope,batch:{...five,writeAttempted:true}})).data,false)
+ assert.equal((await call({command:'diagnostic.put',scope,batch:{...five,writeAttempted:'invalid'}})).ok,false)
+ await call({command:'diagnostic.ack',scope,hash:five.id,verifiedHash:five.id,verifiedSize:Buffer.byteLength(five.body)})
  frame='https://example.test/';assert.equal((await call({command:'diagnostic.pending',scope})).error,'NATIVE_FRAME_DENIED');client.close()
- console.log(JSON.stringify({actualNativeJournal:true,realUTF8Files:true,tornPutDoesNotAdvanceCursor:true,strictFsyncFailure:true,restartSameJournal:true,tornAckRetainsPending:true,ackHashAndSizeRequired:true,otherScopeCannotAck:true,rotationAcrossOriginalTwoFiles:true,retainedAckSuppressesOldPut:true,noRawJournalExport:true,actualReadyAndFrameGuard:true,device:false}))
+ console.log(JSON.stringify({actualNativeJournal:true,realUTF8Files:true,tornPutDoesNotAdvanceCursor:true,strictFsyncFailure:true,restartSameJournal:true,tornAckRetainsPending:true,ackHashAndSizeRequired:true,otherScopeCannotAck:true,rotationAcrossOriginalTwoFiles:true,retainedAckSuppressesOldPut:true,noRawJournalExport:true,actualReadyAndFrameGuard:true,attemptMarkerTornWrite:true,attemptMarkerStickyAfterRestart:true,fsyncUnknownAttemptRetained:true,atomicConcurrentClaim:true,device:false}))
 }
 main().catch(error=>{console.error(error);process.exitCode=1})

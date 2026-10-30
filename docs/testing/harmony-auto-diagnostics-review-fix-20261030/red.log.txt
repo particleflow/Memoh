@@ -1,0 +1,137 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+stderr | src/lib/harmony-diagnostics-api.test.ts
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:runtime-state" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:acp-selection" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:created-bot-id" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+[safe-storage] sessionStorage.removeItem failed for "memoh:onboarding:provider-added-count" ReferenceError: sessionStorage is not defined
+    at safeSessionRemove (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/utils/safe-storage.ts:33:5)
+    at purgeLegacyOnboardingSession (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:109:42)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/pages/onboarding/session.ts:114:1
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+    at VitestModuleRunner.cachedRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1165:73)
+    at /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web/src/composables/useOnboarding.ts:8:1
+    at VitestModuleEvaluator._runInlinedModule (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vitest@4.1.10_@opentelemetry+api@1.9.0_@types+node@25.9.5_jsdom@27.4.0_@noble+hashes@2._ef86c5586c3e9d9a3095bb525d3cc45a/node_modules/vitest/dist/module-evaluator.js:206:4)
+    at VitestModuleRunner.directRequest (file:///workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/node_modules/.pnpm/vite@8.1.5_@types+node@25.9.5_esbuild@0.25.12_jiti@2.7.0_tsx@4.21.0_yaml@2.9.0/node_modules/vite/dist/node/module-runner.js:1258:59)
+
+ ❯ |web| src/lib/harmony-diagnostics-api.test.ts (13 tests | 4 failed | 9 skipped) 62ms
+   × review P1: failed diagnostic initialization cannot block a valid seven-byte original 11ms
+   × review P1: failed diagnostic event reporting cannot change successful body/hash validation 2ms
+   × review P2: after an unknown write, later404 is read-only until the same object verifies 38ms
+   × review P2: a failed durable attempt marker prevents POST dispatch 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > review P1: failed diagnostic initialization cannot block a valid seven-byte original
+Error: synthetic private initialization detail
+ ❯ Crypto.<anonymous> src/lib/harmony-diagnostics-api.test.ts:172:67
+    170| it('review P1: failed diagnostic initialization cannot block a valid s…
+    171|   const hash = await digest('payload'), warn = vi.spyOn(console, 'warn…
+    172|   vi.spyOn(crypto, 'randomUUID').mockImplementation(() => { throw new …
+       |                                                                   ^
+    173|   const blob = await originalBlob({ bot_id: bot, content_hash: hash, t…
+    174|   expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('pay…
+ ❯ diagnosticTransfer src/lib/harmony-diagnostics.ts:95:27
+ ❯ Module.originalBlob src/lib/harmony-files.ts:128:17
+ ❯ src/lib/harmony-diagnostics-api.test.ts:173:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > review P1: failed diagnostic event reporting cannot change successful body/hash validation
+Error: synthetic private event detail
+ ❯ src/lib/harmony-diagnostics-api.test.ts:181:77
+    179| it('review P1: failed diagnostic event reporting cannot change success…
+    180|   const hash = await digest('payload'), warn = vi.spyOn(console, 'warn…
+    181|   vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue(() => { …
+       |                                                                             ^
+    182|   const blob = await originalBlob({ bot_id: bot, content_hash: hash, t…
+    183|   expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('pay…
+ ❯ Module.originalBlob src/lib/harmony-files.ts:129:3
+ ❯ src/lib/harmony-diagnostics-api.test.ts:182:22
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > review P2: after an unknown write, later404 is read-only until the same object verifies
+AssertionError: expected { writes: 2, acks: +0 } to deeply equal { writes: 1, acks: +0 }
+
+- Expected
++ Received
+
+  {
+    "acks": 0,
+-   "writes": 1,
++   "writes": 2,
+  }
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:199:28
+    197|   const restored = await openDiagnosticLease(bot); loseReply = true
+    198|   const error: unknown = await reconcileDiagnosticBatch(item, restored…
+    199|   expect({ writes, acks }).toEqual({ writes: 1, acks: 0 })
+       |                            ^
+    200|   expect(error).toMatchObject({ message: 'DIAGNOSTIC_WRITE_UNCONFIRMED…
+    201|   expect(rows.get(restored.scope)).toHaveLength(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > review P2: a failed durable attempt marker prevents POST dispatch
+AssertionError: expected { writes: 1, acks: 1 } to deeply equal { writes: +0, acks: +0 }
+
+- Expected
++ Received
+
+  {
+-   "acks": 0,
+-   "writes": 0,
++   "acks": 1,
++   "writes": 1,
+  }
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:213:28
+    211|   rows.set(lease.scope, [item]); failAttemptJournal = true
+    212|   const error: unknown = await reconcileDiagnosticBatch(item, lease).c…
+    213|   expect({ writes, acks }).toEqual({ writes: 0, acks: 0 })
+       |                            ^
+    214|   expect(error).toMatchObject({ message: 'DIAGNOSTIC_JOURNAL_FAILED' })
+    215| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 9 skipped (13)
+   Start at  00:04:36
+   Duration  11.47s (transform 8.56s, setup 0ms, import 11.15s, tests 62ms, environment 0ms)

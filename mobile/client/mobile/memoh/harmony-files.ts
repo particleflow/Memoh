@@ -125,7 +125,20 @@ function uploadFetch(progress: ((value: UploadProgress) => void) | undefined, at
 }
 
 export async function originalBlob(attachment: UIAttachment, signal?: AbortSignal): Promise<Blob> {
-  const trace = diagnosticTransfer(referenceBot(attachment))
+  // Observability must never replace the original transfer/validation outcome.
+  // Keep only fixed local failure phases, never the diagnostic Error or payload.
+  const diagnosticFailure = (phase: 'INIT' | 'EVENT') => {
+    try { console.warn(`GARNET_DIAGNOSTIC_${phase}_FAILED`) } catch { /* Logging is also optional. */ }
+  }
+  let trace: ReturnType<typeof diagnosticTransfer> = () => {}
+  try {
+    const observer = diagnosticTransfer(referenceBot(attachment))
+    let disabled = false
+    trace = (...args) => {
+      if (disabled) return
+      try { observer(...args) } catch { disabled = true; diagnosticFailure('EVENT') }
+    }
+  } catch { diagnosticFailure('INIT') }
   trace('send')
   try {
     const blob = await readOriginalBlob(attachment, signal, trace)

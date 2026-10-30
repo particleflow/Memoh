@@ -1,0 +1,19 @@
+{
+  "base": "113bf54c4a66020a4d662d40fdbbdfe11291a7e4",
+  "changedSources": [
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
+    "mobile/client/mobile/memoh/harmony-files.ts",
+    "mobile/client/mobile/memoh/harmony-diagnostics.ts",
+    "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts",
+    "mobile/client/tests/stage2/harmony_diagnostics_journal.cjs"
+  ],
+  "generatedSourceHashes": {
+    "apps/web/src/lib/api-client.ts": "4933be51e4a346a5d70ef5097c583461a6da4ee82e5ebdfd13db3844dd7545c8",
+    "apps/web/src/lib/harmony-files.ts": "42f18355d7b3cd4d33b95d7a7e126ac1c16aaf87e6adde7d202598f4afbfd02d",
+    "apps/web/src/lib/harmony-diagnostics.ts": "b28604d112ca9fda68201ec419d6aa0c3e34c9e8db6965ffc375138cb09df73b",
+    "apps/web/src/lib/harmony-diagnostics-api.test.ts": "4d886f9c05dd5fb7fd98b717d7a4c6dc58e9d27cc573daaaaa4170bb1db434ce"
+  },
+  "remoteSDKUnchanged": true,
+  "newHAPBuilt": false
+}
