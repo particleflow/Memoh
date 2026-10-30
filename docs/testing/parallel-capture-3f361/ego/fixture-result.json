@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "consumer": "controlled fake Page, NOT real Ego",
+  "paidCalls": 0,
+  "browserLaunches": 0,
+  "productionRequests": 0,
+  "cases": [
+    "explicit direct event/CDP/evaluate fixture",
+    "explicit nested event/CDP/evaluate fixture",
+    "events arriving during awaited body RPC survive into next batch",
+    "unknown envelope fails closed without fallback",
+    "no contract no enable; expired response and unfinished stop are unknown",
+    "one shape probe reports paths/types only, no credentials/content"
+  ],
+  "covered": [
+    "pre-arm buffers cannot bind old sends",
+    "destructive buffers serialized",
+    "loadingFinished gates body read",
+    "delayed202 versus earlier409",
+    "postData fetch",
+    "base64 decode in isolated evaluate",
+    "no invocation tool frame retained",
+    "exact queue/run/turn relation",
+    "B history then worker-running ordering",
+    "old task excluded",
+    "changed worker rejected",
+    "403 no retry",
+    "stop drains late completion",
+    "credential/address redaction",
+    "no disable/subscribe/on/off",
+    "unknown shape/body and missing contract"
+  ],
+  "fieldAcceptance": "PENDING one Ego shape readback"
+}

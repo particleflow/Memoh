@@ -1,5 +1,7 @@
 # Pre-send parallel acceptance recorder
 
+**Consumer correction (2026-10-30):** The Python/Playwright recorder below is historical cloud evidence and must not be run in Ego2.1.0, whose supported workflow prohibits importing Playwright or launching another browser. Use the [Ego Page adapter and one-time contract probe](ego/README.md). Its cloud fixtures pass; actual Ego envelope/retention readback is still pending. Parent now reports Server/Web9270 healthy. No new paid field test was run for this adaptation.
+
 This is a **local, one-shot acceptance observer**, not a product change, persistent service, scheduler, model client or browser UI. It addresses the lost A identity and lost B queue response in the parent-reported field run. It does not execute another paid test. No SQL, database credentials, recovery POST, new expert task or model configuration is present.
 
 Contract baseline: Server `3f361e38a0a30fe52248c9361ead008c052ef2ea`. The newer9270 image was reported released but not applied when this work was requested; no assumption about its deployed status is made. The real `dedda02f-1510-417c-baf3-1ddd466d7c7e` sample completed with visible replies, but overlap remains unproven. Its field files were not read here: their contents are parent reports.

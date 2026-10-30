@@ -1,0 +1,47 @@
+--- a/docs/testing/compatibility-incident-register.md
++++ b/docs/testing/compatibility-incident-register.md
+@@ -60,6 +60,7 @@
+ | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
+ | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
+ | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
++| C12 | External recorder versus Ego Page execution | Page adapter fixtures pass; actual consumer shape pending |
+ 
+ ## C01 — Windows helper calls unavailable os.setxattr
+ 
+@@ -279,6 +280,36 @@
+   failures and unknowns; no message fabrication, history reset, expert replay or
+   unchanged release rebuild is required to document this issue.
+ 
++## C12 — External recorder does not match Ego Page execution
++
++- **Platform / signature:** Ego2.1.0 on the original Windows writer; the
++  463cf6e51 external Playwright/CDP-endpoint recorder does not match the supported
++  consumer workflow. Parent reports it never started; A/B and new paid calls were0.
++- **Cause:** The original handoff assumed an external Playwright/browser channel.
++  The writer's actual skill/help read prohibits importing Playwright or launching
++  another browser. The supported Page instead provides cdp, read-and-clear events,
++  and evaluate with JSON arguments. This is separate from C01's os.setxattr fault.
++- **Validated handling:** Read this register and the actual consumer contract first.
++  The original Bot owner prepared an import-free Page adapter and one bounded,
++  no-fee shape probe; controlled cloud fixtures validate identity correlation,
++  destructive-buffer ordering, completed-body handling and unknown preservation.
++  Do not send another external browser script or guess an EventEmitter interface.
++- **Result / unresolved boundary:** Cloud fixtures only, not actual Ego acceptance.
++  Event method/params paths, cdp/evaluate return wrappers and one immediate body
++  read still require the original writer's one no-fee observation on the existing
++  idle fixed-contact Page. Retention, overflow, cancellation and cross-turn lifetime
++  are not established. No new A/B, model request, DB access or product change.
++- **Original evidence:** Parent's 2026-10-30 Ego2.1.0 skill/help readback and
++  [owner adapter/probe and fixture evidence](parallel-capture-3f361/ego/README.md).
++  Consumer-local help and field files were not independently read by the cloud
++  owner. The first recorder remains historical evidence, not an Ego-ready tool.
++- **New condition before another attempt:** Return the one scoped probe's actual
++  sanitized envelope/body shapes through the original writer; validate those exact
++  paths before enabling real capture. A fixture pass or standard Chromium protocol
++  alone is insufficient. Do not obtain another endpoint, launch a browser or use
++  Playwright as a workaround. Preserve any denial/unknown result without a new paid
++  retry, and update this entry only with the subsequent actual result.
++
+ ## Applying these lessons to the existing handoffs
+ 
+ Use the version-specific handoff for actual commands, images and compatibility

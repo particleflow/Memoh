@@ -1,0 +1,177 @@
+{
+  "source": "https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/json/browser_protocol.json",
+  "protocol_version": {
+    "major": "1",
+    "minor": "3"
+  },
+  "sha256": "332d242771f522def6cab034fe90e4d65d87c31c20f3d8a642f54f04466ef642",
+  "commands": [
+    {
+      "name": "disable",
+      "parameters": [],
+      "returns": []
+    },
+    {
+      "name": "enable",
+      "parameters": [
+        {
+          "name": "maxTotalBufferSize",
+          "optional": true,
+          "type": "integer"
+        },
+        {
+          "name": "maxResourceBufferSize",
+          "optional": true,
+          "type": "integer"
+        },
+        {
+          "name": "maxPostDataSize",
+          "optional": true,
+          "type": "integer"
+        },
+        {
+          "name": "reportDirectSocketTraffic",
+          "optional": true,
+          "type": "boolean"
+        },
+        {
+          "name": "enableDurableMessages",
+          "optional": true,
+          "type": "boolean"
+        }
+      ],
+      "returns": []
+    },
+    {
+      "name": "getResponseBody",
+      "parameters": [
+        {
+          "name": "requestId",
+          "$ref": "RequestId"
+        }
+      ],
+      "returns": [
+        {
+          "name": "body",
+          "type": "string"
+        },
+        {
+          "name": "base64Encoded",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "name": "getRequestPostData",
+      "parameters": [
+        {
+          "name": "requestId",
+          "$ref": "RequestId"
+        }
+      ],
+      "returns": [
+        {
+          "name": "postData",
+          "type": "string"
+        },
+        {
+          "name": "base64Encoded",
+          "type": "boolean"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "loadingFailed",
+      "parameters": [
+        "requestId",
+        "timestamp",
+        "type",
+        "errorText",
+        "canceled",
+        "blockedReason",
+        "corsErrorStatus"
+      ]
+    },
+    {
+      "name": "loadingFinished",
+      "parameters": [
+        "requestId",
+        "timestamp",
+        "encodedDataLength",
+        "encodedBodyLength"
+      ]
+    },
+    {
+      "name": "requestWillBeSent",
+      "parameters": [
+        "requestId",
+        "loaderId",
+        "documentURL",
+        "request",
+        "timestamp",
+        "wallTime",
+        "initiator",
+        "redirectHasExtraInfo",
+        "redirectResponse",
+        "type",
+        "frameId",
+        "hasUserGesture",
+        "renderBlockingBehavior"
+      ]
+    },
+    {
+      "name": "responseReceived",
+      "parameters": [
+        "requestId",
+        "loaderId",
+        "timestamp",
+        "type",
+        "response",
+        "hasExtraInfo",
+        "frameId"
+      ]
+    },
+    {
+      "name": "webSocketClosed",
+      "parameters": [
+        "requestId",
+        "timestamp"
+      ]
+    },
+    {
+      "name": "webSocketCreated",
+      "parameters": [
+        "requestId",
+        "url",
+        "initiator"
+      ]
+    },
+    {
+      "name": "webSocketFrameError",
+      "parameters": [
+        "requestId",
+        "timestamp",
+        "errorMessage"
+      ]
+    },
+    {
+      "name": "webSocketFrameReceived",
+      "parameters": [
+        "requestId",
+        "timestamp",
+        "response"
+      ]
+    },
+    {
+      "name": "webSocketFrameSent",
+      "parameters": [
+        "requestId",
+        "timestamp",
+        "response"
+      ]
+    }
+  ],
+  "boundary": "Chromium protocol reference only; not evidence of Ego event/result envelopes, retention or continuity."
+}
