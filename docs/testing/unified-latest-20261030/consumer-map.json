@@ -1,0 +1,36 @@
+{
+  "shared_product_commit": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+  "tree": "d559098d1b8bdf9d4ea22119d1b2725bf8e34be2",
+  "current_Harmony_source": "d30421e0c2f713cc0b338dc86fd8a20b46baf506",
+  "current_signed_HAP": "1.0.36/sharedcef",
+  "package_build": "not requested until final speech/queue/download sources and exact consumer freeze",
+  "SDK": "unchanged by c878/presence/500d",
+  "files": [
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "sha256": "12df4e32a1dc99d43dd6cd2be6315d43b1ce7a0ebad3131c00ce4bf06a4c1650",
+      "source_commit": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+      "consumer": "original Harmony owner; keep phone Home title/adaptations, apply minimal deltas"
+    },
+    {
+      "path": "apps/web/src/store/chat/route-context.ts",
+      "sha256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78",
+      "source_commit": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+      "consumer": "original Harmony owner; keep phone Home title/adaptations, apply minimal deltas"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "sha256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5",
+      "source_commit": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+      "consumer": "original Harmony owner; keep phone Home title/adaptations, apply minimal deltas"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "sha256": "f63335a9e25c5335412ad3d05ad100bea9beb2bbdce91547a29bd5c0df495fc1",
+      "source_commit": "192309002636a6f872f4e6d0c801d8ce0241c5bc",
+      "consumer": "original Harmony owner; keep phone Home title/adaptations, apply minimal deltas"
+    }
+  ],
+  "tests_only_fixture": "apps/web/src/pages/home/index.read-aloud-admission.test.ts",
+  "tests_fixture_reason": "stream+Response instead of legacy Blob; eight preserved guards pass, no production audio bytes changed"
+}

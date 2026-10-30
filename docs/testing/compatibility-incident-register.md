@@ -466,9 +466,37 @@ field deployment and product acceptance remain separate evidence classes.
   Preserve failed and corrected run evidence separately in the task report.
 
 
+## C17 — Home speech fixture still returned a pre-stream SDK result
+
+- **Signature:** All eight Home read-aloud admission cases failed at
+  `api.player.dispatchEvent`: the synthetic Audio was never created. Route-context
+  cases passed. The navigation author also observed the same eight failures with
+  its Home binding removed; this did not establish a navigation regression.
+- **Proved cause:** The fixture returned `{data: Blob}`. The existing production
+  hook requests `parseAs:stream`, reads `response.headers`, and validates a
+  ReadableStream with an audio MIME before creating the player. Its mock therefore
+  failed before reaching the lifecycle assertions.
+- **Verified handling:** Update only that fixture to return a fresh stream and
+  Response, including the deferred late response. Preserve every original
+  identity/admission/cancel/request-count/queue assertion. No production speech,
+  SDK, navigation policy or permission was changed to make the tests pass.
+- **Result / boundary:** The original eight cases pass, exit0; the two new
+  route-context cases pass. Targeted ESLint exits0. This is fixture recovery,
+  not a fix for the independently reproduced ba44 tail/cache P1, real audio,
+  physical ArkWeb or the field's eleven skeletons. No paid/field request occurred.
+- **Evidence:** [Unified convergence](unified-latest-20261030/README.md),
+  [preserved failure](unified-latest-20261030/history-route-speech-current.log.txt),
+  [eight corrected cases](unified-latest-20261030/history-speech-fixture-followup.log.txt).
+- **Before another attempt:** Check the current generated SDK response and the
+  actual first failing step. Mirror this tests-only correction into a consumer
+  that still has the old Blob fixture; do not recompile an unchanged package,
+  delete assertions or modify runtime behavior to mask a mock-contract mismatch.
+
 ## Applying these lessons to the existing handoffs
 
-Use the version-specific handoff for actual commands, images and compatibility
+Use the [current convergence checkpoint](unified-latest-20261030/README.md) to
+distinguish admitted source, active repairs and field gaps without replacing the
+canonical 46-item/seven-gate acceptance Page. Use the version-specific handoff for actual commands, images and compatibility
 requirements. The older [delivery rollout](../delivery-integration-rollout.md)
 and [unified candidate evidence](unified-server-web-candidate/README.md) are
 historical checkpoints; do not apply their old schema numbers to a current

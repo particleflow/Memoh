@@ -1,0 +1,20 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/review-hardcoding-integration-3f
+
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > same Bot/session, different run: stops during authorization and never restores the old queue after admission 86ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cross Bot/session: stops during authorization and never restores the old queue after admission 17ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > denied: stays silent under the error mask, then returns to the actual primary contact path 16ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > expired: stays silent under the error mask, then returns to the actual primary contact path 14ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > wrong-run: stays silent under the error mask, then returns to the actual primary contact path 14ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > ignores a late task admission after returning to the primary contact without restoring old audio 10ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cancels pending synthesis before anchor delivery and discards the response after returning to contact 10ms
+ ✓ |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > stops the old pane when an invalid history URL is rejected before a task request starts 11ms
+
+ Test Files  1 passed (1)
+      Tests  8 passed (8)
+   Start at  15:28:25
+   Duration  2.37s (transform 1.19s, setup 0ms, import 1.62s, tests 182ms, environment 430ms)
+
+
+exit=0
