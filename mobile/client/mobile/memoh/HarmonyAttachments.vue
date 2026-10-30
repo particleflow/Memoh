@@ -2,7 +2,7 @@
   <div v-if="nativeAttachmentsAvailable" class="space-y-1 px-2 text-body" aria-label="原件附件">
     <span v-if="busy" role="status"> 正在处理原件…</span>
     <Button v-if="busy" variant="ghost" @click="cancel">暂停处理</Button>
-    <p v-if="error" role="alert">{{ error.message }}</p>
+    <p v-if="error && error.message" role="alert">{{ error.message }}</p>
     <div v-for="file in modelValue" :key="file.handle" class="space-y-1">
       <img v-if="showPreviews && file.type.startsWith('image/')" :src="preview(file)" :alt="file.name" class="max-h-40 max-w-full object-contain">
       <audio v-else-if="showPreviews && file.type.startsWith('audio/')" :src="preview(file)" controls preload="none" class="max-w-full" />
