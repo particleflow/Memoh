@@ -60,6 +60,7 @@ field deployment and product acceptance remain separate evidence classes.
 | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
 | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
 | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
+| C12 | Task-local Go build cache: no space left on device | Disposable task cache cleaned; scoped lint recovered |
 
 ## C01 — Windows helper calls unavailable os.setxattr
 
@@ -151,6 +152,13 @@ field deployment and product acceptance remain separate evidence classes.
   30927 were detached `Popen` children without a verifiable exec session; current
   liveness is unknown and they were not stopped. PostgreSQL was stopped with data
   retained. Do not describe all test cleanup as complete.
+  A separate input-source workstream was denied reading `/proc/27592/cwd`;
+  its old Vite launcher/child 27589/27592 was not cleaned up and current liveness
+  is unverified. Later, distinct source-test Server/Vite/provider processes were
+  identified from their own startup receipts and unique arguments, then stopped
+  with normal SIGTERM. Managed terminal Ctrl-C did not reliably stop those
+  detached children. Those later shutdowns do not resolve the denied old cleanup.
+  See the [original workstream's exact evidence](https://github.com/particleflow/Memoh/blob/65649801a58946993d2824f3963255750661eb2a/docs/testing/session-input-source-20261030/README.md).
 - **Original evidence:** P-20261030, original navigation-owner startup/cleanup
   report; raw startup receipt links were not supplied. The two denied paths are
   distinct observations, not proof that either process exited.
@@ -278,6 +286,32 @@ field deployment and product acceptance remain separate evidence classes.
   root-cause/patch evidence for targeted product verification. Preserve old
   failures and unknowns; no message fabrication, history reset, expert replay or
   unchanged release rebuild is required to document this issue.
+
+## C12 — Task-local Go build cache exhausts temporary disk
+
+- **Platform / signature:** Input-source workstream scoped lint exited 1 during
+  typechecking: `write /tmp/memoh-input-source-gocache/...: no space left on
+  device`. This was not an approval or access denial.
+- **Cause:** The disposable task-specific Go cache occupied 5.3 GB on the 8.8 GB
+  temporary filesystem. No product/database corruption was observed or inferred.
+- **Validated handling:** The author confirmed the failed check had exited and
+  that no valid build still used this task cache, then used `go clean -cache`
+  with GOCACHE explicitly naming that cache. Source, evidence, configuration,
+  database/history and shared or unidentified caches were preserved.
+- **Result / unresolved boundary:** The author reported 5.7 GB available after
+  cleanup; the affected scoped lint then exited 0 with no new issues. The
+  inherited lint finding and independent C05 denial remain recorded. This does
+  not establish product/field qualification or permit general cache pruning.
+- **Original evidence:** Exact input-source commit
+  `65649801a58946993d2824f3963255750661eb2a`:
+  [disk-full output](https://github.com/particleflow/Memoh/blob/65649801a58946993d2824f3963255750661eb2a/docs/testing/session-input-source-20261030/go-lint-disk-full.log),
+  [checks](https://github.com/particleflow/Memoh/blob/65649801a58946993d2824f3963255750661eb2a/docs/testing/session-input-source-20261030/checks.txt)
+  and its [README](https://github.com/particleflow/Memoh/blob/65649801a58946993d2824f3963255750661eb2a/docs/testing/session-input-source-20261030/README.md).
+  This register reuses the author's observed result; it did not clean that cache.
+- **New condition before another attempt:** Verify the prior command exited,
+  the cache's exact task ownership/disposability and sufficient recovered space.
+  Retry only the affected check. Do not delete shared/unknown data or repeat
+  unrelated builds, tests or paid calls.
 
 ## Applying these lessons to the existing handoffs
 
