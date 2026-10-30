@@ -13893,6 +13893,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/tts/playback/config": {
+            "get": {
+                "description": "Returns an opaque effective configuration identity. Never synthesizes audio. Requires the same account JWT and Bot chat permission as Playback.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Validate access and current voice configuration for cached playback",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playbackConfigResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/tts/synthesize": {
             "post": {
                 "description": "Stream-synthesize text using the bot's configured TTS model, write to temp file",
@@ -30160,6 +30207,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playbackConfigResponse": {
+            "type": "object",
+            "properties": {
+                "identity": {
                     "type": "string"
                 }
             }

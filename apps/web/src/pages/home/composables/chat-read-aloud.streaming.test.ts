@@ -33,15 +33,15 @@ describe('visible speech projection', () => {
 describe('incremental reply scheduling', () => {
   it('starts before completion and emits only unseen visible suffixes', () => {
     const live = new LiveSpeechReplies()
-    expect(live.update([reply('第一句。请看')], true, false)).toEqual([{ key: 'turn', text: '第一句。' }])
-    expect(live.update([reply('第一句。请看[文档](https://secret.test)')], true, false, true)).toEqual([{ key: 'turn', text: '请看文档' }])
-    expect(live.update([reply('第一句。请看[文档](https://secret.test)，结束。', false)], true, false)).toEqual([{ key: 'turn', text: '，结束。' }])
+    expect(live.update([reply('第一句。请看')], true, false)).toEqual([{ key: 'turn', messageId: 'render', text: '第一句。' }])
+    expect(live.update([reply('第一句。请看[文档](https://secret.test)')], true, false, true)).toEqual([{ key: 'turn', messageId: 'render', text: '请看文档' }])
+    expect(live.update([reply('第一句。请看[文档](https://secret.test)，结束。', false)], true, false)).toEqual([{ key: 'turn', messageId: 'render', text: '，结束。' }])
     expect(live.update([reply('第一句。请看[文档](https://secret.test)，结束。', false)], true, false)).toEqual([])
   })
   it('flushes a short opening without waiting for end; history and interrupted runs stay silent', () => {
     const live = new LiveSpeechReplies(), message = reply('短开头')
     expect(live.update([message], true, false)).toEqual([])
-    expect(live.update([message], true, false, true)).toEqual([{ key: 'turn', text: '短开头' }])
+    expect(live.update([message], true, false, true)).toEqual([{ key: 'turn', messageId: 'render', text: '短开头' }])
     live.interrupt([message])
     expect(live.update([reply('短开头后续。')], true, false, true)).toEqual([])
     expect(new LiveSpeechReplies().update([reply('历史。', false)], true, false)).toEqual([])
@@ -98,13 +98,13 @@ describe('incremental native decoder input', () => {
     expect(() => openSpeechStream({ stream, contentType: 'audio/wav' }, new AbortController().signal, () => '')).toThrow(/unsupported/)
     await tick(); expect(cancel).toHaveBeenCalledOnce()
   })
-  it('manual replay uses bounded requests and cancels a pending streaming request synchronously', async () => {
+  it('generated replies use bounded requests and cancels a pending streaming request synchronously', async () => {
     expect(speechChunks('中'.repeat(1100)).map(chunk => Array.from(chunk).length)).toEqual([500, 500, 100])
     let resolve!: (value: Blob) => void
     const synthesize = vi.fn((_text: string, _signal: AbortSignal) => new Promise<Blob>(done => { resolve = done }))
     const player = Object.assign(new EventTarget(), { src: '', play: vi.fn(async () => {}), pause: vi.fn(), load: vi.fn() })
     const speech = new ChatReadAloud({ synthesize, createPlayer: () => player, createURL: () => 'blob:test', revokeURL: vi.fn(), onState: vi.fn() })
-    speech.replay({ key: 'manual', text: '正文'.repeat(300) })
+    speech.enqueue({ key: 'manual', text: '正文'.repeat(300) })
     expect(Array.from(synthesize.mock.calls[0]![0]).length).toBeLessThanOrEqual(500)
     speech.stop(); expect(synthesize.mock.calls[0]![1].aborted).toBe(true)
     resolve(new Blob(['late'], { type: 'audio/mpeg' })); await tick()

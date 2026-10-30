@@ -30,6 +30,20 @@ async function actualRenderer(source: string | string[]) {
  app.use(createPinia()); apps.push(app); app.mount(root); await settle(); return { root, async update(source: string | string[]) { current.value = Array.isArray(source) ? source : [source]; await settle() } }
 }
 describe('actual product renderer speech semantics delta', () => {
+ it('keeps complete rendered text coverage across per-character emphasis reclassification and final tails', async () => {
+  for (const source of ['**重要。**后续也必须朗读。', '**重要。** 后续🙂。请看[文档](https://hidden.test)，价格3.14。最后一句。']) {
+   const renderer = await actualRenderer(''), live = new LiveSpeechReplies(), spoken: string[] = []
+   const project = (m: ChatMessage) => renderedSpeechText(m, renderer.root)
+   let prefix = ''
+   for (const point of Array.from(source)) {
+    prefix += point; await renderer.update(prefix)
+    spoken.push(...live.update([message(prefix, true)], true, false, false, project).map(entry => entry.text))
+   }
+   spoken.push(...live.update([message(source, false)], true, false, false, project).map(entry => entry.text))
+   expect(normalizeSpeechText(spoken.join(''))).toBe(project(message(source)))
+   expect(spoken.join('')).not.toContain('hidden.test')
+  }
+ })
  it('uses actual product code/text/footnote components without reading code chrome or hidden link destinations', async () => {
   const source = '# 标题\n请看[文档](https://hidden.test/target) 与 `x < 2`。\n\n```text\nconst x = 3\n```\n\n|甲|乙|\n|-|-|\n|1|2|\n\n> 引用正文\n\n注释[^1]\n\n[^1]: 脚注正文'
   const { root } = await actualRenderer(source)
@@ -95,7 +109,7 @@ describe('token and block boundaries use rendered semantics without replay or lo
   spoken.push(...live.update([message('第一块。', true)], true, false, true, project).map(entry => entry.text))
   const blocks = ['第一块。', '第二块[文档](https://hidden.test)。', '> 引用第三块']
   await renderer.update(blocks)
-  const final = { ...message(blocks), id: 'persisted-render-id' }
+  const final = { ...message(blocks), serverId: 'persisted-render-id' }
   spoken.push(...live.update([final], true, false, true, project).map(entry => entry.text))
   expect(normalizeSpeechText(spoken.join(''))).toBe(project(final))
   expect(project(final)).toContain('引用第三块')

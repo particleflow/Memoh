@@ -526,10 +526,11 @@ const props = defineProps<{
   isScrolling: boolean
   isLastMessage?: boolean
   speechEnabled?: boolean
+  speechCanReplay?: boolean
   speechStatus?: SpeechStatus
 }>()
 
-const canReplaySpeech = computed(() => props.speechEnabled && !props.message.streaming && !!speechText(props.message))
+const canReplaySpeech = computed(() => props.speechEnabled && props.speechCanReplay && !props.message.streaming && !!speechText(props.message))
 provideNativeTaskResumeScope(props)
 const recoveryToken = useLocalStorage('token', '')
 const recovery = useAcceptedUserInputRecovery(computed(() => ({ bot: props.botId || '', session: props.sessionId || '', run: props.recoveryOriginalRunId,

@@ -3606,6 +3606,10 @@ export type HandlersOauthExchangeRequest = {
     state?: string;
 };
 
+export type HandlersPlaybackConfigResponse = {
+    identity?: string;
+};
+
 export type HandlersSessionAbortControlResponse = {
     /**
      * Applied is the observed control return, not proof of a unique abort cause.
@@ -15932,6 +15936,44 @@ export type PostBotsByBotIdTtsPlaybackResponses = {
      */
     200: unknown;
 };
+
+export type GetBotsByBotIdTtsPlaybackConfigData = {
+    body?: never;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback/config';
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigError = GetBotsByBotIdTtsPlaybackConfigErrors[keyof GetBotsByBotIdTtsPlaybackConfigErrors];
+
+export type GetBotsByBotIdTtsPlaybackConfigResponses = {
+    /**
+     * OK
+     */
+    200: HandlersPlaybackConfigResponse;
+};
+
+export type GetBotsByBotIdTtsPlaybackConfigResponse = GetBotsByBotIdTtsPlaybackConfigResponses[keyof GetBotsByBotIdTtsPlaybackConfigResponses];
 
 export type PostBotsByBotIdTtsSynthesizeData = {
     /**

@@ -40,9 +40,9 @@ it('does not split an unfinished sentence at commas, character counts or elapsed
   const live = new LiveSpeechReplies()
   const text = 'We keep this sentence together, including a longer clause with more than thirty two characters'
   expect(live.update([reply(text)], true, false)).toEqual([])
-  expect(live.update([reply(text + '.')], true, false)).toEqual([{ key: 'turn', text: text + '.' }])
-  expect(live.update([reply(text + '. Next sentence is unfinished')], true, false)).toEqual([])
-  expect(live.update([reply(text + '. Next sentence is unfinished', false)], true, false)).toEqual([{ key: 'turn', text: ' Next sentence is unfinished' }])
+  expect(live.update([reply(text + '.')], true, false)).toEqual([])
+  expect(live.update([reply(text + '. Next sentence is unfinished')], true, false)).toEqual([{ key: 'turn', messageId: 'bubble', text: text + '. ' }])
+  expect(live.update([reply(text + '. Next sentence is unfinished', false)], true, false)).toEqual([{ key: 'turn', messageId: 'bubble', text: 'Next sentence is unfinished' }])
 })
 
 class BufferFixture extends EventTarget {
@@ -109,4 +109,20 @@ it('a failed prefetch stops the active decoder and clears later text without ret
   for (const event of ['playing', 'ended', 'timeupdate']) f.player.dispatchEvent(new Event(event))
   await settle(); expect(f.synthesize).toHaveBeenCalledTimes(2)
   expect(f.states.at(-1)?.status).toBe('error')
+})
+
+it('does not merge distinct assistant rows in one turn into the first row decoder or bubble state', async () => {
+  const f = continuousFixture()
+  f.speech.enqueue({ key: 'turn', messageId: 'first-row', text: 'First.' })
+  f.speech.enqueue({ key: 'turn', messageId: 'second-row', text: 'Second.' })
+  await settle()
+  expect(f.synthesize.mock.calls.map(call => call[0])).toEqual(['First.'])
+  f.player.dispatchEvent(new Event('playing'))
+  expect(f.states.at(-1)).toMatchObject({ messageId: 'first-row', status: 'playing' })
+  f.player.dispatchEvent(new Event('ended')); await settle()
+  expect(f.synthesize.mock.calls.map(call => call[0])).toEqual(['First.', 'Second.'])
+  f.player.dispatchEvent(new Event('playing'))
+  expect(f.states.at(-1)).toMatchObject({ messageId: 'second-row', status: 'playing' })
+  expect(f.createURL).toHaveBeenCalledTimes(2)
+  f.speech.stop()
 })

@@ -75,7 +75,7 @@ func newServer(log *slog.Logger, addr string, jwtSecret string,
 		AllowOrigins:  []string{"*"},
 		AllowMethods:  []string{echo.GET, echo.HEAD, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS},
 		AllowHeaders:  []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization, echo.HeaderXRequestID, "Idempotency-Key", "Upload-Offset", "Upload-Length", "Upload-SHA256"},
-		ExposeHeaders: []string{echo.HeaderXRequestID},
+		ExposeHeaders: []string{echo.HeaderXRequestID, "X-Speech-Playback-Identity"},
 	}))
 	e.Use(recordUpgradeStatus)
 	e.Use(auth.JWTMiddleware(jwtSecret, func(c echo.Context) bool {

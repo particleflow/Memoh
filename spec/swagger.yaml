@@ -6380,6 +6380,11 @@ definitions:
       state:
         type: string
     type: object
+  handlers.playbackConfigResponse:
+    properties:
+      identity:
+        type: string
+    type: object
   handlers.sessionAbortControlResponse:
     properties:
       applied:
@@ -18211,6 +18216,38 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Read text aloud using a bot's configured voice
+      tags:
+      - bots
+  /bots/{bot_id}/tts/playback/config:
+    get:
+      description: Returns an opaque effective configuration identity. Never synthesizes
+        audio. Requires the same account JWT and Bot chat permission as Playback.
+      parameters:
+      - description: Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.playbackConfigResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Validate access and current voice configuration for cached playback
       tags:
       - bots
   /bots/{bot_id}/tts/synthesize:

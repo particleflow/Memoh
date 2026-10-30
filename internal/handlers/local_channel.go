@@ -2717,7 +2717,7 @@ func userInputResponseAppError(err error) error {
 
 // createWSChatSession resolves the system-owned continuous contact. It never
 // creates a parallel Web session, resets preferences, or rebinds its workdir.
-func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, modelID, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
+func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, _, _, workdirID string) (sessionpkg.Thread, error) {
 	return h.resolveWebMessageContact(ctx, botID, channelIdentityID, "", workdirID)
 }
 

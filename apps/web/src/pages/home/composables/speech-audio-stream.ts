@@ -1,6 +1,6 @@
 import { audioTimingObserver, speechMimeClass, type SpeechTiming } from './speech-timing'
 
-export interface SpeechAudioStream { stream: ReadableStream<Uint8Array>, contentType: string, sequential?: boolean }
+export interface SpeechAudioStream { stream: ReadableStream<Uint8Array>, contentType: string, sequential?: boolean, identity?: string }
 export interface SpeechStreamSource { url: string, done: Promise<void>, dispose(): void }
 
 /** Preserve native Audio compatibility when this browser cannot stream the

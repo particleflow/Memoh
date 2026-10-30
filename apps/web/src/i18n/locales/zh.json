@@ -1046,6 +1046,10 @@
     },
     "readAloud": {
       "replay": "重播朗读",
+      "configurationChanged": "暂不可重播：缓存音频与当前语音配置或正文不匹配。",
+      "unavailable": "暂不可重播：无可用缓存音频",
+      "incomplete": "暂不可重播：音频尚未生成完整",
+      "continue": "继续朗读",
       "playing": "正在朗读此回复",
       "failed": "朗读已停止"
     },
