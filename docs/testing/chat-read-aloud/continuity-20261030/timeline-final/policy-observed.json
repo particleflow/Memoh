@@ -1,0 +1,134 @@
+{
+  "events": [],
+  "plays": [
+    {
+      "ms": 529.9000000022352,
+      "active": false,
+      "ever": false,
+      "src": "blob:http://127.0.0.1:43865/a4936f32-b606-4b44-bc8b-7a3a3965c419",
+      "outcome": "rejected",
+      "name": "NotAllowedError"
+    }
+  ],
+  "samples": [
+    {
+      "ms": 218.80000000074506,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 231.20000000298023,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 238.10000000149012,
+      "rms": 0,
+      "state": "idle"
+    },
+    {
+      "ms": 275.9000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 279.30000000074506,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 283.4000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 298.9000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 315.4000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 332,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 348.6000000014901,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 365.5,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 382.4000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 398.9000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 415.30000000074506,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 431.80000000074506,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 448.6000000014901,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 465.20000000298023,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 481.9000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 498.6000000014901,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 515.4000000022352,
+      "rms": 0,
+      "state": "loading"
+    },
+    {
+      "ms": 532.4000000022352,
+      "rms": 0,
+      "state": "blocked"
+    }
+  ],
+  "trigger": 245.40000000223517,
+  "state": {
+    "key": "turn",
+    "status": "blocked"
+  },
+  "inputs": [],
+  "players": [
+    {
+      "src": "blob:http://127.0.0.1:43865/a4936f32-b606-4b44-bc8b-7a3a3965c419",
+      "time": 0,
+      "paused": true,
+      "ended": false
+    }
+  ]
+}

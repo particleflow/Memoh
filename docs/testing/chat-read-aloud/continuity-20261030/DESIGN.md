@@ -1,0 +1,33 @@
+# Read-aloud continuity: source-based choice, 2026-10-30
+
+This is a shared-source correction on `cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f`, not field acceptance of either reported problem.
+
+## Existing protocol and reproduced causes
+
+`internal/handlers/bot_tts.go:Playback` accepts one complete `{text}` (at most 500 Unicode runes), authorizes the account/Bot, resolves the Bot's existing TTS setting, and flushes the provider's audio chunks. `internal/audio/service.go:StreamPlayback` calls `sdk.StreamSpeech(WithText(text), WithSpeechConfig(config))`; configuration/model/voice selection remains server-owned. The browser requests `parseAs:'stream'` through the generated SDK. This is streaming **audio output per fixed text request**, not a client-to-provider incremental text session. Neither the deployed provider/configuration nor its actual response MIME was read from the NAS this turn. No claim about a model's native bidirectional capability follows from an endpoint name or the presence of WSS.
+
+Two local red examples identify concrete causes:
+
+- A live assistant can settle between synchronous reactive updates and the post-render speech watcher. The old watcher first sees `streaming:false` and consumes it as history. The new test observes zero automatic requests before the fix. Eligibility is now recorded synchronously; text extraction still waits for real visible DOM. Old history and interrupted replies remain consumed.
+- The old controller waits for each native `ended` event before starting the next synthesis request, discards the audio source, and installs a new one. The 80ms flush and comma/32-character cuts manufacture additional synthesis boundaries. A native MP3 timeline reproduces a 283.3ms nonzero-graph gap under a 250ms response-header delay.
+
+## Primary sources consulted before the correction
+
+- [Microsoft Speech SDK SpeakerAudioDestination source](https://github.com/microsoft/cognitive-services-speech-sdk-js/blob/master/src/sdk/Audio/SpeakerAudioDestination.ts): native Audio + one MSE SourceBuffer, serialized append/updateend work, completion only after input closes; full-output fallback where MSE cannot decode the format. Mechanism reused, no Microsoft service or SDK dependency introduced. Retrieved 2026-10-30; the linked branch is mutable.
+- [W3C MSE Recommendation, 2016](https://www.w3.org/TR/2016/REC-media-source-20161117/): sequence mode, asynchronous SourceBuffer updates, native buffering/timeline. Use established APIs, not draft worker/MediaSourceHandle additions.
+- [Chrome's audio MSE/gapless example](https://developer.chrome.com/blog/media-source-extensions-for-audio): independently encoded files can contain encoder padding; removing padding requires trustworthy duration/padding metadata and append windows. The correction does **not** guess silence, crossfade phonemes or promise sample-perfect gapless MP3.
+- [W3C Web Audio Recommendation, 2021](https://www.w3.org/TR/2021/REC-webaudio-20210617/): audio-clock scheduling is an alternative for decoded PCM. `decodeAudioData` needs complete file data; it is not an incremental MP3 decoder. A worklet/PCM queue would require a verified PCM protocol or decoder that the current interface does not supply. No new codec/WASM dependency is justified here.
+- [ECMA-402 Intl.Segmenter](https://tc39.es/ecma402/#sec-intl-segmenter-objects): use the platform sentence segmenter rather than a first-phrase character target. An unfinished sentence waits for a sentence boundary/final reply; the existing 500-rune API limit remains the only forced size boundary. A punctuation fallback is retained for runtimes without Segmenter and is not claimed equivalent to every native locale's segmentation.
+- [ElevenLabs incremental-input WebSocket contract](https://elevenlabs.io/docs/api-reference/text-to-speech/v-1-text-to-speech-voice-id-stream-input): a mature alternative keeps partial text in one synthesis context. This is a protocol comparison, not a recommendation to replace the configured supplier. That input contract is not exposed by Memoh Playback, so it cannot be asserted or silently substituted.
+- [Chrome autoplay policy](https://developer.chrome.com/blog/autoplay): observe real `play()` rejection; recover from a supported gesture using the same loaded source.
+- [OpenHarmony ArkWeb Web attributes](https://github.com/openharmony/docs/blob/master/en/application-dev/reference/apis-arkweb/arkts-basic-components-web-attributes.md#mediaplaygestureaccess9): the native gesture setting is independent of Web source. No gesture-access override or autoplay permission is changed. Browser feature detection is necessary and does not prove ArkWeb/device support.
+
+The pinned Twilight source was not inspected: a local `/root/go/pkg/mod/...` read was denied, and the browser tool could not open the referenced pinned upstream tree. Those reads were not routed around. The inspected Memoh boundary above is sufficient for this client correction; upstream session/prosody claims remain unverified.
+
+## Selected minimal correction
+
+For an MSE-supported MP3 response, concatenate sequential response readers into one native decoder input **for the same reply key**, set SourceBuffer sequence mode, and hold input open while that reply is live. Fetch the next response as the previous body finishes, while native playback continues. Before fetching beyond the immediately following response, wait for native `currentTime` to reach the previous response's buffered boundary. This is one in-flight synthesis request and one response of lookahead, not unbounded parallel synthesis or a guessed prebuffer timeout. A different reply retains the existing ended/next ownership boundary.
+
+Stop aborts the active request/reader, wakes pending text/clock work, clears queued text, and detaches old media listeners. Generation checks discard late responses/events. Prefetch failures fail the current reply without retries. Blocked playback retains the loaded source for the existing replay gesture. Native waiting/playing/paused/ended/error continue to own the single active bubble state; no new UI controls, audio attachment, history record, credentials or logging UI are added.
+
+WAV and other unsupported MSE types keep the existing single-response full-body compatibility branch. They are **not** now continuous streaming. Native text-input TTS, PCM scheduling or verified codec-padding removal are possible later choices only after the actual configured protocol/format and device support are established. Independent requests can still differ in prosody. A slow producer can still underrun; the deliberate slow-network test demonstrates that limit instead of hiding it with a magic delay.

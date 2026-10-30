@@ -1,0 +1,22 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
++ actual - expected
+
++ 'Home'
+- 'Home 边界合成回复第2段。'
+       ^
+
+    at liveReply (file:///workspace/memoh-speech-continuity/docs/testing/chat-read-aloud/continuity-20261030/automatic-browser.mjs:152:12)
+    at async file:///workspace/memoh-speech-continuity/docs/testing/chat-read-aloud/continuity-20261030/automatic-browser.mjs:171:3 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: 'Home',
+  expected: 'Home 边界合成回复第2段。',
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.19.0

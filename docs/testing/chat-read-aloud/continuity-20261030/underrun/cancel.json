@@ -1,0 +1,76 @@
+{
+  "state": {
+    "key": "",
+    "status": "idle"
+  },
+  "trustedInput": [
+    {
+      "trusted": true,
+      "ms": 786.8999999985099
+    },
+    {
+      "trusted": true,
+      "ms": 792.1999999992549
+    },
+    {
+      "trusted": true,
+      "ms": 795.7999999970198
+    },
+    {
+      "trusted": true,
+      "ms": 797.8999999985099
+    },
+    {
+      "trusted": true,
+      "ms": 801.5
+    },
+    {
+      "trusted": true,
+      "ms": 803.5999999977648
+    },
+    {
+      "trusted": true,
+      "ms": 805.5
+    },
+    {
+      "trusted": true,
+      "ms": 807.5999999977648
+    },
+    {
+      "trusted": true,
+      "ms": 809.6999999992549
+    }
+  ],
+  "playsAtStop": 1,
+  "playsAfterLateResponse": 1,
+  "media": [
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 371.5999999977648,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:37557/27e9830a-a12e-46d1-a1b2-75005d8aedef"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 373.29999999701977,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:37557/27e9830a-a12e-46d1-a1b2-75005d8aedef"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 826.2999999970198,
+      "time": 0,
+      "src": "http://127.0.0.1:37557/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 826.5,
+      "time": 0,
+      "src": "http://127.0.0.1:37557/"
+    }
+  ]
+}

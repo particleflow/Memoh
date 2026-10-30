@@ -1,0 +1,39 @@
+{
+  "source": "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+  "parent": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "productTree": "9059475f4ad453f176dd073e97c6ddeacc4cd9b9",
+  "providerCalls": 0,
+  "builtSignedDeployed": false,
+  "humanQA": false,
+  "ArkWebDeviceVerified": false,
+  "reportedAutomaticIssue": "UNRESOLVED_PENDING_FIELD",
+  "reportedContinuityIssue": "UNRESOLVED_PENDING_FIELD",
+  "newUnitCases": {
+    "red": 2,
+    "green": 5
+  },
+  "existingRelevantCases": {
+    "initialPass": 30,
+    "initialFail": 1,
+    "failedCaseCorrectedAndPassed": 1,
+    "notes": "The one failure asserted the intentionally removed 80-rune opening cap; server 500-rune bound and stop/late-response checks pass."
+  },
+  "nativeScenarios": {
+    "automaticRealChatUI": "actual-ui-final/result.json",
+    "before": "timeline-red/timeline.json",
+    "after": "timeline-final/timeline.json",
+    "prefetchInputCancel": "timeline-final/cancel.json",
+    "realAutoplayRefusalAndGestureResumeThenClick": "timeline-final/autoplay.json",
+    "intentionalUnderrun": "underrun/timeline.json"
+  },
+  "typecheck": {
+    "targeted": "passed, current generated SDK aliases",
+    "fullApp": "failed: stale installed SDK/media policy context and initially three new fixture type errors; fixture errors fixed and targeted typecheck passed",
+    "noFullAppGreenClaim": true,
+    "targetedExitCode": 0,
+    "fullAppExitCode": 2
+  },
+  "previousMatrix": "Original 12+6 / Chromium five / cancellation six+two were not rerun wholesale; relevant controller/stream compatibility tests were selected because the core changed.",
+  "sourceCommitNormalHookPassed": true,
+  "sourceCommitHookMissingInitiallyThenRecovered": true
+}
