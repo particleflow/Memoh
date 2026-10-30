@@ -95,3 +95,15 @@ the documented development stack and current real UI/screenshots could not be
 verified. That action was stopped without changing socket permissions or using
 another endpoint. The independent reviewer and integration owner must retain
 this outstanding verification boundary.
+
+## Independent-review follow-up: Anthropic terminal proof
+
+Parent `dd10c889631405f7e6a94c937f3efc8614df054b` still treated an absent
+Anthropic `has_more` as false. The independent v3 audit counterexample was
+reproduced: page two without that field returned two models and no error.
+Native Anthropic now requires the boolean on every page. Missing, null and
+wrong-type flags return `ErrCatalogIncomplete` with no successful prefix;
+explicit false remains terminal. Google's omitted continuation and ordinary
+OpenAI single-page semantics are unchanged. Only this terminal-proof boundary
+and its first/second-page variants are rerun; the previous 55-test package and
+other independent findings are not rerun or requalified by this follow-up.

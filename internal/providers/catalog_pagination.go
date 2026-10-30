@@ -137,7 +137,11 @@ func (t *catalogPaginationTransport) RoundTrip(req *http.Request) (*http.Respons
 
 func catalogNextPage(typ models.ClientType, page map[string]json.RawMessage) (string, string, error) {
 	var more bool
-	if raw, ok := page["has_more"]; ok {
+	raw, present := page["has_more"]
+	if typ == models.ClientTypeAnthropicMessages && !present {
+		return "", "", ErrCatalogIncomplete
+	}
+	if present {
 		if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) || json.Unmarshal(raw, &more) != nil {
 			return "", "", ErrCatalogIncomplete
 		}
