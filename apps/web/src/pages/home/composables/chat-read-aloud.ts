@@ -19,7 +19,13 @@ export interface SpeechPlayer {
   addEventListener(type: string, listener: EventListener): void
   removeEventListener(type: string, listener: EventListener): void
 }
+export interface SpeechInputFrame { sequence: number, offset: number, text: string, final: boolean }
+export interface SpeechInputSession {
+  audio: SpeechAudioStream
+  append(frame: SpeechInputFrame): Promise<void>
+}
 export interface SpeechDependencies {
+  openInput?(entry: SpeechEntry, signal: AbortSignal): Promise<SpeechInputSession | undefined>
   synthesize(text: string, signal: AbortSignal, timing?: SpeechTiming, entry?: SpeechEntry): Promise<Blob | SpeechAudioStream>
   createPlayer(): SpeechPlayer
   createURL(blob: Blob | MediaSource): string
@@ -68,6 +74,7 @@ export class LiveSpeechReplies {
   private interruptedRuns = new Set<string>()
   private interruptedInvocations = new Set<string>()
   reset() { this.live.clear(); this.spoken.clear(); this.consumed.clear(); this.interruptedRuns.clear(); this.interruptedInvocations.clear() }
+  isObserved(message: ChatMessage) { return this.live.has(message.id) }
   // Capture eligibility in the reactive update, before Vue batches a fast turn
   // into its final render. Reading visible text still waits for the DOM watcher.
   observe(messages: ChatMessage[], enabled: boolean, loading: boolean) {
@@ -256,7 +263,42 @@ export class ChatReadAloud {
   /** One native decoder/clock for consecutive MP3 responses of the same reply.
    * Fetch while prior audio plays; keep at most one complete response ahead.
    * Other MIME types retain the established native compatibility path. */
-  private async request(entry: SpeechJob, signal: AbortSignal) {
+  private waitInput(signal: AbortSignal, ready: () => boolean) {
+    return new Promise<void>((resolve, reject) => {
+      const check = () => {
+        if (!signal.aborted && !ready()) return
+        signal.removeEventListener('abort', check); this.wake = undefined
+        if (signal.aborted) reject(signal.reason); else resolve()
+      }
+      this.wake = check; signal.addEventListener('abort', check, { once: true }); check()
+    })
+  }
+  private async feedInput(session: SpeechInputSession, entry: SpeechJob, signal: AbortSignal) {
+    let sequence = 1, offset = Array.from(entry.sourceText ?? entry.text).length
+    for (;;) {
+      await this.waitInput(signal, () => this.queue.length > 0 || !this.liveKeys.has(entry.messageId ?? entry.key))
+      const next = this.queue[0]
+      if (!next || next.key !== entry.key || next.messageId !== entry.messageId || next.cacheKey !== entry.cacheKey) {
+        await session.append({ sequence, offset, text: '', final: true }); return
+      }
+      this.queue.shift()
+      const text = next.sourceText ?? next.text
+      await session.append({ sequence, offset, text, final: false })
+      entry.sourceText = (entry.sourceText ?? entry.text) + text
+      offset += Array.from(text).length; sequence++
+    }
+  }
+  private async request(entry: SpeechJob, signal: AbortSignal, allowInput = false) {
+    const token = this.generation
+    const session = allowInput && this.deps.openInput ? await this.deps.openInput({ ...entry, text: entry.sourceText ?? entry.text }, signal) : undefined
+    if (signal.aborted) {
+      if (session) void session.audio.stream.cancel().catch(() => {})
+      throw signal.reason
+    }
+    if (session) {
+      void this.feedInput(session, entry, signal).catch(error => this.fail(token, error))
+      return this.cache.capture(entry.cacheKey ?? entry.key, () => entry.sourceText ?? entry.text, { ...session.audio, incrementalInput: true }, signal)
+    }
     const audio = await this.deps.synthesize(entry.text, signal, entry.timing, entry)
     if (signal.aborted) { if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {}); return audio }
     return audio instanceof Blob ? audio : this.cache.capture(entry.cacheKey ?? entry.key, entry.sourceText ?? entry.text, audio, signal)
@@ -323,7 +365,7 @@ export class ChatReadAloud {
     try {
       const signal = this.abort.signal
       if (!entry.audio) entry.timing?.mark('request_start')
-      const audio = entry.audio ?? await this.request(entry, signal)
+      const audio = entry.audio ?? await this.request(entry, signal, true)
       if (token !== this.generation) {
         if (!(audio instanceof Blob)) void audio.stream.cancel().catch(() => {})
         return
@@ -333,7 +375,7 @@ export class ChatReadAloud {
       if (audio instanceof Blob) this.url = this.deps.createURL(audio)
       else {
         const continuous = /^audio\/(?:mpeg|mp3)(?:;|$)/u.test(audio.contentType.trim()) && typeof MediaSource !== 'undefined' && MediaSource.isTypeSupported(audio.contentType.replace(/^audio\/mp3(?=;|$)/u, 'audio/mpeg'))
-        const stream = await prepareSpeechSource(continuous && !entry.audio ? this.continuous(audio, entry, signal) : audio, signal, source => this.deps.createURL(source), entry.timing)
+        const stream = await prepareSpeechSource(continuous && !entry.audio && !audio.incrementalInput ? this.continuous(audio, entry, signal) : audio, signal, source => this.deps.createURL(source), entry.timing)
         if (token !== this.generation) {
           stream.dispose(); this.deps.revokeURL(stream.url)
           void stream.done.catch(() => {})

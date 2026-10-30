@@ -15,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	"github.com/felinics/memoh/internal/accounts"
+	"github.com/felinics/memoh/internal/audio/input"
 	"github.com/felinics/memoh/internal/auth"
 	"github.com/felinics/memoh/internal/bots"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
@@ -74,7 +75,38 @@ func TestBotPlaybackConfigAccountBoundary(t *testing.T) {
 	testBotPlaybackAccountBoundary(t, true)
 }
 
-func testBotPlaybackAccountBoundary(t *testing.T, metadata bool) {
+func TestBotPlaybackInputStartAccountBoundary(t *testing.T) {
+	testBotPlaybackAccountBoundary(t, false, "start")
+}
+
+func TestBotPlaybackInputAppendAccountBoundary(t *testing.T) {
+	testBotPlaybackAccountBoundary(t, false, "append")
+}
+
+type boundaryInputSession struct{ audio *sdk.SpeechStreamResult }
+
+func (s *boundaryInputSession) Audio() *sdk.SpeechStreamResult          { return s.audio }
+func (*boundaryInputSession) Append(context.Context, input.Frame) error { return nil }
+func (*boundaryInputSession) Cancel()                                   {}
+
+type boundaryInputAudio struct{ *playbackIdentityAudio }
+
+func (a *boundaryInputAudio) PlaybackInputInfo(context.Context, string) (string, string, error) {
+	a.identityCalls++
+	return "opaque-test-identity", "audio/wav", nil
+}
+
+func (a *boundaryInputAudio) OpenPlaybackInput(ctx context.Context, model string) (input.Session, string, error) {
+	stream, err := a.StreamPlayback(ctx, model, "synthetic playback text")
+	return &boundaryInputSession{stream}, "opaque-test-identity", err
+}
+
+func testBotPlaybackAccountBoundary(t *testing.T, metadata bool, native ...string) {
+	mode := ""
+	if len(native) > 0 {
+		mode = native[0]
+	}
+	const inputID = "66666666-6666-4666-8666-666666666666"
 	t.Helper()
 	const secret = "synthetic-playback-account-boundary-secret"
 	const otherBot = "44444444-4444-4444-8444-444444444444"
@@ -123,8 +155,14 @@ func testBotPlaybackAccountBoundary(t *testing.T, metadata bool) {
 				if metadata {
 					service = identityAudio
 				}
+				if mode != "" {
+					service = &boundaryInputAudio{identityAudio}
+				}
 				config := &playbackBoundarySettings{}
 				h := &BotAudioHandler{audioService: service, settingsService: config}
+				if mode == "append" {
+					h.inputSessions.entries = map[string]*playbackInputSession{invocationTestOwnerID + ":" + target + ":" + inputID: {session: &boundaryInputSession{}, identity: "opaque-test-identity", modelID: "existing-configured-model", cancel: func() {}}}
+				}
 				h.SetPlaybackAccess(bots.NewService(nil, q), accountService)
 				srv := server.NewServerWithSessionValidator(slog.New(slog.DiscardHandler), "", secret, accountService.ValidateSession, h)
 				token, _, err := auth.GenerateToken(invocationTestOwnerID, secret, time.Minute)
@@ -145,10 +183,20 @@ func testBotPlaybackAccountBoundary(t *testing.T, metadata bool) {
 					path += "/config"
 					method = http.MethodGet
 				}
+				if mode != "" {
+					path += "/input"
+					if mode == "append" {
+						method = http.MethodPut
+					}
+				}
 				if query && token != "" {
 					path += "?token=" + url.QueryEscape(token)
 				}
-				req := httptest.NewRequest(method, path, strings.NewReader(`{"text":"synthetic playback text"}`))
+				body := `{"text":"synthetic playback text"}`
+				if mode != "" {
+					body = `{"id":"` + inputID + `","sequence":0,"offset":0,"text":"synthetic playback text","final":true}`
+				}
+				req := httptest.NewRequest(method, path, strings.NewReader(body))
 				req.Header.Set("Content-Type", "application/json")
 				req.Header.Set("Origin", "https://phone-fixture.invalid")
 				if !query && token != "" {
@@ -160,16 +208,27 @@ func testBotPlaybackAccountBoundary(t *testing.T, metadata bool) {
 					t.Fatal("cross-origin shared client cannot read the cache identity")
 				}
 				t.Logf("status=%d account_reads=%d bot_reads=%d settings_reads=%d synthesis_calls=%d", rec.Code, accountStore.reads, q.reads, config.calls, audio.calls)
-				if rec.Code != tc.status {
+				expected := tc.status
+				if mode == "append" && expected == http.StatusOK {
+					expected = http.StatusNoContent
+				}
+				if rec.Code != expected {
 					t.Fatalf("status=%d want=%d body=%s", rec.Code, tc.status, rec.Body.String())
 				}
 				if tc.status == http.StatusOK {
-					if metadata {
+					switch {
+					case mode == "append":
+						if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 0 || identityAudio.identityCalls != 1 {
+							t.Fatal("input append skipped account/Bot/config gate or opened another synthesis")
+						}
+					case metadata:
 						if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 0 || identityAudio.identityCalls != 1 || !strings.Contains(rec.Body.String(), "opaque-test-identity") {
 							t.Fatal("cached replay validation generated audio or skipped account/Bot checks")
 						}
-					} else if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 1 || audio.model != "existing-configured-model" || audio.text != "synthetic playback text" || rec.Body.String() != "synthetic-audio" {
-						t.Fatal("validated account playback path changed")
+					default:
+						if accountStore.reads != 2 || q.reads < 1 || config.calls != 1 || audio.calls != 1 || audio.model != "existing-configured-model" || audio.text != "synthetic playback text" || rec.Body.String() != "synthetic-audio" {
+							t.Fatal("validated account playback path changed")
+						}
 					}
 				} else {
 					if config.calls != 0 || audio.calls != 0 || identityAudio.identityCalls != 0 {

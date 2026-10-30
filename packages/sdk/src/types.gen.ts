@@ -3608,6 +3608,15 @@ export type HandlersOauthExchangeRequest = {
 
 export type HandlersPlaybackConfigResponse = {
     identity?: string;
+    input_content_type?: string;
+};
+
+export type HandlersPlaybackInputRequest = {
+    final?: boolean;
+    id?: string;
+    offset?: number;
+    sequence?: number;
+    text?: string;
 };
 
 export type HandlersSessionAbortControlResponse = {
@@ -15974,6 +15983,96 @@ export type GetBotsByBotIdTtsPlaybackConfigResponses = {
 };
 
 export type GetBotsByBotIdTtsPlaybackConfigResponse = GetBotsByBotIdTtsPlaybackConfigResponses[keyof GetBotsByBotIdTtsPlaybackConfigResponses];
+
+export type PostBotsByBotIdTtsPlaybackInputData = {
+    /**
+     * Initial exact spoken-text frame, sequence and Unicode offset zero
+     */
+    body: HandlersPlaybackInputRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback/input';
+};
+
+export type PostBotsByBotIdTtsPlaybackInputErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type PostBotsByBotIdTtsPlaybackInputError = PostBotsByBotIdTtsPlaybackInputErrors[keyof PostBotsByBotIdTtsPlaybackInputErrors];
+
+export type PostBotsByBotIdTtsPlaybackInputResponses = {
+    /**
+     * Configured audio bytes
+     */
+    200: unknown;
+};
+
+export type PutBotsByBotIdTtsPlaybackInputData = {
+    /**
+     * Next frame; final closes text input, not audio output
+     */
+    body: HandlersPlaybackInputRequest;
+    path: {
+        /**
+         * Bot ID
+         */
+        bot_id: string;
+    };
+    query?: never;
+    url: '/bots/{bot_id}/tts/playback/input';
+};
+
+export type PutBotsByBotIdTtsPlaybackInputErrors = {
+    /**
+     * Bad Request
+     */
+    400: ServerProblem;
+    /**
+     * Unauthorized
+     */
+    401: ServerProblem;
+    /**
+     * Forbidden
+     */
+    403: ServerProblem;
+    /**
+     * Not Found
+     */
+    404: ServerProblem;
+    /**
+     * Conflict
+     */
+    409: ServerProblem;
+};
+
+export type PutBotsByBotIdTtsPlaybackInputError = PutBotsByBotIdTtsPlaybackInputErrors[keyof PutBotsByBotIdTtsPlaybackInputErrors];
+
+export type PutBotsByBotIdTtsPlaybackInputResponses = {
+    /**
+     * No Content
+     */
+    204: unknown;
+};
 
 export type PostBotsByBotIdTtsSynthesizeData = {
     /**

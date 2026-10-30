@@ -14,10 +14,11 @@ export class SpeechReplayCache {
   private changed: () => void
   constructor(changed: () => void = () => {}) { this.changed = changed }
   clear() { this.replies.clear(); this.changed() }
-  capture(key: string, source: string, audio: SpeechAudioStream, signal: AbortSignal): SpeechAudioStream {
+  capture(key: string, source: string | (() => string), audio: SpeechAudioStream, signal: AbortSignal): SpeechAudioStream {
     const reply = this.replies.get(key) ?? { parts: [] }
     this.replies.set(key, reply)
-    const part: Part = { source, identity: audio.identity ?? '', type: audio.contentType }
+    const sourceText = () => typeof source === 'function' ? source() : source
+    const part: Part = { source: sourceText(), identity: audio.identity ?? '', type: audio.contentType }
     // Final source can precede the renderer's final visible tail. A new audio
     // part is a new completed version, not a mutation of the old cached bytes.
     reply.version = undefined
@@ -30,6 +31,7 @@ export class SpeechReplayCache {
         try {
           const next = await reader.read()
           if (next.done) {
+            part.source = sourceText()
             if (!canceled && !signal.aborted && chunks.length && part.identity) part.audio = new Blob(chunks, { type: part.type })
             reader.releaseLock(); this.changed(); output.close(); return
           }

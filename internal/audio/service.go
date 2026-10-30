@@ -13,6 +13,7 @@ import (
 	sdk "github.com/felinics/twilight/sdk"
 	"github.com/jackc/pgx/v5/pgtype"
 
+	"github.com/felinics/memoh/internal/audio/input"
 	"github.com/felinics/memoh/internal/db"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	dbstore "github.com/felinics/memoh/internal/db/store"
@@ -469,9 +470,10 @@ func (s *Service) Transcribe(ctx context.Context, modelID string, audio []byte, 
 }
 
 type resolvedSpeechParams struct {
-	model    *sdk.SpeechModel
-	config   map[string]any
-	identity string
+	providerEnabled bool
+	model           *sdk.SpeechModel
+	config          map[string]any
+	identity        string
 }
 
 type resolvedTranscriptionParams struct {
@@ -516,9 +518,10 @@ func (s *Service) resolveSpeechParams(ctx context.Context, modelID string, text 
 	}
 	digest := sha256.Sum256(identityInput)
 	return &resolvedSpeechParams{
-		model:    &sdk.SpeechModel{ID: modelRow.ModelID, Provider: provider},
-		config:   cfg,
-		identity: hex.EncodeToString(digest[:]),
+		providerEnabled: providerRow.Enable,
+		model:           &sdk.SpeechModel{ID: modelRow.ModelID, Provider: provider},
+		config:          cfg,
+		identity:        hex.EncodeToString(digest[:]),
 	}, nil
 }
 
@@ -816,4 +819,44 @@ func toTranscriptionModelWithProviderResponse(row sqlc.GetTranscriptionModelWith
 		CreatedAt:    row.CreatedAt.Time,
 		UpdatedAt:    row.UpdatedAt.Time,
 	}
+}
+
+// PlaybackInputInfo only reads the configured provider's explicit input capability.
+// Empty content type means fixed-text only; names/model strings never opt in.
+func (s *Service) PlaybackInputInfo(ctx context.Context, modelID string) (identity, contentType string, err error) {
+	params, err := s.resolveSpeechParams(ctx, modelID, "", nil)
+	if err != nil {
+		return "", "", err
+	}
+	if !params.providerEnabled {
+		return params.identity, "", nil
+	}
+	provider, ok := params.model.Provider.(input.Provider)
+	if !ok {
+		return params.identity, "", nil
+	}
+	contentType, err = provider.InputContentType(sdk.SpeechParams{Model: params.model, Config: params.config})
+	if err != nil {
+		return params.identity, "", nil
+	}
+	return params.identity, contentType, nil
+}
+
+func (s *Service) OpenPlaybackInput(ctx context.Context, modelID string) (input.Session, string, error) {
+	params, err := s.resolveSpeechParams(ctx, modelID, "", nil)
+	if err != nil {
+		return nil, "", err
+	}
+	if !params.providerEnabled {
+		return nil, "", fmt.Errorf("%w: provider disabled", input.ErrUnsupported)
+	}
+	provider, ok := params.model.Provider.(input.Provider)
+	if !ok {
+		return nil, "", input.ErrUnsupported
+	}
+	if _, err = provider.InputContentType(sdk.SpeechParams{Model: params.model, Config: params.config}); err != nil {
+		return nil, "", fmt.Errorf("%w: %w", input.ErrUnsupported, err)
+	}
+	session, err := provider.OpenInput(ctx, sdk.SpeechParams{Model: params.model, Config: params.config})
+	return session, params.identity, err
 }
