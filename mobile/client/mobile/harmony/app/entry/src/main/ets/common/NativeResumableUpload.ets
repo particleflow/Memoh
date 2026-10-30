@@ -108,6 +108,12 @@ export class NativeResumableUpload {
     if (!/^[a-f0-9]{32}$/.test(handle)) { throw new Error('UPLOAD_IDENTITY'); }
     return this.root + '/' + handle + suffix;
   }
+  private newHandle(): string {
+    // Journal names are validated as 32 lowercase hex characters; a dashed
+    // UUID from util.generateRandomUUID can never pass that validation.
+    return Array.from(cryptoFramework.createRandom().generateRandomSync(16).data)
+      .map((b: number) => b.toString(16).padStart(2, '0')).join('');
+  }
   private save(j: Journal, published?: () => void): void {
     const target = this.path(j.handle, '.json'), temporary = target + '.tmp';
     const file = fs.openSync(temporary, fs.OpenMode.CREATE | fs.OpenMode.TRUNC | fs.OpenMode.WRITE_ONLY | fs.OpenMode.NOFOLLOW);
@@ -195,7 +201,7 @@ export class NativeResumableUpload {
   private async stagePath(run: Running, owner: string, limits: Limits, uri: string, name: string, mime: string): Promise<UploadLocal> {
     run.phase = 'source-open';
     const input = fs.openSync(uri, fs.OpenMode.READ_ONLY), j = new Journal();
-    j.handle = util.generateRandomUUID(true); j.owner = owner; j.bot = run.input.botId; j.scope = run.input.scope;
+    j.handle = this.newHandle(); j.owner = owner; j.bot = run.input.botId; j.scope = run.input.scope;
     j.name = name.replace(/[\\/\x00-\x1f]/g, '_').slice(0, 160) || 'file'; j.type = mime;
     j.resumable = limits.resumable_enabled === true; run.journal = j;
     let output: fs.File | undefined;
@@ -241,7 +247,7 @@ export class NativeResumableUpload {
       run.phase = 'snapshot-create';
       if (!Number.isSafeInteger(size) || size <= 0 || size > limits.max_upload_bytes) { throw new Error('UPLOAD_HTTP_413'); }
       if (name.length > 1024 || mime.length > 256 || /[\x00-\x1f\x7f]/.test(mime)) { throw new Error('UPLOAD_REQUEST'); }
-      const j = new Journal(); j.handle = util.generateRandomUUID(true); j.owner = owner; j.bot = input.botId; j.scope = input.scope;
+      const j = new Journal(); j.handle = this.newHandle(); j.owner = owner; j.bot = input.botId; j.scope = input.scope;
       j.name = name.replace(/[\\/\x00-\x1f]/g, '_').slice(0, 160) || 'file'; j.type = mime || 'application/octet-stream';
       j.size = size; j.resumable = limits.resumable_enabled === true; run.journal = j;
       if (fs.accessSync(this.path(j.handle, '.original'))) { throw new Error('UPLOAD_IDENTITY'); }
