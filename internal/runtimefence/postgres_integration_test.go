@@ -241,15 +241,26 @@ func TestPostgresRuntimeFenceClaimedInputRemainsRespondableAfterExpiry(t *testin
 	queries := dbsqlc.New(pool)
 	store := postgresstore.NewQueriesWithPool(pool, queries)
 	inputs := userinput.NewService(nil, store)
-	expiresAt := time.Now().Add(250 * time.Millisecond)
-	target := createRuntimeFenceUserInput(t, ctx, inputs, botID, sessionID, "claimed-expiring-input", &expiresAt)
+	target := createRuntimeFenceUserInput(t, ctx, inputs, botID, sessionID, "claimed-expiring-input", nil)
 	fence := nextRuntimeFence(t, ctx, queries, botID, sessionID)
 	if err := runtimefence.ActivateWithOptions(ctx, store, fence, runtimefence.ActivationOptions{
 		PreserveDecisions: []runtimefence.PreservedDecision{{Kind: runtimefence.DecisionUserInput, ID: target.ID}},
 	}); err != nil {
 		t.Fatalf("claim expiring input: %v", err)
 	}
-	time.Sleep(time.Until(expiresAt) + 50*time.Millisecond)
+	var expired bool
+	if err := pool.QueryRow(ctx, `
+		UPDATE user_input_requests
+		SET expires_at = created_at
+		WHERE id = $1
+		RETURNING expires_at <= now()`, target.ID).Scan(&expired); err != nil || !expired {
+		t.Fatalf("expire claimed input = (%v, %v)", expired, err)
+	}
+	if _, err := inputs.ResolveTarget(ctx, userinput.ResolveInput{
+		BotID: botID, SessionID: sessionID, ExplicitID: target.ID,
+	}); !errors.Is(err, userinput.ErrNotFound) {
+		t.Fatalf("expired pending input remains respondable without fence: %v", err)
+	}
 	ownerCtx := runtimefence.WithContext(ctx, fence)
 	resolved, err := inputs.ResolveTarget(ownerCtx, userinput.ResolveInput{
 		BotID: botID, SessionID: sessionID, ExplicitID: target.ID,
