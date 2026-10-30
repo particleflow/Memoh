@@ -342,7 +342,6 @@ func (q *DiskQueue) RequestCancel(id string) error {
 	}
 	if !r.Job.CancelRequested {
 		r.AssociationAttempts = 0
-		r.AssociationDue = time.Time{}
 		r.AssociationBlocked = false
 	}
 	r.Job.CancelRequested = true
@@ -361,6 +360,9 @@ func (q *DiskQueue) RequestCancel(id string) error {
 func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, binding *AssociationBinding, now time.Time) error {
 	if !validID(id) || id == "admission" || client == nil {
 		return ErrInvalid
+	}
+	if err := ctx.Err(); err != nil {
+		return err
 	}
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Minute)
 	defer cancel()
@@ -490,7 +492,7 @@ func (q *DiskQueue) RunOne(ctx context.Context, id string, client *Client, bindi
 		}
 		if err != nil {
 			if r.Job.Ready != nil {
-				r.AssociationAttempts++
+				r.AssociationAttempts = incrementAttempts(r.AssociationAttempts)
 				return q.waitAssociation(journal, r, err, now)
 			}
 			return fail(&r.Job, err, now, save)

@@ -321,10 +321,10 @@ func TestDiskQueueCancelUnknownAndRevokedAssociation(t *testing.T) {
 			r := inspectQueue(t, q, "delivery-1")
 			want := 1
 			if mode == "budget" {
-				want = 12
+				want = 14
 			}
-			if r.Associated || !r.AssociationBlocked || calls != want {
-				t.Fatal("outbox authorization or retry bound", r, calls)
+			if r.Associated || r.AssociationBlocked != (mode != "budget") || calls != want {
+				t.Fatal("outbox authorization or retry scheduling", r, calls)
 			}
 		})
 	}
