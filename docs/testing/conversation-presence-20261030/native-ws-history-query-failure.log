@@ -1,0 +1,6 @@
+=== RUN   TestConversationPresenceNativeWSAndHistory
+    conversation_presence_native_postgres_test.go:152: ERROR: column "messages" does not exist (SQLSTATE 42703)
+--- FAIL: TestConversationPresenceNativeWSAndHistory (0.25s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/agent/application	0.303s
+FAIL
