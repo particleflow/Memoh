@@ -1,6 +1,7 @@
-// Package cosyvoiceinput adds the documented CosyVoice duplex input contract to
-// the existing explicitly registered Twilight CosyVoice provider. It is not a
-// generic Qwen/model-name dispatcher. Fixed-text methods remain Twilight-owned.
+// Package cosyvoiceinput adds the documented DashScope duplex input contract
+// shared by CosyVoice and Qwen-Audio-TTS to the registered Twilight provider.
+// It does not dispatch by model name or implement Qwen-TTS-Realtime events.
+// Fixed-text methods remain Twilight-owned.
 package cosyvoiceinput
 
 import (
