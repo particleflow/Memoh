@@ -28,5 +28,6 @@
   "resourceFiles": 802,
   "warningsRetained": true,
   "newNativeBuilds": 0,
-  "physicalPhone": false
+  "physicalPhone": false,
+  "phase": "frontend qualification before native release build"
 }

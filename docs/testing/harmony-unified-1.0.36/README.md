@@ -62,8 +62,10 @@ WebSocket, screenshot, model execution or real-phone verification. The current
 cloud build has no physical phone. No such acceptance is claimed or fabricated.
 
 The final actual generated context passes vue-tsc and production Vite build.
-All47 host-adaptation names are preserved, all162 paired entries match their
-source hashes, and802 resources were generated. Original chunk-size warnings
+All47 host-adaptation names are preserved and all162 paired source hashes
+verify. The existing composer lifetime patch is then applied, retaining the
+exact final35 composer hash94e78e28a276d1443242ceb3eb3878ac320077d35be651a2fd89656f77222939.
+The12 new final consumer mappings verify and802 resources were generated. Original chunk-size warnings
 remain recorded; no budgets or verification checks were loosened.
 
 ## Consumption and rollback
@@ -80,3 +82,26 @@ input_source, rewrite checkpoint versions, clear queues or restore an old dump t
 force compatibility. Keep35 and history as recovery evidence; this is not a
 promise that a backend downgrade afterv4 writes is safe.35 does not include the
 input-source fix. Phone installation/TLS/throughput remain unverified here.
+
+## Completed cloud handoff
+
+Build source6d728c0b06cb2b9d37773e1b860938980cb4d6e7,
+source tree e996501b6767e693600c481d5f2c66a06aa529de.
+The final official API26 release build succeeded once. All163 formal input
+hashes, actual rawfile resources, native ABC/ELF ABIs and empty configuration
+slot match the generated materials. No identity or permission delta.
+
+The normal public artifact branch is artifacts/harmony-1.0.36-unsigned.
+The [fixed download](https://raw.githubusercontent.com/particleflow/Memoh/45853ec772dc76810733454af13b07dd6a2f38b8/garnet-assistant-1.0.36-unified-unsigned-handoff.zip)
+was anonymously downloaded in full with normal TLS validation: HTTP200,
+16,023,713bytes, SHA256b747c014511a9922b852dbbffb434ebbf890410932bddcfda23543dbef1785a8.
+Inner HAP:37,707,852bytes, SHA256f60c9316d3ea225e4bf86d0f38e5d8754733b5d9f9642eae793fdc7c54912fde.
+Outer/inner CRC and all member checksums passed. The privacy scan covers all
+decompressed HAP members plus strict empty configuration and signing-material
+suffixes; no findings in that scope. It is not an exhaustive encoded-secret proof.
+
+See [artifact-handoff.json](artifact-handoff.json) for exact machine-readable
+evidence. This documentation follow-up does not change any built client input
+or rebind the existing package to a later source commit. The original Windows
+writer receives this unsigned generic package for private injection/signing.
+No phone, signing, NAS rollout or throughput acceptance occurred in this task.
