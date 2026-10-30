@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"time"
 
 	"go.uber.org/fx"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/felinics/memoh/internal/config"
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	dbstore "github.com/felinics/memoh/internal/db/store"
+	"github.com/felinics/memoh/internal/followupqueue"
 	"github.com/felinics/memoh/internal/runtimefence"
 )
 
@@ -41,8 +43,27 @@ func provideRuntimeFenceActivator(queries dbstore.Queries) sessionruntime.FenceA
 // elects the reaper leader, and begins the fail-closed generation sweep — for a
 // single OSS instance that sweep is what turns the previous process's runs into
 // `lost` instead of leaving them active forever.
-func provideSessionRuntimeManager(lc fx.Lifecycle, log *slog.Logger, cfg config.Config, runs ledger.Store, fence sessionruntime.FenceActivator, hub *event.Hub) (*sessionruntime.Manager, error) {
-	manager, err := sessionruntime.NewManagerFromConfig(log, cfg.SessionRuntime, runs, fence)
+func provideSessionRuntimeManager(lc fx.Lifecycle, log *slog.Logger, cfg config.Config, runs ledger.Store, fence sessionruntime.FenceActivator, hub *event.Hub, durable *followupqueue.Backend) (*sessionruntime.Manager, error) {
+	var manager *sessionruntime.Manager
+	var err error
+	if durable == nil {
+		manager, err = sessionruntime.NewManagerFromConfig(log, cfg.SessionRuntime, runs, fence)
+	} else {
+		var stateTTL, leaseTTL, lossGrace time.Duration
+		stateTTL, err = time.ParseDuration(cfg.SessionRuntime.StateTTLOrDefault())
+		if err != nil {
+			return nil, err
+		}
+		leaseTTL, err = cfg.SessionRuntime.OwnerLeaseTTLDuration()
+		if err != nil {
+			return nil, err
+		}
+		lossGrace, err = cfg.SessionRuntime.BackendLossGraceDuration()
+		if err != nil {
+			return nil, err
+		}
+		manager = sessionruntime.NewManager(durable, sessionruntime.Options{StateTTL: stateTTL, OwnerLeaseTTL: leaseTTL, BackendLossGrace: lossGrace, Cluster: cfg.SessionRuntime.Cluster, Ledger: runs, Fence: fence, Logger: log})
+	}
 	if err != nil {
 		return nil, err
 	}
