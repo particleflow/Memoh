@@ -1,0 +1,78 @@
+{
+  "mode": "red",
+  "paid_calls": 0,
+  "contact": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+  "a": {
+    "invocation": "2c1b1acd-1074-4efa-a1b3-d99bc93b2f4d",
+    "events": [
+      {
+        "type": "run_accepted",
+        "run_id": "f46cda82-0bc1-41ed-bcc7-91a63ec33f60",
+        "code": null
+      }
+    ]
+  },
+  "task": {
+    "task_type": "bot_delegation",
+    "task_id": "1430f9b1-899a-4b72-9679-beddf77c692f",
+    "record_id": "1430f9b1-899a-4b72-9679-beddf77c692f",
+    "name": "Delegated task",
+    "state": "running",
+    "created_at": "2026-10-30T04:14:47.208037Z",
+    "destination": {
+      "bot_id": "30000000-0000-4000-8000-000000000002",
+      "session_id": "57c66168-0948-4b0a-baad-7cf4c7072285",
+      "run_id": "df6532c9-e49c-49b1-87b3-21c74c88c97f",
+      "turn_id": "41afb3ce-5866-4b17-88c4-0c9442d3d2cf"
+    }
+  },
+  "b": {
+    "item_id": "9ddd9eb1-7450-477c-b43e-b140ece1ba45",
+    "status": "accepted",
+    "position": 1,
+    "text": "CONTINUATION_B_red",
+    "enqueued_during_run_id": "f46cda82-0bc1-41ed-bcc7-91a63ec33f60"
+  },
+  "queued_run": {
+    "run_id": "b26e3427-e139-42b0-bd59-aae04e475aa8",
+    "state": "failed",
+    "error_code": "runtime_run_failed",
+    "error_message": null,
+    "diagnostic_cause": "remote runtime is offline",
+    "source": "server log matched run_id; DB public error_message is empty"
+  },
+  "delivery": {
+    "c8af1fa537d37e6125264709259e8a9fcd031f018e5d4c26d49263ef149eb95e": {
+      "text": "Delegation 1430f9b1-899a-4b72-9679-beddf77c692f (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nCONTINUATION_WORKER_RESULT: original specialist completed once",
+      "state": "completed",
+      "run_id": "df6532c9-e49c-49b1-87b3-21c74c88c97f",
+      "attempt": 3,
+      "report_state": "attention"
+    }
+  },
+  "receipt_count": "0",
+  "provider": {
+    "calls": [
+      {
+        "kind": "delegate",
+        "model": "local-coordinator",
+        "at": 1793333687.1932516
+      },
+      {
+        "kind": "main_final_wait",
+        "model": "local-coordinator",
+        "at": 1793333687.7753162
+      },
+      {
+        "kind": "worker",
+        "model": "local-executor",
+        "at": 1793333687.8900108
+      }
+    ],
+    "worker": 1,
+    "summary": 0,
+    "reply_b": 0,
+    "delegation": 1
+  },
+  "evidence_note": "UI follow-up enqueue and worker completion ran once; final readback repaired harness query/diagnostic-field assumptions without executing this task again"
+}

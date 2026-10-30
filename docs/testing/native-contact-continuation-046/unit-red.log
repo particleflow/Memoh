@@ -1,0 +1,8 @@
+--- FAIL: TestContactContinuationRestoresSavedNativeSelection (0.00s)
+    --- FAIL: TestContactContinuationRestoresSavedNativeSelection/fresh_queued_user_turn (0.00s)
+        contact_workspace_test.go:56: persisted native selection lost: target="44444444-4444-4444-8444-444444444444" error=<nil>; untouched primary is offline
+    --- FAIL: TestContactContinuationRestoresSavedNativeSelection/fresh_result_continuation_context (0.00s)
+        contact_workspace_test.go:56: persisted native selection lost: target="44444444-4444-4444-8444-444444444444" error=<nil>; untouched primary is offline
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.020s
+FAIL

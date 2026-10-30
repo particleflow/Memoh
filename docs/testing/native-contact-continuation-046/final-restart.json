@@ -1,0 +1,18 @@
+{
+  "same_saved_publication_after_restart": true,
+  "no_model_calls_after_restart": true,
+  "old_attention_unchanged": true,
+  "no_machine_envelope_in_contact": true,
+  "page_errors": [],
+  "publications": {
+    "3d8598e2d697b51837b9e11fd087037837247933360ac98ca4a5313d4d7c30c7": {
+      "text": "Delegation aeedde24-778f-4b91-8cb8-fd6e0c681a2e (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nCONTINUATION_WORKER_RESULT: original specialist completed once FINAL",
+      "state": "completed",
+      "run_id": "1e586a5b-ad30-4902-90b7-f000375151d2",
+      "attempt": 1,
+      "message_id": "f0029aae-adc5-4add-ae43-9b0a86358f42",
+      "report_state": "reported",
+      "summary_run_id": "f756a7e1-895b-4410-aaf7-a728fd08a556"
+    }
+  }
+}

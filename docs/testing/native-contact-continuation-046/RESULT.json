@@ -1,0 +1,34 @@
+{
+  "base": "046023913592b00951d7f28fe54842080c5cdc51",
+  "product_commit": "766a99b1c5a331f595e864554be82d90e2d270ea",
+  "product_tree": "cc021ba2030fde631bdf825e6fe948f56b107a48",
+  "backend_sha256": "e926354349613c74c65fbead4a1e65070d20b100b79a09c5c3239e22dbdb109a",
+  "changed_product": [
+    "cmd/internal/core/bot_delegation.go",
+    "cmd/internal/core/contact_workspace.go"
+  ],
+  "changed_tests": [
+    "cmd/internal/core/contact_workspace_test.go"
+  ],
+  "scope": "native placement explicitly persisted on owned native Web root chat; no Agent-core/runtime-switch/schema change",
+  "checks": {
+    "go_test_top_level_pass": 6,
+    "go_test_subtest_pass": 41,
+    "skip": 0,
+    "go_vet": 0,
+    "gofmt": 0,
+    "diff_check": 0,
+    "build": 0
+  },
+  "actual_isolated_postgres_web": true,
+  "scripted_loopback_models_only": true,
+  "paid_calls": 0,
+  "production_touched": false,
+  "deployed": false,
+  "human_qa": false,
+  "remaining": [
+    "production first-supervisor timing/tool-sequence evidence",
+    "controlled reporting of already-attention attempt3 records; existing retry does not reset the budget",
+    "integrated field acceptance"
+  ]
+}

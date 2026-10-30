@@ -1,0 +1,83 @@
+{
+  "mode": "green",
+  "paid_calls": 0,
+  "contact": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+  "a": {
+    "invocation": "710d75b6-fd47-4344-9ab4-dcbf603129f5",
+    "events": [
+      {
+        "type": "run_accepted",
+        "run_id": "30fdc682-a433-4a09-8320-9bcc28c6c632",
+        "code": null
+      }
+    ]
+  },
+  "task": {
+    "task_type": "bot_delegation",
+    "task_id": "aeedde24-778f-4b91-8cb8-fd6e0c681a2e",
+    "record_id": "aeedde24-778f-4b91-8cb8-fd6e0c681a2e",
+    "name": "Delegated task",
+    "state": "running",
+    "created_at": "2026-10-30T04:24:41.198946Z",
+    "destination": {
+      "bot_id": "30000000-0000-4000-8000-000000000002",
+      "session_id": "2632c6e7-00dd-4285-b25a-c064d6e39633",
+      "run_id": "1e586a5b-ad30-4902-90b7-f000375151d2",
+      "turn_id": "158ea192-cff2-4319-9f78-21a05336b932"
+    }
+  },
+  "b": {
+    "item_id": "468d7f6c-ea96-4f07-bb6f-5157e60ca45e",
+    "status": "accepted",
+    "position": 1,
+    "text": "CONTINUATION_B_green",
+    "enqueued_during_run_id": "30fdc682-a433-4a09-8320-9bcc28c6c632"
+  },
+  "reply_while_expert_held": true,
+  "receipt_count": "1",
+  "delivery": {
+    "3d8598e2d697b51837b9e11fd087037837247933360ac98ca4a5313d4d7c30c7": {
+      "text": "Delegation aeedde24-778f-4b91-8cb8-fd6e0c681a2e (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nCONTINUATION_WORKER_RESULT: original specialist completed once FINAL",
+      "state": "completed",
+      "run_id": "1e586a5b-ad30-4902-90b7-f000375151d2",
+      "attempt": 1,
+      "message_id": "f0029aae-adc5-4add-ae43-9b0a86358f42",
+      "report_state": "reported",
+      "summary_run_id": "f756a7e1-895b-4410-aaf7-a728fd08a556"
+    }
+  },
+  "provider": {
+    "calls": [
+      {
+        "kind": "delegate",
+        "model": "local-coordinator",
+        "at": 1793334281.1625643
+      },
+      {
+        "kind": "main_final_wait",
+        "model": "local-coordinator",
+        "at": 1793334281.8338087
+      },
+      {
+        "kind": "reply_b",
+        "model": "local-coordinator",
+        "at": 1793334282.1231353
+      },
+      {
+        "kind": "worker",
+        "model": "local-executor",
+        "at": 1793334282.3775485
+      },
+      {
+        "kind": "summary",
+        "model": "local-coordinator",
+        "at": 1793334282.5930176
+      }
+    ],
+    "worker": 1,
+    "summary": 1,
+    "reply_b": 1,
+    "delegation": 1
+  },
+  "page_errors": []
+}
