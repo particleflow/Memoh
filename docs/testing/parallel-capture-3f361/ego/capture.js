@@ -1,18 +1,23 @@
 /* Paste into one existing Ego execution. No imports, external endpoint or browser.
- * This factory is NOT field-qualified until cfg.contract records actual Ego shapes.
+ * Direct Ego2.1.0 shapes were field-observed; WS/POST paths remain unverified.
  * page.events() has a single owner and is read/clear, never an EventEmitter.
  */
 async function createEgoCapture(page, cfg) {
   const c = cfg.contract;
   if (!c?.evidence || !['methodPath', 'paramsPath', 'cdpResultPath', 'evaluateResultPath'].every(k => Array.isArray(c[k])))
     throw new Error('Actual consumer contract paths and evidence are required before capture');
-  if (!(cfg.timeoutMs > 0) || !(cfg.stopDrainMs > 0)) throw new Error('Explicit observer time budgets required');
+  if (![cfg.timeoutMs, cfg.stopDrainMs, cfg.pollIntervalMs].every(x => Number.isFinite(x) && x > 0))
+    throw new Error('Explicit finite observer timeout, drain budget and read interval required');
   const root = cfg.apiRoot.replace(/\/$/, ''), prefix = `/bots/${cfg.bot}/sessions/${cfg.contact}`;
   const records = [], requests = new Map(), sockets = new Set(), roles = {}, delegations = new Map(), frames = [];
   const ignoredRequests = new Set(), uncertainRequests = new Set();
   const anchors = new Map(), blocked = new Set(), secrets = new Set([root, root.replace(/^https?:\/\//, '').split('/')[0]]);
   let seq = 0, batch = 0, armed = null, credential = null, readyHTTP = false, readyWS = false;
-  let stopped = false, fault = false, tail = Promise.resolve();
+  let stopped = false, fault = false, tail = Promise.resolve(), lastReadEnded = null;
+  let stopRequested = false, stopReason = null, stopPromise = null;
+  const activeSamples = new Set();
+  const metrics = {reads: 0, nonempty: 0, events: 0, maxBatch: 0, waits: 0, unknowns: 0,
+    minimumReadGapMs: null, wsSentFrames: 0, wsReceivedFrames: 0, queueRequests: 0, queueMappings: 0};
   const at = (x, path) => path.reduce((v, key) => v?.[key], x);
   const parse = x => { if (typeof x !== 'string') return x; try { return JSON.parse(x); } catch { return x; } };
   function* objects(x) { x = parse(x); if (!x || typeof x !== 'object') return;
@@ -30,7 +35,7 @@ async function createEgoCapture(page, cfg) {
     return x;
   }
   const failure = e => ({errorType: e?.name || 'Error', errorCode: e?.code, errorMessage: clean(String(e?.message || ''))});
-  const emit = (kind, data = {}) => { const r = clean({seq: ++seq, kind, ...data}); records.push(r); return r.seq; };
+  const emit = (kind, data = {}) => { const r = clean({seq: ++seq, kind, ...data}); if (/unknown|mismatch|missing/.test(kind)) metrics.unknowns++; records.push(r); return r.seq; };
   function scoped(url) {
     if (typeof url !== 'string' || !url.startsWith(root + '/')) return null;
     const path = url.slice(root.length).split('?')[0];
@@ -91,7 +96,7 @@ async function createEgoCapture(page, cfg) {
         catch (e) { emit('request_body_unknown', {requestId: p.requestId, ...failure(e)}); }
       }
       emit('http_request', {requestId: p.requestId, path, method: r.method, body});
-      if (r.method === 'POST' && path === prefix + '/follow-up-queue') bind(body?.invocation_id, 'queue', p.requestId);
+      if (r.method === 'POST' && path === prefix + '/follow-up-queue') { metrics.queueRequests++; bind(body?.invocation_id, 'queue', p.requestId); }
     } else if (method === 'Network.responseReceived') {
       const r = requests.get(p.requestId); if (!r) { if (!ignoredRequests.has(p.requestId)) emit('orphan_network_event_unknown', {requestId: p.requestId, method}); return; }
       r.status = p.response?.status;
@@ -106,7 +111,7 @@ async function createEgoCapture(page, cfg) {
           if (!uncertainRequests.has(p.requestId) && r.status === 202 && typeof body?.item_id === 'string') {
             Object.assign(v, {itemId: body.item_id, admittedInvocation: 'follow-up:' + body.item_id,
               enqueuedDuringRunId: body.enqueued_during_run_id});
-            emit('queue_mapping', {role, evidenceSeq, ...v});
+            metrics.queueMappings++; emit('queue_mapping', {role, evidenceSeq, ...v});
           } else emit('queue_unresolved', {role, evidenceSeq});
         }
       } catch (e) { emit('response_body_unknown', {requestId: p.requestId, ...failure(e)}); }
@@ -122,6 +127,7 @@ async function createEgoCapture(page, cfg) {
       if (!sockets.has(p.requestId)) { emit('unbound_socket_frame', {requestId: p.requestId}); return; }
       if (p.response?.opcode !== 1) { emit('non_text_frame_unparsed', {requestId: p.requestId, opcode: p.response?.opcode}); return; }
       const body = parse(p.response.payloadData), sent = method.endsWith('Sent');
+      if (sent) metrics.wsSentFrames++; else metrics.wsReceivedFrames++;
       const evidenceSeq = emit(sent ? 'ws_sent' : 'ws_received', {requestId: p.requestId, body});
       if (sent && body?.type === 'message' && body.session_id === cfg.contact) bind(body.invocation_id, 'ws');
       if (!sent) { frames.push([body, evidenceSeq]); correlate(); }
@@ -129,14 +135,39 @@ async function createEgoCapture(page, cfg) {
       if (sockets.has(p.requestId)) emit('socket_closed_or_error', {requestId: p.requestId, method});
     }
   }
-  async function drainOne() {
-    if (stopped || fault) return;
+  async function pauseRead(delayMs) {
+    if (delayMs <= 0) return;
+    metrics.waits++;
+    // Browser timer only; JSON argument, no Node closure or unverified Ego wait API.
+    const raw = await page.evaluate(({delayMs}) => new Promise(resolve =>
+      setTimeout(() => resolve({waited: true}), delayMs)), {delayMs});
+    if (at(raw, c.evaluateResultPath)?.waited !== true) throw new Error('OBSERVER_WAIT_CONTRACT_MISMATCH');
+  }
+  async function drainOne(deadline = Infinity) {
+    if (stopped || fault) return false;
+    try {
+      const now = Date.now();
+      const delay = lastReadEnded === null ? 0 : Math.min(cfg.pollIntervalMs, Math.max(0, lastReadEnded + cfg.pollIntervalMs - now));
+      if (now + delay > deadline) {
+        await pauseRead(Math.max(0, deadline - now));
+        emit('read_deferred_at_observer_budget'); return false;
+      }
+      await pauseRead(delay);
+      if (Date.now() > deadline) { emit('read_deferred_at_observer_budget'); return false; }
+    } catch (e) { fault = true; emit('observer_wait_unknown', {...failure(e)}); return false; }
+
     let events;
+    if (lastReadEnded !== null) {
+      const gap = Date.now() - lastReadEnded;
+      metrics.minimumReadGapMs = metrics.minimumReadGapMs === null ? gap : Math.min(metrics.minimumReadGapMs, gap);
+    }
     try { events = await page.events(); }
-    catch (e) { fault = true; emit('events_read_unknown', {...failure(e)}); return; }
+    catch (e) { fault = true; emit('events_read_unknown', {...failure(e)}); return false; }
+    lastReadEnded = Date.now(); metrics.reads++;
+    if (Array.isArray(events)) { metrics.nonempty += events.length > 0 ? 1 : 0; metrics.events += events.length; metrics.maxBatch = Math.max(metrics.maxBatch, events.length); }
     // The buffer was cleared by that call. Number it before any further await.
     emit('buffer_read', {batch: ++batch, count: Array.isArray(events) ? events.length : null});
-    if (!Array.isArray(events)) { fault = true; emit('event_array_contract_mismatch'); return; }
+    if (!Array.isArray(events)) { fault = true; emit('event_array_contract_mismatch'); return false; }
     for (let i = 0; i < events.length; i++) {
       const method = at(events[i], c.methodPath), params = at(events[i], c.paramsPath);
       if (typeof method !== 'string' || !params || typeof params !== 'object') {
@@ -147,10 +178,11 @@ async function createEgoCapture(page, cfg) {
       try { await consume(method, params); }
       catch (e) { fault = true; emit('event_processing_unknown', {batch, index: i, ...failure(e)}); }
     }
+    return true;
   }
-  function drain() { const next = tail.then(drainOne); tail = next.catch(() => {}); return next; }
+  function drain(deadline = Infinity) { const next = tail.then(() => drainOne(deadline)); tail = next.catch(() => {}); return next; }
   async function get(path) {
-    if (!readyHTTP || fault || blocked.has(path) || stopped) return [null, null];
+    if (!readyHTTP || fault || blocked.has(path) || stopped || stopRequested) return [null, null];
     const startSeq = emit('probe_start', {path});
     let r;
     try {
@@ -171,8 +203,9 @@ async function createEgoCapture(page, cfg) {
     if (r.status !== 200) { blocked.add(path); emit('probe_blocked', {path}); return [null, evidenceSeq]; }
     return [r.body, evidenceSeq];
   }
-  async function sample() {
-    await drain(); if (fault || stopped) return;
+  async function sampleImpl() {
+    if (stopRequested || stopped) return;
+    await drain(); if (fault || stopped || stopRequested) return;
     let b, bSeq, turn, historySeq;
     for (const [role, r] of Object.entries(roles)) {
       if (!r.admittedInvocation) continue;
@@ -208,29 +241,59 @@ async function createEgoCapture(page, cfg) {
     }
     await drain();
   }
-  emit('started', {contractEvidence: c.evidence, consumer: cfg.consumer, bufferContinuity: 'UNVERIFIED'});
+  function sample() {
+    if (stopRequested || stopped) return Promise.resolve();
+    const work = sampleImpl(); activeSamples.add(work);
+    work.then(() => activeSamples.delete(work), () => activeSamples.delete(work));
+    return work;
+  }
+  function requestStop(reason = 'writer_stop') {
+    if (!stopRequested) { stopRequested = true; stopReason = reason; emit('observer_stop_requested', {reason}); }
+  }
+  function summary() {
+    return {consumer: cfg.consumer, contractEvidence: c.evidence, ...metrics, stopped, fault,
+      stopReason, readIntervalMs: cfg.pollIntervalMs, scopedGetObserved: readyHTTP, sourceSocketCreated: readyWS, pendingResponses: [...requests.values()].filter(r => !r.done).length,
+      bufferContinuity: 'UNVERIFIED', businessCancellationSent: false, networkDisableAttempted: false};
+  }
+  function stop(reason = 'writer_stop') {
+    requestStop(reason);
+    if (stopPromise) return stopPromise;
+    stopPromise = (async () => {
+      await Promise.allSettled([...activeSamples]); await tail;
+      const until = Date.now() + cfg.stopDrainMs;
+      do {
+        if (!await drain(until)) break;
+      } while (!fault && [...requests.values()].some(r => !r.done) && Date.now() < until);
+      for (const [requestId, r] of requests) if (!r.done) emit('response_unknown_on_stop', {requestId});
+      stopped = true;
+      emit('stopped', {roles, unresolvedArm: armed, delegationIds: [...delegations.keys()], ...summary(),
+        status: 'capture_only_not_acceptance'});
+      credential = null; secrets.clear();
+      return records.slice();
+    })();
+    return stopPromise;
+  }
+  async function collectFor(durationMs) {
+    if (!Number.isFinite(durationMs) || durationMs <= 0) throw new Error('Finite observer duration required');
+    const until = Date.now() + durationMs;
+    emit('observer_window', {durationMs});
+    while (!stopRequested && !stopped && !fault && Date.now() < until) {
+      if (!await drain(until)) break;
+    }
+    return stop(fault ? 'collector_fault' : stopRequested ? stopReason : 'observation_budget');
+  }
+  emit('started', {contractEvidence: c.evidence, consumer: cfg.consumer, readIntervalMs: cfg.pollIntervalMs, bufferContinuity: 'UNVERIFIED'});
   try { await command('Network.enable', {}); await drain(); }
   catch (e) { fault = true; emit('network_enable_unknown', {...failure(e)}); }
   return {
-    drain, sample,
+    drain, sample, collectFor, requestStop, stop, summary,
     async arm(role) {
-      await drain(); // clear pre-arm buffered events before assigning the next UI request
-      if (stopped || fault || !readyHTTP || !readyWS) throw new Error('Fresh socket, successful scoped GET and valid contract required');
+      if (stopRequested) throw new Error('Observer is stopping; do not submit another input');
+      await drain();
+      if (stopped || stopRequested || fault || !readyHTTP || !readyWS) throw new Error('Fresh socket, successful scoped GET and valid contract required');
       if (!['A', 'B'].includes(role) || roles[role] || armed) throw new Error('Role already bound or pending');
       armed = role; emit('armed', {role});
     },
-    records(afterSeq = 0) { return records.filter(r => r.seq > afterSeq); }, // non-destructive; caller saves via supported local workflow
-    async stop() {
-      // Finish outstanding clear-buffer reads first; no concurrent .events consumers.
-      await tail;
-      const until = Date.now() + cfg.stopDrainMs;
-      do { await drain(); } while (!fault && [...requests.values()].some(r => !r.done) && Date.now() < until);
-      for (const [requestId, r] of requests) if (!r.done) emit('response_unknown_on_stop', {requestId});
-      stopped = true;
-      emit('stopped', {roles, unresolvedArm: armed, delegationIds: [...delegations.keys()], fault,
-        networkDisableAttempted: false, bufferContinuity: 'UNVERIFIED', status: 'capture_only_not_acceptance'});
-      credential = null; secrets.clear(); // records already sanitized; no credential export/state checkpoint
-      return records.slice();
-    }
+    records(afterSeq = 0) { return records.filter(r => r.seq > afterSeq); }
   };
 }

@@ -3,7 +3,7 @@
  * to be a stable Ego contract. Only method/key/type metadata leaves the function.
  */
 async function probeEgoNetworkShape(page, cfg) {
-  if (!(cfg.timeoutMs > 0) || !(cfg.durationMs > 0) || cfg.reloadExistingPage !== true)
+  if (![cfg.timeoutMs, cfg.durationMs, cfg.pollIntervalMs].every(x => Number.isFinite(x) && x > 0) || cfg.reloadExistingPage !== true)
     throw new Error('Supply explicit observation budgets and existing-page reload scope');
   const report = {consumer: 'Ego 2.1.0 (parent-reported)', paidCalls: 0, reloads: 0,
     batches: [], examples: {}, cdpEnableShape: null, evaluateShape: null, bodyObservation: null,
@@ -32,7 +32,8 @@ async function probeEgoNetworkShape(page, cfg) {
     return u.pathname === rootPath+`/bots/${cfg.bot}/sessions/${cfg.contact}` ||
       (u.pathname === rootPath+`/bots/${cfg.bot}/messages` && u.searchParams.get('session_id')===cfg.contact);
   }
-  const eligible = new Set(); let attemptedBody=false;
+  const eligible = new Set(); let attemptedBody=false, lastReadEnded=null;
+  report.readIntervalMs=cfg.pollIntervalMs;
   try {
     report.cdpEnableShape=shape(await page.cdp('Network.enable',{}, {timeout:cfg.timeoutMs}));
     // A small read-only evaluate establishes its actual return wrapper without credentials.
@@ -40,7 +41,12 @@ async function probeEgoNetworkShape(page, cfg) {
     await page.cdp('Page.reload', {ignoreCache:false}, {timeout:cfg.timeoutMs}); report.reloads++;
     const deadline=Date.now()+cfg.durationMs;
     do {
+      const delay=lastReadEnded===null?0:Math.min(cfg.pollIntervalMs,Math.max(0,lastReadEnded+cfg.pollIntervalMs-Date.now()));
+      if(Date.now()+delay>deadline) break;
+      if(delay>0) await page.evaluate(({delayMs})=>new Promise(resolve=>setTimeout(()=>resolve({waited:true}),delayMs)),{delayMs:delay});
+      if(Date.now()>deadline) break;
       const events=await page.events(); // destructive; sole consumer, no separate .events debug calls
+      lastReadEnded=Date.now();
       report.batches.push({array:Array.isArray(events),count:Array.isArray(events)?events.length:null});
       if (!Array.isArray(events)) {report.arrayMismatch=shape(events);break;}
       for (const event of events) {

@@ -1,87 +1,79 @@
-# Ego 2.1.0 consumer adaptation — field contract still pending
+# Ego 2.1.0 collector: observed envelopes and bounded reads
 
-Read [the compatibility incident register at the supplied exact revision](https://github.com/particleflow/Memoh/blob/3a2e5d97e7f26fdcd47195f0f89bbb5c852b01a5/docs/testing/compatibility-incident-register.md) before reuse. The C01 text path works around a handoff failure, not a browser-runtime mismatch. The earlier external Playwright recorder is **not an Ego-supported field deliverable**. Do not import Playwright, obtain a debugging endpoint, launch another browser, open a listener or substitute another browser framework for this consumer.
+Read the [compatibility incident register at the supplied revision](https://github.com/particleflow/Memoh/blob/3a2e5d97e7f26fdcd47195f0f89bbb5c852b01a5/docs/testing/compatibility-incident-register.md) before reuse. The external463cf Playwright recorder is historical evidence, **not an Ego field deliverable**. Do not import Playwright, obtain an external debugging endpoint, launch another browser, open a listener or substitute another browser framework. C01's Windows `os.setxattr` handoff failure is separate; use these source files as plain text in the existing supported Ego execution.
 
-Consumer facts are from the original writer's actual help/skill read, relayed by the parent: Ego2.1.0, `page.cdp(method, params?, {timeout?})` on this Page's target session; timeout in milliseconds. `page.events()` returns and clears a buffered array. `page.evaluate(fnOrString, argument?)` takes JSON arguments; a browser function cannot capture Node variables. CDP invalidates old element refs. The cloud owner did not independently read the writer's local `C:/Users/Begonia/.agents/skills/ego-browser/SKILL.md`, run Ego, or access the field. Parent reports Server/Web9270 healthy and the previous external recorder never started/no A/B sent.
+## Consumer evidence and limits
 
-## What is ready, and what is not
+The unique writer actually observed Ego2.1.0 in turn `01a18c43-321a-764e-af5c-025dac3e5fbc`, relayed by the parent. `contract-ego210.json` records that evidence:
 
-`capture.js` preserves the463cf correlation and ordered reads using **only the supplied Page's cdp/events/evaluate interface**. No `.on`, `.off`, import, external endpoint, alternate browser or permanent worker exists in it. `test.mjs` verifies the logic against explicitly declared fake Page contracts. These fixtures do not establish Ego's actual envelopes or real event retention.
+- Events are directly `{method, params, sessionId}`. Paths are `['method']`, `['params']`; request ID is `params.requestId`, request/response are `params.request`/`params.response`.
+- `Network.enable` returned `{}`; evaluate returned `{probe,readyState}` directly. Both result paths are `[]`.
+- One existing scoped GET finished and immediate `Network.getResponseBody` returned `{body:string,base64Encoded:false}`, length522. Body content was not handed off.
+- 2712 reads yielded141 nonempty batches/605 events; largest observed batch47. The2571 empty reads were94.8% of reads. The old probe and final drain loops had no pacing. The observation duration was not supplied, so these counts establish neither field reads/second nor capacity/loss.
+- No loadingFailed, WS sent/received/closed, POST body or base64=true was observed. Capacity, overflow detection, long retention, cross-turn lifetime and cancellation of an in-flight Ego call remain unestablished.
 
-The factory requires explicit `methodPath`, `paramsPath`, `cdpResultPath`, `evaluateResultPath` plus the evidence identifying the consumer readback. It has no default guessed Ego layout. Real paid recording must wait for the one probe below. Do not copy a fixture layout into field configuration as if it had been observed.
+The cloud owner did not read the writer-local `F:/NAS-Assistant/tmp/ego349-consumer-probe/` files or execute Ego. Parent reports one no-fee GET refresh, no A/B/DB/model requests, resources cleared. **Do not repeat that shape probe.** `probe.js` is retained with the same pacing correction for future source reuse, not a request for another field probe.
 
-The only currently missing field evidence is the real array-entry method/params layout, the cdp result wrapper (especially body/base64 fields) and evaluate return wrapper. We also need whether this one sample actually yields the expected request/response/finish sequence and immediate body read. A successful sample cannot establish buffer capacity, silent-overflow detection, long retention, cross-tool-round continuity or cancellation. Those remain explicitly unverified; the adapter assumes no such guarantee.
+The previously read Ego help/skill permits `page.cdp(method, params?, {timeout?})` on this Page target, milliseconds; `page.events()` reads and clears an array, not an EventEmitter; `page.evaluate(fnOrString, argument?)` takes JSON arguments, with no Node closure capture. CDP invalidates element refs. `capture.js` uses only those interfaces. The Chromium [Network protocol](https://chromedevtools.github.io/devtools-protocol/tot/Network/) and `cdp-reference.json` support the CDP parameter names, not Ego buffering guarantees.
 
-## Exactly one no-fee consumer observation request
+## What changed
 
-Give the existing unique writer `probe.js` as plain source text. It defines `probeEgoNetworkShape`; paste it into the existing supported Ego execution with the writer's **already selected, idle fixed-contact Page**. Do not discover an endpoint or create a browser. Confirm sole ownership of `page.events()` during this observation; another reader would clear the same buffer. Do not run A/B.
+All destructive buffer reads, including concurrent callers and final draining, now pass through one serialized reader with an explicit minimum interval after the previous read completed. The interval and finite observation/drain budgets are caller configuration, not task rules. The wait uses a browser timer through `page.evaluate` with a JSON argument. A wait/result mismatch records unknown and stops collection; there is no fast-loop fallback.
 
-In that same Ego execution call:
+`collectFor(durationMs)` only collects existing events and then stops. It does not send messages or query additional APIs. `requestStop(reason)` prevents new samples/arming; `stop()` waits for already-issued samples/body commands, performs paced additional draining, preserves unfinished requests as unknown and is idempotent. Its drain budget bounds additional reads, not cancellation of an in-flight Ego RPC. A stuck Ego call cannot be forcibly cancelled through an undocumented API. The collector never cancels a business run; only its own optional read-only fetches use their existing observer timeout.
 
-```js
-const observation = await probeEgoNetworkShape(page, {
-  apiRoot: /* existing API root, kept local */,
-  bot: /* existing source Bot ID */,
-  contact: /* existing fixed contact ID */,
-  timeoutMs: 10000,
-  durationMs: 5000,
-  reloadExistingPage: true
-});
-// Return only observation through the supported Ego result mechanism.
-```
+`summary()` contains counters and status without request bodies, credentials, actual URLs or task IDs. Full `records()` may contain conversation content despite credential/address redaction; keep those records in the writer's existing restricted evidence workflow and review before sharing. No filesystem/import API is assumed inside Ego.
 
-The numbers above are adjustable **observer** budgets, not task delays/pass criteria. The probe enables Network with no invented subscription or buffer parameters, reads a tiny DOM-ready-state value, and reloads the current fixed-contact Page once through `Page.reload`. That reload lets the existing application issue its normal authorized GETs. It neither submits a message nor modifies model, queue, schedule, permissions or stored history.
+## Next field step: one no-fee collector self-check
 
-It reads/clears the Page buffer until the observation budget or the first exact scoped GET loadingFinished. It inspects actual objects rather than assuming their wrapper. For at most one such GET, it calls `Network.getResponseBody` with the **observed** requestId. It returns only shapes, candidate field paths, method names, batch counts, body length/encoding and operation status. No body text, requestId, credentials, URL or private address is returned. The helper does not infer a second event layout or retry an unknown body read. If nothing suitable is found, the result is `not_observed`; return that once rather than experimenting repeatedly on the live site.
-
-Requested return fields:
-
-- Actual outer event entry shape and candidate `methodPath`/`paramsPath` for requestWillBeSent, responseReceived, loadingFinished/loadingFailed and any WebSocket events observed.
-- cdp enable reply shape and getResponseBody reply shape/candidate result path, `body` type and `base64Encoded` type/value; successful read or precise unknown/not-observed status.
-- evaluate reply shape and the path to the returned `{probe, readyState}` value.
-- Event batch counts/read-clear behavior observed during this one call, and whether the existing GET completed. A missing method in this finite sample is not proof of unsupported capability.
-- No additional paid task, no browser/endpoint creation and whether any command was denied, unknown or failed. Reacquire all UI element refs afterward through normal Ego facilities.
-
-This is the requested minimum new field action. It is **not executed by the cloud owner**. Current local output is fixture-only. A tool denial is not permission to substitute Playwright or another channel.
-
-## Adapter lifecycle after that readback is validated
-
-Paste `capture.js` into one existing Ego execution. Supply verified consumer paths; for example the following deliberately uses placeholders instead of a guessed layout:
+This is the only requested next action. It has **not** run in the field. Use the existing idle fixed-contact Page and its original authorized login. The writer must be the sole `page.events()` consumer and keep this object within one supported Ego execution; do not assume state survives another tool round. Paste the complete `capture.js` source, then run this sequence using existing local API/Bot/contact values (never put those values or Authorization in the handoff):
 
 ```js
 const recorder = await createEgoCapture(page, {
-  apiRoot: /* existing local value */, bot: /* source */, contact: /* fixed C */,
-  consumer: 'Ego 2.1.0', timeoutMs: 10000, stopDrainMs: 5000,
+  apiRoot: existingApiRoot, bot: existingSourceBotId, contact: existingContactId,
+  consumer: 'Ego 2.1.0',
+  timeoutMs: 10000, stopDrainMs: 2000, pollIntervalMs: 250,
   contract: {
-    evidence: /* exact successful observation reference */,
-    methodPath: /* actual path array */, paramsPath: /* actual path array */,
-    cdpResultPath: /* actual path array */, evaluateResultPath: /* actual path array */
+    evidence: 'parent-reported writer turn 01a18c43-321a-764e-af5c-025dac3e5fbc',
+    methodPath: ['method'], paramsPath: ['params'],
+    cdpResultPath: [], evaluateResultPath: []
   }
 });
+try {
+  if (!recorder.summary().fault) {
+    await page.cdp('Page.reload', {}, {timeout: 10000});
+    await recorder.collectFor(5000);
+  }
+} finally {
+  await recorder.stop('self_check_complete');
+}
+const result = recorder.summary();
+// Return only result through Ego's existing supported result mechanism.
 ```
 
-Within the same execution, await each operation. First obtain a fresh source socket and successful scoped GET with the normal approved page refresh, then `await recorder.drain()`. `await recorder.arm('A')` drains pre-arm events before assigning the next UI send. Only then may the already authorized writer's **normal Ego UI action** send A; the adapter contains no send/click/fetch-POST implementation. Drain immediately afterward and sample the exact invocation. When the real original expert is running, do the corresponding `await recorder.arm('B')` and normal one-time B action. Reacquire element refs after CDP, not just after navigation.
+These example numbers are adjustable observer budgets. The sole reload lets the application issue its ordinary GETs. Do not call arm/sample, submit A/B, change permissions, invoke a model or use SQL. Reacquire UI refs afterward. The collector starts before the reload; the immediate first read is allowed, subsequent reads are paced. `minimumReadGapMs` measures completed-read to next-read-start using the observer clock, not server task time. Record observed reads/waits/minimum gap/unknowns, `scopedGetObserved`, stopped/fault/pendingResponses, and the configured budgets. No exact batch count is required. A clock jump, missing GET, wait-contract failure, missing body or unresolved response is a limitation/unknown, not successful self-check. Retention/overflow remain unverified even if the summary is clean. Only the waiting subcase and paced actual collector are new field checks; do not rerun the completed envelope probe.
 
-Call `await recorder.sample()` on observed state changes or the writer's bounded observation cadence; it drains incoming events, performs exact supported GETs and drains again. Use the original procedure's substantive-final-reply and identity review. No fixed task sleep, held worker, text matching, latest-run selection or queue bypass is introduced.
+`Network.disable` is deliberately absent: the adapter does not own Ego's preexisting Network session. It stops its reader and clears its credential reference; Page/task cleanup follows the writer's existing supported Ego lifecycle. An empty batch is not proof of lossless capture. If this consumer cannot encompass the sequence within one supported execution, report that precise lifecycle limitation; do not open another browser or background service.
 
-The writer must keep the recorder object in the **same supported Ego execution** and await operations in order. No Node-global persistence, unawaited background Promise or cross-turn object lifetime is promised. If that execution cannot encompass the existing UI actions and drains, stop at the contract readback and report the precise lifecycle limitation; do not manufacture a new framework/service to keep it alive.
+## Subsequent single real parallel sample — preparation only
 
-`recorder.records(afterSeq)` is a non-destructive sanitized in-memory read. Save returned batches through the writer's existing supported local evidence workflow. The adapter does not assume a filesystem/import API in Ego. Do not return raw CDP events, credentials or application state. `await recorder.stop()` first waits for serialized body/drain work, then drains known pending responses until its budget. Missing bodies are recorded as unknown. The budget bounds extra draining, not cancellation of an already running cdp command; each such command retains its own timeout.
+Do not execute a paid sample as part of this change. After the free collector self-check, the parent coordinates the unique writer for one already-authorized bounded sample. Do not add a new fee question. The following preserves the existing source/invocation/queue contracts; it does not change scheduling.
 
-There is deliberately no invented unsubscribe/cursor/cancel method. `Network.disable` is a Chromium command but does not establish ownership of Ego's existing Network session, so the adapter does **not** disable it or claim underlying buffering was cleaned up. It stops its own reader and clears its credential reference. Page/task cleanup remains the existing writer's supported Ego lifecycle. No completeness/overflow guarantee follows from an empty batch.
+1. Create a **new** recorder before any A send, with the observed contract and explicit pacing/budgets. Refresh normally once and drain until a successful scoped GET and fresh source socket have been observed. Inspect actual WS shape if naturally available. No fabricated message may be sent just to manufacture WS coverage. `arm` refuses missing prerequisites. `collectFor` automatically stops its recorder, so do not run it and then try to arm that stopped object.
+2. `await recorder.arm('A')`, then use the existing normal Ego UI action to send the one authorized A. Reacquire refs after CDP. Immediately drain/sample. Bind A from its original WS invocation or original queue request plus the matching completed202 body, never text or latest run. Preserve request invocation, response status/body, `item_id`, `enqueued_during_run_id`, and admitted `follow-up:{item_id}` when queued. If real WS/POST shapes differ, preserve unknown and stop further submissions; do not guess wrappers or resend A.
+3. `sample()` GETs the exact observed invocation to obtain A's run/turn. A's own tool return or exact turn identifies delegation and target Bot/session/run. Query only that original delegation. When it is actually running, arm B and perform one normal UI send. Do not delay the worker, change a timeout, bypass the queue or branch on sample text/name to create overlap.
+4. Continue awaited, paced `drain()`/`sample()` calls inside the same supported execution and the writer's finite observation budget. A queue202 proves receipt only. B must resolve through its own queue item/admitted invocation, reach completed, and have its exact turn persisted with a substantive final assistant reply. The observer then GETs the same original worker. An `overlap_candidate` requires this causal order: B completed lookup → B exact persisted turn → original expert still running. Review final reply content/UI; progress/empty output is not a pass. Do not compare client and server wall clocks to infer overlap.
+5. Observe that same original task's terminal result and natural result reply to the same C, then one normal refresh to check the persistent reply does not multiply. Inspect exact run/turn/tool identities, not matching text. Public projections do not expose the internal result receipt; do not claim DB receipt uniqueness or extend SQL access from this evidence. Record what the API/UI actually establish.
+6. On deadline, missing response, unresolved mapping, completed worker before B's reply, auth failure or lost observation: stop the observer and retain unknown/inconclusive. Do not cancel the real task, replay A/B, restart the expert or loop paid trials. Await `stop()`, save sanitized full evidence locally, and return only the reviewed result/identity table. A normal late result may still finish independently.
 
-## How asynchronous identity is preserved
+The adapter does not supply or assume concurrent Ego command execution. Each writer action/drain/sample is awaited; no unawaited Promise or cross-round recorder survival is promised. A missing lifecycle capability is a blocker, not permission for a framework workaround. Longer polling intervals can miss a short overlap; observed batching cannot guarantee retention. Such a sample is inconclusive rather than a product failure.
 
-The single serialized read/clear loop numbers each batch and entry before awaiting another command. requestWillBeSent retains the original invocation; responseReceived records only status, not a supposedly complete body. Only loadingFinished triggers one awaited getResponseBody. A body that expired/failed is unknown and never causes a POST retry. Events arriving while that RPC is pending remain for the next drain in the fixture; actual Ego retention still needs the probe.
+Suggested handoff fields: source version/contact-unchanged, A original invocation/run/turn, B transport/request invocation/HTTP status/item_id/admitted invocation/run/turn, original delegation/target identities, B-completed/history/subsequent-worker evidence sequence numbers, substantive reply review, terminal result and refresh observation, observer unknowns, stop status, and outcome `pass|inconclusive|failed` with exact reason. Keep credentials, private addresses and raw history out of the handoff.
 
-The matching202 body supplies `item_id`; queued B then resolves via the existing `follow-up:{item_id}` invocation GET. Redirect/reused request IDs are marked uncertain rather than silently remapped. Orphan completion/error events without a known or intentionally ignored request are recorded as unknown. The original request-only lookup gap remains unchanged when the response is genuinely lost; no private DB read or product API change is added.
+## Correlation and verification
 
-A's exact run/turn anchors tool outputs, including runtime frames lacking invocation_id. After B completed is observed, its exact persisted turn is read, **then** the same expert GET. `overlap_candidate` records that sequence and still requires manual substantive-final-text/UI review. Unknown envelopes fail closed; they are not decoded through alternate guessed paths. Internal result receipt fields remain outside the public projections, as previously documented.
+Each read is numbered before any subsequent await. Only loadingFinished triggers awaited getResponseBody; responseReceived alone does not imply a complete body. Delayed responses retain their original request ID; redirects/reused IDs are uncertain. Lost/expired bodies never trigger POST replay. `getRequestPostData`, WS payload decoding, loadingFailed and base64 decoding retain their original fixture coverage, but **have not been verified in this real consumer**. Synthetic fixture events do not close that gap.
 
-## Verification and provenance
+The349 fixture evidence (`fixture-result.json`, six groups/sixteen boundaries) is reused without rerunning unchanged tests. `test.mjs` only gained the now-required observer interval in its fake configuration. New `test-pacing.mjs`/`pacing-result.json` cover ten changed boundaries: old/new empty-read behavior; bounded passive reads; serialization; delayed finish/idempotent stop; unresolved-response retention; stop during wait; bad wait result; invalid pacing configuration; in-flight body completion; and in-flight exact GET on stop. All pass with zero production requests, browser launches or model calls. The old1000/new10 read comparison uses a virtual clock with synthetic1ms events-call cost; it is not an Ego performance measurement.
 
-Run locally: `node docs/testing/parallel-capture-3f361/ego/test.mjs`. The fixture imports Node test utilities only; the deliverable adapter/probe have no imports and never launch a browser. An isolated evaluate realm catches Node closure capture. Coverage includes explicit direct/nested fake wrappers, pre-arm stale events, serialized destructive reads, delayed202 versus earlier409, post-data/body retrieval, base64 decoding, body-RPC/event overlap, exact A/B/worker identity, causal order, changed worker,403, expired bodies, stop gaps and redaction. See `fixture-result.json`. No old product tests/builds or paid calls ran.
-
-The first fixture execution failed because Node strict deep equality compared cross-realm empty-object prototypes inside the fake cdp assertion; it was corrected to compare serialized parameters. This was a fixture assertion issue, not a real Ego failure. Subsequent checks pass, with consumer acceptance still pending.
-
-`cdp-reference.json` records the official Chromium protocol source and hash used for command/parameter verification. [Chromium Network protocol](https://chromedevtools.github.io/devtools-protocol/tot/Network/) defines Network.enable, getResponseBody and loadingFinished; it does not define Ego's event wrapper or buffering guarantees. `compatibility-register.patch` adds a narrowly scoped pending C12 entry against the exact supplied register; it does not mark field adaptation complete. Apply only that entry during integration, preserving all existing incidents and later owner updates.
+The five source paths in `source-evidence.json` were already verified byte-identical3f361→9270. No product code/build/deployment changed. `compatibility-register.patch` updates only C12 against the exact3a2 register; integrate that entry without overwriting later incidents. The actual envelope remedy is field-observed; this new paced collector self-check, WS/POST mapping, long retention/overflow and actual parallel acceptance remain pending.

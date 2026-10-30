@@ -6,7 +6,7 @@ const context = vm.createContext({URL, Date, Map, Set, Object, JSON, Error, Uint
   encodeURIComponent, atob, AbortController, setTimeout, clearTimeout});
 vm.runInContext(readFileSync(new URL('./capture.js', import.meta.url), 'utf8'), context);
 vm.runInContext(readFileSync(new URL('./probe.js', import.meta.url), 'utf8'), context);
-const cfgBase={apiRoot:'https://fixture.invalid/edge',bot:'source',contact:'contact',timeoutMs:1000,stopDrainMs:50,consumer:'fixture-only'};
+const cfgBase={apiRoot:'https://fixture.invalid/edge',bot:'source',contact:'contact',timeoutMs:1000,stopDrainMs:50,pollIntervalMs:1,consumer:'fixture-only'};
 const prefix='/edge/bots/source/sessions/contact';
 const view={delegation_id:'delegation',source_session_id:'contact',target_bot_id:'expert',target_session_id:'expert-session',target_run_id:'worker'};
 const secret='fixture-sensitive-credential';

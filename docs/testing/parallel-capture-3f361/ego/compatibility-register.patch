@@ -4,43 +4,52 @@
  | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
  | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
  | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
-+| C12 | External recorder versus Ego Page execution | Page adapter fixtures pass; actual consumer shape pending |
++| C12 | External recorder and unpaced Ego reads | Direct envelopes/GET verified; paced collector field check pending |
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,36 @@
+@@ -279,6 +280,45 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
-+## C12 — External recorder does not match Ego Page execution
++## C12 — External recorder and unpaced reads do not match Ego consumption
 +
-+- **Platform / signature:** Ego2.1.0 on the original Windows writer; the
-+  463cf6e51 external Playwright/CDP-endpoint recorder does not match the supported
-+  consumer workflow. Parent reports it never started; A/B and new paid calls were0.
-+- **Cause:** The original handoff assumed an external Playwright/browser channel.
-+  The writer's actual skill/help read prohibits importing Playwright or launching
-+  another browser. The supported Page instead provides cdp, read-and-clear events,
-+  and evaluate with JSON arguments. This is separate from C01's os.setxattr fault.
-+- **Validated handling:** Read this register and the actual consumer contract first.
-+  The original Bot owner prepared an import-free Page adapter and one bounded,
-+  no-fee shape probe; controlled cloud fixtures validate identity correlation,
-+  destructive-buffer ordering, completed-body handling and unknown preservation.
-+  Do not send another external browser script or guess an EventEmitter interface.
-+- **Result / unresolved boundary:** Cloud fixtures only, not actual Ego acceptance.
-+  Event method/params paths, cdp/evaluate return wrappers and one immediate body
-+  read still require the original writer's one no-fee observation on the existing
-+  idle fixed-contact Page. Retention, overflow, cancellation and cross-turn lifetime
-+  are not established. No new A/B, model request, DB access or product change.
-+- **Original evidence:** Parent's 2026-10-30 Ego2.1.0 skill/help readback and
-+  [owner adapter/probe and fixture evidence](parallel-capture-3f361/ego/README.md).
-+  Consumer-local help and field files were not independently read by the cloud
-+  owner. The first recorder remains historical evidence, not an Ego-ready tool.
-+- **New condition before another attempt:** Return the one scoped probe's actual
-+  sanitized envelope/body shapes through the original writer; validate those exact
-+  paths before enabling real capture. A fixture pass or standard Chromium protocol
-+  alone is insufficient. Do not obtain another endpoint, launch a browser or use
-+  Playwright as a workaround. Preserve any denial/unknown result without a new paid
-+  retry, and update this entry only with the subsequent actual result.
++- **Platform / signature:** Ego2.1.0 on the original Windows writer. The463cf
++  external Playwright/CDP-endpoint recorder never started; the skill prohibits
++  importing Playwright or launching another browser. The349 Page probe subsequently
++  read2712 batches, only141 nonempty (605 events, largest batch47).
++- **Causes:** The first handoff assumed an unsupported external browser channel.
++  The349 probe/final-drain loops lacked a read interval, yielding2571 empty reads
++  (94.8%). Field duration was not supplied; no reads/second or capacity is inferred.
++  These failures are separate from C01's Windows os.setxattr materialization fault.
++- **Verified compatibility remedy:** Use the existing Page's cdp, read-and-clear
++  events array and evaluate(JSON argument); no EventEmitter, endpoint or new browser.
++  Unique writer turn01a18c43-321a-764e-af5c-025dac3e5fbc observed direct
++  {method,params,sessionId}, methodPath=['method'], paramsPath=['params'], and empty
++  cdpResultPath/evaluateResultPath arrays. Network.enable returned {}; evaluate was
++  direct. One scoped GET loadingFinished -> getResponseBody succeeded with a string
++  body of length522 and base64Encoded=false. No response content was handed off.
++- **New pacing remedy / evidence:** The original adapter now serializes every read
++  with an explicit configurable interval, including final draining. Bounded passive
++  collection and idempotent stop preserve pending responses as unknown and await
++  already-issued work; they never cancel a business task. Ten changed fixture
++  boundaries pass; the original349 six groups/sixteen boundaries are reused. The
++  virtual-clock old1000/new10 reads comparison is not a field performance claim.
++- **Remaining field boundary:** One no-fee paced collector self-check is pending,
++  on the existing Page with one normal GET refresh. Do not rerun the completed
++  envelope probe. WS sent/received/closed, POST bodies, loadingFailed and base64=true
++  were not observed. Retention, overflow, capacity, cross-turn object lifetime and
++  in-flight Ego-call cancellation remain unknown. No new A/B/model/DB operation,
++  product change or deployment was performed for this increment.
++- **Original evidence and next condition:** [Consumer contract, source, ten checks
++  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
++  Field evidence is parent-transcribed from writer-local probe-result.json and
++  OUTCOME.json; the cloud owner did not read those files. Return metadata-only
++  summary for the next free self-check; preserve full sensitive records locally.
++  Only the parent/unique writer coordinates a subsequent single real sample.
++  Missing mappings or overlap are unknown/inconclusive, never a reason for blind
++  resend, SQL scope expansion or an alternate browser. Do not reuse the historical
++  Playwright script or treat an empty event batch as a lossless-buffer guarantee.
 +
  ## Applying these lessons to the existing handoffs
  

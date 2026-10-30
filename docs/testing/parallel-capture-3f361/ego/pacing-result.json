@@ -1,0 +1,53 @@
+{
+  "status": "PASS",
+  "scope": "new pacing/stop differentials only",
+  "oldEvidenceReused": "34921396d six groups / sixteen boundaries",
+  "paidCalls": 0,
+  "productionRequests": 0,
+  "browserLaunches": 0,
+  "consumerReadback": "parent-reported turn 01a18c43-321a-764e-af5c-025dac3e5fbc; not repeated",
+  "results": [
+    {
+      "case": "probe empty-read red/green",
+      "oldReads": 1000,
+      "newReads": 10,
+      "fixtureClockOnly": true
+    },
+    {
+      "case": "bounded passive collector, no busy loop or business operation",
+      "reads": 11,
+      "waits": 11
+    },
+    {
+      "case": "concurrent callers remain serialized and paced"
+    },
+    {
+      "case": "paced stop drains late completion and repeated stop is idempotent"
+    },
+    {
+      "case": "unresolved response survives finite drain as unknown; no task cancellation"
+    },
+    {
+      "case": "requestStop interrupts collection after current await, not business execution"
+    },
+    {
+      "case": "wait return mismatch fails closed without rapid-read fallback"
+    },
+    {
+      "case": "missing/non-finite pacing rejected before Network enable"
+    },
+    {
+      "case": "stop awaits already-issued body command instead of discarding it"
+    },
+    {
+      "case": "stop awaits in-flight exact GET, prevents subsequent probes/arming"
+    }
+  ],
+  "fieldRemaining": [
+    "new pacing self-check",
+    "WS/POST mapping",
+    "failure/base64=true",
+    "retention/overflow/cross-turn guarantees",
+    "real parallel acceptance"
+  ]
+}
