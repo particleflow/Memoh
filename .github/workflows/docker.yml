@@ -11,7 +11,7 @@ on:
       image_scope:
         description: Images to build and publish
         type: choice
-        options: [all, web]
+        options: [all, web, server]
         default: all
       source_sha:
         description: Optional exact Web source; only workflow files may differ from ref
