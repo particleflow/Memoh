@@ -79,24 +79,35 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	}
 	h := newHost()
 	type sample struct{ id, event, worker, previous, child string }
-	seed := func() sample {
+	type sampleState struct {
+		attempts           int
+		state, workerState string
+		missingWorker      bool
+	}
+	seed := func(options ...sampleState) sample {
 		t.Helper()
+		cfg := sampleState{attempts: 3, state: "completed", workerState: "completed"}
+		if len(options) > 0 {
+			cfg = options[0]
+		}
 		s := sample{id: uuid.NewString(), worker: uuid.NewString(), child: uuid.NewString()}
 		exec(`INSERT INTO bot_sessions(id,bot_id,created_by_user_id,metadata) VALUES($1,$2,$3,'{"workspace_target_id":"native"}')`, s.child, target, user)
-		exec(`INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,$4,$1,1,'completed','{}','fixture')`, s.worker, target, s.child, "bot-delegation:"+s.id)
-		exec(`INSERT INTO bot_delegations(id,user_id,source_bot_id,source_session_id,source_root_id,target_bot_id,target_session_id,request_id,run_id,fingerprint,source_selection,state,payload,result) VALUES($1,$2,$3,$4,$4,$5,$6,$1,$7,'recovery-fixture','native','completed','{"result_delivery_version":1,"target_selection":"native"}','{"summary":{"text":"Saved original outcome"}}')`, s.id, user, bot, parent, target, s.child, s.worker)
+		if !cfg.missingWorker {
+			exec(`INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,$4,$1,1,$5,'{}','fixture')`, s.worker, target, s.child, "bot-delegation:"+s.id, cfg.workerState)
+		}
+		exec(`INSERT INTO bot_delegations(id,user_id,source_bot_id,source_session_id,source_root_id,target_bot_id,target_session_id,request_id,run_id,fingerprint,source_selection,state,payload,result) VALUES($1,$2,$3,$4,$4,$5,$6,$1,$7,'recovery-fixture','native',$8,'{"result_delivery_version":1,"target_selection":"native"}','{"summary":{"text":"Saved original outcome"}}')`, s.id, user, bot, parent, target, s.child, s.worker, cfg.state)
 		task, e := h.loadResultTask(ctx, "bot_delegation", s.id, bot, user, parent)
 		if e != nil {
 			t.Fatal(e)
 		}
 		s.event = taskresult.EventID(task.state, task.run, task.text)
-		for attempt := 1; attempt <= 3; attempt++ {
+		for attempt := 1; attempt <= cfg.attempts; attempt++ {
 			run := uuid.NewString()
 			ref := taskresult.Reference{Kind: "bot_delegation", TaskID: s.id, EventID: s.event, Attempt: attempt}
 			exec(`INSERT INTO session_runs(run_id,bot_id,session_id,invocation_id,turn_id,turn_position,state,input_json,input_fingerprint) VALUES($1,$2,$3,$4,$1,1,'failed','{}','fixture')`, run, bot, parent, application.HostFollowUpInvocation(bot, parent, ref.String()))
 			s.previous = run
 		}
-		raw, _ := json.Marshal(taskresult.Delivery{s.event: {ReportState: "attention", State: task.state, RunID: task.run, Text: task.text, Attempt: 3}})
+		raw, _ := json.Marshal(taskresult.Delivery{s.event: {ReportState: "attention", State: task.state, RunID: task.run, Text: task.text, Attempt: cfg.attempts}})
 		if e = task.save(ctx, task.raw, raw); e != nil {
 			t.Fatal(e)
 		}
@@ -124,6 +135,97 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		meta, _ := json.Marshal(map[string]string{taskresult.MetadataKey: ref.String()})
 		exec(`INSERT INTO bot_history_messages(id,bot_id,session_id,run_id,role,content,metadata,turn_visible) VALUES($1,$2,$3,$4,'assistant','"Saved report"',$5,true)`, uuid.NewString(), bot, parent, run, meta)
 	}
+	t.Run("early_attention_uses_saved_state_not_retry_count", func(t *testing.T) {
+		s := seed(sampleState{attempts: 1, state: "completed", workerState: "completed"})
+		exec(`UPDATE session_runs SET state='aborted' WHERE run_id=$1`, s.previous)
+		v, err := recover(s, 1)
+		if err != nil || v.Event.Attempt != 2 {
+			t.Fatalf("early terminal attention cannot recover: %+v %v", v, err)
+		}
+		admit(s, 2, "failed")
+		if _, err = recover(s, 1); err != nil {
+			t.Fatal(err)
+		}
+		if e := read(s); e.ReportState != "attention" || e.Attempt != 2 {
+			t.Fatalf("explicit grant expanded automatic budget: %+v", e)
+		}
+	})
+	t.Run("saved_failure_and_unknown_are_report_only_recoverable", func(t *testing.T) {
+		for _, cfg := range []sampleState{{attempts: 3, state: "failed", workerState: "failed"}, {attempts: 3, state: "unknown", workerState: "lost"}, {attempts: 3, state: "unknown", missingWorker: true}} {
+			s := seed(cfg)
+			v, err := recover(s, cfg.attempts)
+			if err != nil || v.Event.Attempt != cfg.attempts+1 || v.Event.State != cfg.state {
+				t.Fatalf("saved outcome rejected/rewritten: %+v %v", v, err)
+			}
+			var n int
+			if err = p.QueryRow(ctx, `SELECT count(*) FROM session_runs WHERE session_id=$1 AND invocation_id=$2`, s.child, "bot-delegation:"+s.id).Scan(&n); err != nil {
+				t.Fatal(err)
+			}
+			want := 1
+			if cfg.missingWorker {
+				want = 0
+			}
+			if n != want {
+				t.Fatal("execution replayed", n)
+			}
+			if cfg.state == "unknown" {
+				exec(`DELETE FROM bot_delegations WHERE id=$1`, s.id)
+			}
+		}
+	})
+	t.Run("unknown_with_unbound_active_invocation_still_conflicts", func(t *testing.T) {
+		s := seed(sampleState{attempts: 3, state: "unknown", workerState: "running"})
+		defer exec(`DELETE FROM bot_delegations WHERE id=$1`, s.id)
+		if _, err := recover(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
+			t.Fatal("active original allowed recovery", err)
+		}
+		exec(`UPDATE bot_delegations SET run_id=$2 WHERE id=$1`, s.id, uuid.NewString())
+		if _, err := recover(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
+			t.Fatal("unbound original admitted twice", err)
+		}
+	})
+	t.Run("configured_policy_is_snapshotted_and_attention_never_rearmed", func(t *testing.T) {
+		defer func() { h.resultSummaryAttempts = 0 }()
+		h.resultSummaryAttempts = 7
+		s := seed(sampleState{attempts: 1, state: "completed", workerState: "completed"})
+		task, err := h.loadResultTask(ctx, "bot_delegation", s.id, bot, user, parent)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err = task.save(ctx, task.raw, []byte(`{}`)); err != nil {
+			t.Fatal(err)
+		}
+		if err = h.reconcileResult(ctx, "bot_delegation", s.id, bot, user, parent); err != nil {
+			t.Fatal(err)
+		}
+		if e := read(s); e.AutomaticAttempts != 7 || e.Attempt != 2 {
+			t.Fatal("configured policy not persisted", e)
+		}
+		h.resultSummaryAttempts = 1
+		admit(s, 2, "failed")
+		if err = h.reconcileResult(ctx, "bot_delegation", s.id, bot, user, parent); err != nil {
+			t.Fatal(err)
+		}
+		if e := read(s); e.Attempt != 3 || e.AutomaticAttempts != 7 {
+			t.Fatal("existing policy replaced", e)
+		}
+		old := seed()
+		before := len(captured)
+		h.resultSummaryAttempts = 9
+		if err = h.reconcileResult(ctx, "bot_delegation", old.id, bot, user, parent); err != nil || len(captured) != before || read(old).Attempt != 3 {
+			t.Fatal("policy change rearmed attention", err)
+		}
+		if _, err = recover(old, 3); err != nil {
+			t.Fatal(err)
+		}
+		admit(old, 4, "failed")
+		if _, err = recover(old, 3); err != nil {
+			t.Fatal(err)
+		}
+		if e := read(old); e.Attempt != 4 || e.ReportState != "attention" {
+			t.Fatal("recovery reopened configured budget", e)
+		}
+	})
 	t.Run("concurrent_authorization_keeps_one_attempt_and_original_execution", func(t *testing.T) {
 		s := seed()
 		before := len(captured)
@@ -299,7 +401,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 			t.Fatal(err)
 		}
 	})
-	t.Run("legacy_unknown_and_ungranted_attempt_are_not_opted_in", func(t *testing.T) {
+	t.Run("legacy_changed_event_and_stale_receipt_are_not_opted_in", func(t *testing.T) {
 		for _, state := range []string{"unknown", "legacy"} {
 			s := seed()
 			if state == "unknown" {
@@ -323,8 +425,14 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		if err = task.save(ctx, task.raw, raw); err != nil {
 			t.Fatal(err)
 		}
-		if err = h.reconcileResult(ctx, "bot_delegation", s.id, bot, user, parent); !errors.Is(err, botdelegation.ErrDenied) {
-			t.Fatal("ungranted higher attempt executed", err)
+		before := len(captured)
+		if err = h.reconcileResult(ctx, "bot_delegation", s.id, bot, user, parent); err != nil || len(captured) != before {
+			t.Fatal("attention without admission was rearmed", err)
+		}
+		ref := taskresult.Reference{Kind: "bot_delegation", TaskID: s.id, EventID: s.event, Attempt: 3}
+		_, _, err = h.prepareResult(ctx, application.ChatRequest{BotID: bot, UserID: user, ThreadID: parent, TaskResultReceipt: ref.String(), DelegationResultID: s.id, CurrentChannel: task.cmd.CurrentChannel, ChatID: task.cmd.ChatID, ReplyTarget: task.cmd.ReplyTarget})
+		if !errors.Is(err, botdelegation.ErrDenied) {
+			t.Fatal("stale receipt inherited current identity", err)
 		}
 	})
 }

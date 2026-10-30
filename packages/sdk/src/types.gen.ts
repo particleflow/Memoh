@@ -4790,6 +4790,7 @@ export type SkillsSafeCatalogItem = {
 
 export type TaskresultEvent = {
     attempt?: number;
+    automatic_attempts?: number;
     message_id?: string;
     recoveries?: Array<TaskresultRecovery>;
     report_state?: string;

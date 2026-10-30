@@ -11179,7 +11179,7 @@ const docTemplate = `{
         },
         "/bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover": {
             "post": {
-                "description": "Requires a completed native Web result, original event and exhausted expected attempt (at least 3). New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist.",
+                "description": "Uses the original event, its current expected attempt, attention state and durable execution/publication evidence. New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist or changes an unknown outcome to success.",
                 "consumes": [
                     "application/json"
                 ],
@@ -11189,7 +11189,7 @@ const docTemplate = `{
                 "tags": [
                     "sessions"
                 ],
-                "summary": "Authorize one summary attempt for a saved completed result",
+                "summary": "Authorize one summary attempt for a saved task outcome",
                 "parameters": [
                     {
                         "type": "string",
@@ -32812,6 +32812,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "attempt": {
+                    "type": "integer"
+                },
+                "automatic_attempts": {
                     "type": "integer"
                 },
                 "message_id": {

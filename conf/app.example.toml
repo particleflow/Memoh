@@ -22,6 +22,9 @@ originals_root = ""
 # Set a longer duration (e.g. "2h") or "0s" to disable this outer deadline.
 # Shutdown and Agent/provider cancellation still apply. Restart Server after edits.
 execution_timeout = "30m"
+# Automatic saved-outcome summary attempts; positive integer, default 3.
+# Applies to the shared native result delivery adapter. Attention never auto-rearms.
+result_summary_attempts = 3
 
 [log]
 level = "info"

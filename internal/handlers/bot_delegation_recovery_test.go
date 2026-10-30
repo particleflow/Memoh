@@ -3,7 +3,9 @@ package handlers
 import (
 	"context"
 	"log/slog"
+	"math"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -67,8 +69,9 @@ func TestSavedResultRecoveryHTTPBoundary(t *testing.T) {
 	call("", body, 401)
 	call(taskUser, `{}`, 400)
 	call(taskUser, `{"event_id":"bad","expected_attempt":3}`, 400)
-	call(taskUser, `{"event_id":"`+strings.Repeat("a", 64)+`","expected_attempt":2}`, 400)
-	call(taskUser, `{"event_id":"`+strings.Repeat("a", 64)+`","expected_attempt":2147483647}`, 400)
+	call(taskUser, `{"event_id":"`+strings.Repeat("a", 64)+`","expected_attempt":1}`, 202)
+	call(taskUser, `{"event_id":"`+strings.Repeat("a", 64)+`","expected_attempt":2}`, 202)
+	call(taskUser, `{"event_id":"`+strings.Repeat("a", 64)+`","expected_attempt":`+strconv.Itoa(math.MaxInt)+`}`, 400)
 	call(taskUser, body, 202)
 	host.conflict = true
 	call(taskUser, body, 409)
@@ -80,7 +83,7 @@ func TestSavedResultRecoveryHTTPBoundary(t *testing.T) {
 	f.row.State = "completed"
 	f.row.Payload.ResultDeliveryVersion = 0
 	call(taskUser, body, 409)
-	if host.recoveries != 2 || f.creates.Load() != 0 || f.runs.Load() != 0 || f.deliveries.Load() != 0 {
+	if host.recoveries != 5 || f.creates.Load() != 0 || f.runs.Load() != 0 || f.deliveries.Load() != 0 {
 		t.Fatalf("wrong boundary: recoveries=%d creates=%d runs=%d delivery=%d", host.recoveries, f.creates.Load(), f.runs.Load(), f.deliveries.Load())
 	}
 }

@@ -1015,6 +1015,9 @@ func (cfg Config) validate() error {
 	if _, err := cfg.BotDelegation.ExecutionTimeoutDuration(); err != nil {
 		return err
 	}
+	if _, err := cfg.BotDelegation.SummaryAttemptLimit(); err != nil {
+		return err
+	}
 	if cfg.ComputerTasks.NativeObservationLimit < 0 || cfg.ComputerTasks.NativeObservationLimit > 128 {
 		return errors.New("computer_tasks.native_observation_limit must be between 0 and 128")
 	}

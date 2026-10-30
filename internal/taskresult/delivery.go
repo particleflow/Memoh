@@ -12,10 +12,7 @@ import (
 	"strings"
 )
 
-const (
-	MetadataKey = "task_result_receipt"
-	MaxAttempts = 3
-)
+const MetadataKey = "task_result_receipt"
 
 type Reference struct {
 	Kind, TaskID, EventID string
@@ -32,7 +29,7 @@ func Parse(s string) (Reference, error) {
 		return Reference{}, errors.New("invalid task result reference")
 	}
 	n, e := strconv.Atoi(p[3])
-	if e != nil || n < 1 || n > 2147483647 {
+	if e != nil || n < 1 {
 		return Reference{}, errors.New("invalid summary attempt")
 	}
 	if _, e = hex.DecodeString(p[2]); e != nil {
@@ -44,14 +41,15 @@ func Parse(s string) (Reference, error) {
 // Events are retained separately when an uncertain execution later resolves.
 // Attempt names only the summary invocation, never the original action.
 type Event struct {
-	ReportState  string     `json:"report_state"`
-	State        string     `json:"state"`
-	RunID        string     `json:"run_id,omitempty"`
-	Text         string     `json:"text"`
-	Attempt      int        `json:"attempt"`
-	MessageID    string     `json:"message_id,omitempty"`
-	SummaryRunID string     `json:"summary_run_id,omitempty"`
-	Recoveries   []Recovery `json:"recoveries,omitempty"`
+	ReportState       string     `json:"report_state"`
+	State             string     `json:"state"`
+	RunID             string     `json:"run_id,omitempty"`
+	Text              string     `json:"text"`
+	Attempt           int        `json:"attempt"`
+	MessageID         string     `json:"message_id,omitempty"`
+	SummaryRunID      string     `json:"summary_run_id,omitempty"`
+	Recoveries        []Recovery `json:"recoveries,omitempty"`
+	AutomaticAttempts int        `json:"automatic_attempts,omitempty"`
 }
 
 // Each explicit recovery authorizes one additional summary, never an action.
@@ -65,10 +63,9 @@ type Recovery struct {
 	PreviousRunState string `json:"previous_run_state"`
 }
 
-func (e Event) AuthorizedAttempt() bool {
-	if e.Attempt >= 1 && e.Attempt <= MaxAttempts {
-		return true
-	}
+// RecoveryAttempt derives the one-attempt grant from its durable audit. It
+// applies even when attention occurred before the automatic retry budget ended.
+func (e Event) RecoveryAttempt() bool {
 	for _, r := range e.Recoveries {
 		if r.Attempt == e.Attempt && r.FromAttempt == e.Attempt-1 && r.RequestedBy != "" && r.RequestedAt != "" && r.PreviousRunID != "" && Terminal(r.PreviousRunState) {
 			return true

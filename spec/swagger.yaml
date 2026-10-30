@@ -8315,6 +8315,8 @@ definitions:
     properties:
       attempt:
         type: integer
+      automatic_attempts:
+        type: integer
       message_id:
         type: string
       recoveries:
@@ -16084,10 +16086,10 @@ paths:
     post:
       consumes:
       - application/json
-      description: Requires a completed native Web result, original event and exhausted
-        expected attempt (at least 3). New authorizations conflict while active; repeating
-        the same authorization resumes it. Published results conflict. Never reruns
-        the specialist.
+      description: Uses the original event, its current expected attempt, attention
+        state and durable execution/publication evidence. New authorizations conflict
+        while active; repeating the same authorization resumes it. Published results
+        conflict. Never reruns the specialist or changes an unknown outcome to success.
       parameters:
       - description: Supervisor Bot ID
         in: path
@@ -16141,7 +16143,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/server.Problem'
-      summary: Authorize one summary attempt for a saved completed result
+      summary: Authorize one summary attempt for a saved task outcome
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/follow-up-queue:

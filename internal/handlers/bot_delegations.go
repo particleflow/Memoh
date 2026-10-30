@@ -186,8 +186,8 @@ func (h *BotDelegationHandler) Deliver(c echo.Context) error {
 }
 
 // RecoverDelivery godoc
-// @Summary Authorize one summary attempt for a saved completed result
-// @Description Requires a completed native Web result, original event and exhausted expected attempt (at least 3). New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist.
+// @Summary Authorize one summary attempt for a saved task outcome
+// @Description Uses the original event, its current expected attempt, attention state and durable execution/publication evidence. New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist or changes an unknown outcome to success.
 // @Tags sessions
 // @Accept json
 // @Produce json

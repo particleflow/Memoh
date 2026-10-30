@@ -3016,9 +3016,9 @@ export const postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDelivery
 });
 
 /**
- * Authorize one summary attempt for a saved completed result
+ * Authorize one summary attempt for a saved task outcome
  *
- * Requires a completed native Web result, original event and exhausted expected attempt (at least 3). New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist.
+ * Uses the original event, its current expected attempt, attention state and durable execution/publication evidence. New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist or changes an unknown outcome to success.
  */
 export const postBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverMutation = (options?: Partial<Options<PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverData>>): UseMutationOptions<PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverResponse, Options<PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverData>, PostBotsByBotIdSessionsBySessionIdDelegationsByDelegationIdDeliveryRecoverError> => ({
     mutation: async (vars) => {

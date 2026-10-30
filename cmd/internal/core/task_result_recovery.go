@@ -21,19 +21,20 @@ func (h *delegationHost) RecoverResult(ctx context.Context, r botdelegation.Reco
 	b := r.Identity
 	for range 8 {
 		t, err := h.loadResultTask(ctx, "bot_delegation", r.ID, b.SourceBotID, b.UserID, b.SourceSessionID)
+		if errors.Is(err, errResultNotReady) {
+			return botdelegation.RecoveryView{}, botdelegation.ErrConflict
+		}
 		if err != nil {
 			return botdelegation.RecoveryView{}, err
 		}
-		// Confirm the exact original execution, not a placeholder/latest run.
-		worker, err := h.service.Ledger.TargetRun(ctx, r)
-		if err != nil {
+		if err := h.recoveryExecutionReady(ctx, r, t); err != nil {
 			return botdelegation.RecoveryView{}, err
 		}
-		if worker == nil || worker.ID != t.run || worker.State != "completed" || t.state != "completed" || taskresult.EventID(t.state, t.run, t.text) != input.EventID {
+		if taskresult.EventID(t.state, t.run, t.text) != input.EventID {
 			return botdelegation.RecoveryView{}, botdelegation.ErrConflict
 		}
 		e, ok := t.delivery[input.EventID]
-		if !ok || !e.AuthorizedAttempt() || e.MessageID != "" || e.State != t.state || e.RunID != t.run || e.Text != t.text {
+		if !ok || e.Attempt < 1 || e.MessageID != "" || e.State != t.state || e.RunID != t.run || e.Text != t.text {
 			return botdelegation.RecoveryView{}, botdelegation.ErrConflict
 		}
 		resume := false
@@ -84,4 +85,41 @@ func (h *delegationHost) RecoverResult(ctx context.Context, r botdelegation.Reco
 		// Continue through a fresh authorization read after the durable grant.
 	}
 	return botdelegation.RecoveryView{}, botdelegation.ErrConflict
+}
+
+// Use original invocation facts, including the admission-before-run-binding
+// crash window. A saved failure/unknown without execution admission is a
+// reportable outcome, not permission to dispatch that execution again.
+func (h *delegationHost) recoveryExecutionReady(ctx context.Context, r botdelegation.Record, t resultTask) error {
+	missing := func() error {
+		if (t.state == "unknown" || t.state == "failed") && r.State == t.state {
+			return nil
+		}
+		return botdelegation.ErrConflict
+	}
+	if r.Identity.TargetSessionID == "" {
+		return missing()
+	}
+	worker, err := h.store.GetSessionRunByInvocation(ctx, sqlc.GetSessionRunByInvocationParams{SessionID: nativeTaskUUID(r.Identity.TargetSessionID), InvocationID: "bot-delegation:" + r.ID})
+	if errors.Is(err, pgx.ErrNoRows) {
+		return missing()
+	}
+	if err != nil {
+		return err
+	}
+	if worker.TeamID.String() != r.Identity.TeamID || worker.BotID.String() != r.Identity.TargetBotID || worker.SessionID.String() != r.Identity.TargetSessionID || worker.RunID.String() != t.run || !taskresult.Terminal(worker.State) {
+		return botdelegation.ErrConflict
+	}
+	// Retain the existing ownership/history/fencing check for an observed run.
+	visible, err := h.service.Ledger.TargetRun(ctx, r)
+	if err != nil {
+		return err
+	}
+	if visible == nil || visible.ID != worker.RunID.String() {
+		return botdelegation.ErrConflict
+	}
+	if worker.State != t.state && !(worker.State == "lost" && t.state == "unknown") && !(worker.State == "aborted" && t.state == "failed") {
+		return botdelegation.ErrConflict
+	}
+	return nil
 }
