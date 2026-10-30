@@ -1,0 +1,172 @@
+{
+  "exactSharedCommit": "4425e3c5f5940d71d65c98b0ba2290db14b97b43",
+  "exactSharedTree": "95aa493c7e6e7bbff2ef63a0ca671f56b4d4c5be",
+  "rawUpstreamFilesVerified": 19,
+  "mapping": [
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "upstreamSHA256": "e3ecc6b9611aa80b1c1f3e4f585d93fd1bfe4043e69a526416f8216c68ffac4d",
+      "pairedSHA256": "a9dba2ae4832e708c81f9731cd0434ba31aa46c664b25af1f6bf3a88639ffab5",
+      "adaptation": "Retained phone auth/attachment/source keys and omitted removed recovery UI; speech locale keys exact",
+      "generatedSHA256": "a9dba2ae4832e708c81f9731cd0434ba31aa46c664b25af1f6bf3a88639ffab5"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "upstreamSHA256": "d52c2e317a220ea089f6d9098e650ce80e24a9a7acd5e07429e45fc8b5f67be7",
+      "pairedSHA256": "05ae62096f5349401481fd0e37ab560babc11b3225e4e98a348e6d31e6ebd58c",
+      "adaptation": "Retained phone auth/attachment/source keys and omitted removed recovery UI; speech locale keys exact",
+      "generatedSHA256": "05ae62096f5349401481fd0e37ab560babc11b3225e4e98a348e6d31e6ebd58c"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "upstreamSHA256": "573c87db3c9b7e4e8a8eee52da3de46403181c92089547fa5c9dcf134b1f121d",
+      "pairedSHA256": "1a281b476802b69792f954d055dd47a56fb6f50e623030db18624cf0ce2f3123",
+      "adaptation": "Retained phone auth/attachment/source keys and omitted removed recovery UI; speech locale keys exact",
+      "generatedSHA256": "1a281b476802b69792f954d055dd47a56fb6f50e623030db18624cf0ce2f3123"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/chat-pane.vue",
+      "upstreamSHA256": "4d52b3b9bf7acdaf82a7e8b454d61b15539cc1f1be9805eec2bec4366a0e7697",
+      "pairedSHA256": "8ed1b5d9e805f94901946ac6f16d246288035e691c2274e58550b2ed2d8ee09b",
+      "adaptation": "Retained qualified native attachment/recording/readonly footer and post-pair lifetime patch; no new shared delta",
+      "generatedSHA256": "94cffa8bd7d7a0620b5fad42a33737fbe63e4a2c78abd82e5356853928bcbd59"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "upstreamSHA256": "8877f81580dc47dffbb9c7be6e75b98b62d2608270e6179cff518973b8755378",
+      "pairedSHA256": "90722c9409e6d40242a54c4ac69701ea0978e3504a567f21d0e30d661369c8a2",
+      "adaptation": "Only four final conversation_ack lines merged into qualified phone source; media origin and renderer callbacks retained",
+      "generatedSHA256": "90722c9409e6d40242a54c4ac69701ea0978e3504a567f21d0e30d661369c8a2"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+      "upstreamSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893",
+      "pairedSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-audio-stream.ts",
+      "upstreamSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8",
+      "pairedSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-render-completion.ts",
+      "upstreamSHA256": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85",
+      "pairedSHA256": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-replay-cache.ts",
+      "upstreamSHA256": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21",
+      "pairedSHA256": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-sentence-boundary.ts",
+      "upstreamSHA256": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92",
+      "pairedSHA256": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "27ca448c08cf84cc042aef368cd3f404a0e615b9a3e114bb400cc0f0dc5cbf92"
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "upstreamSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48",
+      "pairedSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48"
+    },
+    {
+      "path": "apps/web/src/pages/home/index.vue",
+      "upstreamSHA256": "f63335a9e25c5335412ad3d05ad100bea9beb2bbdce91547a29bd5c0df495fc1",
+      "pairedSHA256": "bed697e297d69c339bd1712ea2cc346257d113694742042cde3fb9e85a3eeb88",
+      "adaptation": "Retain qualified Garnet Assistant title only; live Router binding is current shared source",
+      "generatedSHA256": "bed697e297d69c339bd1712ea2cc346257d113694742042cde3fb9e85a3eeb88"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "upstreamSHA256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5",
+      "pairedSHA256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "10e98549cdb383f9f29871ad319370e11972a3fb5dd428e4f97c4806d8417bf5"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "upstreamSHA256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269",
+      "pairedSHA256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269"
+    },
+    {
+      "path": "apps/web/src/store/chat/route-context.ts",
+      "upstreamSHA256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78",
+      "pairedSHA256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78",
+      "adaptation": "exact upstream",
+      "generatedSHA256": "181a2796732b0c09378f9acbfac445c4c11c3dabe10b4601c98207af83770f78"
+    },
+    {
+      "path": "packages/sdk/src/@pinia/colada.gen.ts",
+      "upstreamSHA256": "82cc814502755155302db56f83f5fbc7d8705d90926c9481151e8c76439cf149",
+      "pairedSHA256": "8880db42632984fa726d0b6f024a0f02189e9316223545e1808f089214b324f6",
+      "adaptation": "Qualified explicit generated-symbol merge; preserve382 operations and omit unused delivery/recover operation; three speech APIs present",
+      "generatedSHA256": "8880db42632984fa726d0b6f024a0f02189e9316223545e1808f089214b324f6"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "upstreamSHA256": "d66198b2faa3525e1c8485f95e92191669cd26f6156fbbbcc1765713ffc1917b",
+      "pairedSHA256": "01f9ea058fa9454aad45f2c10b813071778cfa7e22ede32a78b3832a53999b48",
+      "adaptation": "Qualified explicit generated-symbol merge; preserve382 operations and omit unused delivery/recover operation; three speech APIs present",
+      "generatedSHA256": "01f9ea058fa9454aad45f2c10b813071778cfa7e22ede32a78b3832a53999b48"
+    },
+    {
+      "path": "packages/sdk/src/sdk.gen.ts",
+      "upstreamSHA256": "fb802e4a1bc088353496174cd5bb119411cad00cf1a377dd622a8fdd2a41aeb9",
+      "pairedSHA256": "8a2d3dfeed09fd03db1d98c9983a928802c6361c9a8ba105a3cf32b4ed53e5a6",
+      "adaptation": "Qualified explicit generated-symbol merge; preserve382 operations and omit unused delivery/recover operation; three speech APIs present",
+      "generatedSHA256": "8a2d3dfeed09fd03db1d98c9983a928802c6361c9a8ba105a3cf32b4ed53e5a6"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "upstreamSHA256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f",
+      "pairedSHA256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f",
+      "adaptation": "Qualified explicit generated-symbol merge; preserve382 operations and omit unused delivery/recover operation; three speech APIs present",
+      "generatedSHA256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f"
+    }
+  ],
+  "webBuildChecks": [
+    {
+      "name": "submodule-check",
+      "exitCode": 0
+    },
+    {
+      "name": "dependencies",
+      "exitCode": 0
+    },
+    {
+      "name": "patched-dependencies",
+      "exitCode": 0
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "vue-build",
+      "exitCode": 0
+    }
+  ],
+  "webBuildExitCode": 0,
+  "resources": 802,
+  "hostPatchesRetained": 47,
+  "pairedSources": 181,
+  "unchangedTrackedClientFilesFrom36": 198,
+  "persistentQueueEfacIncluded": false,
+  "newFourCasesPassed": true,
+  "prior78Reused": true,
+  "newHapBuiltAtThisCheckpoint": false,
+  "fileTransferProtocolAndPermissionChanged": false
+}

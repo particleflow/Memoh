@@ -455,13 +455,13 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "3411b3658625df3c30ca8452fe542e1c35375fbff10d490e38775dd80471ed54"
+      "sha256": "5a67099326608bbc6fd1a7ec0f7665a573e971f481fd59490ff2054884f021aa"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
     "HAP27ContainsDelta": false,
     "releaseBuildAuthorized": true,
-    "compatibleReleaseBackend": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+    "compatibleReleaseBackend": "4425e3c5f5940d71d65c98b0ba2290db14b97b43",
     "taskHistoryCancellation": {
       "commit": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
       "base": "5a42d013e801cb6229ee029113e3a63782bc3e13",
@@ -545,13 +545,14 @@
       "sourceBase": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
       "productCandidate": "500d86f52ae97ba92ac8245bbafbe66ba21543db",
       "evidenceCommit": "a7e69c4d63d528bf578939b45b4c8198878ccbaa",
-      "reviewState": "candidate under unified review; not final release",
+      "reviewState": "included in frozen unified4425; physical field acceptance separate",
       "livePerStoreRouter": true,
       "persistedRouterContext": false,
       "oldEnsureWebSocketFixRetained": true,
       "fieldElevenSkeletonCauseReproduced": false,
       "readAloudFixtureFailuresResolved": false,
-      "newHapBuilt": false
+      "newHapBuilt": false,
+      "finalUnifiedCommit": "4425e3c5f5940d71d65c98b0ba2290db14b97b43"
     },
     "speechConvergence": {
       "parentHarmony": "d30421e0c2f713cc0b338dc86fd8a20b46baf506",
@@ -566,10 +567,24 @@
       "protocolSupplement": "1764c882642ef43256ccd8001b97c145c593af54",
       "existingSDKOperationsUnchanged": 382,
       "newSDKOperations": 3,
-      "pendingExactUnifiedHead": true,
+      "pendingExactUnifiedHead": false,
       "newHapBuilt": false,
       "nativeProviderMimeReadbackProven": false,
-      "actualArkWebAcceptance": false
+      "actualArkWebAcceptance": false,
+      "finalUnifiedCommit": "4425e3c5f5940d71d65c98b0ba2290db14b97b43",
+      "finalUnifiedTree": "95aa493c7e6e7bbff2ef63a0ca671f56b4d4c5be"
+    },
+    "finalUnifiedRelease": {
+      "commit": "4425e3c5f5940d71d65c98b0ba2290db14b97b43",
+      "tree": "95aa493c7e6e7bbff2ef63a0ca671f56b4d4c5be",
+      "versionName": "1.0.37",
+      "versionCode": 1000037,
+      "persistentQueueEfacIncluded": false,
+      "candidateServerSchema": 182,
+      "nativeConfigurationEmpty": true,
+      "originalSigningAndPermissionScopeRetained": true,
+      "unifiedRemoteCIAtParentFreeze": "ESLint/Policy passed; other classes in progress; no all-green assertion",
+      "actualPhoneOrVoiceAccepted": false
     }
   }
 }

@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "83afc59d182b53e01caed11660202b064ef0928a31748d38bf877383ab78d8fd",
+      "sha256": "15f2cb1d498fbe26c8ededd9020997712371e2f475abbad6c89daacc9441dddb",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -546,7 +546,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/AppScope/app.json5",
-      "sha256": "c1be97ed70b85b57caa70b47771fbb0d97718d0ef815614977d4d46b60ab62fa",
+      "sha256": "bc5ddc5ed50e256efb79929b1fae027b2e13a4d982cd70e7bb4090606ce1f279",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "8bf012709e50c891530b1e3d45b49214bf6aa34b7e65265f4424a1c5c3f9c907",
@@ -1850,7 +1850,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "3411b3658625df3c30ca8452fe542e1c35375fbff10d490e38775dd80471ed54",
+      "sha256": "5a67099326608bbc6fd1a7ec0f7665a573e971f481fd59490ff2054884f021aa",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
