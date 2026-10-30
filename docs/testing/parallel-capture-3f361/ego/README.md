@@ -1,6 +1,6 @@
 # Ego 2.1.0 collector: observed envelopes and bounded reads
 
-**Incoming directory also passed:** Receiver791af2c4… list/detail200, df60… exactly once, original session/run/turn match. No repeat requested. The saved artifact lacks the other three rows; no repeat extraction is needed. Remaining prerequisites and the single authorized metadata-GET contract are in [the acceptance ledger](../../bot-continuity-acceptance.md).
+**Incoming directory also passed:** Receiver791af2c4… list/detail200, df60… exactly once, original session/run/turn match. No repeat requested. The saved artifact lacks the other three rows; no repeat extraction is needed. The ecf GET was not sent because the old plan wrongly required an existing Page. The corrected normal-login preparation → one metadata GET → cleanup contract is in [the acceptance ledger](../../bot-continuity-acceptance.md).
 
 **Completed field result:** Parent reports b965 PASS: exact B completed → substantive reply persisted → same expert still running (seq2805/2808/2810), then expert completed and natural result persisted in original C without another reply ID after refresh. A/B each once; WS path; all business terminal and space64 cleaned. Do not repeat this sample or its preflight. See [the acceptance ledger: incoming-directory PASS and remaining evidence](../../bot-continuity-acceptance.md). The plan/repair notes below are preserved as the consumed procedure.
 

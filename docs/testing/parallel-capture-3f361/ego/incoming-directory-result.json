@@ -37,5 +37,16 @@
     "new_samples": 0,
     "in_flight": false,
     "repeat_extraction_requested": false
+  },
+  "later_metadata_get_attempt": {
+    "status": "not_sent",
+    "provenance": "parent-reported original writer terminal",
+    "reason": "empty listTaskSpaces after normal space67 cleanup; old plan incorrectly prohibited establishing a Page",
+    "api_requests": 0,
+    "model_calls": 0,
+    "in_flight": false,
+    "access_denied": false,
+    "product_fault_established": false,
+    "next_contract": "normal authorized app preparation, one metadata GET, owned-resource cleanup"
   }
 }

@@ -8,7 +8,7 @@
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,94 @@
+@@ -279,6 +280,104 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -90,6 +90,16 @@
 +  returned type/ID/state/destination metadata, with no detail request or retry.
 +  This is existing-state discovery, not a repeated df60 acceptance or new sample.
 +  Do not manufacture tasks/accounts or broaden permissions to fill coverage.
++- **ecf preparation correction:** The metadata GET was not sent: listTaskSpaces
++  was empty after correct space67 cleanup, while the old plan prohibited normal
++  navigation. This was an author-created prerequisite, not denial/product failure.
++  The ledger now allows a supported owned Page with the original logged-in profile
++  when none exists, normal app/resolver initialization, one metadata response, then
++  owned-resource cleanup. Parent reports navigation owner544/0954 verified resolver
++  semantics: existing Chat permission, no new grants, possible first internal
++  contact initialization, and explicit unknown preservation. Do not blanket-block
++  POST, demand redundant login, blindly retry unknown initialization or keep spaces
++  alive to avoid preparation. No new tests/build/model/live request in this update.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
 +  Field evidence is parent-transcribed from writer-local probe-result.json,
