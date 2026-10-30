@@ -81,3 +81,8 @@ remains an acceptance boundary, not an extra source/build approval gate. Runtime
 native input is selected only by explicit capability MIME and supported MP3 MSE;
 provider/model display names do not enable it. No future shared head is guessed,
 no configured/signed private package goes public, and no field is touched here.
+
+The five changed entries in the existing live file-route/timing source index
+are refreshed to the new helper/SDK hashes. All14 index hashes match active
+paired entries. This metadata follow-up changes no generated product bytes;
+the78-test/type/lint qualification is retained without rerunning unchanged code.

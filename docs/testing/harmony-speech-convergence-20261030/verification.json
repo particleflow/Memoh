@@ -53,5 +53,14 @@
   "privateConfigOrPermissionsChanged": false,
   "fieldOrPhoneOrModelOrPaidCall": false,
   "physicalArkWebOrVoiceOrThroughputAccepted": false,
-  "pendingBuildCondition": "Exact final unified source/API and source consumer hash lock, then one new official release build. Device/provider acceptance does not block generic source/build preparation."
+  "pendingBuildCondition": "Exact final unified source/API and source consumer hash lock, then one new official release build. Device/provider acceptance does not block generic source/build preparation.",
+  "liveFileRouteAndTimingIndexUpdated": [
+    "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+    "apps/web/src/pages/home/composables/speech-audio-stream.ts",
+    "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+    "packages/sdk/src/index.ts",
+    "packages/sdk/src/types.gen.ts"
+  ],
+  "all14ActiveIndexHashesMatchPairedSource": true,
+  "postMetadataGeneratedProductHashesUnchanged": true
 }

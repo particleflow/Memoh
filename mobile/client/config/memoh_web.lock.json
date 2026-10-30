@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "926f2d77b9411ec6b6d6cbec425dcf3a4048183b5263888c9195811aa4123d2d"
+      "sha256": "3411b3658625df3c30ca8452fe542e1c35375fbff10d490e38775dd80471ed54"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",

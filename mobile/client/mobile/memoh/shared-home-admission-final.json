@@ -2074,14 +2074,14 @@
       },
       {
         "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
-        "upstreamSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
-        "phoneSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+        "upstreamSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893",
+        "phoneSHA256": "a80e8164723c1a1af878be189bcc42b29c78090d550d6e8fc2ce84bbd3ebb893",
         "phoneAdapted": false
       },
       {
         "path": "apps/web/src/pages/home/composables/speech-audio-stream.ts",
-        "upstreamSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
-        "phoneSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+        "upstreamSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8",
+        "phoneSHA256": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8",
         "phoneAdapted": false
       },
       {
@@ -2092,8 +2092,8 @@
       },
       {
         "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
-        "upstreamSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
-        "phoneSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+        "upstreamSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48",
+        "phoneSHA256": "2031b224e41ac8b6cba56b5299bba31c57acc7d79b1d03626653ace296e1ee48",
         "phoneAdapted": false
       },
       {
@@ -2104,14 +2104,14 @@
       },
       {
         "path": "packages/sdk/src/index.ts",
-        "upstreamSHA256": "805db7cda66ad67a9bae80b88b057a53c473366336773be5a1f4bd890f6de62f",
-        "phoneSHA256": "b984cb6157830d54333e98da2cb197a0b5cea0294d7fda38ddc1b170f2fdd371",
+        "upstreamSHA256": "d66198b2faa3525e1c8485f95e92191669cd26f6156fbbbcc1765713ffc1917b",
+        "phoneSHA256": "01f9ea058fa9454aad45f2c10b813071778cfa7e22ede32a78b3832a53999b48",
         "phoneAdapted": true
       },
       {
         "path": "packages/sdk/src/types.gen.ts",
-        "upstreamSHA256": "eaaca02e1ef65612fe13bb6dc3b6de3e8fff4ce8b00123e91085716afe1d3d65",
-        "phoneSHA256": "eaaca02e1ef65612fe13bb6dc3b6de3e8fff4ce8b00123e91085716afe1d3d65",
+        "upstreamSHA256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f",
+        "phoneSHA256": "84d4dd110f570e142570accfc6b7df2f988d948cb71f31eee50450f7e62f173f",
         "phoneAdapted": false
       }
     ],
