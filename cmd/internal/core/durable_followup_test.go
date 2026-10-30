@@ -2,17 +2,119 @@ package core
 
 import (
 	"context"
+	"errors"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	runtime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/runtime/session/ledger"
+	"github.com/felinics/memoh/internal/db"
+	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/followupqueue"
 	"github.com/felinics/memoh/internal/testutil/sessionledger"
 )
+
+type followUpRecoveryLookupHook struct {
+	ledger.Store
+	after func(context.Context) error
+}
+
+func (s followUpRecoveryLookupHook) GetByInvocation(ctx context.Context, sessionID, invocationID string) (ledger.Run, error) {
+	run, err := s.Store.GetByInvocation(ctx, sessionID, invocationID)
+	if errors.Is(err, ledger.ErrRunNotFound) && s.after != nil {
+		if hookErr := s.after(ctx); hookErr != nil {
+			return ledger.Run{}, hookErr
+		}
+	}
+	return run, err
+}
+
+func TestDurableFollowUpRecoverySinglePostgresConnection(t *testing.T) {
+	dsn := os.Getenv("MEMOH_FOLLOW_UP_TEST_DSN")
+	if dsn == "" {
+		t.Skip("isolated PostgreSQL DSN not supplied")
+	}
+	config, err := pgxpool.ParseConfig(dsn)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config.MaxConns = 1
+	config.AfterConnect = db.SetDefaultTeamOnConnect
+	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	for _, mode := range []string{"missing_admission", "claim_changed_after_lookup", "lookup_failed"} {
+		t.Run(mode, func(t *testing.T) {
+			// This is an observation deadline for the regression, not a product timeout.
+			ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			store, e := followupqueue.New(pool, "")
+			if e != nil {
+				t.Fatal(e)
+			}
+			key := runtime.Key{BotID: uuid.NewString(), SessionID: uuid.NewString()}
+			defer func() {
+				if _, cleanupErr := pool.Exec(context.Background(), `DELETE FROM session_follow_up_queues WHERE bot_id=$1 AND session_id=$2`, key.BotID, key.SessionID); cleanupErr != nil {
+					t.Error(cleanupErr)
+				}
+			}()
+			itemID := runtime.FollowUpItemID(uuid.NewString())
+			claim := runtime.FollowUpClaimRef{ItemID: itemID, TriggerRunID: uuid.NewString(), ClaimToken: uuid.NewString()}
+			if e = store.Change(ctx, key, func(state *followupqueue.State) error {
+				state.Items = []runtime.FollowUpItem{{ID: itemID, Status: runtime.QueueClaimed, Claim: &claim, Payload: []byte(`{"text":"fixture"}`)}}
+				state.Claims[claim.TriggerRunID] = string(itemID)
+				return nil
+			}); e != nil {
+				t.Fatal(e)
+			}
+			runs := followUpRecoveryLookupHook{Store: ledger.NewPostgres(sqlc.New(pool), pool)}
+			lookupFailure := errors.New("fixture ledger read unavailable")
+			if mode == "lookup_failed" {
+				runs.after = func(context.Context) error { return lookupFailure }
+			}
+			if mode == "claim_changed_after_lookup" {
+				runs.after = func(ctx context.Context) error {
+					return store.Change(ctx, key, func(state *followupqueue.State) error {
+						state.Items[0].Claim.ClaimToken = "replacement-claim"
+						return nil
+					})
+				}
+			}
+			backend := followupqueue.NewBackend(runtime.NewMemoryBackend(), store)
+			e = reconcileFollowUpClaims(ctx, backend, key, runs)
+			if mode == "lookup_failed" {
+				if !errors.Is(e, lookupFailure) {
+					t.Fatalf("ledger error not preserved: %v", e)
+				}
+			} else if e != nil {
+				t.Fatalf("single-connection recovery failed: %v", e)
+			}
+			state, e := store.Read(ctx, key)
+			if e != nil || len(state.Items) != 1 {
+				t.Fatalf("read original item: %v", e)
+			}
+			want := runtime.QueueClaimed
+			if mode == "missing_admission" {
+				want = "unknown"
+			}
+			if state.Items[0].ID != itemID || state.Items[0].Status != want {
+				t.Fatalf("recovery changed identity or newer claim: %#v", state.Items[0])
+			}
+			if mode == "claim_changed_after_lookup" && state.Items[0].Claim.ClaimToken != "replacement-claim" {
+				t.Fatal("newer claim overwritten")
+			}
+			if pool.Stat().AcquiredConns() != 0 {
+				t.Fatal("recovery retained a pool connection")
+			}
+		})
+	}
+}
 
 func TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun(t *testing.T) {
 	dsn := os.Getenv("MEMOH_FOLLOW_UP_TEST_DSN")
