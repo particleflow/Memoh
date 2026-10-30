@@ -418,7 +418,7 @@
     "parent": "565c0b4b3386d87d057234efe6828479d35fcee0",
     "sourceChanges": {
       "local": "shared-read-aloud-changes.json",
-      "sha256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2"
+      "sha256": "fa8d9d9709704c365da655ad4097df2ead36667a3dd75c69b9e72656a0671f56"
     },
     "scope": "Final a0a821a4 source mapping for current read-aloud UI and generated playback SDK; original phone adapters preserved. No synthesize fallback. Deployment/device readiness is not inferred from source checks.",
     "backendPlaybackReadyForRelease": false,
@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "a06fcea72a38b3b79a0f6a824b0e51170e666b4b8087aafe837b8b91cd542c56"
+      "sha256": "17812ab801f21cc942a0eb4b11501ee2302402e1509f4422b8b879afdd97393d"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",

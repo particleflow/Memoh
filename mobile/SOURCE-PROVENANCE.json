@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "b916fccb2e6b14016109dfd672a853c15b11151364925fc269d18cd0f7261f20",
+      "sha256": "7a388f98f6cf68d5a299fef5502c7e439c0ebe923773be5052c337260d67360d",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -120,7 +120,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/HarmonyAttachments.vue",
-      "sha256": "0cd4bbfb5b3dff6e1e6108a5295c6fb2932668328d1a2726b71e9bb39aee3e4b",
+      "sha256": "5a313b36b7a8cb52728d6b66b84258ab0ea1d7a17a5828a4c0c01b2b6dc1f518",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -150,7 +150,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-entry.ts",
-      "sha256": "efc48270e6bfe3c835f2aff34a99471ee6f899770c4dece089d467ec9d9d3cef",
+      "sha256": "df122fff0f36c93bb2b8b52fe0b1c9cec848d70fd5800c7d849e8bc26760f925",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -169,7 +169,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
-      "sha256": "a261230357f7cd8397520b1f1f87a916fc21beea9e0ec2af1134110c6389b605",
+      "sha256": "4f77e30ced6d94db040c28c58bbaa474ab83650dc947958397c013a4ffc65950",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -1101,7 +1101,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "138241bfdce7a669726fe03d37e42f7325e0870583fd0116b3b8e7c1a9e9ff9e",
+      "sha256": "a50978ccb26fe92e053d6a830a8776f55eb33581c184b0f2c55d690440e51f06",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
@@ -1804,7 +1804,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-changes.json",
-      "sha256": "6f101c0fce6769bd299649a2cc2a4d64b8f9c257b5d7f7964b5ce595563f18b2",
+      "sha256": "fa8d9d9709704c365da655ad4097df2ead36667a3dd75c69b9e72656a0671f56",
       "origin": "Frontend and exact generated playback endpoint additions from9c361d60371703c157d344dcebfd439acc6d78de plus four phone SDK seam regressions. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new external dependency, SDK binary, private configuration or signing material.",
       "preparationChanges": [
@@ -1850,7 +1850,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "a06fcea72a38b3b79a0f6a824b0e51170e666b4b8087aafe837b8b91cd542c56",
+      "sha256": "17812ab801f21cc942a0eb4b11501ee2302402e1509f4422b8b879afdd97393d",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
