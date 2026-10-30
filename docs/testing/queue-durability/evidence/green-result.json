@@ -1,0 +1,101 @@
+{
+  "phase": "green",
+  "paid_calls": 0,
+  "source_commit": "29685958ec896489371a894b6854ee8b2e9df9c5",
+  "product_patch": true,
+  "database": "memoh_queue_post_identity_20261030",
+  "a": {
+    "found": true,
+    "invocation_id": "5129bada-701e-4de9-9150-6362169580fd",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a",
+    "turn_id": "3f3d0b4c-78bf-4154-aa30-c32a43c50978",
+    "turn_position": 78,
+    "state": "running"
+  },
+  "responses": [
+    [
+      202,
+      {
+        "item_id": "0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+        "status": "accepted",
+        "position": 1,
+        "text": "DURABLE_QUEUE_B_TEXT_7085422e67414238bb8007d2fe49b620",
+        "enqueued_during_run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a"
+      }
+    ],
+    [
+      202,
+      {
+        "item_id": "0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+        "status": "accepted",
+        "position": 1,
+        "text": "DURABLE_QUEUE_B_TEXT_7085422e67414238bb8007d2fe49b620",
+        "enqueued_during_run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a"
+      }
+    ]
+  ],
+  "item": {
+    "item_id": "0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+    "status": "accepted",
+    "position": 1,
+    "text": "DURABLE_QUEUE_B_TEXT_7085422e67414238bb8007d2fe49b620",
+    "enqueued_during_run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a"
+  },
+  "before": {
+    "items": [
+      {
+        "item_id": "0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+        "status": "accepted",
+        "position": 1,
+        "text": "DURABLE_QUEUE_B_TEXT_7085422e67414238bb8007d2fe49b620",
+        "enqueued_during_run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a"
+      }
+    ]
+  },
+  "a_after": {
+    "found": true,
+    "invocation_id": "5129bada-701e-4de9-9150-6362169580fd",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a",
+    "turn_id": "3f3d0b4c-78bf-4154-aa30-c32a43c50978",
+    "turn_position": 78,
+    "state": "lost"
+  },
+  "after": {
+    "items": []
+  },
+  "b_after": {
+    "found": true,
+    "invocation_id": "follow-up:0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "22ba1881-93c3-40f4-80a1-79fac2f5bc0e",
+    "turn_id": "ddd3a867-b640-4c18-8e1c-532ec78a942c",
+    "turn_position": 79,
+    "state": "running"
+  },
+  "model_calls": {
+    "a": 1,
+    "b": 1,
+    "other": 0
+  },
+  "b_completed": {
+    "found": true,
+    "invocation_id": "follow-up:0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "22ba1881-93c3-40f4-80a1-79fac2f5bc0e",
+    "turn_id": "ddd3a867-b640-4c18-8e1c-532ec78a942c",
+    "turn_position": 79,
+    "state": "completed"
+  },
+  "replay_after_restart": {
+    "item_id": "0a2ae26a-688e-44ba-b8cb-53784884ca4b",
+    "status": "applied",
+    "position": 1,
+    "text": "DURABLE_QUEUE_B_TEXT_7085422e67414238bb8007d2fe49b620",
+    "enqueued_during_run_id": "c4cdcb04-d4aa-4be4-82fc-e36e1bba8e5a"
+  },
+  "original_contact_answer_persisted": true,
+  "b_run_count": "1",
+  "status": "PASS"
+}

@@ -1,0 +1,22 @@
+{
+  "product_commit": "efac3b837b6c5291c09a714dddb4b73251367361",
+  "binary_sha256": "8bf37ef6c89d359b18f2d00fe2f4db70ef5a0777b46f5f7e7fd3d8e3d46e6a3d",
+  "isolated_schema": "182|f",
+  "exact_0182_sql_down_up_only_preserved_envelopes": true,
+  "cli_down_not_repeated": true,
+  "active_runs": 0,
+  "model_calls": {
+    "a": 1,
+    "b": 1,
+    "other": 0
+  },
+  "owned_processes": {
+    "server": 1100078,
+    "provider": 1100044
+  },
+  "process_exit_readback": {
+    "server": "Z",
+    "provider": "Z"
+  },
+  "owned_processes_no_longer_executing": true
+}

@@ -1,0 +1,11 @@
+{
+  "incident": "CLI down executes all downs, not one step",
+  "quarantined_database": "memoh_queue_post_identity_20261030",
+  "quarantined_version": "42|t",
+  "quarantine_dump_sha256": "85a64c0c8be5165fb3a8f477034737a460d720004ab6340ba5eb27f572e73b87",
+  "recovered_database": "memoh_queue_durability_recovered_20261030",
+  "restore_snapshot_sha256": "b0cf112a5b76414cd6418ddf734141e7e645337a2cc7933c83175170d1048fe6",
+  "restored_to": "pre-queue-test snapshot; later test run/delegation ledger rows dropped by down are not reconstructed",
+  "production_touched": false,
+  "original_source_database_touched": false
+}

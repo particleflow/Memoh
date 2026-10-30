@@ -1,0 +1,137 @@
+{
+  "source_commit": "29685958ec896489371a894b6854ee8b2e9df9c5",
+  "paid_calls": 0,
+  "environment": "isolated cloned original PostgreSQL and local model fixture",
+  "queue_backend": "PostgreSQL follow-up adapter; existing memory run coordination and PostgreSQL ledger",
+  "checks": [
+    "concurrent duplicate POST same202/item",
+    "different payload409",
+    "pending replay after disconnect/reconnect same item",
+    "exact follow-up:item invocation maps single durable run/turn",
+    "running and terminal replay no second execution",
+    "trusted result persisted in queue while B active; consumed after B",
+    "original expert result returned once to original C",
+    "all prior rows preserved"
+  ],
+  "a": {
+    "found": true,
+    "invocation_id": "1562db5b-c4c1-4cbd-90ff-b45b7030203b",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "2332ff6f-40be-45ea-af54-308ba5095132",
+    "turn_id": "54de5dba-f48f-4cc4-87ce-693897dd1b52",
+    "turn_position": 71,
+    "state": "running"
+  },
+  "delegation": {
+    "id": "0076b682-f11d-48cd-aa92-bb5072df8736",
+    "target_session_id": "72f8fcff-15eb-4c5c-a068-45d19e594df8",
+    "run_id": "a436d610-97ed-425b-aa5c-27fd0dab7c9b",
+    "state": "running"
+  },
+  "post_request_invocation": "6647a134-f086-42a8-9fbc-f072b31037ac",
+  "concurrent_post_responses": [
+    {
+      "item_id": "e047a7cd-f15d-4d93-a090-02694daf7467",
+      "status": "accepted",
+      "position": 1,
+      "text": "QUEUE_SEAM_B_TEXT_b8d0182f82a0417c8039a10fc73beb86",
+      "enqueued_during_run_id": "2332ff6f-40be-45ea-af54-308ba5095132"
+    },
+    {
+      "item_id": "e047a7cd-f15d-4d93-a090-02694daf7467",
+      "status": "accepted",
+      "position": 1,
+      "text": "QUEUE_SEAM_B_TEXT_b8d0182f82a0417c8039a10fc73beb86",
+      "enqueued_during_run_id": "2332ff6f-40be-45ea-af54-308ba5095132"
+    }
+  ],
+  "changed_payload_status": 409,
+  "queued_before_admission": true,
+  "reconnect_before_claim_run": "2332ff6f-40be-45ea-af54-308ba5095132",
+  "replay_after_reconnect": {
+    "item_id": "e047a7cd-f15d-4d93-a090-02694daf7467",
+    "status": "accepted",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_b8d0182f82a0417c8039a10fc73beb86",
+    "enqueued_during_run_id": "2332ff6f-40be-45ea-af54-308ba5095132"
+  },
+  "b_running": {
+    "found": true,
+    "invocation_id": "follow-up:e047a7cd-f15d-4d93-a090-02694daf7467",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "95232f62-2e7b-4c3f-823e-ac67909db248",
+    "turn_id": "472f8a67-d710-4fe5-924c-df36016773e0",
+    "turn_position": 72,
+    "state": "running"
+  },
+  "reconnect_during_b_run": "95232f62-2e7b-4c3f-823e-ac67909db248",
+  "replay_during_b": {
+    "item_id": "e047a7cd-f15d-4d93-a090-02694daf7467",
+    "status": "applied",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_b8d0182f82a0417c8039a10fc73beb86",
+    "enqueued_during_run_id": "2332ff6f-40be-45ea-af54-308ba5095132"
+  },
+  "trusted_result_queued_while_b_active": {
+    "item_id": "406ec4c2-6451-529b-a36f-fe3f6ae41af4",
+    "status": "accepted",
+    "position": 2,
+    "text": "",
+    "enqueued_during_run_id": "95232f62-2e7b-4c3f-823e-ac67909db248"
+  },
+  "b_completed": {
+    "found": true,
+    "invocation_id": "follow-up:e047a7cd-f15d-4d93-a090-02694daf7467",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "95232f62-2e7b-4c3f-823e-ac67909db248",
+    "turn_id": "472f8a67-d710-4fe5-924c-df36016773e0",
+    "turn_position": 72,
+    "state": "completed"
+  },
+  "b_reply_persisted_in_original_C": true,
+  "original_completed_expert_identity_preserved": true,
+  "terminal_queue_replay": {
+    "item_id": "e047a7cd-f15d-4d93-a090-02694daf7467",
+    "status": "applied",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_b8d0182f82a0417c8039a10fc73beb86",
+    "enqueued_during_run_id": "2332ff6f-40be-45ea-af54-308ba5095132"
+  },
+  "natural_result_back_to_C": true,
+  "receipt_count": "1",
+  "provider": {
+    "calls": [
+      {
+        "kind": "delegate",
+        "at": 1793373957.7464635
+      },
+      {
+        "kind": "main",
+        "at": 1793373957.802258
+      },
+      {
+        "kind": "worker",
+        "at": 1793373957.937836
+      },
+      {
+        "kind": "b",
+        "at": 1793373958.4005337
+      },
+      {
+        "kind": "summary",
+        "at": 1793373958.794642
+      }
+    ],
+    "delegate": 1,
+    "worker": 1,
+    "b": 1,
+    "summary": 1,
+    "other": 0
+  },
+  "original_rows_preserved": {
+    "bot_history_messages": 373,
+    "session_runs": 100,
+    "bot_delegations": 10
+  },
+  "status": "PASS"
+}

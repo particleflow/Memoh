@@ -1,0 +1,9 @@
+# Compatibility incident addendum
+
+The shared `docs/testing/compatibility-incident-register.md` is not present at this branch base. Merge these entries into that register through its original owner; do not replace another branch's register.
+
+1. **Migration CLI down is global.** Confirmed in the isolated experiment and command source: `Down()` attempts all versions, not one. The mistaken isolated call left42 dirty and removed later experimental ledger tables. Preserve that clone; recover a separate clone from the pre-test snapshot. Use the supported forward migration for release. The182 down file is a preservation no-op, but does not make the global CLI safe. Exact182 SQL envelope preservation was verified separately; production was untouched. See the main README and recovery receipt for the incomplete restoration boundary.
+2. **Tool wrapper pulled unrelated Rust.** `mise run sqlc-generate` attempted Rust installation into read-only toolchain state. Executing the task's declared `go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate` succeeded. SQLC used its required downloaded Go toolchain; project go.mod/go.sum were unchanged. No permission bypass or alternate generated SQL format was used.
+3. **Workspace cache capacity.** Lint exhausted the small workspace volume. The owned lint process was stopped. Existing cache files were moved to the larger writable `/tmp` volume with hashes verified (29,935 lint cache files), original locations preserved by symlink, and explicit GOCACHE/GOLANGCI_LINT_CACHE supplied. Differential lint then passed. This does not imply production storage was changed or prescribe a production cache location.
+
+These are local tool compatibility findings. Earlier Ego host-timer/collector solutions and their field evidence are unchanged; no browser or Playwright workflow was introduced here.

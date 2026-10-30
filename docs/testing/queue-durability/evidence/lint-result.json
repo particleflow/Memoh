@@ -1,0 +1,7 @@
+{
+  "product_commit": "efac3b837b6c5291c09a714dddb4b73251367361",
+  "base_commit": "29685958ec896489371a894b6854ee8b2e9df9c5",
+  "command": "golangci-lint run --new-from-rev=29685958ec896489371a894b6854ee8b2e9df9c5 ./internal/followupqueue/... ./cmd/internal/core/... ./internal/handlers/...",
+  "exit_code": 0,
+  "stdout_stderr_bytes": 0
+}

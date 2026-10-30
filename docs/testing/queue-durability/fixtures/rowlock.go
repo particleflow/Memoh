@@ -1,0 +1,3 @@
+package main
+import("context";"os";"fmt";"bufio";"github.com/jackc/pgx/v5")
+func main(){ctx:=context.Background();conn,err:=pgx.Connect(ctx,os.Getenv("FIXTURE_PG_DSN"));if err!=nil{panic("fixture database connection failed")};defer conn.Close(ctx);tx,err:=conn.Begin(ctx);if err!=nil{panic("fixture transaction failed")};defer tx.Rollback(ctx);var id string;if err=tx.QueryRow(ctx,`SELECT session_id::text FROM session_follow_up_queues WHERE bot_id=$1 AND session_id=$2 FOR UPDATE`,os.Getenv("FIXTURE_BOT"),os.Getenv("FIXTURE_SESSION")).Scan(&id);err!=nil{panic("fixture queue row lock failed")};fmt.Println("LOCKED");bufio.NewReader(os.Stdin).ReadString('\n')}

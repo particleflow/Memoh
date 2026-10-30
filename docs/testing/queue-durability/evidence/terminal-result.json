@@ -1,0 +1,103 @@
+{
+  "phase": "terminal",
+  "paid_calls": 0,
+  "source_commit": "29685958ec896489371a894b6854ee8b2e9df9c5",
+  "product_patch": true,
+  "product_commit": "efac3b837b6c5291c09a714dddb4b73251367361",
+  "database": "memoh_queue_durability_recovered_20261030",
+  "a": {
+    "found": true,
+    "invocation_id": "fafb8603-68bc-472a-9e5b-8fdb8de372f6",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "a381a138-f83a-443e-b02e-fddf29b85c42",
+    "turn_id": "a986bdec-38d2-4584-9397-2755ee60e323",
+    "turn_position": 74,
+    "state": "running"
+  },
+  "responses": [
+    [
+      202,
+      {
+        "item_id": "7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+        "status": "accepted",
+        "position": 3,
+        "text": "DURABLE_QUEUE_B_TEXT_59f9f0fc5426462689c8b374f1995636",
+        "enqueued_during_run_id": "a381a138-f83a-443e-b02e-fddf29b85c42"
+      }
+    ],
+    [
+      202,
+      {
+        "item_id": "7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+        "status": "accepted",
+        "position": 3,
+        "text": "DURABLE_QUEUE_B_TEXT_59f9f0fc5426462689c8b374f1995636",
+        "enqueued_during_run_id": "a381a138-f83a-443e-b02e-fddf29b85c42"
+      }
+    ]
+  ],
+  "item": {
+    "item_id": "7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+    "status": "accepted",
+    "position": 3,
+    "text": "DURABLE_QUEUE_B_TEXT_59f9f0fc5426462689c8b374f1995636",
+    "enqueued_during_run_id": "a381a138-f83a-443e-b02e-fddf29b85c42"
+  },
+  "before": {
+    "items": [
+      {
+        "item_id": "7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+        "status": "accepted",
+        "position": 3,
+        "text": "DURABLE_QUEUE_B_TEXT_59f9f0fc5426462689c8b374f1995636",
+        "enqueued_during_run_id": "a381a138-f83a-443e-b02e-fddf29b85c42"
+      }
+    ]
+  },
+  "source_completed_before_process_death": true,
+  "a_after": {
+    "found": true,
+    "invocation_id": "fafb8603-68bc-472a-9e5b-8fdb8de372f6",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "a381a138-f83a-443e-b02e-fddf29b85c42",
+    "turn_id": "a986bdec-38d2-4584-9397-2755ee60e323",
+    "turn_position": 74,
+    "state": "completed"
+  },
+  "after": {
+    "items": []
+  },
+  "b_after": {
+    "found": true,
+    "invocation_id": "follow-up:7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "f0e89f61-f336-4e28-bdbe-9bd245833b07",
+    "turn_id": "5c88ffd3-775a-445e-a085-899db3658a35",
+    "turn_position": 75,
+    "state": "running"
+  },
+  "model_calls": {
+    "a": 1,
+    "b": 1,
+    "other": 0
+  },
+  "b_completed": {
+    "found": true,
+    "invocation_id": "follow-up:7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "f0e89f61-f336-4e28-bdbe-9bd245833b07",
+    "turn_id": "5c88ffd3-775a-445e-a085-899db3658a35",
+    "turn_position": 75,
+    "state": "completed"
+  },
+  "replay_after_restart": {
+    "item_id": "7fcab1d2-0a2c-42ce-8717-c2dff8c618fd",
+    "status": "applied",
+    "position": 3,
+    "text": "DURABLE_QUEUE_B_TEXT_59f9f0fc5426462689c8b374f1995636",
+    "enqueued_during_run_id": "a381a138-f83a-443e-b02e-fddf29b85c42"
+  },
+  "original_contact_answer_persisted": true,
+  "b_run_count": "1",
+  "status": "PASS"
+}

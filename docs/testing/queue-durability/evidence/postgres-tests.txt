@@ -1,0 +1,10 @@
+=== RUN   TestPostgresFollowUpRestartIdentityAndClaims
+--- PASS: TestPostgresFollowUpRestartIdentityAndClaims (0.09s)
+=== RUN   TestPostgresFollowUpMutationsPreserveLiveQueueContracts
+--- PASS: TestPostgresFollowUpMutationsPreserveLiveQueueContracts (0.05s)
+PASS
+ok  	github.com/felinics/memoh/internal/followupqueue	0.182s
+=== RUN   TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun
+--- PASS: TestDurableFollowUpRecoveryKeepsUnknownAndOriginalLostRun (0.02s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.044s

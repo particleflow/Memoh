@@ -1,0 +1,79 @@
+{
+  "phase": "red",
+  "paid_calls": 0,
+  "source_commit": "29685958ec896489371a894b6854ee8b2e9df9c5",
+  "product_patch": false,
+  "database": "memoh_queue_post_identity_20261030",
+  "a": {
+    "found": true,
+    "invocation_id": "60108229-6992-4f39-9297-5c53ee2fe91e",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "0392d6a9-db32-471e-a50e-1af6b69d8210",
+    "turn_id": "3488e0c9-db53-433f-8447-bb580ceda7ef",
+    "turn_position": 77,
+    "state": "running"
+  },
+  "responses": [
+    [
+      202,
+      {
+        "item_id": "c37d3b9c-62b5-46ac-9e98-fb9172dd365f",
+        "status": "accepted",
+        "position": 1,
+        "text": "DURABLE_QUEUE_B_TEXT_ddce111829c04b62b11fec3e75f7994b",
+        "enqueued_during_run_id": "0392d6a9-db32-471e-a50e-1af6b69d8210"
+      }
+    ],
+    [
+      202,
+      {
+        "item_id": "c37d3b9c-62b5-46ac-9e98-fb9172dd365f",
+        "status": "accepted",
+        "position": 1,
+        "text": "DURABLE_QUEUE_B_TEXT_ddce111829c04b62b11fec3e75f7994b",
+        "enqueued_during_run_id": "0392d6a9-db32-471e-a50e-1af6b69d8210"
+      }
+    ]
+  ],
+  "item": {
+    "item_id": "c37d3b9c-62b5-46ac-9e98-fb9172dd365f",
+    "status": "accepted",
+    "position": 1,
+    "text": "DURABLE_QUEUE_B_TEXT_ddce111829c04b62b11fec3e75f7994b",
+    "enqueued_during_run_id": "0392d6a9-db32-471e-a50e-1af6b69d8210"
+  },
+  "before": {
+    "items": [
+      {
+        "item_id": "c37d3b9c-62b5-46ac-9e98-fb9172dd365f",
+        "status": "accepted",
+        "position": 1,
+        "text": "DURABLE_QUEUE_B_TEXT_ddce111829c04b62b11fec3e75f7994b",
+        "enqueued_during_run_id": "0392d6a9-db32-471e-a50e-1af6b69d8210"
+      }
+    ]
+  },
+  "a_after": {
+    "found": true,
+    "invocation_id": "60108229-6992-4f39-9297-5c53ee2fe91e",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "0392d6a9-db32-471e-a50e-1af6b69d8210",
+    "turn_id": "3488e0c9-db53-433f-8447-bb580ceda7ef",
+    "turn_position": 77,
+    "state": "lost"
+  },
+  "after": {
+    "items": []
+  },
+  "b_after": {
+    "found": false,
+    "invocation_id": "follow-up:c37d3b9c-62b5-46ac-9e98-fb9172dd365f",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54"
+  },
+  "model_calls": {
+    "a": 1,
+    "b": 0,
+    "other": 0
+  },
+  "status": "CONFIRMED_PENDING_ITEM_LOST"
+}
