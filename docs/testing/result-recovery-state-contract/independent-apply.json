@@ -1,0 +1,12 @@
+[
+  {
+    "patch": "contact-target",
+    "base": "766a99b1c5a331f595e864554be82d90e2d270ea",
+    "applies_independently": true
+  },
+  {
+    "patch": "result-state",
+    "base": "e7f91d6b32c20f22e5edc3331a0a433d589ed9b5",
+    "applies_independently": true
+  }
+]

@@ -1,0 +1,11 @@
+=== RUN   TestSavedResultRecoveryPostgres
+=== RUN   TestSavedResultRecoveryPostgres/early_attention_uses_saved_state_not_retry_count
+    task_result_recovery_test.go:143: early terminal attention cannot recover: {EventID: Event:{ReportState: State: RunID: Text: Attempt:0 MessageID: SummaryRunID: Recoveries:[]}} invalid delegation input
+=== RUN   TestSavedResultRecoveryPostgres/saved_failure_and_unknown_are_report_only_recoverable
+    task_result_recovery_test.go:158: saved outcome rejected/rewritten: {EventID: Event:{ReportState: State: RunID: Text: Attempt:0 MessageID: SummaryRunID: Recoveries:[]}} delegation request conflicts with an existing handoff
+--- FAIL: TestSavedResultRecoveryPostgres (0.15s)
+    --- FAIL: TestSavedResultRecoveryPostgres/early_attention_uses_saved_state_not_retry_count (0.03s)
+    --- FAIL: TestSavedResultRecoveryPostgres/saved_failure_and_unknown_are_report_only_recoverable (0.02s)
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.195s
+FAIL

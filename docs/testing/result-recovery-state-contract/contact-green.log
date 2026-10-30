@@ -1,0 +1,50 @@
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/changed_primary
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/queued_without_channel
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/ordinary_bridge_without_delegation_profile
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/offline
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/revoked_runtime
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/owner_changed
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/missing_mount
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/revoked_workspace_read
+=== RUN   TestRemoteContactRestoresRecordedTargetAndResolverErrors/conflicting_metadata
+--- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/changed_primary (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/queued_without_channel (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/ordinary_bridge_without_delegation_profile (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/offline (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/revoked_runtime (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/owner_changed (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/missing_mount (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/revoked_workspace_read (0.00s)
+    --- PASS: TestRemoteContactRestoresRecordedTargetAndResolverErrors/conflicting_metadata (0.00s)
+=== RUN   TestContactContinuationRestoresSavedNativeSelection
+=== RUN   TestContactContinuationRestoresSavedNativeSelection/fresh_queued_user_turn
+=== RUN   TestContactContinuationRestoresSavedNativeSelection/fresh_result_continuation_context
+--- PASS: TestContactContinuationRestoresSavedNativeSelection (0.00s)
+    --- PASS: TestContactContinuationRestoresSavedNativeSelection/fresh_queued_user_turn (0.00s)
+    --- PASS: TestContactContinuationRestoresSavedNativeSelection/fresh_result_continuation_context (0.00s)
+=== RUN   TestContactWorkspaceInheritanceBoundaries
+=== RUN   TestContactWorkspaceInheritanceBoundaries/explicit_remote
+=== RUN   TestContactWorkspaceInheritanceBoundaries/stored_remote
+=== RUN   TestContactWorkspaceInheritanceBoundaries/missing_selection
+=== RUN   TestContactWorkspaceInheritanceBoundaries/malformed_selection
+=== RUN   TestContactWorkspaceInheritanceBoundaries/conflicting_snapshot
+=== RUN   TestContactWorkspaceInheritanceBoundaries/wrong_owner
+=== RUN   TestContactWorkspaceInheritanceBoundaries/revoked_chat
+=== RUN   TestContactWorkspaceInheritanceBoundaries/external_runtime
+=== RUN   TestContactWorkspaceInheritanceBoundaries/external_channel
+=== RUN   TestContactWorkspaceInheritanceBoundaries/workdir_owns_target
+--- PASS: TestContactWorkspaceInheritanceBoundaries (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/explicit_remote (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/stored_remote (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/missing_selection (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/malformed_selection (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/conflicting_snapshot (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/wrong_owner (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/revoked_chat (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/external_runtime (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/external_channel (0.00s)
+    --- PASS: TestContactWorkspaceInheritanceBoundaries/workdir_owns_target (0.00s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.020s

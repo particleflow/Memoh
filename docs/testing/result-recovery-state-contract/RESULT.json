@@ -1,0 +1,32 @@
+{
+  "remote_commit": "73730b91c9e7993f9d8d02666ac12e6d40bf8d24",
+  "remote_semantic_base": "766a99b1c5a331f595e864554be82d90e2d270ea",
+  "state_commit": "0bd268a7c0c91ef17ce9a2ab122a89c42614eb1b",
+  "state_semantic_base": "e7f91d6b32c20f22e5edc3331a0a433d589ed9b5",
+  "combined_tree": "8b04d9556b54cf4bdae74a6503c7dfa38b442187",
+  "binary_sha256": "6a358a30a14e8e6817748958cc9a244ba4e8704fe6590ec7d4ee51ba66f187ce",
+  "schema": 181,
+  "migration": false,
+  "official_agent_core_changes": false,
+  "ui_changes": false,
+  "paid_calls": 0,
+  "production_touched": false,
+  "checks": {
+    "contact_subtests": 21,
+    "authority_subtests": 22,
+    "pg_new_affected_subtests": 6,
+    "http_boundary_pass": true,
+    "config_subtests": 5,
+    "vet": 0,
+    "build": 0,
+    "sdk_typecheck": 0,
+    "real_web_saved_outcomes": true,
+    "real_web_remote_offline_no_model_fallback": true,
+    "actual_process_restart": true
+  },
+  "remaining": [
+    "unified review/integration and unique-writer field acceptance",
+    "online remote target A execution not tested in this isolated run",
+    "real production event has not been recovered here"
+  ]
+}

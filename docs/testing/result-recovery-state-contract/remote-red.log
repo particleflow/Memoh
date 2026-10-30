@@ -1,0 +1,6 @@
+=== RUN   TestSavedRemoteContactDoesNotFollowChangedPrimary
+    z_contact_remote_regression_test.go:33: persisted authorized remote target lost: got="aa121e11-af21-4b75-b883-24b97811bc03" want="44444444-4444-4444-8444-444444444444" changedPrimary="aa121e11-af21-4b75-b883-24b97811bc03" error=<nil>
+--- FAIL: TestSavedRemoteContactDoesNotFollowChangedPrimary (0.00s)
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.020s
+FAIL

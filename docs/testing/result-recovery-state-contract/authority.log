@@ -1,0 +1,56 @@
+=== RUN   TestAuthorizedSpecialistHandoffKeepsDistinctOwnership
+--- PASS: TestAuthorizedSpecialistHandoffKeepsDistinctOwnership (0.00s)
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/other_user
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_owner
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_bot
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_team
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_team
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/source_grant_revoked
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_grant_revoked
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/user_revoked
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_cycle
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/forged_root
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_owner
+=== RUN   TestHandoffRechecksEveryAncestorBothBotsAndActualUser/cross_bot_parent
+--- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/other_user (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_owner (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_bot (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_team (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_team (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/source_grant_revoked (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_grant_revoked (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/user_revoked (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/parent_cycle (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/forged_root (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/target_owner (0.00s)
+    --- PASS: TestHandoffRechecksEveryAncestorBothBotsAndActualUser/cross_bot_parent (0.00s)
+=== RUN   TestHandoffComputerIntersectionAndRevocation
+=== RUN   TestHandoffComputerIntersectionAndRevocation/selected_other_PC
+=== RUN   TestHandoffComputerIntersectionAndRevocation/source_revoked
+=== RUN   TestHandoffComputerIntersectionAndRevocation/target_revoked
+=== RUN   TestHandoffComputerIntersectionAndRevocation/runtime_revoked
+=== RUN   TestHandoffComputerIntersectionAndRevocation/owner_changed
+=== RUN   TestHandoffComputerIntersectionAndRevocation/runtime_changed
+=== RUN   TestHandoffComputerIntersectionAndRevocation/registration_changed
+=== RUN   TestHandoffComputerIntersectionAndRevocation/source_exec_revoked
+=== RUN   TestHandoffComputerIntersectionAndRevocation/target_exec_revoked
+=== RUN   TestHandoffComputerIntersectionAndRevocation/forged_pair
+--- PASS: TestHandoffComputerIntersectionAndRevocation (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/selected_other_PC (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/source_revoked (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/target_revoked (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/runtime_revoked (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/owner_changed (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/runtime_changed (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/registration_changed (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/source_exec_revoked (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/target_exec_revoked (0.00s)
+    --- PASS: TestHandoffComputerIntersectionAndRevocation/forged_pair (0.00s)
+=== RUN   TestPCSelectionCannotBroadenThroughChildMetadata
+--- PASS: TestPCSelectionCannotBroadenThroughChildMetadata (0.00s)
+=== RUN   TestPCTextAndStoredMediaDoNotRequireExecutionPermission
+--- PASS: TestPCTextAndStoredMediaDoNotRequireExecutionPermission (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/botdelegation	0.013s

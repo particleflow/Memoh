@@ -1,0 +1,16 @@
+=== RUN   TestSavedResultRecoveryPostgres
+=== RUN   TestSavedResultRecoveryPostgres/early_attention_uses_saved_state_not_retry_count
+=== RUN   TestSavedResultRecoveryPostgres/saved_failure_and_unknown_are_report_only_recoverable
+=== RUN   TestSavedResultRecoveryPostgres/unknown_with_unbound_active_invocation_still_conflicts
+=== RUN   TestSavedResultRecoveryPostgres/configured_policy_is_snapshotted_and_attention_never_rearmed
+=== RUN   TestSavedResultRecoveryPostgres/failed_recovery_does_not_automatically_expand_budget
+=== RUN   TestSavedResultRecoveryPostgres/legacy_changed_event_and_stale_receipt_are_not_opted_in
+--- PASS: TestSavedResultRecoveryPostgres (0.43s)
+    --- PASS: TestSavedResultRecoveryPostgres/early_attention_uses_saved_state_not_retry_count (0.06s)
+    --- PASS: TestSavedResultRecoveryPostgres/saved_failure_and_unknown_are_report_only_recoverable (0.07s)
+    --- PASS: TestSavedResultRecoveryPostgres/unknown_with_unbound_active_invocation_still_conflicts (0.02s)
+    --- PASS: TestSavedResultRecoveryPostgres/configured_policy_is_snapshotted_and_attention_never_rearmed (0.07s)
+    --- PASS: TestSavedResultRecoveryPostgres/failed_recovery_does_not_automatically_expand_budget (0.06s)
+    --- PASS: TestSavedResultRecoveryPostgres/legacy_changed_event_and_stale_receipt_are_not_opted_in (0.04s)
+PASS
+ok  	github.com/felinics/memoh/cmd/internal/core	0.452s

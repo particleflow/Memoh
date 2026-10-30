@@ -1,0 +1,35 @@
+package core
+
+import (
+	"context"
+	"github.com/felinics/memoh/internal/agent/application"
+	"github.com/felinics/memoh/internal/botdelegation"
+	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/config"
+	"github.com/felinics/memoh/internal/workspace"
+	"github.com/google/uuid"
+	"log/slog"
+	"testing"
+)
+
+func TestSavedRemoteContactDoesNotFollowChangedPrimary(t *testing.T) {
+	f, a, b := newDelegationPlanFixture(t, planSourceMount)
+	f.session.ChannelType = "local"
+	f.session.RuntimeType = thread.RuntimeModel
+	if got, err := a.Source(t.Context(), b.UserID, b.SourceBotID, b.SourceSessionID); err != nil || got.SourceSelection != planSourceMount {
+		t.Fatalf("fixture is not currently authorized: %+v %v", got, err)
+	}
+	h := &delegationHost{service: &botdelegation.Service{Authority: a, Ledger: contactWorkspaceLedger{}}}
+	primary := f.mounts[planSourceBot+"/"+planSourceMount]
+	primary.ID = uuid.NewString()
+	m := workspace.NewManager(slog.Default(), nil, nil, config.WorkspaceConfig{}, "", nil)
+	m.SetRemoteWorkspaceService(workspace.NewRemoteWorkspaceService(contactWorkspaceMounts{record: primary}, nil))
+	ctx, _, err := h.prepare(context.Background(), application.ChatRequest{BotID: b.SourceBotID, UserID: b.UserID, ThreadID: b.SourceSessionID, CurrentChannel: "web"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, err := m.CurrentWorkspaceTargetID(ctx, b.SourceBotID)
+	if err != nil || got != planSourceMount {
+		t.Fatalf("persisted authorized remote target lost: got=%q want=%q changedPrimary=%q error=%v", got, planSourceMount, primary.ID, err)
+	}
+}

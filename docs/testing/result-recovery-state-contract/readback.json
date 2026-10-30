@@ -1,0 +1,80 @@
+{
+  "paid_calls": 0,
+  "cases": [
+    {
+      "state": "completed",
+      "report": {
+        "text": "Delegation 1581263f-4956-49ef-a2b4-55d754928b75 (Bot 30000000-0000-4000-8000-000000000002) execution state: completed.\n\nSTATE_SAVED_RESULT",
+        "state": "completed",
+        "run_id": "d4468a0e-a173-47c6-a617-0084fb04ccc4",
+        "attempt": 2,
+        "message_id": "0bd6a746-9eab-4a0d-a417-aca141489668",
+        "recoveries": [
+          {
+            "attempt": 2,
+            "from_attempt": 1,
+            "requested_at": "2026-10-30T05:15:14.096114522Z",
+            "requested_by": "d72dd4a8-394a-4f4b-b722-005671adc8d0",
+            "previous_run_id": "ca658bc0-9576-4c30-bfaa-9b8d5fcc688d",
+            "previous_run_state": "aborted"
+          }
+        ],
+        "report_state": "reported",
+        "summary_run_id": "741c2b73-0281-4585-9094-a4f1d01b9c2b",
+        "automatic_attempts": 7
+      },
+      "original_execution_count": "1",
+      "assistant_receipts": "1",
+      "previous_summary_state": "aborted"
+    },
+    {
+      "state": "unknown",
+      "report": {
+        "text": "Delegation d295e208-7313-461c-9d62-f12b8010506e (Bot 30000000-0000-4000-8000-000000000002) execution state: unknown.",
+        "state": "unknown",
+        "run_id": "369dc909-50e5-424a-a936-7db99cd374a7",
+        "attempt": 2,
+        "message_id": "03fab3cf-4baa-44c1-b880-140a2056da79",
+        "recoveries": [
+          {
+            "attempt": 2,
+            "from_attempt": 1,
+            "requested_at": "2026-10-30T05:15:14.949823551Z",
+            "requested_by": "d72dd4a8-394a-4f4b-b722-005671adc8d0",
+            "previous_run_id": "d3b2a49b-b2bf-406d-a22e-c27749b2eedf",
+            "previous_run_state": "aborted"
+          }
+        ],
+        "report_state": "reported",
+        "summary_run_id": "d73367e4-2cf0-4690-8d8b-8675276fb99c",
+        "automatic_attempts": 7
+      },
+      "original_execution_count": "0",
+      "assistant_receipts": "1",
+      "previous_summary_state": "aborted"
+    }
+  ],
+  "provider": {
+    "completed": 1,
+    "unknown": 1,
+    "unexpected": 0,
+    "tools": [
+      0,
+      0
+    ]
+  },
+  "remote": {
+    "run_id": "a7701780-f0ea-42c7-a65e-b5a058dd220c",
+    "state": "failed",
+    "error_code": "runtime_run_failed",
+    "input_workspace_target": null,
+    "saved_target": "34f1db15-c208-491e-b819-5a1357f09266",
+    "default_during_probe": "native",
+    "diagnostic": "remote runtime is offline",
+    "no_model_calls": true,
+    "terminal_observation": "read existing run and its matching server diagnostic; no resend"
+  },
+  "page_errors": [],
+  "restart_same_reports_no_calls": true,
+  "binary_sha256": "6a358a30a14e8e6817748958cc9a244ba4e8704fe6590ec7d4ee51ba66f187ce"
+}

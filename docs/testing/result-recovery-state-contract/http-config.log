@@ -1,0 +1,18 @@
+=== RUN   TestSavedResultRecoveryHTTPBoundary
+--- PASS: TestSavedResultRecoveryHTTPBoundary (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.023s
+=== RUN   TestLoadResultSummaryAttempts
+=== RUN   TestLoadResultSummaryAttempts/#00
+=== RUN   TestLoadResultSummaryAttempts/result_summary_attempts=1
+=== RUN   TestLoadResultSummaryAttempts/result_summary_attempts=7
+=== RUN   TestLoadResultSummaryAttempts/result_summary_attempts=0
+=== RUN   TestLoadResultSummaryAttempts/result_summary_attempts=-2
+--- PASS: TestLoadResultSummaryAttempts (0.00s)
+    --- PASS: TestLoadResultSummaryAttempts/#00 (0.00s)
+    --- PASS: TestLoadResultSummaryAttempts/result_summary_attempts=1 (0.00s)
+    --- PASS: TestLoadResultSummaryAttempts/result_summary_attempts=7 (0.00s)
+    --- PASS: TestLoadResultSummaryAttempts/result_summary_attempts=0 (0.00s)
+    --- PASS: TestLoadResultSummaryAttempts/result_summary_attempts=-2 (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/config	0.007s
