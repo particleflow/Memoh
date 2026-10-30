@@ -512,7 +512,7 @@ func (h *delegationHost) prepare(ctx context.Context, req application.ChatReques
 	}
 	r, err := h.service.ForSession(ctx, req.BotID, req.UserID, req.ThreadID)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return ctx, req, nil
+		return h.prepareContactWorkspace(ctx, req)
 	}
 	if err != nil {
 		return ctx, req, err
