@@ -1,0 +1,26 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/speech-wav-compat.test.ts (9 tests | 1 failed) 44ms
+   × stop between fallback completion and controller continuation revokes the late URL without playback 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-wav-compat.test.ts > stop between fallback completion and controller continuation revokes the late URL without playback
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/pages/home/composables/speech-wav-compat.test.ts:92:23
+     90|   f.speech.enqueue({ key: 'wav', text: 'visible' }); await tick()
+     91|   f.feed.close(); await Promise.resolve(); f.speech.stop(); await tick…
+     92|   expect(f.createURL).toHaveBeenCalledOnce(); expect(f.revokeURL).toHa…
+       |                       ^
+     93|   expect(f.player.play).not.toHaveBeenCalled(); expect(f.states.at(-1)…
+     94| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 5 passed (6)
+      Tests  1 failed | 37 passed (38)
+   Start at  12:40:08
+   Duration  2.56s (transform 628ms, setup 0ms, import 1.81s, tests 562ms, environment 3.29s)
