@@ -1,0 +1,12 @@
+{
+  "Path": "github.com/felinics/twilight",
+  "Version": "v0.9.0",
+  "Sum": "h1:c27975dBTda9XJvUrexupi3KlblZznevzX25M2CscK0=",
+  "GoModSum": "h1:8U7YKU0im7BTJxlatQgSAilEiGuyAJCTr83Cz/gjdk8=",
+  "Origin": {
+    "VCS": "git",
+    "URL": "https://github.com/felinics/twilight",
+    "Hash": "0ee7c270912f58f3b9d21ec1430366e106c5139c",
+    "Ref": "refs/tags/v0.9.0"
+  }
+}

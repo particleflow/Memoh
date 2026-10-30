@@ -1,0 +1,34 @@
+{
+  "native-current": {
+    "runtimeHashesMatch": {
+      "chat-read-aloud.ts": true,
+      "useChatReadAloud.ts": true,
+      "speech-replay-cache.ts": true,
+      "speech-audio-stream.ts": true,
+      "speech-render-completion.ts": true
+    },
+    "timing": {
+      "firstNonzeroMS": 350.29999999701977,
+      "gapsMS": [],
+      "underruns": 0,
+      "samplerMaxPollGapMS": 63.899999998509884
+    }
+  },
+  "native-underrun-current": {
+    "runtimeHashesMatch": {
+      "chat-read-aloud.ts": true,
+      "useChatReadAloud.ts": true,
+      "speech-replay-cache.ts": true,
+      "speech-audio-stream.ts": true,
+      "speech-render-completion.ts": true
+    },
+    "timing": {
+      "firstNonzeroMS": 325.5999999977648,
+      "gapsMS": [
+        916.1999999992549
+      ],
+      "underruns": 1,
+      "samplerMaxPollGapMS": 43.19999999925494
+    }
+  }
+}

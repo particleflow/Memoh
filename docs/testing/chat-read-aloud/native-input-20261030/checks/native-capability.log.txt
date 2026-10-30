@@ -1,0 +1,4 @@
+=== RUN   TestPlaybackInputCapabilityIsExplicitProtocolReadOnlyAndHonorsDisabledOrSSML
+--- PASS: TestPlaybackInputCapabilityIsExplicitProtocolReadOnlyAndHonorsDisabledOrSSML (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/audio	0.007s

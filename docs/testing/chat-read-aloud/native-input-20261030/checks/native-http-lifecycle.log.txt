@@ -1,0 +1,6 @@
+=== RUN   TestNativeHTTPInputKeepsOneTaskAndStreamsBeforeFinishWithoutReopeningMissingOrDuplicateInput
+--- PASS: TestNativeHTTPInputKeepsOneTaskAndStreamsBeforeFinishWithoutReopeningMissingOrDuplicateInput (0.02s)
+=== RUN   TestNativeHTTPConfigCancellationIsTruncatedEOFAndNeverACompleteCacheBody
+--- PASS: TestNativeHTTPConfigCancellationIsTruncatedEOFAndNeverACompleteCacheBody (0.01s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	1.092s

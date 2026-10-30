@@ -1,3 +1,5 @@
+> This is the frozen fixed-input receipt. A later, optional native-input candidate and its remaining provider/device conditions are documented in [native-input CONTRACT](../native-input-20261030/CONTRACT.md). Neither receipt is field listening acceptance.
+
 # Current speech correction, 2026-10-30
 
 This supersedes the first-phase README and the explicitly unfinished phase receipt. **All four user complaints remain open for actual affected-client and human listening acceptance.** The local corrections below do not establish the deployed cause, natural voice quality, or ArkWeb behavior. No provider/model call, voice clone, ASR, application build, signing, deployment, phone installation or field browser access occurred. The user's Web/Windows delivery channel does not identify the affected playback client.

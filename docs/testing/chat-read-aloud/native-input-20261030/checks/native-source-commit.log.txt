@@ -1,0 +1,99 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (70d544cc1)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 14 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 6.36s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/audio ./internal/audio/adapter/cosyvoiceinput ./internal/audio/input ./internal/handlers ./spec
+[hooks] Go package selection: 0.27s
+[hooks] Go lint: golangci-lint run --concurrency=2 /workspace/memoh-speech-continuity/internal/audio /workspace/memoh-speech-continuity/internal/audio/adapter/cosyvoiceinput /workspace/memoh-speech-continuity/internal/audio/input /workspace/memoh-speech-continuity/internal/handlers /workspace/memoh-speech-continuity/spec
+internal/audio/adapter/cosyvoiceinput/provider.go:92:28: Error return value of `response.Body.Close` is not checked (errcheck)
+		defer response.Body.Close()
+		                         ^
+internal/audio/adapter/cosyvoiceinput/provider_test.go:35:16: Error return value of `c.Close` is not checked (errcheck)
+		defer c.Close()
+		             ^
+internal/audio/adapter/cosyvoiceinput/provider_test.go:188:18: Error return value of `c.Close` is not checked (errcheck)
+				defer c.Close()
+				             ^
+internal/handlers/bot_tts_input_lifecycle_test.go:55:16: Error return value of `c.Close` is not checked (errcheck)
+		defer c.Close()
+		             ^
+internal/handlers/bot_tts_input_lifecycle_test.go:135:27: Error return value of `response.Body.Close` is not checked (errcheck)
+	defer response.Body.Close()
+	                         ^
+internal/handlers/bot_tts_input_lifecycle_test.go:144:22: Error return value of `duplicate.Body.Close` is not checked (errcheck)
+	duplicate.Body.Close()
+	                    ^
+internal/handlers/bot_tts_input_lifecycle_test.go:149:18: Error return value of `wrong.Body.Close` is not checked (errcheck)
+	wrong.Body.Close()
+	                ^
+internal/handlers/bot_tts_input_lifecycle_test.go:154:27: Error return value of `appendResponse.Body.Close` is not checked (errcheck)
+	appendResponse.Body.Close()
+	                         ^
+internal/handlers/bot_tts_input_lifecycle_test.go:170:18: Error return value of `final.Body.Close` is not checked (errcheck)
+	final.Body.Close()
+	                ^
+internal/handlers/bot_tts_input_lifecycle_test.go:179:17: Error return value of `late.Body.Close` is not checked (errcheck)
+	late.Body.Close()
+	               ^
+internal/handlers/bot_tts_input_lifecycle_test.go:192:27: Error return value of `response.Body.Close` is not checked (errcheck)
+	defer response.Body.Close()
+	                         ^
+internal/handlers/bot_tts_input_lifecycle_test.go:197:19: Error return value of `denied.Body.Close` is not checked (errcheck)
+	denied.Body.Close()
+	                 ^
+internal/audio/service.go:858:62: non-wrapping format verb for fmt.Errorf. Use `%w` to format errors (errorlint)
+		return nil, "", fmt.Errorf("%w: %v", input.ErrUnsupported, err)
+		                                                           ^
+internal/handlers/bot_tts_playback_account_test.go:219:6: ifElseChain: rewrite if-else to switch statement (gocritic)
+					if mode == "append" {
+					^
+internal/audio/adapter/cosyvoiceinput/provider.go:178:17: G115: integer overflow conversion int -> uint64 (gosec)
+	count := uint64(utf8.RuneCountInString(frame.Text))
+	               ^
+internal/handlers/bot_tts_input_lifecycle_test.go:88:8: G101: Potential hardcoded credentials (gosec)
+	const secret = "native-input-loopback-only-secret"
+	      ^
+internal/handlers/bot_tts_input_lifecycle_test.go:110:62: G704: SSRF via taint analysis (gosec)
+	response, err := (&http.Client{Timeout: 3 * time.Second}).Do(req)
+	                                                            ^
+internal/handlers/bot_tts_input_lifecycle_test.go:104:29: net/http.NewRequest must not be called. use net/http.NewRequestWithContext (noctx)
+	req, err := http.NewRequest(method, server.URL+"/bots/"+invocationTestBotID+"/tts/playback/input", strings.NewReader(string(body)))
+	                           ^
+internal/audio/adapter/cosyvoiceinput/provider.go:54:126: QF1001: could apply De Morgan's law (staticcheck)
+	if err != nil || endpoint.User != nil || endpoint.RawQuery != "" || endpoint.Fragment != "" || (endpoint.Scheme != "wss" && !(endpoint.Scheme == "ws" && (endpoint.Hostname() == "localhost" || net.ParseIP(endpoint.Hostname()).IsLoopback()))) {
+	                                                                                                                            ^
+internal/handlers/bot_tts_input_lifecycle_test.go:136:28: "200" can be replaced by http.StatusOK (usestdlibvars)
+	if response.StatusCode != 200 || response.Header.Get("X-Speech-Playback-Identity") != "fixture-config-one" {
+	                          ^
+internal/handlers/bot_tts_input_lifecycle_test.go:145:29: "409" can be replaced by http.StatusConflict (usestdlibvars)
+	if duplicate.StatusCode != 409 {
+	                           ^
+internal/handlers/bot_tts_input_lifecycle_test.go:150:25: "404" can be replaced by http.StatusNotFound (usestdlibvars)
+	if wrong.StatusCode != 404 {
+	                       ^
+internal/handlers/bot_tts_input_lifecycle_test.go:155:34: "204" can be replaced by http.StatusNoContent (usestdlibvars)
+	if appendResponse.StatusCode != 204 {
+	                                ^
+internal/handlers/bot_tts_input_lifecycle_test.go:171:25: "204" can be replaced by http.StatusNoContent (usestdlibvars)
+	if final.StatusCode != 204 {
+	                       ^
+internal/handlers/bot_tts_input_lifecycle_test.go:180:24: "404" can be replaced by http.StatusNotFound (usestdlibvars)
+	if late.StatusCode != 404 {
+	                      ^
+internal/handlers/bot_tts_input_lifecycle_test.go:198:26: "409" can be replaced by http.StatusConflict (usestdlibvars)
+	if denied.StatusCode != 409 {
+	                        ^
+[hooks] Go lint: 191.46s
+[hooks] Go lint failed (1)
+husky - pre-commit script failed (code 1)

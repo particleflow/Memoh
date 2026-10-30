@@ -1,0 +1,1100 @@
+{
+  "source": "cefdf0c + continuous-read-aloud candidate",
+  "syntheticServerAndMP3": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "Home 边界合成回复第2段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "text": "Home 边界合成回复第3段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "writes": [],
+  "configurationReads": [
+    {
+      "bot": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "bot": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "bot": "10000000-0000-4000-8000-000000000001"
+    },
+    {
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "pageErrors": [],
+  "checks": [
+    "Nonvirtual renderer completion is checked through actual public metrics/settle handles",
+    "Configured Bot primary chat automatic runtime reply without manual replay",
+    "Completed cached MP3 replay: zero additional generation POSTs; only current account/Bot/config GET, native playback from saved bytes",
+    "Nonvirtual renderer completion is checked through actual public metrics/settle handles",
+    "Changed voice/config identity refuses stale replay explicitly, with zero new generation POSTs",
+    "New persistent MP3 decoder: native message click and input stop media and bubble animation; late same-run frame and cleared input cannot restart old speech",
+    "Native capability: two new replies open two tasks, zero fixed-text POSTs; renderer final gates the single finish; complete message cache replay opens no task"
+  ],
+  "observations": [
+    {
+      "label": "automatic-normal",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "visibility": "visible",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "48.0085deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": false,
+          "time": 0.368929,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "duration": 1.227754
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.002612,
+          "paused": false
+        }
+      ]
+    },
+    {
+      "label": "click-stopped",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "visible",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.002612,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "cached-replay",
+      "requestCount": 1,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "playing",
+          "visibility": "visible",
+          "animation": "chat-speech-orbit, chat-speech-breathe",
+          "angle": "8.00436deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": false,
+          "time": 0.036651,
+          "src": "blob:http://127.0.0.1:18635/7e5bdbc2-1500-46e7-bfc4-7936f96e6796",
+          "duration": 1.227755
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/7e5bdbc2-1500-46e7-bfc4-7936f96e6796",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "contextmenu",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.002612,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        }
+      ]
+    },
+    {
+      "label": "input-stopped",
+      "requestCount": 2,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "visible",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/7e5bdbc2-1500-46e7-bfc4-7936f96e6796",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/2461d8f1-8008-4d19-86d2-0b6229c53a05",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "contextmenu",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.002612,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        }
+      ]
+    },
+    {
+      "label": "late-run-stays-silent",
+      "requestCount": 2,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "visible",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/7e5bdbc2-1500-46e7-bfc4-7936f96e6796",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/2461d8f1-8008-4d19-86d2-0b6229c53a05",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "contextmenu",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.002612,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    },
+    {
+      "label": "configuration-mismatch",
+      "requestCount": 2,
+      "active": true,
+      "hasBeenActive": true,
+      "bubbles": [
+        {
+          "state": "idle",
+          "visibility": "visible",
+          "animation": "none",
+          "angle": "0deg"
+        }
+      ],
+      "players": [
+        {
+          "paused": true,
+          "time": 0,
+          "src": "",
+          "duration": null
+        }
+      ],
+      "plays": [
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/b60d0c1f-5e7e-46c9-b20f-66f529a8d92e",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/7e5bdbc2-1500-46e7-bfc4-7936f96e6796",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        },
+        {
+          "player": 0,
+          "src": "blob:http://127.0.0.1:18635/2461d8f1-8008-4d19-86d2-0b6229c53a05",
+          "active": true,
+          "hasBeenActive": true,
+          "muted": false,
+          "volume": 1,
+          "outcome": "fulfilled"
+        }
+      ],
+      "inputs": [
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "contextmenu",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "input",
+          "trusted": true,
+          "tag": "TEXTAREA",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "contextmenu",
+          "trusted": true,
+          "tag": "P",
+          "active": true,
+          "hasBeenActive": true
+        },
+        {
+          "type": "click",
+          "trusted": true,
+          "tag": "DIV",
+          "active": true,
+          "hasBeenActive": true
+        }
+      ],
+      "nativePlay": "function play() { [native code] }",
+      "mediaEvents": [
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0.002612,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "waiting",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "playing",
+          "trusted": true,
+          "time": 0,
+          "paused": false
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "emptied",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        },
+        {
+          "type": "error",
+          "trusted": true,
+          "time": 0,
+          "paused": true
+        }
+      ]
+    }
+  ],
+  "inputFrames": [
+    {
+      "method": "POST",
+      "id": "45d48e37-9685-412c-b3c3-424598fca900",
+      "sequence": 0,
+      "offset": 0,
+      "text": "Home 边界合成回复第2段。",
+      "final": false
+    },
+    {
+      "method": "PUT",
+      "id": "45d48e37-9685-412c-b3c3-424598fca900",
+      "sequence": 1,
+      "offset": 15,
+      "text": "",
+      "final": true
+    },
+    {
+      "method": "POST",
+      "id": "c95b4b55-48ff-484a-8536-8040d4861205",
+      "sequence": 0,
+      "offset": 0,
+      "text": "Home 边界合成回复第3段。",
+      "final": false
+    },
+    {
+      "method": "PUT",
+      "id": "c95b4b55-48ff-484a-8536-8040d4861205",
+      "sequence": 1,
+      "offset": 15,
+      "text": "",
+      "final": true
+    }
+  ],
+  "nativeTaskCount": 2,
+  "legacyGeneration": 0,
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ],
+  "menuDebug": {
+    "targets": [
+      {
+        "tag": "DIV",
+        "id": "runtime:result-turn-2:assistant",
+        "html": "<div data-state=\"open\" data-slot=\"context-menu-trigger\" data-message-id=\"runtime:result-turn-2:assistant\" class=\"transition-[background-color] duration-500 scroll-mt-2 px-2 -mx-2\" data-anchor=\"runtime:result-turn-2:assistant\" style=\"pointer-events: auto;\"><div class=\"flex gap-3 items-start\"><!-- Sender avatar. Local chat shows it only for remote users; a synced\n         channel thread shows it for every participant (self / bot included). --><!--v-if--><!-- Content --><div class=\"min-w-0 group/msg flex-1 max-w-full\" data-chat-content=\"\"><!-- Sender name (channel threads only): names every participant so the\n           group conversation is legible without relying on bubble side. --><!--v-if--"
+      }
+    ],
+    "menu": [
+      {
+        "text": "重播朗读",
+        "disabled": null
+      }
+    ],
+    "vue": [
+      {
+        "enabled": true,
+        "message": {
+          "id": "runtime:result-turn-2:assistant",
+          "role": "assistant",
+          "turn": "result-turn-2",
+          "blocks": [
+            {
+              "id": 0,
+              "type": "text",
+              "content": "Home 边界合成回复第2段。"
+            }
+          ]
+        },
+        "available": true,
+        "replay": true,
+        "label": "chat.readAloud.replay"
+      }
+    ]
+  }
+}

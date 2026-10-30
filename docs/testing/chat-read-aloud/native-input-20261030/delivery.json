@@ -1,0 +1,51 @@
+{
+  "frozenProductCommits": [
+    "e57d218b34ccdd8bf1e55b790de62f7d73de6eb5",
+    "ba44c06261fb3be30557160840bc25e339cab650"
+  ],
+  "independentCursorP1": "7a1784ce9a11ff31b76537431fb829debd25e87f",
+  "nativeSourceCommit": "09acf7b00d560bac3f312522756e3749d7ddd0a3",
+  "nativeSourceTree": "3739c20a622c0af63eddb376e81d473169221a5f",
+  "independentFixtureOnlyCommit": "d2cc9bd60e220f8f191ccbf8474704dad3d9b14c",
+  "branch": "fix/chat-native-speech-input-20261030",
+  "normalNativeCommitChecks": {
+    "passed": true,
+    "seconds": 202.12,
+    "packages": [
+      "internal/audio",
+      "internal/audio/adapter/cosyvoiceinput",
+      "internal/audio/input",
+      "internal/handlers",
+      "spec"
+    ]
+  },
+  "newFrontendCases": 10,
+  "newJWTVariants": 44,
+  "newHTTPRealTransportCases": 2,
+  "existingSDKOperationInitializersUnchanged": 384,
+  "newSDKOperations": 2,
+  "fixtureOnlyCasesRestored": 8,
+  "navigation500dCombinationTestedHere": false,
+  "browserFixture": {
+    "nativeTasksForTwoFreshReplies": 2,
+    "fixedGeneration": 0,
+    "pageErrors": [],
+    "completedReplayGeneration": 0
+  },
+  "providerCalls": 0,
+  "voiceCloneOrASR": false,
+  "builtSignedDeployedInstalled": false,
+  "humanQA": false,
+  "nativePatchSHA256": "4c1e8234587c4525ceb91f7e0ddb05aab6e757cad194742fd54bb51a03d8cdd6",
+  "fixturePatchSHA256": "5e6b9508d453002c0a480f6bf92179568c1de7ff921470a487e39210093960dd",
+  "blockingReadback": {
+    "target": "actual selected production Bot TTS protocol/format",
+    "operation": "SAFE_FIELDS.sql under unique writer existing authorized team context; passive existing response MIME",
+    "status": "not read here; awaiting unique writer, not a denied operation or an in-flight field request"
+  },
+  "remainingAcceptance": [
+    "actual current protocol/MIME applicability",
+    "actual spoken words/prosody and physical audio gaps",
+    "ArkWeb activation, MSE/PUT stream, interruption, stale queue, motion/accessibility, foreground/background"
+  ]
+}

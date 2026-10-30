@@ -1,0 +1,120 @@
+{
+  "browser": "154.0.8037.57",
+  "origin": "http://127.0.0.1:41029",
+  "fixtureSHA256": "61733f484615302542de71f9a2f88e783fd9c70768daef912e413225c76aa07d",
+  "providerCalls": 0,
+  "physicalAudibleMeasurement": false,
+  "profile": "intentional-underrun",
+  "sourceHashes": {
+    "chat-read-aloud.ts": "b116b4c9794e53e5c8989540353a7a04f50d24c4bac6f972fc7d8b2b12248401",
+    "useChatReadAloud.ts": "8c6e882321a3a60ac800b20729a071373ecc45868159c3aa8c93716c171211da",
+    "speech-replay-cache.ts": "53ca3c764eb4dc4db9f5dd1e3414b9fad6712993fe8200ad57eabeb0bfb48a21",
+    "speech-audio-stream.ts": "9679678f910790f3adbd4ce9f7cc7fcca28567ba6a1c9dba31ceb9be2dc1a5c8",
+    "speech-render-completion.ts": "1214f6b5c074bf24a342328053eb0c1a5f9669397828a759b86e4a226b3d5e85"
+  },
+  "timing": {
+    "firstNonzeroMS": 323.80000000074506,
+    "gapsMS": [
+      916.8000000007451
+    ],
+    "samplerMaxPollGapMS": 44.5,
+    "underruns": 1,
+    "plays": [
+      {
+        "ms": 419.1000000014901,
+        "src": "blob:http://127.0.0.1:41029/9f95b1f2-828d-4297-b75d-d0900e3f3693",
+        "active": true,
+        "ever": true,
+        "outcome": "fulfilled"
+      }
+    ],
+    "events": [
+      {
+        "type": "waiting",
+        "ms": 420.80000000074506,
+        "time": 0,
+        "trusted": true
+      },
+      {
+        "type": "playing",
+        "ms": 669.1999999992549,
+        "time": 0,
+        "trusted": true
+      },
+      {
+        "type": "waiting",
+        "ms": 2080.900000002235,
+        "time": 1.417958,
+        "trusted": true
+      },
+      {
+        "type": "playing",
+        "ms": 2984.10000000149,
+        "time": 1.417958,
+        "trusted": true
+      },
+      {
+        "type": "pause",
+        "ms": 4000.800000000745,
+        "time": 2.448,
+        "trusted": true
+      },
+      {
+        "type": "ended",
+        "ms": 4001,
+        "time": 2.448,
+        "trusted": true
+      },
+      {
+        "type": "emptied",
+        "ms": 4002,
+        "time": 0,
+        "trusted": true
+      },
+      {
+        "type": "error",
+        "ms": 4002.199999999255,
+        "time": 0,
+        "trusted": true
+      }
+    ],
+    "state": {
+      "key": "",
+      "status": "idle"
+    },
+    "calls": [
+      {
+        "phase": "timing",
+        "method": "POST",
+        "ms": 1293.576007,
+        "id": "c221e546-d98f-4070-a090-9534e5f0523d",
+        "sequence": 0,
+        "offset": 0,
+        "text": "First sentence. ",
+        "final": false
+      },
+      {
+        "phase": "timing",
+        "method": "PUT",
+        "ms": 1657.610103,
+        "id": "c221e546-d98f-4070-a090-9534e5f0523d",
+        "sequence": 1,
+        "offset": 16,
+        "text": "Second sentence.",
+        "final": false
+      },
+      {
+        "phase": "timing",
+        "method": "PUT",
+        "ms": 1659.809546,
+        "id": "c221e546-d98f-4070-a090-9534e5f0523d",
+        "sequence": 2,
+        "offset": 32,
+        "text": "",
+        "final": true
+      }
+    ]
+  },
+  "reusedCancellationAndPolicyFrom": "native-normal/result.json",
+  "errors": []
+}

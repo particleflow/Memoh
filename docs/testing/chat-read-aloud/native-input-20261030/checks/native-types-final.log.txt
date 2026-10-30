@@ -1,0 +1,3 @@
+apps/web/src/pages/home/composables/speech-native-input.test.ts(55,41): error TS7006: Parameter 'frame' implicitly has an 'any' type.
+apps/web/src/pages/home/composables/useChatReadAloud.ts(51,11): error TS18048: 'capabilityResponse' is possibly 'undefined'.
+apps/web/src/pages/home/composables/useChatReadAloud.ts(52,12): error TS18048: 'capabilityResponse' is possibly 'undefined'.

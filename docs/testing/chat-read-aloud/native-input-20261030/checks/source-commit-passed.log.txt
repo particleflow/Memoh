@@ -1,0 +1,39 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (a0f400369)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 14 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 6.60s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/audio ./internal/audio/adapter/cosyvoiceinput ./internal/audio/input ./internal/handlers ./spec
+[hooks] Go package selection: 0.34s
+[hooks] Go lint: golangci-lint run --concurrency=2 /workspace/memoh-speech-continuity/internal/audio /workspace/memoh-speech-continuity/internal/audio/adapter/cosyvoiceinput /workspace/memoh-speech-continuity/internal/audio/input /workspace/memoh-speech-continuity/internal/handlers /workspace/memoh-speech-continuity/spec
+[hooks] Go lint: 183.87s
+[hooks] Go test: go test -p=2 -timeout=600s /workspace/memoh-speech-continuity/internal/audio /workspace/memoh-speech-continuity/internal/audio/adapter/cosyvoiceinput /workspace/memoh-speech-continuity/internal/audio/input /workspace/memoh-speech-continuity/internal/handlers /workspace/memoh-speech-continuity/spec
+ok  	github.com/felinics/memoh/internal/audio	0.013s
+ok  	github.com/felinics/memoh/internal/audio/adapter/cosyvoiceinput	0.020s
+?   	github.com/felinics/memoh/internal/audio/input	[no test files]
+ok  	github.com/felinics/memoh/internal/handlers	4.764s
+?   	github.com/felinics/memoh/spec	[no test files]
+[hooks] Go test: 11.31s
+[hooks] Total: 202.12s
+[fix/chat-native-speech-input-20261030 09acf7b00] feat(chat): stream incremental speech through one native task
+ 27 files changed, 2069 insertions(+), 41 deletions(-)
+ create mode 100644 apps/web/src/pages/home/composables/speech-native-input.test.ts
+ create mode 100644 apps/web/src/pages/home/composables/speech-render-completion.test.ts
+ create mode 100644 apps/web/src/pages/home/composables/speech-render-completion.ts
+ create mode 100644 apps/web/src/pages/home/composables/useChatReadAloud.native.test.ts
+ create mode 100644 internal/audio/adapter/cosyvoiceinput/provider.go
+ create mode 100644 internal/audio/adapter/cosyvoiceinput/provider_test.go
+ create mode 100644 internal/audio/input/input.go
+ create mode 100644 internal/audio/playback_input_capability_test.go
+ create mode 100644 internal/handlers/bot_tts_input.go
+ create mode 100644 internal/handlers/bot_tts_input_lifecycle_test.go

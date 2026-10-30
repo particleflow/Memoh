@@ -1,0 +1,19 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (2242ab9ef)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 1 file
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 5.25s
+[hooks] Go: no packages selected for this build context
+[hooks] Total: 5.25s
+[fix/chat-native-speech-input-20261030 d2cc9bd60] test(chat): seed admission playback with a fresh streamed reply
+ 1 file changed, 17 insertions(+), 6 deletions(-)

@@ -1,0 +1,5 @@
+--- FAIL: TestPinnedFixedTextCannotKeepTwoInputsInOneTask (0.00s)
+    provider_test.go:88: want one native task for two input increments, got 2, commands=["run-task","continue-task","finish-task","run-task","continue-task","finish-task"]
+FAIL
+FAIL	github.com/felinics/memoh/internal/audio/adapter/cosyvoiceinput	0.013s
+FAIL

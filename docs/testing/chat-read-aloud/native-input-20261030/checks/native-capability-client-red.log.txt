@@ -1,0 +1,27 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/useChatReadAloud.native.test.ts (3 tests | 1 failed) 53ms
+   × keeps a fresh automatic reply compatible with a backend that has no native capability route, without retrying any synthesis 42ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/useChatReadAloud.native.test.ts > keeps a fresh automatic reply compatible with a backend that has no native capability route, without retrying any synthesis
+AssertionError: expected "vi.fn()" to be called once, but got 0 times
+ ❯ src/pages/home/composables/useChatReadAloud.native.test.ts:30:64
+     28|   api.config.mockImplementation(async options => { if (options.throwOn…
+     29|   const f = mount(); emit(f); await settle()
+     30|   expect(api.config).toHaveBeenCalledOnce(); expect(api.fixed).toHaveB…
+       |                                                                ^
+     31| })
+     32| it('does not convert a denied capability read into an automatic paid r…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 2 passed (3)
+   Start at  14:49:57
+   Duration  1.25s (transform 287ms, setup 0ms, import 480ms, tests 53ms, environment 559ms)
+

@@ -1,0 +1,62 @@
+diff --git a/apps/web/src/pages/home/index.read-aloud-admission.test.ts b/apps/web/src/pages/home/index.read-aloud-admission.test.ts
+index be4190144..cb6d468e7 100644
+--- a/apps/web/src/pages/home/index.read-aloud-admission.test.ts
++++ b/apps/web/src/pages/home/index.read-aloud-admission.test.ts
+@@ -62,6 +62,13 @@ function oldAnchor(): TaskHistoryAnchor { return { directoryBotId: 'source', tas
+ function reply(id: string, streaming = false): ChatMessage { return { id, role: 'assistant', turnId: `${id}-turn`, runtimeRunId: id, timestamp: '', streaming, messages: [{ id: 0, type: 'text', content: `Reply ${id}` }] } }
+ function task(id: string, bot = 'source', session = 'history') { return { data: { task_type: 'native_agent', task_id: id, record_id: id, destination: { bot_id: bot, session_id: session, run_id: id, turn_id: `${id}-turn` } } } }
+ function url(id: string, bot = 'source', session = 'history') { return `/bot/${bot}?session=${session}&task_bot=source&task_type=native_agent&task_id=${id}&task_record=${id}&run=${id}` }
++function audioResponse(text = 'synthetic') {
++  return { data: new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new TextEncoder().encode(text)); controller.close() } }), response: new Response(null, { headers: { 'Content-Type': 'audio/wav', 'X-Speech-Playback-Identity': 'synthetic-admission-config' } }) }
++}
++async function freshReply(id: string) {
++  api.messages!.value.push(reply(id, true)); await settle()
++  api.messages!.value[api.messages!.value.length - 1] = reply(id); await settle()
++}
+ function deferred<T>() { let resolve!: (value: T) => void, reject!: (reason: unknown) => void; const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail }); return { promise, resolve, reject } }
+ let app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement
+ async function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }
+@@ -73,7 +80,10 @@ async function mount() {
+   app.use(createI18n({ legacy: false, locale: 'en', messages: { en: {} }, missingWarn: false, fallbackWarn: false }))
+   app.mount(root); await settle()
+   expect(masked()).toBe(false)
+-  api.speech!.replay(api.messages!.value[0]!); await settle()
++  // A historical row has no generated cache and must never synthesize on
++  // Replay. Establish the admission precondition through a new live reply.
++  api.messages!.value = []
++  await freshReply('old-playing')
+   api.player!.dispatchEvent(new Event('playing'))
+   expect(api.speech!.state.value.status).toBe('playing')
+   api.messages!.value.push(reply('queued', true)); await settle()
+@@ -105,8 +115,8 @@ beforeEach(() => {
+   api.lookup.mockReset().mockImplementation(async ({ path }) => ({ data: { name: path.id } }))
+   api.open.mockReset().mockImplementation((options: { taskAnchor?: TaskHistoryAnchor }) => { if (api.pane) api.pane.taskAnchor = options.taskAnchor })
+   api.select.mockReset(); api.task.mockReset().mockResolvedValue(task('old'))
+-  api.playback.mockReset().mockResolvedValue({ data: new Blob(['synthetic'], { type: 'audio/wav' }) })
+-  api.pane = undefined
++  api.playback.mockReset().mockImplementation(async () => audioResponse())
++  api.pane = undefined; api.player = undefined; api.speech = undefined; api.messages = undefined
+   vi.stubGlobal('Audio', class extends Player { constructor() { super(); api.player = this } })
+   vi.stubGlobal('URL', { createObjectURL: () => 'blob:synthetic', revokeObjectURL: vi.fn() })
+ })
+@@ -152,16 +162,17 @@ describe('actual Home URL admission stops speech before pane anchor delivery', (
+   })
+ 
+   it('cancels pending synthesis before anchor delivery and discards the response after returning to contact', async () => {
+-    const router = await mount(), synthesis = deferred<{ data: Blob }>(), admission = deferred<ReturnType<typeof task>>()
++    const router = await mount(), synthesis = deferred<ReturnType<typeof audioResponse>>(), admission = deferred<ReturnType<typeof task>>()
+     api.playback.mockImplementationOnce(() => synthesis.promise)
+-    api.speech!.replay(api.messages!.value[0]!); await settle()
++    api.speech!.stop()
++    await freshReply('pending-new')
+     const signal = api.playback.mock.calls[1]![0].signal as AbortSignal
+     api.task.mockImplementationOnce(() => admission.promise)
+     await router.push(url('new')); await settle()
+     expect(api.pane!.taskAnchor?.runId).toBe('old'); expect(masked()).toBe(true)
+     expect(signal.aborted).toBe(true); expect(api.speech!.state.value.status).toBe('idle')
+     await router.push('/bot/source'); await settle()
+-    synthesis.resolve({ data: new Blob(['late'], { type: 'audio/wav' }) }); admission.resolve(task('new')); await settle()
++    synthesis.resolve(audioResponse('late')); admission.resolve(task('new')); await settle()
+     expect(api.player!.src).toBe(''); expect(api.speech!.state.value.status).toBe('idle')
+     expect(api.playback).toHaveBeenCalledTimes(2)
+   })

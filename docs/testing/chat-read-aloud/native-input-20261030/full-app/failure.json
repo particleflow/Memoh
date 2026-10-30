@@ -1,0 +1,40 @@
+{
+  "source": "cefdf0c + continuous-read-aloud candidate",
+  "syntheticServerAndMP3": true,
+  "realProviderCalls": 0,
+  "playbackRequests": [
+    {
+      "text": "Home 边界合成回复第2段。",
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "writes": [],
+  "configurationReads": [
+    {
+      "bot": "10000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "pageErrors": [],
+  "checks": [],
+  "observations": [],
+  "inputFrames": [
+    {
+      "method": "POST",
+      "id": "292ae5e0-5aac-4d35-8cce-219419ee69a4",
+      "sequence": 0,
+      "offset": 0,
+      "text": "Home 边界合成回复第2段。",
+      "final": false
+    }
+  ],
+  "nativeTaskCount": 1,
+  "legacyGeneration": 0,
+  "browser": "154.0.8037.57",
+  "policyArguments": [
+    "--disable-features=AcceptCHFrame,AvoidUnnecessaryBeforeUnloadCheckSync,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,Translate,AutoDeElevate,RenderDocument,OptimizationHints",
+    "--mute-audio",
+    "--autoplay-policy=document-user-activation-required",
+    "--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies"
+  ],
+  "failureBody": "朗\n朗读交互模拟验证\n联系人\n文件\n日程\n市场\n联系人\n朗读交互模拟验证\n合成专家 Bot\n历史与调试\n看看 Memoh 能做什么\nSY\nsynthetic\n朗读交互模拟验证\n\nHome 边界合成回复第2段。\n\nSynthetic\n云端电脑\nMemoh\n任务\nBots"
+}
