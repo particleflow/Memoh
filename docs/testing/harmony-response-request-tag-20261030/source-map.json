@@ -1,0 +1,13 @@
+{
+  "base": "fcc39b31b1db11e7a9d7396e34c94d5b3301a778",
+  "versionUnchanged": "1.0.34/1000034",
+  "changedSourceInputs": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets": "238b36821757ae38f1cbc2b5678964f23a692b1c7813d2dd2a7310d9380b01ff",
+    "mobile/client/mobile/memoh/harmony-files.ts": "138241bfdce7a669726fe03d37e42f7325e0870583fd0116b3b8e7c1a9e9ff9e",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets": "48dad46248cff3c5609cdc389ed8efa970d6c372478c80acc201b672ce7449f7",
+    "mobile/client/mobile/memoh/harmony-diagnostics.ts": "28b1780d19a7162aed7c422923a12e370d120ab166fa21bbd055a39b604ff883",
+    "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts": "29aad33982dbe1eb3542caf8368fc16d35f8cdc1ff551b3a4868c17e95e4294d",
+    "mobile/client/tests/stage2/harmony_diagnostics_journal.cjs": "98d6a3e6675675dfd744dd8725a451cdf1cc618536fc7ff43b9e484786e09e2f"
+  },
+  "sourceEntries": 193
+}

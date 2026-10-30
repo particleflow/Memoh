@@ -1,0 +1,42 @@
+{
+  "browser": "controlled desktop Chromium, not ArkWeb/phone",
+  "helperSHA256": "eca816225bfb59b9e7473e8002903de5d87f8f0b713316e9b367ffbd5d4fd121",
+  "cases": [
+    {
+      "name": "same-origin",
+      "requestTagPresent": true,
+      "bodyBytes": 7,
+      "bodySHA256": "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5"
+    },
+    {
+      "name": "cross-hidden",
+      "requestTagPresent": false,
+      "bodyBytes": 7,
+      "bodySHA256": "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5"
+    },
+    {
+      "name": "cross-exposed",
+      "requestTagPresent": true,
+      "bodyBytes": 7,
+      "bodySHA256": "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5"
+    },
+    {
+      "name": "cross-duplicate",
+      "requestTagPresent": false,
+      "bodyBytes": 7,
+      "bodySHA256": "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5"
+    },
+    {
+      "name": "cross-invalid",
+      "requestTagPresent": false,
+      "bodyBytes": 7,
+      "bodySHA256": "239f59ed55e737c77147cf55ad0c1b030b6d7ee748a7426952f9b852d5a935e5"
+    }
+  ],
+  "apiGETs": 4,
+  "preflights": 4,
+  "productionCORSChanged": false,
+  "credentials": "synthetic only",
+  "ephemeralServersClosedOnExit": true,
+  "actualNASOrSamplingEnabled": false
+}

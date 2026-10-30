@@ -95,8 +95,12 @@ export class NativeWebNetwork {
     if (encoding && encoding !== 'identity') { throw new Error('WEB_NETWORK_ENCODING'); }
     const response = new webview.WebSchemeHandlerResponse();
     response.setUrl(state.source.getRequestUrl()); response.setStatus(status);
+    // Do not collapse case-alias duplicates into one apparently valid diagnostic
+    // tag. Other response headers retain their existing forwarding behavior.
+    const requestTagNames = Object.keys(headers).filter((name: string): boolean => name.toLowerCase() === 'x-nas-request-id');
     for (const key of Object.keys(headers)) {
       if (['connection', 'transfer-encoding', 'keep-alive', 'set-cookie'].includes(key.toLowerCase())) { continue; }
+      if (key.toLowerCase() === 'x-nas-request-id' && requestTagNames.length !== 1) { continue; }
       const value = headers[key];
       if (typeof value === 'string') {
         response.setHeaderByName(key, value, true);

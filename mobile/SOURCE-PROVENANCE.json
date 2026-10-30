@@ -717,11 +717,14 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets",
-      "sha256": "09b559a416cea78637bb610ce6963da2cf92e233cbc8a87837e0104f549b134d",
+      "sha256": "238b36821757ae38f1cbc2b5678964f23a692b1c7813d2dd2a7310d9380b01ff",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
-      "archiveCheckpointSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a"
+      "archiveCheckpointSHA256": "393b16098d45f52e7dda6d94d4c6fcfc5c22302b797ad94eff038e934256000a",
+      "preparationChanges": [
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+      ]
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets",
@@ -1090,7 +1093,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "0efb6474473d9c6af33b17104e5bc3540163dd28b2c655b75969fa02682dfee2",
+      "sha256": "138241bfdce7a669726fe03d37e42f7325e0870583fd0116b3b8e7c1a9e9ff9e",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
@@ -1101,7 +1104,8 @@
         "Wire retained native resumable attachment entry and durable scoped downloads; source and controlled byte/UI tests only, no new HAP or deployed acceptance.",
         "Native transfer follow-up: persist ambiguous Create/complete states; reconcile only the original receipt, preserve expiry and scoped identities; route picker, clipboard, drop and recorded Files through the retained native uploader using bounded local intake. No new NAS API, service, PC lease or private configuration.",
         "Connect bounded opt-in image-stage measurement/readback without changing UI, requests, authorization or persisted configuration; source-only, no new HAP.",
-        "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol."
+        "Retain the shared store line-limit rule by moving only the existing phone preparation block to harmony-files; preserve callback, NAS hash/size reference validation, cancellation/cause and one-send behavior. Add its targeted regression; no new UI/permissions/protocol.",
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
       ]
     },
     {
@@ -1918,11 +1922,12 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets",
-      "sha256": "9f5f290202888a485ec07370a4d44db3b31abd10c62343194f312d37f5ef3475",
+      "sha256": "48dad46248cff3c5609cdc389ed8efa970d6c372478c80acc201b672ce7449f7",
       "origin": "New scoped native connection adapter against a158c564 and abb2f697; not recovered historical source.",
       "licenseReview": "Project source under retained repository license.",
       "preparationChanges": [
-        "Map existing authenticated logical file requests below ArkWeb URL guard; no file protocol or storage migration."
+        "Map existing authenticated logical file requests below ArkWeb URL guard; no file protocol or storage migration.",
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
       ]
     },
     {
@@ -1936,21 +1941,30 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-diagnostics.ts",
-      "sha256": "ee78d6037a2a39a2de728b230e0e07b80d2cb66b261bf5f5d68cfd914c23c52a",
+      "sha256": "28b1780d19a7162aed7c422923a12e370d120ab166fa21bbd055a39b604ff883",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
-      "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
+      "licenseReview": "Project source and focused tests; no private configuration or SDK binary.",
+      "preparationChanges": [
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+      ]
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts",
-      "sha256": "674e289924421e50c501d3ca20fd29a768b110f53009d7db9a8e568f7877dab8",
+      "sha256": "29aad33982dbe1eb3542caf8368fc16d35f8cdc1ff551b3a4868c17e95e4294d",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
-      "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
+      "licenseReview": "Project source and focused tests; no private configuration or SDK binary.",
+      "preparationChanges": [
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+      ]
     },
     {
       "path": "mobile/client/tests/stage2/harmony_diagnostics_journal.cjs",
-      "sha256": "f3c87fda39b81d74eda44599865b4b1820e805f26db40964fa7de88526d55c28",
+      "sha256": "98d6a3e6675675dfd744dd8725a451cdf1cc618536fc7ff43b9e484786e09e2f",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
-      "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
+      "licenseReview": "Project source and focused tests; no private configuration or SDK binary.",
+      "preparationChanges": [
+        "Add optional headers-only response requestTag correlation with strict 32-lowercase-hex validation; omit unavailable, invalid or duplicate values without changing file transfer or diagnostic recovery semantics."
+      ]
     }
   ],
   "excludedSourcePaths": [],

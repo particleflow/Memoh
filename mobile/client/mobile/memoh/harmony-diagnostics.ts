@@ -6,7 +6,15 @@ import { onAuthSessionCleared } from '@/lib/auth-session'
 // successful verification, and final consumer outcome. No wire first-byte or
 // per-chunk progress observation is implied by this event vocabulary.
 type Kind = 'send' | 'headers' | 'load' | 'error' | 'abort' | 'loadend' | 'validation'
-interface TraceEvent { seq: number, t: number, kind: Kind, g: number, request: number | null, status?: number, loaded?: number, check?: 'body', ok?: boolean }
+interface TraceEvent { seq: number, t: number, kind: Kind, g: number, request: number | null, status?: number, loaded?: number, requestTag?: string, check?: 'body', ok?: boolean }
+// The only permitted response correlation field. Normal Fetch visibility/CORS
+// applies; a missing, combined duplicate, invalid or unreadable value is unknown.
+export function responseRequestTag(response: Response): string | undefined {
+  try {
+    const value = response.headers.get('X-NAS-Request-ID')
+    return value && value.length === 32 && /^[a-f0-9]{32}$/.test(value) ? value : undefined
+  } catch { return undefined }
+}
 interface Batch { id: string, document: string, through: number, body: string, writeAttempted?: boolean }
 // Only our retained unknown-write state may defer one batch without stopping
 // its siblings. Never classify arbitrary SDK/auth/integrity errors by message.
@@ -20,7 +28,7 @@ function validateBatch(batch: Batch): void {
     body.schema !== 1 || !/^[a-f0-9]{32}$/.test(body.document) || body.document !== batch.document || body.timeUnit !== 'relative_monotonic_ms' || !Array.isArray(body.events) || !body.events.length) throw new Error('DIAGNOSTIC_BODY')
   let previous = 0
   for (const event of body.events) {
-    if (!event || Object.keys(event).some(key => !['seq', 't', 'kind', 'g', 'request', 'method', 'status', 'loaded', 'total', 'lengthComputable', 'check', 'ok', 'reason'].includes(key)) ||
+    if (!event || Object.keys(event).some(key => !['seq', 't', 'kind', 'g', 'request', 'method', 'status', 'loaded', 'total', 'lengthComputable', 'check', 'ok', 'reason', 'requestTag'].includes(key)) ||
       typeof event.seq !== 'number' || !Number.isSafeInteger(event.seq) || event.seq <= previous || !number(event.t) ||
       typeof event.g !== 'number' || !Number.isSafeInteger(event.g) || event.g < 0 ||
       typeof event.kind !== 'string' || !['generation', 'stop_requested', 'run_failed', 'send', 'headers', 'progress', 'load', 'error', 'timeout', 'abort', 'loadend', 'validation'].includes(event.kind) ||
@@ -29,6 +37,7 @@ function validateBatch(batch: Batch): void {
       ['status', 'loaded', 'total'].some(key => event[key] !== undefined && !number(event[key])) ||
       event.check !== undefined && !['head', 'range_headers', 'body'].includes(String(event.check)) ||
       event.reason !== undefined && event.reason !== 'user_stop' ||
+      event.requestTag !== undefined && (event.kind !== 'headers' || typeof event.requestTag !== 'string' || !/^[a-f0-9]{32}$/.test(event.requestTag)) ||
       ['ok', 'lengthComputable'].some(key => event[key] !== undefined && typeof event[key] !== 'boolean')) throw new Error('DIAGNOSTIC_BODY')
     previous = event.seq
   }
@@ -113,17 +122,18 @@ export async function resumeDiagnostics(botId = currentBot): Promise<void> {
 
 // Only natural formal-client transfers call this sink; it never replays a file,
 // HAP, message, model or task. No caller-provided text, names, URLs or IDs enter.
-export function diagnosticTransfer(botId: string): (kind: Kind, status?: number, loaded?: number) => void {
+export function diagnosticTransfer(botId: string): (kind: Kind, status?: number, loaded?: number, requestTag?: string) => void {
   if (!bridge()) return () => {}
   currentBot = botId
   const document = crypto.randomUUID().replace(/-/g, ''), start = performance.now(), events: TraceEvent[] = []
   const bound = openDiagnosticLease(botId).then(lease => { leases.add(lease); return lease })
   // Attach immediately: authentication may fail before the next natural event.
   void bound.catch(() => {})
-  return (kind, status, loaded) => {
+  return (kind, status, loaded, requestTag) => {
     const event: TraceEvent = { seq: events.length + 1, t: Math.max(0, performance.now() - start), kind, g: 1, request: 1 }
     if (typeof status === 'number' && Number.isFinite(status) && status >= 0) event.status = status
     if (typeof loaded === 'number' && Number.isSafeInteger(loaded) && loaded >= 0) event.loaded = loaded
+    if (kind === 'headers' && typeof requestTag === 'string' && /^[a-f0-9]{32}$/.test(requestTag)) event.requestTag = requestTag
     if (kind === 'validation') { event.check = 'body'; event.ok = true }
     events.push(event)
     const captured = events.slice()

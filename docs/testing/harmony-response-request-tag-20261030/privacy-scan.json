@@ -1,0 +1,13 @@
+{
+  "scope": "six changed source/test inputs plus review evidence; synthetic test credentials and loopback fixtures only",
+  "patternCounts": {
+    "privateKey": 0,
+    "GitHubToken": 0,
+    "awsAccessKey": 0,
+    "productionIPv6Literal": 0,
+    "privateLANURL": 0
+  },
+  "changedProductNoNewEndpoints": true,
+  "productionValuesRead": false,
+  "exhaustiveSecretProof": false
+}

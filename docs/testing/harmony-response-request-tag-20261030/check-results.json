@@ -1,0 +1,10 @@
+{
+  "typecheckExitCode": 0,
+  "scopedESLintExitCode": 0,
+  "officialAPI26": "BUILD SUCCESSFUL",
+  "scope": "new requestTag seam only; no new HAP",
+  "JS": {
+    "passed": 11,
+    "unchangedSkipped": 24
+  }
+}

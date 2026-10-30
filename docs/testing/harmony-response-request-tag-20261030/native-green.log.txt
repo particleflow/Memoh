@@ -1,0 +1,1 @@
+{"requestTagNative":true,"headersOnly":true,"strict32LowerHex":true,"legacyUntaggedAccepted":true,"realFileRoundTrip":true,"rawHeadersRejected":true,"device":false}

@@ -6,7 +6,7 @@ import { BusinessError } from '@kit.BasicServicesKit';
 import { cryptoFramework } from '@kit.CryptoArchitectureKit';
 
 interface DiagnosticEvent { at: number; area: string; component: string; phase: string; detail: string; }
-interface TraceEvent { seq: number; t: number; kind: string; g: number; request: number | null; method?: string; status?: number; loaded?: number; total?: number; lengthComputable?: boolean; check?: string; ok?: boolean; reason?: string; }
+interface TraceEvent { seq: number; t: number; kind: string; g: number; request: number | null; method?: string; status?: number; loaded?: number; total?: number; lengthComputable?: boolean; check?: string; ok?: boolean; reason?: string; requestTag?: string; }
 interface TraceBody { schema: number; document: string; timeUnit: string; events: TraceEvent[]; }
 export interface DiagnosticBatch { id: string; document: string; through: number; body: string; writeAttempted?: boolean; }
 interface QueueRecord { kind: string; at: number; scope: string; id: string; document?: string; through?: number; body?: string; writeAttempted?: boolean; }
@@ -29,7 +29,7 @@ export class ClientDiagnostics {
       !Array.isArray(body.events) || !body.events.length) { throw new Error('DIAGNOSTIC_BODY'); }
     let previous = 0;
     for (const event of body.events) {
-      if (!ClientDiagnostics.shape(event, ['seq', 't', 'kind', 'g', 'request', 'method', 'status', 'loaded', 'total', 'lengthComputable', 'check', 'ok', 'reason']) ||
+      if (!ClientDiagnostics.shape(event, ['seq', 't', 'kind', 'g', 'request', 'method', 'status', 'loaded', 'total', 'lengthComputable', 'check', 'ok', 'reason', 'requestTag']) ||
         !Number.isSafeInteger(event.seq) || event.seq <= previous || !ClientDiagnostics.number(event.t) || !Number.isSafeInteger(event.g) || event.g < 0 ||
         !['generation', 'stop_requested', 'run_failed', 'send', 'headers', 'progress', 'load', 'error', 'timeout', 'abort', 'loadend', 'validation'].includes(event.kind) ||
         (event.request !== null && (!Number.isSafeInteger(event.request) || event.request < 0)) ||
@@ -40,7 +40,8 @@ export class ClientDiagnostics {
         (event.lengthComputable !== undefined && typeof event.lengthComputable !== 'boolean') ||
         (event.check !== undefined && !['head', 'range_headers', 'body'].includes(event.check)) ||
         (event.ok !== undefined && typeof event.ok !== 'boolean') ||
-        (event.reason !== undefined && event.reason !== 'user_stop')) { throw new Error('DIAGNOSTIC_BODY'); }
+        (event.reason !== undefined && event.reason !== 'user_stop') ||
+        (event.requestTag !== undefined && (event.kind !== 'headers' || typeof event.requestTag !== 'string' || !/^[a-f0-9]{32}$/.test(event.requestTag)))) { throw new Error('DIAGNOSTIC_BODY'); }
       previous = event.seq;
     }
     if (previous !== through || !Number.isSafeInteger(through)) { throw new Error('DIAGNOSTIC_CURSOR'); }

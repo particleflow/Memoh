@@ -11,7 +11,7 @@ import { shallowReactive, toRaw } from 'vue'
 import { client } from '@memohai/sdk/client'
 import { imageTimingHandle, imageTimingFetch, imageTimingMark, imageTimingResource, imageTimingBlob } from './harmony-image-timing'
 import { createApiFetch, sdkApiUrl, sdkAuthQuery } from '@/lib/api-client'
-import { diagnosticTransfer } from './harmony-diagnostics'
+import { diagnosticTransfer, responseRequestTag } from './harmony-diagnostics'
 import { normalizeDelegationPath } from './harmony-service-url'
 import { saveNativeOriginal } from './harmony-download'
 import { nativeAttachmentCommand, stageNativeFile, forgetNativeFile, type NativeAttachment, type NativeUploadReceipt } from './harmony-resumable'
@@ -166,7 +166,7 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
       const result = await originalFetch(input, init)
       // Response headers are visible at this approved fetch boundary, before
       // SDK body parsing. This is not a wire-header or first-body-byte clock.
-      trace('headers', result.status)
+      trace('headers', result.status, undefined, responseRequestTag(result))
       return result
     }
   }

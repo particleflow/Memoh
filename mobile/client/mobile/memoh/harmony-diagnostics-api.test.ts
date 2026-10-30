@@ -388,3 +388,96 @@ it('timing review: a buffered approved fetch does not invent earlier wire-header
     expect(events.slice(-2)).toEqual([{ kind: 'validation', t: 110 }, { kind: 'loadend', t: 110 }])
   } finally { release(); releaseHash(); await pending.catch(() => {}) }
 })
+
+
+const syntheticRequestTag = '0123456789abcdef0123456789abcdef'
+it('request tag: reads only the named normalized32-lowercase-hex response value', () => {
+  const extract = Reflect.get(diagnostics, 'responseRequestTag') as (response: Response) => string | undefined
+  expect(extract).toBeTypeOf('function')
+  for (const value of [syntheticRequestTag, '', 'A'.repeat(32), 'a'.repeat(31), 'a'.repeat(33), 'x'.repeat(32), syntheticRequestTag + ', ' + syntheticRequestTag]) {
+    const response = new Response(null, { headers: { 'X-NAS-Request-ID': value } })
+    expect(extract(response)).toBe(value === syntheticRequestTag ? value : undefined)
+  }
+  const duplicate = new Headers(); duplicate.append('X-NAS-Request-ID', syntheticRequestTag); duplicate.append('x-nas-request-id', syntheticRequestTag)
+  expect(extract(new Response(null, { headers: duplicate }))).toBeUndefined()
+  expect(extract(new Response(null))).toBeUndefined()
+  const unreadable = new Response(null)
+  Object.defineProperty(unreadable, 'headers', { get() { throw new Error('controlled hidden headers') } })
+  expect(extract(unreadable)).toBeUndefined()
+})
+
+it.each(['media', 'delegation'] as const)('request tag: attaches only the optional headers field on the existing %s read', async mode => {
+  const hash = await digest('payload'), events: unknown[][] = []
+  vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue((...args) => { events.push(args) })
+  mediaFetch = async () => new Response(new TextEncoder().encode('payload'), { headers: { 'X-NAS-Request-ID': syntheticRequestTag, 'X-Unrelated-Private-Header': 'synthetic-do-not-export' } })
+  vi.stubGlobal('fetch', fetcher)
+  const path = `/bots/${bot}/sessions/11111111-aaaa-4111-8111-111111111111/delegations/22222222-bbbb-4222-8222-222222222222/attachments/${hash}`
+  const blob = await originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7, ...(mode === 'delegation' ? { metadata: { delegation_url: path } } : {}) })
+  expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('payload')
+  expect(events.find(event => event[0] === 'headers')?.[3]).toBe(syntheticRequestTag)
+  expect(events.filter(event => event[0] !== 'headers').every(event => event[3] === undefined)).toBe(true)
+  expect(JSON.stringify(events)).not.toContain('synthetic-do-not-export'); expect(writes).toBe(0)
+  expect(sends.filter(request => /\/(?:media|attachments)\/[a-f0-9]{64}$/.test(new URL(request.url).pathname))).toHaveLength(1)
+})
+
+it.each(['missing', 'duplicate', 'invalid', 'hidden', 'read-error'] as const)('request tag: %s is omitted without changing original bytes/hash', async variant => {
+  const hash = await digest('payload'), events: unknown[][] = []
+  vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue((...args) => { events.push(args) })
+  mediaFetch = async () => {
+    const headers = new Headers()
+    if (variant !== 'missing') headers.append('X-NAS-Request-ID', variant === 'invalid' ? 'A'.repeat(32) : syntheticRequestTag)
+    if (variant === 'duplicate') headers.append('X-NAS-Request-ID', syntheticRequestTag)
+    const response = new Response(new TextEncoder().encode('payload'), { headers })
+    const get = response.headers.get.bind(response.headers)
+    if (variant === 'hidden' || variant === 'read-error') vi.spyOn(response.headers, 'get').mockImplementation(name => {
+      if (name.toLowerCase() === 'x-nas-request-id') { if (variant === 'read-error') throw new Error('controlled diagnostic-only access error'); return null }
+      return get(name)
+    })
+    return response
+  }
+  const blob = await originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7 })
+  expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('payload')
+  expect(events.find(event => event[0] === 'headers')).toBeDefined()
+  expect(events.every(event => event[3] === undefined)).toBe(true)
+  expect(events.some(event => event[0] === 'validation')).toBe(true)
+})
+
+it('request tag: failure before Response stays unknown and does not create a tag', async () => {
+  const hash = await digest('payload'), events: unknown[][] = []
+  vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue((...args) => { events.push(args) })
+  mediaFetch = async () => { throw new Error('controlled pre-response failure') }
+  await expect(originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7 })).rejects.toThrow('controlled pre-response failure')
+  expect(events.some(event => event[0] === 'headers')).toBe(false)
+  expect(events.every(event => event[3] === undefined)).toBe(true)
+})
+
+it('request tag: the real emitter persists only a legal tag on headers with the existing sequence context', async () => {
+  blockRead = true
+  const trace = diagnosticTransfer(bot)
+  Reflect.apply(trace, undefined, ['headers', 200, undefined, syntheticRequestTag])
+  Reflect.apply(trace, undefined, ['load', 200, 7, syntheticRequestTag])
+  await vi.waitFor(() => expect([...rows.values()].flat()).toHaveLength(2))
+  const batches = [...rows.values()].flat().map(row => JSON.parse(row.body))
+  expect(batches[0].events[0].requestTag).toBe(syntheticRequestTag)
+  expect(batches[1].events[0].requestTag).toBeUndefined()
+  expect(batches[0].document).toBe(batches[1].document)
+  expect(batches.flatMap(batch => batch.events.map((event: { seq: number }) => event.seq))).toEqual([1, 2])
+  expect(JSON.stringify(batches)).not.toContain('X-NAS-Request-ID'); expect(writes).toBe(0)
+})
+
+it('request tag: JS strict validation accepts a legal optional tag and rejects wrong-phase/type/value without dispatch', async () => {
+  const lease = await openDiagnosticLease(bot)
+  const make = async (requestTag: unknown, kind = 'headers') => {
+    const body = JSON.stringify({ schema: 1, document: '7'.repeat(32), timeUnit: 'relative_monotonic_ms', events: [{ seq: 1, t: 1, kind, g: 1, request: 1, requestTag }] })
+    return { id: await digest(body), body, document: '7'.repeat(32), through: 1 }
+  }
+  const valid = await make(syntheticRequestTag)
+  rows.set(lease.scope, [valid]); objects.set('/data/.memoh/media/' + valid.id.slice(0, 2) + '/' + valid.id + '.json', new TextEncoder().encode(valid.body).buffer)
+  await reconcileDiagnosticBatch(valid, lease); expect(acks).toBe(1)
+  const before = sends.length
+  for (const [value, kind] of [[syntheticRequestTag, 'load'], ['A'.repeat(32), 'headers'], [null, 'headers'], [32, 'headers'], [syntheticRequestTag + ',' + syntheticRequestTag, 'headers']] as const) {
+    const invalid = await make(value, kind); rows.set(lease.scope, [invalid])
+    await expect(reconcileDiagnosticBatch(invalid, lease)).rejects.toThrow('DIAGNOSTIC_BODY')
+  }
+  expect(sends).toHaveLength(before); expect(writes).toBe(0)
+})

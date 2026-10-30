@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  11 passed | 24 skipped (35)
+   Start at  05:27:47
+   Duration  14.37s (transform 10.94s, setup 0ms, import 13.97s, tests 113ms, environment 1ms)

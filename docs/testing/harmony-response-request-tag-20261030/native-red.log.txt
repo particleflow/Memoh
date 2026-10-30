@@ -1,0 +1,11 @@
+Error: DIAGNOSTIC_BODY
+    at ClientDiagnostics.validateBody (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/ClientDiagnostics.ets:46:23)
+    at requestTagOnly (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_diagnostics_journal.cjs:24:25)
+    at main (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_diagnostics_journal.cjs:46:51)
+    at Object.<anonymous> (/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/tests/stage2/harmony_diagnostics_journal.cjs:94:1)
+    at Module._compile (node:internal/modules/cjs/loader:1872:14)
+    at Object..js (node:internal/modules/cjs/loader:2003:10)
+    at Module.load (node:internal/modules/cjs/loader:1594:32)
+    at Module._load (node:internal/modules/cjs/loader:1396:12)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)

@@ -1,0 +1,87 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/lib/harmony-diagnostics-api.test.ts (35 tests | 5 failed | 24 skipped) 91ms
+   × request tag: reads only the named normalized32-lowercase-hex response value 10ms
+   × request tag: attaches only the optional headers field on the existing media read 11ms
+   × request tag: attaches only the optional headers field on the existing delegation read 2ms
+   × request tag: the real emitter persists only a legal tag on headers with the existing sequence context 54ms
+   × request tag: JS strict validation accepts a legal optional tag and rejects wrong-phase/type/value without dispatch 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > request tag: reads only the named normalized32-lowercase-hex response value
+AssertionError: expected undefined to be type of 'function'
+
+Expected: "function"
+Received: "undefined"
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:396:19
+    394| it('request tag: reads only the named normalized32-lowercase-hex respo…
+    395|   const extract = Reflect.get(diagnostics, 'responseRequestTag') as (r…
+    396|   expect(extract).toBeTypeOf('function')
+       |                   ^
+    397|   for (const value of [syntheticRequestTag, '', 'A'.repeat(32), 'a'.re…
+    398|     const response = new Response(null, { headers: { 'X-NAS-Request-ID…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > request tag: attaches only the optional headers field on the existing media read
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > request tag: attaches only the optional headers field on the existing delegation read
+AssertionError: expected undefined to be '0123456789abcdef0123456789abcdef' // Object.is equality
+
+- Expected:
+"0123456789abcdef0123456789abcdef"
+
++ Received:
+undefined
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:415:61
+    413|   const blob = await originalBlob({ bot_id: bot, content_hash: hash, t…
+    414|   expect(new TextDecoder().decode(await blob.arrayBuffer())).toBe('pay…
+    415|   expect(events.find(event => event[0] === 'headers')?.[3]).toBe(synth…
+       |                                                             ^
+    416|   expect(events.filter(event => event[0] !== 'headers').every(event =>…
+    417|   expect(JSON.stringify(events)).not.toContain('synthetic-do-not-expor…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > request tag: the real emitter persists only a legal tag on headers with the existing sequence context
+AssertionError: expected undefined to be '0123456789abcdef0123456789abcdef' // Object.is equality
+
+- Expected:
+"0123456789abcdef0123456789abcdef"
+
++ Received:
+undefined
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:459:43
+    457|   await vi.waitFor(() => expect([...rows.values()].flat()).toHaveLengt…
+    458|   const batches = [...rows.values()].flat().map(row => JSON.parse(row.…
+    459|   expect(batches[0].events[0].requestTag).toBe(syntheticRequestTag)
+       |                                           ^
+    460|   expect(batches[1].events[0].requestTag).toBeUndefined()
+    461|   expect(batches[0].document).toBe(batches[1].document)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > request tag: JS strict validation accepts a legal optional tag and rejects wrong-phase/type/value without dispatch
+Error: DIAGNOSTIC_BODY
+ ❯ validateBatch src/lib/harmony-diagnostics.ts:32:114
+     30|       event.check !== undefined && !['head', 'range_headers', 'body'].…
+     31|       event.reason !== undefined && event.reason !== 'user_stop' ||
+     32|       ['ok', 'lengthComputable'].some(key => event[key] !== undefined …
+       |                                                                                                                  ^
+     33|     previous = event.seq
+     34|   }
+ ❯ Module.reconcileDiagnosticBatch src/lib/harmony-diagnostics.ts:54:3
+ ❯ src/lib/harmony-diagnostics-api.test.ts:474:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  5 failed | 6 passed | 24 skipped (35)
+   Start at  05:21:43
+   Duration  10.63s (transform 7.95s, setup 0ms, import 10.28s, tests 91ms, environment 0ms)

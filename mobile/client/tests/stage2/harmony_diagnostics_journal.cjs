@@ -16,7 +16,35 @@ function load(name,extra={}){
  vm.runInNewContext(output,{require:req,module:m,exports:m.exports,Uint8Array,ArrayBuffer,Map,Set,Date,JSON,Number,Error},{filename:native});return m.exports
 }
 const batch=seq=>{const body=JSON.stringify({schema:1,document,timeUnit:'relative_monotonic_ms',events:[{seq,t:seq,kind:'load',g:1,request:1,loaded:seq}]});return{id:crypto.createHash('sha256').update(body).digest('hex'),document,through:seq,body}}
+async function requestTagOnly(){
+ const D=load('ClientDiagnostics').ClientDiagnostics;D.bind({filesDir:dir})
+ const tag='0123456789abcdef0123456789abcdef'
+ const make=(value,kind='headers')=>JSON.stringify({schema:1,document,timeUnit:'relative_monotonic_ms',events:[{seq:1,t:1,kind,g:1,request:1,...(value===undefined?{}:{requestTag:value})}]})
+ D.validateBody(make(undefined),document,1);D.validateBody(batch(1).body,document,1)
+ const body=make(tag);D.validateBody(body,document,1)
+ const item={id:crypto.createHash('sha256').update(body).digest('hex'),body,document,through:1};await D.put(scope,item)
+ const restored=load('ClientDiagnostics').ClientDiagnostics;restored.bind({filesDir:dir});assert.equal(JSON.parse(restored.pending(scope)[0].body).events[0].requestTag,tag)
+ for(const value of ['',null,32,[],{},'A'.repeat(32),'a'.repeat(31),'a'.repeat(33),tag+', '+tag])assert.throws(()=>D.validateBody(make(value),document,1))
+ assert.throws(()=>D.validateBody(make(tag,'load'),document,1))
+ const bad=JSON.parse(body);bad.events[0].headers={'X-NAS-Request-ID':tag};assert.throws(()=>D.validateBody(JSON.stringify(bad),document,1))
+ restored.ack(scope,item.id,item.id,Buffer.byteLength(body));assert.equal(restored.pending(scope).length,0)
+ console.log(JSON.stringify({requestTagNative:true,headersOnly:true,strict32LowerHex:true,legacyUntaggedAccepted:true,realFileRoundTrip:true,rawHeadersRejected:true,device:false}))
+}
+async function requestTagForwardOnly(){
+ const tag='0123456789abcdef0123456789abcdef',origin='https://example.test/api'
+ class Handler{}
+ class Response{constructor(){this.headers=new Map()}setUrl(x){this.url=x}setStatus(x){this.status=x}setMimeType(x){this.mime=x}setHeaderByName(k,v,overwrite){const key=k.toLowerCase();if(overwrite||!this.headers.has(key))this.headers.set(key,v)}}
+ const {NativeWebNetwork}=load('NativeWebNetwork',{'@kit.ArkWeb':{webview:{WebSchemeHandler:Handler,WebSchemeHandlerResponse:Response}},'./MemohClientConfig':{MEMOH_ORIGIN:origin}})
+ const network=new NativeWebNetwork(()=>true)
+ function forward(headers){let value;network.response({epoch:0,base:origin,ownerRead:true,stopped:false,source:{getRequestUrl:()=>origin+'/bots/fixture/media/original'},sink:{didReceiveResponse:x=>value=x}},200,{'content-type':'application/octet-stream','content-length':'7',...headers});assert.equal(value.status,200);assert.equal(value.headers.get('content-length'),'7');assert.equal(value.mime,'application/octet-stream');return value.headers.get('x-nas-request-id')}
+ assert.equal(forward({'X-NAS-Request-ID':tag}),tag)
+ assert.equal(forward({'x-nas-request-id':[tag,tag]}),tag+', '+tag)
+ assert.equal(forward({'X-NAS-Request-ID':tag,'x-nas-request-id':'f'.repeat(32)}),undefined)
+ console.log(JSON.stringify({requestTagForwarding:true,arrayDuplicatesStayCombinedInvalid:true,caseAliasDuplicateOmitted:true,unrelatedHeadersUnchanged:true,requestsSent:0,device:false}))
+}
 async function main(){
+ if(process.argv.includes('--request-tag'))return requestTagOnly()
+ if(process.argv.includes('--request-tag-forward'))return requestTagForwardOnly()
  let D=load('ClientDiagnostics').ClientDiagnostics;D.bind({filesDir:dir});D.event('TEST','local','utf8','本地秘密不进入回传')
  short=17;await assert.rejects(D.put(scope,batch(1)));failed=false
  assert.equal(D.capturedThrough(scope,document),0);assert.equal(D.pending(scope).length,0)
