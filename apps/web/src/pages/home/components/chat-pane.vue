@@ -194,6 +194,16 @@
         </section>
       </section>
 
+      <div
+        v-if="activeChatReadOnly && currentBotId"
+        class="flex shrink-0 justify-end px-4 py-2 sm:px-6 lg:px-10"
+      >
+        <BotTaskDirectory
+          :bot-id="currentBotId"
+          :visible="isVisible"
+        />
+      </div>
+
       <MediaGalleryLightbox
         :items="galleryItems"
         :open-index="galleryOpenIndex"
