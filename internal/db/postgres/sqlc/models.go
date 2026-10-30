@@ -889,6 +889,13 @@ type SearchProvider struct {
 	TeamID    pgtype.UUID        `json:"team_id"`
 }
 
+type SessionFollowUpQueue struct {
+	BotID     pgtype.UUID        `json:"bot_id"`
+	SessionID pgtype.UUID        `json:"session_id"`
+	Envelope  []byte             `json:"envelope"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
 type SessionRun struct {
 	RunID                 pgtype.UUID        `json:"run_id"`
 	TeamID                pgtype.UUID        `json:"team_id"`

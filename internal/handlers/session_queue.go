@@ -20,6 +20,7 @@ import (
 	"github.com/felinics/memoh/internal/db"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/errs"
+	"github.com/felinics/memoh/internal/followupqueue"
 )
 
 // SessionQueueHandler exposes the live steer and follow-up queues. It owns
@@ -338,7 +339,7 @@ func (h *SessionQueueHandler) EnqueueFollowUp(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	item, err := h.agentService.EnqueueFollowUp(c.Request().Context(), scope.input(req.InvocationID, req.Text))
+	item, err := h.agentService.EnqueueFollowUp(followupqueue.HTTPOrigin(c.Request().Context()), scope.input(req.InvocationID, req.Text))
 	if err = queueAdmissionError(err); err != nil {
 		return err
 	}
