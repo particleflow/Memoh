@@ -1,5 +1,5 @@
 import { routerKey } from 'vue-router'
-import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'
+import { createChatRouteContext } from './chat/route-context'
 import { defineStore, storeToRefs } from 'pinia'
 import { computed, hasInjectionContext, inject, onScopeDispose, ref } from 'vue'
 import { toast } from '@felinic/ui'
@@ -50,7 +50,7 @@ export type { FsChangeBatch, FsChangeEvent, FsToolKind } from './chat/fs-beacon'
 export type { ChatViewEntry, ChatViewTarget } from './chat/view-registry'
 
 export const useChatStore = defineStore('chat', () => {
-  const router = hasInjectionContext() ? inject(routerKey, null) : null
+  const { bindRouteContext, hasHistoryEntry, hasContactEntry } = createChatRouteContext(hasInjectionContext() ? inject(routerKey, null) : null)
   const selectionStore = useChatSelectionStore()
   const workdirsStore = useWorkdirsStore()
   const { currentBotId, sessionId, draftIntent, explicitSelection: explicitSessionSelection } = storeToRefs(selectionStore)
@@ -414,8 +414,7 @@ export const useChatStore = defineStore('chat', () => {
     createNewSession, selectDraft,
     reset: resetBootstrap,
   } = createChatBootstrap({
-    hasHistoryEntry: () => !!router?.currentRoute.value.query.session,
-    hasContactEntry: () => !!router && CHAT_ROUTE_NAMES.has(router.currentRoute.value.name as string) && !router.currentRoute.value.query.session,
+    hasHistoryEntry, hasContactEntry,
     currentBotId,
     sessionId,
     draftIntent,
@@ -612,7 +611,7 @@ export const useChatStore = defineStore('chat', () => {
     commandEvent, commandEventForScope, rememberCommandEvent, beginCommandEvent, showCommandError,
     fsChangedAt, markFsChanged, affectsPath, fsEventForPath,
     backgroundTaskFor,
-    initialize, initializeWithRecovery, refreshBots, selectBot, selectSession, createNewSession,
+    bindRouteContext, initialize, initializeWithRecovery, refreshBots, selectBot, selectSession, createNewSession,
     selectDraft, userSentInSession, draftPromoted, draftViewRequested, applyDraftViewRequest,
     forkedSessionRequested, deletedSession,
     stageExternalAgentSession, stageDefaultExternalAgentSession, cacheDefaultExternalAgentSession,

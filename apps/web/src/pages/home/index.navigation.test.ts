@@ -26,6 +26,7 @@ function activatePanel(id: string, params: Record<string, unknown>) {
 const useChat = defineStore('navigation-fixture', {
   state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false }),
   actions: {
+    bindRouteContext() {},
     async selectBot(botId: string, options?: { sessionId?: string }) { this.currentBotId = botId; await api.select(botId, options) },
     cancelContactChoice() {}, isSessionTentative() { return false },
   },

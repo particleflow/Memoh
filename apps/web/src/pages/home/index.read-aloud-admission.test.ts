@@ -47,6 +47,7 @@ vi.mock('@/store/workspace-tabs', () => ({ useWorkspaceTabsStore: () => ({ api: 
 const useChat = defineStore('read-aloud-home-admission', {
   state: () => ({ currentBotId: 'source', bots: [{ id: 'source', name: 'source' }, { id: 'expert', name: 'expert' }], activeSession: null, loadingChats: false, contactNavigationPending: false, contactOpenRequested: null as { botId: string, sessionId: string } | null }),
   actions: {
+    bindRouteContext() {},
     async selectBot(botId: string, options?: { sessionId?: string }) {
       this.currentBotId = botId
       if (!options?.sessionId) this.contactNavigationPending = true
@@ -63,6 +64,14 @@ function reply(id: string, streaming = false): ChatMessage { return { id, role: 
 function task(id: string, bot = 'source', session = 'history') { return { data: { task_type: 'native_agent', task_id: id, record_id: id, destination: { bot_id: bot, session_id: session, run_id: id, turn_id: `${id}-turn` } } } }
 function url(id: string, bot = 'source', session = 'history') { return `/bot/${bot}?session=${session}&task_bot=source&task_type=native_agent&task_id=${id}&task_record=${id}&run=${id}` }
 function deferred<T>() { let resolve!: (value: T) => void, reject!: (reason: unknown) => void; const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail }); return { promise, resolve, reject } }
+// Current generated SDK playback uses parseAs:stream and returns HTTP metadata.
+// Keep the original lifecycle assertions; a legacy Blob-only mock never reaches Audio.
+function playbackResponse(text = 'synthetic') {
+  return {
+    data: new ReadableStream<Uint8Array>({ start(controller) { controller.enqueue(new TextEncoder().encode(text)); controller.close() } }),
+    response: new Response(null, { headers: { 'Content-Type': 'audio/wav' } }),
+  }
+}
 let app: ReturnType<typeof createApp> | undefined, root: HTMLDivElement
 async function settle() { for (let i = 0; i < 40; i++) { await Promise.resolve(); await nextTick() } }
 async function mount() {
@@ -105,7 +114,7 @@ beforeEach(() => {
   api.lookup.mockReset().mockImplementation(async ({ path }) => ({ data: { name: path.id } }))
   api.open.mockReset().mockImplementation((options: { taskAnchor?: TaskHistoryAnchor }) => { if (api.pane) api.pane.taskAnchor = options.taskAnchor })
   api.select.mockReset(); api.task.mockReset().mockResolvedValue(task('old'))
-  api.playback.mockReset().mockResolvedValue({ data: new Blob(['synthetic'], { type: 'audio/wav' }) })
+  api.playback.mockReset().mockImplementation(async () => playbackResponse())
   api.pane = undefined
   vi.stubGlobal('Audio', class extends Player { constructor() { super(); api.player = this } })
   vi.stubGlobal('URL', { createObjectURL: () => 'blob:synthetic', revokeObjectURL: vi.fn() })
@@ -152,7 +161,7 @@ describe('actual Home URL admission stops speech before pane anchor delivery', (
   })
 
   it('cancels pending synthesis before anchor delivery and discards the response after returning to contact', async () => {
-    const router = await mount(), synthesis = deferred<{ data: Blob }>(), admission = deferred<ReturnType<typeof task>>()
+    const router = await mount(), synthesis = deferred<ReturnType<typeof playbackResponse>>(), admission = deferred<ReturnType<typeof task>>()
     api.playback.mockImplementationOnce(() => synthesis.promise)
     api.speech!.replay(api.messages!.value[0]!); await settle()
     const signal = api.playback.mock.calls[1]![0].signal as AbortSignal
@@ -161,7 +170,7 @@ describe('actual Home URL admission stops speech before pane anchor delivery', (
     expect(api.pane!.taskAnchor?.runId).toBe('old'); expect(masked()).toBe(true)
     expect(signal.aborted).toBe(true); expect(api.speech!.state.value.status).toBe('idle')
     await router.push('/bot/source'); await settle()
-    synthesis.resolve({ data: new Blob(['late'], { type: 'audio/wav' }) }); admission.resolve(task('new')); await settle()
+    synthesis.resolve(playbackResponse('late')); admission.resolve(task('new')); await settle()
     expect(api.player!.src).toBe(''); expect(api.speech!.state.value.status).toBe('idle')
     expect(api.playback).toHaveBeenCalledTimes(2)
   })
