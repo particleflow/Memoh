@@ -6,13 +6,14 @@ import (
 	"log/slog"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
+
 	"github.com/felinics/memoh/internal/agent/application"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/chat/thread"
 	"github.com/felinics/memoh/internal/config"
 	dbstore "github.com/felinics/memoh/internal/db/store"
 	"github.com/felinics/memoh/internal/workspace"
-	"github.com/jackc/pgx/v5"
 )
 
 type contactWorkspaceLedger struct{ botdelegation.Ledger }
@@ -29,6 +30,7 @@ type contactWorkspaceMounts struct {
 func (s contactWorkspaceMounts) GetPrimaryMount(context.Context, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	return s.record, nil
 }
+
 func (s contactWorkspaceMounts) GetMount(context.Context, string, string) (dbstore.BotRemoteRuntimeBindingRecord, error) {
 	return s.record, nil
 }
