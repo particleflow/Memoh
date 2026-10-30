@@ -105,3 +105,52 @@ This handoff is not deployed/field accepted and does not establish parallel
 execution, natural result return or overall Bot/Harmony acceptance.
 
 - [ ] Human QA passed
+
+## 9270 first-click field follow-up: unresolved
+
+Reference: `9270da0252128a296d9a641235cdfd32ab44cfda`. The parent reports the
+recipient button and row click are now visible and all original task/Bot/session/
+run route identities match, but the first entrance did not finish loading.
+One refresh of that deep link displayed the two original messages. This is
+recovery evidence, not a successful first entrance. The original field JSON
+files under `F:/NAS-Assistant/tmp/deploy-9270da02/` have not been read by this
+owner, and the cause is not established.
+
+Source comparison verifies that the pane, directory navigation, run anchor,
+realtime controller and transcript are byte-identical between the admitted3da
+product commit and9270. The ten-line entry does not introduce an asynchronous
+controller. Three distinct gates need discrimination before changing code:
+
+1. `pages/home/index.vue`: the outer workspace is masked while history identity,
+   session selection or contact admission is pending.
+2. `store/chat/transcript.ts`: a masked initial history load can have received
+   HTTP200 but still await its commit callback before revealing the transcript.
+   `store/chat/realtime.ts:259` waits for the initial runtime snapshot at that
+   callback. This preserves the atomic history/runtime projection; the wait is
+   not proof of this field failure's cause.
+3. `composables/useTaskRunAnchor.ts`: a task pane remains pending until its
+   authorized original turn can be located; `chat-pane.vue:18` separately masks
+   that pane. Its identity GET has a15-second/cancellation bound; ordinary
+   session/message initialization is a different lifecycle.
+
+The server's `internal/handlers/runtime_ws.go` explicitly sends an authoritative
+snapshot for every subscription, even with a cursor. Do not infer that a cached
+cursor legitimately suppresses the first snapshot, remove the atomic wait,
+replace an original run with latest, or call refresh success a fix.
+
+Request one read of the already saved `ui-row-click.json`, `ui-final.json` and,
+if necessary, `OUTCOME.json`: preserve pre-refresh timestamps/elapsed time, URL,
+the exact visible loading node/text/selector, existing HTTP completion/pending/
+abort/error records, page errors and any existing pane/loading/anchor values.
+If already captured, include the original session's runtime subscribe/snapshot/
+dropped/error/close frame metadata and its timing; do not include credentials or
+message content. Mark absent fields unrecorded. Do not repeat the field click,
+query private DB metadata, replay a result, or create a new workload to obtain it.
+
+No new reproduction, product fix or test pass is claimed for this symptom.
+After the evidence identifies a distinguishable transition, reproduce only that
+transition in isolation, record its red/green result and smallest fix here.
+Any new long-running fixture must retain its real executable tool session for
+normal cleanup. The previous denied `/proc/29353/cwd` read and unverified cleanup
+state remain separate; this investigation does not authorize another route to
+that data or signalling those old processes.
