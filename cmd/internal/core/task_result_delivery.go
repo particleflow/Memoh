@@ -15,11 +15,22 @@ import (
 	"github.com/felinics/memoh/internal/agent/turn"
 	"github.com/felinics/memoh/internal/botdelegation"
 	"github.com/felinics/memoh/internal/chat/thread"
+	"github.com/felinics/memoh/internal/config"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/taskresult"
 )
 
 var errResultNotReady = errors.New("task result is not ready")
+
+func (h *delegationHost) resultAttemptLimit(e taskresult.Event) int {
+	if e.AutomaticAttempts > 0 {
+		return e.AutomaticAttempts
+	}
+	if h.resultSummaryAttempts > 0 {
+		return h.resultSummaryAttempts
+	}
+	return config.DefaultResultSummaryAttempts
+}
 
 // Wakes come from the existing lifecycle/terminal observer, not a new service
 // or scheduler. Dirty coalescing avoids losing a completion during a scan.
@@ -364,7 +375,7 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
 		key := taskresult.EventID(t.state, t.run, t.text)
 		e, exists := t.delivery[key]
 		if !exists {
-			e = taskresult.Event{ReportState: "pending", State: t.state, RunID: t.run, Text: t.text, Attempt: 1}
+			e = taskresult.Event{ReportState: "pending", State: t.state, RunID: t.run, Text: t.text, Attempt: 1, AutomaticAttempts: h.resultAttemptLimit(taskresult.Event{})}
 			t.delivery[key] = e
 			next, _ := json.Marshal(t.delivery)
 			err = t.save(ctx, t.raw, next)
@@ -379,6 +390,9 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
 		if e.MessageID != "" {
 			return nil
 		}
+		if e.Attempt < 1 {
+			return botdelegation.ErrDenied
+		}
 		ref := taskresult.Reference{Kind: kind, TaskID: id, EventID: key, Attempt: e.Attempt}
 		t.cmd.TaskResultReceipt = ref.String()
 		invocation := application.HostFollowUpInvocation(bot, session, ref.String())
@@ -392,10 +406,11 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
 				if !taskresult.Terminal(observed.State) {
 					return nil
 				}
-				if observed.State == "aborted" || e.Attempt >= taskresult.MaxAttempts {
-					if e.ReportState == "attention" {
-						return nil
-					}
+				// A policy change must not silently rearm an attention event.
+				if e.ReportState == "attention" {
+					return nil
+				}
+				if observed.State == "aborted" || e.RecoveryAttempt() || e.Attempt >= h.resultAttemptLimit(e) {
 					e.ReportState = "attention"
 				} else {
 					e.Attempt++
@@ -415,6 +430,9 @@ func (h *delegationHost) reconcileResult(ctx context.Context, kind, id, bot, use
 		}
 		if !errors.Is(err, pgx.ErrNoRows) {
 			return err
+		}
+		if e.ReportState == "attention" {
+			return nil
 		}
 		// Same event+attempt => same queue UUID and durable invocation. An
 		// uncertain enqueue response can never mint a new action or summary.
@@ -436,7 +454,7 @@ func (h *delegationHost) prepareResult(ctx context.Context, req application.Chat
 		return ctx, req, err
 	}
 	e, ok := t.delivery[ref.EventID]
-	if !ok || e.Attempt != ref.Attempt || e.MessageID != "" || taskresult.EventID(t.state, t.run, t.text) != ref.EventID || req.DelegationResultID != t.cmd.DelegationResultID || !delegationRequestMatchesRoute(req, botdelegation.ReturnRoute{Channel: t.cmd.CurrentChannel, ChatID: t.cmd.ChatID, RouteID: t.cmd.RouteID, ReplyTarget: t.cmd.ReplyTarget, ConversationType: t.cmd.ConversationType}) {
+	if !ok || e.ReportState != "pending" || e.Attempt != ref.Attempt || e.MessageID != "" || taskresult.EventID(t.state, t.run, t.text) != ref.EventID || req.DelegationResultID != t.cmd.DelegationResultID || !delegationRequestMatchesRoute(req, botdelegation.ReturnRoute{Channel: t.cmd.CurrentChannel, ChatID: t.cmd.ChatID, RouteID: t.cmd.RouteID, ReplyTarget: t.cmd.ReplyTarget, ConversationType: t.cmd.ConversationType}) {
 		return ctx, req, botdelegation.ErrDenied
 	}
 	req.Query = t.text

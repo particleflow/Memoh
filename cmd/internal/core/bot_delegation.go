@@ -38,17 +38,18 @@ import (
 )
 
 type delegationHost struct {
-	store        *postgresstore.Store
-	accounts     *accounts.Service
-	permissions  *applicationBotPermissionChecker
-	sessions     *thread.Service
-	agent        *application.Service
-	service      *botdelegation.Service
-	messages     *messagepkg.DBService
-	media        *media.Service
-	routes       delegationRouteReader
-	resultWake   *resultDeliveryWake
-	resultSubmit func(context.Context, string, turn.StartTurnCommand) error
+	store                 *postgresstore.Store
+	accounts              *accounts.Service
+	permissions           *applicationBotPermissionChecker
+	sessions              *thread.Service
+	agent                 *application.Service
+	service               *botdelegation.Service
+	messages              *messagepkg.DBService
+	media                 *media.Service
+	routes                delegationRouteReader
+	resultWake            *resultDeliveryWake
+	resultSubmit          func(context.Context, string, turn.StartTurnCommand) error
+	resultSummaryAttempts int
 }
 
 func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstore.Store, accounts *accounts.Service, bots *bots.Service, sessions *thread.Service, media *media.Service, messages *messagepkg.DBService, runtime *boot.RuntimeConfig, routes *route.DBService, cfg config.Config) (*botdelegation.Service, error) {
@@ -56,7 +57,11 @@ func provideBotDelegation(lc fx.Lifecycle, log *slog.Logger, store *postgresstor
 	if err != nil {
 		return nil, err
 	}
-	h := &delegationHost{store: store, accounts: accounts, permissions: &applicationBotPermissionChecker{bots: bots, accounts: accounts}, sessions: sessions, media: media, messages: messages, routes: routes}
+	summaryAttempts, err := cfg.BotDelegation.SummaryAttemptLimit()
+	if err != nil {
+		return nil, err
+	}
+	h := &delegationHost{store: store, accounts: accounts, permissions: &applicationBotPermissionChecker{bots: bots, accounts: accounts}, sessions: sessions, media: media, messages: messages, routes: routes, resultSummaryAttempts: summaryAttempts}
 	a := &botdelegation.Authority{Permissions: h, Sessions: sessions, Workdirs: delegationWorkdirs{store}, Mounts: store, Assets: h}
 	s := botdelegation.NewService(a, botdelegation.NewPostgresLedger(store.SQLC()), media, log, timeout)
 	s.SetCursorSecret(runtime.JwtSecret)

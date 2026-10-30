@@ -1415,6 +1415,23 @@ definitions:
     required:
     - items
     type: object
+  botdelegation.RecoveryInput:
+    properties:
+      event_id:
+        type: string
+      expected_attempt:
+        type: integer
+    required:
+    - event_id
+    - expected_attempt
+    type: object
+  botdelegation.RecoveryView:
+    properties:
+      event:
+        $ref: '#/definitions/taskresult.Event'
+      event_id:
+        type: string
+    type: object
   botdelegation.Summary:
     properties:
       source:
@@ -8292,6 +8309,44 @@ definitions:
       source_kind:
         type: string
       state:
+        type: string
+    type: object
+  taskresult.Event:
+    properties:
+      attempt:
+        type: integer
+      automatic_attempts:
+        type: integer
+      message_id:
+        type: string
+      recoveries:
+        items:
+          $ref: '#/definitions/taskresult.Recovery'
+        type: array
+      report_state:
+        type: string
+      run_id:
+        type: string
+      state:
+        type: string
+      summary_run_id:
+        type: string
+      text:
+        type: string
+    type: object
+  taskresult.Recovery:
+    properties:
+      attempt:
+        type: integer
+      from_attempt:
+        type: integer
+      previous_run_id:
+        type: string
+      previous_run_state:
+        type: string
+      requested_at:
+        type: string
+      requested_by:
         type: string
     type: object
   turn.RuntimeCommand:
@@ -16025,6 +16080,70 @@ paths:
           schema:
             $ref: '#/definitions/server.Problem'
       summary: Retry only result delivery to the supervisor
+      tags:
+      - sessions
+  /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover:
+    post:
+      consumes:
+      - application/json
+      description: Uses the original event, its current expected attempt, attention
+        state and durable execution/publication evidence. New authorizations conflict
+        while active; repeating the same authorization resumes it. Published results
+        conflict. Never reruns the specialist or changes an unknown outcome to success.
+      parameters:
+      - description: Supervisor Bot ID
+        in: path
+        name: bot_id
+        required: true
+        type: string
+      - description: Owned source session
+        in: path
+        name: session_id
+        required: true
+        type: string
+      - description: Delegation ID
+        in: path
+        name: delegation_id
+        required: true
+        type: string
+      - description: Exact saved event and expected attempt
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/botdelegation.RecoveryInput'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/botdelegation.RecoveryView'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/server.Problem'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/server.Problem'
+      summary: Authorize one summary attempt for a saved task outcome
       tags:
       - sessions
   /bots/{bot_id}/sessions/{session_id}/follow-up-queue:

@@ -351,6 +351,21 @@ jobs:
               raise SystemExit("Required native profile PostgreSQL tests did not PASS: " + ", ".join(sorted(missing)))
           print("Verified native profile PostgreSQL PASS: " + ", ".join(sorted(required)))
           PY
+      - name: Require saved-result recovery CAS and retained execution history
+        env:
+          MEMOH_NATIVE_QUEUE_TEST_DSN: postgres://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/memoh_runtime_test?sslmode=disable
+        run: |
+          : "${MEMOH_NATIVE_QUEUE_TEST_DSN:?Saved-result recovery requires isolated PostgreSQL}"
+          set -o pipefail
+          go test -json -race -count=1 -run '^TestSavedResultRecoveryPostgres$' ./cmd/internal/core | tee saved-result-recovery.jsonl
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          events = [json.loads(line) for line in Path('saved-result-recovery.jsonl').read_text().splitlines()]
+          assert any(e.get('Action') == 'pass' and e.get('Test') == 'TestSavedResultRecoveryPostgres' for e in events), 'required saved-result recovery did not PASS'
+          assert not any(e.get('Action') in ('skip', 'fail') for e in events), 'saved-result recovery skipped or failed a contract'
+          print('Verified saved-result recovery PostgreSQL CAS/history contracts without skips')
+          PY
       # Additive gate: retain the other contract steps when merging stacked workflows.
       - name: Require computer operation CAS and RLS (no skips)
         env:

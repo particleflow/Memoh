@@ -6,10 +6,22 @@ import (
 	"time"
 )
 
-// BotDelegationConfig configures the existing host-owned specialist execution.
-// It does not change Agent runtime timeouts or the result delivery contract.
+// BotDelegationConfig configures existing host-owned execution and reporting.
 type BotDelegationConfig struct {
-	ExecutionTimeout string `toml:"execution_timeout"`
+	ExecutionTimeout      string `toml:"execution_timeout"`
+	ResultSummaryAttempts *int   `toml:"result_summary_attempts"`
+}
+
+const DefaultResultSummaryAttempts = 3
+
+func (c BotDelegationConfig) SummaryAttemptLimit() (int, error) {
+	if c.ResultSummaryAttempts == nil {
+		return DefaultResultSummaryAttempts, nil
+	}
+	if *c.ResultSummaryAttempts < 1 {
+		return 0, errors.New("bot_delegation.result_summary_attempts must be a positive integer")
+	}
+	return *c.ResultSummaryAttempts, nil
 }
 
 func (c BotDelegationConfig) ExecutionTimeoutDuration() (time.Duration, error) {

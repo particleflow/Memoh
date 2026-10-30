@@ -41,6 +41,7 @@ func (h *BotDelegationHandler) Register(e *echo.Echo) {
 	g.GET("", h.List)
 	g.GET("/:delegation_id", h.Get)
 	g.POST("/:delegation_id/delivery", h.Deliver)
+	g.POST("/:delegation_id/delivery/recover", h.RecoverDelivery)
 	g.GET("/:delegation_id/attachments/:content_hash", h.Attachment)
 	g.HEAD("/:delegation_id/attachments/:content_hash", h.Attachment)
 }
@@ -182,6 +183,35 @@ func (h *BotDelegationHandler) Deliver(c echo.Context) error {
 		return delegationHTTPError(err)
 	}
 	return c.JSON(http.StatusOK, v)
+}
+
+// RecoverDelivery godoc
+// @Summary Authorize one summary attempt for a saved task outcome
+// @Description Uses the original event, its current expected attempt, attention state and durable execution/publication evidence. New authorizations conflict while active; repeating the same authorization resumes it. Published results conflict. Never reruns the specialist or changes an unknown outcome to success.
+// @Tags sessions
+// @Accept json
+// @Produce json
+// @Param bot_id path string true "Supervisor Bot ID"
+// @Param session_id path string true "Owned source session"
+// @Param delegation_id path string true "Delegation ID"
+// @Param body body botdelegation.RecoveryInput true "Exact saved event and expected attempt"
+// @Success 202 {object} botdelegation.RecoveryView
+// @Failure 400,401,403,404,409,500 {object} server.Problem
+// @Router /bots/{bot_id}/sessions/{session_id}/delegations/{delegation_id}/delivery/recover [post].
+func (h *BotDelegationHandler) RecoverDelivery(c echo.Context) error {
+	user, err := h.authorize(c)
+	if err != nil {
+		return err
+	}
+	var input botdelegation.RecoveryInput
+	if err = c.Bind(&input); err != nil {
+		return err
+	}
+	v, err := h.service.RecoverDelivery(c.Request().Context(), c.Param("bot_id"), user, c.Param("session_id"), c.Param("delegation_id"), input)
+	if err != nil {
+		return delegationHTTPError(err)
+	}
+	return c.JSON(http.StatusAccepted, v)
 }
 
 // Attachment godoc
