@@ -1,0 +1,52 @@
+{
+  "encoded": [
+    200,
+    {
+      "found": false,
+      "invocation_id": "follow-up%3A292f5fed-6d8e-4b27-8271-bb1ce9a71593",
+      "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54"
+    }
+  ],
+  "literal": [
+    200,
+    {
+      "found": true,
+      "invocation_id": "follow-up:292f5fed-6d8e-4b27-8271-bb1ce9a71593",
+      "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+      "run_id": "6fa920c7-e080-471e-907a-c4e553e45fe9",
+      "turn_id": "4041ae7b-b673-4b82-b931-29f93b1649eb",
+      "turn_position": 72,
+      "state": "completed"
+    }
+  ],
+  "provider": {
+    "calls": [
+      {
+        "kind": "delegate",
+        "at": 1793370027.4063308
+      },
+      {
+        "kind": "main",
+        "at": 1793370027.4889896
+      },
+      {
+        "kind": "worker",
+        "at": 1793370027.6921608
+      },
+      {
+        "kind": "b",
+        "at": 1793370028.0943716
+      },
+      {
+        "kind": "summary",
+        "at": 1793370058.4097931
+      }
+    ],
+    "delegate": 1,
+    "worker": 1,
+    "b": 1,
+    "summary": 1,
+    "other": 0
+  },
+  "active_runs": "0"
+}

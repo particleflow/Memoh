@@ -1,0 +1,132 @@
+{
+  "paid_calls": 0,
+  "environment": "isolated cloned original PostgreSQL and local model fixture",
+  "queue_backend": "memory live queue; admitted runs/history persist in PostgreSQL",
+  "checks": [
+    "concurrent duplicate POST same202/item",
+    "different payload409",
+    "pending replay after disconnect/reconnect same item",
+    "exact follow-up:item invocation maps single durable run/turn",
+    "running and terminal replay no second execution",
+    "B persisted while same expert running",
+    "original expert result returned once to original C",
+    "all prior rows preserved"
+  ],
+  "a": {
+    "found": true,
+    "invocation_id": "86338bda-567a-4a8d-9eb1-2161ef0d7774",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "0483abac-e1d1-404b-97bc-a55a7871eb42",
+    "turn_id": "4e05d072-60b5-47ef-851f-98261f94f4f8",
+    "turn_position": 74,
+    "state": "running"
+  },
+  "delegation": {
+    "id": "92cfcbcd-7ddb-41ea-b00e-1df4b6fb2d65",
+    "target_session_id": "d7498635-1148-47de-9381-3cc163503c79",
+    "run_id": "209a82a1-a3bf-4017-9508-3773e91ca2e5",
+    "state": "running"
+  },
+  "post_request_invocation": "21fa3add-c84d-43ed-930e-cf5c49cb8b2b",
+  "concurrent_post_responses": [
+    {
+      "item_id": "e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+      "status": "accepted",
+      "position": 1,
+      "text": "QUEUE_SEAM_B_TEXT_3238f48f97794551935736517471197c",
+      "enqueued_during_run_id": "0483abac-e1d1-404b-97bc-a55a7871eb42"
+    },
+    {
+      "item_id": "e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+      "status": "accepted",
+      "position": 1,
+      "text": "QUEUE_SEAM_B_TEXT_3238f48f97794551935736517471197c",
+      "enqueued_during_run_id": "0483abac-e1d1-404b-97bc-a55a7871eb42"
+    }
+  ],
+  "changed_payload_status": 409,
+  "queued_before_admission": true,
+  "reconnect_before_claim_run": "0483abac-e1d1-404b-97bc-a55a7871eb42",
+  "replay_after_reconnect": {
+    "item_id": "e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+    "status": "accepted",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_3238f48f97794551935736517471197c",
+    "enqueued_during_run_id": "0483abac-e1d1-404b-97bc-a55a7871eb42"
+  },
+  "b_running": {
+    "found": true,
+    "invocation_id": "follow-up:e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "5c038f5b-cbd4-4499-afec-7da2d4b6b7d7",
+    "turn_id": "e923c8e5-29b3-4754-b764-984b8d609366",
+    "turn_position": 75,
+    "state": "running"
+  },
+  "reconnect_during_b_run": "5c038f5b-cbd4-4499-afec-7da2d4b6b7d7",
+  "replay_during_b": {
+    "item_id": "e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+    "status": "applied",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_3238f48f97794551935736517471197c",
+    "enqueued_during_run_id": "0483abac-e1d1-404b-97bc-a55a7871eb42"
+  },
+  "b_completed": {
+    "found": true,
+    "invocation_id": "follow-up:e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "5c038f5b-cbd4-4499-afec-7da2d4b6b7d7",
+    "turn_id": "e923c8e5-29b3-4754-b764-984b8d609366",
+    "turn_position": 75,
+    "state": "completed"
+  },
+  "b_reply_persisted_in_original_C": true,
+  "same_expert_running_after_b_persisted": true,
+  "terminal_queue_replay": {
+    "item_id": "e7ae410f-b0c5-442b-8bfa-7ad6a5aab6c9",
+    "status": "applied",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_3238f48f97794551935736517471197c",
+    "enqueued_during_run_id": "0483abac-e1d1-404b-97bc-a55a7871eb42"
+  },
+  "natural_result_back_to_C": true,
+  "receipt_count": "1",
+  "provider": {
+    "calls": [
+      {
+        "kind": "delegate",
+        "at": 1793370441.600408
+      },
+      {
+        "kind": "main",
+        "at": 1793370441.6637115
+      },
+      {
+        "kind": "worker",
+        "at": 1793370441.91536
+      },
+      {
+        "kind": "b",
+        "at": 1793370442.3483732
+      },
+      {
+        "kind": "summary",
+        "at": 1793370442.8663888
+      }
+    ],
+    "delegate": 1,
+    "worker": 1,
+    "b": 1,
+    "summary": 1,
+    "other": 0
+  },
+  "original_rows_preserved": {
+    "bot_history_messages": 383,
+    "session_runs": 104,
+    "bot_delegations": 11
+  },
+  "status": "PASS",
+  "source_base": "f74e462b20f49b6167c90baf9a7a2bd1b51bdcfc",
+  "product_commit": "c878a31e268119939330d9eed52050539636b306",
+  "source_binding": "Binary built from these exact server product bytes before commit; only test import grouping was formatted afterward."
+}

@@ -1,0 +1,52 @@
+{
+  "source_commit": "f74e462b20f49b6167c90baf9a7a2bd1b51bdcfc",
+  "paid_calls": 0,
+  "environment": "isolated cloned original PostgreSQL and local model fixture",
+  "queue_backend": "memory live queue; admitted runs/history persist in PostgreSQL",
+  "checks": [],
+  "a": {
+    "found": true,
+    "invocation_id": "c5df95c6-3ab1-4aef-8586-44e07fabdaad",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "9e957d9d-327b-4d88-ae2f-3b60fda6b242",
+    "turn_id": "5f5285c0-9fc3-4a14-9080-ddcc1f5160ec",
+    "turn_position": 71,
+    "state": "running"
+  },
+  "delegation": {
+    "id": "298db0d8-957f-46ae-85cf-e57589368f49",
+    "target_session_id": "18481178-acea-43c2-87d1-65573f0a30a8",
+    "run_id": "92d2b0e4-b935-47e8-bfbb-3cc627402e42",
+    "state": "running"
+  },
+  "post_request_invocation": "b5ba675d-b8c8-4358-9d02-17db7b2fb7f3",
+  "concurrent_post_responses": [
+    {
+      "item_id": "292f5fed-6d8e-4b27-8271-bb1ce9a71593",
+      "status": "accepted",
+      "position": 1,
+      "text": "QUEUE_SEAM_B_TEXT_f6b80e1d32d44464a2f23e599a9d44c4",
+      "enqueued_during_run_id": "9e957d9d-327b-4d88-ae2f-3b60fda6b242"
+    },
+    {
+      "item_id": "292f5fed-6d8e-4b27-8271-bb1ce9a71593",
+      "status": "accepted",
+      "position": 1,
+      "text": "QUEUE_SEAM_B_TEXT_f6b80e1d32d44464a2f23e599a9d44c4",
+      "enqueued_during_run_id": "9e957d9d-327b-4d88-ae2f-3b60fda6b242"
+    }
+  ],
+  "changed_payload_status": 409,
+  "queued_before_admission": true,
+  "reconnect_before_claim_run": "9e957d9d-327b-4d88-ae2f-3b60fda6b242",
+  "replay_after_reconnect": {
+    "item_id": "292f5fed-6d8e-4b27-8271-bb1ce9a71593",
+    "status": "accepted",
+    "position": 1,
+    "text": "QUEUE_SEAM_B_TEXT_f6b80e1d32d44464a2f23e599a9d44c4",
+    "enqueued_during_run_id": "9e957d9d-327b-4d88-ae2f-3b60fda6b242"
+  },
+  "status": "FAILED",
+  "failure_type": "AssertionError",
+  "failure": "local fixture condition deadline"
+}

@@ -1,0 +1,12 @@
+--- FAIL: TestGetSessionInvocationEscapedPathIdentity (0.00s)
+    --- FAIL: TestGetSessionInvocationEscapedPathIdentity/encoded_colon (0.00s)
+        session_invocation_test.go:369: encoded lookup: status 200 body map[string]interface {}{"found":false, "invocation_id":"follow-up%3Aitem", "session_id":"22222222-2222-2222-2222-222222222222"}
+    --- FAIL: TestGetSessionInvocationEscapedPathIdentity/mixed_escapes (0.00s)
+        session_invocation_test.go:369: encoded lookup: status 200 body map[string]interface {}{"found":false, "invocation_id":"literal%253A%3Aitem", "session_id":"22222222-2222-2222-2222-222222222222"}
+    --- FAIL: TestGetSessionInvocationEscapedPathIdentity/plus (0.00s)
+        session_invocation_test.go:369: encoded lookup: status 200 body map[string]interface {}{"found":false, "invocation_id":"literal%2Bitem", "session_id":"22222222-2222-2222-2222-222222222222"}
+    --- FAIL: TestGetSessionInvocationEscapedPathIdentity/slash (0.00s)
+        session_invocation_test.go:369: encoded lookup: status 200 body map[string]interface {}{"found":false, "invocation_id":"literal%2Fitem", "session_id":"22222222-2222-2222-2222-222222222222"}
+FAIL
+FAIL	github.com/felinics/memoh/internal/handlers	0.022s
+FAIL

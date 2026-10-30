@@ -1,0 +1,15 @@
+{
+  "response": {
+    "found": true,
+    "invocation_id": "follow-up:292f5fed-6d8e-4b27-8271-bb1ce9a71593",
+    "session_id": "558f2a9e-0d3a-4907-a836-cd7f13901f54",
+    "run_id": "6fa920c7-e080-471e-907a-c4e553e45fe9",
+    "turn_id": "4041ae7b-b673-4b82-b931-29f93b1649eb",
+    "turn_position": 72,
+    "state": "completed"
+  },
+  "http_status": 200,
+  "same_original_run": true,
+  "provider_calls_unchanged": true,
+  "server_restarted": true
+}

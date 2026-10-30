@@ -1,0 +1,36 @@
+=== RUN   TestGetSessionInvocationReportsAdmittedRun
+--- PASS: TestGetSessionInvocationReportsAdmittedRun (0.00s)
+=== RUN   TestGetSessionInvocationReportsLedgerStateAsIs
+--- PASS: TestGetSessionInvocationReportsLedgerStateAsIs (0.00s)
+=== RUN   TestGetSessionInvocationUnknownInvocationIsNotAnError
+--- PASS: TestGetSessionInvocationUnknownInvocationIsNotAnError (0.00s)
+=== RUN   TestGetSessionInvocationDoesNotResolveAcrossSessions
+--- PASS: TestGetSessionInvocationDoesNotResolveAcrossSessions (0.00s)
+=== RUN   TestGetSessionInvocationDropsRunFromAnotherSession
+--- PASS: TestGetSessionInvocationDropsRunFromAnotherSession (0.00s)
+=== RUN   TestGetSessionInvocationRequiresSessionReadAccess
+=== RUN   TestGetSessionInvocationRequiresSessionReadAccess/other_user's_session
+=== RUN   TestGetSessionInvocationRequiresSessionReadAccess/no_bot_grant
+=== RUN   TestGetSessionInvocationRequiresSessionReadAccess/unknown_session
+--- PASS: TestGetSessionInvocationRequiresSessionReadAccess (0.00s)
+    --- PASS: TestGetSessionInvocationRequiresSessionReadAccess/other_user's_session (0.00s)
+    --- PASS: TestGetSessionInvocationRequiresSessionReadAccess/no_bot_grant (0.00s)
+    --- PASS: TestGetSessionInvocationRequiresSessionReadAccess/unknown_session (0.00s)
+=== RUN   TestGetSessionInvocationLedgerFailureIsServerError
+--- PASS: TestGetSessionInvocationLedgerFailureIsServerError (0.00s)
+=== RUN   TestGetSessionInvocationEscapedPathIdentity
+=== RUN   TestGetSessionInvocationEscapedPathIdentity/encoded_colon
+=== RUN   TestGetSessionInvocationEscapedPathIdentity/literal_colon
+=== RUN   TestGetSessionInvocationEscapedPathIdentity/literal_percent_escape
+=== RUN   TestGetSessionInvocationEscapedPathIdentity/mixed_escapes
+=== RUN   TestGetSessionInvocationEscapedPathIdentity/plus
+=== RUN   TestGetSessionInvocationEscapedPathIdentity/slash
+--- PASS: TestGetSessionInvocationEscapedPathIdentity (0.00s)
+    --- PASS: TestGetSessionInvocationEscapedPathIdentity/encoded_colon (0.00s)
+    --- PASS: TestGetSessionInvocationEscapedPathIdentity/literal_colon (0.00s)
+    --- PASS: TestGetSessionInvocationEscapedPathIdentity/literal_percent_escape (0.00s)
+    --- PASS: TestGetSessionInvocationEscapedPathIdentity/mixed_escapes (0.00s)
+    --- PASS: TestGetSessionInvocationEscapedPathIdentity/plus (0.00s)
+    --- PASS: TestGetSessionInvocationEscapedPathIdentity/slash (0.00s)
+PASS
+ok  	github.com/felinics/memoh/internal/handlers	0.027s

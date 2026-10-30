@@ -1,0 +1,17 @@
+{
+  "active_runs": 0,
+  "paid_calls": 0,
+  "original_database_untouched": true,
+  "owned_processes": {
+    "server": {
+      "pid": 1053694,
+      "signal": "SIGTERM",
+      "stopped_confirmed": true
+    },
+    "provider": {
+      "pid": 1054006,
+      "signal": "SIGTERM",
+      "stopped_confirmed": true
+    }
+  }
+}

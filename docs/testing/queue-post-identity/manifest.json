@@ -1,0 +1,17 @@
+{
+  "product_commit": "c878a31e268119939330d9eed52050539636b306",
+  "binary_sha256": "3ef465c19cbd13c0af0f4974ac02def977cd365b477dfc70d2c4fc7dd7329b52",
+  "files": {
+    "README.md": "d616bd570b521bb87bd13afe61bcfc51ef06586d6412606171de3f6a885a6d0d",
+    "cleanup.json": "281f424c4d171cc4dc12ff1ad9758df9420b97a4a8a71ee1b54b26ea5cd2f5fe",
+    "fixture/provider.py": "6aeaba5ac8025d0ed55636706dfc4772096b502c8d68ad3c170300f603e45cc4",
+    "fixture/util.py": "bbb752606f849408f43d4405e0e89b1879b0ed5f14b9c1b74332ec337a9ee910",
+    "fixture/verify.py": "fecce0c9c1d80626f2df46e18fa72df6fdd07f32c09b1d57db8dc4558f9c1f1f",
+    "green-result.json": "feaf1c6768934c3f8aa37bc1a0c93246183f5c0eef7422cf6808934962c35dfa",
+    "red-path-proof.json": "175d1c2ab386c75186235f09466d13051942bb7655c88449f69636ffbd984254",
+    "red-result.json": "2554094ef6bcf5785c83cdbe2aa49edaa64f7812755ec28dcd8f319466051ff3",
+    "router-green.txt": "fb42d959ca135eafa75cb1f078b210301806a47415c1c91502a4002d3ad66811",
+    "router-red.txt": "327b2ec551cbbd750ba3343b1c7d12554f5df7b17ed41306bd63e5dad77347c8",
+    "same-record-green.json": "b27f7823ce330ed4818f27ae717abae3b1863c5277fda71e025800f0fb8f869a"
+  }
+}
