@@ -1,0 +1,35 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/lib/harmony-diagnostics-api.test.ts (21 tests | 1 failed | 20 skipped) 23ms
+   × queue review: an invalid journal claim reply remains a fatal integrity error 22ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > queue review: an invalid journal claim reply remains a fatal integrity error
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:305:39
+    303|     return request(raw)
+    304|   }
+    305|   await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_JOU…
+       |                                       ^
+    306|   expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({…
+    307| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 20 skipped (21)
+   Start at  00:25:40
+   Duration  11.11s (transform 8.22s, setup 0ms, import 10.80s, tests 23ms, environment 1ms)

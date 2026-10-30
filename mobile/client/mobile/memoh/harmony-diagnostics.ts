@@ -5,6 +5,11 @@ import { onAuthSessionCleared } from '@/lib/auth-session'
 type Kind = 'send' | 'headers' | 'load' | 'error' | 'abort' | 'loadend' | 'validation'
 interface TraceEvent { seq: number, t: number, kind: Kind, g: number, request: number | null, status?: number, loaded?: number, check?: 'body', ok?: boolean }
 interface Batch { id: string, document: string, through: number, body: string, writeAttempted?: boolean }
+// Only our retained unknown-write state may defer one batch without stopping
+// its siblings. Never classify arbitrary SDK/auth/integrity errors by message.
+class DiagnosticWriteUnconfirmed extends Error {
+  constructor() { super('DIAGNOSTIC_WRITE_UNCONFIRMED') }
+}
 function validateBatch(batch: Batch): void {
   const body = JSON.parse(batch.body) as { schema: number, document: string, timeUnit: string, events: Array<Record<string, unknown>> }
   const number = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0
@@ -47,6 +52,7 @@ export async function reconcileDiagnosticBatch(batch: Batch, lease: DiagnosticLe
   const pending = await journal<Batch[]>('diagnostic.pending', lease)
   const retained = pending.find(item => item.id === batch.id && item.body === batch.body && item.document === batch.document && item.through === batch.through)
   if (!retained) throw new Error('DIAGNOSTIC_NOT_PENDING')
+  if (retained.writeAttempted !== undefined && typeof retained.writeAttempted !== 'boolean') throw new Error('DIAGNOSTIC_JOURNAL_FAILED')
   const bytes = new TextEncoder().encode(batch.body)
   if (!/^[a-f0-9]{64}$/.test(batch.id) || await hash(bytes) !== batch.id) throw new Error('DIAGNOSTIC_DIGEST')
   lease.assertCurrent()
@@ -57,11 +63,12 @@ export async function reconcileDiagnosticBatch(batch: Batch, lease: DiagnosticLe
   // 404 cannot establish that a previous unknown write did not happen.
   let result = await read(); lease.assertCurrent()
   if (result.response?.status === 404) {
-    if (retained.writeAttempted) throw new Error('DIAGNOSTIC_WRITE_UNCONFIRMED')
+    if (retained.writeAttempted === true) throw new DiagnosticWriteUnconfirmed()
     // Reuse the original PUT row/command: persist the sticky attempt phase
     // before SDK dispatch. Its atomic claim also excludes concurrent POSTs.
     const claimed = await journal<boolean>('diagnostic.put', lease, { batch: { ...retained, writeAttempted: true } })
-    if (claimed !== true) throw new Error('DIAGNOSTIC_WRITE_UNCONFIRMED')
+    if (claimed === false) throw new DiagnosticWriteUnconfirmed()
+    if (claimed !== true) throw new Error('DIAGNOSTIC_JOURNAL_FAILED')
     lease.assertCurrent()
     await postBotsByBotIdContainerFsUpload({ ...lease.sdkOptions(), path: { bot_id: lease.botId },
       body: { path, file: new Blob([new Uint8Array(bytes).buffer], { type: 'application/json' }) }, throwOnError: true })
@@ -79,7 +86,13 @@ async function flush(lease: DiagnosticLease): Promise<void> {
     do {
       again = false
       for (const batch of await journal<Batch[]>('diagnostic.pending', lease)) {
-        lease.assertCurrent(); await reconcileDiagnosticBatch(batch, lease)
+        lease.assertCurrent()
+        try { await reconcileDiagnosticBatch(batch, lease) } catch (error) {
+          if (!(error instanceof DiagnosticWriteUnconfirmed)) throw error
+          lease.assertCurrent()
+          // Retain this exact object without POST/ACK; other valid batches can
+          // progress. A later natural resume can verify and ACK the same object.
+        }
       }
     } while (again)
   })()

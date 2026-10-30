@@ -1,0 +1,10 @@
+{
+  "base": "2d35b6edd87038458747cbb8ca73152913675a7e",
+  "hostInputHashes": {
+    "mobile/memoh/harmony-diagnostics.ts": "a1988b3b6fbedd2573e4876b3638c4a10b75b7da4d4ad77cf36438dbc172bbcc",
+    "mobile/memoh/harmony-diagnostics-api.test.ts": "dc7dd7c9cce59ebce0d61591c0357213d309b0306ebd52261099782cb534ed8b"
+  },
+  "nativeAndSDKUnchanged": true,
+  "newHAPBuilt": false,
+  "permissionsUnchanged": true
+}

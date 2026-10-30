@@ -22,6 +22,7 @@ const { host, storage } = vi.hoisted(() => {
 
 const bot = '11111111-2222-4333-8444-555555555555', other = '66666666-7777-4888-8999-aaaaaaaaaaaa'
 let principal = 'user-a', sends: Request[], objects: Map<string, ArrayBuffer>, writes: number, acks: number, loseReply: boolean
+let forcedDownloadStatus = 0, spoofUnconfirmed = false
 let failAttemptJournal = false
 let blockRead: boolean, readReject: ((error: Error) => void) | undefined
 const rows = new Map<string, Array<{ id: string, document: string, through: number, body: string, writeAttempted?: boolean }>>()
@@ -32,6 +33,8 @@ const fetcher: typeof fetch = async (input, init) => {
   if (url.pathname.endsWith('/users/me')) return Response.json({ id: principal })
   if (/\/media\/[a-f0-9]{64}$/.test(url.pathname)) return new Response(new TextEncoder().encode('payload'))
   if (url.pathname.endsWith('/download')) {
+    if (spoofUnconfirmed) throw new Error('DIAGNOSTIC_WRITE_UNCONFIRMED')
+    if (forcedDownloadStatus) return new Response(null, { status: forcedDownloadStatus })
     if (blockRead) return new Promise((_resolve, reject) => { readReject = reject; request.signal.addEventListener('abort', () => reject(new Error('retired')), { once: true }) })
     const data = objects.get(url.searchParams.get('path')!)
     return data ? new Response(data) : new Response(null, { status: 404 })
@@ -48,7 +51,7 @@ const fetcher: typeof fetch = async (input, init) => {
 beforeEach(() => {
   vi.stubGlobal('window', host); vi.stubGlobal('localStorage', storage)
   vi.stubGlobal('sessionStorage', { getItem: () => null, setItem: () => {}, removeItem: () => {} })
-  vi.stubGlobal('crypto', webcrypto); sends = []; objects = new Map(); writes = 0; acks = 0; loseReply = false; failAttemptJournal = false; blockRead = false; readReject = undefined; principal = 'user-a'; rows.clear(); cursors.clear()
+  vi.stubGlobal('crypto', webcrypto); sends = []; objects = new Map(); writes = 0; acks = 0; loseReply = false; forcedDownloadStatus = 0; spoofUnconfirmed = false; failAttemptJournal = false; blockRead = false; readReject = undefined; principal = 'user-a'; rows.clear(); cursors.clear()
   localStorage.clear(); localStorage.setItem('token', 'synthetic-a'); client.interceptors.request.clear()
   setupApiClient({ baseUrl: 'https://example.test/api', fetch: fetcher })
   Object.assign(window, { begoniaNative: { async request(raw: string) {
@@ -233,4 +236,73 @@ it('review P1: diagnostic errors do not hide a real body/hash failure', async ()
   vi.spyOn(crypto, 'randomUUID').mockImplementation(() => { throw new Error('controlled diagnostic failure') })
   await expect(originalBlob({ bot_id: bot, content_hash: 'a'.repeat(64), type: 'file', size: 7 })).rejects.toThrow()
   expect(sends.filter(request => /\/media\/[a-f0-9]{64}$/.test(new URL(request.url).pathname))).toHaveLength(1)
+})
+
+
+async function queueReviewBatches() {
+  const make = async (document: string) => {
+    const body = JSON.stringify({ schema: 1, document, timeUnit: 'relative_monotonic_ms', events: [{ seq: 1, t: 8, kind: 'load', g: 1, request: 1 }] })
+    return { id: await digest(body), body, document, through: 1 }
+  }
+  const lease = await openDiagnosticLease(bot), A = { ...await make('1'.repeat(32)), writeAttempted: true }, B = await make('2'.repeat(32))
+  rows.set(lease.scope, [A, B]); lease.retire()
+  const path = (id: string) => '/data/.memoh/media/' + id.slice(0, 2) + '/' + id + '.json'
+  return { scope: lease.scope, A, B, path }
+}
+
+it('queue review: leaves unknown A pending, uploads B once, then ACKs verified A without repeating B', async () => {
+  const { scope, A, path } = await queueReviewBatches()
+  const outcome: unknown = await resumeDiagnostics(bot).catch(error => error)
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 1, acks: 1, pending: 1 })
+  expect(outcome).toBeUndefined(); expect(rows.get(scope)).toEqual([A])
+  expect(sends.filter(request => request.method === 'POST').every(request => request.url.endsWith('/upload'))).toBe(true)
+  objects.set(path(A.id), new TextEncoder().encode(A.body).buffer)
+  await resumeDiagnostics(bot)
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 1, acks: 2, pending: 0 })
+  await resumeDiagnostics(bot); expect({ writes, acks }).toEqual({ writes: 1, acks: 2 })
+})
+
+it('queue review: does not continue B after A permission denial', async () => {
+  const { scope } = await queueReviewBatches(); forcedDownloadStatus = 403
+  await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_UNVERIFIED')
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 0, acks: 0, pending: 2 })
+})
+
+it('queue review: does not continue B after A integrity failure', async () => {
+  const { scope, A, path } = await queueReviewBatches()
+  objects.set(path(A.id), new TextEncoder().encode('corrupt').buffer)
+  await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_UNVERIFIED')
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 0, acks: 0, pending: 2 })
+})
+
+it('queue review: does not continue B when identity changes while dispatching A', async () => {
+  const { scope, A, path } = await queueReviewBatches()
+  client.interceptors.request.use(request => {
+    if (new URL(request.url).searchParams.get('path') === path(A.id)) localStorage.setItem('token', 'synthetic-replaced')
+    return request
+  })
+  await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_IDENTITY_CHANGED')
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 0, acks: 0, pending: 2 })
+})
+
+it('queue review: does not continue B after an external transport failure', async () => {
+  const { scope } = await queueReviewBatches(); spoofUnconfirmed = true
+  // The real generated SDK normalizes throwOnError:false fetch failures.
+  await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_UNVERIFIED')
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 0, acks: 0, pending: 2 })
+})
+
+
+it('queue review: an invalid journal claim reply remains a fatal integrity error', async () => {
+  const { scope } = await queueReviewBatches()
+  const native = (window as Window & { begoniaNative?: { request(raw: string): Promise<string> } }).begoniaNative
+  if (!native) throw new Error('Native test fixture is unavailable')
+  const request = native.request
+  native.request = async raw => {
+    const value = JSON.parse(raw)
+    if (value.command === 'diagnostic.put' && value.batch.writeAttempted) return JSON.stringify({ ok: true })
+    return request(raw)
+  }
+  await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_JOURNAL_FAILED')
+  expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 0, acks: 0, pending: 2 })
 })

@@ -1,0 +1,56 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/lib/harmony-diagnostics-api.test.ts (20 tests | 2 failed | 15 skipped) 46ms
+   × queue review: leaves unknown A pending, uploads B once, then ACKs verified A without repeating B 25ms
+   × queue review: does not swallow an external error merely using the unconfirmed message 6ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > queue review: leaves unknown A pending, uploads B once, then ACKs verified A without repeating B
+AssertionError: expected { writes: +0, acks: +0, pending: 2 } to deeply equal { writes: 1, acks: 1, pending: 1 }
+
+- Expected
++ Received
+
+  {
+-   "acks": 1,
+-   "pending": 1,
+-   "writes": 1,
++   "acks": 0,
++   "pending": 2,
++   "writes": 0,
+  }
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:256:62
+    254|   const { scope, A, path } = await queueReviewBatches()
+    255|   const outcome: unknown = await resumeDiagnostics(bot).catch(error =>…
+    256|   expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({…
+       |                                                              ^
+    257|   expect(outcome).toBeUndefined(); expect(rows.get(scope)).toEqual([A])
+    258|   expect(sends.filter(request => request.method === 'POST').every(requ…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > queue review: does not swallow an external error merely using the unconfirmed message
+AssertionError: expected [Function] to throw error including 'DIAGNOSTIC_WRITE_UNCONFIRMED' but got 'DIAGNOSTIC_UNVERIFIED'
+
+Expected: "DIAGNOSTIC_WRITE_UNCONFIRMED"
+Received: "DIAGNOSTIC_UNVERIFIED"
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:290:39
+    288| it('queue review: does not swallow an external error merely using the …
+    289|   const { scope } = await queueReviewBatches(); spoofUnconfirmed = true
+    290|   await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_WRI…
+       |                                       ^
+    291|   expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({…
+    292| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 3 passed | 15 skipped (20)
+   Start at  00:23:42
+   Duration  11.70s (transform 8.68s, setup 0ms, import 11.35s, tests 46ms, environment 1ms)

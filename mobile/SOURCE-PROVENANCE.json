@@ -1936,13 +1936,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-diagnostics.ts",
-      "sha256": "b28604d112ca9fda68201ec419d6aa0c3e34c9e8db6965ffc375138cb09df73b",
+      "sha256": "a1988b3b6fbedd2573e4876b3638c4a10b75b7da4d4ad77cf36438dbc172bbcc",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
       "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts",
-      "sha256": "4d886f9c05dd5fb7fd98b717d7a4c6dc58e9d27cc573daaaaa4170bb1db434ce",
+      "sha256": "dc7dd7c9cce59ebce0d61591c0357213d309b0306ebd52261099782cb534ed8b",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
       "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
     },

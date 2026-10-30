@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  6 passed | 15 skipped (21)
+   Start at  00:26:08
+   Duration  14.07s (transform 10.85s, setup 0ms, import 13.81s, tests 92ms, environment 0ms)

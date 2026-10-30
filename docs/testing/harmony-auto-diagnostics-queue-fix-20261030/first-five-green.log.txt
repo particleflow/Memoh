@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  5 passed | 15 skipped (20)
+   Start at  00:24:48
+   Duration  10.57s (transform 7.84s, setup 0ms, import 10.34s, tests 67ms, environment 0ms)

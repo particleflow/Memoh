@@ -1,5 +1,7 @@
 # Automatic diagnostics113bf review corrections
 
+**Subsequent independent review:** the P1/P2 controls below passed on2d35, but unknown A blocked an unattempted batch B. That candidate was not admitted. See [the source-only queue correction](../harmony-auto-diagnostics-queue-fix-20261030/README.md); new readmission is still pending. Original logs below remain historical evidence.
+
 Source-only corrections to113bf54c4a66020a4d662d40fdbbdfe11291a7e4. The prior automatic-diagnostics candidate was NOT admitted after independent review found P1 and P2. Its original evidence remains unchanged. This correction awaits the same independent review; it is not packaged, deployed or tested on a phone.
 
 ## P1: diagnostic failures must not change original reads
