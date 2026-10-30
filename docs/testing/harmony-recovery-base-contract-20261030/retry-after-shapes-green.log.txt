@@ -1,0 +1,28 @@
+{
+  "cases": [
+    {
+      "name": "retry-after-rcp-single-array",
+      "bytes": 524305,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 1,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": true
+    },
+    {
+      "name": "retry-after-http-date",
+      "bytes": 524305,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 1,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": true
+    }
+  ],
+  "device": false,
+  "TLS": false
+}

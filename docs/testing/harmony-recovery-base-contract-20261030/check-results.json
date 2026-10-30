@@ -1,6 +1,6 @@
 {
   "parent": "51ccf9222ed9e2312aa3ddfaad03084cfeaacaa3",
-  "recoveryScenarios": 15,
+  "recoveryScenarios": 16,
   "sdkRootAndPrefix": 2,
   "originalConfigFocusedChecks": 106,
   "typecheckExitCode": 0,
@@ -9,5 +9,6 @@
   "fullHAPBuilt": false,
   "realPhone": false,
   "realTLS": false,
-  "inheritedFullScriptsPass": false
+  "inheritedFullScriptsPass": false,
+  "RCPArrayCooldownRedGreen": true
 }

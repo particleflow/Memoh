@@ -372,7 +372,9 @@ export class NativeResumableUpload {
     let due = now + delay;
     if (reply) {
       const names = Object.keys(reply.headers).filter((key: string): boolean => key.toLowerCase() === 'retry-after');
-      const value = names.length === 1 ? reply.headers[names[0]] : undefined;
+      const raw = names.length === 1 ? reply.headers[names[0]] : undefined;
+      // RCP may expose one legal header value as a one-element array.
+      const value = Array.isArray(raw) && raw.length === 1 ? raw[0] : raw;
       if (typeof value === 'string') {
         if (/^[0-9]+$/.test(value)) {
           const seconds = Number(value);

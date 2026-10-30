@@ -20,5 +20,6 @@
   "credentialsUsedInTests": "synthetic only",
   "productionConfigRead": false,
   "privateLibraryTransferMetadataCommitted": false,
-  "completeSecretProof": false
+  "completeSecretProof": false,
+  "RCPHeaderShapeFollowup": "Only unwrap one legal Retry-After value; no endpoint or data collection added."
 }

@@ -1,0 +1,14 @@
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert(firstCooldownReadAt>=firstFailureAt+1000)
+
+    at one (/workspace/harmony-recovery-20261023/image-probe-source/docs/testing/harmony-recovery-base-contract-20261030/recovery-check.cjs:66:42)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async /workspace/harmony-recovery-20261023/image-probe-source/docs/testing/harmony-recovery-base-contract-20261030/recovery-check.cjs:77:59 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}

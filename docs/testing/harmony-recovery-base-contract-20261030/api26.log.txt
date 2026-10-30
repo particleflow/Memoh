@@ -1,14 +1,14 @@
 > hvigor UP-TO-DATE :entry:default@PreBuild...
 > hvigor Finished :entry:default@CreateModuleInfo... after 2 ms
-> hvigor Finished :entry:default@ConfigureCmake... after 64 ms
+> hvigor Finished :entry:default@ConfigureCmake... after 40 ms
 > hvigor UP-TO-DATE :entry:default@MergeProfile...
 > hvigor UP-TO-DATE :entry:default@CreateBuildProfile...
-> hvigor Finished :entry:default@BuildNativeWithCmake... after 25 ms
+> hvigor Finished :entry:default@BuildNativeWithCmake... after 17 ms
 > hvigor UP-TO-DATE :entry:default@GeneratePkgContextInfo...
 > hvigor UP-TO-DATE :entry:default@ProcessProfile...
 > hvigor UP-TO-DATE :entry:default@ProcessRouterMap...
 > hvigor UP-TO-DATE :entry:default@ProcessShareConfig...
-> hvigor Finished :entry:default@ProcessStartupConfig... after 4 ms
+> hvigor Finished :entry:default@ProcessStartupConfig... after 2 ms
 > hvigor UP-TO-DATE :entry:default@ProcessResource...
 > hvigor UP-TO-DATE :entry:default@GenerateLoaderJson...
 > hvigor UP-TO-DATE :entry:default@CompileResource...
@@ -357,28 +357,28 @@ WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/m
 WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:332:66
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:478:23
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:480:23
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:484:14
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:486:14
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:485:30
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:487:30
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:506:22
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:508:22
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:545:38
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:547:38
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:555:25
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:557:25
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:570:28
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:572:28
  Function may throw exceptions. Special handling is required.
 
-WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:571:12
+WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets:573:12
  Function may throw exceptions. Special handling is required.
 
 WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeMediaDownload.ets:48:28
@@ -655,7 +655,7 @@ WARN: ArkTS:WARN File: /workspace/harmony-recovery-20261023/image-probe-source/m
  Function may throw exceptions. Special handling is required.
 
 
-> hvigor Finished :entry:default@CompileArkTS... after 8 s 775 ms
-> hvigor BUILD SUCCESSFUL in 13 s 920 ms
+> hvigor Finished :entry:default@CompileArkTS... after 5 s 562 ms
+> hvigor BUILD SUCCESSFUL in 9 s 429 ms
 
 15 tasks in total: 5 executed, 10 up-to-date

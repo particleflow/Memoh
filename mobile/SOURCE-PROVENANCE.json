@@ -100,7 +100,7 @@
     },
     {
       "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
-      "sha256": "cadd10ed3b9b3bba3ead2cc7d03d773c7d08b583ca38e11d31bb3ef35bfb9ee5",
+      "sha256": "66776b53f1b3331b2fb0554cac9b19d43a2588f7415e8a29dacb90bf12db56c4",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -344,7 +344,7 @@
     },
     {
       "path": "mobile/client/tests/stage2/harmony_resumable.cjs",
-      "sha256": "bb33c01d09a06ebd3f00b573675e2c266767406f6d215d5a4d459469cac176b9",
+      "sha256": "c078862aa4b0080eec37b7972a1ff764ebca8c932dc07dfde01a79729a6f9e61",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
