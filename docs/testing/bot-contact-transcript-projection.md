@@ -1,5 +1,7 @@
 # Native contact transcript projection
 
+**Later field evidence:** See [the original Bot acceptance ledger](bot-continuity-acceptance.md) for the completed b965 Web parallel/result sample and earlier046 historical-directory acceptance. The isolated results and limits below describe this original slice; they are preserved rather than treated as current all-client acceptance.
+
 This slice changes shared Web presentation only. The server-resolved contact
 entrance opens a contact-scoped panel. Native (`model`) contact panels omit
 raw structured assistant tool activity and typed background-task notifications.

@@ -4,11 +4,11 @@
  | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
  | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
  | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
-+| C12 | External recorder and unpaced Ego reads | 890 page-wait dependency fixed using field-used a766 host timer; collector field check pending |
++| C12 | External recorder and unpaced Ego reads | b965 host-timer collector and one Web parallel sample passed; remaining scope tracked |
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,73 @@
+@@ -279,6 +280,83 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -63,12 +63,22 @@
 +  Collector pacing now runs outside page.evaluate; absent host timer rejects before
 +  Network.enable with no Page fallback. Serial interval, stop/drain and unknown
 +  behavior remain. Seven new seam checks pass; old suites were not rerun. The
-+  updated collector has not run in the field. No product/deployment/model action.
++  collector was not field-run during that repair. The subsequent actual pass is recorded below.
 +- **Current handoff:** [Host-wait repair and executable continuation](parallel-capture-3f361/ego/host-wait-handoff.md).
 +  The old generic timer-contract request is resolved; do not repeat the Page timer
-+  experiment, enlarge timeouts or remove pacing. Parent resumes the one-sample
-+  plan only through the unique writer after HAP priority work. Page data-RPC and
++  experiment, enlarge timeouts or remove pacing. The one-sample
++  plan has since completed; any remaining step stays with the unique writer. Page data-RPC and
 +  host-termination limits remain; this repair does not claim business acceptance.
++- **Actual b965 field PASS:** Parent reports production cef/HAP36, Web observation;
++  collector b965f0b00c320fd4155de077c99d253c52c2f5a2. Strict seq2805/2808/2810:
++  original B completed, substantive answer persisted, same original expert still
++  running. Expert then completed; assistant_final summary returned naturally to C,
++  and refresh did not add a reply ID. A/B each once, WS path, no business retry;
++  all terminal, space64 cleared. QueuePOST/item mapping, internal receipt and
++  billing were not exercised/inspected. No HAP acceptance follows from Web.
++  [Original Bot acceptance ledger](bot-continuity-acceptance.md) retains exact IDs,
++  parent provenance, prior046 directory coverage, and one proposed incoming-task
++  directory read using this existing completed sample. Do not rerun the sample.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
 +  Field evidence is parent-transcribed from writer-local probe-result.json,

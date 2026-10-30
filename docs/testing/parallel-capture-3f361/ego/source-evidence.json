@@ -39,5 +39,12 @@
     "read_via": "authorized original repository exact Git object",
     "reuse_scope": "Node-host timer only, not source IDs or read-only POST guard",
     "field_provenance": "parent-reported actual writer execution; local log not read by cloud"
+  },
+  "latest_field_acceptance": {
+    "record": "field-parallel-result.json",
+    "provenance": "parent reports writer outcome; cloud did not read local F: evidence",
+    "productionLabel": "cef",
+    "fullProductionSHA": "not supplied",
+    "sourceComparisonsScope": "prior exact3f361/9270 reads only; no claim of current cef source comparison"
   }
 }

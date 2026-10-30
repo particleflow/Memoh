@@ -1,5 +1,7 @@
 # Durable background result delivery
 
+**Later field evidence:** See [the original Bot acceptance ledger](bot-continuity-acceptance.md) for the completed b965 Web parallel/result sample and earlier046 historical-directory acceptance. The isolated results and limits below describe this original slice; they are preserved rather than treated as current all-client acceptance.
+
 This local slice extends the native queue identity change at `4768679adf01047bff66c148ded37f215c9994be`. It does not complete the remaining primary-chat activity visibility or precise historical-run navigation work.
 
 ## Contract

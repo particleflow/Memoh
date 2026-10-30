@@ -104,7 +104,21 @@
     "pattern": "ms => new Promise(resolve => setTimeout(resolve, ms))",
     "realm": "Node host outside page.evaluate",
     "actualExecutionEvidence": "Parent reports writer used a766 host wait without Page timer timeout; stopped on separate natural-contact-POST guard; GET200 in27.572ms",
-    "collectorFieldRun": "not performed",
+    "collectorFieldRun": "PASS, parent-reported parallel-b965-20261030 OUTCOME; see field-parallel-result.json",
     "seamChecks": "seven passed; old suites not rerun"
+  },
+  "fieldParallelAcceptance": {
+    "record": "field-parallel-result.json",
+    "client": "Web",
+    "productionLabel": "cef",
+    "fullProductionSHA": "not supplied",
+    "strictOrder": [
+      2805,
+      2808,
+      2810
+    ],
+    "businessAllTerminal": true,
+    "repeatRequested": false,
+    "remaining": "queue POST/item mapping, internal receipt/billing and other ledger coverage; no HAP proof"
   }
 }
