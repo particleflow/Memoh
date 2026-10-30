@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+ RUN  v4.1.10 /workspace/memoh-hydration-cef
+
+
+ Test Files  2 passed (2)
+      Tests  20 passed (20)
+   Start at  12:43:03
+   Duration  7.31s (transform 5.66s, setup 0ms, import 7.32s, tests 89ms, environment 1ms)

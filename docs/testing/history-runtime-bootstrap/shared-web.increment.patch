@@ -1,0 +1,36 @@
+diff --git a/apps/web/src/store/chat-list.ts b/apps/web/src/store/chat-list.ts
+index ba425f978..e0df3388e 100644
+--- a/apps/web/src/store/chat-list.ts
++++ b/apps/web/src/store/chat-list.ts
+@@ -438,7 +438,7 @@ export const useChatStore = defineStore('chat', () => {
+     clearHistoryView,
+     markHistoryEmpty,
+     knownSessionSummary,
+-    startWebSocket,
++    startWebSocket, ensureWebSocket,
+     startBotSessionsActivityStream,
+     startSessionRuntime,
+     releasePreviousSession: (botId, targetSessionId) => {
+diff --git a/apps/web/src/store/chat/bootstrap.ts b/apps/web/src/store/chat/bootstrap.ts
+index 67fbe3698..c53775979 100644
+--- a/apps/web/src/store/chat/bootstrap.ts
++++ b/apps/web/src/store/chat/bootstrap.ts
+@@ -33,6 +33,7 @@ export interface ChatBootstrapDeps {
+   markHistoryEmpty: () => void
+   knownSessionSummary: (sessionId: string) => SessionSummary | null | undefined
+   startWebSocket: (botId: string) => void
++  ensureWebSocket: (botId: string) => boolean
+   startBotSessionsActivityStream: (botId: string) => void
+   startSessionRuntime: (botId: string, sessionId: string) => void
+   releasePreviousSession: (botId: string, sessionId: string) => void
+@@ -288,6 +289,10 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
+       // that transport boundary before selecting the historical runtime.
+       if (initializePromise) await initializePromise
+       if (deps.currentBotId.value !== targetBotId || navigation !== contactRequest) return
++      // Persisted Bot selection can precede initialize(). A runtime can fetch
++      // history without a socket, then wait forever for its first snapshot.
++      // Reuse the native handle (including an in-flight handshake) when present.
++      deps.ensureWebSocket(targetBotId)
+       if (options.sessionId) await selectSession(options.sessionId)
+       else await openContact()
+       return

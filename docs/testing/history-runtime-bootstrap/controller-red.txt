@@ -1,0 +1,59 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+
+ RUN  v4.1.10 /workspace/memoh-hydration-cef
+
+ ❯ |web| src/store/chat/bootstrap-history-runtime.test.ts (4 tests | 3 failed) 23ms
+     × opens the target transport before history hydration and commits atomically (rest-first) 13ms
+     × opens the target transport before history hydration and commits atomically (snapshot-first) 2ms
+     × propagates a transport setup error before starting a permanently masked history load 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/store/chat/bootstrap-history-runtime.test.ts > cold same-Bot historical runtime admission > opens the target transport before history hydration and commits atomically (rest-first)
+ FAIL  |web| src/store/chat/bootstrap-history-runtime.test.ts > cold same-Bot historical runtime admission > opens the target transport before history hydration and commits atomically (snapshot-first)
+AssertionError: expected [] to deeply equal [ 'history-bot' ]
+
+- Expected
++ Received
+
+- [
+-   "history-bot",
+- ]
++ []
+
+ ❯ src/store/chat/bootstrap-history-runtime.test.ts:73:51
+     71|     expect(transcript.loadingMessages.value).toBe(true)
+     72|     expect(transcript.visibleMessages.value).toEqual([])
+     73|     expect(h.sockets.map(socket => socket.botId)).toEqual([bot])
+       |                                                   ^
+     74|     h.sockets[0]!.open()
+     75|     expect(h.sockets[0]!.sent).toEqual([{ type: 'runtime_subscribe', s…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  |web| src/store/chat/bootstrap-history-runtime.test.ts > cold same-Bot historical runtime admission > propagates a transport setup error before starting a permanently masked history load
+AssertionError: promise resolved "undefined" instead of rejecting
+
+- Expected:
+Error {
+  "message": "rejected promise",
+}
+
++ Received:
+undefined
+
+ ❯ src/store/chat/bootstrap-history-runtime.test.ts:102:69
+    100|   it('propagates a transport setup error before starting a permanently…
+    101|     const error = new Error('synthetic transport setup failed'), h = h…
+    102|     await expect(h.bootstrap.selectBot(bot, { sessionId: session })).r…
+       |                                                                     ^
+    103|     expect(api.fetchMessagesUI).not.toHaveBeenCalled()
+    104|     expect(h.views.sessionTranscript(bot, session).loadingMessages.val…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  12:38:02
+   Duration  9.12s (transform 6.63s, setup 0ms, import 8.93s, tests 23ms, environment 0ms)

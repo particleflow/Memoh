@@ -1,0 +1,25 @@
+{
+  "base": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "product_commit": "1f021c94d08ac5617a8ae2489103d4036a11d51b",
+  "ui_submodule": "f69402a55dd87a59c10722fe11507ad8fd7048f5",
+  "production_files": [
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "before_sha256": "68f308e1b09fdd4f4177c7470fb2ef2edaac48173dd3dd8f4b33f2945e6b9a47",
+      "after_sha256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "before_sha256": "b56c603a230471247ed1c87d4ea313cca209f3caeff2ccbe91dc50c8a44251cf",
+      "after_sha256": "1a9ba6bc2ce53945a61dd2e3f99203546cbb931ac526beaf9da4273076da65fd"
+    }
+  ],
+  "sdk_backend_schema_agent_changes": false,
+  "harmony": {
+    "current_source_revision": null,
+    "mirror_paths_verified": false,
+    "lock_hashes_updated": false,
+    "physical_acceptance": false,
+    "required": "Consume both exact production deltas together in each current native Web mirror; update the current source mapping/lock after hash/context review. No whole old store replacement."
+  }
+}
