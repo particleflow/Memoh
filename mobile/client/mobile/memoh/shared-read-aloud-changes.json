@@ -186,28 +186,28 @@
   },
   "locales": {
     "en": {
-      "replay": "Read aloud again",
+      "replay": "Read aloud",
       "stop": "Stop reading",
       "enable": "Enable reading aloud",
       "resume": "Resume reading",
       "playing": "Reading this reply aloud",
-      "failed": "Reading stopped. Use Read aloud again to retry."
+      "failed": "Reading stopped. Use Read aloud to retry."
     },
     "zh": {
-      "replay": "重播朗读",
+      "replay": "朗读",
       "stop": "停止朗读",
       "enable": "点击启用朗读",
       "resume": "继续朗读",
       "playing": "正在朗读此回复",
-      "failed": "朗读已停止，可选择重播朗读重试。"
+      "failed": "朗读已停止，可选择朗读重试。"
     },
     "ja": {
-      "replay": "もう一度読み上げる",
+      "replay": "読み上げる",
       "stop": "読み上げを停止",
       "enable": "読み上げを有効にする",
       "resume": "読み上げを再開",
       "playing": "この返信を読み上げています",
-      "failed": "読み上げが停止しました。もう一度読み上げて再試行できます。"
+      "failed": "読み上げが停止しました。読み上げるで再試行できます。"
     }
   },
   "sdkOverlays": {

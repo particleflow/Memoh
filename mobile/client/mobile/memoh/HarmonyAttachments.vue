@@ -7,7 +7,7 @@
       <img v-if="showPreviews && file.type.startsWith('image/')" :src="preview(file)" :alt="file.name" class="max-h-40 max-w-full object-contain">
       <audio v-else-if="showPreviews && file.type.startsWith('audio/')" :src="preview(file)" controls preload="none" class="max-w-full" />
       <video v-else-if="showPreviews && file.type.startsWith('video/')" :src="preview(file)" controls preload="none" class="max-h-48 max-w-full" />
-      <span class="min-w-0 truncate">{{ file.name }} · {{ Math.ceil(file.size / 1024) }} KiB · {{ file.resumable ? '支持续传' : '旧服务：不支持续传' }}</span>
+      <span class="min-w-0 truncate">{{ file.name }} · {{ Math.ceil(file.size / 1024) }} KiB</span>
       <Button variant="ghost" :disabled="disabled || busy" @click="remove(file)">移除</Button>
     </div>
   </div>
