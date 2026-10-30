@@ -1,5 +1,7 @@
 # One bounded text delegation: release9270 source review and writer handoff
 
+**890 preflight hold:** No A/B was sent. Page-owned evaluate pacing timed out before readiness; do not execute this older plan or repeat its self-check. See [the scoped diagnosis and one read-only consumer excerpt request](navigation-wait-diagnosis.md).4120 success remains historical evidence; a documented host wait/lifecycle binding is still needed.
+
 This plan supersedes the README's already-completed free self-check. It is preparation only: the cloud owner sent no live requests, ran no old fixtures/self-checks, and changed no product code. The parent reports the4120 writer result:20 serialized reads/20 waits, minimum253ms,10 scoped GET responses completed, stopped=true/fault=false/unknown0/pending0, naturally observed WS sent/received one each. No A/B, model, DB or configuration work; resources cleared. Evidence files are writer-local `ego412-paced-selfcheck/RESULT.json` and `OUTCOME.json`, not independently read here. Natural WS frames do not prove a business message/queue-item mapping. POST, A/B, base64 and cross-round lifetime remain unverified.
 
 ## Is parallel execution possible on this version?

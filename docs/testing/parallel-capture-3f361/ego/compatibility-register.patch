@@ -4,11 +4,11 @@
  | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
  | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
  | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
-+| C12 | External recorder and unpaced Ego reads | Envelopes and paced collector verified; business mapping/parallel pending |
++| C12 | External recorder and unpaced Ego reads | 4120 self-check passed;890 page-wait timeout, host lifecycle unresolved |
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,49 @@
+@@ -279,6 +280,63 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -45,6 +45,20 @@
 +  in-flight Ego-call cancellation remain unverified. Release9270 source supports
 +  independent expert execution, while primary turns serialize. The next handoff
 +  specifies one bounded text sample; a missed window remains inconclusive.
++- **890 later failure (not a business failure):** Parent readback of writer
++  turn01a18c6a-52f2-71ca-aec9-32e493efa35e reports PageEvaluationTimeoutError /
++  EGO_PAGE_EVALUATION_TIMED_OUT after the first empty read, before GET/socket
++  readiness. No A/B/model submission. The owned space61 was subsequently closed;
++  unknown execution status belongs only to that Page evaluation, not a business run.
++  The4120/890 collector blobs are identical. The page-owned evaluate timer is a
++  source-confirmed lifecycle dependency, but actual context destruction and the
++  two wrapper call-order differences are not established. Preserve4120's success.
++- **Required repair boundary:** [Exact diagnosis and one read-only excerpt request](parallel-capture-3f361/ego/navigation-wait-diagnosis.md). Read original journal
++  order plus installed host-wait/outer-execution help, without new live operations.
++  Bind only a documented host-side delay; no larger timeout, unpaced fallback,
++  guessed sleep API or new framework. Two injected error diagnostics pass but do
++  not prove real Ego navigation handling. No field-ready host-wait fix is claimed;
++  the prior real-sample plan is held before A until this contract is resolved.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
 +  Field evidence is parent-transcribed from writer-local probe-result.json,

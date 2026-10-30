@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "scope": "new injected page-wait failure diagnostics only",
+  "sameSourceAtBothRevisions": true,
+  "cases": [
+    {
+      "navigationReported": false,
+      "firstEmptyReadThenPageWaitFails": true,
+      "noSecondReadOrBusinessAction": true,
+      "localCatchAndStop": "works only if Ego returns the rejection into the still-running collector execution"
+    },
+    {
+      "navigationReported": true,
+      "firstEmptyReadThenPageWaitFails": true,
+      "noSecondReadOrBusinessAction": true,
+      "localCatchAndStop": "works only if Ego returns the rejection into the still-running collector execution"
+    }
+  ],
+  "notProven": [
+    "actual navigation/context destruction",
+    "Ego host execution survival/cancellation",
+    "supported host timer primitive"
+  ],
+  "liveRequests": 0,
+  "modelCalls": 0,
+  "oldSuitesRerun": false
+}

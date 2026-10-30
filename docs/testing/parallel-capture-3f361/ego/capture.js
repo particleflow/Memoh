@@ -1,4 +1,7 @@
-/* Paste into one existing Ego execution. No imports, external endpoint or browser.
+/* HISTORICAL PAGE-WAIT IMPLEMENTATION:890 preflight failed before A/B.
+ * Do not rerun until a documented navigation-independent host wait is bound.
+ * See navigation-wait-diagnosis.md. No guessed replacement API is implemented.
+ * No imports, external endpoint or browser.
  * Direct Ego2.1.0 shapes were field-observed; WS/POST paths remain unverified.
  * page.events() has a single owner and is read/clear, never an EventEmitter.
  */

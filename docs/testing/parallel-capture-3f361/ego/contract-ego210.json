@@ -80,5 +80,18 @@
       "cross-round lifetime",
       "real parallel acceptance"
     ]
+  },
+  "laterPreflightFailure": {
+    "provenance": "Parent readback of writer turn01a18c6a-52f2-71ca-aec9-32e493efa35e; cloud did not read local journal/OUTCOME",
+    "stage": "page-evaluate pacing after first empty batch, before GET/socket readiness",
+    "errorName": "PageEvaluationTimeoutError",
+    "errorCode": "EGO_PAGE_EVALUATION_TIMED_OUT",
+    "observedNonresponseSeconds": 15,
+    "AB": 0,
+    "modelCalls": 0,
+    "unknownScope": "only the evaluate in the subsequently closed owned Page; no business submission",
+    "cleanup": "parent reports owned space61 closed,4 temporary scripts removed, none in flight",
+    "hostWaitContract": "not supplied; one read-only help/journal excerpt requested",
+    "navigationContextDestroyed": "not established"
   }
 }
