@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -118,12 +119,19 @@ func (s *postgresPresenceClaims) prepare(ctx context.Context, policy conversatio
 			return err
 		}
 		hasPrior := err == nil
-		last := f.LastDirectInput.Time
+		anchor := time.Time{}
+		if hasPrior {
+			anchor = prior.CreatedAt.Time
+		}
+		previousInputs, last, reliableHistory, err := presenceHistoryContinuity(f.PreviousSources, s.handle.BotID, s.handle.SessionID, anchor)
+		if err != nil {
+			return err
+		}
 		if hasPrior && prior.CreatedAt.Time.After(last) {
 			last = prior.CreatedAt.Time
 		}
 		now := run.CreatedAt.Time
-		facts = conversationpresence.Facts{Admitted: true, FirstDirectInput: f.PreviousInputs == 0 && !hasPrior, HistoryAvailable: true, PreviousSettled: f.PreviousSettled, PendingUserInput: f.PendingInput.Bool, ReplyContinuation: reply, LastDirectInput: last, Now: now}
+		facts = conversationpresence.Facts{Admitted: true, FirstDirectInput: previousInputs == 0 && !hasPrior, HistoryAvailable: reliableHistory, PreviousSettled: f.PreviousSettled, PendingUserInput: f.PendingInput.Bool, ReplyContinuation: reply, LastDirectInput: last, Now: now}
 		facts.RecentExchange = !last.IsZero() && (policy.IdleAfter <= 0 || now.Sub(last) < policy.IdleAfter)
 		decision := conversationpresence.Classify(s.source, s.handle.BotID, s.handle.SessionID, facts, policy)
 		episode := run.RunID
@@ -139,6 +147,39 @@ func (s *postgresPresenceClaims) prepare(ctx context.Context, policy conversatio
 		return err
 	})
 	return ticket, facts, inserted, err
+}
+
+func presenceHistoryContinuity(raw []byte, botID, sessionID string, anchor time.Time) (int64, time.Time, bool, error) {
+	var entries []struct {
+		Source    json.RawMessage `json:"source"`
+		CreatedAt time.Time       `json:"created_at"`
+	}
+	if err := json.Unmarshal(raw, &entries); err != nil {
+		return 0, time.Time{}, false, err
+	}
+	var previousInputs int64
+	var lastDirect time.Time
+	reliable := true
+	for _, entry := range entries {
+		source := inputsource.FromMetadata(map[string]any{inputsource.MetadataKey: entry.Source}, botID, sessionID)
+		switch source.Kind {
+		case inputsource.User:
+			previousInputs++
+			if entry.CreatedAt.After(lastDirect) {
+				lastDirect = entry.CreatedAt
+			}
+		case inputsource.Schedule, inputsource.Result, inputsource.Delegation, inputsource.NativeTask:
+			// Ignore only supported machine sources validated by Scoped.
+		default:
+			// Unknown cannot be silently discarded as a machine input. A later
+			// trusted receipt may anchor continuity beyond old unknown history.
+			previousInputs++
+			if anchor.IsZero() || entry.CreatedAt.After(anchor) {
+				reliable = false
+			}
+		}
+	}
+	return previousInputs, lastDirect, reliable, nil
 }
 
 func (s *postgresPresenceClaims) Claim(ctx context.Context, ticket conversationpresence.Ticket) (bool, error) {

@@ -212,8 +212,9 @@ func (q *Queries) PublishConversationPresence(ctx context.Context, arg PublishCo
 
 const readConversationPresenceFacts = `-- name: ReadConversationPresenceFacts :one
 SELECT
-  (SELECT count(*) FROM bot_history_messages h WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1 AND h.role = 'user' AND h.turn_id IS DISTINCT FROM $2::uuid) AS previous_inputs,
-  (SELECT max(h.created_at) FROM bot_history_messages h WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1 AND h.role = 'user' AND h.turn_id IS DISTINCT FROM $2::uuid AND h.metadata->'input_source'->>'kind' = 'user')::timestamptz AS last_direct_input,
+  -- Storage role alone cannot distinguish a direct user from machine input.
+  -- Return only provenance and time; the shared source validator resolves it.
+  COALESCE((SELECT jsonb_agg(jsonb_build_object('source', h.metadata->'input_source', 'created_at', h.created_at)) FROM bot_history_messages h WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = $1 AND h.role = 'user' AND h.turn_id IS DISTINCT FROM $2::uuid), '[]'::jsonb)::jsonb AS previous_sources,
   EXISTS(SELECT 1 FROM user_input_requests u WHERE u.team_id = public.memoh_current_team_id() AND u.session_id = $1 AND u.status = 'pending') OR
   EXISTS(SELECT 1 FROM tool_approval_requests a WHERE a.team_id = public.memoh_current_team_id() AND a.session_id = $1 AND a.status = 'pending') AS pending_input,
   NOT EXISTS(SELECT 1 FROM session_runs r WHERE r.team_id = public.memoh_current_team_id() AND r.session_id = $1 AND r.run_id <> $3::uuid AND r.state IN ('accepted','running','waiting_decision','finishing')) AS previous_settled
@@ -226,20 +227,14 @@ type ReadConversationPresenceFactsParams struct {
 }
 
 type ReadConversationPresenceFactsRow struct {
-	PreviousInputs  int64              `json:"previous_inputs"`
-	LastDirectInput pgtype.Timestamptz `json:"last_direct_input"`
-	PendingInput    pgtype.Bool        `json:"pending_input"`
-	PreviousSettled bool               `json:"previous_settled"`
+	PreviousSources []byte      `json:"previous_sources"`
+	PendingInput    pgtype.Bool `json:"pending_input"`
+	PreviousSettled bool        `json:"previous_settled"`
 }
 
 func (q *Queries) ReadConversationPresenceFacts(ctx context.Context, arg ReadConversationPresenceFactsParams) (ReadConversationPresenceFactsRow, error) {
 	row := q.db.QueryRow(ctx, readConversationPresenceFacts, arg.SessionID, arg.TurnID, arg.RunID)
 	var i ReadConversationPresenceFactsRow
-	err := row.Scan(
-		&i.PreviousInputs,
-		&i.LastDirectInput,
-		&i.PendingInput,
-		&i.PreviousSettled,
-	)
+	err := row.Scan(&i.PreviousSources, &i.PendingInput, &i.PreviousSettled)
 	return i, err
 }

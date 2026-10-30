@@ -8,6 +8,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/felinics/memoh/internal/db/postgres/sqlc"
+	sdkcopilot "github.com/felinics/twilight/provider/github/copilot"
 	sdk "github.com/felinics/twilight/sdk"
 
 	"github.com/felinics/memoh/internal/conversationpresence"
@@ -107,5 +109,37 @@ func TestPresenceSDKRejectsWrongSelectionAndInvalidOutput(t *testing.T) {
 	wrong.ProviderID = "different-provider"
 	if _, err := generator.Generate(context.Background(), conversationpresence.Input{Identity: wrong, Choice: choice, Phase: conversationpresence.Accepted}, conversationpresence.Limits{MaxInputRunes: 100, MaxOutputTokens: 80}); err == nil {
 		t.Fatal("different provider accepted")
+	}
+}
+
+func TestPresenceAdmissionRequiresPinnedEffectiveModel(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		client  models.ClientType
+		modelID string
+		want    bool
+	}{
+		{"copilot automatic member", models.ClientTypeGitHubCopilot, sdkcopilot.AutoModel, false},
+		{"copilot fixed member", models.ClientTypeGitHubCopilot, "fixed-fixture-model", true},
+		{"same literal on a fixed-model protocol", models.ClientTypeOpenAICompletions, sdkcopilot.AutoModel, true},
+		{"empty selection", models.ClientTypeOpenAICompletions, "", false},
+		{"whitespace selection", models.ClientTypeGitHubCopilot, " \t", false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			model := models.GetResponse{ID: "fixture-model", ModelID: tc.modelID, Model: models.Model{ProviderID: "fixture-provider", ModelID: tc.modelID, Enable: true, Config: models.ModelConfig{ThinkingMode: reasoning.ModeNone}}}
+			provider := sqlc.Provider{ClientType: string(tc.client), Enable: true}
+			if got := declaredPresenceCapabilities(model, provider); got != tc.want {
+				t.Errorf("runtime gate=%v want %v", got, tc.want)
+			}
+			main := models.SDKModelConfig{ModelID: tc.modelID, ClientType: string(tc.client)}
+			identity := conversationpresence.Identity{ModelUUID: model.ID, ModelID: tc.modelID, ProviderID: model.ProviderID, ClientType: main.ClientType}
+			generator, choice, err := prepareConversationPresenceSDK(identity, model, main, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := generator != nil && choice.Usable; got != tc.want {
+				t.Errorf("SDK admission=%v want %v reason=%s", got, tc.want, choice.Reason)
+			}
+		})
 	}
 }

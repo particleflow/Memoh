@@ -1,7 +1,8 @@
 -- name: ReadConversationPresenceFacts :one
 SELECT
-  (SELECT count(*) FROM bot_history_messages h WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = sqlc.arg(session_id) AND h.role = 'user' AND h.turn_id IS DISTINCT FROM sqlc.arg(turn_id)::uuid) AS previous_inputs,
-  (SELECT max(h.created_at) FROM bot_history_messages h WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = sqlc.arg(session_id) AND h.role = 'user' AND h.turn_id IS DISTINCT FROM sqlc.arg(turn_id)::uuid AND h.metadata->'input_source'->>'kind' = 'user')::timestamptz AS last_direct_input,
+  -- Storage role alone cannot distinguish a direct user from machine input.
+  -- Return only provenance and time; the shared source validator resolves it.
+  COALESCE((SELECT jsonb_agg(jsonb_build_object('source', h.metadata->'input_source', 'created_at', h.created_at)) FROM bot_history_messages h WHERE h.team_id = public.memoh_current_team_id() AND h.session_id = sqlc.arg(session_id) AND h.role = 'user' AND h.turn_id IS DISTINCT FROM sqlc.arg(turn_id)::uuid), '[]'::jsonb)::jsonb AS previous_sources,
   EXISTS(SELECT 1 FROM user_input_requests u WHERE u.team_id = public.memoh_current_team_id() AND u.session_id = sqlc.arg(session_id) AND u.status = 'pending') OR
   EXISTS(SELECT 1 FROM tool_approval_requests a WHERE a.team_id = public.memoh_current_team_id() AND a.session_id = sqlc.arg(session_id) AND a.status = 'pending') AS pending_input,
   NOT EXISTS(SELECT 1 FROM session_runs r WHERE r.team_id = public.memoh_current_team_id() AND r.session_id = sqlc.arg(session_id) AND r.run_id <> sqlc.arg(run_id)::uuid AND r.state IN ('accepted','running','waiting_decision','finishing')) AS previous_settled;

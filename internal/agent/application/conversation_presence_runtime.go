@@ -28,6 +28,9 @@ type ConversationPresenceOptions struct {
 }
 
 func declaredPresenceCapabilities(model models.GetResponse, provider sqlc.Provider) bool {
+	if !presenceHasFixedModel(provider.ClientType, model.ModelID) {
+		return false
+	}
 	if model.Config.CatalogAvailable != nil && !*model.Config.CatalogAvailable {
 		return false
 	}

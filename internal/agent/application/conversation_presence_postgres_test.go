@@ -2,6 +2,7 @@ package application
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sync"
 	"testing"
@@ -221,6 +222,107 @@ func TestConversationPresencePostgresRevocationStillClosesFeedback(t *testing.T)
 				if _, _, inserted, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false); err != nil || inserted {
 					t.Fatalf("close-before-prepare lost: %v %v", inserted, err)
 				}
+			}
+		})
+	}
+}
+
+func TestConversationPresencePostgresFirstDirectIgnoresValidMachineHistory(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		kind      string
+		malformed string
+		want      conversationpresence.Temperature
+	}{
+		{"schedule", inputsource.Schedule, "", conversationpresence.Cold},
+		{"task result", inputsource.Result, "", conversationpresence.Cold},
+		{"delegation", inputsource.Delegation, "", conversationpresence.Cold},
+		{"native task", inputsource.NativeTask, "", conversationpresence.Cold},
+		{"missing provenance", "", "missing", conversationpresence.Uncertain},
+		{"explicit unknown", inputsource.Unknown, "", conversationpresence.Uncertain},
+		{"unsupported source", "future_kind", "", conversationpresence.Uncertain},
+		{"task missing id", inputsource.Schedule, "task_id", conversationpresence.Uncertain},
+		{"foreign bot", inputsource.Result, "bot_id", conversationpresence.Uncertain},
+		{"foreign session", inputsource.Result, "session_id", conversationpresence.Uncertain},
+		{"wrong field type", inputsource.Schedule, "field_type", conversationpresence.Uncertain},
+		{"direct source without actor", inputsource.User, "actor", conversationpresence.Uncertain},
+		{"machine mixed with unknown", inputsource.Schedule, "mixed_unknown", conversationpresence.Uncertain},
+		{"machine mixed with direct input", inputsource.Result, "mixed_direct", conversationpresence.Hot},
+		{"direct user", inputsource.User, "", conversationpresence.Hot},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			claims, ctx, pool := presencePostgresFixture(t)
+			source := map[string]any{"kind": tc.kind, "bot_id": claims.handle.BotID, "session_id": claims.handle.SessionID, "task_id": "synthetic-task"}
+			if tc.kind == inputsource.User {
+				source["user_id"] = claims.actor
+			}
+			switch tc.malformed {
+			case "task_id":
+				delete(source, "task_id")
+			case "bot_id":
+				source["bot_id"] = uuid.NewString()
+			case "session_id":
+				source["session_id"] = uuid.NewString()
+			case "field_type":
+				source["origin_run_id"] = 17
+			case "actor":
+				delete(source, "user_id")
+			}
+			metadata := map[string]any{inputsource.MetadataKey: source}
+			if tc.malformed == "missing" {
+				metadata = map[string]any{}
+			}
+			raw, err := json.Marshal(metadata)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if _, err = pool.Exec(ctx, `INSERT INTO bot_history_messages(bot_id,session_id,role,content,metadata,created_at) VALUES($1,$2,'user','{"role":"user","content":"synthetic machine history"}'::jsonb,$3,now()-interval '1 minute')`, claims.handle.BotID, claims.handle.SessionID, raw); err != nil {
+				t.Fatal(err)
+			}
+			if tc.malformed == "mixed_unknown" || tc.malformed == "mixed_direct" {
+				extra := []byte(`{}`)
+				if tc.malformed == "mixed_direct" {
+					extra, err = json.Marshal(map[string]any{inputsource.MetadataKey: claims.source})
+					if err != nil {
+						t.Fatal(err)
+					}
+				}
+				if _, err = pool.Exec(ctx, `INSERT INTO bot_history_messages(bot_id,session_id,role,content,metadata,created_at) VALUES($1,$2,'user','{}'::jsonb,$3,now()-interval '30 seconds')`, claims.handle.BotID, claims.handle.SessionID, extra); err != nil {
+					t.Fatal(err)
+				}
+			}
+			_, facts, inserted, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{IdleAfter: 15 * time.Minute, IdleStartsEpisode: true}, false)
+			if err != nil || !inserted {
+				t.Fatalf("prepare inserted=%v error=%v", inserted, err)
+			}
+			decision := conversationpresence.Classify(claims.source, claims.handle.BotID, claims.handle.SessionID, facts, conversationpresence.ContinuityPolicy{IdleAfter: 15 * time.Minute, IdleStartsEpisode: true})
+			if decision.Temperature != tc.want {
+				t.Fatalf("got %s/%s want %s facts=%+v", decision.Temperature, decision.Reason, tc.want, facts)
+			}
+		})
+	}
+}
+
+func TestConversationPresenceUnknownHistoryNeedsTrustedAnchor(t *testing.T) {
+	anchor := time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC)
+	for _, tc := range []struct {
+		name     string
+		created  time.Time
+		receipt  time.Time
+		reliable bool
+	}{
+		{"no receipt", anchor.Add(-time.Minute), time.Time{}, false},
+		{"unknown before receipt", anchor.Add(-time.Minute), anchor, true},
+		{"unknown after receipt", anchor.Add(time.Minute), anchor, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			raw, err := json.Marshal([]map[string]any{{"source": nil, "created_at": tc.created}})
+			if err != nil {
+				t.Fatal(err)
+			}
+			count, last, reliable, err := presenceHistoryContinuity(raw, "fixture-bot", "fixture-session", tc.receipt)
+			if err != nil || count != 1 || !last.IsZero() || reliable != tc.reliable {
+				t.Fatalf("unknown history: count=%d last=%s reliable=%v error=%v", count, last, reliable, err)
 			}
 		})
 	}

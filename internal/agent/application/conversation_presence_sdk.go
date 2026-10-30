@@ -7,6 +7,7 @@ import (
 	"io"
 	"strings"
 
+	sdkcopilot "github.com/felinics/twilight/provider/github/copilot"
 	sdk "github.com/felinics/twilight/sdk"
 
 	"github.com/felinics/memoh/internal/conversationpresence"
@@ -27,6 +28,16 @@ type conversationPresenceSDKGenerator struct {
 	generate func(context.Context, sdk.Request) (sdk.ModelResult, error)
 }
 
+// The SDK AutoModel contract delegates member selection and omits model on the
+// wire. Reusing that selection cannot establish a same-effective-model pair.
+// This is scoped to the adapter contract, not a production model-name blacklist.
+func presenceHasFixedModel(clientType, modelID string) bool {
+	if strings.TrimSpace(modelID) == "" {
+		return false
+	}
+	return models.ClientType(clientType) != models.ClientTypeGitHubCopilot || modelID != sdkcopilot.AutoModel
+}
+
 // prepareConversationPresenceSDK must be called with the exact model and SDK
 // configuration resolved for main. verified means the host has established the
 // effective model/route capabilities, not merely recognized an alias string.
@@ -36,6 +47,9 @@ func prepareConversationPresenceSDK(identity conversationpresence.Identity, mode
 		identity.ModelID != model.ModelID || identity.ProviderID != model.ProviderID ||
 		identity.ModelID != main.ModelID || identity.ClientType != main.ClientType {
 		return nil, conversationpresence.ThinkingChoice{}, conversationpresence.ErrInvalidContract
+	}
+	if !presenceHasFixedModel(main.ClientType, main.ModelID) {
+		return nil, conversationpresence.ThinkingChoice{Reason: "effective_model_unpinned"}, nil
 	}
 	// Unlike ordinary chat's legacy bridge, auxiliary generation must not infer
 	// controllability from a model's name or a synthetic default tier list.
