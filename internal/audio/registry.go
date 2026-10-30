@@ -6,7 +6,6 @@ import (
 	"strings"
 	"sync"
 
-	alibabaspeech "github.com/felinics/twilight/provider/alibabacloud/speech"
 	deepgramspeech "github.com/felinics/twilight/provider/deepgram/speech"
 	deepgramtranscription "github.com/felinics/twilight/provider/deepgram/transcription"
 	edgespeech "github.com/felinics/twilight/provider/edge/speech"
@@ -24,6 +23,7 @@ import (
 
 	"github.com/felinics/memoh/internal/apperror"
 	"github.com/felinics/memoh/internal/audio/adapter/alibabacloud"
+	"github.com/felinics/memoh/internal/audio/adapter/cosyvoiceinput"
 	"github.com/felinics/memoh/internal/models"
 )
 
@@ -824,14 +824,7 @@ func defaultProviderDefinitions() []ProviderDefinition {
 				},
 			}},
 			Factory: func(config map[string]any) (sdk.SpeechProvider, error) {
-				opts := []alibabaspeech.Option{}
-				if v := configString(config, "api_key"); v != "" {
-					opts = append(opts, alibabaspeech.WithAPIKey(v))
-				}
-				if v := configString(config, "base_url"); v != "" {
-					opts = append(opts, alibabaspeech.WithBaseURL(v))
-				}
-				return alibabaspeech.New(opts...), nil
+				return cosyvoiceinput.New(configString(config, "api_key"), configString(config, "base_url")), nil
 			},
 			Order: 80,
 		},

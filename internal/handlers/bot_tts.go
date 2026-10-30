@@ -37,6 +37,7 @@ type BotAudioHandler struct {
 	playbackAccess  func(context.Context, string, string) error
 	tempStore       *audiopkg.TempStore
 	logger          *slog.Logger
+	inputSessions   playbackInputSessions
 }
 
 func NewBotAudioHandler(log *slog.Logger, audioService *audiopkg.Service, settingsService *settings.Service, tempStore *audiopkg.TempStore) *BotAudioHandler {
@@ -52,6 +53,8 @@ func (h *BotAudioHandler) Register(e *echo.Echo) {
 	e.POST("/bots/:bot_id/tts/synthesize", h.Synthesize)
 	e.POST("/bots/:bot_id/tts/playback", h.Playback)
 	e.GET("/bots/:bot_id/tts/playback/config", h.PlaybackConfig)
+	e.POST("/bots/:bot_id/tts/playback/input", h.StartPlaybackInput)
+	e.PUT("/bots/:bot_id/tts/playback/input", h.AppendPlaybackInput)
 }
 
 type playbackIdentityService interface {
@@ -60,7 +63,8 @@ type playbackIdentityService interface {
 }
 
 type playbackConfigResponse struct {
-	Identity string `json:"identity"`
+	Identity         string `json:"identity"`
+	InputContentType string `json:"input_content_type,omitempty"`
 }
 
 // PlaybackConfig godoc
@@ -90,12 +94,17 @@ func (h *BotAudioHandler) PlaybackConfig(c echo.Context) error {
 	if !ok {
 		return echo.NewHTTPError(http.StatusServiceUnavailable)
 	}
-	identity, err := service.PlaybackIdentity(c.Request().Context(), botSettings.TtsModelID)
+	result := playbackConfigResponse{}
+	if inputService, ok := h.audioService.(playbackInputService); ok {
+		result.Identity, result.InputContentType, err = inputService.PlaybackInputInfo(c.Request().Context(), botSettings.TtsModelID)
+	} else {
+		result.Identity, err = service.PlaybackIdentity(c.Request().Context(), botSettings.TtsModelID)
+	}
 	if err != nil {
-		return errs.Wrap(err, "read playback configuration identity")
+		return errs.Wrap(err, "read playback configuration identity and capability")
 	}
 	c.Response().Header().Set(echo.HeaderCacheControl, "private, no-store")
-	return c.JSON(http.StatusOK, playbackConfigResponse{Identity: identity})
+	return c.JSON(http.StatusOK, result)
 }
 
 type synthesizeRequest struct {

@@ -3999,6 +3999,7 @@ const taskRunAnchor = useTaskRunAnchor({
 })
 
 const readAloud = useChatReadAloud({
+  nativeInput: true,
   botId: currentBotId,
   modelId: computed(() => botSettings.value?.tts_model_id),
   runIdentity: message => {

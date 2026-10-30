@@ -258,7 +258,9 @@
                  edge trims are the only exceptions. -->
               <div
                 v-if="node.block.type === 'text' && node.block.content"
+                :ref="element => setSpeechBody(node.block.id, speechSource(node.block), !isAssistantBlockStreaming(node.index), element)"
                 data-speech-body
+                :data-speech-final="speechFinalSources.get(node.block.id) === node.block.content && !isAssistantBlockStreaming(node.index) ? 'true' : 'false'"
                 :data-speech-block-id="node.block.id"
                 :lang="contentLang(node.block.content)"
                 class="prose prose-sm dark:prose-invert max-w-none [&_li]:my-0.5! [&>*:first-child]:mt-0! [&>*:last-child]:mb-0!"
@@ -268,7 +270,9 @@
                      default docs profile — it is tuned for message streams,
                      not long documents. -->
                 <MarkdownRender
+                  :ref="renderer => setSpeechRenderer(node.block.id, speechSource(node.block), !isAssistantBlockStreaming(node.index), renderer)"
                   :content="node.block.content"
+                  :final="!isAssistantBlockStreaming(node.index)"
                   :custom-markdown-it="withLiteralSingleDollars"
                   :is-dark="isDark"
                   mode="chat"
@@ -446,8 +450,9 @@ import { computed, nextTick, ref, toRef, useTemplateRef, watch } from 'vue'
 import { Sparkles, Target } from 'lucide-vue-next'
 import { formatRelativeTime, formatDateTime, formatCalendarTime } from '@/utils/date-time'
 import { Avatar, AvatarImage, AvatarFallback, Button, CalloutBanner, Spinner, Textarea, Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@felinic/ui'
-import MarkdownRender, { enableKatex, enableMermaid } from 'markstream-vue'
+import MarkdownRender, { enableKatex, enableMermaid, type MarkstreamRendererHandle } from 'markstream-vue'
 import { useLocalStorage } from '@vueuse/core'
+import { bindSpeechRenderer } from '../composables/speech-render-completion'
 import { useAcceptedUserInputRecovery } from '../composables/useAcceptedUserInputRecovery'
 import { resolveApiErrorMessage } from '@/utils/api-error'
 import { useSettingsStore } from '@/store/settings'
@@ -529,6 +534,25 @@ const props = defineProps<{
   speechCanReplay?: boolean
   speechStatus?: SpeechStatus
 }>()
+
+// Source-versioned native renderer acknowledgement; no guessed quiet timer.
+const speechFinalSources = ref(new Map<number, string>())
+function speechSource(block: ContentBlock) { return block.type === 'text' ? block.content : '' }
+const speechBodies = new Map<number, Element>()
+const speechRenderers = new Map<number, MarkstreamRendererHandle>()
+function bindSpeechSource(id: number, source: string, final: boolean) {
+  const body = speechBodies.get(id), renderer = speechRenderers.get(id)
+  if (!body || !renderer) return
+  bindSpeechRenderer(body, renderer, source, final, () => { speechFinalSources.value = new Map(speechFinalSources.value).set(id, source) })
+}
+function setSpeechBody(id: number, source: string, final: boolean, element: unknown) {
+  if (element instanceof Element) speechBodies.set(id, element); else speechBodies.delete(id)
+  bindSpeechSource(id, source, final)
+}
+function setSpeechRenderer(id: number, source: string, final: boolean, renderer: unknown) {
+  if (renderer && typeof (renderer as MarkstreamRendererHandle).getVirtualMetrics === 'function') speechRenderers.set(id, renderer as MarkstreamRendererHandle); else speechRenderers.delete(id)
+  bindSpeechSource(id, source, final)
+}
 
 const canReplaySpeech = computed(() => props.speechEnabled && props.speechCanReplay && !props.message.streaming && !!speechText(props.message))
 provideNativeTaskResumeScope(props)

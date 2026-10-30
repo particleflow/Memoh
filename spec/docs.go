@@ -13940,6 +13940,134 @@ const docTemplate = `{
                 }
             }
         },
+        "/bots/{bot_id}/tts/playback/input": {
+            "put": {
+                "description": "Revalidates the active account, Bot chat permission and current effective configuration. Exact next sequence and Unicode offset are required. Missing/closed input never creates another synthesis.",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Append or finish the current native speech input",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Next frame; final closes text input, not audio output",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playbackInputRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Requires an active account JWT and Bot chat permission. Streams one task's audio until final input and provider completion. Maximum 20000 Unicode characters per frame, within the native protocol limit. Never retry an uncertain synthesis. No message or attachment is created.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "bots"
+                ],
+                "summary": "Start one configured native incremental speech task",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Bot ID",
+                        "name": "bot_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Initial exact spoken-text frame, sequence and Unicode offset zero",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.playbackInputRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Configured audio bytes",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/server.Problem"
+                        }
+                    }
+                }
+            }
+        },
         "/bots/{bot_id}/tts/synthesize": {
             "post": {
                 "description": "Stream-synthesize text using the bot's configured TTS model, write to temp file",
@@ -30215,6 +30343,29 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "identity": {
+                    "type": "string"
+                },
+                "input_content_type": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.playbackInputRequest": {
+            "type": "object",
+            "properties": {
+                "final": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "offset": {
+                    "type": "integer"
+                },
+                "sequence": {
+                    "type": "integer"
+                },
+                "text": {
                     "type": "string"
                 }
             }
