@@ -1,12 +1,14 @@
 # 冷／热沟通与快速回应：只读调研及实施建议
 
-日期：2026-10-30 UTC。状态：研究完成，未实施、未发布、未验收。
+日期：2026-10-30 UTC。首轮研究完成；后续本地实现准备见第 10 节。尚未接入主链、发布或验收。第 1—9 节的零业务代码／静态检查描述保留首轮范围，不作为第 10 节的代码验证记录。
 
 研究范围：通过会话连续性判断何时提供同模型低思考快速反馈。已参考项目验收要求和兼容故障登记；私有验收页面与对话定位不公开。以下区分来源事实、历史阶段与项目建议。
 
 ## 1. 可以直接交给实施负责人的结论
 
 推荐在现有消息链上增加**同一回合的受理／进度表现**，并以确定性会话状态决定是否启动**同模型辅助快回请求**；正式请求立即独立推进。辅助请求不能排进同会话的正式 turn 队列，不能改正式模型／思考偏好，不能执行工具。先有可信受理反馈，再尽可能出现一句自然快回，最后由正式正文接替。
+
+快速反馈的思考选择策略为：**优先同模型官方支持的 off／none，不支持关闭则 low；没有 low 才取最低有效档位。**这已是输入要求，不再作为产品取舍重复询问。能力核对仅用于选对实际参数；本地确定性反馈只作可靠前置或失败回落，不代替同模型自然快回目标。
 
 这与用户的同模型想法匹配，但有两个必要前提：实际模型及实际路由支持请求级低／无思考，而且双请求不会因账户并发限制明显拖慢主链。若不满足，快回退为本地、事实准确的受理文字，不能悄悄换模型、谎称已关闭思考或先等待快回再开始正式工作。
 
@@ -96,7 +98,7 @@ Magpie 固定源码核对点是历史项目文档引用的 `d783df46cbac9021e26a
 
 辅助模型输入采用单独、短且受限的生成任务：当前 Bot 的可信名称／语言／沟通风格、当前用户短文本、已鉴权附件**存在及类型**、当前真实阶段和允许的措辞；不读取其他 Bot／任务上下文，不传隐藏推理或整份历史／图像二进制。辅助请求无工具、无外部动作，不生成答案、澄清问题、事实结论、时间承诺或“已完成”。用户内容只作待回应数据，不能把正文中的“以另一个 Bot 身份回复”等当系统指令。可要求结构化单句并在发布端校验长度、有效非空、允许状态；不能保证靠 prompt 就完全防止越界。校验失败直接采用事实文案，不追加修复 LLM 调用。
 
-若采用“同模型生成但最终只选用允许文案”的严格方案，个性化收益有限，应在小范围实测其相对纯本地反馈的价值；没有收益就保留已学到的生命周期机制，并明确告知该模式不再产生模型快回，而不是表面宣称仍在调用。
+若采用“同模型生成但最终只选用允许文案”的严格方案，个性化收益有限，应在小范围实测其价值。没有收益时记录时延／路由瓶颈并继续针对同模型自然反馈目标修正，不能自行改成固定句方案，或表面宣称仍在调用模型。
 
 ### 5.1 去重、竞态和打断
 
@@ -172,4 +174,45 @@ TTS 必须先确定这类片段是否应读：用户开启自动语音回复时�
 
 ## 9. 本轮验证范围与复用入口
 
-静态核验：固定 cef 来源、本地所有代码相对链接存在、37 组验收素材结构／编号、文档差分及不含业务改动。结果见 [STATIC-CHECK.json](STATIC-CHECK.json)；可在仓库根目录离线执行 `python3 docs/testing/conversation-presence-20261030/check-design.py`，源码见 [check-design.py](check-design.py)。仅研究文档及既有兼容登记发生变化；现有 Go 测试未运行，不运行模型或真实 UI，静态检查不证明方案实现正确。以后发现能力／协议变化，在本报告修订日期及证据，不覆写旧兼容失败；工具／环境故障继续用既有兼容登记，不新建平行故障手册。
+首轮静态核验：固定 cef 来源、本地所有代码相对链接存在、37 组验收素材结构／编号、文档差分及不含业务改动。结果见 [STATIC-CHECK.json](STATIC-CHECK.json)，对应研究提交 `1e0950077a4e2ec025cbda68a5388bae15a75d6f`，源码见 [check-design.py](check-design.py)。该脚本限定首轮纯文档范围；后续含代码的分支使用第 10 节的 `check-preparation.py`，不能拿旧范围检查充当代码测试。首轮仅研究文档及既有兼容登记发生变化；现有 Go 测试未运行，不运行模型或真实 UI，静态检查不证明方案实现正确。以后发现能力／协议变化，在本报告修订日期及证据，不覆写旧兼容失败；工具／环境故障继续用既有兼容登记，不新建平行故障手册。
+
+## 10. 用户明确选择后的本地实现准备
+
+本轮唯一文件所有权：新增 `internal/conversationpresence/` 包、`internal/agent/application/conversation_presence_sdk.go` 及同名测试、当前研究目录。没有修改共享 `service.go`、`service_stream.go`、`contract.go`、handler／WS、runtime queue／ledger、input_source、前端 projection、SDK 生成文件或朗读文件。原外部推送被拒仍有效；没有 push、外部提交、部署、凭据变化或真实推理／TTS。
+
+### 10.1 具体增量
+
+- `policy.go`：实际的确定性冷热判定；有来源、受理、重试、待用户回答、reply／follow-up 和新沟通证据。空闲策略由调用方配置，只有空闲且历史已结束、没有延续证据时才可按策略开始新反馈 episode；没有写死秒数、Bot 名称或话题关键词。
+- `ChooseThinking`：直接复用现有 `reasoning` 能力和档位顺序。支持关闭先选关闭；否则 low；没有 low 时按已有通用顺序选最低可用的实际声明档位。空目录产生的通用默认列表不能充当真实能力，未知配置不猜低档。没有模型 ID 分支或新的人工模型白名单。
+- `coordinator.go`：`Start` 立即返回，只在旁路 goroutine 内认领／生成／发布，API 不接受或等待正式 turn 函数。调用方提供同一受理 owner 的 Ticket、作用域、episode、generation、fence；无工具、无正式历史写入、无模型偏好写回。正式正文／取消通过 `Handle.Close` 同时取消网络与持久发布资格；发布前再次核状态，晚到回调不因 HTTP 成功就出现。
+- `conversation_presence_sdk.go`：从正式请求已经解析的 model/provider/SDK 配置制作值副本，构造同一个模型的短 `Generate`；不二次查 DB、不解析新凭据、不借标题模型、不换 Agent runtime。只带有界当前用户文本、Bot 名称／语言、图片存在性和可信 phase，不带图像实体、旧历史或工具。按原 provider adapter 构造 wire；主链原 reasoning 指针不变。
+- 辅助输出必须是单个 `{text, phase}` 对象。拒绝额外字段／尾随内容、错误 phase、非 stop 终态、工具调用、文件及来源；不回传 SDK reasoning。再核非空、单行、可配置字数和无标签。**这些是结构校验，不是自然语言“无任何过度承诺”的语义证明**；真实小样本必须继续评估措辞，不能拿 JSON 校验代替事实准确性验收。
+- 请求时限、输入片段、总输出 token 和可见文字长度从 Policy/Limits 传入，没有将测试数字当产品默认值。原账户 limiter 以 Capacity port 接入，优先主请求；取消后仍等实际 provider 返回才释放辅助容量，usage 未知不记零。不加自动修复／重试调用。
+
+### 10.2 原共享链的最小接入契约
+
+这部分已写成代码接口，但**尚未接线**；没有把进程内 fixture 当生产持久去重：
+
+1. 原 admission owner 在鉴权、附件就绪和原幂等受理后提供可信 scope／source／invocation，维护此次沟通 episode 及 generation。分类只改变反馈，不改变原队列。
+2. 正式链按原顺序独立启动；已解析实际模型配置后，用该不可变快照调用 `prepareConversationPresenceSDK`。此 helper 仅构造请求能力，不写主链偏好。支持路径的代码准备与现场快照获取独立推进；真实双请求启用前才需要准确运行能力。
+3. 将 `Claims` 实现在**既有持久 admission/event owner**，不新建服务。Claim 原子检查权限、身份、fence／generation、episode receipt；Close 在 Claim 尚未开始时也必须保存失效；Publish 再原子检查正式正文／终态及 receipt，并写类型化进度。跨副本／重启不能靠本地 map。
+4. 正式正文、错误、取消、撤权、lease 丢失、编辑／新输入导致失效时，在与正式发布相同的 owner 序列化域内 Close，避免另一路 WS 回调先后不确定。原会话运行与任务不因辅助 Close 而取消。
+5. 既有 snapshot/delta/history 投影消费类型化 `conversation_ack`，默认不写正式 assistant/history/memory。前端可见片段和 TTS generation 取消契约由原 owner 对接；本地模块没有创建第二播放器，也没有改现在的自动朗读问题。
+6. 后台 supervisor 异步收集 `Handle.Done` 的 outcome／usage，不能让正式正文 await 它，也不能把 raw error 当用户文案。
+
+目前这些共享文件仍留给统一线审查、协调所有权后接入。因此本轮产物是**本地实现及合成测试准备，不是可启用的完整功能**。
+
+### 10.3 无费用合成契约和验证边界
+
+已准备 Go 契约测试，覆盖：状态而非时长单独判断；可信直接来源；off 优先／low 次选／无 low 最低档及目录顺序；空目录和静默高档回落；自然生成片段及来源；真实晚回调忽略取消；正式结果先到；同 episode 连发／重放；Store 卡住时 Start 仍返回；热聊／跨 actor 不生成；容量不足／供应商错误／无效输出不发布不重试；本地 HTTP fixture 捕获同 model 的 `none/low` wire、无工具、主配置不变、调用方后改 choice 不污染快照；拒绝错误 phase／多余 JSON／额外字段／不同 provider。
+
+HTTP fixture 只指向 `httptest.NewServer`，凭据是合成 `fixture-only`，不读取真实配置；本轮没有运行这些 Go 测试。环境中先前确认的 `/usr/bin/go` 是围棋程序，未安装工具链；缓存 Docker 镜像清单也没有 Go 编译镜像，没有拉取或启动替代编译服务。
+
+后续有正确 Go 工具链时的定向命令：
+
+```sh
+gofmt -w internal/conversationpresence/*.go internal/agent/application/conversation_presence_sdk*.go
+go test -race ./internal/conversationpresence ./internal/agent/application -run 'Test(Continuity|OnlyTrusted|ThinkingPrefers|Acknowledgement|Formal|StartDoes|HotConversation|FailureCapacity|PresenceSDK)' -count=1
+```
+
+这不是本轮已经执行成功的命令。类型编译、gofmt、Go 行为测试、真实应用启动／UI／截图、持久 Claims、全链 projection 和 TTS 均未完成，不能宣称已可发布。已做的无网络结构／变更范围检查记录在 `PREPARATION-CHECK.json`，不替代上述验证。
