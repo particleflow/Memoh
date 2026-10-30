@@ -1,0 +1,115 @@
+{
+  "base": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "product": "1f021c94d08ac5617a8ae2489103d4036a11d51b",
+  "date": "2026-10-30",
+  "admission": "bounded runtime-bootstrap correction",
+  "actual_full_app": true,
+  "ordinary_cold": {
+    "before": "pass",
+    "after": "pass",
+    "speed_comparison_valid": false
+  },
+  "recovery_gap": {
+    "before": {
+      "server_ready_ms": 10276.08,
+      "probe_ms": 11945.97,
+      "probe": {
+        "visible": [
+          false,
+          false
+        ],
+        "rows": 0,
+        "skeletons": 0,
+        "path": "/bot/bootstrap-review-a-ad40d397?session=54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+      },
+      "frames": [
+        {
+          "direction": "sent",
+          "type": "runtime_subscribe",
+          "session_id": "c7b62199-0c98-4fd4-9b66-22dc17aa4f72",
+          "bot_id": null,
+          "at_ms": 18192.57
+        },
+        {
+          "direction": "received",
+          "type": "runtime_snapshot",
+          "session_id": "c7b62199-0c98-4fd4-9b66-22dc17aa4f72",
+          "bot_id": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+          "at_ms": 18203.3
+        }
+      ],
+      "target_history_rest": [
+        {
+          "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+          "query": {
+            "session_id": [
+              "54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+            ],
+            "limit": [
+              "30"
+            ]
+          },
+          "status": 200,
+          "at_ms": 10430.97,
+          "items": 2
+        }
+      ]
+    },
+    "after": {
+      "server_ready_ms": 9991.96,
+      "probe_ms": 11763.81,
+      "probe": {
+        "visible": [
+          true,
+          true
+        ],
+        "rows": 2,
+        "skeletons": 0,
+        "path": "/bot/bootstrap-review-a-ad40d397?session=54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+      },
+      "frames": [
+        {
+          "direction": "sent",
+          "type": "runtime_subscribe",
+          "session_id": "54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+          "bot_id": null,
+          "at_ms": 10052.47
+        },
+        {
+          "direction": "received",
+          "type": "runtime_snapshot",
+          "session_id": "54d56633-5b76-46c5-9b2b-23021f8fa5ff",
+          "bot_id": "ad40d397-a4c9-4e70-9dd8-3f7919245fcf",
+          "at_ms": 10143.73
+        }
+      ],
+      "target_history_rest": [
+        {
+          "path": "/api/bots/ad40d397-a4c9-4e70-9dd8-3f7919245fcf/messages",
+          "query": {
+            "session_id": [
+              "54d56633-5b76-46c5-9b2b-23021f8fa5ff"
+            ],
+            "limit": [
+              "30"
+            ]
+          },
+          "status": 200,
+          "at_ms": 10149.49,
+          "items": 2
+        }
+      ]
+    }
+  },
+  "warm": {
+    "same_bot_new_sockets": 0,
+    "cross_bot_new_sockets": 1,
+    "mismatched_bot_session_status": 404,
+    "mismatched_bot_session_new_sockets": 0
+  },
+  "inference_frames": 0,
+  "field_0954_same_cause_proven": false,
+  "schema": 181,
+  "backend_unchanged": true,
+  "remaining": "scheduled full initialize later selected fixed contact; this patch does not establish preservation of the history selection across that later retry"
+}

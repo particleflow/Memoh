@@ -287,6 +287,42 @@ field deployment and product acceptance remain separate evidence classes.
   failures and unknowns; no message fabrication, history reset, expert replay or
   unchanged release rebuild is required to document this issue.
 
+### C11 controlled follow-up — cold same-Bot history has no transport
+
+- **New field witness, relayed by parent:**0954's45-second run on read-back
+  Server/Webcefdf0 (`index-5VwLPQ4H.js`) had original component messages200 in
+  44.94ms/two valid original messages, followed by85 DOM samples of eleven
+  skeleton nodes/zero rows after Home admission. Anchor was absent. No target
+  subscribe/snapshot was recorded; that does not prove online absence. Screenshot
+  failed with the window minimized; no retry. Space65 closed/no in-flight writer.
+  Raw Windows JSON was not read by this source owner. Natural resolver binding
+  outcomes remain unknown and do not backfill older records.
+- **Proved source defect:** persisted `currentBotId` can equal a cold explicit
+  history target before bootstrap has started. Its same-Bot shortcut awaits no
+  initialization Promise, then starts history/runtime without creating a target
+  WebSocket. REST can complete while the real snapshot-gated atomic commit waits
+  indefinitely. Real pane-view binding can start that same pending load earlier.
+  This defect is independently reproduced; the exact field entry branch is
+  still unrecorded, so do not assign the whole field incident from absence alone.
+- **Correction:** product `1f021c94d08ac5617a8ae2489103d4036a11d51b` calls the existing
+  native `ensureWebSocket` after navigation/Bot fences and before selecting that
+  runtime; `chat-list` supplies it. A handshaking/live socket is reused. Snapshot
+  atomicity, identities, queue, history, permissions, schema, UI and Agent core
+  are preserved. Synchronous setup errors propagate before masking history.
+- **Controlled result:** unchangedcefdf0's accepted initial four cases had three
+  failures/one pass; final six actual-controller lifecycle cases and fourteen
+  existing contact cases pass. Targeted lint/type/copy/contract/diff checks pass.
+  Observer8/4/3 suites/full builds were not rerun. This is controller integration,
+  not full application/browser, screenshot, human QA, NAS or Harmony acceptance.
+- **Remaining boundary:** the source owner did not deploy or take over the sole
+  writer. The first corrected real load, screenshot and exact current Harmony
+  mirrors/locks remain unverified. Do not remove snapshot waiting, force refresh,
+  replay a request, create work or probe protected process metadata as recovery.
+  Parent arranges one original-record acceptance after unified consumption.
+- **Reusable evidence:** [Cold-history diagnosis, patch and validation](history-runtime-bootstrap/README.md),
+  [consumer map](history-runtime-bootstrap/consumer-map.json). Original navigation
+  branch/history are preserved; the product branch starts from currentcefdf0.
+
 ## C12 — Task-local Go build cache exhausts temporary disk
 
 - **Platform / signature:** Input-source workstream scoped lint exited 1 during
@@ -312,6 +348,30 @@ field deployment and product acceptance remain separate evidence classes.
   the cache's exact task ownership/disposability and sufficient recovered space.
   Retry only the affected check. Do not delete shared/unknown data or repeat
   unrelated builds, tests or paid calls.
+
+## C13 — Vite test navigation used an unmounted router
+
+- **Platform / signature:** Owned full-app Chromium fixture changed the URL but
+  Home did not request the selected history. The test timed out waiting for that
+  REST request. This was not a field authorization or product failure.
+- **Proven cause:** In this Vite/HMR fixture, dynamic import of `src/router.ts`
+  produced a different router object from the mounted application's global
+  router. Identity comparison was false; its current route was `/` while the
+  mounted route contained the actual Bot/session.
+- **Verified handling:** Within this owned controlled test, navigate using the
+  already mounted application's router. Do not use this as a field injection or
+  bypass authorization. The full-app warm check then passed same-Bot reuse,
+  cross-Bot connection ownership and404/no-connection rejection. The corrected
+  outage/restoration check produced the bounded missing-transport red/green.
+- **Evidence / boundaries:** [Full-app review](history-runtime-bootstrap/README.md#unified-mounted-app-review-2026-10-30),
+  [router identity and guards](history-runtime-bootstrap/full-app-review/warm-identity.json),
+  [outcome](history-runtime-bootstrap/full-app-review/OUTCOME.json). Old failed
+  fixture logs are preserved in the unified task evidence. Ordinary cold entry
+  passed before and after;0954's same cause and later initializer selection
+  preservation remain unproved. This is not deployment or phone acceptance.
+- **Before another attempt:** If URL changes without a target read, inspect the
+  actual mounted router identity and the recorded request path first. Reuse
+  these passing checks; do not repeat the faulty fixture or infer missing data.
 
 ## Applying these lessons to the existing handoffs
 

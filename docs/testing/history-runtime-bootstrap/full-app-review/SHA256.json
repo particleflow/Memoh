@@ -1,0 +1,58 @@
+{
+  "warm-identity.json": {
+    "bytes": 7907,
+    "sha256": "b145557b56d3dc93f796ca11df87fbdedbec9476e9119842221d125a64197121"
+  },
+  "OUTCOME.json": {
+    "bytes": 3176,
+    "sha256": "cf46718b630ed5ff8df85f4c55b412081a251fcb67720555b6c6b5ae830781b2"
+  },
+  "before-recovery-gap-mounted.json": {
+    "bytes": 8136,
+    "sha256": "2973aa2a984b1dbff5cab865f2b0d6d636bef9b52d1efaee643897fb0909e902"
+  },
+  "outage_recheck.py": {
+    "bytes": 9047,
+    "sha256": "ac88b744556628d713c67d6a8e19a25feca2233115af05fe01513a1536f2ebc3"
+  },
+  "warm_recheck.py": {
+    "bytes": 5349,
+    "sha256": "e589f2d03709b5a395e82593f674fd10456659edf94aa506b39d7cb5890e19b5"
+  },
+  "after-recovery-gap-mounted-probe.png": {
+    "bytes": 43456,
+    "sha256": "3f769a98f1f88d01a39b022cbec1e89ab6b707d71bccad744f325686a2135095"
+  },
+  "warm-cross-bot.png": {
+    "bytes": 48467,
+    "sha256": "c3045a47590990b5848f3263038e4de1cd3c876432b3f994921926b56281ea5a"
+  },
+  "server-layer-source.json": {
+    "bytes": 475,
+    "sha256": "35504f6e22b18ffba291ac770f161cda22380a176742371fbe7369d104f9a16c"
+  },
+  "after-recovery-gap-mounted.json": {
+    "bytes": 17043,
+    "sha256": "97615fa458b63e79ee413eca37dd7d5450950c1223a4c3d9bcf2b4ec9b65ca90"
+  },
+  "before-cold.json": {
+    "bytes": 12067,
+    "sha256": "4ee2f917abf29ea2e28d98c00042621836c9a3174165c59a58bbbc34eaef1ab9"
+  },
+  "browser_recheck.py": {
+    "bytes": 6603,
+    "sha256": "c0db7de7ab363f3d1991b1b9eb784ad9977ba767823b44cd0d1042b34a09909c"
+  },
+  "before-recovery-gap-mounted-probe.png": {
+    "bytes": 39819,
+    "sha256": "c24a8a3a4f09ce9605fa32f44fb4448d95cb225aee32fc4be69c8c3d6de6fd6b"
+  },
+  "after-cold.json": {
+    "bytes": 11694,
+    "sha256": "7d19e944fb6d91e69d3e127724246a32f2f9fd591894f06e58b874a326a0c740"
+  },
+  "server-binary-provenance.json": {
+    "bytes": 523,
+    "sha256": "49bc8168849b0b96e31c2147e956fa067bb9143741e7051592c234965f6d601b"
+  }
+}
