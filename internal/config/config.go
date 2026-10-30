@@ -388,10 +388,11 @@ type AuthConfig struct {
 }
 
 type AgentConfig struct {
-	ToolOutputMaxBytes  int    `toml:"tool_output_max_bytes"`
-	ToolOutputMaxLines  int    `toml:"tool_output_max_lines"`
-	SystemFilesMaxBytes int    `toml:"system_files_max_bytes"`
-	ContextLoopReselect string `toml:"context_loop_reselect"`
+	ConversationPresence ConversationPresenceConfig `toml:"conversation_presence"`
+	ToolOutputMaxBytes   int                        `toml:"tool_output_max_bytes"`
+	ToolOutputMaxLines   int                        `toml:"tool_output_max_lines"`
+	SystemFilesMaxBytes  int                        `toml:"system_files_max_bytes"`
+	ContextLoopReselect  string                     `toml:"context_loop_reselect"`
 	// ContextAbsoluteMaxTokens is the server-wide context admission cap
 	// (CM-ADM-001): the effective per-turn budget is
 	// min(model context window − reserve, this cap), and the cap alone when

@@ -83,6 +83,8 @@ func (c *UIMessageStreamConverter) HandleEvent(event UIMessageStreamEvent) []UIM
 		c.status.Name = event.Code
 		c.status.Args = noticeArgsFromMetadata(event.Metadata)
 		return []UIMessage{*c.status}
+	case "progress":
+		return c.conversationPresence(event.Progress)
 
 	case "text_delta":
 		c.reasoning = nil

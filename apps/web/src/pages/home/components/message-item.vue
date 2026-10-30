@@ -929,6 +929,10 @@ const runtimeStatusText = computed(() => {
   if (props.message.role !== 'assistant' || !props.message.streaming) return ''
   const status = props.message.messages.find(block => block.type === 'status')
   if (status?.type !== 'status' || !status.name) return ''
+  if (status.name === 'conversation_ack') {
+    if (props.message.messages.some(block => block.type === 'text' && block.content.trim())) return ''
+    return status.args?.text ?? ''
+  }
   const key = `chat.runtimeStatus.${status.name}`
   return te(key) ? t(key, status.args ?? {}) : ''
 })

@@ -1,0 +1,55 @@
+{
+  "checked_at_utc": "2026-10-30T12:00:27.984673+00:00",
+  "source_commit": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "kind": "offline_design_input_validation_only",
+  "status": "passed",
+  "case_count": 37,
+  "categories": [
+    "admission",
+    "compatibility",
+    "continuity",
+    "eligibility",
+    "failure",
+    "idempotency",
+    "identity",
+    "measurement",
+    "model",
+    "persistence",
+    "race",
+    "security",
+    "speech",
+    "truthfulness"
+  ],
+  "local_link_count": 18,
+  "changed_files_are_research_docs_only": true,
+  "whitespace_checked": [
+    "docs/testing/compatibility-incident-register.md",
+    "docs/testing/conversation-presence-20261030/README.md",
+    "docs/testing/conversation-presence-20261030/STATIC-CHECK.json",
+    "docs/testing/conversation-presence-20261030/acceptance-cases.json",
+    "docs/testing/conversation-presence-20261030/check-design.py"
+  ],
+  "sha256": {
+    "docs/testing/conversation-presence-20261030/README.md": "f9693020d26da9c7b789098c3b09ffd65a12f1aeb3b21fc5e9df7070d7933299",
+    "docs/testing/conversation-presence-20261030/acceptance-cases.json": "1d75a0504a52dc97794fa29245a9219fa94ed3fb1213f266f08bb47de4bc7d75",
+    "docs/testing/conversation-presence-20261030/check-design.py": "f99df78e7ae4643c0e56b8417acbb29e2441352c3342e64d33b5e596c3b37076",
+    "docs/testing/compatibility-incident-register.md": "dfa21710eb6a1b5edf5293d586a1b9259aa71d5170c5def09a4faa6e2f28cd4e"
+  },
+  "go_test_attempt": {
+    "command": "go test ./internal/reasoning -run 'TestResolveConfigAgreesWithOffReachability|TestResolveConfigHonorsProjectedOffDeclarations|TestAlwaysOnModelIsSupportedWithoutAControl' -count=1 -v",
+    "exit_code": 1,
+    "error": "Go: Unknown option: test",
+    "observed_cause": "/usr/bin/go --help identifies a local two-player board-game application",
+    "tests_ran": false,
+    "denied": false,
+    "status": "blocked_pending_identified_go_compiler"
+  },
+  "scope_declaration": {
+    "real_model_requests": 0,
+    "tts_requests": 0,
+    "production_changes": 0,
+    "product_implementation": false,
+    "ui_or_live_latency_verified": false,
+    "note": "These scope declarations describe this research turn; static validation does not measure them or prove product behavior."
+  }
+}

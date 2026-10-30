@@ -1,0 +1,6 @@
+=== RUN   TestConversationPresenceNativeWSAndHistory
+    conversation_presence_native_postgres_test.go:114: ack/main sequence: [] all=[agent_start: retry: retry: retry: retry: retry:] requests=0
+--- FAIL: TestConversationPresenceNativeWSAndHistory (10.11s)
+FAIL
+FAIL	github.com/felinics/memoh/internal/agent/application	10.132s
+FAIL
