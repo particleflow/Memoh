@@ -1,0 +1,36 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/memoh-speech-continuity
+
+ ❯ |web| src/pages/home/composables/speech-replay-cache.test.ts (9 tests | 1 failed | 8 skipped) 10ms
+     × does not let a settled sibling row consume a distinct live assistant row in the same turn/run 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/composables/speech-replay-cache.test.ts > uninterrupted text coverage before synthesis > does not let a settled sibling row consume a distinct live assistant row in the same turn/run
+AssertionError: expected [] to deeply equal [ 'Fresh response. ' ]
+
+- Expected
++ Received
+
+- [
+-   "Fresh response. ",
+- ]
++ []
+
+ ❯ src/pages/home/composables/speech-replay-cache.test.ts:19:75
+     17|     const old = { ...reply('Old response.', false), id: 'old-row' }
+     18|     const fresh = { ...reply('Fresh response. Next'), id: 'fresh-row' }
+     19|     expect(live.update([old, fresh], true, false).map(part => part.tex…
+       |                                                                           ^
+     20|   })
+     21|   it.each([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 8 skipped (9)
+   Start at  13:41:51
+   Duration  437ms (transform 123ms, setup 0ms, import 266ms, tests 10ms, environment 0ms)
+

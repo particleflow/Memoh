@@ -1,0 +1,104 @@
+{
+  "state": {
+    "key": "",
+    "status": "idle"
+  },
+  "trustedInput": [
+    {
+      "trusted": true,
+      "ms": 1111.699999999255
+    },
+    {
+      "trusted": true,
+      "ms": 1126.8999999985099
+    },
+    {
+      "trusted": true,
+      "ms": 1131.699999999255
+    },
+    {
+      "trusted": true,
+      "ms": 1141.300000000745
+    },
+    {
+      "trusted": true,
+      "ms": 1145.3999999985099
+    },
+    {
+      "trusted": true,
+      "ms": 1150.3999999985099
+    },
+    {
+      "trusted": true,
+      "ms": 1156.300000000745
+    },
+    {
+      "trusted": true,
+      "ms": 1158.800000000745
+    },
+    {
+      "trusted": true,
+      "ms": 1161.5
+    }
+  ],
+  "playsAtStop": 1,
+  "playsAfterLateResponse": 1,
+  "media": [
+    {
+      "type": "waiting",
+      "trusted": true,
+      "ms": 662.0999999977648,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:37791/f64ee8d0-f8c1-4aad-848e-3ecae1d7936e"
+    },
+    {
+      "type": "playing",
+      "trusted": true,
+      "ms": 670.5999999977648,
+      "time": 0,
+      "src": "blob:http://127.0.0.1:37791/f64ee8d0-f8c1-4aad-848e-3ecae1d7936e"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 1134.8999999985099,
+      "time": 0,
+      "src": "http://127.0.0.1:37791/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 1135,
+      "time": 0,
+      "src": "http://127.0.0.1:37791/"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 1149.0999999977648,
+      "time": 0,
+      "src": "http://127.0.0.1:37791/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 1149.3999999985099,
+      "time": 0,
+      "src": "http://127.0.0.1:37791/"
+    },
+    {
+      "type": "emptied",
+      "trusted": true,
+      "ms": 1167.0999999977648,
+      "time": 0,
+      "src": "http://127.0.0.1:37791/"
+    },
+    {
+      "type": "error",
+      "trusted": true,
+      "ms": 1167.199999999255,
+      "time": 0,
+      "src": "http://127.0.0.1:37791/"
+    }
+  ]
+}

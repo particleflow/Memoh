@@ -21,7 +21,7 @@ const bot = { id: botId, name: 'read-aloud-synthetic', display_name: '朗读交�
 const session = { id: sessionId, bot_id: botId, title: '仅合成音频 · 无模型调用', type: 'chat', runtime_type: 'native', channel_type: 'local', created_at: '2026-10-28T10:00:00Z', updated_at: '2026-10-28T10:00:00Z' }
 const args = ['--no-sandbox', '--autoplay-policy=document-user-activation-required', '--disable-features=PreloadMediaEngagementData,MediaEngagementBypassAutoplayPolicies']
 const browser = await chromium.launch({ headless: true, executablePath: '/usr/bin/chromium', args })
-const proof = { source: 'cefdf0c + continuous-read-aloud candidate', syntheticServerAndMP3: true, realProviderCalls: 0, playbackRequests: [], writes: [], pageErrors: [], checks: [], observations: [] }
+const proof = { source: 'cefdf0c + continuous-read-aloud candidate', syntheticServerAndMP3: true, realProviderCalls: 0, playbackRequests: [], writes: [], configurationReads: [], pageErrors: [], checks: [], observations: [] }
 let debugSession, viteProcess
 const fixtureHTTP = createServer((request, response) => { response.writeHead(503); response.end('Unexpected fixture HTTP request') })
 const fixtureSockets = new WebSocketServer({ server: fixtureHTTP })
@@ -95,6 +95,7 @@ try {
   const taskFor = id => id===botId?'20000000-0000-4000-8000-000000000002':'20000000-0000-4000-8000-000000000004'
   const sessionFor = (id,bid) => ({...session,id,bot_id:bid})
   const recordFor = id => `30000000-0000-4000-8000-${String(id).padStart(12,'0')}`
+  let voiceIdentity='fixture-config-one'
   let socket, seq=0, busy=true, run=1, currentSession=taskFor(botId), currentBot=botId
   let destinationBot=botId,destinationSession=taskFor(botId),mode='ok'
   function snapshot() {return {type:'runtime_snapshot',session_id:currentSession,epoch:'home-admission',seq:++seq,snapshot:{bot_id:currentBot,session_id:currentSession,epoch:'home-admission',seq,current_run_view:{run_id:`result-run-${run}`,turn_id:`result-turn-${run}`,generation:'1',status:busy?'running':'completed',started_at:'2026-10-28T10:00:00Z',updated_at:'2026-10-28T10:00:00Z',messages:[{id:0,type:'text',content:`Home 边界合成回复第${run}段。`}]},updated_at:'2026-10-28T10:00:00Z'}}}
@@ -108,7 +109,8 @@ try {
     if(!pathname.startsWith('/api/'))return route.continue()
     const path=pathname.slice(4),requestBot=path.split('/')[2]
     if(path.endsWith('/sessions/contact')){const contact=sessionFor(mainFor(requestBot),requestBot);return route.fulfill({json:req.method()==='POST'?contact:{session:contact,candidates:[]}}).catch(()=>{})}
-    if(path.endsWith('/tts/playback')){proof.playbackRequests.push({...req.postDataJSON(),bot:requestBot});return route.fulfill({contentType:'audio/mpeg',body:fs.readFileSync(new URL('./fixture.mp3',import.meta.url))})}
+    if(path.endsWith('/tts/playback/config')){proof.configurationReads.push({bot:requestBot});return route.fulfill({json:{identity:voiceIdentity}})}
+    if(path.endsWith('/tts/playback')){proof.playbackRequests.push({...req.postDataJSON(),bot:requestBot});return route.fulfill({contentType:'audio/mpeg',headers:{'X-Speech-Playback-Identity':'fixture-config-one'},body:fs.readFileSync(new URL('./fixture.mp3',import.meta.url))})}
     if(req.method()!=='GET'){proof.writes.push({path,method:req.method()});return route.fulfill({json:{}})}
     let body={items:[]}
     if(path==='/users/me')body={id:'11111111-1111-4111-8111-111111111111',username:'synthetic',role:'admin',metadata:{onboarding_completed:true}}
@@ -153,6 +155,17 @@ try {
   await pointer("document.querySelector('[data-message-id]')")
   await poll("![...document.querySelectorAll('[data-speech-state]')].some(el=>el.getAttribute('data-speech-state')==='playing') && window.refusalAudit.players.every(player=>player.paused)",'native click stops shared decoder and bubble')
   silent(await observe('click-stopped'));await capture('click-stopped')
+  const generatedBeforeReplay=proof.playbackRequests.length
+  await page.locator('[data-message-id]').last().click({button:'right'})
+  proof.menuDebug=await read(`(()=>{const nodes=[...document.querySelectorAll('[data-message-id]')];return {targets:nodes.map(el=>({tag:el.tagName,id:el.getAttribute('data-message-id'),html:el.outerHTML.slice(0,700)})),menu:[...document.querySelectorAll('[role=menuitem]')].map(el=>({text:el.textContent,disabled:el.getAttribute('data-disabled')})),vue:nodes.map(el=>{let p=el.__vueParentComponent;for(let n=0;p&&n<15;n++,p=p.parent){const s=p.setupState;if(s?.readAloud){const m=s.messages?.find(m=>m.role==='assistant');return {enabled:s.readAloud.enabled.value??s.readAloud.enabled,message:{id:m?.id,role:m?.role,turn:m?.turnId,run:m?.runtimeRunId,invocation:m?.invocationId,blocks:m?.messages?.map(b=>({id:b.id,type:b.type,content:b.content}))},available:m&&s.readAloud.menuAvailable(m),replay:m&&s.readAloud.canReplay(m),label:m&&s.readAloud.replayLabel(m)}}}return null})}})()`)
+  fs.writeFileSync(`${out}/menu-debug.json`,JSON.stringify(proof.menuDebug,null,2)+'\n')
+  await capture('menu-attempt')
+  await page.getByRole('menuitem',{name:'重播朗读',exact:true}).click()
+  await poll("document.querySelector('[data-speech-state=playing]') && window.refusalAudit.players.some(player=>!player.paused)",'cached replay uses native media')
+  assert.equal(proof.playbackRequests.length,generatedBeforeReplay);assert.equal(proof.configurationReads.length,1)
+  await observe('cached-replay');await capture('cached-replay')
+  proof.checks.push('Completed cached MP3 replay: zero additional generation POSTs; only current account/Bot/config GET, native playback from saved bytes')
+  await pointer("document.querySelector('[data-message-id]')")
   await liveReply(3)
   await page.locator('textarea').pressSequentially('x')
   silent(await observe('input-stopped'));await capture('input-stopped')
@@ -160,6 +173,12 @@ try {
   await page.locator('textarea').press('Backspace')
   socket.send(JSON.stringify(snapshot()));await new Promise(resolve=>setTimeout(resolve,1500))
   silent(await observe('late-run-stays-silent'));assert.equal(proof.playbackRequests.length,stoppedCount)
+  voiceIdentity='fixture-config-two'
+  await page.locator('[data-message-id]').last().click({button:'right'})
+  await page.getByRole('menuitem',{name:'重播朗读',exact:true}).click()
+  await poll("document.body.innerText.includes('缓存音频与当前语音配置或正文不匹配')",'configuration mismatch is explicit')
+  assert.equal(proof.playbackRequests.length,stoppedCount);silent(await observe('configuration-mismatch'));await capture('configuration-mismatch')
+  proof.checks.push('Changed voice/config identity refuses stale replay explicitly, with zero new generation POSTs')
   proof.checks.push('New persistent MP3 decoder: native message click and input stop media and bubble animation; late same-run frame and cleared input cannot restart old speech')
   assert.deepEqual(proof.pageErrors,[])
   fs.writeFileSync(`${out}/result.json`,JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify(proof,null,2))

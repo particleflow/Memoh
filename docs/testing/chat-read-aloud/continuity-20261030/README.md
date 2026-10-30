@@ -1,3 +1,5 @@
+> This is the retained first-phase receipt. The current source, cache/coverage correction, exact evidence and limitations are in [CURRENT.md](CURRENT.md). Do not treat this older receipt as final-source acceptance.
+
 # Automatic triggering and continuous playback correction
 
 Source fix: [`e57d218b34ccdd8bf1e55b790de62f7d73de6eb5`](https://github.com/particleflow/Memoh/commit/e57d218b34ccdd8bf1e55b790de62f7d73de6eb5), direct parent `cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f`, product tree `9059475f4ad453f176dd073e97c6ddeacc4cd9b9`. Independent branch `fix/chat-continuous-read-aloud-20261030`. Cherry-pick the source fix; evidence is separate. No changes to the original read-aloud branch, Bot navigation/auth policy, Agent core, database, providers or service topology.

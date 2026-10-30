@@ -1,0 +1,6 @@
+✓ patched dependencies verified against installed content
+
+  VITE v8.1.5  ready in 1688 ms
+
+  ➜  Local:   http://127.0.0.1:18615/
+1:47:30 PM [vite] vite.read-aloud-review.config.ts changed, restarting server...

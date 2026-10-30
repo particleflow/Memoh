@@ -1,0 +1,24 @@
+[hooks] Web lint: pnpm exec lint-staged
+⋯ Backing up original state…
+✔ Done backing up original state (b4fa27824)!
+⋯ Running tasks for staged files…
+    *.{vue,js,jsx,mjs,cjs,ts,tsx} — 20 files
+      ⋯ eslint --fix
+
+✔ eslint --fix
+
+✔ Done running tasks for staged files!
+⋯ Staging changes from tasks…
+✔ Done staging changes from tasks!
+⋯ Cleaning up temporary files…
+✔ Done cleaning up temporary files!
+[hooks] Web lint: 6.11s
+[hooks] Go package selection: go list -e -f {{if .Error}}{{if eq (printf "%v" .Error.Err) (printf "build constraints exclude all Go files in %s" .Dir)}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}}{{else}}{{if .Dir}}{{.Dir}}{{else}}{{.ImportPath}}{{end}}{{end}} ./internal/audio ./internal/handlers ./internal/server ./spec
+[hooks] Go package selection: 0.27s
+[hooks] Go lint: golangci-lint run --concurrency=2 /workspace/memoh-speech-continuity/internal/audio /workspace/memoh-speech-continuity/internal/handlers /workspace/memoh-speech-continuity/internal/server /workspace/memoh-speech-continuity/spec
+internal/handlers/local_channel.go:2720:101: unused-parameter: parameter 'reasoningEffort' seems to be unused, consider removing or renaming it as _ (revive)
+func (h *LocalChannelHandler) createWSChatSession(ctx context.Context, botID, channelIdentityID, _, reasoningEffort, workdirID string) (sessionpkg.Thread, error) {
+                                                                                                    ^
+[hooks] Go lint: 184.75s
+[hooks] Go lint failed (1)
+husky - pre-commit script failed (code 1)

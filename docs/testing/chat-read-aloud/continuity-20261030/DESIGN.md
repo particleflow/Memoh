@@ -22,7 +22,7 @@ Two local red examples identify concrete causes:
 - [Chrome autoplay policy](https://developer.chrome.com/blog/autoplay): observe real `play()` rejection; recover from a supported gesture using the same loaded source.
 - [OpenHarmony ArkWeb Web attributes](https://github.com/openharmony/docs/blob/master/en/application-dev/reference/apis-arkweb/arkts-basic-components-web-attributes.md#mediaplaygestureaccess9): the native gesture setting is independent of Web source. No gesture-access override or autoplay permission is changed. Browser feature detection is necessary and does not prove ArkWeb/device support.
 
-The pinned Twilight source was not inspected: a local `/root/go/pkg/mod/...` read was denied, and the browser tool could not open the referenced pinned upstream tree. Those reads were not routed around. The inspected Memoh boundary above is sufficient for this client correction; upstream session/prosody claims remain unverified.
+At the first phase, the guessed `/root/go/pkg/mod/...` path was denied and was not retried. Later successful normal Go compilation and `go env GOMODCACHE` established the actual workspace cache `/workspace/.memoh-cloud/cache/go-mod`. The pinned dependency was then inspected there through ordinary permitted workspace reads. The exact findings and file hashes are recorded in CURRENT.md; this supersedes the first-phase upstream-unknown status without reinterpreting the denied path as a successful read.
 
 ## Selected minimal correction
 
