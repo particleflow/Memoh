@@ -2,6 +2,9 @@ import { getBotsByBotIdContainerFsDownload, postBotsByBotIdContainerFsUpload } f
 import { openDiagnosticLease, type DiagnosticLease } from '@/lib/api-client'
 import { onAuthSessionCleared } from '@/lib/auth-session'
 
+// Logical read phases: fetch Response availability, complete decoded body,
+// successful verification, and final consumer outcome. No wire first-byte or
+// per-chunk progress observation is implied by this event vocabulary.
 type Kind = 'send' | 'headers' | 'load' | 'error' | 'abort' | 'loadend' | 'validation'
 interface TraceEvent { seq: number, t: number, kind: Kind, g: number, request: number | null, status?: number, loaded?: number, check?: 'body', ok?: boolean }
 interface Batch { id: string, document: string, through: number, body: string, writeAttempted?: boolean }

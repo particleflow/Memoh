@@ -1090,7 +1090,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-files.ts",
-      "sha256": "42f18355d7b3cd4d33b95d7a7e126ac1c16aaf87e6adde7d202598f4afbfd02d",
+      "sha256": "0efb6474473d9c6af33b17104e5bc3540163dd28b2c655b75969fa02682dfee2",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "a959a8a8196fc3d13fdf2afc33bd6bf2df2df953025f2506f6e0cbeb60d8e839",
@@ -1936,13 +1936,13 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-diagnostics.ts",
-      "sha256": "a1988b3b6fbedd2573e4876b3638c4a10b75b7da4d4ad77cf36438dbc172bbcc",
+      "sha256": "ee78d6037a2a39a2de728b230e0e07b80d2cb66b261bf5f5d68cfd914c23c52a",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
       "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts",
-      "sha256": "dc7dd7c9cce59ebce0d61591c0357213d309b0306ebd52261099782cb534ed8b",
+      "sha256": "674e289924421e50c501d3ca20fd29a768b110f53009d7db9a8e568f7877dab8",
       "origin": "Scoped diagnostic contract implementation; handoff SHA2562c32a5b72f554964cb1bb1a9a02df47fba7987947a40460ec41d2f90bc673df1",
       "licenseReview": "Project source and focused tests; no private configuration or SDK binary."
     },

@@ -1,0 +1,12 @@
+{
+  "base33": "8da01566dba0c79f7922e5979ff9a64e0a4e3c14",
+  "changedHostInputHashes": {
+    "mobile/memoh/harmony-files.ts": "0efb6474473d9c6af33b17104e5bc3540163dd28b2c655b75969fa02682dfee2",
+    "mobile/memoh/harmony-diagnostics.ts": "ee78d6037a2a39a2de728b230e0e07b80d2cb66b261bf5f5d68cfd914c23c52a",
+    "mobile/memoh/harmony-diagnostics-api.test.ts": "674e289924421e50c501d3ca20fd29a768b110f53009d7db9a8e568f7877dab8"
+  },
+  "nativeSDKPermissionsAndQueueUnchanged": true,
+  "wireFirstByteObservable": false,
+  "actualProgressEmitted": false,
+  "newHAPBuilt": false
+}

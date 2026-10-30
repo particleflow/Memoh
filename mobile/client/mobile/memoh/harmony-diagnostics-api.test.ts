@@ -22,6 +22,7 @@ const { host, storage } = vi.hoisted(() => {
 
 const bot = '11111111-2222-4333-8444-555555555555', other = '66666666-7777-4888-8999-aaaaaaaaaaaa'
 let principal = 'user-a', sends: Request[], objects: Map<string, ArrayBuffer>, writes: number, acks: number, loseReply: boolean
+let mediaFetch: (() => Promise<Response>) | undefined
 let forcedDownloadStatus = 0, spoofUnconfirmed = false
 let failAttemptJournal = false
 let blockRead: boolean, readReject: ((error: Error) => void) | undefined
@@ -31,7 +32,7 @@ const digest = async (body: string) => Array.from(new Uint8Array(await crypto.su
 const fetcher: typeof fetch = async (input, init) => {
   const request = new Request(input, init), url = new URL(request.url); sends.push(request)
   if (url.pathname.endsWith('/users/me')) return Response.json({ id: principal })
-  if (/\/media\/[a-f0-9]{64}$/.test(url.pathname)) return new Response(new TextEncoder().encode('payload'))
+  if (/\/(?:media|attachments)\/[a-f0-9]{64}$/.test(url.pathname)) return mediaFetch ? mediaFetch() : new Response(new TextEncoder().encode('payload'))
   if (url.pathname.endsWith('/download')) {
     if (spoofUnconfirmed) throw new Error('DIAGNOSTIC_WRITE_UNCONFIRMED')
     if (forcedDownloadStatus) return new Response(null, { status: forcedDownloadStatus })
@@ -51,7 +52,7 @@ const fetcher: typeof fetch = async (input, init) => {
 beforeEach(() => {
   vi.stubGlobal('window', host); vi.stubGlobal('localStorage', storage)
   vi.stubGlobal('sessionStorage', { getItem: () => null, setItem: () => {}, removeItem: () => {} })
-  vi.stubGlobal('crypto', webcrypto); sends = []; objects = new Map(); writes = 0; acks = 0; loseReply = false; forcedDownloadStatus = 0; spoofUnconfirmed = false; failAttemptJournal = false; blockRead = false; readReject = undefined; principal = 'user-a'; rows.clear(); cursors.clear()
+  vi.stubGlobal('crypto', webcrypto); sends = []; objects = new Map(); writes = 0; acks = 0; loseReply = false; mediaFetch = undefined; forcedDownloadStatus = 0; spoofUnconfirmed = false; failAttemptJournal = false; blockRead = false; readReject = undefined; principal = 'user-a'; rows.clear(); cursors.clear()
   localStorage.clear(); localStorage.setItem('token', 'synthetic-a'); client.interceptors.request.clear()
   setupApiClient({ baseUrl: 'https://example.test/api', fetch: fetcher })
   Object.assign(window, { begoniaNative: { async request(raw: string) {
@@ -305,4 +306,85 @@ it('queue review: an invalid journal claim reply remains a fatal integrity error
   }
   await expect(resumeDiagnostics(bot)).rejects.toThrow('DIAGNOSTIC_JOURNAL_FAILED')
   expect({ writes, acks, pending: rows.get(scope)?.length }).toEqual({ writes: 0, acks: 0, pending: 2 })
+})
+
+
+it.each(['media', 'delegation'] as const)('timing review: separates response availability, body read and SHA completion for %s', async mode => {
+  const hash = await digest('payload'), payload = new TextEncoder().encode('payload')
+  const gate = () => {
+    let resolve!: () => void
+    const promise = new Promise<void>(ready => { resolve = ready })
+    return { promise, resolve: () => resolve() }
+  }
+  const entered = gate(), releaseHeaders = gate(), reading = gate(), nextPull = gate(), hashing = gate(), releaseHash = gate()
+  let clock = 0, pulls = 0, closed = false, queued = 0
+  let controller!: ReadableStreamDefaultController<Uint8Array>
+  const stream = new ReadableStream<Uint8Array>({
+    start(value) { controller = value },
+    pull() { if (++pulls === 1) reading.resolve(); else nextPull.resolve() },
+  }, { highWaterMark: 0 })
+  const response = new Response(stream, { status: 200, headers: { 'content-type': 'application/octet-stream' } })
+  mediaFetch = async () => { entered.resolve(); await releaseHeaders.promise; return response }
+  // Delegated reads use the original global fetch through createApiFetch().
+  vi.stubGlobal('fetch', fetcher)
+  const events: Array<{ kind: string, t: number, status?: number, loaded?: number }> = []
+  vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue((kind, status, loaded) => { events.push({ kind, t: clock, status, loaded }) })
+  const digestSource = crypto.subtle.digest.bind(crypto.subtle)
+  vi.spyOn(crypto.subtle, 'digest').mockImplementation(async (algorithm, data) => {
+    hashing.resolve(); await releaseHash.promise; return digestSource(algorithm, data)
+  })
+  const path = `/bots/${bot}/sessions/11111111-aaaa-4111-8111-111111111111/delegations/22222222-bbbb-4222-8222-222222222222/attachments/${hash}`
+  const pending = originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7,
+    ...(mode === 'delegation' ? { metadata: { delegation_url: path } } : {}) })
+  try {
+    await Promise.race([entered.promise, pending.then(() => { throw new Error('Expected a gated media read') })])
+    expect(events.map(event => [event.kind, event.t])).toEqual([['send', 0]])
+    clock = 10; releaseHeaders.resolve(); await reading.promise
+    expect(events.map(event => [event.kind, event.t])).toEqual([['send', 0], ['headers', 10]])
+    clock = 30; controller.enqueue(payload.slice(0, 3)); queued = 3; await nextPull.promise
+    expect(events.map(event => event.kind)).toEqual(['send', 'headers'])
+    clock = 70; controller.enqueue(payload.slice(3)); queued = 7; controller.close(); closed = true; await hashing.promise
+    expect(events.map(event => [event.kind, event.t])).toEqual([['send', 0], ['headers', 10], ['load', 70]])
+    expect(events[2]).toMatchObject({ status: 200, loaded: 7 })
+    clock = 110; releaseHash.resolve(); const blob = await pending
+    expect(new Uint8Array(await blob.arrayBuffer())).toEqual(payload)
+    expect(events.map(event => [event.kind, event.t])).toEqual([['send', 0], ['headers', 10], ['load', 70], ['validation', 110], ['loadend', 110]])
+    expect(events[2]!.t - events[1]!.t).toBe(60)
+    expect(events[3]!.t - events[2]!.t).toBe(40)
+    expect(events.some(event => event.kind === 'progress' || event.kind === 'firstByte')).toBe(false)
+    const requests = sends.filter(request => /\/(?:media|attachments)\/[a-f0-9]{64}$/.test(new URL(request.url).pathname))
+    expect(requests).toHaveLength(1); expect(requests[0]!.method).toBe('GET')
+    expect(requests[0]!.headers.get('Authorization')).toBe('Bearer synthetic-a')
+    expect(new URL(requests[0]!.url).pathname).toBe(mode === 'delegation' ? '/api' + path : `/api/bots/${bot}/media/${hash}`)
+  } finally {
+    releaseHeaders.resolve(); releaseHash.resolve()
+    if (!closed) { if (queued < 7) controller.enqueue(payload.slice(queued)); controller.close() }
+    await pending.catch(() => {})
+  }
+})
+
+
+it('timing review: a buffered approved fetch does not invent earlier wire-header or first-byte timing', async () => {
+  const hash = await digest('payload'), payload = new TextEncoder().encode('payload')
+  let release!: () => void, entered!: () => void, hashing!: () => void, releaseHash!: () => void, clock = 0
+  const entry = new Promise<void>(resolve => { entered = resolve }), ready = new Promise<void>(resolve => { release = resolve })
+  const hashEntry = new Promise<void>(resolve => { hashing = resolve }), hashReady = new Promise<void>(resolve => { releaseHash = resolve })
+  mediaFetch = async () => { entered(); await ready; return new Response(payload) }
+  const events: Array<{ kind: string, t: number }> = []
+  vi.spyOn(diagnostics, 'diagnosticTransfer').mockReturnValue(kind => { events.push({ kind, t: clock }) })
+  const digestSource = crypto.subtle.digest.bind(crypto.subtle)
+  vi.spyOn(crypto.subtle, 'digest').mockImplementation(async (algorithm, data) => { hashing(); await hashReady; return digestSource(algorithm, data) })
+  const pending = originalBlob({ bot_id: bot, content_hash: hash, type: 'file', size: 7 })
+  try {
+    await Promise.race([entry, pending.then(() => { throw new Error('Expected a buffered read') })])
+    clock = 30
+    expect(events).toEqual([{ kind: 'send', t: 0 }])
+    clock = 70; release(); await hashEntry
+    expect(events).toEqual([{ kind: 'send', t: 0 }, { kind: 'headers', t: 70 }, { kind: 'load', t: 70 }])
+    // Equal JS timestamps reveal no lower-layer byte interval. They cannot be
+    // converted into wire throughput, zero wire time or a first-byte value.
+    expect(events.some(event => event.kind === 'firstByte' || event.kind === 'progress')).toBe(false)
+    clock = 110; releaseHash(); await pending
+    expect(events.slice(-2)).toEqual([{ kind: 'validation', t: 110 }, { kind: 'loadend', t: 110 }])
+  } finally { release(); releaseHash(); await pending.catch(() => {}) }
 })

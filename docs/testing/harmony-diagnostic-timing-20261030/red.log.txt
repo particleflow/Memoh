@@ -1,0 +1,70 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/lib/harmony-diagnostics-api.test.ts (23 tests | 2 failed | 21 skipped) 39ms
+   × timing review: separates response availability, body read and SHA completion for media 29ms
+   × timing review: separates response availability, body read and SHA completion for delegation 7ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > timing review: separates response availability, body read and SHA completion for media
+AssertionError: expected [ [ 'send', +0 ] ] to deeply equal [ [ 'send', +0 ], [ 'headers', 10 ] ]
+
+- Expected
++ Received
+
+  [
+    [
+      "send",
+      0,
+    ],
+-   [
+-     "headers",
+-     10,
+-   ],
+  ]
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:343:56
+    341|     expect(events.map(event => [event.kind, event.t])).toEqual([['send…
+    342|     clock = 10; releaseHeaders.resolve(); await reading.promise
+    343|     expect(events.map(event => [event.kind, event.t])).toEqual([['send…
+       |                                                        ^
+    344|     clock = 30; controller.enqueue(payload.slice(0, 3)); queued = 3; a…
+    345|     expect(events.map(event => event.kind)).toEqual(['send', 'headers'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > timing review: separates response availability, body read and SHA completion for delegation
+AssertionError: expected [ [ 'send', +0 ], [ 'headers', 10 ] ] to deeply equal [ [ 'send', +0 ], …(2) ]
+
+- Expected
++ Received
+
+@@ -5,10 +5,6 @@
+    ],
+    [
+      "headers",
+      10,
+    ],
+-   [
+-     "load",
+-     70,
+-   ],
+  ]
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:347:56
+    345|     expect(events.map(event => event.kind)).toEqual(['send', 'headers'…
+    346|     clock = 70; controller.enqueue(payload.slice(3)); queued = 7; cont…
+    347|     expect(events.map(event => [event.kind, event.t])).toEqual([['send…
+       |                                                        ^
+    348|     expect(events[2]).toMatchObject({ status: 200, loaded: 7 })
+    349|     clock = 110; releaseHash.resolve(); const blob = await pending
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 21 skipped (23)
+   Start at  01:44:45
+   Duration  14.38s (transform 10.88s, setup 0ms, import 14.06s, tests 39ms, environment 1ms)

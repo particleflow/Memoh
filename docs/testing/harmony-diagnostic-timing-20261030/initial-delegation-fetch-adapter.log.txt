@@ -1,0 +1,74 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+ ❯ |web| src/lib/harmony-diagnostics-api.test.ts (23 tests | 2 failed | 21 skipped) 15040ms
+   × timing review: separates response availability, body read and SHA completion for media 17ms
+   × timing review: separates response availability, body read and SHA completion for delegation 15020ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > timing review: separates response availability, body read and SHA completion for media
+AssertionError: expected [ [ 'send', +0 ] ] to deeply equal [ [ 'send', +0 ], [ 'headers', 10 ] ]
+
+- Expected
++ Received
+
+  [
+    [
+      "send",
+      0,
+    ],
+-   [
+-     "headers",
+-     10,
+-   ],
+  ]
+
+ ❯ src/lib/harmony-diagnostics-api.test.ts:341:56
+    339|     expect(events.map(event => [event.kind, event.t])).toEqual([['send…
+    340|     clock = 10; releaseHeaders.resolve(); await reading.promise
+    341|     expect(events.map(event => [event.kind, event.t])).toEqual([['send…
+       |                                                        ^
+    342|     clock = 30; controller.enqueue(payload.slice(0, 3)); queued = 3; a…
+    343|     expect(events.map(event => event.kind)).toEqual(['send', 'headers'…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  |web| src/lib/harmony-diagnostics-api.test.ts > timing review: separates response availability, body read and SHA completion for delegation
+Error: Test timed out in 15000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/lib/harmony-diagnostics-api.test.ts:312:42
+    310|
+    311|
+    312| it.each(['media', 'delegation'] as const)('timing review: separates re…
+       |                                          ^
+    313|   const hash = await digest('payload'), payload = new TextEncoder().en…
+    314|   const gate = () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+⎯⎯⎯⎯⎯⎯ Unhandled Errors ⎯⎯⎯⎯⎯⎯
+
+Vitest caught 1 unhandled error during the test run.
+This might cause false positive tests. Resolve unhandled errors to make sure your tests are not affected.
+
+⎯⎯⎯⎯ Unhandled Rejection ⎯⎯⎯⎯⎯
+TypeError: fetch failed
+This error originated in "apps/web/src/lib/harmony-diagnostics-api.test.ts" test file. It doesn't mean the error was thrown inside the file itself, but while it was running.
+The latest test that might've caused the error is "timing review: separates response availability, body read and SHA completion for delegation". It might mean one of the following:
+- The error was thrown, while Vitest was running this test.
+- If the error occurred after the test had been completed, this was the last documented test before it was thrown.
+Caused by: Error: getaddrinfo EAI_AGAIN example.test
+ ❯ GetAddrInfoReqWrap.onlookupall [as oncomplete] node:dns:122:26
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+Serialized Error: { errno: -3001, code: 'EAI_AGAIN', syscall: 'getaddrinfo', hostname: 'example.test' }
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 21 skipped (23)
+     Errors  1 error
+   Start at  01:42:56
+   Duration  27.27s (transform 9.17s, setup 0ms, import 11.93s, tests 15.04s, environment 0ms)

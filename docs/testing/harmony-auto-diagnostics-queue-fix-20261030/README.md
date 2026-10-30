@@ -1,5 +1,7 @@
 # Scoped diagnostic queue continuation after2d35 review
 
+**Later status:** the owner handoff confirmed f60ec606 independently admitted and packaged in33/source8da01566. That does not establish timing accuracy or phone throughput. The subsequent [timing semantics correction](../harmony-diagnostic-timing-20261030/README.md) is source-only and not in the published33 package. Historical review logs below are retained.
+
 This source-only patch addresses the one newly rejected queue-recovery behavior on2d35b6edd87038458747cbb8ca73152913675a7e. Independent review accepted the prior P1 business-error isolation and P2 no-second-POST controls; those controls and original evidence are retained. This new candidate still requires independent readmission. No HAP/version/signing/deployment or phone result is produced here.
 
 ## Exact failure and minimal correction

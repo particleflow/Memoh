@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
+
+ RUN  v4.1.10 /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout
+
+
+ Test Files  1 passed (1)
+      Tests  2 passed | 21 skipped (23)
+   Start at  01:45:43
+   Duration  10.73s (transform 7.99s, setup 0ms, import 10.46s, tests 19ms, environment 0ms)

@@ -142,8 +142,6 @@ export async function originalBlob(attachment: UIAttachment, signal?: AbortSigna
   trace('send')
   try {
     const blob = await readOriginalBlob(attachment, signal, trace)
-    trace('validation', undefined, blob.size)
-    trace('load', undefined, blob.size)
     return blob
   } catch (error) {
     trace(signal?.aborted ? 'abort' : 'error')
@@ -162,26 +160,37 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
   }
   let bytes: unknown
   let response: Response
+  const observeHeaders = (source: typeof fetch): typeof fetch => {
+    const originalFetch = imageTimingFetch(timing, source)
+    return async (input, init) => {
+      const result = await originalFetch(input, init)
+      // Response headers are visible at this approved fetch boundary, before
+      // SDK body parsing. This is not a wire-header or first-body-byte clock.
+      trace('headers', result.status)
+      return result
+    }
+  }
   const scope = attachment.metadata?.delegation_url
   if (scope !== undefined) {
     const path = normalizeDelegationPath(scope as string, hash)
     const token = sdkAuthQuery().token
     if (!token) throw new Error('原件授权不可用')
-    response = await imageTimingFetch(timing, createApiFetch())(sdkApiUrl({ url: path }), {
+    response = await observeHeaders(createApiFetch())(sdkApiUrl({ url: path }), {
       method: 'GET', signal, redirect: 'error', headers: { authorization: 'Bearer ' + token },
     })
-    trace('headers', response.status)
     if (response.status !== 200) throw new Error('委派原件访问失败')
     bytes = await response.arrayBuffer()
   } else {
     const result = await getBotsByBotIdMediaByContentHash({
       path: { bot_id: botId, content_hash: hash }, signal, parseAs: 'arrayBuffer', throwOnError: true,
-      ...(timing ? { fetch: imageTimingFetch(timing, client.getConfig().fetch ?? globalThis.fetch) } : {}) })
+      fetch: observeHeaders(client.getConfig().fetch ?? globalThis.fetch) })
     bytes = result.data
     response = result.response
-    trace('headers', response.status)
   }
   if (response.status !== 200) throw new Error('原件响应不完整')
+  // Complete decoded body is now available to this reader; validation and Blob
+  // work have not completed. This duration alone is not public-network throughput.
+  if (bytes instanceof ArrayBuffer) trace('load', response.status, bytes.byteLength)
   imageTimingMark(timing, 'body', bytes instanceof ArrayBuffer ? bytes.byteLength : undefined)
   imageTimingResource(timing, response.url)
   if (!(bytes instanceof ArrayBuffer) || (typeof attachment.size === 'number' && bytes.byteLength !== attachment.size)) throw new Error('原件校验未通过')
@@ -190,6 +199,7 @@ async function readOriginalBlob(attachment: UIAttachment, signal: AbortSignal | 
   imageTimingMark(timing, 'hashEnd')
   if (verifiedHash !== hash) throw new Error('原件校验未通过')
   signal?.throwIfAborted()
+  trace('validation', undefined, bytes.byteLength)
   const blob = new Blob([bytes], { type: attachment.mime || 'application/octet-stream' })
   imageTimingBlob(timing, blob)
   return blob
