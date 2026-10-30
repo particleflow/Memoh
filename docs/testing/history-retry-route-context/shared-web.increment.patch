@@ -1,0 +1,71 @@
+diff --git a/apps/web/src/pages/home/index.vue b/apps/web/src/pages/home/index.vue
+index 5d70dac28..2b6be8a0f 100644
+--- a/apps/web/src/pages/home/index.vue
++++ b/apps/web/src/pages/home/index.vue
+@@ -56,6 +56,7 @@ const route = useRoute()
+ const router = useRouter()
+ const { t } = useI18n()
+ const chatStore = useChatStore()
++chatStore.bindRouteContext(router)
+ const workspaceTabs = useWorkspaceTabsStore()
+ const { currentBotId, bots, activeSession } = storeToRefs(chatStore)
+ const composerPrefill = useComposerPrefillStore()
+diff --git a/apps/web/src/store/chat-list.ts b/apps/web/src/store/chat-list.ts
+index e0df3388e..b87dfcad7 100644
+--- a/apps/web/src/store/chat-list.ts
++++ b/apps/web/src/store/chat-list.ts
+@@ -1,5 +1,5 @@
+ import { routerKey } from 'vue-router'
+-import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'
++import { createChatRouteContext } from './chat/route-context'
+ import { defineStore, storeToRefs } from 'pinia'
+ import { computed, hasInjectionContext, inject, onScopeDispose, ref } from 'vue'
+ import { toast } from '@felinic/ui'
+@@ -50,7 +50,7 @@ export type { FsChangeBatch, FsChangeEvent, FsToolKind } from './chat/fs-beacon'
+ export type { ChatViewEntry, ChatViewTarget } from './chat/view-registry'
+
+ export const useChatStore = defineStore('chat', () => {
+-  const router = hasInjectionContext() ? inject(routerKey, null) : null
++  const { bindRouteContext, hasHistoryEntry, hasContactEntry } = createChatRouteContext(hasInjectionContext() ? inject(routerKey, null) : null)
+   const selectionStore = useChatSelectionStore()
+   const workdirsStore = useWorkdirsStore()
+   const { currentBotId, sessionId, draftIntent, explicitSelection: explicitSessionSelection } = storeToRefs(selectionStore)
+@@ -414,8 +414,7 @@ export const useChatStore = defineStore('chat', () => {
+     createNewSession, selectDraft,
+     reset: resetBootstrap,
+   } = createChatBootstrap({
+-    hasHistoryEntry: () => !!router?.currentRoute.value.query.session,
+-    hasContactEntry: () => !!router && CHAT_ROUTE_NAMES.has(router.currentRoute.value.name as string) && !router.currentRoute.value.query.session,
++    hasHistoryEntry, hasContactEntry,
+     currentBotId,
+     sessionId,
+     draftIntent,
+@@ -612,7 +611,7 @@ export const useChatStore = defineStore('chat', () => {
+     commandEvent, commandEventForScope, rememberCommandEvent, beginCommandEvent, showCommandError,
+     fsChangedAt, markFsChanged, affectsPath, fsEventForPath,
+     backgroundTaskFor,
+-    initialize, initializeWithRecovery, refreshBots, selectBot, selectSession, createNewSession,
++    bindRouteContext, initialize, initializeWithRecovery, refreshBots, selectBot, selectSession, createNewSession,
+     selectDraft, userSentInSession, draftPromoted, draftViewRequested, applyDraftViewRequest,
+     forkedSessionRequested, deletedSession,
+     stageExternalAgentSession, stageDefaultExternalAgentSession, cacheDefaultExternalAgentSession,
+diff --git a/apps/web/src/store/chat/route-context.ts b/apps/web/src/store/chat/route-context.ts
+new file mode 100644
+index 000000000..093ee18f4
+--- /dev/null
++++ b/apps/web/src/store/chat/route-context.ts
+@@ -0,0 +1,14 @@
++import type { Router } from 'vue-router'
++import { CHAT_ROUTE_NAMES } from '@/constants/chat-routes'
++
++// Web creates workspace/chat stores before installing Router; native hosts can
++// do the same. Home supplies its real router once mounted. Keep this context
++// live and unpersisted so a later initialize retry sees the current entry.
++export function createChatRouteContext(initialRouter: Router | null) {
++  let router = initialRouter
++  return {
++    bindRouteContext(nextRouter: Router) { router = nextRouter },
++    hasHistoryEntry: () => !!router?.currentRoute.value.query.session,
++    hasContactEntry: () => !!router && CHAT_ROUTE_NAMES.has(router.currentRoute.value.name as string) && !router.currentRoute.value.query.session,
++  }
++}

@@ -1,0 +1,3 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/memoh-history-retry/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json

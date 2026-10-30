@@ -323,6 +323,42 @@ field deployment and product acceptance remain separate evidence classes.
   [consumer map](history-runtime-bootstrap/consumer-map.json). Original navigation
   branch/history are preserved; the product branch starts from currentcefdf0.
 
+### C11 later initialize follow-up — route context was captured before Router
+
+- **Preserved field failure:** parent reports Web1fa17fd7 deployed with strict
+  TLS/resource verification and digest9cb53e5297d7ee5d2e5d36e3bf852f5e7759a41d49b7a1119bea35cc53a1ba6d,
+  Servercefdf0 retained. Original component history returned two messages but45
+  seconds still showed11 skeletons/zero rows; no positive target subscription/
+  snapshot obtained. Field root cause is not closed by CI/Docker or absent events.
+  This source owner has not read the Windows receipt; one existing-only lifecycle
+  excerpt is pending, with no new field page/API/DB or45-second repeat.
+- **New proved defect:** main.ts constructs workspace/chat stores before app
+  installs Router. Capturing injected Router once left entry callbacks reading
+  null permanently. Later native initialize treated a history URL as primary
+  entry, selected contactC and replaced the historyS subscription. The existing
+  unified full-app-review already recorded this remaining late-retry risk.
+- **Bounded correction:** product500d86f52ae97ba92ac8245bbafbe66ba21543db introduces
+  live per-store route context, bound from Home's actual Router before URL sync.
+  A primary route still chooses its fixed contact. The prior ensureWebSocket
+  benefit, authorization, histories, queues, snapshot atomicity and Agent core
+  remain. No persisted intent/singleton Router/UI/permission/API is added.
+- **New browser evidence:** full real frontend at an owned local Vite origin,
+  with synthetic HTTP/WS ports and native catalog-outage/backoff lifecycle.
+  Red initially subscribedS, then subscribedC while URL stayedS. Green subscribedS
+  again after retry and kept URL/store/runtime agreement. Both ended with two
+  cached rows visible; this is an ownership counterexample, not a claimed repeat
+  of the exact field11-skeleton symptom. No backend/auth or NAS acceptance is
+  inferred from the fixture. Browser/Vite closed; old C05 remains untouched.
+- **Checks and honest gap:**29 targeted cases pass;8 Home read-aloud fixture
+  cases fail because the mocked player is undefined. Removing the new Home
+  binding call gives the same8 failures; cause remains unestablished. Do not
+  call the whole suite green or expand speech production changes to hide this.
+  Types/lint/copy/contract/diff checks pass. Old initial-transport and observer
+  tests/builds were not repeated. Current Harmony mirrors/locks remain unverified.
+- **Evidence:** [Route-context diagnosis and full frontend red/green](history-retry-route-context/README.md).
+  Rendered cached rows alone cannot prove that the right history runtime is
+  still observed. Retain this distinction before further unified/field acceptance.
+
 ## C12 — Task-local Go build cache exhausts temporary disk
 
 - **Platform / signature:** Input-source workstream scoped lint exited 1 during

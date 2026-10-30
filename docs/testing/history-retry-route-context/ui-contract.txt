@@ -1,0 +1,6 @@
+
+ℹ px baseline: 102 grandfathered px violation(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ app-injection baseline: 131 grandfathered injection(s) remaining — burn down per cluster, then re-run with --write-baseline
+ℹ hand-spun-loader baseline: 10 grandfathered loader(s) remaining — adopt a loading-ladder rung per cluster, then re-run with --write-baseline
+ℹ alpha baseline: 146 grandfathered hand-written alpha value(s) remaining — burn down per cluster, then re-run with --write-baseline
+✓ UI contract OK (3 warning(s))

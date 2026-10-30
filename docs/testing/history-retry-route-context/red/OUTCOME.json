@@ -1,0 +1,515 @@
+{
+  "phase": "red",
+  "fixture": "synthetic HTTP/WS ports; complete unmodified frontend entry",
+  "http": [
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "session": null,
+      "status": 502,
+      "at_ms": 7410.69
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7412.03
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/workdirs",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7609.93
+    },
+    {
+      "path": "/api/bots/retry-history-fixture",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7612.29
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "session": null,
+      "status": 502,
+      "at_ms": 7613.95
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/settings",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7614.45
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/container",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7615.01
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7615.7
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/contact",
+      "method": "POST",
+      "session": null,
+      "status": 200,
+      "at_ms": 7616.18
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7627.18
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/media/limits",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7654.8
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/messages",
+      "method": "GET",
+      "session": [
+        "20000000-0000-4000-8000-000000000001"
+      ],
+      "status": 200,
+      "at_ms": 7659.24
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7660.53
+    },
+    {
+      "path": "/api/ping",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7808.93
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7810.16
+    },
+    {
+      "path": "/api/users/me",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7810.95
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/settings",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7814.25
+    },
+    {
+      "path": "/api/acp/profiles",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7815.05
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/agents",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7815.71
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/skills/catalog",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7816.22
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/20000000-0000-4000-8000-000000000001/status",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7822.06
+    },
+    {
+      "path": "/api/models",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7825.29
+    },
+    {
+      "path": "/api/providers",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7826.08
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7826.59
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7827.29
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/messages",
+      "method": "GET",
+      "session": [
+        "20000000-0000-4000-8000-000000000001"
+      ],
+      "status": 200,
+      "at_ms": 7828.58
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/media/limits",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 7837.94
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "session": null,
+      "status": 502,
+      "at_ms": 8441.98
+    },
+    {
+      "path": "/api/bots",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 10455.3
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions",
+      "method": "GET",
+      "session": null,
+      "status": 200,
+      "at_ms": 10462.72
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/contact",
+      "method": "POST",
+      "session": null,
+      "status": 200,
+      "at_ms": 10483.01
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/sessions/events",
+      "method": "GET",
+      "status": "held-synthetic-stream",
+      "at_ms": 10483.51
+    },
+    {
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/messages",
+      "method": "GET",
+      "session": [
+        "20000000-0000-4000-8000-000000000002"
+      ],
+      "status": 200,
+      "at_ms": 10498.38
+    }
+  ],
+  "frames": [
+    {
+      "socket": 0,
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "20000000-0000-4000-8000-000000000001",
+      "at_ms": 7661.85
+    },
+    {
+      "socket": 0,
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "20000000-0000-4000-8000-000000000001",
+      "at_ms": 7661.9
+    },
+    {
+      "socket": 0,
+      "direction": "sent",
+      "type": "runtime_unsubscribe",
+      "session_id": "20000000-0000-4000-8000-000000000001",
+      "at_ms": 8437.18
+    },
+    {
+      "socket": 1,
+      "direction": "sent",
+      "type": "runtime_subscribe",
+      "session_id": "20000000-0000-4000-8000-000000000002",
+      "at_ms": 10497.66
+    },
+    {
+      "socket": 1,
+      "direction": "received",
+      "type": "runtime_snapshot",
+      "session_id": "20000000-0000-4000-8000-000000000002",
+      "at_ms": 10497.7
+    }
+  ],
+  "sockets": [
+    {
+      "id": 0,
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/web/ws",
+      "at_ms": 7653.72
+    },
+    {
+      "id": 1,
+      "path": "/api/bots/10000000-0000-4000-8000-000000000001/web/ws",
+      "at_ms": 10487.67
+    }
+  ],
+  "samples": [
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 0,
+      "skeletons": 0,
+      "originals": [
+        false,
+        false
+      ],
+      "at_ms": 7665.37
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 7878.87
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 8085.72
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 8302.48
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 8531.54
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 8741.89
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 8950.33
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 9158.43
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 9365.6
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 9576.8
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 9816.45
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 10021.92
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 10227.28
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000001",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 10432.66
+    },
+    {
+      "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+      "bot": "10000000-0000-4000-8000-000000000001",
+      "session": "20000000-0000-4000-8000-000000000002",
+      "loading": false,
+      "rows": 2,
+      "skeletons": 0,
+      "originals": [
+        true,
+        true
+      ],
+      "at_ms": 10638.61
+    }
+  ],
+  "errors": [],
+  "external_blocked": [
+    {
+      "path": "/css2"
+    }
+  ],
+  "cleanup": {
+    "browser": "closed",
+    "vite_exit": -2
+  },
+  "catalog_recovered": true,
+  "ownership_preserved": false,
+  "validation_boundary": "Complete real frontend and browser; synthetic HTTP/WS ports only, not backend/field validation",
+  "final": {
+    "url": "/bot/retry-history-fixture?session=20000000-0000-4000-8000-000000000001",
+    "bot": "10000000-0000-4000-8000-000000000001",
+    "session": "20000000-0000-4000-8000-000000000002",
+    "loading": false,
+    "rows": 2,
+    "skeletons": 0,
+    "originals": [
+      true,
+      true
+    ],
+    "at_ms": 10638.61
+  },
+  "inference_frames": []
+}

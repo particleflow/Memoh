@@ -1,0 +1,9 @@
+{
+  "red_exec_session": 35582,
+  "green_exec_session": 51262,
+  "both_completed": true,
+  "browser_closed": true,
+  "vite_direct_child_exit": -2,
+  "old_C05_cleanup_untouched": true,
+  "note": "Initial Vite-path setup exited1; schema-incorrect setup closed browser/Vite before accepted red. No detached fixture, Server, DB or field connection."
+}

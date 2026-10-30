@@ -1,0 +1,8 @@
+✓ patched dependencies verified against installed content
+
+  VITE v8.1.5  ready in 931 ms
+
+  ➜  Local:   http://127.0.0.1:49971/
+3:02:09 PM [vite] (client) [console.error] Failed to fetch bots: {"message":"synthetic catalog-only startup outage"}
+3:02:09 PM [vite] (client) [console.error] Chat initialize failed; retrying with backoff: {"message":"synthetic catalog-only startup outage"}
+3:02:10 PM [vite] (client) [console.error] Failed to fetch bots: {"message":"synthetic catalog-only startup outage"}

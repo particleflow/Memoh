@@ -1,0 +1,95 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+ RUN  v4.1.10 /workspace/memoh-history-retry
+
+(node:246254) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:246253) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:246252) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ |web| src/pages/home/index.read-aloud-admission.test.ts (8 tests | 8 failed) 164ms
+     × same Bot/session, different run: stops during authorization and never restores the old queue after admission 111ms
+     × cross Bot/session: stops during authorization and never restores the old queue after admission 15ms
+     × denied: stays silent under the error mask, then returns to the actual primary contact path 7ms
+     × expired: stays silent under the error mask, then returns to the actual primary contact path 6ms
+     × wrong-run: stays silent under the error mask, then returns to the actual primary contact path 6ms
+     × ignores a late task admission after returning to the primary contact without restoring old audio 7ms
+     × cancels pending synthesis before anchor delivery and discards the response after returning to contact 6ms
+     × stops the old pane when an invalid history URL is rejected before a task request starts 4ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > same Bot/session, different run: stops during authorization and never restores the old queue after admission
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cross Bot/session: stops during authorization and never restores the old queue after admission
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:78:15
+     76|   expect(masked()).toBe(false)
+     77|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     78|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     79|   expect(api.speech!.state.value.status).toBe('playing')
+     80|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:118:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > denied: stays silent under the error mask, then returns to the actual primary contact path
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > expired: stays silent under the error mask, then returns to the actual primary contact path
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > wrong-run: stays silent under the error mask, then returns to the actual primary contact path
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:78:15
+     76|   expect(masked()).toBe(false)
+     77|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     78|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     79|   expect(api.speech!.state.value.status).toBe('playing')
+     80|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:129:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > ignores a late task admission after returning to the primary contact without restoring old audio
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:78:15
+     76|   expect(masked()).toBe(false)
+     77|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     78|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     79|   expect(api.speech!.state.value.status).toBe('playing')
+     80|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:144:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > cancels pending synthesis before anchor delivery and discards the response after returning to contact
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:78:15
+     76|   expect(masked()).toBe(false)
+     77|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     78|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     79|   expect(api.speech!.state.value.status).toBe('playing')
+     80|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:156:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/8]⎯
+
+ FAIL  |web| src/pages/home/index.read-aloud-admission.test.ts > actual Home URL admission stops speech before pane anchor delivery > stops the old pane when an invalid history URL is rejected before a task request starts
+TypeError: Cannot read properties of undefined (reading 'dispatchEvent')
+ ❯ mount src/pages/home/index.read-aloud-admission.test.ts:78:15
+     76|   expect(masked()).toBe(false)
+     77|   api.speech!.replay(api.messages!.value[0]!); await settle()
+     78|   api.player!.dispatchEvent(new Event('playing'))
+       |               ^
+     79|   expect(api.speech!.state.value.status).toBe('playing')
+     80|   api.messages!.value.push(reply('queued', true)); await settle()
+ ❯ src/pages/home/index.read-aloud-admission.test.ts:171:20
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/8]⎯
+
+
+ Test Files  1 failed | 3 passed (4)
+      Tests  8 failed | 29 passed (37)
+   Start at  15:06:16
+   Duration  3.20s (transform 4.03s, setup 0ms, import 5.68s, tests 465ms, environment 2.07s)

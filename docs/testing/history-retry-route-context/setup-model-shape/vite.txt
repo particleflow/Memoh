@@ -1,0 +1,91 @@
+✓ patched dependencies verified against installed content
+
+  VITE v8.1.5  ready in 687 ms
+
+  ➜  Local:   http://127.0.0.1:49971/
+2:59:52 PM [vite] (client) [optimizer] bundling dependencies...
+3:00:03 PM [vite] (client) [console.error] Failed to fetch bots: {"message":"synthetic catalog-only startup outage"}
+3:00:03 PM [vite] (client) [console.error] Chat initialize failed; retrying with backoff: {"message":"synthetic catalog-only startup outage"}
+3:00:03 PM [vite] (client) [console.warn] [Vue warn]: Unhandled error during execution of component update
+  at <ChatPane key="chat-pane:10000000-0000-4000-8000-000000000001:chat:1" tab-id="chat:1" session-id="20000000-0000-4000-8000-000000000001"  ... >
+  at <KeepAlive>
+  at <PanelFrame>
+  at <PanelChat params= {"params":{"sessionId":"20000000-0000-4000-8000-000000000001","explicitSelection":true,"contactView":false,"taskAnchor":null},"api":{"_isDisposed":false,"_disposables":{},"id":"chat:1","component":"chat","_isFocused":false,"_isActive":true,"_isVisible":true,"_width":976,"_height":900,"_parameters":{},"panelUpdatesDisposable":{"_disposable":{}},"_onDidDimensionChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidChangeFocus":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onWillFocus":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidVisibilityChange":{"_listeners":[{},{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onWillVisibilityChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidActiveChange":{"_listeners":[{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onActiveChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidParametersChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChangeInternal":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidSizeChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"panel":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"},"accessor":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"},"_onDidTitleChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidActiveGroupChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidGroupChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidRendererChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidLocationChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"groupEventsDisposable":{"_disposable":{"_isDisposed":false,"_disposables":{}}},"_tabComponent":"props.defaultTabComponent","_group":{"views":["chat:1"],"activeView":"chat:1","id":"1"}},"containerApi":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"}} >
+3:00:03 PM [vite] (client) [console.warn] [Vue warn]: Unhandled error during execution of component update
+  at <ChatPane key="chat-pane:10000000-0000-4000-8000-000000000001:chat:1" tab-id="chat:1" session-id="20000000-0000-4000-8000-000000000001"  ... >
+  at <KeepAlive>
+  at <PanelFrame>
+  at <PanelChat params= {"params":{"sessionId":"20000000-0000-4000-8000-000000000001","explicitSelection":true,"contactView":false,"taskAnchor":null},"api":{"_isDisposed":false,"_disposables":{},"id":"chat:1","component":"chat","_isFocused":false,"_isActive":true,"_isVisible":true,"_width":976,"_height":900,"_parameters":{},"panelUpdatesDisposable":{"_disposable":{}},"_onDidDimensionChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidChangeFocus":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onWillFocus":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidVisibilityChange":{"_listeners":[{},{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onWillVisibilityChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidActiveChange":{"_listeners":[{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onActiveChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidParametersChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChangeInternal":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidSizeChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"panel":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"},"accessor":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"},"_onDidTitleChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidActiveGroupChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidGroupChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidRendererChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidLocationChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"groupEventsDisposable":{"_disposable":{"_isDisposed":false,"_disposables":{}}},"_tabComponent":"props.defaultTabComponent","_group":{"views":["chat:1"],"activeView":"chat:1","id":"1"}},"containerApi":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"}} >
+3:00:04 PM [vite] (client) [Unhandled rejection] TypeError: models.value.map is not a function
+ > ComputedRefImpl.fn src/pages/home/components/chat-pane.vue:3021:5
+    3019 |    activeSessionMetadata.value,
+    3020 |    models.value
+    3021 |      .map(model => model.id)
+         |       ^
+    3022 |      .filter((id): id is string => !!id),
+    3023 |  ))
+ > refreshComputed ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:418:27
+ > isDirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:389:67
+ > get dirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:306:11
+ > job ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:1915:39
+ > callWithErrorHandling ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:199:32
+ > flushJobs ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:408:8
+
+3:00:04 PM [vite] (client) [Unhandled rejection] TypeError: models.value.find is not a function
+ > ComputedRefImpl.fn src/pages/home/components/chat-pane.vue:2798:22
+    2796 |  const activeModel = computed(() => {
+    2797 |    const id = overrideModelId.value || botSettings.value?.chat_model_id || ''
+    2798 |    return models.value.find((m) => m.id === id)
+         |                        ^
+    2799 |  })
+    2800 |
+ > refreshComputed ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:418:27
+ > isDirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:389:67
+ > refreshComputed ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:407:89
+ > isDirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:389:67
+ > get dirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:306:11
+ > job ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:1915:39
+ > callWithErrorHandling ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:199:32
+ > flushJobs ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:408:8
+
+3:00:04 PM [vite] (client) [console.error] Failed to fetch bots: {"message":"synthetic catalog-only startup outage"}
+3:00:06 PM [vite] (client) [console.warn] [Vue warn]: Unhandled error during execution of component update
+  at <ChatPane key="chat-pane:10000000-0000-4000-8000-000000000001:chat:1" tab-id="chat:1" session-id="20000000-0000-4000-8000-000000000001"  ... >
+  at <KeepAlive>
+  at <PanelFrame>
+  at <PanelChat params= {"params":{"sessionId":"20000000-0000-4000-8000-000000000001","explicitSelection":true,"contactView":false,"taskAnchor":null},"api":{"_isDisposed":false,"_disposables":{},"id":"chat:1","component":"chat","_isFocused":false,"_isActive":true,"_isVisible":true,"_width":976,"_height":900,"_parameters":{},"panelUpdatesDisposable":{"_disposable":{}},"_onDidDimensionChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidChangeFocus":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onWillFocus":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidVisibilityChange":{"_listeners":[{},{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onWillVisibilityChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidActiveChange":{"_listeners":[{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onActiveChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidParametersChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChangeInternal":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidSizeChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"panel":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"},"accessor":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"},"_onDidTitleChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidActiveGroupChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidGroupChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidRendererChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidLocationChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"groupEventsDisposable":{"_disposable":{"_isDisposed":false,"_disposables":{}}},"_tabComponent":"props.defaultTabComponent","_group":{"views":["chat:1"],"activeView":"chat:1","id":"1"}},"containerApi":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"}} >
+3:00:06 PM [vite] (client) [Unhandled rejection] TypeError: models.value.map is not a function
+ > ComputedRefImpl.fn src/pages/home/components/chat-pane.vue:3021:5
+    3019 |    activeSessionMetadata.value,
+    3020 |    models.value
+    3021 |      .map(model => model.id)
+         |       ^
+    3022 |      .filter((id): id is string => !!id),
+    3023 |  ))
+ > refreshComputed ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:418:27
+ > isDirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:389:67
+ > get dirty ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:306:11
+ > job ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:1915:39
+ > callWithErrorHandling ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:199:32
+ > flushJobs ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:408:8
+
+3:00:06 PM [vite] (client) [console.warn] [Vue warn]: Unhandled error during execution of component update
+  at <ChatPane key="chat-pane:10000000-0000-4000-8000-000000000001:chat:1" tab-id="chat:1" session-id="20000000-0000-4000-8000-000000000001"  ... >
+  at <KeepAlive>
+  at <PanelFrame>
+  at <PanelChat params= {"params":{"sessionId":"20000000-0000-4000-8000-000000000001","explicitSelection":true,"contactView":false,"taskAnchor":null},"api":{"_isDisposed":false,"_disposables":{},"id":"chat:1","component":"chat","_isFocused":false,"_isActive":true,"_isVisible":true,"_width":976,"_height":900,"_parameters":{},"panelUpdatesDisposable":{"_disposable":{}},"_onDidDimensionChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidChangeFocus":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onWillFocus":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidVisibilityChange":{"_listeners":[{},{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onWillVisibilityChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidActiveChange":{"_listeners":[{},{},{}],"_disposed":false,"_pauseTokens":{}},"_onActiveChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidParametersChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChangeInternal":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidConstraintsChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidSizeChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"panel":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"},"accessor":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"},"_onDidTitleChange":{"_listeners":[{},{}],"_disposed":false,"_pauseTokens":{}},"_onDidActiveGroupChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidGroupChange":{"_listeners":[],"_disposed":false,"_pauseTokens":{}},"_onDidRendererChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"_onDidLocationChange":{"_listeners":[{}],"_disposed":false,"_pauseTokens":{}},"groupEventsDisposable":{"_disposable":{"_isDisposed":false,"_disposables":{}}},"_tabComponent":"props.defaultTabComponent","_group":{"views":["chat:1"],"activeView":"chat:1","id":"1"}},"containerApi":{"grid":{"root":{"type":"branch","data":[{"type":"leaf","data":{"views":["chat:1"],"activeView":"chat:1","id":"1"},"size":976}],"size":900},"width":976,"height":900,"orientation":"HORIZONTAL"},"panels":{"chat:1":{"id":"chat:1","contentComponent":"chat","tabComponent":"props.defaultTabComponent","params":"[Circular]","title":"Fixture history","renderer":"always"}},"activeGroup":"1"}} >
+3:00:06 PM [vite] (client) [Unhandled rejection] TypeError: models.value.map is not a function
+ > ComputedRefImpl.fn src/pages/home/components/chat-pane.vue:3021:5
+    3019 |    activeSessionMetadata.value,
+    3020 |    models.value
+    3021 |      .map(model => model.id)
+         |       ^
+    3022 |      .filter((id): id is string => !!id),
+    3023 |  ))
+ > refreshComputed ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:418:27
+ > get value ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:1749:4
+ > ReactiveEffect.getter [as fn] ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:1848:26
+ > ReactiveEffect.run ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:264:18
+ > job ../../node_modules/.pnpm/@vue+reactivity@3.5.40/node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:1919:30
+ > callWithErrorHandling ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:199:32
+ > flushJobs ../../node_modules/.pnpm/@vue+runtime-core@3.5.40/node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:408:8

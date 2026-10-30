@@ -1,0 +1,13 @@
+{
+  "phase": "red",
+  "fixture": "synthetic HTTP/WS ports; complete unmodified frontend entry",
+  "http": [],
+  "frames": [],
+  "sockets": [],
+  "samples": [],
+  "errors": [],
+  "external_blocked": [],
+  "cleanup": {
+    "vite_exit": 1
+  }
+}
