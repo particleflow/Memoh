@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"sync"
 	"testing"
@@ -54,7 +55,9 @@ func TestConversationPresenceRuntimeSameModelParallelAndFormalFirst(t *testing.T
 					case <-r.Context().Done():
 						return
 					}
-					fmt.Fprint(w, "formal response")
+					if _, err := fmt.Fprint(w, "formal response"); err != nil {
+						t.Error(err)
+					}
 					return
 				}
 				close(auxiliaryStarted)
@@ -64,23 +67,43 @@ func TestConversationPresenceRuntimeSameModelParallelAndFormalFirst(t *testing.T
 					return
 				}
 				w.Header().Set("Content-Type", "application/json")
-				fmt.Fprint(w, `{"id":"fixture","object":"chat.completion","model":"same-fixture-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"text\":\"收到，我来梳理。\",\"phase\":\"thinking\"}"},"finish_reason":"stop"}],"usage":{"prompt_tokens":7,"completion_tokens":4,"total_tokens":11}}`)
+				if _, err := fmt.Fprint(w, `{"id":"fixture","object":"chat.completion","model":"same-fixture-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"text\":\"收到，我来梳理。\",\"phase\":\"thinking\"}"},"finish_reason":"stop"}],"usage":{"prompt_tokens":7,"completion_tokens":4,"total_tokens":11}}`); err != nil {
+					t.Error(err)
+				}
 			}))
 			defer server.Close()
+			fixtureURL, err := url.Parse(server.URL)
+			if err != nil {
+				t.Fatal(err)
+			}
+			transport := &presenceLocalOnlyTransport{host: fixtureURL.Host, base: server.Client().Transport}
+			defer func() {
+				if transport.blocked.Load() != 0 {
+					t.Error("nonlocal HTTP attempt in presence fixture")
+				}
+			}()
 			service := &Service{queries: claims.queries, botPermissions: presenceChatPermission{}, logger: slog.New(slog.DiscardHandler)}
 			service.SetConversationPresence(ConversationPresenceOptions{Policy: conversationpresence.Policy{Continuity: conversationpresence.ContinuityPolicy{}, Limits: conversationpresence.Limits{Deadline: 4 * time.Second, MaxInputRunes: 100, MaxOutputTokens: 100, MaxTextRunes: 100}}, MaxConcurrentPerProvider: 1})
 			req := ChatRequest{BotID: claims.handle.BotID, ThreadID: claims.handle.SessionID, RunHandle: claims.handle, UserID: claims.actor, CurrentChannel: "local", RawQuery: "Can you explain this?"}
 			selected := models.GetResponse{ID: "fixture-model-uuid", ModelID: "same-fixture-model", Model: models.Model{ProviderID: "fixture-provider", ModelID: "same-fixture-model", Config: models.ModelConfig{ThinkingMode: reasoning.ModeToggle, ReasoningEfforts: []string{"low", "high"}, ReasoningOffSupport: reasoning.OffSupportRejected}}}
 			provider := sqlc.Provider{ClientType: string(models.ClientTypeOpenAICompletions)}
-			mainCfg := models.SDKModelConfig{ModelID: selected.ModelID, ClientType: provider.ClientType, BaseURL: server.URL + "/v1", APIKey: "fixture-only", HTTPClient: server.Client(), ReasoningConfig: &models.ReasoningConfig{Active: true, Effort: "high"}}
+			mainCfg := models.SDKModelConfig{ModelID: selected.ModelID, ClientType: provider.ClientType, BaseURL: server.URL + "/v1", APIKey: "fixture-only", HTTPClient: &http.Client{Transport: transport}, ReasoningConfig: &models.ReasoningConfig{Active: true, Effort: "high"}}
 			var snapshot *presenceResolvedModel
 			hooked := service.presenceModelHook(req, &snapshot)(selected, provider, mainCfg)
 			main := make(chan native.StreamEvent, 2)
 			out := service.withConversationPresence(ctx, req, resolvedContext{presence: snapshot, runConfig: native.RunConfig{Bot: native.BotInfo{Name: "Fixture"}}}, main)
 			mainRequestDone := make(chan error, 1)
 			go func() {
-				r, _ := http.NewRequestWithContext(ctx, http.MethodPost, server.URL+"/v1/chat/completions", strings.NewReader(`{"model":"same-fixture-model","reasoning_effort":"high","stream":true}`))
-				response, e := hooked.HTTPClient.Do(r)
+				r, requestErr := http.NewRequestWithContext(ctx, http.MethodPost, server.URL+"/v1/chat/completions", strings.NewReader(`{"model":"same-fixture-model","reasoning_effort":"high","stream":true}`))
+				if requestErr != nil {
+					mainRequestDone <- requestErr
+					close(main)
+					return
+				}
+				// Single-hop real HTTP through the exact-host fixture guard: never
+				// follow redirects or reach an unapproved provider. The wrapped
+				// transport still exercises the main WroteRequest priority hook.
+				response, e := hooked.HTTPClient.Transport.RoundTrip(r)
 				if e == nil {
 					_, e = io.ReadAll(response.Body)
 					_ = response.Body.Close()

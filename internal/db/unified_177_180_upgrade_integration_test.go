@@ -3,16 +3,40 @@
 package db_test
 
 import (
+	"errors"
 	"io/fs"
 	"maps"
 	"testing"
 
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/google/uuid"
 
 	memohdb "github.com/felinics/memoh/internal/db"
 )
 
 func TestUnified177To181PreservesAcceptedWorkAndHistory(t *testing.T) {
+	// Keep the historical test identity used by CI. The actual up command
+	// consumes the current embedded chain, so its endpoint must come from that
+	// same source rather than a version constant that predates new migrations.
+	source, err := iofs.New(postgresMigrationsFS(t), ".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = source.Close() })
+	expectedVersion, err := source.First()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for {
+		next, nextErr := source.Next(expectedVersion)
+		if errors.Is(nextErr, fs.ErrNotExist) {
+			break
+		}
+		if nextErr != nil {
+			t.Fatal(nextErr)
+		}
+		expectedVersion = next
+	}
 	f := newNativeHerdrFixture(t)
 	// Only this newly created disposable fixture is prepared as schema 177.
 	// This is not a production rollback procedure or an old-data restoration.
@@ -59,9 +83,9 @@ func TestUnified177To181PreservesAcceptedWorkAndHistory(t *testing.T) {
 	if err := memohdb.RunMigrate(nil, pgConfigFromDSN(t, teamMigrationDSN(t)), postgresMigrationsFS(t), "up", nil); err != nil {
 		t.Fatal(err)
 	}
-	var version int
+	var version uint
 	var dirty, unknown bool
-	if err := f.conn.QueryRow(t.Context(), `SELECT version,dirty FROM schema_migrations`).Scan(&version, &dirty); err != nil || version != 181 || dirty {
+	if err := f.conn.QueryRow(t.Context(), `SELECT version,dirty FROM schema_migrations`).Scan(&version, &dirty); err != nil || version != expectedVersion || dirty {
 		t.Fatalf("upgrade status: version=%d dirty=%v err=%v", version, dirty, err)
 	}
 	if !maps.Equal(before, snapshot()) {

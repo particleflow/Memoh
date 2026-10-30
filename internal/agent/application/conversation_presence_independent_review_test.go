@@ -1,12 +1,14 @@
 package application
 
 import (
+	"testing"
+
+	githubcopilot "github.com/felinics/twilight/provider/github/copilot"
+
 	"github.com/felinics/memoh/internal/conversationpresence"
 	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/models"
 	"github.com/felinics/memoh/internal/reasoning"
-	githubcopilot "github.com/felinics/twilight/provider/github/copilot"
-	"testing"
 )
 
 // Construction only: no Generate, HTTP request, credential or model call.

@@ -8,6 +8,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	sessionruntime "github.com/felinics/memoh/internal/agent/runtime/session"
 	"github.com/felinics/memoh/internal/agent/runtime/session/ledger"
 	"github.com/felinics/memoh/internal/conversationpresence"
@@ -15,8 +18,6 @@ import (
 	postgresstore "github.com/felinics/memoh/internal/db/postgres/store"
 	"github.com/felinics/memoh/internal/inputsource"
 	"github.com/felinics/memoh/internal/runtimefence"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func presencePostgresFixture(t *testing.T) (*postgresPresenceClaims, context.Context, *pgxpool.Pool) {
@@ -124,15 +125,15 @@ func TestConversationPresencePostgresRejectsStaleAndRevoked(t *testing.T) {
 		name   string
 		change func(*postgresPresenceClaims, *conversationpresence.Ticket)
 	}{
-		{"actor", func(c *postgresPresenceClaims, t *conversationpresence.Ticket) { t.Scope.ActorID = "foreign" }},
-		{"team", func(c *postgresPresenceClaims, t *conversationpresence.Ticket) { t.Scope.TeamID = uuid.NewString() }},
+		{"actor", func(_ *postgresPresenceClaims, t *conversationpresence.Ticket) { t.Scope.ActorID = "foreign" }},
+		{"team", func(_ *postgresPresenceClaims, t *conversationpresence.Ticket) { t.Scope.TeamID = uuid.NewString() }},
 		{"generation", func(c *postgresPresenceClaims, t *conversationpresence.Ticket) {
 			c.handle.Generation = "other"
 			t.Generation = "other"
 		}},
 		{"fence", func(c *postgresPresenceClaims, t *conversationpresence.Ticket) { c.handle.FencingToken++; t.Fence++ }},
-		{"owner", func(c *postgresPresenceClaims, t *conversationpresence.Ticket) { c.handle.OwnerID = "foreign-owner" }},
-		{"permission", func(c *postgresPresenceClaims, t *conversationpresence.Ticket) {
+		{"owner", func(c *postgresPresenceClaims, _ *conversationpresence.Ticket) { c.handle.OwnerID = "foreign-owner" }},
+		{"permission", func(c *postgresPresenceClaims, _ *conversationpresence.Ticket) {
 			c.authorize = func(context.Context) (bool, error) { return false, nil }
 		}},
 	} {

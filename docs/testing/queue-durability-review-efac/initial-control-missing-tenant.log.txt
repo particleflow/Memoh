@@ -1,0 +1,8 @@
+=== RUN   TestIndependentClaimRecoveryWithSingleConnection
+    durable_followup_independent_review_test.go:57: single-connection ledger control failed: ledger(postgres): get run by invocation: ERROR: memoh.team_id is not set (SQLSTATE 42501)
+--- FAIL: TestIndependentClaimRecoveryWithSingleConnection (0.04s)
+FAIL
+FAIL	github.com/felinics/memoh/cmd/internal/core	0.070s
+FAIL
+
+exit=1

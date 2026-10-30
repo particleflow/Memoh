@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	sdkcopilot "github.com/felinics/twilight/provider/github/copilot"
 	sdk "github.com/felinics/twilight/sdk"
 
 	"github.com/felinics/memoh/internal/conversationpresence"
+	"github.com/felinics/memoh/internal/db/postgres/sqlc"
 	"github.com/felinics/memoh/internal/models"
 	"github.com/felinics/memoh/internal/reasoning"
 )
@@ -37,7 +37,9 @@ func TestPresenceSDKUsesSameModelOffThenLowWithoutPreferenceWrites(t *testing.T)
 				}
 				bodies <- body
 				w.Header().Set("Content-Type", "application/json")
-				fmt.Fprint(w, `{"id":"fixture","object":"chat.completion","model":"catalog-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"text\":\"收到，我来梳理。\",\"phase\":\"accepted\"}"},"finish_reason":"stop"}],"usage":{"prompt_tokens":7,"completion_tokens":4,"total_tokens":11}}`)
+				if _, err := fmt.Fprint(w, `{"id":"fixture","object":"chat.completion","model":"catalog-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"text\":\"收到，我来梳理。\",\"phase\":\"accepted\"}"},"finish_reason":"stop"}],"usage":{"prompt_tokens":7,"completion_tokens":4,"total_tokens":11}}`); err != nil {
+					t.Error(err)
+				}
 			}))
 			defer server.Close()
 			model := models.GetResponse{

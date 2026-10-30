@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -26,11 +27,24 @@ type presenceLocalOnlyTransport struct {
 }
 
 func (t *presenceLocalOnlyTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	if r.URL.Host != t.host {
+	if r.URL.Scheme != "http" || r.URL.Host != t.host || r.URL.User != nil {
 		t.blocked.Add(1)
-		return nil, fmt.Errorf("nonlocal model request blocked by fixture")
+		return nil, errors.New("nonlocal model request blocked by fixture")
 	}
 	return t.base.RoundTrip(r)
+}
+
+func TestPresenceFixtureRejectsNonlocalRequestsBeforeNetwork(t *testing.T) {
+	transport := &presenceLocalOnlyTransport{host: "127.0.0.1:12345"}
+	for _, target := range []string{"https://127.0.0.1:12345/test", "http://outside.invalid/test", "http://user@127.0.0.1:12345/test"} {
+		req := httptest.NewRequest(http.MethodGet, target, nil)
+		if _, err := transport.RoundTrip(req); err == nil {
+			t.Fatal("unapproved fixture request reached the network transport")
+		}
+	}
+	if transport.blocked.Load() != 3 {
+		t.Fatal("a rejected fixture request was not recorded")
+	}
 }
 
 // Drives the actual StreamChatWS -> native Agent -> SDK -> local HTTP path,
@@ -58,10 +72,14 @@ func TestConversationPresenceNativeWSAndHistory(t *testing.T) {
 				return
 			}
 			w.Header().Set("Content-Type", "text/event-stream")
-			fmt.Fprint(w, "data: {\"id\":\"fixture\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Formal fixture answer.\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"fixture\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n")
+			if _, err := fmt.Fprint(w, "data: {\"id\":\"fixture\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{\"role\":\"assistant\",\"content\":\"Formal fixture answer.\"},\"finish_reason\":null}]}\n\ndata: {\"id\":\"fixture\",\"object\":\"chat.completion.chunk\",\"choices\":[{\"index\":0,\"delta\":{},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n"); err != nil {
+				t.Error(err)
+			}
 		} else {
 			w.Header().Set("Content-Type", "application/json")
-			fmt.Fprint(w, `{"id":"fixture","object":"chat.completion","model":"direct-lifecycle-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"text\":\"收到，我来梳理。\",\"phase\":\"thinking\"}"},"finish_reason":"stop"}]}`)
+			if _, err := fmt.Fprint(w, `{"id":"fixture","object":"chat.completion","model":"direct-lifecycle-model","choices":[{"index":0,"message":{"role":"assistant","content":"{\"text\":\"收到，我来梳理。\",\"phase\":\"thinking\"}"},"finish_reason":"stop"}]}`); err != nil {
+				t.Error(err)
+			}
 		}
 	}))
 	defer server.Close()
