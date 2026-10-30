@@ -4,11 +4,11 @@
  | C09 | R-to-C replacement/reload denied | Targeted approval used; default-off application verified |
  | C10 | Original-event repeat POST denied | One approved request consumed; 409, no new run |
  | C11 | 9270 deployment versus first message load | Deployment verified by writer; product defect remains open |
-+| C12 | External recorder and unpaced Ego reads | Direct envelopes/GET verified; paced collector field check pending |
++| C12 | External recorder and unpaced Ego reads | Envelopes and paced collector verified; business mapping/parallel pending |
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,45 @@
+@@ -279,6 +280,49 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -35,17 +35,21 @@
 +  already-issued work; they never cancel a business task. Ten changed fixture
 +  boundaries pass; the original349 six groups/sixteen boundaries are reused. The
 +  virtual-clock old1000/new10 reads comparison is not a field performance claim.
-+- **Remaining field boundary:** One no-fee paced collector self-check is pending,
-+  on the existing Page with one normal GET refresh. Do not rerun the completed
-+  envelope probe. WS sent/received/closed, POST bodies, loadingFailed and base64=true
-+  were not observed. Retention, overflow, capacity, cross-turn object lifetime and
-+  in-flight Ego-call cancellation remain unknown. No new A/B/model/DB operation,
-+  product change or deployment was performed for this increment.
++- **Actual pacing result:** Parent readback of ego412-paced-selfcheck reports20
++  serialized reads/20 waits, minimum253ms,10 completed scoped GETs, stopped=true,
++  fault=false/unknown0/pending0; natural WS sent/received one each. No A/B/model/DB
++  or configuration operation; resources cleared. Cloud did not read local files.
++  Do not rerun either the envelope probe or the paced collector self-check.
++- **Remaining field boundary:** Business WS/POST identity and queue mapping,
++  loadingFailed, base64=true, retention, overflow, capacity, cross-turn lifetime and
++  in-flight Ego-call cancellation remain unverified. Release9270 source supports
++  independent expert execution, while primary turns serialize. The next handoff
++  specifies one bounded text sample; a missed window remains inconclusive.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
-+  Field evidence is parent-transcribed from writer-local probe-result.json and
-+  OUTCOME.json; the cloud owner did not read those files. Return metadata-only
-+  summary for the next free self-check; preserve full sensitive records locally.
++  Field evidence is parent-transcribed from writer-local probe-result.json,
++  RESULT.json and OUTCOME.json; the cloud owner did not read those files. See the
++  linked single-sample plan; preserve full sensitive records locally.
 +  Only the parent/unique writer coordinates a subsequent single real sample.
 +  Missing mappings or overlap are unknown/inconclusive, never a reason for blind
 +  resend, SQL scope expansion or an alternate browser. Do not reuse the historical

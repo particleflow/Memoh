@@ -31,5 +31,5 @@
   "consumer_evidence": "Parent-reported actual Ego2.1.0 skill/help read; cloud has no Ego execution tool",
   "field_probe": "Completed by unique writer, parent-reported turn 01a18c43-321a-764e-af5c-025dac3e5fbc; cloud did not read writer-local files",
   "consumer_contract": "contract-ego210.json",
-  "new_field_check": "Paced collector self-check pending; no new A/B/model/DB operations performed"
+  "new_field_check": "Completed: parent reports20 reads/20 waits, minimum253ms,10 scoped GETs, stopped true/fault false/unknown0/pending0; natural WS frames1 sent/1 received. No A/B/model/DB/configuration."
 }

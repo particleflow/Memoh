@@ -1,0 +1,54 @@
+{
+  "release": "9270da0252128a296d9a641235cdfd32ab44cfda",
+  "owner_comparison": "4120cdb1d24d3c948ca30a1d116658b606bb5aaf",
+  "files": [
+    {
+      "path": "internal/agent/tool/bot_delegation.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "a0a6f4b9a60feddc8d9c9e22ab2503b1a5a24c8c7176a596d4ecb364d07a6f2c"
+    },
+    {
+      "path": "internal/botdelegation/service.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "c8647a0d509b92f3a5f9b701c1130fe3744f783cc4e987029df74f4ec1a3ee79"
+    },
+    {
+      "path": "cmd/internal/core/bot_delegation.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "7ece6cd26d172403bc5f6fd531c157660d70b7c0f1ef84625fedbe8749935179"
+    },
+    {
+      "path": "internal/agent/runtime/session/admit.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "7c5ae32347657735bdf6d9cceef77412cf68fd4b87486614e74c49ce85d7bd2b"
+    },
+    {
+      "path": "internal/agent/application/queue_continuation.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "663328d68c052e80267f08e130fddd1538f54f1ec351de9e5ea9fd75c11012c3"
+    },
+    {
+      "path": "internal/handlers/session_queue.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "dca581ea1c2b5d0302d6bc3705cb0919a28dd73041335daaf03aa0a724913af8"
+    },
+    {
+      "path": "internal/handlers/session_invocation.go",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "985d23630fe4a3bfd94ed0a9a54976cd59ff00ac8f36a1d0146e292b69a7b26e"
+    },
+    {
+      "path": "apps/web/src/store/chat/send.ts",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "51094cd18ccb3b7158812354cc4d620914e47bbd746af00dda8a7e54f19de019"
+    },
+    {
+      "path": "apps/web/src/composables/api/useChat.chat-api.ts",
+      "same_as_owner_HEAD": true,
+      "sha256_9270": "5b8d3d449d0c9cd5565667881ddadb991abcaeb1e4eed73fe393a47e5b92c34d"
+    }
+  ],
+  "tests_rerun": false,
+  "product_changes": false,
+  "conclusion": "Same primary session turns serialize; durable expert delegation runs in an independent internal session. No deterministic expert-to-primary serialization defect established."
+}

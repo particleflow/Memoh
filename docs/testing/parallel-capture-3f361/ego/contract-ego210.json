@@ -2,26 +2,83 @@
   "consumer": "Ego 2.1.0",
   "contract": {
     "evidence": "parent-reported actual writer turn 01a18c43-321a-764e-af5c-025dac3e5fbc",
-    "methodPath": ["method"],
-    "paramsPath": ["params"],
+    "methodPath": [
+      "method"
+    ],
+    "paramsPath": [
+      "params"
+    ],
     "cdpResultPath": [],
     "evaluateResultPath": []
   },
   "observed": {
     "eventShape": "{method,params,sessionId}",
-    "requestIdPath": ["params", "requestId"],
-    "requestPath": ["params", "request"],
-    "responsePath": ["params", "response"],
+    "requestIdPath": [
+      "params",
+      "requestId"
+    ],
+    "requestPath": [
+      "params",
+      "request"
+    ],
+    "responsePath": [
+      "params",
+      "response"
+    ],
     "networkEnable": "{}",
     "evaluate": "direct {probe,readyState}",
-    "scopedGetResponseBody": {"bodyType": "string", "base64Encoded": false, "length": 522},
+    "scopedGetResponseBody": {
+      "bodyType": "string",
+      "base64Encoded": false,
+      "length": 522
+    },
     "batches": 2712,
     "nonemptyBatches": 141,
     "events": 605,
     "largestObservedBatch": 47
   },
-  "notObserved": ["loadingFailed", "WebSocket frame sent/received/closed", "POST body", "base64Encoded=true"],
-  "notEstablished": ["capacity", "overflow or loss detection", "long retention", "cross-turn lifetime", "cancellation of an in-flight Ego call"],
+  "notObserved": [
+    "loadingFailed",
+    "WebSocket frame sent/received/closed",
+    "POST body",
+    "base64Encoded=true"
+  ],
+  "notEstablished": [
+    "capacity",
+    "overflow or loss detection",
+    "long retention",
+    "cross-turn lifetime",
+    "cancellation of an in-flight Ego call"
+  ],
   "provenance": "Parent transcription of writer-local probe-result.json and OUTCOME.json; cloud did not read the F: files",
-  "fieldWork": {"pageRefresh": "one authorized scoped GET refresh", "AB": 0, "database": 0, "modelCalls": 0, "resources": "parent reports cleared, none in flight"}
+  "fieldWork": {
+    "pageRefresh": "one authorized scoped GET refresh",
+    "AB": 0,
+    "database": 0,
+    "modelCalls": 0,
+    "resources": "parent reports cleared, none in flight"
+  },
+  "pacedCollectorSelfCheck": {
+    "provenance": "Parent-reported actual writer ego412-paced-selfcheck RESULT.json/OUTCOME.json; cloud did not read writer-local files",
+    "reads": 20,
+    "waits": 20,
+    "minimumReadGapMs": 253,
+    "completedScopedGETs": 10,
+    "stopped": true,
+    "fault": false,
+    "unknowns": 0,
+    "pendingResponses": 0,
+    "naturalWSSentFrames": 1,
+    "naturalWSReceivedFrames": 1,
+    "AB": 0,
+    "modelCalls": 0,
+    "database": 0,
+    "configurationChanges": 0,
+    "remaining": [
+      "business WS/POST identity and queue mapping",
+      "base64=true",
+      "cross-round lifetime",
+      "real parallel acceptance"
+    ]
+  }
 }
