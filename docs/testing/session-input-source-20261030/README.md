@@ -2,6 +2,8 @@
 
 Candidate fix for the user's 2026-10-30 request to display **and inject** each Bot conversation's actual input source, including automatic tasks. This is the dedicated identity/source workstream. Production acceptance is **incomplete**; no deployment or device acceptance was performed.
 
+Independent review found a P2 in the initial live assistant projection; the original candidate was not admitted. See the [live projection follow-up](projection-followup/README.md) for its exact-turn correction, same-fixture red/green tests, actual application before/after evidence and unchanged resume v4 compatibility boundary. The earlier history-only verification below does not cover that live seam.
+
 Branch: `fix/session-input-origin`. Exact parent: `9270da0252128a296d9a641235cdfd32ab44cfda` (the existing unified PR79 head). The parent subsequently reported that Server/Web 9270 were deployed; this source work is not in that deployment. No changes to the official Agent runtime/contextview, permissions, TLS, providers, credentials, database schema, or management/navigation controls. The source display is the explicit new user request; the existing copy baseline was updated only for that display.
 
 ## Findings and repairs

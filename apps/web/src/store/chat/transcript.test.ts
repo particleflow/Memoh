@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { nextTick, ref, toRaw, watch } from 'vue'
-import type { UIMessage, UITurn } from '@/composables/api/useChat.types'
+import type { UIAssistantTurn, UIMessage, UITurn, UIUserTurn } from '@/composables/api/useChat.types'
 import { createBackgroundTaskTracker } from './background-tasks'
 import { createTranscriptController } from './transcript'
 import type { ChatAssistantTurn, ChatUserTurn, ToolCallBlock } from './types'
@@ -10,11 +10,11 @@ vi.mock('@/store/user', () => ({
   useUserStore: () => ({ userInfo: { id: 'user-1' } }),
 }))
 
-function rawUser(id: string, text = 'hello', timestamp = '2026-01-01T00:00:00.000Z'): UITurn {
+function rawUser(id: string, text = 'hello', timestamp = '2026-01-01T00:00:00.000Z'): UIUserTurn {
   return { id, turn_id: `turn-${id}`, turn_position: 1, role: 'user', text, timestamp, platform: 'local' }
 }
 
-function rawAssistant(id: string, messages: UIMessage[] = [], timestamp = '2026-01-01T00:00:01.000Z'): UITurn {
+function rawAssistant(id: string, messages: UIMessage[] = [], timestamp = '2026-01-01T00:00:01.000Z'): UIAssistantTurn {
   return { id, turn_id: `turn-${id}`, turn_position: 1, role: 'assistant', messages, timestamp }
 }
 

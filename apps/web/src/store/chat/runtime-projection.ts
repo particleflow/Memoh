@@ -3,6 +3,7 @@ import type {
   RuntimeDelta,
   RuntimeRunOperation,
   RuntimeSnapshot,
+  UIInputSource,
   UIMessage,
   UIRuntimeDeltaEvent,
   UIRuntimeSnapshotEvent,
@@ -133,6 +134,7 @@ function cloneRunView(run: RuntimeCurrentRunView): RuntimeCurrentRunView {
     messages: messages.map(cloneUIMessage),
     user_turns: run.user_turns?.map(turn => ({
       ...turn,
+      input_source: turn.input_source ? { ...turn.input_source } : undefined,
       attachments: turn.attachments?.map(attachment => ({ ...attachment })),
       reply: turn.reply ? { ...turn.reply } : undefined,
       forward: turn.forward ? { ...turn.forward } : undefined,
@@ -141,6 +143,7 @@ function cloneRunView(run: RuntimeCurrentRunView): RuntimeCurrentRunView {
     request_user_turn: run.request_user_turn
       ? {
           ...run.request_user_turn,
+          input_source: run.request_user_turn.input_source ? { ...run.request_user_turn.input_source } : undefined,
           attachments: run.request_user_turn.attachments?.map(attachment => ({ ...attachment })),
           reply: run.request_user_turn.reply ? { ...run.request_user_turn.reply } : undefined,
           forward: run.request_user_turn.forward ? { ...run.request_user_turn.forward } : undefined,
@@ -150,7 +153,7 @@ function cloneRunView(run: RuntimeCurrentRunView): RuntimeCurrentRunView {
       ? {
           ...run.operation,
           replacement_user_turn: run.operation.replacement_user_turn
-            ? { ...run.operation.replacement_user_turn }
+            ? { ...run.operation.replacement_user_turn, input_source: run.operation.replacement_user_turn.input_source ? { ...run.operation.replacement_user_turn.input_source } : undefined }
             : undefined,
         }
       : undefined,
@@ -172,11 +175,25 @@ function emptyTranscript(): RuntimeTranscriptSlice {
   }
 }
 
-function transcriptForRun(run: RuntimeCurrentRunView | null): RuntimeTranscriptSlice {
+type RuntimeSourceScope = Pick<RuntimeProjectionState, 'botId' | 'sessionId'>
+
+function scopedInputSource(source: UIInputSource | undefined, scope?: RuntimeSourceScope): UIInputSource | undefined {
+  if (!scope) return undefined
+  const unknown: UIInputSource = { kind: 'unknown', bot_id: scope.botId, session_id: scope.sessionId }
+  if (!source || source.bot_id !== scope.botId || source.session_id !== scope.sessionId) return unknown
+  if (source.kind === 'user') return source.user_id || source.channel_identity_id ? { ...source } : unknown
+  if (['schedule', 'bot_delegation', 'task_result', 'native_task'].includes(source.kind) && source.task_id) return { ...source }
+  return unknown
+}
+
+function transcriptForRun(run: RuntimeCurrentRunView | null, scope?: RuntimeSourceScope): RuntimeTranscriptSlice {
   if (!run || run.configuration_only) return emptyTranscript()
   const turnId = run.turn_id.trim()
   const turns: UITurn[] = []
-  const userTurns = userTurnsForRun(run)
+  const userTurns = userTurnsForRun(run).map(turn => ({ ...turn, turn_id: turn.turn_id.trim() || turnId }))
+  // A segment belongs to its exact input turn. A missing/foreign annotation
+  // stays unknown; it must never fall back to the first request's actor/task.
+  const sourceOf = (id: string) => scopedInputSource(userTurns.find(turn => turn.turn_id === id)?.input_source, scope)
   // A run spans several turns once a steer opens one (SR-TURN-001), so a
   // segment is numbered by the turn it is filed under, not by the run. The
   // run's own position covers its request turn; a steer's turn arrives
@@ -202,6 +219,7 @@ function transcriptForRun(run: RuntimeCurrentRunView | null): RuntimeTranscriptS
     const userTurnId = userTurn.turn_id.trim() || turnId
     turns.push({
       ...userTurn,
+      ...(userTurn.input_source ? { input_source: sourceOf(userTurnId) } : {}),
       turn_id: userTurnId,
       turn_position: userTurn.turn_position ?? positionOf(userTurnId),
       id: `runtime:${userTurnId}:user`,
@@ -250,7 +268,7 @@ function transcriptForRun(run: RuntimeCurrentRunView | null): RuntimeTranscriptS
       }
       const segment = assistantMessages.slice(segmentStart, segmentEnd)
       if (segment.length > 0) {
-        turns.push(runtimeAssistantTurn(segmentTurnId, segmentTimestamp, segment, positionOf(segmentTurnId)))
+        turns.push(runtimeAssistantTurn(segmentTurnId, segmentTimestamp, segment, positionOf(segmentTurnId), sourceOf(segmentTurnId)))
       }
       // The server names a steer's turn when it claims the input, so the name
       // is authoritative from the first frame — waiting for the persisted user
@@ -272,6 +290,7 @@ function transcriptForRun(run: RuntimeCurrentRunView | null): RuntimeTranscriptS
           timestamp: steer.timestamp,
         }),
         turn_id: steerTurnId,
+        input_source: sourceOf(steerTurnId),
         turn_position: steerTurnPosition,
         id: `runtime:${RUNTIME_STEER_TURN_PREFIX}${steer.item_id}:user`,
       })
@@ -295,7 +314,7 @@ function transcriptForRun(run: RuntimeCurrentRunView | null): RuntimeTranscriptS
     const finalSegment: UIMessage[] = assistantMessages.slice(segmentStart)
     if (runtimeStatus) finalSegment.push(runtimeStatus)
     if (active || finalSegment.length > 0 || turns.every(turn => turn.role !== 'assistant')) {
-      turns.push(runtimeAssistantTurn(segmentTurnId, segmentTimestamp, finalSegment, positionOf(segmentTurnId)))
+      turns.push(runtimeAssistantTurn(segmentTurnId, segmentTimestamp, finalSegment, positionOf(segmentTurnId), sourceOf(segmentTurnId)))
     }
   }
   return {
@@ -323,11 +342,13 @@ function runtimeAssistantTurn(
   timestamp: string,
   messages: UIMessage[],
   turnPosition?: number,
+  inputSource?: UIInputSource,
 ): UITurn {
   return {
     turn_id: turnId,
     turn_position: turnPosition,
     role: 'assistant',
+    input_source: inputSource,
     id: `runtime:${turnId}:assistant`,
     timestamp,
     messages,
@@ -382,6 +403,7 @@ function applyRunPatch(
     if (!turnId) continue
     const cloned = {
       ...incoming,
+      input_source: incoming.input_source ? { ...incoming.input_source } : undefined,
       attachments: incoming.attachments?.map(attachment => ({ ...attachment })),
       reply: incoming.reply ? { ...incoming.reply } : undefined,
       forward: incoming.forward ? { ...incoming.forward } : undefined,
@@ -449,8 +471,8 @@ export function applyRuntimeRunPatch(
   return applyRunPatch(run, delta)
 }
 
-export function projectRuntimeTranscript(run: RuntimeCurrentRunView | null): RuntimeTranscriptSlice {
-  return transcriptForRun(run)
+export function projectRuntimeTranscript(run: RuntimeCurrentRunView | null, scope?: RuntimeSourceScope): RuntimeTranscriptSlice {
+  return transcriptForRun(run, scope)
 }
 
 export function createEmptyRuntimeProjection(sessionId = ''): RuntimeProjectionState {
@@ -479,7 +501,7 @@ export function reduceRuntimeProjection(
       epoch: input.epoch,
       seq: input.seq,
       currentRunView,
-      transcript: transcriptForRun(currentRunView),
+      transcript: transcriptForRun(currentRunView, { botId: snapshot.bot_id, sessionId: input.session_id }),
     }
   }
 
@@ -490,6 +512,6 @@ export function reduceRuntimeProjection(
     epoch: input.epoch,
     seq: input.seq,
     currentRunView,
-    transcript: transcriptForRun(currentRunView),
+    transcript: transcriptForRun(currentRunView, { botId: state.botId, sessionId: input.session_id }),
   }
 }

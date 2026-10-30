@@ -123,7 +123,7 @@ export function createRuntimeClient({ send, onProjection, scheduleFrame }: Runti
       epoch: batch.epoch,
       seq: batch.seq,
       currentRunView: batch.currentRunView,
-      transcript: projectRuntimeTranscript(batch.currentRunView),
+      transcript: projectRuntimeTranscript(batch.currentRunView, { botId: batch.base.botId, sessionId: sid }),
     }
     projections.set(sid, current)
     onProjection(sid, { previous: batch.base, current, event: batch.lastEvent })
