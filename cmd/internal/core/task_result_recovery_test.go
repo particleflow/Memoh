@@ -121,7 +121,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		}
 		return task.delivery[s.event]
 	}
-	recover := func(s sample, attempt int) (botdelegation.RecoveryView, error) {
+	recoverSaved := func(s sample, attempt int) (botdelegation.RecoveryView, error) {
 		return h.service.RecoverDelivery(ctx, bot, user, parent, s.id, botdelegation.RecoveryInput{EventID: s.event, ExpectedAttempt: attempt})
 	}
 	admit := func(s sample, attempt int, state string) string {
@@ -138,12 +138,12 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	t.Run("early_attention_uses_saved_state_not_retry_count", func(t *testing.T) {
 		s := seed(sampleState{attempts: 1, state: "completed", workerState: "completed"})
 		exec(`UPDATE session_runs SET state='aborted' WHERE run_id=$1`, s.previous)
-		v, err := recover(s, 1)
+		v, err := recoverSaved(s, 1)
 		if err != nil || v.Event.Attempt != 2 {
 			t.Fatalf("early terminal attention cannot recover: %+v %v", v, err)
 		}
 		admit(s, 2, "failed")
-		if _, err = recover(s, 1); err != nil {
+		if _, err = recoverSaved(s, 1); err != nil {
 			t.Fatal(err)
 		}
 		if e := read(s); e.ReportState != "attention" || e.Attempt != 2 {
@@ -153,7 +153,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	t.Run("saved_failure_and_unknown_are_report_only_recoverable", func(t *testing.T) {
 		for _, cfg := range []sampleState{{attempts: 3, state: "failed", workerState: "failed"}, {attempts: 3, state: "unknown", workerState: "lost"}, {attempts: 3, state: "unknown", missingWorker: true}} {
 			s := seed(cfg)
-			v, err := recover(s, cfg.attempts)
+			v, err := recoverSaved(s, cfg.attempts)
 			if err != nil || v.Event.Attempt != cfg.attempts+1 || v.Event.State != cfg.state {
 				t.Fatalf("saved outcome rejected/rewritten: %+v %v", v, err)
 			}
@@ -176,11 +176,11 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	t.Run("unknown_with_unbound_active_invocation_still_conflicts", func(t *testing.T) {
 		s := seed(sampleState{attempts: 3, state: "unknown", workerState: "running"})
 		defer exec(`DELETE FROM bot_delegations WHERE id=$1`, s.id)
-		if _, err := recover(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
+		if _, err := recoverSaved(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
 			t.Fatal("active original allowed recovery", err)
 		}
 		exec(`UPDATE bot_delegations SET run_id=$2 WHERE id=$1`, s.id, uuid.NewString())
-		if _, err := recover(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
+		if _, err := recoverSaved(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
 			t.Fatal("unbound original admitted twice", err)
 		}
 	})
@@ -215,11 +215,11 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		if err = h.reconcileResult(ctx, "bot_delegation", old.id, bot, user, parent); err != nil || len(captured) != before || read(old).Attempt != 3 {
 			t.Fatal("policy change rearmed attention", err)
 		}
-		if _, err = recover(old, 3); err != nil {
+		if _, err = recoverSaved(old, 3); err != nil {
 			t.Fatal(err)
 		}
 		admit(old, 4, "failed")
-		if _, err = recover(old, 3); err != nil {
+		if _, err = recoverSaved(old, 3); err != nil {
 			t.Fatal(err)
 		}
 		if e := read(old); e.Attempt != 4 || e.ReportState != "attention" {
@@ -234,7 +234,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				if v, e := recover(s, 3); e != nil || v.Event.Attempt != 4 {
+				if v, e := recoverSaved(s, 3); e != nil || v.Event.Attempt != 4 {
 					t.Errorf("recover %+v %v", v, e)
 				}
 			}()
@@ -263,7 +263,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		h.resultSubmit = func(context.Context, string, turn.StartTurnCommand) error {
 			return errors.New("synthetic lost enqueue reply")
 		}
-		if _, e := recover(s, 3); e == nil {
+		if _, e := recoverSaved(s, 3); e == nil {
 			t.Fatal("lost reply hidden")
 		}
 		saved := read(s)
@@ -274,36 +274,36 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		p.Close()
 		p = open()
 		h = newHost()
-		v, e := recover(s, 3)
+		v, e := recoverSaved(s, 3)
 		if e != nil || v.Event.Attempt != 4 || len(v.Event.Recoveries) != 1 {
 			t.Fatalf("restart minted another attempt %+v %v", v, e)
 		}
 	})
 	t.Run("failed_recovery_does_not_automatically_expand_budget", func(t *testing.T) {
 		s := seed()
-		if _, e := recover(s, 3); e != nil {
+		if _, e := recoverSaved(s, 3); e != nil {
 			t.Fatal(e)
 		}
 		admit(s, 4, "failed")
-		if _, e := recover(s, 3); e != nil {
+		if _, e := recoverSaved(s, 3); e != nil {
 			t.Fatal(e)
 		}
 		e := read(s)
 		if e.Attempt != 4 || e.ReportState != "attention" {
 			t.Fatal(e)
 		}
-		v, err := recover(s, 4)
+		v, err := recoverSaved(s, 4)
 		if err != nil || v.Event.Attempt != 5 || len(v.Event.Recoveries) != 2 {
 			t.Fatalf("new explicit authorization %+v %v", v, err)
 		}
-		if _, err = recover(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
+		if _, err = recoverSaved(s, 3); !errors.Is(err, botdelegation.ErrConflict) {
 			t.Fatal("stale recovery advanced budget", err)
 		}
 	})
 	t.Run("published_receipt_wins_before_acknowledgement", func(t *testing.T) {
 		s := seed()
 		publish(s, s.previous, 3)
-		if _, e := recover(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
+		if _, e := recoverSaved(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
 			t.Fatal(e)
 		}
 		if read(s).Attempt != 3 {
@@ -312,7 +312,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	})
 	t.Run("published_recovery_survives_reconnect_without_resubmission", func(t *testing.T) {
 		s := seed()
-		if _, e := recover(s, 3); e != nil {
+		if _, e := recoverSaved(s, 3); e != nil {
 			t.Fatal(e)
 		}
 		run := admit(s, 4, "lost")
@@ -321,7 +321,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		p.Close()
 		p = open()
 		h = newHost()
-		if _, e := recover(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
+		if _, e := recoverSaved(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
 			t.Fatal(e)
 		}
 		if e := h.reconcileResult(ctx, "bot_delegation", s.id, bot, user, parent); e != nil {
@@ -339,7 +339,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 			} else {
 				exec(`UPDATE session_runs SET state=$2 WHERE run_id=$1`, s.previous, state)
 			}
-			if _, e := recover(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
+			if _, e := recoverSaved(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
 				t.Fatal(state, e)
 			}
 			if read(s).Attempt != 3 {
@@ -350,7 +350,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	t.Run("active_original_worker_cannot_be_recovered", func(t *testing.T) {
 		s := seed()
 		exec(`UPDATE session_runs SET state='running' WHERE run_id=$1`, s.worker)
-		if _, e := recover(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
+		if _, e := recoverSaved(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
 			t.Fatal(e)
 		}
 	})
@@ -358,10 +358,10 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 		s := seed()
 		wrong := s
 		wrong.event = taskresult.EventID("wrong", "", "")
-		if _, e := recover(wrong, 3); !errors.Is(e, botdelegation.ErrConflict) {
+		if _, e := recoverSaved(wrong, 3); !errors.Is(e, botdelegation.ErrConflict) {
 			t.Fatal(e)
 		}
-		if _, e := recover(s, 4); !errors.Is(e, botdelegation.ErrConflict) {
+		if _, e := recoverSaved(s, 4); !errors.Is(e, botdelegation.ErrConflict) {
 			t.Fatal(e)
 		}
 		for _, args := range [][3]string{{bot, uuid.NewString(), parent}, {target, user, parent}, {bot, user, child}} {
@@ -373,13 +373,13 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	t.Run("revocation_and_changed_recipient_fail_before_authorization", func(t *testing.T) {
 		s := seed()
 		exec(`UPDATE users SET is_active=false WHERE id=$1`, user)
-		_, err := recover(s, 3)
+		_, err := recoverSaved(s, 3)
 		exec(`UPDATE users SET is_active=true WHERE id=$1`, user)
 		if !errors.Is(err, botdelegation.ErrDenied) {
 			t.Fatal(err)
 		}
 		exec(`UPDATE bot_sessions SET channel_type='telegram' WHERE id=$1`, parent)
-		_, err = recover(s, 3)
+		_, err = recoverSaved(s, 3)
 		exec(`UPDATE bot_sessions SET channel_type='' WHERE id=$1`, parent)
 		if !errors.Is(err, botdelegation.ErrDenied) {
 			t.Fatal(err)
@@ -390,7 +390,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 	})
 	t.Run("revocation_after_grant_blocks_queued_admission", func(t *testing.T) {
 		s := seed()
-		if _, e := recover(s, 3); e != nil {
+		if _, e := recoverSaved(s, 3); e != nil {
 			t.Fatal(e)
 		}
 		c := captured[len(captured)-1]
@@ -409,7 +409,7 @@ func TestSavedResultRecoveryPostgres(t *testing.T) {
 			} else {
 				exec(`UPDATE bot_delegations SET payload='{}' WHERE id=$1`, s.id)
 			}
-			if _, e := recover(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
+			if _, e := recoverSaved(s, 3); !errors.Is(e, botdelegation.ErrConflict) {
 				t.Fatal(state, e)
 			}
 		}

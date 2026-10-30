@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"math"
+	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"strings"
@@ -26,7 +27,7 @@ type recoveryHTTPHost struct {
 	conflict   bool
 }
 
-func (h *recoveryHTTPHost) RecoverResult(_ context.Context, r botdelegation.Record, in botdelegation.RecoveryInput) (botdelegation.RecoveryView, error) {
+func (h *recoveryHTTPHost) RecoverResult(_ context.Context, _ botdelegation.Record, in botdelegation.RecoveryInput) (botdelegation.RecoveryView, error) {
 	h.recoveries++
 	if h.conflict {
 		return botdelegation.RecoveryView{}, botdelegation.ErrConflict
@@ -51,7 +52,7 @@ func TestSavedResultRecoveryHTTPBoundary(t *testing.T) {
 	body := `{"event_id":"` + strings.Repeat("a", 64) + `","expected_attempt":3}`
 	call := func(user, raw string, want int) {
 		t.Helper()
-		req := httptest.NewRequest("POST", path, strings.NewReader(raw))
+		req := httptest.NewRequest(http.MethodPost, path, strings.NewReader(raw))
 		req.Header.Set("Content-Type", "application/json")
 		if user != "" {
 			token, _, err := auth.GenerateToken(user, "synthetic", time.Minute)

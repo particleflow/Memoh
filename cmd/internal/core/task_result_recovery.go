@@ -118,7 +118,8 @@ func (h *delegationHost) recoveryExecutionReady(ctx context.Context, r botdelega
 	if visible == nil || visible.ID != worker.RunID.String() {
 		return botdelegation.ErrConflict
 	}
-	if worker.State != t.state && !(worker.State == "lost" && t.state == "unknown") && !(worker.State == "aborted" && t.state == "failed") {
+	sameOutcome := worker.State == t.state || worker.State == "lost" && t.state == "unknown" || worker.State == "aborted" && t.state == "failed"
+	if !sameOutcome {
 		return botdelegation.ErrConflict
 	}
 	return nil
