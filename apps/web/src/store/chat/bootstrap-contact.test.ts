@@ -20,7 +20,7 @@ function fixture(contactEntry = false) {
     sessionsCursor: ref<string | null>(null), hasMoreSessions: ref(false),
     ensureSessionSummary: vi.fn(async (_bot: string, id: string) => remembered.get(id) || conversation(id)),
     pendingExternalAgentSessionInput: ref(null), clearPendingExternalAgentSession: vi.fn(), clearHistoryView: vi.fn(), markHistoryEmpty: vi.fn(),
-    knownSessionSummary: id => remembered.get(id), startWebSocket: vi.fn(), startBotSessionsActivityStream: vi.fn(), startSessionRuntime: vi.fn(),
+    knownSessionSummary: id => remembered.get(id), startWebSocket: vi.fn(), ensureWebSocket: vi.fn(() => true), startBotSessionsActivityStream: vi.fn(), startSessionRuntime: vi.fn(),
     releasePreviousSession: vi.fn(), abort: vi.fn(), abortAllAssistantStreams: vi.fn(), clearFsForBotSwitch: vi.fn(), clearRememberedSessions: vi.fn(),
     resetToEmptyComposer: vi.fn(), stageDefaultExternalAgentFromSettings: vi.fn(async () => {}),
   }

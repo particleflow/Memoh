@@ -33,6 +33,7 @@ export interface ChatBootstrapDeps {
   markHistoryEmpty: () => void
   knownSessionSummary: (sessionId: string) => SessionSummary | null | undefined
   startWebSocket: (botId: string) => void
+  ensureWebSocket: (botId: string) => boolean
   startBotSessionsActivityStream: (botId: string) => void
   startSessionRuntime: (botId: string, sessionId: string) => void
   releasePreviousSession: (botId: string, sessionId: string) => void
@@ -288,6 +289,10 @@ export function createChatBootstrap(deps: ChatBootstrapDeps) {
       // that transport boundary before selecting the historical runtime.
       if (initializePromise) await initializePromise
       if (deps.currentBotId.value !== targetBotId || navigation !== contactRequest) return
+      // Persisted Bot selection can precede initialize(). A runtime can fetch
+      // history without a socket, then wait forever for its first snapshot.
+      // Reuse the native handle (including an in-flight handshake) when present.
+      deps.ensureWebSocket(targetBotId)
       if (options.sessionId) await selectSession(options.sessionId)
       else await openContact()
       return

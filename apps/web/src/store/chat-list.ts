@@ -438,7 +438,7 @@ export const useChatStore = defineStore('chat', () => {
     clearHistoryView,
     markHistoryEmpty,
     knownSessionSummary,
-    startWebSocket,
+    startWebSocket, ensureWebSocket,
     startBotSessionsActivityStream,
     startSessionRuntime,
     releasePreviousSession: (botId, targetSessionId) => {
