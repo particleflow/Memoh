@@ -41,7 +41,7 @@ jobs:
           REQUESTED_SOURCE_SHA: ${{ inputs.source_sha }}
         run: |
           set -euo pipefail
-          case "$IMAGE_SCOPE" in all|web|server) ;; *) exit 1 ;; esac
+          case "$IMAGE_SCOPE" in all|web|server|server-web) ;; *) exit 1 ;; esac
           [[ "$GITHUB_SHA" =~ ^[a-f0-9]{40}$ ]]
           test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
           selected_source="${REQUESTED_SOURCE_SHA:-$GITHUB_SHA}"
@@ -64,7 +64,8 @@ jobs:
           printf 'Workflow commit: `%s`\n\nSource commit: `%s`\n\nImage scope: `%s`\n' "$GITHUB_SHA" "$selected_source" "$IMAGE_SCOPE" >> "$GITHUB_STEP_SUMMARY"
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os
-          images = ['server', 'web', 'workspace'] if os.environ['IMAGE_SCOPE'] == 'all' else [os.environ['IMAGE_SCOPE']]
+          scope = os.environ['IMAGE_SCOPE']
+          images = ['server', 'web', 'workspace'] if scope == 'all' else ['server', 'web'] if scope == 'server-web' else [scope]
           build, publish = [], []
           for image in images:
               variant = 'debian' if image == 'workspace' else ''
