@@ -1,0 +1,13 @@
+{
+  "retained35SourceFiles": 198,
+  "onlyClientSourceChanges": [
+    "config/memoh_web.lock.json",
+    "mobile/harmony/app/AppScope/app.json5",
+    "mobile/memoh/shared-home-admission-final.json"
+  ],
+  "sourceScan": {
+    "scope": "changed source/docs; private key, token and private-infrastructure URL patterns, not exhaustive encoded-secret proof",
+    "findings": []
+  },
+  "originalPrepareAttachmentsTypeRestored": true
+}

@@ -1,0 +1,32 @@
+{
+  "webProducerExitCode": 0,
+  "checks": [
+    {
+      "name": "submodule-check",
+      "exitCode": 0
+    },
+    {
+      "name": "dependencies",
+      "exitCode": 0
+    },
+    {
+      "name": "patched-dependencies",
+      "exitCode": 0
+    },
+    {
+      "name": "typecheck",
+      "exitCode": 0
+    },
+    {
+      "name": "vue-build",
+      "exitCode": 0
+    }
+  ],
+  "hostPatchNamesRetained": 47,
+  "incomingMappedFiles": 12,
+  "pairedSourceEntries": 162,
+  "resourceFiles": 802,
+  "warningsRetained": true,
+  "newNativeBuilds": 0,
+  "physicalPhone": false
+}

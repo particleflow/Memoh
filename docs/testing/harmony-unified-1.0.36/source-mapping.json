@@ -1,0 +1,94 @@
+{
+  "source": "0ec25b7e0b0de46349cc1555ba86248062d9c1ea",
+  "compatibleUnifiedCommit": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "unifiedTree": "ce11e378aeffab4152c954ab256b7ff62284e36d",
+  "mapping": [
+    {
+      "path": "apps/web/src/composables/api/useChat.types.ts",
+      "beforePhoneSHA256": "6c872f7eff59ae17ff86fd140b5d187144cc92fad94171569e947d30a32aed64",
+      "upstreamSHA256": "bd1f0a4aec4b98340a3dbf67d967c68b1e7d9cea799641249960eb2cc38c0459",
+      "phoneSHA256": "bd1f0a4aec4b98340a3dbf67d967c68b1e7d9cea799641249960eb2cc38c0459",
+      "adaptation": "exact upstream"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/en.json",
+      "beforePhoneSHA256": "d63184dfe7b85a4daf45eaddcc46950d86d4b6fb17ab2bbf159020bde0d9e97e",
+      "upstreamSHA256": "62cd346c0a7e4b1e742afe77157db045c794a84ca73639920c804043229cc213",
+      "phoneSHA256": "44639309852ed0518885ec70ac83a2a15bd3397dacbfc8ec1f7f34bf15736032",
+      "adaptation": "Only add approved chat.inputSources; preserve existing phone/locale differences and unrelated keys"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/ja.json",
+      "beforePhoneSHA256": "49e427b31e05fcc31ebabd5d9abc9a2293fb5d5404e0d5622150767c61d77212",
+      "upstreamSHA256": "3d591c46ff767d6a36a2557bfbbbd046162d64279b2f5cdf10561ca63ce3ebe0",
+      "phoneSHA256": "2eead53fc03360def07a2ee74e0348e226a0c1d1656dea6f0f91602f7aaed52a",
+      "adaptation": "Only add approved chat.inputSources; preserve existing phone/locale differences and unrelated keys"
+    },
+    {
+      "path": "apps/web/src/i18n/locales/zh.json",
+      "beforePhoneSHA256": "13bc6bed2b83ffe10321b3b976a39d5eb0bd7b3f187f959ca3e5a8ce40098bc7",
+      "upstreamSHA256": "6c0f9b84fc5a6afe80c73fa9ab8c2479dcc72e11c30d7e2c8273676897833016",
+      "phoneSHA256": "a7b5a288d2c633c21eb39afa99dab4bb9d7e238d108c256bbe522786524a2211",
+      "adaptation": "Only add approved chat.inputSources; preserve existing phone/locale differences and unrelated keys"
+    },
+    {
+      "path": "apps/web/src/pages/home/components/message-item.vue",
+      "beforePhoneSHA256": "e4a6754a05012b8ac8c435e78dac6553e4f8211379d88e034ae329f0dbf8e8bb",
+      "upstreamSHA256": "9c9b264989f8b166376e7770003f628cae025c4bc6aeaba64fe879e0838bf1dd",
+      "phoneSHA256": "1d4bc597ea202882a978cb7c07bfa4c8603a30c3427e165f4c4c902aba5db4fb",
+      "adaptation": "Retain existing native media origin callback type; markup and source semantics exact upstream"
+    },
+    {
+      "path": "apps/web/src/store/chat-list.normalize.ts",
+      "beforePhoneSHA256": "4a6db37266cd5e5c0a7bc7d41ecf3a29172d4141abeb1d7d2307814d80e75457",
+      "upstreamSHA256": "db1f1b1d1a88319968337472cc0b773143c911ae6d18ee28dfc7d996880c4c23",
+      "phoneSHA256": "db1f1b1d1a88319968337472cc0b773143c911ae6d18ee28dfc7d996880c4c23",
+      "adaptation": "exact upstream"
+    },
+    {
+      "path": "apps/web/src/store/chat/runtime-client.ts",
+      "beforePhoneSHA256": "8230d0a2d31c03b41e125cbfdd5641ac8128c6d75ac5bdbab2de8d5e98a16521",
+      "upstreamSHA256": "10b2ee5fd4f679e458efc3d2653b852fd51b3272a5a28349a541a9b250b85e59",
+      "phoneSHA256": "10b2ee5fd4f679e458efc3d2653b852fd51b3272a5a28349a541a9b250b85e59",
+      "adaptation": "exact upstream"
+    },
+    {
+      "path": "apps/web/src/store/chat/runtime-projection.ts",
+      "beforePhoneSHA256": "e6d5337a66851d23b84a0b4fb418702d3f86860a5310b7a0b9e26c43c839273e",
+      "upstreamSHA256": "ab58cbde69ca7aa00613c7edbb142b83c2e6f8759762e5917b03e6b4cf5c5900",
+      "phoneSHA256": "ab58cbde69ca7aa00613c7edbb142b83c2e6f8759762e5917b03e6b4cf5c5900",
+      "adaptation": "exact upstream"
+    },
+    {
+      "path": "apps/web/src/store/chat/transcript-history.ts",
+      "beforePhoneSHA256": "314e9558acead76890569a6a3461d9ca06b93425d8d771369a88f11f81a06d5c",
+      "upstreamSHA256": "b0d9a10de95297b84ebd1f79185f30f99b2babdf8a109ff5d5f3c933b0a3104d",
+      "phoneSHA256": "b0d9a10de95297b84ebd1f79185f30f99b2babdf8a109ff5d5f3c933b0a3104d",
+      "adaptation": "exact upstream"
+    },
+    {
+      "path": "apps/web/src/store/chat/types.ts",
+      "beforePhoneSHA256": "e68614eebfdad47c1244d7a6328b580d179fab8106a2644c833317d608c5bc4d",
+      "upstreamSHA256": "19c9944b1ebaa1e97d4b6c1738127e1f6830a5e06fc11a2f56001469bcb92d85",
+      "phoneSHA256": "c8c01ec07a64f7036c08778f3a8074c4621827a3de16805f5eb3ab02a665e128",
+      "adaptation": "Retain existing native prepareAttachments option from original host patch; source identity additions otherwise exact upstream"
+    },
+    {
+      "path": "packages/sdk/src/index.ts",
+      "beforePhoneSHA256": "51c4bde71b02d81f9356802e3b3c5d948e3d5c72e35363ee95e1d9ef62ad2f76",
+      "upstreamSHA256": "805db7cda66ad67a9bae80b88b057a53c473366336773be5a1f4bd890f6de62f",
+      "phoneSHA256": "b984cb6157830d54333e98da2cb197a0b5cea0294d7fda38ddc1b170f2fdd371",
+      "adaptation": "Retain382 operation bodies; omit export of the still-unconsumed delivery/recover operation absent from native SDK; add source types"
+    },
+    {
+      "path": "packages/sdk/src/types.gen.ts",
+      "beforePhoneSHA256": "ebeca407df3445cb760ffa9ef9a3f515102f3a9a78e40046c552f1a4dfbf6570",
+      "upstreamSHA256": "eaaca02e1ef65612fe13bb6dc3b6de3e8fff4ce8b00123e91085716afe1d3d65",
+      "phoneSHA256": "eaaca02e1ef65612fe13bb6dc3b6de3e8fff4ce8b00123e91085716afe1d3d65",
+      "adaptation": "exact upstream"
+    }
+  ],
+  "sourceIsAuthorization": false,
+  "unknownHistoryRetained": true,
+  "resumeV4RequiresNewServer": true
+}

@@ -1,0 +1,29 @@
+{
+  "candidate": "65649801a58946993d2824f3963255750661eb2a",
+  "path": "reduceRuntimeProjection(runtime_snapshot)",
+  "userSource": {
+    "kind": "schedule",
+    "bot_id": "bot-review",
+    "session_id": "schedule-review",
+    "task_id": "plan-review",
+    "task_run_id": "run-review",
+    "occurrence_id": "fire-review"
+  },
+  "assistantSource": {
+    "kind": "schedule",
+    "bot_id": "bot-review",
+    "session_id": "schedule-review",
+    "task_id": "plan-review",
+    "task_run_id": "run-review",
+    "occurrence_id": "fire-review"
+  },
+  "expectedAssistantSource": {
+    "kind": "schedule",
+    "bot_id": "bot-review",
+    "session_id": "schedule-review",
+    "task_id": "plan-review",
+    "task_run_id": "run-review",
+    "occurrence_id": "fire-review"
+  },
+  "passed": true
+}

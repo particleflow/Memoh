@@ -455,13 +455,13 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "d02e2ae4a7413994bb98cdec871aa98ceb49c9765ba4ec77a2e0eafb6bd1fe72"
+      "sha256": "f48a4c9380a3b5ebd5bf4aa5cb52e493f8bd7bf53ef603a0c83e5e7178ec8912"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
     "HAP27ContainsDelta": false,
     "releaseBuildAuthorized": true,
-    "compatibleReleaseBackend": "9270da0252128a296d9a641235cdfd32ab44cfda",
+    "compatibleReleaseBackend": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
     "taskHistoryCancellation": {
       "commit": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
       "base": "5a42d013e801cb6229ee029113e3a63782bc3e13",
@@ -523,6 +523,14 @@
       "finalPhoneSHA256": "94e78e28a276d1443242ceb3eb3878ac320077d35be651a2fd89656f77222939",
       "APIChanges": false,
       "nativeLifetimeRetained": true
+    },
+    "inputSourceIdentity": {
+      "source": "0ec25b7e0b0de46349cc1555ba86248062d9c1ea",
+      "compatibleUnifiedCommit": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+      "unifiedTree": "ce11e378aeffab4152c954ab256b7ff62284e36d",
+      "sourceIsAuthorization": false,
+      "unknownHistoryRetained": true,
+      "resumeV4RequiresNewServer": true
     }
   }
 }

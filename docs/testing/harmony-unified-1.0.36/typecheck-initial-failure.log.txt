@@ -1,0 +1,10 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/pages/home/components/chat-pane.vue(4463,5): error TS2353: Object literal may only specify known properties, and 'prepareAttachments' does not exist in type 'SendMessageOptions'.
+src/store/chat/send.ts(289,43): error TS2339: Property 'prepareAttachments' does not exist on type 'SendMessageOptions'.
+src/store/chat/send.ts(295,48): error TS2339: Property 'prepareAttachments' does not exist on type 'SendMessageOptions'.
+/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

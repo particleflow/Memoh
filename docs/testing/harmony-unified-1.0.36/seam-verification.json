@@ -1,0 +1,27 @@
+{
+  "source": "0ec25b7e0b0de46349cc1555ba86248062d9c1ea",
+  "unified": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "mappedFiles": 12,
+  "pairedFiles": 162,
+  "otherPairedEntriesUnchanged": true,
+  "phoneMediaOriginCallbackRetained": true,
+  "onlyApprovedLocaleDelta": true,
+  "unconsumedRecoveryOperationNotAdded": true,
+  "oldSourceLabelRegression": "failed on 35, passed on mapped consumer",
+  "threeScopedProjectionChecks": "passed",
+  "newSourceDoesNotGrantAuthorization": true,
+  "backendV4CompatibilityRequired": true,
+  "physicalPhone": false,
+  "provenanceUpdated": [
+    "mobile/client/config/memoh_web.lock.json",
+    "mobile/client/mobile/harmony/app/AppScope/app.json5",
+    "mobile/client/mobile/memoh/shared-home-admission-final.json"
+  ],
+  "nativeAttachmentPreparationTypeRetained": true,
+  "initialTypecheckFailure": {
+    "errors": 3,
+    "cause": "New upstream chat/types replaced existing native prepareAttachments host field",
+    "fix": "Restore original field in mapped source; no uploader behavior change",
+    "log": "typecheck-initial-failure.log.txt"
+  }
+}
