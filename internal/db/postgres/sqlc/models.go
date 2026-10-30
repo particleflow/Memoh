@@ -638,6 +638,26 @@ type ContextLifecycle struct {
 	CreatedAt          pgtype.Timestamptz `json:"created_at"`
 }
 
+type ConversationPresence struct {
+	TeamID         pgtype.UUID        `json:"team_id"`
+	BotID          pgtype.UUID        `json:"bot_id"`
+	SessionID      pgtype.UUID        `json:"session_id"`
+	RunID          pgtype.UUID        `json:"run_id"`
+	InvocationID   string             `json:"invocation_id"`
+	ActorID        string             `json:"actor_id"`
+	EpisodeID      pgtype.UUID        `json:"episode_id"`
+	Generation     string             `json:"generation"`
+	LiveGeneration string             `json:"live_generation"`
+	FencingToken   int64              `json:"fencing_token"`
+	Temperature    string             `json:"temperature"`
+	State          string             `json:"state"`
+	ClaimedAt      pgtype.Timestamptz `json:"claimed_at"`
+	Piece          []byte             `json:"piece"`
+	CloseReason    pgtype.Text        `json:"close_reason"`
+	CreatedAt      pgtype.Timestamptz `json:"created_at"`
+	UpdatedAt      pgtype.Timestamptz `json:"updated_at"`
+}
+
 type FetchProvider struct {
 	ID        pgtype.UUID        `json:"id"`
 	Name      string             `json:"name"`
