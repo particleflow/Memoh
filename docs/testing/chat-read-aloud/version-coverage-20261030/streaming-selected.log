@@ -1,0 +1,9 @@
+[dotenv@17.2.3] injecting env (0) from .env -- tip: ⚙️  override existing env vars with { override: true }
+
+ RUN  v4.1.10 /workspace/memoh-readaloud-coverage-review
+
+
+ Test Files  3 passed (3)
+      Tests  6 passed | 9 skipped (15)
+   Start at  07:06:26
+   Duration  1.63s (transform 456ms, setup 0ms, import 1.05s, tests 93ms, environment 3.00s)

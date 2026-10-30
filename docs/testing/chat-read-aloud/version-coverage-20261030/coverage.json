@@ -1,0 +1,146 @@
+{
+  "baseline": {
+    "source": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
+    "evidence": "c96c0ef29454ee7b2412f1c69ae79915c3644c07",
+    "scope": "old Blob-era cancellation; no ArkWeb proof"
+  },
+  "Web": {
+    "source": "2c0e277c2cb49b5a4a99b89a5e568ef9f413ab8a",
+    "tree": "881bd9e5cc03707b4a5d0fa1e037e7faf880063f",
+    "runningDeploymentReadbackThisTurn": false
+  },
+  "HAP34": {
+    "source": "fcc39b31b1db11e7a9d7396e34c94d5b3301a778",
+    "tree": "c8f3aa7fe6d26b87ee68b0bfa9c96c180a7258c7",
+    "bundleName": "cloud.begonia.workassistant",
+    "versionCode": 1000034,
+    "versionName": "1.0.34",
+    "distribution": "reported by parent",
+    "binaryAssetsReadback": false,
+    "phoneInstalledReadback": false,
+    "mappedSourcesOnly": true
+  },
+  "coreFiles": [
+    {
+      "path": "apps/web/src/pages/home/composables/chat-read-aloud.ts",
+      "WebSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+      "HAP34MappedSourceSHA256": "21ccfa06f5f413f4420519f18014e3876010321fa98c4b7d4f40c324f8a27d0b",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": "4433842adb52d2741b280e6ccd36718aff50aa75f874ad1958f5163fd35e76b3",
+      "changedSinceAc7eba": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useChatReadAloud.ts",
+      "WebSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+      "HAP34MappedSourceSHA256": "080122e623b45166128d070415d109cf5ff74277e3da73842eca3dacbe838b29",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": "7593018b2f82eb64d573d06a2b0cccc9eea55560d10545d02e41116a6970614f",
+      "changedSinceAc7eba": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-audio-stream.ts",
+      "WebSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+      "HAP34MappedSourceSHA256": "8df15d3ea41ccfb9937ea96bc82e7000caa54c02e3827dfcc074b14d41db3f30",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": null,
+      "changedSinceAc7eba": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-visible-text.ts",
+      "WebSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "HAP34MappedSourceSHA256": "f91ed73d653de0fca9f4cbe34873b484a85482324496005ab4948db01c8fb886",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": null,
+      "changedSinceAc7eba": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-rendered-text.ts",
+      "WebSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "HAP34MappedSourceSHA256": "33ee0c31760f244d1e9c5c2aea91b2b8c403b218ff29434453136099a04e9eca",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": null,
+      "changedSinceAc7eba": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/speech-timing.ts",
+      "WebSHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "HAP34MappedSourceSHA256": "c37d7fcafe57ce49511c58d5531476a56d215a447db0d16a90c954fceef1c664",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": null,
+      "changedSinceAc7eba": true
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/chat-workspace-visibility.ts",
+      "WebSHA256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7",
+      "HAP34MappedSourceSHA256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": "ade7bdaab312d019d938b15c300d6568f366d8b77cc035e4d745413ce103b7e7",
+      "changedSinceAc7eba": false
+    },
+    {
+      "path": "apps/web/src/pages/home/composables/useTaskRunAnchor.ts",
+      "WebSHA256": "6266c27065eedd273d8758f61045a6077dbec29f838538223aeac1b8813d7f47",
+      "HAP34MappedSourceSHA256": "6266c27065eedd273d8758f61045a6077dbec29f838538223aeac1b8813d7f47",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": "6266c27065eedd273d8758f61045a6077dbec29f838538223aeac1b8813d7f47",
+      "changedSinceAc7eba": false
+    },
+    {
+      "path": "apps/web/src/utils/task-history-link.ts",
+      "WebSHA256": "ae8b09ab640cf820e43469e492f0f7f0014da10201e77ba7c894e839e52dd802",
+      "HAP34MappedSourceSHA256": "ae8b09ab640cf820e43469e492f0f7f0014da10201e77ba7c894e839e52dd802",
+      "WebEqualsPhoneMappedSource": true,
+      "ac7ebaSHA256": "ae8b09ab640cf820e43469e492f0f7f0014da10201e77ba7c894e839e52dd802",
+      "changedSinceAc7eba": false
+    }
+  ],
+  "adaptations": {
+    "Home": {
+      "WebSHA256": "e6e02553184352a51d8d0fd9ab16d733d543ee07669b4a91fe830b5ee00668d6",
+      "phoneSHA256": "25756fa89096db1bb14ce6aaf3fb434ecd5098ce12da0f2f06b9191dd78e298b",
+      "onlyApplicationTitleDiff": true
+    },
+    "pane": {
+      "WebSHA256": "99e27d3358555af304b4509dba4753d1c9f0ea8777f32cd60a876c5c9aa41188",
+      "phoneAfterFinalBuilderAdaptationSHA256": "694baf4e9a60793424c804108caa16c83cd23d246a31c4e572ae555282c5e682",
+      "speechOptionsBlockEqual": true,
+      "clickInputReplayAndStatusHooksPresentBoth": true,
+      "additionalNativeMicPointerStopsSpeech": true,
+      "lastPureSourceTransform": "apply_transfer_lifetime_context; only attachment teardown changes, no HAP/JS build"
+    },
+    "workspaceProvider": {
+      "WebSHA256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "phoneFinalSourceGuardSHA256": "4778d455b91547573311822c6dfb1c4ab9462af38085c5bac309ab0d9fed84b9",
+      "fullNativeContextNotRebuilt": true
+    },
+    "speechCSS": {
+      "sameMappedInsertionAsCurrentWeb": true,
+      "insertionSHA256": "998bcd62af6dbe0869769baff6eca242c4db43df1b58b4172f1dcd92456352fe",
+      "fullGeneratedPhoneCSSOrBinaryNotReadBack": true
+    }
+  },
+  "nativeLifecycleSourceHashes": {
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/pages/SharedChat.ets": "d37a3476d9ba5772f4b241c306341a1de690d457347265331cb6c9f8709065c4",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/entryability/EntryAbility.ets": "d8d7201df07a20f1f387b8f2553aaa4bb75160a1227863fa6a5dbd3a705b6653",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets": "a97c3c2493be3b36c7219f8d3e87ecb7ab0a66d801eada924d3bf78683a924c9",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets": "87ec4e6ec9dd12e615427dddbf2a0402a85e2ed2a67657e5c40aae234a6aad47",
+    "mobile/client/mobile/memoh/harmony-back.ts": "473cc71c9a9a06e3d9a2aa75c79f505f6a8d7a63a36738d613d4be150597f9d7",
+    "mobile/client/mobile/build_memoh_web.py": "37854f940c37463ca7f9965eb107cf74fd3c2aa0979098e361c11aa88b9c6f26"
+  },
+  "nativeLifecycleFindings": [
+    "Native Web starts at secure begonia-client://app origin; no explicit mediaPlayGestureAccess override in SharedChat.",
+    "System Back first invokes __memohBack; root can move Ability to background without destroying drafts/document.",
+    "EntryAbility foreground/background are diagnostics/image-timing callbacks; no explicit readAloud.stop bridge.",
+    "SharedChat disappearance closes NativeClient/native voice/transfer view; this is not proof that Vue deactivation/unmount or HTMLAudio stop fires on every background transition."
+  ],
+  "selectedTests": {
+    "existingStreamingTimingWavCasesPassed": 6,
+    "newContactTabRouteCasePassed": 1,
+    "old12Plus6Rerun": false,
+    "oldC96SixPlusTwoRerun": false,
+    "newBrowserOrArkWebRun": false,
+    "paidCalls": 0
+  },
+  "buildSignDeploy": false,
+  "productPatch": false
+}
