@@ -1,0 +1,182 @@
+{
+  "checklist": "https://chatgpt.com/space/page_881a70a14c5081919d8fd93132fc6968",
+  "readSequence": 217,
+  "fieldUpdateProvenance": "Parent instruction in this turn: HAP36 signed/original page distributed; Web production1fa; real history11 skeletons/0 rows persists. Not independently accessed on phone/NAS. Historical checklist subsection versions are not treated as current runtime.",
+  "items": [
+    {
+      "id": "U01",
+      "requirement": "Login persistence and safe recovery",
+      "currentEvidence": "Existing injected-config and verified legacy HTTP-to-HTTPS migration preserved; no token/storage mutation.",
+      "remainingGap": "Phone upgrade/relaunch and complete persistence matrix not accepted.",
+      "source": "mobile/client/mobile/memoh/harmony-service-config.ts"
+    },
+    {
+      "id": "U02",
+      "requirement": "Task name, real state and exact navigation",
+      "currentEvidence": "Readonly task-directory/2c0 history route preserved; two missing-transport source files now mapped to1fa.",
+      "remainingGap": "Field11 skeletons/0 messages remains unresolved; await navigation owner, no replay/refresh workaround.",
+      "source": "paired959.files: apps/web/src/store/chat/bootstrap.ts; apps/web/src/store/chat-list.ts"
+    },
+    {
+      "id": "U03",
+      "requirement": "Agent name, real state and exact navigation",
+      "currentEvidence": "Existing scoped conversation relations/original execution deep links retained unchanged.",
+      "remainingGap": "Actual phone list and destination acceptance missing; do not add details/logs/IDs/actions.",
+      "source": "mobile/client/mobile/memoh/shared-home-admission-final.json"
+    },
+    {
+      "id": "U04",
+      "requirement": "Bot name, real state and exact navigation",
+      "currentEvidence": "Fixed Bot contact and original-history association unchanged.",
+      "remainingGap": "Actual phone Bot list/contact behavior unaccepted; no global management expansion.",
+      "source": "mobile/client/mobile/memoh/shared-home-admission-final.json"
+    },
+    {
+      "id": "U05",
+      "requirement": "Ordinary image task minimal row",
+      "currentEvidence": "Existing root-run/tool-call projection unchanged; ordinary image work is not fabricated as delegated expert.",
+      "remainingGap": "Current phone actual name/state/destination sample missing.",
+      "source": "paired959 runtime-projection and shared task view"
+    },
+    {
+      "id": "B03",
+      "requirement": "Generated result returns to original conversation attachment",
+      "currentEvidence": "Normal server-owned automatic delivery and existing committed references consumed; no manual recovery UI.",
+      "remainingGap": "Current candidate/phone/original snow-scene automatic delivery not proved; source history emptiness is not repaired locally.",
+      "source": "paired959.files: apps/web/src/pages/home/components/session-task-results.vue"
+    },
+    {
+      "id": "F01",
+      "requirement": "User-defined storage root and NAS central configuration",
+      "currentEvidence": "Original configuration/HostBinding and NAS identity retained; no new root or address written.",
+      "remainingGap": "Effective phone/NAS/PC roots still require cross-end field evidence.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferPolicy.ets"
+    },
+    {
+      "id": "F02",
+      "requirement": "LAN priority and IPv6 fallback",
+      "currentEvidence": "Original policy consumer/physical connection bridges preserved; missing policy keeps existing behavior.",
+      "remainingGap": "Actual policy values, official engine ordering, strict TLS fallback and physical reconnection not accepted.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets"
+    },
+    {
+      "id": "F03",
+      "requirement": "Real-byte large file transfer",
+      "currentEvidence": "Existing chunked native path and hash checks unchanged.",
+      "remainingGap": "Current HTTP also slow per parent; no phone quantitative throughput or HTTPS root cause proof.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets"
+    },
+    {
+      "id": "F04",
+      "requirement": "Multiple files and pagination are separate",
+      "currentEvidence": "Existing all-file input and bounded listing/attachment paths retained, no queue replacement.",
+      "remainingGap": "Phone/Windows native multi-file and cross-end paging/performance require actual acceptance.",
+      "source": "mobile/client/mobile/memoh/harmony-files.ts"
+    },
+    {
+      "id": "F05",
+      "requirement": "Resume and hash integrity",
+      "currentEvidence": "9533 retryAt/Retry-After/original receipt, ready hash and no duplicate Create retained.",
+      "remainingGap": "Physical phone upload/download cancellation/restart/hash matrix not accepted.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets"
+    },
+    {
+      "id": "F06",
+      "requirement": "Disconnect and process restart recovery",
+      "currentEvidence": "Persistent owner/journals and no unknown-write replay retained; no state reset.",
+      "remainingGap": "Actual phone process restart/background lifetime evidence missing.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferOwner.ets"
+    },
+    {
+      "id": "F07",
+      "requirement": "Real producer registration and task references",
+      "currentEvidence": "Phone observes original committed task references; no host filesystem shortcut.",
+      "remainingGap": "Producer/PC-input/automatic return end-to-end remains other owners field responsibility.",
+      "source": "paired959.files: apps/web/src/pages/home/components/session-task-results.vue"
+    },
+    {
+      "id": "F08",
+      "requirement": "One cross-end transfer contract",
+      "currentEvidence": "Original Bot-scoped uploads/receipts/root, delegation download authorization and queues retained.",
+      "remainingGap": "Combined phone/Windows/NAS protocol and real public-network acceptance not complete.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeClient.ets"
+    },
+    {
+      "id": "T01",
+      "requirement": "Domain and certificate identity",
+      "currentEvidence": "Current validators and logical origin/Host/SNI rules unchanged.",
+      "remainingGap": "Phone effective configured endpoint/certificate identity unaccepted.",
+      "source": "mobile/client/mobile/memoh/harmony-service-url.ts"
+    },
+    {
+      "id": "T02",
+      "requirement": "Certificate chain and system trust",
+      "currentEvidence": "No trust bypass or certificate setting change.",
+      "remainingGap": "Actual phone official trust-chain acceptance missing.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets"
+    },
+    {
+      "id": "T03",
+      "requirement": "HTTPS/WSS and entry protocols",
+      "currentEvidence": "Existing logical-origin and native bridge gates unchanged; no real HTTP credentials used.",
+      "remainingGap": "Phone authenticated WSS/dynamic media/public-network paths require real acceptance.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeWebNetwork.ets"
+    },
+    {
+      "id": "T04",
+      "requirement": "No unsafe warnings on each endpoint",
+      "currentEvidence": "No change to trust/transport rules; cloud source checks cannot prove absence of device warnings.",
+      "remainingGap": "Actual phone evidence missing.",
+      "source": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/SharedWebPolicy.ets"
+    },
+    {
+      "id": "V01",
+      "requirement": "Exact source/CI/image/package/running identity",
+      "currentEvidence": "HAP36 remains exact6d728c/cef. Parent reports it signed and distributed. New1fa source-only checkpoint is not in36.",
+      "remainingGap": "Final unified candidate and one new matching HAP are pending; no new version or package assigned here.",
+      "source": "docs/testing/harmony-unified-1.0.36/artifact-handoff.json"
+    },
+    {
+      "id": "V03",
+      "requirement": "Recoverable delivery and history integrity",
+      "currentEvidence": "Old36 package and source bundles retained; source-only append, no overwrite/force/history reset.",
+      "remainingGap": "Actual rollback compatibility, resumev4 backend and queues must be assessed by original field owner.",
+      "source": "docs/testing/harmony-unified-1.0.36/README.md"
+    },
+    {
+      "id": "N01",
+      "requirement": "No unnecessary service/protocol/account/task",
+      "currentEvidence": "This delta changes two existing controller consumers plus tests/mapping only.",
+      "remainingGap": "No new service/account/system task created; full-project live audit is not claimed.",
+      "source": "docs/testing/harmony-history-bootstrap-1fa17/verification.json"
+    },
+    {
+      "id": "N02",
+      "requirement": "No Agent-core change or wider port/permission scope",
+      "currentEvidence": "SDK/native/permissions/official Agent unchanged.",
+      "remainingGap": "No real device or deployment changes performed.",
+      "source": "docs/testing/harmony-history-bootstrap-1fa17/verification.json"
+    },
+    {
+      "id": "N03",
+      "requirement": "No external deletion; preserve queues",
+      "currentEvidence": "No external files/history/receipts/unknown records deleted or re-bound.",
+      "remainingGap": "Actual cross-end recovery acceptance remains open.",
+      "source": "docs/testing/harmony-history-bootstrap-1fa17/verification.json"
+    },
+    {
+      "id": "N04",
+      "requirement": "No secrets/private infrastructure in public source",
+      "currentEvidence": "Changed source pattern scan clear; public package36 had empty private config, remains untouched.",
+      "remainingGap": "Scope is this source increment and preserved package evidence, not a new whole-project secret audit.",
+      "source": "docs/testing/harmony-history-bootstrap-1fa17/verification.json"
+    },
+    {
+      "id": "N05",
+      "requirement": "Recovery inventory and reversible cleanup",
+      "currentEvidence": "Original branch/history and new recovery bundle retained; no cleanup done.",
+      "remainingGap": "No permanent deletion, unrelated binary cleanup or field restore acceptance claimed.",
+      "source": "docs/testing/harmony-history-bootstrap-1fa17/verification.json"
+    }
+  ]
+}

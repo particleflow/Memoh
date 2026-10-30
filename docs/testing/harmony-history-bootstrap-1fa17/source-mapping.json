@@ -1,0 +1,47 @@
+{
+  "sourceCommit": "1f021c94d08ac5617a8ae2489103d4036a11d51b",
+  "compatibleUnifiedCommit": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+  "sourceBase": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "mapping": [
+    {
+      "path": "apps/web/src/store/chat-list.ts",
+      "beforePhoneSHA256": "b56c603a230471247ed1c87d4ea313cca209f3caeff2ccbe91dc50c8a44251cf",
+      "phoneSHA256": "1a9ba6bc2ce53945a61dd2e3f99203546cbb931ac526beaf9da4273076da65fd",
+      "upstreamSHA256": "1a9ba6bc2ce53945a61dd2e3f99203546cbb931ac526beaf9da4273076da65fd",
+      "gitBlob": "e0df3388e3075e781146f70f64f14f6d2a2e8d34",
+      "adaptation": "none; exact admitted upstream bytes",
+      "scope": "production"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap.ts",
+      "beforePhoneSHA256": "68f308e1b09fdd4f4177c7470fb2ef2edaac48173dd3dd8f4b33f2945e6b9a47",
+      "phoneSHA256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269",
+      "upstreamSHA256": "ef03f6d12e1e08fe8d0127acb535c3362216ffb8ca75903c3cc1f6c9bd128269",
+      "gitBlob": "c537759791902204d66637a818809e3c06778f56",
+      "adaptation": "none; exact admitted upstream bytes",
+      "scope": "production"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap-contact.test.ts",
+      "beforePhoneSHA256": "8f8d20cc913342fa05de1c7053a56636ec8f93a6ba31445b23ccd5181fb39a64",
+      "phoneSHA256": "738b19eea9851fc609406c1464a6360ff66b8429a7b77c6a687b76a0637cef71",
+      "upstreamSHA256": "738b19eea9851fc609406c1464a6360ff66b8429a7b77c6a687b76a0637cef71",
+      "gitBlob": "cfb98df557a79439a88cfa273ca7237f4f236863",
+      "adaptation": "none; exact admitted upstream bytes",
+      "scope": "test"
+    },
+    {
+      "path": "apps/web/src/store/chat/bootstrap-history-runtime.test.ts",
+      "beforePhoneSHA256": null,
+      "phoneSHA256": "58433086e1c500750cb1495364d0d35401973705c1c6c8922c24ef31d090f3f2",
+      "upstreamSHA256": "58433086e1c500750cb1495364d0d35401973705c1c6c8922c24ef31d090f3f2",
+      "gitBlob": "ffb9f3bdeaa25859954d8d0ee70cb60a0af21047",
+      "adaptation": "none; exact admitted upstream bytes",
+      "scope": "test"
+    }
+  ],
+  "sdkBackendSchemaAgentChanges": false,
+  "fieldSkeletonRootCauseProven": false,
+  "laterInitializerHistoryPreservationProven": false,
+  "newHapBuilt": false
+}

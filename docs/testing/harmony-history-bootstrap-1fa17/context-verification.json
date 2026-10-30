@@ -1,0 +1,14 @@
+{
+  "contextGeneration": "original build_memoh_web.context_archive, isolated output only",
+  "contextSHA256": "6e1fb5317cf969a92a2e66765c97ea8541ea535b724fccff53804cdde97c0ff0",
+  "incomingSourceFiles": 4,
+  "newProductionFiles": 2,
+  "hostPatchNamesRetained": 47,
+  "pairedEntries": 163,
+  "inputSourceIdentity12HashesRetained": true,
+  "readonlyComposerAndLifetimeFinalHashRetained": true,
+  "newSdkNativeConfigVersionPermissionChanges": false,
+  "webProductionBuild": false,
+  "newHapBuild": false,
+  "realPhone": false
+}

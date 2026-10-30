@@ -1,0 +1,34 @@
+{
+  "baselineHarmonySource": "1a53db02c15061d344dcc379a1b8abef7da805c0",
+  "build36Source": "6d728c0b06cb2b9d37773e1b860938980cb4d6e7",
+  "sharedWeb": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+  "priorTwoProductionFilesMatchedUpstreamBeforeExactly": true,
+  "sourceDeltaProductionFiles": 2,
+  "testFiles": 2,
+  "baselineController": {
+    "failed": 4,
+    "passed": 2
+  },
+  "mappedController": {
+    "passed": 20,
+    "failed": 0
+  },
+  "typecheckExitCode": 0,
+  "lintExitCode": 0,
+  "unchangedClientFiles": 199,
+  "priorPairedEntriesRetained": 159,
+  "inputSourceIdentityPreserved": true,
+  "newVersionAssigned": false,
+  "newHapBuilt": false,
+  "newSdkOrNativeOrPermissionChanges": false,
+  "newBackendOrSchemaChanges": false,
+  "modelOrPaidCalls": false,
+  "phoneOrFieldOperations": false,
+  "fieldSkeletonIncidentFixed": false,
+  "remainingOwnerWork": [
+    "history navigation owner: real11-skeleton/0-message and later initialization/history preservation",
+    "read-aloud owner: missing-runId repeat tail and continuous input",
+    "quick-reply owner: independent review corrections"
+  ],
+  "sourcePrivacyScan": "changed source pattern scan: no findings in private-key/token/private-infrastructure URL categories; not exhaustive encoded-secret proof"
+}

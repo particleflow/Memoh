@@ -455,13 +455,13 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "f48a4c9380a3b5ebd5bf4aa5cb52e493f8bd7bf53ef603a0c83e5e7178ec8912"
+      "sha256": "cf7548d56636a83d1eaf1c4260ea01a3cb70bef2adee20cc5cfc196a96733405"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
     "HAP27ContainsDelta": false,
     "releaseBuildAuthorized": true,
-    "compatibleReleaseBackend": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+    "compatibleReleaseBackend": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
     "taskHistoryCancellation": {
       "commit": "ac7eba92fee9c2824f058b1394a6c55362b787e8",
       "base": "5a42d013e801cb6229ee029113e3a63782bc3e13",
@@ -531,6 +531,15 @@
       "sourceIsAuthorization": false,
       "unknownHistoryRetained": true,
       "resumeV4RequiresNewServer": true
+    },
+    "historyRuntimeBootstrap": {
+      "sourceCommit": "1f021c94d08ac5617a8ae2489103d4036a11d51b",
+      "compatibleUnifiedCommit": "1fa17fd72aca0f8ee4ab46f1578a369fb039016b",
+      "sourceBase": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+      "sdkBackendSchemaAgentChanges": false,
+      "fieldSkeletonRootCauseProven": false,
+      "laterInitializerHistoryPreservationProven": false,
+      "newHapBuilt": false
     }
   }
 }
