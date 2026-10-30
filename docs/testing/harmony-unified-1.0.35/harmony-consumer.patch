@@ -1,9 +1,6 @@
 --- a/apps/web/src/pages/home/components/chat-pane.vue
 +++ b/apps/web/src/pages/home/components/chat-pane.vue
-@@ -193,6 +193,16 @@
-           />
-         </section>
-       </section>
+@@ -195,0 +196,10 @@
 +
 +      <div
 +        v-if="activeChatReadOnly && currentBotId"
@@ -14,6 +11,3 @@
 +          :visible="isVisible"
 +        />
 +      </div>
- 
-       <MediaGalleryLightbox
-         :items="galleryItems"
