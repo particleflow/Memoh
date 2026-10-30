@@ -34,7 +34,7 @@ func (q *mediaCatalogHandlerQueries) GetProviderByID(context.Context, pgtype.UUI
 }
 
 func TestProviderMediaCatalogBoundary(t *testing.T) {
-	for _, mode := range []string{"success", "empty", "forbidden", "unauthorized_upstream", "redirect", "invalid", "anonymous", "revoked", "foreign_team", "wrong_protocol", "bad_id", "not_enabled"} {
+	for _, mode := range []string{"success", "empty", "incomplete", "forbidden", "unauthorized_upstream", "redirect", "invalid", "anonymous", "revoked", "foreign_team", "wrong_protocol", "bad_id", "not_enabled"} {
 		t.Run(mode, func(t *testing.T) {
 			upstreamCalls := 0
 			upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +43,9 @@ func TestProviderMediaCatalogBoundary(t *testing.T) {
 					t.Error("wrong upstream request")
 				}
 				switch mode {
+				case "incomplete":
+					_, _ = w.Write([]byte(`{"data":[{"id":"synthetic/first"}],"has_more":true,"last_id":"synthetic/first"}`))
+					return
 				case "forbidden":
 					w.WriteHeader(http.StatusForbidden)
 				case "unauthorized_upstream":
@@ -100,7 +103,7 @@ func TestProviderMediaCatalogBoundary(t *testing.T) {
 			e.ServeHTTP(rec, req)
 			want := 200
 			switch mode {
-			case "forbidden", "unauthorized_upstream", "redirect", "invalid":
+			case "incomplete", "forbidden", "unauthorized_upstream", "redirect", "invalid":
 				want = 502
 			case "anonymous", "revoked":
 				want = 401

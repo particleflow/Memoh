@@ -90,14 +90,22 @@ func (s *Service) DiscoverMediaCatalog(ctx context.Context, id string) (MediaCat
 	if creds.APIKey != "" {
 		req.Header.Set("Authorization", "Bearer "+creds.APIKey)
 	}
-	client := *s.httpClient
-	client.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
-	// No cookies from another provider and no redirects to another destination.
-	client.Jar = nil
+	client := catalogHTTPClient(clientType, s.httpClient)
+	if s.httpClient != nil {
+		// Keep the read-only catalog client's existing timeout as well as the
+		// overall probe context; pagination must not extend either deadline.
+		client.Timeout = s.httpClient.Timeout
+	}
 	resp, err := client.Do(req) //nolint:gosec // Destination comes only from the saved provider, as in existing model discovery.
 	if err != nil {
 		if ctx.Err() != nil {
 			return MediaCatalogResponse{}, ctx.Err()
+		}
+		if errors.Is(err, ErrCatalogIncomplete) {
+			return MediaCatalogResponse{}, errors.Join(ErrMediaCatalogResponse, ErrCatalogIncomplete)
+		}
+		if errors.Is(err, ErrMediaCatalogResponse) {
+			return MediaCatalogResponse{}, ErrMediaCatalogResponse
 		}
 		return MediaCatalogResponse{}, ErrMediaCatalogTransport
 	}

@@ -502,13 +502,21 @@ func (s *Service) fetchRemoteModelsViaSDKWithOptions(ctx context.Context, provid
 		return nil, fmt.Errorf("resolve credentials: %w", err)
 	}
 
-	sdkProvider := models.NewSDKProvider(baseURL, creds.APIKey, creds.CodexAccountID, clientType, probeTimeout, nil)
+	sdkProvider := models.NewSDKProvider(baseURL, creds.APIKey, creds.CodexAccountID, clientType, probeTimeout, catalogHTTPClient(clientType, s.httpClient))
 
 	ctx, cancel := context.WithTimeout(ctx, probeTimeout)
 	defer cancel()
 
 	sdkModels, err := sdkProvider.ListModels(ctx)
 	if err != nil {
+		// HTTP client errors may retain the request URL. Pagination validation
+		// failures need only their safe class, never a provider URL or cursor.
+		if errors.Is(err, ErrCatalogIncomplete) {
+			return nil, ErrCatalogIncomplete
+		}
+		if errors.Is(err, ErrMediaCatalogResponse) {
+			return nil, ErrMediaCatalogResponse
+		}
 		return nil, errs.WrapDependency(err, "list models")
 	}
 

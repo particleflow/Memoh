@@ -94,6 +94,16 @@ func (s *Service) SyncModelCatalog(ctx context.Context, id string, apply Catalog
 		row.ContextWindow = fact.ContextWindow
 		row.MaxOutputTokens = fact.MaxOutputTokens
 	}
+	// These are separate upstream reads. A successful but shorter SDK response
+	// must not hide models present in the validated complete chat catalog.
+	for id, fact := range validIDs {
+		if (fact.Kind == "" || fact.Kind == "chat") && !seen[id] {
+			return true, ErrCatalogIncomplete
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return true, err
+	}
 	if err := apply(ctx, id, remote); err != nil {
 		return true, err
 	}
