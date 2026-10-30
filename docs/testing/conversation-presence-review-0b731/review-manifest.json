@@ -1,0 +1,51 @@
+{
+  "candidate": "0b731eb9e72de5abf6c6cf28b87a608360efedf3",
+  "tree": "aa7020d1f14dea4155929ea8c9aeec5b6a1d5116",
+  "candidate_parent": "1fdfcb2e1670d00f0b0fb8d7237a7a101d307cfb",
+  "base": "cefdf0cbb3207d2a07db17ef365e1b8d2d43ca3f",
+  "published_runtime_source": "1c1951f43746f5818c3bd1cd7091d87fb672d45b -> 1fdfcb2e1670d00f0b0fb8d7237a7a101d307cfb",
+  "qualification": "not admitted: P1 unresolved effective-model route and P2 trusted non-user history classification",
+  "runtime_hashes": {
+    "internal/agent/application/conversation_presence_runtime.go": "6b3b9bc4f9bd09d7c30b97189f07674b02cd8c8464384e453f51e595f577ce05",
+    "internal/agent/application/conversation_presence_sdk.go": "961bb64a8387166df617e2faaa90c0f6f6ff678b4490fa2458c9c23b65c76f5b",
+    "internal/agent/application/conversation_presence_postgres.go": "bba16111f7d6f39b5d41c0dc032e6c0c0c7b11441df0d0b2c5b8cc916b4b6de9",
+    "internal/conversationpresence/coordinator.go": "fa6a57ef7a351f210ff2baeb4a7f28f52b84339ff7879cf4b4e5e6ab7b2d6d37",
+    "internal/conversationpresence/policy.go": "9b4212684fc27c40676db61a4271b09bc67a1ba13ac1a1d2e227672aca9b4c81",
+    "db/postgres/queries/conversation_presence.sql": "087ed10f8ff6d196bb8174ee32a366a5598eb44779ccb65d5936b13846e55d39",
+    "db/postgres/migrations/0182_conversation_presence.up.sql": "4bb58657fb9f152b03e9a02fa617d7caae749a48fbf43bd2f975f79bd5ebb3f0",
+    "db/postgres/migrations/0182_conversation_presence.down.sql": "95788b41c74a648e2e016045ca65b3cc5ccfa8e64d5fbe142d1b16269240f1cb",
+    "internal/config/conversation_presence.go": "61d763f0088800b0033e6ba7a8a64c29e47caea70b5a1d0e129939d39683d9c7"
+  },
+  "SQL_checks": {
+    "control": 0,
+    "valid_schedule": 1,
+    "valid_task_result": 1,
+    "temporary_tables_only": true,
+    "permanent_writes": 0
+  },
+  "classifier_checks": {
+    "pass": 1,
+    "fail": 2,
+    "exit": 1
+  },
+  "effective_identity_checks": {
+    "pass": 1,
+    "fail": 1,
+    "exit": 1,
+    "Generate_calls": 0,
+    "HTTP_calls": 0,
+    "provider_and_model_enabled": true
+  },
+  "reused_author_checks": [
+    "18 race +17 regressions at public source1c1951f",
+    "3 reasoning checks",
+    "2 newer revocation/formal-order checks at public source1fdfcb2"
+  ],
+  "new_full_builds": 0,
+  "CI_dispatch": 0,
+  "migration_applied_to_product": false,
+  "source_merged_or_pushed": false,
+  "field_deployment": false,
+  "audio_ack_not_implemented": true,
+  "followup_received_only": "c878a31e268119939330d9eed52050539636b306 / evidence29685958ec896489371a894b6854ee8b2e9df9c5"
+}
