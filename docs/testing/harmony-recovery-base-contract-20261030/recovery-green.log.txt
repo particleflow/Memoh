@@ -1,0 +1,148 @@
+{
+  "cases": [
+    {
+      "name": "three-committed",
+      "bytes": 1048593,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 3,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "four-committed",
+      "bytes": 1310737,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 4,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "eight-committed",
+      "bytes": 2359313,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 8,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "four-lost-replies",
+      "bytes": 1310737,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 4,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "four-conflicts",
+      "bytes": 1310737,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 4,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "retry-after",
+      "bytes": 524305,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 1,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": true
+    },
+    {
+      "name": "retry-after-http-date",
+      "bytes": 524305,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 1,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "long-cooldown-cancel",
+      "pendingPreserved": true,
+      "error": "UPLOAD_CANCELLED",
+      "creates": 1,
+      "completes": 0,
+      "patches": 1
+    },
+    {
+      "name": "retry-after-restart",
+      "bytes": 524305,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 1,
+      "identityRejected": true,
+      "processes": 4,
+      "headersCooldownRespected": true
+    },
+    {
+      "name": "expiry-no-busy-loop",
+      "pendingPreserved": true,
+      "error": "UPLOAD_RECEIPT_UNAVAILABLE",
+      "creates": 1,
+      "completes": 0,
+      "patches": 3
+    },
+    {
+      "name": "cancel-cooldown",
+      "pendingPreserved": true,
+      "error": "UPLOAD_CANCELLED",
+      "creates": 1,
+      "completes": 0,
+      "patches": 1
+    },
+    {
+      "name": "403-not-retried",
+      "pendingPreserved": true,
+      "error": "UPLOAD_HTTP_403",
+      "creates": 1,
+      "completes": 0,
+      "patches": 1
+    },
+    {
+      "name": "root-api-real-bytes",
+      "bytes": 1310737,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 4,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    },
+    {
+      "name": "safe-prefix-real-bytes",
+      "bytes": 1310737,
+      "hashVerified": true,
+      "creates": 1,
+      "completes": 1,
+      "recoveredFaults": 4,
+      "identityRejected": true,
+      "processes": 3,
+      "headersCooldownRespected": false
+    }
+  ],
+  "device": false,
+  "TLS": false
+}

@@ -1,6 +1,6 @@
 // One validator, also packaged as ServiceUrl.ets with the platform URL parser.
 // No default endpoint or automatic fallback. Explicit LAN endpoints require TLS.
-export function normalizeServiceUrl(value: string, api: boolean = true): string {
+export function normalizeServiceUrl(value: string, _api: boolean = true): string {
   if (!value || value.length > 2048 || value !== value.trim() || /[\\\u0000-\u0020%?#]/.test(value) || !/^https?:\/\//.test(value)) throw new Error('SERVICE_URL_INVALID')
   const authority = value.replace(/^https?:\/\//, '').split('/')[0] ?? ''
   const hostPort = /^(?:\[[0-9a-fA-F:]+\]|[A-Za-z0-9.-]+)(?::([0-9]+))?$/.exec(authority)
@@ -27,7 +27,6 @@ export function normalizeServiceUrl(value: string, api: boolean = true): string 
   const path = parsed.pathname.replace(/\/+$/, '')
   const rawPath = value.replace(/^https?:\/\/[^/]+/, '')
   if (/\/\.{1,2}(\/|$)/.test(rawPath) || rawPath.includes('//') || !/^(\/[A-Za-z0-9_.~-]+)*\/?$/.test(rawPath)) throw new Error('SERVICE_URL_INVALID')
-  if (api && !path.endsWith('/api')) throw new Error('SERVICE_URL_API_PATH')
   return parsed.origin + path
 }
 

@@ -83,7 +83,7 @@ async function boot(config: ServiceConfig) {
 
 function form(current: ServiceConfig | null, message = '') {
   const root = document.getElementById('app')!
-  root.innerHTML = '<main class="service-setup"><form><h1>连接服务</h1><p>地址仅保存在这台设备。API 和安装包下载地址分别设置。</p><label for="service-api">API 地址</label><input id="service-api" type="url" required autocomplete="off" spellcheck="false" maxlength="2048" inputmode="url"><p class="service-hint">填写完整 HTTP(S) 地址和 /api 路径。HTTP 传输不加密。</p><label for="service-download">安装包下载地址（可选）</label><input id="service-download" type="url" autocomplete="off" spellcheck="false" maxlength="2048" inputmode="url"><p id="service-migration"></p><p role="alert" id="service-error"></p><button type="submit">保存并继续</button><button type="button" id="service-cancel">返回</button></form></main>'
+  root.innerHTML = '<main class="service-setup"><form><h1>连接服务</h1><p>地址仅保存在这台设备。API 和安装包下载地址分别设置。</p><label for="service-api">API 地址</label><input id="service-api" type="url" required autocomplete="off" spellcheck="false" maxlength="2048" inputmode="url"><p class="service-hint">填写完整服务地址，可使用根路径或已配置的 API 前缀。HTTP 传输不加密。</p><label for="service-download">安装包下载地址（可选）</label><input id="service-download" type="url" autocomplete="off" spellcheck="false" maxlength="2048" inputmode="url"><p id="service-migration"></p><p role="alert" id="service-error"></p><button type="submit">保存并继续</button><button type="button" id="service-cancel">返回</button></form></main>'
   const api = document.getElementById('service-api') as HTMLInputElement
   const download = document.getElementById('service-download') as HTMLInputElement
   const error = document.getElementById('service-error')!
@@ -109,7 +109,7 @@ function form(current: ServiceConfig | null, message = '') {
     } catch (failure) {
       error.textContent = failure instanceof Error && failure.message === 'SERVICE_BINDING_REQUIRED'
         ? '地址未能与旧服务核对，原登录和本地数据未更改。请使用原服务的 API 地址。'
-        : '无法保存。请使用无账号、查询或片段的服务地址；内网地址须使用 HTTPS，API 路径须以 /api 结尾，并检查本地存储是否可用。'
+        : '无法保存。请使用无账号、查询或片段的服务地址；内网地址须使用 HTTPS，API 路径须与服务配置一致，并检查本地存储是否可用。'
       submit.disabled = unbound
     }
   }

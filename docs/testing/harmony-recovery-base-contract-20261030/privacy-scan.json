@@ -1,0 +1,24 @@
+{
+  "scope": "added product-code lines; source review, screenshots inspected separately",
+  "productFiles": [
+    "mobile/client/mobile/client_config.py",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets",
+    "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts",
+    "mobile/client/mobile/memoh/harmony-entry.ts",
+    "mobile/client/mobile/memoh/harmony-service-url.ts",
+    "mobile/client/mobile/memoh/shared-home-admission-final.json"
+  ],
+  "patternCounts": {
+    "privateKey": 0,
+    "GitHubCredential": 0,
+    "AWSKey": 0,
+    "literalPrivateLANURL": 0,
+    "literalIPv6Endpoint": 0
+  },
+  "testDomainsAndIPs": "synthetic examples from fixed public contract; never private deployment input",
+  "credentialsUsedInTests": "synthetic only",
+  "productionConfigRead": false,
+  "privateLibraryTransferMetadataCommitted": false,
+  "completeSecretProof": false
+}

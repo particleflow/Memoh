@@ -45,7 +45,7 @@ try:
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth')
     page.screenshot(path=str(f.OUT/'service-empty-internal.png'))
     checks['emptyConfigurationSendsNoAPIRequest']=True
-    for invalid in ['http://127.0.0.1/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/not-api']:
+    for invalid in ['http://127.0.0.1/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/%2Fapi']:
         save(page,invalid)
         page.get_by_role('alert').get_by_text('无法保存。',exact=False).wait_for()
         assert not requests

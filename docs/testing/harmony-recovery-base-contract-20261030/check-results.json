@@ -1,0 +1,13 @@
+{
+  "parent": "51ccf9222ed9e2312aa3ddfaad03084cfeaacaa3",
+  "recoveryScenarios": 15,
+  "sdkRootAndPrefix": 2,
+  "originalConfigFocusedChecks": 106,
+  "typecheckExitCode": 0,
+  "scopedLintExitCode": 0,
+  "officialAPI26CompileArkTS": "BUILD SUCCESSFUL",
+  "fullHAPBuilt": false,
+  "realPhone": false,
+  "realTLS": false,
+  "inheritedFullScriptsPass": false
+}

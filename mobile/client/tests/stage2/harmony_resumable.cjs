@@ -94,6 +94,7 @@ async function worker(){
    }
   }
   else if(action==='create-before-send-kill'){onJournalSave=p=>{assert.equal(JSON.parse(fs.readFileSync(p)).state,'create-unknown');process.kill(process.pid,'SIGKILL')};result=await native.upload(input)}
+  else if(action==='retry-pause'){const hook=p=>{if(JSON.parse(fs.readFileSync(p)).retryAt)native.close();else onJournalSave=hook};onJournalSave=hook;result=await native.upload(input)}
   else if(action==='list')result=await native.list(input)
   else if(action==='list-drafts')result=await native.list({...input,recoverDrafts:true})
   else if(action==='consume')result=await native.consume(input)

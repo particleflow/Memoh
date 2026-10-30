@@ -53,8 +53,6 @@ def public_url(value, field):
     if re.search(r'/\.{1,2}(/|$)', raw_path) or '//' in raw_path or not re.fullmatch(r'(?:/[A-Za-z0-9_.~-]+)*/?', raw_path):
         raise ValueError(field + ' must use an unencoded path without dot segments')
     path = raw_path.rstrip('/')
-    if field != 'hapDownloadUrl' and not path.endswith('/api'):
-        raise ValueError(field + ' must end in /api')
     authority = '[' + address.compressed + ']' if isinstance(address, ipaddress.IPv6Address) else host
     if port is not None and port != {'http': 80, 'https': 443}[parsed.scheme]:
         authority += ':' + str(port)

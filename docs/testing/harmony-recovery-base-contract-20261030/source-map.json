@@ -1,0 +1,22 @@
+{
+  "baseCommit": "51ccf9222ed9e2312aa3ddfaad03084cfeaacaa3",
+  "versionUnchanged": "1.0.34/1000034",
+  "sourceEntries": 193,
+  "changedInputs": {
+    "mobile/client/mobile/client_config.py": "09cc1d9894c04cfdbb71880a3321ff2e0705162c3276701047f07ceb1cc07884",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets": "cadd10ed3b9b3bba3ead2cc7d03d773c7d08b583ca38e11d31bb3ef35bfb9ee5",
+    "mobile/client/mobile/memoh/harmony-entry.ts": "efc48270e6bfe3c835f2aff34a99471ee6f899770c4dece089d467ec9d9d3cef",
+    "mobile/client/mobile/memoh/harmony-service-url.ts": "c1514f910bf94f8bde28c1b260c2a1b5153de494e72eeef554be0bdc97f1ddc8",
+    "mobile/client/tests/stage2/harmony_resumable.cjs": "bb33c01d09a06ebd3f00b573675e2c266767406f6d215d5a4d459469cac176b9",
+    "mobile/client/tests/stage2/harmony_service_config.cjs": "f87443182acc5c6695ccea690dbecfc104e1e19e2cd8771ff3cd42f73be5a34d",
+    "mobile/client/tests/stage2/harmony_service_config_ui.py": "7bd1758679e3c9f03032dca75a17530deb7facaaea09f39f3a3cd8ee64535ceb",
+    "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeTransferNetwork.ets": "3439209123e86eaa7115f08122b84e83b6b558ee34e802d964e61efee6f2790a",
+    "mobile/client/mobile/memoh/shared-home-admission-final.json": "43b817c0d313ebf2259d38f7ba7a2d4065ae6dc72b2523907c73282efaa1bda5",
+    "mobile/client/mobile/memoh/harmony-diagnostics-api.test.ts": "54be6e4bdb6e1ebf8048eb0d6a436a5a74a1e909967bb597e46d0884bbcdbe86"
+  },
+  "unitTestChangedOutsideInventory": "mobile/client/tests/unit/service-config.test.cjs (existing allowed file)",
+  "pairedAPIClientPhoneSHA256": "1a90c5259d3a0e4fb367e01110467d72517d6c032cbe19e2ff0c275107c6d04b",
+  "pairedUpstreamHashRetained": "d6569a2412300ffc3d288a4f684f4f43e6cef7d994b03cc58ed801193b4c52ee",
+  "generated4InputsMatch": true,
+  "nativeServiceUrlMatchesExistingGenerator": true
+}

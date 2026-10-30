@@ -1,0 +1,10 @@
+
+> @memohai/web@0.22.0 typecheck /workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web
+> vue-tsc --noEmit -p tsconfig.app.json
+
+src/lib/harmony-diagnostics-api.test.ts(491,25): error TS2769: No overload matches this call.
+  The last overload gave the following error.
+    Argument of type 'unknown' is not assignable to parameter of type 'ArrayBuffer | ArrayLike<number>'.
+/workspace/harmony-recovery-20261023/image-probe-source/mobile/client/mobile/.build/memoh-web/checkout/apps/web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @memohai/web@0.22.0 typecheck: `vue-tsc --noEmit -p tsconfig.app.json`
+Exit status 2

@@ -3,8 +3,10 @@ const root=path.resolve(__dirname,'../..'),ts=require(process.env.HARMONY_TEST_T
 function load(file,imports={}){const m={exports:{}};vm.runInNewContext(ts.transpileModule(fs.readFileSync(path.join(root,file),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText,{module:m,exports:m.exports,require:n=>{assert.ok(n in imports,n);return imports[n]},URL,Error,JSON,Number,String,Array,Map,Set,Promise,console});return m.exports}
 const validator=load('mobile/memoh/harmony-service-url.ts'),{normalizeServiceUrl:normal}=validator
 let checks=0;function check(f){f();checks++}
-for(const value of ['','/api','http://localhost/api','http://127.0.0.1/api','http://10.0.0.2/api','http://[::1]/api','http://[fd00::1]/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/api#x','https://alpha.example/foo/../api','https://alpha.example/%61pi','https://alpha.example//api','https://alpha.example/','ftp://alpha.example/api','https://0x7f000001/api','https://alpha.example./api'])check(()=>assert.throws(()=>normal(value)))
+for(const value of ['','/api','http://localhost/api','http://127.0.0.1/api','http://10.0.0.2/api','http://[::1]/api','http://[fd00::1]/api','https://user:pass@alpha.example/api','https://alpha.example/api?token=x','https://alpha.example/api#x','https://alpha.example/foo/../api','https://alpha.example/%61pi','https://alpha.example//api','ftp://alpha.example/api','https://0x7f000001/api','https://alpha.example./api'])check(()=>assert.throws(()=>normal(value)))
 check(()=>assert.equal(normal('http://alpha.example:18000/api/'),'http://alpha.example:18000/api'))
+check(()=>assert.equal(normal('https://alpha.example/'),'https://alpha.example'))
+check(()=>assert.equal(normal('https://alpha.example/service/v1'),'https://alpha.example/service/v1'))
 check(()=>assert.equal(normal('https://[2606:4700::1111]/api'),'https://[2606:4700::1111]/api'))
 check(()=>assert.equal(normal('https://download.example/releases',false),'https://download.example/releases'))
 check(()=>assert.equal(normal('https://download.example/app-1.0.8.hap',false),'https://download.example/app-1.0.8.hap'))

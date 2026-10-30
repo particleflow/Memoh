@@ -1,0 +1,21 @@
+{
+  "library_file_id": "libfile_34f4bd2b7acc8191b0bb1fa7d506eb4f",
+  "consumedInitialArchiveBytes": 66548,
+  "consumedInitialArchiveSHA256": "ff0f181ea3f1d7d6c5ab8cf38f0f1a7cbb25700b63ef7e0942fa80c1fb032c4d",
+  "archiveCRCValid": true,
+  "matches": [
+    {
+      "path": "mobile/client/mobile/memoh/harmony-service-url.ts",
+      "auditCommit": "fcc39b31b1db11e7a9d7396e34c94d5b3301a778",
+      "sameAtParent51cc": true,
+      "sha256": "3016ff1f7abb945a3c3a18a2b3ab0de6a12e062369dd5f18f679c98f6c4c71db"
+    },
+    {
+      "path": "mobile/client/mobile/harmony/app/entry/src/main/ets/common/NativeResumableUpload.ets",
+      "auditCommit": "fcc39b31b1db11e7a9d7396e34c94d5b3301a778",
+      "sameAtParent51cc": true,
+      "sha256": "198ee1d16c78effb3bdcf1d1df653e565cc71911a4cb0ee620b62701d8d5e6db"
+    }
+  ],
+  "updatedArchiveNotRequired": "HC-03/HC-05 inputs unchanged per subsequent owner handoff; initial verified copy reused"
+}

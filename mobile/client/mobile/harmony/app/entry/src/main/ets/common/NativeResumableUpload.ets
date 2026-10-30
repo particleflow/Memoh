@@ -34,11 +34,11 @@ interface UploadStagingOffset { offset: number; }
 class Journal {
   version: number = 1; handle: string = ''; owner: string = ''; bot: string = ''; scope: string = '';
   name: string = ''; type: string = ''; size: number = 0; hash: string = ''; uploadId: string = '';
-  offset: number = 0; expires: string = ''; state: string = 'staged'; resumable: boolean = false; completePending: boolean = false;
+  offset: number = 0; expires: string = ''; retryAt?: number; retryDelay?: number; state: string = 'staged'; resumable: boolean = false; completePending: boolean = false;
 }
 class Running {
   apiOrigin: string = MEMOH_ORIGIN; epoch: number = 0; cancelled: boolean = false; staged: Journal[] = []; input: UploadScope; session: rcp.Session; journal?: Journal;
-  phase: string = 'prepare'; accepted: boolean = false;
+  phase: string = 'prepare'; accepted: boolean = false; retryWake?: () => void;
   failure?: StageError;
   copying: boolean = false; copyBusy: boolean = false; copyCommitted: boolean = false; copyOffset: number = 0; copyFile?: fs.File; ended: boolean = false;
   network: NativeTransferNetwork;
@@ -95,7 +95,7 @@ export class NativeResumableUpload {
   }
   private end(run: Running): void {
     if (run.ended) { return; }
-    run.ended = true;
+    run.ended = true; run.retryWake?.();
     if (run.copyFile) { fs.closeSync(run.copyFile); run.copyFile = undefined; }
     if (run.copying && !run.copyCommitted && run.journal) { this.remove(run.journal); }
     run.session.close();
@@ -131,7 +131,8 @@ export class NativeResumableUpload {
     const j = JSON.parse(fs.readTextSync(path)) as Journal;
     if (j.version !== 1 || j.handle !== handle || !/^[a-f0-9]{64}$/.test(j.hash) || !/^[a-f0-9]{64}$/.test(j.owner) ||
       !Number.isSafeInteger(j.size) || j.size <= 0 || !Number.isSafeInteger(j.offset) || j.offset < 0 || j.offset > j.size ||
-      (j.uploadId !== '' && !/^[a-f0-9-]{36}$/.test(j.uploadId))) { throw new Error('UPLOAD_JOURNAL_INVALID'); }
+      (j.uploadId !== '' && !/^[a-f0-9-]{36}$/.test(j.uploadId)) ||
+      [j.retryAt, j.retryDelay].some((value: number | undefined): boolean => value !== undefined && (!Number.isSafeInteger(value) || value < 0))) { throw new Error('UPLOAD_JOURNAL_INVALID'); }
     return j;
   }
   private info(j: Journal): UploadLocal { return { handle: j.handle, name: j.name, type: j.type, size: j.size, hash: j.hash, resumable: j.resumable, scope: j.scope }; }
@@ -349,16 +350,74 @@ export class NativeResumableUpload {
       !Number.isSafeInteger(r.offset) || r.offset < 0 || r.offset > j.size || !Number.isFinite(Date.parse(r.expires_at)) ||
       typeof r.mime !== 'string' || !r.mime || !['uploading', 'ready', 'canceled'].includes(r.state) ||
       (r.state === 'ready' ? r.content_hash !== j.hash || r.offset !== j.size : !!r.content_hash)) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
+    const previous = j.offset;
     this.check(run); j.uploadId = r.id; j.offset = r.offset; j.expires = r.expires_at; j.state = r.state; j.type = r.mime;
+    if (r.offset > previous) { j.retryDelay = undefined; }
+    if ((j.retryAt ?? 0) <= Date.now() || r.state === 'ready') { j.retryAt = undefined; }
     if (r.state === 'ready') { j.completePending = false; }
     this.save(j); this.progress(run.input.operation, j.offset, j.size); return r;
   }
+  private recoverableNetwork(error: Error): boolean {
+    // Same official RCP transient codes already admitted by NativeTransferNetwork.
+    // Certificate, permission, receipt and local integrity errors are excluded.
+    return [1007900007, 1007900028, 1007900052, 1007900055, 1007900056].includes((error as UploadSDKError).code);
+  }
+  private deferRetry(run: Running, reply?: Reply): void {
+    this.check(run); const j = run.journal;
+    if (!j?.uploadId || !Number.isFinite(Date.parse(j.expires))) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
+    const now = Date.now(), expires = Date.parse(j.expires), remaining = Math.max(0, expires - now);
+    // Retain the existing initial backoff, grow only while no confirmed progress
+    // occurs, and bound lifetime by the actual receipt rather than a fault count.
+    const delay = Math.min(j.retryDelay === undefined ? 250 : j.retryDelay * 2, remaining);
+    let due = now + delay;
+    if (reply) {
+      const names = Object.keys(reply.headers).filter((key: string): boolean => key.toLowerCase() === 'retry-after');
+      const value = names.length === 1 ? reply.headers[names[0]] : undefined;
+      if (typeof value === 'string') {
+        if (/^[0-9]+$/.test(value)) {
+          const seconds = Number(value);
+          // A cooldown beyond receipt lifetime stops at expiry, never retries early.
+          due = Math.max(due, seconds >= remaining / 1000 ? expires : now + seconds * 1000);
+        } else {
+          const date = Date.parse(value);
+          if (Number.isFinite(date)) { due = Math.max(due, date); }
+        }
+      }
+    }
+    j.retryDelay = delay; j.retryAt = Math.min(expires, Math.max(j.retryAt ?? 0, due)); this.save(j);
+  }
+  private async waitRetry(run: Running): Promise<void> {
+    const j = run.journal;
+    while (j?.uploadId) {
+      this.check(run);
+      const now = Date.now(), expires = Date.parse(j.expires);
+      if (!Number.isFinite(expires)) { throw new Error('UPLOAD_RECEIPT_INVALID'); }
+      if (now >= expires) { throw new Error('UPLOAD_RECEIPT_UNAVAILABLE'); }
+      const due = Math.min(j.retryAt ?? now, expires);
+      if (due <= now) { return; }
+      await new Promise<void>((resolve: () => void): void => {
+        // Timer platform bound only; neither the receipt deadline nor server
+        // Retry-After is shortened when a wait exceeds one native timer.
+        const timer = setTimeout((): void => { run.retryWake = undefined; resolve(); }, Math.min(due - now, 2147483647));
+        run.retryWake = (): void => { clearTimeout(timer); run.retryWake = undefined; resolve(); };
+      });
+    }
+  }
   private async retryCall(run: Running, path: string, method: rcp.HttpMethod = 'GET', body?: rcp.RequestContent,
     headers: rcp.RequestHeaders = {}): Promise<Reply> {
-    for (let i = 0; ; i++) {
-      const reply = await this.call(run, path, method, body, headers);
-      if (reply.status !== 429 || i === 3) { return reply; }
-      await new Promise<void>((resolve: () => void) => setTimeout(resolve, 250 * (2 ** i))); this.check(run);
+    while (true) {
+      await this.waitRetry(run); this.check(run);
+      let reply: Reply;
+      try { reply = await this.call(run, path, method, body, headers); }
+      catch (error) {
+        this.check(run);
+        if (method !== 'GET' || !this.recoverableNetwork(error as Error)) { throw error as Error; }
+        this.deferRetry(run); continue;
+      }
+      // An uncertain write is never resent here. Its original receipt must be
+      // read back before another PATCH; Create/complete remain single-send.
+      if (method !== 'GET' || (reply.status !== 429 && (reply.status < 500 || reply.status > 599))) { return reply; }
+      this.deferRetry(run, reply);
     }
   }
   async upload(input: UploadScope): Promise<MediaReply> {
@@ -417,10 +476,11 @@ export class NativeResumableUpload {
       if (j.completePending && j.state !== 'ready') { throw new Error('UPLOAD_COMPLETE_UNCERTAIN'); }
       if (j.state === 'canceled') { throw new Error('UPLOAD_CANCELLED'); }
       const file = fs.openSync(this.path(j.handle, '.original'), fs.OpenMode.READ_ONLY | fs.OpenMode.NOFOLLOW);
-      const buffer = new ArrayBuffer(Math.min(262144, limit.chunk_max_bytes ?? 262144)); let recoveries = 0;
+      const buffer = new ArrayBuffer(Math.min(262144, limit.chunk_max_bytes ?? 262144));
       try {
         while (j.offset < j.size) {
-          this.check(run); const start = j.offset, length = Math.min(buffer.byteLength, j.size - start);
+          this.check(run); if (j.state === 'canceled') { throw new Error('UPLOAD_CANCELLED'); }
+          const start = j.offset, length = Math.min(buffer.byteLength, j.size - start);
           fs.lseek(file.fd, start, fs.WhenceType.SEEK_SET);
           const n = await fs.read(file.fd, buffer, { length }); this.check(run);
           if (n !== length) { throw new Error('UPLOAD_SHORT_READ'); }
@@ -430,12 +490,14 @@ export class NativeResumableUpload {
           try { reply = await this.retryCall(run, base + '/uploads/' + j.uploadId, 'PATCH', bytes,
             { 'content-type': 'application/octet-stream', 'Upload-Offset': String(start), 'Upload-Length': String(n), 'Upload-SHA256': checksum }); }
           catch (error) {
-            this.check(run); if (++recoveries > 3) { throw error as Error; }
+            this.check(run); this.deferRetry(run);
             reply = await this.retryCall(run, base + '/uploads/' + j.uploadId);
-            this.receipt(run, j, reply); continue;
+            this.receipt(run, j, reply);
+            if (j.offset === start && !this.recoverableNetwork(error as Error)) { throw error as Error; }
+            continue;
           }
-          if (reply.status === 409 || reply.status >= 500) {
-            if (++recoveries > 3) { throw new Error('UPLOAD_RETRY_LIMIT'); }
+          if (reply.status === 409 || reply.status === 429 || (reply.status >= 500 && reply.status <= 599)) {
+            this.deferRetry(run, reply);
             this.receipt(run, j, await this.retryCall(run, base + '/uploads/' + j.uploadId)); continue;
           }
           this.receipt(run, j, reply);
@@ -476,7 +538,7 @@ export class NativeResumableUpload {
   abort(operation: string): void {
     const run = this.running;
     if (!run || run.input.operation !== operation) { return; }
-    run.cancelled = true;
+    run.cancelled = true; run.retryWake?.();
     if (run.journal?.hash) { run.journal.state = 'canceled'; this.save(run.journal); }
     run.session.cancel();
     const preview = run.journal ? this.previews.get(run.journal.handle) : undefined;
@@ -526,7 +588,7 @@ export class NativeResumableUpload {
     if (this.running && !this.running.accepted) { this.close(); }
   }
   close(): void {
-    this.epoch++; const run = this.running; run?.session.cancel();
+    this.epoch++; const run = this.running; run?.retryWake?.(); run?.session.cancel();
     // Between bridge chunks there is no pending await to run a finally block.
     // During I/O, its owner keeps the FD until the epoch check unwinds it.
     if (run?.copying && !run.copyBusy) { this.end(run); }

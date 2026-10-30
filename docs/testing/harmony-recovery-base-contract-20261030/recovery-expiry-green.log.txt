@@ -1,0 +1,14 @@
+{
+  "cases": [
+    {
+      "name": "retry-after-beyond-expiry",
+      "pendingPreserved": true,
+      "error": "UPLOAD_RECEIPT_UNAVAILABLE",
+      "creates": 1,
+      "completes": 0,
+      "patches": 1
+    }
+  ],
+  "device": false,
+  "TLS": false
+}

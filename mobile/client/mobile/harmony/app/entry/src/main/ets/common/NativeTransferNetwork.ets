@@ -130,7 +130,7 @@ export class NativeTransferNetwork {
     if (/%(?:2f|5c|2e|25)/i.test(target.split(/[?#]/)[0])) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
     const parsed = url.URL.parseURL(target);
     const base = url.URL.parseURL(this.base);
-    if (parsed.origin !== base.origin || !parsed.pathname.startsWith(base.pathname + '/') ||
+    if (parsed.origin !== base.origin || !parsed.pathname.startsWith(base.pathname.replace(/\/+$/, '') + '/') ||
       parsed.username || parsed.password || parsed.hash || /[\\\u0000-\u0020]/.test(target) ||
       /%(?:2f|5c|2e|25)/i.test(parsed.pathname) || parsed.pathname.includes('//')) { throw new Error('NETWORK_POLICY_AUTHORITY'); }
     const build = (): rcp.Request => this.dispatch(factory, target, method);

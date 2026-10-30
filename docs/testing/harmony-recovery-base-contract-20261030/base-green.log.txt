@@ -1,0 +1,162 @@
+{
+  "sharedVectors": [
+    {
+      "name": "https-root",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "https-api-prefix",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "https-nested-prefix",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "existing-trailing-slash",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "explicit-port",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "configured-private-ipv4",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "configured-private-name",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "configured-ipv6",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "configured-ula-ipv6",
+      "accepted": true,
+      "sharedAccepted": true
+    },
+    {
+      "name": "http",
+      "accepted": true,
+      "sharedAccepted": false
+    },
+    {
+      "name": "relative",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "empty-host",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "userinfo",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "query",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "empty-query",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "fragment",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "empty-fragment",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "dot-parent",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "dot-current",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "encoded-parent",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "encoded-separator",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "double-separator",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "double-root-separator",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "backslash",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "leading-space",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "path-space",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "zero-port",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "overflow-port",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "empty-port",
+      "accepted": false,
+      "sharedAccepted": false
+    },
+    {
+      "name": "ipv6-zone",
+      "accepted": false,
+      "sharedAccepted": false
+    }
+  ],
+  "rootAndPrefixes": 8,
+  "invalidRejected": 10,
+  "pythonParity": true,
+  "rootLoginAndIdentityPreserved": true,
+  "nativeResourceRoot": true,
+  "existingWebGuardRoot": true,
+  "noAlternateAuthority": true,
+  "device": false
+}

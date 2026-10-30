@@ -481,3 +481,18 @@ it('request tag: JS strict validation accepts a legal optional tag and rejects w
   }
   expect(sends).toHaveLength(before); expect(writes).toBe(0)
 })
+
+it.each(['https://example.test', 'https://example.test/service/v1'])('API base: existing SDK lease uses the exact root/prefix %s without adding api', async base => {
+  setupApiClient({ baseUrl: base, fetch: fetcher })
+  const lease = await openDiagnosticLease(bot)
+  const data = new TextEncoder().encode('synthetic diagnostic'), path = '/data/.memoh/diagnostic.json'
+  objects.set(path, data.buffer)
+  const result = await getBotsByBotIdContainerFsDownload({ path: { bot_id: bot }, query: { path }, ...lease.sdkOptions(), parseAs: 'arrayBuffer', throwOnError: true })
+  if (!(result.data instanceof ArrayBuffer)) throw new Error('Expected the requested SDK ArrayBuffer')
+  expect(new Uint8Array(result.data)).toEqual(data)
+  expect(sends.map(request => request.url.split('?')[0])).toEqual([base + '/users/me', base + '/bots/' + bot + '/container/fs/download'])
+  expect(sends.every(request => request.headers.get('authorization') === 'Bearer synthetic-a')).toBe(true)
+  const before = sends.length
+  await expect(lease.sdkOptions().fetch(new Request('https://other.test/bots/' + bot + '/container/fs/download', { headers: { Authorization: 'Bearer synthetic-a' } }))).rejects.toThrow('DIAGNOSTIC_DISPATCH_DENIED')
+  expect(sends).toHaveLength(before)
+})
