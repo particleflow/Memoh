@@ -81,6 +81,7 @@ func TestContactWorkspaceInheritanceBoundaries(t *testing.T) {
 				wantRequest = planSourceMount
 			case "stored remote":
 				f.session.Metadata["workspace_target_id"] = planSourceMount
+				wantTarget, wantRequest = planSourceMount, planSourceMount
 			case "missing selection":
 				f.session.Metadata = nil
 			case "malformed selection":

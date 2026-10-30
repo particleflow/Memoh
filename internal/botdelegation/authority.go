@@ -70,22 +70,45 @@ type Authority struct {
 // Source authorizes an owned source conversation before listing its handoffs.
 // Each returned record still requires both Bots' current permissions.
 func (a *Authority) Source(ctx context.Context, user, bot, session string) (Identity, error) {
+	b, path, err := a.sourceIdentity(ctx, user, bot, session)
+	if err != nil {
+		return Identity{}, err
+	}
+	b.SourceSelection, err = a.selection(ctx, b, path)
+	return b, err
+}
+
+// ContactSource validates the owned root and parses only its recorded target.
+// Ordinary chat uses the workspace resolver's registration/capability contract,
+// not the stricter cross-Bot device-profile contract or an inferred primary.
+func (a *Authority) ContactSource(ctx context.Context, user, bot, session string) (Identity, error) {
+	b, path, err := a.sourceIdentity(ctx, user, bot, session)
+	if err != nil {
+		return Identity{}, err
+	}
+	if len(path) != 1 || path[0].WorkdirID != "" {
+		return Identity{}, ErrDenied
+	}
+	b.SourceSelection, err = storedSelection(path[0].Metadata)
+	return b, err
+}
+
+func (a *Authority) sourceIdentity(ctx context.Context, user, bot, session string) (Identity, []thread.Thread, error) {
 	b := Identity{UserID: user, SourceBotID: bot, SourceSessionID: session}
 	path, err := a.sourcePath(ctx, b)
 	if err != nil || a.Permissions == nil || a.Permissions.ValidateSession(ctx, user) != nil {
-		return Identity{}, ErrDenied
+		return Identity{}, nil, ErrDenied
 	}
 	b.TeamID, b.SourceRootID = path[0].TeamID, path[len(path)-1].ID
 	team, err := a.Permissions.BotTeam(ctx, bot)
 	if err != nil || team != b.TeamID {
-		return Identity{}, ErrDenied
+		return Identity{}, nil, ErrDenied
 	}
 	ok, err := a.Permissions.Allowed(ctx, user, bot, bots.PermissionChat)
 	if err != nil || !ok {
-		return Identity{}, ErrDenied
+		return Identity{}, nil, ErrDenied
 	}
-	b.SourceSelection, err = a.selection(ctx, b, path)
-	return b, err
+	return b, path, nil
 }
 
 // Bind checks the caller's complete owned source ancestry and both Bot grants.
