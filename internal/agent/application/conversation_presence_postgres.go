@@ -46,12 +46,17 @@ func (s *postgresPresenceClaims) transaction(ctx context.Context, ticket convers
 	if !ok || !tx.SupportsTransactions() || s.authorize == nil || ticket.Scope.BotID != s.handle.BotID || ticket.Scope.SessionID != s.handle.SessionID || ticket.Scope.ActorID != s.actor || ticket.Generation != s.handle.Generation || ticket.Fence != s.handle.FencingToken || ticket.RunID != s.handle.RunID {
 		return conversationpresence.ErrInvalidContract
 	}
-	allowed, err := s.authorize(ctx)
-	if err != nil {
-		return err
-	}
-	if !allowed {
-		return runtimefence.ErrStale
+	// Closing withdraws feedback under the existing host fence. Requiring a
+	// live chat grant here would prevent cleanup precisely when it is revoked.
+	// Preparation, claiming and publication still require permission twice.
+	if !terminalOK {
+		allowed, err := s.authorize(ctx)
+		if err != nil {
+			return err
+		}
+		if !allowed {
+			return runtimefence.ErrStale
+		}
 	}
 	ctx = runtimefence.WithContext(ctx, runtimefence.Fence{BotID: s.handle.BotID, SessionID: s.handle.SessionID, Token: s.handle.FencingToken})
 	runID, err := db.ParseUUID(s.handle.RunID)
@@ -78,12 +83,14 @@ func (s *postgresPresenceClaims) transaction(ctx context.Context, ticket convers
 		if !terminalOK && (run.State != "running" || run.AbortRequestedAt.Valid || run.OwnerID.String != s.handle.OwnerID) {
 			return runtimefence.ErrStale
 		}
-		allowed, err := s.authorize(ctx)
-		if err != nil {
-			return err
-		}
-		if !allowed {
-			return runtimefence.ErrStale
+		if !terminalOK {
+			allowed, err := s.authorize(ctx)
+			if err != nil {
+				return err
+			}
+			if !allowed {
+				return runtimefence.ErrStale
+			}
 		}
 		p, ok := q.(presenceSQL)
 		if !ok {

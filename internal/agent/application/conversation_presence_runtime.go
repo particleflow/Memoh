@@ -261,12 +261,8 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 				}
 				// Prefer already available formal output over auxiliary completion.
 				// A random select tie must not flash a stale acknowledgement.
-				select {
-				case event, open := <-main:
-					if !open || !handleMain(event) {
-						return
-					}
-				default:
+				if !forwardReadyPresenceMain(main, handleMain) {
+					return
 				}
 				if closed {
 					continue
@@ -297,5 +293,20 @@ func presenceSupersededBy(event native.StreamEvent) bool {
 		return true
 	default:
 		return false
+	}
+}
+
+// forwardReadyPresenceMain forwards already ready main output before a pending
+// acknowledgement, including output preceded by non-substantive events.
+func forwardReadyPresenceMain(main <-chan native.StreamEvent, handle func(native.StreamEvent) bool) bool {
+	for {
+		select {
+		case event, open := <-main:
+			if !open || !handle(event) {
+				return false
+			}
+		default:
+			return true
+		}
 	}
 }

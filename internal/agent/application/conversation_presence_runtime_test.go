@@ -149,3 +149,20 @@ func TestConversationPresenceRuntimeSameModelParallelAndFormalFirst(t *testing.T
 		})
 	}
 }
+
+func TestConversationPresencePrioritizesFormalBehindReadyPrelude(t *testing.T) {
+	// Both events are already available when auxiliary completion is selected.
+	main := make(chan native.StreamEvent, 2)
+	main <- native.StreamEvent{Type: native.EventAgentStart}
+	main <- native.StreamEvent{Type: native.EventTextDelta, Delta: "Formal is already ready"}
+	var closed bool
+	if !forwardReadyPresenceMain(main, func(event native.StreamEvent) bool {
+		closed = closed || presenceSupersededBy(event)
+		return true
+	}) {
+		t.Fatal("live main stream ended")
+	}
+	if !closed {
+		t.Fatal("pending acknowledgement could precede formal text behind a ready prelude")
+	}
+}

@@ -167,3 +167,61 @@ func TestConversationPresencePostgresAbortRejectsPublication(t *testing.T) {
 		t.Fatalf("publication survived abort: %v %v", ok, e)
 	}
 }
+
+func TestConversationPresencePostgresRevocationStillClosesFeedback(t *testing.T) {
+	for _, prepared := range []bool{false, true} {
+		name := "before_prepare"
+		if prepared {
+			name = "after_prepare"
+		}
+		t.Run(name, func(t *testing.T) {
+			claims, ctx, _ := presencePostgresFixture(t)
+			ticket := claims.baseTicket()
+			if prepared {
+				var err error
+				ticket, _, _, err = claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if prepared {
+				if ok, err := claims.Claim(ctx, ticket); err != nil || !ok {
+					t.Fatalf("initial claim: %v %v", ok, err)
+				}
+			}
+			claims.authorize = func(context.Context) (bool, error) { return false, nil }
+			if prepared {
+				piece := conversationpresence.Piece{Kind: "conversation_ack", Text: "Must be suppressed", Phase: conversationpresence.Thinking, InputSource: claims.source}
+				if ok, err := claims.Publish(ctx, ticket, piece); ok || !errors.Is(err, runtimefence.ErrStale) {
+					t.Fatalf("revoked publication: %v %v", ok, err)
+				}
+			}
+			foreignOwner := *claims
+			foreignOwner.handle.OwnerID = "foreign-owner"
+			if err := foreignOwner.Close(ctx, ticket, "wrong_owner"); !errors.Is(err, runtimefence.ErrStale) {
+				t.Fatalf("cleanup bypassed owner: %v", err)
+			}
+			staleFence := *claims
+			staleFence.handle.FencingToken++
+			staleTicket := ticket
+			staleTicket.Fence++
+			if err := staleFence.Close(ctx, staleTicket, "wrong_fence"); !errors.Is(err, runtimefence.ErrStale) {
+				t.Fatalf("cleanup bypassed fence: %v", err)
+			}
+			if err := claims.Close(ctx, ticket, "permission_revoked"); err != nil {
+				t.Fatalf("trusted fenced cleanup must survive chat revocation: %v", err)
+			}
+			// A later regrant must not resurrect the invalidated input.
+			claims.authorize = func(context.Context) (bool, error) { return true, nil }
+			if prepared {
+				if ok, err := claims.Claim(ctx, ticket); err != nil || ok {
+					t.Fatalf("closed input reclaimed: %v %v", ok, err)
+				}
+			} else {
+				if _, _, inserted, err := claims.prepare(ctx, conversationpresence.ContinuityPolicy{}, false); err != nil || inserted {
+					t.Fatalf("close-before-prepare lost: %v %v", inserted, err)
+				}
+			}
+		})
+	}
+}
