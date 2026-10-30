@@ -8,7 +8,7 @@
  
  ## C01 — Windows helper calls unavailable os.setxattr
  
-@@ -279,6 +280,83 @@
+@@ -279,6 +280,90 @@
    failures and unknowns; no message fabrication, history reset, expert replay or
    unchanged release rebuild is required to document this issue.
  
@@ -77,8 +77,15 @@
 +  all terminal, space64 cleared. QueuePOST/item mapping, internal receipt and
 +  billing were not exercised/inspected. No HAP acceptance follows from Web.
 +  [Original Bot acceptance ledger](bot-continuity-acceptance.md) retains exact IDs,
-+  parent provenance, prior046 directory coverage, and one proposed incoming-task
-+  directory read using this existing completed sample. Do not rerun the sample.
++  parent provenance and prior046 directory coverage. The incoming-task read below
++  has also passed. Do not rerun either sample.
++- **Incoming directory follow-up PASS:** Parent reports writer01a18cd9: receiver
++  791af2c4-2d89-4c57-b863-5d5ff53ff9f7 list200,4 items/no next cursor, df60 exactly
++  once/completed; detail200 and original session20942…/run d822…/turn02c69… agree.
++  Pure GET, zero model/DB/write; space67 cleaned. This is not phone or restricted
++  account acceptance. Full transcription and exact remaining prerequisites are in
++  the acceptance ledger. Only one saved-artifact metadata extraction is proposed
++  next; do not manufacture tasks/accounts or repeat the completed field sample.
 +- **Original evidence and next condition:** [Consumer contract, source, ten checks
 +  and exact self-check/one-sample steps](parallel-capture-3f361/ego/README.md).
 +  Field evidence is parent-transcribed from writer-local probe-result.json,

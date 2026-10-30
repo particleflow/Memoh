@@ -1,6 +1,8 @@
 # Ego 2.1.0 collector: observed envelopes and bounded reads
 
-**Completed field result:** Parent reports b965 PASS: exact B completed → substantive reply persisted → same expert still running (seq2805/2808/2810), then expert completed and natural result persisted in original C without another reply ID after refresh. A/B each once; WS path; all business terminal and space64 cleaned. Do not repeat this sample or its preflight. See [the acceptance ledger and single remaining incoming-directory step](../../bot-continuity-acceptance.md). The plan/repair notes below are preserved as the consumed procedure.
+**Incoming directory also passed:** Receiver791af2c4… list/detail200, df60… exactly once, original session/run/turn match. No repeat requested. Remaining sample prerequisites and one saved-artifact-only extraction are in [the acceptance ledger](../../bot-continuity-acceptance.md).
+
+**Completed field result:** Parent reports b965 PASS: exact B completed → substantive reply persisted → same expert still running (seq2805/2808/2810), then expert completed and natural result persisted in original C without another reply ID after refresh. A/B each once; WS path; all business terminal and space64 cleaned. Do not repeat this sample or its preflight. See [the acceptance ledger: incoming-directory PASS and remaining evidence](../../bot-continuity-acceptance.md). The plan/repair notes below are preserved as the consumed procedure.
 
 **Current repair:** The parent supplied the actual field-used a766 Node-host wait; capture.js now uses that pattern for pacing, with seven new seam checks passed. No further generic timer contract is missing. Read [the executable host-wait handoff](host-wait-handoff.md) before continuing the one-sample plan. The corrected collector has now passed the single real Web sample recorded above; this does not establish HAP behavior.
 

@@ -1,6 +1,6 @@
 # One bounded text delegation: release9270 source review and writer handoff
 
-**Completed field result:** Parent reports b965 PASS: exact B completed → substantive reply persisted → same expert still running (seq2805/2808/2810), then expert completed and natural result persisted in original C without another reply ID after refresh. A/B each once; WS path; all business terminal and space64 cleaned. Do not repeat this sample or its preflight. See [the acceptance ledger and single remaining incoming-directory step](../../bot-continuity-acceptance.md). The plan/repair notes below are preserved as the consumed procedure.
+**Completed field result:** Parent reports b965 PASS: exact B completed → substantive reply persisted → same expert still running (seq2805/2808/2810), then expert completed and natural result persisted in original C without another reply ID after refresh. A/B each once; WS path; all business terminal and space64 cleaned. Do not repeat this sample or its preflight. See [the acceptance ledger: incoming-directory PASS and remaining evidence](../../bot-continuity-acceptance.md). The plan/repair notes below are preserved as the consumed procedure.
 
 **Current repair:**890's Page-owned pacing dependency is corrected using the a766 field-used Node-host wait. Read [host-wait-handoff.md](host-wait-handoff.md), then use the corrected current capture.js for this plan. The single sample has now completed and passed; retain this consumed plan without scheduling another run.
 

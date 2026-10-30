@@ -46,5 +46,11 @@
     "productionLabel": "cef",
     "fullProductionSHA": "not supplied",
     "sourceComparisonsScope": "prior exact3f361/9270 reads only; no claim of current cef source comparison"
+  },
+  "latest_incoming_directory_acceptance": {
+    "record": "incoming-directory-result.json",
+    "provenance": "parent reports writer01a18cd9; cloud did not read F: file",
+    "version": "not supplied",
+    "scope": "one existing incoming delegation, original user, GET only; not restricted-account or phone evidence"
   }
 }

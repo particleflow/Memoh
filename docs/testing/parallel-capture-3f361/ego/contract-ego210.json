@@ -120,5 +120,12 @@
     "businessAllTerminal": true,
     "repeatRequested": false,
     "remaining": "queue POST/item mapping, internal receipt/billing and other ledger coverage; no HAP proof"
+  },
+  "incomingDirectoryAcceptance": {
+    "record": "incoming-directory-result.json",
+    "status": "PASS",
+    "source": "parent-reported writer01a18cd9",
+    "repeatRequested": false,
+    "phoneAcceptance": false
   }
 }

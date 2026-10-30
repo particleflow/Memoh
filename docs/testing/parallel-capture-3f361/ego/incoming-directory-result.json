@@ -1,0 +1,30 @@
+{
+  "status": "PASS",
+  "provenance": "Parent transcription of writer01a18cd9 outcome; cloud owner did not read local F: evidence",
+  "evidence_location": "F:/NAS-Assistant/tmp/incoming-df60-directory-20261030/OUTCOME.json",
+  "production_version": "not supplied for this read",
+  "receiving_bot_id": "791af2c4-2d89-4c57-b863-5d5ff53ff9f7",
+  "list_http_status": 200,
+  "list_limit": 100,
+  "list_item_count": 4,
+  "next_cursor_present": false,
+  "delegation_id": "df60a59d-979e-404e-b707-ca50217b10a8",
+  "matching_occurrences": 1,
+  "name": "Delegated task",
+  "state": "completed",
+  "detail_http_status": 200,
+  "list_detail_destination_agree": true,
+  "destination": {
+    "bot_id": "791af2c4-2d89-4c57-b863-5d5ff53ff9f7",
+    "session_id": "20942e37-d160-4645-8a4f-c210749ac733",
+    "run_id": "d8227e4f-d8fe-4c33-b3bc-01cb82bc83ee",
+    "turn_id": "02c69f3c-2b0a-43ce-b690-1ae1dd782c1a"
+  },
+  "requests": "GET only",
+  "model_calls": 0,
+  "database_operations": 0,
+  "business_writes": 0,
+  "cleanup": "Parent reports space67 cleaned, none in flight",
+  "phone_acceptance": false,
+  "other_three_rows": "not supplied in parent summary; do not infer their types or identities"
+}
