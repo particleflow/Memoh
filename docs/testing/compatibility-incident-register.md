@@ -339,6 +339,42 @@ field deployment and product acceptance remain separate evidence classes.
   path or verified project toolchain; do not retry the board-game executable or
   install tooling solely to disguise this documentation-only task's boundary.
 
+### C13 follow-up — recovered prepared compiler
+
+- **New evidence:** Existing project setup and prior repository evidence identify
+  `<prepared-toolchain>/bin/go` as official Go 1.25.7. Sourcing
+  `<prepared-environment>/env.sh` activates that compiler and writable caches.
+  No installation or global PATH mutation was necessary. A direct attempt with
+  the real compiler first hit read-only default GOCACHE; prepared cache variables
+  resolved it. The original board-game failure remains historical evidence.
+- **Verified result:** Actual gofmt, compilation and race tests now execute.
+  Conversation-presence integration results and exact commands are recorded in
+  [the research report, section 11](conversation-presence-20261030/README.md)
+  and `RUNTIME-CHECK.json`. Do not continue reporting missing Go as a blocker.
+
+## C14 — constrain the durable provider and transport in a local model fixture
+
+- **Signature:** The supplementary native WS fixture changed its fake provider
+  address, but replaced the application store with real PostgreSQL. Provider
+  resolution therefore read a different persistent row with empty config. Two
+  initial runs showed agent_start and retries, zero requests at the intended
+  httptest server, and no model result.
+- **Cause / exposure boundary:** The SDK default for an absent base URL is
+  `https://api.openai.com/v1`; the persistent fixture had no API key. Upstream
+  attempts may have left the process. External receipt/response was not captured
+  and is **unknown**; zero external traffic is not established. No production
+  configuration or production credentials were used. This was a test isolation
+  error, not an approved real inference experiment or a bypass of the rejected
+  production `/providers` read.
+- **Handling:** Stopped the original path. The durable fixture provider now also
+  points to httptest. A test-only transport accepts only that exact local host,
+  rejecting all other hosts before network I/O. Final success requires a zero
+  blocked-host count and captures same-model main/auxiliary request bodies.
+- **Prevention:** When substituting a real application store into a fake-model
+  harness, inventory every selection/address/credential owner. Restrict the
+  actual transport independently; modifying a fake service alone is insufficient.
+  Preserve failed and corrected run evidence separately in the task report.
+
 ## Applying these lessons to the existing handoffs
 
 Use the version-specific handoff for actual commands, images and compatibility

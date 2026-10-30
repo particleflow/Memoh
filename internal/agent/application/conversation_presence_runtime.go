@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptrace"
+	"strings"
 	"sync"
 
 	agentevent "github.com/felinics/memoh/internal/agent/event"
@@ -155,6 +156,9 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 		defer close(done)
 		ticket, facts, inserted, err := claims.prepare(sideCtx, runtime.options.Policy.Continuity, req.SourceReplyToMessageID != "")
 		if err != nil || !inserted {
+			if s.logger != nil {
+				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "prepare_skipped"), slog.Bool("store_error", err != nil))
+			}
 			return
 		}
 		identity := conversationpresence.Identity{ModelUUID: model.model.ID, ModelID: model.model.ModelID, ProviderID: model.model.ProviderID, ClientType: model.provider.ClientType, RuntimeType: "model"}
@@ -164,6 +168,9 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 		}
 		generator, choice, err := prepareConversationPresenceSDK(identity, model.model, model.sdk, verified)
 		if err != nil || generator == nil {
+			if s.logger != nil {
+				s.logger.InfoContext(ctx, "conversation_presence", slog.String("status", "capability_unavailable"), slog.String("reason", choice.Reason))
+			}
 			return
 		}
 		// The main request must already have been written to its transport. An
@@ -174,7 +181,14 @@ func (s *Service) withConversationPresence(ctx context.Context, req ChatRequest,
 			return
 		}
 		coordinator := conversationpresence.Coordinator{Claims: claims, Capacity: runtime.capacity, Generator: generator, Policy: runtime.options.Policy}
-		handle, err := coordinator.Start(sideCtx, conversationpresence.Input{Ticket: ticket, Source: source, Facts: facts, Identity: identity, Choice: choice, Phase: conversationpresence.Thinking, BotName: rc.runConfig.Bot.Name, Text: req.RawQuery, ImagePresent: len(req.Attachments) > 0})
+		imagePresent := false
+		for _, attachment := range req.Attachments {
+			if attachment.Type == "image" || strings.HasPrefix(attachment.Mime, "image/") {
+				imagePresent = true
+				break
+			}
+		}
+		handle, err := coordinator.Start(sideCtx, conversationpresence.Input{Ticket: ticket, Source: source, Facts: facts, Identity: identity, Choice: choice, Phase: conversationpresence.Thinking, BotName: rc.runConfig.Bot.Name, Text: req.RawQuery, ImagePresent: imagePresent})
 		if err != nil {
 			return
 		}

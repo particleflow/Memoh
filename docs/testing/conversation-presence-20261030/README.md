@@ -1,6 +1,6 @@
 # 冷／热沟通与快速回应：只读调研及实施建议
 
-日期：2026-10-30 UTC。首轮研究完成；后续本地实现准备见第 10 节。尚未接入主链、发布或验收。第 1—9 节的零业务代码／静态检查描述保留首轮范围，不作为第 10 节的代码验证记录。
+日期：2026-10-30 UTC。首轮研究与本地主链增量完成；阶段记录见第 10 节，最新实现、实测与未验边界见第 11 节。未部署或生产验收。第 1—9 节的零业务代码／静态检查描述保留首轮范围，不作为第 10—11 节的代码验证记录。
 
 研究范围：通过会话连续性判断何时提供同模型低思考快速反馈。已参考项目验收要求和兼容故障登记；私有验收页面与对话定位不公开。以下区分来源事实、历史阶段与项目建议。
 
@@ -176,7 +176,7 @@ TTS 必须先确定这类片段是否应读：用户开启自动语音回复时�
 
 首轮静态核验：固定 cef 来源、本地所有代码相对链接存在、37 组验收素材结构／编号、文档差分及不含业务改动。结果见 [STATIC-CHECK.json](STATIC-CHECK.json)，对应研究提交 `1e0950077a4e2ec025cbda68a5388bae15a75d6f`，源码见 [check-design.py](check-design.py)。该脚本限定首轮纯文档范围；后续含代码的分支使用第 10 节的 `check-preparation.py`，不能拿旧范围检查充当代码测试。首轮仅研究文档及既有兼容登记发生变化；现有 Go 测试未运行，不运行模型或真实 UI，静态检查不证明方案实现正确。以后发现能力／协议变化，在本报告修订日期及证据，不覆写旧兼容失败；工具／环境故障继续用既有兼容登记，不新建平行故障手册。
 
-## 10. 用户明确选择后的本地实现准备
+## 10. 历史阶段： 用户明确选择后的本地实现准备
 
 本轮唯一文件所有权：新增 `internal/conversationpresence/` 包、`internal/agent/application/conversation_presence_sdk.go` 及同名测试、当前研究目录。没有修改共享 `service.go`、`service_stream.go`、`contract.go`、handler／WS、runtime queue／ledger、input_source、前端 projection、SDK 生成文件或朗读文件。原外部推送被拒仍有效；没有 push、外部提交、部署、凭据变化或真实推理／TTS。
 
@@ -216,3 +216,39 @@ go test -race ./internal/conversationpresence ./internal/agent/application -run 
 ```
 
 这不是本轮已经执行成功的命令。类型编译、gofmt、Go 行为测试、真实应用启动／UI／截图、持久 Claims、全链 projection 和 TTS 均未完成，不能宣称已可发布。已做的无网络结构／变更范围检查记录在 `PREPARATION-CHECK.json`，不替代上述验证。
+
+## 11. 本地主链实现与实际验证（2026-10-30 后续阶段）
+
+前述“没有找到编译器／未执行 Go 测试／未持久接线”是先前阶段结果，已经被本节的新证据更新，不能作为当前结论。发现仓库已准备 `<prepared-toolchain>/bin/go`（Go 1.25.7），按既有 `env.sh` 启用可写缓存后继续；未安装全局 Go。sqlc 按仓库指定 v1.31.1 自动使用官方 Go 1.26.10，未改 go.mod。首次真实数据库测试发现错误地将运行 generation 当成后端 live_generation，已分字段存储和比较；测试记录保存修复前失败，不能以早先纯接口检查代替。
+
+### 11.1 已接入的最小路径
+
+- 原 `buildBaseRunConfig` 解析**正式请求当前选择**后保存精确 model UUID/slug、provider client type 与 SDK 配置快照；快回不再次选择模型、不查询或写回用户偏好。实际 SDK 主链原设置保持；请求级快回按用户顺序 off → low → 最低真实声明档位。缺明确 thinking mode/effort 声明时不猜模型名或默认高档。
+- 能力来自该次运行实际解析的目录与现有 adapter，默认无需人工白名单或产品确认。可选 host verifier 只能收窄该合同。此证据层是**目录声明及本地 wire 合同**，只保证同一 Memoh model/provider 请求身份。未实现路由组固定 member 的保证或自动识别全部 opaque alias，不是不透明网关实际执行证明；真实网关覆盖、固定 effort、组路由／fallback 和并发仍需现场核验，不宣称已在生产切换。
+- 原生 `StreamChatWS` 主模型请求实际写出后，独立发快回请求，防止快回抢占第一上游槽位。辅助超时、容量、错误不令正式链等待；provider 本地辅助并发计数不是跨副本或上游总配额证明。
+- 冷热判定复用当前直接用户输入、历史、已有会话 episode、待补充输入／审批、reply 及已结束状态。首次直接输入冷；回复／未决交互／近期沟通热；长间隔还须历史已结束且无继续信号，才可冷。旧历史来源不明不冒认，模糊默认不多发 ack；不为每条消息加 LLM 分类，也不猜语义关键词。短间隔话题变化无可信新会话信号时仍视为热，是本最小方案的明确限制。
+- `0182_conversation_presence` 使用原 PostgreSQL。准备、claim、publish、关闭 tombstone 复用 Bot 父锁及 session runtime fence。唯一 receipt 防跨实例／重启重复 claim；claim 后关闭保留 receipt；权限再校验，保存 run generation 和 live_generation 各自含义，旧 fence／owner／actor／team 或已 abort 拒绝发布。不新增持久服务、不修改官方 Agent 核心。
+- 只有一个 mux 向原事件通道发送。`conversation_ack` 是带来源的类型化 Progress，view 转现有 status，Web 复用现有 `role=status` 区域。正式文本或终态等事件同步取消可见快回；select 同时就绪时优先已有正式事件，避免迟到 ack 闪现。临时 status 与正文共存时前端也会隐藏它。
+- 快回不进入 model history、memory、title 或 compaction；单独保存 receipt/piece，不是 assistant 正文。日志仅状态、目录选择理由和已知 token 数，不输出用户输入、凭据、原始错误或隐藏思考。图片标记只针对 image 类型或 image MIME，文件／音频不能被说成已看图片；快回没有图片内容、工具或执行权限，只允许接收与后续意图。
+
+### 11.2 可配置初始参数，不是用户定义或验收 SLO
+
+`[agent.conversation_presence]` 支持 enabled、idle_after_seconds、deadline_seconds、max_input_runes、max_output_tokens、max_text_runes、max_concurrent_per_provider。省略时分别采用开启、15 分钟的辅助 idle 证据、15 秒辅助预算、1200 字符输入、1024 总输出 token、160 可见字符及每 provider 一个本地辅助并发槽。idle 设置不大于零禁用 idle 推断；时间从 run 的 admitted created_at 起计算连续性，不能把模型耗时当用户离开。阈值需测实际语言、模型思考预算及网关能力再调，不能解释为用户要求“15 分钟”或承诺“15 秒”。1024 是上限而非保证模型一定能在此预算产出 ack；受最低 thinking budget 约束的 adapter 会拒绝预算不足，正式链继续。
+
+### 11.3 已执行验证与证据边界
+
+- 18 项定向 race 测试通过，覆盖原 11 项契约及 PostgreSQL、SDK、mux、原生 WS/历史、类型化 view。原阻塞的 3 项 reasoning 测试也已实际通过。精确最终测试列表和结果见 `RUNTIME-CHECK.json`，完整 Go JSONL 保存在本目录。SQL 在独立本地数据库 `memoh_presence_contracts` 运行；并发 claim 使用两个实例对象和真实事务，不是仅内存 stub。0182 down/up 在该隔离库执行过。
+- 原正式流的 17 项 DirectChat／AdmittedStream／PostgresWSStepHistory 回归通过。core、config、view 现有测试通过；真实 Go server 和 bridge build 通过。
+- 已按准备环境启动实际本地 Go server 与 Vite，仅本地认证和隔离 UI Bot/session；没有部署 NAS。UI 浏览器检查使用真实聊天页面及受控内存 transcript 片段，**不是全浏览器 WS→模型 E2E**；后端原生 WS→本地 HTTP→历史链由独立测试覆盖。浅色中文、深色窄屏、正式文本清掉 ack、终态不显示旧 status 均通过，页面错误为空，截图见 `ui/RESULT.json`。这是自动浏览器验证，未获人工 QA。
+- 初次 Web build/dev 因已安装依赖与当前 frozen lockfile 不一致，缺少 `@noble/hashes/sha2.js`；一次 `pnpm install --frozen-lockfile` 及重启已恢复，未改 lockfile。重装前 Vue 类型重复导致的 typecheck 失败保留为历史；重装后 build、typecheck、目标 eslint、copy policy 及 UI contract 都通过（contract 原有 3 项警告未改 baseline）。
+- **测试隔离事件：**补充完整原生 WS fixture 最初只修改 fake provider，持久 provider 行仍为 `{}`，SDK 因而尝试默认 `https://api.openai.com/v1`，只观察到 retry、无结果，未捕获外部响应／到达情况。没有读取或使用生产凭据，不能把这次运行报告成“零外部请求已证明”。随后停止原路径，给该 fixture 的持久 provider 也设置本地服务，并加 transport host allowlist；修复后非本地请求计数必须为零。此处改动是针对测试隔离错误，不是重试被拒绝的生产 provider 读取。相关失败日志与最终受限测试分开保存。
+
+### 11.4 生产快照、可安全补证的既有接口及尚未验收内容
+
+本公开报告省略生产 Bot、模型与会话实例标识和运行快照。生产能力仍须由实际请求解析结果及现场证据核验；官方模型参数与目录档位若有差异，应按 adapter 和 gateway 核定，不能擅自更改正式偏好。
+
+只读源码显示现有 `GET /models/{id}` 返回无凭据 Model GetResponse：id、model_id、provider_id、config.thinking_mode/reasoning_efforts/reasoning_dialect/reasoning_off_support/reasoning_default_on，以及解析后的 reasoning。`GET /models?client_type=<已注册协议>` 的既有分支只返回相应 Model GetResponse，可由父审查后用于核定目标 UUID 的协议归属；本 owner 未发此现场请求。`GET /provider-templates/{id}` 是全局模板声明，不能单独证明实例当前协议／网关。未找到只返回 provider client_type 的实例窄接口，不能读取完整 `/providers` 再仅打印字段来替代，未执行该被拒绝路径。
+
+仍需统一 owner／现场验证：真实模型低档是否执行、并行是否被网关串行化、TTFA 与 TTFT p50/p95、正式延迟回归、额外 token／成本／限流、冷热误触发与多 Bot 分布。指标定义和验收场景沿用第 7—9 节，目标值由实测及产品取舍确定。当前仅原生 Web WS 先行；普通批量 Chat、其它外部 runtime、后台任务不据此新增发言。ack 仍为 status，当前自动朗读不读它；与朗读 owner 的同音色、打断与自然音频衔接尚未接入。已保持音频／hydration 文件不变。这些不能凭本地 fixture 或截图签生产验收。
+
+本阶段只有本地代码与文档提交。没有 push、上传、远端修改、收费模型授权调用、部署或凭据更改；原外部提交及含秘密 provider 完整响应的安全拒绝继续有效，未换工具绕过。
