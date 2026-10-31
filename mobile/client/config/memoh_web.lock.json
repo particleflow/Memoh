@@ -586,5 +586,13 @@
       "unifiedRemoteCIAtParentFreeze": "all six PR-triggered CI classes success on the 09564fa merge of read-aloud PR#97; no all-green or deployment assertion",
       "actualPhoneOrVoiceAccepted": false
     }
+  },
+  "sharedReadAloudStreaming": {
+    "sourceChanges": {
+      "local": "shared-read-aloud-streaming.json",
+      "sha256": "9015650c8a199642a61d272c5b50dce1a598dd6d9a7e7094fbc1f738887cb5b0"
+    },
+    "scope": "Post-override of the shared home admission phone snapshot with the streaming read-aloud v2 sources (decision tree, eligibility, framing, typing decoupling); harmony platform only; removedFiles registers the retired continuity test.",
+    "upstreamCommitPendingWebLinePR": true
   }
 }
