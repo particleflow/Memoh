@@ -125,8 +125,8 @@
   },
   "existingFiles": {
     "apps/web/src/pages/home/components/chat-pane.vue": {
-      "baseSHA256": "94cffa8bd7d7a0620b5fad42a33737fbe63e4a2c78abd82e5356853928bcbd59",
-      "adaptedSHA256": "d0d847e1ade95bd8ee97e71fc9e92440ce6734b404dd4ecffc074dba2f3538be",
+      "baseSHA256": "0a3d6f2ae045e6e9aae861e0dcfe11c60f5e1babb22dbf6b6be52208cf03bd84",
+      "adaptedSHA256": "991e09bd1958b9c4d051302d8c1adaab6d2ef6bd7e8bc1b07bfcc239280d17cf",
       "anchorSourceSHA256": "8ed1b5d9e805f94901946ac6f16d246288035e691c2274e58550b2ed2d8ee09b",
       "anchorSource": "paired959 embedded phone pane source; replacement strings extracted from it",
       "replacements": [
