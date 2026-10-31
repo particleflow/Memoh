@@ -29,7 +29,7 @@ export function nativeUploadFailure(error: unknown): NativeUploadFailure | undef
 export const nativeAttachmentsAvailable = typeof window !== 'undefined' && !!(window as Window & { begoniaNative?: unknown }).begoniaNative
 async function bridge(command: string, fields: object) {
   const host = window as Window & { begoniaNative?: { request: (raw: string) => Promise<string> } }
-  if (!host.begoniaNative) throw new Error('当前设备不支持原生文件传输')
+  if (!host.begoniaNative) throw new Error('')
   return JSON.parse(await host.begoniaNative.request(JSON.stringify({ version: 1, command, ...fields })))
 }
 export function closeNativeAttachments(authorization?: string) { return bridge('upload.close', { authorization }).then(() => undefined) }

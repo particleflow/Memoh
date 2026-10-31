@@ -15,7 +15,7 @@ export const nativeVoiceAvailable = typeof window !== 'undefined' && !!(window a
 
 export async function nativeVoice<T>(command: string, handle: string, offset?: number): Promise<T> {
   const host = window as Window & { begoniaNative?: { request: (request: string) => Promise<string> } }
-  if (!host.begoniaNative) throw new Error('此设备暂不支持原生录音')
+  if (!host.begoniaNative) throw new Error('')
   const reply = JSON.parse(await host.begoniaNative.request(JSON.stringify({ version: 1, command, handle, offset })))
   if (!reply.ok) throw new Error(reply.error === 'VOICE_MICROPHONE_RETRY'
     ? '麦克风已允许，请重新按住录音'

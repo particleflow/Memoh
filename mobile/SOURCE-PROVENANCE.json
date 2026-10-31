@@ -22,7 +22,7 @@
     },
     {
       "path": "mobile/client/config/memoh_web.lock.json",
-      "sha256": "97fe048c23dd68a4fb66bfa42548cf82b15f9756e9fdf857b9146f4a07209550",
+      "sha256": "23a5c5c02da4942b7b2ecb22940726d8ff9abebca55839e3b61f5548a8e4b3ab",
       "origin": "reviewed empty configuration or public source pin metadata",
       "licenseReview": "Metadata only; does not redistribute the pinned dependencies.",
       "preparationChanges": [
@@ -169,7 +169,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-resumable.ts",
-      "sha256": "4f77e30ced6d94db040c28c58bbaa474ab83650dc947958397c013a4ffc65950",
+      "sha256": "6df136d05d75319a9303e016342db22878e2fe29b899f9be2f3337c7a888f527",
       "origin": "project client addition developed during cloud alignment",
       "licenseReview": "Contribution under the existing repository terms; no new license assignment or third-party implementation copied.",
       "preparationChanges": [
@@ -1129,7 +1129,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/harmony-voice.ts",
-      "sha256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
+      "sha256": "f88ee1b29091f5c29732ce2629469a6e1d84fac779a821776f2a49666b5376d7",
       "origin": "Recovered verbatim from the user-provided 5900 source checkpoint; newer inaccessible cloud edits are not inferred.",
       "licenseReview": "User authorized publication of clean project source. Existing project and bundled third-party license notices preserved; no SDK/CLT binary or private configuration imported.",
       "archiveOriginalSHA256": "69262cf289fba98189c3be6bd660ec6b31f2c0df25595946c0a2b87707b77b41",
@@ -1850,7 +1850,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-home-admission-final.json",
-      "sha256": "17812ab801f21cc942a0eb4b11501ee2302402e1509f4422b8b879afdd97393d",
+      "sha256": "112219aa0baccac394500e56a5d79c27d128426ac1f4937c6a2e2216f8167d80",
       "origin": "Exact reviewed shared15-file product mapping and companion tests from5a42d013e801cb6229ee029113e3a63782bc3e13.",
       "licenseReview": "Existing Memoh source; no new SDK, library, binary or permission.",
       "preparationChanges": [
@@ -1981,7 +1981,7 @@
     },
     {
       "path": "mobile/client/mobile/memoh/shared-read-aloud-streaming.json",
-      "sha256": "9015650c8a199642a61d272c5b50dce1a598dd6d9a7e7094fbc1f738887cb5b0",
+      "sha256": "cb2c3465654c9bbed11f180dd462d58a719f1477d9eeaeadcc32aac77994d201",
       "origin": "Workspace-authored phone overlay for the streaming read-aloud v2 sources; post-overrides the shared home admission phone snapshot. Not recovered historical source.",
       "licenseReview": "Derived Memoh source under retained repository license; no new SDK, library, binary or permission.",
       "preparationChanges": [

@@ -455,7 +455,7 @@
     "base": "2edfd88dafec2291df6eee9343a7a2bd494da24a",
     "sourceChanges": {
       "local": "shared-home-admission-final.json",
-      "sha256": "17812ab801f21cc942a0eb4b11501ee2302402e1509f4422b8b879afdd97393d"
+      "sha256": "112219aa0baccac394500e56a5d79c27d128426ac1f4937c6a2e2216f8167d80"
     },
     "scope": "Exact 2ed-to5a42 Home/Dockview admission, original task/run/turn anchoring and contact presentation delta; no HAP/version/artifact action.",
     "consumerMapProductSource": "19015a545a38f3fd6ca2c3b17d71280556101756",
@@ -590,7 +590,7 @@
   "sharedReadAloudStreaming": {
     "sourceChanges": {
       "local": "shared-read-aloud-streaming.json",
-      "sha256": "9015650c8a199642a61d272c5b50dce1a598dd6d9a7e7094fbc1f738887cb5b0"
+      "sha256": "cb2c3465654c9bbed11f180dd462d58a719f1477d9eeaeadcc32aac77994d201"
     },
     "scope": "Post-override of the shared home admission phone snapshot with the streaming read-aloud v2 sources (decision tree, eligibility, framing, typing decoupling); harmony platform only; removedFiles registers the retired continuity test.",
     "upstreamCommitPendingWebLinePR": true
